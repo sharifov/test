@@ -20,5 +20,4 @@ class LeadCreatedEvent
     {
         $this->lead = $lead;
     }
-
 }

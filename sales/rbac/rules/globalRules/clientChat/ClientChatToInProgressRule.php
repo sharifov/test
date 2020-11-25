@@ -10,15 +10,15 @@ use yii\rbac\Rule;
  */
 class ClientChatToInProgressRule extends Rule
 {
-	public $name = 'ClientChatToInProgressRule';
+    public $name = 'ClientChatToInProgressRule';
 
-	public function execute($user, $item, $params): bool
-	{
-		if (!isset($params['chat']) || !$params['chat'] instanceof ClientChat) {
-			return false;
-		}
-		$chat = $params['chat'];
+    public function execute($user, $item, $params): bool
+    {
+        if (!isset($params['chat']) || !$params['chat'] instanceof ClientChat) {
+            return false;
+        }
+        $chat = $params['chat'];
 
-		return $chat->isHold();
-	}
+        return $chat->isHold();
+    }
 }

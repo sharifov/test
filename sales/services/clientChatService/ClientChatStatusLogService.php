@@ -1,6 +1,5 @@
 <?php
 
-
 namespace sales\services\clientChatService;
 
 use sales\model\clientChat\entity\statusLogReason\ClientChatStatusLogReason;

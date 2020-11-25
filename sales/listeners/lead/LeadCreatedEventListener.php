@@ -25,5 +25,4 @@ class LeadCreatedEventListener
 
 //        Yii::info('Lead: ' . $event->lead->id . ', QuickSearchInitPriceJob: ' . $jobId, 'info\LeadCreatedEventListener');
     }
-
 }

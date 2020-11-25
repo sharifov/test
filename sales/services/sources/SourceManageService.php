@@ -39,7 +39,6 @@ class SourceManageService
             Sources::updateAll(['default' => 0], ['project_id' => $source->project_id]);
             $source->default();
             $this->sourceRepository->save($source);
-
         });
     }
 }

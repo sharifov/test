@@ -32,8 +32,7 @@ class LeadFlowLogService
         LeadFlowRepository $leadFlowRepository,
         LeadChecklistRepository $leadChecklistRepository,
         LeadFlowChecklistRepository $leadFlowChecklistRepository
-    )
-    {
+    ) {
         $this->leadFlowRepository = $leadFlowRepository;
         $this->leadChecklistRepository = $leadChecklistRepository;
         $this->leadFlowChecklistRepository = $leadFlowChecklistRepository;
@@ -48,14 +47,15 @@ class LeadFlowLogService
      * @param string|null $reason
      * @param string|null $created
      */
-    public function log(int $leadId,
-                        int $newStatus,
-                        ?int $oldStatus,
-                        ?int $newOwnerId,
-                        ?int $creatorId,
-                        ?string $reason,
-                        ?string $created): void
-    {
+    public function log(
+        int $leadId,
+        int $newStatus,
+        ?int $oldStatus,
+        ?int $newOwnerId,
+        ?int $creatorId,
+        ?string $reason,
+        ?string $created
+    ): void {
         if ($previous = $this->leadFlowRepository->getPrevious($leadId)) {
             $previous->end($created);
             $this->leadFlowRepository->save($previous);
@@ -83,7 +83,5 @@ class LeadFlowLogService
                 }
             }
         }
-
     }
-
 }

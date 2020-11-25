@@ -17,19 +17,21 @@ class ContactUpdateAccess
      * @return bool
      */
     public function isUserCanUpdateContact(Client $client, Employee $user): bool
-	{
-		return (
-			$user->isAdmin() ||
-			$user->isSuperAdmin() ||
-			$this->isContactPublicOwner($client->id, $user->id)
-		);
-	}
+    {
+        return (
+            $user->isAdmin() ||
+            $user->isSuperAdmin() ||
+            $this->isContactPublicOwner($client->id, $user->id)
+        );
+    }
 
-	private function isContactPublicOwner(int $clientId, int $userId): bool
+    private function isContactPublicOwner(int $clientId, int $userId): bool
     {
         return Client::find()
-            ->innerJoin(UserContactList::tableName() . ' AS user_contact_list',
-                'user_contact_list.ucl_client_id = ' . Client::tableName() . '.id')
+            ->innerJoin(
+                UserContactList::tableName() . ' AS user_contact_list',
+                'user_contact_list.ucl_client_id = ' . Client::tableName() . '.id'
+            )
             ->where(['ucl_user_id' => $userId])
             ->andWhere(['ucl_client_id' => $clientId])
             ->andWhere(['is_public' => false])

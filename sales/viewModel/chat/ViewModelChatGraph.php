@@ -1,6 +1,5 @@
 <?php
 
-
 namespace sales\viewModel\chat;
 
 use sales\entities\chat\ChatGraphsSearch;
@@ -40,7 +39,7 @@ class ViewModelChatGraph
     {
         $mappedData = [];
 
-        foreach ($this->clientChatData as $arr){
+        foreach ($this->clientChatData as $arr) {
             array_push($mappedData, [
                 $arr['date'],
                 (int)$arr['new'],
@@ -69,7 +68,7 @@ class ViewModelChatGraph
             'Closed',
             'Archive'
         ];
-        if ($mappedData){
+        if ($mappedData) {
             $this->preparedData = json_encode(ArrayHelper::merge([$headers], $mappedData));
         }
     }
@@ -78,11 +77,11 @@ class ViewModelChatGraph
      * @param array $data
      * @return array
      */
-    private function setWeekDayName(array $data):array
+    private function setWeekDayName(array $data): array
     {
         $week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-        foreach ($data as $key => $arr){
+        foreach ($data as $key => $arr) {
             $firstKey = array_key_first($arr);
             $data[$key][$firstKey] = $week[$arr[$firstKey]];
         }

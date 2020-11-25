@@ -116,12 +116,11 @@ class ProcessingReasonForm extends Model
         if (parent::validate($attributeNames, $clearErrors)) {
             if ($this->isOtherReason()) {
                 $this->description = $this->other;
-            }  else {
+            } else {
                 $this->description = self::REASON_LIST[$this->reason];
             }
             return true;
         }
         return false;
     }
-
 }

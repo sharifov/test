@@ -75,13 +75,11 @@ class Baggage implements ParseDumpInterface
         $uniq = [];
         $i = 0;
         foreach ($this->segments as $segment) {
-
             $result[$i]['segment'] = $segment;
             $result[$i]['paid_baggage'] = [];
             $result[$i]['free_baggage'] = [];
 
             if (!empty($paidBaggage) && array_key_exists($segment, $paidBaggage)) {
-
                 $hash = md5(serialize($paidBaggage[$segment]));
                 if (!array_key_exists($hash, $uniq)) {
                     $result[$i]['paid_baggage'] = $paidBaggage[$segment];
@@ -117,7 +115,6 @@ class Baggage implements ParseDumpInterface
         preg_match($carryPattern, $string, $carryMatches);
 
         if (isset($carryMatches[1])) {
-
             $itemPattern = '/' . $this->rowDelimPatten . '(.*?)' . $this->rowDelimPatten . '/s';
             preg_match_all($itemPattern, $carryMatches[1], $itemMatches);
 

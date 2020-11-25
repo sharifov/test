@@ -1,6 +1,5 @@
 <?php
 
-
 namespace sales\viewModel\chat;
 
 use common\components\ChartTools;
@@ -279,7 +278,7 @@ class ViewModelChatExtendedGraph
      * @param array $data
      * @return array
      */
-    private function setMonthName(array $data):array
+    private function setMonthName(array $data): array
     {
         foreach ($data as $key => $arr) {
             $firstKey = array_key_first($arr);
@@ -318,5 +317,4 @@ class ViewModelChatExtendedGraph
             'totalChatDurationAvg' =>  \Yii::$app->formatter->asDuration($totalChatDurationAvg),
         ];
     }
-
 }

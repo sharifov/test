@@ -29,14 +29,15 @@ class IncomingSmsCreatedByLeadTypeNotificationListener
         if ($users = $this->projectParamsRepository->findUsersIdByPhone($event->userPhone)) {
             $clientName = $this->getClientName($event->clientPhone);
             foreach ($users as $userId) {
-                if ($ntf = Notifications::create(
-                    $userId,
-                    'New SMS ' . $event->clientPhone,
-                    'SMS from ' . $event->clientPhone . ' (' . $clientName . ') to ' . $event->userPhone . ' <br> ' . nl2br(Html::encode($event->text))
-                    . ($event->sms->sLead ? '<br>Lead (Id: ' . Purifier::createLeadShortLink($event->sms->sLead) . ')' : ''),
-                    Notifications::TYPE_INFO,
-                    true
-                )
+                if (
+                    $ntf = Notifications::create(
+                        $userId,
+                        'New SMS ' . $event->clientPhone,
+                        'SMS from ' . $event->clientPhone . ' (' . $clientName . ') to ' . $event->userPhone . ' <br> ' . nl2br(Html::encode($event->text))
+                        . ($event->sms->sLead ? '<br>Lead (Id: ' . Purifier::createLeadShortLink($event->sms->sLead) . ')' : ''),
+                        Notifications::TYPE_INFO,
+                        true
+                    )
                 ) {
 //                    Notifications::socket($userId, null, 'getNewNotification', ['sms_id' => $event->sms->s_id], true);
                     $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];

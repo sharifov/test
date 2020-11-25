@@ -27,7 +27,6 @@ class EmailSenderService
         $transaction = Yii::$app->db->beginTransaction();
 
         if ($mail->save()) {
-
             $mail->e_message_id = $mail->generateMessageId();
             $mail->update();
             $mailResponse = $mail->sendMail();

@@ -133,5 +133,4 @@ class ClientChatProjectConfig extends \yii\db\ActiveRecord
     {
         return 'chat-config-' . $projectId . '-' . $languageId;
     }
-
 }

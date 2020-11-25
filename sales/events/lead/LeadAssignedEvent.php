@@ -40,5 +40,4 @@ class LeadAssignedEvent
         $this->newStatus = $newStatus;
         $this->created = date('Y-m-d H:i:s');
     }
-
 }

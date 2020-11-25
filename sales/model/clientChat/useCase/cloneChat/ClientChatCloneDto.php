@@ -1,4 +1,5 @@
 <?php
+
 namespace sales\model\clientChat\useCase\cloneChat;
 
 use sales\model\clientChat\entity\ClientChat;

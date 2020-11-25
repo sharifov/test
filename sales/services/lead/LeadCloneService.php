@@ -32,8 +32,7 @@ class LeadCloneService
         TransactionManager $transactionManager,
         EventDispatcher $eventDispatcher,
         ServiceFinder $serviceFinder
-)
-    {
+    ) {
         $this->leadRepository = $leadRepository;
         $this->leadSegmentRepository = $leadSegmentRepository;
         $this->transactionManager = $transactionManager;
@@ -49,7 +48,7 @@ class LeadCloneService
      * @return Lead
      * @throws \Throwable
      */
-    public function cloneLead($lead, int $ownerId, ?int $creatorId = null, ?string  $reason = ''): Lead
+    public function cloneLead($lead, int $ownerId, ?int $creatorId = null, ?string $reason = ''): Lead
     {
         $lead = $this->serviceFinder->leadFind($lead);
 
@@ -70,10 +69,8 @@ class LeadCloneService
             }
 
             return $clone;
-
         });
 
         return $clone;
     }
-
 }

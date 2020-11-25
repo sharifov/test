@@ -1,6 +1,5 @@
 <?php
 
-
 namespace sales\services\cleaner;
 
 use sales\services\cleaner\form\DbCleanerParamsForm;

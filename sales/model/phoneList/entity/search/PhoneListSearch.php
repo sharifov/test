@@ -9,7 +9,7 @@ use sales\model\phoneList\entity\PhoneList;
 
 class PhoneListSearch extends PhoneList
 {
-    public function rules():array
+    public function rules(): array
     {
         return [
             [['pl_id', 'pl_created_user_id', 'pl_updated_user_id'], 'integer'],
@@ -26,7 +26,7 @@ class PhoneListSearch extends PhoneList
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['pl_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['pl_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],

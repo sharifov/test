@@ -34,8 +34,7 @@ class Command
         int $project_id,
         ?string $subject,
         ?string $description
-    )
-    {
+    ) {
         $this->contact_email = $contact_email;
         $this->contact_phone = $contact_phone;
         $this->category_id = $category_id;

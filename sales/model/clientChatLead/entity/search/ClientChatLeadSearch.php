@@ -25,7 +25,7 @@ class ClientChatLeadSearch extends ClientChatLead
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['ccl_chat_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['ccl_chat_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],

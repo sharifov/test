@@ -19,7 +19,7 @@ use yii\base\Model;
 class ClientCreateForm extends Model
 {
 
-	public $id;
+    public $id;
     public $firstName;
     public $middleName;
     public $lastName;
@@ -36,12 +36,12 @@ class ClientCreateForm extends Model
         return [
 
             ['firstName', 'required'],
-			['id', 'integer'],
+            ['id', 'integer'],
             [['firstName', 'middleName', 'lastName'], 'string', 'max' => 100],
             [['firstName', 'middleName', 'lastName'], 'match', 'pattern' => "/^[a-z-\s\']+$/i"],
             [['firstName', 'middleName', 'lastName'], 'filter', 'filter' => 'trim'],
-			['uuid', 'string', 'max' => 36],
-			['rcId', 'string', 'max' => 50],
+            ['uuid', 'string', 'max' => 36],
+            ['rcId', 'string', 'max' => 50],
 
             ['projectId', 'default', 'value' => null],
             ['projectId', 'integer'],

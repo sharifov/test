@@ -31,7 +31,7 @@ class ClientChatLastMessageSearch extends ClientChatLastMessage
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cclm_dt' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['cclm_dt' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],

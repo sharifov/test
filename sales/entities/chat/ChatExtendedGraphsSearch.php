@@ -89,8 +89,8 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
             'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_AGENT . ', 1, 0)) AS newOutgoingAgentChats',
             //'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_CLIENT . ' AND cch_status_id = '. ClientChat::STATUS_IN_PROGRESS . ', 1, 0)) AS progressIncomingClientChats',
             //'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_AGENT . ' AND cch_status_id = '. ClientChat::STATUS_IN_PROGRESS . ', 1, 0)) AS progressOutgoingAgentChats',
-            'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_CLIENT . ' AND (cch_status_id = '. ClientChat::STATUS_CLOSED. ' OR cch_status_id = '. ClientChat::STATUS_ARCHIVE .'), 1, 0)) AS initByClientClosedArchive',
-            'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_AGENT . ' AND (cch_status_id = '. ClientChat::STATUS_CLOSED . ' OR cch_status_id = '. ClientChat::STATUS_ARCHIVE .'), 1, 0)) AS initByAgentClosedArchive',
+            'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_CLIENT . ' AND (cch_status_id = ' . ClientChat::STATUS_CLOSED . ' OR cch_status_id = ' . ClientChat::STATUS_ARCHIVE . '), 1, 0)) AS initByClientClosedArchive',
+            'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_AGENT . ' AND (cch_status_id = ' . ClientChat::STATUS_CLOSED . ' OR cch_status_id = ' . ClientChat::STATUS_ARCHIVE . '), 1, 0)) AS initByAgentClosedArchive',
             'SUM(IF(cch_missed = ' . ClientChat::MISSED . ', 1, 0)) AS missedChats',
             'GROUP_CONCAT(DISTINCT cch_owner_user_id) AS agentsInGroup'
         ]);
@@ -308,7 +308,7 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
     private function getTimeZoneOffset()
     {
         $timezone = new \DateTimeZone($this->timeZone);
-        $seconds = $timezone->getOffset(new \DateTime);
+        $seconds = $timezone->getOffset(new \DateTime());
         $sign = ($seconds > 0) ? '+' : '-';
         $hours = floor(abs($seconds) / 3600);
         $minutes = floor((abs($seconds) / 60) % 60);

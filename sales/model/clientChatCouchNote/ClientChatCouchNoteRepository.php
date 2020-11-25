@@ -1,4 +1,5 @@
 <?php
+
 namespace sales\model\clientChatCouchNote;
 
 use sales\model\clientChatCouchNote\entity\ClientChatCouchNote;

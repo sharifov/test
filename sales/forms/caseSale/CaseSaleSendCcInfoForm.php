@@ -1,4 +1,5 @@
 <?php
+
 namespace sales\forms\caseSale;
 
 use yii\base\Model;
@@ -12,23 +13,23 @@ use yii\base\Model;
  */
 class CaseSaleSendCcInfoForm extends Model
 {
-	public string $email = '';
+    public string $email = '';
 
-	public array $emailList = [];
+    public array $emailList = [];
 
-	public function rules(): array
-	{
-		return [
-			['email', 'string'],
-			['email', 'required'],
-			['email', 'checkIfEmailInList']
-		];
-	}
+    public function rules(): array
+    {
+        return [
+            ['email', 'string'],
+            ['email', 'required'],
+            ['email', 'checkIfEmailInList']
+        ];
+    }
 
-	public function checkIfEmailInList($attribute): void
-	{
-		if (!in_array($this->$attribute, $this->emailList, false)) {
-			$this->addError('email', 'Invalid email address');
-		}
-	}
+    public function checkIfEmailInList($attribute): void
+    {
+        if (!in_array($this->$attribute, $this->emailList, false)) {
+            $this->addError('email', 'Invalid email address');
+        }
+    }
 }

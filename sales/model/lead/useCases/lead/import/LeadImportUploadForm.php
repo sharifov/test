@@ -20,7 +20,7 @@ class LeadImportUploadForm extends Model
     {
         return [
             [['file'], 'required'],
-            [['file'], 'file', 'skipOnEmpty' => false, 'extensions' => ['csv'], 'checkExtensionByMimeType'=>false, 'maxSize' => 1024 * 1024 * 10],
+            [['file'], 'file', 'skipOnEmpty' => false, 'extensions' => ['csv'], 'checkExtensionByMimeType' => false, 'maxSize' => 1024 * 1024 * 10],
         ];
     }
 

@@ -176,7 +176,6 @@ class UserMonitor extends \yii\db\ActiveRecord
         if ($userOnline) {
             $ucList = UserConnection::find()->select(['uc_idle_state'])->where(['uc_user_id' => $userId])->all();
             if ($ucList) {
-
                 $idleState = true;
                 foreach ($ucList as $uc) {
                     if (!$uc->uc_idle_state) {
@@ -264,5 +263,4 @@ class UserMonitor extends \yii\db\ActiveRecord
     {
         return \Yii::$app->params['settings']['autologout_idle_period_min'] ?? 0;
     }
-
 }

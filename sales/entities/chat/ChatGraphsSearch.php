@@ -71,15 +71,15 @@ class ChatGraphsSearch extends ClientChatSearch
 
         $query = static::find();
         $query->select([
-            ''. $this->setGroupingParam() .' AS date',
-            'SUM(IF(cch_status_id = '. ClientChat::STATUS_NEW .', 1, 0)) AS new',
-            'SUM(IF(cch_status_id = '. ClientChat::STATUS_PENDING .', 1, 0)) AS pending',
-            'SUM(IF(cch_status_id = '. ClientChat::STATUS_IN_PROGRESS .', 1, 0)) AS progress',
-            'SUM(IF(cch_status_id = '. ClientChat::STATUS_TRANSFER .', 1, 0)) AS transfer',
-            'SUM(IF(cch_status_id = '. ClientChat::STATUS_HOLD .', 1, 0)) AS hold',
-            'SUM(IF(cch_status_id = '. ClientChat::STATUS_IDLE .', 1, 0)) AS idle',
-            'SUM(IF(cch_status_id = '. ClientChat::STATUS_CLOSED .', 1, 0)) AS closed',
-            'SUM(IF(cch_status_id = '. ClientChat::STATUS_ARCHIVE .', 1, 0)) AS archive'
+            '' . $this->setGroupingParam() . ' AS date',
+            'SUM(IF(cch_status_id = ' . ClientChat::STATUS_NEW . ', 1, 0)) AS new',
+            'SUM(IF(cch_status_id = ' . ClientChat::STATUS_PENDING . ', 1, 0)) AS pending',
+            'SUM(IF(cch_status_id = ' . ClientChat::STATUS_IN_PROGRESS . ', 1, 0)) AS progress',
+            'SUM(IF(cch_status_id = ' . ClientChat::STATUS_TRANSFER . ', 1, 0)) AS transfer',
+            'SUM(IF(cch_status_id = ' . ClientChat::STATUS_HOLD . ', 1, 0)) AS hold',
+            'SUM(IF(cch_status_id = ' . ClientChat::STATUS_IDLE . ', 1, 0)) AS idle',
+            'SUM(IF(cch_status_id = ' . ClientChat::STATUS_CLOSED . ', 1, 0)) AS closed',
+            'SUM(IF(cch_status_id = ' . ClientChat::STATUS_ARCHIVE . ', 1, 0)) AS archive'
         ]);
 
         $query->andWhere([
@@ -117,17 +117,17 @@ class ChatGraphsSearch extends ClientChatSearch
     private function setGroupingParam()
     {
         $format = $this->getDateFormat($this->graphGroupBy);
-        if($this->graphGroupBy === self::DATE_FORMAT_HOURS){
+        if ($this->graphGroupBy === self::DATE_FORMAT_HOURS) {
             return "date_format(cch_created_dt, '$format')";
-        } else if ($this->graphGroupBy === self::DATE_FORMAT_DAYS){
+        } else if ($this->graphGroupBy === self::DATE_FORMAT_DAYS) {
             return "date_format(cch_created_dt, '$format')";
-        } else if ($this->graphGroupBy === self::DATE_FORMAT_WEEKS){
+        } else if ($this->graphGroupBy === self::DATE_FORMAT_WEEKS) {
             return "concat(str_to_date(date_format(cch_created_dt, '%Y %v Monday'), '%x %v %W'), ' - ', str_to_date(date_format(cch_created_dt, '%Y %v Sunday'), '%x %v %W'))";
-        } else if ($this->graphGroupBy === self::DATE_FORMAT_MONTH){
+        } else if ($this->graphGroupBy === self::DATE_FORMAT_MONTH) {
             return "date_format(cch_created_dt, '$format')";
-        } else if ($this->graphGroupBy === self::DATE_FORMAT_HOURS_DAYS){
+        } else if ($this->graphGroupBy === self::DATE_FORMAT_HOURS_DAYS) {
             return "date_format(cch_created_dt, '$format')";
-        } else if ($this->graphGroupBy === self::DATE_FORMAT_WEEKDAYS){
+        } else if ($this->graphGroupBy === self::DATE_FORMAT_WEEKDAYS) {
             return "WEEKDAY(cch_created_dt)";
         }
     }

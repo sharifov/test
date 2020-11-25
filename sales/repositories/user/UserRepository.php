@@ -23,5 +23,4 @@ class UserRepository extends Repository
         }
         throw new NotFoundException('User is not found');
     }
-
 }

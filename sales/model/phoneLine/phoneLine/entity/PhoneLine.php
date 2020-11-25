@@ -48,19 +48,19 @@ use yii\db\ActiveRecord;
  */
 class PhoneLine extends \yii\db\ActiveRecord
 {
-	public function behaviors(): array
-	{
-		return [
-			'timestamp' => [
-				'class' => TimestampBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['line_created_dt', 'line_updated_dt'],
-					ActiveRecord::EVENT_BEFORE_UPDATE => ['line_updated_dt'],
-				],
-				'value' => date('Y-m-d H:i:s'),
-			],
-		];
-	}
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['line_created_dt', 'line_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['line_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s'),
+            ],
+        ];
+    }
 
     public function rules(): array
     {
@@ -80,7 +80,7 @@ class PhoneLine extends \yii\db\ActiveRecord
             ['line_enabled', 'integer'],
 
             ['line_language_id', 'string', 'max' => 5],
-			['line_language_id', 'exist', 'skipOnError' => true, 'skipOnEmpty' => true, 'targetClass' => Language::class, 'targetAttribute' => ['line_language_id' => 'language_id']],
+            ['line_language_id', 'exist', 'skipOnError' => true, 'skipOnEmpty' => true, 'targetClass' => Language::class, 'targetAttribute' => ['line_language_id' => 'language_id']],
 
             ['line_name', 'string', 'max' => 100],
 

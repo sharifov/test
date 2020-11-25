@@ -21,5 +21,4 @@ class QuoteSegmentStopRepository
         }
         return $quoteSegmentStop->qss_id;
     }
-
 }

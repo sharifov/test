@@ -24,9 +24,9 @@ class UserPaymentCategorySearch extends UserPaymentCategory
         ];
     }
 
-	/**
-	 * @return array
-	 */
+    /**
+     * @return array
+     */
     public function scenarios(): array
     {
         // bypass scenarios() implementation in the parent class
@@ -39,7 +39,7 @@ class UserPaymentCategorySearch extends UserPaymentCategory
      * @return ActiveDataProvider
      */
     public function search($params): ActiveDataProvider
-	{
+    {
         $query = UserPaymentCategory::find();
 
         // add conditions that should always apply here

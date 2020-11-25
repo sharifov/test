@@ -1,4 +1,5 @@
 <?php
+
 namespace sales\model\user\entity\profit\listener;
 
 use sales\model\user\entity\profit\event\UserProfitCalculateByOrderUserProfitEvent;
@@ -12,20 +13,20 @@ use sales\services\user\profit\UserProfitCalculateService;
  */
 class UserProfitCalculateByOrderUserProfitEventListener
 {
-	/**
-	 * @var UserProfitCalculateService
-	 */
-	private $userProfitCalculateService;
+    /**
+     * @var UserProfitCalculateService
+     */
+    private $userProfitCalculateService;
 
-	public function __construct(UserProfitCalculateService $userProfitCalculateService)
-	{
-		$this->userProfitCalculateService = $userProfitCalculateService;
-	}
+    public function __construct(UserProfitCalculateService $userProfitCalculateService)
+    {
+        $this->userProfitCalculateService = $userProfitCalculateService;
+    }
 
-	public function handle(UserProfitCalculateByOrderUserProfitEvent $event): void
-	{
-		foreach ($event->order->productQuotes as $productQuote) {
-			$this->userProfitCalculateService->calculateByOrderUserProfit($productQuote, $event->order);
-		}
-	}
+    public function handle(UserProfitCalculateByOrderUserProfitEvent $event): void
+    {
+        foreach ($event->order->productQuotes as $productQuote) {
+            $this->userProfitCalculateService->calculateByOrderUserProfit($productQuote, $event->order);
+        }
+    }
 }

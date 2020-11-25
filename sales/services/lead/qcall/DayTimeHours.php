@@ -37,7 +37,7 @@ class DayTimeHours
      */
     public function isEmpty(): bool
     {
-        return !$this->startHour && !$this->startMinutes && !$this->endHour &&! $this->endMinutes;
+        return !$this->startHour && !$this->startMinutes && !$this->endHour && ! $this->endMinutes;
     }
 
     /**
@@ -67,5 +67,4 @@ class DayTimeHours
     {
         return self::format($this->endHour) . ':' . self::format($this->endMinutes) . ':00';
     }
-
 }

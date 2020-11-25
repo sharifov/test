@@ -27,26 +27,26 @@ use yii\db\ActiveRecord;
 class CallNote extends \yii\db\ActiveRecord
 {
 
-	public function behaviors(): array
-	{
-		return [
-			'timestamp' => [
-				'class' => TimestampBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['cn_created_dt'],
-					ActiveRecord::EVENT_BEFORE_UPDATE => ['cn_updated_dt'],
-				],
-				'value' => date('Y-m-d H:i:s'),
-			],
-			'user' => [
-				'class' => BlameableBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['cn_created_user_id'],
-					ActiveRecord::EVENT_BEFORE_UPDATE => ['cn_updated_user_id'],
-				]
-			],
-		];
-	}
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['cn_created_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['cn_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s'),
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['cn_created_user_id'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['cn_updated_user_id'],
+                ]
+            ],
+        ];
+    }
 
     public function rules(): array
     {
@@ -106,16 +106,16 @@ class CallNote extends \yii\db\ActiveRecord
         return 'call_note';
     }
 
-	/**
-	 * @param int $callId
-	 * @param string $note
-	 * @return CallNote
-	 */
+    /**
+     * @param int $callId
+     * @param string $note
+     * @return CallNote
+     */
     public static function create(int $callId, string $note): CallNote
-	{
-		$callNote = new self();
-		$callNote->cn_call_id = $callId;
-		$callNote->cn_note = $note;
-		return $callNote;
-	}
+    {
+        $callNote = new self();
+        $callNote->cn_call_id = $callId;
+        $callNote->cn_note = $note;
+        return $callNote;
+    }
 }

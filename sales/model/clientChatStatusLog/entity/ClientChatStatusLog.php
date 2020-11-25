@@ -141,7 +141,7 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
     {
         return $this->hasOne(ClientChatChannel::class, ['ccc_id' => 'csl_prev_channel_id']);
     }
-    
+
     public function getCslUser(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'csl_user_id']);

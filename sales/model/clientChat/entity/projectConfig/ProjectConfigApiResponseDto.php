@@ -1,4 +1,5 @@
 <?php
+
 namespace sales\model\clientChat\entity\projectConfig;
 
 use sales\model\clientChat\entity\channelTranslate\ClientChatChannelTranslate;

@@ -48,10 +48,10 @@ class UserPaymentSearch extends UserPayment
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-			'sort'=> ['defaultOrder' => ['upt_id' => SORT_DESC]],
-			'pagination' => [
-				'pageSize' => 30,
-			],
+            'sort' => ['defaultOrder' => ['upt_id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
         ]);
 
         $this->load($params);

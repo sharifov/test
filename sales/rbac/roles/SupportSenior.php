@@ -14,7 +14,7 @@ class SupportSenior
     '/report/agents',
     '/kpi/details', '/kpi/index',
     '/user-group-set/create', '/user-group-set/delete', '/user-group-set/index', '/user-group-set/update', '/user-group-set/view',
-];
+    ];
 
     public static function getExcludePermissions(): array
     {

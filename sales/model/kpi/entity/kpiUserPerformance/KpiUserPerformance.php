@@ -34,28 +34,28 @@ class KpiUserPerformance extends \yii\db\ActiveRecord
         return 'kpi_user_performance';
     }
 
-	/**
-	 * @return array
-	 */
-	public function behaviors(): array
-	{
-		return [
-			'timestamp' => [
-				'class' => TimestampBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['up_created_dt', 'up_updated_dt'],
-					ActiveRecord::EVENT_BEFORE_UPDATE => ['up_updated_dt'],
-				],
-				'value' => date('Y-m-d H:i:s'),
-				'preserveNonEmptyValues' => true
-			],
-			'user' => [
-				'class' => BlameableBehavior::class,
-				'createdByAttribute' => 'up_created_user_id',
-				'updatedByAttribute' => 'up_updated_user_id',
-			],
-		];
-	}
+    /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['up_created_dt', 'up_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['up_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s'),
+                'preserveNonEmptyValues' => true
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'up_created_user_id',
+                'updatedByAttribute' => 'up_updated_user_id',
+            ],
+        ];
+    }
 
     /**
      * {@inheritdoc}
@@ -66,10 +66,10 @@ class KpiUserPerformance extends \yii\db\ActiveRecord
             [['up_user_id', 'up_year', 'up_month'], 'required'],
             [['up_user_id', 'up_year', 'up_month', 'up_performance', 'up_created_user_id', 'up_updated_user_id'], 'integer'],
             [['up_created_dt', 'up_updated_dt'], 'safe'],
-			[['up_month'], 'number', 'max' => 12, 'min' => 1],
-			[['up_year'], 'string', 'max' => 4],
-			[['up_year'], 'number', 'min' => 0],
-			[['up_performance'], 'number', 'min' => 0, 'max' => 100],
+            [['up_month'], 'number', 'max' => 12, 'min' => 1],
+            [['up_year'], 'string', 'max' => 4],
+            [['up_year'], 'number', 'min' => 0],
+            [['up_performance'], 'number', 'min' => 0, 'max' => 100],
             [['up_user_id', 'up_year', 'up_month'], 'unique', 'targetAttribute' => ['up_user_id', 'up_year', 'up_month']],
             [['up_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['up_created_user_id' => 'id']],
             [['up_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['up_updated_user_id' => 'id']],

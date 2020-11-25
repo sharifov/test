@@ -58,7 +58,6 @@ class Pricing implements ParseDumpInterface
 
             foreach ($ticketPrices as $key => $value) {
                 if ($values = $this->prepareRow($value)) {
-
                     preg_match('/([A-Z]+)(\d+)/', $values[0], $typeMatches);
                     if (empty($typeMatches)) {
                         continue;
@@ -68,7 +67,7 @@ class Pricing implements ParseDumpInterface
                         $result[$j]['type'] = PricingService::passengerTypeMapping($typeMatches[1]);
                         $result[$j]['fare'] = $values[1] ?? null;
                         $result[$j]['taxes'] = $values[2] ?? '0.00';
-                        $j ++;
+                        $j++;
                     }
                 }
             }

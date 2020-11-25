@@ -133,7 +133,7 @@ class CaseCategory extends ActiveRecord
      * @param bool|null $enabled
      * @return array
      */
-    public static function getList(?array $departments = null, ?bool $enabled = null) : array
+    public static function getList(?array $departments = null, ?bool $enabled = null): array
     {
         $conditions = [];
 
@@ -160,5 +160,4 @@ class CaseCategory extends ActiveRecord
     {
         return '{{%case_category}}';
     }
-
 }

@@ -21,5 +21,4 @@ class LeadPreferencesHelper
             7 => 7,
         ];
     }
-
 }

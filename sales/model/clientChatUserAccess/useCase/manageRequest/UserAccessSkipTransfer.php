@@ -1,6 +1,5 @@
 <?php
 
-
 namespace sales\model\clientChatUserAccess\useCase\manageRequest;
 
 use sales\guards\clientChat\ClientChatManageGuard;

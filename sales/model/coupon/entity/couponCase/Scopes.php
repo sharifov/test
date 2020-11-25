@@ -7,8 +7,8 @@ namespace sales\model\coupon\entity\couponCase;
  */
 class Scopes extends \yii\db\ActiveQuery
 {
-	public function getByCaseId(int $id)
-	{
-		return $this->andWhere(['cc_case_id' => $id]);
-	}
+    public function getByCaseId(int $id)
+    {
+        return $this->andWhere(['cc_case_id' => $id]);
+    }
 }

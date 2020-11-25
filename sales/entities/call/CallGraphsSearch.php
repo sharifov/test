@@ -260,7 +260,7 @@ class CallGraphsSearch extends CallLogSearch
     /**
      * @return SqlDataProvider
      */
-    public function getCallLogStats():SqlDataProvider
+    public function getCallLogStats(): SqlDataProvider
     {
         if ($this->createTimeRange) {
             $this->createTimeStart = date('Y-m-d H:i:00', $this->createTimeStart);
@@ -275,14 +275,14 @@ class CallGraphsSearch extends CallLogSearch
         $timeZone = $this->getTimeZoneOffset();
 
         $parentQuery = self::find()->select([
-            ''. $this->setGroupingParam() .' AS `group`',
+            '' . $this->setGroupingParam() . ' AS `group`',
             'CASE cl_type_id WHEN 1 THEN \'out\' WHEN 2 THEN \'in\' END `callType`',
             'COUNT(*) as `totalCalls`',
             'count(*)/count(distinct(DATE_FORMAT(cl_call_created_dt, \'%Y-%m-%d\'))) `avgCallsPerGroup`',
             'sum(cl_duration)as `totalCallsDuration`',
             'avg(cl_duration) as `avgCallDuration`'
         ]);
-        $parentQuery->from([new \yii\db\Expression(CallLog::tableName(). ' PARTITION('. $this->getPartitionsByYears() .') ')]);
+        $parentQuery->from([new \yii\db\Expression(CallLog::tableName() . ' PARTITION(' . $this->getPartitionsByYears() . ') ')]);
 
         $parentQuery->andWhere([
             'between',
@@ -323,17 +323,17 @@ class CallGraphsSearch extends CallLogSearch
         }
 
         if ($this->betweenHoursFrom) {
-            $parentQuery->andWhere(['>=', 'hour(convert_tz(cl_call_created_dt, \'+00:00\', \''.$timeZone.'\'))', $this->betweenHoursFrom]);
+            $parentQuery->andWhere(['>=', 'hour(convert_tz(cl_call_created_dt, \'+00:00\', \'' . $timeZone . '\'))', $this->betweenHoursFrom]);
         }
 
         if ($this->betweenHoursTo) {
-            $parentQuery->andWhere(['<=', 'hour(convert_tz(cl_call_created_dt, \'+00:00\', \''.$timeZone.'\'))', $this->betweenHoursTo]);
+            $parentQuery->andWhere(['<=', 'hour(convert_tz(cl_call_created_dt, \'+00:00\', \'' . $timeZone . '\'))', $this->betweenHoursTo]);
         }
 
         $parentQuery->groupBy([new \yii\db\Expression('1,2')]);
 
         $childQuery = self::find()->select([
-            ''. $this->setGroupingParam() .' AS group',
+            '' . $this->setGroupingParam() . ' AS group',
             '"total" AS `callType`',
             'count(*) as `totalCalls`',
             'count(*)/count(distinct(DATE_FORMAT(cl_call_created_dt, \'%Y-%m-%d\'))) `avgCallsPerGroup`',
@@ -341,7 +341,7 @@ class CallGraphsSearch extends CallLogSearch
             'avg(cl_duration) as `avgCallDuration`'
         ]);
 
-        $childQuery->from([new \yii\db\Expression(CallLog::tableName(). ' PARTITION('. $this->getPartitionsByYears() .') ')]);
+        $childQuery->from([new \yii\db\Expression(CallLog::tableName() . ' PARTITION(' . $this->getPartitionsByYears() . ') ')]);
 
         $childQuery->andWhere([
             'between',
@@ -382,11 +382,11 @@ class CallGraphsSearch extends CallLogSearch
         }
 
         if ($this->betweenHoursFrom) {
-            $childQuery->andWhere(['>=', 'hour(convert_tz(cl_call_created_dt, \'+00:00\', \''.$timeZone.'\'))', $this->betweenHoursFrom]);
+            $childQuery->andWhere(['>=', 'hour(convert_tz(cl_call_created_dt, \'+00:00\', \'' . $timeZone . '\'))', $this->betweenHoursFrom]);
         }
 
         if ($this->betweenHoursTo) {
-            $childQuery->andWhere(['<=', 'hour(convert_tz(cl_call_created_dt, \'+00:00\', \''.$timeZone.'\'))', $this->betweenHoursTo]);
+            $childQuery->andWhere(['<=', 'hour(convert_tz(cl_call_created_dt, \'+00:00\', \'' . $timeZone . '\'))', $this->betweenHoursTo]);
         }
 
         $childQuery->groupBy([new \yii\db\Expression('1')]);
@@ -403,12 +403,12 @@ class CallGraphsSearch extends CallLogSearch
 
         $dateFormat = $this->getDateFormat($this->callGraphGroupBy) ?? $this->getDefaultDateFormat();
         if ((int)$this->callGraphGroupBy === self::DATE_FORMAT_WEEKS) {
-            return "concat(str_to_date(date_format(convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."'), '%Y %v Monday'), '%x %v %W'), '/', str_to_date(date_format(convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."'), '%Y %v Sunday'), '%x %v %W'))";
+            return "concat(str_to_date(date_format(convert_tz(cl_call_created_dt, '+00:00', '" . $timeZone . "'), '%Y %v Monday'), '%x %v %W'), '/', str_to_date(date_format(convert_tz(cl_call_created_dt, '+00:00', '" . $timeZone . "'), '%Y %v Sunday'), '%x %v %W'))";
         }
         if ((int)$this->callGraphGroupBy === self::DATE_FORMAT_WEEKDAYS) {
-            return "WEEKDAY(convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."'))";
+            return "WEEKDAY(convert_tz(cl_call_created_dt, '+00:00', '" . $timeZone . "'))";
         } else {
-            return "date_format(convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."'), '$dateFormat')";
+            return "date_format(convert_tz(cl_call_created_dt, '+00:00', '" . $timeZone . "'), '$dateFormat')";
         }
     }
 
@@ -423,7 +423,7 @@ class CallGraphsSearch extends CallLogSearch
         } else {
             $nextYearFrom = (int)$yFrom + 1 ;
             $nextYearTo = (int)$yTo + 1 ;
-            $partitions = 'y'. $nextYearFrom . ',' . 'y' . $nextYearTo ;
+            $partitions = 'y' . $nextYearFrom . ',' . 'y' . $nextYearTo ;
         }
 
         return $partitions;
@@ -494,7 +494,7 @@ class CallGraphsSearch extends CallLogSearch
     private function getTimeZoneOffset()
     {
         $timezone = new \DateTimeZone($this->timeZone);
-        $seconds = $timezone->getOffset(new \DateTime);
+        $seconds = $timezone->getOffset(new \DateTime());
         $sign = ($seconds > 0) ? '+' : '-';
         $hours = floor(abs($seconds) / 3600);
         $minutes = floor((abs($seconds) / 60) % 60);
@@ -514,7 +514,6 @@ class CallGraphsSearch extends CallLogSearch
 
                 (strtotime(reset($range)) > strtotime(end($range)) ||
                     strtotime(end($range)) < strtotime(reset($range)))
-
             ) {
                 $this->addError($attribute, 'Range start date or end date is incorrect');
             }

@@ -34,7 +34,7 @@ class ClientChatChannelSearch extends ClientChatChannel
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['ccc_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['ccc_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],

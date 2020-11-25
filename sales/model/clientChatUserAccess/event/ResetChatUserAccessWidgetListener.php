@@ -1,4 +1,5 @@
 <?php
+
 namespace sales\model\clientChatUserAccess\event;
 
 use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
@@ -11,15 +12,15 @@ use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessReposi
  */
 class ResetChatUserAccessWidgetListener
 {
-	public $accessRepository;
+    public $accessRepository;
 
-	public function __construct(ClientChatUserAccessRepository $accessRepository)
-	{
-		$this->accessRepository = $accessRepository;
-	}
+    public function __construct(ClientChatUserAccessRepository $accessRepository)
+    {
+        $this->accessRepository = $accessRepository;
+    }
 
-	public function handle(ResetChatUserAccessWidgetEvent $event): void
-	{
-		$this->accessRepository->resetChatUserAccessWidget($event->userId);
-	}
+    public function handle(ResetChatUserAccessWidgetEvent $event): void
+    {
+        $this->accessRepository->resetChatUserAccessWidget($event->userId);
+    }
 }

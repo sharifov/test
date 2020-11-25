@@ -28,39 +28,39 @@ use yii\db\ActiveRecord;
  */
 class UserPaymentCategory extends \yii\db\ActiveRecord
 {
-	public const STATUS_PENDING = 1;
-	public const STATUS_DONE = 2;
-	public const STATUS_CANCELED = 3;
-	public const STATUS_DELETED = 4;
+    public const STATUS_PENDING = 1;
+    public const STATUS_DONE = 2;
+    public const STATUS_CANCELED = 3;
+    public const STATUS_DELETED = 4;
 
-	public const STATUS_LIST = [
-		self::STATUS_PENDING => 'Pending',
-		self::STATUS_DONE => 'Done',
-		self::STATUS_CANCELED => 'Canceled',
-		self::STATUS_DELETED => 'Deleted'
-	];
+    public const STATUS_LIST = [
+        self::STATUS_PENDING => 'Pending',
+        self::STATUS_DONE => 'Done',
+        self::STATUS_CANCELED => 'Canceled',
+        self::STATUS_DELETED => 'Deleted'
+    ];
 
-	/**
-	 * @return array
-	 */
-	public function behaviors(): array
-	{
-		return [
-			'timestamp' => [
-				'class' => TimestampBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['upc_created_dt', 'upc_updated_dt'],
-					ActiveRecord::EVENT_BEFORE_UPDATE => ['upc_updated_dt'],
-				],
-				'value' => date('Y-m-d H:i:s')
-			],
-			'user' => [
-				'class' => BlameableBehavior::class,
-				'createdByAttribute' => 'upc_created_user_id',
-				'updatedByAttribute' => 'upc_updated_user_id',
-			],
-		];
-	}
+    /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['upc_created_dt', 'upc_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['upc_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s')
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'upc_created_user_id',
+                'updatedByAttribute' => 'upc_updated_user_id',
+            ],
+        ];
+    }
 
     /**
      * {@inheritdoc}
@@ -134,30 +134,30 @@ class UserPaymentCategory extends \yii\db\ActiveRecord
         return $this->hasOne(Employee::class, ['id' => 'upc_updated_user_id']);
     }
 
-	/**
-	 * @return array|UserPaymentCategory[]
-	 */
+    /**
+     * @return array|UserPaymentCategory[]
+     */
     public static function getList(): array
-	{
-		return self::find()->select(['upc_name', 'upc_id'])->indexBy('upc_id')->asArray()->column();
-	}
+    {
+        return self::find()->select(['upc_name', 'upc_id'])->indexBy('upc_id')->asArray()->column();
+    }
 
-	/**
-	 * @return array
-	 */
-	public static function getStatusList(): array
-	{
-		return self::STATUS_LIST;
-	}
+    /**
+     * @return array
+     */
+    public static function getStatusList(): array
+    {
+        return self::STATUS_LIST;
+    }
 
-	/**
-	 * @param int $statusId
-	 * @return string|null
-	 */
-	public static function getStatusName(int $statusId): ?string
-	{
-		return self::getStatusList()[$statusId] ?? null;
-	}
+    /**
+     * @param int $statusId
+     * @return string|null
+     */
+    public static function getStatusName(int $statusId): ?string
+    {
+        return self::getStatusList()[$statusId] ?? null;
+    }
 
     /**
      * {@inheritdoc}

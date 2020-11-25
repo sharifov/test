@@ -28,8 +28,8 @@ class UpdateInfoForm extends Model
     public function __construct(
         Cases $case,
         array $categoryList,
-        $config = [])
-    {
+        $config = []
+    ) {
         parent::__construct($config);
         $this->case = $case;
         $this->categoryId = $case->cs_category_id;

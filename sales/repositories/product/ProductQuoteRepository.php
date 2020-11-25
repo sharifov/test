@@ -13,7 +13,7 @@ use sales\repositories\Repository;
  */
 class ProductQuoteRepository extends Repository
 {
-	private $eventDispatcher;
+    private $eventDispatcher;
 
     /**
      * CasesRepository constructor.
@@ -23,16 +23,16 @@ class ProductQuoteRepository extends Repository
     {
         $this->eventDispatcher = $eventDispatcher;
     }
-	/**
-	 * @param ProductQuote $productQuote
-	 * @return int
-	 */
-	public function save(ProductQuote $productQuote): int
-	{
-		if (!$productQuote->save()) {
-			throw new \RuntimeException($productQuote->getErrorSummary(false)[0]);
-		}
-		$this->eventDispatcher->dispatchAll($productQuote->releaseEvents());
-		return $productQuote->pq_id;
-	}
+    /**
+     * @param ProductQuote $productQuote
+     * @return int
+     */
+    public function save(ProductQuote $productQuote): int
+    {
+        if (!$productQuote->save()) {
+            throw new \RuntimeException($productQuote->getErrorSummary(false)[0]);
+        }
+        $this->eventDispatcher->dispatchAll($productQuote->releaseEvents());
+        return $productQuote->pq_id;
+    }
 }

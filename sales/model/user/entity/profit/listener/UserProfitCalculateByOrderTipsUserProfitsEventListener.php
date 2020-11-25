@@ -13,19 +13,19 @@ use sales\services\user\profit\UserProfitCalculateService;
  */
 class UserProfitCalculateByOrderTipsUserProfitsEventListener
 {
-	/**
-	 * @var UserProfitCalculateService
-	 */
-	private $userProfitCalculateService;
+    /**
+     * @var UserProfitCalculateService
+     */
+    private $userProfitCalculateService;
 
-	public function __construct(UserProfitCalculateService $userProfitCalculateService)
-	{
+    public function __construct(UserProfitCalculateService $userProfitCalculateService)
+    {
 
-		$this->userProfitCalculateService = $userProfitCalculateService;
-	}
+        $this->userProfitCalculateService = $userProfitCalculateService;
+    }
 
-	public function handle(UserProfitCalculateByOrderTipsUserProfitsEvent $event): void
-	{
-		$this->userProfitCalculateService->calculateByTipsUserProfit($event->order);
-	}
+    public function handle(UserProfitCalculateByOrderTipsUserProfitsEvent $event): void
+    {
+        $this->userProfitCalculateService->calculateByTipsUserProfit($event->order);
+    }
 }

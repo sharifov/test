@@ -11,7 +11,7 @@ class CallNoteSearch extends CallNote
     {
         return [
             ['cn_call_id', 'integer'],
-            
+
             [['cn_created_dt', 'cn_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
 
             ['cn_created_user_id', 'integer'],

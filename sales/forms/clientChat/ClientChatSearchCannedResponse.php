@@ -1,6 +1,5 @@
 <?php
 
-
 namespace sales\forms\clientChat;
 
 use yii\base\Model;

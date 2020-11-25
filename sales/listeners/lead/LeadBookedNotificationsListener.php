@@ -61,11 +61,14 @@ class LeadBookedNotificationsListener
 
         $quote = Quote::find()->where(['lead_id' => $lead->id, 'status' => Quote::STATUS_APPLIED])->orderBy(['id' => SORT_DESC])->one();
 
-        $body = Yii::t('email', "Your Lead (Id: {lead_id}) has been changed status to BOOKED! Booked quote UID: {quote_uid}",
+        $body = Yii::t(
+            'email',
+            "Your Lead (Id: {lead_id}) has been changed status to BOOKED! Booked quote UID: {quote_uid}",
             [
                 'lead_id' => Purifier::createLeadShortLink($lead),
                 'quote_uid' => $quote ? $quote->uid : '-',
-            ]);
+            ]
+        );
 
         if ($ntf = Notifications::create($owner->id, $subject, $body, Notifications::TYPE_INFO, true)) {
             //Notifications::socket($owner->id, null, 'getNewNotification', [], true);
@@ -77,7 +80,5 @@ class LeadBookedNotificationsListener
                 'LeadBookedNotificationsListener:createNotification'
             );
         }
-
     }
-
 }

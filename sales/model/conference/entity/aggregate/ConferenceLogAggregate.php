@@ -39,7 +39,6 @@ class ConferenceLogAggregate
         $this->logState();
 
         foreach ($this->events as $event) {
-
             [$participantId, $participantType] = $this->getParticipantProperties($event);
 
             if ($event->isConferenceStart() || $event->isConferenceEnd()) {
@@ -49,37 +48,23 @@ class ConferenceLogAggregate
             }
 
             if ($event->isConferenceStart()) {
-
             } elseif ($event->isConferenceEnd()) {
-
                 $this->participants->leave($event->getTimestamp());
-
             } elseif ($event->isParticipantJoin()) {
-
                 $this->processJoinEvent($event, $participantId, $participantType);
-
             } elseif ($event->isParticipantLeave()) {
-
                 $this->processLeaveEvent($event, $participantId, $participantType);
-
             } elseif ($event->isParticipantHold()) {
-
                 $this->processHoldEvent($event, $participantId, $participantType);
-
             } elseif ($event->isParticipantUnHold()) {
-
                 $this->processUnHoldEvent($event, $participantId, $participantType);
-
             } elseif ($event->isParticipantMute()) {
-
             } elseif ($event->isParticipantUnMute()) {
-
             }
 
             $this->participants->recalculateTalkDuration($event->getTimestamp());
 
             $this->logState();
-
         }
 
         $this->logResult();
@@ -104,7 +89,7 @@ class ConferenceLogAggregate
 
     private function processLeaveEvent(ParticipantLeave $event, ParticipantId $participantId, ParticipantType $participantType): void
     {
-       if ($this->participants->isExist($participantId)) {
+        if ($this->participants->isExist($participantId)) {
             $participant = $this->participants->get($participantId);
             $participant->leave($event->getTimestamp());
             return;

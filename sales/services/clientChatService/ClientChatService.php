@@ -1,4 +1,5 @@
 <?php
+
 namespace sales\services\clientChatService;
 
 use common\components\purifier\Purifier;
@@ -325,9 +326,9 @@ class ClientChatService
                 throw new \DomainException('It’s not possible to transfer the chat to another department because it is in the "Closed" status');
             }
 
-            //			if ($clientChat->cch_dep_id === $form->depId && !$form->agentId) {
-            //				throw new \DomainException('Chat already assigned to this department; Choose another;');
-            //			}
+            //          if ($clientChat->cch_dep_id === $form->depId && !$form->agentId) {
+            //              throw new \DomainException('Chat already assigned to this department; Choose another;');
+            //          }
 
             foreach ($form->agentId as $agentId) {
                 if ($clientChat->cch_owner_user_id === $agentId) {

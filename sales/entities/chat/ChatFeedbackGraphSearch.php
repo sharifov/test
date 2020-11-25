@@ -1,8 +1,6 @@
 <?php
 
-
 namespace sales\entities\chat;
-
 
 use common\models\Employee;
 use sales\model\clientChatFeedback\entity\ClientChatFeedbackSearch;

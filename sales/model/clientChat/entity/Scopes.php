@@ -171,7 +171,7 @@ class Scopes extends \yii\db\ActiveQuery
 
     public function withUnreadMessage(bool $edgerLoading = false): self
     {
-        return $this->innerJoinWith(['unreadMessage' => static function(ActiveQuery $query) {
+        return $this->innerJoinWith(['unreadMessage' => static function (ActiveQuery $query) {
             $query->andOnCondition(['>', 'ccu_count', 0]);
         }], $edgerLoading);
     }
@@ -210,5 +210,4 @@ class Scopes extends \yii\db\ActiveQuery
     {
         return $this->byStatuses(ClientChat::FREE_TO_TAKE_STATUS_GROUP);
     }
-
 }

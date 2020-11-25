@@ -1,6 +1,5 @@
 <?php
 
-
 namespace sales\logger\db;
 
 /**
@@ -9,5 +8,5 @@ namespace sales\logger\db;
  */
 interface GlobalLogInterface
 {
-	public function log(LogDTO $data);
+    public function log(LogDTO $data);
 }

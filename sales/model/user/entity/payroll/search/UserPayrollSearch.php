@@ -40,18 +40,18 @@ class UserPayrollSearch extends UserPayroll
      * @return ActiveDataProvider
      */
     public function search($params)
-	{
+    {
         $query = UserPayroll::find();
 
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-			'sort'=> ['defaultOrder' => ['ups_id' => SORT_DESC]],
-			'pagination' => [
-				'pageSize' => 30,
-			],
-		]);
+            'sort' => ['defaultOrder' => ['ups_id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
+        ]);
 
         $this->load($params);
 

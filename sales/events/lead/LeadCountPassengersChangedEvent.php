@@ -19,7 +19,5 @@ class LeadCountPassengersChangedEvent
     public function __construct(Lead $lead)
     {
         $this->lead = $lead;
-
     }
-
 }

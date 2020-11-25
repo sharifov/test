@@ -1,4 +1,5 @@
 <?php
+
 namespace sales\model\clientChat\useCase\hold;
 
 use frontend\helpers\JsonHelper;
@@ -20,48 +21,48 @@ use yii\helpers\Json;
  */
 class ClientChatHoldForm extends Model
 {
-	public $cchId;
-	public $minuteToDeadline;
-	public $comment;
-	public $reasonId;
+    public $cchId;
+    public $minuteToDeadline;
+    public $comment;
+    public $reasonId;
 
-	public $reasons;
+    public $reasons;
 
     /**
      * @param array $config
      */
     public function __construct($config = [])
-	{
-		parent::__construct($config);
-		$this->reasons = ClientChatActionReasonQuery::getReasons(ClientChatStatusLog::ACTION_HOLD);
-	}
+    {
+        parent::__construct($config);
+        $this->reasons = ClientChatActionReasonQuery::getReasons(ClientChatStatusLog::ACTION_HOLD);
+    }
 
-	public function rules(): array
-	{
-		return [
-			[['cchId', 'minuteToDeadline'], 'required'],
-			[['cchId', 'minuteToDeadline', 'reasonId'], 'integer'],
-			[['cchId', 'minuteToDeadline'], 'filter', 'filter' => 'intval'],
+    public function rules(): array
+    {
+        return [
+            [['cchId', 'minuteToDeadline'], 'required'],
+            [['cchId', 'minuteToDeadline', 'reasonId'], 'integer'],
+            [['cchId', 'minuteToDeadline'], 'filter', 'filter' => 'intval'],
 
-			['minuteToDeadline', 'validateMinuteToDeadline'],
+            ['minuteToDeadline', 'validateMinuteToDeadline'],
 
-			['comment', 'string', 'max' => 255],
+            ['comment', 'string', 'max' => 255],
 
-			['reasonId', 'in', 'range' => array_keys($this->getReasonList())],
+            ['reasonId', 'in', 'range' => array_keys($this->getReasonList())],
 
-			['comment', 'required', 'when' => function () {
-				return (isset($this->reasons[$this->reasonId]) && $this->reasons[$this->reasonId]->isCommentRequired());
-			}, 'skipOnError' => true],
-		];
-	}
+            ['comment', 'required', 'when' => function () {
+                return (isset($this->reasons[$this->reasonId]) && $this->reasons[$this->reasonId]->isCommentRequired());
+            }, 'skipOnError' => true],
+        ];
+    }
 
-	public function attributeLabels(): array
-	{
-		return [
-			'cchId' => 'Client Chat Id',
-			'minuteToDeadline' => 'Deadline',
-		];
-	}
+    public function attributeLabels(): array
+    {
+        return [
+            'cchId' => 'Client Chat Id',
+            'minuteToDeadline' => 'Deadline',
+        ];
+    }
 
     /**
      * @param $attribute
@@ -76,12 +77,11 @@ class ClientChatHoldForm extends Model
     }
 
     public function getReasonList(): array
-	{
-		$list = [];
-		foreach ($this->reasons as $reason) {
-			$list[$reason->id] = $reason->name;
-		}
-		return $list;
-	}
-
+    {
+        $list = [];
+        foreach ($this->reasons as $reason) {
+            $list[$reason->id] = $reason->name;
+        }
+        return $list;
+    }
 }

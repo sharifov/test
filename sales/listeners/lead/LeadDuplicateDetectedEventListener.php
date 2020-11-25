@@ -20,5 +20,4 @@ class LeadDuplicateDetectedEventListener
 
 //        Yii::info('Warning: detected duplicate Lead (Origin id: ' . $lead->l_duplicate_lead_id . ', Hash: ' . $lead->l_request_hash . ')', 'info\Lead:duplicate');
     }
-
 }

@@ -64,5 +64,4 @@ class EmployeeAccessHelper
         $result = array_intersect($user->getRoles(true), $roles);
         return !empty($result);
     }
-
 }

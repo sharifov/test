@@ -30,23 +30,23 @@ use modules\flight\models\Flight;
  */
 abstract class ProductQuoteDTO
 {
-	public $gid;
-	public $name;
-	public $productId;
-	public $orderId;
-	public $description;
-	public $statusId;
-	public $price;
-	public $originPrice;
-	public $clientPrice;
-	public $serviceFeeSum;
-	public $originCurrency;
-	public $clientCurrency;
-	public $originCurrencyRate;
-	public $clientCurrencyRate;
-	public $ownerUserId;
-	public $createdUserId;
-	public $updatedUserId;
-	public $createdDt;
-	public $updatedDt;
+    public $gid;
+    public $name;
+    public $productId;
+    public $orderId;
+    public $description;
+    public $statusId;
+    public $price;
+    public $originPrice;
+    public $clientPrice;
+    public $serviceFeeSum;
+    public $originCurrency;
+    public $clientCurrency;
+    public $originCurrencyRate;
+    public $clientCurrencyRate;
+    public $ownerUserId;
+    public $createdUserId;
+    public $updatedUserId;
+    public $createdDt;
+    public $updatedDt;
 }

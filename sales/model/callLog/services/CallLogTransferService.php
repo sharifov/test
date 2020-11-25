@@ -106,10 +106,12 @@ class CallLogTransferService
 
         if (
             $call->isOut() &&
-            !$call->isGeneralParent()
-            && $call->c_group_id != null
-            && (
-                !$call->isTransfer() || ($call->isTransfer() && !$call->isSourceTransfer())
+            !$call->isGeneralParent() &&
+            $call->c_group_id != null &&
+            (
+                !$call->isTransfer() ||
+                ($call->isTransfer() &&
+                !$call->isSourceTransfer())
             )
         ) {
             $this->outChildTransferCall();
@@ -423,7 +425,6 @@ class CallLogTransferService
             if ($log->cl_user_id && ($log->isIn() || $log->isOut())) {
                 $this->sendHistorySocketMessage($log->getAttributes(), $this->call['c_case_id'], $this->call['c_lead_id']);
             }
-
         } catch (\Throwable $e) {
             $transaction->rollBack();
             \Yii::error(VarDumper::dumpAsString(['category' => 'createCallLogs', 'Call' => $this->call, 'error' => $e->getMessage()]), 'CallLogTransferService');

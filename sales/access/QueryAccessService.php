@@ -19,8 +19,7 @@ class QueryAccessService
     public function __construct(
         ProjectAccessService $projectAccessService,
         DepartmentAccessService $departmentAccessService
-    )
-    {
+    ) {
         $this->projectAccessService = $projectAccessService;
         $this->departmentAccessService = $departmentAccessService;
     }

@@ -320,8 +320,10 @@ class CasesQRepository
             ]);
 
         if ($joinByStatus) {
-            $query->innerJoin(Cases::tableName() . ' AS cases',
-                'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . $joinByStatus);
+            $query->innerJoin(
+                Cases::tableName() . ' AS cases',
+                'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . $joinByStatus
+            );
         }
 
         $query->where('css_out_date >= SUBDATE(CURDATE(), 1)')

@@ -29,5 +29,4 @@ class QuoteSendEventListener
             AppHelper::throwableLogger($throwable, 'QuoteSendEventListener:Throwable', true);
         }
     }
-
 }

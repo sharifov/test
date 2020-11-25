@@ -66,13 +66,13 @@ class SmsDistributionList extends ActiveRecord
     ];
 
     public const STATUS_LIST_LABEL = [
-        self::STATUS_NEW        => '<span class="badge badge-info">' .self::STATUS_LIST[self::STATUS_NEW]. '</span>',
-        self::STATUS_PENDING    => '<span class="badge badge-warning">' .self::STATUS_LIST[self::STATUS_PENDING]. '</span>',
-        self::STATUS_PROCESS    => '<span class="badge badge-white">' .self::STATUS_LIST[self::STATUS_PROCESS]. '</span>',
-        self::STATUS_SENT       => '<span class="badge badge-green">' .self::STATUS_LIST[self::STATUS_SENT]. '</span>',
-        self::STATUS_ERROR      => '<span class="badge badge-danger">' .self::STATUS_LIST[self::STATUS_ERROR]. '</span>',
-        self::STATUS_DONE       => '<span class="badge badge-green">' .self::STATUS_LIST[self::STATUS_DONE]. '</span>',
-        self::STATUS_CANCEL     => '<span class="badge badge-danger">' .self::STATUS_LIST[self::STATUS_CANCEL]. '</span>',
+        self::STATUS_NEW        => '<span class="badge badge-info">' . self::STATUS_LIST[self::STATUS_NEW] . '</span>',
+        self::STATUS_PENDING    => '<span class="badge badge-warning">' . self::STATUS_LIST[self::STATUS_PENDING] . '</span>',
+        self::STATUS_PROCESS    => '<span class="badge badge-white">' . self::STATUS_LIST[self::STATUS_PROCESS] . '</span>',
+        self::STATUS_SENT       => '<span class="badge badge-green">' . self::STATUS_LIST[self::STATUS_SENT] . '</span>',
+        self::STATUS_ERROR      => '<span class="badge badge-danger">' . self::STATUS_LIST[self::STATUS_ERROR] . '</span>',
+        self::STATUS_DONE       => '<span class="badge badge-green">' . self::STATUS_LIST[self::STATUS_DONE] . '</span>',
+        self::STATUS_CANCEL     => '<span class="badge badge-danger">' . self::STATUS_LIST[self::STATUS_CANCEL] . '</span>',
     ];
 
     /**
@@ -132,7 +132,6 @@ class SmsDistributionList extends ActiveRecord
     public function beforeSave($insert): bool
     {
         if (parent::beforeSave($insert)) {
-
             if (!$this->sdl_client_id) {
                 $clientPhone = ClientPhone::find()->where(['phone' => $this->sdl_phone_to])->orderBy(['id' => SORT_DESC])->one();
                 if ($clientPhone) {
@@ -287,14 +286,12 @@ class SmsDistributionList extends ActiveRecord
 
 
         try {
-
-            $str = 'ProjectId: ' . $this->sdl_project_id. ' From:' . $this->sdl_phone_from . ' To:'. $this->sdl_phone_to;
+            $str = 'ProjectId: ' . $this->sdl_project_id . ' From:' . $this->sdl_phone_from . ' To:' . $this->sdl_phone_to;
             //VarDumper::dump($str); exit;
 
             $request = $communication->smsSend($this->sdl_project_id, null, $this->sdl_phone_from, $this->sdl_phone_to, $content_data, $data, 'en-US', 0);
 
-            if($request && isset($request['data']['sq_status_id'])) {
-
+            if ($request && isset($request['data']['sq_status_id'])) {
                 $this->sdl_status_id        = $request['data']['sq_status_id'];
                 $this->sdl_com_id           = $request['data']['sq_id'];
                 $this->sdl_message_sid      = $request['data']['sq_tw_message_id'] ?? null;
@@ -308,7 +305,7 @@ class SmsDistributionList extends ActiveRecord
 
             //VarDumper::dump($request, 10, true); exit;
 
-            if($request && isset($request['error']) && $request['error']) {
+            if ($request && isset($request['error']) && $request['error']) {
                 $this->sdl_status_id = self::STATUS_ERROR;
                 $errorData = @json_decode($request['error'], true);
                 $this->sdl_error_message = 'Communication error: ' . ($errorData['message'] ?: $request['error']);
@@ -316,13 +313,12 @@ class SmsDistributionList extends ActiveRecord
                     Yii::error(VarDumper::dumpAsString($this->errors), 'SmsDistributionList:sendSms:save2');
                 }
                 $out['error'] = $this->sdl_error_message;
-                Yii::error($str. "\r\n". $out['error'], 'SmsDistributionList:sendSms:smsSend:CommunicationError');
+                Yii::error($str . "\r\n" . $out['error'], 'SmsDistributionList:sendSms:smsSend:CommunicationError');
             }
-
         } catch (\Throwable $throwable) {
             $error = AppHelper::throwableFormatter($throwable);
             $out['error'] = $error;
-            Yii::error($str. "\r\n". $error, 'SmsDistributionList:sendSms:smsSend:Throwable');
+            Yii::error($str . "\r\n" . $error, 'SmsDistributionList:sendSms:smsSend:Throwable');
             $this->sdl_error_message = 'Communication error: ' . $error;
             if (!$this->save()) {
                 Yii::error(VarDumper::dumpAsString($this->errors), 'SmsDistributionList:sendSms:save3');

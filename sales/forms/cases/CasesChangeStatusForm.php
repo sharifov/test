@@ -68,7 +68,7 @@ class CasesChangeStatusForm extends Model
 
             ['userId', 'integer'],
             ['userId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['userId', 'required', 'when' =>  function() {
+            ['userId', 'required', 'when' =>  function () {
                 return $this->isProcessing();
             }, 'skipOnEmpty' => false],
 

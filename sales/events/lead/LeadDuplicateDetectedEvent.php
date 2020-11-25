@@ -20,5 +20,4 @@ class LeadDuplicateDetectedEvent
     {
         $this->lead = $lead;
     }
-
 }

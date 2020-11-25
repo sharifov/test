@@ -23,7 +23,7 @@ class Dial extends Model implements CommandTypeInterface
             [['typeId'], 'required'],
 
             [['typeId', 'sort'], 'integer'],
-        ];
+         ];
     }
 
     public function formName(): string

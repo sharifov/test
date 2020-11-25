@@ -1,6 +1,5 @@
 <?php
 
-
 namespace sales\model\clientChatMessage\event;
 
 use sales\model\clientChatMessage\entity\ClientChatMessage;
@@ -12,13 +11,13 @@ use sales\model\clientChatMessage\entity\ClientChatMessage;
  */
 class ClientChatMessageCreateEvent
 {
-	public $clientChatMessage;
+    public $clientChatMessage;
 
     /**
      * @param ClientChatMessage $clientChatMessage
      */
     public function __construct(ClientChatMessage $clientChatMessage)
-	{
-		$this->clientChatMessage = $clientChatMessage;
-	}
+    {
+        $this->clientChatMessage = $clientChatMessage;
+    }
 }

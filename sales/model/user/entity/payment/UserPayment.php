@@ -37,46 +37,46 @@ use yii\db\ActiveRecord;
  */
 class UserPayment extends \yii\db\ActiveRecord
 {
-	public const STATUS_PENDING = 1;
-	public const STATUS_APPROVED = 2;
-	public const STATUS_CANCELED = 3;
-	public const STATUS_DELETED = 4;
+    public const STATUS_PENDING = 1;
+    public const STATUS_APPROVED = 2;
+    public const STATUS_CANCELED = 3;
+    public const STATUS_DELETED = 4;
 
-	public const STATUS_LIST = [
-		self::STATUS_PENDING => 'Pending',
-		self::STATUS_APPROVED => 'Approved',
-		self::STATUS_CANCELED => 'Canceled',
-		self::STATUS_DELETED => 'Deleted'
-	];
+    public const STATUS_LIST = [
+        self::STATUS_PENDING => 'Pending',
+        self::STATUS_APPROVED => 'Approved',
+        self::STATUS_CANCELED => 'Canceled',
+        self::STATUS_DELETED => 'Deleted'
+    ];
 
-	public const STATUS_CLASS_LIST = [
-		self::STATUS_PENDING => 'info',
-		self::STATUS_APPROVED => 'success',
-		self::STATUS_CANCELED => 'warning',
-		self::STATUS_DELETED => 'danger'
-	];
+    public const STATUS_CLASS_LIST = [
+        self::STATUS_PENDING => 'info',
+        self::STATUS_APPROVED => 'success',
+        self::STATUS_CANCELED => 'warning',
+        self::STATUS_DELETED => 'danger'
+    ];
 
-	/**
-	 * @return array
-	 */
-	public function behaviors(): array
-	{
-		return [
-			'timestamp' => [
-				'class' => TimestampBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['upt_created_dt', 'upt_updated_dt'],
-					ActiveRecord::EVENT_BEFORE_UPDATE => ['upt_updated_dt'],
-				],
-				'value' => date('Y-m-d H:i:s')
-			],
-			'user' => [
-				'class' => BlameableBehavior::class,
-				'createdByAttribute' => 'upt_created_user_id',
-				'updatedByAttribute' => 'upt_updated_user_id',
-			],
-		];
-	}
+    /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['upt_created_dt', 'upt_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['upt_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s')
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'upt_created_user_id',
+                'updatedByAttribute' => 'upt_updated_user_id',
+            ],
+        ];
+    }
 
     /**
      * {@inheritdoc}
@@ -179,14 +179,14 @@ class UserPayment extends \yii\db\ActiveRecord
     }
 
     public static function getStatusList(): array
-	{
-		return self::STATUS_LIST;
-	}
+    {
+        return self::STATUS_LIST;
+    }
 
-	public static function getStatusName($statusId): ?string
-	{
-		return self::getStatusList()[$statusId];
-	}
+    public static function getStatusName($statusId): ?string
+    {
+        return self::getStatusList()[$statusId];
+    }
 
     /**
      * {@inheritdoc}
@@ -197,25 +197,25 @@ class UserPayment extends \yii\db\ActiveRecord
         return new UserPaymentQuery(static::class);
     }
 
-	public static function asFormat(?int $value): ?string
-	{
-		return $value ? Html::tag(
-			'span',
-			self::getStatusName($value),
-			['class' => 'badge badge-' . self::getClassName($value)]
-		) : null;
-	}
+    public static function asFormat(?int $value): ?string
+    {
+        return $value ? Html::tag(
+            'span',
+            self::getStatusName($value),
+            ['class' => 'badge badge-' . self::getClassName($value)]
+        ) : null;
+    }
 
-	/**
-	 * @return mixed|null
-	 */
-	public function getRowClass()
-	{
-		return self::STATUS_CLASS_LIST[$this->upt_status_id] ?? null;
-	}
+    /**
+     * @return mixed|null
+     */
+    public function getRowClass()
+    {
+        return self::STATUS_CLASS_LIST[$this->upt_status_id] ?? null;
+    }
 
-	private static function getClassName(?int $value): string
-	{
-		return self::STATUS_CLASS_LIST[$value] ?? 'secondary';
-	}
+    private static function getClassName(?int $value): string
+    {
+        return self::STATUS_CLASS_LIST[$value] ?? 'secondary';
+    }
 }

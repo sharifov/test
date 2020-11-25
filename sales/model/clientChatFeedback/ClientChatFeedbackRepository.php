@@ -1,4 +1,5 @@
 <?php
+
 namespace sales\model\clientChatFeedback;
 
 use sales\model\clientChatFeedback\entity\ClientChatFeedback;

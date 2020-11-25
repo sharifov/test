@@ -46,5 +46,4 @@ class LeadFlowChecklistRepository extends Repository
             throw new \RuntimeException('Removing error');
         }
     }
-
 }

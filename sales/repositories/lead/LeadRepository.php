@@ -71,7 +71,7 @@ class LeadRepository extends Repository
      * @param $requestHash
      * @return Lead|null
      */
-    public function getByRequestHash($requestHash):? Lead
+    public function getByRequestHash($requestHash): ?Lead
     {
         return Lead::find()
             ->where(['l_request_hash' => $requestHash])
@@ -97,35 +97,35 @@ class LeadRepository extends Repository
             ])->andWhere(['<>', 'id', $current])->asArray()->all();
     }
 
-	/**
-	 * @param int $clientId
-	 * @return null|Lead
-	 */
+    /**
+     * @param int $clientId
+     * @return null|Lead
+     */
     public function findActiveByClientId(int $clientId): ?Lead
-	{
-		return Lead::find()
-			->where(['client_id' => $clientId,
-					 'status' => [
-					 	Lead::STATUS_PROCESSING, Lead::STATUS_SNOOZE,
-						Lead::STATUS_ON_HOLD, Lead::STATUS_FOLLOW_UP]
-			])
-			->orderBy(['id' => SORT_DESC])
-			->limit(1)
-			->one();
-	}
+    {
+        return Lead::find()
+            ->where(['client_id' => $clientId,
+                     'status' => [
+                        Lead::STATUS_PROCESSING, Lead::STATUS_SNOOZE,
+                        Lead::STATUS_ON_HOLD, Lead::STATUS_FOLLOW_UP]
+            ])
+            ->orderBy(['id' => SORT_DESC])
+            ->limit(1)
+            ->one();
+    }
 
-	/**
-	 * @param int $clientId
-	 * @return null|Lead
-	 */
-	public function findByClientId(int $clientId): ?Lead
-	{
-		return Lead::find()
-			->where(['client_id' => $clientId])
-			->orderBy(['id' => SORT_DESC])
-			->limit(1)
-			->one();
-	}
+    /**
+     * @param int $clientId
+     * @return null|Lead
+     */
+    public function findByClientId(int $clientId): ?Lead
+    {
+        return Lead::find()
+            ->where(['client_id' => $clientId])
+            ->orderBy(['id' => SORT_DESC])
+            ->limit(1)
+            ->one();
+    }
 
     /**
      * @param Lead $lead

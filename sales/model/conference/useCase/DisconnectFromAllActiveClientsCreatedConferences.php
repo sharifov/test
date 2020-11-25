@@ -98,7 +98,6 @@ class DisconnectFromAllActiveClientsCreatedConferences
         }
 
         if (Call::applyCallToAgentAccess($clientCall, $userId)) {
-
         }
     }
 
@@ -113,14 +112,14 @@ class DisconnectFromAllActiveClientsCreatedConferences
             'c_call_type_id' => [Call::CALL_TYPE_IN, Call::CALL_TYPE_OUT],
             'c_status_id' => [Call::STATUS_RINGING, Call::STATUS_IN_PROGRESS, Call::STATUS_HOLD]
         ])
-            ->innerJoinWith(['conferenceParticipants' => static function(ConferenceParticipantQuery $query) {
+            ->innerJoinWith(['conferenceParticipants' => static function (ConferenceParticipantQuery $query) {
                 $query->andOnCondition([
                     'cp_type_id' => ConferenceParticipant::TYPE_AGENT,
                 ]);
                 $query->andOnCondition(['IS NOT', 'cp_status_id', null]);
                 $query->andOnCondition(['<>', 'cp_status_id', ConferenceParticipant::STATUS_LEAVE]);
             }], false)
-            ->innerJoinWith(['conferences' => static function(ConferenceQuery $query) {
+            ->innerJoinWith(['conferences' => static function (ConferenceQuery $query) {
                 $query->andOnCondition([
                     'cf_status_id' => [
                         Conference::STATUS_START,
@@ -138,14 +137,12 @@ class DisconnectFromAllActiveClientsCreatedConferences
     private function log(int $userId): void
     {
         foreach ($this->messages as $message) {
-
             if ($ntf = Notifications::create($userId, 'Hold call', $message['error'], Notifications::TYPE_DANGER, true)) {
                 $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
                 Notifications::publish('getNewNotification', ['user_id' => $userId], $dataNotification);
             }
 
             \Yii::error(VarDumper::dumpAsString($message), static::class);
-
         }
     }
 }

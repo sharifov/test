@@ -87,27 +87,27 @@ class CaseCategorySearch extends CaseCategory
         return $dataProvider;
     }
 
-    public function prepareReportData($params):SqlDataProvider
+    public function prepareReportData($params): SqlDataProvider
     {
         $this->load($params);
         $query = CaseCategory::find()->joinWith(['dep', 'cases']);
         $query->select([
             'cc_id', 'cc_dep_id', 'dep_name', 'cc_name',
-            'SUM(IF(cs_status = '. CasesStatus::STATUS_PENDING .', 1, 0)) AS pending',
-            'SUM(IF(cs_status = '. CasesStatus::STATUS_PROCESSING .', 1, 0)) AS processing',
-            'SUM(IF(cs_status = '. CasesStatus::STATUS_FOLLOW_UP .', 1, 0)) AS followup',
-            'SUM(IF(cs_status = '. CasesStatus::STATUS_SOLVED .', 1, 0)) AS solved',
-            'SUM(IF(cs_status = '. CasesStatus::STATUS_TRASH .', 1, 0)) AS trash'
+            'SUM(IF(cs_status = ' . CasesStatus::STATUS_PENDING . ', 1, 0)) AS pending',
+            'SUM(IF(cs_status = ' . CasesStatus::STATUS_PROCESSING . ', 1, 0)) AS processing',
+            'SUM(IF(cs_status = ' . CasesStatus::STATUS_FOLLOW_UP . ', 1, 0)) AS followup',
+            'SUM(IF(cs_status = ' . CasesStatus::STATUS_SOLVED . ', 1, 0)) AS solved',
+            'SUM(IF(cs_status = ' . CasesStatus::STATUS_TRASH . ', 1, 0)) AS trash'
         ]);
         $query->groupBy(['cc_id']);
 
-        if ($this->createTimeRange){
+        if ($this->createTimeRange) {
             $dateTimeStart = Employee::convertTimeFromUserDtToUTC(strtotime($this->createTimeStart));
             $dateTimeEnd = Employee::convertTimeFromUserDtToUTC(strtotime($this->createTimeEnd));
             $query->andWhere(['between', 'cases.cs_created_dt', $dateTimeStart, $dateTimeEnd]);
         }
 
-        if($this->depID){
+        if ($this->depID) {
             $query->andWhere(['cc_dep_id' => $this->depID]);
         }
 

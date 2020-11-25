@@ -45,5 +45,4 @@ class Hangup extends Model implements CommandTypeInterface
     {
         return $this->sort;
     }
-
 }

@@ -20,7 +20,7 @@ class LeadImportParseService
 
         foreach ($rows as $rn => $row) {
             $rowData = explode(',', $row);
-            if (!$rowData || $rn ===0) {
+            if (!$rowData || $rn === 0) {
                 continue;
             }
 
@@ -42,11 +42,9 @@ class LeadImportParseService
                 } else {
                     $errors[$rn] = 'Cant load.';
                 }
-
             } catch (\Throwable $e) {
                 $errors[$rn] = $e->getMessage();
             }
-
         }
 
         return new Parse($errors, $forms);

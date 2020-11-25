@@ -15,17 +15,19 @@ class ClientChatMessageCreateListener
      * @param ClientChatLastMessageRepository $clientChatLastMessageRepository
      */
     public function __construct(ClientChatLastMessageRepository $clientChatLastMessageRepository)
-	{
+    {
         $this->clientChatLastMessageRepository = $clientChatLastMessageRepository;
-	}
+    }
 
-	public function handle(ClientChatMessageCreateEvent $event): void
-	{
-		try {
+    public function handle(ClientChatMessageCreateEvent $event): void
+    {
+        try {
             $this->clientChatLastMessageRepository->createOrUpdateByMessage($event->clientChatMessage);
-		} catch (\Throwable $throwable) {
-			\Yii::error($throwable,
-			'ClientChatMessageCreateListener:handle');
-		}
-	}
+        } catch (\Throwable $throwable) {
+            \Yii::error(
+                $throwable,
+                'ClientChatMessageCreateListener:handle'
+            );
+        }
+    }
 }

@@ -1,6 +1,5 @@
 <?php
 
-
 namespace sales\model\userVoiceMail\useCase\manage;
 
 use sales\helpers\app\AppParamsHelper;

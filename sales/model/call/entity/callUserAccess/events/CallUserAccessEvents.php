@@ -1,4 +1,5 @@
 <?php
+
 namespace sales\model\call\entity\callUserAccess\events;
 
 use common\models\CallUserAccess;
@@ -78,5 +79,4 @@ class CallUserAccessEvents extends Component
             \Yii::error(VarDumper::dumpAsString($userStatus->errors), 'CallUserAccessEvents:resetHasCallAccess:UserStatus:save');
         }
     }
-
 }

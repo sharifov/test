@@ -1,6 +1,7 @@
 <?php
 
 namespace sales\model\sms\entity\smsDistributionList\forms;
+
 use borales\extensions\phoneInput\PhoneInputValidator;
 use common\models\Project;
 use yii\base\Model;
@@ -40,7 +41,7 @@ class SmsDistributionListAddMultipleForm extends Model
             [['sdl_phone_from', 'sdl_phone_to_list', 'sdl_text', 'sdl_status_id', 'sdl_project_id'], 'required'],
             [['sdl_phone_from'], PhoneInputValidator::class],
 
-            [['sdl_phone_to_list'], 'filter', 'filter' => static function ($value){
+            [['sdl_phone_to_list'], 'filter', 'filter' => static function ($value) {
                 return str_replace(['(', ')', '-', ' '], '', $value);
             }],
 
@@ -72,6 +73,6 @@ class SmsDistributionListAddMultipleForm extends Model
 
     public function getProjects(): array
     {
-       return Project::getSmsEnabledList();
+        return Project::getSmsEnabledList();
     }
 }

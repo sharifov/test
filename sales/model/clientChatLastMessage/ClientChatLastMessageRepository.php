@@ -1,4 +1,5 @@
 <?php
+
 namespace sales\model\clientChatLastMessage;
 
 use sales\model\clientChat\entity\ClientChat;

@@ -31,7 +31,7 @@ class ClientForm extends Model
             ['email', 'default', 'value' => null],
             ['email', 'string', 'max' => 160],
             ['email', 'email'],
-            ['email', 'filter', 'filter' => static function($value) {
+            ['email', 'filter', 'filter' => static function ($value) {
                 return $value === null ? null : mb_strtolower(trim($value));
             }],
             ['email', InternalEmailValidator::class, 'allowInternalEmail' => \Yii::$app->params['settings']['allow_contact_internal_email']],

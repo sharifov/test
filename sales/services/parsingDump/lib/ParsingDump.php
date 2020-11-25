@@ -10,30 +10,30 @@ use common\models\Quote;
  */
 class ParsingDump
 {
-    public CONST PARSING_TYPE_RESERVATION = 'Reservation';
-    public CONST PARSING_TYPE_PRICING = 'Pricing';
-    public CONST PARSING_TYPE_BAGGAGE = 'Baggage';
-    public CONST PARSING_TYPE_ALL = 'ParseAll';
-    public CONST PARSING_DEFAULT_TYPE = self::PARSING_TYPE_ALL;
+    public const PARSING_TYPE_RESERVATION = 'Reservation';
+    public const PARSING_TYPE_PRICING = 'Pricing';
+    public const PARSING_TYPE_BAGGAGE = 'Baggage';
+    public const PARSING_TYPE_ALL = 'ParseAll';
+    public const PARSING_DEFAULT_TYPE = self::PARSING_TYPE_ALL;
 
-    public CONST PARSING_TYPE_MAP = [
+    public const PARSING_TYPE_MAP = [
         self::PARSING_TYPE_ALL => 'All',
         self::PARSING_TYPE_RESERVATION => 'Reservation',
         self::PARSING_TYPE_PRICING => 'Pricing',
         self::PARSING_TYPE_BAGGAGE => 'Baggage',
     ];
 
-    public CONST GDS_TYPE_WORLDSPAN = 'worldSpan';
-    public CONST GDS_TYPE_SABRE = 'sabre';
-    public CONST GDS_TYPE_AMADEUS = 'amadeus';
+    public const GDS_TYPE_WORLDSPAN = 'worldSpan';
+    public const GDS_TYPE_SABRE = 'sabre';
+    public const GDS_TYPE_AMADEUS = 'amadeus';
 
-    public CONST GDS_TYPE_MAP = [
+    public const GDS_TYPE_MAP = [
         self::GDS_TYPE_AMADEUS => 'Amadeus',
         self::GDS_TYPE_SABRE => 'Sabre',
         self::GDS_TYPE_WORLDSPAN => 'WorldSpan',
     ];
 
-    public CONST QUOTE_GDS_TYPE_MAP = [
+    public const QUOTE_GDS_TYPE_MAP = [
         SearchService::GDS_AMADEUS => self::GDS_TYPE_AMADEUS,
         SearchService::GDS_SABRE => self::GDS_TYPE_SABRE,
         SearchService::GDS_WORLDSPAN => self::GDS_TYPE_WORLDSPAN,

@@ -29,32 +29,32 @@ use yii\helpers\ArrayHelper;
  */
 class ClientChatActionReason extends \yii\db\ActiveRecord
 {
-	public function behaviors(): array
-	{
-		$behaviors = [
-			'timestamp' => [
-				'class' => TimestampBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['ccar_created_dt', 'ccar_updated_dt'],
-					ActiveRecord::EVENT_BEFORE_UPDATE => ['ccar_updated_dt'],
-				],
-				'value' => date('Y-m-d H:i:s')
-			],
-			'user' => [
-				'class' => BlameableBehavior::class,
-				'createdByAttribute' => 'ccar_created_user_id',
-				'updatedByAttribute' => 'ccar_updated_user_id',
-			],
-		];
-		return ArrayHelper::merge(parent::behaviors(), $behaviors);
-	}
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['ccar_created_dt', 'ccar_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['ccar_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s')
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'ccar_created_user_id',
+                'updatedByAttribute' => 'ccar_updated_user_id',
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
 
     public function rules(): array
     {
         return [
             ['ccar_action_id', 'required'],
             ['ccar_action_id', 'integer'],
-			['ccar_action_id', 'in', 'range' => array_keys(ClientChatStatusLog::getActionList())],
+            ['ccar_action_id', 'in', 'range' => array_keys(ClientChatStatusLog::getActionList())],
 
             ['ccar_comment_required', 'integer'],
 

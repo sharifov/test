@@ -148,5 +148,4 @@ class RejectReasonForm extends Model
         }
         return false;
     }
-
 }

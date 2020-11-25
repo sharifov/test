@@ -99,12 +99,11 @@ class CloneQuoteByUidForm extends Model
         }
 
         try {
-           $this->checkCount($quote, $this->lead);
+            $this->checkCount($quote, $this->lead);
         } catch (\DomainException $e) {
             $this->addError('uid', $e->getMessage());
             return;
         }
-
     }
 
     public function checkCount(Quote $quote, Lead $lead): void
@@ -121,7 +120,7 @@ class CloneQuoteByUidForm extends Model
         }
 
         if ($ADT !== $lead->adults || $CHD !== $lead->children) {
-            if ($this->confirm == $this->uid ) {
+            if ($this->confirm == $this->uid) {
                 return;
             }
             $message = 'Passenger number has been changed from';
@@ -171,5 +170,4 @@ class CloneQuoteByUidForm extends Model
             throw new \DomainException($message);
         }
     }
-
 }

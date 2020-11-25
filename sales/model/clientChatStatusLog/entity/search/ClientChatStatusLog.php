@@ -38,7 +38,7 @@ class ClientChatStatusLog extends ClientChatStatusLogModel
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['csl_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['csl_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],

@@ -25,7 +25,7 @@ class ClientChatCaseSearch extends ClientChatCase
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cccs_chat_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['cccs_chat_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],

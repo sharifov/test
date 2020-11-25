@@ -75,8 +75,8 @@ class LeadManageService
         ClientManageService $clientManageService,
         CasesRepository $casesRepository,
         CasesManageService $casesManageService,
-        TransactionManager $transaction)
-    {
+        TransactionManager $transaction
+    ) {
         $this->leadRepository = $leadRepository;
         $this->segmentRepository = $segmentRepository;
         $this->clientEmailRepository = $clientEmailRepository;
@@ -166,7 +166,6 @@ class LeadManageService
             }
 
             return $lead;
-
         });
 
         return $lead;
@@ -204,7 +203,6 @@ class LeadManageService
         $lead = $this->transaction->wrap(function () use ($form, $employeeId, $creatorId, $reason) {
 
             return $this->createManually($form, $employeeId, $creatorId, $reason);
-
         });
 
         return $lead;
@@ -230,7 +228,6 @@ class LeadManageService
             $this->casesManageService->assignLead($case->cs_id, $lead->id);
 
             return $lead;
-
         });
 
         return $lead;
@@ -248,8 +245,7 @@ class LeadManageService
         int $employeeId,
         ?int $creatorId,
         ?string $reason
-    ): Lead
-    {
+    ): Lead {
         $client = $this->clientManageService->getOrCreate($form->phones, $form->emails, $form->client);
 
         $lead = Lead::createManually(
@@ -312,7 +308,6 @@ class LeadManageService
         }
 
         return $lead;
-
     }
 
     /**
@@ -344,7 +339,6 @@ class LeadManageService
             $this->leadRepository->save($lead);
 
             $lead->updateLastAction();
-
         });
     }
 
@@ -444,5 +438,4 @@ class LeadManageService
         );
         return $segment;
     }
-
 }

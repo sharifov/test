@@ -205,13 +205,13 @@ class CallLog extends \yii\db\ActiveRecord
         return $this->hasOne(CallLogRecord::class, ['clr_cl_id' => 'cl_id']);
     }
 
-	public function getChildCalls(): array
-	{
-		return (new ActiveQuery($this))
-			->where(['cl_group_id' => $this->cl_id])
-			->orWhere(['cl_id' => $this->cl_id])
-			->orderBy(['cl_call_created_dt' => SORT_ASC])->all();
-	}
+    public function getChildCalls(): array
+    {
+        return (new ActiveQuery($this))
+            ->where(['cl_group_id' => $this->cl_id])
+            ->orWhere(['cl_id' => $this->cl_id])
+            ->orderBy(['cl_call_created_dt' => SORT_ASC])->all();
+    }
 
     public function getConference(): ActiveQuery
     {
@@ -224,58 +224,58 @@ class CallLog extends \yii\db\ActiveRecord
     }
 
     public function isStatusCompleted(): bool
-	{
-		return $this->cl_status_id === CallLogStatus::COMPLETE;
-	}
+    {
+        return $this->cl_status_id === CallLogStatus::COMPLETE;
+    }
 
-	public function isStatusCanceled(): bool
-	{
-		return $this->cl_status_id === CallLogStatus::CANCELED;
-	}
+    public function isStatusCanceled(): bool
+    {
+        return $this->cl_status_id === CallLogStatus::CANCELED;
+    }
 
-	public function isStatusBusy(): bool
-	{
-		return $this->cl_status_id === CallLogStatus::BUSY;
-	}
+    public function isStatusBusy(): bool
+    {
+        return $this->cl_status_id === CallLogStatus::BUSY;
+    }
 
-	public function isStatusNoAnswer(): bool
-	{
-		return $this->cl_status_id === CallLogStatus::NOT_ANSWERED;
-	}
+    public function isStatusNoAnswer(): bool
+    {
+        return $this->cl_status_id === CallLogStatus::NOT_ANSWERED;
+    }
 
-	public function isStatusFailed(): bool
-	{
-		return $this->cl_status_id === CallLogStatus::FAILED;
-	}
+    public function isStatusFailed(): bool
+    {
+        return $this->cl_status_id === CallLogStatus::FAILED;
+    }
 
-	public function isIn(): bool
-	{
-		return $this->cl_type_id === CallLogType::IN;
-	}
+    public function isIn(): bool
+    {
+        return $this->cl_type_id === CallLogType::IN;
+    }
 
-	public function isOut(): bool
-	{
-		return $this->cl_type_id === CallLogType::OUT;
-	}
+    public function isOut(): bool
+    {
+        return $this->cl_type_id === CallLogType::OUT;
+    }
 
     public function isOwner(int $userId): bool
     {
         return $this->cl_user_id === $userId;
-	}
+    }
 
-	/**
-	 * @return string
-	 */
-	public function getStatusIcon(): string
-	{
-		if ($this->isStatusCompleted()) {
-			$icon = 'fa fa-flag text-success';
-		} elseif ($this->isStatusCanceled() || $this->isStatusNoAnswer() || $this->isStatusBusy() || $this->isStatusFailed()) {
-			$icon = 'fa fa-times-circle text-danger';
-		} else {
-			$icon = '';
-		}
+    /**
+     * @return string
+     */
+    public function getStatusIcon(): string
+    {
+        if ($this->isStatusCompleted()) {
+            $icon = 'fa fa-flag text-success';
+        } elseif ($this->isStatusCanceled() || $this->isStatusNoAnswer() || $this->isStatusBusy() || $this->isStatusFailed()) {
+            $icon = 'fa fa-times-circle text-danger';
+        } else {
+            $icon = '';
+        }
 
-		return '<i class="' . $icon . '"></i>';
-	}
+        return '<i class="' . $icon . '"></i>';
+    }
 }

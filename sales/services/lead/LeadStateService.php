@@ -27,8 +27,7 @@ class LeadStateService
     public function __construct(
         ServiceFinder $serviceFinder,
         LeadRepository $leadRepository
-    )
-    {
+    ) {
         $this->serviceFinder = $serviceFinder;
         $this->leadRepository = $leadRepository;
     }
@@ -198,5 +197,4 @@ class LeadStateService
         }
         return $newOwner;
     }
-
 }

@@ -1,6 +1,5 @@
 <?php
 
-
 namespace sales\model\clientChat\event;
 
 interface ClosedStatusGroupEventInterface

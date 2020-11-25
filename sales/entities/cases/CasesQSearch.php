@@ -60,7 +60,7 @@ class CasesQSearch extends Cases
     public function rules(): array
     {
         return [
-        	['cs_id', 'integer'],
+            ['cs_id', 'integer'],
             ['cs_gid', 'string'],
             ['cs_project_id', 'integer'],
             ['cs_subject', 'string'],
@@ -94,7 +94,7 @@ class CasesQSearch extends Cases
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cs_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['cs_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 20,
             ],
@@ -110,8 +110,8 @@ class CasesQSearch extends Cases
 
         // grid filtering conditions
         $query->andFilterWhere([
-			'cs_id' => $this->cs_id,
-			'cs_gid' => $this->cs_gid,
+            'cs_id' => $this->cs_id,
+            'cs_gid' => $this->cs_gid,
             'cs_project_id' => $this->cs_project_id,
             'cs_category_id' => $this->cs_category_id,
             'cs_dep_id' => $this->cs_dep_id,
@@ -142,7 +142,7 @@ class CasesQSearch extends Cases
     {
         $query = $this->casesQRepository->getInboxQuery($user);
 
-		$query->joinWith('project', true, 'INNER JOIN');
+        $query->joinWith('project', true, 'INNER JOIN');
 
         $query->addSelect('*');
         $query->addSelect(new Expression('
@@ -154,19 +154,21 @@ class CasesQSearch extends Cases
         $query->addSelect(new Expression('
             DATE(if(last_out_date IS NULL, last_in_date, LEAST(last_in_date, last_out_date))) AS nextFlight'));
 
-		$query->addSelect('css_penalty_type');
+        $query->addSelect('css_penalty_type');
 
-		$query->leftJoin([
-			'penalty_departure' => CaseSale::find()
-				->select([
-					'css_cs_id',
-					new Expression('
+        $query->leftJoin([
+            'penalty_departure' => CaseSale::find()
+                ->select([
+                    'css_cs_id',
+                    new Expression('
                     MIN(css_penalty_type) AS css_penalty_type'),
-				])
-				->innerJoin(Cases::tableName() . ' AS cases',
-					'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING)
-				->groupBy('css_cs_id')
-		], 'cases.cs_id = penalty_departure.css_cs_id');
+                ])
+                ->innerJoin(
+                    Cases::tableName() . ' AS cases',
+                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
+                )
+                ->groupBy('css_cs_id')
+        ], 'cases.cs_id = penalty_departure.css_cs_id');
 
         $query->leftJoin([
             'sale_out' => CaseSale::find()
@@ -175,8 +177,10 @@ class CasesQSearch extends Cases
                 new Expression('
                     MIN(css_out_date) AS last_out_date'),
             ])
-            ->innerJoin(Cases::tableName() . ' AS cases',
-                'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING)
+            ->innerJoin(
+                Cases::tableName() . ' AS cases',
+                'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
+            )
             ->where('css_out_date >= SUBDATE(CURDATE(), 1)')
             ->groupBy('css_cs_id')
         ], 'cases.cs_id = sale_out.css_cs_id');
@@ -188,15 +192,17 @@ class CasesQSearch extends Cases
                 new Expression('
                     MIN(css_in_date) AS last_in_date'),
             ])
-            ->innerJoin(Cases::tableName() . ' AS cases',
-                'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING)
+            ->innerJoin(
+                Cases::tableName() . ' AS cases',
+                'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING
+            )
             ->where('css_in_date >= SUBDATE(CURDATE(), 1)')
             ->groupBy('css_cs_id')
         ], 'cases.cs_id = sale_in.css_cs_id');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => [
+            'sort' => ['defaultOrder' => [
                 'saleExist' => SORT_DESC,
                 'nextFlight' => SORT_ASC,
                 'sort_order' => SORT_DESC,
@@ -226,12 +232,12 @@ class CasesQSearch extends Cases
                 'default' => SORT_ASC,
                 'label' => 'Next flight date',
             ],
-			'css_penalty_type' => [
-				'asc' => ['css_penalty_type' => SORT_ASC],
-				'desc' => ['css_penalty_type' => SORT_DESC],
-				'default' => SORT_ASC,
-				'label' => 'Penalty Type',
-			],
+            'css_penalty_type' => [
+                'asc' => ['css_penalty_type' => SORT_ASC],
+                'desc' => ['css_penalty_type' => SORT_DESC],
+                'default' => SORT_ASC,
+                'label' => 'Penalty Type',
+            ],
         ]);
         $dataProvider->setSort($sorting);
 
@@ -245,14 +251,14 @@ class CasesQSearch extends Cases
 
         // grid filtering conditions
         $query->andFilterWhere([
-			'cs_id' => $this->cs_id,
-			'cs_gid' => $this->cs_gid,
+            'cs_id' => $this->cs_id,
+            'cs_gid' => $this->cs_gid,
             'cs_project_id' => $this->cs_project_id,
             'cs_category_id' => $this->cs_category_id,
             'cs_dep_id' => $this->cs_dep_id,
             'cs_need_action' => $this->cs_need_action,
-			'css_penalty_type' => $this->css_penalty_type,
-		]);
+            'css_penalty_type' => $this->css_penalty_type,
+        ]);
 
         if ($this->cs_lead_id) {
             $query->andWhere(['cs_lead_id' => Lead::find()->select('id')->andWhere(['uid' => $this->cs_lead_id])]);
@@ -278,49 +284,51 @@ class CasesQSearch extends Cases
     {
         $query = $this->casesQRepository->getProcessingQuery($user);
 
-		$query->addSelect('css_penalty_type');
-		$query->addSelect('css_departure_dt');
+        $query->addSelect('css_penalty_type');
+        $query->addSelect('css_departure_dt');
 
-		// add conditions that should always apply here
+        // add conditions that should always apply here
 
-		$query->leftJoin([
-			'penalty_departure' => CaseSale::find()
-				->select([
-					'css_cs_id',
-					new Expression('
+        $query->leftJoin([
+            'penalty_departure' => CaseSale::find()
+                ->select([
+                    'css_cs_id',
+                    new Expression('
                     MIN(css_penalty_type) AS css_penalty_type'),
-					new Expression('
+                    new Expression('
                     MIN(css_departure_dt) AS css_departure_dt'),
-				])
-				->innerJoin(Cases::tableName() . ' AS cases',
-					'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PROCESSING)
-				->groupBy('css_cs_id')
-		], 'cases.cs_id = penalty_departure.css_cs_id');
+                ])
+                ->innerJoin(
+                    Cases::tableName() . ' AS cases',
+                    'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PROCESSING
+                )
+                ->groupBy('css_cs_id')
+        ], 'cases.cs_id = penalty_departure.css_cs_id');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cs_need_action' => SORT_DESC, 'cs_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['cs_need_action' => SORT_DESC, 'cs_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 20,
             ],
         ]);
 
-		$sorting = $dataProvider->getSort();
-		$sorting->attributes = array_merge($sorting->attributes, [
-			'css_penalty_type' => [
-				'asc' => ['css_penalty_type' => SORT_ASC],
-				'desc' => ['css_penalty_type' => SORT_DESC],
-				'default' => SORT_ASC,
-				'label' => 'Penalty Type',
-			],
-			'css_departure_dt' => [
-				'asc' => ['css_departure_dt' => SORT_ASC],
-				'desc' => ['css_departure_dt' => SORT_DESC],
-				'default' => SORT_ASC,
-				'label' => 'Departure Date Time',
-			],
-		]);
-		$dataProvider->setSort($sorting);
+        $sorting = $dataProvider->getSort();
+        $sorting->attributes = array_merge($sorting->attributes, [
+            'css_penalty_type' => [
+                'asc' => ['css_penalty_type' => SORT_ASC],
+                'desc' => ['css_penalty_type' => SORT_DESC],
+                'default' => SORT_ASC,
+                'label' => 'Penalty Type',
+            ],
+            'css_departure_dt' => [
+                'asc' => ['css_departure_dt' => SORT_ASC],
+                'desc' => ['css_departure_dt' => SORT_DESC],
+                'default' => SORT_ASC,
+                'label' => 'Departure Date Time',
+            ],
+        ]);
+        $dataProvider->setSort($sorting);
 
         $this->load($params);
 
@@ -332,16 +340,16 @@ class CasesQSearch extends Cases
 
         // grid filtering conditions
         $query->andFilterWhere([
-        	'cs_id' => $this->cs_id,
+            'cs_id' => $this->cs_id,
             'cs_gid' => $this->cs_gid,
             'cs_project_id' => $this->cs_project_id,
             'cs_category_id' => $this->cs_category_id,
             'cs_dep_id' => $this->cs_dep_id,
-			'cs_user_id' => $this->cs_user_id,
+            'cs_user_id' => $this->cs_user_id,
             'cs_need_action' => $this->cs_need_action,
-			'css_penalty_type' => $this->css_penalty_type,
-			'date_format(css_departure_dt, "%Y-%m-%d")' => $this->css_departure_dt,
-		]);
+            'css_penalty_type' => $this->css_penalty_type,
+            'date_format(css_departure_dt, "%Y-%m-%d")' => $this->css_departure_dt,
+        ]);
 
 //        if ($this->cs_user_id) {
 //            $query->andWhere(['cs_user_id' => Employee::find()->select('id')->andWhere(['like', 'username', $this->cs_user_id])]);
@@ -376,7 +384,7 @@ class CasesQSearch extends Cases
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> [
+            'sort' => [
                 'defaultOrder' => [
                     'cs_need_action' => SORT_DESC,
                     'time_left' => SORT_ASC,
@@ -412,14 +420,14 @@ class CasesQSearch extends Cases
 
         // grid filtering conditions
         $query->andFilterWhere([
-			'cs_id' => $this->cs_id,
-			'cs_gid' => $this->cs_gid,
+            'cs_id' => $this->cs_id,
+            'cs_gid' => $this->cs_gid,
             'cs_project_id' => $this->cs_project_id,
             'cs_category_id' => $this->cs_category_id,
             'cs_dep_id' => $this->cs_dep_id,
-			'cs_user_id' => $this->cs_user_id,
-			'cs_need_action' => $this->cs_need_action,
-		]);
+            'cs_user_id' => $this->cs_user_id,
+            'cs_need_action' => $this->cs_need_action,
+        ]);
 
         if ($this->cs_lead_id) {
             $query->andWhere(['cs_lead_id' => Lead::find()->select('id')->andWhere(['uid' => $this->cs_lead_id])]);
@@ -447,16 +455,16 @@ class CasesQSearch extends Cases
         $query->addSelect('*');
 
         // add conditions that should always apply here
-		$query->addSelect('b.csl_start_dt as `solved_date`');
+        $query->addSelect('b.csl_start_dt as `solved_date`');
 
-		$query->join('JOIN', '('.(new Query())->select(['csl_start_dt', 'csl_case_id'])
-			->from(CaseStatusLog::tableName())
-			->where(['csl_to_status' => CasesStatus::STATUS_SOLVED])
-			->orderBy(['csl_start_dt' => 'desc'])->createCommand()->getRawSql().') as b', 'b.`csl_case_id` = `cases`.`cs_id`');
+        $query->join('JOIN', '(' . (new Query())->select(['csl_start_dt', 'csl_case_id'])
+            ->from(CaseStatusLog::tableName())
+            ->where(['csl_to_status' => CasesStatus::STATUS_SOLVED])
+            ->orderBy(['csl_start_dt' => 'desc'])->createCommand()->getRawSql() . ') as b', 'b.`csl_case_id` = `cases`.`cs_id`');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cs_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['cs_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 20,
             ],
@@ -472,13 +480,13 @@ class CasesQSearch extends Cases
 
         // grid filtering conditions
         $query->andFilterWhere([
-        	'cs_id' => $this->cs_id,
+            'cs_id' => $this->cs_id,
             'cs_gid' => $this->cs_gid,
             'cs_project_id' => $this->cs_project_id,
             'cs_category_id' => $this->cs_category_id,
             'cs_dep_id' => $this->cs_dep_id,
-			'cs_user_id' => $this->cs_user_id,
-//			'cs_updated_dt' => $this->cs_updated_dt,
+            'cs_user_id' => $this->cs_user_id,
+//          'cs_updated_dt' => $this->cs_updated_dt,
         ]);
 
 //        if ($this->cs_user_id) {
@@ -505,9 +513,9 @@ class CasesQSearch extends Cases
         $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
 
         $dataProvider->sort->attributes['solved_date'] = [
-        	'asc' => ['solved_date' => SORT_ASC],
-        	'desc' => ['solved_date' => SORT_DESC],
-		];
+            'asc' => ['solved_date' => SORT_ASC],
+            'desc' => ['solved_date' => SORT_DESC],
+        ];
 
 //        echo $query->createCommand()->getRawSql();die;
 
@@ -523,19 +531,19 @@ class CasesQSearch extends Cases
     {
         $query = $this->casesQRepository->getTrashQuery($user);
 
-		$query->addSelect('*');
+        $query->addSelect('*');
 
-		// add conditions that should always apply here
-		$query->addSelect('b.csl_start_dt as `trash_date`');
+        // add conditions that should always apply here
+        $query->addSelect('b.csl_start_dt as `trash_date`');
 
-		$query->join('JOIN', '('.(new Query())->select(['csl_start_dt', 'csl_case_id'])
-				->from(CaseStatusLog::tableName())
-				->where(['csl_to_status' => CasesStatus::STATUS_TRASH])
-				->orderBy(['csl_start_dt' => 'desc'])->createCommand()->getRawSql().') as b', 'b.`csl_case_id` = `cases`.`cs_id`');
+        $query->join('JOIN', '(' . (new Query())->select(['csl_start_dt', 'csl_case_id'])
+                ->from(CaseStatusLog::tableName())
+                ->where(['csl_to_status' => CasesStatus::STATUS_TRASH])
+                ->orderBy(['csl_start_dt' => 'desc'])->createCommand()->getRawSql() . ') as b', 'b.`csl_case_id` = `cases`.`cs_id`');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cs_need_action' => SORT_DESC, 'cs_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['cs_need_action' => SORT_DESC, 'cs_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 20,
             ],
@@ -551,14 +559,14 @@ class CasesQSearch extends Cases
 
         // grid filtering conditions
         $query->andFilterWhere([
-			'cs_id' => $this->cs_id,
-			'cs_gid' => $this->cs_gid,
+            'cs_id' => $this->cs_id,
+            'cs_gid' => $this->cs_gid,
             'cs_project_id' => $this->cs_project_id,
             'cs_category_id' => $this->cs_category_id,
             'cs_dep_id' => $this->cs_dep_id,
-			'cs_user_id' => $this->cs_user_id,
-			'cs_need_action' => $this->cs_need_action,
-		]);
+            'cs_user_id' => $this->cs_user_id,
+            'cs_need_action' => $this->cs_need_action,
+        ]);
 
 //        if ($this->cs_user_id) {
 //            $query->andWhere(['cs_user_id' => Employee::find()->select('id')->andWhere(['like', 'username', $this->cs_user_id])]);
@@ -572,17 +580,17 @@ class CasesQSearch extends Cases
             $query->andFilterWhere(['DATE(cs_created_dt)' => date('Y-m-d', strtotime($this->cs_created_dt))]);
         }
 
-		if ($this->trash_date) {
-			$query->andFilterHaving(['DATE(trash_date)' => date('Y-m-d', strtotime($this->trash_date))]);
-		}
+        if ($this->trash_date) {
+            $query->andFilterHaving(['DATE(trash_date)' => date('Y-m-d', strtotime($this->trash_date))]);
+        }
 
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
         $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
 
-		$dataProvider->sort->attributes['trash_date'] = [
-			'asc' => ['trash_date' => SORT_ASC],
-			'desc' => ['trash_date' => SORT_DESC],
-		];
+        $dataProvider->sort->attributes['trash_date'] = [
+            'asc' => ['trash_date' => SORT_ASC],
+            'desc' => ['trash_date' => SORT_DESC],
+        ];
 
         return $dataProvider;
     }
@@ -602,7 +610,7 @@ class CasesQSearch extends Cases
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> [
+            'sort' => [
                 'defaultOrder' => [
                     'cs_last_action_dt' => SORT_DESC,
                     'cs_id' => SORT_ASC,

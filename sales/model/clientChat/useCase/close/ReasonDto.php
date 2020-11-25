@@ -1,6 +1,5 @@
 <?php
 
-
 namespace sales\model\clientChat\useCase\close;
 
 /**
@@ -13,19 +12,19 @@ namespace sales\model\clientChat\useCase\close;
  */
 class ReasonDto
 {
-	public $id;
-	public $name;
-	public $commentRequired;
+    public $id;
+    public $name;
+    public $commentRequired;
 
-	public function __construct(int $id, string $name, bool $commentRequired)
-	{
-		$this->id = $id;
-		$this->name = $name;
-		$this->commentRequired = $commentRequired;
-	}
+    public function __construct(int $id, string $name, bool $commentRequired)
+    {
+        $this->id = $id;
+        $this->name = $name;
+        $this->commentRequired = $commentRequired;
+    }
 
-	public function isCommentRequired(): bool
-	{
-		return $this->commentRequired;
-	}
+    public function isCommentRequired(): bool
+    {
+        return $this->commentRequired;
+    }
 }

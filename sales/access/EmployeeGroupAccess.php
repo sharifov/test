@@ -21,8 +21,10 @@ class EmployeeGroupAccess
     {
         return UserGroupAssign::find()
             ->select('related_users.ugs_user_id')
-            ->innerJoin(UserGroupAssign::tableName(). ' AS related_users',
-                UserGroupAssign::tableName() . '.ugs_group_id = related_users.ugs_group_id')
+            ->innerJoin(
+                UserGroupAssign::tableName() . ' AS related_users',
+                UserGroupAssign::tableName() . '.ugs_group_id = related_users.ugs_group_id'
+            )
             ->where([UserGroupAssign::tableName() . '.ugs_user_id' => $userId])
             ->groupBy('related_users.ugs_user_id')
             ->cache($cacheDuration);
@@ -43,13 +45,13 @@ class EmployeeGroupAccess
         return ArrayHelper::getColumn(self::usersIdsInCommonGroupsSubQuery($userId)->asArray()->indexBy('ugs_user_id')->asArray()->all(), 'ugs_user_id');
     }
 
-	/**
-	 * @param int $searchUserId
-	 * @param int $userIdExist
-	 * @return bool
-	 */
+    /**
+     * @param int $searchUserId
+     * @param int $userIdExist
+     * @return bool
+     */
     public static function isUserInCommonGroup(int $searchUserId, int $userIdExist): bool
-	{
-		return array_key_exists($userIdExist, self::getUsersIdsInCommonGroups($searchUserId));
-	}
+    {
+        return array_key_exists($userIdExist, self::getUsersIdsInCommonGroups($searchUserId));
+    }
 }

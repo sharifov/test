@@ -39,8 +39,7 @@ class LeadCreateHandler
         LeadHashGenerator $hashGenerator,
         LeadRepository $leadRepository,
         LeadSegmentRepository $segmentRepository
-    )
-    {
+    ) {
         $this->clientManageService = $clientManageService;
         $this->transactionManager = $transactionManager;
         $this->hashGenerator = $hashGenerator;
@@ -94,7 +93,6 @@ class LeadCreateHandler
             $this->createFlightSegments($leadId, $form->flightsForm);
 
             return $lead;
-
         });
 
         return $lead;

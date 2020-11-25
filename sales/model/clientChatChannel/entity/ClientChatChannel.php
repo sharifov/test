@@ -230,19 +230,19 @@ class ClientChatChannel extends \yii\db\ActiveRecord
     /**
      * @return array
      */
-    public static function getList() : array
+    public static function getList(): array
     {
         $data = self::find()->orderBy(['ccc_name' => SORT_ASC])->asArray()->all();
         return ArrayHelper::map($data, 'ccc_id', 'ccc_name');
     }
 
-    public static function getListWithNames() : array
+    public static function getListWithNames(): array
     {
         $data = self::find()->where('LENGTH(ccc_name) > 0')->distinct()->orderBy(['ccc_name' => SORT_ASC])->asArray()->all();
         return ArrayHelper::map($data, 'ccc_name', 'ccc_name');
     }
 
-    public static function getListWithFrontedNames() : array
+    public static function getListWithFrontedNames(): array
     {
         $data = self::find()->where('LENGTH(ccc_frontend_name) > 0')->distinct()->orderBy(['ccc_frontend_name' => SORT_ASC])->asArray()->all();
         return ArrayHelper::map($data, 'ccc_frontend_name', 'ccc_frontend_name');
@@ -283,9 +283,9 @@ class ClientChatChannel extends \yii\db\ActiveRecord
                     'id' => $channelItem->ccc_id,
                     'name' => $translateName ?: $channelItem->ccc_frontend_name,
                     'priority' => $channelItem->ccc_priority,
-                    'default' => (boolean) $channelItem->ccc_default,
-                    'enabled' => (boolean) $channelItem->ccc_frontend_enabled,
-                    'defaultDevice' => (boolean) $channelItem->ccc_default_device,
+                    'default' => (bool) $channelItem->ccc_default,
+                    'enabled' => (bool) $channelItem->ccc_frontend_enabled,
+                    'defaultDevice' => (bool) $channelItem->ccc_default_device,
                     'settings' => $settings
                 ];
             }

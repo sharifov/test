@@ -87,7 +87,7 @@ class ItineraryEditForm extends CompositeForm
             }],
 
             ['segments', function () {
-                if ( !is_array($this->segments)) {
+                if (!is_array($this->segments)) {
                     return;
                 }
                 foreach ($this->segments as $key => $segment) {

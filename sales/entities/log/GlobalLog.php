@@ -41,26 +41,26 @@ class GlobalLog extends ActiveRecord
         return 'global_log';
     }
 
-	/**
-	 * @return array
-	 */
-	public function behaviors(): array
-	{
-		return [
-			'timestamp' => [
-				'class' => TimestampBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['gl_created_at']
-				],
-				'value' => static function ($model) {
-					if ($model->sender->gl_created_at) {
-						return $model->sender->gl_created_at;
-					}
-					return date('Y-m-d H:i:s');
-				}
-			],
-		];
-	}
+    /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['gl_created_at']
+                ],
+                'value' => static function ($model) {
+                    if ($model->sender->gl_created_at) {
+                        return $model->sender->gl_created_at;
+                    }
+                    return date('Y-m-d H:i:s');
+                }
+            ],
+        ];
+    }
 
     /**
      * {@inheritdoc}
@@ -76,42 +76,41 @@ class GlobalLog extends ActiveRecord
         ];
     }
 
-	/**
-	 * @param string $glModel
-	 * @param int $glObjectId
-	 * @param string $glAppId
-	 * @param int|null $glAppUserId
-	 * @param string|null $glOldAttr
-	 * @param string|null $glNewAttr
-	 * @param string|null $glFormattedAttr
-	 * @param int|null $glActionType
-	 * @param string|null $glCreatedAt
-	 * @return static
-	 */
+    /**
+     * @param string $glModel
+     * @param int $glObjectId
+     * @param string $glAppId
+     * @param int|null $glAppUserId
+     * @param string|null $glOldAttr
+     * @param string|null $glNewAttr
+     * @param string|null $glFormattedAttr
+     * @param int|null $glActionType
+     * @param string|null $glCreatedAt
+     * @return static
+     */
     public static function create(
-		string $glModel,
-		int $glObjectId,
-    	string $glAppId,
-		?int $glAppUserId,
-		?string $glOldAttr,
-		?string $glNewAttr,
-		?string $glFormattedAttr,
-		?int $glActionType,
-		?string $glCreatedAt
-	): self
-	{
-		$log = new static();
-		$log->gl_app_id = $glAppId;
-		$log->gl_app_user_id = $glAppUserId;
-		$log->gl_model = $glModel;
-		$log->gl_obj_id = $glObjectId;
-		$log->gl_old_attr = $glOldAttr;
-		$log->gl_new_attr = $glNewAttr;
-		$log->gl_formatted_attr = $glFormattedAttr;
-		$log->gl_action_type = $glActionType;
-		$log->gl_created_at = $glCreatedAt;
-		return $log;
-	}
+        string $glModel,
+        int $glObjectId,
+        string $glAppId,
+        ?int $glAppUserId,
+        ?string $glOldAttr,
+        ?string $glNewAttr,
+        ?string $glFormattedAttr,
+        ?int $glActionType,
+        ?string $glCreatedAt
+    ): self {
+        $log = new static();
+        $log->gl_app_id = $glAppId;
+        $log->gl_app_user_id = $glAppUserId;
+        $log->gl_model = $glModel;
+        $log->gl_obj_id = $glObjectId;
+        $log->gl_old_attr = $glOldAttr;
+        $log->gl_new_attr = $glNewAttr;
+        $log->gl_formatted_attr = $glFormattedAttr;
+        $log->gl_action_type = $glActionType;
+        $log->gl_created_at = $glCreatedAt;
+        return $log;
+    }
 
     /**
      * {@inheritdoc}
@@ -128,8 +127,8 @@ class GlobalLog extends ActiveRecord
             'gl_new_attr' => 'New attributes',
             'gl_formatted_attr' => 'Formatted Attributes',
             'gl_created_at' => 'When changes were made',
-			'gl_action_type' => 'Action',
-			'glModel' => 'Model'
+            'gl_action_type' => 'Action',
+            'glModel' => 'Model'
         ];
     }
 }

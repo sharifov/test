@@ -21,5 +21,4 @@ class LeadTaskEvent
     {
         $this->lead = $lead;
     }
-
 }

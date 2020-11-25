@@ -1,6 +1,5 @@
 <?php
 
-
 namespace sales\rbac\rules\clientChat\close;
 
 use sales\model\clientChat\entity\ClientChat;

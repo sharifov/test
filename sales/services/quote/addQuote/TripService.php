@@ -21,9 +21,9 @@ class TripService
      * @param Quote $quote
      */
     public function __construct(Quote $quote)
-	{
-		$this->quote = $quote;
-	}
+    {
+        $this->quote = $quote;
+    }
 
     /**
      * @param array $parsedData

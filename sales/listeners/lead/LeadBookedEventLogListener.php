@@ -44,5 +44,4 @@ class LeadBookedEventLogListener
             Yii::error($e, 'Listeners:LeadBookedEventLogListener');
         }
     }
-
 }

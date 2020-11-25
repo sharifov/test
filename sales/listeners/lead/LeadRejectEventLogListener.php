@@ -44,5 +44,4 @@ class LeadRejectEventLogListener
             Yii::error($e, 'Listeners:LeadRejectEventLogListener');
         }
     }
-
 }

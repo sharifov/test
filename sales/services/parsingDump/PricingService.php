@@ -16,9 +16,9 @@ class PricingService
      * @param string $gds
      */
     public function __construct(string $gds)
-	{
-		$this->gds = ParsingDump::setGdsForParsing($gds);
-	}
+    {
+        $this->gds = ParsingDump::setGdsForParsing($gds);
+    }
 
     /**
      * @param string $string
@@ -55,14 +55,33 @@ class PricingService
     public static function passengerTypeMapping(?string $source): string
     {
         switch ($source) {
-            case 'ADT': case 'JCB': case 'PFA': case 'ITX': case 'JWZ': case 'WEB':
-                $result = QuotePrice::PASSENGER_ADULT;
+            case 'ADT':
+            case 'JCB':
+            case 'PFA':
+            case 'ITX':
+            case 'JWZ':
+            case 'WEB':
+                                $result = QuotePrice::PASSENGER_ADULT;
                 break;
-            case 'CHD': case 'CNN': case 'JNN':case 'CBC': case 'INN': case 'PNN': case 'JWC': case 'UNN':
-                $result = QuotePrice::PASSENGER_CHILD;
+            case 'CHD':
+            case 'CNN':
+            case 'JNN':
+            case 'CBC':
+            case 'INN':
+            case 'PNN':
+            case 'JWC':
+            case 'UNN':
+                                        $result = QuotePrice::PASSENGER_CHILD;
                 break;
-            case 'INF': case 'INS': case 'JNS':case 'CBI': case 'JNF': case 'PNF': case 'ITF': case 'ITS':
-                $result = QuotePrice::PASSENGER_INFANT;
+            case 'INF':
+            case 'INS':
+            case 'JNS':
+            case 'CBI':
+            case 'JNF':
+            case 'PNF':
+            case 'ITF':
+            case 'ITS':
+                                        $result = QuotePrice::PASSENGER_INFANT;
                 break;
             default:
                 $result = QuotePrice::PASSENGER_ADULT;

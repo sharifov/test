@@ -141,5 +141,4 @@ class CallDataForm extends Model
             ['com_call_id', 'integer'],
         ];
     }
-
 }

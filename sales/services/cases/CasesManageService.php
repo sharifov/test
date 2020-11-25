@@ -44,8 +44,7 @@ class CasesManageService
         LeadRepository $leadRepository,
         CaseCategoryRepository $caseCategoryRepository,
         ServiceFinder $finder
-    )
-    {
+    ) {
         $this->casesRepository = $casesRepository;
         $this->userRepository = $userRepository;
         $this->leadRepository = $leadRepository;

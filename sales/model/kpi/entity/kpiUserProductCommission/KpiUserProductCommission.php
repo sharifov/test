@@ -40,28 +40,28 @@ class KpiUserProductCommission extends \yii\db\ActiveRecord
         return 'kpi_user_product_commission';
     }
 
-	/**
-	 * @return array
-	 */
-	public function behaviors(): array
-	{
-		return [
-			'timestamp' => [
-				'class' => TimestampBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['upc_created_dt', 'upc_updated_dt'],
-					ActiveRecord::EVENT_BEFORE_UPDATE => ['upc_updated_dt'],
-				],
-				'value' => date('Y-m-d H:i:s'),
-				'preserveNonEmptyValues' => true
-			],
-			'user' => [
-				'class' => BlameableBehavior::class,
-				'createdByAttribute' => 'upc_created_user_id',
-				'updatedByAttribute' => 'upc_updated_user_id',
-			],
-		];
-	}
+    /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['upc_created_dt', 'upc_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['upc_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s'),
+                'preserveNonEmptyValues' => true
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'upc_created_user_id',
+                'updatedByAttribute' => 'upc_updated_user_id',
+            ],
+        ];
+    }
 
     /**
      * {@inheritdoc}
@@ -73,10 +73,10 @@ class KpiUserProductCommission extends \yii\db\ActiveRecord
             [['upc_product_type_id', 'upc_user_id', 'upc_year', 'upc_month', 'upc_performance', 'upc_commission_percent', 'upc_created_user_id', 'upc_updated_user_id'], 'integer'],
             [['upc_created_dt', 'upc_updated_dt'], 'safe'],
             [['upc_product_type_id', 'upc_user_id', 'upc_year', 'upc_month'], 'unique', 'targetAttribute' => ['upc_product_type_id', 'upc_user_id', 'upc_year', 'upc_month']],
-			[['upc_commission_percent', 'upc_performance'], 'number', 'max' => 100, 'min' => 0],
-			[['upc_month'], 'number', 'max' => 12, 'min' => 1],
-			[['upc_year'], 'string', 'max' => 4],
-			[['upc_year'], 'number', 'min' => 0],
+            [['upc_commission_percent', 'upc_performance'], 'number', 'max' => 100, 'min' => 0],
+            [['upc_month'], 'number', 'max' => 12, 'min' => 1],
+            [['upc_year'], 'string', 'max' => 4],
+            [['upc_year'], 'number', 'min' => 0],
             [['upc_product_type_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductType::class, 'targetAttribute' => ['upc_product_type_id' => 'pt_id']],
             [['upc_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['upc_created_user_id' => 'id']],
             [['upc_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['upc_updated_user_id' => 'id']],

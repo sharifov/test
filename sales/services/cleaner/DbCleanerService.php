@@ -88,13 +88,13 @@ class DbCleanerService
         $dtOlder = self::generateDate($form);
 
         if ($form->strict_date) {
-            return ['DATE('. $form->column .')' => $dtOlder->format(self::FORMAT_DATE)];
+            return ['DATE(' . $form->column . ')' => $dtOlder->format(self::FORMAT_DATE)];
         }
         if ($form->datetime) {
             return ['<', $form->column, $dtOlder->format(self::FORMAT_DATE_TIME)];
         }
         if ($form->date) {
-            return ['<', 'DATE('. $form->column .')', $dtOlder->format(self::FORMAT_DATE)];
+            return ['<', 'DATE(' . $form->column . ')', $dtOlder->format(self::FORMAT_DATE)];
         }
         return ['<', $form->column, $dtOlder->format(self::FORMAT_DATE_TIME)];
     }

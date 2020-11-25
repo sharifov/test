@@ -43,5 +43,4 @@ class CaseStatusLogService
         );
         $this->caseStatusLogRepository->save($log);
     }
-
 }

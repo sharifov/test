@@ -133,5 +133,4 @@ class SnoozeReasonForm extends Model
             return date('Y-m-d H:i', strtotime($date));
         }
     }
-
 }

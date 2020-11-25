@@ -55,7 +55,6 @@ class CallLogConferenceTransferService
         $transaction = \Yii::$app->db->beginTransaction();
 
         try {
-
             $log = new CallLog();
             $log->cl_id = $call->c_id;
             $log->cl_conference_id = $call->c_conference_id;

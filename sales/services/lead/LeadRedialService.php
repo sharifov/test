@@ -45,8 +45,7 @@ class LeadRedialService
         TransactionManager $transactionManager,
         TakeGuard $takeGuard,
         QCallService $qCallService
-    )
-    {
+    ) {
         $this->leadRepository = $leadRepository;
         $this->serviceFinder = $serviceFinder;
         $this->transactionManager = $transactionManager;
@@ -77,7 +76,6 @@ class LeadRedialService
             if ($qCall = $lead->leadQcall) {
                 $this->qCallService->resetReservation($qCall);
             }
-
         });
     }
 

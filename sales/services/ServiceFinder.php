@@ -32,32 +32,32 @@ class ServiceFinder
     private $userRepository;
     private $casesRepository;
     private $clientRepository;
-	private $leadPreferencesRepository;
-	private $callRepository;
+    private $leadPreferencesRepository;
+    private $callRepository;
 
-	/**
-	 * @param LeadRepository $leadRepository
-	 * @param UserRepository $userRepository
-	 * @param CasesRepository $casesRepository
-	 * @param ClientRepository $clientRepository
-	 * @param LeadPreferencesRepository $leadPreferencesRepository
-	 * @param CallRepository $callRepository
-	 */
+    /**
+     * @param LeadRepository $leadRepository
+     * @param UserRepository $userRepository
+     * @param CasesRepository $casesRepository
+     * @param ClientRepository $clientRepository
+     * @param LeadPreferencesRepository $leadPreferencesRepository
+     * @param CallRepository $callRepository
+     */
     public function __construct(
-    	LeadRepository $leadRepository,
-		UserRepository $userRepository,
-		CasesRepository $casesRepository,
-		ClientRepository $clientRepository,
-		LeadPreferencesRepository $leadPreferencesRepository,
+        LeadRepository $leadRepository,
+        UserRepository $userRepository,
+        CasesRepository $casesRepository,
+        ClientRepository $clientRepository,
+        LeadPreferencesRepository $leadPreferencesRepository,
         CallRepository $callRepository
     ) {
         $this->leadRepository = $leadRepository;
         $this->userRepository = $userRepository;
         $this->casesRepository = $casesRepository;
         $this->clientRepository = $clientRepository;
-		$this->leadPreferencesRepository = $leadPreferencesRepository;
-		$this->callRepository = $callRepository;
-	}
+        $this->leadPreferencesRepository = $leadPreferencesRepository;
+        $this->callRepository = $callRepository;
+    }
 
     /**
      * @param int|Lead $lead
@@ -152,5 +152,4 @@ class ServiceFinder
         }
         throw new \InvalidArgumentException('$call must be integer or Call');
     }
-
 }

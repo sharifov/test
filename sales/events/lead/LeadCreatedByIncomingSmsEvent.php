@@ -10,7 +10,7 @@ use common\models\Lead;
  * @property Lead $lead
  * @property string $created
  */
-class LeadCreatedByIncomingSmsEvent  implements LeadableEventInterface
+class LeadCreatedByIncomingSmsEvent implements LeadableEventInterface
 {
     public $lead;
     public $created;

@@ -66,7 +66,7 @@ class CompleteAllUserToUserCalls
             'c_call_type_id' => [Call::CALL_TYPE_IN, Call::CALL_TYPE_OUT],
             'c_status_id' => [Call::STATUS_RINGING, Call::STATUS_IN_PROGRESS]
         ])
-            ->innerJoinWith(['conferenceParticipants' => static function(ConferenceParticipantQuery $query) {
+            ->innerJoinWith(['conferenceParticipants' => static function (ConferenceParticipantQuery $query) {
                 $query->andOnCondition([
                     'cp_type_id' => ConferenceParticipant::TYPE_USER,
                 ]);
@@ -85,14 +85,12 @@ class CompleteAllUserToUserCalls
     private function log(int $userId): void
     {
         foreach ($this->messages as $message) {
-
             if ($ntf = Notifications::create($userId, 'Complete User To User call', $message['error'], Notifications::TYPE_DANGER, true)) {
                 $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
                 Notifications::publish('getNewNotification', ['user_id' => $userId], $dataNotification);
             }
 
             \Yii::error(VarDumper::dumpAsString($message), static::class);
-
         }
     }
 }

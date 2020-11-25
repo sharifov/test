@@ -9,7 +9,7 @@ use yii\data\ActiveDataProvider;
 
 class EmailListSearch extends EmailList
 {
-    public function rules():array
+    public function rules(): array
     {
         return [
             [['el_id', 'el_created_user_id', 'el_updated_user_id'], 'integer'],

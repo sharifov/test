@@ -44,5 +44,4 @@ class LeadProcessingEventLogListener
             Yii::error($e, 'Listeners:LeadProcessingEventLogListener');
         }
     }
-
 }

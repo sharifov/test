@@ -30,7 +30,8 @@ class AntiBruteForceService
     /**
      * AntiBruteForceService constructor.
      */
-    public function __construct() {
+    public function __construct()
+    {
         $settings = Yii::$app->params['settings'];
         $this->captchaLoginEnable = $settings['captcha_login_enable'];
         $this->captchaLoginAttempts = $settings['captcha_login_attempts'];
@@ -60,7 +61,8 @@ class AntiBruteForceService
     public function checkAttempts(Employee $user): void
     {
         if (!$user->isBlocked() && $attempts = (new UserFailedLogin())->getCountActiveByUserId($user->id)) {
-            if ($this->userNotifyFailedLoginAttempts !== 0 &&
+            if (
+                $this->userNotifyFailedLoginAttempts !== 0 &&
                 $attempts >= $this->userNotifyFailedLoginAttempts &&
                 $attempts < $this->userBlockAttempts
             ) {
@@ -68,12 +70,13 @@ class AntiBruteForceService
                 $this->setUserNotificationMessage($user);
                 $this->sendNotification($user);
                 $this->sendEmail($user);
-
             } elseif ($this->userBlockAttempts !== 0 && $attempts >= $this->userBlockAttempts) {
                 $user->setBlocked();
                 if (!$user->save(false)) {
-                    \Yii::error(VarDumper::dumpAsString($user->getErrors(), 10),
-                    'antiBruteForceService:checkAttempts:saveFailed');
+                    \Yii::error(
+                        VarDumper::dumpAsString($user->getErrors(), 10),
+                        'antiBruteForceService:checkAttempts:saveFailed'
+                    );
                 }
 
                 $this->setTitleForBlocked($user);
@@ -101,7 +104,7 @@ class AntiBruteForceService
         $this->notificationMessage .= "Last failed attempts: \n";
         foreach (UserFailedLogin::getLastAttempts($user->id) as $value) {
             $browser = explode('UserAgent', $value->ufl_ua);
-            $this->notificationMessage .= '[Failed] ' . $value->ufl_created_dt .' - IP: ' . $value->ufl_ip . ' / ' . $browser[0] . "\n";
+            $this->notificationMessage .= '[Failed] ' . $value->ufl_created_dt . ' - IP: ' . $value->ufl_ip . ' / ' . $browser[0] . "\n";
         }
         return $this->notificationMessage;
     }
@@ -133,23 +136,23 @@ class AntiBruteForceService
      */
     private function sendEmail(Employee $user): bool
     {
-		if ($this->internalNotificationForUserEmail === false) {
-		    return false;
-		}
+        if ($this->internalNotificationForUserEmail === false) {
+            return false;
+        }
 
-		try {
-		    Yii::$app->mailer->compose()
+        try {
+            Yii::$app->mailer->compose()
                 ->setFrom(\Yii::$app->params['email_from']['no-reply'])
                 ->setTo($user->email)
                 ->setSubject($this->notificationTitle)
                 ->setTextBody($this->notificationMessage)
                 ->setHtmlBody($this->notificationMessage)
                 ->send();
-		} catch (\Throwable $throwable) {
-		    Yii::error(AppHelper::throwableFormatter($throwable), 'antiBruteForceService:sendEmail:failed');
-		    return false;
-		}
-		return true;
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableFormatter($throwable), 'antiBruteForceService:sendEmail:failed');
+            return false;
+        }
+        return true;
     }
 
     /**

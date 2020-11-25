@@ -50,7 +50,7 @@ class UserStatusSearch extends UserStatus
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['us_updated_dt' => SORT_DESC, 'us_user_id' => SORT_ASC]],
+            'sort' => ['defaultOrder' => ['us_updated_dt' => SORT_DESC, 'us_user_id' => SORT_ASC]],
             'pagination' => [
                 'pageSize' => 30,
             ],

@@ -46,7 +46,7 @@ class ClientChatQaSearch extends ClientChat
 
     public const MESSAGE_BY_LIST = [
         self::MESSAGE_BY_CLIENT => 'Client',
-        self::MESSAGE_BY_USER=> 'User',
+        self::MESSAGE_BY_USER => 'User',
     ];
 
     public function rules(): array
@@ -99,7 +99,7 @@ class ClientChatQaSearch extends ClientChat
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cch_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['cch_id' => SORT_DESC]],
         ]);
 
         $this->load($params);
@@ -286,7 +286,6 @@ class ClientChatQaSearch extends ClientChat
 
                 (strtotime(reset($range)) > strtotime(end($range)) ||
                     strtotime(end($range)) < strtotime(reset($range)))
-
             ) {
                 $this->addError($attribute, 'Range start date or end date is incorrect');
             }

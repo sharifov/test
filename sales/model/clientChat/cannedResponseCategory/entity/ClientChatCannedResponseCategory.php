@@ -104,7 +104,7 @@ class ClientChatCannedResponseCategory extends \yii\db\ActiveRecord
     /**
      * @return array
      */
-    public static function getList() : array
+    public static function getList(): array
     {
         $data = self::find()->orderBy(['crc_name' => SORT_ASC])->asArray()->all();
         return ArrayHelper::map($data, 'crc_id', 'crc_name');

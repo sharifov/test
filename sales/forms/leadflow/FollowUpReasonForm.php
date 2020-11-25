@@ -105,5 +105,4 @@ class FollowUpReasonForm extends Model
         }
         return false;
     }
-
 }

@@ -38,8 +38,8 @@ class EmployeeProductAccess
                 ->indexBy('pt_id')
                 ->asArray()
                 ->column();
-       }
-       return $list ?? [];
+        }
+        return $list ?? [];
     }
 
     /**

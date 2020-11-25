@@ -1,6 +1,5 @@
 <?php
 
-
 namespace sales\model\clientChat\entity\projectConfig\service;
 
 use common\models\Language;

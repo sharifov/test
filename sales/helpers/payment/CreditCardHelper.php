@@ -58,5 +58,4 @@ class CreditCardHelper
         // Return the formatted credit card number
         return $newCreditCard;
     }
-
 }

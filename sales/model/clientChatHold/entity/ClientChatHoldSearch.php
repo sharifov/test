@@ -31,7 +31,7 @@ class ClientChatHoldSearch extends ClientChatHold
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cchd_deadline_dt' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['cchd_deadline_dt' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],

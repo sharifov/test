@@ -25,8 +25,7 @@ class Command
         ?string $subject,
         ?string $description,
         ?string $orderUid
-    )
-    {
+    ) {
         $this->caseId = $caseId;
         $this->categoryId = $categoryId;
         $this->subject = $subject;

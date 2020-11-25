@@ -46,11 +46,11 @@ class UserVoiceMailSearch extends UserVoiceMail
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-			'sort' => [
-				'defaultOrder' => [
-					'uvm_id' => SORT_DESC
-				]
-			]
+            'sort' => [
+                'defaultOrder' => [
+                    'uvm_id' => SORT_DESC
+                ]
+            ]
         ]);
 
         $this->load($params);

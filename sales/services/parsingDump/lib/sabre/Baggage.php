@@ -55,7 +55,7 @@ class Baggage implements ParseDumpInterface
             if ($key < $index) {
                 continue;
             }
-            if (stripos($val, "BAG ALLOWANCE") !== false && $key > $index){
+            if (stripos($val, "BAG ALLOWANCE") !== false && $key > $index) {
                 break;
             }
             $bags[] = $val;
@@ -79,53 +79,52 @@ class Baggage implements ParseDumpInterface
 
             if (stripos($val, "BAG ALLOWANCE") !== false) {
                 $bags['segment'] = $detail[1];
-                if (stripos($val, "NIL/") !== false ||
+                if (
+                    stripos($val, "NIL/") !== false ||
                     stripos($val, "*/") !== false
-                    ) {
-                        if (stripos($val, "1STCHECKED") !== false) {
-                            $bagsString = explode('1STCHECKED', $val);
-                            $detailBag = explode('/', $bagsString[1]);
-                            if (stripos($detailBag[0], "USD") !== false) {
+                ) {
+                    if (stripos($val, "1STCHECKED") !== false) {
+                        $bagsString = explode('1STCHECKED', $val);
+                        $detailBag = explode('/', $bagsString[1]);
+                        if (stripos($detailBag[0], "USD") !== false) {
+                            $price = explode('-', $detailBag[0])[2];
+                            $price = BaggageService::prepareCost($price);
 
-                                $price = explode('-', $detailBag[0])[2];
-                                $price = BaggageService::prepareCost($price);
-
-                                $bagItem = [
-                                    'ordinal' => '1st',
-                                    'piece' => 1,
-                                    'weight' => 'N/A',
-                                    'height' => 'N/A',
-                                    'price' => $price,
-                                    'currency' => 'USD',
-                                ];
-                                $detailVolume = explode('UP TO', $bagsString[1]);
-                                if (isset($detailVolume[1])) {
-                                    $bagItem['weight'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[1])));
-                                }
-                                if (isset($detailVolume[2])) {
-                                    $bagItem['height'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[2])));
-                                }
-                                $bags['paid_baggage'][] = $bagItem;
+                            $bagItem = [
+                                'ordinal' => '1st',
+                                'piece' => 1,
+                                'weight' => 'N/A',
+                                'height' => 'N/A',
+                                'price' => $price,
+                                'currency' => 'USD',
+                            ];
+                            $detailVolume = explode('UP TO', $bagsString[1]);
+                            if (isset($detailVolume[1])) {
+                                $bagItem['weight'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[1])));
                             }
-                        }
-                    } else {
-
-                        $detailBag = explode('/', $detail[2]);
-                        $bags['free_baggage'] = [
-                            'piece' => (int)str_replace('P', '', $detailBag[0]),
-                            'weight' => 'N/A',
-                            'height' => 'N/A',
-                            'price' => '0',
-                            'currency' => '',
-                        ];
-                        $detailVolume = explode('UP TO', $detail[2]);
-                        if (isset($detailVolume[1])) {
-                            $bags['free_baggage']['weight'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[1])));
-                        }
-                        if (isset($detailVolume[2])) {
-                            $bags['free_baggage']['height'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[2])));
+                            if (isset($detailVolume[2])) {
+                                $bagItem['height'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[2])));
+                            }
+                            $bags['paid_baggage'][] = $bagItem;
                         }
                     }
+                } else {
+                    $detailBag = explode('/', $detail[2]);
+                    $bags['free_baggage'] = [
+                        'piece' => (int)str_replace('P', '', $detailBag[0]),
+                        'weight' => 'N/A',
+                        'height' => 'N/A',
+                        'price' => '0',
+                        'currency' => '',
+                    ];
+                    $detailVolume = explode('UP TO', $detail[2]);
+                    if (isset($detailVolume[1])) {
+                        $bags['free_baggage']['weight'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[1])));
+                    }
+                    if (isset($detailVolume[2])) {
+                        $bags['free_baggage']['height'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[2])));
+                    }
+                }
             } else {
                 $detailBag = explode('/', $detail[2]);
                 if (stripos($detailBag[0], "USD") !== false) {
@@ -147,7 +146,6 @@ class Baggage implements ParseDumpInterface
                     }
                     $bags['paid_baggage'][] = $bagItem;
                 }
-
             }
         }
         return $bags;

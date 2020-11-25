@@ -49,8 +49,7 @@ class LeadCreateApiService
         LeadHashGenerator $leadHashGenerator,
         LeadSegmentRepository $leadSegmentRepository,
         TransactionManager $transactionManager
-    )
-    {
+    ) {
         $this->leadRepository = $leadRepository;
         $this->clientManageService = $clientManageService;
         $this->leadHashGenerator = $leadHashGenerator;
@@ -67,7 +66,7 @@ class LeadCreateApiService
     public function createByApi(ApiLead $modelLead, $apiProject): Lead
     {
         /** @var Lead $lead */
-        $lead = $this->transactionManager->wrap(function() use ($modelLead, $apiProject) {
+        $lead = $this->transactionManager->wrap(function () use ($modelLead, $apiProject) {
 
             $lead = Lead::createByApi();
             $lead->l_client_email = $this->getRequestEmail($modelLead->emails);
@@ -194,7 +193,9 @@ class LeadCreateApiService
                     Yii::error(
                         'Cant save visitor_log. LeadId: ' . $lead->id
                         . ' log: ' . VarDumper::dumpAsString($visitorLog)
-                        . ' Errors: ' . VarDumper::dumpAsString($log->getErrors()), 'API:LeadCreateApiService:createByApi:visitor:log:save');
+                        . ' Errors: ' . VarDumper::dumpAsString($log->getErrors()),
+                        'API:LeadCreateApiService:createByApi:visitor:log:save'
+                    );
                 } else {
                     if ($lastVisitDt) {
                         if (strtotime($log->vl_visit_dt) >= strtotime($lastVisitDt)) {

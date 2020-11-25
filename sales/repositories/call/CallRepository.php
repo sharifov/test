@@ -34,7 +34,8 @@ class CallRepository extends Repository
      */
     public function findLastCallByUserCreated(string $callSid): Call
     {
-        if ($call = Call::find()
+        if (
+            $call = Call::find()
             ->where(['c_call_sid' => $callSid])
             //->andWhere(['c_call_status' => Call::CALL_STATUS_COMPLETED])
             ->andWhere(['>', 'c_created_user_id', 0])
@@ -95,19 +96,19 @@ class CallRepository extends Repository
         $this->eventDispatcher->dispatchAll($call->releaseEvents());
     }
 
-	/**
-	 * @param string $callSid
-	 * @param int $callId
-	 * @return Call
-	 */
+    /**
+     * @param string $callSid
+     * @param int $callId
+     * @return Call
+     */
     public function findByCallSidOrCallId(string $callSid, int $callId): Call
-	{
-		$call = Call::find()->byCallSidOrCallId($callSid, $callId)->one();
-		if (!$call) {
-			throw new \RuntimeException('Call is not found');
-		}
-		return $call;
-	}
+    {
+        $call = Call::find()->byCallSidOrCallId($callSid, $callId)->one();
+        if (!$call) {
+            throw new \RuntimeException('Call is not found');
+        }
+        return $call;
+    }
 
     /**
      * @param $sid
@@ -122,10 +123,10 @@ class CallRepository extends Repository
     }
 
     public function isUserHasActiveCalls(int $userId): bool
-	{
-		return Call::find()
-			->byCreatedUser($userId)
-			->andWhere(['OR', ['c_status_id' => Call::STATUS_IN_PROGRESS], ['c_status_id' => Call::STATUS_RINGING]])
-			->exists();
-	}
+    {
+        return Call::find()
+            ->byCreatedUser($userId)
+            ->andWhere(['OR', ['c_status_id' => Call::STATUS_IN_PROGRESS], ['c_status_id' => Call::STATUS_RINGING]])
+            ->exists();
+    }
 }

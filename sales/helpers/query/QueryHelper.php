@@ -35,8 +35,7 @@ class QueryHelper
         string $valueFrom,
         string $valueTo,
         ?string $userTimeZone
-    ): void
-    {
+    ): void {
         $dateFrom = self::getDateFromUserTZToUtc($valueFrom, $userTimeZone);
         $dateTo = self::getDateFromUserTZToUtc($valueTo, $userTimeZone);
         $query->andWhere(['>=', $dateFieldName, $dateFrom->format('Y-m-d H:i:s')])->andWhere(['<=', $dateFieldName, $dateTo->format('Y-m-d H:i:s')]);
@@ -47,8 +46,7 @@ class QueryHelper
         string $dateFieldName,
         string $value,
         ?string $userTimeZone
-    ): void
-    {
+    ): void {
         $date = self::getDateFromUserTZToUtc($value, $userTimeZone);
         $query->andWhere(['>=', $dateFieldName, $date->format('Y-m-d H:i:s')]);
     }
@@ -58,8 +56,7 @@ class QueryHelper
         string $dateFieldName,
         string $value,
         ?string $userTimeZone
-    ): void
-    {
+    ): void {
         $date = self::getDateFromUserTZToUtc($value, $userTimeZone);
         $query->andWhere(['<=', $dateFieldName, $date->format('Y-m-d H:i:s')]);
     }
@@ -78,7 +75,6 @@ class QueryHelper
         return Yii::$app->cache->getOrSet($hash, static function () use ($query) {
             $query = clone $query;
             return (int) $query->limit(-1)->offset(-1)->orderBy([])->count('*');
-
         }, $duration);
     }
 

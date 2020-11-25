@@ -29,7 +29,7 @@ class ClientChatRequestSearch extends ClientChatRequest
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['ccr_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['ccr_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],

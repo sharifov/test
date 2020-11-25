@@ -55,7 +55,7 @@ class SmsIncomingForm extends Model
             ['si_id', 'safe'],
 
             ['si_sent_dt', 'string'],
-            ['si_sent_dt', 'filter', 'filter' => static function($value) {
+            ['si_sent_dt', 'filter', 'filter' => static function ($value) {
                 return date('Y-m-d H:i:s', strtotime($value));
             }, 'skipOnEmpty' => true],
 

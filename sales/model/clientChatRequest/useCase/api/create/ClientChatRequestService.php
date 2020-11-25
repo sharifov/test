@@ -256,13 +256,15 @@ class ClientChatRequestService
     private static function sendFeedbackNotifications(ClientChat $clientChat): void
     {
         $clientChatLink = Purifier::createChatShortLink($clientChat);
-        if ($notification = Notifications::create(
-            $clientChat->cch_owner_user_id,
-            'Feedback received',
-            'Feedback received. ' . 'Client Chat; ' . $clientChatLink,
-            Notifications::TYPE_INFO,
-            true
-        )) {
+        if (
+            $notification = Notifications::create(
+                $clientChat->cch_owner_user_id,
+                'Feedback received',
+                'Feedback received. ' . 'Client Chat; ' . $clientChatLink,
+                Notifications::TYPE_INFO,
+                true
+            )
+        ) {
             $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ?
                 NotificationMessage::add($notification) : [];
 
@@ -430,7 +432,7 @@ class ClientChatRequestService
     {
         $user = $clientChat->cchOwnerUser;
         $dateTime = $message->ccm_sent_dt;
-        $formatter = new \Yii::$app->formatter;
+        $formatter = new \Yii::$app->formatter();
         if ($user->timezone) {
             $formatter->timeZone = $user->timezone;
         }

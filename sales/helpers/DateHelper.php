@@ -1,4 +1,5 @@
 <?php
+
 namespace sales\helpers;
 
 use DateTime;

@@ -18,14 +18,15 @@ use yii\db\ActiveRecord;
  * @property CallCommand $callExecCommand
  */
 class CallGatherSwitch extends ActiveRecord
-{    
-    
-    public static function tableName(): string 
+{
+
+
+    public static function tableName(): string
     {
         return '{{%call_gather_switch}}';
     }
-    
-    public function rules(): array 
+
+    public function rules(): array
     {
         return [
             [['cgs_ccom_id', 'cgs_step', 'cgs_case', 'cgs_exec_ccom_id'], 'required'],

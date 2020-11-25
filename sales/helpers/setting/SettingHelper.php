@@ -1,6 +1,5 @@
 <?php
 
-
 namespace sales\helpers\setting;
 
 use Yii;

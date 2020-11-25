@@ -97,5 +97,4 @@ class CallDataForm extends Model
             ['duration', 'integer'],
         ];
     }
-
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace sales\repositories\clientChatUserAccessRepository;
 
 use common\models\Notifications;

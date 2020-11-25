@@ -51,7 +51,7 @@ class PhoneLineCommandSearch extends PhoneLineCommand
             'plc_created_user_id' => $this->plc_created_user_id,
         ]);
 
-        if ($this->plc_created_dt){
+        if ($this->plc_created_dt) {
             $query->andFilterWhere(['>=', 'plc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->plc_created_dt))])
                 ->andFilterWhere(['<=', 'plc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->plc_created_dt) + 3600 * 24)]);
         }

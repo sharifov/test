@@ -1,8 +1,6 @@
 <?php
 
-
 namespace sales\viewModel\chat;
-
 
 use sales\entities\chat\ChatFeedbackGraphSearch;
 use yii\data\ArrayDataProvider;
@@ -83,10 +81,10 @@ class ViewModelChatFeedbackGraph
     {
         $timeRange = explode(' - ', $this->chatFeedbackGraphsSearch->timeRange);
 
-        if ($this->chatFeedbackGraphsSearch->groupBy == $this->chatFeedbackGraphsSearch::GROUP_BY_DAYS){
+        if ($this->chatFeedbackGraphsSearch->groupBy == $this->chatFeedbackGraphsSearch::GROUP_BY_DAYS) {
             $groupFormat = $this->chatFeedbackGraphsSearch::GROUP_FORMAT_DAYS;
             $chartData = ChartTools::getDaysRange($timeRange[0], $timeRange[1]);
-        } elseif ($this->chatFeedbackGraphsSearch->groupBy == $this->chatFeedbackGraphsSearch::GROUP_BY_HOURS){
+        } elseif ($this->chatFeedbackGraphsSearch->groupBy == $this->chatFeedbackGraphsSearch::GROUP_BY_HOURS) {
             $groupFormat = $this->chatFeedbackGraphsSearch::GROUP_FORMAT_HOURS;
             $chartData = ChartTools::getHoursRange($timeRange[0], $timeRange[1], $step = '+1 hour', $groupFormat);
         } elseif ($this->chatFeedbackGraphsSearch->groupBy == $this->chatFeedbackGraphsSearch::GROUP_BY_WEEKS) {
@@ -149,5 +147,4 @@ class ViewModelChatFeedbackGraph
             $this->prepareStatsData = json_encode(ArrayHelper::merge([$headers], $chartData));
         }
     }
-
 }

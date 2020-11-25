@@ -20,7 +20,6 @@ class CreateVisitorLog
         }
 
         if ($lastVisitorLog = VisitorLog::find()->andWhere(['vl_client_id' => $client->id, 'vl_project_id' => $lead->project_id])->orderBy(['vl_visit_dt' => SORT_DESC])->limit(1)->one()) {
-
             if ($sourceCid && $lastVisitorLog->vl_source_cid === $sourceCid) {
                 return $lastVisitorLog->vl_id;
             }
@@ -44,7 +43,6 @@ class CreateVisitorLog
             }
 
             return $log->vl_id;
-
         }
 
         $log = new VisitorLog([

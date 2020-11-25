@@ -42,19 +42,19 @@ class SegmentForm extends Model
             [['origin', 'destination'], 'required'],
             [['origin', 'destination'], IataValidator::class],
             ['destination', 'compare', 'compareAttribute' => 'origin', 'operator' => '!='],
-            [['origin', 'destination'], 'filter', 'filter' => function($value) {
+            [['origin', 'destination'], 'filter', 'filter' => function ($value) {
                 return strtoupper($value);
             }],
 
             ['departure', 'required'],
             ['departure', 'date', 'format' => 'php:d-M-Y'],
-            ['departure', 'filter', 'filter' => function($value) {
+            ['departure', 'filter', 'filter' => function ($value) {
                 return date('Y-m-d', strtotime($value));
             }],
 
             ['flexibility', 'integer'],
             ['flexibility', 'in', 'range' => array_keys(LeadFlightSegmentHelper::flexibilityList())],
-            ['flexibility', 'filter', 'filter' => function($value) {
+            ['flexibility', 'filter', 'filter' => function ($value) {
                 return (int)$value;
             }],
 

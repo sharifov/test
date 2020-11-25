@@ -36,7 +36,7 @@ class ClientChatUserAccessSearch extends ClientChatUserAccess
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['ccua_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['ccua_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],

@@ -220,7 +220,7 @@ class UserVoiceMail extends \yii\db\ActiveRecord
             $count = self::find()->where(['uvm_user_id' => $this->uvm_user_id])->count();
 
             $maxRows = Yii::$app->params['user_voice_mail'] ?? self::MAX_COUNT_ROWS;
-            if ($count+1 > $maxRows) {
+            if ($count + 1 > $maxRows) {
                 $this->addError('uvm_user_id', 'Maximum number of entries exceeded: ' . $maxRows);
             }
         }
@@ -327,7 +327,7 @@ class UserVoiceMail extends \yii\db\ActiveRecord
         return Yii::$app->params['url_address'] . $this->uvm_voice_file_message;
     }
 
-    public static function getList() : array
+    public static function getList(): array
     {
         $data = self::find()->orderBy(['uvm_name' => SORT_ASC])->asArray()->all();
         return ArrayHelper::map($data, 'uvm_id', 'uvm_name');

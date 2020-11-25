@@ -1,4 +1,5 @@
 <?php
+
 namespace sales\model\lead\useCases\lead\create;
 
 use common\models\Client;

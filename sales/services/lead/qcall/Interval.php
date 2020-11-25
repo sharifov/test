@@ -41,5 +41,4 @@ class Interval
     {
         return $this->to->format($format);
     }
-
 }

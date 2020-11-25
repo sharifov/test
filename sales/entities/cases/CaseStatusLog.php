@@ -43,8 +43,7 @@ class CaseStatusLog extends ActiveRecord
         ?int $creatorId,
         ?int $ownerId,
         ?string $description = ''
-    ): self
-    {
+    ): self {
         $status = new static();
         $status->csl_case_id = $caseId;
         $status->csl_to_status = $toStatus;

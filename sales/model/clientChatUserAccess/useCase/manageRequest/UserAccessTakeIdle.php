@@ -1,6 +1,5 @@
 <?php
 
-
 namespace sales\model\clientChatUserAccess\useCase\manageRequest;
 
 use common\components\purifier\Purifier;

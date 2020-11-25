@@ -1,6 +1,5 @@
 <?php
 
-
 namespace sales\repositories\log;
 
 use sales\entities\log\GlobalLog;
@@ -11,15 +10,15 @@ use sales\entities\log\GlobalLog;
  */
 class GlobalLogRepository
 {
-	/**
-	 * @param GlobalLog $globalLog
-	 * @return int
-	 */
-	public function save(GlobalLog $globalLog): int
-	{
-		if (!$globalLog->save(false)) {
-			throw new \RuntimeException('Saving error');
-		}
-		return $globalLog->gl_id;
-	}
+    /**
+     * @param GlobalLog $globalLog
+     * @return int
+     */
+    public function save(GlobalLog $globalLog): int
+    {
+        if (!$globalLog->save(false)) {
+            throw new \RuntimeException('Saving error');
+        }
+        return $globalLog->gl_id;
+    }
 }

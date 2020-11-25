@@ -87,5 +87,4 @@ class CallDataForm extends Model
             ['subresource_uris', 'safe'],
         ];
     }
-
 }

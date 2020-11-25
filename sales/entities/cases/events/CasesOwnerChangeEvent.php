@@ -25,7 +25,7 @@ class CasesOwnerChangeEvent
      */
     public function __construct(Cases $cases, ?int $oldOwner, int $newOwner)
     {
-        $this->cases  =$cases;
+        $this->cases  = $cases;
         $this->oldOwner = $oldOwner;
         $this->newOwner = $newOwner;
     }

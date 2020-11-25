@@ -69,7 +69,7 @@ class CaseStatusLogSearch extends CaseStatusLog
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['csl_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['csl_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -133,7 +133,7 @@ class CaseStatusLogSearch extends CaseStatusLog
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['csl_id' => SORT_ASC]],
+            'sort' => ['defaultOrder' => ['csl_id' => SORT_ASC]],
             'pagination' => [
                 'pageSize' => 10,
             ],
@@ -165,11 +165,11 @@ class CaseStatusLogSearch extends CaseStatusLog
         }
 
         if ($this->csl_start_dt) {
-            $query->andFilterWhere(['DATE(csl_start_dt)'=> date('Y-m-d', strtotime($this->csl_start_dt))]);
+            $query->andFilterWhere(['DATE(csl_start_dt)' => date('Y-m-d', strtotime($this->csl_start_dt))]);
         }
 
         if ($this->csl_end_dt) {
-            $query->andFilterWhere(['DATE(csl_end_dt)'=> date('Y-m-d', strtotime($this->csl_end_dt))]);
+            $query->andFilterWhere(['DATE(csl_end_dt)' => date('Y-m-d', strtotime($this->csl_end_dt))]);
         }
 
         if ($this->statuses && is_array($this->statuses)) {

@@ -140,7 +140,7 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
      * @param string $arrivalOffset
      * @throws \Exception
      */
-    public function getArrivalDateTime(?DateTime $departureDateTime,  string $arrivalHour, string $arrivalMinute, string $arrivalOffset)
+    public function getArrivalDateTime(?DateTime $departureDateTime, string $arrivalHour, string $arrivalMinute, string $arrivalOffset)
     {
         if (!$departureDateTime) {
             return null;
@@ -152,7 +152,7 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
         } else {
             $result = $sourceDate->modify($arrivalOffset . ' day')->setTime($arrivalHour, $arrivalMinute);
         }
-		return $result;
+        return $result;
     }
 
     /**
@@ -161,8 +161,8 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
      */
     public function prepareArrivalOffset(string $arrivalOffset): string
     {
-		$arrivalOffset = ($arrivalOffset === '') ? '0' : $arrivalOffset;
-		return str_replace('#', '+', $arrivalOffset);
+        $arrivalOffset = ($arrivalOffset === '') ? '0' : $arrivalOffset;
+        return str_replace('#', '+', $arrivalOffset);
     }
 
     /**

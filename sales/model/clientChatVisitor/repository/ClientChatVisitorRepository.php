@@ -1,6 +1,5 @@
 <?php
 
-
 namespace sales\model\clientChatVisitor\repository;
 
 use sales\model\clientChatVisitor\entity\ClientChatVisitor;
@@ -23,8 +22,8 @@ class ClientChatVisitorRepository extends Repository
         return $clientChatVisitor->ccv_id;
     }
 
-	public function exists(int $cchId, int $cvdId): bool
-	{
-		return ClientChatVisitor::find()->byUniqueFields($cchId, $cvdId)->exists();
-	}
+    public function exists(int $cchId, int $cvdId): bool
+    {
+        return ClientChatVisitor::find()->byUniqueFields($cchId, $cvdId)->exists();
+    }
 }

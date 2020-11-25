@@ -25,7 +25,7 @@ class CouponCaseSearch extends CouponCase
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cc_coupon_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['cc_coupon_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],

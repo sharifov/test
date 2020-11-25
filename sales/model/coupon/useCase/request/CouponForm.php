@@ -37,7 +37,7 @@ class CouponForm extends Model
             ['enc_coupon', 'required'],
             ['enc_coupon', 'string', 'max' => 20],
 
-            [['exp_date', 'create_date'], 'filter', 'filter' => static function($value) {
+            [['exp_date', 'create_date'], 'filter', 'filter' => static function ($value) {
                 return date('Y-m-d H:i:s', strtotime($value));
             }, 'skipOnEmpty' => true],
             [['exp_date', 'create_date'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],

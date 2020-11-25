@@ -25,5 +25,4 @@ class LeadOwnerFreedEvent
         $this->lead = $lead;
         $this->oldOwnerId = $oldOwnerId;
     }
-
 }

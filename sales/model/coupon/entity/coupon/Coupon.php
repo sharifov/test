@@ -118,9 +118,9 @@ class Coupon extends \yii\db\ActiveRecord
     }
 
     public function isSend(): bool
-	{
-		return $this->c_status_id === CouponStatus::SEND;
-	}
+    {
+        return $this->c_status_id === CouponStatus::SEND;
+    }
 
     public function attributeLabels(): array
     {

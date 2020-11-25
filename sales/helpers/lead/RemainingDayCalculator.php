@@ -31,5 +31,4 @@ class RemainingDayCalculator
 
         return $interval->invert ? '-' . $interval->days : $interval->days;
     }
-
 }

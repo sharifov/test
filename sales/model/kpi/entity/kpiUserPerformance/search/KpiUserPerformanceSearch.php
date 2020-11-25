@@ -45,11 +45,11 @@ class KpiUserPerformanceSearch extends KpiUserPerformance
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
-			'query' => $query,
-			'sort'=> ['defaultOrder' => ['up_created_dt' => SORT_DESC, 'up_updated_dt' => SORT_DESC]],
-			'pagination' => [
-				'pageSize' => 30,
-			],
+            'query' => $query,
+            'sort' => ['defaultOrder' => ['up_created_dt' => SORT_DESC, 'up_updated_dt' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
         ]);
 
         $this->load($params);

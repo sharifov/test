@@ -77,25 +77,25 @@ class CasesCreateByWebForm extends Model
             ['categoryId', 'required'],
             ['categoryId', 'integer'],
             ['categoryId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['categoryId', 'in', 'range' => function() {
+            ['categoryId', 'in', 'range' => function () {
                 return $this->getAvailableCategories($this->depId);
             }],
 
             ['clientPhone', 'phoneOrEmailRequired', 'skipOnEmpty' => false],
             ['clientPhone', 'string', 'max' => 100],
             ['clientPhone', PhoneInputValidator::class],
-            ['clientPhone', 'filter', 'filter' => function($value) {
+            ['clientPhone', 'filter', 'filter' => function ($value) {
                 return str_replace('-', '', trim($value));
             }],
-//			['clientPhone', 'checkPhoneForExistence']
+//          ['clientPhone', 'checkPhoneForExistence']
 
             ['clientEmail', 'phoneOrEmailRequired', 'skipOnEmpty' => false],
             ['clientEmail', 'string', 'max' => 100],
             ['clientEmail', 'email'],
-            ['clientEmail', 'filter', 'filter' => static function($value) {
+            ['clientEmail', 'filter', 'filter' => static function ($value) {
                 return mb_strtolower(trim($value));
             }],
-            
+
             ['sourceTypeId', 'required'],
             ['sourceTypeId', 'integer'],
             ['sourceTypeId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
@@ -168,27 +168,27 @@ class CasesCreateByWebForm extends Model
         return array_column($categories, 'cc_id');
     }
 
-//	/**
-//	 * @return bool
-//	 */
-//	public function checkPhoneForExistence()
-//	{
-//		$cases = Cases::find()
-//			->join('join', 'client_phone', 'cs_client_id = client_id and phone = :phone', ['phone' => $this->clientPhone])
-//			->where(['cs_status' => [CasesStatus::STATUS_PENDING, CasesStatus::STATUS_PROCESSING, CasesStatus::STATUS_FOLLOW_UP]])
-//			->all();
+//  /**
+//   * @return bool
+//   */
+//  public function checkPhoneForExistence()
+//  {
+//      $cases = Cases::find()
+//          ->join('join', 'client_phone', 'cs_client_id = client_id and phone = :phone', ['phone' => $this->clientPhone])
+//          ->where(['cs_status' => [CasesStatus::STATUS_PENDING, CasesStatus::STATUS_PROCESSING, CasesStatus::STATUS_FOLLOW_UP]])
+//          ->all();
 //
-//		if ($cases) {
-//			$casesLink = '';
-//			foreach ($cases as $case) {
-//				$casesLink .= Html::a('Case ' . $case->cs_id, '/cases/view/' . $case->cs_gid, ['target' => '_blank']) . ' ';
-//			}
-//			$this->addError('clientPhone', 'This number is already used in ' . $casesLink);
-//			return false;
-//		}
+//      if ($cases) {
+//          $casesLink = '';
+//          foreach ($cases as $case) {
+//              $casesLink .= Html::a('Case ' . $case->cs_id, '/cases/view/' . $case->cs_gid, ['target' => '_blank']) . ' ';
+//          }
+//          $this->addError('clientPhone', 'This number is already used in ' . $casesLink);
+//          return false;
+//      }
 //
-//		return true;
-//	}
+//      return true;
+//  }
 
     /**
      * @return array
@@ -207,5 +207,4 @@ class CasesCreateByWebForm extends Model
             'orderUid' => 'Booking ID',
         ];
     }
-
 }
