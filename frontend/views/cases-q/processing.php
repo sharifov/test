@@ -156,7 +156,7 @@ $lists = new ListsAccess($user->id);
                 'attribute' => 'cs_user_id',
                 'relation' => 'owner',
                 'placeholder' => 'Select User',
-                'visible' => $user->isSupSuper() || $user->isExSuper() || $user->isAdmin()
+//                'visible' => $user->isSupSuper() || $user->isExSuper() || $user->isAdmin()
             ],
 
 			[
