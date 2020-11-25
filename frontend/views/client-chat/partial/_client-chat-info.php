@@ -381,11 +381,14 @@ $_self = $this;
 </div>
 
 <?php if (isset($clientChatHold)) : ?>
-    <?php
 
-    $formatTimer = ClientChatHoldService::isMoreThanHourLeft($clientChatHold) ? '%H:%M:%S' : '%M:%S';
+<?php
 
-    $js = <<<JS
+$formatTimer = ClientChatHoldService::isMoreThanHourLeft($clientChatHold) ? '%H:%M:%S' : '%M:%S';
+
+$js = <<<JS
+
+    clearInterval(timerProgressBar);
 
     var maxProgressBar = {$clientChatHold->deadlineStartDiffInSeconds()};
     var leftProgressBar = {$clientChatHold->deadlineNowDiffInSeconds()};
@@ -430,6 +433,6 @@ $_self = $this;
     }, 1000);
     
 JS;
-    $this->registerJs($js);
-    ?>
+$this->registerJs($js);
+?>
 <?php endif; ?>
