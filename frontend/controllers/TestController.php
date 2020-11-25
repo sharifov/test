@@ -702,14 +702,14 @@ class TestController extends FController
 //        $service = Yii::$app->communication;
 //
 //        $call = Call::findOne(['c_call_sid' => 'CA78c6d347bc1db1e33550997bb9b0b6c2']);
-////
-////        $service->disconnectFromConferenceCall($call->c_conference_sid, $call->c_call_sid);
-////
+        ////
+        ////        $service->disconnectFromConferenceCall($call->c_conference_sid, $call->c_call_sid);
+        ////
 //        $conference = Conference::findOne(['cf_sid' => $call->c_conference_sid]);
 //        $service->returnToConferenceCall($call->c_call_sid,$conference->cf_friendly_name,$conference->cf_sid,'client:seller295');
-////
-////        $search = new ContactsSearch(295);
-////        $search->searchContactsByWidget('373');
+        ////
+        ////        $search = new ContactsSearch(295);
+        ////        $search->searchContactsByWidget('373');
         die;
 
 
@@ -718,11 +718,10 @@ class TestController extends FController
 
     public function actionTestNew()
     {
-
         $userId = 295;
         $prepare = new PrepareCurrentCallsForNewCall($userId);
         $prepare->prepare();
-         die;
+        die;
     }
 
     private function getPathForTable($actions, $controller, &$batchTmpTableItem, &$batchTmpTableItemChild, $role)
@@ -797,8 +796,6 @@ class TestController extends FController
 
     public function actionSocket()
     {
-
-
         Notifications::create(Yii::$app->user->id, 'Test ' . date('H:i:s'), 'Test message <h2>asdasdasd</h2>', Notifications::TYPE_SUCCESS, true);
 
         $socket = 'tcp://127.0.0.1:1234';
@@ -916,7 +913,6 @@ class TestController extends FController
 
     public function actionEmailJob()
     {
-
         $job = new ReceiveEmailsJob();
 
         $job->last_email_id = 18964;
@@ -1173,7 +1169,6 @@ class TestController extends FController
 
     public function actionTest2()
     {
-
         $call = new Call();
         $call->c_project_id = 6;
         $call->c_dep_id = null;
@@ -1312,7 +1307,6 @@ class TestController extends FController
 
     public function actionMysql()
     {
-
         $sqlData = [];
         $sqlData[] = "SELECT COUNT(*) FROM `call`";
         $sqlData[] = "SELECT * FROM `call` WHERE c_call_sid = 'CA4cd4b85d370ee0d517119e50da556b16'";
@@ -1399,7 +1393,7 @@ class TestController extends FController
         //$module = HotelModule::getInstance();
 
         $apiHotelService = Yii::$app->getModule('hotel')->apiService;
-       // $service = $hotel->apiService;
+        // $service = $hotel->apiService;
 
 
         $rooms[] = ['rooms' => 1, 'adults' => 1];
@@ -1485,7 +1479,6 @@ class TestController extends FController
 
     public function actionEncrypt()
     {
-
         $text = 'Hello!';
         $encryptData = CreditCard::encrypt($text);
         $decryptData = CreditCard::decrypt($encryptData);
@@ -1497,7 +1490,6 @@ class TestController extends FController
 
     public function actionMask()
     {
-
         $number = '41112222333344445';
         //echo  substr_replace($number, str_repeat('*', strlen( $number ) - 4), 0, strlen( $number ) - 4);
 
@@ -1520,7 +1512,6 @@ class TestController extends FController
 
     public function actionFilter()
     {
-
         $array[] = ['price' => 1, 'gds' => 'A', 'data' => []];
         $array[] = ['price' => 2, 'gds' => 'B', 'data' => []];
         $array[] = ['price' => 3.5, 'gds' => 'C', 'data' => []];
@@ -1536,7 +1527,6 @@ class TestController extends FController
 
     public function actionTestEvents()
     {
-
         $result = [];
 
         $db = \Yii::$app->db;
@@ -1768,12 +1758,12 @@ class TestController extends FController
 
 
 //        "email": "test@gmail.com",
-//  "name": "John Balon",
-//  "password": "test",
-//  "username": "test",
-//  "active": true,
-//  "roles": ["user", "livechat-agent"],
-//  "joinDefaultChannels": false
+        //  "name": "John Balon",
+        //  "password": "test",
+        //  "username": "test",
+        //  "active": true,
+        //  "roles": ["user", "livechat-agent"],
+        //  "joinDefaultChannels": false
 
         //VarDumper::dump($chat->getSystemAuthData(), 10, true);
         //VarDumper::dump($chat->getAllDepartments(), 10, true);
@@ -1851,7 +1841,6 @@ class TestController extends FController
 
     public function actionZ()
     {
-
         return $this->render('z');
     }
 
@@ -1946,25 +1935,52 @@ class TestController extends FController
         return Yii::$app->prometheus->getMetric();
     }
 
+
     public function actionMetrics(): string
     {
-        $metrics = new Metrics();
+        /** @var Metrics $metrics */
+        $metrics = \Yii::$container->get(Metrics::class);
 
-        $timeStart = microtime(true);
+        $metrics->serviceCounter('test1', []);
+        $metrics->serviceCounter('test1', []);
+        $metrics->serviceCounter('test1', []);
+        $metrics->serviceCounter('test1', []);
+        $metrics->serviceCounter('test1', []);
+
+        $metrics->jobCounter('job1', ['name' => 'Alexandr']);
+        $metrics->jobCounter('job1', ['name' => 'Dendy']);
+        $metrics->jobCounter('job1', ['name' => 'Alexandr']);
+        $metrics->jobCounter('job1', ['name' => 'Dendy']);
 
 
-        sleep(random_int(0, 2));
-        $seconds = round(microtime(true) - $timeStart, 1);
-        echo $seconds;
-        exit;
+        $metrics->jobHistogram('histogram2', 0.3, ['name' => 'Dendy']);
+        $metrics->jobHistogram('histogram2', 0.5, ['name' => 'Alexandr']);
+
+
+        $metrics->jobGauge('gauge1', 3.4, ['type' => 'Dendy2']);
+        $metrics->jobGauge('gauge1', 2.7, ['type' => 'Alexandr3']);
+        $metrics->jobGauge('gauge1', 3.2, ['type' => 'Dendy2']);
+
 
         $metrics->jobCounter('count');
         $metrics->jobHistogram('hst', random_int(0, 7));
         $metrics->jobHistogram('hst2', random_int(0, 7));
         $metrics->jobGauge('test2', random_int(-100, 100));
         $metrics->jobGauge('test1', random_int(-100, 100));
+
+
+
+        /*$timeStart = microtime(true);
+
+
+        sleep(random_int(0, 2));
+        $seconds = round(microtime(true) - $timeStart, 1);
+        echo $seconds;
+        exit;*/
+
         return Yii::$app->prometheus->getMetric();
     }
+
 
     public function actionLocale()
     {

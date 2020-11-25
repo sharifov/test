@@ -97,8 +97,7 @@ class BackOffice
             ])
             ->send();
 
-
-        $metrics = new Metrics();
+        $metrics = \Yii::$container->get(Metrics::class);
         if ($response->isOk) {
             $metrics->serviceCounter('back_office', ['type' => 'success', 'action' => $endpoint]);
         } else {

@@ -2,6 +2,7 @@
 
 namespace common\bootstrap;
 
+use common\components\Metrics;
 use frontend\assets\overridden\ImperaviAsset;
 use sales\services\log\GlobalLogDBService;
 use sales\logger\db\GlobalLogInterface;
@@ -19,5 +20,7 @@ class SetUp implements BootstrapInterface
         $container->setSingleton(CheckAccessInterface::class, static function () use ($app) {
             return $app->authManager;
         });
+
+        $container->setSingleton(Metrics::class, Metrics::class);
     }
 }

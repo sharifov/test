@@ -105,7 +105,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
         $response = $this->request->send();
 
-        $metrics = new Metrics();
+        $metrics = \Yii::$container->get(Metrics::class);
         if ($response->isOk) {
             $metrics->serviceCounter('communication', ['type' => 'success', 'action' => $action]);
         } else {

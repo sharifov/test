@@ -71,7 +71,7 @@ class CallQueueJob extends BaseObject implements JobInterface
      */
     public function execute($queue): bool
     {
-        $metrics = new Metrics();
+        $metrics = \Yii::$container->get(Metrics::class);
         $timeStart = microtime(true);
 
         try {

@@ -88,7 +88,7 @@ class AirSearchService extends Component
 
         $response = $this->request->send();
 
-        $metrics = new Metrics();
+        $metrics = \Yii::$container->get(Metrics::class);
         if ($response->isOk) {
             $metrics->serviceCounter('air_search', ['type' => 'success', 'action' => $action]);
         } else {

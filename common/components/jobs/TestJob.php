@@ -32,12 +32,12 @@ class TestJob extends BaseObject implements JobInterface
      */
     public function execute($queue): bool
     {
-        $metrics = new Metrics();
+        $metrics = \Yii::$container->get(Metrics::class);
         $timeStart = microtime(true);
 
-        Yii::warning(VarDumper::dumpAsString($this->data), 'JOB:TestJob');
+        Yii::warning($this->data, 'JOB:TestJob');
 
-        sleep(random_int(1, 5));
+        sleep(random_int(0, 2));
         $seconds = round(microtime(true) - $timeStart, 1);
         $metrics->jobHistogram(substr(strrchr(get_class($this), '\\'), 1) . '_seconds', $seconds);
         unset($metrics);

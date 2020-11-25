@@ -112,7 +112,7 @@ class RocketChat extends Component
 
         $response = $this->request->send();
 
-        $metrics = new Metrics();
+        $metrics = \Yii::$container->get(Metrics::class);
         if ($response->isOk) {
             $metrics->serviceCounter('rocket_chat', ['type' => 'success', 'action' => $action]);
         } else {

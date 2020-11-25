@@ -83,7 +83,7 @@ class ChatBot extends Component
 
         $response = $this->send($url, $data, $method, $headers, $options);
 
-        $metrics = new Metrics();
+        $metrics = \Yii::$container->get(Metrics::class);
         if ($response->isOk) {
             $metrics->serviceCounter('chat_bot', ['type' => 'success', 'action' => $action]);
         } else {
