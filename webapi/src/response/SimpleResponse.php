@@ -13,7 +13,7 @@ class SimpleResponse extends Response
 
     public function getResponse(): array
     {
-       return $this->getResponseMessages();
+        return $this->getResponseMessages();
     }
 
     public function getStatusCodeDefault(): int

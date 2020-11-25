@@ -29,7 +29,7 @@ class ApiLeadCallExpert extends Model
     /**
      * @return string
      */
-    public function formName() : string
+    public function formName(): string
     {
         return 'call';
     }
@@ -38,12 +38,12 @@ class ApiLeadCallExpert extends Model
     /**
      * @return array
      */
-    public function rules() : array
+    public function rules(): array
     {
         return [
             [['lce_id', 'lce_status_id'], 'required'],
 
-            [['lce_response_text', 'lce_expert_username'], 'required', 'when' => static function(self $model) {
+            [['lce_response_text', 'lce_expert_username'], 'required', 'when' => static function (self $model) {
                 return (int) $model->lce_status_id === LeadCallExpert::STATUS_DONE;
             }],
 
@@ -78,7 +78,7 @@ class ApiLeadCallExpert extends Model
     /**
      * @return array
      */
-    public function attributeLabels() : array
+    public function attributeLabels(): array
     {
         return [
             'lce_id' => 'ID',
@@ -89,5 +89,4 @@ class ApiLeadCallExpert extends Model
             'lce_expert_username' => 'Expert Username',
         ];
     }
-
 }

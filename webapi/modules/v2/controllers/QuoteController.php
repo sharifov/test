@@ -18,7 +18,6 @@ use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\UnprocessableEntityHttpException;
 
-
 class QuoteController extends ApiBaseController
 {
 
@@ -440,7 +439,6 @@ class QuoteController extends ApiBaseController
         ];
 
         try {
-
             if ($checkout_id && !$model->lead->hybrid_uid) {
                 $model->lead->hybrid_uid = $checkout_id;
                 $model->lead->save();
@@ -467,7 +465,7 @@ class QuoteController extends ApiBaseController
             $response['booked_quote_uid'] = null;
             $response['source_code'] = ($model->lead && isset($model->lead->source)) ? $model->lead->source->cid : null;
 
-            if(in_array($model->lead->status,[Lead::STATUS_SOLD, Lead::STATUS_BOOKED])){
+            if (in_array($model->lead->status, [Lead::STATUS_SOLD, Lead::STATUS_BOOKED])) {
                 $response['lead_status'] = $model->lead->status == Lead::STATUS_SOLD ? 'sold' : 'booked';
                 $response['booked_quote_uid'] = $model->lead->getBookedQuoteUid();
             }
@@ -536,7 +534,6 @@ class QuoteController extends ApiBaseController
                             $message = 'Your Quote (UID: ' . $model->uid . ") has been OPENED by client! \r\nProject: " . Html::encode($project_name) . "! \r\n Lead (Id: " . Purifier::createLeadShortLink($lead) . ")";
 
                             if ($lead->employee_id) {
-
                                 if ($ntf = Notifications::create($lead->employee_id, $subject, $message, Notifications::TYPE_INFO, true)) {
                                     // Notifications::socket($lead->employee_id, null, 'getNewNotification', [], true);
                                     $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
@@ -548,12 +545,13 @@ class QuoteController extends ApiBaseController
                     //exec(dirname(Yii::getAlias('@app')) . '/yii quote/send-opened-notification '.$uid.'  > /dev/null 2>&1 &');
                 }
             }
-
         } catch (\Throwable $e) {
-
             Yii::error($e->getTraceAsString(), 'API:Quote:get:try');
-            if (Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
-            else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
+            if (Yii::$app->request->get('debug')) {
+                $message = ($e->getTraceAsString());
+            } else {
+                $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
+            }
 
             $response['error'] = $message;
             $response['error_code'] = 30;
@@ -569,8 +567,11 @@ class QuoteController extends ApiBaseController
 
         if (isset($response['error']) && $response['error']) {
             $json = @json_encode($response['error']);
-            if (isset($response['error_code']) && $response['error_code']) $error_code = $response['error_code'];
-            else $error_code = 0;
+            if (isset($response['error_code']) && $response['error_code']) {
+                $error_code = $response['error_code'];
+            } else {
+                $error_code = 0;
+            }
             throw new UnprocessableEntityHttpException($json, $error_code);
         }
 

@@ -1,5 +1,7 @@
 <?php
+
 namespace webapi\tests;
+
 use yii\helpers\Url;
 
 class IndexApiCest

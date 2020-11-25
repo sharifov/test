@@ -1,4 +1,5 @@
 <?php
+
 namespace webapi\modules\v1\controllers;
 
 use common\components\jobs\CallQueueJob;
@@ -103,7 +104,7 @@ class CommunicationController extends ApiBaseController
      * @param CallService $callService
      * @param array $config
      */
-    public function __construct($id, $module, CallService $callService, ConferenceStatusCallbackHandler $conferenceStatusCallbackHandler,  $config = [])
+    public function __construct($id, $module, CallService $callService, ConferenceStatusCallbackHandler $conferenceStatusCallbackHandler, $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->callService = $callService;
@@ -145,18 +146,21 @@ class CommunicationController extends ApiBaseController
         $apiLog = $this->startApiLog($this->action->uniqueId);
 
         $type = Yii::$app->request->post('type');
-        $last_id = Yii::$app->request->post('last_email_id', NULL);
+        $last_id = Yii::$app->request->post('last_email_id', null);
 
-        if(!$type) {
+        if (!$type) {
             throw new NotFoundHttpException('Not found Email type', 1);
         }
 
         switch ($type) {
-            case self::TYPE_UPDATE_EMAIL_STATUS : $response = $this->updateEmailStatus();
+            case self::TYPE_UPDATE_EMAIL_STATUS:
+                $response = $this->updateEmailStatus();
                 break;
-            case self::TYPE_NEW_EMAIL_MESSAGES_RECEIVED : $response = $this->newEmailMessagesReceived($last_id);
+            case self::TYPE_NEW_EMAIL_MESSAGES_RECEIVED:
+                $response = $this->newEmailMessagesReceived($last_id);
                 break;
-            default: throw new BadRequestHttpException('Invalid Email type', 2);
+            default:
+                throw new BadRequestHttpException('Invalid Email type', 2);
         }
 
         $responseData = $this->getResponseData($response, $apiLog);
@@ -199,18 +203,18 @@ class CommunicationController extends ApiBaseController
         $apiLog = $this->startApiLog($this->action->uniqueId);
         $type = Yii::$app->request->post('type');
 
-        if(!$type) {
+        if (!$type) {
             throw new NotFoundHttpException('Not found type', 1);
         }
 
         switch ($type) {
-            case self::TYPE_UPDATE_SMS_STATUS :
+            case self::TYPE_UPDATE_SMS_STATUS:
                 $response = $this->updateSmsStatus();
                 break;
-            case self::TYPE_NEW_SMS_MESSAGES_RECEIVED :
+            case self::TYPE_NEW_SMS_MESSAGES_RECEIVED:
                 $response = $this->newSmsMessagesReceived();
                 break;
-            case self::TYPE_SMS_FINISH :
+            case self::TYPE_SMS_FINISH:
                 $response = $this->smsFinish();
                 break;
             default:
@@ -314,7 +318,6 @@ class CommunicationController extends ApiBaseController
         // $ciscoPhoneNumber = \Yii::$app->params['global_phone'];
 
         if ($postCall) {
-
             $client_phone_number = null;
             $incoming_phone_number = null;
 
@@ -343,7 +346,7 @@ class CommunicationController extends ApiBaseController
 //                $sayParam = ['language' => 'en-US'];   // ['language' => 'en-US', 'voice' => 'alice']
                 //$vr->say('Test', $sayParam);
                 $vr->reject(['reason' => 'busy']);
-                return $this->getResponseChownData($vr, 404, 404, 'Sales Communication error: '. $e->getMessage());
+                return $this->getResponseChownData($vr, 404, 404, 'Sales Communication error: ' . $e->getMessage());
             }
 
             //$clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->orderBy(['id' => SORT_DESC])->limit(1)->one();
@@ -357,7 +360,6 @@ class CommunicationController extends ApiBaseController
 //            $departmentPhone = DepartmentPhoneProject::find()->where(['dpp_phone_number' => $incoming_phone_number, 'dpp_enable' => true])->limit(1)->one();
             $departmentPhone = DepartmentPhoneProject::find()->byPhone($incoming_phone_number, false)->enabled()->limit(1)->one();
             if ($departmentPhone) {
-
                 $project = $departmentPhone->dppProject;
                 $source = $departmentPhone->dppSource;
                 if ($project && !$source) {
@@ -374,12 +376,19 @@ class CommunicationController extends ApiBaseController
 
                 $ivrEnable = (bool)$departmentPhone->dpp_ivr_enable;
 
-                $callModel = $this->findOrCreateCall($callSid, $parentCallSid, $postCall, $call_project_id,
-                    $call_dep_id, $call_source_id, false, $call_language_id);
+                $callModel = $this->findOrCreateCall(
+                    $callSid,
+                    $parentCallSid,
+                    $postCall,
+                    $call_project_id,
+                    $call_dep_id,
+                    $call_source_id,
+                    false,
+                    $call_language_id
+                );
 
                 if ($departmentPhone->dugUgs) {
                     foreach ($departmentPhone->dugUgs as $userGroup) {
-
                         $exist = CallUserGroup::find()->where([ 'cug_ug_id' => $userGroup->ug_id, 'cug_c_id' => $callModel->c_id])->exists();
 
                         if ($exist) {
@@ -391,8 +400,10 @@ class CommunicationController extends ApiBaseController
                         $cug->cug_c_id = $callModel->c_id;
                         //$cug->link('cugUg', $callModel);
                         if (!$cug->save()) {
-                            Yii::error(VarDumper::dumpAsString($cug->errors),
-                                'API:Communication:voiceIncoming:CallUserGroup:save');
+                            Yii::error(
+                                VarDumper::dumpAsString($cug->errors),
+                                'API:Communication:voiceIncoming:CallUserGroup:save'
+                            );
                         }
                     }
                 }
@@ -407,13 +418,10 @@ class CommunicationController extends ApiBaseController
 
                 $response['error'] = 'Not enable IVR';
                 $response['error_code'] = 13;
-
             } else {
-
 //                $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $incoming_phone_number])->limit(1)->one();
                 $upp = UserProjectParams::find()->byPhone($incoming_phone_number, false)->limit(1)->one();
                 if ($upp) {
-
                     if ($upp->upp_dep_id) {
                         $call_dep_id = $upp->upp_dep_id;
                     } elseif ($upp->uppUser && $upp->uppUser->userDepartments && isset($upp->uppUser->userDepartments[0])) {
@@ -429,17 +437,23 @@ class CommunicationController extends ApiBaseController
 
                     $callFromInternalPhone = PhoneList::find()->byPhone($client_phone_number)->enabled()->exists();
 
-                    $callModel = $this->findOrCreateCall($callSid, $parentCallSid, $postCall, $upp->upp_project_id,
-                        $call_dep_id, null, $callFromInternalPhone);
+                    $callModel = $this->findOrCreateCall(
+                        $callSid,
+                        $parentCallSid,
+                        $postCall,
+                        $upp->upp_project_id,
+                        $call_dep_id,
+                        null,
+                        $callFromInternalPhone
+                    );
                     $callModel->c_source_type_id = Call::SOURCE_DIRECT_CALL;
 
                    // Yii::error(VarDumper::dumpAsString($callFromInternalPhone), 'CommunicationController::DebugCall');
 
-					/** @var Employee $user */
+                    /** @var Employee $user */
                     $user = $upp->uppUser;
 
                     if ($user) {
-
                         if ($upp->upp_vm_enabled && $upp->upp_vm_id) {
                             if (
                                 $upp->vmIsAll()
@@ -468,18 +482,18 @@ class CommunicationController extends ApiBaseController
 
                         if ($user->isOnline()) {
                             // Yii::info('DIRECT CALL - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $incoming_phone_number, 'info\API:Communication:Incoming:DirectCall');
-							if ($callFromInternalPhone && $user->userStatus->us_is_on_call) {
-								return $this->createExceptionCall($incoming_phone_number, 'User is on call');
-							}
+                            if ($callFromInternalPhone && $user->userStatus->us_is_on_call) {
+                                return $this->createExceptionCall($incoming_phone_number, 'User is on call');
+                            }
 
                             return $this->createDirectCall($callModel, $user, $callFromInternalPhone);
                         }
 
-						if ($callFromInternalPhone) {
-							return $this->createExceptionCall($incoming_phone_number, 'User is offline');
-						}
+                        if ($callFromInternalPhone) {
+                            return $this->createExceptionCall($incoming_phone_number, 'User is offline');
+                        }
 
-//						Yii::info('Offline - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $incoming_phone_number,
+//                      Yii::info('Offline - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $incoming_phone_number,
 //                            'info\API:Communication:Incoming:Offline');
                         $message = 'Missing Call from ' . $client_phone_number . ' to ' . $incoming_phone_number . "\r\n Reason: Agent offline";
                         if ($callModel->c_lead_id && $callModel->cLead) {
@@ -488,9 +502,14 @@ class CommunicationController extends ApiBaseController
                         if ($callModel->c_case_id && $callModel->cCase) {
                             $message .= "\r\n Case (Id: " . Purifier::createCaseShortLink($callModel->cCase) . ")";
                         }
-                        if ($ntf = Notifications::create($user->id, 'Missing Call [Offline]',
-                            $message,
-                            Notifications::TYPE_WARNING, true)
+                        if (
+                            $ntf = Notifications::create(
+                                $user->id,
+                                'Missing Call [Offline]',
+                                $message,
+                                Notifications::TYPE_WARNING,
+                                true
+                            )
                         ) {
                             // Notifications::socket($user->id, null, 'getNewNotification', [], true);
                             $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
@@ -502,13 +521,10 @@ class CommunicationController extends ApiBaseController
 
                     $response['error'] = 'Not found "user" for Call';
                     $response['error_code'] = 14;
-
                 }
-
             }
 
             return $this->createExceptionCall($incoming_phone_number); //$ciscoPhoneNumber
-
         }
 
         $response['error'] = 'Not found "call" data';
@@ -529,8 +545,7 @@ class CommunicationController extends ApiBaseController
 
         //Yii::info(VarDumper::dumpAsString($post), 'info\API:Communication:voiceRecord');
 
-        if ($callData && isset($callData['CallSid'], $callData['RecordingSid']) ) {
-
+        if ($callData && isset($callData['CallSid'], $callData['RecordingSid'])) {
             //$call = Call::find()->where(['c_call_sid' => $callData['CallSid']])->one();
 
 //            $call = null;
@@ -563,7 +578,6 @@ class CommunicationController extends ApiBaseController
 //            Yii::error(VarDumper::dumpAsString(['post' => $post, 'model' => $call->getAttributes()]));;
 
             if ($call && $callData['RecordingUrl']) {
-
                 //$call->c_recording_url = $callData['RecordingUrl'] ?? null;
 
 //                if (!$call->c_recording_sid && !empty($callData['RecordingUrl'])) {
@@ -579,7 +593,7 @@ class CommunicationController extends ApiBaseController
 
                 $call->c_recording_duration = $callData['RecordingDuration'] ?? null;
 
-                if(!$call->save()) {
+                if (!$call->save()) {
                     Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceRecord:Call:save');
                 } else {
                     $logEnable = Yii::$app->params['settings']['call_log_enable'] ?? false;
@@ -620,7 +634,9 @@ class CommunicationController extends ApiBaseController
                         $ntf = Notifications::create(
                             $voiceMailRecord->vmr_user_id,
                             'Voice Mail',
-                            'New Voice Mail. ' . $clientData . 'Record: ' . $voiceMailRecord->getRecordingUrl(), Notifications::TYPE_INFO, true
+                            'New Voice Mail. ' . $clientData . 'Record: ' . $voiceMailRecord->getRecordingUrl(),
+                            Notifications::TYPE_INFO,
+                            true
                         );
                         if ($ntf) {
                             Notifications::publish('getNewNotification', ['user_id' => $voiceMailRecord->vmr_user_id], NotificationMessage::add($ntf));
@@ -635,7 +651,6 @@ class CommunicationController extends ApiBaseController
                     }
                 }
             }
-
         } else {
             $response['error'] = 'Not found callData[CallSid] or callData[RecordingSid] in voiceRecord';
         }
@@ -661,7 +676,6 @@ class CommunicationController extends ApiBaseController
             $call = Call::find()->where(['c_call_sid' => $callData['sid']])->orderBy(['c_id' => SORT_ASC])->limit(1)->one();
 
             if ($call) {
-
                 if (isset($callData['price']) && $callData['price']) {
                     $call->c_price = abs((float) $callData['price']);
                 }
@@ -670,10 +684,9 @@ class CommunicationController extends ApiBaseController
                     $call->c_call_duration = (int) $callData['duration'];
                 }
 
-                if(!$call->save()) {
+                if (!$call->save()) {
                     Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:TYPE_VOIP_FINISH:Call:save');
                 }
-
             } else {
                 Yii::error('Communication Request: Not found Call SID: ' . $callData['sid'], 'API:Communication:voiceFinish:Call:find');
             }
@@ -700,13 +713,12 @@ class CommunicationController extends ApiBaseController
         $callSid = $post['callData']['sid'] ?? $post['callData']['CallSid'] ?? null;
 
         if ($callSid) {
-
             $call = Call::find()->where(['c_call_sid' => $callSid])->orderBy(['c_id' => SORT_ASC])->limit(1)->one();
 
             $callData = $post['call'];
             $callOriginalData = $post['callData'] ?? [];
 
-            if(!$call) {
+            if (!$call) {
                 $call = new Call();
                 $call->c_call_sid = $callSid;
                 $call->c_call_type_id = (int) $callData['c_call_type_id'];
@@ -800,7 +812,7 @@ class CommunicationController extends ApiBaseController
                 // Yii::warning('Not found Call: ' . $callSid, 'API:Communication:voiceClient:Call::find');
             }
 
-            if(!empty($callOriginalData['CallStatus'])) {
+            if (!empty($callOriginalData['CallStatus'])) {
                 $call->c_call_status = $callOriginalData['CallStatus'];
                 $call->setStatusByTwilioStatus($call->c_call_status);
             }
@@ -873,11 +885,10 @@ class CommunicationController extends ApiBaseController
 //                    }
 //                }
 //            }
-            if(!$call->save()) {
+            if (!$call->save()) {
                 Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceClient:Call:save');
             }
-        }
-        else {
+        } else {
             Yii::error('Communication Request: Not found post[callData][sid] / post[callData][CallSid] ' . VarDumper::dumpAsString($post), 'API:Communication:voiceClient:post');
         }
 
@@ -898,7 +909,6 @@ class CommunicationController extends ApiBaseController
         ];
 
         if (isset($post['callData']['CallSid']) && $post['callData']['CallSid']) {
-
             $callData = $post['callData'];
             try {
                 $call = $this->findOrCreateCallByData($callData);
@@ -920,7 +930,6 @@ class CommunicationController extends ApiBaseController
             }
 
             if (!$call->isJoin()) {
-
                 if ($call->isStatusNoAnswer() || $call->isStatusBusy() || $call->isStatusCanceled() || $call->isStatusFailed()) {
                     if ($call->c_lead_id) {
                         if (($lead = $call->cLead) && !$lead->isCallCancel()) {
@@ -934,9 +943,7 @@ class CommunicationController extends ApiBaseController
                             }
                         }
                     }
-
                 }
-
             }
             /*if ($call->c_source_type_id === Call::SOURCE_CONFERENCE_CALL && isset($callData['CallStatus'])) {
                 $call->c_call_status = $callData['CallStatus'];
@@ -962,7 +969,6 @@ class CommunicationController extends ApiBaseController
             if (!empty($callData['accepted_call_sid']) && $call->c_created_user_id && $call->isStatusInProgress()) {
                 Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $call->c_created_user_id], RemoveIncomingRequestMessage::create($callData['accepted_call_sid']));
             }
-
         } else {
             Yii::error('Not found POST[callData][CallSid] ' . VarDumper::dumpAsString($post), 'API:Communication:voiceDefault:callData:notFound');
             $response['error'] = 'Error in method voiceDefault. Not found POST[callData][CallSid]';
@@ -1011,14 +1017,13 @@ class CommunicationController extends ApiBaseController
 
 
         if (!$call) {
-
             $call = new Call();
             $call->c_call_sid = $calData['CallSid'] ?? null;
             $call->setTypeIn();
             // $call->c_call_status = Call::TW_STATUS_IVR; //$calData['CallStatus'] ?? Call::CALL_STATUS_QUEUE;
-			if (!$callFromInternalPhone) {
-            	$call->setStatusIvr();
-			}
+            if (!$callFromInternalPhone) {
+                $call->setStatusIvr();
+            }
 
             $call->c_com_call_id = $calData['c_com_call_id'] ?? null;
             $call->c_parent_call_sid = $calData['ParentCallSid'] ?? null;
@@ -1174,7 +1179,6 @@ class CommunicationController extends ApiBaseController
         }
 
         if (!$call) {
-
             $call = new Call();
             $call->c_call_sid = $callData['CallSid'] ?? null;
             $call->c_parent_call_sid = $parentCallSid;
@@ -1324,7 +1328,6 @@ class CommunicationController extends ApiBaseController
                     ], 'API:CommunicationController:findOrCreateCallByData:Call:save');
                 }
             } else {
-
                 try {
                     $call->save(false);
                     $callSaved = true;
@@ -1346,7 +1349,6 @@ class CommunicationController extends ApiBaseController
                         throw $e;
                     }
                 }
-
             }
 
             if ($callSaved) {
@@ -1356,8 +1358,10 @@ class CommunicationController extends ApiBaseController
                         $cug->cug_ug_id = $cugItem->cug_ug_id;
                         $cug->cug_c_id = $call->c_id;
                         if (!$cug->save()) {
-                            \Yii::error(VarDumper::dumpAsString($cug->errors),
-                                'API:CommunicationController:findOrCreateCallByData:CallUserGroup:save');
+                            \Yii::error(
+                                VarDumper::dumpAsString($cug->errors),
+                                'API:CommunicationController:findOrCreateCallByData:CallUserGroup:save'
+                            );
                         }
                     }
                 }
@@ -1382,7 +1386,7 @@ class CommunicationController extends ApiBaseController
         }
 
         if ($preCallStatus === Call::TW_STATUS_IN_PROGRESS && $call->c_call_status === Call::TW_STATUS_RINGING) {
-           $call->c_call_status = Call::TW_STATUS_IN_PROGRESS;
+            $call->c_call_status = Call::TW_STATUS_IN_PROGRESS;
         }
 
         $call->setStatusByTwilioStatus($call->c_call_status);
@@ -1442,14 +1446,14 @@ class CommunicationController extends ApiBaseController
     }
 
 
-	/**
-	 * @param Call $callModel
-	 * @param Employee $user
-	 * @param bool $callFromInternalPhone
-	 * @return array
-	 * @throws \Throwable
-	 * @throws \yii\db\StaleObjectException
-	 */
+    /**
+     * @param Call $callModel
+     * @param Employee $user
+     * @param bool $callFromInternalPhone
+     * @return array
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
     protected function createDirectCall(Call $callModel, Employee $user, bool $callFromInternalPhone = false): array
     {
         $jobId = null;
@@ -1471,10 +1475,10 @@ class CommunicationController extends ApiBaseController
 //        $url_music_play_hold = 'https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3';
 
         $responseTwml = new VoiceResponse();
-		$callInfo = [];
-		$response = [];
+        $callInfo = [];
+        $response = [];
 
-		if ($project && $project->custom_data && !$callFromInternalPhone) {
+        if ($project && $project->custom_data && !$callFromInternalPhone) {
             $customData = @json_decode($project->custom_data, true);
             if ($customData) {
 //                if(isset($customData['url_say_play_hold']) && $customData['url_say_play_hold']) {
@@ -1482,9 +1486,9 @@ class CommunicationController extends ApiBaseController
 //                }
 
                 if (isset($customData['play_direct_message'])) {
-                    if($customData['play_direct_message']) {
+                    if ($customData['play_direct_message']) {
                         $responseTwml->play($customData['play_direct_message']);
-                    } else  {
+                    } else {
                         if (isset($customData['say_direct_message']) && $customData['say_direct_message']) {
                             $responseTwml->say($customData['say_direct_message'], [
                                 'language' => 'en-US',
@@ -1494,22 +1498,21 @@ class CommunicationController extends ApiBaseController
                     }
                 }
 
-                if(isset($customData['url_music_play_hold']) && $customData['url_music_play_hold']) {
+                if (isset($customData['url_music_play_hold']) && $customData['url_music_play_hold']) {
                     $responseTwml->play($customData['url_music_play_hold'], ['loop' => 0]);
                 }
-
             }
         } else if ($callFromInternalPhone) {
-//			$dial = $responseTwml->dial('', [
-//				'answerOnBridge' => true,
-//				'recordingStatusCallbackMethod' => 'POST',
-//				'record' => 'record-from-answer-dual',
-//				'recordingStatusCallback' =>  Yii::$app->params['host'] . '/v1/twilio-jwt/recording-callback',
-//			]);
-//			$dial->client(UserCallIdentity::getId($user->id));
-			$response['agent_username'][] = UserCallIdentity::getId($user->id);
-			$responseTwml = null;
-		}
+//          $dial = $responseTwml->dial('', [
+//              'answerOnBridge' => true,
+//              'recordingStatusCallbackMethod' => 'POST',
+//              'record' => 'record-from-answer-dual',
+//              'recordingStatusCallback' =>  Yii::$app->params['host'] . '/v1/twilio-jwt/recording-callback',
+//          ]);
+//          $dial->client(UserCallIdentity::getId($user->id));
+            $response['agent_username'][] = UserCallIdentity::getId($user->id);
+            $responseTwml = null;
+        }
 
         $callInfo['id'] = $callModel->c_id;
         $callInfo['project_id'] = $callModel->c_project_id;
@@ -1533,20 +1536,20 @@ class CommunicationController extends ApiBaseController
         return $responseData;
     }
 
-	/**
-	 * @param Call $callModel
-	 * @param Employee $user
-	 * @param bool $callFromInternalPhone
-	 * @return array
-	 * @throws \Throwable
-	 * @throws \yii\db\StaleObjectException
-	 */
+    /**
+     * @param Call $callModel
+     * @param Employee $user
+     * @param bool $callFromInternalPhone
+     * @return array
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
     protected function createHoldCall(Call $callModel, Employee $user, bool $callFromInternalPhone = false): array
     {
         $callModel->c_created_user_id = null;
         $callModel->c_source_type_id = Call::SOURCE_REDIRECT_CALL;
 
-        if(!$callModel->update()) {
+        if (!$callModel->update()) {
             Yii::error(VarDumper::dumpAsString($callModel->errors), 'API:Communication:createDirectCall:Call:update');
         } else {
             $job = new CallQueueJob();
@@ -1564,19 +1567,18 @@ class CommunicationController extends ApiBaseController
 
         $responseTwml = new VoiceResponse();
 
-        if($project && $project->custom_data) {
+        if ($project && $project->custom_data) {
             $customData = @json_decode($project->custom_data, true);
-            if($customData) {
-
+            if ($customData) {
 //                if(isset($customData['url_say_play_hold']) && $customData['url_say_play_hold']) {
 //                    $url_say_play_hold = $customData['url_say_play_hold'];
 //                }
 
-                if(isset($customData['play_redirect_message'])) {
-                    if($customData['play_redirect_message']) {
+                if (isset($customData['play_redirect_message'])) {
+                    if ($customData['play_redirect_message']) {
                         $responseTwml->play($customData['play_redirect_message']);
-                    } else  {
-                        if(isset($customData['say_redirect_message']) && $customData['say_redirect_message']) {
+                    } else {
+                        if (isset($customData['say_redirect_message']) && $customData['say_redirect_message']) {
                             $responseTwml->say($customData['say_redirect_message'], [
                                 'language' => 'en-US',
                                 'voice' => 'alice'
@@ -1585,10 +1587,9 @@ class CommunicationController extends ApiBaseController
                     }
                 }
 
-                if(isset($customData['url_music_play_hold']) && $customData['url_music_play_hold']) {
+                if (isset($customData['url_music_play_hold']) && $customData['url_music_play_hold']) {
                     $responseTwml->play($customData['url_music_play_hold'], ['loop' => 0]);
                 }
-
             }
         }
 
@@ -1605,11 +1606,11 @@ class CommunicationController extends ApiBaseController
         return $responseData;
     }
 
-	/**
-	 * @param string $phoneNumber
-	 * @param string $message
-	 * @return array
-	 */
+    /**
+     * @param string $phoneNumber
+     * @param string $message
+     * @return array
+     */
     protected function createExceptionCall(string $phoneNumber, string $message = 'Sorry, this number is temporarily not working.'): array
     {
 //        Yii::error('Number is temporarily not working ('.$phoneNumber.')', 'API:Communication:createExceptionCall');
@@ -1659,9 +1660,9 @@ class CommunicationController extends ApiBaseController
         QueueLongTimeNotificationParams $queueLongTimeParams
     ): array {
 
-        if(isset(Department::DEPARTMENT_LIST[$ivrSelectedDigit])) {
+        if (isset(Department::DEPARTMENT_LIST[$ivrSelectedDigit])) {
             $callModel->c_dep_id = $ivrSelectedDigit;
-            if(!$callModel->save()) {
+            if (!$callModel->save()) {
                 Yii::error(VarDumper::dumpAsString($callModel->errors), 'API:Communication:startCallService:Call:update');
             }
 
@@ -1689,25 +1690,24 @@ class CommunicationController extends ApiBaseController
                     'call' => $callModel->getAttributes(),
                 ], 'CallQueueStartCallService::JobsCreate');
             }
-
         }
 
         $choice = $stepParams['digits'][$ivrSelectedDigit] ?? null;
         $responseTwml = new VoiceResponse();
 
-        if(isset($stepParams['before_say']) && $stepParams['before_say']) {
+        if (isset($stepParams['before_say']) && $stepParams['before_say']) {
             $responseTwml->say($stepParams['before_say'], ['language' => $stepParams['language'], 'voice' => $stepParams['voice']]);
         }
 
-        if($choice) {
-            if(isset($choice['pause']) && $choice['pause']) {
+        if ($choice) {
+            if (isset($choice['pause']) && $choice['pause']) {
                 $responseTwml->pause(['length' => $choice['pause']]);
             }
-            if(isset($choice['say'])) {
+            if (isset($choice['say'])) {
                 $responseTwml->say($choice['say'], ['language' => $choice['language'], 'voice' => $choice['voice']]);
             }
 
-            if(isset($stepParams['after_say']) && $stepParams['after_say']) {
+            if (isset($stepParams['after_say']) && $stepParams['after_say']) {
                 $responseTwml->say($stepParams['after_say'], ['language' => $stepParams['language'], 'voice' => $stepParams['voice']]);
             }
 
@@ -1762,7 +1762,7 @@ class CommunicationController extends ApiBaseController
 
             $stepParams = [];
 
-            if(isset($ivrParams['steps'][$ivrStep])) {
+            if (isset($ivrParams['steps'][$ivrStep])) {
                 $stepParams = $ivrParams['steps'][$ivrStep];
             }
 
@@ -1773,8 +1773,7 @@ class CommunicationController extends ApiBaseController
             }
 
 
-            if($ivrStep === 2) {
-
+            if ($ivrStep === 2) {
                 $ivrSelectedDigit = (int) $ivrSelectedDigit;
 
                 if ($ivrSelectedDigit) {
@@ -1810,19 +1809,18 @@ class CommunicationController extends ApiBaseController
 
             $responseTwml = new VoiceResponse();
 
-            if(isset($ivrParams['entry_pause']) && $ivrParams['entry_pause']) {
+            if (isset($ivrParams['entry_pause']) && $ivrParams['entry_pause']) {
                 $responseTwml->pause(['length' => $ivrParams['entry_pause']]);
             }
 
             $entry_phrase = isset($ivrParams['entry_phrase']) ? str_replace('{{project}}', $company, $ivrParams['entry_phrase']) : null;
 
-            if($entry_phrase) {
+            if ($entry_phrase) {
                 $responseTwml->say($entry_phrase, ['language' => $ivrParams['entry_language'], 'voice' => $ivrParams['entry_voice']]);
             }
 
 
-            if(isset($ivrParams['steps'])) {
-
+            if (isset($ivrParams['steps'])) {
                 $gather = $responseTwml->gather([
                     'action' => '/v1/twilio/voice-gather/?step=2',
                     'method' => 'POST',
@@ -1860,11 +1858,9 @@ class CommunicationController extends ApiBaseController
                 $responseTwml->say($ivrParams['error_phrase']);
                 $responseTwml->redirect('/v1/twilio/voice-gather/?step=1', ['method' => 'POST']);
             } else {
-
-
-                if(isset(Department::DEPARTMENT_LIST[$department->dpp_dep_id])) {
+                if (isset(Department::DEPARTMENT_LIST[$department->dpp_dep_id])) {
                     $callModel->c_dep_id = $department->dpp_dep_id;
-                    if(!$callModel->save()) {
+                    if (!$callModel->save()) {
                         Yii::error(VarDumper::dumpAsString($callModel->errors), 'API:Communication:startCallService:Call:update2');
                     }
 
@@ -1894,10 +1890,9 @@ class CommunicationController extends ApiBaseController
                     }
                 }
 
-                if(isset($ivrParams['hold_play']) && $ivrParams['hold_play']) {
+                if (isset($ivrParams['hold_play']) && $ivrParams['hold_play']) {
                     $responseTwml->play($ivrParams['hold_play'], ['loop' => 0]);
                 }
-
             }
 
             $response['twml'] = (string) $responseTwml;
@@ -1908,7 +1903,6 @@ class CommunicationController extends ApiBaseController
                 'message' => ''
             ];
             $responseData['data']['response'] = $response;
-
         } catch (\Throwable $e) {
             $responseTwml = new VoiceResponse();
             $responseTwml->reject(['reason' => 'busy']);
@@ -1917,7 +1911,7 @@ class CommunicationController extends ApiBaseController
                 'status' => 404,
                 'name' => 'Error',
                 'code' => 404,
-                'message' => 'Sales Communication error: '. $e->getMessage(). "\n" . $e->getFile() . ':' . $e->getLine(),
+                'message' => 'Sales Communication error: ' . $e->getMessage() . "\n" . $e->getFile() . ':' . $e->getLine(),
             ];
             $responseData['data']['response'] = $response;
         }
@@ -1935,36 +1929,32 @@ class CommunicationController extends ApiBaseController
         // $eq_project_id = Yii::$app->request->post('eq_project_id');
 
         try {
-
-            if(!$eq_id) {
+            if (!$eq_id) {
                 throw new NotFoundHttpException('Not found eq_id', 11);
             }
 
-            if(!$eq_status_id) {
+            if (!$eq_status_id) {
                 throw new NotFoundHttpException('Not found eq_status_id', 12);
             }
 
             $email = Email::findOne(['e_communication_id' => $eq_id]);
-            if($email) {
-
-                if($eq_status_id > 0) {
+            if ($email) {
+                if ($eq_status_id > 0) {
                     $email->e_status_id = $eq_status_id;
-                    if($eq_status_id === Email::STATUS_DONE) {
+                    if ($eq_status_id === Email::STATUS_DONE) {
                         $email->e_status_done_dt = date('Y-m-d H:i:s');
                     }
 
-                    if(!$email->save()) {
+                    if (!$email->save()) {
                         Yii::error(VarDumper::dumpAsString($email->errors), 'API:Communication:updateEmailStatus:Email:save');
                     }
                 }
 
                 $response['email'] = $email->e_id;
             } else {
-                $response['error'] = 'Not found Communication ID ('.$eq_id.')';
+                $response['error'] = 'Not found Communication ID (' . $eq_id . ')';
                 $response['error_code'] = 13;
             }
-
-
         } catch (\Throwable $e) {
             Yii::error($e->getTraceAsString(), 'API:Communication:updateEmailStatus:Email:try');
             $message = $this->debug ? $e->getTraceAsString() : $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
@@ -2027,14 +2017,13 @@ class CommunicationController extends ApiBaseController
         // $sq_project_id = Yii::$app->request->post('sq_project_id');
 
         try {
-
             // Yii::info(VarDumper::dumpAsString(Yii::$app->request->post()), 'info\updateSmsStatus');
 
-            if(!$sq_id) {
+            if (!$sq_id) {
                 throw new NotFoundHttpException('Not found sq_id', 11);
             }
 
-            if(!$sq_status_id) {
+            if (!$sq_status_id) {
                 throw new NotFoundHttpException('Not found sq_status_id', 12);
             }
 
@@ -2046,36 +2035,34 @@ class CommunicationController extends ApiBaseController
 //                $sms = Sms::findOne(['s_tw_message_sid' => $sid]);
 //            }
 
-            if(!$sms) {
+            if (!$sms) {
                 $sms = Sms::findOne(['s_communication_id' => $sq_id]);
             }
 
 
-            if($sms) {
-
-                if($sq_status_id > 0) {
+            if ($sms) {
+                if ($sq_status_id > 0) {
                     $sms->s_status_id = $sq_status_id;
-                    if($sq_status_id === Sms::STATUS_DONE) {
+                    if ($sq_status_id === Sms::STATUS_DONE) {
                         $sms->s_status_done_dt = date('Y-m-d H:i:s');
                     }
 
-                    if($smsParams) {
-                        if(isset($smsParams['sq_tw_price']) && $smsParams['sq_tw_price']) {
+                    if ($smsParams) {
+                        if (isset($smsParams['sq_tw_price']) && $smsParams['sq_tw_price']) {
                             $sms->s_tw_price = abs((float) $smsParams['sq_tw_price']);
                         }
 
-                        if(isset($smsParams['sq_tw_num_segments']) && $smsParams['sq_tw_num_segments']) {
+                        if (isset($smsParams['sq_tw_num_segments']) && $smsParams['sq_tw_num_segments']) {
                             $sms->s_tw_num_segments = (int) $smsParams['sq_tw_num_segments'];
                         }
 
-                        if(isset($smsParams['sq_tw_status']) && $smsParams['sq_tw_status']) {
+                        if (isset($smsParams['sq_tw_status']) && $smsParams['sq_tw_status']) {
                             $sms->s_error_message = 'status: ' .  $smsParams['sq_tw_status'];
                         }
 
-                        if(!$sms->s_tw_message_sid && isset($smsParams['sq_tw_message_id']) && $smsParams['sq_tw_message_id']) {
+                        if (!$sms->s_tw_message_sid && isset($smsParams['sq_tw_message_id']) && $smsParams['sq_tw_message_id']) {
                             $sms->s_tw_message_sid = $smsParams['sq_tw_message_id'];
                         }
-
                     }
 
                     if (!$sms->save()) {
@@ -2086,11 +2073,9 @@ class CommunicationController extends ApiBaseController
                 }
                 $response['SmsId'] = $sms->s_id;
             } else {
-
                 $smsModel = SmsDistributionList::find()->where(['sdl_com_id' => $sq_id])->one();
 
                 if ($smsModel) {
-
                     if ($sq_status_id > 0) {
                         $smsModel->sdl_status_id = $sq_status_id;
 //                        if($sq_status_id === SmsDistributionList::STATUS_DONE) {
@@ -2113,24 +2098,22 @@ class CommunicationController extends ApiBaseController
                             if (!$smsModel->sdl_message_sid && !empty($smsParams['sq_tw_message_id'])) {
                                 $smsModel->sdl_message_sid = $smsParams['sq_tw_message_id'];
                             }
-
                         }
 
                         if (!$smsModel->save()) {
-                            Yii::error(VarDumper::dumpAsString($sms->errors),
-                                'API:Communication:updateSmsStatus:SmsDistributionList:save');
+                            Yii::error(
+                                VarDumper::dumpAsString($sms->errors),
+                                'API:Communication:updateSmsStatus:SmsDistributionList:save'
+                            );
                         }
                     }
 
                     $response['SmsDistributionId'] = $smsModel->sdl_id;
-
                 } else {
                     $response['error'] = 'Not found SMS or SmsDistributionList ID (' . $sq_id . ')';
                     $response['error_code'] = 13;
                 }
             }
-
-
         } catch (\Throwable $throwable) {
             Yii::error($throwable->getTraceAsString(), 'API:Communication:updateSmsStatus:try');
             $message = $this->debug ? $throwable->getTraceAsString() : AppHelper::throwableFormatter($throwable);
@@ -2175,15 +2158,14 @@ class CommunicationController extends ApiBaseController
         $response = [];
 
         try {
-
             $smsData = Yii::$app->request->post('smsData');
             $comId = Yii::$app->request->post('sq_id');
 
-            if(!$smsData) {
+            if (!$smsData) {
                 throw new NotFoundHttpException('Not found smsData', 11);
             }
 
-            if(!$smsData['sid']) {
+            if (!$smsData['sid']) {
                 throw new NotFoundHttpException('Not found smsData[sid]', 12);
             }
 
@@ -2191,46 +2173,44 @@ class CommunicationController extends ApiBaseController
 
             $sms = Sms::findOne(['s_tw_message_sid' => $smsData['sid']]);
 
-            if(!$sms) {
+            if (!$sms) {
                 $sms = Sms::findOne(['s_communication_id' => $comId]);
             }
 
 
-            if($sms) {
-
-                if(isset($smsData['price'])) {
+            if ($sms) {
+                if (isset($smsData['price'])) {
                     $sms->s_tw_price = abs((float) $smsData['price']);
                 }
 
-                if(isset($smsData['num_segments']) && $smsData['num_segments']) {
+                if (isset($smsData['num_segments']) && $smsData['num_segments']) {
                     $sms->s_tw_num_segments = (int) $smsData['num_segments'];
                 }
 
-                if(isset($smsData['sid']) && $smsData['sid']) {
-                    if(!$sms->s_tw_message_sid) {
+                if (isset($smsData['sid']) && $smsData['sid']) {
+                    if (!$sms->s_tw_message_sid) {
                         $sms->s_tw_message_sid = $smsData['sid'];
                     }
                 }
 
-                if(isset($smsData['account_sid']) && $smsData['account_sid']) {
-                    if(!$sms->s_tw_account_sid) {
+                if (isset($smsData['account_sid']) && $smsData['account_sid']) {
+                    if (!$sms->s_tw_account_sid) {
                         $sms->s_tw_account_sid = $smsData['account_sid'];
                     }
                 }
 
 
                 $smsStatusChanged = false;
-                if(isset($smsData['status'])) {
-
+                if (isset($smsData['status'])) {
                     $sms->s_error_message = 'status: ' . $smsData['status'];
 
-                    if($smsData['status'] === 'delivered') {
+                    if ($smsData['status'] === 'delivered') {
                         $sms->s_status_id = SMS::STATUS_DONE;
                         $smsStatusChanged = true;
                     }
                 }
 
-                if(!$sms->save()) {
+                if (!$sms->save()) {
                     Yii::error(VarDumper::dumpAsString($sms->errors), 'API:Communication:smsFinish:Sms:save');
                 } else {
                     if ($smsStatusChanged) {
@@ -2238,46 +2218,40 @@ class CommunicationController extends ApiBaseController
                     }
                 }
                 $response['sms'] = $sms->attributes;
-
             } else {
-
                 $smsModel = SmsDistributionList::find()->where(['sdl_com_id' => $comId])->one();
 
                 if ($smsModel) {
-                    if(isset($smsData['price'])) {
+                    if (isset($smsData['price'])) {
                         $smsModel->sdl_price = abs((float) $smsData['price']);
                     }
 
-                    if(!empty($smsData['num_segments'])) {
+                    if (!empty($smsData['num_segments'])) {
                         $smsModel->sdl_num_segments = (int) $smsData['num_segments'];
                     }
 
-                    if(!empty($smsData['sid']) && !$smsModel->sdl_message_sid) {
+                    if (!empty($smsData['sid']) && !$smsModel->sdl_message_sid) {
                         $smsModel->sdl_message_sid = $smsData['sid'];
                     }
 
-                    if(isset($smsData['status'])) {
-
+                    if (isset($smsData['status'])) {
                         $smsModel->sdl_error_message = 'status: ' . $smsData['status'];
 
-                        if($smsData['status'] === 'delivered') {
+                        if ($smsData['status'] === 'delivered') {
                             $smsModel->sdl_status_id = SmsDistributionList::STATUS_DONE;
                         }
                     }
 
-                    if(!$smsModel->save()) {
+                    if (!$smsModel->save()) {
                         Yii::error(VarDumper::dumpAsString($smsModel->errors), 'API:Communication:smsFinish:SmsDistributionList:save');
                     }
 
                     $response['smsDistribution'] = $smsModel->attributes;
-
                 } else {
                     $response['error'] = 'Not found SMS or Sms Distribution message_sid (' . $smsData['sid'] . ') and not found CommId (' . $comId . ')';
                     $response['error_code'] = 13;
                 }
             }
-
-
         } catch (\Throwable $throwable) {
             Yii::error($throwable->getTraceAsString(), 'API:Communication:smsFinish:Throwable');
             $message = $this->debug ? $throwable->getTraceAsString() : AppHelper::throwableFormatter($throwable);
@@ -2305,15 +2279,13 @@ class CommunicationController extends ApiBaseController
      * @param null $last_id
      * @return array
      */
-    private function newEmailMessagesReceived($last_id = NULl): array
+    private function newEmailMessagesReceived($last_id = null): array
     {
         $response = [];
         try {
-
             $filter = [];
             $dateTime = null;
-            if(NULL === $last_id) {
-
+            if (null === $last_id) {
                 $lastEmail = Email::find()->where(['>', 'e_inbox_email_id', 0])->orderBy(['e_inbox_email_id' => SORT_DESC])->limit(1)->one();
 
                 if ($lastEmail) {
@@ -2326,7 +2298,7 @@ class CommunicationController extends ApiBaseController
                 $filter['last_id'] = (int)$last_id;
 
                 $checkLastEmail = Email::find()->where(['e_inbox_email_id' => $filter['last_id']])->limit(1)->one();
-                if($checkLastEmail) {
+                if ($checkLastEmail) {
                     $response[] = 'Last ID ' . $filter['last_id'] . ' Exists';
                     return $response;
                 }
@@ -2364,7 +2336,6 @@ class CommunicationController extends ApiBaseController
             ];
 
             //Yii::info('JOB (' .VarDumper::dumpAsString($response).') Push ' . VarDumper::dumpAsString($data) . ' last_id: ' . $last_id, 'info\API:newEmailMessagesReceived');
-
         } catch (\Throwable $e) {
             $message = AppHelper::throwableFormatter($e);
             Yii::error($message, 'API:Communication:newEmailMessagesReceived:Email:try');
@@ -2385,17 +2356,17 @@ class CommunicationController extends ApiBaseController
 
         $smsItem = Yii::$app->request->post();
 
-        if(!\is_array($smsItem)) {
+        if (!\is_array($smsItem)) {
             $response['error'] = 'Sales: Invalid POST request (array)';
             $response['error_code'] = 16;
         }
 
-        if(!isset($smsItem['si_id'])) {
+        if (!isset($smsItem['si_id'])) {
             $response['error'] = 'Sales: Invalid POST request - not found (si_id)';
             $response['error_code'] = 17;
         }
 
-        if(isset($response['error']) && $response['error']) {
+        if (isset($response['error']) && $response['error']) {
             return $response;
         }
 
@@ -2403,13 +2374,13 @@ class CommunicationController extends ApiBaseController
                     $form = new SmsIncomingForm();
                     $data['SmsIncomingForm'] = $smsItem;
                     $form->load($data);
-                    if ($form->validate()) {
-                        $response = (Yii::createObject(SmsIncomingService::class))->create($form)->attributes;
-                    } else {
-                        Yii::error(VarDumper::dumpAsString($form->errors), 'API:Communication:newSmsMessagesReceived:Sms:validate');
-                        $response['error_code'] = 12;
-                        throw new \Exception('Error save SMS data ' . VarDumper::dumpAsString($form->errors));
-                    }
+            if ($form->validate()) {
+                $response = (Yii::createObject(SmsIncomingService::class))->create($form)->attributes;
+            } else {
+                Yii::error(VarDumper::dumpAsString($form->errors), 'API:Communication:newSmsMessagesReceived:Sms:validate');
+                $response['error_code'] = 12;
+                throw new \Exception('Error save SMS data ' . VarDumper::dumpAsString($form->errors));
+            }
 
 //                    $sms = new Sms();
 //                    $sms->s_type_id = Sms::TYPE_INBOX;
@@ -2495,12 +2466,11 @@ class CommunicationController extends ApiBaseController
 //                    }
 //
 //                    $response = $sms->attributes;
-
         } catch (\Throwable $e) {
             Yii::error($e->getTraceAsString(), 'API:Communication:newSmsMessagesReceived:Sms:try');
             $message = $this->debug ? $e->getTraceAsString() : $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
             $response['error'] = $message;
-            if(!isset($response['error_code']) || !$response['error_code']) {
+            if (!isset($response['error_code']) || !$response['error_code']) {
                 $response['error_code'] = 15;
             }
         }
@@ -2551,7 +2521,6 @@ class CommunicationController extends ApiBaseController
         $vr = new VoiceResponse();
 
         try {
-
             $call = $this->findOrCreateCallByData($postCall);
             $call->c_source_type_id = Call::SOURCE_CONFERENCE_CALL;
             if (!$call->save()) {
@@ -2560,14 +2529,14 @@ class CommunicationController extends ApiBaseController
 
             $sayParam = ['language' => 'en-US'];   // ['language' => 'en-US', 'voice' => 'alice']
 
-            if ($conferenceRoom->cr_start_dt && strtotime($conferenceRoom->cr_start_dt) > time() ) {
+            if ($conferenceRoom->cr_start_dt && strtotime($conferenceRoom->cr_start_dt) > time()) {
                 $vr->say('This conference room has not started yet', $sayParam);
                 $vr->reject(['reason' => 'busy']);
                 Yii::warning('Conference (id: ' . $conferenceRoom->cr_id . ') has not started yet', 'API:CommunicationController:startConference:start');
                 return $this->getResponseChownData($vr);
             }
 
-            if ($conferenceRoom->cr_end_dt && strtotime($conferenceRoom->cr_end_dt) < time() ) {
+            if ($conferenceRoom->cr_end_dt && strtotime($conferenceRoom->cr_end_dt) < time()) {
                 $vr->say('This conference room has already ended', $sayParam);
                 $vr->reject(['reason' => 'busy']);
                 Yii::warning('Conference (id: ' . $conferenceRoom->cr_id . ') has already ended', 'API:CommunicationController:startConference:end');
@@ -2605,13 +2574,10 @@ class CommunicationController extends ApiBaseController
             if (!$conference->save()) {
                 Yii::error(VarDumper::dumpAsString($conference->errors), 'API:CommunicationController:startConference:Conference:save');
             }*/
-
-
         } catch (\Throwable $e) {
-
             $vr->say('Conference Error!');
             $vr->reject(['reason' => 'busy']);
-            return $this->getResponseChownData($vr, 404, 404, 'Sales Communication error: '. $e->getMessage(). "\n" . $e->getFile() . ':' . $e->getLine());
+            return $this->getResponseChownData($vr, 404, 404, 'Sales Communication error: ' . $e->getMessage() . "\n" . $e->getFile() . ':' . $e->getLine());
         }
 
         return $this->getResponseChownData($vr);
@@ -2652,7 +2618,6 @@ class CommunicationController extends ApiBaseController
         $conference = Conference::findOne(['cf_sid' => $form->ConferenceSid]);
 
         if (!$conference) {
-
             $conference = new Conference();
             $conference->start();
             $conference->cf_sid = $form->ConferenceSid;
@@ -2674,7 +2639,6 @@ class CommunicationController extends ApiBaseController
                 $conference = Conference::findOne(['cf_sid' => $form->ConferenceSid]);
                 Yii::error($e->getMessage(), 'API:CommunicationController:voiceConferenceCallCallback');
             }
-
         }
 
         if (
@@ -2706,37 +2670,21 @@ class CommunicationController extends ApiBaseController
         $form->conferenceId = $conference->cf_id;
 
         if ($form->StatusCallbackEvent === Conference::EVENT_CONFERENCE_START) {
-
             $this->conferenceStatusCallbackHandler->start($conference, $form);
-
         } elseif ($form->StatusCallbackEvent === Conference::EVENT_CONFERENCE_END) {
-
             $this->conferenceStatusCallbackHandler->end($conference, $form);
-
         } elseif ($form->StatusCallbackEvent === Conference::EVENT_PARTICIPANT_JOIN) {
-
             $this->conferenceStatusCallbackHandler->join($conference, $form);
-
         } elseif ($form->StatusCallbackEvent === Conference::EVENT_PARTICIPANT_HOLD) {
-
             $this->conferenceStatusCallbackHandler->hold($conference, $form);
-
         } elseif ($form->StatusCallbackEvent === Conference::EVENT_PARTICIPANT_UNHOLD) {
-
             $this->conferenceStatusCallbackHandler->unHold($conference, $form);
-
         } elseif ($form->StatusCallbackEvent === Conference::EVENT_PARTICIPANT_LEAVE) {
-
             $this->conferenceStatusCallbackHandler->leave($conference, $form);
-
         } elseif ($form->StatusCallbackEvent === Conference::EVENT_PARTICIPANT_MUTE) {
-
             $this->conferenceStatusCallbackHandler->mute($conference, $form);
-
         } elseif ($form->StatusCallbackEvent === Conference::EVENT_PARTICIPANT_UNMUTE) {
-
             $this->conferenceStatusCallbackHandler->unMute($conference, $form);
-
         }
 
         return $response;
@@ -2821,14 +2769,12 @@ class CommunicationController extends ApiBaseController
         //$agentId = null;
 
         if (isset($post['conferenceData']['ConferenceSid']) && $post['conferenceData']['ConferenceSid']) {
-
             $conferenceData = $post['conferenceData'];
             $conferenceSid = mb_substr($conferenceData['ConferenceSid'], 0, 34);
 
             $conference = Conference::findOne(['cf_sid' => $conferenceSid]);
 
             if (!$conference) {
-
                 $without_room_id = $conferenceData['without_room_id'] ?? false;
 
                 if ($without_room_id) {
@@ -2840,14 +2786,15 @@ class CommunicationController extends ApiBaseController
 
                     try {
                         if (!$conference->save()) {
-                            Yii::error(VarDumper::dumpAsString($conference->errors),
-                                'API:CommunicationController:startConference:Conference:without_room_id:save');
+                            Yii::error(
+                                VarDumper::dumpAsString($conference->errors),
+                                'API:CommunicationController:startConference:Conference:without_room_id:save'
+                            );
                         }
                     } catch (\Throwable $e) {
                         $conference = Conference::findOne(['cf_sid' => $conferenceSid]);
                         Yii::error($e->getMessage(), 'API:CommunicationController:startConference:Conference:without_room_id:throwable:save');
                     }
-
                 } else {
                     $conferenceRoom = ConferenceRoom::find()->where(['cr_key' => $conferenceData['FriendlyName'], 'cr_enabled' => true])->limit(1)->one();
 
@@ -2859,23 +2806,25 @@ class CommunicationController extends ApiBaseController
                         $conference->cf_sid = $conferenceSid;
                         try {
                             if (!$conference->save()) {
-                                Yii::error(VarDumper::dumpAsString($conference->errors),
-                                    'API:CommunicationController:startConference:Conference:save');
+                                Yii::error(
+                                    VarDumper::dumpAsString($conference->errors),
+                                    'API:CommunicationController:startConference:Conference:save'
+                                );
                             }
                         } catch (\Throwable $e) {
                             $conference = Conference::findOne(['cf_sid' => $conferenceSid]);
                             Yii::error($e->getMessage(), 'API:CommunicationController:startConference:Conference:with_room_id:throwable:save');
                         }
                     } else {
-                        Yii::warning('Not found ConferenceRoom by key: conferenceData - ' . VarDumper::dumpAsString($conferenceData),
-                            'API:CommunicationController:startConference:conferenceData:notfound');
+                        Yii::warning(
+                            'Not found ConferenceRoom by key: conferenceData - ' . VarDumper::dumpAsString($conferenceData),
+                            'API:CommunicationController:startConference:conferenceData:notfound'
+                        );
                     }
                 }
-
             }
 
             if ($conference) {
-
                 /*
                  *  conference-end
                     conference-start
@@ -2894,17 +2843,20 @@ class CommunicationController extends ApiBaseController
                 if ($conferenceData['StatusCallbackEvent'] === 'conference-end') {
                     $conference->cf_status_id = Conference::STATUS_END;
                     if (!$conference->save()) {
-                        Yii::error(VarDumper::dumpAsString($conference->errors),
-                            'API:CommunicationController:startConference:Conference:save-end');
+                        Yii::error(
+                            VarDumper::dumpAsString($conference->errors),
+                            'API:CommunicationController:startConference:Conference:save-end'
+                        );
                     }
                 } elseif ($conferenceData['StatusCallbackEvent'] === 'participant-join') {
-
                     $call = Call::find()->where(['c_call_sid' => $conferenceData['CallSid']])->one();
                     if ($call && $call->c_conference_sid !== $conference->cf_sid) {
                         $call->c_conference_sid = $conference->cf_sid;
                         if (!$call->save()) {
-                            Yii::error(VarDumper::dumpAsString($call->errors),
-                                'API:CommunicationController:voiceConferenceCallback:participant-join:call:save');
+                            Yii::error(
+                                VarDumper::dumpAsString($call->errors),
+                                'API:CommunicationController:voiceConferenceCallback:participant-join:call:save'
+                            );
                         }
                     }
 
@@ -2916,7 +2868,7 @@ class CommunicationController extends ApiBaseController
                     }
                     $cPart->join();
                     $cPart->cp_join_dt = date('Y-m-d H:i:s');
-                    if(!$cPart->save()) {
+                    if (!$cPart->save()) {
                         Yii::error(VarDumper::dumpAsString($cPart->errors), 'API:Communication:voiceConferenceCallback:ConferenceParticipant:save-join');
                     }
 
@@ -2931,15 +2883,17 @@ class CommunicationController extends ApiBaseController
                     if ($cPart) {
                         $cPart->hold(date('Y-m-d H:i:s'));
                         if (!$cPart->save()) {
-                            Yii::error(VarDumper::dumpAsString($cPart->errors),'API:Communication:voiceConferenceCallback:ConferenceParticipant:save-hold');
+                            Yii::error(VarDumper::dumpAsString($cPart->errors), 'API:Communication:voiceConferenceCallback:ConferenceParticipant:save-hold');
                         }
                     } else {
                         $call = Call::find()->where(['c_call_sid' => $conferenceData['CallSid']])->one();
                         if ($call && $call->c_conference_sid !== $conference->cf_sid) {
                             $call->c_conference_sid = $conference->cf_sid;
                             if (!$call->save()) {
-                                Yii::error(VarDumper::dumpAsString($call->errors),
-                                    'API:CommunicationController:voiceConferenceCallback:participant-hold:call:save');
+                                Yii::error(
+                                    VarDumper::dumpAsString($call->errors),
+                                    'API:CommunicationController:voiceConferenceCallback:participant-hold:call:save'
+                                );
                             }
                         }
 
@@ -2950,7 +2904,7 @@ class CommunicationController extends ApiBaseController
                         if ($call) {
                             $cPart->cp_call_id = $call->c_id;
                         }
-                        if(!$cPart->save()) {
+                        if (!$cPart->save()) {
                             Yii::error(VarDumper::dumpAsString($cPart->errors), 'API:Communication:voiceConferenceCallback:ConferenceParticipant:save-hold');
                         }
                     }
@@ -2964,15 +2918,17 @@ class CommunicationController extends ApiBaseController
                     if ($cPart) {
                         $cPart->join();
                         if (!$cPart->save()) {
-                            Yii::error(VarDumper::dumpAsString($cPart->errors),'API:Communication:voiceConferenceCallback:ConferenceParticipant:save-hold');
+                            Yii::error(VarDumper::dumpAsString($cPart->errors), 'API:Communication:voiceConferenceCallback:ConferenceParticipant:save-hold');
                         }
                     } else {
                         $call = Call::find()->where(['c_call_sid' => $conferenceData['CallSid']])->one();
                         if ($call && $call->c_conference_sid !== $conference->cf_sid) {
                             $call->c_conference_sid = $conference->cf_sid;
                             if (!$call->save()) {
-                                Yii::error(VarDumper::dumpAsString($call->errors),
-                                    'API:CommunicationController:voiceConferenceCallback:participant-hold:call:save');
+                                Yii::error(
+                                    VarDumper::dumpAsString($call->errors),
+                                    'API:CommunicationController:voiceConferenceCallback:participant-hold:call:save'
+                                );
                             }
                         }
 
@@ -2983,7 +2939,7 @@ class CommunicationController extends ApiBaseController
                         if ($call) {
                             $cPart->cp_call_id = $call->c_id;
                         }
-                        if(!$cPart->save()) {
+                        if (!$cPart->save()) {
                             Yii::error(VarDumper::dumpAsString($cPart->errors), 'API:Communication:voiceConferenceCallback:ConferenceParticipant:save-hold');
                         }
                     }
@@ -2999,16 +2955,20 @@ class CommunicationController extends ApiBaseController
                     if ($cPart) {
                         $cPart->leave(date('Y-m-d H:i:s'));
                         if (!$cPart->save()) {
-                            Yii::error(VarDumper::dumpAsString($cPart->errors),
-                                'API:Communication:voiceConferenceCallback:ConferenceParticipant:save-leave');
+                            Yii::error(
+                                VarDumper::dumpAsString($cPart->errors),
+                                'API:Communication:voiceConferenceCallback:ConferenceParticipant:save-leave'
+                            );
                         }
                     } else {
                         $call = Call::find()->where(['c_call_sid' => $conferenceData['CallSid']])->one();
                         if ($call && $call->c_conference_sid !== $conference->cf_sid) {
                             $call->c_conference_sid = $conference->cf_sid;
                             if (!$call->save()) {
-                                Yii::error(VarDumper::dumpAsString($call->errors),
-                                    'API:CommunicationController:voiceConferenceCallback:participant-leave:call:save');
+                                Yii::error(
+                                    VarDumper::dumpAsString($call->errors),
+                                    'API:CommunicationController:voiceConferenceCallback:participant-leave:call:save'
+                                );
                             }
                         }
 
@@ -3019,20 +2979,16 @@ class CommunicationController extends ApiBaseController
                         if ($call) {
                             $cPart->cp_call_id = $call->c_id;
                         }
-                        if(!$cPart->save()) {
+                        if (!$cPart->save()) {
                             Yii::error(VarDumper::dumpAsString($cPart->errors), 'API:Communication:voiceConferenceCallback:ConferenceParticipant:save-leave');
                         }
                     }
                 }
-
-
-
             }
 
 //            if(!$call->save()) {
 //                Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceDefault:Call2:save');
 //            }
-
         } else {
             //Yii::error('Not found POST[callData][CallSid] ' . VarDumper::dumpAsString($post), 'API:Communication:voiceDefault:callData:notFound');
             $response['error'] = 'Not found POST[conferenceData][ConferenceSid]';
@@ -3053,7 +3009,6 @@ class CommunicationController extends ApiBaseController
         //$agentId = null;
 
         if (isset($post['conferenceData']['ConferenceSid']) && $post['conferenceData']['ConferenceSid']) {
-
             $conferenceData = $post['conferenceData'];
             $conferenceSid = mb_substr($conferenceData['ConferenceSid'], 0, 34);
 
@@ -3069,7 +3024,6 @@ class CommunicationController extends ApiBaseController
 
 
             if ($conference) {
-
                 if ($recordingUrl) {
                     $conference->cf_recording_url = $recordingUrl;
                 }
@@ -3085,14 +3039,10 @@ class CommunicationController extends ApiBaseController
                 $conference->cf_updated_dt = date('Y-m-d H:i:s');
                 if ($conference->save()) {
                     $response['conference'] = $conference->attributes;
-
                 } else {
                     Yii::error(VarDumper::dumpAsString($conference->errors), 'API:TwilioController:actionConferenceRecordingStatusCallback:Conference:update');
                     $response['error'] = VarDumper::dumpAsString($conference->errors);
                 }
-
-
-
             } else {
                 $response['error'] = 'Not found Conference SID: ' . $conferenceSid;
                 Yii::error($response['error'] . ' - ' . VarDumper::dumpAsString($post), 'API:Communication:voiceConferenceRecordCallback:notFound');
@@ -3101,7 +3051,6 @@ class CommunicationController extends ApiBaseController
 //            if(!$call->save()) {
 //                Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceDefault:Call2:save');
 //            }
-
         } else {
             //Yii::error('Not found POST[callData][CallSid] ' . VarDumper::dumpAsString($post), 'API:Communication:voiceDefault:callData:notFound');
             $response['error'] = 'Not found POST[conferenceData][ConferenceSid]';
@@ -3145,5 +3094,4 @@ class CommunicationController extends ApiBaseController
             Notifications::publish('phoneWidgetSmsSocketMessage', ['user_id' => $userForNotify], Message::updateStatus($sms));
         }
     }
-
 }

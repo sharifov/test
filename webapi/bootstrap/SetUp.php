@@ -13,7 +13,7 @@ class SetUp implements BootstrapInterface
     {
         $container = \Yii::$container;
 
-        $container->setSingleton(RequestBo::class, static function() use ($app) {
+        $container->setSingleton(RequestBo::class, static function () use ($app) {
             $client = new Client();
             $client->setTransport(CurlTransport::class);
             $request = $client

@@ -33,7 +33,7 @@ class TechnicalInfoBehavior extends LoggerBehavior
             return $result;
         }
 
-        $result->addMessage(New TechnicalMessage($logger->getTechnicalInfo()));
+        $result->addMessage(new TechnicalMessage($logger->getTechnicalInfo()));
 
         return $result;
     }

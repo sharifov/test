@@ -46,7 +46,6 @@ class ErrorResponse extends Response implements StandardResponseInterface
         $codeExist = false;
 
         foreach ($messages as $message) {
-
             if ($message->isErrors()) {
                 $errorsExist = true;
             }

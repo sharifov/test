@@ -55,9 +55,9 @@ use yii\base\Model;
 class ApiLead extends Model
 {
 
-    CONST SCENARIO_CREATE = 'create';
-    CONST SCENARIO_UPDATE = 'update';
-    CONST SCENARIO_GET = 'get';
+    const SCENARIO_CREATE = 'create';
+    const SCENARIO_UPDATE = 'update';
+    const SCENARIO_GET = 'get';
 
     public $lead_id;
     public $client_id;
@@ -120,8 +120,8 @@ class ApiLead extends Model
             [['client_first_name', 'client_last_name', 'client_middle_name'], 'string', 'max' => 100],
             [['emails'], 'each', 'rule' => ['email']],
             [['phones'], 'each', 'rule' => ['string', 'max' => 20]],
-			[['phones'], 'filter', 'filter' => static function ($phones) {
-			    if ($phones) {
+            [['phones'], 'filter', 'filter' => static function ($phones) {
+                if ($phones) {
                     return array_map(
                         static function ($phone) {
                             return preg_replace("/[^0-9\+]/", '', $phone);
@@ -129,7 +129,7 @@ class ApiLead extends Model
                         $phones
                     );
                 }
-			}],
+            }],
             [['phones'], 'checkForExistence'],
             [['source_id'], 'checkEmailAndPhone', 'except' => [self::SCENARIO_UPDATE, self::SCENARIO_GET]],
 
@@ -140,7 +140,7 @@ class ApiLead extends Model
             [['created', 'updated', 'snooze_for', 'flights', 'emails', 'phones'], 'safe'],
             [['uid', 'request_ip', 'offset_gmt'], 'string', 'max' => 255],
 
-            [['uid'], 'unique', 'targetClass' => Lead::class, 'targetAttribute' => ['uid', 'project_id'], 'message'=>'Lead UID ({value}) already exists!', 'except' => [self::SCENARIO_GET]],
+            [['uid'], 'unique', 'targetClass' => Lead::class, 'targetAttribute' => ['uid', 'project_id'], 'message' => 'Lead UID ({value}) already exists!', 'except' => [self::SCENARIO_GET]],
 
             [['trip_type'], 'string', 'max' => 2],
             [['cabin'], 'string', 'max' => 1],
@@ -209,22 +209,21 @@ class ApiLead extends Model
     {
         if (empty($this->flights)) {
             $this->addError('flights', "Flights cannot be empty");
-        }
-        elseif (!is_array($this->flights)) {
+        } elseif (!is_array($this->flights)) {
             $this->addError('config', "Flights must be array.");
-        }
-        else{
+        } else {
             foreach ($this->flights as $key => $flight) {
-
                 $model = new ApiLeadFlightSegment();
                 $model->attributes = $flight;
 
-                if(!$model->validate()) {
+                if (!$model->validate()) {
+                    if ($model->firstErrors) {
+                        $error = $model->firstErrors[key($model->firstErrors)];
+                    } else {
+                        $error = 'ApiLeadFlightSegment validate error';
+                    }
 
-                    if($model->firstErrors) $error = $model->firstErrors[key($model->firstErrors)];
-                    else $error = 'ApiLeadFlightSegment validate error';
-
-                    $this->addError('flights ', 'Flight ['.$key.']: ' . $error);
+                    $this->addError('flights ', 'Flight [' . $key . ']: ' . $error);
                 }
             }
         }
@@ -237,7 +236,9 @@ class ApiLead extends Model
             $this->addError('source_id', "Source ID cannot be empty");
         } else {
             $source = Sources::findOne(['id' => $this->source_id, 'project_id' => $this->project_id]);
-            if(!$source) $this->addError('source_id', "Invalid Source ID (project: ".$this->project_id.")");
+            if (!$source) {
+                $this->addError('source_id', "Invalid Source ID (project: " . $this->project_id . ")");
+            }
         }
     }
 
@@ -245,8 +246,8 @@ class ApiLead extends Model
     {
         if (!empty($this->sub_sources_code)) {
             $source = Sources::findOne(['cid' => $this->sub_sources_code, 'project_id' => $this->project_id]);
-            if(!$source) {
-                $this->addError('source_id', "Invalid Source Code (project: ".$this->project_id.")");
+            if (!$source) {
+                $this->addError('source_id', "Invalid Source Code (project: " . $this->project_id . ")");
             } else {
                 $this->source_id = $source->id;
             }
@@ -267,25 +268,24 @@ class ApiLead extends Model
             $this->addError('emails', 'Phones or Emails cannot be blank');
             $this->addError('phones', 'Phones or Emails cannot be blank');
         }
-
     }
 
-	/**
-	 * @param $attribute
-	 * @param $params
-	 */
-	public function checkForExistence($attribute, $params): void
-	{
-		foreach ($this->phones as $phone) {
-//			if (DepartmentPhoneProject::find()->where(['dpp_phone_number' => $phone])->exists()) {
-			if (DepartmentPhoneProject::find()->byPhone($phone, false)->exists()) {
-				$this->addError($attribute, $phone . ' - This phone number is not allowed (General)');
-//			} elseif (UserProjectParams::find()->where(['upp_tw_phone_number' => $phone])->exists()) {
-			} elseif (UserProjectParams::find()->byPhone($phone, false)->exists()) {
-				$this->addError($attribute, $phone . ' - This phone number is not allowed (Direct)');
-			}
-		}
-	}
+    /**
+     * @param $attribute
+     * @param $params
+     */
+    public function checkForExistence($attribute, $params): void
+    {
+        foreach ($this->phones as $phone) {
+//          if (DepartmentPhoneProject::find()->where(['dpp_phone_number' => $phone])->exists()) {
+            if (DepartmentPhoneProject::find()->byPhone($phone, false)->exists()) {
+                $this->addError($attribute, $phone . ' - This phone number is not allowed (General)');
+//          } elseif (UserProjectParams::find()->where(['upp_tw_phone_number' => $phone])->exists()) {
+            } elseif (UserProjectParams::find()->byPhone($phone, false)->exists()) {
+                $this->addError($attribute, $phone . ' - This phone number is not allowed (Direct)');
+            }
+        }
+    }
 
 
     /**
@@ -334,7 +334,7 @@ class ApiLead extends Model
     /**
      * @return string
      */
-    public function getRequestHash() : string
+    public function getRequestHash(): string
     {
         $hashArray = [];
         $hashArray[] = $this->request_ip;
@@ -345,13 +345,13 @@ class ApiLead extends Model
         $hashArray[] = $this->cabin;
         $hashArray[] = date('Y-m-d');
 
-        if($this->phones) {
+        if ($this->phones) {
             foreach ($this->phones as $phone) {
                 $hashArray[] = $phone;
             }
         }
 
-        if($this->flights) {
+        if ($this->flights) {
             foreach ($this->flights as $flight) {
                 $hashArray[] = $flight['origin'];
                 $hashArray[] = $flight['destination'];
@@ -366,6 +366,4 @@ class ApiLead extends Model
 
         return $hash;
     }
-
-
 }

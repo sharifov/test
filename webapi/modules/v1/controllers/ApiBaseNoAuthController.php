@@ -1,11 +1,11 @@
 <?php
+
 namespace webapi\modules\v1\controllers;
 
 use common\models\ApiLog;
 use Yii;
 use yii\rest\Controller;
 use yii\web\BadRequestHttpException;
-
 
 /**
  * Class ApiBaseNoAuthController
@@ -26,7 +26,7 @@ class ApiBaseNoAuthController extends Controller
         parent::init();
 
         Yii::$app->user->enableSession = false;
-        if(Yii::$app->request->get('debug')) {
+        if (Yii::$app->request->get('debug')) {
             $this->debug = true;
         }
     }
@@ -75,11 +75,10 @@ class ApiBaseNoAuthController extends Controller
         $apiLog->start_microtime = microtime(true);
         $apiLog->start_memory_usage = memory_get_usage();
 
-        if(!$apiLog->save()) {
+        if (!$apiLog->save()) {
             Yii::error(print_r($apiLog->errors, true), 'ApiBaseNoAuthControl:startApiLog:ApiLog:save');
         }
 
         return $apiLog;
     }
-
 }

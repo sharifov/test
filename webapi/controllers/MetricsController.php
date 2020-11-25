@@ -1,4 +1,5 @@
 <?php
+
 namespace webapi\controllers;
 
 use webapi\models\PrometheusUser;

@@ -16,7 +16,6 @@ trait ProcessStandardMessageTrait
         $statusCodeExist = false;
 
         foreach ($messages as $message) {
-
             if ($message->isMessage()) {
                 $messageExist = true;
             }
@@ -29,7 +28,6 @@ trait ProcessStandardMessageTrait
                 $statusCodeExist = true;
                 $this->setStatusCode((int)$message->getValue());
             }
-
         }
 
         if (!$messageExist) {

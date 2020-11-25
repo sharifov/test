@@ -42,8 +42,7 @@ class CasesController extends BaseController
         Handler $createHandler,
         CasesSaleService $casesSaleService,
         $config = []
-    )
-    {
+    ) {
         parent::__construct($id, $module, $logger, $config);
         $this->createHandler = $createHandler;
         $this->casesSaleService = $casesSaleService;

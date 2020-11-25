@@ -179,10 +179,10 @@ class ClientChatRequestController extends ApiBaseController
      *
      * HTTP/1.1 400 Bad Request
      * {
-     * 	"status":400,
-     * 	"message":"Some errors occurred while creating client chat request",
-     * 	"code":"13104",
-     * 	"errors":["Event is invalid."]
+     *  "status":400,
+     *  "message":"Some errors occurred while creating client chat request",
+     *  "code":"13104",
+     *  "errors":["Event is invalid."]
      * }
      *
      */
@@ -361,10 +361,10 @@ class ClientChatRequestController extends ApiBaseController
      *
      * HTTP/1.1 400 Bad Request
      * {
-     * 	"status":400,
-     * 	"message":"Some errors occurred while creating client chat request",
-     * 	"code":"13104",
-     * 	"errors":["Event is invalid."]
+     *  "status":400,
+     *  "message":"Some errors occurred while creating client chat request",
+     *  "code":"13104",
+     *  "errors":["Event is invalid."]
      * }
      *
      */
@@ -691,9 +691,9 @@ class ClientChatRequestController extends ApiBaseController
      *
      * @apiParamExample {json} Request-Example LEAVE_FEEDBACK:
      * {
-     *		"event": "LEAVE_FEEDBACK",
-     *		"data": {
-     *			"rid": "20a20989-4d26-42f4-9a1c-2948ce4c4d56",
+     *      "event": "LEAVE_FEEDBACK",
+     *      "data": {
+     *          "rid": "20a20989-4d26-42f4-9a1c-2948ce4c4d56",
      *          "comment": "Hello, this is my feedback",
      *          "rating": 4,
      *          "visitor": {
@@ -714,10 +714,10 @@ class ClientChatRequestController extends ApiBaseController
      *
      * HTTP/1.1 400 Bad Request
      * {
-     * 	"status":400,
-     * 	"message":"Some errors occurred while creating client chat request",
-     * 	"code":"13104",
-     * 	"errors":["Event is invalid."]
+     *  "status":400,
+     *  "message":"Some errors occurred while creating client chat request",
+     *  "code":"13104",
+     *  "errors":["Event is invalid."]
      * }
      *
      */
