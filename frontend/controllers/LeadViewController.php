@@ -13,6 +13,8 @@ use sales\access\ClientInfoAccess;
 use sales\access\EmployeeGroupAccess;
 use sales\access\LeadPreferencesAccess;
 use sales\auth\Auth;
+use sales\model\clientChat\socket\ClientChatSocketCommands;
+use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\services\client\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\LeadPreferencesForm;
@@ -669,6 +671,10 @@ class LeadViewController extends FController
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
                 $this->leadCloneQuoteService->cloneByUid($form->uid, $form->leadGid, Auth::id());
+                $chat = ClientChatLead::find()->andWhere(['ccl_lead_id' => $form->getLeadId()])->one();
+                if ($chat) {
+                    ClientChatSocketCommands::addClientChatAddOfferButton($chat->chat, $form->getLeadId());
+                }
             } catch (\DomainException $e) {
                 Yii::warning($e->getMessage());
                 return ['success' => false, 'message' => $e->getMessage()];

@@ -170,4 +170,9 @@ class CloneQuoteByUidForm extends Model
             throw new \DomainException($message);
         }
     }
+
+    public function getLeadId(): int
+    {
+        return $this->lead->id;
+    }
 }

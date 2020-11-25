@@ -5,14 +5,18 @@ namespace frontend\controllers;
 use common\components\BackOffice;
 use common\models\GlobalLog;
 use common\models\Lead;
+use common\models\Notifications;
 use common\models\Quote;
 use common\models\QuotePrice;
 use sales\auth\Auth;
+use sales\model\clientChat\socket\ClientChatSocketCommands;
 use sales\forms\quotePrice\AddQuotePriceForm;
 use sales\forms\segment\SegmentBaggageForm;
 use sales\helpers\quote\BaggageHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
+use sales\model\clientChatChannel\entity\ClientChatChannel;
+use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\services\parsingDump\BaggageService;
 use sales\services\parsingDump\lib\ParsingDump;
 use sales\services\parsingDump\ReservationService;
@@ -352,6 +356,11 @@ class QuoteController extends FController
 
                                 if ($lead->called_expert) {
                                     $quote->sendUpdateBO();
+                                }
+
+                                $chat = ClientChatLead::find()->andWhere(['ccl_lead_id' => $lead->id])->one();
+                                if ($chat) {
+                                    ClientChatSocketCommands::addClientChatAddOfferButton($chat->chat, $lead->id);
                                 }
                             }
 
@@ -782,6 +791,10 @@ class QuoteController extends FController
                             if ($quote->save(false)) {
                                 if ($lead->called_expert) {
                                     $quote->sendUpdateBO();
+                                }
+                                $chat = ClientChatLead::find()->andWhere(['ccl_lead_id' => $lead->id])->one();
+                                if ($chat) {
+                                    ClientChatSocketCommands::addClientChatAddOfferButton($chat->chat, $lead->id);
                                 }
                             }
 

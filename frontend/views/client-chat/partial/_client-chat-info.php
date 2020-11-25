@@ -301,9 +301,11 @@ $_self = $this;
                                 <?= Yii::$app->formatter->format($lead, 'lead'); ?>
                             </span>
                             <span>
+                                <span data-cc-lead-info-offer="<?= $lead->id?>">
                                 <?php if (!$clientChat->isClosed() && $lead->isExistQuotesForSend()) : ?>
-                                    <?= \yii\helpers\Html::tag('span', '<i class="fa fa-plane"></i> Offer', ['class' => 'chat-offer', 'data-chat-id' => $clientChat->cch_id, 'data-lead-id' => $lead->id]); ?>
+                                    <?= \yii\helpers\Html::tag('span', '<i class="fa fa-plane"> </i> Offer', ['class' => 'chat-offer', 'data-chat-id' => $clientChat->cch_id, 'data-lead-id' => $lead->id]); ?>
                                 <?php endif; ?>
+                                </span>
                                 <?= $lead->getStatusLabel($lead->status); ?>
                             </span>
                         </div>

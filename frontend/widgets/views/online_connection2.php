@@ -517,6 +517,13 @@ $js = <<<JS
                                 }
                             }    
                         }
+                        
+                        if(obj.cmd === 'clientChatAddOfferButton') {                            
+                            let chatId = parseInt(obj.data.chatId, 10);
+                            let leadId = parseInt(obj.data.leadId, 10);
+                            let content = '<span class="chat-offer" data-chat-id="' + chatId + '" data-lead-id="' + leadId + '"><i class="fa fa-plane"> </i> Offer</span>';
+                            $(document).find('span[data-cc-lead-info-offer="' + leadId + '"]').html(content);
+                        }
                     }
                     // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
                 } catch (error) {
