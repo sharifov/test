@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created
  * User: alex.connor@techork.com
@@ -48,7 +49,7 @@ class RocketChat extends Component
 
     private Request $request;
 
-    public function init() : void
+    public function init(): void
     {
         parent::init();
         $this->initRequest();
@@ -57,7 +58,7 @@ class RocketChat extends Component
     /**
      * @return bool
      */
-    private function initRequest() : bool
+    private function initRequest(): bool
     {
         $this->request = $this->getNewRequest();
         return $this->request != null;
@@ -66,7 +67,7 @@ class RocketChat extends Component
     /**
      * @return null|Request
      */
-    private function getNewRequest() : ?\yii\httpclient\Request
+    private function getNewRequest(): ?\yii\httpclient\Request
     {
         try {
             $client = new Client();
@@ -88,7 +89,7 @@ class RocketChat extends Component
      * @return \yii\httpclient\Response
      * @throws Exception
      */
-    protected function sendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []) : Response
+    protected function sendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []): Response
     {
         $url = $this->url . $action;
 
@@ -130,7 +131,7 @@ class RocketChat extends Component
      * @return array
      * @throws Exception
      */
-    public function systemLogin() : array
+    public function systemLogin(): array
     {
         $out = ['error' => false, 'data' => []];
         $data = [
@@ -166,7 +167,7 @@ class RocketChat extends Component
      * @return array
      * @throws Exception
      */
-    public function login(string $username, string $password) : array
+    public function login(string $username, string $password): array
     {
         $out = ['error' => false, 'data' => []];
         $data = [
@@ -522,7 +523,7 @@ class RocketChat extends Component
         if ($request == null) {
             throw new \Exception("unable to create rocket chat request");
         }
-        $request->setMethod("get")->setUrl($this->url.$url);
+        $request->setMethod("get")->setUrl($this->url . $url);
         $headers =  $this->getSystemAuthDataHeader();
         $request->setHeaders($headers);
         $response = $request->send();

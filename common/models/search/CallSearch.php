@@ -148,7 +148,7 @@ class CallSearch extends Call
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['c_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['c_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -265,7 +265,7 @@ class CallSearch extends Call
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['c_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['c_id' => SORT_DESC]],
             'pagination' => $this->limit > 0 ? false : ['pageSize' => 30],
         ]);
 
@@ -348,7 +348,7 @@ class CallSearch extends Call
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['c_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['c_id' => SORT_DESC]],
             'pagination' => $this->limit > 0 ? false : [
                 'pageSize' => 100,
             ]
@@ -452,7 +452,7 @@ class CallSearch extends Call
      * @return ArrayDataProvider
      * @throws \Exception
      */
-    public function searchCallsStats($params, $user):ArrayDataProvider
+    public function searchCallsStats($params, $user): ArrayDataProvider
     {
         $this->load($params);
         $timezone = $user->timezone;
@@ -486,7 +486,7 @@ class CallSearch extends Call
         } else {
             //$timeSub = date('G', strtotime(date('00:00')));
 
-            $date_from = Employee::convertToUTC(strtotime(date('Y-m-d 00:00').' -2 days'), $this->defaultUserTz);
+            $date_from = Employee::convertToUTC(strtotime(date('Y-m-d 00:00') . ' -2 days'), $this->defaultUserTz);
             $date_to = Employee::convertToUTC(strtotime(date('Y-m-d 23:59')), $this->defaultUserTz);
             $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
             //$utcOffsetDST = Employee::getUtcOffsetDst($timezone, $date_from) ?? date('P');
@@ -497,7 +497,7 @@ class CallSearch extends Call
         } elseif (!empty($this->call_duration_to) && empty($this->call_duration_from)) {
             $queryByDuration = ' AND c_call_duration <=' . $this->call_duration_to;
         } elseif (!empty($this->call_duration_from) && !empty($this->call_duration_to)) {
-            $queryByDuration = ' AND c_call_duration BETWEEN ' . $this->call_duration_from . ' AND '. $this->call_duration_to;
+            $queryByDuration = ' AND c_call_duration BETWEEN ' . $this->call_duration_from . ' AND ' . $this->call_duration_to;
         } else {
             $queryByDuration = '';
         }
@@ -505,29 +505,29 @@ class CallSearch extends Call
         $query = new Query();
         $query->select(['c_created_user_id,
         
-        SUM(IF(c_call_type_id = '. self::CALL_TYPE_OUT .' AND c_parent_call_sid IS NOT NULL AND (c_source_type_id <> '. self::SOURCE_REDIAL_CALL .' OR c_source_type_id IS NULL), c_call_duration, 0)) AS outgoingCallsDuration,
-        SUM(IF(c_call_type_id = '. self::CALL_TYPE_OUT .' AND c_parent_call_sid IS NOT NULL AND (c_source_type_id <> '. self::SOURCE_REDIAL_CALL .' OR c_source_type_id IS NULL), 1, 0)) AS outgoingCalls,
-        SUM(IF(c_call_type_id = '. self::CALL_TYPE_OUT .' AND c_status_id = '. self::STATUS_COMPLETED .' AND c_parent_call_sid IS NOT NULL AND (c_source_type_id <> '. self::SOURCE_REDIAL_CALL .' OR c_source_type_id IS NULL) '. $queryByDuration .', 1, 0)) AS outgoingCallsCompleted,
-        SUM(IF(c_call_type_id = '. self::CALL_TYPE_OUT .' AND c_status_id = '. self::STATUS_NO_ANSWER .' AND c_parent_call_sid IS NOT NULL AND (c_source_type_id <> '. self::SOURCE_REDIAL_CALL .' OR c_source_type_id IS NULL), 1, 0)) AS outgoingCallsNoAnswer,
-        SUM(IF(c_call_type_id = '. self::CALL_TYPE_OUT .' AND c_status_id = '. self::STATUS_BUSY.' AND c_parent_call_sid IS NOT NULL AND (c_source_type_id <> '. self::SOURCE_REDIAL_CALL .' OR c_source_type_id IS NULL), 1, 0)) AS outgoingCallsBusy,
+        SUM(IF(c_call_type_id = ' . self::CALL_TYPE_OUT . ' AND c_parent_call_sid IS NOT NULL AND (c_source_type_id <> ' . self::SOURCE_REDIAL_CALL . ' OR c_source_type_id IS NULL), c_call_duration, 0)) AS outgoingCallsDuration,
+        SUM(IF(c_call_type_id = ' . self::CALL_TYPE_OUT . ' AND c_parent_call_sid IS NOT NULL AND (c_source_type_id <> ' . self::SOURCE_REDIAL_CALL . ' OR c_source_type_id IS NULL), 1, 0)) AS outgoingCalls,
+        SUM(IF(c_call_type_id = ' . self::CALL_TYPE_OUT . ' AND c_status_id = ' . self::STATUS_COMPLETED . ' AND c_parent_call_sid IS NOT NULL AND (c_source_type_id <> ' . self::SOURCE_REDIAL_CALL . ' OR c_source_type_id IS NULL) ' . $queryByDuration . ', 1, 0)) AS outgoingCallsCompleted,
+        SUM(IF(c_call_type_id = ' . self::CALL_TYPE_OUT . ' AND c_status_id = ' . self::STATUS_NO_ANSWER . ' AND c_parent_call_sid IS NOT NULL AND (c_source_type_id <> ' . self::SOURCE_REDIAL_CALL . ' OR c_source_type_id IS NULL), 1, 0)) AS outgoingCallsNoAnswer,
+        SUM(IF(c_call_type_id = ' . self::CALL_TYPE_OUT . ' AND c_status_id = ' . self::STATUS_BUSY . ' AND c_parent_call_sid IS NOT NULL AND (c_source_type_id <> ' . self::SOURCE_REDIAL_CALL . ' OR c_source_type_id IS NULL), 1, 0)) AS outgoingCallsBusy,
         
-        SUM(IF(c_call_type_id = '. self::CALL_TYPE_IN .' AND c_status_id = '. self::STATUS_COMPLETED .' AND c_parent_call_sid IS NOT NULL, c_call_duration, 0)) AS incomingCallsDuration,
-        SUM(IF(c_call_type_id = '. self::CALL_TYPE_IN .' AND c_status_id = '. self::STATUS_COMPLETED .' AND c_parent_call_sid IS NOT NULL '. $queryByDuration .', 1, 0)) AS incomingCompletedCalls,
-        SUM(IF(c_call_type_id = '. self::CALL_TYPE_IN .' AND c_status_id = '. self::STATUS_COMPLETED .' AND c_parent_call_sid IS NOT NULL AND c_source_type_id = '. self::SOURCE_DIRECT_CALL .', 1, 0)) AS incomingDirectLine,
-        SUM(IF(c_call_type_id = '. self::CALL_TYPE_IN .' AND c_status_id = '. self::STATUS_COMPLETED .' AND c_parent_call_sid IS NOT NULL AND c_source_type_id <> '. self::SOURCE_DIRECT_CALL .', 1, 0)) AS incomingGeneralLine,
+        SUM(IF(c_call_type_id = ' . self::CALL_TYPE_IN . ' AND c_status_id = ' . self::STATUS_COMPLETED . ' AND c_parent_call_sid IS NOT NULL, c_call_duration, 0)) AS incomingCallsDuration,
+        SUM(IF(c_call_type_id = ' . self::CALL_TYPE_IN . ' AND c_status_id = ' . self::STATUS_COMPLETED . ' AND c_parent_call_sid IS NOT NULL ' . $queryByDuration . ', 1, 0)) AS incomingCompletedCalls,
+        SUM(IF(c_call_type_id = ' . self::CALL_TYPE_IN . ' AND c_status_id = ' . self::STATUS_COMPLETED . ' AND c_parent_call_sid IS NOT NULL AND c_source_type_id = ' . self::SOURCE_DIRECT_CALL . ', 1, 0)) AS incomingDirectLine,
+        SUM(IF(c_call_type_id = ' . self::CALL_TYPE_IN . ' AND c_status_id = ' . self::STATUS_COMPLETED . ' AND c_parent_call_sid IS NOT NULL AND c_source_type_id <> ' . self::SOURCE_DIRECT_CALL . ', 1, 0)) AS incomingGeneralLine,
         
-        SUM(IF(c_source_type_id = '. self::SOURCE_REDIAL_CALL .' AND c_status_id = '. self::STATUS_COMPLETED .' AND c_parent_call_sid IS NOT NULL , 1, 0)) AS redialCallsDuration,
-        SUM(IF(c_source_type_id = '. self::SOURCE_REDIAL_CALL .' AND c_parent_call_sid IS NOT NULL, 1, 0)) AS totalAttempts,
-        SUM(IF(c_source_type_id = '. self::SOURCE_REDIAL_CALL .' AND c_status_id = '. self::STATUS_COMPLETED .'  AND c_parent_call_sid IS NOT NULL '. $queryByDuration .', 1, 0)) AS redialCompleted           
+        SUM(IF(c_source_type_id = ' . self::SOURCE_REDIAL_CALL . ' AND c_status_id = ' . self::STATUS_COMPLETED . ' AND c_parent_call_sid IS NOT NULL , 1, 0)) AS redialCallsDuration,
+        SUM(IF(c_source_type_id = ' . self::SOURCE_REDIAL_CALL . ' AND c_parent_call_sid IS NOT NULL, 1, 0)) AS totalAttempts,
+        SUM(IF(c_source_type_id = ' . self::SOURCE_REDIAL_CALL . ' AND c_status_id = ' . self::STATUS_COMPLETED . '  AND c_parent_call_sid IS NOT NULL ' . $queryByDuration . ', 1, 0)) AS redialCompleted           
             
         ']);
         $query->from('call');
-        $query->where('c_created_dt ' .$between_condition);
+        $query->where('c_created_dt ' . $between_condition);
         $query->andWhere('c_created_user_id IS NOT NULL');
         //$query->andWhere('TIME(CONVERT_TZ(DATE_SUB(c_created_dt, INTERVAL '. $timeSub .' HOUR), "+00:00", "'. $utcOffsetDST. '")) <= TIME("'.$differenceTimeToFrom.'")');
 
         if (!empty($this->c_created_user_id)) {
-            $query->andWhere('c_created_user_id='. $this->c_created_user_id);
+            $query->andWhere('c_created_user_id=' . $this->c_created_user_id);
         } else {
             $query->andWhere(['c_created_user_id' => EmployeeGroupAccess::getUsersIdsInCommonGroups(Auth::id())]);
         }
@@ -537,7 +537,7 @@ class CallSearch extends Call
         }
 
         if (!empty($this->c_project_id)) {
-            $query->andWhere('c_project_id='. $this->c_project_id);
+            $query->andWhere('c_project_id=' . $this->c_project_id);
         }
 
         if (!empty($this->userGroupId)) {
@@ -563,7 +563,6 @@ class CallSearch extends Call
                 $model['redialCallsDuration'] == 0 &&
                 $model['totalAttempts'] == 0 &&
                 $model['redialCompleted'] == 0
-
             ) {
                 unset($data[$key]);
             }
@@ -766,7 +765,7 @@ class CallSearch extends Call
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['c_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['c_id' => SORT_DESC]],
             'pagination' => $this->limit > 0 ? false : [
                 'pageSize' => 100,
             ]
@@ -906,7 +905,7 @@ class CallSearch extends Call
         $query->orWhere(['IN', 'c_to', $this->phoneList]);
         $query->orderBy(['c_created_dt' => SORT_DESC]);
 
-        //		print_r($query->createCommand()->rawSql);die;
+        //      print_r($query->createCommand()->rawSql);die;
 
         return $dataProvider;
     }

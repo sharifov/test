@@ -139,14 +139,15 @@ class Setting extends \yii\db\ActiveRecord
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
-        if (!$insert && isset($changedAttributes['s_value'])){
+        if (!$insert && isset($changedAttributes['s_value'])) {
             $staff = Employee::getAllEmployeesByRole([Employee::ROLE_SUPER_ADMIN, Employee::ROLE_ADMIN]);
-            foreach ($staff as $unit){
+            foreach ($staff as $unit) {
                 Notifications::create(
                     $unit->id,
-                    'Setting Changed: ('. $this->s_id .')',
-                    'Site setting: '. $this->s_name .' (id:'. $this->s_id .') has been changed from '. $changedAttributes['s_value'] .' to '. $this->s_value .' by '. $this->sUpdatedUser->username,
-                    Notifications::TYPE_INFO, true
+                    'Setting Changed: (' . $this->s_id . ')',
+                    'Site setting: ' . $this->s_name . ' (id:' . $this->s_id . ') has been changed from ' . $changedAttributes['s_value'] . ' to ' . $this->s_value . ' by ' . $this->sUpdatedUser->username,
+                    Notifications::TYPE_INFO,
+                    true
                 );
             }
         }

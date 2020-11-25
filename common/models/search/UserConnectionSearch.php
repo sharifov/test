@@ -256,6 +256,4 @@ class UserConnectionSearch extends UserConnection
 
         return $command->queryAll();
     }
-
-
 }

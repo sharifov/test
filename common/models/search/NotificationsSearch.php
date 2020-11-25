@@ -56,7 +56,7 @@ class NotificationsSearch extends Notifications
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['n_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['n_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 40,
             ],
@@ -70,7 +70,7 @@ class NotificationsSearch extends Notifications
             return $dataProvider;
         }
 
-        if(empty($this->n_created_dt) && isset($params['NotificationsSearch']['date_range'])){
+        if (empty($this->n_created_dt) && isset($params['NotificationsSearch']['date_range'])) {
             $query->andFilterWhere(['>=', 'n_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
                 ->andFilterWhere(['<=', 'n_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         }

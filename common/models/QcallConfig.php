@@ -123,7 +123,7 @@ class QcallConfig extends \yii\db\ActiveRecord
      * @param int $callCount
      * @return QcallConfig|null
      */
-    public static function getByStatusCall(?int $statusId, int $callCount = 0):? QcallConfig
+    public static function getByStatusCall(?int $statusId, int $callCount = 0): ?QcallConfig
     {
         return self::find()->where(['qc_status_id' => $statusId])
             ->andWhere(['<=', 'qc_call_att', $callCount])

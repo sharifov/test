@@ -132,12 +132,12 @@ class KpiHistory extends \yii\db\ActiveRecord
         $khUserId = $agent->id;
 
         $kpiHistory = KpiHistory::find()->where(['kh_date_dt' => $khDate, 'kh_user_id' => $khUserId])->one();
-        if(!$kpiHistory){
+        if (!$kpiHistory) {
             $kpiHistory = new KpiHistory();
             $kpiHistory->kh_date_dt = $khDate;
             $kpiHistory->kh_user_id = $khUserId;
         }
-        if(empty($kpiHistory->kh_agent_approved_dt) && empty($kpiHistory->kh_super_approved_dt)){
+        if (empty($kpiHistory->kh_agent_approved_dt) && empty($kpiHistory->kh_super_approved_dt)) {
             $kpiHistory->kh_base_amount = $salaryParams['base_amount'];
             $kpiHistory->kh_commission_percent = $salaryParams['commission_percent'];
             $kpiHistory->kh_bonus_active = $salaryParams['bonus_active'];
@@ -145,7 +145,7 @@ class KpiHistory extends \yii\db\ActiveRecord
             $kpiHistory->kh_estimation_profit = $salary['startProfit'];
         }
 
-        if(empty($kpiHistory->kh_agent_approved_dt)|| empty($kpiHistory->kh_super_approved_dt)){
+        if (empty($kpiHistory->kh_agent_approved_dt) || empty($kpiHistory->kh_super_approved_dt)) {
             $kpiHistory->kh_agent_approved_dt = null;
             $kpiHistory->kh_super_approved_dt = null;
         }

@@ -61,7 +61,7 @@ class LeadFlowChecklistSearch extends LeadFlow
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -75,26 +75,26 @@ class LeadFlowChecklistSearch extends LeadFlow
             return $dataProvider;
         }
 
-        if($this->statuses) {
+        if ($this->statuses) {
             $query->andWhere(['lead_flow.status' => $this->statuses]);
         }
 
-        if($this->dateRange) {
+        if ($this->dateRange) {
             $dates = explode(' - ', $this->dateRange);
             $query->andFilterWhere(['>=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($dates[0]))]);
             $query->andFilterWhere(['<=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($dates[1]))]);
         } else {
-            if($this->created) {
+            if ($this->created) {
                 $query->andFilterWhere(['>=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
                     ->andFilterWhere(['<=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
             }
-            if($this->lf_end_dt) {
+            if ($this->lf_end_dt) {
                 $query->andFilterWhere(['>=', 'lead_flow.lf_end_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lf_end_dt))])
                     ->andFilterWhere(['<=', 'lead_flow.lf_end_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lf_end_dt) + 3600 * 24)]);
             }
         }
 
-        if($this->supervision_id > 0) {
+        if ($this->supervision_id > 0) {
             $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
             $query->andWhere(['IN', 'lead_flow.employee_id', $subQuery]);

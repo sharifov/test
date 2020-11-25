@@ -226,7 +226,8 @@ class Airports extends \yii\db\ActiveRecord
         return Yii::$app->cacheFile->getOrSet(__FUNCTION__, static function () {
             return ArrayHelper::map(
                 self::find()->select(['iata'])->distinct()->orderBy(['iata' => SORT_ASC])->all(),
-                'iata', 'iata'
+                'iata',
+                'iata'
             );
         }, $duration);
     }
@@ -240,7 +241,8 @@ class Airports extends \yii\db\ActiveRecord
         return Yii::$app->cacheFile->getOrSet(__FUNCTION__, static function () {
             return ArrayHelper::map(
                 self::find()->select(['country'])->distinct()->orderBy(['country' => SORT_ASC])->all(),
-                'country', 'country'
+                'country',
+                'country'
             );
         }, $duration);
     }
@@ -262,7 +264,7 @@ class Airports extends \yii\db\ActiveRecord
      * @return array
      * @throws \yii\httpclient\Exception
      */
-    public static function synchronization(int $limit = 0) : array
+    public static function synchronization(int $limit = 0): array
     {
         $data = [
             'created' => [],
@@ -278,7 +280,7 @@ class Airports extends \yii\db\ActiveRecord
         $utcTime = new \DateTime('now', new \DateTimeZone('UTC'));
 
 
-        if($airportsData) {
+        if ($airportsData) {
             if ($airportsData['error']) {
                 $data['error'] = 'Error: ' . $airportsData['error'];
             } else {
@@ -320,8 +322,10 @@ class Airports extends \yii\db\ActiveRecord
 
                         if (!$airport->save()) {
                             $data['errored'][] = $item['Iata'];
-                            Yii::error(VarDumper::dumpAsString(['data' => $item, 'errors' => $airport->errors]),
-                                'Airports:synchronization:Airports:save');
+                            Yii::error(
+                                VarDumper::dumpAsString(['data' => $item, 'errors' => $airport->errors]),
+                                'Airports:synchronization:Airports:save'
+                            );
                         }
                     }
                 }

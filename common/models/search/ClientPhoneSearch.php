@@ -51,7 +51,7 @@ class ClientPhoneSearch extends ClientPhone
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -77,8 +77,8 @@ class ClientPhoneSearch extends ClientPhone
         }
 
         if ($this->type >= 0) {
-        	$query->andFilterWhere(['=', 'type', $this->type]);
-		}
+            $query->andFilterWhere(['=', 'type', $this->type]);
+        }
 
         // grid filtering conditions
         $query->andFilterWhere([

@@ -222,7 +222,7 @@ class QuoteSegment extends \yii\db\ActiveRecord
         $departureTime = new \DateTime($this->qs_departure_time);
         $arrivalTime = new \DateTime($this->qs_arrival_time);
 
-        if(($departureTime->format('H') <= 1 || $departureTime->format('H') >= 22)  && $arrivalTime->format('H') <= 7){
+        if (($departureTime->format('H') <= 1 || $departureTime->format('H') >= 22)  && $arrivalTime->format('H') <= 7) {
             $this->isOvernight = true;
         }
 
@@ -297,7 +297,7 @@ class QuoteSegment extends \yii\db\ActiveRecord
     public static function getByQuoteAndIata(int $quoteId, string $departure, string $arrival): ?ActiveRecord
     {
         return self::find()
-            ->innerJoin(QuoteTrip::tableName(),'qs_trip_id = qt_id')
+            ->innerJoin(QuoteTrip::tableName(), 'qs_trip_id = qt_id')
             ->andWhere(['qt_quote_id' => $quoteId])
             ->andWhere(['qs_departure_airport_code' => $departure])
             ->andWhere(['qs_arrival_airport_code' => $arrival])

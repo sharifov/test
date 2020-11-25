@@ -1,4 +1,5 @@
 <?php
+
 namespace common\components;
 
 use common\models\Project;
@@ -52,7 +53,7 @@ class EmailService
             }
         } catch (\Swift_SwiftException $ex) {
             $errors[] = $ex->getMessage();
-            Yii::warning(sprintf("Send error:\n%s\n\n%s",$ex->getMessage(), print_r($ex->getTraceAsString(), true)), 'EmailService->send()');
+            Yii::warning(sprintf("Send error:\n%s\n\n%s", $ex->getMessage(), print_r($ex->getTraceAsString(), true)), 'EmailService->send()');
         }
         return false;
     }
@@ -92,7 +93,7 @@ class EmailService
             }
         } catch (\Swift_SwiftException $ex) {
             $errors[] = $ex->getMessage();
-            Yii::warning(sprintf("Send error:\n%s\n\n%s",$ex->getMessage(), print_r($ex->getTraceAsString(), true)), 'EmailService->send()');
+            Yii::warning(sprintf("Send error:\n%s\n\n%s", $ex->getMessage(), print_r($ex->getTraceAsString(), true)), 'EmailService->send()');
         }
         return false;
     }

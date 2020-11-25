@@ -31,15 +31,14 @@ class CreateSaleFromBOJob extends BaseObject implements JobInterface
      * @param Queue $queue
      * @return bool
      */
-    public function execute($queue) : bool
+    public function execute($queue): bool
     {
         try {
-            if($this->checkParams()) {
+            if ($this->checkParams()) {
                 $this->casesSaleService = Yii::createObject(CasesSaleService::class);
 
                 $saleData = $this->casesSaleService->getSaleFromBo($this->order_uid, $this->email, $this->phone);
                 if (count($saleData) && isset($saleData['saleId'])) {
-
                     $keyCasesSale = $this->case_id . '-' . $saleData['saleId'];
                     $existCasesSale = Yii::$app->cache->get($keyCasesSale);
 

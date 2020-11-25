@@ -1,6 +1,5 @@
 <?php
 
-
 namespace common\models\query;
 
 use common\models\Employee;
@@ -31,7 +30,7 @@ class EmployeeQuery extends \yii\db\ActiveQuery
     }
 
 //    public function supervisorsByGroups(array $groups)
-//	{
-//		return $this->leftJoin('auth_assignment','auth_assignment.user_id = id')->andWhere(['auth_assignment.item_name' => Employee::SUPE])->innerJoin(UserGroup::tableName(), new Expression(''))
-//	}
+//  {
+//      return $this->leftJoin('auth_assignment','auth_assignment.user_id = id')->andWhere(['auth_assignment.item_name' => Employee::SUPE])->innerJoin(UserGroup::tableName(), new Expression(''))
+//  }
 }

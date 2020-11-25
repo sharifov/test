@@ -35,9 +35,9 @@ use yii\db\ActiveRecord;
  */
 class DepartmentEmailProject extends \yii\db\ActiveRecord
 {
-	public $user_group_list = [];
+    public $user_group_list = [];
 
-	/**
+    /**
      * {@inheritdoc}
      */
     public static function tableName()
@@ -58,8 +58,8 @@ class DepartmentEmailProject extends \yii\db\ActiveRecord
 //            [['dep_email'], 'string', 'max' => 50],
             [['dep_description'], 'string', 'max' => 255],
 //            [['dep_email'], 'unique'],
-			[['user_group_list'], 'safe'],
-			[['dep_dep_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['dep_dep_id' => 'dep_id']],
+            [['user_group_list'], 'safe'],
+            [['dep_dep_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['dep_dep_id' => 'dep_id']],
             [['dep_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['dep_project_id' => 'id']],
             [['dep_source_id'], 'exist', 'skipOnError' => true, 'targetClass' => Sources::class, 'targetAttribute' => ['dep_source_id' => 'id']],
             [['dep_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['dep_updated_user_id' => 'id']],
@@ -92,27 +92,27 @@ class DepartmentEmailProject extends \yii\db\ActiveRecord
         ];
     }
 
-	/**
-	 * @return array
-	 */
-	public function behaviors(): array
-	{
-		return [
-			'timestamp' => [
-				'class' => TimestampBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['dep_updated_dt'],
-					ActiveRecord::EVENT_BEFORE_UPDATE => ['dep_updated_dt'],
-				],
-				'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
-			],
-			'user' => [
-				'class' => BlameableBehavior::class,
-				'createdByAttribute' => 'dep_updated_user_id',
-				'updatedByAttribute' => 'dep_updated_user_id',
-			],
-		];
-	}
+    /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['dep_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['dep_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'dep_updated_user_id',
+                'updatedByAttribute' => 'dep_updated_user_id',
+            ],
+        ];
+    }
 
     /**
      * @return \yii\db\ActiveQuery
@@ -154,10 +154,10 @@ class DepartmentEmailProject extends \yii\db\ActiveRecord
         return $this->hasMany(DepartmentEmailProjectUserGroup::class, ['dug_dep_id' => 'dep_id']);
     }
 
-	/**
-	 * @return \yii\db\ActiveQuery
-	 * @throws \yii\base\InvalidConfigException
-	 */
+    /**
+     * @return \yii\db\ActiveQuery
+     * @throws \yii\base\InvalidConfigException
+     */
     public function getDugUgs()
     {
         return $this->hasMany(UserGroup::class, ['ug_id' => 'dug_ug_id'])->viaTable('department_email_project_user_group', ['dug_dep_id' => 'dep_id']);

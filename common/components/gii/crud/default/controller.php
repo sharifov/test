@@ -1,11 +1,11 @@
 <?php
+
 /**
  * This is the template for generating a CRUD controller class file.
  */
 
 use yii\db\ActiveRecordInterface;
 use yii\helpers\StringHelper;
-
 
 /* @var $this yii\web\View */
 /* @var $generator common\components\gii\crud\Generator */
@@ -36,9 +36,9 @@ namespace <?= StringHelper::dirname(ltrim($generator->controllerClass, '\\')) ?>
 
 use Yii;
 use <?= ltrim($generator->modelClass, '\\') ?>;
-<?php if (!empty($generator->searchModelClass)): ?>
+<?php if (!empty($generator->searchModelClass)) : ?>
 use <?= ltrim($generator->searchModelClass, '\\') . (isset($searchModelAlias) ? " as $searchModelAlias" : "") ?>;
-<?php else: ?>
+<?php else : ?>
 use yii\data\ActiveDataProvider;
 <?php endif; ?>
 use <?= ltrim($generator->baseControllerClass, '\\') ?>;
@@ -46,13 +46,13 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\db\StaleObjectException;
-<?php if ($isCrud): ?>
+<?php if ($isCrud) : ?>
 use yii\helpers\ArrayHelper;
 <?php endif; ?>
 
 class <?= $controllerClass ?> extends <?= StringHelper::basename($generator->baseControllerClass) . "\n" ?>
 {
-    <?php if ($isCrud): ?>
+    <?php if ($isCrud) : ?>
 public function init(): void
     {
         parent::init();
@@ -71,7 +71,7 @@ public function init(): void
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
-    <?php else: ?>
+    <?php else : ?>
     /**
     * @return array
     */
@@ -93,7 +93,7 @@ public function init(): void
      */
     public function actionIndex(): string
     {
-<?php if (!empty($generator->searchModelClass)): ?>
+<?php if (!empty($generator->searchModelClass)) : ?>
         $searchModel = new <?= isset($searchModelAlias) ? $searchModelAlias : $searchModelClass ?>();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
@@ -101,7 +101,7 @@ public function init(): void
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
-<?php else: ?>
+<?php else : ?>
         $dataProvider = new ActiveDataProvider([
             'query' => <?= $modelClass ?>::find(),
         ]);

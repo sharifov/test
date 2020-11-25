@@ -24,11 +24,11 @@ use yii\db\ActiveRecord;
  */
 class UserCommissionRules extends \yii\db\ActiveRecord
 {
-	public const VALUE_MAX = 100;
-	public const VALUE_MIN = 0;
+    public const VALUE_MAX = 100;
+    public const VALUE_MIN = 0;
 
-	public const EXP_MAX_VALUE = 32767;
-	public const EXP_MIN_VALUE = 0;
+    public const EXP_MAX_VALUE = 32767;
+    public const EXP_MIN_VALUE = 0;
 
     /**
      * {@inheritdoc}
@@ -38,24 +38,24 @@ class UserCommissionRules extends \yii\db\ActiveRecord
         return 'user_commission_rules';
     }
 
-	public function behaviors(): array
-	{
-		return [
-			'timestamp' => [
-				'class' => TimestampBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['ucr_created_dt', 'ucr_updated_dt'],
-					ActiveRecord::EVENT_BEFORE_UPDATE => ['ucr_updated_dt'],
-				],
-				'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
-			],
-			'user' => [
-				'class' => BlameableBehavior::class,
-				'createdByAttribute' => 'ucr_created_user_id',
-				'updatedByAttribute' => 'ucr_updated_user_id',
-			],
-		];
-	}
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['ucr_created_dt', 'ucr_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['ucr_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'ucr_created_user_id',
+                'updatedByAttribute' => 'ucr_updated_user_id',
+            ],
+        ];
+    }
 
     /**
      * {@inheritdoc}
@@ -68,9 +68,9 @@ class UserCommissionRules extends \yii\db\ActiveRecord
             [['ucr_value'], 'number', 'min' => self::VALUE_MIN, 'max' => self::VALUE_MAX],
             [['ucr_exp_month'], 'number', 'min' => self::EXP_MIN_VALUE, 'max' => self::EXP_MAX_VALUE],
             [['ucr_order_profit'], 'number', 'min' => self::VALUE_MIN],
-			[['ucr_kpi_percent'], 'number', 'max' => self::VALUE_MAX, 'min' => self::VALUE_MIN],
-			[['ucr_value'], 'filter', 'filter' => 'floatval'],
-			[['ucr_created_dt', 'ucr_updated_dt'], 'safe'],
+            [['ucr_kpi_percent'], 'number', 'max' => self::VALUE_MAX, 'min' => self::VALUE_MIN],
+            [['ucr_value'], 'filter', 'filter' => 'floatval'],
+            [['ucr_created_dt', 'ucr_updated_dt'], 'safe'],
             [['ucr_exp_month', 'ucr_kpi_percent', 'ucr_order_profit'], 'unique', 'targetAttribute' => ['ucr_exp_month', 'ucr_kpi_percent', 'ucr_order_profit']],
             [['ucr_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ucr_created_user_id' => 'id']],
             [['ucr_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ucr_updated_user_id' => 'id']],
@@ -114,11 +114,11 @@ class UserCommissionRules extends \yii\db\ActiveRecord
         return $this->hasOne(Employee::class, ['id' => 'ucr_updated_user_id']);
     }
 
-	/**
-	 * @return UserCommissionRulesQuery|\yii\db\ActiveQuery
-	 */
-	public static function find()
-	{
-		return new UserCommissionRulesQuery(static::class);
-	}
+    /**
+     * @return UserCommissionRulesQuery|\yii\db\ActiveQuery
+     */
+    public static function find()
+    {
+        return new UserCommissionRulesQuery(static::class);
+    }
 }

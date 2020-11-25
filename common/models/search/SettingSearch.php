@@ -47,7 +47,7 @@ class SettingSearch extends Setting
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['s_updated_dt' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['s_updated_dt' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 50,
             ],

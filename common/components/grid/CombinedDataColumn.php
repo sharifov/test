@@ -70,7 +70,7 @@ class CombinedDataColumn extends DataColumn
         $labels = [];
         foreach ($this->attributes as $i => $attribute) {
             $this->setParameters($i, $attribute);
-            $labels['{'.$i.'}'] = parent::renderHeaderCellContent();
+            $labels['{' . $i . '}'] = parent::renderHeaderCellContent();
         }
 
         if ($this->labelTemplate === null) {
@@ -93,7 +93,7 @@ class CombinedDataColumn extends DataColumn
         $values = [];
         foreach ($this->attributes as $i => $attribute) {
             $this->setParameters($i, $attribute);
-            $values['{'.$i.'}'] = parent::renderDataCellContent($model, $key, $index);
+            $values['{' . $i . '}'] = parent::renderDataCellContent($model, $key, $index);
         }
 
         if ($this->valueTemplate === null) {

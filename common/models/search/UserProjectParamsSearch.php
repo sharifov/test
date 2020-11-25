@@ -64,7 +64,7 @@ class UserProjectParamsSearch extends UserProjectParams
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['upp_updated_dt' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['upp_updated_dt' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 20,
             ],
@@ -83,7 +83,7 @@ class UserProjectParamsSearch extends UserProjectParams
             return $dataProvider;
         }
 
-        if ($this->upp_updated_dt){
+        if ($this->upp_updated_dt) {
             $query->andFilterWhere(['>=', 'upp_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->upp_updated_dt))])
                 ->andFilterWhere(['<=', 'upp_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->upp_updated_dt) + 3600 * 24)]);
         }
@@ -119,7 +119,7 @@ class UserProjectParamsSearch extends UserProjectParams
             $query->andWhere(['like', UserVoiceMail::tableName() . '.uvm_name', $this->upp_vm_id]);
         }
 
-        if($this->supervision_id > 0) {
+        if ($this->supervision_id > 0) {
             $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
             $query->andWhere(['IN', 'employees.id', $subQuery]);

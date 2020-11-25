@@ -58,18 +58,18 @@ class ClientProject extends \yii\db\ActiveRecord
     }
 
     public function behaviors(): array
-	{
-		$behaviors = [
-			'timestamp' => [
-				'class' => TimestampBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['cp_created_dt'],
-				],
-				'value' => date('Y-m-d H:i:s')
-			],
-		];
-		return ArrayHelper::merge(parent::behaviors(), $behaviors);
-	}
+    {
+        $behaviors = [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['cp_created_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s')
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
 
     /**
      * Gets query for [[CpClient]].
@@ -97,10 +97,10 @@ class ClientProject extends \yii\db\ActiveRecord
      * @param bool $action
      * @return bool
      */
-    public static function unSubScribe(int $cID, int $pID, bool $action):bool
+    public static function unSubScribe(int $cID, int $pID, bool $action): bool
     {
-        $model = self::find()->where(['cp_client_id'=>$cID, 'cp_project_id'=>$pID])->one();
-        if ($model){
+        $model = self::find()->where(['cp_client_id' => $cID, 'cp_project_id' => $pID])->one();
+        if ($model) {
             $model->cp_unsubscribe = $action;
         } else {
             $model = new self();

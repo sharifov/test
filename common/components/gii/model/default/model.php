@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This is the template for generating the model class of a specified table.
  */
@@ -24,14 +25,14 @@ use Yii;
 /**
  * This is the model class for table "<?= $generator->generateTableName($tableName) ?>".
  *
-<?php foreach ($properties as $property => $data): ?>
+<?php foreach ($properties as $property => $data) : ?>
  * @property <?= "{$data['type']} \${$property}"  . ($data['comment'] ? ' ' . strtr($data['comment'], ["\n" => ' ']) : '') . "\n" ?>
 <?php endforeach; ?>
-<?php if (!empty($relations)): ?>
+<?php if (!empty($relations)) : ?>
  *
-<?php foreach ($relations as $name => $relation): ?>
+    <?php foreach ($relations as $name => $relation) : ?>
  * @property <?= $relation[1] . ($relation[2] ? '[]' : '') . ' $' . lcfirst($name) . "\n" ?>
-<?php endforeach; ?>
+    <?php endforeach; ?>
 <?php endif; ?>
  */
 class <?= $className ?> extends <?= '\\' . ltrim($generator->baseClass, '\\') . "\n" ?>
@@ -48,8 +49,7 @@ class <?= $className ?> extends <?= '\\' . ltrim($generator->baseClass, '\\') . 
 } ?>
         ];
     }
-<?php foreach ($relations as $name => $relation): ?>
-
+<?php foreach ($relations as $name => $relation) : ?>
     public function get<?= $name ?>(): \yii\db\ActiveQuery
     {
         <?= $relation[0] . "\n" ?>
@@ -59,16 +59,16 @@ class <?= $className ?> extends <?= '\\' . ltrim($generator->baseClass, '\\') . 
     public function attributeLabels(): array
     {
         return [
-<?php foreach ($labels as $name => $label): ?>
+<?php foreach ($labels as $name => $label) : ?>
             <?= "'$name' => " . $generator->generateString($label) . ",\n" ?>
 <?php endforeach; ?>
         ];
     }
-<?php if ($queryClassName): ?>
-<?php
+<?php if ($queryClassName) : ?>
+    <?php
     $queryClassFullName = ($generator->ns === $generator->queryNs) ? $queryClassName : '\\' . $generator->queryNs . '\\' . $queryClassName;
     echo "\n";
-?>
+    ?>
     public static function find(): <?= $queryClassFullName  . "\n"?>
     {
         return new <?= $queryClassFullName ?>(static::class);
@@ -79,8 +79,7 @@ class <?= $className ?> extends <?= '\\' . ltrim($generator->baseClass, '\\') . 
     {
         return '<?= $generator->generateTableName($tableName) ?>';
     }
-<?php if ($generator->db !== 'db'): ?>
-
+<?php if ($generator->db !== 'db') : ?>
     /**
     * @return \yii\db\Connection the database connection used by this AR class.
     */

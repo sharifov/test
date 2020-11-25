@@ -57,7 +57,7 @@ class KpiHistorySearch extends KpiHistory
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['kh_date_dt' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['kh_date_dt' => SORT_DESC]],
         ]);
 
         $this->load($params);

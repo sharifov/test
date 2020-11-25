@@ -47,12 +47,12 @@ class CurrencyHistorySearch extends CurrencyHistory
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-			'sort' => [
-				'defaultOrder' => [
-					'ch_created_date' => SORT_DESC,
-					'ch_code' => SORT_ASC
-				]
-			]
+            'sort' => [
+                'defaultOrder' => [
+                    'ch_created_date' => SORT_DESC,
+                    'ch_code' => SORT_ASC
+                ]
+            ]
         ]);
 
         $this->load($params);

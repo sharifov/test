@@ -85,10 +85,11 @@ class GaQuote
             $this->postData['cd11'] = implode(',', $this->getMarketingAirlines());
 
             $this->postData = GaHelper::preparePostData($this->postData, $this->lead);
-
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableFormatter($throwable),
-            'GaQuote:prepareData:Throwable');
+            Yii::error(
+                AppHelper::throwableFormatter($throwable),
+                'GaQuote:prepareData:Throwable'
+            );
             $this->postData = [];
         }
         return $this;
@@ -98,7 +99,7 @@ class GaQuote
     {
         $result = [];
         foreach ($quote->quoteTrips as $trpKey => $trip) {
-            foreach ($trip->quoteSegments as  $segmentKey => $segment) {
+            foreach ($trip->quoteSegments as $segmentKey => $segment) {
                 if ($trpKey === 0) {
                     $result[] = $segment->qs_departure_airport_code;
                 }

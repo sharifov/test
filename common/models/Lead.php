@@ -372,7 +372,7 @@ class Lead extends ActiveRecord implements Objectable
     /**
      * {@inheritdoc}
      */
-    public static function tableName() : string
+    public static function tableName(): string
     {
         return 'leads';
     }
@@ -2041,7 +2041,7 @@ class Lead extends ActiveRecord implements Objectable
     /**
      * @return int
      */
-    public function updateLastAction() : int
+    public function updateLastAction(): int
     {
         return self::updateAll(['l_last_action_dt' => date('Y-m-d H:i:s')], ['id' => $this->id]);
     }
@@ -2551,17 +2551,17 @@ class Lead extends ActiveRecord implements Objectable
 
                             if ($offset > 0) {
                                 if ($offset < 10) {
-                                    $offsetStr = '+0'.$offset.':00';
+                                    $offsetStr = '+0' . $offset . ':00';
                                 } else {
-                                    $offsetStr = '+'.$offset.':00';
+                                    $offsetStr = '+' . $offset . ':00';
                                 }
                             }
 
                             if ($offset < 0) {
                                 if ($offset > -10) {
-                                    $offsetStr = '-0'.abs($offset).':00';
+                                    $offsetStr = '-0' . abs($offset) . ':00';
                                 } else {
-                                    $offsetStr = $offset.':00';
+                                    $offsetStr = $offset . ':00';
                                 }
                             }
 
@@ -2607,7 +2607,6 @@ class Lead extends ActiveRecord implements Objectable
             }
 
             if ($user && $user->email) {
-
                 //$swiftMailer = Yii::$app->mailer2;
 
                 $userName = $user->username;
@@ -2985,7 +2984,6 @@ Reason: {reason}',
 
 
                 if ($this->status != self::STATUS_TRASH && isset($changedAttributes['employee_id']) && $this->employee_id && $changedAttributes['employee_id'] != $this->employee_id) {
-
                     //echo $changedAttributes['employee_id'].' - '. $this->employee_id;
 
                     if (isset($changedAttributes['status']) && ($changedAttributes['status'] == self::STATUS_TRASH || $changedAttributes['status'] == self::STATUS_FOLLOW_UP)) {
@@ -3163,7 +3161,7 @@ Reason: {reason}',
      * @return DateTime|null
      * @throws \Exception
      */
-    public function getClientTime2():? DateTime
+    public function getClientTime2(): ?DateTime
     {
         $clientDt = null;
         $offset = false;
@@ -3297,7 +3295,7 @@ Reason: {reason}',
 
             //$clientTime = $clientTime; . ' '.$timezone->getName();  //$offset
 
-            $clientTime = '<b title="TZ ('.$offset.') '.($this->offset_gmt ? 'by IP': 'by IATA').'"><i class="fa fa-clock-o '.($this->offset_gmt ? 'success': '').'"></i> ' . Html::encode($clientTime) . '</b>'; //<br/>(GMT: ' .$offset_gmt . ')';
+            $clientTime = '<b title="TZ (' . $offset . ') ' . ($this->offset_gmt ? 'by IP' : 'by IATA') . '"><i class="fa fa-clock-o ' . ($this->offset_gmt ? 'success' : '') . '"></i> ' . Html::encode($clientTime) . '</b>'; //<br/>(GMT: ' .$offset_gmt . ')';
 
             //$clientTime = $offset;
         }
@@ -3354,7 +3352,6 @@ Reason: {reason}',
     public function beforeSave($insert): bool
     {
         if (parent::beforeSave($insert)) {
-
             if ($insert) {
                 //$this->created = date('Y-m-d H:i:s');
                 if (!empty($this->project_id) && empty($this->source_id) && $this->l_type_create !== self::TYPE_CREATE_CLIENT_CHAT) {
@@ -3375,7 +3372,6 @@ Reason: {reason}',
                 /*if(!$this->gid) {
                     $this->gid = md5(uniqid('', true));
                 }*/
-
             } else {
                 //$this->updated = date('Y-m-d H:i:s');
             }
@@ -3484,7 +3480,7 @@ Reason: {reason}',
             return $this->totalTips;
         }
 
-        $this->totalTips = $this->tips ? $this->tips/2 : 0;
+        $this->totalTips = $this->tips ? $this->tips / 2 : 0;
 
         return $this->totalTips;
     }
@@ -3786,7 +3782,7 @@ Reason: {reason}',
      * @param $projectContactInfo
      * @return array
      */
-    public function getEmailData2($quoteIds = [], $projectContactInfo) : array
+    public function getEmailData2($quoteIds = [], $projectContactInfo): array
     {
         $project = $this->project;
 
@@ -4415,9 +4411,9 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $leadFlights = $this->leadFlightSegments;
         $key = $this->cabin;
         foreach ($leadFlights as $flEntry) {
-            $key .= $flEntry->origin.$flEntry->destination.strtotime($flEntry->departure).$flEntry->flexibility_type.$flEntry->flexibility;
+            $key .= $flEntry->origin . $flEntry->destination . strtotime($flEntry->departure) . $flEntry->flexibility_type . $flEntry->flexibility;
         }
-        $key .= '_'.$this->adults.'_'.$this->children.'_'.$this->infants;
+        $key .= '_' . $this->adults . '_' . $this->children . '_' . $this->infants;
         return $key;
     }
 
@@ -4513,7 +4509,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
 
         $query->andWhere(['status' => self::STATUS_PENDING, 'l_call_status_id' => [self::CALL_STATUS_READY, self::CALL_STATUS_NONE]]);
         $query->andWhere(['OR', ['IS', 'l_pending_delay_dt', null], ['<=', 'l_pending_delay_dt', date('Y-m-d H:i:s')]]);
-        $query->andWhere(['OR', ['BETWEEN', new Expression('TIME(CONVERT_TZ(NOW(), \'+00:00\', offset_gmt))'), '09:00', '21:00'], ['>=', 'created', date('Y-m-d H:i:s', strtotime('-'.self::PENDING_ALLOW_CALL_TIME_MINUTES.' min'))]]);
+        $query->andWhere(['OR', ['BETWEEN', new Expression('TIME(CONVERT_TZ(NOW(), \'+00:00\', offset_gmt))'), '09:00', '21:00'], ['>=', 'created', date('Y-m-d H:i:s', strtotime('-' . self::PENDING_ALLOW_CALL_TIME_MINUTES . ' min'))]]);
         $query->andWhere(['OR', ['employee_id' => null], ['employee_id' => $user_id]]);
 
         if ($user_id) {
@@ -4595,7 +4591,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     public function getCommunicationInfo(bool $linkMode = true): string
     {
         $str = '';
-        $linkAttributes = ['target' => '_blank', 'data-pjax'=> '0'];
+        $linkAttributes = ['target' => '_blank', 'data-pjax' => '0'];
 
         if ($linkMode) {
             $callsText = '<span title="Calls Out / In"><i class="fa fa-phone success"></i> ' . $this->getCountCalls(Call::CALL_TYPE_OUT) . '/' .
@@ -4616,7 +4612,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
             }
 
             $emilText = '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> ' .
-                $this->getCountEmails(Email::TYPE_OUTBOX) .'/'.  $this->getCountEmails(Email::TYPE_INBOX) . '</span> | ';
+                $this->getCountEmails(Email::TYPE_OUTBOX) . '/' .  $this->getCountEmails(Email::TYPE_INBOX) . '</span> | ';
             if (Auth::can('/email/index')) {
                 $str .= Html::a(
                     $emilText,
@@ -4639,9 +4635,9 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
                 $str .= $chatText;
             }
         } else {
-            $str .= '<span title="Calls Out / In / Join"><i class="fa fa-phone success"></i> '. $this->getCountCalls(\common\models\Call::CALL_TYPE_OUT) .'/'.  $this->getCountCalls(\common\models\Call::CALL_TYPE_IN) .'/'.  $this->getCountCalls(\common\models\Call::CALL_TYPE_JOIN) .'</span> | ';
-            $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> '. $this->getCountSms(\common\models\Sms::TYPE_OUTBOX) .'/'.  $this->getCountSms(\common\models\Sms::TYPE_INBOX) .'</span> | ';
-            $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> '. $this->getCountEmails(\common\models\Email::TYPE_OUTBOX) .'/'.  $this->getCountEmails(\common\models\Email::TYPE_INBOX) .'</span> | ';
+            $str .= '<span title="Calls Out / In / Join"><i class="fa fa-phone success"></i> ' . $this->getCountCalls(\common\models\Call::CALL_TYPE_OUT) . '/' .  $this->getCountCalls(\common\models\Call::CALL_TYPE_IN) . '/' .  $this->getCountCalls(\common\models\Call::CALL_TYPE_JOIN) . '</span> | ';
+            $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> ' . $this->getCountSms(\common\models\Sms::TYPE_OUTBOX) . '/' .  $this->getCountSms(\common\models\Sms::TYPE_INBOX) . '</span> | ';
+            $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> ' . $this->getCountEmails(\common\models\Email::TYPE_OUTBOX) . '/' .  $this->getCountEmails(\common\models\Email::TYPE_INBOX) . '</span> | ';
             $str .= '<span title="Client Chat"><i class="fa fa-weixin warning"></i> ' . $this->getCountClientChat() . '</span>';
         }
 

@@ -59,7 +59,7 @@ class UserParamsSearch extends UserParams
             return $dataProvider;
         }
 
-        if ($this->up_updated_dt){
+        if ($this->up_updated_dt) {
             $query->andFilterWhere(['>=', 'up_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->up_updated_dt))])
                 ->andFilterWhere(['<=', 'up_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->up_updated_dt) + 3600 * 24)]);
         }

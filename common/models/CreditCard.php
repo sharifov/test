@@ -77,9 +77,9 @@ class CreditCard extends ActiveRecord
         self::STATUS_INVALID         =>   'danger',
     ];
 
-	public const SCENARIO_CASE_AJAX_UPDATE = 'case_ajax_update';
+    public const SCENARIO_CASE_AJAX_UPDATE = 'case_ajax_update';
 
-	/**
+    /**
      * @return string
      */
     public static function tableName(): string
@@ -87,12 +87,12 @@ class CreditCard extends ActiveRecord
         return 'credit_card';
     }
 
-	public function scenarios()
-	{
-		$scenarios = parent::scenarios();
-		$scenarios[self::SCENARIO_CASE_AJAX_UPDATE] = ['cc_holder_name', 'cc_type_id'];
-		return $scenarios;
-	}
+    public function scenarios()
+    {
+        $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_CASE_AJAX_UPDATE] = ['cc_holder_name', 'cc_type_id'];
+        return $scenarios;
+    }
 
     /**
      * @return array
@@ -343,5 +343,4 @@ class CreditCard extends ActiveRecord
         $str = openssl_decrypt($data, $cryptMethod, $cryptPassword, 0, $cryptIv);
         return $str ?: '';
     }
-
 }

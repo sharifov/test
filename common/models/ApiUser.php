@@ -118,8 +118,11 @@ class ApiUser extends ActiveRecord implements IdentityInterface, RateLimitInterf
      */
     public static function getList()
     {
-        return ArrayHelper::map(self::find()->where(['au_enabled' => true])->orderBy(['au_id' => SORT_ASC])->asArray()->all(),
-            'au_id', 'au_name');
+        return ArrayHelper::map(
+            self::find()->where(['au_enabled' => true])->orderBy(['au_id' => SORT_ASC])->asArray()->all(),
+            'au_id',
+            'au_name'
+        );
     }
 
     /**
@@ -128,10 +131,9 @@ class ApiUser extends ActiveRecord implements IdentityInterface, RateLimitInterf
 
     public static function findIdentity($id)
     {
-        if (Yii::$app->getSession()->has('user-'.$id)) {
-            return new self(Yii::$app->getSession()->get('user-'.$id));
-        }
-        else {
+        if (Yii::$app->getSession()->has('user-' . $id)) {
+            return new self(Yii::$app->getSession()->get('user-' . $id));
+        } else {
             return static::findOne(['au_id' => $id]);
         }
     }
@@ -190,7 +192,7 @@ class ApiUser extends ActiveRecord implements IdentityInterface, RateLimitInterf
      */
     public function validatePassword($password)
     {
-        return sha1($password) == $this->au_api_password ? TRUE : FALSE;
+        return sha1($password) == $this->au_api_password ? true : false;
         //Yii::$app->security->validatePassword($password, $this->ac_api_password);
     }
 

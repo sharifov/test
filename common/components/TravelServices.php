@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created
  * User: alex.connor@techork.com
@@ -38,7 +39,7 @@ class TravelServices extends Component
     /**
      *
      */
-    public function init() : void
+    public function init(): void
     {
         parent::init();
         $this->initRequest();
@@ -47,7 +48,7 @@ class TravelServices extends Component
     /**
      * @return bool
      */
-    private function initRequest() : bool
+    private function initRequest(): bool
     {
         try {
             $client = new Client(['baseUrl' => $this->url]);
@@ -76,7 +77,7 @@ class TravelServices extends Component
      * @return \yii\httpclient\Response
      * @throws Exception
      */
-    protected function sendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []) : Response
+    protected function sendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []): Response
     {
         $url = $action;
 
@@ -118,7 +119,7 @@ class TravelServices extends Component
      * @return array
      * @throws Exception
      */
-    public function airportExport(int $lastUpdate = 0, int $limit = 0, string $format = 'json') : array
+    public function airportExport(int $lastUpdate = 0, int $limit = 0, string $format = 'json'): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -136,7 +137,7 @@ class TravelServices extends Component
 
 
         $params = http_build_query($data);
-        $response = $this->sendRequest('airport/export?' . $params , [], 'get');
+        $response = $this->sendRequest('airport/export?' . $params, [], 'get');
 
         if ($response->isOk) {
             if (!empty($response->data['Data'])) {
@@ -151,6 +152,4 @@ class TravelServices extends Component
 
         return $out;
     }
-
-
 }

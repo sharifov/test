@@ -24,17 +24,14 @@ class DummyLogger implements LoggerInterface
 
     public function release(): void
     {
-
     }
 
     public function messagesInlineMode(): void
     {
-
     }
 
     public function messagesNewLineMode(): void
     {
-
     }
 
     private function isMessagesInlineMode(): bool
@@ -44,7 +41,6 @@ class DummyLogger implements LoggerInterface
 
     private function cleanMessages(): void
     {
-
     }
 
     public function isOff(): bool

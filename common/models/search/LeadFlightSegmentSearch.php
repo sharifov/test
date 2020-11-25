@@ -49,7 +49,7 @@ class LeadFlightSegmentSearch extends LeadFlightSegment
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['id' => SORT_ASC]],
+            'sort' => ['defaultOrder' => ['id' => SORT_ASC]],
             'pagination' => [
                 'pageSize' => 30,
             ],

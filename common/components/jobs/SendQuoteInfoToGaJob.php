@@ -23,14 +23,15 @@ class SendQuoteInfoToGaJob extends BaseObject implements JobInterface
      * @param Queue $queue
      * @return bool
      */
-    public function execute($queue) : bool
+    public function execute($queue): bool
     {
         try {
-            if($this->checkParams() && $gaQuote = new GaQuote($this->quote)) {
-
+            if ($this->checkParams() && $gaQuote = new GaQuote($this->quote)) {
                 $gaQuote->send();
-                Yii::info('Quote (ID:' . $this->quote->id . ') info sent to GA',
-                    'info\SendQuoteInfoToGaJob:execute:sent');
+                Yii::info(
+                    'Quote (ID:' . $this->quote->id . ') info sent to GA',
+                    'info\SendQuoteInfoToGaJob:execute:sent'
+                );
             }
         } catch (\Throwable $throwable) {
             AppHelper::throwableLogger($throwable, 'SendQuoteInfoToGaJob:execute:Throwable');

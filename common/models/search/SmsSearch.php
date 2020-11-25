@@ -88,7 +88,7 @@ class SmsSearch extends Sms
         }
 
 
-        if($this->datetime_start && $this->datetime_end){
+        if ($this->datetime_start && $this->datetime_end) {
             $query->andFilterWhere(['>=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
                 ->andFilterWhere(['<=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         }
@@ -97,7 +97,7 @@ class SmsSearch extends Sms
             $query->andFilterWhere(['DATE(s_created_dt)' => date('Y-m-d', strtotime($this->s_created_dt))]);
         }
 
-        if($this->supervision_id > 0) {
+        if ($this->supervision_id > 0) {
             $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
             $query->andWhere(['IN', 's_created_user_id', $subQuery]);
@@ -167,7 +167,7 @@ class SmsSearch extends Sms
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['s_created_dt' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['s_created_dt' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 20,
             ],
@@ -211,8 +211,7 @@ class SmsSearch extends Sms
         ]);
 
 
-        if(isset($params['SmsSearch']['user_id']) && $params['SmsSearch']['user_id'] > 0) {
-
+        if (isset($params['SmsSearch']['user_id']) && $params['SmsSearch']['user_id'] > 0) {
 //            $subQuery = UserProjectParams::find()->select(['DISTINCT(upp_tw_phone_number)'])->where(['upp_user_id' => $params['SmsSearch']['user_id']])
 //                ->andWhere(['and', ['<>', 'upp_tw_phone_number', ''], ['IS NOT', 'upp_tw_phone_number', null]]);
 
@@ -226,12 +225,12 @@ class SmsSearch extends Sms
         }
 
 
-        if(isset($params['SmsSearch']['phone_list']) && $params['SmsSearch']['phone_list']) {
+        if (isset($params['SmsSearch']['phone_list']) && $params['SmsSearch']['phone_list']) {
             //$params['SmsSearch']['phone_list'] = strtolower(trim($params['SmsSearch']['phone']));
             $query->andWhere(['or', ['s_phone_from' => $params['SmsSearch']['phone_list']], ['and', ['s_phone_to' => $params['SmsSearch']['phone_list']], ['s_type_id' => Sms::TYPE_INBOX]]]);
         }
 
-        if(is_numeric($this->s_is_deleted)) {
+        if (is_numeric($this->s_is_deleted)) {
             $query->andWhere(['s_is_deleted' => $this->s_is_deleted]);
         }
 
@@ -266,7 +265,7 @@ class SmsSearch extends Sms
         $query->from(static::tableName());
         $query->where('s_status_id IS NOT NULL');
         $query->andWhere(['s_created_user_id' => $user_id]);
-        if($this->datetime_start && $this->datetime_end){
+        if ($this->datetime_start && $this->datetime_end) {
             $query->andWhere(['>=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))]);
             $query->andWhere(['<=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         }

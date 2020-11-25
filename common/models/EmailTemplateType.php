@@ -146,7 +146,7 @@ class EmailTemplateType extends \yii\db\ActiveRecord
      * @return array
      * @throws \yii\httpclient\Exception
      */
-    public static function synchronizationTypes() : array
+    public static function synchronizationTypes(): array
     {
         $data = [
             'created' => [],
@@ -158,37 +158,35 @@ class EmailTemplateType extends \yii\db\ActiveRecord
         $communication = Yii::$app->communication;
         $mailTypes = $communication->mailTypes();
 
-        if($mailTypes && isset($mailTypes['data']['types'])) {
+        if ($mailTypes && isset($mailTypes['data']['types'])) {
+            foreach ($mailTypes['data']['types'] as $type) {
+                $t = self::findOne($type['etp_id']);
+                if (!$t) {
+                    $t = new self();
+                    $t->etp_id = $type['etp_id'];
+                    $t->etp_created_dt = date('Y-m-d H:i:s');
+                    $t->etp_name = $type['etp_name'];
 
-                foreach ($mailTypes['data']['types'] as $type) {
-                    $t = self::findOne($type['etp_id']);
-                    if(!$t) {
-                        $t = new self();
-                        $t->etp_id = $type['etp_id'];
-                        $t->etp_created_dt = date('Y-m-d H:i:s');
-                        $t->etp_name = $type['etp_name'];
-
-                        if(isset(Yii::$app->user) && Yii::$app->user->id) {
-                            $t->etp_created_user_id = Yii::$app->user->id;
-                        }
-
-                        $data['created'][] = $type['etp_id'];
-                    } else {
-                        $data['updated'][] = $type['etp_id'];
+                    if (isset(Yii::$app->user) && Yii::$app->user->id) {
+                        $t->etp_created_user_id = Yii::$app->user->id;
                     }
 
-                    $t->etp_key = $type['etp_key'];
-                    $t->etp_origin_name = $type['etp_name'];
-                    $t->etp_updated_dt = date('Y-m-d H:i:s');
-
-                    if(isset(Yii::$app->user) && Yii::$app->user->id) {
-                        $t->etp_updated_user_id = Yii::$app->user->id;
-                    }
-                    if(!$t->save()) {
-                        Yii::error(VarDumper::dumpAsString($t->errors), 'EmailTemplateType:synchronizationTypes:save');
-                    }
+                    $data['created'][] = $type['etp_id'];
+                } else {
+                    $data['updated'][] = $type['etp_id'];
                 }
 
+                $t->etp_key = $type['etp_key'];
+                $t->etp_origin_name = $type['etp_name'];
+                $t->etp_updated_dt = date('Y-m-d H:i:s');
+
+                if (isset(Yii::$app->user) && Yii::$app->user->id) {
+                    $t->etp_updated_user_id = Yii::$app->user->id;
+                }
+                if (!$t->save()) {
+                    Yii::error(VarDumper::dumpAsString($t->errors), 'EmailTemplateType:synchronizationTypes:save');
+                }
+            }
         } else {
             $data['error'] = 'Not found response data';
         }
@@ -202,14 +200,14 @@ class EmailTemplateType extends \yii\db\ActiveRecord
      * @param int|null $dep_id
      * @return array
      */
-    public static function getList(?bool $withHidden = true, ?int $dep_id) : array
+    public static function getList(?bool $withHidden = true, ?int $dep_id): array
     {
         $query = self::find()->orderBy(['etp_name' => SORT_ASC]);
-        if(!$withHidden) {
+        if (!$withHidden) {
             $query->andWhere(['etp_hidden' => false]);
         }
 
-        if($dep_id !== null) {
+        if ($dep_id !== null) {
             $query->andWhere(['etp_dep_id' => $dep_id]);
         }
 
@@ -222,19 +220,18 @@ class EmailTemplateType extends \yii\db\ActiveRecord
      * @param int|null $dep_id
      * @return array
      */
-    public static function getKeyList(?bool $withHidden = true, ?int $dep_id) : array
+    public static function getKeyList(?bool $withHidden = true, ?int $dep_id): array
     {
         $query = self::find()->orderBy(['etp_name' => SORT_ASC]);
-        if(!$withHidden) {
+        if (!$withHidden) {
             $query->andWhere(['etp_hidden' => false]);
         }
 
-        if($dep_id !== null) {
+        if ($dep_id !== null) {
             $query->andWhere(['etp_dep_id' => $dep_id]);
         }
 
         $data = $query->asArray()->all();
         return ArrayHelper::map($data, 'etp_key', 'etp_name');
     }
-
 }

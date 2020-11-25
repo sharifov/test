@@ -97,7 +97,7 @@ class UserGroupAssign extends \yii\db\ActiveRecord
     /**
      * @return array
      */
-    public static function getGroupsNameByUserId($userID) : array
+    public static function getGroupsNameByUserId($userID): array
     {
         $data = self::find()->with('ugsGroup')->where(['ugs_user_id' => $userID])->asArray()->all();
         return ArrayHelper::getColumn(ArrayHelper::getColumn($data, 'ugsGroup'), 'ug_name');

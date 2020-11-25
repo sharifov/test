@@ -23,13 +23,15 @@ class SendLeadInfoToGaJob extends BaseObject implements JobInterface
      * @param Queue $queue
      * @return bool
      */
-    public function execute($queue) : bool
+    public function execute($queue): bool
     {
         try {
-            if($this->checkParams() && $gaLead = new GaLead($this->lead)) {
+            if ($this->checkParams() && $gaLead = new GaLead($this->lead)) {
                 $gaLead->send();
-                Yii::info('Lead (ID:' . $this->lead->id . ') info sent to GA',
-                    'info\SendLeadInfoToGaJob:execute:sent');
+                Yii::info(
+                    'Lead (ID:' . $this->lead->id . ') info sent to GA',
+                    'info\SendLeadInfoToGaJob:execute:sent'
+                );
             }
         } catch (\Throwable $throwable) {
             AppHelper::throwableLogger($throwable, 'SendLeadInfoToGaJob:execute:Throwable');

@@ -177,15 +177,20 @@ class Notifications extends ActiveRecord
     public function getNotifyType()
     {
         switch ($this->n_type_id) {
-            case self::TYPE_SUCCESS: $str = 'success';
+            case self::TYPE_SUCCESS:
+                $str = 'success';
                 break;
-            case self::TYPE_INFO: $str = 'info';
+            case self::TYPE_INFO:
+                $str = 'info';
                 break;
-            case self::TYPE_WARNING: $str = 'notice';
+            case self::TYPE_WARNING:
+                $str = 'notice';
                 break;
-            case self::TYPE_DANGER: $str = 'error';
+            case self::TYPE_DANGER:
+                $str = 'error';
                 break;
-            default: $str = 'info';
+            default:
+                $str = 'info';
         }
         return $str;
     }
@@ -343,7 +348,7 @@ class Notifications extends ActiveRecord
      * @param array $data
      * @return bool
      */
-    public static function publish(string $command, array $params = [], array $data = []) : bool
+    public static function publish(string $command, array $params = [], array $data = []): bool
     {
         $redis = \Yii::$app->redis;
         $channels = [];
@@ -390,7 +395,7 @@ class Notifications extends ActiveRecord
      * @param array $data
      * @return bool
      */
-    public static function pub(array $channels, string $command, array $data = []) : bool
+    public static function pub(array $channels, string $command, array $data = []): bool
     {
         $redis = \Yii::$app->redis;
         if ($command) {

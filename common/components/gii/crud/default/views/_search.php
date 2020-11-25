@@ -22,7 +22,7 @@ use common\components\bootstrap4\activeForm\ActiveForm;
     <?= "<?php " ?>$form = ActiveForm::begin([
         'action' => ['index'],
         'method' => 'get',
-<?php if ($generator->enablePjax): ?>
+<?php if ($generator->enablePjax) : ?>
         'options' => [
             'data-pjax' => 1
         ],

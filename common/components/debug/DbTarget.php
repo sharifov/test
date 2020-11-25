@@ -44,7 +44,6 @@ class DbTarget implements Target
                 $out .= PHP_EOL;
             }
             $out .= $this->process($message);
-
         }
         Yii::getLogger()->log($out, $this->level, $this->category);
     }

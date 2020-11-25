@@ -46,7 +46,7 @@ class UserOnlineSearch extends UserOnline
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['uo_updated_dt' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['uo_updated_dt' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],

@@ -44,13 +44,13 @@ class DepartmentPhoneProjectQuery extends \yii\db\ActiveQuery
     public function byPhone($phone, bool $eagerLoading = true, bool $onyEnabled = false): self
     {
         if ($onyEnabled) {
-            $this->innerJoinWith(['phoneList' => static function(\sales\model\phoneList\entity\Scopes $query) use ($phone) {
+            $this->innerJoinWith(['phoneList' => static function (\sales\model\phoneList\entity\Scopes $query) use ($phone) {
                 $query
                     ->andOnCondition(['pl_enabled' => true])
                     ->andOnCondition(['pl_phone_number' => $phone]);
             }], $eagerLoading);
         } else {
-            $this->innerJoinWith(['phoneList' => static function(\sales\model\phoneList\entity\Scopes $query) use ($phone) {
+            $this->innerJoinWith(['phoneList' => static function (\sales\model\phoneList\entity\Scopes $query) use ($phone) {
                 $query->andOnCondition(['pl_phone_number' => $phone]);
             }], $eagerLoading);
         }
@@ -60,7 +60,7 @@ class DepartmentPhoneProjectQuery extends \yii\db\ActiveQuery
     public function withPhoneList(bool $onyEnabled = false): self
     {
         if ($onyEnabled) {
-            return $this->with(['phoneList' => static function(\sales\model\phoneList\entity\Scopes $query) {
+            return $this->with(['phoneList' => static function (\sales\model\phoneList\entity\Scopes $query) {
                 $query->enabled();
             }]);
         }

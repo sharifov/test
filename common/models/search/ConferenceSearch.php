@@ -34,7 +34,7 @@ class ConferenceSearch extends Conference
         // bypass scenarios() implementation in the parent class
         return Model::scenarios();
     }
-    
+
     public function search($params, Employee $user): ActiveDataProvider
     {
         $query = Conference::find()->with(['createdUser']);
@@ -43,7 +43,7 @@ class ConferenceSearch extends Conference
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cf_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['cf_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],

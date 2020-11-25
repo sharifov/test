@@ -1,12 +1,12 @@
 <?php
-namespace common\components;
 
+namespace common\components;
 
 use common\models\Employee;
 use common\models\EmployeeAcl;
 use common\models\EmployeeActivity;
 use common\models\GlobalAcl;
-use \Yii;
+use Yii;
 use yii\base\Behavior;
 use yii\web\Application;
 
@@ -52,7 +52,8 @@ class EmployeeActivityLogging extends Behavior
             $employee = Employee::findIdentity(Yii::$app->user->id);
             if ($employee->acl_rules_activated) {
                 $clientIP = $this->getClientIPAddress();
-                if ($clientIP === 'UNKNOWN' ||
+                if (
+                    $clientIP === 'UNKNOWN' ||
                     (!GlobalAcl::isActiveIPRule($clientIP) &&
                         !EmployeeAcl::isActiveIPRule($clientIP, Yii::$app->user->id))
                 ) {
@@ -65,20 +66,21 @@ class EmployeeActivityLogging extends Behavior
 
     private function getClientIPAddress()
     {
-        if (isset($_SERVER['HTTP_CLIENT_IP']))
+        if (isset($_SERVER['HTTP_CLIENT_IP'])) {
             $ipAddress = $_SERVER['HTTP_CLIENT_IP'];
-        else if (isset($_SERVER['HTTP_X_FORWARDED_FOR']))
+        } else if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
             $ipAddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
-        else if (isset($_SERVER['HTTP_X_FORWARDED']))
+        } else if (isset($_SERVER['HTTP_X_FORWARDED'])) {
             $ipAddress = $_SERVER['HTTP_X_FORWARDED'];
-        else if (isset($_SERVER['HTTP_FORWARDED_FOR']))
+        } else if (isset($_SERVER['HTTP_FORWARDED_FOR'])) {
             $ipAddress = $_SERVER['HTTP_FORWARDED_FOR'];
-        else if (isset($_SERVER['HTTP_FORWARDED']))
+        } else if (isset($_SERVER['HTTP_FORWARDED'])) {
             $ipAddress = $_SERVER['HTTP_FORWARDED'];
-        else if (isset($_SERVER['REMOTE_ADDR']))
+        } else if (isset($_SERVER['REMOTE_ADDR'])) {
             $ipAddress = $_SERVER['REMOTE_ADDR'];
-        else
+        } else {
             $ipAddress = 'UNKNOWN';
+        }
 
         return $ipAddress;
     }

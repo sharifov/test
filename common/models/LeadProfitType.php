@@ -26,22 +26,22 @@ use yii\db\ActiveRecord;
  */
 class LeadProfitType extends \yii\db\ActiveRecord
 {
-	public const LEAD_PROFIT_TYPE_NEW = 1;
-	public const LEAD_PROFIT_TYPE_FUP = 2;
-	public const LEAD_PROFIT_TYPE_REFERRAL = 3;
-	public const LEAD_PROFIT_TYPE_RETURN = 4;
-	public const LEAD_PROFIT_TYPE_GROUP = 5;
+    public const LEAD_PROFIT_TYPE_NEW = 1;
+    public const LEAD_PROFIT_TYPE_FUP = 2;
+    public const LEAD_PROFIT_TYPE_REFERRAL = 3;
+    public const LEAD_PROFIT_TYPE_RETURN = 4;
+    public const LEAD_PROFIT_TYPE_GROUP = 5;
 
-	public const LEAD_PROFIT_TYPE_LIST = [
-		self::LEAD_PROFIT_TYPE_NEW => 'New',
-		self::LEAD_PROFIT_TYPE_FUP => 'F-UP',
-		self::LEAD_PROFIT_TYPE_REFERRAL => 'Referral',
-		self::LEAD_PROFIT_TYPE_RETURN => 'Return',
-		self::LEAD_PROFIT_TYPE_GROUP => 'Group'
-	];
+    public const LEAD_PROFIT_TYPE_LIST = [
+        self::LEAD_PROFIT_TYPE_NEW => 'New',
+        self::LEAD_PROFIT_TYPE_FUP => 'F-UP',
+        self::LEAD_PROFIT_TYPE_REFERRAL => 'Referral',
+        self::LEAD_PROFIT_TYPE_RETURN => 'Return',
+        self::LEAD_PROFIT_TYPE_GROUP => 'Group'
+    ];
 
-	public const MAX_PERCENT_VALUE = 100;
-	public const MIN_PERCENT_VALUE = 0;
+    public const MAX_PERCENT_VALUE = 100;
+    public const MIN_PERCENT_VALUE = 0;
 
     /**
      * {@inheritdoc}
@@ -61,30 +61,30 @@ class LeadProfitType extends \yii\db\ActiveRecord
             [['lpt_profit_type_id', 'lpt_diff_rule', 'lpt_commission_min', 'lpt_commission_max', 'lpt_commission_fix', 'lpt_created_user_id', 'lpt_updated_user_id'], 'integer'],
             [['lpt_created_dt', 'lpt_updated_dt'], 'safe'],
             [['lpt_profit_type_id'], 'unique'],
-			['lpt_profit_type_id', 'in', 'range' => array_keys(self::getProfitTypeList())],
-			[['lpt_diff_rule', 'lpt_commission_min', 'lpt_commission_max', 'lpt_commission_fix'], 'default', 'value' => 0],
-			[['lpt_diff_rule', 'lpt_commission_min', 'lpt_commission_max', 'lpt_commission_fix'], 'number', 'min' => self::MIN_PERCENT_VALUE, 'max' => self::MAX_PERCENT_VALUE]
+            ['lpt_profit_type_id', 'in', 'range' => array_keys(self::getProfitTypeList())],
+            [['lpt_diff_rule', 'lpt_commission_min', 'lpt_commission_max', 'lpt_commission_fix'], 'default', 'value' => 0],
+            [['lpt_diff_rule', 'lpt_commission_min', 'lpt_commission_max', 'lpt_commission_fix'], 'number', 'min' => self::MIN_PERCENT_VALUE, 'max' => self::MAX_PERCENT_VALUE]
         ];
     }
 
-	public function behaviors(): array
-	{
-		return [
-			'timestamp' => [
-				'class' => TimestampBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['lpt_created_dt', 'lpt_updated_dt'],
-					ActiveRecord::EVENT_BEFORE_UPDATE => ['lpt_updated_dt'],
-				],
-				'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
-			],
-			'user' => [
-				'class' => BlameableBehavior::class,
-				'createdByAttribute' => 'lpt_created_user_id',
-				'updatedByAttribute' => 'lpt_updated_user_id',
-			],
-		];
-	}
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['lpt_created_dt', 'lpt_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['lpt_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'lpt_created_user_id',
+                'updatedByAttribute' => 'lpt_updated_user_id',
+            ],
+        ];
+    }
 
     /**
      * {@inheritdoc}
@@ -105,22 +105,22 @@ class LeadProfitType extends \yii\db\ActiveRecord
     }
 
     public static function getProfitTypeList(): array
-	{
-		return self::LEAD_PROFIT_TYPE_LIST;
-	}
+    {
+        return self::LEAD_PROFIT_TYPE_LIST;
+    }
 
-	public static function getProfitTypeName(int $id): ?string
-	{
-		return self::getProfitTypeList()[$id] ?? null;
-	}
+    public static function getProfitTypeName(int $id): ?string
+    {
+        return self::getProfitTypeList()[$id] ?? null;
+    }
 
-	public function getCreatedUser(): ActiveQuery
-	{
-		return $this->hasOne(Employee::class, ['id' => 'lpt_created_user_id']);
-	}
+    public function getCreatedUser(): ActiveQuery
+    {
+        return $this->hasOne(Employee::class, ['id' => 'lpt_created_user_id']);
+    }
 
-	public function getUpdatedUser(): ActiveQuery
-	{
-		return $this->hasOne(Employee::class, ['id' => 'lpt_updated_user_id']);
-	}
+    public function getUpdatedUser(): ActiveQuery
+    {
+        return $this->hasOne(Employee::class, ['id' => 'lpt_updated_user_id']);
+    }
 }

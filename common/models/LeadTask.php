@@ -111,23 +111,20 @@ class LeadTask extends \yii\db\ActiveRecord
     public static function createTaskList(int $lead_id, int $user_id, int $day = 1, string $date = '', int $category_id = 0, array $task_list = [])
     {
 
-        if($day < 1) {
+        if ($day < 1) {
             $day = 1;
         }
 
-        if(!$date) {
+        if (!$date) {
             $date = date('Y-m-d');
         }
 
-        if($lead_id && $user_id) {
-
-
-            if($category_id > 0) {
+        if ($lead_id && $user_id) {
+            if ($category_id > 0) {
                 $taskList = Task::find()->where(['t_category_id' => $category_id])->orderBy(['t_sort_order' => SORT_ASC])->all();
 
                 if ($taskList) {
                     foreach ($taskList as $task) {
-
                         $lt_date = date('Y-m-d', strtotime($date . " +" . ($day - 1) . " days"));
 
                         $lt = LeadTask::find()->where([
@@ -147,7 +144,6 @@ class LeadTask extends \yii\db\ActiveRecord
                                 Yii::error(print_r($lt->errors), 'LeadTask:createTaskList:Task:save');
                             }
                         }
-
                     }
                 }
             }
@@ -163,11 +159,10 @@ class LeadTask extends \yii\db\ActiveRecord
                     $taskList = [];
             }*/
 
-            if($task_list) {
+            if ($task_list) {
                 foreach ($taskList as $taskKey) {
                     $task = Task::find()->select(['t_id'])->where(['t_key' => $taskKey])->one();
                     if ($task) {
-
                         $lt_date = date('Y-m-d', strtotime($date . " +" . ($day - 1) . " days"));
 
                         $lt = LeadTask::find()->where([
@@ -198,8 +193,10 @@ class LeadTask extends \yii\db\ActiveRecord
 
     public static function deleteUnnecessaryTasks($leadId)
     {
-        LeadTask::deleteAll('lt_lead_id = :lead_id AND lt_date >= :date AND lt_completed_dt IS NULL',
-            [':lead_id' => $leadId, ':date' => date('Y-m-d') ]);
+        LeadTask::deleteAll(
+            'lt_lead_id = :lead_id AND lt_date >= :date AND lt_completed_dt IS NULL',
+            [':lead_id' => $leadId, ':date' => date('Y-m-d') ]
+        );
     }
 
 
@@ -207,9 +204,8 @@ class LeadTask extends \yii\db\ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
 
-        if($this->lt_completed_dt && $this->lt_lead_id && $this->ltLead) {
+        if ($this->lt_completed_dt && $this->lt_lead_id && $this->ltLead) {
             $this->ltLead->updateLastAction();
         }
-
     }
 }

@@ -128,7 +128,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         5000 => 150
     ];
 
-    private const CALL_EXPERT_SHIFT_MINUTES = 12*60;
+    private const CALL_EXPERT_SHIFT_MINUTES = 12 * 60;
 
     private const LEVEL_PERMISSION_IS_AGENT = 'isAgent';
 
@@ -185,7 +185,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @param string $hash
      * @return array|null
      */
-    public function getProjectAccess(string $hash):? array
+    public function getProjectAccess(string $hash): ?array
     {
         if (isset($this->projectAccess['data']) && !empty($this->projectAccess['hash']) && $hash === $this->projectAccess['hash']) {
             return $this->projectAccess['data'];
@@ -207,7 +207,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @param string $hash
      * @return array|null
      */
-    public function getDepartmentAccess(string $hash):? array
+    public function getDepartmentAccess(string $hash): ?array
     {
         if (isset($this->departmentAccess['data']) && !empty($this->departmentAccess['hash']) && $hash === $this->departmentAccess['hash']) {
             return $this->departmentAccess['data'];
@@ -403,7 +403,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             [['email'], 'email'],
             /*[['nickname_client_chat'], SlugValidator::class],*/
             ['email', 'filter', 'filter' => 'strtolower', 'skipOnEmpty' => true],
-            [['username'], 'match' ,'pattern'=>'/^[a-z0-9_\-\.]+$/i', 'message'=>'Username can contain only characters ("a-z", "0-9", "_", "-", ".")'],
+            [['username'], 'match' ,'pattern' => '/^[a-z0-9_\-\.]+$/i', 'message' => 'Username can contain only characters ("a-z", "0-9", "_", "-", ".")'],
             [['make_user_project_params'], 'boolean'],
             [['password_reset_token'], 'unique'],
             [['created_at', 'updated_at', 'last_activity', 'acl_rules_activated', 'user_groups', 'user_projects', 'deleted', 'user_departments', 'client_chat_user_channel'], 'safe'],
@@ -607,7 +607,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function getCallExpertCount(int $minutes = self::CALL_EXPERT_SHIFT_MINUTES): int
     {
         if ($this->_callExpertCount === null) {
-            $startShiftDateTime = date('Y-m-d H:i:s', strtotime('-' . $minutes .' minutes'));
+            $startShiftDateTime = date('Y-m-d H:i:s', strtotime('-' . $minutes . ' minutes'));
 
             $this->_callExpertCount = LeadCallExpert::find()->where(['lce_agent_user_id' => $this->id])->andWhere(['>=', 'lce_request_dt', $startShiftDateTime])->count();
         }
@@ -659,7 +659,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * @return bool
      */
-    public function isDeleted() : bool
+    public function isDeleted(): bool
     {
         return $this->status === self::STATUS_DELETED;
     }
@@ -669,7 +669,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @param string $role
      * @return bool
      */
-    public function canRole(string $role = '') : bool
+    public function canRole(string $role = ''): bool
     {
         if ($this->roles === null) {
             $roles = $this->getRoles();
@@ -683,7 +683,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @param array $roles
      * @return bool
      */
-    public function canRoles(array $roles = []) : bool
+    public function canRoles(array $roles = []): bool
     {
         foreach ($roles as $role) {
             if ($this->canRole($role)) {
@@ -1053,7 +1053,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 //                $this->form_roles[] = $role;
 //            }
 //        }
-        
+
         if (!$this->auth_key) {
             $this->generateAuthKey();
         }
@@ -1066,7 +1066,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @param bool $isNew
      * @throws \Exception
      */
-    public function addRole(bool $isNew = false) : void
+    public function addRole(bool $isNew = false): void
     {
         $auth = \Yii::$app->authManager;
 
@@ -1109,7 +1109,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @param bool $onlyNames
      * @return array
      */
-    public function getRoles($onlyNames = false) : array
+    public function getRoles($onlyNames = false): array
     {
         if ($this->rolesName === null) {
             //todo
@@ -1278,7 +1278,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
                 $list[$item['id']] = $item['username'] . ' (' . $item['description'];
             }
         }
-        foreach ($list as $k =>  $item) {
+        foreach ($list as $k => $item) {
             $list[$k] .= ')';
         }
         return $list;
@@ -1674,7 +1674,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * @return array
      */
-    public function paramsForSalary() : array
+    public function paramsForSalary(): array
     {
         $data = [];
         if ($this->userParams) {
@@ -1729,7 +1729,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             ->leftJoin(ProfitSplit::tableName() . ' ps', 'ps.ps_lead_id = l.id')
             ->leftJoin(TipsSplit::tableName() . ' ts', 'ts.ts_lead_id = l.id')
             ->where(['l.status' => Lead::STATUS_SOLD, 'q.status' => Quote::STATUS_APPLIED])
-            ->andWhere('l.employee_id = ' . $this->id . ' OR ps.ps_user_id = ' . $this->id. ' OR ts.ts_user_id = ' . $this->id)
+            ->andWhere('l.employee_id = ' . $this->id . ' OR ps.ps_user_id = ' . $this->id . ' OR ts.ts_user_id = ' . $this->id)
             ->groupBy(['q.id', 'l.id']);
 
         if ($startDate !== null || $endDate !== null) {
@@ -1753,18 +1753,18 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $quote = Quote::findOne(['id' => $entry['q_id']]);
             if ($entry['final_profit'] !== null) {
                 $totalProfit = $entry['final_profit'];
-                $agentsProcessingFee = ($entry['agents_processing_fee'])?$entry['agents_processing_fee']:$entry['pax_cnt']*SettingHelper::processingFee();
+                $agentsProcessingFee = ($entry['agents_processing_fee']) ? $entry['agents_processing_fee'] : $entry['pax_cnt'] * SettingHelper::processingFee();
                 $totalProfit -= $agentsProcessingFee;
             } else {
                 $totalProfit = $quote->getEstimationProfit();
             }
-            $totalTips = $entry['tips']/2;
+            $totalTips = $entry['tips'] / 2;
             if ($entry['agent_type'] == 'main') {
                 $agentProfit = $totalProfit * (100 - $entry['minus_percent_profit']) / 100;
-                $agentTips = ($totalTips > 0)?($totalTips * (100 - $entry['minus_percent_tips']) / 100):0;
+                $agentTips = ($totalTips > 0) ? ($totalTips * (100 - $entry['minus_percent_tips']) / 100) : 0;
             } else {
                 $agentProfit = $totalProfit * $entry['split_percent_profit'] / 100;
-                $agentTips = ($totalTips > 0)?($totalTips * $entry['split_percent_tips'] / 100):0;
+                $agentTips = ($totalTips > 0) ? ($totalTips * $entry['split_percent_tips'] / 100) : 0;
             }
             $profit += $agentProfit + $agentTips;
         }
@@ -2174,7 +2174,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @param bool $onyEnabled
      * @return array
      */
-    public static function getPhoneList(int $user_id, $onyEnabled = false) : array
+    public static function getPhoneList(int $user_id, $onyEnabled = false): array
     {
 //        $phoneList = [];
 //
@@ -2206,7 +2206,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @param bool $onyEnabled
      * @return array
      */
-    public static function getEmailList(int $user_id, $onyEnabled = false) : array
+    public static function getEmailList(int $user_id, $onyEnabled = false): array
     {
         $emailList = UserProjectParams::find()
             ->select(['el_email', 'upp_email_list_id'])
@@ -2225,7 +2225,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * @return bool
      */
-    public function isOnline() : bool
+    public function isOnline(): bool
     {
         return $this->userOnline ? true : false;
         //return UserOnline::find()->where(['uo_user_id' => $this->id])->exists();
@@ -2234,7 +2234,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * @return bool
      */
-    public function isCallStatusReady() : bool
+    public function isCallStatusReady(): bool
     {
         $status = $this->userStatus;
 
@@ -2256,7 +2256,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * @return bool
      */
-    public function isCallFree() : bool
+    public function isCallFree(): bool
     {
         $status = $this->userStatus;
 
@@ -2280,7 +2280,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @param int|null $supervision_id
      * @return bool
      */
-    public static function isSupervisionAgent(int $user_id, int $supervision_id = null) : bool
+    public static function isSupervisionAgent(int $user_id, int $supervision_id = null): bool
     {
         //$exist = false;
         if (!$supervision_id) {
@@ -2345,7 +2345,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
 
         $query = UserConnection::find();
-        $date_time = date('Y-m-d H:i:s', strtotime('-' . $hours .' hours'));
+        $date_time = date('Y-m-d H:i:s', strtotime('-' . $hours . ' hours'));
 
         $subQuery2 = UserCallStatus::find()->select(['us_type_id'])->where('us_user_id = user_connection.uc_user_id')->orderBy(['us_id' => SORT_DESC])->limit(1);
         // $subQuery3 = Call::find()->select(['c_status_id'])->where('c_created_user_id = user_connection.uc_user_id')->orderBy(['c_id' => SORT_DESC])->limit(1);
@@ -2660,7 +2660,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function initUserStatus(): ?UserStatus
     {
         $last_hours = (int)(Yii::$app->params['settings']['general_line_last_hours'] ?? 1);
-        $date_time = date('Y-m-d H:i:s', strtotime('-' . $last_hours .' hours'));
+        $date_time = date('Y-m-d H:i:s', strtotime('-' . $last_hours . ' hours'));
 
         $onCall = Call::find()->where(['c_created_user_id' => $this->id, 'c_status_id' => [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING]])->exists();
         $glCallCount = (int) Call::find()->select('COUNT(*)')->where(['c_created_user_id' => $this->id, 'c_call_type_id' => Call::CALL_TYPE_IN, 'c_status_id' => Call::STATUS_COMPLETED])

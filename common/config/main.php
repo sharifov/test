@@ -87,8 +87,8 @@ return [
             'url' => 'https://rocketchat.travel-dev.com/api/v1/',
             'username' => '',
             'password' => '',
-			'host' => 'https://rocketchat.travel-dev.com',
-		],
+            'host' => 'https://rocketchat.travel-dev.com',
+        ],
 
         'chatBot' => [
             'class' => \common\components\ChatBot::class,

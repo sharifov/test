@@ -57,7 +57,7 @@ class LeadTaskSearch extends LeadTask
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['lt_date' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['lt_date' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -111,7 +111,7 @@ class LeadTaskSearch extends LeadTask
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['lt_date' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['lt_date' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 20,
             ],

@@ -23,13 +23,13 @@ class DepartmentEmailProjectQuery extends ActiveQuery
     public function byEmail($email, bool $eagerLoading = true, bool $onyEnabled = false): self
     {
         if ($onyEnabled) {
-            $this->innerJoinWith(['emailList' => static function(\sales\model\emailList\entity\Scopes $query) use ($email) {
+            $this->innerJoinWith(['emailList' => static function (\sales\model\emailList\entity\Scopes $query) use ($email) {
                 $query
                     ->andOnCondition(['el_enabled' => true])
                     ->andOnCondition(['el_email' => $email]);
             }], $eagerLoading);
         } else {
-            $this->innerJoinWith(['emailList' => static function(\sales\model\emailList\entity\Scopes $query) use ($email) {
+            $this->innerJoinWith(['emailList' => static function (\sales\model\emailList\entity\Scopes $query) use ($email) {
                 $query->andOnCondition(['el_email' => $email]);
             }], $eagerLoading);
         }
@@ -39,7 +39,7 @@ class DepartmentEmailProjectQuery extends ActiveQuery
     public function withEmailList(bool $onyEnabled = false): self
     {
         if ($onyEnabled) {
-            return $this->with(['emailList' => static function(\sales\model\emailList\entity\Scopes $query) {
+            return $this->with(['emailList' => static function (\sales\model\emailList\entity\Scopes $query) {
                 $query->enabled();
             }]);
         }

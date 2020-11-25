@@ -99,7 +99,7 @@ class AgentActivitySearch extends Call
      * @param $user Employee
      * @return SqlDataProvider
      */
-    public function searchAgentLeads($params, $user):SqlDataProvider
+    public function searchAgentLeads($params, $user): SqlDataProvider
     {
         $this->load($params);
 
@@ -116,35 +116,35 @@ class AgentActivitySearch extends Call
         $date_to = Employee::convertTimeFromUserDtToUTC(strtotime($this->date_to));
         $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
 
-        $query->addSelect(['(SELECT COUNT(*) FROM `call` WHERE (c_created_dt '.$between_condition.') AND c_created_user_id=e.id AND c_call_type_id = '.Call::CALL_TYPE_IN.') AS inbound_calls ']);
-        $query->addSelect(['(SELECT COUNT(*) FROM `call` WHERE (c_created_dt '.$between_condition.') AND c_created_user_id=e.id AND c_call_type_id = '.Call::CALL_TYPE_OUT.') AS outbound_calls ']);
-        $query->addSelect(['(SELECT SUM(c_call_duration) FROM `call` WHERE (c_created_dt '.$between_condition.') AND c_created_user_id=e.id) AS call_duration ']);
-        $query->addSelect(['(SELECT SUM(c_recording_duration) FROM `call` WHERE (c_created_dt '.$between_condition.') AND c_created_user_id=e.id) AS call_recording_duration ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM `call` WHERE (c_created_dt ' . $between_condition . ') AND c_created_user_id=e.id AND c_call_type_id = ' . Call::CALL_TYPE_IN . ') AS inbound_calls ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM `call` WHERE (c_created_dt ' . $between_condition . ') AND c_created_user_id=e.id AND c_call_type_id = ' . Call::CALL_TYPE_OUT . ') AS outbound_calls ']);
+        $query->addSelect(['(SELECT SUM(c_call_duration) FROM `call` WHERE (c_created_dt ' . $between_condition . ') AND c_created_user_id=e.id) AS call_duration ']);
+        $query->addSelect(['(SELECT SUM(c_recording_duration) FROM `call` WHERE (c_created_dt ' . $between_condition . ') AND c_created_user_id=e.id) AS call_recording_duration ']);
 
-        $query->addSelect(['(SELECT COUNT(*) FROM sms WHERE (s_created_dt '.$between_condition.') AND s_created_user_id=e.id AND s_type_id = 1) AS sms_sent ']);
-        $query->addSelect(['(SELECT COUNT(*) FROM sms WHERE (s_created_dt '.$between_condition.') AND s_created_user_id=e.id AND s_type_id = 2) AS sms_received ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM sms WHERE (s_created_dt ' . $between_condition . ') AND s_created_user_id=e.id AND s_type_id = 1) AS sms_sent ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM sms WHERE (s_created_dt ' . $between_condition . ') AND s_created_user_id=e.id AND s_type_id = 2) AS sms_received ']);
 
-        $query->addSelect(['(SELECT COUNT(*) FROM email WHERE (e_created_dt '.$between_condition.') AND e_created_user_id=e.id AND e_type_id = 1) AS email_sent ']);
-        $query->addSelect(['(SELECT COUNT(*) FROM email WHERE (e_created_dt '.$between_condition.') AND e_created_user_id=e.id AND e_type_id = 2) AS email_received ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM email WHERE (e_created_dt ' . $between_condition . ') AND e_created_user_id=e.id AND e_type_id = 1) AS email_sent ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM email WHERE (e_created_dt ' . $between_condition . ') AND e_created_user_id=e.id AND e_type_id = 2) AS email_received ']);
 
-        $query->addSelect(['(SELECT COUNT(*) FROM quote_status_log WHERE (created '.$between_condition.') AND employee_id=e.id AND status = '.Quote::STATUS_SEND.') AS quotes_sent ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM quote_status_log WHERE (created ' . $between_condition . ') AND employee_id=e.id AND status = ' . Quote::STATUS_SEND . ') AS quotes_sent ']);
 
-        $query->addSelect(['(SELECT COUNT(*) FROM lead_flow lf LEFT JOIN leads l ON lf.lead_id = l.id WHERE (lf.created '.$between_condition.') AND l.employee_id=e.id AND lf.status=' . Lead::STATUS_SOLD . ') AS st_sold ']);
-        $query->addSelect(['(SELECT COUNT(*) FROM lead_flow lf WHERE (lf.created '.$between_condition.') AND lf.employee_id=e.id AND lf.status=' . Lead::STATUS_PROCESSING . ') AS st_processing ']);
-        $query->addSelect(['(SELECT COUNT(*) FROM lead_flow lf WHERE (lf.created '.$between_condition.') AND lf.employee_id=e.id AND lf.status=' . Lead::STATUS_SNOOZE . ') AS st_snooze ']);
-        $query->addSelect(['(SELECT COUNT(*) FROM lead_flow lf WHERE (lf.created '.$between_condition.') AND lf.employee_id=e.id AND lf.status=' . Lead::STATUS_PENDING . ') AS st_pending ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM lead_flow lf LEFT JOIN leads l ON lf.lead_id = l.id WHERE (lf.created ' . $between_condition . ') AND l.employee_id=e.id AND lf.status=' . Lead::STATUS_SOLD . ') AS st_sold ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM lead_flow lf WHERE (lf.created ' . $between_condition . ') AND lf.employee_id=e.id AND lf.status=' . Lead::STATUS_PROCESSING . ') AS st_processing ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM lead_flow lf WHERE (lf.created ' . $between_condition . ') AND lf.employee_id=e.id AND lf.status=' . Lead::STATUS_SNOOZE . ') AS st_snooze ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM lead_flow lf WHERE (lf.created ' . $between_condition . ') AND lf.employee_id=e.id AND lf.status=' . Lead::STATUS_PENDING . ') AS st_pending ']);
 
-        $query->addSelect(['(SELECT COUNT(lf.id) FROM lead_flow lf WHERE (lf.created '.$between_condition.') AND lf.employee_id=e.id AND lf.status=' . Lead::STATUS_PROCESSING . ' AND lf.lf_from_status_id IS NULL) AS created_leads ']);
-        $query->addSelect(['(SELECT COUNT(lf.id) FROM lead_flow lf LEFT JOIN leads l ON lf.lead_id = l.id WHERE l.clone_id IS NOT NULL AND (lf.created '.$between_condition.') AND lf.employee_id=e.id AND lf.status=' . Lead::STATUS_PROCESSING . ') AS cloned_leads ']);
-        $query->addSelect(['(SELECT COUNT(*) FROM lead_flow WHERE (created '.$between_condition.') AND employee_id=e.id AND lf_from_status_id = '.Lead::STATUS_PENDING.' AND status=' . Lead::STATUS_PROCESSING . ') AS inbox_processing ']);
-        $query->addSelect(['(SELECT COUNT(*) FROM lead_flow WHERE (created '.$between_condition.') AND employee_id=e.id AND lf_from_status_id = '.Lead::STATUS_FOLLOW_UP.' AND status=' . Lead::STATUS_PROCESSING . ') AS followup_processing ']);
-        $query->addSelect(['(SELECT COUNT(*) FROM lead_flow WHERE (created '.$between_condition.') AND employee_id=e.id AND lf_from_status_id = '.Lead::STATUS_PROCESSING.' AND status=' . Lead::STATUS_TRASH . ') AS processing_trash ']);
-        $query->addSelect(['(SELECT COUNT(*) FROM lead_flow WHERE (created '.$between_condition.') AND employee_id=e.id AND lf_from_status_id = '.Lead::STATUS_PROCESSING.' AND status=' . Lead::STATUS_FOLLOW_UP . ') AS processing_followup ']);
-        $query->addSelect(['(SELECT COUNT(*) FROM lead_flow WHERE (created '.$between_condition.') AND employee_id=e.id AND lf_from_status_id = '.Lead::STATUS_PROCESSING.' AND status=' . Lead::STATUS_SNOOZE . ') AS processing_snooze ']);
+        $query->addSelect(['(SELECT COUNT(lf.id) FROM lead_flow lf WHERE (lf.created ' . $between_condition . ') AND lf.employee_id=e.id AND lf.status=' . Lead::STATUS_PROCESSING . ' AND lf.lf_from_status_id IS NULL) AS created_leads ']);
+        $query->addSelect(['(SELECT COUNT(lf.id) FROM lead_flow lf LEFT JOIN leads l ON lf.lead_id = l.id WHERE l.clone_id IS NOT NULL AND (lf.created ' . $between_condition . ') AND lf.employee_id=e.id AND lf.status=' . Lead::STATUS_PROCESSING . ') AS cloned_leads ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM lead_flow WHERE (created ' . $between_condition . ') AND employee_id=e.id AND lf_from_status_id = ' . Lead::STATUS_PENDING . ' AND status=' . Lead::STATUS_PROCESSING . ') AS inbox_processing ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM lead_flow WHERE (created ' . $between_condition . ') AND employee_id=e.id AND lf_from_status_id = ' . Lead::STATUS_FOLLOW_UP . ' AND status=' . Lead::STATUS_PROCESSING . ') AS followup_processing ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM lead_flow WHERE (created ' . $between_condition . ') AND employee_id=e.id AND lf_from_status_id = ' . Lead::STATUS_PROCESSING . ' AND status=' . Lead::STATUS_TRASH . ') AS processing_trash ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM lead_flow WHERE (created ' . $between_condition . ') AND employee_id=e.id AND lf_from_status_id = ' . Lead::STATUS_PROCESSING . ' AND status=' . Lead::STATUS_FOLLOW_UP . ') AS processing_followup ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM lead_flow WHERE (created ' . $between_condition . ') AND employee_id=e.id AND lf_from_status_id = ' . Lead::STATUS_PROCESSING . ' AND status=' . Lead::STATUS_SNOOZE . ') AS processing_snooze ']);
 
-        $query->addSelect(['(SELECT COUNT(*) FROM lead_task WHERE (lt_date '.$between_condition.') AND lt_user_id=e.id AND lt_completed_dt IS NULL) AS tasks_pending ']);
-        $query->addSelect(['(SELECT COUNT(*) FROM lead_task WHERE (lt_date '.$between_condition.') AND lt_user_id=e.id) AS total_tasks ']);
-        $query->addSelect(['(SELECT COUNT(*) FROM lead_task WHERE (lt_date '.$between_condition.') AND lt_user_id=e.id AND lt_completed_dt IS NOT NULL) AS completed_tasks ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM lead_task WHERE (lt_date ' . $between_condition . ') AND lt_user_id=e.id AND lt_completed_dt IS NULL) AS tasks_pending ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM lead_task WHERE (lt_date ' . $between_condition . ') AND lt_user_id=e.id) AS total_tasks ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM lead_task WHERE (lt_date ' . $between_condition . ') AND lt_user_id=e.id AND lt_completed_dt IS NOT NULL) AS completed_tasks ']);
 
         $query->from('employees AS e');
 
@@ -157,7 +157,7 @@ class AgentActivitySearch extends Call
             $query->andWhere(['IN', 'e.id', $subQuery]);
         }
 
-        if (!empty($this->user_groups)){
+        if (!empty($this->user_groups)) {
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $this->user_groups]);
             $query->andWhere(['IN', 'e.id', $subQuery]);
         }
@@ -181,14 +181,13 @@ class AgentActivitySearch extends Call
                 $qCountEmployees->andWhere(['IN', 'id', $subQuery]);
             }
 
-            if (!empty($this->user_groups)){
+            if (!empty($this->user_groups)) {
                 $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $this->user_groups]);
                 $qCountEmployees->andWhere(['IN', 'id', $subQuery]);
             }
 
             $totalEmployees = $qCountEmployees->count();
         } else {
-
             if ($user->isSupervision()) {
                 $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $user->id]);
                 $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1])
@@ -198,7 +197,7 @@ class AgentActivitySearch extends Call
                 $qCountEmployees->andWhere(['IN', 'id', $subQuery]);
             }
 
-            if (!empty($this->user_groups)){
+            if (!empty($this->user_groups)) {
                 $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $this->user_groups]);
                 $qCountEmployees->andWhere(['IN', 'id', $subQuery]);
             }
@@ -402,7 +401,7 @@ class AgentActivitySearch extends Call
 
     public function searchClonedLeads($params)
     {
-        $query = LeadFlow::find()->leftJoin('leads','lead_flow.lead_id = leads.id');
+        $query = LeadFlow::find()->leftJoin('leads', 'lead_flow.lead_id = leads.id');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -434,7 +433,7 @@ class AgentActivitySearch extends Call
 
     public function searchCreatedLeads($params)
     {
-        $query = LeadFlow::find()->leftJoin('leads','lead_flow.lead_id = leads.id');
+        $query = LeadFlow::find()->leftJoin('leads', 'lead_flow.lead_id = leads.id');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -466,7 +465,7 @@ class AgentActivitySearch extends Call
 
     public function searchSoldLeads($params)
     {
-        $query = LeadFlow::find()->leftJoin('leads','lead_flow.lead_id = leads.id');
+        $query = LeadFlow::find()->leftJoin('leads', 'lead_flow.lead_id = leads.id');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -494,7 +493,7 @@ class AgentActivitySearch extends Call
 
     public function searchFromToLeads($params)
     {
-        $query = LeadFlow::find()->leftJoin('leads','lead_flow.lead_id = leads.id');
+        $query = LeadFlow::find()->leftJoin('leads', 'lead_flow.lead_id = leads.id');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -519,5 +518,4 @@ class AgentActivitySearch extends Call
 
         return $dataProvider;
     }
-
 }

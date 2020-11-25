@@ -48,7 +48,7 @@ class SourcesSearch extends Sources
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['hidden' => SORT_ASC, 'last_update' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['hidden' => SORT_ASC, 'last_update' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],

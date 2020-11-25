@@ -121,10 +121,10 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                     $cicleCount--;
                 } elseif (
                     isset($res['data']['emails']) &&
-                    $res['data']['emails']
-                    && \is_array($res['data']['emails'])
-                    && isset($res['data']['emails'][0])
-                    && $res['data']['emails'][0]
+                    $res['data']['emails'] &&
+                    \is_array($res['data']['emails']) &&
+                    isset($res['data']['emails'][0]) &&
+                    $res['data']['emails'][0]
                 ) {
                     foreach ($res['data']['emails'] as $mail) {
                         if ($debug) {
@@ -277,7 +277,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 
             if ($notifyByCases) {
                 foreach ($notifyByCases as $data) {
-                    if ($ntf = Notifications::create($data['user'], 'New Email Received', 'New Email Received. Case('. $data['case_short_link'] .').', Notifications::TYPE_INFO, true)) {
+                    if ($ntf = Notifications::create($data['user'], 'New Email Received', 'New Email Received. Case(' . $data['case_short_link'] . ').', Notifications::TYPE_INFO, true)) {
                         $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
                         Notifications::publish('getNewNotification', ['user_id' => $data['user']], $dataNotification);
                     }
@@ -286,7 +286,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 
             if ($notifyByLeads) {
                 foreach ($notifyByLeads as $data) {
-                    if ($ntf = Notifications::create($data['user'], 'New Email Received', 'New Email Received. Lead('. $data['lead_short_link'] .').', Notifications::TYPE_INFO, true)) {
+                    if ($ntf = Notifications::create($data['user'], 'New Email Received', 'New Email Received. Lead(' . $data['lead_short_link'] . ').', Notifications::TYPE_INFO, true)) {
                         $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
                         Notifications::publish('getNewNotification', ['user_id' => $data['user']], $dataNotification);
                     }
@@ -333,7 +333,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
         if (!$str) {
             return $str;
         }
-        return filter_var($str, FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW|FILTER_FLAG_STRIP_HIGH);
+        return filter_var($str, FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
     }
 
     private function getEmailsForReceivedMessages(): array

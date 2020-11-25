@@ -29,10 +29,10 @@ class UpdateSaleFromBOJob extends BaseObject implements JobInterface
      * @param Queue $queue
      * @return bool
      */
-    public function execute($queue) : bool
+    public function execute($queue): bool
     {
         try {
-            if($this->checkParams()) {
+            if ($this->checkParams()) {
                 /** @var CasesSaleService $casesSaleService */
                 $casesSaleService = Yii::createObject(CasesSaleService::class);
                 /** @var SaleTicketService $saleTicketService */
@@ -42,14 +42,16 @@ class UpdateSaleFromBOJob extends BaseObject implements JobInterface
                 $refreshSaleData = Yii::$app->cache->get($cacheKeySale);
 
                 if ($refreshSaleData === false) {
-                    if ($refreshSaleData = $casesSaleService->detailRequestToBackOffice(
-                        $this->saleId,
-                        $this->withFareRules,
-                        $this->requestTime,
-                        $this->withRefundRules)
+                    if (
+                        $refreshSaleData = $casesSaleService->detailRequestToBackOffice(
+                            $this->saleId,
+                            $this->withFareRules,
+                            $this->requestTime,
+                            $this->withRefundRules
+                        )
                     ) {
                         Yii::$app->cache->set($cacheKeySale, $refreshSaleData, $this->cacheDuration);
-                    }  else {
+                    } else {
                         throw new \RuntimeException('Response from detailRequestToBackOffice is empty. SaleId (' . $this->saleId . ')', 101);
                     }
                 }
@@ -65,11 +67,15 @@ class UpdateSaleFromBOJob extends BaseObject implements JobInterface
             }
         } catch (\Throwable $throwable) {
             if ($throwable->getCode() > 100) {
-                Yii::info(VarDumper::dumpAsString($throwable->getMessage()),
-                'info\UpdateSaleFromBOJob:execute:Throwable');
+                Yii::info(
+                    VarDumper::dumpAsString($throwable->getMessage()),
+                    'info\UpdateSaleFromBOJob:execute:Throwable'
+                );
             } else {
-                Yii::error(VarDumper::dumpAsString($throwable->getMessage()),
-                'UpdateSaleFromBOJob:execute:Throwable');
+                Yii::error(
+                    VarDumper::dumpAsString($throwable->getMessage()),
+                    'UpdateSaleFromBOJob:execute:Throwable'
+                );
             }
         }
         return false;

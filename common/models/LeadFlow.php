@@ -28,7 +28,6 @@ use Yii;
  */
 class LeadFlow extends \yii\db\ActiveRecord
 {
-
     use EventTrait;
 
     public const DESCRIPTION_TAKE = 'Take';
@@ -64,8 +63,7 @@ class LeadFlow extends \yii\db\ActiveRecord
         ?int $creatorId = null,
         ?string $reason = null,
         ?string $created = null
-    ): self
-    {
+    ): self {
         $leadFlow = new static();
         $leadFlow->lead_id = $leadId;
         $leadFlow->status = $newStatus;
@@ -170,7 +168,7 @@ class LeadFlow extends \yii\db\ActiveRecord
 
         $logPrev = self::find()->where(['lead_id' => $lead->id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
 
-        if($logPrev) {
+        if ($logPrev) {
             $logPrev->lf_end_dt = date('Y-m-d H:i:s');
             $logPrev->lf_time_duration = (int) (strtotime($logPrev->lf_end_dt) - strtotime($logPrev->created));
             $logPrev->save();
@@ -182,16 +180,17 @@ class LeadFlow extends \yii\db\ActiveRecord
         $stateFlow->status = $lead->status;
         $stateFlow->created = date('Y-m-d H:i:s');
 
-        if($logPrev && $logPrev->status) {
+        if ($logPrev && $logPrev->status) {
             $stateFlow->lf_from_status_id = $logPrev->status;
         }
 
-        if($lead->status_description) {
+        if ($lead->status_description) {
             $stateFlow->lf_description = mb_substr($lead->status_description, 0, 250);
         }
 
 
-        if (!is_a(\Yii::$app, 'yii\console\Application') &&
+        if (
+            !is_a(\Yii::$app, 'yii\console\Application') &&
             !Yii::$app->user->isGuest &&
             Yii::$app->user->identityClass != 'webapi\models\ApiUser'
         ) {

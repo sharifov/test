@@ -4,7 +4,7 @@
     <!-- check all files in the app directory, feel free to add more files with:
     <file>FOLDER NAME</file>
     -->
-<!--    <file>common</file>-->
+    <file>common</file>
     <file>console</file>
 <!--    <file>frontend</file>-->
     <file>webapi</file>

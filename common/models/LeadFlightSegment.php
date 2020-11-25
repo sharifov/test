@@ -30,23 +30,22 @@ use yii\db\ActiveRecord;
  */
 class LeadFlightSegment extends \yii\db\ActiveRecord
 {
-
     use EventTrait;
 
-    public CONST FLEX_TYPE_MINUS = '-';
-    public CONST FLEX_TYPE_PLUS = '+';
-    public CONST FLEX_TYPE_PLUS_MINUS = '+/-';
+    public const FLEX_TYPE_MINUS = '-';
+    public const FLEX_TYPE_PLUS = '+';
+    public const FLEX_TYPE_PLUS_MINUS = '+/-';
 
-    public CONST FLEX_TYPE_LIST = [
+    public const FLEX_TYPE_LIST = [
         self::FLEX_TYPE_MINUS => '-',
         self::FLEX_TYPE_PLUS => '+',
         self::FLEX_TYPE_PLUS_MINUS => '+/-',
     ];
 
 
-    public CONST SCENARIO_CREATE_AGENT = 'create_agent';
-    public CONST SCENARIO_CREATE_API = 'create_api';
-    public CONST SCENARIO_UPDATE_API = 'update_api';
+    public const SCENARIO_CREATE_AGENT = 'create_agent';
+    public const SCENARIO_CREATE_API = 'create_api';
+    public const SCENARIO_UPDATE_API = 'update_api';
 
     /**
      * {@inheritdoc}
@@ -149,32 +148,34 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
         return $this->hasOne(Airports::class, ['iata' => 'origin']);
     }
 
-    public function checkOriginIata() : void
+    public function checkOriginIata(): void
     {
         $origin = Airports::findByIata($this->origin);
         if ($origin) {
             $this->origin_label = sprintf('%s (%s)', $origin->city, $origin->iata);
         } else {
-            $this->addError('origin', sprintf('Not found %s IATA ("'.$this->origin.'") ',
+            $this->addError('origin', sprintf(
+                'Not found %s IATA ("' . $this->origin . '") ',
                 $this->getAttributeLabel('origin')
             ));
         }
     }
 
-    public function checkDestinationIata() : void
+    public function checkDestinationIata(): void
     {
         $destination = Airports::findByIata($this->destination);
         if ($destination) {
             $this->destination_label = sprintf('%s (%s)', $destination->city, $destination->iata);
         } else {
-            $this->addError('origin', sprintf('Not found %s IATA ("'.$this->destination.'") ',
+            $this->addError('origin', sprintf(
+                'Not found %s IATA ("' . $this->destination . '") ',
                 $this->getAttributeLabel('destination')
             ));
         }
     }
 
 
-    public function checkOriginLabel() : void
+    public function checkOriginLabel(): void
     {
         $this->origin_label = trim($this->origin_label);
         if (!empty($this->origin_label)) {
@@ -184,7 +185,8 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
                 $iata = str_replace('(', '', str_replace($matches[1][0], '', $matches[0][0]));
                 $this->origin = str_replace(')', '', $iata);
             } else {
-                $this->addError('origin_label', sprintf('%s invalid format.',
+                $this->addError('origin_label', sprintf(
+                    '%s invalid format.',
                     $this->getAttributeLabel('origin_label')
                 ));
             }
@@ -193,14 +195,15 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
             if ($origin !== null) {
                 $this->origin_label = sprintf('%s (%s)', $origin->city, $origin->iata);
             } else {
-                $this->addError('origin_label', sprintf('%s cannot be blank.',
+                $this->addError('origin_label', sprintf(
+                    '%s cannot be blank.',
                     $this->getAttributeLabel('origin_label')
                 ));
             }
         }
     }
 
-    public function checkDestinationLabel() : void
+    public function checkDestinationLabel(): void
     {
         $this->destination_label = trim($this->destination_label);
         if (!empty($this->destination_label)) {
@@ -210,7 +213,8 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
                 $iata = str_replace('(', '', str_replace($matches[1][0], '', $matches[0][0]));
                 $this->destination = str_replace(')', '', $iata);
             } else {
-                $this->addError('destination_label', sprintf('%s invalid format.',
+                $this->addError('destination_label', sprintf(
+                    '%s invalid format.',
                     $this->getAttributeLabel('destination_label')
                 ));
             }
@@ -219,7 +223,8 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
             if ($destination !== null) {
                 $this->destination_label = sprintf('%s (%s)', $destination->city, $destination->iata);
             } else {
-                $this->addError('destination_label', sprintf('%s cannot be blank.',
+                $this->addError('destination_label', sprintf(
+                    '%s cannot be blank.',
                     $this->getAttributeLabel('destination_label')
                 ));
             }
@@ -281,7 +286,6 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
     public function beforeSave($insert): bool
     {
         if (parent::beforeSave($insert)) {
-
             //$this->updated = date('Y-m-d H:i:s');
 
             if ($this->departure) {
@@ -361,5 +365,4 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Lead::class, ['id' => 'lead_id']);
     }
-
 }

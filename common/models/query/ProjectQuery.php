@@ -18,12 +18,12 @@ class ProjectQuery extends ActiveQuery
     }
 
     public function byName(string $name): self
-	{
-		return $this->andWhere(['name' => $name]);
-	}
+    {
+        return $this->andWhere(['name' => $name]);
+    }
 
     public function byKey(string $key): self
-	{
-		return $this->andWhere(['project_key' => $key]);
-	}
+    {
+        return $this->andWhere(['project_key' => $key]);
+    }
 }

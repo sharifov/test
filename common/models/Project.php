@@ -161,10 +161,10 @@ class Project extends \yii\db\ActiveRecord
     /**
      * @return array
      */
-    public static function getList() : array
+    public static function getList(): array
     {
         $data = self::find()->orderBy(['name' => SORT_ASC])->asArray()->all();
-        return ArrayHelper::map($data,'id', 'name');
+        return ArrayHelper::map($data, 'id', 'name');
     }
 
     public static function getSmsEnabledList(): array
@@ -182,16 +182,16 @@ class Project extends \yii\db\ActiveRecord
      * @param int $user_id
      * @return array
      */
-    public static function getListByUser(int $user_id = 0) : array
+    public static function getListByUser(int $user_id = 0): array
     {
         $data = ProjectEmployeeAccess::find()->select(['project_id'])->with('project')->where(['employee_id' => $user_id])->all();
-        return ArrayHelper::map($data,'project_id', 'project.name');
+        return ArrayHelper::map($data, 'project_id', 'project.name');
     }
 
-	public static function getListByUserWithProjectKeys(int $user_id = 0) : array
-	{
-		return self::find()->select(['project' => 'name', 'projectKey' => 'project_key'])->innerJoin(ProjectEmployeeAccess::tableName(), 'project_id = id and employee_id = :userId', ['userId' => $user_id])->asArray()->all();
-	}
+    public static function getListByUserWithProjectKeys(int $user_id = 0): array
+    {
+        return self::find()->select(['project' => 'name', 'projectKey' => 'project_key'])->innerJoin(ProjectEmployeeAccess::tableName(), 'project_id = id and employee_id = :userId', ['userId' => $user_id])->asArray()->all();
+    }
 
 
     /**
@@ -199,7 +199,7 @@ class Project extends \yii\db\ActiveRecord
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\httpclient\Exception
      */
-    public static function synchronizationProjects() : array
+    public static function synchronizationProjects(): array
     {
         $data = [
             'created' => [],
@@ -209,7 +209,7 @@ class Project extends \yii\db\ActiveRecord
 
         $projectsData = self::getProjectListBO();
         //VarDumper::dump($projectsData, 10, true); exit;
-        if($projectsData) {
+        if ($projectsData) {
             if ($projectsData['error']) {
                 $data['error'] = 'Error: ' . $projectsData['error'];
             } else {
@@ -221,7 +221,6 @@ class Project extends \yii\db\ActiveRecord
                             $pr->id = $projectItem['id'];
                             $data['created'][] = $projectItem['id'];
                             //$pr->custom_data = @json_encode(['name' => $projectItem['name'], 'phone' => '', 'email' => '']);
-
                         } else {
                             $data['updated'][] = $projectItem['id'];
                         }
@@ -237,10 +236,11 @@ class Project extends \yii\db\ActiveRecord
                             $pr->pr_updated_user_id = Yii::$app->user->id;
                         }*/
                         if (!$pr->save()) {
-                            Yii::error(VarDumper::dumpAsString($pr->errors),
-                                'Project:synchronizationProjects:Project:save');
+                            Yii::error(
+                                VarDumper::dumpAsString($pr->errors),
+                                'Project:synchronizationProjects:Project:save'
+                            );
                         } else {
-
                             if ($projectItem['sources']) {
                                 foreach ($projectItem['sources'] as $sourceId => $sourceAttr) {
                                     $source = Sources::findOne(['id' => $sourceId]);
@@ -254,12 +254,13 @@ class Project extends \yii\db\ActiveRecord
 
                                     $source->attributes = $sourceAttr;
                                     if (!$source->save()) {
-                                        Yii::error(VarDumper::dumpAsString($source->errors),
-                                            'Project:synchronizationProjects:Sources:save');
+                                        Yii::error(
+                                            VarDumper::dumpAsString($source->errors),
+                                            'Project:synchronizationProjects:Sources:save'
+                                        );
                                     }
                                 }
                             }
-
                         }
                     }
                 }
@@ -339,7 +340,7 @@ class Project extends \yii\db\ActiveRecord
      * @param string $version
      * @return string
      */
-    private static function getSignatureBO(string $apiKey = '', string $version = '') : string
+    private static function getSignatureBO(string $apiKey = '', string $version = ''): string
     {
         $expired = time() + 3600;
         $md5 = md5(sprintf('%s:%s:%s', $apiKey, $version, $expired));
@@ -606,5 +607,4 @@ class Project extends \yii\db\ActiveRecord
     {
         return $this->hasMany(VisitorLog::class, ['vl_project_id' => 'id']);
     }
-
 }

@@ -1,10 +1,10 @@
 <?php
+
 /**
  * This is the template for generating CRUD search class of the specified model.
  */
 
 use yii\helpers\StringHelper;
-
 
 /* @var $this yii\web\View */
 /* @var $generator common\components\gii\crud\Generator */
@@ -34,12 +34,12 @@ class <?= $searchModelClass ?> extends <?= isset($modelAlias) ? $modelAlias : $m
     {
         return [
 <?php foreach ($rules as $rule) {
-            if ($rule) {
-                echo '            ' . $rule . ",\n";
-            } else {
-                echo "\n";
-            }
-        } ?>
+    if ($rule) {
+        echo '            ' . $rule . ",\n";
+    } else {
+        echo "\n";
+    }
+} ?>
         ];
     }
 

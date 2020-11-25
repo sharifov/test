@@ -40,12 +40,12 @@ class CallQueueLongTimeNotificationJob implements JobInterface
         try {
             $call = $this->findCall();
             if (
-            !
-            (
+                !
+                (
                 $call->isStatusQueue()
                 && $call->getData()->queueLongTime->departmentPhoneId === $this->departmentPhoneProjectId
                 && $call->getData()->queueLongTime->createdJobTime === $this->createdTime
-            )
+                )
             ) {
                 return;
             }

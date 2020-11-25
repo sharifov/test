@@ -36,13 +36,13 @@ class CurrencyHistory extends \yii\db\ActiveRecord
     {
         return [
             [['ch_code', 'ch_created_date'], 'required'],
-			[['ch_app_percent'], 'number', 'max' => 100],
-			[['ch_base_rate', 'ch_app_rate'], 'number', 'max' => 1000],
+            [['ch_app_percent'], 'number', 'max' => 100],
+            [['ch_base_rate', 'ch_app_rate'], 'number', 'max' => 1000],
             [['ch_created_date', 'ch_main_created_dt', 'ch_main_updated_dt', 'ch_main_synch_dt'], 'safe'],
             [['ch_code'], 'string', 'max' => 3],
             [['ch_code', 'ch_created_date'], 'unique', 'targetAttribute' => ['ch_code', 'ch_created_date']],
-			[['ch_code'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['ch_code' => 'cur_code']],
-		];
+            [['ch_code'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['ch_code' => 'cur_code']],
+        ];
     }
 
     /**
@@ -62,66 +62,65 @@ class CurrencyHistory extends \yii\db\ActiveRecord
         ];
     }
 
-	/**
-	 * @return ActiveQuery
-	 */
-	public function getChCode(): ActiveQuery
-	{
-		return $this->hasOne(Currency::class, ['cur_code' => 'ch_code']);
-	}
+    /**
+     * @return ActiveQuery
+     */
+    public function getChCode(): ActiveQuery
+    {
+        return $this->hasOne(Currency::class, ['cur_code' => 'ch_code']);
+    }
 
-	/**
-	 * {@inheritdoc}
-	 * @return CurrencyHistoryQuery the active query used by this AR class.
-	 */
-	public static function find()
-	{
-		return new CurrencyHistoryQuery (static::class);
-	}
+    /**
+     * {@inheritdoc}
+     * @return CurrencyHistoryQuery the active query used by this AR class.
+     */
+    public static function find()
+    {
+        return new CurrencyHistoryQuery(static::class);
+    }
 
-	/**
-	 * @param Currency $currency
-	 * @return $this
-	 */
+    /**
+     * @param Currency $currency
+     * @return $this
+     */
     public function fillByCurrency(Currency $currency): self
-	{
-		$dateToday = date('Y-m-d');
+    {
+        $dateToday = date('Y-m-d');
 
-		$currencyHistory = $this->findOrCreateByPrimaryKeys($currency->cur_code, $dateToday);
-		$currencyHistory->ch_code = $currency->cur_code;
-		$currencyHistory->ch_base_rate = $currency->cur_base_rate;
-		$currencyHistory->ch_app_rate = $currency->cur_app_rate;
-		$currencyHistory->ch_app_percent = $currency->cur_app_percent;
-		$currencyHistory->ch_main_created_dt = $currency->cur_created_dt;
-		$currencyHistory->ch_main_updated_dt = $currency->cur_updated_dt;
-		$currencyHistory->ch_main_synch_dt = $currency->cur_synch_dt;
-		$currencyHistory->ch_created_date = $dateToday;
+        $currencyHistory = $this->findOrCreateByPrimaryKeys($currency->cur_code, $dateToday);
+        $currencyHistory->ch_code = $currency->cur_code;
+        $currencyHistory->ch_base_rate = $currency->cur_base_rate;
+        $currencyHistory->ch_app_rate = $currency->cur_app_rate;
+        $currencyHistory->ch_app_percent = $currency->cur_app_percent;
+        $currencyHistory->ch_main_created_dt = $currency->cur_created_dt;
+        $currencyHistory->ch_main_updated_dt = $currency->cur_updated_dt;
+        $currencyHistory->ch_main_synch_dt = $currency->cur_synch_dt;
+        $currencyHistory->ch_created_date = $dateToday;
 
-		return $currencyHistory;
-	}
+        return $currencyHistory;
+    }
 
-	/**
-	 * @param string $code
-	 * @param string $createdDate
-	 * @return $this|array|CurrencyHistory|\yii\db\ActiveRecord|null
-	 */
-	public function findOrCreateByPrimaryKeys(string $code, string $createdDate)
-	{
-		$currencyHistory = self::find()->where(['ch_code' => $code, 'ch_created_date' => $createdDate])->one();
-		if ($currencyHistory) {
-			return $currencyHistory;
-		}
+    /**
+     * @param string $code
+     * @param string $createdDate
+     * @return $this|array|CurrencyHistory|\yii\db\ActiveRecord|null
+     */
+    public function findOrCreateByPrimaryKeys(string $code, string $createdDate)
+    {
+        $currencyHistory = self::find()->where(['ch_code' => $code, 'ch_created_date' => $createdDate])->one();
+        if ($currencyHistory) {
+            return $currencyHistory;
+        }
 
-		return (new static());
-	}
+        return (new static());
+    }
 
-	/**
-	 * @param string $code
-	 * @return float|null
-	 */
-	public static function getBaseRateByCurrencyCode(string $code): ?float
-	{
-		return self::find()->where(['ch_code' => $code])->orderBy(['ch_main_updated_dt' => SORT_DESC])->one()->ch_base_rate ?? null;
-	}
-
+    /**
+     * @param string $code
+     * @return float|null
+     */
+    public static function getBaseRateByCurrencyCode(string $code): ?float
+    {
+        return self::find()->where(['ch_code' => $code])->orderBy(['ch_main_updated_dt' => SORT_DESC])->one()->ch_base_rate ?? null;
+    }
 }

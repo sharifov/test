@@ -40,7 +40,7 @@ class LeadSearchByClient extends Model
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> [
+            'sort' => [
                 'defaultOrder' => ['l_last_action_dt' => SORT_DESC]
             ],
             'pagination' => [
@@ -74,5 +74,4 @@ class LeadSearchByClient extends Model
     {
         return (new \ReflectionClass(static::class))->getShortName();
     }
-
 }

@@ -48,7 +48,7 @@ class CaseNoteSearch extends CaseNote
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cn_id' => SORT_ASC]],
+            'sort' => ['defaultOrder' => ['cn_id' => SORT_ASC]],
             'pagination' => [
                 'pageSize' => 15,
             ],

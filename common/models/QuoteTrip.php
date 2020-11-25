@@ -35,10 +35,10 @@ class QuoteTrip extends \yii\db\ActiveRecord
     public function getStops()
     {
 
-        if(!empty($this->quoteSegments) && count($this->quoteSegments) > 1){
+        if (!empty($this->quoteSegments) && count($this->quoteSegments) > 1) {
             $this->stops = count($this->quoteSegments) - 1;
-            foreach ($this->quoteSegments as $segment){
-                if(isset($segment->qs_stop) && !empty($segment->qs_stop)){
+            foreach ($this->quoteSegments as $segment) {
+                if (isset($segment->qs_stop) && !empty($segment->qs_stop)) {
                     $this->stops += $segment->qs_stop;
                 }
             }

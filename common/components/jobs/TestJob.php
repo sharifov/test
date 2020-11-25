@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by Alex Connor.
  * User: alexandr
@@ -29,7 +30,7 @@ class TestJob extends BaseObject implements JobInterface
      * @param Queue $queue
      * @return bool
      */
-    public function execute($queue) : bool
+    public function execute($queue): bool
     {
         $metrics = new Metrics();
         $timeStart = microtime(true);

@@ -44,8 +44,7 @@ class ClientBeforeSubmit
         ?string $doneSuccessScript,
         ?string $doneErrorScript,
         ?string $doneAlwaysScript
-    )
-    {
+    ) {
         $this->header = $header;
         $this->notify = $notify ? 1 : 0;
         $this->modalId = $modalId;

@@ -51,60 +51,60 @@ use yii\helpers\Json;
 class CaseSale extends \yii\db\ActiveRecord
 {
 
-	public const PASSENGER_MEAL = [
-		"AVML" => "AVML - Vegetarian/Hindu",
-		"BBML" => "BBML - Baby",
-		"BLML" => "BLML - Bland",
-		"CHML" => "CHML - Child",
-		"CNML" => "CNML - Chicken (LY only)",
-		"CHCK" => "CHCK - Chicken (AA only)",
-		"DBML" => "DBML - Diabetic",
-		"FPML" => "FPML - Fruit Platter",
-		"GFML" => "GFML - Gluten intolerant,",
-		"HNML" => "HNML - Hindu (non-vegerarian)",
-		"IVML" => "IVML - Indian Vegetarian (UA only)",
-		"JPML" => "JPML - Japanese (LH only)",
-		"KSML" => "KSML - Kosher",
-		"LCML" => "LCML - Low Calorie",
-		"LFML" => "LFML - Low Fat",
-		"LSML" => "LSML - Low Salt",
-		"MOML" => "MOML - Moslem",
-		"NFML" => "NFML - No Fish (LH only)",
-		"NLML" => "NLML - Low Lactose",
-		"OBML" => "OBML - Japanese Obento (UA only)",
-		"RVML" => "RVML - Vegeratian Raw",
-		"SFML" => "SFML - Sea Food",
-		"SPML" => "SPML - Special meal, specify ~",
-		"VGML" => "VGML - Vegetarian Vegan",
-		"VJML" => "VJML - Vegetarian Jain",
-		"VOML" => "VOML - Vagetarian Oriental",
-		"VLML" => "VLML - Vegetarian Lacto-Ovo",
-		"NOML" => "NOML - No Meal",
-		"NSML" => "NSML - No Salt/Sodium",
-		"PFML" => "PFML - Peanut Free"
-	];
+    public const PASSENGER_MEAL = [
+        "AVML" => "AVML - Vegetarian/Hindu",
+        "BBML" => "BBML - Baby",
+        "BLML" => "BLML - Bland",
+        "CHML" => "CHML - Child",
+        "CNML" => "CNML - Chicken (LY only)",
+        "CHCK" => "CHCK - Chicken (AA only)",
+        "DBML" => "DBML - Diabetic",
+        "FPML" => "FPML - Fruit Platter",
+        "GFML" => "GFML - Gluten intolerant,",
+        "HNML" => "HNML - Hindu (non-vegerarian)",
+        "IVML" => "IVML - Indian Vegetarian (UA only)",
+        "JPML" => "JPML - Japanese (LH only)",
+        "KSML" => "KSML - Kosher",
+        "LCML" => "LCML - Low Calorie",
+        "LFML" => "LFML - Low Fat",
+        "LSML" => "LSML - Low Salt",
+        "MOML" => "MOML - Moslem",
+        "NFML" => "NFML - No Fish (LH only)",
+        "NLML" => "NLML - Low Lactose",
+        "OBML" => "OBML - Japanese Obento (UA only)",
+        "RVML" => "RVML - Vegeratian Raw",
+        "SFML" => "SFML - Sea Food",
+        "SPML" => "SPML - Special meal, specify ~",
+        "VGML" => "VGML - Vegetarian Vegan",
+        "VJML" => "VJML - Vegetarian Jain",
+        "VOML" => "VOML - Vagetarian Oriental",
+        "VLML" => "VLML - Vegetarian Lacto-Ovo",
+        "NOML" => "NOML - No Meal",
+        "NSML" => "NSML - No Salt/Sodium",
+        "PFML" => "PFML - Peanut Free"
+    ];
 
-	public const PASSENGER_WHEELCHAIR = [
-		"WCOB" => "WCOB - Wheelchair on board",
-		"WCHR" => "WCHR - Wheelchair airport departure hall",
-		"WCHS" => "WCHS - Wheelchair Up/Down stairs",
-		"WCHC" => "WCHC - Passenger must be carried"
-	];
+    public const PASSENGER_WHEELCHAIR = [
+        "WCOB" => "WCOB - Wheelchair on board",
+        "WCHR" => "WCHR - Wheelchair airport departure hall",
+        "WCHS" => "WCHS - Wheelchair Up/Down stairs",
+        "WCHC" => "WCHC - Passenger must be carried"
+    ];
 
-	public const PASSENGER_TYPE_BIRTH_DATE_RANGE = [
-		'INF' => [
-			'min' => 0,
-			'max' => 1
-		],
-		'CHD' => [
-			'min' => 2,
-			'max' => 11
-		],
-		'ADT' => [
-			'min' => 12,
-			'max' => 130
-		]
-	];
+    public const PASSENGER_TYPE_BIRTH_DATE_RANGE = [
+        'INF' => [
+            'min' => 0,
+            'max' => 1
+        ],
+        'CHD' => [
+            'min' => 2,
+            'max' => 11
+        ],
+        'ADT' => [
+            'min' => 12,
+            'max' => 130
+        ]
+    ];
 
     /**
      * {@inheritdoc}
@@ -131,9 +131,9 @@ class CaseSale extends \yii\db\ActiveRecord
             [['css_out_date', 'css_in_date', 'css_fare_rules', 'css_departure_dt', 'css_send_email_dt'], 'string'],
             [['css_out_date', 'css_in_date', 'css_departure_dt'],  'datetime', 'format' => 'php:Y-m-d H:i:s'],
             [['css_charge_type'], 'string', 'max' => 100],
-			['css_penalty_type', 'in', 'range' => array_keys(SaleTicket::getAirlinePenaltyList()), 'skipOnEmpty' => true,],
+            ['css_penalty_type', 'in', 'range' => array_keys(SaleTicket::getAirlinePenaltyList()), 'skipOnEmpty' => true,],
 
-			[['css_sale_data'], 'filter', 'filter' => static function($value) {
+            [['css_sale_data'], 'filter', 'filter' => static function ($value) {
                 return JsonHelper::decode($value);
             }],
         ];
@@ -166,9 +166,9 @@ class CaseSale extends \yii\db\ActiveRecord
             'css_out_date' => 'Out date',
             'css_in_date' => 'In date',
             'css_fare_rules' => 'Fare rules',
-			'css_penalty_type' => 'Penalty Type',
-			'css_departure_dt' => 'Departure DT',
-			'css_send_email_dt' => 'Send Email DT',
+            'css_penalty_type' => 'Penalty Type',
+            'css_departure_dt' => 'Departure DT',
+            'css_send_email_dt' => 'Send Email DT',
         ];
     }
 
@@ -219,9 +219,9 @@ class CaseSale extends \yii\db\ActiveRecord
     }
 
     public function getCssSaleTicket(): ActiveQuery
-	{
-		return $this->hasMany(SaleTicket::class, ['st_case_id' => 'css_cs_id', 'st_case_sale_id' => 'css_sale_id']);
-	}
+    {
+        return $this->hasMany(SaleTicket::class, ['st_case_id' => 'css_cs_id', 'st_case_sale_id' => 'css_sale_id']);
+    }
 
     /**
      * {@inheritdoc}
@@ -233,21 +233,21 @@ class CaseSale extends \yii\db\ActiveRecord
     }
 
     public function getSaleDataDecoded(): array
-	{
-		if (is_string($this->css_sale_data)) {
-			return json_decode((string)$this->css_sale_data, true);
-		}
-		return $this->css_sale_data;
-	}
+    {
+        if (is_string($this->css_sale_data)) {
+            return json_decode((string)$this->css_sale_data, true);
+        }
+        return $this->css_sale_data;
+    }
 
     /**
      * @return string
      */
     public function getSaleDataEncoded(): string
-	{
-		if (!is_string($this->css_sale_data)) {
-			return Json::encode($this->css_sale_data);
-		}
-		return $this->css_sale_data;
-	}
+    {
+        if (!is_string($this->css_sale_data)) {
+            return Json::encode($this->css_sale_data);
+        }
+        return $this->css_sale_data;
+    }
 }

@@ -71,7 +71,7 @@ class QuoteSearch extends Quote
             return $dataProvider;
         }
 
-        if(empty($this->created) && isset($params['QuoteSearch']['date_range'])){
+        if (empty($this->created) && isset($params['QuoteSearch']['date_range'])) {
             $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
                 ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         }

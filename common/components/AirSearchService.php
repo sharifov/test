@@ -1,4 +1,5 @@
 <?php
+
 namespace common\components;
 
 use yii\base\Component;
@@ -26,7 +27,7 @@ class AirSearchService extends Component
     public array $options = [CURLOPT_ENCODING => 'gzip'];
     public Request $request;
 
-    public function init() : void
+    public function init(): void
     {
         parent::init();
         $this->initRequest();
@@ -35,7 +36,7 @@ class AirSearchService extends Component
     /**
      * @return bool
      */
-    private function initRequest() : bool
+    private function initRequest(): bool
     {
         $authStr = base64_encode($this->username . ':' . $this->password);
 

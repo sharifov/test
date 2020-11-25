@@ -59,11 +59,10 @@ class UserSelect2Column extends DataColumn
             if ($userId) {
                 $user = Employee::find()->select(['id', 'username'])->where(['id' => $userId])->cache(3600)->one();
                 if ($user) {
-                    $this->data[$user->id] = $user->username . ' ('.$user->id.')';
+                    $this->data[$user->id] = $user->username . ' (' . $user->id . ')';
                 }
             }
         }
-
     }
 
     /**

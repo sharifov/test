@@ -2,7 +2,6 @@
 
 namespace common\models;
 
-
 use Yii;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
@@ -98,7 +97,8 @@ class AirportOld extends ActiveRecord
         return Yii::$app->cacheFile->getOrSet(__FUNCTION__, static function () {
             return ArrayHelper::map(
                 self::find()->select(['iata'])->distinct()->orderBy(['iata' => SORT_ASC])->all(),
-                'iata', 'iata'
+                'iata',
+                'iata'
             );
         }, $duration);
     }
@@ -112,7 +112,8 @@ class AirportOld extends ActiveRecord
         return Yii::$app->cacheFile->getOrSet(__FUNCTION__, static function () {
             return ArrayHelper::map(
                 self::find()->select(['country'])->distinct()->orderBy(['country' => SORT_ASC])->all(),
-                'country', 'country'
+                'country',
+                'country'
             );
         }, $duration);
     }

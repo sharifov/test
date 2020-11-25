@@ -23,16 +23,18 @@ class RocketChatUserUpdateJob extends BaseObject implements JobInterface
      * @param Queue $queue
      * @return bool
      */
-    public function execute($queue) : bool
+    public function execute($queue): bool
     {
         try {
             $rocketChat = \Yii::$app->rchat;
             $result = $rocketChat->updateUser($this->userId, $this->data);
 
             if (!empty($result['data'])) {
-                Yii::info('RocketChat User Updated. ' .
+                Yii::info(
+                    'RocketChat User Updated. ' .
                     VarDumper::dumpAsString($this->data, 10),
-                    'info\RocketChatUserUpdateJob:execute:success');
+                    'info\RocketChatUserUpdateJob:execute:success'
+                );
             }
         } catch (\Throwable $throwable) {
             AppHelper::throwableLogger($throwable, 'RocketChatUserUpdateJob:execute:Throwable');

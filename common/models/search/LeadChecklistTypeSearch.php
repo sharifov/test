@@ -60,7 +60,7 @@ class LeadChecklistTypeSearch extends LeadChecklistType
 
         if ($this->lct_updated_dt) {
             $query->andFilterWhere(['>=', 'lct_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lct_updated_dt))])
-                ->andFilterWhere(['<=', 'lct_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lct_updated_dt) + 3600 *24)]);
+                ->andFilterWhere(['<=', 'lct_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lct_updated_dt) + 3600 * 24)]);
         }
 
         // grid filtering conditions

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by Alex Connor.
  * User: alexandr
@@ -30,18 +31,16 @@ class TelegramSendMessageJob extends BaseObject implements JobInterface
      * @param Queue $queue
      * @return bool
      */
-    public function execute($queue) : bool
+    public function execute($queue): bool
     {
 
         try {
-
-            if($this->user_id) {
+            if ($this->user_id) {
                 $profile = UserProfile::find()->where(['up_user_id' => $this->user_id])->limit(1)->one();
 
                 //Yii::info($this->user_id, 'info\TelegramJob:execute:info');
 
                 if ($profile && $profile->up_telegram && $profile->up_telegram_enable) {
-
                     $tgm = Yii::$app->telegram;
 
                     $tgm->sendMessage([
@@ -53,11 +52,7 @@ class TelegramSendMessageJob extends BaseObject implements JobInterface
                     return true;
                 }
             }
-
-
-
         } catch (\Throwable $e) {
-
             Yii::error(VarDumper::dumpAsString($e->getMessage()), 'TelegramJob:execute:catch');
         }
 

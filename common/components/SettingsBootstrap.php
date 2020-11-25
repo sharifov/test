@@ -37,7 +37,6 @@ class SettingsBootstrap implements BootstrapInterface
             $settingsArr = $cache->get('site_settings');
 
             if (!$settingsArr) {
-
                 // Get settings from database
                 $sql = $this->db->createCommand('SELECT s_key, s_type, s_value FROM {{%setting}}');
                 $settings = $sql->queryAll();

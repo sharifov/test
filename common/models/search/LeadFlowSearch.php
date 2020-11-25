@@ -54,7 +54,7 @@ class LeadFlowSearch extends LeadFlow
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -72,7 +72,7 @@ class LeadFlowSearch extends LeadFlow
             $query->andFilterWhere(['=','DATE(created)', $this->created]);
         }
 
-        if($this->statuses) {
+        if ($this->statuses) {
             $query->andWhere(['lead_flow.status' => $this->statuses]);
         }
 
@@ -91,16 +91,16 @@ class LeadFlowSearch extends LeadFlow
                  ->andFilterWhere(['<=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($params['LeadFlowSearch']['created_date_to']))]);
         }
 
-        if($this->created) {
+        if ($this->created) {
             $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
                 ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
         }
-        if($this->lf_end_dt) {
+        if ($this->lf_end_dt) {
             $query->andFilterWhere(['>=', 'lead_flow.lf_end_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lf_end_dt))])
                 ->andFilterWhere(['<=', 'lead_flow.lf_end_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lf_end_dt) + 3600 * 24)]);
         }
 
-        if($this->supervision_id > 0) {
+        if ($this->supervision_id > 0) {
             $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
             $query->andWhere(['IN', 'lead_flow.lf_owner_id', $subQuery]);

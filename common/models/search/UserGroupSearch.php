@@ -60,7 +60,7 @@ class UserGroupSearch extends UserGroup
             return $dataProvider;
         }
 
-        if ($this->ug_updated_dt){
+        if ($this->ug_updated_dt) {
             $query->andFilterWhere(['>=', 'ug_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ug_updated_dt))])
                 ->andFilterWhere(['<=', 'ug_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ug_updated_dt) + 3600 * 24)]);
         }

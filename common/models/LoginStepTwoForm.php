@@ -1,4 +1,5 @@
 <?php
+
 namespace common\models;
 
 use Yii;
@@ -48,7 +49,6 @@ class LoginStepTwoForm extends Model
     public function validateKey($attribute, $params): void
     {
         if (!$this->hasErrors()) {
-
             $valid = (new Manager())
                 ->setCycles($this->twoFactorAuthCycles)
                 ->verify($this->secret_key, $this->twoFactorAuthKey);
@@ -66,7 +66,7 @@ class LoginStepTwoForm extends Model
      */
     public function login(): bool
     {
-        if($this->validate() && $user = Employee::findOne(['email' => $this->userEmail])) {
+        if ($this->validate() && $user = Employee::findOne(['email' => $this->userEmail])) {
             $isLogin = Yii::$app->user->login($user, $this->rememberMe ? 3600 * 24 * 30 : 0);
             if ($isLogin) {
                 LoginForm::sendWsIdentityCookie(Yii::$app->user->identity, $this->rememberMe ? 3600 * 24 * 30 : 0);

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by Alex Connor.
  * User: alexandr
@@ -53,11 +54,10 @@ class AgentCallQueueJob extends BaseObject implements JobInterface
      * @param Queue $queue
      * @return bool
      */
-    public function execute($queue) : bool
+    public function execute($queue): bool
     {
 
         try {
-
 //            $this->casesCreateService = Yii::createObject(CasesCreateService::class);
 //            $this->clientManageService = Yii::createObject(ClientManageService::class);
 //            $this->casesRepository = Yii::createObject(CasesRepository::class);
@@ -70,17 +70,16 @@ class AgentCallQueueJob extends BaseObject implements JobInterface
 
             $calls = Call::find()->where(['c_status_id' => Call::STATUS_QUEUE, 'c_source_type_id' => Call::SOURCE_GENERAL_LINE])->orderBy(['c_id' => SORT_ASC])->limit(10)->all();
 
-            if($calls) {
+            if ($calls) {
                 foreach ($calls as $call) {
-
                     $originalAgentId = $call->c_created_user_id;
                     $isCalled = false;
 
-                    if(!$originalAgentId && $call->c_lead_id && $call->cLead) {
+                    if (!$originalAgentId && $call->c_lead_id && $call->cLead) {
                         $originalAgentId = $call->cLead->employee_id;
                     }
 
-                    if(!$originalAgentId && $call->c_case_id && $call->cCase) {
+                    if (!$originalAgentId && $call->c_case_id && $call->cCase) {
                         $originalAgentId = $call->cCase->cs_user_id;
                     }
 
@@ -88,9 +87,9 @@ class AgentCallQueueJob extends BaseObject implements JobInterface
                         $originalAgentId = $call->c_created_user_id;
                     }*/
 
-                    if($originalAgentId) {
+                    if ($originalAgentId) {
                         $user = Employee::findOne($originalAgentId);
-                        if($user && $user->isOnline() /*&& $user->isCallStatusReady() && $user->isCallFree()*/) {
+                        if ($user && $user->isOnline() /*&& $user->isCallStatusReady() && $user->isCallFree()*/) {
                             $depListIds = array_keys($user->getUserDepartmentList());
                             if (in_array($call->c_dep_id, $depListIds, true)) {
                                 $isCalled = Call::applyCallToAgentAccess($call, $user->id);
@@ -98,7 +97,7 @@ class AgentCallQueueJob extends BaseObject implements JobInterface
                         }
                     }
 
-                    if(!$isCalled) {
+                    if (!$isCalled) {
                         $limitCallUsers = (int) (Yii::$app->params['settings']['general_line_user_limit'] ?? 1); //direct_agent_user_limit
 
                         $exceptUserIds = ArrayHelper::map($call->callUserAccesses, 'cua_user_id', 'cua_user_id');
@@ -115,7 +114,6 @@ class AgentCallQueueJob extends BaseObject implements JobInterface
 
                 Notifications::pingUserMap();
             }
-
         } catch (\Throwable $e) {
             Yii::error(VarDumper::dumpAsString($e->getMessage()), 'AgentCallQueueJob:execute:Throwable');
         }

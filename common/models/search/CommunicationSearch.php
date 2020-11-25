@@ -177,7 +177,7 @@ class CommunicationSearch extends Model
             //'user_group_id' => $this->user_group_id,
         ]);
 
-        if(empty($this->created_dt) && isset($params['CommunicationSearch']['date_range'])){
+        if (empty($this->created_dt) && isset($params['CommunicationSearch']['date_range'])) {
             $query->andFilterWhere(['>=', 'created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
                 ->andFilterWhere(['<=', 'created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         } else {

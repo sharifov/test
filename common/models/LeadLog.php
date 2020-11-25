@@ -105,7 +105,8 @@ class LeadLog extends \yii\db\ActiveRecord
     {
         $this->attributes = $params;
         $this->message = $this->logMessage->getMessage();
-        if (!is_a(\Yii::$app, 'yii\console\Application') &&
+        if (
+            !is_a(\Yii::$app, 'yii\console\Application') &&
             Yii::$app->user->identityClass != 'webapi\models\ApiUser'
         ) {
             $this->employee_id = (Yii::$app->user->isGuest)

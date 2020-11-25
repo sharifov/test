@@ -52,9 +52,9 @@ class FilterShortCodeToId implements Filter
     }
 
     public function processChat(): void
-	{
-		$this->content = preg_replace_callback('|{chat-([\d]+)}|iU', static function ($matches) {
-			return $matches[1];
-		}, $this->content);
-	}
+    {
+        $this->content = preg_replace_callback('|{chat-([\d]+)}|iU', static function ($matches) {
+            return $matches[1];
+        }, $this->content);
+    }
 }

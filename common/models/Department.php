@@ -225,10 +225,10 @@ class Department extends \yii\db\ActiveRecord
     }
 
     public static function getListExcludingExchange(): array
-	{
-		$data = self::find()->where(['<>', 'dep_id', self::DEPARTMENT_EXCHANGE])->orderBy(['dep_id' => SORT_ASC])->asArray()->all();
-		return ArrayHelper::map($data, 'dep_id', 'dep_name');
-	}
+    {
+        $data = self::find()->where(['<>', 'dep_id', self::DEPARTMENT_EXCHANGE])->orderBy(['dep_id' => SORT_ASC])->asArray()->all();
+        return ArrayHelper::map($data, 'dep_id', 'dep_name');
+    }
 
     public function getParams(): ?Params
     {

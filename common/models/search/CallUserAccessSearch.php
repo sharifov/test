@@ -57,14 +57,14 @@ class CallUserAccessSearch extends CallUserAccess
             return $dataProvider;
         }
 
-        if ($this->cua_created_dt){
+        if ($this->cua_created_dt) {
             $query->andFilterWhere(['>=', 'cua_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->cua_created_dt))])
-                ->andFilterWhere(['<=', 'cua_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->cua_created_dt) + 3600 *24)]);
+                ->andFilterWhere(['<=', 'cua_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->cua_created_dt) + 3600 * 24)]);
         }
 
-        if ($this->cua_updated_dt){
+        if ($this->cua_updated_dt) {
             $query->andFilterWhere(['>=', 'cua_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->cua_updated_dt))])
-                ->andFilterWhere(['<=', 'cua_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->cua_updated_dt) + 3600 *24)]);
+                ->andFilterWhere(['<=', 'cua_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->cua_updated_dt) + 3600 * 24)]);
         }
 
         // grid filtering conditions

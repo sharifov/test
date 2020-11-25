@@ -26,7 +26,6 @@ use yii\db\ActiveQuery;
  */
 class LeadPreferences extends \yii\db\ActiveRecord
 {
-
     use EventTrait;
 
     /**
@@ -49,24 +48,24 @@ class LeadPreferences extends \yii\db\ActiveRecord
         return $preferences;
     }
 
-	/**
-	 * @param int $marketPrice
-	 * @param int $clientBudget
-	 * @param int $numberStops
-	 * @param null|string $currency
+    /**
+     * @param int $marketPrice
+     * @param int $clientBudget
+     * @param int $numberStops
+     * @param null|string $currency
      *
-	 */
+     */
     public function edit($marketPrice, $clientBudget, $numberStops, $currency): void
-	{
-		$this->market_price = $marketPrice;
-		$this->clients_budget = $clientBudget;
-		$this->number_stops = $numberStops;
+    {
+        $this->market_price = $marketPrice;
+        $this->clients_budget = $clientBudget;
+        $this->number_stops = $numberStops;
 
-		if ($this->pref_currency != $currency) {
-			$this->recordEvent((new LeadPreferencesUpdateCurrencyEvent($this)));
-		}
+        if ($this->pref_currency != $currency) {
+            $this->recordEvent((new LeadPreferencesUpdateCurrencyEvent($this)));
+        }
         $this->pref_currency = $currency;
-	}
+    }
 
     /**
      * @return array
@@ -75,8 +74,8 @@ class LeadPreferences extends \yii\db\ActiveRecord
     {
         return [
             [['lead_id', 'number_stops'], 'integer'],
-			[['lead_id', 'numberStops'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-			[['marketPrice', 'clientsBudget'], 'filter', 'filter' => 'floatval', 'skipOnEmpty' => true],
+            [['lead_id', 'numberStops'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            [['marketPrice', 'clientsBudget'], 'filter', 'filter' => 'floatval', 'skipOnEmpty' => true],
             [['pref_currency'], 'string', 'max' => 3],
             [['notes'], 'string'],
             [['clients_budget', 'market_price'], 'number'],

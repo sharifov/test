@@ -29,11 +29,11 @@ use yii\helpers\VarDumper;
  */
 class Currency extends \yii\db\ActiveRecord
 {
-	private const DEFAULT_CURRENCY = 'USD';
+    private const DEFAULT_CURRENCY = 'USD';
 
-	private const DEFAULT_CURRENCY_CLIENT_RATE = 1.00;
+    private const DEFAULT_CURRENCY_CLIENT_RATE = 1.00;
 
-	private const DEFAULT_CURRENCY_BASE_RATE = 1.00;
+    private const DEFAULT_CURRENCY_BASE_RATE = 1.00;
 
     /**
      * {@inheritdoc}
@@ -108,24 +108,24 @@ class Currency extends \yii\db\ActiveRecord
         return new CurrencyQuery(static::class);
     }
 
-	/**
-	 * @param bool $insert
-	 * @param array $changedAttributes
-	 */
+    /**
+     * @param bool $insert
+     * @param array $changedAttributes
+     */
     public function afterSave($insert, $changedAttributes)
-	{
-		parent::afterSave($insert, $changedAttributes);
-		$currencyHistory = (new CurrencyHistory())->fillByCurrency($this);
-		if (!$currencyHistory->save(false)) {
-			Yii::error($currencyHistory->cur_his_code . ': ' . VarDumper::dumpAsString($currencyHistory->errors), 'Currency:synchronization:CurrencyHistory:save');
-		}
-	}
+    {
+        parent::afterSave($insert, $changedAttributes);
+        $currencyHistory = (new CurrencyHistory())->fillByCurrency($this);
+        if (!$currencyHistory->save(false)) {
+            Yii::error($currencyHistory->cur_his_code . ': ' . VarDumper::dumpAsString($currencyHistory->errors), 'Currency:synchronization:CurrencyHistory:save');
+        }
+    }
 
     /**
      * @return array
      * @throws \yii\httpclient\Exception
      */
-    public static function synchronization() : array
+    public static function synchronization(): array
     {
         $data = [
             'created' => [],
@@ -138,7 +138,7 @@ class Currency extends \yii\db\ActiveRecord
 
         // VarDumper::dump($currencyResponse); exit;
 
-        if($currencyResponse && isset($currencyResponse['data']['quotes'])) {
+        if ($currencyResponse && isset($currencyResponse['data']['quotes'])) {
             $curData = $currencyResponse['data'];
 
 
@@ -178,14 +178,12 @@ class Currency extends \yii\db\ActiveRecord
 
 
             foreach ($curData['quotes'] as $curItem) {
-
                 if (!isset($curItem['code'])) {
                     continue;
                 }
 
                 $currency = self::findOne(['cur_code' => $curItem['code']]);
                 if (!$currency) {
-
                     $currency = new self();
                     $currency->cur_code = $curItem['code'];
                     $currency->cur_name = $curItem['name'];
@@ -204,9 +202,7 @@ class Currency extends \yii\db\ActiveRecord
                     }
 
                     $data['created'][] = $currency->cur_code;
-
                 } else {
-
                     if ($currency->cur_name !== $curItem['name']) {
                         $currency->cur_name = $curItem['name'];
                     }
@@ -243,10 +239,7 @@ class Currency extends \yii\db\ActiveRecord
                 if (!$currency->save()) {
                     Yii::error($currency->cur_code . ': ' . VarDumper::dumpAsString($currency->errors), 'Currency:synchronization:save');
                 }
-
             }
-
-
         } else {
             $data['error'] = 'Not found response[data][quotes]';
         }
@@ -258,7 +251,7 @@ class Currency extends \yii\db\ActiveRecord
     /**
      * @return array
      */
-    public static function getList() : array
+    public static function getList(): array
     {
         $query = self::find()->where(['cur_enabled' => true])->orderBy(['cur_sort_order' => SORT_ASC]);
         $data = $query->asArray()->all();
@@ -266,40 +259,40 @@ class Currency extends \yii\db\ActiveRecord
     }
 
     public static function getDefaultCurrency()
-	{
-		return self::find()->where(['cur_default' => 1])->one();
-	}
+    {
+        return self::find()->where(['cur_default' => 1])->one();
+    }
 
-	/**
-	 * @return string
-	 */
+    /**
+     * @return string
+     */
     public static function getDefaultCurrencyCode(): string
-	{
-		return self::getDefaultCurrency()->cur_code ?? self::DEFAULT_CURRENCY;
-	}
+    {
+        return self::getDefaultCurrency()->cur_code ?? self::DEFAULT_CURRENCY;
+    }
 
-	/**
-	 * @return float
-	 */
-	public static function getDefaultClientCurrencyRate(): float
-	{
-		return self::getDefaultCurrency()->cur_app_rate ?? self::DEFAULT_CURRENCY_CLIENT_RATE;
-	}
+    /**
+     * @return float
+     */
+    public static function getDefaultClientCurrencyRate(): float
+    {
+        return self::getDefaultCurrency()->cur_app_rate ?? self::DEFAULT_CURRENCY_CLIENT_RATE;
+    }
 
-	/**
-	 * @return float
-	 */
-	public static function getDefaultBaseCurrencyRate(): float
-	{
-		return self::getDefaultCurrency()->cur_base_rate ?? self::DEFAULT_CURRENCY_BASE_RATE;
-	}
+    /**
+     * @return float
+     */
+    public static function getDefaultBaseCurrencyRate(): float
+    {
+        return self::getDefaultCurrency()->cur_base_rate ?? self::DEFAULT_CURRENCY_BASE_RATE;
+    }
 
-	/**
-	 * @param string $code
-	 * @return float|null
-	 */
-	public static function getBaseRateByCurrencyCode(string $code): ?float
-	{
-		return self::find()->where(['cur_code' => $code])->one()->cur_base_rate ?? null;
-	}
+    /**
+     * @param string $code
+     * @return float|null
+     */
+    public static function getBaseRateByCurrencyCode(string $code): ?float
+    {
+        return self::find()->where(['cur_code' => $code])->one()->cur_base_rate ?? null;
+    }
 }

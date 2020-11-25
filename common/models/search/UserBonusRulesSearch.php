@@ -73,7 +73,7 @@ class UserBonusRulesSearch extends UserBonusRules
     }
 
     public function getCommissionValue(int $exp, float $kpiPercent, int $orderProfit)
-	{
-		$query = UserBonusRules::find();
-	}
+    {
+        $query = UserBonusRules::find();
+    }
 }

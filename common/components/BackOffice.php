@@ -1,4 +1,5 @@
 <?php
+
 namespace common\components;
 
 use http\Client\Request;
@@ -115,7 +116,7 @@ class BackOffice
      * @param string $version
      * @return string
      */
-    private static function getSignatureBO(string $apiKey = '', string $version = '') : string
+    private static function getSignatureBO(string $apiKey = '', string $version = ''): string
     {
         $expired = time() + 3600;
         $md5 = md5(sprintf('%s:%s:%s', $apiKey, $version, $expired));
@@ -144,7 +145,7 @@ class BackOffice
                             return $result;
                         }
                     } else {
-                        throw new Exception('Url: ' . $uri .' , BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
+                        throw new Exception('Url: ' . $uri . ' , BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
                     }
                 } catch (\Throwable $exception) {
                     //throw new BadRequestHttpException($exception->getMessage());

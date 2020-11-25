@@ -90,7 +90,7 @@ class LeadQcallSearch extends LeadQcall
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['lqc_weight' => SORT_ASC, 'lqc_dt_from' => SORT_ASC]],
+            'sort' => ['defaultOrder' => ['lqc_weight' => SORT_ASC, 'lqc_dt_from' => SORT_ASC]],
             'pagination' => [
                 'pageSize' => 40,
             ],
@@ -128,7 +128,7 @@ class LeadQcallSearch extends LeadQcall
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['lqc_weight' => SORT_ASC, 'lqc_dt_from' => SORT_ASC]],
+            'sort' => ['defaultOrder' => ['lqc_weight' => SORT_ASC, 'lqc_dt_from' => SORT_ASC]],
             'pagination' => [
                 'pageSize' => 40,
             ],
@@ -217,8 +217,8 @@ class LeadQcallSearch extends LeadQcall
         }
 
         if (empty($params['is_test']) && !$user->checkIfUsersIpIsAllowed()) {
-			$query->andWhere([Lead::tableName() . '.l_is_test' => 0]);
-		}
+            $query->andWhere([Lead::tableName() . '.l_is_test' => 0]);
+        }
 
         $redialSame = (int)Yii::$app->params['settings']['redial_same_deadline_priority'];
         $samePriority = "TIMESTAMPDIFF(MINUTE, '" . $nowDt . "', lqc_dt_to)";
@@ -266,17 +266,16 @@ class LeadQcallSearch extends LeadQcall
             $clientGmt = "TIME( CONVERT_TZ(NOW(), '+00:00', " . Lead::tableName() . '.offset_gmt) )';
 //            $query->addSelect(['client_gmt' => new Expression($clientGmt)]);
             $query->addSelect(['is_in_day_time_hours' =>
-                new Expression('if ( '.$expression . ' > ' . $freshTime .'  AND ' . $clientGmt . ' >= \'' . $dayTimeHours->getStart() . '\' AND ' . $clientGmt . ' <= \'' . $dayTimeHours->getEnd() . '\', 1, 0) ')
+                new Expression('if ( ' . $expression . ' > ' . $freshTime . '  AND ' . $clientGmt . ' >= \'' . $dayTimeHours->getStart() . '\' AND ' . $clientGmt . ' <= \'' . $dayTimeHours->getEnd() . '\', 1, 0) ')
             ]);
 //            $query->addOrderBy([
 //                'is_in_day_time_hours' => SORT_DESC
 //            ]);
 
             $defaultOrder = array_merge($defaultOrder, [
-				'isFresh' => SORT_DESC,
-				'is_in_day_time_hours' => SORT_DESC
-			]);
-
+                'isFresh' => SORT_DESC,
+                'is_in_day_time_hours' => SORT_DESC
+            ]);
         } else {
             $dayTimeHours = new DayTimeHours(Yii::$app->params['settings']['qcall_day_time_hours']);
             $clientGmt = "TIME( CONVERT_TZ(NOW(), '+00:00', " . Lead::tableName() . '.offset_gmt) )';
@@ -294,7 +293,6 @@ class LeadQcallSearch extends LeadQcall
         }
 
         if (($settingsMinute = (int)Yii::$app->params['settings']['redial_business_flight_leads_skill_priority_time']) > 0) {
-
             $expression = "TIMESTAMPDIFF(MINUTE, lqc_created_dt, '" . $nowDt . "')";
 
             $query->addSelect(['redial_business_flight_leads_over_created_time' =>
@@ -342,10 +340,10 @@ class LeadQcallSearch extends LeadQcall
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> [
+            'sort' => [
                 'defaultOrder' => $defaultOrder,
-				'attributes' => [
-				    'is_ready',
+                'attributes' => [
+                    'is_ready',
                     'is_reserved',
                     'isFresh',
                     'is_in_day_time_hours',
@@ -358,7 +356,7 @@ class LeadQcallSearch extends LeadQcall
                     'lqc_created_dt',
                     'lqc_lead_id',
                     'is_not_empty_passengers',
-				]
+                ]
             ],
             /*'pagination' => [
                 'pageSize' => 40,
@@ -386,25 +384,23 @@ class LeadQcallSearch extends LeadQcall
             Lead::tableName() . '.project_id' => $this->projectId,
             Lead::tableName() . '.status' => $this->leadStatus,
             Lead::tableName() . '.cabin' => $this->cabin,
-			Lead::tableName() . '.l_is_test' => $this->l_is_test,
+            Lead::tableName() . '.l_is_test' => $this->l_is_test,
         ]);
 
 
         $dataProvider->sort->attributes['l_is_test'] = [
-        	'asc' => ['l_is_test' => SORT_ASC],
-        	'desc' => ['l_is_test' => SORT_DESC],
-		];
+            'asc' => ['l_is_test' => SORT_ASC],
+            'desc' => ['l_is_test' => SORT_DESC],
+        ];
 
 //        VarDumper::dump($dataProvider);die;
         if ($user->isAdmin()) {
-
             $query->andFilterWhere([
                 Lead::tableName() . '.l_call_status_id' => $this->l_call_status_id
             ]);
 
             if ($this->attempts === '0') {
                 $query->andHaving(['attempts' => 0]);
-
             } else {
                 $query->andFilterHaving(['attempts' => $this->attempts]);
             }
@@ -428,7 +424,7 @@ class LeadQcallSearch extends LeadQcall
             }
         }
 
-//		VarDumper::dump($query->createCommand()->getRawSql());die;
+//      VarDumper::dump($query->createCommand()->getRawSql());die;
 
         return $dataProvider;
     }

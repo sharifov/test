@@ -47,11 +47,11 @@ class CheckPhoneNumberJob extends BaseObject implements \yii\queue\JobInterface
             }
             $clientPhone = ClientPhone::findOne(['client_id' => $this->client_id, 'id' => $this->client_phone_id ]);
             if (!$clientPhone) {
-                throw new \Exception('Error CheckPhoneNumberJob: ClientPhone not found in db (client_id: '.$this->client_id.', phone_id: '.$this->client_phone_id.')');
+                throw new \Exception('Error CheckPhoneNumberJob: ClientPhone not found in db (client_id: ' . $this->client_id . ', phone_id: ' . $this->client_phone_id . ')');
             }
 
             if (strlen($clientPhone->phone) < 8) {
-                throw new \Exception('Error CheckPhoneNumberJob: ClientPhone is < 8 ('.$clientPhone->phone.', clientId: '.$clientPhone->client_id.')');
+                throw new \Exception('Error CheckPhoneNumberJob: ClientPhone is < 8 (' . $clientPhone->phone . ', clientId: ' . $clientPhone->client_id . ')');
             }
 
             if ($debug) {
@@ -63,7 +63,7 @@ class CheckPhoneNumberJob extends BaseObject implements \yii\queue\JobInterface
             }*/
 
             $data = [];
-            $url = Yii::$app->communication->url .'phone/index/?phone=' . $clientPhone->phone;
+            $url = Yii::$app->communication->url . 'phone/index/?phone=' . $clientPhone->phone;
             if ($debug) {
                 echo $url . PHP_EOL;
             }
@@ -82,7 +82,7 @@ class CheckPhoneNumberJob extends BaseObject implements \yii\queue\JobInterface
             //print_r($response->data); exit;
 
             if ($debug) {
-                echo "isOk: ". $response->isOk . PHP_EOL;
+                echo "isOk: " . $response->isOk . PHP_EOL;
             }
 
             if ($response->isOk) {
@@ -91,12 +91,14 @@ class CheckPhoneNumberJob extends BaseObject implements \yii\queue\JobInterface
                     throw new \Exception('Error CheckPhoneNumberJob: Not found in response array data key [data][response] :: ' . VarDumper::dumpAsString(['client_phone' => $clientPhone->phone, 'response_data' => $response->data]));
                 }
             } else {
-                throw new \Exception('Error CheckPhoneNumberJob: ClientPhone error response from communication: '. $response->content);
+                throw new \Exception('Error CheckPhoneNumberJob: ClientPhone error response from communication: ' . $response->content);
             }
 
             $is_error = false;
-            if (isset($response->data['data']['response'], $response->data['data']['response']['numbers'])
-                && count($response->data['data']['response']['numbers'])) {
+            if (
+                isset($response->data['data']['response'], $response->data['data']['response']['numbers'])
+                && count($response->data['data']['response']['numbers'])
+            ) {
                 foreach ($response->data['data']['response']['numbers'] as $phoneNumber => $phoneData) {
                     if (isset($phoneData['internationalNumber'], $phoneData['numberType'])) {
                         $phone = str_replace(' ', '', $phoneNumber);

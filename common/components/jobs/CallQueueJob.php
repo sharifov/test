@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by Alex Connor.
  * User: alexandr
@@ -68,7 +69,7 @@ class CallQueueJob extends BaseObject implements JobInterface
      * @param Queue $queue
      * @return bool
      */
-    public function execute($queue) : bool
+    public function execute($queue): bool
     {
         $metrics = new Metrics();
         $timeStart = microtime(true);
@@ -142,8 +143,8 @@ class CallQueueJob extends BaseObject implements JobInterface
                                 }
 
 //                            if (!$lead) {
-//                            	return true;
-                                //							}
+//                              return true;
+                                //                          }
 
                                 $call->c_lead_id = $lead->id ?? null;
 
@@ -274,7 +275,6 @@ class CallQueueJob extends BaseObject implements JobInterface
                     }
 
                     if (!$isCalled) {
-
                         // Yii::info('Accept multiple users - CallId: ' . $call->c_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-Accept-multi');
 
                         $last_hours = (int)(Yii::$app->params['settings']['general_line_last_hours'] ?? 1);

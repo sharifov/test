@@ -120,10 +120,10 @@ class LeadChecklistType extends \yii\db\ActiveRecord
      * @param bool $enabled
      * @return array
      */
-    public static function getList(bool $enabled = true) : array
+    public static function getList(bool $enabled = true): array
     {
         $query = self::find()->orderBy(['lct_sort_order' => SORT_ASC]);
-        if($enabled) {
+        if ($enabled) {
             $query->andWhere(['lct_enabled' => true]);
         }
         $data = $query->asArray()->all();

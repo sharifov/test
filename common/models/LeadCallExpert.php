@@ -100,7 +100,7 @@ class LeadCallExpert extends \yii\db\ActiveRecord
             $call = $query->one();
 
             if ($call) {
-                $this->addError($attribute, 'Exist Call Expert on status pending (id: '.$call->lce_id.')');
+                $this->addError($attribute, 'Exist Call Expert on status pending (id: ' . $call->lce_id . ')');
             }
         }
     }
@@ -208,7 +208,7 @@ class LeadCallExpert extends \yii\db\ActiveRecord
     {
         $lead = $this->lceLead;
 
-        if($lead) {
+        if ($lead) {
             $data = $lead->getLeadInformationForExpert();
             $data['call_expert'] = true;
 
@@ -224,7 +224,7 @@ class LeadCallExpert extends \yii\db\ActiveRecord
 
             $result = BackOffice::sendRequest('lead/update-lead', 'POST', json_encode($data));
 
-            if(!$lead->called_expert) {
+            if (!$lead->called_expert) {
                 $lead->called_expert = true;
                 $lead->save();
             }
@@ -232,7 +232,6 @@ class LeadCallExpert extends \yii\db\ActiveRecord
             if ($result && isset($result['status']) && $result['status'] === 'Success') {
                 return true;
             }
-
         }
 
         return false;
@@ -250,11 +249,8 @@ class LeadCallExpert extends \yii\db\ActiveRecord
             $this->callExpert();
         }
 
-        if($this->lce_lead_id && $this->lceLead) {
+        if ($this->lce_lead_id && $this->lceLead) {
             $this->lceLead->updateLastAction();
         }
-
     }
-
-
 }

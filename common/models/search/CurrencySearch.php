@@ -48,7 +48,7 @@ class CurrencySearch extends Currency
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cur_sort_order' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['cur_sort_order' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],

@@ -339,16 +339,16 @@ class Formatter extends \yii\i18n\Formatter
     }
 
     public function asPayroll($userPayrollId): string
-	{
-		if ($userPayrollId === null) {
-			return $this->nullDisplay;
-		}
-		return Html::a(
-			$userPayrollId,
-			['/user-payroll-crud/view', 'id' => $userPayrollId],
-			['target' => '_blank', 'data-pjax' => 0]
-		);
-	}
+    {
+        if ($userPayrollId === null) {
+            return $this->nullDisplay;
+        }
+        return Html::a(
+            $userPayrollId,
+            ['/user-payroll-crud/view', 'id' => $userPayrollId],
+            ['target' => '_blank', 'data-pjax' => 0]
+        );
+    }
 
     public function asProduct(?Product $product): string
     {
@@ -378,19 +378,19 @@ class Formatter extends \yii\i18n\Formatter
     }
 
     public function asCaseSale(?CaseSale $caseSale): string
-	{
-		if ($caseSale === null) {
-			return $this->nullDisplay;
-		}
+    {
+        if ($caseSale === null) {
+            return $this->nullDisplay;
+        }
 
-		return Html::tag('i', '', ['class' => 'fa fa-arrow-right'])
-			. ' '
-			. Html::a(
-				'Case Sale',
-				['/case-sale/view', 'css_cs_id' => $caseSale->css_cs_id, 'css_sale_id' => $caseSale->css_sale_id],
-				['target' => '_blank', 'data-pjax' => 0]
-			);
-	}
+        return Html::tag('i', '', ['class' => 'fa fa-arrow-right'])
+            . ' '
+            . Html::a(
+                'Case Sale',
+                ['/case-sale/view', 'css_cs_id' => $caseSale->css_cs_id, 'css_sale_id' => $caseSale->css_sale_id],
+                ['target' => '_blank', 'data-pjax' => 0]
+            );
+    }
 
     public function asProductType($value): string
     {
@@ -402,19 +402,19 @@ class Formatter extends \yii\i18n\Formatter
     }
 
     public function asPaymentMethod($value): string
-	{
-		if ($value === null) {
-			return $this->nullDisplay;
-		}
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
 
-		$paymentMethod = PaymentMethod::findOne($value);
+        $paymentMethod = PaymentMethod::findOne($value);
 
-		if ($paymentMethod) {
-			return $paymentMethod->pm_name;
-		}
+        if ($paymentMethod) {
+            return $paymentMethod->pm_name;
+        }
 
-		return $this->nullDisplay;
-	}
+        return $this->nullDisplay;
+    }
 
     public function asQuoteType($value): string
     {
@@ -439,49 +439,49 @@ class Formatter extends \yii\i18n\Formatter
         return Html::tag('span', Quote::getTypeName($value), ['class' => $class]);
     }
 
-	/**
-	 * @param $categoryId
-	 * @return string|null
-	 */
+    /**
+     * @param $categoryId
+     * @return string|null
+     */
     public function asUserPaymentCategoryName($categoryId): ?string
-	{
-		$category = UserPaymentCategory::findOne(['upc_id' => $categoryId]);
+    {
+        $category = UserPaymentCategory::findOne(['upc_id' => $categoryId]);
 
-		if ($category) {
-			return $category->upc_name ?? '--';
-		}
-		return '--';
-	}
+        if ($category) {
+            return $category->upc_name ?? '--';
+        }
+        return '--';
+    }
 
-	public function asTimer(string $dateTime, string $timerSpanClass = 'label label-info')
-	{
-		if (!$dateTime) {
-			return $this->nullDisplay;
-		}
+    public function asTimer(string $dateTime, string $timerSpanClass = 'label label-info')
+    {
+        if (!$dateTime) {
+            return $this->nullDisplay;
+        }
 
-		$currentTime = time();
-		$dateTime = strtotime($dateTime);
+        $currentTime = time();
+        $dateTime = strtotime($dateTime);
 
-		$diff = abs($currentTime-$dateTime);
+        $diff = abs($currentTime - $dateTime);
 
-		$icon = Html::tag('i', '', ['class' => 'fa fa-clock-o']);
-		$timerSpan = Html::tag('span', '', ['class' => 'enable-timer ' . $timerSpanClass, 'data-seconds' => $diff]);
-		return Html::tag('div', $icon . ' ' . $timerSpan);
-	}
+        $icon = Html::tag('i', '', ['class' => 'fa fa-clock-o']);
+        $timerSpan = Html::tag('span', '', ['class' => 'enable-timer ' . $timerSpanClass, 'data-seconds' => $diff]);
+        return Html::tag('div', $icon . ' ' . $timerSpan);
+    }
 
-	/**
-	 * @param $statusId
-	 * @return string|null
-	 */
-	public function asUserPaymentStatusName($statusId): ?string
-	{
-		$statusName = UserPaymentCategory::getStatusName($statusId);
+    /**
+     * @param $statusId
+     * @return string|null
+     */
+    public function asUserPaymentStatusName($statusId): ?string
+    {
+        $statusName = UserPaymentCategory::getStatusName($statusId);
 
-		if ($statusName) {
-			return $statusName;
-		}
-		return '--';
-	}
+        if ($statusName) {
+            return $statusName;
+        }
+        return '--';
+    }
 
     /**
      * @param $dateTime
@@ -497,18 +497,18 @@ class Formatter extends \yii\i18n\Formatter
         return Html::tag('i', '', ['class' => 'fa fa-calendar']) . ' ' . $this->asDatetime(strtotime($dateTime), $format);
     }
 
-	/**
-	 * @param $dateTime
-	 * @return string
-	 * @throws \yii\base\InvalidConfigException
-	 */
-	public function asByUserDateTimeWithSeconds($dateTime): string
-	{
-		if (!$dateTime) {
-			return $this->nullDisplay;
-		}
-		return Html::tag('i', '', ['class' => 'fa fa-calendar']) . ' ' . $this->asDatetime(strtotime($dateTime), 'php:d-M-Y [H:i:s]');
-	}
+    /**
+     * @param $dateTime
+     * @return string
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function asByUserDateTimeWithSeconds($dateTime): string
+    {
+        if (!$dateTime) {
+            return $this->nullDisplay;
+        }
+        return Html::tag('i', '', ['class' => 'fa fa-calendar']) . ' ' . $this->asDatetime(strtotime($dateTime), 'php:d-M-Y [H:i:s]');
+    }
 
     /**
      * @param Employee|int|string|null $value
@@ -537,24 +537,24 @@ class Formatter extends \yii\i18n\Formatter
         return Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' . Html::encode($name);
     }
 
-	/**
-	 * @param $numberOfMonth
-	 * @return string
-	 */
+    /**
+     * @param $numberOfMonth
+     * @return string
+     */
     public function asMonthNameByMonthNumber($numberOfMonth)
-	{
-		return \DateTime::createFromFormat('!m', $numberOfMonth)->format('F');
-	}
+    {
+        return \DateTime::createFromFormat('!m', $numberOfMonth)->format('F');
+    }
 
-	public function asUserPayrollAgentStatusName($agentStatusId): ?string
-	{
-		return UserPayroll::getAgentStatusName($agentStatusId);
-	}
+    public function asUserPayrollAgentStatusName($agentStatusId): ?string
+    {
+        return UserPayroll::getAgentStatusName($agentStatusId);
+    }
 
-	public function asUserPayrollStatusName($statusId): ?string
-	{
-		return UserPayroll::getStatusName($statusId);
-	}
+    public function asUserPayrollStatusName($statusId): ?string
+    {
+        return UserPayroll::getStatusName($statusId);
+    }
 
     /**
      * @param Department|int|string|null $value
@@ -620,9 +620,9 @@ class Formatter extends \yii\i18n\Formatter
     }
 
     public function asPercentInteger($value): string
-	{
-    	return $value . ' %';
-	}
+    {
+        return $value . ' %';
+    }
 
     /**
      * @param $value
@@ -685,10 +685,12 @@ class Formatter extends \yii\i18n\Formatter
     public function asUserNameLinkToUpdate(?int $userId): string
     {
         if ($user = Employee::find()->select(['username'])->where(['id' => $userId])->cache(3600)->one()) {
-            $result = Html::a(Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' .
+            $result = Html::a(
+                Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' .
                     Html::encode($user->username) . ' ID:' . $userId,
                 ['employee/update', 'id' => $userId],
-                ['target' => '_blank']);
+                ['target' => '_blank']
+            );
         } else {
             $result = $this->nullDisplay;
         }
@@ -706,18 +708,18 @@ class Formatter extends \yii\i18n\Formatter
         }
 
         switch ($status) {
-			case Employee::STATUS_ACTIVE:
-			    $result = Html::tag('span', Employee::STATUS_LIST[Employee::STATUS_ACTIVE], ['class' => 'label label-success']);
-			    break;
-			case Employee::STATUS_DELETED:
-				$result = Html::tag('span', Employee::STATUS_LIST[Employee::STATUS_DELETED], ['class' => 'label label-danger']);
-				break;
-			case Employee::STATUS_BLOCKED:
-				$result = Html::tag('span', Employee::STATUS_LIST[Employee::STATUS_BLOCKED], ['class' => 'label label-warning']);
-				break;
-			default:
-				$result = Html::tag('span', 'not found', ['class' => 'label label-info']);
-		}
+            case Employee::STATUS_ACTIVE:
+                $result = Html::tag('span', Employee::STATUS_LIST[Employee::STATUS_ACTIVE], ['class' => 'label label-success']);
+                break;
+            case Employee::STATUS_DELETED:
+                $result = Html::tag('span', Employee::STATUS_LIST[Employee::STATUS_DELETED], ['class' => 'label label-danger']);
+                break;
+            case Employee::STATUS_BLOCKED:
+                $result = Html::tag('span', Employee::STATUS_LIST[Employee::STATUS_BLOCKED], ['class' => 'label label-warning']);
+                break;
+            default:
+                $result = Html::tag('span', 'not found', ['class' => 'label label-info']);
+        }
         return $result;
     }
 
@@ -776,10 +778,10 @@ class Formatter extends \yii\i18n\Formatter
     }
 
     public function asDumpJson(?string $data): string
-	{
-		if ($data) {
-			return VarDumper::dumpAsString($data);
-		}
-		return $this->nullDisplay;
-	}
+    {
+        if ($data) {
+            return VarDumper::dumpAsString($data);
+        }
+        return $this->nullDisplay;
+    }
 }

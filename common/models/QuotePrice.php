@@ -38,7 +38,7 @@ class QuotePrice extends \yii\db\ActiveRecord
         PASSENGER_INFANT = 'INF';
 
 
-    public CONST PASSENGER_TYPE_LIST = [
+    public const PASSENGER_TYPE_LIST = [
         self::PASSENGER_ADULT => 'Adult',
         self::PASSENGER_CHILD => 'Child',
         self::PASSENGER_INFANT => 'Infant'
@@ -176,15 +176,12 @@ class QuotePrice extends \yii\db\ActiveRecord
 
         if ($this->oldAttributes['selling'] !== $this->selling) {
             $this->mark_up = $this->selling / (1 + $serviceFee) - $this->net; // Selling Price/(1+SERVICE_FEE) - Net Price
-
         } elseif ($this->oldAttributes['fare'] !== $this->fare) {
             $this->net = $this->fare + $this->taxes;
             $this->selling = ($this->fare + $this->taxes + $this->mark_up) * (1 + $serviceFee); // Selling Price = (Fare + Taxes + Mark-up)*(1+SERVICE_FEE)
-
         } elseif ($this->oldAttributes['taxes'] !== $this->taxes) {
             $this->net = $this->fare + $this->taxes;
             $this->selling = ($this->fare + $this->taxes + $this->mark_up) * (1 + $serviceFee);
-
         } elseif ($this->oldAttributes['mark_up'] !== $this->mark_up) {
             $this->selling = ($this->fare + $this->taxes + $this->mark_up) * (1 + $serviceFee);
         } else {
@@ -233,10 +230,10 @@ class QuotePrice extends \yii\db\ActiveRecord
      * @return false|float
      */
     public function roundValue($value, ?int $precision = null)
-     {
+    {
         $precision = $precision ?? $this->defaultPrecision;
         return round((float) $value, $precision);
-     }
+    }
 
     /**
      * {@inheritdoc}
@@ -247,7 +244,7 @@ class QuotePrice extends \yii\db\ActiveRecord
             [['quote_id'], 'integer'],
             [['selling', 'net', 'fare', 'taxes', 'mark_up', 'service_fee'], 'number', 'max' => 99999],
             [['extra_mark_up'], 'number', 'min' => 0],
-            [['taxes'],'number','min' => 0.01, 'when' => function($model) {
+            [['taxes'],'number','min' => 0.01, 'when' => function ($model) {
                 return $model->passenger_type !== self::PASSENGER_INFANT;
             }],
             [['created', 'updated', 'oldParams', 'uid'], 'safe'],
@@ -291,7 +288,7 @@ class QuotePrice extends \yii\db\ActiveRecord
         $this->net = $this->taxes + $this->fare;
 
         $this->selling = ($this->net + $this->mark_up + $this->extra_mark_up);
-        if($serviceFeePercent > 0){
+        if ($serviceFeePercent > 0) {
             $this->service_fee = $this->selling * $serviceFeePercent / 100;
             $this->selling += $this->service_fee;
         }
@@ -314,10 +311,9 @@ class QuotePrice extends \yii\db\ActiveRecord
     }*/
 
 
-    public function beforeSave($insert) : bool
+    public function beforeSave($insert): bool
     {
         if (parent::beforeSave($insert)) {
-
             //$this->updated = date('Y-m-d H:i:s');
 
             if (empty($this->uid)) {
@@ -350,7 +346,7 @@ class QuotePrice extends \yii\db\ActiveRecord
 
         $data['selling'] = $data['net'] + $data['mark_up'] + $data['extra_mark_up'];
         $service_fee_percent = $this->quote->getServiceFeePercent();
-        $service_fee = ($service_fee_percent > 0)?$data['selling'] * $service_fee_percent / 100:0;
+        $service_fee = ($service_fee_percent > 0) ? $data['selling'] * $service_fee_percent / 100 : 0;
         $data['selling'] += $service_fee;
         $data['selling'] = round($data['selling']);
 
@@ -379,7 +375,7 @@ class QuotePrice extends \yii\db\ActiveRecord
         }
     }
 
-    public function getPassengerTypeName($type = null) : string
+    public function getPassengerTypeName($type = null): string
     {
         if ($type !== null) {
             return self::PASSENGER_TYPE_LIST[$type] ?? '-';

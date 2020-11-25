@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created
  * User: alex.connor@techork.com
@@ -33,7 +34,7 @@ class CurrencyService extends Component
 
     private $request;
 
-    public function init() : void
+    public function init(): void
     {
         parent::init();
         $this->initRequest();
@@ -42,7 +43,7 @@ class CurrencyService extends Component
     /**
      * @return bool
      */
-    private function initRequest() : bool
+    private function initRequest(): bool
     {
         $authStr = base64_encode($this->username . ':' . $this->password);
 
@@ -68,7 +69,7 @@ class CurrencyService extends Component
      * @return \yii\httpclient\Response
      * @throws \yii\httpclient\Exception
      */
-    protected function sendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []) : Response
+    protected function sendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []): Response
     {
         $url = $this->url . $action;
 
@@ -109,7 +110,7 @@ class CurrencyService extends Component
      * @return array
      * @throws \yii\httpclient\Exception
      */
-    public function getRate(bool $extra = true, ?string $sourceCurrencyCode, array $rateCurrencyList = []) : array
+    public function getRate(bool $extra = true, ?string $sourceCurrencyCode, array $rateCurrencyList = []): array
     {
         $out = ['error' => false, 'data' => []];
         $data = [];
@@ -142,5 +143,4 @@ class CurrencyService extends Component
 
         return $out;
     }
-
 }

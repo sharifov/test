@@ -47,7 +47,7 @@ class QcallConfigSearch extends QcallConfig
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['qc_status_id' => SORT_ASC, 'qc_call_att' => SORT_ASC]],
+            'sort' => ['defaultOrder' => ['qc_status_id' => SORT_ASC, 'qc_call_att' => SORT_ASC]],
             'pagination' => [
                 'pageSize' => 40,
             ],

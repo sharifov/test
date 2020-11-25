@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created
  * User: alexandr
@@ -43,7 +44,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
     public $voipApiUsername = '';
 
 
-    public function init() : void
+    public function init(): void
     {
         parent::init();
         $this->initRequest();
@@ -53,7 +54,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
     /**
      * @return bool
      */
-    private function initRequest() : bool
+    private function initRequest(): bool
     {
         $authStr = base64_encode($this->username . ':' . $this->password);
 
@@ -79,7 +80,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return \yii\httpclient\Response
      * @throws Exception
      */
-    protected function sendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []) : Response
+    protected function sendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []): Response
     {
         $url = $this->url . $action;
 
@@ -126,7 +127,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function mailPreview(int $project_id, string $template_type, string $email_from, string $email_to, array $email_data = [], string $language = 'en-US') : array
+    public function mailPreview(int $project_id, string $template_type, string $email_from, string $email_to, array $email_data = [], string $language = 'en-US'): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -172,7 +173,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function mailCapture(int $project_id, string $template_type, string $email_from, string $email_to, array $email_data = [], string $language = 'en-US', array $capture_options = []) : array
+    public function mailCapture(int $project_id, string $template_type, string $email_from, string $email_to, array $email_data = [], string $language = 'en-US', array $capture_options = []): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -219,7 +220,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function clientChatOfferCapture(int $project_id, string $template_type, string $email_from, string $email_to, array $email_data = [], string $language = 'en-US', array $capture_options = []) : array
+    public function clientChatOfferCapture(int $project_id, string $template_type, string $email_from, string $email_to, array $email_data = [], string $language = 'en-US', array $capture_options = []): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -270,7 +271,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function mailSend(int $project_id, ?string $template_type, string $email_from, string $email_to, array $content_data = [], array $email_data = [], ?string $language = 'en-US', int $delay = 0) : array
+    public function mailSend(int $project_id, ?string $template_type, string $email_from, string $email_to, array $content_data = [], array $email_data = [], ?string $language = 'en-US', int $delay = 0): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -344,7 +345,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function mailTypes() : array
+    public function mailTypes(): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -371,7 +372,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function mailGetMessages(array $filter = []) : array
+    public function mailGetMessages(array $filter = []): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -409,7 +410,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error('filter: '. VarDumper::dumpAsString($filter)."\r\n". VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::mailGetMessages');
+            \Yii::error('filter: ' . VarDumper::dumpAsString($filter) . "\r\n" . VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::mailGetMessages');
         }
 
         return $out;
@@ -426,7 +427,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function smsPreview(int $project_id, ?string $template_type, string $phone_from, string $phone_to, array $sms_data = [], ?string $language = 'en-US') : array
+    public function smsPreview(int $project_id, ?string $template_type, string $phone_from, string $phone_to, array $sms_data = [], ?string $language = 'en-US'): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -466,7 +467,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function smsSend(int $project_id, ?string $template_type, string $phone_from, string $phone_to, array $content_data = [], array $sms_data = [], ?string $language = 'en-US', ?int $delay = 0) : array
+    public function smsSend(int $project_id, ?string $template_type, string $phone_from, string $phone_to, array $content_data = [], array $sms_data = [], ?string $language = 'en-US', ?int $delay = 0): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -507,7 +508,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function smsTypes() : array
+    public function smsTypes(): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -534,7 +535,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function smsGetMessages(array $filter = []) : array
+    public function smsGetMessages(array $filter = []): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -575,7 +576,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error('filter: '. VarDumper::dumpAsString($filter)."\r\n". VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::smsGetMessages');
+            \Yii::error('filter: ' . VarDumper::dumpAsString($filter) . "\r\n" . VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::smsGetMessages');
         }
 
         return $out;
@@ -592,7 +593,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function callToPhone(int $project_id, string $phone_from, string $from_number, string $phone_to, string $from_name = '', array $options = []) : array
+    public function callToPhone(int $project_id, string $phone_from, string $from_number, string $phone_to, string $from_name = '', array $options = []): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -628,7 +629,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function updateCall(string $sid, array $updateData = []) : array
+    public function updateCall(string $sid, array $updateData = []): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -659,7 +660,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function redirectCall(string $sid, array $data = [], string $callBackUrl = '') : array
+    public function redirectCall(string $sid, array $data = [], string $callBackUrl = ''): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -690,7 +691,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function updateRecordingStatus(string $sid, string $status, ?string $recordingSid = null) : array
+    public function updateRecordingStatus(string $sid, string $status, ?string $recordingSid = null): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -731,7 +732,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function getJwtToken($username = '') : array
+    public function getJwtToken($username = ''): array
     {
 
         /*'identity' => $token->jt_agent,
@@ -768,7 +769,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      */
     public function getJwtTokenCache($username = '', $deleteCache = false)
     {
-        $cacheKey = 'jwt_token_'.$username;
+        $cacheKey = 'jwt_token_' . $username;
 
         if ($deleteCache) {
             \Yii::$app->cache->delete($cacheKey);
@@ -1056,7 +1057,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
         return $out;
     }
-    
+
     /**
      * @param int $limit
      * @param int $offset

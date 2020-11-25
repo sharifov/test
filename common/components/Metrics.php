@@ -1,4 +1,5 @@
 <?php
+
 namespace common\components;
 
 use Prometheus\CollectorRegistry;
@@ -19,7 +20,7 @@ class Metrics extends Component
 
     private CollectorRegistry $_registry;
 
-    public function init() : void
+    public function init(): void
     {
         // parent::init();
         try {

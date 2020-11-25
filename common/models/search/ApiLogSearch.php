@@ -48,7 +48,7 @@ class ApiLogSearch extends ApiLog
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['al_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['al_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],

@@ -67,7 +67,6 @@ class CallQueueRepeatMessageJob implements JobInterface
             }
 
             (new RepeatMessageCallJobCreator())->create($call, $this->departmentPhoneProjectId, $params);
-
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => $e->getMessage(),

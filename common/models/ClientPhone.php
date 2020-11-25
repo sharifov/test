@@ -14,7 +14,6 @@ use yii\helpers\VarDumper;
 use yii\queue\Queue;
 use common\components\CheckPhoneNumberJob;
 
-
 /**
  * This is the model class for table "client_phone".
  *
@@ -33,7 +32,6 @@ use common\components\CheckPhoneNumberJob;
  */
 class ClientPhone extends \yii\db\ActiveRecord
 {
-
     use EventTrait;
 
     public const PHONE_VALID = 1;
@@ -42,36 +40,36 @@ class ClientPhone extends \yii\db\ActiveRecord
     public const PHONE_NOT_SET = 0;
 
     public const PHONE_TYPE = [
-		self::PHONE_NOT_SET => 'Not set',
-    	self::PHONE_VALID => 'Valid',
-		self::PHONE_FAVORITE => 'Favorite',
-		self::PHONE_INVALID => 'Invalid',
-	];
+        self::PHONE_NOT_SET => 'Not set',
+        self::PHONE_VALID => 'Valid',
+        self::PHONE_FAVORITE => 'Favorite',
+        self::PHONE_INVALID => 'Invalid',
+    ];
 
-	public const PHONE_TYPE_ICO_CLASS = [
-		self::PHONE_VALID => 'fa fa-phone success',
-		self::PHONE_FAVORITE => 'fa fa-phone warning',
-		self::PHONE_INVALID => 'fa fa-phone danger',
-		self::PHONE_NOT_SET => 'fa fa-phone'
-	];
+    public const PHONE_TYPE_ICO_CLASS = [
+        self::PHONE_VALID => 'fa fa-phone success',
+        self::PHONE_FAVORITE => 'fa fa-phone warning',
+        self::PHONE_INVALID => 'fa fa-phone danger',
+        self::PHONE_NOT_SET => 'fa fa-phone'
+    ];
 
     public const PHONE_TYPE_ICONS = [
-		self::PHONE_VALID => '<i class="fa fa-phone success"></i> ',
-		self::PHONE_FAVORITE => '<i class="fa fa-phone warning"></i> ',
-		self::PHONE_INVALID => '<i class="fa fa-phone danger"></i> ',
-		self::PHONE_NOT_SET => '<i class="fa fa-phone"></i> '
-	];
+        self::PHONE_VALID => '<i class="fa fa-phone success"></i> ',
+        self::PHONE_FAVORITE => '<i class="fa fa-phone warning"></i> ',
+        self::PHONE_INVALID => '<i class="fa fa-phone danger"></i> ',
+        self::PHONE_NOT_SET => '<i class="fa fa-phone"></i> '
+    ];
 
     public const PHONE_TYPE_LABELS = [
-    	self::PHONE_VALID => '<span class="label label-success">{type}</span>',
-		self::PHONE_FAVORITE => '<span class="label label-warning">{type}</span>',
-		self::PHONE_INVALID => '<span class="label label-danger">{type}</span>',
-		self::PHONE_NOT_SET => '<span class="label label-primary">{type}</span>'
-	];
+        self::PHONE_VALID => '<span class="label label-success">{type}</span>',
+        self::PHONE_FAVORITE => '<span class="label label-warning">{type}</span>',
+        self::PHONE_INVALID => '<span class="label label-danger">{type}</span>',
+        self::PHONE_NOT_SET => '<span class="label label-primary">{type}</span>'
+    ];
 
-	public const PHONE_TYPE_TEXT_DECORATION = [
-		self::PHONE_INVALID => 'text-line-through'
-	];
+    public const PHONE_TYPE_TEXT_DECORATION = [
+        self::PHONE_INVALID => 'text-line-through'
+    ];
 
     // old phone value. need for afterSave() method
     private $old_phone = '';
@@ -111,11 +109,11 @@ class ClientPhone extends \yii\db\ActiveRecord
      * @param string|null $cpTitle
      */
     public function edit(string $phone, int $phoneType = null, string $cpTitle = null): void
-	{
-		$this->phone = $phone;
-		$this->type = $phoneType;
-		$this->cp_title = $cpTitle;
-	}
+    {
+        $this->phone = $phone;
+        $this->type = $phoneType;
+        $this->cp_title = $cpTitle;
+    }
 
     /**
      * {@inheritdoc}
@@ -138,17 +136,17 @@ class ClientPhone extends \yii\db\ActiveRecord
         ];
     }
 
-	/**
-	 * @return array
-	 */
+    /**
+     * @return array
+     */
     public function formatValue(): array
-	{
-		return [
-			'type' => static function ($value) {
-				return self::PHONE_TYPE[$value];
-			}
-		];
-	}
+    {
+        return [
+            'type' => static function ($value) {
+                return self::PHONE_TYPE[$value];
+            }
+        ];
+    }
 
     /**
      * {@inheritdoc}
@@ -163,8 +161,8 @@ class ClientPhone extends \yii\db\ActiveRecord
             'validate_dt' => 'Validated at',
             'created' => 'Created',
             'updated' => 'Updated',
-			'type' => 'Phone Type',
-			'cp_title' => 'Title'
+            'type' => 'Phone Type',
+            'cp_title' => 'Title'
         ];
     }
 
@@ -195,7 +193,7 @@ class ClientPhone extends \yii\db\ActiveRecord
     {
         $this->phone = str_replace('-', '', $this->phone);
         $this->phone = str_replace(' ', '', $this->phone);
-        if(!$this->isNewRecord) {
+        if (!$this->isNewRecord) {
             $this->old_phone = $this->oldAttributes['phone'];
         }
         $this->updated = date('Y-m-d H:i:s');
@@ -209,7 +207,7 @@ class ClientPhone extends \yii\db\ActiveRecord
     public static function clearNumber(string $phoneNumber = '')
     {
         $phoneNumber = preg_replace('~[^0-9\+]~', '', $phoneNumber);
-        if(isset($phoneNumber[0])) {
+        if (isset($phoneNumber[0])) {
             $phoneNumber = ($phoneNumber[0] === '+' ? '+' : '') . str_replace('+', '', $phoneNumber);
         }
         return $phoneNumber;
@@ -218,7 +216,6 @@ class ClientPhone extends \yii\db\ActiveRecord
     public function afterSave($insert, $changedAttributes)
     {
         if ($this->enablelAferSave) {
-
             if ($this->id > 0 && $this->client_id > 0) {
                 $isRenewPhoneNumber = ($this->old_phone != '' && $this->old_phone !== $this->phone);
                 /*\Yii::info(VarDumper::dumpAsString([
@@ -232,7 +229,7 @@ class ClientPhone extends \yii\db\ActiveRecord
                 ]), 'info\model:ClientPhone:afterSave');*/
 
                 // check if phone rewrite
-                if (NULL === $this->validate_dt || $isRenewPhoneNumber) {
+                if (null === $this->validate_dt || $isRenewPhoneNumber) {
                     /** @var Queue $queue */
                     $queue = \Yii::$app->queue_phone_check;
                     $job = new CheckPhoneNumberJob();
@@ -241,80 +238,79 @@ class ClientPhone extends \yii\db\ActiveRecord
                     $queue->push($job);
                 }
             }
-
         }
 
         parent::afterSave($insert, $changedAttributes);
     }
 
-	/**
-	 * @return int
-	 */
-	public function countUsersSamePhone(): int
-	{
-		$subQuery = (new Query())->select(['client_id'])->distinct()
-			->from(ClientPhone::tableName())
-			->where(['phone' => $this->phone]);
+    /**
+     * @return int
+     */
+    public function countUsersSamePhone(): int
+    {
+        $subQuery = (new Query())->select(['client_id'])->distinct()
+            ->from(ClientPhone::tableName())
+            ->where(['phone' => $this->phone]);
 
-		$query = (new Query())->select(['id'])->distinct()
-			->from(Client::tableName())
-			->where(['NOT IN', 'id', $this->client_id])
-			->andWhere(['IN', 'id', $subQuery]);
+        $query = (new Query())->select(['id'])->distinct()
+            ->from(Client::tableName())
+            ->where(['NOT IN', 'id', $this->client_id])
+            ->andWhere(['IN', 'id', $subQuery]);
 
-		return (int)$query->count();
-	}
+        return (int)$query->count();
+    }
 
-	/**
-	 * @param int|null $type
-	 * @return mixed|string
-	 */
-	public static function getPhoneType(?int $type): string
-	{
-		return self::PHONE_TYPE[$type] ?? '';
-	}
+    /**
+     * @param int|null $type
+     * @return mixed|string
+     */
+    public static function getPhoneType(?int $type): string
+    {
+        return self::PHONE_TYPE[$type] ?? '';
+    }
 
-	/**
-	 * @return array
-	 */
-	public static function getPhoneTypeList(): array
-	{
-		return self::PHONE_TYPE;
-	}
+    /**
+     * @return array
+     */
+    public static function getPhoneTypeList(): array
+    {
+        return self::PHONE_TYPE;
+    }
 
-	/**
-	 * @param int $type
-	 * @return mixed|string
-	 */
-	public static function getPhoneTypeTextDecoration(?int $type): string
-	{
-		return self::PHONE_TYPE_TEXT_DECORATION[$type] ?? '';
-	}
+    /**
+     * @param int $type
+     * @return mixed|string
+     */
+    public static function getPhoneTypeTextDecoration(?int $type): string
+    {
+        return self::PHONE_TYPE_TEXT_DECORATION[$type] ?? '';
+    }
 
-	/**
-	 * @param int $type
-	 * @return mixed|string
-	 */
-	public static function getPhoneTypeIcon(?int $type): string
-	{
-		return self::PHONE_TYPE_ICONS[$type] ?? '';
-	}
+    /**
+     * @param int $type
+     * @return mixed|string
+     */
+    public static function getPhoneTypeIcon(?int $type): string
+    {
+        return self::PHONE_TYPE_ICONS[$type] ?? '';
+    }
 
-	/**
-	 * @param int|null $type
-	 * @return string
-	 */
-	public static function getPhoneTypeLabel(?int $type): string
-	{
-		if (isset(self::PHONE_TYPE_LABELS[$type], self::PHONE_TYPE[$type])) {
-			return str_replace('{type}', self::PHONE_TYPE[$type], self::PHONE_TYPE_LABELS[$type]);
-		}
-		return '';
-	}
+    /**
+     * @param int|null $type
+     * @return string
+     */
+    public static function getPhoneTypeLabel(?int $type): string
+    {
+        if (isset(self::PHONE_TYPE_LABELS[$type], self::PHONE_TYPE[$type])) {
+            return str_replace('{type}', self::PHONE_TYPE[$type], self::PHONE_TYPE_LABELS[$type]);
+        }
+        return '';
+    }
 
-	public static function getPhoneListByClient(int $clientId): array
-	{
-		return self::find()->select(['phone', 'id'])->where(['client_id' => $clientId])->column();
-	}
+    public static function getPhoneListByClient(int $clientId): array
+    {
+        return self::find()->select(['phone', 'id'])->where(['client_id' => $clientId])->column();
+    }
 
     public static function find()
     {

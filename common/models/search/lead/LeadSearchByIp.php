@@ -39,7 +39,7 @@ class LeadSearchByIp extends Model
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> [
+            'sort' => [
                 'defaultOrder' => ['l_last_action_dt' => SORT_DESC]
             ],
             'pagination' => [
@@ -89,5 +89,4 @@ class LeadSearchByIp extends Model
     {
         return (new \ReflectionClass(static::class))->getShortName();
     }
-
 }
