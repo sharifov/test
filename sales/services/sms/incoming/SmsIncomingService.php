@@ -73,19 +73,18 @@ class SmsIncomingService
     {
         /** @var Sms $sms */
         $sms = $this->transactionManager->wrap(function () use ($form) {
-            $isInternalPhone = PhoneList::find()->byPhone($form->si_phone_from)->enabled()->exists();
+            $contact = $this->internalContactService->findByPhone($form->si_phone_to, $form->si_project_id);
 
             $clientForm = ClientCreateForm::createWidthDefaultName();
-            $clientForm->projectId = $form->si_project_id;
+            $clientForm->projectId = $contact->projectId;
             $clientForm->typeCreate = Client::TYPE_CREATE_SMS;
 
+            $isInternalPhone = PhoneList::find()->byPhone($form->si_phone_from)->enabled()->exists();
             if (!$isInternalPhone) {
                 $client = $this->clients->getOrCreateByPhones([new PhoneCreateForm(['phone' => $form->si_phone_from])], $clientForm);
             } else {
                 $client = $this->clients->getExistingOrCreateEmptyObj([new PhoneCreateForm(['phone' => $form->si_phone_from])], $clientForm);
             }
-
-            $contact = $this->internalContactService->findByPhone($form->si_phone_to, $form->si_project_id);
 
             $form->replaceProject($contact->projectId);
 
