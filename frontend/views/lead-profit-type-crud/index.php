@@ -41,29 +41,29 @@ $this->params['breadcrumbs'][] = $this->title;
             'lpt_commission_min:percentInteger',
             'lpt_commission_max:percentInteger',
             'lpt_commission_fix:percentInteger',
-			[
-				'class' => \common\components\grid\UserSelect2Column::class,
-				'attribute' => 'lpt_created_user_id',
-				'relation' => 'createdUser',
-				'url' => '/employee/list-ajax',
-			],
-			[
-				'class' => \common\components\grid\UserSelect2Column::class,
-				'attribute' => 'lpt_updated_user_id',
-				'relation' => 'updatedUser',
-				'url' => '/employee/list-ajax',
-			],
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'lpt_created_dt',
-			],
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'lpt_updated_dt',
-			],
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'attribute' => 'lpt_created_user_id',
+                'relation' => 'createdUser',
+                'url' => '/employee/list-ajax',
+            ],
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'attribute' => 'lpt_updated_user_id',
+                'relation' => 'updatedUser',
+                'url' => '/employee/list-ajax',
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'lpt_created_dt',
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'lpt_updated_dt',
+            ],
 
 
-			['class' => 'yii\grid\ActionColumn'],
+            ['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
 

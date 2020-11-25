@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $this \yii\web\View
  * @var $title string
@@ -15,9 +16,9 @@ use yii\helpers\Html;
             <h2 class="page-header__title">
                 <?= Html::encode($title) ?>
                 <?php
-                    if($lead->clone_id && $cloneLead = $lead->clone) {
-                        echo Html::a('(Cloned from ' . $lead->clone_id . ' )', ['lead/view', 'gid' => $cloneLead->gid], ['title' => 'Clone reason: ' . $lead->description]);
-                    }
+                if ($lead->clone_id && $cloneLead = $lead->clone) {
+                    echo Html::a('(Cloned from ' . $lead->clone_id . ' )', ['lead/view', 'gid' => $cloneLead->gid], ['title' => 'Clone reason: ' . $lead->description]);
+                }
                 ?>
                 <?= $lead->getStatusLabel() ?>
             </h2>

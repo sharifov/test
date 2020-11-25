@@ -51,7 +51,7 @@ class UserProjectParamsController extends FController
 
         $params = Yii::$app->request->queryParams;
 
-        if(Yii::$app->user->identity->canRole('supervision')) {
+        if (Yii::$app->user->identity->canRole('supervision')) {
             $params['UserProjectParamsSearch']['supervision_id'] = Yii::$app->user->id;
         }
 
@@ -89,8 +89,7 @@ class UserProjectParamsController extends FController
         ]);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-
-            if(Yii::$app->request->post('redirect')) {
+            if (Yii::$app->request->post('redirect')) {
                 return $this->redirect(Yii::$app->request->post('redirect'));
             } else {
                 return $this->redirect(['view', 'upp_user_id' => $model->upp_user_id, 'upp_project_id' => $model->upp_project_id]);
@@ -113,13 +112,12 @@ class UserProjectParamsController extends FController
         //VarDumper::dump(Yii::$app->request->post(), 10, true); exit;
 
         if ($model->load(Yii::$app->request->post())) {
-
             //$url = \yii\helpers\Url::to(Yii::$app->request->post('redirect'));
 
             //VarDumper::dump($url, 10, true); exit;
             //\Yii::$app->response->format = Response::FORMAT_JSON;
 
-            if($model->save()) {
+            if ($model->save()) {
                 return 'Success <script>$("#modal-df").modal("hide")</script>';
                 //Yii::$app->session->setFlash('success', 'Created new project params!');
                 //return $this->redirect(Yii::$app->request->referrer); //'/'.Yii::$app->request->post('redirect'));
@@ -129,7 +127,6 @@ class UserProjectParamsController extends FController
         return $this->renderAjax('create_ajax', [
             'model' => $model,
         ]);
-
     }
 
     /**
@@ -145,26 +142,22 @@ class UserProjectParamsController extends FController
         $model = $this->findModel($upp_user_id, $upp_project_id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-
-            if(Yii::$app->request->isAjax) {
+            if (Yii::$app->request->isAjax) {
                 return $this->redirect(Yii::$app->request->referrer);
             }
 
             return $this->redirect(['view', 'upp_user_id' => $model->upp_user_id, 'upp_project_id' => $model->upp_project_id]);
         }
 
-        if(Yii::$app->request->isAjax) {
-
+        if (Yii::$app->request->isAjax) {
             return $this->renderAjax('create_ajax', [
                 'model' => $model,
             ]);
-
         }
 
         return $this->render('update', [
             'model' => $model,
         ]);
-
     }
 
 
@@ -184,8 +177,7 @@ class UserProjectParamsController extends FController
 
         if ($model->load(Yii::$app->request->post())) {
             //if(Yii::$app->request->isAjax) {
-            if($model->save()) {
-
+            if ($model->save()) {
                 //$this->view->registerJs('$("#activity-modal").modal("hide");');
                 return 'Success <script>$("#modal-df").modal("hide")</script>';
 
@@ -196,7 +188,6 @@ class UserProjectParamsController extends FController
         return $this->renderAjax('update_ajax', [
             'model' => $model,
         ]);
-
     }
 
     /**

@@ -4,6 +4,7 @@ use unclead\multipleinput\MultipleInput;
 use yii\widgets\ActiveForm;
 use unclead\multipleinput\MultipleInputColumn;
 use borales\extensions\phoneInput\PhoneInput;
+
 //use frontend\extensions\PhoneInput;
 
 /**
@@ -48,8 +49,8 @@ use borales\extensions\phoneInput\PhoneInput;
         </div>
     </div>
     <div class="col-md-4 col-sm-12">
-		<?php
-		$js = <<<JS
+        <?php
+        $js = <<<JS
             document.validationField = {
                 isNumeric: function(event) {
                     return !!(event.shiftKey || (event.keyCode < 48 || event.keyCode > 57));
@@ -83,8 +84,8 @@ use borales\extensions\phoneInput\PhoneInput;
                 }
             };
 JS;
-		$this->registerJs($js);
-		?>
+        $this->registerJs($js);
+        ?>
         <div id="create-lead-phone">
             <?= $form->field($leadForm, 'phones')->widget(MultipleInput::class, [
                 'max' => 10,
@@ -120,6 +121,6 @@ JS;
         </div>
     </div>
     <div class="col-md-4">
-		<?= $form->field($leadForm, 'requestIp')->textInput() ?>
+        <?= $form->field($leadForm, 'requestIp')->textInput() ?>
     </div>
 </div>

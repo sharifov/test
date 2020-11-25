@@ -38,7 +38,7 @@ class LeadTaskController extends FController
     {
         $searchModel = new LeadTaskSearch();
         $params = Yii::$app->request->queryParams;
-        if(isset($params['reset'])){
+        if (isset($params['reset'])) {
             unset($params['LeadTaskSearch']['date_range']);
         }
 

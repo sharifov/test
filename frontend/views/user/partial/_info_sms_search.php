@@ -1,7 +1,7 @@
 <?php
 
 use yii\helpers\Html;
-use \kartik\form\ActiveForm;
+use kartik\form\ActiveForm;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\search\CallSearch */

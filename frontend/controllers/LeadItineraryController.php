@@ -65,7 +65,7 @@ class LeadItineraryController extends FController
         }
 
         $form = new ItineraryEditForm($lead);
-        if($mode !== 'view') {
+        if ($mode !== 'view') {
             $form->setEditMode();
         }
         return $this->renderAjax('/lead/partial/_flightDetails', ['itineraryForm' => $form]);

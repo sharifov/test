@@ -72,11 +72,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => 'Pending Time',
                 'value' => static function (Cases $model) {
                     $createdTS = strtotime($model->cs_created_dt);
-    
+
                     $diffTime = time() - $createdTS;
                     $diffHours = (int) ($diffTime / (60 * 60));
-    
-                    return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+
+                    return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
                 },
                 'options' => [
                     'style' => 'width:180px'
@@ -87,7 +87,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'header' => 'Client time',
                 'format' => 'raw',
-                'value' => function(Cases $model) {
+                'value' => function (Cases $model) {
                     return $model->getClientTime();
                 },
             ],
@@ -103,11 +103,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'value' => static function (Cases $model) {
                     $createdTS = strtotime($model->cs_last_action_dt);
-    
+
                     $diffTime = time() - $createdTS;
                     $diffHours = (int) ($diffTime / (60 * 60));
-    
-                    return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+
+                    return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
                 }
             ],
             [

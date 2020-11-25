@@ -38,7 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'lc_lead_id',
-                'value' => function(\common\models\LeadChecklist $model) {
+                'value' => function (\common\models\LeadChecklist $model) {
                     return Html::a($model->lc_lead_id, ['lead/view', 'gid' => $model->lcLead->gid], ['target' => '_blank', 'data-pjax' => 0]);
                 },
                 'format' => 'raw',
@@ -56,7 +56,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'lc_created_dt',
-                'value' => function(\common\models\LeadChecklist $model) {
+                'value' => function (\common\models\LeadChecklist $model) {
                     return $model->lc_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lc_created_dt)) : '-';
                 },
                 'format' => 'raw',

@@ -3,6 +3,7 @@
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\clientChatVisitor\entity\search\ClientChatVisitorSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */

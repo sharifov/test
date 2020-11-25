@@ -27,24 +27,24 @@ use yii\widgets\ActiveForm;
 
         <?php
             $model->ccf_dataform_json = JsonHelper::encode($model->ccf_dataform_json);
+        try {
+            echo $form->field($model, 'ccf_dataform_json')->widget(
+                \kdn\yii2\JsonEditor::class,
+                [
+                    'clientOptions' => [
+                        'modes' => ['code', 'form'],
+                        'mode' => $model->isNewRecord ? 'code' : 'form'
+                    ],
+                    'expandAll' => ['tree', 'form'],
+                ]
+            );
+        } catch (Exception $exception) {
             try {
-                echo $form->field($model, 'ccf_dataform_json')->widget(
-                    \kdn\yii2\JsonEditor::class,
-                    [
-                        'clientOptions' => [
-                            'modes' => ['code', 'form'],
-                            'mode' => $model->isNewRecord ? 'code' : 'form'
-                        ],
-                        'expandAll' => ['tree', 'form'],
-                    ]
-                );
-            } catch (Exception $exception) {
-                try {
-                    echo $form->field($model, 'ccf_dataform_json')->textarea(['rows' => 8, 'class' => 'form-control']);
-                } catch (Throwable $throwable) {
-                    Yii::error(AppHelper::throwableFormatter($throwable), 'ClientChatFormCrud:_form:notValidJson');
-                }
+                echo $form->field($model, 'ccf_dataform_json')->textarea(['rows' => 8, 'class' => 'form-control']);
+            } catch (Throwable $throwable) {
+                Yii::error(AppHelper::throwableFormatter($throwable), 'ClientChatFormCrud:_form:notValidJson');
             }
+        }
         ?>
 
         <?php echo $form->field($model, 'ccf_enabled')->checkbox() ?>

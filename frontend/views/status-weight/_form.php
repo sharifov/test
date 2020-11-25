@@ -13,7 +13,7 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?php if ($model->isNewRecord): ?>
+    <?php if ($model->isNewRecord) : ?>
         <?= $form->field($model, 'sw_status_id')->dropDownList(Lead::STATUS_LIST, ['prompt' => ''])?>
     <?php endif;?>
 

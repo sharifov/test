@@ -7,6 +7,7 @@ use common\models\ConferenceParticipant;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\ConferenceParticipantSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -38,7 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'cp_cf_id',
             [
                 'attribute' => 'cp_cf_id',
-                'value' => static function(\common\models\ConferenceParticipant $model) {
+                'value' => static function (\common\models\ConferenceParticipant $model) {
                     return Html::a($model->cp_cf_id, ['conference/view', 'id' => $model->cp_cf_id], ['target' => '_blank', 'data-pjax' => 0]);
                 },
                 'format' => 'raw'
@@ -48,7 +49,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'cp_call_id',
-                'value' => static function(\common\models\ConferenceParticipant $model) {
+                'value' => static function (\common\models\ConferenceParticipant $model) {
                     return Html::a($model->cp_call_id, ['call/view', 'id' => $model->cp_call_id], ['target' => '_blank', 'data-pjax' => 0]);
                 },
                 'format' => 'raw'

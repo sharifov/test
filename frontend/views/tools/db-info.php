@@ -12,7 +12,7 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="db-info-page">
     <h1><?= Html::encode($this->title) ?></h1>
-    <?php if ($tables): ?>
+    <?php if ($tables) : ?>
         <table class="table table-bordered table-hover table-striped">
             <tr>
                 <th>Nr</th>
@@ -25,7 +25,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <th>Create time</th>
                 <th>Table Collation</th>
             </tr>
-        <?php foreach ($tables as $n => $table): ?>
+        <?php foreach ($tables as $n => $table) : ?>
             <tr>
                 <td><?= ($n + 1) ?></td>
                 <td><b><?=Html::encode($table['TABLE_NAME'])?></b></td>
@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <td><?=Html::encode($table['INDEX_LENGTH'])?></td>
                 <td><?=Html::encode($table['AUTO_INCREMENT'])?></td>
                 <td><?=Html::encode($table['CREATE_TIME'])?></td>
-                <td><?= $table['TABLE_COLLATION'] === 'utf8mb4_unicode_ci' ? Html::encode($table['TABLE_COLLATION']) : '<span class="danger">'.Html::encode($table['TABLE_COLLATION']) . '</span>'?></td>
+                <td><?= $table['TABLE_COLLATION'] === 'utf8mb4_unicode_ci' ? Html::encode($table['TABLE_COLLATION']) : '<span class="danger">' . Html::encode($table['TABLE_COLLATION']) . '</span>'?></td>
             </tr>
         <?php endforeach; ?>
         </table>

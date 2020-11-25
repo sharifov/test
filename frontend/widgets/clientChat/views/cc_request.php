@@ -21,7 +21,7 @@ $totalRequest = count($access);
         <div class="_cc-box-header <?= $access ? 'active' : '' ?>">
             <div class="_cc-box-option">
                 <div class="header_img">
-					<?= Html::img('/img/user.png')?>
+                    <?= Html::img('/img/user.png')?>
                 </div>
                 <span id="_cc-box-title">Client Chat Request</span> <br>
             </div>

@@ -56,20 +56,20 @@ $user = Yii::$app->user->identity;
         <div class="col-md-3">
             <?php
             echo  \kartik\daterange\DateRangePicker::widget([
-                'model'=> $searchModel,
+                'model' => $searchModel,
                 'attribute' => 'date_range',
-                'useWithAddon'=>true,
-                'presetDropdown'=>true,
-                'hideInput'=>true,
-                'convertFormat'=>true,
+                'useWithAddon' => true,
+                'presetDropdown' => true,
+                'hideInput' => true,
+                'convertFormat' => true,
                 'startAttribute' => 'datetime_start',
                 'endAttribute' => 'datetime_end',
-                'pluginOptions'=>[
-                    'timePicker'=> true,
+                'pluginOptions' => [
+                    'timePicker' => true,
                     'timePickerIncrement' => 1,
                     'timePicker24Hour' => true,
-                    'locale'=>[
-                        'format'=>'Y-m-d H:i',
+                    'locale' => [
+                        'format' => 'Y-m-d H:i',
                         'separator' => ' - '
                     ]
                 ]

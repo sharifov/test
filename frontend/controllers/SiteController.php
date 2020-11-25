@@ -25,7 +25,6 @@ use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use Da\QrCode\QrCode;
 use Da\TwoFA\Manager;
-
 use Da\TwoFA\Service\TOTPSecretKeyUriGeneratorService;
 use Da\TwoFA\Service\QrCodeDataUriGeneratorService;
 use yii\web\Response;
@@ -152,7 +151,6 @@ class SiteController extends FController
             }
 
             if ($model->login()) {
-
                 if (UserConnection::isIdleMonitorEnabled()) {
                     UserMonitor::addEvent(Yii::$app->user->id, UserMonitor::TYPE_LOGIN);
                 }
@@ -197,7 +195,10 @@ class SiteController extends FController
         }
 
         $totpUri = (new TOTPSecretKeyUriGeneratorService(
-            Yii::$app->params['settings']['two_factor_company_name'], $userName, $twoFactorAuthKey))->run();
+            Yii::$app->params['settings']['two_factor_company_name'],
+            $userName,
+            $twoFactorAuthKey
+        ))->run();
         $qrcodeSrc = (new QrCodeDataUriGeneratorService($totpUri))->run();
 
         return $this->render('step-two', [
@@ -252,7 +253,7 @@ class SiteController extends FController
                         $updated++;
                     }
                 } catch (\Throwable $throwable) {
-                    Yii::error(AppHelper::throwableFormatter($throwable), 'SiteController:actionProfile:updProfile' );
+                    Yii::error(AppHelper::throwableFormatter($throwable), 'SiteController:actionProfile:updProfile');
                 }
             }
 
@@ -279,7 +280,7 @@ class SiteController extends FController
 
 
         if (Yii::$app->telegram && !empty(Yii::$app->telegram->botUsername)) {
-            $url = 'https://telegram.me/' . trim(Yii::$app->telegram->botUsername) . '?start='.$code;
+            $url = 'https://telegram.me/' . trim(Yii::$app->telegram->botUsername) . '?start=' . $code;
 
             $qrCode = (new QrCode($url))
                 ->setSize(160)
@@ -292,9 +293,9 @@ class SiteController extends FController
 
 
 
-		$expMonth = $modelUserParams->upUser->userProfile->getExperienceMonth();
-		$userCommissionRulesValue = UserCommissionRules::find()->getCommissionValueByExpMonth($expMonth);
-		$userBonusRulesValue = UserBonusRules::find()->getBonusValueByExpMonth($expMonth);
+        $expMonth = $modelUserParams->upUser->userProfile->getExperienceMonth();
+        $userCommissionRulesValue = UserCommissionRules::find()->getCommissionValueByExpMonth($expMonth);
+        $userBonusRulesValue = UserBonusRules::find()->getBonusValueByExpMonth($expMonth);
 
 
         /*$qrCode = (new QrCode('https://2amigos.us'))
@@ -326,8 +327,8 @@ class SiteController extends FController
             'model' => $model,
             'modelUserParams' => $modelUserParams,
             'qrcodeData' => $qrCodeData,
-			'userCommissionRuleValue' => $userCommissionRulesValue,
-			'userBonusRuleValue' => $userBonusRulesValue,
+            'userCommissionRuleValue' => $userCommissionRulesValue,
+            'userBonusRuleValue' => $userBonusRulesValue,
             'userProfileForm' => $userProfileForm,
         ]);
     }
@@ -374,7 +375,5 @@ class SiteController extends FController
         //VarDumper::dump($data); exit;
 
         return $box->run();
-
     }
-
 }

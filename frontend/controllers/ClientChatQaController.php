@@ -46,8 +46,7 @@ class ClientChatQaController extends FController
         $module,
         ClientChatRepository $clientChatRepository,
         $config = []
-    )
-    {
+    ) {
         parent::__construct($id, $module, $config);
         $this->clientChatRepository = $clientChatRepository;
     }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $previewEmailModel PreviewEmailQuotesForm
  * @var $errors []
@@ -7,7 +8,6 @@
 use yii\bootstrap\Html;
 use yii\widgets\ActiveForm;
 use yii\helpers\Url;
-
 
 $alert = false;
 
@@ -40,10 +40,10 @@ if (empty($errors)) :
         'id' => $formId
     ]) ?>
     <div class="form-group">
-    	<?= $form->field($previewEmailModel,'subject')?>
+        <?= $form->field($previewEmailModel, 'subject')?>
     </div>
     <div class="form-group">
-		<?= $form->field($previewEmailModel, 'body')->widget(\dosamigos\ckeditor\CKEditor::class, [
+        <?= $form->field($previewEmailModel, 'body')->widget(\dosamigos\ckeditor\CKEditor::class, [
             'options' => [
                 'rows' => 6,
                 'readonly' => false
@@ -61,9 +61,9 @@ if (empty($errors)) :
             ]
         ]) ?>
     </div>
-    <?= $form->field($previewEmailModel,'leadId', ['template' => '{input}'])->hiddenInput()?>
-    <?= $form->field($previewEmailModel,'email', ['template' => '{input}'])->hiddenInput()?>
-    <?= $form->field($previewEmailModel,'quotes', ['template' => '{input}'])->hiddenInput()?>
+    <?= $form->field($previewEmailModel, 'leadId', ['template' => '{input}'])->hiddenInput()?>
+    <?= $form->field($previewEmailModel, 'email', ['template' => '{input}'])->hiddenInput()?>
+    <?= $form->field($previewEmailModel, 'quotes', ['template' => '{input}'])->hiddenInput()?>
     <div class="btn-wrapper">
         <?= Html::button('<i class="glyphicon glyphicon-remove-circle"></i> Cancel', [
             'id' => 'cancel-sent-email',
@@ -77,8 +77,8 @@ if (empty($errors)) :
 else :
     ?>
     <div class="row text-center">
-    	<?php foreach ($errors as $error):?>
-    	<div class="alert alert-warning"><?= $error?></div>
-    	<?php endforeach;?>
+        <?php foreach ($errors as $error) :?>
+        <div class="alert alert-warning"><?= $error?></div>
+        <?php endforeach;?>
     </div>
 <?php endif; ?>

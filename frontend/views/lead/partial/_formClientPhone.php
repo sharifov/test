@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $form ActiveForm
  * @var $phone ClientPhone
@@ -13,6 +14,7 @@ use yii\helpers\Html;
 use frontend\models\LeadForm;
 use borales\extensions\phoneInput\PhoneInput;
 use yii\bootstrap4\Modal;
+
 //use frontend\extensions\PhoneInput;
 
 ?>
@@ -20,10 +22,10 @@ use yii\bootstrap4\Modal;
     <?php
     $template = '<div class="input-group">{input}';
     if (($key == '__id__' || strpos($key, 'new') !== false) && $nr != 0) {
-        $template .= '<span class="input-group-btn">'.
-            Html::button('<i class="fa fa-trash"></i>',[
+        $template .= '<span class="input-group-btn">' .
+            Html::button('<i class="fa fa-trash"></i>', [
                 'class' => 'btn btn-danger client-remove-phone-button'
-            ]).
+            ]) .
             '</span>';
     }
     if (!$phone->isNewRecord) {
@@ -38,7 +40,6 @@ use yii\bootstrap4\Modal;
         $phoneCount = $dataProvider->count;
 
         if ($phoneCount > 0) {
-
             $phoneContent = \yii\grid\GridView::widget([
                 'dataProvider' => $dataProvider,
                 'filterModel' => null,
@@ -51,17 +52,17 @@ use yii\bootstrap4\Modal;
                         'attribute' => 'client_phone',
                         'value' => static function (\common\models\Client $model) {
 
-                        $phones = $model->clientPhones;
-                        $data = [];
-                        if ($phones) {
-                            foreach ($phones as $k => $phone) {
-                                $data[] = '<i class="fa fa-phone"></i> <code>' . Html::encode($phone->phone) . '</code>';
+                            $phones = $model->clientPhones;
+                            $data = [];
+                            if ($phones) {
+                                foreach ($phones as $k => $phone) {
+                                    $data[] = '<i class="fa fa-phone"></i> <code>' . Html::encode($phone->phone) . '</code>';
+                                }
                             }
-                        }
 
-                        $str = implode('<br>', $data);
-                        return '' . $str . '';
-                    },
+                            $str = implode('<br>', $data);
+                            return '' . $str . '';
+                        },
                     'format' => 'raw',
                     'contentOptions' => ['class' => 'text-left'],
                     ],
@@ -71,17 +72,17 @@ use yii\bootstrap4\Modal;
                         'attribute' => 'client_email',
                         'value' => static function (\common\models\Client $model) {
 
-                        $emails = $model->clientEmails;
-                        $data = [];
-                        if ($emails) {
-                            foreach ($emails as $k => $email) {
-                                $data[] = '<i class="fa fa-envelope"></i> <code>' . Html::encode($email->email) . '</code>';
+                            $emails = $model->clientEmails;
+                            $data = [];
+                            if ($emails) {
+                                foreach ($emails as $k => $email) {
+                                    $data[] = '<i class="fa fa-envelope"></i> <code>' . Html::encode($email->email) . '</code>';
+                                }
                             }
-                        }
 
-                        $str = implode('<br>', $data);
-                        return '' . $str . '';
-                    },
+                            $str = implode('<br>', $data);
+                            return '' . $str . '';
+                        },
                     'format' => 'raw',
                     'contentOptions' => ['class' => 'text-left'],
                     ],
@@ -90,21 +91,21 @@ use yii\bootstrap4\Modal;
                         'header' => 'Leads',
                         'value' => static function (\common\models\Client $model) {
 
-                        $leads = $model->leads;
-                        $data = [];
-                        if ($leads) {
-                            foreach ($leads as $lead) {
-                                $data[] = '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $lead->id, ['leads/view', 'id' => $lead->id], ['target' => '_blank', 'data-pjax' => 0]) . ' (IP: ' . $lead->request_ip . ')';
+                            $leads = $model->leads;
+                            $data = [];
+                            if ($leads) {
+                                foreach ($leads as $lead) {
+                                    $data[] = '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $lead->id, ['leads/view', 'id' => $lead->id], ['target' => '_blank', 'data-pjax' => 0]) . ' (IP: ' . $lead->request_ip . ')';
+                                }
                             }
-                        }
 
-                        $str = '';
-                        if ($data) {
-                            $str = '' . implode('<br>', $data) . '';
-                        }
+                            $str = '';
+                            if ($data) {
+                                $str = '' . implode('<br>', $data) . '';
+                            }
 
-                        return $str;
-                    },
+                            return $str;
+                        },
                     'format' => 'raw',
                     //'options' => ['style' => 'width:100px']
                     ],
@@ -112,8 +113,8 @@ use yii\bootstrap4\Modal;
                     [
                         'attribute' => 'created',
                         'value' => static function (\common\models\Client $model) {
-                        return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
-                    },
+                            return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
+                        },
                     'format' => 'html',
                     ],
 
@@ -132,14 +133,13 @@ use yii\bootstrap4\Modal;
             Modal::end();
 
 
-            $template .= '<span class="input-group-btn">'.Html::button('<i class="fa fa-user"></i> '.$phoneCount, [
+            $template .= '<span class="input-group-btn">' . Html::button('<i class="fa fa-user"></i> ' . $phoneCount, [
                 'id' => 'phone-cnt-' . $key,
                 'title' => $phone->phone,
                 'data-modal_id' => 'phone-cnt-' . $key,
                 'class' => 'btn btn-primary showModalButton',
-            ]).'</span>';
+            ]) . '</span>';
         }
-
     }
     $template .= '</div>{error}';
 

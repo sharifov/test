@@ -9,6 +9,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Json;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\CaseSaleSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -58,17 +59,17 @@ $userCanDeleteSaleData = Auth::can('/sale/delete-ajax');
                     <td style="width: 10%">Pax</td>
                     <td>Sale Created Date</td>
                     <td>Added Date</td>
-                    <?php if ($caseModel->isProcessing()): ?>
+                    <?php if ($caseModel->isProcessing()) : ?>
                         <td>Update to B/O</td>
                     <?php endif; ?>
 
-                    <?php if ($userCanRefresh): ?>
+                    <?php if ($userCanRefresh) : ?>
                         <td>Refresh Data From B/O</td>
                     <?php endif; ?>
-                    <?php if ($userCanCheckFareRules): ?>
+                    <?php if ($userCanCheckFareRules) : ?>
                         <td>Check Fare rules</td>
                     <?php endif; ?>
-                    <?php if ($userCanDeleteSaleData): ?>
+                    <?php if ($userCanDeleteSaleData) : ?>
                         <td>Remove Sale</td>
                     <?php endif; ?>
                 </tr>
@@ -79,24 +80,23 @@ $userCanDeleteSaleData = Auth::can('/sale/delete-ajax');
             <?php
 
             $itemColls = [];
-            if($items = $dataProvider->getModels()) {
+            if ($items = $dataProvider->getModels()) {
                 foreach ($items as $itemKey => $item) {
-
                     $label = '<table class="table table-bordered table-striped" style="margin: 0; color: #0d3349; font-size: 14px"><tr>
-                        <td style="width: 10%">Id: '.Html::encode($item->css_sale_id).'</td>
-                        <td style="width: 15%">'.Html::encode($item->css_sale_book_id).'</td>
-                        <td style="width: 15%">'.Html::encode($item->css_sale_pnr).'</td>
-                        <td style="width: 10%">'.Html::encode($item->css_sale_pax).'</td>
-                        <td>'.Yii::$app->formatter->asDatetime($item->css_sale_created_dt).'</td>
-                        <td>'.Yii::$app->formatter->asDatetime($item->css_created_dt).'</td>';
+                        <td style="width: 10%">Id: ' . Html::encode($item->css_sale_id) . '</td>
+                        <td style="width: 15%">' . Html::encode($item->css_sale_book_id) . '</td>
+                        <td style="width: 15%">' . Html::encode($item->css_sale_pnr) . '</td>
+                        <td style="width: 10%">' . Html::encode($item->css_sale_pax) . '</td>
+                        <td>' . Yii::$app->formatter->asDatetime($item->css_sale_created_dt) . '</td>
+                        <td>' . Yii::$app->formatter->asDatetime($item->css_created_dt) . '</td>';
 
                     if ($caseModel->isProcessing()) {
                         $label .= '<td>';
 
                         $label .= Html::button('<i class="fa fa-upload"></i> Update', [
-							'class' => 'update-to-bo btn ' . ($item->css_need_sync_bo ? 'btn-success' : 'btn-default'),
-							'disabled' => !$item->css_need_sync_bo ? true : false,
-							'id' => 'update-to-bo-' . $item->css_sale_id,
+                            'class' => 'update-to-bo btn ' . ($item->css_need_sync_bo ? 'btn-success' : 'btn-default'),
+                            'disabled' => !$item->css_need_sync_bo ? true : false,
+                            'id' => 'update-to-bo-' . $item->css_sale_id,
                             'data-case-id' => $item->css_cs_id,
                             'data-case-sale-id' => $item->css_sale_id,
                             'title' => 'Update data to B/O'
@@ -106,19 +106,19 @@ $userCanDeleteSaleData = Auth::can('/sale/delete-ajax');
                     }
                     if ($userCanRefresh) {
                         $label .= '<td>' . Html::button('<i class="fa fa-refresh"></i> Refresh', [
-					            'class' => 'refresh-from-bo btn btn-info',
-								'data-case-id' => $item->css_cs_id,
-								'data-case-sale-id' => $item->css_sale_id,
-								'check-fare-rules' => 0,
+                                'class' => 'refresh-from-bo btn btn-info',
+                                'data-case-id' => $item->css_cs_id,
+                                'data-case-sale-id' => $item->css_sale_id,
+                                'check-fare-rules' => 0,
                                 'title' => 'Refresh from B/O'
                         ]) . '</td>';
                     }
                     if ($userCanCheckFareRules) {
                         $label .= '<td>' . Html::button('<i class="fa fa-refresh"></i> Check Fare rules', [
-					            'class' => 'refresh-from-bo btn btn-info',
-								'data-case-id' => $item->css_cs_id,
-								'data-case-sale-id' => $item->css_sale_id,
-								'check-fare-rules' => 1,
+                                'class' => 'refresh-from-bo btn btn-info',
+                                'data-case-id' => $item->css_cs_id,
+                                'data-case-sale-id' => $item->css_sale_id,
+                                'check-fare-rules' => 1,
                                 'title' => 'Check Fare rules',
                         ]) . '</td>';
                     }
@@ -137,7 +137,7 @@ $userCanDeleteSaleData = Auth::can('/sale/delete-ajax');
                     $content = '';
                     $dataSale = JsonHelper::decode($item->css_sale_data_updated);
 
-                    if(is_array($dataSale)) {
+                    if (is_array($dataSale)) {
                         $dataProviderCc = new ActiveDataProvider([
                             'query' => CreditCard::find()->innerJoin('sale_credit_card', 'scc_cc_id=cc_id')->where(['scc_sale_id' => $item->css_sale_id]),
                         ]);

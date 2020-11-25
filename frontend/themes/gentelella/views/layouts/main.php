@@ -29,13 +29,13 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
     $this->registerMetaTag(['name' => 'robots', 'content' => 'noindex, nofollow']);
     $this->registerMetaTag(['name' => 'msapplication-TileColor', 'content' => '#a9e04b']);
     //$this->registerLinkTag(['rel' => 'icon', 'type' => 'image/png', 'href' => Helper::publishStatic('images/favicons/16x16.png'), 'sizes' => '16x16']);
-    $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'href' => Yii::$app->request->baseUrl.'/favicon.ico']);
+    $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'href' => Yii::$app->request->baseUrl . '/favicon.ico']);
     $this->head();
 
     //$this->head();
 
     $host = 'Sales';
-    echo Html::tag('title', ucfirst($host).' - '.Html::encode($this->title));
+    echo Html::tag('title', ucfirst($host) . ' - ' . Html::encode($this->title));
     ?>
     <?php /*<link rel="stylesheet" href="<?= Yii::$app->getAssetManager()->publish(Yii::getAlias('@frontend').'/web/css/style_theme.css')[1];?>"/>*/ ?>
     <?php //php $this->head() ?>
@@ -51,8 +51,7 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
 <?php $this->beginBody(); ?>
 <div class="container body">
     <div class="main_container">
-        <?php if(!Yii::$app->user->isGuest):?>
-
+        <?php if (!Yii::$app->user->isGuest) :?>
         <div class="col-md-3 left_col">
             <div class="left_col scroll-view">
 
@@ -62,12 +61,11 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
 
                     $default = 'identicon';
 
-                    if($user && $user->email) {
-                        $gravUrl = '//www.gravatar.com/avatar/' . md5(strtolower(trim($user->email))) . '?d=identicon&s=128';
-
-                    } else {
-                        $gravUrl = '//www.gravatar.com/avatar/?d=identicon&s=60';
-                    }
+                if ($user && $user->email) {
+                    $gravUrl = '//www.gravatar.com/avatar/' . md5(strtolower(trim($user->email))) . '?d=identicon&s=128';
+                } else {
+                    $gravUrl = '//www.gravatar.com/avatar/?d=identicon&s=60';
+                }
 
                 ?>
 
@@ -129,10 +127,16 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
                                 </li>*/ ?>
 
                                 <li>
-                                    <?=Html::a('<i class="fa fa-user pull-right"></i> My Profile', ['/site/profile'],
-                                        ['title' => 'My Profile']) ?>
-                                    <?=Html::a('<i class="fa fa-sign-out pull-right"></i> Log Out', ['/site/logout'],
-                                        ['title' => 'Logout']) ?>
+                                    <?=Html::a(
+                                        '<i class="fa fa-user pull-right"></i> My Profile',
+                                        ['/site/profile'],
+                                        ['title' => 'My Profile']
+                                    ) ?>
+                                    <?=Html::a(
+                                        '<i class="fa fa-sign-out pull-right"></i> Log Out',
+                                        ['/site/logout'],
+                                        ['title' => 'Logout']
+                                    ) ?>
 
                                 </li>
                             </ul>
@@ -163,7 +167,7 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
 
         <!-- page content -->
         <div class="right_col" role="main">
-            <?php if (isset($this->params['h1'])): ?>
+            <?php if (isset($this->params['h1'])) : ?>
                 <div class="page-title">
                     <div class="title_left">
                         <h1><?= $this->params['h1'] ?></h1>
@@ -185,7 +189,7 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
                 <?php echo yii\widgets\Breadcrumbs::widget([
                     'homeLink' => [
                         'label' => false,
-                        'template' => '<li><a href="'.Yii::$app->urlManager->createUrl('/').'">Home</a></li>',
+                        'template' => '<li><a href="' . Yii::$app->urlManager->createUrl('/') . '">Home</a></li>',
                     ],
                     'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
                 ]);?>

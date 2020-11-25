@@ -39,13 +39,13 @@ use yii\widgets\Pjax;
                 <br>
                 <?= $activeForm->errorSummary($form, ['showAllErrors' => false]) ?>
             </div>
-            <?php if ($client = $chat->cchClient): ?>
+            <?php if ($client = $chat->cchClient) : ?>
                 <div class="col-md-12 col-sm-12">
                     <div class="x_panel">
                         <div class="x_title">
                             <h2>Client Info</h2>
                             <ul class="nav navbar-right panel_toolbox">
-                                <!--							<li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>-->
+                                <!--                            <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>-->
                             </ul>
                             <div class="clearfix"></div>
                         </div>
@@ -57,13 +57,13 @@ use yii\widgets\Pjax;
                         </div>
                     </div>
                 </div>
-            <?php else: ?>
+            <?php else : ?>
                 <div class="col-md-12 col-sm-12">
                     <div class="x_panel">
                         <div class="x_title">
                             <h2>Client Not Found</h2>
                             <ul class="nav navbar-right panel_toolbox">
-                                <!--							<li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>-->
+                                <!--                            <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>-->
                             </ul>
                             <div class="clearfix"></div>
                         </div>

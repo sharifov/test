@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\ConferenceRoomSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -56,16 +57,16 @@ $this->params['breadcrumbs'][] = $this->title;
             //'cr_start_dt',
             [
                 'attribute' => 'cr_start_dt',
-                'value' => function(\common\models\ConferenceRoom $model) {
-                    return $model->cr_start_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->cr_start_dt)) : '-';
+                'value' => function (\common\models\ConferenceRoom $model) {
+                    return $model->cr_start_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->cr_start_dt)) : '-';
                 },
                 'format' => 'raw',
             ],
 
             [
                 'attribute' => 'cr_end_dt',
-                'value' => function(\common\models\ConferenceRoom $model) {
-                    return $model->cr_end_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->cr_end_dt)) : '-';
+                'value' => function (\common\models\ConferenceRoom $model) {
+                    return $model->cr_end_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->cr_end_dt)) : '-';
                 },
                 'format' => 'raw',
             ],

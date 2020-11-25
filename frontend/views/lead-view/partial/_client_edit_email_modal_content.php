@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $form ActiveForm
  * @var $this View
@@ -18,52 +19,52 @@ $user = Yii::$app->user->identity;
 ?>
 
 <div class="edit-phone-modal-content-ghj">
-	<?php $form = ActiveForm::begin([
-		'id' => 'client-edit-email-form',
-		'action' => Url::to(['lead-view/ajax-edit-client-email', 'gid' => $lead->gid]),
-		'enableClientValidation' => false,
-		'enableAjaxValidation' => true,
-		'validateOnChange' => false,
-		'validateOnBlur' => false,
-		'validationUrl' => Url::to(['lead-view/ajax-edit-client-email-validation', 'gid' => $lead->gid])
-	]); ?>
+    <?php $form = ActiveForm::begin([
+        'id' => 'client-edit-email-form',
+        'action' => Url::to(['lead-view/ajax-edit-client-email', 'gid' => $lead->gid]),
+        'enableClientValidation' => false,
+        'enableAjaxValidation' => true,
+        'validateOnChange' => false,
+        'validateOnBlur' => false,
+        'validationUrl' => Url::to(['lead-view/ajax-edit-client-email-validation', 'gid' => $lead->gid])
+    ]); ?>
 
-	<?= $form->errorSummary($editEmail) ?>
+    <?= $form->errorSummary($editEmail) ?>
 
-	<?php if ($user->isAdmin() || $user->isSuperAdmin()): ?>
-		<?=
-		$form->field($editEmail, 'email', [
-			'template' => '<div class="input-group"><span class="input-group-addon">@</span>{input}</div>{error}',
-			'options' => [
-				'class' => 'form-group'
-			]
-		])->textInput([
-			'class' => 'form-control email lead-form-input-element',
-			'type' => 'email',
+    <?php if ($user->isAdmin() || $user->isSuperAdmin()) : ?>
+        <?=
+        $form->field($editEmail, 'email', [
+            'template' => '<div class="input-group"><span class="input-group-addon">@</span>{input}</div>{error}',
+            'options' => [
+                'class' => 'form-group'
+            ]
+        ])->textInput([
+            'class' => 'form-control email lead-form-input-element',
+            'type' => 'email',
             'required' => true
-		])
-		?>
-	<?php endif; ?>
+        ])
+        ?>
+    <?php endif; ?>
 
-	<?=
-	$form->field($editEmail, 'type')->dropDownList(ClientEmail::EMAIL_TYPE)
-	?>
+    <?=
+    $form->field($editEmail, 'type')->dropDownList(ClientEmail::EMAIL_TYPE)
+    ?>
 
-	<?=
-	$form->field($editEmail, 'id')->hiddenInput()->label(false)->error(false)
-	?>
+    <?=
+    $form->field($editEmail, 'id')->hiddenInput()->label(false)->error(false)
+    ?>
 
-	<?=
-	$form->field($editEmail, 'client_id')->hiddenInput()->label(false)->error(false)
-	?>
+    <?=
+    $form->field($editEmail, 'client_id')->hiddenInput()->label(false)->error(false)
+    ?>
 
     <div class="text-center">
         <?= Html::submitButton('<i class="fa fa-check-square-o"></i> Save email', [
             'class' => 'btn btn-warning'
         ])
-        ?>
+?>
     </div>
-	<?php ActiveForm::end(); ?>
+    <?php ActiveForm::end(); ?>
 </div>
 
 <?php

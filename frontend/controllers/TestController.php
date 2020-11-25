@@ -207,7 +207,6 @@ use common\components\ReceiveEmailsJob;
 use yii\queue\Queue;
 use yii\web\NotFoundHttpException;
 
-
 /**
  * Test controller
  * @property ClientManageService $clientManageService
@@ -226,12 +225,12 @@ class TestController extends FController
         $module,
         ClientManageService $clientManageService,
         DeferredEventDispatcher $dispatcher,
-        TransactionManager $transactionManager, $config = []
-    )
-    {
+        TransactionManager $transactionManager,
+        $config = []
+    ) {
         $this->clientManageService = $clientManageService;
         $this->dispatcher = $dispatcher;
-        $this->transactionManager= $transactionManager;
+        $this->transactionManager = $transactionManager;
         parent::__construct($id, $module, $config);
     }
 
@@ -353,7 +352,7 @@ class TestController extends FController
 //        Yii::$app->queue_job->push($job);
 
         die;
-        VarDumper::dump( Json::decode('{
+        VarDumper::dump(Json::decode('{
     "message": {
         "rid": "f93a9c3e-e04a-4e0f-b39e-5be30f938da4",
         "attachments": [
@@ -547,7 +546,7 @@ class TestController extends FController
                             'type' => '',
                             'duration' => 12
                         ],
-                ],
+                    ],
             ]
         ];
 //        Notifications::publish('updateIncomingCall', ['user_id' => 295], $callInfo);
@@ -757,7 +756,7 @@ class TestController extends FController
         $mail->setHeader('Message-ID', '123456.chalpet@gmail.com');
         $mail->setHtmlBody('HTML message');
 
-        if($mail->send()) {
+        if ($mail->send()) {
             echo 'Send';
         } else {
             echo 'Not send';
@@ -794,19 +793,18 @@ class TestController extends FController
 
 
         VarDumper::dump($mailSend, 10, true);
-
     }
 
     public function actionSocket()
     {
 
 
-        Notifications::create(Yii::$app->user->id, 'Test '.date('H:i:s'), 'Test message <h2>asdasdasd</h2>', Notifications::TYPE_SUCCESS, true);
+        Notifications::create(Yii::$app->user->id, 'Test ' . date('H:i:s'), 'Test message <h2>asdasdasd</h2>', Notifications::TYPE_SUCCESS, true);
 
         $socket = 'tcp://127.0.0.1:1234';
         $user_id = Yii::$app->user->id; //'tester01';
         $lead_id = 12345;
-        $data['message'] = 'test '.date('H:i:s');
+        $data['message'] = 'test ' . date('H:i:s');
         $data['command'] = 'getNewNotification';
 
 
@@ -851,11 +849,14 @@ class TestController extends FController
     }
 
 
-    private function generateWebsocketKey() {
+    private function generateWebsocketKey()
+    {
         $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"$&/()=[]{}0123456789';
         $key = '';
         $chars_length = strlen($chars);
-        for ($i = 0; $i < 16; $i++) $key .= $chars[mt_rand(0, $chars_length-1)];
+        for ($i = 0; $i < 16; $i++) {
+            $key .= $chars[mt_rand(0, $chars_length - 1)];
+        }
         return base64_encode($key);
     }
 
@@ -871,10 +872,10 @@ class TestController extends FController
         //preg_match('~\[uid:(\w+)\]~si', $subject, $matches);
 
         preg_match_all('~<kiv\.(.+)>~iU', $message_id, $matches);
-        if(isset($matches[1]) && $matches[1]) {
+        if (isset($matches[1]) && $matches[1]) {
             foreach ($matches[1] as $messageId) {
                 $messageArr = explode('.', $messageId);
-                if(isset($messageArr[2]) && $messageArr[2]) {
+                if (isset($messageArr[2]) && $messageArr[2]) {
                     $lead_id = (int) $messageArr[2];
 
                     echo $lead_id . '<br>';
@@ -886,7 +887,6 @@ class TestController extends FController
 
 
         //VarDumper::dump($matches, 10, true);
-
     }
 
     public function actionLangPlural()
@@ -899,9 +899,10 @@ class TestController extends FController
         Yii::$app->language = 'en-US';
 
 
-        for($i = 0; $i<=20; $i++) {
-
-            echo \Yii::t('app', '{n, selectordinal,
+        for ($i = 0; $i <= 20; $i++) {
+            echo \Yii::t(
+                'app',
+                '{n, selectordinal,
      =0{У вас нет новых сообщений}
 
      one{У вас # непрочитанное сообщение}
@@ -909,9 +910,8 @@ class TestController extends FController
      many{У вас # непрочитанных сообщений...}
      other{У вас # прочитанных сообщений!}}',
                 ['n' => $i]
-            ).'<br>';
+            ) . '<br>';
         }
-
     }
 
     public function actionEmailJob()
@@ -1001,9 +1001,8 @@ class TestController extends FController
             $data['status'] = $status;
             $n++;
             // Notifications::socket($user_id, $lead_id = null, 'incomingCall', $data, true);
-            echo '<br>'.$status;
+            echo '<br>' . $status;
         }
-
     }
 
 
@@ -1069,7 +1068,7 @@ class TestController extends FController
     public function actionTz()
     {
         $offset = -5; //'+05:00';
-        $timezoneName = timezone_name_from_abbr('',intval($offset) * 60 * 60,0);
+        $timezoneName = timezone_name_from_abbr('', intval($offset) * 60 * 60, 0);
         //$timezoneName = timezone_name_from_abbr('', $offset,0);
 
         /*$date = new \DateTime(time(), new \DateTimeZone($timezoneName));
@@ -1096,15 +1095,14 @@ class TestController extends FController
 
 
         $dt = new \DateTime();
-        if($timezoneName) {
+        if ($timezoneName) {
             $timezone = new \DateTimeZone($timezoneName);
             $dt->setTimezone($timezone);
         }
         $clientTime =  $dt->format('H:i');
 
-        echo $timezoneName. ' - ' . $dt->getOffset();
+        echo $timezoneName . ' - ' . $dt->getOffset();
         //echo $clientTime;
-
     }
 
     public function actionTwml()
@@ -1119,7 +1117,7 @@ class TestController extends FController
     {
         $user_id = Yii::$app->user->id;
 
-        if($user_id) {
+        if ($user_id) {
             $profile = UserProfile::find()->where(['up_user_id' => $user_id])->limit(1)->one();
             if ($profile && $profile->up_telegram && $profile->up_telegram_enable) {
                 $tgm = Yii::$app->telegram;
@@ -1181,7 +1179,6 @@ class TestController extends FController
         $call->c_dep_id = null;
 
         Employee::getUsersForCallQueue($call, 6);
-
     }
 
     public function actionNotify()
@@ -1192,7 +1189,7 @@ class TestController extends FController
 
     public function actionNotify2()
     {
-        Notifications::create(Yii::$app->user->id, 'Test '.date('H:i:s'), 'Test message <h2>asdasdasd</h2>', Notifications::TYPE_SUCCESS, true);
+        Notifications::create(Yii::$app->user->id, 'Test ' . date('H:i:s'), 'Test message <h2>asdasdasd</h2>', Notifications::TYPE_SUCCESS, true);
         //Notifications::socket(Yii::$app->user->id, null, 'openUrl', ['url' => $host . '/lead/view/b5d963c9241dd741e22b37d1fa80a9b6'], false);
     }
 
@@ -1242,7 +1239,7 @@ class TestController extends FController
 
 
         $call = Call::find()->where(['c_call_sid' => '123'])->limit(1)->one();
-        if(!$call) {
+        if (!$call) {
             $call = new Call();
             $call->c_call_sid = uniqid();
             $call->c_from = '+373';
@@ -1250,7 +1247,6 @@ class TestController extends FController
             $call->c_created_dt = date('Y-m-d H:i:s');
             $call->c_created_user_id = Yii::$app->user->id;
             $call->c_call_type_id = Call::CALL_TYPE_OUT;
-
         }
 
         /*if(!$call->c_lead_id && $lead_id) {
@@ -1264,7 +1260,7 @@ class TestController extends FController
         $call->c_call_status = $call_status;*/
         //$call->c_updated_dt = date('Y-m-d H:i:s');
 
-        if(!$call->save()) {
+        if (!$call->save()) {
             $out['error'] = VarDumper::dumpAsString($call->errors);
             Yii::error($out['error'], 'PhoneController:actionAjaxSaveCall:Call:save');
         } else {
@@ -1272,7 +1268,8 @@ class TestController extends FController
         }
 
 
-        VarDumper::dump($out, 10, true); exit;
+        VarDumper::dump($out, 10, true);
+        exit;
 
 
         return $this->render('blank');
@@ -1280,7 +1277,6 @@ class TestController extends FController
         /*if (!$callsCount) {
             return false;
         }*/
-
     }
 
     public function actionCache()
@@ -1312,7 +1308,6 @@ class TestController extends FController
         //VarDumper::dump($model, 10, true);*/
 
         return $this->render('blank');
-
     }
 
     public function actionMysql()
@@ -1334,7 +1329,7 @@ class TestController extends FController
             $time_start = microtime(true);
             $result = Yii::$app->db->createCommand($sql)->queryAll();
             $time_end = microtime(true);
-            echo '<tr><td>'.$sql.'</td><td>Time: ' . round($time_end - $time_start, 6).'</td></tr>';
+            echo '<tr><td>' . $sql . '</td><td>Time: ' . round($time_end - $time_start, 6) . '</td></tr>';
         }
         echo '</table>';
 
@@ -1342,14 +1337,13 @@ class TestController extends FController
         echo '<hr><h2>SQL x 10</h2><table border="1" cellpadding="3" cellspacing="1">';
         foreach ($sqlData as $sql) {
             $time_start = microtime(true);
-            for($i = 0; $i < 10; $i++) {
+            for ($i = 0; $i < 10; $i++) {
                 $result = Yii::$app->db->createCommand($sql)->queryAll();
             }
             $time_end = microtime(true);
-            echo '<tr><td>'.$sql.'</td><td>Time: ' . round($time_end - $time_start, 6).'</td></tr>';
+            echo '<tr><td>' . $sql . '</td><td>Time: ' . round($time_end - $time_start, 6) . '</td></tr>';
         }
         echo '</table>';
-
     }
 
 
@@ -1427,68 +1421,69 @@ class TestController extends FController
     }
 
     public function actionGetCountWeekDays()
-	{
-		$week = ['Monday' => 0, 'Tuesday' => 0, 'Wednesday' => 0, 'Thursday' => 0, 'Friday' => 0, 'Saturday' => 0, 'Sunday' => 0];
+    {
+        $week = ['Monday' => 0, 'Tuesday' => 0, 'Wednesday' => 0, 'Thursday' => 0, 'Friday' => 0, 'Saturday' => 0, 'Sunday' => 0];
 
-		$d1 = new DateTime('2019-12-01 01:00:00');
-		$d2 = new DateTime('2019-12-31 15:00:00');
+        $d1 = new DateTime('2019-12-01 01:00:00');
+        $d2 = new DateTime('2019-12-31 15:00:00');
 
-		$interval = DateInterval::createFromDateString('1 day');
-		$period   = new DatePeriod($d1, $interval, $d2);
+        $interval = DateInterval::createFromDateString('1 day');
+        $period   = new DatePeriod($d1, $interval, $d2);
 
-		foreach ($period as $date) {
-			$week[$date->format('l')]++;
-		}
+        foreach ($period as $date) {
+            $week[$date->format('l')]++;
+        }
 
-		print_r($week);
-	}
+        print_r($week);
+    }
 
-	public function actionGetCountHourDays()
-	{
-		$hours = [];
-		for($i = 0; $i<=23; $i++) {
-			$hours[$i] = 0;
-		}
+    public function actionGetCountHourDays()
+    {
+        $hours = [];
+        for ($i = 0; $i <= 23; $i++) {
+            $hours[$i] = 0;
+        }
 
-		$d1 = new DateTime('2019-12-01 01:00:00');
-		$d2 = new DateTime('2019-12-31 15:00:00');
+        $d1 = new DateTime('2019-12-01 01:00:00');
+        $d2 = new DateTime('2019-12-31 15:00:00');
 
-		$interval = DateInterval::createFromDateString('1 hour');
-		$period   = new DatePeriod($d1, $interval, $d2);
+        $interval = DateInterval::createFromDateString('1 hour');
+        $period   = new DatePeriod($d1, $interval, $d2);
 
-		foreach ($period as $date) {
-			$hours[$date->format('G')]++;
-		}
+        foreach ($period as $date) {
+            $hours[$date->format('G')]++;
+        }
 
-		print_r($hours);
-	}
+        print_r($hours);
+    }
 
-	public function actionTestCurrencyHistoryLog()
-	{
-		$date = '2019-12-25';
-		$currency = Currency::find()->all();
-		foreach ($currency as $item) {
-			$currencyHistory = (new CurrencyHistory())->findOrCreateByPrimaryKeys($item->cur_code, $date);
+    public function actionTestCurrencyHistoryLog()
+    {
+        $date = '2019-12-25';
+        $currency = Currency::find()->all();
+        foreach ($currency as $item) {
+            $currencyHistory = (new CurrencyHistory())->findOrCreateByPrimaryKeys($item->cur_code, $date);
 
-			$currencyHistory->ch_code = $item->cur_code;
-			$currencyHistory->ch_base_rate = $item->cur_base_rate;
-			$currencyHistory->ch_app_rate = $item->cur_app_rate;
-			$currencyHistory->ch_app_percent = $item->cur_app_percent;
-			$currencyHistory->ch_main_created_dt = $item->cur_created_dt;
-			$currencyHistory->ch_main_updated_dt = $item->cur_updated_dt;
-			$currencyHistory->ch_main_synch_dt = $item->cur_synch_dt;
-			$currencyHistory->ch_created_date = $date;
+            $currencyHistory->ch_code = $item->cur_code;
+            $currencyHistory->ch_base_rate = $item->cur_base_rate;
+            $currencyHistory->ch_app_rate = $item->cur_app_rate;
+            $currencyHistory->ch_app_percent = $item->cur_app_percent;
+            $currencyHistory->ch_main_created_dt = $item->cur_created_dt;
+            $currencyHistory->ch_main_updated_dt = $item->cur_updated_dt;
+            $currencyHistory->ch_main_synch_dt = $item->cur_synch_dt;
+            $currencyHistory->ch_created_date = $date;
 
-			if (!$currencyHistory->save(false)) {
-				Yii::error($currencyHistory->ch_code . ': ' . VarDumper::dumpAsString($currencyHistory->errors), 'Currency:synchronization:CurrencyHistory:save');
-				echo 'Error';die;
-			}
-		}
+            if (!$currencyHistory->save(false)) {
+                Yii::error($currencyHistory->ch_code . ': ' . VarDumper::dumpAsString($currencyHistory->errors), 'Currency:synchronization:CurrencyHistory:save');
+                echo 'Error';
+                die;
+            }
+        }
 
-		echo 'Successful';
-	}
+        echo 'Successful';
+    }
 
-	public function actionEncrypt()
+    public function actionEncrypt()
     {
 
         $text = 'Hello!';
@@ -1517,9 +1512,8 @@ class TestController extends FController
         $creditCard[] = '3528066275370961'; // JCB 16
         $creditCard[] = '8699775919'; // Voyager
 
-        for($i=0;$i < count($creditCard);$i++)
-        {
-            echo CreditCardHelper::formatCreditCard(CreditCardHelper::maskCreditCard($creditCard[$i])).'<br>'; //FormatCreditCard(MaskCreditCard(($creditCard[$i])))."\n";
+        for ($i = 0; $i < count($creditCard); $i++) {
+            echo CreditCardHelper::formatCreditCard(CreditCardHelper::maskCreditCard($creditCard[$i])) . '<br>'; //FormatCreditCard(MaskCreditCard(($creditCard[$i])))."\n";
         }
     }
 
@@ -1550,7 +1544,6 @@ class TestController extends FController
         $transaction = $db->beginTransaction();
 
         try {
-
             $user = Employee::findOne(\Yii::$app->user->id);
 
             if ($user) {
@@ -1560,8 +1553,11 @@ class TestController extends FController
             $notify = Notifications::findOne(1);
 
             if ($notify) {
-                $notify->addEvent(NotificationEvents::NOTIFY_SENT, [NotificationEvents::class, 'send'],
-                    $notify->n_title);
+                $notify->addEvent(
+                    NotificationEvents::NOTIFY_SENT,
+                    [NotificationEvents::class, 'send'],
+                    $notify->n_title
+                );
 
                 //Event::on(Notifications::class, NotificationEvents::EVENT_NOTIFY, [NotificationEvents::class, 'send'], $notify->n_title);
 
@@ -1596,10 +1592,7 @@ class TestController extends FController
             $result = $notify->triggerEvents();
 
             //$notify->trigger(NotificationEvents::EVENT_NOTIFY);
-
-
-
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $transaction->rollBack();
             VarDumper::dump($e->getMessage());
         } catch (\Throwable $e) {
@@ -1622,7 +1615,7 @@ class TestController extends FController
         if ($rows) {
             foreach ($rows as $rn => $row) {
                 $rowData = explode(',', $row);
-                if (!$rowData || $rn ===0) {
+                if (!$rowData || $rn === 0) {
                     continue;
                 }
                 $lead = [
@@ -1643,16 +1636,15 @@ class TestController extends FController
         echo '<pre>';
         echo VarDumper::dump($leads, 10, true);
         echo '</pre>';
-
     }
 
     public function actionTestUserProfile()
-	{
-		$userProfile = new UserProfile();
-		$userProfile->up_join_date = '2019-01-01';
-		$expMonth = $userProfile->getExperienceMonth();
-		var_dump($expMonth);
-	}
+    {
+        $userProfile = new UserProfile();
+        $userProfile->up_join_date = '2019-01-01';
+        $expMonth = $userProfile->getExperienceMonth();
+        var_dump($expMonth);
+    }
 
     public function actionWebSocket()
     {
@@ -1664,56 +1656,56 @@ class TestController extends FController
     }
 
     public function actionTestCallHelper(): void
-	{
-		$callAccess = CallAccess::isUserCanDial(464, UserProfile::CALL_TYPE_WEB);
+    {
+        $callAccess = CallAccess::isUserCanDial(464, UserProfile::CALL_TYPE_WEB);
 
-		$test1 = CallHelper::callNumber('+123456789', false);
-		$test2 = CallHelper::callNumber('+123456789', $callAccess, 'call phone');
-		$test3 = CallHelper::callNumber('+123456789', $callAccess, 'call phone', [
-			'confirm' => 1,
-			'call' => 1,
-			'phone-from-id' => 34,
-			'icon-class' => 'fa fa-phone valid'
-		]);
-		$test4 = CallHelper::callNumber('+123456789', $callAccess,'call phone', [
-			'confirm' => 1,
-			'call' => 1,
-			'phone-from-id' => 34,
-			'icon-class' => 'fa fa-phone valid',
-		], 'a');
+        $test1 = CallHelper::callNumber('+123456789', false);
+        $test2 = CallHelper::callNumber('+123456789', $callAccess, 'call phone');
+        $test3 = CallHelper::callNumber('+123456789', $callAccess, 'call phone', [
+            'confirm' => 1,
+            'call' => 1,
+            'phone-from-id' => 34,
+            'icon-class' => 'fa fa-phone valid'
+        ]);
+        $test4 = CallHelper::callNumber('+123456789', $callAccess, 'call phone', [
+            'confirm' => 1,
+            'call' => 1,
+            'phone-from-id' => 34,
+            'icon-class' => 'fa fa-phone valid',
+        ], 'a');
 
-		echo Html::encode($test1);
-		echo '<br>';
-		echo Html::encode($test2);
-		echo '<br>';
-		echo Html::encode($test3);
-		echo '<br>';
-		echo Html::encode($test4);
-	}
+        echo Html::encode($test1);
+        echo '<br>';
+        echo Html::encode($test2);
+        echo '<br>';
+        echo Html::encode($test3);
+        echo '<br>';
+        echo Html::encode($test4);
+    }
 
-	public function actionTestAddCreditCardBo()
-	{
-		$bookId = 'B2917FB';
-		$saleId = 136503;
+    public function actionTestAddCreditCardBo()
+    {
+        $bookId = 'B2917FB';
+        $saleId = 136503;
 
-		$card = new CreditCardForm();
-		$card->cc_holder_name = 'Alex Grub Test';
-		$card->cc_number = '5555555555555555';
-		$card->cc_expiration = '10 / 21';
-		$card->cc_cvv = 111;
+        $card = new CreditCardForm();
+        $card->cc_holder_name = 'Alex Grub Test';
+        $card->cc_number = '5555555555555555';
+        $card->cc_expiration = '10 / 21';
+        $card->cc_cvv = 111;
 
-		$repository = Yii::createObject(CasesSaleRepository::class);
+        $repository = Yii::createObject(CasesSaleRepository::class);
 
-		$caseSale = $repository->getSaleByPrimaryKeys(135814, $saleId);
+        $caseSale = $repository->getSaleByPrimaryKeys(135814, $saleId);
 
-		$saleOriginalData = JsonHelper::decode($caseSale->css_sale_data);
+        $saleOriginalData = JsonHelper::decode($caseSale->css_sale_data);
 
-		$service = Yii::createObject(CasesSaleService::class);
-		echo '<pre>';
-		print_r($service->sendAddedCreditCardToBO($saleOriginalData['projectApiKey'], $bookId, $saleId, $card));
-	}
+        $service = Yii::createObject(CasesSaleService::class);
+        echo '<pre>';
+        print_r($service->sendAddedCreditCardToBO($saleOriginalData['projectApiKey'], $bookId, $saleId, $card));
+    }
 
-	public function actionPreview()
+    public function actionPreview()
     {
         $gid = mb_substr('26958bc1be930b2213595af0ab40f586', 0, 32);
         $lead = Lead::find()->where(['gid' => $gid])->limit(1)->one();
@@ -1751,7 +1743,8 @@ class TestController extends FController
 
 
         $mailPreview = $communication->mailCapture($lead->project_id, ($tpl ? $tpl/*$tpl->etp_key*/ : ''), $mailFrom, $mailTo/*$comForm->c_email_to*/, $content_data, $language);
-        VarDumper::dump($mailPreview, 10 , true); exit;
+        VarDumper::dump($mailPreview, 10, true);
+        exit;
     }
 
     public function actionVue()
@@ -1775,12 +1768,12 @@ class TestController extends FController
 
 
 //        "email": "test@gmail.com",
-//	"name": "John Balon",
-//	"password": "test",
-//	"username": "test",
-//	"active": true,
-//	"roles": ["user", "livechat-agent"],
-//	"joinDefaultChannels": false
+//  "name": "John Balon",
+//  "password": "test",
+//  "username": "test",
+//  "active": true,
+//  "roles": ["user", "livechat-agent"],
+//  "joinDefaultChannels": false
 
         //VarDumper::dump($chat->getSystemAuthData(), 10, true);
         //VarDumper::dump($chat->getAllDepartments(), 10, true);
@@ -1794,23 +1787,24 @@ class TestController extends FController
     }
 
     public function actionTestRcAssignUserToChannel()
-	{
+    {
 
-//		$response = Yii::$app->rchat->setActiveStatus('Wvuk6YpiZJdgWeiaL', '9HFxzz2zfZsN7eMhv', 'juHeZVXwDSR4wLuap2fC5dqS4tR39M4CcAHwVeeph2O');
-//		$response = Yii::$app->rchat->setStatus(RocketChat::STATUS_ONLINE, 'Wvuk6YpiZJdgWeiaL', '9oUd_DynNc1Rc-in9ZUPrSBh62fNhwl-bR4oj-23tYy');
-//		var_dump($response);die;
+//      $response = Yii::$app->rchat->setActiveStatus('Wvuk6YpiZJdgWeiaL', '9HFxzz2zfZsN7eMhv', 'juHeZVXwDSR4wLuap2fC5dqS4tR39M4CcAHwVeeph2O');
+//      $response = Yii::$app->rchat->setStatus(RocketChat::STATUS_ONLINE, 'Wvuk6YpiZJdgWeiaL', '9oUd_DynNc1Rc-in9ZUPrSBh62fNhwl-bR4oj-23tYy');
+//      var_dump($response);die;
 
-		try {
-			$clientChatService = Yii::createObject(ClientChatService::class);
-			$clientChatService->assignAgentToRcChannel('0a0aed99-a191-436c-8c79-cb5a55770bbe', 'Wvuk6YpiZJdgWeiaL');
-		} catch (\RuntimeException $e) {
-			echo $e->getMessage();die;
-		}
+        try {
+            $clientChatService = Yii::createObject(ClientChatService::class);
+            $clientChatService->assignAgentToRcChannel('0a0aed99-a191-436c-8c79-cb5a55770bbe', 'Wvuk6YpiZJdgWeiaL');
+        } catch (\RuntimeException $e) {
+            echo $e->getMessage();
+            die;
+        }
 
-		echo 'success';
-	}
+        echo 'success';
+    }
 
-	public function actionGaSendQuote($id = 733986, int $debug = 1) // test/ga-send-quote?id=733986&debug=1
+    public function actionGaSendQuote($id = 733986, int $debug = 1) // test/ga-send-quote?id=733986&debug=1
     {
         try {
             if (is_int($id)) {
@@ -1829,7 +1823,6 @@ class TestController extends FController
                 'post Data' => $gaQbj->getPostData(),
                 'response' => $response,
             ], 10, true);
-
         } catch (\Throwable $throwable) {
             VarDumper::dump(AppHelper::throwableFormatter($throwable), 10, true);
         }
@@ -1850,14 +1843,13 @@ class TestController extends FController
                 'post Data' => $gaQbj->getPostData(),
                 'response' => $response,
             ], 10, true);
-
         } catch (\Throwable $throwable) {
             VarDumper::dump(AppHelper::throwableFormatter($throwable), 10, true);
         }
         exit();
     }
 
-	public function actionZ()
+    public function actionZ()
     {
 
         return $this->render('z');
@@ -1878,25 +1870,25 @@ class TestController extends FController
     }
 
     public function actionTestSetByUserId()
-	{
-		$repository = Yii::createObject(ClientChatUserAccessService::class);
+    {
+        $repository = Yii::createObject(ClientChatUserAccessService::class);
 
-		$repository->setUserAccessToAllChats(464);
-	}
+        $repository->setUserAccessToAllChats(464);
+    }
 
-	public function actionSetAccessToAllChatsByChannelIds()
-	{
-		try {
-			$userAccessService = Yii::createObject(ClientChatUserAccessService::class);
+    public function actionSetAccessToAllChatsByChannelIds()
+    {
+        try {
+            $userAccessService = Yii::createObject(ClientChatUserAccessService::class);
 
-			$userAccessService->disableUserAccessToAllChats(464);
-			$userAccessService->setUserAccessToAllChatsByChannelIds([5], 464);
-		} catch (\Throwable $e) {
-			echo AppHelper::throwableFormatter($e);
-		}
-	}
+            $userAccessService->disableUserAccessToAllChats(464);
+            $userAccessService->setUserAccessToAllChatsByChannelIds([5], 464);
+        } catch (\Throwable $e) {
+            echo AppHelper::throwableFormatter($e);
+        }
+    }
 
-	public function actionErrors()
+    public function actionErrors()
     {
         $message = 'Test message ' . date('Y-m-d H:i:s');
 
@@ -1963,7 +1955,8 @@ class TestController extends FController
 
         sleep(random_int(0, 2));
         $seconds = round(microtime(true) - $timeStart, 1);
-        echo $seconds; exit;
+        echo $seconds;
+        exit;
 
         $metrics->jobCounter('count');
         $metrics->jobHistogram('hst', random_int(0, 7));
@@ -1979,13 +1972,13 @@ class TestController extends FController
         Yii::$app->formatter->locale = 'ru-CA';
 
         echo '<hr>';
-        echo 'lang: ' . Yii::$app->language.'<br>';
-        echo 'locale: ' . Yii::$app->formatter->locale.'<br>';
-        echo 'Decimal: ' . Yii::$app->formatter->asDecimal(1234.5678).'<br>';
-        echo 'Currency: ' . Yii::$app->formatter->asCurrency(1234.5678).'<br>';
-        echo 'Date: ' . Yii::$app->formatter->asDate('2014-01-01').'<br>';
+        echo 'lang: ' . Yii::$app->language . '<br>';
+        echo 'locale: ' . Yii::$app->formatter->locale . '<br>';
+        echo 'Decimal: ' . Yii::$app->formatter->asDecimal(1234.5678) . '<br>';
+        echo 'Currency: ' . Yii::$app->formatter->asCurrency(1234.5678) . '<br>';
+        echo 'Date: ' . Yii::$app->formatter->asDate('2014-01-01') . '<br>';
 
-        echo 'DateTime: ' . Yii::$app->formatter->asDatetime(time()).'<br><hr>';
+        echo 'DateTime: ' . Yii::$app->formatter->asDatetime(time()) . '<br><hr>';
 
 
         //Yii::$app->formatter->locale = 'ru-RU';
@@ -1993,26 +1986,23 @@ class TestController extends FController
 
 
 
-        echo 'lang: ' . Yii::$app->language.'<br>';
-        echo 'locale: ' . Yii::$app->formatter->locale.'<br>';
-        echo 'Decimal: ' . Yii::$app->formatter->asDecimal(1234.5678).'<br>';
-        echo 'Currency: ' . Yii::$app->formatter->asCurrency(1234.5678).'<br>';
-        echo 'Date: ' . Yii::$app->formatter->asDate('2014-01-01').'<br>';
-        echo 'DateTime: ' . Yii::$app->formatter->asDatetime(time()).'<br>';
+        echo 'lang: ' . Yii::$app->language . '<br>';
+        echo 'locale: ' . Yii::$app->formatter->locale . '<br>';
+        echo 'Decimal: ' . Yii::$app->formatter->asDecimal(1234.5678) . '<br>';
+        echo 'Currency: ' . Yii::$app->formatter->asCurrency(1234.5678) . '<br>';
+        echo 'Date: ' . Yii::$app->formatter->asDate('2014-01-01') . '<br>';
+        echo 'DateTime: ' . Yii::$app->formatter->asDatetime(time()) . '<br>';
 
         Yii::$app->formatter->locale = 'SK';
         Yii::$app->language = 'ru-RU';
 
 
         echo '<hr>';
-        echo 'lang: ' . Yii::$app->language.'<br>';
-        echo 'locale: ' . Yii::$app->formatter->locale.'<br>';
-        echo 'Decimal: ' . Yii::$app->formatter->asDecimal(1234.5678).'<br>';
-        echo 'Currency: ' . Yii::$app->formatter->asCurrency(1234.5678).'<br>';
-        echo 'Date: ' . Yii::$app->formatter->asDate('2014-01-01').'<br>';
-        echo 'DateTime: ' . Yii::$app->formatter->asDatetime(time()).'<br>';
-
+        echo 'lang: ' . Yii::$app->language . '<br>';
+        echo 'locale: ' . Yii::$app->formatter->locale . '<br>';
+        echo 'Decimal: ' . Yii::$app->formatter->asDecimal(1234.5678) . '<br>';
+        echo 'Currency: ' . Yii::$app->formatter->asCurrency(1234.5678) . '<br>';
+        echo 'Date: ' . Yii::$app->formatter->asDate('2014-01-01') . '<br>';
+        echo 'DateTime: ' . Yii::$app->formatter->asDatetime(time()) . '<br>';
     }
 }
-
-

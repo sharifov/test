@@ -5,6 +5,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\QuotePriceSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -48,7 +49,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'quote.status',
                 'header'    => 'Quote Status',
-                'value' => function(\common\models\QuotePrice $model) {
+                'value' => function (\common\models\QuotePrice $model) {
                     return $model->quote ? $model->quote->getStatusName(true) : '-';
                 },
                 'format' => 'html',
@@ -58,8 +59,8 @@ $this->params['breadcrumbs'][] = $this->title;
             //'passenger_type',
             [
                 'attribute' => 'passenger_type',
-                'value' => function(\common\models\QuotePrice $model) {
-                    return '<i class="fa fa-user"></i> '.$model->getPassengerTypeName();
+                'value' => function (\common\models\QuotePrice $model) {
+                    return '<i class="fa fa-user"></i> ' . $model->getPassengerTypeName();
                 },
                 'format' => 'raw',
                 'filter' => \common\models\QuotePrice::PASSENGER_TYPE_LIST

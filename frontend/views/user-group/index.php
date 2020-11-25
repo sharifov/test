@@ -5,6 +5,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\UserGroupSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -38,7 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'ug_on_leaderboard',
                 'format' => 'raw',
-                'value' => function(\common\models\UserGroup $model) {
+                'value' => function (\common\models\UserGroup $model) {
                     return $model->ug_on_leaderboard ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
                 },
                 'contentOptions' => ['class' => 'text-left'],
@@ -71,7 +72,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'ug_user_group_set_id',
                 'format' => 'raw',
-                'value' => function(\common\models\UserGroup $model) {
+                'value' => function (\common\models\UserGroup $model) {
                     if ($model->ug_user_group_set_id) {
                         return $model->userGroupSet->ugs_name;
                     }

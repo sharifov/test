@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $this \yii\web\View
  * @var $dataProvider ActiveDataProvider
@@ -57,6 +58,6 @@ $user = Yii::$app->user->identity;
                 'country',
             ]
         ])
-        ?>
+?>
     </div>
 </div>

@@ -1,4 +1,5 @@
 <?php
+
 /* @var $this \yii\web\View */
 
 use yii\bootstrap4\Modal;
@@ -27,7 +28,7 @@ use yii\bootstrap4\Modal;
 ]); ?>
 
 <?php echo Modal::widget([
-	'id' => 'modal-md',
-	'title' => '',
-	'size' => 'modal-md',
-]); ?>
+    'id' => 'modal-md',
+    'title' => '',
+    'size' => 'modal-md',
+]);

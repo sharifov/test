@@ -38,7 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <span class="sr-only">Toggle Dropdown</span>
         </button>
         <div class="dropdown-menu">
-            <?= \yii\helpers\Html::a('<i class="fa fa-remove text-danger"></i>  Delete Selected', null, ['id' =>'btn-act-delete-selected', 'class' => 'dropdown-item btn-multiple-update' ])?>
+            <?= \yii\helpers\Html::a('<i class="fa fa-remove text-danger"></i>  Delete Selected', null, ['id' => 'btn-act-delete-selected', 'class' => 'dropdown-item btn-multiple-update' ])?>
             <div class="dropdown-divider"></div>
             <?= \yii\helpers\Html::a('<i class="fa fa-info text-info"></i> Show Checked IDs', null, ['class' => 'dropdown-item btn-show-checked-ids'])?>
         </div>
@@ -105,7 +105,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'cch_status_id',
                 'value' => static function (ClientChat $model) {
-                    return Html::tag('span', $model->getStatusName(), ['class' => 'badge badge-'.$model->getStatusClass()]);
+                    return Html::tag('span', $model->getStatusName(), ['class' => 'badge badge-' . $model->getStatusClass()]);
                 },
                 'format' => 'raw',
                 'filter' => ClientChat::getStatusList()
@@ -195,7 +195,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             ['class' => 'yii\grid\ActionColumn'],
-        ],
+            ],
     ]); ?>
 
     <?php Pjax::end(); ?>

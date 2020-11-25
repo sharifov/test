@@ -55,7 +55,7 @@ $form = ActiveForm::begin([
 
     </div>
 
-    <?php if ($updateForm->authUserIsAdmin()): ?>
+    <?php if ($updateForm->authUserIsAdmin()) : ?>
         <?= $form->field($updateForm, 'redial_queue')->dropDownList($updateForm->getRedialQueueList(), [
             'prompt' => '',
             'onChange' => 'let wrapper = $(this).val(); if (wrapper == 1 || wrapper == 2) $(".redial_queue-wrapper").hide(); else $(".redial_queue-wrapper").show();'

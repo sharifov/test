@@ -5,6 +5,7 @@ use common\components\grid\UserSelect2Column;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\clientChatUserChannel\entity\search\ClientChatUserChannelSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -28,26 +29,26 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
 
-			[
-				'class' => UserSelect2Column::class,
-				'attribute' => 'ccuc_user_id',
-				'relation' => 'ccucUser',
-				'format' => 'username',
-				'placeholder' => 'Select User'
-			],
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'ccuc_user_id',
+                'relation' => 'ccucUser',
+                'format' => 'username',
+                'placeholder' => 'Select User'
+            ],
             'ccuc_channel_id',
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'ccuc_created_dt',
-				'format' => 'byUserDateTime'
-			],
-			[
-				'class' => UserSelect2Column::class,
-				'attribute' => 'ccuc_created_user_id',
-				'relation' => 'ccucCreatedUser',
-				'format' => 'username',
-				'placeholder' => 'Select User'
-			],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'ccuc_created_dt',
+                'format' => 'byUserDateTime'
+            ],
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'ccuc_created_user_id',
+                'relation' => 'ccucCreatedUser',
+                'format' => 'username',
+                'placeholder' => 'Select User'
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

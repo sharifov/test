@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $this yii\web\View
  * @var $dataProvider yii\data\ActiveDataProvider
@@ -100,7 +101,7 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
 
                 <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerIdForm ,'enablePushState' => false]) ?>
 
-                <?php if($model->isProcessing() || $model->isSolved()):?>
+                <?php if ($model->isProcessing() || $model->isSolved()) :?>
                      <div class="chat__form panel">
 
                     <?php Modal::begin(['id' => 'modal-email-preview',
@@ -155,7 +156,8 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
                     <div class="form-group">
 
                         <?php echo $form2->field($previewEmailForm, 'e_email_message')->textarea(
-                            ['style' => 'display:none', 'id' => 'e_email_message']) ?>
+                            ['style' => 'display:none', 'id' => 'e_email_message']
+                        ) ?>
 
                         <div style="max-height: 800px; overflow-x: auto;">
                             <iframe id="email_view" src="/lead/get-template?key_cache=<?php echo $previewEmailForm->keyCache?>"
@@ -163,7 +165,7 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
                         </div>
 
                     </div>
-                    <?php if($isAdmin):?>
+                    <?php if ($isAdmin) :?>
                     <div class="row" style="display: none" id="email-data-content-div">
                         <pre><?php
                             //\yii\helpers\VarDumper::dump($previewEmailForm->e_content_data, 10, true);
@@ -177,7 +179,7 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
                         <div class="col-md-12">
                             <?php $messageSize = mb_strlen($previewEmailForm->e_email_message) ?>
                             <b>Content size: <?=Yii::$app->formatter->asShortSize($messageSize, 1) ?></b>
-                            <?php if($messageSize > 102 * 1024): ?>
+                            <?php if ($messageSize > 102 * 1024) : ?>
                                     &nbsp;&nbsp;&nbsp;<span class="danger">Warning: recommended MAX content size: <b><?=Yii::$app->formatter->asShortSize(102 * 1024, 1) ?></b>.</span>
                             <?php endif; ?>
 
@@ -186,9 +188,11 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
                     </div>
 
                     <div class="btn-wrapper text-right">
-                        <?= Html::submitButton('<i class="fa fa-envelope-o"></i> Send Email',
-                            ['class' => 'btn btn-lg btn-primary', 'id' => 'send_email_btn']) ?>
-                        <?php if($isAdmin):?>
+                        <?= Html::submitButton(
+                            '<i class="fa fa-envelope-o"></i> Send Email',
+                            ['class' => 'btn btn-lg btn-primary', 'id' => 'send_email_btn']
+                        ) ?>
+                        <?php if ($isAdmin) :?>
                             <?= Html::button('<i class="fa fa-list"></i> Show Email data (for Admins)', ['class' => 'btn btn-lg btn-warning', 'onclick' => '$("#email-data-content-div").toggle()']) ?>
                         <?php endif; ?>
                     </div>
@@ -315,40 +319,36 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
                                     $call_type = \common\models\UserProfile::find()->select('up_call_type_id')->where(['up_user_id' => Yii::$app->user->id])->one();
 
 
-                                    if($call_type && $call_type->up_call_type_id) {
-                                        $call_type_id = $call_type->up_call_type_id;
+                                if ($call_type && $call_type->up_call_type_id) {
+                                    $call_type_id = $call_type->up_call_type_id;
+                                } else {
+                                    $call_type_id = \common\models\UserProfile::CALL_TYPE_OFF;
+                                }
 
-                                    } else {
-                                        $call_type_id = \common\models\UserProfile::CALL_TYPE_OFF;
-                                    }
 
-
-                                    if($agentParams) {
-                                        foreach (\frontend\models\CommunicationForm::TYPE_LIST as $tk => $itemName) {
-
-                                            if ($tk == \frontend\models\CommunicationForm::TYPE_EMAIL) {
-
-                                                if ($model->isDepartmentSupport()) {
-													$typeList[$tk] = $itemName;
-//												} else if ($agentParams->upp_email) {
+                                if ($agentParams) {
+                                    foreach (\frontend\models\CommunicationForm::TYPE_LIST as $tk => $itemName) {
+                                        if ($tk == \frontend\models\CommunicationForm::TYPE_EMAIL) {
+                                            if ($model->isDepartmentSupport()) {
+                                                $typeList[$tk] = $itemName;
+//                                              } else if ($agentParams->upp_email) {
 //                                                    $typeList[$tk] = $itemName . ' (' . $agentParams->upp_email . ')';
 //                                              }
-												} else if ($agentParams->getEmail()) {
-                                                    $typeList[$tk] = $itemName . ' (' . $agentParams->getEmail() . ')';
-                                                }
+                                            } else if ($agentParams->getEmail()) {
+                                                $typeList[$tk] = $itemName . ' (' . $agentParams->getEmail() . ')';
                                             }
+                                        }
 
-                                            //if ($agentParams->upp_tw_phone_number) {
-                                                if ($tk == \frontend\models\CommunicationForm::TYPE_SMS && $smsEnabled) {
-
-                                                    if ($model->isDepartmentSupport()) {
-                                                        $typeList[$tk] = $itemName;
+                                        //if ($agentParams->upp_tw_phone_number) {
+                                        if ($tk == \frontend\models\CommunicationForm::TYPE_SMS && $smsEnabled) {
+                                            if ($model->isDepartmentSupport()) {
+                                                $typeList[$tk] = $itemName;
 //                                                    } elseif ($agentParams->upp_tw_phone_number){
 //                                                        $typeList[$tk] = $itemName . ' (' . $agentParams->upp_tw_phone_number . ')';
-                                                    } elseif ($agentParams->getPhone()){
-                                                        $typeList[$tk] = $itemName . ' (' . $agentParams->getPhone() . ')';
-                                                    }
-                                                }
+                                            } elseif ($agentParams->getPhone()) {
+                                                $typeList[$tk] = $itemName . ' (' . $agentParams->getPhone() . ')';
+                                            }
+                                        }
 
 
 //                                                if($call_type_id) {
@@ -366,21 +366,20 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
 //                                                    }
 //                                                }
                                             //}
-                                        }
+                                    }
+                                }
+
+                                if ($call_type_id) {
+                                    $callTypeName = \common\models\UserProfile::CALL_TYPE_LIST[$call_type_id] ?? '-';
+
+                                    if ($call_type_id == \common\models\UserProfile::CALL_TYPE_SIP && $userModel->userProfile && !$userModel->userProfile->up_sip) {
+                                        $callTypeName .= ' [empty account]';
                                     }
 
-                                    if ($call_type_id) {
-
-                                        $callTypeName = \common\models\UserProfile::CALL_TYPE_LIST[$call_type_id] ?? '-';
-
-                                        if ($call_type_id == \common\models\UserProfile::CALL_TYPE_SIP && $userModel->userProfile && !$userModel->userProfile->up_sip) {
-                                            $callTypeName .= ' [empty account]';
-                                        }
-
-                                        //if ($userModel->userProfile->up_sip) {
-                                        $typeList[\frontend\models\CommunicationForm::TYPE_VOICE] = \frontend\models\CommunicationForm::TYPE_LIST[\frontend\models\CommunicationForm::TYPE_VOICE] . ' (' . $callTypeName . ')';
-                                        //}
-                                    }
+                                    //if ($userModel->userProfile->up_sip) {
+                                    $typeList[\frontend\models\CommunicationForm::TYPE_VOICE] = \frontend\models\CommunicationForm::TYPE_LIST[\frontend\models\CommunicationForm::TYPE_VOICE] . ' (' . $callTypeName . ')';
+                                    //}
+                                }
 
 
                                 ?>
@@ -408,28 +407,28 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
                                 <?= $form->field($comForm, 'c_email_to')->dropDownList($clientEmails, ['prompt' => '---', 'class' => 'form-control', 'id' => 'email']) ?>
                             </div>
 
-							<?php if ($model->isDepartmentSupport()): ?>
+                            <?php if ($model->isDepartmentSupport()) : ?>
                                 <div class="col-md-3 form-group message-field-email" id="department-emails">
-									<?php
+                                    <?php
                                     $departmentEmailsList = [];
                                     /** @var DepartmentEmailProject[] $departmentEmails */
-									$departmentEmails = $model->getDepartmentEmailsByProjectAndDepartment()->where(['dep_default' => \common\models\DepartmentPhoneProject::DEP_DEFAULT_TRUE])->withEmailList()->all();
+                                    $departmentEmails = $model->getDepartmentEmailsByProjectAndDepartment()->where(['dep_default' => \common\models\DepartmentPhoneProject::DEP_DEFAULT_TRUE])->withEmailList()->all();
                                     foreach ($departmentEmails as $departmentEmail) {
                                         if ($departmentEmail->getEmail()) {
                                             $departmentEmailsList[$departmentEmail->dep_id] = $departmentEmail->getEmail();
                                         }
                                     }
-									?>
+                                    ?>
                                     <?php
                                         $optionsEmail = ['class' => 'form-control'];
-                                        if (count($departmentEmailsList) > 1) {
-											$optionsEmail['prompt'] = '---';
-                                        }
+                                    if (count($departmentEmailsList) > 1) {
+                                        $optionsEmail['prompt'] = '---';
+                                    }
                                     ?>
                                     <?php //= $form->field($comForm,'dep_email_id')->dropDownList(\yii\helpers\ArrayHelper::map($departmentEmails, 'dep_id', 'dep_email'), $optionsEmail) ?>
-                                    <?= $form->field($comForm,'dep_email_id')->dropDownList($departmentEmailsList, $optionsEmail) ?>
+                                    <?= $form->field($comForm, 'dep_email_id')->dropDownList($departmentEmailsList, $optionsEmail) ?>
                                 </div>
-							<?php endif; ?>
+                            <?php endif; ?>
 
                             <div class="col-sm-12 form-group message-field-email" id="email-subtitle-group" style="display: none;">
                                 <?= $form->field($comForm, 'c_email_subject')->textInput(['class' => 'form-control', 'id' => 'email-subtitle', 'maxlength' => true]) ?>
@@ -439,43 +438,43 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
                                 <?= $form->field($comForm, 'c_phone_number')->dropDownList($clientPhones, ['prompt' => '---', 'class' => 'form-control', 'id' => !SettingHelper::isCaseCommunicationNewCallWidgetEnabled() ? 'c_phone_number' : 'call-to-number']) ?>
                             </div>
 
-                            <?php if (SettingHelper::isCaseCommunicationNewCallWidgetEnabled()): ?>
+                            <?php if (SettingHelper::isCaseCommunicationNewCallWidgetEnabled()) : ?>
                                 <div class="col-sm-3 form-group message-field-phone" style="display: block;">
                                     <?= Html::label('Phone from', null, ['class' => 'control-label']) ?>
                                     <?= Html::dropDownList('call-from-number', null, $fromPhoneNumbers, ['prompt' => '---', 'id' => 'call-from-number', 'class' => 'form-control', 'label'])?>
                                 </div>
                                 <div class="col-sm-3 form-group message-field-phone" style="display: block;">
-									<?= Html::button('<i class="fa fa-phone-square"></i> Make Call', ['class' => 'btn btn-sm btn-success', 'id' => 'btn-make-call-communication-block', 'style' => 'margin-top: 28px'])?>
+                                    <?= Html::button('<i class="fa fa-phone-square"></i> Make Call', ['class' => 'btn btn-sm btn-success', 'id' => 'btn-make-call-communication-block', 'style' => 'margin-top: 28px'])?>
                                 </div>
-								<?=Html::hiddenInput('call-lead-id', null, ['id' => 'call-lead-id'])?>
-								<?=Html::hiddenInput('call-case-id', $model->cs_id, ['id' => 'call-case-id'])?>
-								<?=Html::hiddenInput('call-project-id', $model->cs_project_id, ['id' => 'call-project-id'])?>
+                                <?=Html::hiddenInput('call-lead-id', null, ['id' => 'call-lead-id'])?>
+                                <?=Html::hiddenInput('call-case-id', $model->cs_id, ['id' => 'call-case-id'])?>
+                                <?=Html::hiddenInput('call-project-id', $model->cs_project_id, ['id' => 'call-project-id'])?>
                                 <?=Html::hiddenInput('call-source-type-id', Call::SOURCE_CASE, ['id' => 'call-source-type-id'])?>
                                 <?=Html::hiddenInput('call-department-id', $model->cs_dep_id, ['id' => 'call-department-id'])?>
                                 <?=Html::hiddenInput('call-client-id', $model->cs_client_id, ['id' => 'call-client-id'])?>
                                 <?=Html::hiddenInput('call-client-name', ($model->cs_client_id ? $model->client->getShortName() : ''), ['id' => 'call-client-name'])?>
                             <?php endif; ?>
 
-                            <?php if ($model->isDepartmentSupport()): ?>
+                            <?php if ($model->isDepartmentSupport()) : ?>
                                 <div class="col-md-3 form-group message-field-sms" id="sms-phone-numbers">
                                     <?php
                                         $departmentPhonesList = [];
                                         /** @var DepartmentPhoneProject[] $departmentPhones */
                                         $departmentPhones = $model->getDepartmentPhonesByProjectAndDepartment()->where(['dpp_default' => \common\models\DepartmentPhoneProject::DPP_DEFAULT_TRUE])->withPhoneList()->all();
-                                        foreach ($departmentPhones as $departmentPhone) {
-                                            if ($departmentPhone->getPhone()) {
-                                                $departmentPhonesList[$departmentPhone->dpp_id] = $departmentPhone->getPhone();
-                                            }
+                                    foreach ($departmentPhones as $departmentPhone) {
+                                        if ($departmentPhone->getPhone()) {
+                                            $departmentPhonesList[$departmentPhone->dpp_id] = $departmentPhone->getPhone();
                                         }
+                                    }
                                     ?>
-									<?php
-									$optionsPhone = ['class' => 'form-control'];
-									if (count($departmentPhonesList) > 1) {
-										$optionsPhone['prompt'] = '---';
-									}
-									?>
+                                    <?php
+                                    $optionsPhone = ['class' => 'form-control'];
+                                    if (count($departmentPhonesList) > 1) {
+                                        $optionsPhone['prompt'] = '---';
+                                    }
+                                    ?>
                                     <?php //= $form->field($comForm,'dpp_phone_id')->dropDownList(\yii\helpers\ArrayHelper::map($departmentPhones, 'dpp_id', 'dpp_phone_number'), $optionsPhone) ?>
-                                    <?= $form->field($comForm,'dpp_phone_id')->dropDownList($departmentPhonesList, $optionsPhone) ?>
+                                    <?= $form->field($comForm, 'dpp_phone_id')->dropDownList($departmentPhonesList, $optionsPhone) ?>
                                 </div>
                             <?php endif; ?>
 
@@ -523,42 +522,44 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
 
                             </div>
                             <div class="btn-wrapper">
-                                <?= Html::submitButton('<i class="fa fa-envelope-o"></i> Preview and Send Email',
-                                    ['class' => 'btn btn-lg btn-primary', 'id' => 'preview_email_btn']) ?>
+                                <?= Html::submitButton(
+                                    '<i class="fa fa-envelope-o"></i> Preview and Send Email',
+                                    ['class' => 'btn btn-lg btn-primary', 'id' => 'preview_email_btn']
+                                ) ?>
                             </div>
                         </div>
-                         <?php if (!SettingHelper::isCaseCommunicationNewCallWidgetEnabled()): ?>
+                         <?php if (!SettingHelper::isCaseCommunicationNewCallWidgetEnabled()) : ?>
                         <div class="chat__call call-box message-field-phone" id="call-box" style="display: none;">
 
                             <div class="call-box__interlocutor">
                                 <div class="call-box__interlocutor-name"><?= $model->client ? Html::encode($model->client->full_name) : '' ?></div>
                                 <div class="call-box__interlocutor-number" id="div-call-phone-number"><?=$comForm->c_phone_number?></div>
                             </div>
-                            <div class="call-box__img <?=$comForm->c_voice_status == 1 ? 'call-box__img--waiting':''?>" id="div-call-img">
+                            <div class="call-box__img <?=$comForm->c_voice_status == 1 ? 'call-box__img--waiting' : ''?>" id="div-call-img">
                                 <?=Html::img('/img/user.png', ['class' => 'img-circle img-responsive', 'alt' => 'client'])?>
                             </div>
 
                                 <div class="call-box__status call-box__status--waiting" style="display: block" id="div-call-message">
-                                    <?php if($comForm->c_voice_status == 0):?>
+                                    <?php if ($comForm->c_voice_status == 0) :?>
                                         Waiting
                                     <?php endif;?>
-                                    <?php if($comForm->c_voice_status == 1):?>
+                                    <?php if ($comForm->c_voice_status == 1) :?>
                                         Connection ... <?=$comForm->c_voice_sid?>
                                     <?php endif;?>
-                                    <?php if($comForm->c_voice_status == 2):?>
+                                    <?php if ($comForm->c_voice_status == 2) :?>
                                         Canceled Call
                                     <?php endif;?>
-                                    <?php if($comForm->c_voice_status == 5):?>
+                                    <?php if ($comForm->c_voice_status == 5) :?>
                                         Error Call
                                     <?php endif;?>
                                 </div>
-                            <?php if($comForm->c_voice_status == 1):?>
+                                <?php if ($comForm->c_voice_status == 1) :?>
                                 <div class="call-box__status call-box__status--call" style="display: block" id="div-call-time"><i class="fa fa-clock-o"></i>&nbsp;<strong id="div-call-timer">00:00</strong></div>
-                            <?php endif;?>
+                                <?php endif;?>
 
 
 
-                            <?php if($call_type_id == \common\models\UserProfile::CALL_TYPE_WEB): ?>
+                                <?php if ($call_type_id == \common\models\UserProfile::CALL_TYPE_WEB) : ?>
                                 <div class="call-box__btns">
 
                                     <?= Html::a('<i class="fa fa-phone"></i>', '#', ['class' => 'btn call-box__btn call-box__btn--call', 'id' => 'btn-start-web-call',
@@ -573,12 +574,12 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
                                     <?php //= Html::button('<i class="fa fa-microphone-slash"></i>', ['class' => 'btn call-box__btn call-box__btn--mute']) ?>
                                     <?php /*= Html::button('<i class="fa fa-pause"></i>', ['class' => 'btn call-box__btn call-box__btn--pause', 'disabled' => true, 'id' => 'btn-pause'])*/ ?>
                                 </div>
-                            <?php else: ?>
+                                <?php else : ?>
                                 <div class="call-box__btns">
                                     <?= Html::submitButton('<i class="fa fa-phone"></i>', ['class' => 'btn call-box__btn call-box__btn--call', 'id' => 'btn-start-call', 'disabled' => ($comForm->c_voice_status == 1 ? true : false), 'onclick' => '$("#c_voice_status").val(1)']) ?>
                                     <?= Html::submitButton('<i class="fa fa-stop"></i>', ['class' => 'btn call-box__btn call-box__btn--stop', 'disabled' => $comForm->c_voice_status == 1 ? false : true, 'id' => 'btn-stop-call', 'onclick' => '$("#c_voice_status").val(2)']) ?>
                                 </div>
-                            <?php endif; ?>
+                                <?php endif; ?>
                         </div>
                          <?php endif; ?>
 
@@ -586,9 +587,9 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
                         <?= $form2->field($comForm, 'c_voice_sid')->hiddenInput(['id' => 'c_voice_sid'])->label(false); ?>
                         <?= $form2->field($comForm, 'c_call_id')->hiddenInput(['id' => 'c_call_id'])->label(false); ?>
 
-<?php
-if ($comForm->c_preview_email) {
-    $js = <<<JS
+                    <?php
+                    if ($comForm->c_preview_email) {
+                        $js = <<<JS
  
     $('#modal-email-preview').modal('show');
     
@@ -616,18 +617,18 @@ if ($comForm->c_preview_email) {
         return true;       
     });
 JS;
-    $this->registerJs($js);
-}
-?>
-
-<?php
-     if ($comForm->c_preview_sms) {
-         $this->registerJs("$('#modal-sms-preview').modal('show');");
-     }
-?>
+                        $this->registerJs($js);
+                    }
+                    ?>
 
                     <?php
-$js = <<<JS
+                    if ($comForm->c_preview_sms) {
+                        $this->registerJs("$('#modal-sms-preview').modal('show');");
+                    }
+                    ?>
+
+                    <?php
+                    $js = <<<JS
     
     function initializeMessageType(messageType) {
         if (messageType == 2) {
@@ -663,8 +664,8 @@ $js = <<<JS
 
 JS;
 
-    $this->registerJs($js);
-    ?>
+                    $this->registerJs($js);
+                    ?>
 
                     <?php \yii\bootstrap\ActiveForm::end(); ?>
 
@@ -691,7 +692,7 @@ JS;
 
 <?php
     $currentUrl = \yii\helpers\Url::current();
-    $jsPath = Yii::$app->request->baseUrl.'/js/sounds/';
+    $jsPath = Yii::$app->request->baseUrl . '/js/sounds/';
 ?>
 
 <script>

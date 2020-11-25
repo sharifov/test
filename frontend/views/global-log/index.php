@@ -25,7 +25,7 @@ $pjaxListId = 'pjax-global-log';
         <?php //    = Html::a('Create Global Log', ['create'], ['class' => 'btn btn-success'])?>
     </p>
 
-    <?php if (Auth::can('global/clean/table')): ?>
+    <?php if (Auth::can('global/clean/table')) : ?>
         <?php echo $this->render('../clean/_clean_table_form', [
             'modelCleaner' => $modelCleaner,
             'pjaxIdForReload' => $pjaxListId,

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $email Email
  * @var $errors []
@@ -8,7 +9,6 @@ use dosamigos\ckeditor\CKEditor;
 use yii\bootstrap\Html;
 use yii\widgets\ActiveForm;
 use yii\helpers\Url;
-
 
 $alert = false;
 
@@ -40,18 +40,18 @@ if (empty($errors)) :
     $form = ActiveForm::begin([
         'id' => $formId
     ]) ?>
-    <?= $form->field($email,'quotes', ['template' => '{input}'])->hiddenInput()?>
-    <?= $form->field($email,'e_lead_id', ['template' => '{input}'])->hiddenInput()?>
-    <?= $form->field($email,'e_language_id', ['template' => '{input}'])->hiddenInput()?>
-    <?= $form->field($email,'e_project_id', ['template' => '{input}'])->hiddenInput()?>
-    <?= $form->field($email,'e_template_type_id', ['template' => '{input}'])->hiddenInput()?>
-    <?= $form->field($email,'e_email_data', ['template' => '{input}'])->hiddenInput()?>
+    <?= $form->field($email, 'quotes', ['template' => '{input}'])->hiddenInput()?>
+    <?= $form->field($email, 'e_lead_id', ['template' => '{input}'])->hiddenInput()?>
+    <?= $form->field($email, 'e_language_id', ['template' => '{input}'])->hiddenInput()?>
+    <?= $form->field($email, 'e_project_id', ['template' => '{input}'])->hiddenInput()?>
+    <?= $form->field($email, 'e_template_type_id', ['template' => '{input}'])->hiddenInput()?>
+    <?= $form->field($email, 'e_email_data', ['template' => '{input}'])->hiddenInput()?>
     <div class="row">
-    	<div class="col-md-6"><?= $form->field($email,'e_email_from')->textInput([ 'readonly' => true])?></div>
-    	<div class="col-md-6"><?= $form->field($email,'e_email_to')->textInput(['readonly' => true])?></div>
+        <div class="col-md-6"><?= $form->field($email, 'e_email_from')->textInput([ 'readonly' => true])?></div>
+        <div class="col-md-6"><?= $form->field($email, 'e_email_to')->textInput(['readonly' => true])?></div>
     </div>
     <div class="form-group">
-    	<?= $form->field($email,'e_email_subject')?>
+        <?= $form->field($email, 'e_email_subject')?>
     </div>
 
     <div class="form-group">
@@ -83,8 +83,8 @@ if (empty($errors)) :
 else :
     ?>
     <div class="row text-center">
-    	<?php foreach ($errors as $error):?>
-    	<div class="alert alert-warning"><?= $error?></div>
-    	<?php endforeach;?>
+        <?php foreach ($errors as $error) :?>
+        <div class="alert alert-warning"><?= $error?></div>
+        <?php endforeach;?>
     </div>
 <?php endif; ?>

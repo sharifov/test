@@ -59,7 +59,7 @@ $addPhone->client_id = $client->id;
             <?= Html::submitButton('<i class="fa fa-plus"></i> Add Phone', [
                 'class' => 'btn btn-success'
             ])
-            ?>
+?>
         </div>
     <?php ActiveForm::end(); ?>
 </div>

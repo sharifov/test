@@ -7,6 +7,7 @@ use yii\widgets\Pjax;
 use dosamigos\datepicker\DatePicker;
 use common\models\Quote;
 use yii\helpers\Url;
+
 /* @var $this yii\web\View
  * @var $searchModel common\models\search\ApiLogSearch
  * @var $dataProvider yii\data\ActiveDataProvider
@@ -16,7 +17,7 @@ use yii\helpers\Url;
  * @var $agent string
  * */
 
-$this->title = 'Salary by '.$month.' for '.$agent.': $'.$kpiHistory->getSalary();
+$this->title = 'Salary by ' . $month . ' for ' . $agent . ': $' . $kpiHistory->getSalary();
 
 $this->params['breadcrumbs'][] = ['label' => 'KPI', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
@@ -54,14 +55,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     $quote = $model->getBookedQuote();
                     if (empty($quote)) {
                         $totalProfitTxt = 0;
-                    } else{
+                    } else {
                         $model->totalProfit = $quote->getEstimationProfit();
                         $totalProfitTxt = $model->totalProfit;
                     }
-
                 }
 
-                $totalProfitTxt = '<strong>$' .number_format($totalProfitTxt, 2) . '</strong>';
+                $totalProfitTxt = '<strong>$' . number_format($totalProfitTxt, 2) . '</strong>';
 
                 $splitProfitTxt = '';
                 $splitProfit = $model->getAllProfitSplits();
@@ -80,12 +80,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
                 $mainAgentProfitTxt = $model->totalProfit * $mainAgentPercent / 100;
 
-                return 'Total profit: '.$totalProfitTxt .
-                    ($splitProfitTxt ? '<hr/>Split profit:<br/>'.$splitProfitTxt : '')
-                    .'<hr/> '
-                    .($model->employee ? $model->employee->username : 'Main agent')
-                    .' profit: <strong>$' . number_format($mainAgentProfitTxt, 2) . '</strong>';
-
+                return 'Total profit: ' . $totalProfitTxt .
+                    ($splitProfitTxt ? '<hr/>Split profit:<br/>' . $splitProfitTxt : '')
+                    . '<hr/> '
+                    . ($model->employee ? $model->employee->username : 'Main agent')
+                    . ' profit: <strong>$' . number_format($mainAgentProfitTxt, 2) . '</strong>';
             },
             'format' => 'raw'
         ],
@@ -136,7 +135,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'Tips',
             'value' => static function (\common\models\Lead $model) {
-                if($model->getTotalTips() == 0) {
+                if ($model->getTotalTips() == 0) {
                     return '-';
                 }
                 $totalTipsTxt = "<strong>$" . number_format($model->getTotalTips(), 2) . "</strong>";
@@ -158,8 +157,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
                 $mainAgentTipsTxt = "<strong>$" . number_format($model->getTotalTips() * $mainAgentPercent / 100, 2) . "</strong>";
 
-                return 'Tips: '.$totalTipsTxt . ($splitTipsTxt ? '<hr/>Split tips:<br/>'.$splitTipsTxt:'').'<hr/> '.
-                    ($model->employee ? $model->employee->username : 'Main agent').' tips: '.$mainAgentTipsTxt;
+                return 'Tips: ' . $totalTipsTxt . ($splitTipsTxt ? '<hr/>Split tips:<br/>' . $splitTipsTxt : '') . '<hr/> ' .
+                    ($model->employee ? $model->employee->username : 'Main agent') . ' tips: ' . $mainAgentTipsTxt;
             },
             'format' => 'raw'
         ],
@@ -204,13 +203,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'template' => '{action}',
             'buttons' => [
                 'action' => function ($url, \common\models\Lead $model, $key) {
-                return Html::a('<i class="fa fa-search"></i> View Lead', ['lead/view', 'gid' => $model->gid], [
+                    return Html::a('<i class="fa fa-search"></i> View Lead', ['lead/view', 'gid' => $model->gid], [
                     'class' => 'btn btn-info btn-xs',
                     'target' => '_blank',
                     'data-pjax' => 0,
                     'title' => 'View lead'
-                ]);
-            }
+                    ]);
+                }
             ]
             ]
     ];?>

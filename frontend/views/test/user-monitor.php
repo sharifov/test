@@ -1,4 +1,5 @@
 <?php
+
 use yii\helpers\Html;
 
 $bundle = \frontend\assets\Timeline2Asset::register($this);

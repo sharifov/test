@@ -33,20 +33,20 @@ if (!$count) {
 
         <ul id="cc-notification-menu" class="dropdown-menu list-unstyled msg_list" role="menu" x-placement="bottom-end">
 
-			<?php if ($chatsWithUnreadMessages): ?>
-				<?php foreach ($chatsWithUnreadMessages as $clientChat): ?>
-					<?= $this->render('item_cc', [
-						'clientChat' => $clientChat
-					]) ?>
-				<?php endforeach; ?>
+            <?php if ($chatsWithUnreadMessages) : ?>
+                <?php foreach ($chatsWithUnreadMessages as $clientChat) : ?>
+                    <?= $this->render('item_cc', [
+                        'clientChat' => $clientChat
+                    ]) ?>
+                <?php endforeach; ?>
 
-			<?php else: ?>
+            <?php else : ?>
                 <li>
                     <div class="text-center">
-						<?= Html::a('<i class="fa fa-warning"></i> <strong>You have no new notifications</strong>', ['#']) ?>
+                        <?= Html::a('<i class="fa fa-warning"></i> <strong>You have no new notifications</strong>', ['#']) ?>
                     </div>
                 </li>
-			<?php endif; ?>
+            <?php endif; ?>
         </ul>
 
 <?php Pjax::end() ?>
@@ -65,7 +65,7 @@ if (!$count) {
     </a>
 
     <ul id="notification-menu" class="dropdown-menu list-unstyled msg_list" role="menu" x-placement="bottom-end">
-        <?php foreach ($notifications as $notification): ?>
+        <?php foreach ($notifications as $notification) : ?>
             <?= $this->render('item', [
                 'id' => $notification->n_id,
                 'title' => $notification->n_title,
@@ -73,18 +73,18 @@ if (!$count) {
                 'message' => $notification->n_message
             ]) ?>
             <?php
-                if ($notification->isMustPopupShow()) {
-                    $title = Html::encode($notification->n_title);
-                    $type = $notification->getNotifyType();
-                    $message = str_replace(["\r\n", "\n", '"'], ['', '', '\"'], $notification->n_message);
-                    $desktopMessage = str_replace('"', '\"', strip_tags($notification->n_message));
-                    $pNotifiers .= "notificationPNotify('" . $type . "', '" . $title . "', '" . $message . "', '" . $desktopMessage . "');" . PHP_EOL;
-                }
+            if ($notification->isMustPopupShow()) {
+                $title = Html::encode($notification->n_title);
+                $type = $notification->getNotifyType();
+                $message = str_replace(["\r\n", "\n", '"'], ['', '', '\"'], $notification->n_message);
+                $desktopMessage = str_replace('"', '\"', strip_tags($notification->n_message));
+                $pNotifiers .= "notificationPNotify('" . $type . "', '" . $title . "', '" . $message . "', '" . $desktopMessage . "');" . PHP_EOL;
+            }
             ?>
         <?php endforeach; ?>
 
         <?php $this->registerJs($pNotifiers, View::POS_END); ?>
-        <?php $this->registerJs('notificationCount(\'' . $count . '\', "'.$totalUnreadMessages.'");', View::POS_END); ?>
+        <?php $this->registerJs('notificationCount(\'' . $count . '\', "' . $totalUnreadMessages . '");', View::POS_END); ?>
 
         <li>
             <div class="text-center">

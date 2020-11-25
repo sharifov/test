@@ -43,12 +43,12 @@ use common\models\LeadFlow;
                     <td> <?= $item->owner ? '<span class="fa fa-user"></span> ' . $item->owner->username : '' ?></td>
                     <td> <?= $item->employee ? '<span class="fa fa-user"></span> ' . $item->employee->username : 'System' ?></td>
                     <td><?php
-                        if ($item->lf_time_duration !== null) {
-                            echo Yii::$app->formatter->asDuration($item->lf_time_duration);
-                        } else {
-                            echo Yii::$app->formatter->asDuration(time() - strtotime($item->created));
-                        }
-                        ?>
+                    if ($item->lf_time_duration !== null) {
+                        echo Yii::$app->formatter->asDuration($item->lf_time_duration);
+                    } else {
+                        echo Yii::$app->formatter->asDuration(time() - strtotime($item->created));
+                    }
+                    ?>
                     </td>
                     <td><?= $item->lf_description ? nl2br(\yii\helpers\Html::encode($item->lf_description)) : '-' ?></td>
                 </tr>

@@ -11,7 +11,7 @@ use yii\widgets\ActiveForm;
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
 
-if($user->isAdmin()) {
+if ($user->isAdmin()) {
     $userList = \common\models\Employee::getList();
 } else {
     $userList = \common\models\Employee::getListByUserId($user->id);
@@ -64,17 +64,17 @@ if($user->isAdmin()) {
             <div class="row">
                 <div class="col-md-12">
                     <?= $form->field($model, 'dateRange')->widget(\kartik\daterange\DateRangePicker::class, [
-                        'presetDropdown'=>true,
-                        'hideInput'=>true,
-                        'convertFormat'=>true,
+                        'presetDropdown' => true,
+                        'hideInput' => true,
+                        'convertFormat' => true,
                         //'startAttribute' => 'timeStart',
                         //'endAttribute' => 'timeEnd',
-                        'pluginOptions'=>[
-                            'timePicker'=> true,
-                            'timePickerIncrement'=>1,
+                        'pluginOptions' => [
+                            'timePicker' => true,
+                            'timePickerIncrement' => 1,
                             'timePicker24Hour' => true,
-                            'locale'=>[
-                                'format'=>'Y-m-d H:i',
+                            'locale' => [
+                                'format' => 'Y-m-d H:i',
                             ]
                         ]
                     ]);?>

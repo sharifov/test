@@ -37,7 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'lct_sort_order',
             [
                 'attribute' => 'lct_updated_dt',
-                'value' => function(\common\models\LeadChecklistType $model) {
+                'value' => function (\common\models\LeadChecklistType $model) {
                     return $model->lct_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lct_updated_dt)) : '-';
                 },
                 'format' => 'raw',

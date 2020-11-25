@@ -11,30 +11,29 @@ use yii\widgets\ActiveForm;
 
 ?>
 
-<?php if($modelEmailView && $modelEmailView->e_id == $model->e_id):?>
+<?php if ($modelEmailView && $modelEmailView->e_id == $model->e_id) :?>
 <div style="padding: 8px; background-color: rgba(175,255,236,0.5); color: darkgreen">
-<?php else: ?>
-
+<?php else : ?>
 <a style="color: <?=($model->e_is_deleted ? 'darkred' : ($model->e_is_new ? 'blue' : 'black'))?>" href="<?=\yii\helpers\Url::current(['id' => $model->e_id, 'action' => null, 'edit_id' => null, 'reply_id' => null ])?>" class="view_email" data-email-id="<?=$model->e_id?>">
 <?php endif; ?>
 
     <div class="mail_list">
         <div class="left">
-            <?php if($model->e_type_id == \common\models\Email::TYPE_DRAFT):?>
+            <?php if ($model->e_type_id == \common\models\Email::TYPE_DRAFT) :?>
                 <i class="fa fa-edit" title="Draft"></i><br>
             <?php endif; ?>
-            <?php if($model->e_type_id == \common\models\Email::TYPE_OUTBOX):?>
+            <?php if ($model->e_type_id == \common\models\Email::TYPE_OUTBOX) :?>
                 <i class="fa fa-arrow-circle-up" title="Outbox"></i><br>
             <?php endif; ?>
-            <?php if($model->e_type_id == \common\models\Email::TYPE_INBOX):?>
+            <?php if ($model->e_type_id == \common\models\Email::TYPE_INBOX) :?>
                 <i class="fa fa-arrow-circle-down" title="Inbox"></i><br>
             <?php endif; ?>
 
-            <?php if($model->e_is_deleted):?>
+            <?php if ($model->e_is_deleted) :?>
                 <i class="fa fa-trash" title="Trash"></i><br>
             <?php endif; ?>
 
-            <?php if($model->e_is_new):?>
+            <?php if ($model->e_is_new) :?>
                 <i class="fa fa-circle" title="New message"></i><br>
             <?php endif; ?><?php /*<i class="fa fa-edit"></i>*/?>
         </div>
@@ -42,28 +41,28 @@ use yii\widgets\ActiveForm;
             <h3>
                 <?=Html::encode($model->e_email_from)?> - <?=Html::encode($model->e_email_to)?>
                 <small>
-                    <?php if($model->e_type_id == \common\models\Email::TYPE_INBOX):?>
-                        <?=$model->e_inbox_email_id ? 'cid: '.$model->e_inbox_email_id : ''?><br/>
+                    <?php if ($model->e_type_id == \common\models\Email::TYPE_INBOX) :?>
+                        <?=$model->e_inbox_email_id ? 'cid: ' . $model->e_inbox_email_id : ''?><br/>
                         <?=$model->e_inbox_created_dt ? Yii::$app->formatter->asDatetime(strtotime($model->e_inbox_created_dt)) : '-'?>
                     <?php endif; ?>
-                    <?php if($model->e_type_id == \common\models\Email::TYPE_OUTBOX):?>
+                    <?php if ($model->e_type_id == \common\models\Email::TYPE_OUTBOX) :?>
                         <?=Yii::$app->formatter->asDatetime(strtotime($model->e_created_dt))?>
                     <?php endif; ?>
-                    <?php if($model->e_type_id == \common\models\Email::TYPE_DRAFT):?>
+                    <?php if ($model->e_type_id == \common\models\Email::TYPE_DRAFT) :?>
                         <i><?=Yii::$app->formatter->asDatetime(strtotime($model->e_created_dt))?></i>
                     <?php endif; ?>
 
                 </small>
             </h3>
-            <p><?php if($model->eProject):?>
+            <p><?php if ($model->eProject) :?>
                 <span class="label label-info"><?=Html::encode($model->eProject->name)?></span>
-                <?php endif;?><?=Html::encode($model->e_email_subject)?></p>
+               <?php endif;?><?=Html::encode($model->e_email_subject)?></p>
         </div>
     </div>
-<?php if($modelEmailView && $modelEmailView->e_id == $model->e_id):?>
+<?php if ($modelEmailView && $modelEmailView->e_id == $model->e_id) :?>
     </div>
 
-<?php else: ?>
+<?php else : ?>
 </a>
 <?php endif; ?>
 

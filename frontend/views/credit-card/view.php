@@ -66,13 +66,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 //'cc_type_id',
                 [
                     'attribute' => 'cc_type_id',
-                    'value' => static function(\common\models\CreditCard $model) {
+                    'value' => static function (\common\models\CreditCard $model) {
                         return $model->typeName;
                     },
                 ],
                 [
                     'attribute' => 'cc_status_id',
-                    'value' => static function(\common\models\CreditCard $model) {
+                    'value' => static function (\common\models\CreditCard $model) {
                         return $model->statusName;
                     },
                 ],

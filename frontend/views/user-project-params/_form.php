@@ -11,6 +11,7 @@ use yii\web\JsExpression;
 use yii\web\View;
 use yii\widgets\ActiveForm;
 use borales\extensions\phoneInput\PhoneInput;
+
 //use frontend\extensions\PhoneInput;
 
 /* @var $this yii\web\View */
@@ -71,8 +72,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
         <?= $form->field($model, 'upp_allow_general_line')->checkbox() ?>
 
-        <?php if (!$model->isNewRecord): ?>
-
+        <?php if (!$model->isNewRecord) : ?>
             <?= $form->field($model, 'upp_vm_enabled')->checkbox() ?>
             <?= $form->field($model, 'upp_vm_user_status_id')->dropDownList(UserProjectParams::VM_USER_STATUS_LIST, ['prompt' => 'Select user status']) ?>
             <?= $form->field($model, 'upp_vm_id')->dropDownList($model->getAvailableVoiceMail(), ['prompt' => 'Select voice mail']) ?>

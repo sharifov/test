@@ -4,6 +4,7 @@ use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\UserConnectionSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -91,7 +92,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
             [
                 'attribute' => 'uc_page_url',
                 'value' => static function (\common\models\UserConnection $model) {
-                    return  $model->uc_page_url ? '<i class="fa fa-link"></i> ' .Html::a('Link', $model->uc_page_url, ['target' => '_blank', 'data-pjax' => 0, 'title' => Html::encode($model->uc_page_url)]) : '-';
+                    return  $model->uc_page_url ? '<i class="fa fa-link"></i> ' . Html::a('Link', $model->uc_page_url, ['target' => '_blank', 'data-pjax' => 0, 'title' => Html::encode($model->uc_page_url)]) : '-';
                 },
                 'format' => 'raw',
             ],
@@ -118,7 +119,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                     ],
                     'options' => [
                         'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
+                        'placeholder' => 'Choose Date'
                     ],
                     'containerOptions' => [
                         'class' => (array_key_exists('uc_window_state_dt', $searchModel->errors)) ? 'has-error' : null,
@@ -148,7 +149,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                     ],
                     'options' => [
                         'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
+                        'placeholder' => 'Choose Date'
                     ],
                     'containerOptions' => [
                         'class' => (array_key_exists('uc_idle_state_dt', $searchModel->errors)) ? 'has-error' : null,
@@ -175,7 +176,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                     ],
                     'options' => [
                         'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
+                        'placeholder' => 'Choose Date'
                     ],
                     'containerOptions' => [
                         'class' => (array_key_exists('uc_created_dt', $searchModel->errors)) ? 'has-error' : null,

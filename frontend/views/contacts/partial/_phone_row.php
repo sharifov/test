@@ -22,14 +22,15 @@ $user = Yii::$app->user->identity;
         <span style="line-height: 0;" class="<?= $phone::getPhoneTypeTextDecoration($phone->type) ?>"><?= Html::encode($phone->phone) ?></span>
     </td>
 
-    <?php if ($user->isAdmin() || $user->isSuperAdmin()): ?>
+    <?php if ($user->isAdmin() || $user->isSuperAdmin()) : ?>
     <td class="text-right" style="width: 40px; padding: 5px 10px;">
         <a class="showModalButton" title="Edit Phone" data-content-url="<?= Url::to(
             [
                 'contacts/ajax-edit-contact-phone-modal-content',
                 'phone_id' => $phone->id,
-            ])
-        ?>" data-modal_id="sm">
+            ]
+        )
+                                                                        ?>" data-modal_id="sm">
             <i class="fa fa-edit text-warning"></i>
         </a>
     </td>

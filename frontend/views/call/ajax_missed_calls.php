@@ -4,6 +4,7 @@ use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\CallSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */

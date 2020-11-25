@@ -45,20 +45,20 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="col-md-3">
             <?php
             echo  \kartik\daterange\DateRangePicker::widget([
-                'model'=> $searchModel,
+                'model' => $searchModel,
                 'attribute' => 'date_range',
-                'useWithAddon'=>true,
-                'presetDropdown'=>true,
-                'hideInput'=>true,
-                'convertFormat'=>true,
+                'useWithAddon' => true,
+                'presetDropdown' => true,
+                'hideInput' => true,
+                'convertFormat' => true,
                 'startAttribute' => 'datetime_start',
                 'endAttribute' => 'datetime_end',
-                'pluginOptions'=>[
-                    'timePicker'=> true,
-                    'timePickerIncrement'=>1,
+                'pluginOptions' => [
+                    'timePicker' => true,
+                    'timePickerIncrement' => 1,
                     'timePicker24Hour' => true,
-                    'locale'=>[
-                        'format'=>'Y-m-d H:i',
+                    'locale' => [
+                        'format' => 'Y-m-d H:i',
                         'separator' => ' - '
                     ]
                 ]
@@ -320,7 +320,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'max-width: 250px;'
             ],
             'value' => static function (\common\models\Lead $model) {
-                return '<pre>'. $model->getLastReasonFromLeadFlow()  . '</pre>';
+                return '<pre>' . $model->getLastReasonFromLeadFlow()  . '</pre>';
             },
             'format' => 'raw'
         ],

@@ -7,6 +7,7 @@ use yii\helpers\Json;
 use yii\widgets\Pjax;
 use common\components\grid\UserSelect2Column;
 use common\components\grid\DateTimeColumn;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\DepartmentSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -41,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     try {
                         $val = Json::decode($model->dep_params);
-                        return '<pre>'.print_r($val, true).'</pre>';
+                        return '<pre>' . print_r($val, true) . '</pre>';
                     } catch (Throwable $e) {
                         return 'Json decode error';
                     }

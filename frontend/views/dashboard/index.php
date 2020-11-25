@@ -78,7 +78,7 @@ $user = Yii::$app->user->identity;
                             <td><i class="fa fa-users"></i>
                                 <?php
                                 $groupsValue = '';
-                                if( $groupsModel =  Yii::$app->user->identity->ugsGroups) {
+                                if ($groupsModel =  Yii::$app->user->identity->ugsGroups) {
                                     $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
                                     $groupsValueArr = [];
                                     foreach ($groups as $group) {
@@ -101,8 +101,7 @@ $user = Yii::$app->user->identity;
                                 //$projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee();
                                 $projectList = Yii::$app->user->identity->projects;
 
-                                if($projectList) {
-
+                                if ($projectList) {
                                     $groupsValueArr = [];
                                     foreach ($projectList as $project) {
                                         $groupsValueArr[] = Html::tag('span', Html::encode($project->name), ['class' => 'label label-default']);
@@ -117,13 +116,13 @@ $user = Yii::$app->user->identity;
                             <th>My Product Types:</th>
                             <td><i class="fa fa-list"></i>
                                 <?php
-                                    if ($productTypeList = Yii::$app->user->identity->productType) {
-                                        $productTypeValue = '';
-                                        foreach ($productTypeList as $productType) {
-                                            $productTypeValue .= Html::tag('span', Html::encode($productType->pt_name), ['class' => 'label label-default']) . ' ';
-                                        }
-                                        echo $productTypeValue;
+                                if ($productTypeList = Yii::$app->user->identity->productType) {
+                                    $productTypeValue = '';
+                                    foreach ($productTypeList as $productType) {
+                                        $productTypeValue .= Html::tag('span', Html::encode($productType->pt_name), ['class' => 'label label-default']) . ' ';
                                     }
+                                    echo $productTypeValue;
+                                }
                                 ?>
                             </td>
                         </tr>
@@ -135,7 +134,7 @@ $user = Yii::$app->user->identity;
                 <?php
                 /** @var \common\models\UserParams $modelUserParams */
                 $modelUserParams = Yii::$app->user->identity->userParams;
-                if($modelUserParams) {
+                if ($modelUserParams) {
                     echo \yii\widgets\DetailView::widget([
                         'model' => $modelUserParams ?? null,
                         'attributes' => [
@@ -206,8 +205,7 @@ $user = Yii::$app->user->identity;
             </div>
         </div>
 
-        <?php if($modelUserParams):
-
+        <?php if ($modelUserParams) :
             $js = <<<JS
     //google.charts.load('current', {packages: ['corechart', 'bar']});
     $("#myTimeline").timeline({
@@ -228,19 +226,19 @@ JS;
                 <ul class="timeline-events">
                     <?php
                     $currentDateTS = strtotime(Yii::$app->formatter->asDate(time()));
-                    $startTime = date('Y-m-d '.$modelUserParams->up_work_start_tm);
+                    $startTime = date('Y-m-d ' . $modelUserParams->up_work_start_tm);
                     echo $startTime;
                     $endTime = date('Y-m-d H:i', strtotime($startTime) + ($modelUserParams->up_work_minutes * 60));
                     ?>
-                    <li data-timeline-node="{ start:'<?=$startTime?>',end:'<?=$endTime?>',content:'1 shift',bgColor:'rgb(137, 201, 151)',color:'#fff',row:1,extend:{'post_id':1,'permalink':'https://google.com/'} }"><?=date('d-M [H:i]', strtotime($startTime))?> ........ <?=date('d-M [H:i]', strtotime($endTime))?> ..... (<?=round($modelUserParams->up_work_minutes/60, 1)?> hours)</li>
+                    <li data-timeline-node="{ start:'<?=$startTime?>',end:'<?=$endTime?>',content:'1 shift',bgColor:'rgb(137, 201, 151)',color:'#fff',row:1,extend:{'post_id':1,'permalink':'https://google.com/'} }"><?=date('d-M [H:i]', strtotime($startTime))?> ........ <?=date('d-M [H:i]', strtotime($endTime))?> ..... (<?=round($modelUserParams->up_work_minutes / 60, 1)?> hours)</li>
 
                     <?php
                     $currentDateTS = strtotime(Yii::$app->formatter->asDate(strtotime("+1 day")));
-                    $startTime = date('Y-m-d '.$modelUserParams->up_work_start_tm, $currentDateTS);
+                    $startTime = date('Y-m-d ' . $modelUserParams->up_work_start_tm, $currentDateTS);
                     echo $startTime;
                     $endTime = date('Y-m-d H:i', strtotime($startTime) + ($modelUserParams->up_work_minutes * 60));
                     ?>
-                    <li data-timeline-node="{ start:'<?=$startTime?>',end:'<?=$endTime?>',content:'2 shift',row:1 }"><?=date('d-M [H:i]', strtotime($startTime))?> ........ <?=date('d-M [H:i]', strtotime($endTime))?> ..... (<?=round($modelUserParams->up_work_minutes/60, 1)?> hours)</li>
+                    <li data-timeline-node="{ start:'<?=$startTime?>',end:'<?=$endTime?>',content:'2 shift',row:1 }"><?=date('d-M [H:i]', strtotime($startTime))?> ........ <?=date('d-M [H:i]', strtotime($endTime))?> ..... (<?=round($modelUserParams->up_work_minutes / 60, 1)?> hours)</li>
 
                 </ul>
             </div>
@@ -258,7 +256,7 @@ JS;
             [
                 //'label' => 'Lead UID',
                 'attribute' => 'lt_lead_id',
-                'value' => function(\common\models\LeadTask $model) {
+                'value' => function (\common\models\LeadTask $model) {
                     return Html::a($model->lt_lead_id, ['lead/view', 'gid' => $model->ltLead->gid], ['target' => '_blank', 'data-pjax' => 0]);
                 },
                 'format' => 'raw',
@@ -269,20 +267,19 @@ JS;
             [
                 'label' => 'Task',
                 'attribute' => 'lt_task_id',
-                'value' => function(\common\models\LeadTask $model) {
+                'value' => function (\common\models\LeadTask $model) {
 
                     $taskIcon = '';
-                    if($model->ltTask && $model->ltTask->t_key === 'call2') {
-
+                    if ($model->ltTask && $model->ltTask->t_key === 'call2') {
                         $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
 
                         $taskCall1 = \common\models\LeadTask::find()->where(['lt_user_id' => $model->lt_user_id, 'lt_lead_id' => $model->lt_lead_id, 'lt_date' => $model->lt_date, 'lt_task_id' => 1])->one();
 
-                        if($taskCall1) {
-                            if((strtotime($taskCall1->lt_completed_dt) + $call2DelayTime) <= time()) {
+                        if ($taskCall1) {
+                            if ((strtotime($taskCall1->lt_completed_dt) + $call2DelayTime) <= time()) {
                                 $call2TaskEnable = true;
                             } else {
-                                $taskIcon = '<br><span class="label label-default">Call after <i class="fa fa-clock-o"></i> '.Yii::$app->formatter->asDatetime(strtotime($taskCall1->lt_completed_dt) + $call2DelayTime).'</span>';
+                                $taskIcon = '<br><span class="label label-default">Call after <i class="fa fa-clock-o"></i> ' . Yii::$app->formatter->asDatetime(strtotime($taskCall1->lt_completed_dt) + $call2DelayTime) . '</span>';
                                 //'<i class="fa fa-clock-o" title="Next call '.Yii::$app->formatter->asDatetime(strtotime($taskCall1->lt_completed_dt) + $call2DelayTime).'"></i> ';
                             }
                         }
@@ -290,7 +287,7 @@ JS;
                     }
 
 
-                    return $model->ltTask ? '<span style="font-size: 13px" title="'.Html::encode($model->ltTask->t_description).'" class="label label-info">'.Html::encode($model->ltTask->t_name).'</span>'.$taskIcon .'': '-';
+                    return $model->ltTask ? '<span style="font-size: 13px" title="' . Html::encode($model->ltTask->t_description) . '" class="label label-info">' . Html::encode($model->ltTask->t_name) . '</span>' . $taskIcon . '' : '-';
                 },
                 'format' => 'raw',
                 'filter' => \common\models\Task::getList()
@@ -298,23 +295,22 @@ JS;
 
             [
                 'label' => 'Timer',
-                'value' => function(\common\models\LeadTask $model) {
+                'value' => function (\common\models\LeadTask $model) {
 
                     $cdTime = 0;
-                    if($model->ltTask && $model->ltTask->t_key === 'call2') {
+                    if ($model->ltTask && $model->ltTask->t_key === 'call2') {
                         $call2DelayTime = Yii::$app->params['lead']['call2DelayTime'];
 
                         $taskCall1 = \common\models\LeadTask::find()->where(['lt_user_id' => $model->lt_user_id, 'lt_lead_id' => $model->lt_lead_id, 'lt_date' => $model->lt_date, 'lt_task_id' => 1])->one();
 
-                        if($taskCall1 && (strtotime($taskCall1->lt_completed_dt) + $call2DelayTime) > time()) {
+                        if ($taskCall1 && (strtotime($taskCall1->lt_completed_dt) + $call2DelayTime) > time()) {
                             $cdTime = strtotime($taskCall1->lt_completed_dt) + $call2DelayTime;
                         }
                     }
 
                     $elapsedTime = $cdTime - time();
 
-                    return $elapsedTime > 0 ? '<div data-elapsed="'.$elapsedTime.'" data-countdown="'.date('Y-m-d H:i:s', $cdTime).'"></div>': '-';
-
+                    return $elapsedTime > 0 ? '<div data-elapsed="' . $elapsedTime . '" data-countdown="' . date('Y-m-d H:i:s', $cdTime) . '"></div>' : '-';
                 },
                 'format' => 'raw',
                 'contentOptions' => ['class' => 'text-center', 'style' => 'width: 80px']
@@ -322,7 +318,7 @@ JS;
 
             [
                 'attribute' => 'lt_notes',
-                'value' => function(\common\models\LeadTask $model) {
+                'value' => function (\common\models\LeadTask $model) {
                     return $model->lt_notes ? $model->lt_notes : '-';
                 },
             ],
@@ -330,7 +326,7 @@ JS;
             [
                 'label' => 'Lead status',
                 'attribute' => 'ltLead.status',
-                'value' => function(\common\models\LeadTask $model) {
+                'value' => function (\common\models\LeadTask $model) {
                     return $model->ltLead ? $model->ltLead->getStatusName() : '-';
                 },
                 'format' => 'raw'
@@ -340,14 +336,14 @@ JS;
                 //'attribute' => 'client_id',
                 'header' => 'Client name',
                 'format' => 'raw',
-                'value' => function(\common\models\LeadTask $model) {
+                'value' => function (\common\models\LeadTask $model) {
 
-                    if($model->ltLead->client) {
+                    if ($model->ltLead->client) {
                         $clientName = $model->ltLead->client->first_name . ' ' . $model->ltLead->client->last_name;
                         if ($clientName === 'Client Name') {
                             $clientName = '-';
                         } else {
-                            $clientName = '<i class="fa fa-user"></i> '. Html::encode($clientName);
+                            $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName);
                         }
                     } else {
                         $clientName = '-';
@@ -363,8 +359,8 @@ JS;
                 //'attribute' => 'client_id',
                 'header' => 'Client time',
                 'format' => 'raw',
-                'value' => function(\common\models\LeadTask $model) {
-                    if($model->ltLead) {
+                'value' => function (\common\models\LeadTask $model) {
+                    if ($model->ltLead) {
                         $clientTime = ClientTimeFormatter::format($model->ltLead->getClientTime2(), $model->ltLead->offset_gmt);
                     } else {
                         $clientTime = '-';
@@ -379,20 +375,19 @@ JS;
 
             [
                 'label' => 'Segments',
-                'value' => function(\common\models\LeadTask $model) {
+                'value' => function (\common\models\LeadTask $model) {
 
                     $segments = $model->ltLead->leadFlightSegments;
                     $segmentData = [];
-                    if($segments) {
+                    if ($segments) {
                         foreach ($segments as $sk => $segment) {
                             //$segmentData[] = ($sk + 1).'. <code>'.Html::a($segment->origin.'->'.$segment->destination, ['lead-flight-segment/view', 'id' => $segment->id], ['target' => '_blank', 'data-pjax' => 0]).'</code>';
-                            $segmentData[] = ($sk + 1).'. <code>'.$segment->origin.'->'.$segment->destination.'</code>';
+                            $segmentData[] = ($sk + 1) . '. <code>' . $segment->origin . '->' . $segment->destination . '</code>';
                         }
                     }
 
                     $segmentStr = implode('<br>', $segmentData);
-                    return ''.$segmentStr.'';
-
+                    return '' . $segmentStr . '';
                 },
                 'format' => 'raw',
                 'contentOptions' => ['class' => 'text-center'],
@@ -403,7 +398,7 @@ JS;
             [
                 'label' => 'Cabin',
                 'attribute' => 'leads.cabin',
-                'value' => function(\common\models\LeadTask $model) {
+                'value' => function (\common\models\LeadTask $model) {
                     return $model->ltLead->getCabinClassName();
                 },
             ],
@@ -411,7 +406,7 @@ JS;
             [
                 'label' => 'Adults',
                 'attribute' => 'leads.adults',
-                'value' => function(\common\models\LeadTask $model) {
+                'value' => function (\common\models\LeadTask $model) {
                     return $model->ltLead->adults ?: 0;
                 },
                 'contentOptions' => ['class' => 'text-center'],
@@ -420,7 +415,7 @@ JS;
             [
                 'label' => 'Children',
                 'attribute' => 'leads.children',
-                'value' => function(\common\models\LeadTask $model) {
+                'value' => function (\common\models\LeadTask $model) {
                     return $model->ltLead->children ?: '-';
                 },
                 'contentOptions' => ['class' => 'text-center'],
@@ -428,7 +423,7 @@ JS;
             [
                 'label' => 'Infants',
                 'attribute' => 'leads.infants',
-                'value' => function(\common\models\LeadTask $model) {
+                'value' => function (\common\models\LeadTask $model) {
                     return $model->ltLead->infants ?: '-';
                 },
                 'contentOptions' => ['class' => 'text-center'],
@@ -438,8 +433,8 @@ JS;
             [
                 'label' => 'Lead created',
                 'attribute' => 'ltLead.created',
-                'value' => function(\common\models\LeadTask $model) {
-                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->ltLead->created));
+                'value' => function (\common\models\LeadTask $model) {
+                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->ltLead->created));
                 },
                 'format' => 'raw',
             ],
@@ -447,7 +442,7 @@ JS;
             [
                 'label' => 'Lead pending time',
                 //'attribute' => 'ltLead.created',
-                'value' => function(\common\models\LeadTask $model) {
+                'value' => function (\common\models\LeadTask $model) {
                     $time = Yii::$app->formatter->asRelativeTime(strtotime($model->ltLead->created));
                     return $time; //'<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->ltLead->created));
                 },
@@ -555,19 +550,19 @@ JS;
                     <div class="col-md-3">
                         <?php
                         echo  \kartik\daterange\DateRangePicker::widget([
-                            'model'=> $searchModel,
+                            'model' => $searchModel,
                             'attribute' => 'timeRange',
-                            'useWithAddon'=>true,
-                            'presetDropdown'=>true,
-                            'hideInput'=>true,
-                            'convertFormat'=>true,
+                            'useWithAddon' => true,
+                            'presetDropdown' => true,
+                            'hideInput' => true,
+                            'convertFormat' => true,
                             'startAttribute' => 'timeStart',
                             'endAttribute' => 'timeEnd',
-                            'pluginOptions'=>[
-                                'timePicker'=> true,
-                                'timePickerIncrement'=>1,
+                            'pluginOptions' => [
+                                'timePicker' => true,
+                                'timePickerIncrement' => 1,
                                 'timePicker24Hour' => true,
-                                'locale'=>['format'=>'Y-m-d H:i']
+                                'locale' => ['format' => 'Y-m-d H:i']
                             ]
                         ]);
                         ?>
@@ -597,7 +592,7 @@ JS;
                         [
                             'attribute' => 'username',
                             'value' => static function (\common\models\Employee $model) {
-                                return Html::tag('i', '', ['class' => 'fa fa-user']).' '.Html::encode($model->username);
+                                return Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' . Html::encode($model->username);
                             },
                             'format' => 'raw',
                             //'contentOptions' => ['title' => 'text-center'],
@@ -647,7 +642,7 @@ JS;
 
                         [
                             'label' => 'Tasks Result for Period',
-                            'value' => function(\common\models\Employee $model) use ($searchModel) {
+                            'value' => function (\common\models\Employee $model) use ($searchModel) {
                                 return $model->getTaskStats($searchModel->timeStart, $searchModel->timeEnd);
                             },
                             'format' => 'raw',
@@ -751,7 +746,7 @@ JS;
                         ]
                     ]
                 ])
-                ?>
+?>
             </div>
         </div>
         <?php Pjax::end(); ?>

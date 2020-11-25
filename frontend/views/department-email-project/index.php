@@ -8,6 +8,7 @@ use common\components\grid\DateTimeColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\DepartmentEmailProjectSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -29,8 +30,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
-		'tableOptions' => ['class' => 'table table-bordered table-hover'],
-		'columns' => [
+        'tableOptions' => ['class' => 'table table-bordered table-hover'],
+        'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
             'dep_id',
@@ -52,26 +53,26 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'dep_dep_id',
                 'relation' => 'depDep',
             ],
-			[
-				'label' => 'User Groups',
-				'value' => static function (\common\models\DepartmentEmailProject $model) {
-					$userGroupList = [];
-					if ($model->dugUgs) {
-						foreach ($model->dugUgs as $userGroup) {
-							$userGroupList[] =  '<span class="label label-info"><i class="fa fa-users"></i> ' . Html::encode($userGroup->ug_name) . '</span>';
-						}
-					}
-					return $userGroupList ? implode(' ', $userGroupList) : '-';
-				},
-				'format' => 'raw',
-			],
-			[
-				'attribute' => 'dep_source_id',
-				'value' => static function (\common\models\DepartmentEmailProject $model) {
-					return $model->depSource ? $model->depSource->name : '-';
-				},
-				'filter' => \common\models\Sources::getList(true)
-			],
+            [
+                'label' => 'User Groups',
+                'value' => static function (\common\models\DepartmentEmailProject $model) {
+                    $userGroupList = [];
+                    if ($model->dugUgs) {
+                        foreach ($model->dugUgs as $userGroup) {
+                            $userGroupList[] =  '<span class="label label-info"><i class="fa fa-users"></i> ' . Html::encode($userGroup->ug_name) . '</span>';
+                        }
+                    }
+                    return $userGroupList ? implode(' ', $userGroupList) : '-';
+                },
+                'format' => 'raw',
+            ],
+            [
+                'attribute' => 'dep_source_id',
+                'value' => static function (\common\models\DepartmentEmailProject $model) {
+                    return $model->depSource ? $model->depSource->name : '-';
+                },
+                'filter' => \common\models\Sources::getList(true)
+            ],
             ['class' => BooleanColumn::class, 'attribute' => 'dep_enable'],
             ['class' => BooleanColumn::class, 'attribute' => 'dep_default'],
             [
@@ -85,13 +86,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'dep_updated_dt'
             ],
 
-			/*[
-				'attribute' => 'dep_updated_dt',
-				'value' => static function (\common\models\DepartmentEmailProject $model) {
-					return $model->dep_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->dep_updated_dt)) : '-';
-				},
-				'format' => 'raw'
-			],*/
+            /*[
+                'attribute' => 'dep_updated_dt',
+                'value' => static function (\common\models\DepartmentEmailProject $model) {
+                    return $model->dep_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->dep_updated_dt)) : '-';
+                },
+                'format' => 'raw'
+            ],*/
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

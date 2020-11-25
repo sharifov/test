@@ -46,7 +46,7 @@ class UserFailedLoginSearch extends UserFailedLogin
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['ufl_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['ufl_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 50,
             ],

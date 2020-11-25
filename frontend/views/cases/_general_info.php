@@ -38,7 +38,7 @@ use yii\widgets\DetailView;
         <div class="clearfix"></div>
     </div>
     <div class="x_content" style="display: block;">
-        <?php if($model):?>
+        <?php if ($model) :?>
         <div class="row">
             <div class="col-md-12">
                 <h4>Category: <span style="color: #0a0a0a"><?=$model->category ? Html::encode($model->category->cc_name) : '' ?></span></h4>

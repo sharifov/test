@@ -12,7 +12,7 @@ use yii\widgets\ActiveForm;
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
 
-if($user->isAdmin()) {
+if ($user->isAdmin()) {
     $userList = \common\models\Employee::getList();
 } else {
     $userList = \common\models\Employee::getListByUserId($user->id);
@@ -79,7 +79,7 @@ if($user->isAdmin()) {
                             ]
                         ]
                     ])->label('Created From / To');
-                    ?>
+?>
                 </div>
             </div>
         </div>

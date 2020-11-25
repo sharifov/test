@@ -7,6 +7,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\NotificationsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -33,20 +34,20 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="col-md-3">
             <?php
             echo  \kartik\daterange\DateRangePicker::widget([
-                'model'=> $searchModel,
+                'model' => $searchModel,
                 'attribute' => 'date_range',
-                'useWithAddon'=>true,
-                'presetDropdown'=>true,
-                'hideInput'=>true,
-                'convertFormat'=>true,
+                'useWithAddon' => true,
+                'presetDropdown' => true,
+                'hideInput' => true,
+                'convertFormat' => true,
                 'startAttribute' => 'datetime_start',
                 'endAttribute' => 'datetime_end',
-                'pluginOptions'=>[
-                    'timePicker'=> true,
-                    'timePickerIncrement'=>1,
+                'pluginOptions' => [
+                    'timePicker' => true,
+                    'timePickerIncrement' => 1,
                     'timePicker24Hour' => true,
-                    'locale'=>[
-                        'format'=>'Y-m-d H:i',
+                    'locale' => [
+                        'format' => 'Y-m-d H:i',
                         'separator' => ' - '
                     ]
                 ]
@@ -85,8 +86,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'n_type_id',
-                'value' => function(\common\models\Notifications $model){
-                    return '<span class="label label-default">'.$model->getType().'</span>';
+                'value' => function (\common\models\Notifications $model) {
+                    return '<span class="label label-default">' . $model->getType() . '</span>';
                 },
                 'format' => 'raw',
                 'filter' => \common\models\Notifications::getTypeList()

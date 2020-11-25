@@ -3,8 +3,7 @@
 ?>
 <h5>Calls Chart</h5>
 <div class="well">
-    <?php if (isset($callsInfoGraph) && $callsInfoGraph): ?>
-
+    <?php if (isset($callsInfoGraph) && $callsInfoGraph) : ?>
         <div id="info-calls-chart"></div>
 
         <script type="text/javascript">
@@ -48,7 +47,7 @@
                         'Declined',
                         {role: 'annotation'}
                     ],
-                    <?php foreach($callsInfoGraph as $k => $item): ?>
+                    <?php foreach ($callsInfoGraph as $k => $item) : ?>
                     [
                         '<?=($item['createdDate']) ?>',
                         <?= $item['callsComplete'] ?>,
@@ -70,7 +69,7 @@
             })
         </script>
 
-    <?php else: ?>
+    <?php else : ?>
         <div class="row">
             <div class="col-md-12 text-center">
                 <p style="margin: 0;">No results found.</p>

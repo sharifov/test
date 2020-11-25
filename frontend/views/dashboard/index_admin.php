@@ -72,7 +72,7 @@ $user = Yii::$app->user->identity;
                         <td><i class="fa fa-users"></i>
                             <?php
                             $groupsValue = '';
-                            if( $groupsModel =  $user->ugsGroups) {
+                            if ($groupsModel =  $user->ugsGroups) {
                                 $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
 
                                 $groupsValueArr = [];
@@ -91,8 +91,7 @@ $user = Yii::$app->user->identity;
                             <?php
                             $projectsValue = '';
 
-                            if($projectList = EmployeeProjectAccess::getProjects($user->id)) {
-
+                            if ($projectList = EmployeeProjectAccess::getProjects($user->id)) {
                                 $groupsValueArr = [];
                                 foreach ($projectList as $project) {
                                     $groupsValueArr[] = Html::tag('span', Html::encode($project), ['class' => 'label label-default']);
@@ -117,8 +116,8 @@ $user = Yii::$app->user->identity;
                         <th>Time</th>
                         <th>Command</th>
                     </tr>
-                    <?php if($processList): ?>
-                        <?php foreach($processList AS $proc): ?>
+                    <?php if ($processList) : ?>
+                        <?php foreach ($processList as $proc) : ?>
                             <tr>
                                 <td><?php echo $proc['pid']; ?></td>
                                 <td><?php echo $proc['stime']; ?></td>
@@ -132,14 +131,14 @@ $user = Yii::$app->user->identity;
         </div>
 
         <div class="col-md-3">
-            <?php if($crontabJobList): ?>
+            <?php if ($crontabJobList) : ?>
                 <h4>Cron jobs (/etc/crontab)</h4>
                 <div class="table-responsive">
                     <table class="table table-bordered table-condensed">
                         <tr>
                             <th>Cron jobs</th>
                         </tr>
-                        <?php foreach($crontabJobList AS $cronJob): ?>
+                        <?php foreach ($crontabJobList as $cronJob) : ?>
                             <tr>
                                 <td><?php echo $cronJob; ?></td>
                             </tr>
@@ -197,7 +196,7 @@ $user = Yii::$app->user->identity;
                     <div class="count">
                         <?php
                             //$callsOutIn = \common\models\Call::find()->select(['SUM(IF(c_call_type_id = '. \common\models\Call::CALL_TYPE_OUT . ', 1, 0)) as `cOut`', 'SUM(IF(c_call_type_id = '. \common\models\Call::CALL_TYPE_IN . ', 1, 0)) as `cIn`'])->where('DATE(c_created_dt) = DATE(NOW())')->cache(600)->asArray()->all();
-                            $callsOutIn = CallLog::find()->select(['SUM(IF(cl_type_id = '. CallLogType::OUT . ', 1, 0)) as `cOut`', 'SUM(IF(cl_type_id = '. CallLogType::IN . ', 1, 0)) as `cIn`'])->where('DATE(cl_call_created_dt) = DATE(NOW())')->cache(600)->asArray()->all();
+                            $callsOutIn = CallLog::find()->select(['SUM(IF(cl_type_id = ' . CallLogType::OUT . ', 1, 0)) as `cOut`', 'SUM(IF(cl_type_id = ' . CallLogType::IN . ', 1, 0)) as `cIn`'])->where('DATE(cl_call_created_dt) = DATE(NOW())')->cache(600)->asArray()->all();
                         ?>
                         <?= $callsOutIn[0]['cOut'] ?? 0 ?>
                         /
@@ -214,7 +213,7 @@ $user = Yii::$app->user->identity;
                     <div class="icon"><i class="fa fa-comment"></i></div>
                     <div class="count">
                         <?php
-                        $callsOutIn = \common\models\Sms::find()->select(['SUM(IF(s_type_id = '. \common\models\SMS::TYPE_OUTBOX .', 1, 0)) as `sOut`', 'SUM(IF(s_type_id = '. \common\models\SMS::TYPE_INBOX .', 1, 0)) as `sIn`'])->where('DATE(s_created_dt) = DATE(NOW())')->cache(600)->asArray()->all();
+                        $callsOutIn = \common\models\Sms::find()->select(['SUM(IF(s_type_id = ' . \common\models\SMS::TYPE_OUTBOX . ', 1, 0)) as `sOut`', 'SUM(IF(s_type_id = ' . \common\models\SMS::TYPE_INBOX . ', 1, 0)) as `sIn`'])->where('DATE(s_created_dt) = DATE(NOW())')->cache(600)->asArray()->all();
                         ?>
                         <?= $callsOutIn[0]['sOut'] ?? 0 ?>
                         /
@@ -248,7 +247,7 @@ $user = Yii::$app->user->identity;
         </div>
     </div>
 
-    <?php if ($dataStats): ?>
+    <?php if ($dataStats) : ?>
         <div class="row">
             <div class="col-md-12">
                 <div id="chart_div"></div>
@@ -259,7 +258,7 @@ $user = Yii::$app->user->identity;
                     function drawChart() {
                         var data = google.visualization.arrayToDataTable([
                             ['Days', 'Not Trash', 'Trash', 'Pending', 'Processing + On Hold', 'Follow Up', 'Sold', {role: 'annotation'}],
-                            <?php foreach($dataStats as $k => $item):?>
+                            <?php foreach ($dataStats as $k => $item) :?>
                             ['<?=date('d M', strtotime($item['created_date']))?>', <?=$item['done_count']?>, <?=$item['trash_count']?>, <?=$item['pending_count']?>, <?=$item['proc_count']?>, <?=$item['book_count']?>, <?=$item['sold_count']?>, '<?='--'?>'],
                             <?php endforeach;?>
 
@@ -291,7 +290,7 @@ $user = Yii::$app->user->identity;
         <div class="col-md-12">
             <div class="col-md-4">
                 <div id="chart_div_projects"></div>
-                <?php if ($dataSources): ?>
+                <?php if ($dataSources) : ?>
                         <?php
                             $this->registerJs('google.charts.setOnLoadCallback(drawBasic1);', \yii\web\View::POS_READY);
                         ?>
@@ -299,8 +298,7 @@ $user = Yii::$app->user->identity;
                             function drawBasic1() {
                                 var data = google.visualization.arrayToDataTable([
                                     ['Project', 'Count'],
-                                    <?php foreach($dataSources as $k => $item):
-
+                                    <?php foreach ($dataSources as $k => $item) :
                                         $apiUser = \common\models\ApiUser::findOne($item['al_user_id']);
                                         if (!$apiUser) {
                                             continue;
@@ -311,8 +309,8 @@ $user = Yii::$app->user->identity;
                                             continue;
                                         }
 
-                                    ?>
-                                    ['<?php echo \yii\helpers\Html::encode($project->name).' (apiUser: '.$item['al_user_id'].')' ?>', <?=$item['cnt']?>],
+                                        ?>
+                                    ['<?php echo \yii\helpers\Html::encode($project->name) . ' (apiUser: ' . $item['al_user_id'] . ')' ?>', <?=$item['cnt']?>],
                                     <?php endforeach;?>
                                 ]);
 
@@ -330,7 +328,7 @@ $user = Yii::$app->user->identity;
 
             <div class="col-md-4">
                 <div id="chart_div2"></div>
-                <?php if($dataEmployee): ?>
+                <?php if ($dataEmployee) : ?>
                         <?php
                             $this->registerJs('google.charts.setOnLoadCallback(drawBasic2);', \yii\web\View::POS_READY);
                         ?>
@@ -338,11 +336,13 @@ $user = Yii::$app->user->identity;
                             function drawBasic2() {
                                 var data = google.visualization.arrayToDataTable([
                                     ['Employee', 'Count of leads'],
-                                    <?php foreach($dataEmployee as $k => $item):
+                                    <?php foreach ($dataEmployee as $k => $item) :
                                         $employee = \common\models\Employee::find()->where(['id' => $item['employee_id']])->one();
-                                        if(!$employee) continue;
+                                        if (!$employee) {
+                                            continue;
+                                        }
 
-                                    ?>
+                                        ?>
                                     ['<?php echo \yii\helpers\Html::encode($employee->username) ?>', <?=$item['cnt']?>],
                                     <?php endforeach;?>
                                 ]);
@@ -362,7 +362,7 @@ $user = Yii::$app->user->identity;
 
             <div class="col-md-4">
                 <div id="chart_div3"></div>
-                <?php if ($dataEmployeeSold): ?>
+                <?php if ($dataEmployeeSold) : ?>
                         <?php
                             $this->registerJs('google.charts.setOnLoadCallback(drawBasic3);', \yii\web\View::POS_READY);
                         ?>
@@ -370,11 +370,13 @@ $user = Yii::$app->user->identity;
                             function drawBasic3() {
                                 var data = google.visualization.arrayToDataTable([
                                     ['Employee', 'Count of leads'],
-                                    <?php foreach($dataEmployeeSold as $k => $item):
-                                    $employee = \common\models\Employee::find()->where(['id' => $item['employee_id']])->one();
-                                    if(!$employee) continue;
+                                    <?php foreach ($dataEmployeeSold as $k => $item) :
+                                        $employee = \common\models\Employee::find()->where(['id' => $item['employee_id']])->one();
+                                        if (!$employee) {
+                                            continue;
+                                        }
 
-                                    ?>
+                                        ?>
                                     ['<?php echo \yii\helpers\Html::encode($employee->username) ?>', <?=$item['cnt']?>],
                                     <?php endforeach;?>
                                 ]);

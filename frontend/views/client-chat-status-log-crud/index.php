@@ -34,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'csl_id',
             [
-                'label' =>'Client Chat ID',
+                'label' => 'Client Chat ID',
                 'attribute' => 'csl_cch_id',
                 'value' => static function (ClientChatStatusLog $model) {
                     return $model->cslCch->cch_id ?? null;

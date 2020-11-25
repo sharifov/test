@@ -4,7 +4,6 @@ use common\models\Employee;
 use sales\auth\Auth;
 use yii\grid\ActionColumn;
 use common\components\grid\DateTimeColumn;
-
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\EmployeeSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -85,7 +84,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
     )*/
     ?>
 
-    <?php if ($multipleErrors || $multipleForm->getErrors()): ?>
+    <?php if ($multipleErrors || $multipleForm->getErrors()) : ?>
         <div class="card multiple-update-summary" style="margin-bottom: 10px;">
             <div class="card-header">
                 <span class="pull-right clickable close-icon"><i class="fa fa-times"> </i></span>
@@ -111,7 +110,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
         ?>
     <?php endif;?>
 
-    <?php if($user->isAdmin() || $user->isSupervision()) : ?>
+    <?php if ($user->isAdmin() || $user->isSupervision()) : ?>
         <p>
             <?php //= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
             <?php // \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-warning', 'data-toggle'=> 'modal', 'data-target'=>'#modalUpdate' ])?>
@@ -124,7 +123,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 <span class="sr-only">Toggle Dropdown</span>
             </button>
             <div class="dropdown-menu">
-                <?= \yii\helpers\Html::a('<i class="fa fa-edit text-warning"></i> Multiple update', null, ['class' => 'dropdown-item btn-multiple-update', 'data-toggle'=> 'modal', 'data-target'=>'#modalUpdate' ])?>
+                <?= \yii\helpers\Html::a('<i class="fa fa-edit text-warning"></i> Multiple update', null, ['class' => 'dropdown-item btn-multiple-update', 'data-toggle' => 'modal', 'data-target' => '#modalUpdate' ])?>
                 <div class="dropdown-divider"></div>
                 <?= \yii\helpers\Html::a('<i class="fa fa-info text-info"></i> Show Checked IDs', null, ['class' => 'dropdown-item btn-show-checked-ids'])?>
             </div>
@@ -186,14 +185,14 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                             || !($model->isAdmin() || $model->isSuperAdmin())
                         );
                     },
-                    'projects' => static function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM)  {
+                    'projects' => static function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM) {
                         return (
                             $isAdmin
                             || ($isUM && (!$model->isOnlyAdmin() && !$model->isSuperAdmin()))
                             || !($model->isAdmin() || $model->isSuperAdmin())
                         );
                     },
-                    'groups' => static function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM)  {
+                    'groups' => static function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM) {
                         return (
                             $isAdmin
                             || ($isUM && (!$model->isOnlyAdmin() && !$model->isSuperAdmin()))
@@ -227,7 +226,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 'label' => 'Grav',
                 'value' => static function (\common\models\Employee $model) {
 
-                    if($model->email) {
+                    if ($model->email) {
                         $grav_url = "//www.gravatar.com/avatar/" . md5(mb_strtolower(trim($model->email))) . "?d=identicon&s=25";
                     } else {
                         $grav_url = '//www.gravatar.com/avatar/?d=identicon&s=25';
@@ -277,7 +276,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 'attribute' => 'user_call_type_id',
                 'value' => static function (\common\models\Employee $model) {
                     $call_type_id = '';
-                    if($model->userProfile && is_numeric($model->userProfile->up_call_type_id)) {
+                    if ($model->userProfile && is_numeric($model->userProfile->up_call_type_id)) {
                         $call_type_id = $model->userProfile->up_call_type_id;
                     }
 
@@ -318,10 +317,10 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     $groupsValueArr = [];
 
                     foreach ($groups as $group) {
-                        $groupsValueArr[] = '<div class="col-md-4">'.Html::tag('div', /*Html::tag('i', '', ['class' => 'fa fa-users']) . ' ' .*/ Html::encode($group), ['class' => 'label label-info']).'</div>';
+                        $groupsValueArr[] = '<div class="col-md-4">' . Html::tag('div', /*Html::tag('i', '', ['class' => 'fa fa-users']) . ' ' .*/ Html::encode($group), ['class' => 'label label-info']) . '</div>';
                     }
 
-                    $groupsValue = '<div class="row">'.implode(' ', $groupsValueArr).'</div>';
+                    $groupsValue = '<div class="row">' . implode(' ', $groupsValueArr) . '</div>';
 
                     return $groupsValue;
                 },
@@ -339,10 +338,10 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     $valueArr = [];
 
                     foreach ($list as $item) {
-                        $valueArr[] = '<div class="col-md-4">'.Html::tag('div', /*Html::tag('i', '', ['class' => 'fa fa-users']) . ' ' .*/ Html::encode($item), ['class' => 'label label-default']).'</div>';
+                        $valueArr[] = '<div class="col-md-4">' . Html::tag('div', /*Html::tag('i', '', ['class' => 'fa fa-users']) . ' ' .*/ Html::encode($item), ['class' => 'label label-default']) . '</div>';
                     }
 
-                    $value = '<div class="row">'.implode(' ', $valueArr).'</div>';
+                    $value = '<div class="row">' . implode(' ', $valueArr) . '</div>';
 
                     return $value;
                 },
@@ -413,11 +412,11 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     $str = '<small><table class="table table-bordered">';
 
                     $projectParams = $model->userProjectParams;
-                    if($projectParams) {
+                    if ($projectParams) {
                         foreach ($projectParams as $projectParam) {
                             $str .= '<tr>';
-                            $str .= '<td>'.Html::encode($projectParam->uppProject->name).'</td>';
-                            $str .= '<td>'.Html::encode($projectParam->getPhone()).'</td>';
+                            $str .= '<td>' . Html::encode($projectParam->uppProject->name) . '</td>';
+                            $str .= '<td>' . Html::encode($projectParam->getPhone()) . '</td>';
                             $str .= '<td title="' . ($projectParam->uppDep ? $projectParam->uppDep->dep_name : '-') . '">' . Html::encode($projectParam->upp_dep_id) . '</td>';
 
                             if ($projectParam->upp_allow_general_line) {
@@ -426,7 +425,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                                 $str .= '<td><span class="label label-danger">No</span></td>';
                             }
 
-                            $str.='</tr>';
+                            $str .= '</tr>';
                         }
                     }
 
@@ -626,24 +625,24 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
         ]
     ])
-    ?>
+?>
 
     <?php $form = \yii\bootstrap\ActiveForm::begin(['id' => 'user-list-update-form', /*'action' => ['employee/list'],*/ 'method' => 'post', 'options' => ['data-pjax' => true]]); // ['action' => ['leads/update-multiple'] ?>
 
-    <?php if($isAdmin) : ?>
+    <?php if ($isAdmin) : ?>
     <p>
         <?php //= \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-warning','data-toggle' => 'modal','data-target' => '#modalUpdate'])?>
     </p>
 
-    <?= $form->errorSummary($multipleForm) ?>
+        <?= $form->errorSummary($multipleForm) ?>
 
-    <?php
+        <?php
 
-    Modal::begin([
+        Modal::begin([
         'title' => 'Multiple update selected Users',
         'id' => 'modalUpdate'
-    ]);
-    ?>
+        ]);
+        ?>
 
     <div class="row">
         <div class="col-md-12">
@@ -665,13 +664,15 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                             ]) ?>
                             <?= $form->field($multipleForm, 'status')->dropDownList([$searchModel::STATUS_ACTIVE => 'Active', $searchModel::STATUS_DELETED => 'Deleted'], ['prompt' => '']) ?>
                             <?= $form->field($multipleForm, 'workStart')->widget(
-                                \kartik\time\TimePicker::class, [
+                                \kartik\time\TimePicker::class,
+                                [
                                 'readonly' => true,
                                 'pluginOptions' => [
                                     'defaultTime' => false,
                                     'showSeconds' => false,
                                     'showMeridian' => false,
-                                ]]) ?>
+                                ]]
+                            ) ?>
                             <?= $form->field($multipleForm, 'workMinutes')->input('number', ['step' => 10, 'min' => 0])?>
                             <?=
                             $form->field($multipleForm, 'timeZone')->widget(\kartik\select2\Select2::class, [
@@ -696,9 +697,9 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                             <?= $form->field($multipleForm, 'baseAmount')->input('number', ['step' => 0.01, 'min' => 0, 'max' => 1000]) ?>
                             <?= $form->field($multipleForm, 'commissionPercent')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
                             <?= $form->field($multipleForm, 'up_call_expert_limit')->input('number', ['min' => -1, 'max' => 1000]) ?>
-                            <?= $form->field($multipleForm, 'autoRedial')->dropDownList([1 =>'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
-                            <?= $form->field($multipleForm, 'kpiEnable')->dropDownList([1 =>'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
-                            <?= $form->field($multipleForm, 'leaderBoardEnabled')->dropDownList([1 =>'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
+                            <?= $form->field($multipleForm, 'autoRedial')->dropDownList([1 => 'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
+                            <?= $form->field($multipleForm, 'kpiEnable')->dropDownList([1 => 'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
+                            <?= $form->field($multipleForm, 'leaderBoardEnabled')->dropDownList([1 => 'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
                             <?= $form->field($multipleForm, 'user_list_json')->hiddenInput(['id' => 'user_list_json'])->label(false) ?>
                         </div>
                         <div class="col-md-12">
@@ -712,7 +713,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
         </div>
 
         <?php Modal::end(); ?>
-        <?php endif; ?>
+    <?php endif; ?>
 
         <?php \yii\bootstrap\ActiveForm::end(); ?>
 

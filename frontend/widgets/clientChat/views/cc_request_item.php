@@ -1,4 +1,5 @@
 <?php
+
 use common\components\i18n\Formatter;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
@@ -16,8 +17,8 @@ $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
 $date = (int)$access['is_transfer'] ? $access['ccua_created_dt'] : $access['cch_created_dt'];
 ?>
 <div class="_cc-box-item-wrapper" id="ccr_<?= $access['ccua_cch_id'] ?>_<?= $access['ccua_user_id'] ?>" data-is-transfer="<?= (int)$access['is_transfer'] ?>">
-	<div class="_cc-box-item">
-		<div class="_cc-client-info">
+    <div class="_cc-box-item">
+        <div class="_cc-client-info">
             <span class="_cc-client-name">
                 <span class="_cc_access_item_num"></span>
                 <i class="fa fa-user"></i>
@@ -29,7 +30,7 @@ $date = (int)$access['is_transfer'] ? $access['ccua_created_dt'] : $access['cch_
                     <span class="label label-default"><?= Html::encode($access->ccuaCch->cchDep->dep_name) ?></span>
                 <?php endif;*/ ?>
 
-                <?php if ($access['project_name']): ?>
+                <?php if ($access['project_name']) : ?>
                     <span class="label label-success" style="font-size: 12px"><?= Html::encode($access['project_name']) ?></span>
                 <?php endif; ?>
 
@@ -39,9 +40,9 @@ $date = (int)$access['is_transfer'] ? $access['ccua_created_dt'] : $access['cch_
             <div class="col-md-12">
                 <span class="_cc-request-created">
                     <small>
-                        <?php if ($formatter instanceof Formatter): ?>
+                        <?php if ($formatter instanceof Formatter) : ?>
                             <?= $formatter->asByUserDateTime($date) ?>
-                        <?php else: ?>
+                        <?php else : ?>
                             <?= $formatter->asDatetime($date) ?>
                         <?php endif; ?>
                     </small>
@@ -65,18 +66,18 @@ $date = (int)$access['is_transfer'] ? $access['ccua_created_dt'] : $access['cch_
             </div>
 
             <div>
-                <?php if ((int)$access['is_transfer']): ?>
+                <?php if ((int)$access['is_transfer']) : ?>
                     <span class="label label-warning">Transfer</span> from <b><?= Html::encode($access['owner_nickname'] ?? 'Unknown agent') ?></b>
-                <?php elseif ((int)$access['is_pending']): ?>
+                <?php elseif ((int)$access['is_pending']) : ?>
                     <span class="label label-default">Pending</span>
-                <?php elseif ((int)$access['is_idle']): ?>
+                <?php elseif ((int)$access['is_idle']) : ?>
                     <span class="label label-info">Idle</span>
                 <?php endif; ?>
             </div>
-		</div>
+        </div>
 
-		<div class="_cc-action">
-            <?php if ((int)$access['is_transfer']): ?>
+        <div class="_cc-action">
+            <?php if ((int)$access['is_transfer']) : ?>
                 <?= ClientChatHelper::displayBtnAcceptTransfer(
                     $user,
                     $access['ccua_id'],
@@ -91,7 +92,7 @@ $date = (int)$access['is_transfer'] ? $access['ccua_created_dt'] : $access['cch_
                     $accessUrl,
                     ClientChatUserAccess::STATUS_TRANSFER_SKIP
                 ) ?>
-            <?php elseif ((int)$access['is_pending']): ?>
+            <?php elseif ((int)$access['is_pending']) : ?>
                 <?= ClientChatHelper::displayBtnAcceptPending(
                     $user,
                     $access['ccua_id'],
@@ -107,7 +108,7 @@ $date = (int)$access['is_transfer'] ? $access['ccua_created_dt'] : $access['cch_
                     $accessUrl,
                     ClientChatUserAccess::STATUS_SKIP
                 ) ?>
-            <?php elseif ((int)$access['is_idle']): ?>
+            <?php elseif ((int)$access['is_idle']) : ?>
                 <?= ClientChatHelper::displayBtnTakeIdle(
                     $user,
                     $access,
@@ -115,7 +116,7 @@ $date = (int)$access['is_transfer'] ? $access['ccua_created_dt'] : $access['cch_
                     ClientChatUserAccess::STATUS_TAKE
                 ) ?>
             <?php endif; ?>
-		</div>
-	</div>
-	<hr>
+        </div>
+    </div>
+    <hr>
 </div>

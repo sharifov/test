@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use dosamigos\datepicker\DatePicker;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\UserOnlineSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -35,7 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'label' => 'User ID',
-                'value' => static function(\common\models\UserOnline $model) {
+                'value' => static function (\common\models\UserOnline $model) {
                     return $model->uo_user_id;
                 },
             ],
@@ -67,7 +68,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'options' => [
                         'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
+                        'placeholder' => 'Choose Date'
                     ],
                     'containerOptions' => [
                         'class' => (array_key_exists('uo_idle_state_dt', $searchModel->errors)) ? 'has-error' : null,
@@ -101,7 +102,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'options' => [
                         'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
+                        'placeholder' => 'Choose Date'
                     ],
                     'containerOptions' => [
                         'class' => (array_key_exists('uo_updated_dt', $searchModel->errors)) ? 'has-error' : null,

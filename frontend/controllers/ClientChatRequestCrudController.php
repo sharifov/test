@@ -92,7 +92,7 @@ class ClientChatRequestCrudController extends FController
                 $this->requestRepository->save($model);
                 return $this->redirect(['view', 'id' => $model->ccr_id]);
             } catch (\Throwable $e) {
-                $model->addError('general' , $e->getMessage());
+                $model->addError('general', $e->getMessage());
             }
         }
 

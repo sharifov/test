@@ -14,8 +14,7 @@ use yii\helpers\Html;
 ?>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
-<?php if ($viewModel->prepareStatsData): ?>
-
+<?php if ($viewModel->prepareStatsData) : ?>
     <div id="myChart"></div>
     <script type="text/javascript">
         $(document).ready(function () {
@@ -198,13 +197,15 @@ use yii\helpers\Html;
                             ]);
                     },*/
                     'room' => static function ($url, $model) {
-                        return Html::a('<span class="glyphicon glyphicon-list-alt"></span>',
+                        return Html::a(
+                            '<span class="glyphicon glyphicon-list-alt"></span>',
                             ['/client-chat-qa/room', 'id' => $model['cch_id']],
                             [
                                 'target' => '_blank',
                                 'data-pjax' => 0,
                                 'title' => 'Dialog',
-                            ]);
+                            ]
+                        );
                     },
                 ],
             ],
@@ -212,7 +213,7 @@ use yii\helpers\Html;
         'emptyTextOptions' => ['class' => 'text-center']
     ]) ?>
     <?php Pjax::end() ?>
-<?php else: ?>
+<?php else : ?>
     <div class="row">
         <div class="col-md-12 text-center">
             <p style="margin: 0;">Not Found Data</p>

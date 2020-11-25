@@ -55,20 +55,20 @@ if ($user->isAdmin() || $user->isQa()) {
                     <div class="col-md-3">
                         <?php
                         echo  \kartik\daterange\DateRangePicker::widget([
-                            'model'=> $searchModel,
+                            'model' => $searchModel,
                             'attribute' => 'date_range',
-                            'useWithAddon'=>true,
-                            'presetDropdown'=>true,
-                            'hideInput'=>true,
-                            'convertFormat'=>true,
+                            'useWithAddon' => true,
+                            'presetDropdown' => true,
+                            'hideInput' => true,
+                            'convertFormat' => true,
                             'startAttribute' => 'datetime_start',
                             'endAttribute' => 'datetime_end',
-                            'pluginOptions'=>[
-                                'timePicker'=> true,
-                                'timePickerIncrement'=>1,
-                                'timePicker24Hour'=>true,
-                                'locale'=>[
-                                    'format'=>'Y-m-d H:i',
+                            'pluginOptions' => [
+                                'timePicker' => true,
+                                'timePickerIncrement' => 1,
+                                'timePicker24Hour' => true,
+                                'locale' => [
+                                    'format' => 'Y-m-d H:i',
                                     'separator' => ' - '
                                 ]
                             ]
@@ -177,7 +177,7 @@ if ($user->isAdmin() || $user->isQa()) {
                                         }*/
                                     }
                                 }
-                                return $type . ' / '.$statusTitle.'';
+                                return $type . ' / ' . $statusTitle . '';
                             },
                             'format' => 'raw',
                             //'filter' => $user->isAdmin() ? \common\models\UserGroup::getList() : $user->getUserGroupList()
@@ -412,7 +412,7 @@ if ($user->isAdmin() || $user->isQa()) {
                                 if ($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_VOICE) {
                                     $call = \common\models\Call::findOne($model['id']);
                                     if ($call && $call->recordingUrl) {
-                                        $view =  '<audio controls="controls" controlsList="nodownload" style="width: 300px; height: 25px"><source src="'.$call->recordingUrl.'" type="audio/mpeg"> </audio>';
+                                        $view =  '<audio controls="controls" controlsList="nodownload" style="width: 300px; height: 25px"><source src="' . $call->recordingUrl . '" type="audio/mpeg"> </audio>';
                                     }
                                 } elseif ($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_SMS) {
                                     $sms = \common\models\Sms::findOne($model['id']);
@@ -455,7 +455,7 @@ if ($user->isAdmin() || $user->isQa()) {
 
                     ]
                 ])
-                ?>
+?>
 
 
             </div>

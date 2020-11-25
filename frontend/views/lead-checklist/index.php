@@ -6,6 +6,7 @@ use yii\grid\GridView;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\LeadChecklistSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -17,7 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
     <p>
         <?= Html::a('<i class="fa fa-plus"></i> Create Lead Checklist', ['create'], ['class' => 'btn btn-success']) ?>
-        <?php if(Yii::$app->user->can('/lead-checklist-type/index') || Yii::$app->user->can('/lead-checklist-type/*') || Yii::$app->user->can('/*')):?>
+        <?php if (Yii::$app->user->can('/lead-checklist-type/index') || Yii::$app->user->can('/lead-checklist-type/*') || Yii::$app->user->can('/*')) :?>
             <?= Html::a('<i class="fa fa-list"></i> Checklist Types', ['lead-checklist-type/index'], ['class' => 'btn btn-warning']) ?>
         <?php endif; ?>
     </p>
@@ -37,20 +38,20 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="col-md-3">
             <?php
             echo  \kartik\daterange\DateRangePicker::widget([
-                'model'=> $searchModel,
+                'model' => $searchModel,
                 'attribute' => 'date_range',
-                'useWithAddon'=>true,
-                'presetDropdown'=>true,
-                'hideInput'=>true,
-                'convertFormat'=>true,
+                'useWithAddon' => true,
+                'presetDropdown' => true,
+                'hideInput' => true,
+                'convertFormat' => true,
                 'startAttribute' => 'datetime_start',
                 'endAttribute' => 'datetime_end',
-                'pluginOptions'=>[
-                    'timePicker'=> true,
-                    'timePickerIncrement'=>1,
+                'pluginOptions' => [
+                    'timePicker' => true,
+                    'timePickerIncrement' => 1,
                     'timePicker24Hour' => true,
-                    'locale'=>[
-                        'format'=>'Y-m-d H:i',
+                    'locale' => [
+                        'format' => 'Y-m-d H:i',
                         'separator' => ' - '
                     ]
                 ]
@@ -82,7 +83,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'lc_lead_id',
-                'value' => function(\common\models\LeadChecklist $model) {
+                'value' => function (\common\models\LeadChecklist $model) {
                     return Html::a($model->lc_lead_id, ['lead/view', 'gid' => $model->lcLead->gid], ['target' => '_blank', 'data-pjax' => 0]);
                 },
                 'format' => 'raw',

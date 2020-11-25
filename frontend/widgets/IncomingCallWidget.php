@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @link http://www.yiiframework.com/
  * @copyright Copyright (c) 2008 Yii Software LLC
@@ -57,11 +58,11 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
         /** @var Employee $userModel */
         $userModel = \Yii::$app->user->identity;
 
-//		if (!SettingHelper::isOriginalPhoneWidgetEnabled()) {
-//			return '';
-//		}
+//      if (!SettingHelper::isOriginalPhoneWidgetEnabled()) {
+//          return '';
+//      }
 
-        if(!$userModel) {
+        if (!$userModel) {
             return '';
         }
 
@@ -69,12 +70,11 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
         $action = \Yii::$app->request->get('act');
         $call_id = \Yii::$app->request->get('call_id');
 
-        if(\Yii::$app->request->isPjax && $action && $call_id) {
+        if (\Yii::$app->request->isPjax && $action && $call_id) {
             try {
                 $call = Call::findOne($call_id);
 
-                if ($call  ) { // && $call->c_call_status === Call::CALL_STATUS_QUEUE && (!$call->c_created_user_id || $call->c_created_user_id == $userModel->id)
-
+                if ($call) { // && $call->c_call_status === Call::CALL_STATUS_QUEUE && (!$call->c_created_user_id || $call->c_created_user_id == $userModel->id)
                     //VarDumper::dump($action); exit;
 
                     $callUserAccess = CallUserAccess::find()->where([
@@ -84,7 +84,6 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
                     ])->one();
 
                     if ($callUserAccess) {
-
                         //VarDumper::dump($action); exit;
 
                         switch ($action) {
@@ -196,8 +195,7 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
     private function acceptCall(CallUserAccess $callUserAccess, Employee $user): bool
     {
         $callUserAccess->acceptCall();
-        if($callUserAccess->update()) {
-
+        if ($callUserAccess->update()) {
             if ($call = $callUserAccess->cuaCall) {
                 /*$call->c_created_user_id = $user->id;
                 $call->c_call_status = Call::CALL_STATUS_IN_PROGRESS;
@@ -252,10 +250,10 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
         $ucs->us_type_id = UserCallStatus::STATUS_TYPE_OCCUPIED;
         $ucs->us_user_id = $user->id;
         $ucs->us_created_dt = date('Y-m-d H:i:s');
-        if($ucs->save()) {
+        if ($ucs->save()) {
             $callUserAccess->update();
             // Notifications::socket($ucs->us_user_id, null, 'updateUserCallStatus', ['id' => 'ucs'.$ucs->us_id, 'type_id' => $ucs->us_type_id]);
-            Notifications::publish('updateUserCallStatus', ['user_id' =>$ucs->us_user_id], ['id' => 'ucs'.$ucs->us_id, 'type_id' => $ucs->us_type_id]);
+            Notifications::publish('updateUserCallStatus', ['user_id' => $ucs->us_user_id], ['id' => 'ucs' . $ucs->us_id, 'type_id' => $ucs->us_type_id]);
             Notifications::pingUserMap();
         } else {
             Yii::error(VarDumper::dumpAsString($ucs->errors), 'IncomingCallWidget:busyCall:UserCallStatus:save');

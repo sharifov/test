@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model common\models\Sms */
 
-$this->title = 'SMS - '.$model->s_id;
+$this->title = 'SMS - ' . $model->s_id;
 $this->params['breadcrumbs'][] = ['label' => 'My Sms', 'url' => ['list']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -145,7 +145,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 's_created_user_id',
                 'value' => static function (\common\models\Sms $model) {
-                    return  ($model->sCreatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->sCreatedUser->username) : $model->s_created_user_id);
+                    return  ($model->sCreatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->sCreatedUser->username) : $model->s_created_user_id);
                 },
                 'format' => 'raw'
             ],

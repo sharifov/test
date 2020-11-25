@@ -25,7 +25,7 @@ use yii\bootstrap4\Html; ?>
                     <th>Name</th>
                     <th>Result</th>
                 </tr>
-                <?php foreach ($report as $item): ?>
+                <?php foreach ($report as $item) : ?>
                     <tr>
                         <td>
                             <?= $item['id'] ?>
@@ -33,11 +33,11 @@ use yii\bootstrap4\Html; ?>
                         <td>
                             <?= $item['name'] ?>
                         </td>
-                        <?php if ($item['message'] === 'Registered'): ?>
+                        <?php if ($item['message'] === 'Registered') : ?>
                         <td style="color: #28a048">
-                            <?php else: ?>
+                        <?php else : ?>
                         <td style="color: #4f0800">
-                            <?php endif; ?>
+                        <?php endif; ?>
                             <?= $item['message'] ?>
                         </td>
                     </tr>

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $this View
  * @var $dataProvider ArrayDataProvider
@@ -75,5 +76,5 @@ HTML;
     //'layout' => $template,
     'showFooter' => true,
     'columns' => $model->getColumns($dataProvider)
-])
-?>
+]);
+

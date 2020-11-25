@@ -77,7 +77,7 @@ $user = Yii::$app->user->identity;
                 </tr>
                 <?php
                 $nr = 1;
-                foreach ($phoneList as $phone):?>
+                foreach ($phoneList as $phone) :?>
                     <tr>
                         <td width="100px"><?=($nr++)?></td>
                         <td><?=Html::encode($phone)?></td>
@@ -301,7 +301,7 @@ $user = Yii::$app->user->identity;
             [
                 'attribute' => 's_created_user_id',
                 'value' => static function (\common\models\Sms $model) {
-                    return  ($model->sCreatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->sCreatedUser->username) : $model->s_created_user_id);
+                    return  ($model->sCreatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->sCreatedUser->username) : $model->s_created_user_id);
                 },
                 'format' => 'raw'
             ],
@@ -320,7 +320,7 @@ $user = Yii::$app->user->identity;
                     ],
                     'options' => [
                         'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
+                        'placeholder' => 'Choose Date'
                     ],
                 ]),
             ],

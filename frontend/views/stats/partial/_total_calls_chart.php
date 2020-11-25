@@ -8,7 +8,7 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
  */
 ?>
 
-<?php if ($viewModel->callData): ?>
+<?php if ($viewModel->callData) : ?>
     <div class="btn-toolbar">
         <?= $this->render('_call_graph_export', ['viewModel' => $viewModel]) ?>
         <div class="btn-group" role="group">
@@ -24,24 +24,31 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
     <div class="row d-flex align-items-center">
         <div class="col-md-2">
             <label class="control-label">View Columns on Graph</label>
-            <?= \yii\helpers\Html::checkboxList('totalChartColumns', $viewModel->callGraphsSearch->totalChartColumns,
-                $viewModel->callGraphsSearch::getChartTotalCallTextList(), [
+            <?= \yii\helpers\Html::checkboxList(
+                'totalChartColumns',
+                $viewModel->callGraphsSearch->totalChartColumns,
+                $viewModel->callGraphsSearch::getChartTotalCallTextList(),
+                [
                     'itemOptions' => [
                         'class' => 'totalChartColumns',
                         'data-name' => $viewModel->callGraphsSearch->formName() . '[totalChartColumns][]'
                     ]
-                ]) ?>
+                ]
+            ) ?>
         </div>
 
         <div class="col-md-2">
             <div class="form-group">
                 <label class="control-label">Measure</label>
-                <?= \yii\helpers\Html::dropDownList('chartTotalCallsVaxis',
+                <?= \yii\helpers\Html::dropDownList(
+                    'chartTotalCallsVaxis',
                     $viewModel->callGraphsSearch->chartTotalCallsVaxis,
-                    $viewModel->callGraphsSearch::getChartTotalCallsVaxisTextList(), [
+                    $viewModel->callGraphsSearch::getChartTotalCallsVaxisTextList(),
+                    [
                         'class' => 'form-control chartTotalCallsVaxis',
                         'data-name' => $viewModel->callGraphsSearch->formName() . '[chartTotalCallsVaxis]'
-                    ]) ?>
+                    ]
+                ) ?>
             </div>
         </div>
     </div>
@@ -406,7 +413,7 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
             });
         });
     </script>
-<?php else: ?>
+<?php else : ?>
     <div class="row">
         <div class="col-md-12 text-center">
             <p style="margin: 0;">Not Found Data</p>

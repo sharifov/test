@@ -7,7 +7,7 @@ use sales\access\EmployeeProjectAccess;
 use unclead\multipleinput\MultipleInput;
 use unclead\multipleinput\MultipleInputColumn;
 use yii\helpers\Html;
-use \yii\widgets\ActiveForm;
+use yii\widgets\ActiveForm;
 use borales\extensions\phoneInput\PhoneInput;
 
 /* @var yii\web\View $this */
@@ -27,8 +27,7 @@ $this->registerCss('
     .multiple-input-box .table.multiple-input-list tr > th {
         border: 0;
     }   
-'
-);
+');
 
 $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
 
@@ -43,7 +42,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
             'id' => $contactForm->formName() . '-form',
             'enableClientValidation' => false,
             'enableAjaxValidation' => true,
-            'validationUrl' =>['/contacts/validate-contact'],
+            'validationUrl' => ['/contacts/validate-contact'],
             'action' => ['/contacts/create']
         ]) ?>
 
@@ -66,8 +65,11 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
                 <?= $form->field($contactForm, 'disabled')->checkbox() ?>
                 <?= $form->field($contactForm, 'cl_project_id')->dropDownList($projectList, ['prompt' => '-'])->label('Project') ?>
 
-                <?php echo Html::checkbox('ucl_favorite', 0,
-                    ['id' => 'ucl_favorite', ]) ?> Favorite
+                <?php echo Html::checkbox(
+                    'ucl_favorite',
+                    0,
+                    ['id' => 'ucl_favorite', ]
+                ) ?> Favorite
 
             </div>
 
@@ -89,7 +91,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
                             'type' => MultipleInputColumn::TYPE_HIDDEN_INPUT
                         ],
                     ]
-                ])->label(false) ?>
+                    ])->label(false) ?>
             </div>
 
             <div class="col-md-4 multiple-input-box" id="create-contact-phone">
@@ -142,7 +144,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
 </div>
 
 <?php
-$js =<<<JS
+$js = <<<JS
 
     $(document).on('click', '.is_company', function(e) {                
         let isCompany = $(this).prop("checked") ? 1 : 0;

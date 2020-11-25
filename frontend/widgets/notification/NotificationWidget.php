@@ -31,14 +31,14 @@ class NotificationWidget extends Widget
 
         $service = \Yii::createObject(ClientChatMessageService::class);
         $totalUnreadMessages = $service->getCountOfTotalUnreadMessagesByUser($this->userId);
-		$chatsWithUnreadMessages = ClientChat::find()->select(['*', 'ccu_count as countUnreadMessage'])->byOwner($this->userId)->withUnreadMessage()->all();
+        $chatsWithUnreadMessages = ClientChat::find()->select(['*', 'ccu_count as countUnreadMessage'])->byOwner($this->userId)->withUnreadMessage()->all();
 
         return $this->render('notifications', [
-        	'notifications' => $notifications,
-			'count' => $result['count'],
-			'totalUnreadMessages' => $totalUnreadMessages ?: '',
-			'chatsWithUnreadMessages' => $chatsWithUnreadMessages
-		]);
+            'notifications' => $notifications,
+            'count' => $result['count'],
+            'totalUnreadMessages' => $totalUnreadMessages ?: '',
+            'chatsWithUnreadMessages' => $chatsWithUnreadMessages
+        ]);
     }
 
     /**

@@ -37,7 +37,7 @@ use yii\web\JsExpression;
 
             <div class="row">
 
-                <?php if ($filter->permissions->canShow()): ?>
+                <?php if ($filter->permissions->canShow()) : ?>
                     <div class="col-md-6">
                         <?= Html::label('Show:', null, ['class' => 'control-label']); ?>
                         <?= Select2::widget([
@@ -61,7 +61,7 @@ use yii\web\JsExpression;
                     </div>
                 <?php endif; ?>
 
-                <?php if ($filter->permissions->canChannel()): ?>
+                <?php if ($filter->permissions->canChannel()) : ?>
                     <div class="col-md-6">
                         <?= Html::label('Channel:', null, ['class' => 'control-label']); ?>
                         <?= Select2::widget([
@@ -86,14 +86,13 @@ use yii\web\JsExpression;
                 <?php endif; ?>
             </div>
 
-        <?php if ($filter->permissions->canAdditionalFilter()): ?>
-
+        <?php if ($filter->permissions->canAdditionalFilter()) : ?>
             <?php $isAdditionalFilterActive = $filter->isAdditionalFilterActive(); ?>
 
             <div class="row" style="margin-top: 6px;">
                 <div class="col-md-12 text-right">
                     <i class="fa fa-filter"></i> <?= Html::a('Additional filters', null, ['id' => 'btn_additional_filters']) ?>
-                    <?php if ($isAdditionalFilterActive): ?>
+                    <?php if ($isAdditionalFilterActive) : ?>
                         <?php echo Html::a('(reset <i class="fa fa-times"></i>)', null, ['id' => 'reset_additional', 'style' => 'font-weight: bold;']); ?>
                     <?php endif ?>
                 </div>
@@ -104,7 +103,7 @@ use yii\web\JsExpression;
                 id="additional_filters_div"
                 style="margin-bottom: 20px; display: <?php echo $isAdditionalFilterActive ? '' : 'none' ?>;">
 
-                <?php if ($filter->permissions->canProject()): ?>
+                <?php if ($filter->permissions->canProject()) : ?>
                     <div class="col-md-6">
                         <?= Html::label('Project:', null, ['class' => 'control-label']); ?>
                         <?= Select2::widget([
@@ -128,7 +127,7 @@ use yii\web\JsExpression;
                     </div>
                 <?php endif; ?>
 
-                <?php if ($filter->permissions->canUser()): ?>
+                <?php if ($filter->permissions->canUser()) : ?>
                     <div class="col-md-6">
                         <?= Html::label('Agent:', null, ['class' => 'control-label']); ?>
                         <?= UserSelect2Widget::widget([
@@ -152,7 +151,7 @@ use yii\web\JsExpression;
                     </div>
                 <?php endif; ?>
 
-                <?php if ($filter->permissions->canCreatedDate()): ?>
+                <?php if ($filter->permissions->canCreatedDate()) : ?>
                     <div class="col-md-12">
                         <?= Html::label('Created:', null, ['class' => 'control-label']); ?>
                         <?= \kartik\daterange\DateRangePicker::widget([
@@ -199,7 +198,7 @@ use yii\web\JsExpression;
                     </div>
                 <?php endif; ?>
 
-                <?php if ($filter->permissions->canStatus()): ?>
+                <?php if ($filter->permissions->canStatus()) : ?>
                     <div class="col-md-6">
                         <?php echo Html::label('Status:', null, ['class' => 'control-label']); ?>
                         <?= Select2::widget([
@@ -223,7 +222,7 @@ use yii\web\JsExpression;
                     </div>
                 <?php endif; ?>
 
-                <?php if ($filter->permissions->canClientName()): ?>
+                <?php if ($filter->permissions->canClientName()) : ?>
                     <div class="col-md-6">
                         <?php echo Html::label('Client Name:', null, ['class' => 'control-label']); ?>
                         <?php echo Html::textInput(
@@ -241,25 +240,25 @@ use yii\web\JsExpression;
 
             </div>
 
-    <?php endif; ?>
+        <?php endif; ?>
 
     </div>
 
-    <?php if ($filter->permissions->canOneOfGroup()): ?>
+    <?php if ($filter->permissions->canOneOfGroup()) : ?>
         <div class="_cc_groups_wrapper ">
-            <?php foreach ($filter->getGroupFilterUI() as $key => $item): ?>
-                <?php if ($key === GroupFilter::FREE_TO_TAKE): ?>
+            <?php foreach ($filter->getGroupFilterUI() as $key => $item) : ?>
+                <?php if ($key === GroupFilter::FREE_TO_TAKE) : ?>
                     <?php
                         $countItems = '';
-                        if ($countFreeToTake) {
-                            $countItems = ' 
+                    if ($countFreeToTake) {
+                        $countItems = ' 
                                 <small style="margin-left: 4px;">
                                     <span 
                                         class="label label-default" 
                                         style="font-size: 9px;" 
                                         id="count_free_to_take">
                                             ' . $countFreeToTake . '</span></small>';
-                        }
+                    }
                     ?>
                     <div
                         class="_cc_group cc_btn_group_filter <?php echo($key === $filter->group ? 'active' : '') ?>"
@@ -267,21 +266,25 @@ use yii\web\JsExpression;
                             <?php echo $item . $countItems ?>
                                 <span class="_cc_group_active"> </span>
                     </div>
-                <?php else: ?>
+                <?php else : ?>
                     <div class="_cc_group cc_btn_group_filter <?= ($key === $filter->group ? 'active' : ''); ?>" data-group-id="<?= $key; ?>"><?= $item; ?><span class="_cc_group_active"> </span></div>
                 <?php endif; ?>
             <?php endforeach; ?>
             <?= $filter->getGroupInput(); ?>
         </div>
-    <?php else: ?>
+    <?php else : ?>
         <div class="_cc_groups_wrapper"><h5>Not found chat permissions</h5></div>
     <?php endif; ?>
 
     <?php $canReadUnread = (GroupFilter::isMy($filter->group) && $filter->permissions->canReadUnread()); ?>
     <div class="row" style="margin-top: 10px">
         <div class="col-md-12">
-            <div class="d-flex justify-content-<?php if ($canReadUnread): ?>between<?php else: ?>end<?php endif; ?> align-items-center">
-                <?php if ($canReadUnread): ?>
+            <div class="d-flex justify-content-<?php if ($canReadUnread) :
+                ?>between<?php
+                                               else :
+                                                    ?>end<?php
+                                               endif; ?> align-items-center">
+                <?php if ($canReadUnread) : ?>
                     <?= $filter->getReadUnreadInput(); ?>
                 <?php endif; ?>
 

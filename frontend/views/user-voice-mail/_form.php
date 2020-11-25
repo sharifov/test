@@ -28,15 +28,15 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'uvm_say_text_message')->textarea(['rows' => 6]) ?>
 
-		<?= $form->field($model, 'uvm_say_language')->dropDownList(Language::getListByPk($model->getAllowedList()), ['prompt' => '--'])?>
-		<?= $form->field($model, 'uvm_say_voice')->dropDownList($model->getSaveVoiceList(), ['prompt' => '--']) ?>
-		<?php if ($model->uvm_voice_file_message): ?>
-			<?= $form->field($model, 'uvm_voice_file_message')->hiddenInput(['max' => 255, 'id' => 'voice-file-message']) ?>
+        <?= $form->field($model, 'uvm_say_language')->dropDownList(Language::getListByPk($model->getAllowedList()), ['prompt' => '--'])?>
+        <?= $form->field($model, 'uvm_say_voice')->dropDownList($model->getSaveVoiceList(), ['prompt' => '--']) ?>
+        <?php if ($model->uvm_voice_file_message) : ?>
+            <?= $form->field($model, 'uvm_voice_file_message')->hiddenInput(['max' => 255, 'id' => 'voice-file-message']) ?>
             <div class="d-flex justify-content-center align-items-center">
                 <audio src="<?= $model->uvm_voice_file_message ?>" controls style="width: 100%; margin-right: 10px;"></audio>
-				<?= Html::button('<i class="fa fa-trash"></i>', ['class' => 'delete-record btn btn-danger']); ?>
+                <?= Html::button('<i class="fa fa-trash"></i>', ['class' => 'delete-record btn btn-danger']); ?>
             </div>
-		<?php endif; ?>
+        <?php endif; ?>
 
         <?= $form->field($model, 'uvm_record_enable')->checkbox() ?>
 
@@ -48,8 +48,8 @@ use yii\widgets\ActiveForm;
 
         <div id="webAudioRecorder">
             <div>
-				<?= Html::button('<i class="fa fa-microphone"></i> Record', ['id' => 'recordButton', 'class' => 'btn btn-success']) ?>
-				<?= Html::button('<i class="fa fa-stop"></i> Stop', ['id' => 'stopButton', 'class' => 'btn btn-danger', 'disabled' => true]) ?>
+                <?= Html::button('<i class="fa fa-microphone"></i> Record', ['id' => 'recordButton', 'class' => 'btn btn-success']) ?>
+                <?= Html::button('<i class="fa fa-stop"></i> Stop', ['id' => 'stopButton', 'class' => 'btn btn-danger', 'disabled' => true]) ?>
             </div>
             <div id="timer-wrapper" class="d-flex align-items-center">
                 <span id="time-display" class="label label-default" style="margin-right: 10px;">00:00</span>

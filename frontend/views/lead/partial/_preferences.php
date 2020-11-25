@@ -48,7 +48,7 @@ $formId = sprintf('%s-form', $leadForm->getLeadPreferences()->formName());
         </div>
     </div>
 
-    <?php if($leadForm->getLead()->isNewRecord): ?>
+    <?php if ($leadForm->getLead()->isNewRecord) : ?>
         <?php echo $formPreferences->field($leadForm->getLead(), 'notes_for_experts')->textarea(['rows' => 7, 'id' => 'lead-notes_for_experts']); ?>
     <?php endif; ?>
 
@@ -71,7 +71,7 @@ $formId = sprintf('%s-form', $leadForm->getLeadPreferences()->formName());
 
         <?php
 
-        if(!$leadForm->getLead()->isNewRecord) {
+        if (!$leadForm->getLead()->isNewRecord) {
             $name = 'notes_for_experts'; //[' . $leadForm->getLead()->id . ']';
 
             echo Editable::widget([
@@ -98,8 +98,6 @@ $formId = sprintf('%s-form', $leadForm->getLeadPreferences()->formName());
                 'size' => \kartik\popover\PopoverX::SIZE_LARGE,
                 'options' => ['class' => 'form-control', 'rows' => 7, 'placeholder' => 'Enter notes...', 'id' => 'lead-notes_for_experts']
             ]);
-
-
         }
         ?>
     </div>

@@ -22,8 +22,8 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
         [
             'attribute' => 's_lead_id',
             'label' => 'Lead ID',
-            'value' => function(\common\models\Sms $model) {
-                return $model->s_lead_id ? Html::a($model->s_lead_id,[
+            'value' => function (\common\models\Sms $model) {
+                return $model->s_lead_id ? Html::a($model->s_lead_id, [
                     'lead/view',
                     'gid' => $model->sLead->gid
                 ]) : '-';

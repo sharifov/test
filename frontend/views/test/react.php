@@ -1,5 +1,7 @@
 <?php
+
 use yii\helpers\Html;
+
 //\frontend\assets\ReactAsset::register($this); // register ReactAsset
 
 //$this->registerJsFile('/js/vue/call-widget.js', [

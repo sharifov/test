@@ -15,7 +15,7 @@ if (!Auth::can('PhoneWidget_Dialpad')) {
 <div class="phone-widget__tab is_active" id="tab-phone">
 
   <div class="call-pane call-pane-initial is_active">
-    <?php if ($canDialpad): ?>
+    <?php if ($canDialpad) : ?>
         <div class="calling-from-info">
           <div class="current-number">
             <div class="custom-phone-select"></div>
@@ -32,7 +32,7 @@ if (!Auth::can('PhoneWidget_Dialpad')) {
 
                 use common\models\UserCallStatus;
                 use yii\bootstrap4\Html;
-				use yii\helpers\Url;
+                use yii\helpers\Url;
                 use yii\web\View;
                 use yii\widgets\ActiveForm;
 
@@ -68,7 +68,7 @@ if (!Auth::can('PhoneWidget_Dialpad')) {
                 ?>
             </div>
 
-        <?php if ($canDialpad): ?>
+        <?php if ($canDialpad) : ?>
             <a href="#" class="call-pane__dial-clear-all is-shown call_pane_dialpad_clear_number">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
@@ -76,7 +76,7 @@ if (!Auth::can('PhoneWidget_Dialpad')) {
                             fill="white" />
                 </svg>
             </a>
-        <?php else: ?>
+        <?php else : ?>
             <a href="#" class="call-pane__dial-clear-all is-shown call_pane_dialpad_clear_number_disabled">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
@@ -93,7 +93,7 @@ if (!Auth::can('PhoneWidget_Dialpad')) {
         if (!$canDialpad) {
             $dialPadButtonDisabledClass = ' disabled="disabled"';
         }
-      ?>
+        ?>
     <div class="call-pane__dial-block">
       <ul class="call-pane__dial dial">
         <li class="dial__item"><button class="dial__btn dialpad_btn_init" value="1"<?= $dialPadButtonDisabledClass?>>1</button></li>
@@ -113,7 +113,7 @@ if (!Auth::can('PhoneWidget_Dialpad')) {
         <button class="call-pane__start-call calling-state-block" id="btn-new-make-call">
           <i class="fas fa-phone"> </i>
         </button>
-        <?php if ($canDialpad): ?>
+        <?php if ($canDialpad) : ?>
             <button class="call-pane__correction">
               <i class="fas fa-backspace"> </i>
             </button>

@@ -6,6 +6,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
+
 /* @var $this yii\web\View */
 /* @var $searchModel frontend\models\search\UserSiteActivitySearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -21,7 +22,7 @@ $pjaxListId = 'pjax-site-activity';
 
     <?php echo $this->render('_search', ['model' => $searchModel]); ?>
 
-    <?php if (Auth::can('global/clean/table')): ?>
+    <?php if (Auth::can('global/clean/table')) : ?>
         <?php echo $this->render('../clean/_clean_table_form', [
             'modelCleaner' => $modelCleaner,
             'pjaxIdForReload' => $pjaxListId,

@@ -47,7 +47,7 @@ class QuotesController extends FController
     {
         $searchModel = new QuoteSearch();
         $params = Yii::$app->request->queryParams;
-        if(isset($params['reset'])){
+        if (isset($params['reset'])) {
             unset($params['QuoteSearch']['date_range']);
         }
 
@@ -88,8 +88,6 @@ class QuotesController extends FController
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
-
-
     }
 
     public function actionAjaxDetails()
@@ -99,7 +97,7 @@ class QuotesController extends FController
         $model = $this->findModel($id);
         $lead = $model->lead;
 
-        if($lead->status === Lead::STATUS_TRASH && Auth::user()->isAgent()) {
+        if ($lead->status === Lead::STATUS_TRASH && Auth::user()->isAgent()) {
             throw new ForbiddenHttpException('Access Denied for Agent');
         }
 
@@ -136,11 +134,12 @@ class QuotesController extends FController
 
         $mailCapture = $communication->mailCapture(
             $lead->project_id,
-            $tpl ,
+            $tpl,
             $mailFrom,
             $mailTo,
             $content_data,
-            $language, [
+            $language,
+            [
                 'img_width' => 265,
                 'img_height' => 60,
                 'img_update' => 1

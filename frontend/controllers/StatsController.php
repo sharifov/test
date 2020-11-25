@@ -273,8 +273,8 @@ class StatsController extends FController
             if (date('Y-m-d', strtotime($date[0])) == date('Y-m-d', strtotime($date[1])) && $rangeBy != 'D' && $rangeBy != 'M') {
                 $range = 'H';
                 $chartTimeFormat = 'H:i';
-                $currentDate =  date('Y-m-d H:i:s', strtotime($date[0].' 00:00:00'));
-                $lastDate =  date('Y-m-d H:i:s', strtotime($date[1].' 23:59:59'));
+                $currentDate =  date('Y-m-d H:i:s', strtotime($date[0] . ' 00:00:00'));
+                $lastDate =  date('Y-m-d H:i:s', strtotime($date[1] . ' 23:59:59'));
             } elseif (date('Y-m-d', strtotime($date[0])) != date('Y-m-d', strtotime($date[1])) && $rangeBy == 'D') {
                 $range = 'D';
                 $chartTimeFormat = 'd M';

@@ -10,6 +10,7 @@ use sales\model\clientChat\cannedResponseCategory\entity\ClientChatCannedRespons
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\clientChat\cannedResponse\entity\search\ClientChatCannedResponseSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */

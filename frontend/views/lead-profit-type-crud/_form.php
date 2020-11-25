@@ -15,7 +15,7 @@ use yii\widgets\ActiveForm;
         <div class="col-md-2">
             <?php \yii\widgets\Pjax::begin([]) ?>
 
-			<?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1]]); ?>
+            <?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1]]); ?>
 
                 <?= $form->errorSummary($model) ?>
 
@@ -32,20 +32,20 @@ use yii\widgets\ActiveForm;
                 ]) ?>
 
                 <?= $form->field($model, 'lpt_commission_max')->input('number', [
-					'min' => LeadProfitType::MIN_PERCENT_VALUE,
-					'max' => LeadProfitType::MAX_PERCENT_VALUE
-				]) ?>
+                    'min' => LeadProfitType::MIN_PERCENT_VALUE,
+                    'max' => LeadProfitType::MAX_PERCENT_VALUE
+                ]) ?>
 
                 <?= $form->field($model, 'lpt_commission_fix')->input('number', [
-					'min' => LeadProfitType::MIN_PERCENT_VALUE,
-					'max' => LeadProfitType::MAX_PERCENT_VALUE
-				]) ?>
+                    'min' => LeadProfitType::MIN_PERCENT_VALUE,
+                    'max' => LeadProfitType::MAX_PERCENT_VALUE
+                ]) ?>
 
                 <div class="form-group">
                     <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
                 </div>
 
-			<?php ActiveForm::end(); ?>
+            <?php ActiveForm::end(); ?>
 
             <?php \yii\widgets\Pjax::end() ?>
         </div>

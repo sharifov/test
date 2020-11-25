@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $form ActiveForm
  * @var $segment sales\forms\lead\SegmentEditForm
@@ -8,10 +9,10 @@
 use yii\widgets\ActiveForm;
 use dosamigos\datepicker\DatePicker;
 use yii\web\JsExpression;
-use \kartik\select2\Select2;
+use kartik\select2\Select2;
 use yii\web\View;
-use \sales\helpers\lead\LeadFlightSegmentHelper;
-use \unclead\multipleinput\MultipleInput;
+use sales\helpers\lead\LeadFlightSegmentHelper;
+use unclead\multipleinput\MultipleInput;
 
 $select2Properties = [
     'options' => [
@@ -52,11 +53,10 @@ $select2Properties = [
             },
             'options' => function ($segment) use ($select2Properties) {
                 $select2Properties['data'] = [];
-                if(isset($segment['origin'])) {
+                if (isset($segment['origin'])) {
                     $select2Properties['data'] = [$segment['origin'] => $segment['originLabel']];
                 }
                 return $select2Properties;
-
             },
             'headerOptions' => [
                 //'style' => 'width: 35%;',
@@ -71,7 +71,7 @@ $select2Properties = [
             },
             'options' => function ($segment) use ($select2Properties) {
                 $select2Properties['data'] = [];
-                if(isset($segment['destination'])) {
+                if (isset($segment['destination'])) {
                     $select2Properties['data'] = [$segment['destination'] => $segment['destinationLabel']];
                 }
                 return $select2Properties;

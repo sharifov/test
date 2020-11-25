@@ -1,4 +1,5 @@
 <?php
+
 /* @var $this \yii\web\View */
 /* @var $host string */
 /* @var $grav_url string */

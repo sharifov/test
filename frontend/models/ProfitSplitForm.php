@@ -43,44 +43,44 @@ class ProfitSplitForm extends Model
             [['ProfitSplit'], 'checkSumPercentage'],
             [['ProfitSplit'], 'checkMainAgent'],
             [['ProfitSplit'], 'safe'],
-			[['ProfitSplit'], 'checkSumPercent', 'on' => self::SCENARIO_CHECK_PERCENTAGE]
+            [['ProfitSplit'], 'checkSumPercent', 'on' => self::SCENARIO_CHECK_PERCENTAGE]
         ];
     }
 
     public function checkSumPercentage($attribute, $params)
     {
         $sum = $this->getSumProfitSplit();
-        if($sum > 100){
+        if ($sum > 100) {
             $this->addError('sumPercent', \Yii::t('user', 'Sum of percent more than 100'));
             return false;
         }
         return true;
     }
 
-	/**
-	 * @param $attribute
-	 * @param $params
-	 * @return bool
-	 */
-	public function checkSumPercent($attribute, $params): bool
-	{
-		$sum = $this->getSumProfitSplit();
-		if ($sum === 100){
-			NotificationsFormHelper::addNotification('sumPercent', \Yii::t('user', 'Sum of percent is 100. The main agent was left without profit.'));
-			return false;
-		}
-		return true;
-	}
+    /**
+     * @param $attribute
+     * @param $params
+     * @return bool
+     */
+    public function checkSumPercent($attribute, $params): bool
+    {
+        $sum = $this->getSumProfitSplit();
+        if ($sum === 100) {
+            NotificationsFormHelper::addNotification('sumPercent', \Yii::t('user', 'Sum of percent is 100. The main agent was left without profit.'));
+            return false;
+        }
+        return true;
+    }
 
     public function checkMainAgent($attribute, $params)
     {
         //var_dump($attribute);die;
         $employee = $this->getLead()->employee;
         $profitSplit = $this->getProfitSplit();
-        if(!empty($profitSplit)){
-            foreach ($profitSplit as $entry){
-                if(!empty($entry->ps_user_id) && $employee->id == $entry->ps_user_id){
-                    $this->addError('mainAgent', \Yii::t('user', $employee->username.' already is main agent'));
+        if (!empty($profitSplit)) {
+            foreach ($profitSplit as $entry) {
+                if (!empty($entry->ps_user_id) && $employee->id == $entry->ps_user_id) {
+                    $this->addError('mainAgent', \Yii::t('user', $employee->username . ' already is main agent'));
                     return false;
                 }
             }
@@ -92,7 +92,7 @@ class ProfitSplitForm extends Model
     {
         $this->setLead($lead);
        // $this->setProfitSplit([(new ProfitSplit())]);
-        if(!empty($lead->profitSplits)){
+        if (!empty($lead->profitSplits)) {
             $this->setProfitSplit($lead->profitSplits);
         }
 
@@ -130,9 +130,9 @@ class ProfitSplitForm extends Model
             $this->clearErrors('ProfitSplit');
         }
 
-		if (NotificationsFormHelper::hasNotifications()) {
-			$this->addError('warnings', NotificationsFormHelper::getAllAlertsNotifications('alert-warning'));
-		}
+        if (NotificationsFormHelper::hasNotifications()) {
+            $this->addError('warnings', NotificationsFormHelper::getAllAlertsNotifications('alert-warning'));
+        }
 
         parent::afterValidate();
     }
@@ -143,11 +143,11 @@ class ProfitSplitForm extends Model
             'Lead' => $this->getLead(),
         ];
         $profitSplit = $this->getProfitSplit();
-        if(!empty($profitSplit)){
+        if (!empty($profitSplit)) {
             foreach ($profitSplit as $id => $split) {
                 $models['ProfitSplit'][$id] = $profitSplit[$id];
             }
-        }else{
+        } else {
             $models['ProfitSplit'][] = new ProfitSplit();
         }
         return $models;
@@ -202,7 +202,7 @@ class ProfitSplitForm extends Model
             $lead = $this->getLead();
 
             $keep = [];
-            if(!empty($this->getProfitSplit())){
+            if (!empty($this->getProfitSplit())) {
                 foreach ($this->getProfitSplit() as $key => $split) {
                     $split->ps_lead_id = $lead->id;
                     if (!$split->save()) {
@@ -256,7 +256,6 @@ class ProfitSplitForm extends Model
                         $modelsPopulate[$key] = $m;
                     }
                     $this->modelsPopulate($modelsPopulate, $modelName);
-
                 } else {
                     if (!empty($attributes) && $models[$modelName]->load($attributes, '')) {
                         $success = true;
@@ -285,7 +284,7 @@ class ProfitSplitForm extends Model
             if (is_int($key)) {
                 return $this->getAllModels()[$model][$key];
             } else {
-                return new $mapping[$model];
+                return new $mapping[$model]();
             }
         }
 
@@ -303,20 +302,20 @@ class ProfitSplitForm extends Model
         }
     }
 
-	/**
-	 * @return int
-	 */
-	private function getSumProfitSplit(): int
-	{
-		$profitSplit = $this->getProfitSplit();
-		$sum = 0;
-		if(!empty($profitSplit)){
-			foreach ($profitSplit as $entry){
-				if(!empty($entry->ps_percent)){
-					$sum += $entry->ps_percent;
-				}
-			}
-		}
-		return $sum;
-	}
+    /**
+     * @return int
+     */
+    private function getSumProfitSplit(): int
+    {
+        $profitSplit = $this->getProfitSplit();
+        $sum = 0;
+        if (!empty($profitSplit)) {
+            foreach ($profitSplit as $entry) {
+                if (!empty($entry->ps_percent)) {
+                    $sum += $entry->ps_percent;
+                }
+            }
+        }
+        return $sum;
+    }
 }

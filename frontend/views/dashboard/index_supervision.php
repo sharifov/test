@@ -131,7 +131,7 @@ $user = Yii::$app->user->identity;
         </div>
     </div>
 
-<?php if ($modelUserParams):
+<?php if ($modelUserParams) :
     $js = <<<JS
         
         $("#myTimeline").timeline({
@@ -146,7 +146,7 @@ $user = Yii::$app->user->identity;
         });
 JS;
     $this->registerJs($js, \yii\web\View::POS_READY);
- ?>
+    ?>
 
         <h3>My Shift Timeline</h3>
         <!-- Timeline Block -->
@@ -179,7 +179,7 @@ JS;
         <!-- Timeline Event Detail View Area (optional) -->
         <div class="timeline-event-view"></div>
 
-    <?php endif; ?>
+<?php endif; ?>
 
     <?php Pjax::begin(); ?>
     <div class="card card-default">
@@ -258,11 +258,11 @@ JS;
                         'value' => static function ($model) {
                             $roleDescriptions = [];
                             $roles = Yii::$app->authManager->getRolesByUser($model['id']);
-                            foreach ($roles as $roleObj)
-                            {
+                            foreach ($roles as $roleObj) {
                                 array_push($roleDescriptions, $roleObj->description);
                             }
-                            return $roleDescriptions ? implode(', ', $roleDescriptions) : '-';;
+                            return $roleDescriptions ? implode(', ', $roleDescriptions) : '-';
+                            ;
                         },
                         'options' => ['style' => 'width:150px'],
                         //'format' => 'raw'
@@ -364,7 +364,7 @@ JS;
                     ]
                 ]
             ])
-            ?>
+?>
         </div>
     </div>
     <?php Pjax::end(); ?>

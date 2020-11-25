@@ -98,7 +98,7 @@ use yii\web\View;
           <span>Call</span>
         </a>
       </li>
-        <?php if (Auth::can('PhoneWidget_HistoryTab')): ?>
+        <?php if (Auth::can('PhoneWidget_HistoryTab')) : ?>
             <li>
                 <a href="#" data-toggle-tab="tab-history" data-missed-calls="0" style="margin-right: 15px">
                     <i class="fas fa-file-invoice"></i>
@@ -106,7 +106,7 @@ use yii\web\View;
                 </a>
             </li>
         <?php endif;?>
-        <?php if (Auth::can('PhoneWidget_ContactsTab')): ?>
+        <?php if (Auth::can('PhoneWidget_ContactsTab')) : ?>
               <li>
                 <a href="#" data-toggle-tab="tab-contacts" >
                   <i class="far fa-address-book"></i>

@@ -7,20 +7,20 @@ use sales\model\clientChat\entity\ClientChat;
 
 ?>
 
-<?php if ($clientChat): ?>
+<?php if ($clientChat) : ?>
     <?php echo (new ClientChatIframeHelper($clientChat))->setReadOnly(true)->generateIframe(); ?>
 
-<?php
-$js = <<<JS
+    <?php
+    $js = <<<JS
     removeCcLoadFromIframe = function () {
         $('#_rc-iframe-wrapper').find('#_cc-load').remove();
     }
 JS;
-$this->registerJs($js);
-?>
+    $this->registerJs($js);
+    ?>
 
-<?php else: ?>
-	<?= \yii\bootstrap4\Alert::widget([
+<?php else : ?>
+    <?= \yii\bootstrap4\Alert::widget([
         'options' => [
             'class' => 'alert-danger',
             'delay' => 4000
@@ -29,5 +29,5 @@ $this->registerJs($js);
         'body' => 'Chat is undefined or unable to find chat history',
         'closeButton' => false
     ]) ?>
-<?php endif; ?>
+<?php endif;
 

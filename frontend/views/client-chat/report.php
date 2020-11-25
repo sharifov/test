@@ -1,7 +1,7 @@
 <?php
+
 use kartik\grid\GridView;
 use yii\helpers\Html;
-
 
 $this->title = 'Client Chat Users';
 $this->params['breadcrumbs'][] = $this->title;
@@ -54,7 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Messages',
                 'attribute' => 'msg',
-                'value' => function($model){
+                'value' => function ($model) {
                     return $model['msg'] ? $model['msg'] : '-';
                 },
                 'contentOptions' => [
@@ -63,5 +63,5 @@ $this->params['breadcrumbs'][] = $this->title;
             ]
         ]
     ]);
-    ?>
+?>
 </div>

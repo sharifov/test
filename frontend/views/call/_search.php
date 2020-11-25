@@ -1,7 +1,7 @@
 <?php
 
 use yii\helpers\Html;
-use \kartik\form\ActiveForm;
+use kartik\form\ActiveForm;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\search\CallSearch */
@@ -106,7 +106,7 @@ use \kartik\form\ActiveForm;
                             ]
                         ]
                     ])->label('Created DateTime Range');
-                    ?>
+?>
                 </div>
                 <div class="col-md-3">
                     <div class="col-md-6">

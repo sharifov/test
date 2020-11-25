@@ -42,7 +42,7 @@ class ClientCounterWidget extends Widget
      */
     private function countActiveLeads(): int
     {
-        $query = (new Query)->select(['client_id', 'status'])->from(Lead::tableName())
+        $query = (new Query())->select(['client_id', 'status'])->from(Lead::tableName())
             ->andWhere(['client_id' => $this->clientId])
             ->andWhere(['NOT IN', 'status', [Lead::STATUS_TRASH, Lead::STATUS_SOLD, Lead::STATUS_REJECT]]);
 
@@ -54,7 +54,7 @@ class ClientCounterWidget extends Widget
      */
     private function countAllLeads(): int
     {
-        $query = (new Query)->select(['client_id'])->from(Lead::tableName())
+        $query = (new Query())->select(['client_id'])->from(Lead::tableName())
             ->andWhere(['client_id' => $this->clientId]);
 
         return $this->count($query, 'project_id');
@@ -65,7 +65,7 @@ class ClientCounterWidget extends Widget
      */
     private function countActiveCases(): int
     {
-        $query = (new Query)->select(['cs_client_id', 'cs_status'])->from(Cases::tableName())
+        $query = (new Query())->select(['cs_client_id', 'cs_status'])->from(Cases::tableName())
             ->andWhere(['cs_client_id' => $this->clientId])
             ->andWhere(['NOT IN', 'cs_status', [CasesStatus::STATUS_SOLVED, CasesStatus::STATUS_TRASH]]);
 
@@ -77,7 +77,7 @@ class ClientCounterWidget extends Widget
      */
     private function countAllCases(): int
     {
-        $query = (new Query)->select(['cs_client_id'])->from(Cases::tableName())
+        $query = (new Query())->select(['cs_client_id'])->from(Cases::tableName())
             ->andWhere(['cs_client_id' => $this->clientId]);
 
         return $this->count($query, 'cs_project_id');
@@ -94,5 +94,4 @@ class ClientCounterWidget extends Widget
 
         return $q->count();
     }
-
 }

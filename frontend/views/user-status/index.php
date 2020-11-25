@@ -6,6 +6,7 @@ use common\components\grid\UserColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\user\entity\userStatus\search\UserStatusSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -23,7 +24,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <div class="row">
         <div class="col-md-12">
-            Site settings "general_line_last_hours":  <b><?=(Yii::$app->params['settings']['general_line_last_hours'] ?? 1)?></b> for "<b><?=Html::encode((new UserStatus)->getAttributeLabel('us_gl_call_count'))?></b>"
+            Site settings "general_line_last_hours":  <b><?=(Yii::$app->params['settings']['general_line_last_hours'] ?? 1)?></b> for "<b><?=Html::encode((new UserStatus())->getAttributeLabel('us_gl_call_count'))?></b>"
         </div>
         <hr>
         <div class="col-md-12">

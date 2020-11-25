@@ -54,7 +54,7 @@ $lists =  new ListsAccess(Yii::$app->user->id);
         [
             'label' => 'Created',
             'attribute' => 'l_type_create',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) {
                 return Lead::TYPE_CREATE_LIST[$model->l_type_create] ?? '-';
             },
             'filter' => \common\models\Lead::TYPE_CREATE_LIST
@@ -62,16 +62,16 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 
         [
             'attribute' => 'status',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) {
                 return $model->getStatusName(false);
             },
             'filter' => \common\models\Lead::STATUS_LIST
         ],
         [
             'header' => 'Status Date',
-            'value' => function(\common\models\Lead $model){
-                foreach ($model->leadFlows as $flow){
-                    if ($model->id === $flow['lead_id'] && $model->status === $flow['status']){
+            'value' => function (\common\models\Lead $model) {
+                foreach ($model->leadFlows as $flow) {
+                    if ($model->id === $flow['lead_id'] && $model->status === $flow['status']) {
                         return Yii::$app->formatter->asDatetime(strtotime($flow['created']), 'php: Y-m-d H:i');
                     }
                 }
@@ -79,7 +79,7 @@ $lists =  new ListsAccess(Yii::$app->user->id);
         ],
         'reason' => [
             'header' => 'Trash/Reject reason.',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) {
                 if ($model->status === \common\models\Lead::STATUS_REJECT || $model->status === \common\models\Lead::STATUS_TRASH) {
                     return $model->getLastReasonFromLeadFlow();
                 }
@@ -88,7 +88,7 @@ $lists =  new ListsAccess(Yii::$app->user->id);
         ],
         [
             'header' => 'Customer email',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) {
                 $emails = [];
                 if ($model->client && $emailList = $model->client->clientEmails) {
                     $emails = \yii\helpers\ArrayHelper::map($emailList, 'email', 'email');
@@ -141,18 +141,18 @@ $lists =  new ListsAccess(Yii::$app->user->id);
         ],
         [
             'header' => 'Segments',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) {
 
                 $segments = $model->leadFlightSegments;
                 $segmentData = [];
-                if($segments) {
+                if ($segments) {
                     foreach ($segments as $sk => $segment) {
-                        $segmentData[] = ($sk + 1).'. '.($segment->origin.'->'.$segment->destination).'';
+                        $segmentData[] = ($sk + 1) . '. ' . ($segment->origin . '->' . $segment->destination) . '';
                     }
                 }
 
                 $segmentStr = implode("\r\n", $segmentData);
-                return ''.$segmentStr.'';
+                return '' . $segmentStr . '';
                 //return $model->leadFlightSegmentsCount ? Html::a($model->leadFlightSegmentsCount, ['lead-flight-segment/index', "LeadFlightSegmentSearch[lead_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0]) : '-' ;
             },
 
@@ -160,16 +160,15 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 
         [
             'header' => 'Origin City Code',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) {
 
                 $segments = $model->leadFlightSegments;
                 $originCode = null;
                 $destinationCode = null;
 
-                if($segments) {
+                if ($segments) {
                     foreach ($segments as $sk => $segment) {
-
-                        if(!$originCode) {
+                        if (!$originCode) {
                             $originCode = $segment->origin;
                             break;
                         }
@@ -183,22 +182,20 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 
         [
             'header' => 'Destination City Code',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) {
 
                 $segments = $model->leadFlightSegments;
                 $originCode = null;
                 $destinationCode = null;
 
-                if($segments) {
+                if ($segments) {
                     foreach ($segments as $sk => $segment) {
-
                         /*if(!$originCode) {
                             $originCode = $segment->origin;
                         }*/
-                        if(!$destinationCode) {
+                        if (!$destinationCode) {
                             $destinationCode = $segment->destination;
                         }
-
                     }
                 }
 
@@ -208,16 +205,15 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 
         [
             'header' => 'Origin City, full name',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) {
 
                 $segments = $model->leadFlightSegments;
                 $originCode = null;
                 $destinationCode = null;
 
-                if($segments) {
+                if ($segments) {
                     foreach ($segments as $sk => $segment) {
-
-                        if(!$originCode) {
+                        if (!$originCode) {
                             $originCode = $segment->origin;
                         }
                         //$destinationCode = $segment->destination;
@@ -228,7 +224,7 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 
                 $airport = \common\models\Airports::find()->where(['iata' => $originCode])->one();
 
-                if($airport && $airport->city) {
+                if ($airport && $airport->city) {
                     $city = $airport->city;
                 }
 
@@ -245,19 +241,18 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 
         [
             'header' => 'Destination City, full name',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) {
 
                 $segments = $model->leadFlightSegments;
                 $originCode = null;
                 $destinationCode = null;
 
-                if($segments) {
+                if ($segments) {
                     foreach ($segments as $sk => $segment) {
-
                         /*if(!$originCode) {
                             $originCode = $segment->origin;
                         }*/
-                        if(!$destinationCode) {
+                        if (!$destinationCode) {
                             $destinationCode = $segment->destination;
                         }
                     }
@@ -267,7 +262,7 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 
                 $airport = \common\models\Airports::find()->where(['iata' => $destinationCode])->one();
 
-                if($airport && $airport->city) {
+                if ($airport && $airport->city) {
                     $city = $airport->city;
                 }
 
@@ -277,16 +272,15 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 
         [
             'header' => 'Origin Country',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) {
 
                 $segments = $model->leadFlightSegments;
                 $originCode = null;
                 $destinationCode = null;
 
-                if($segments) {
+                if ($segments) {
                     foreach ($segments as $sk => $segment) {
-
-                        if(!$originCode) {
+                        if (!$originCode) {
                             $originCode = $segment->origin;
                         }
                         // $destinationCode = $segment->destination;
@@ -294,11 +288,11 @@ $lists =  new ListsAccess(Yii::$app->user->id);
                 }
 
                 $country = '-';
-                if($originCode) {
+                if ($originCode) {
                     //$airport = \common\models\AirportList::find()->where(['ai_iata_code' => $originCode])->one();
                     $airport = \common\models\Airports::find()->where(['iata' => $originCode])->one();
 
-                    if($airport && $airport->a_country_code) {
+                    if ($airport && $airport->a_country_code) {
                         $country = $airport->a_country_code;
                     }
                 }
@@ -309,19 +303,18 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 
         [
             'header' => 'Destination Country',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) {
 
                 $segments = $model->leadFlightSegments;
                 $originCode = null;
                 $destinationCode = null;
 
-                if($segments) {
+                if ($segments) {
                     foreach ($segments as $sk => $segment) {
-
                         /*if(!$originCode) {
                             $originCode = $segment->origin;
                         }*/
-                        if(!$destinationCode) {
+                        if (!$destinationCode) {
                             $destinationCode = $segment->destination;
                         }
                         //$destinationCode = $segment->destination;
@@ -329,12 +322,12 @@ $lists =  new ListsAccess(Yii::$app->user->id);
                 }
 
                 $country = '-';
-                if($destinationCode) {
+                if ($destinationCode) {
                     //$airport = \common\models\AirportList::find()->where(['ai_iata_code' => $destinationCode])->one();
 
                     $airport = \common\models\Airports::find()->where(['iata' => $destinationCode])->one();
 
-                    if($airport && $airport->a_country_code) {
+                    if ($airport && $airport->a_country_code) {
                         $country = $airport->a_country_code;
                     }
 
@@ -349,10 +342,10 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 
         [
             'header' => 'Profit',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) {
                 $total = 0;
 
-                if($model->status == \common\models\Lead::STATUS_SOLD) {
+                if ($model->status == \common\models\Lead::STATUS_SOLD) {
                     $quote = \common\models\Quote::find()->where(['lead_id' => $model->id, 'status' => \common\models\Quote::STATUS_APPLIED])->orderBy(['id' => SORT_DESC])->one();
 
                     if (!$quote) {
@@ -366,7 +359,6 @@ $lists =  new ListsAccess(Yii::$app->user->id);
                                 $total += (float)$price->selling - (float)$price->net;
                             }
                         }
-
                     }
                 } else {
                     $total = '';
@@ -389,7 +381,7 @@ $lists =  new ListsAccess(Yii::$app->user->id);
         [
             'header' => 'Expert Quotes',
             'value' => static function (\common\models\Lead $model) {
-                return $model->quotesExpertCount ? $model->quotesExpertCount: '-';
+                return $model->quotesExpertCount ? $model->quotesExpertCount : '-';
             },
             'format' => 'raw',
             'contentOptions' => [
@@ -398,10 +390,10 @@ $lists =  new ListsAccess(Yii::$app->user->id);
         ],
         [
             'header' => 'Outbound Date',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) {
                 $segments = $model->leadFlightSegments;
                 $datetime = '';
-                if(isset($segments[0]) && $segments[0]->departure) {
+                if (isset($segments[0]) && $segments[0]->departure) {
                     $datetime = date('d-M-Y', strtotime($segments[0]->departure));
                 }
                 return $datetime;
@@ -417,7 +409,7 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 
         [
             'header' => 'Market info',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) {
                 return $model->source ? $model->source->name : '-';
             },
         ],
@@ -425,7 +417,7 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 
         [
             'attribute' => 'trip_type',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) {
                 return $model->getFlightTypeName();
             },
             'filter' => \common\models\Lead::getFlightTypeList()
@@ -441,7 +433,7 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 
         [
             'attribute' => 'adults',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) {
                 return $model->adults ?: 0;
             },
             'filter' => array_combine(range(0, 9), range(0, 9)),
@@ -450,7 +442,7 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 
         [
             'attribute' => 'children',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) {
                 return $model->children ?: 0;
             },
             'filter' => array_combine(range(0, 9), range(0, 9)),
@@ -459,7 +451,7 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 
         [
             'attribute' => 'infants',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) {
                 return $model->infants ?: 0;
             },
             'filter' => array_combine(range(0, 9), range(0, 9)),
@@ -468,20 +460,20 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 
         [
             'header' => 'Agent name',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) {
                 return $model->employee_id ? $model->employee->username : '';
             },
         ],
         [
             'header' => 'Created Date',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) {
                 return Yii::$app->formatter->asDate($model->created);
             },
         ],
 
         [
             'header' => 'Created Time',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) {
                 return Yii::$app->formatter->asDatetime(strtotime($model->created), 'php:H:i');
             },
         ],
@@ -586,11 +578,11 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 
         'columns' => $gridColumnsExport,
         'toolbar' =>  [
-            ['content'=>
+            ['content' =>
             //Html::button('<i class="glyphicon glyphicon-plus"></i>', ['type'=>'button', 'title'=>'Add Lead', 'class'=>'btn btn-success', 'onclick'=>'alert("This will launch the book creation form.\n\nDisabled for this demo!");']) . ' '.
-                Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['leads/export'], ['data-pjax'=>0, 'class' => 'btn btn-outline-secondary', 'title'=>'Reset Grid']) . ' ' .
+                Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['leads/export'], ['data-pjax' => 0, 'class' => 'btn btn-outline-secondary', 'title' => 'Reset Grid']) . ' ' .
                 '{export}' . ' ' .
-                Html::button('<i class="glyphicon glyphicon-download"></i> Full Export', ['type'=>'button', 'title'=>'Full Export in CSV', 'id' => 'fullExportLeads', 'class'=>'btn btn-outline-secondary'])
+                Html::button('<i class="glyphicon glyphicon-download"></i> Full Export', ['type' => 'button', 'title' => 'Full Export in CSV', 'id' => 'fullExportLeads', 'class' => 'btn btn-outline-secondary'])
             ],
             //$fullExportMenu,
             //'{toggleData}'
@@ -617,7 +609,7 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 </div>
 
 <?php
-$downloadButton = Html::a('<i class="glyphicon glyphicon-cloud-download"></i> Download', ['leads/download-csv'], ['data-pjax'=>0, 'class' => 'btn btn-default', 'title'=>'Download']);
+$downloadButton = Html::a('<i class="glyphicon glyphicon-cloud-download"></i> Download', ['leads/download-csv'], ['data-pjax' => 0, 'class' => 'btn btn-default', 'title' => 'Download']);
 yii\bootstrap4\Modal::begin([
     'id' => 'modalClient',
     'size' => \yii\bootstrap4\Modal::SIZE_DEFAULT,

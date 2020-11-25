@@ -42,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'etp_updated_user_id',
                 'value' => static function (\common\models\EmailTemplateType $model) {
-                    return ($model->etpUpdatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->etpUpdatedUser->username) : $model->etp_updated_user_id);
+                    return ($model->etpUpdatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->etpUpdatedUser->username) : $model->etp_updated_user_id);
                 },
                 'format' => 'raw'
             ],
@@ -57,7 +57,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'etp_created_user_id',
                 'value' => static function (\common\models\EmailTemplateType $model) {
-                    return  ($model->etpCreatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->etpCreatedUser->username) : $model->etp_created_user_id);
+                    return  ($model->etpCreatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->etpCreatedUser->username) : $model->etp_created_user_id);
                 },
                 'format' => 'raw'
             ],

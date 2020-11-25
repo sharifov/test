@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $this \yii\web\View
  * @var $lead \common\models\Lead
@@ -27,12 +28,10 @@ use yii\widgets\Pjax;
         <h2><i class="fa fa-folder-o"></i> Quotes</h2>
         <ul class="nav navbar-right panel_toolbox">
             <?php if ($leadForm->mode !== $leadForm::VIEW_MODE || $is_manager) : ?>
-
-
             <li>
-                <?php if($lead->leadFlightSegmentsCount):?>
+                <?php if ($lead->leadFlightSegmentsCount) :?>
                     <?=Html::a('<i class="fa fa-search warning"></i> Quick Search', null, ['class' => '', 'id' => 'quick-search-quotes-btn', 'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id])])?>
-                <?php else: ?>
+                <?php else : ?>
                     <span class="badge badge-warning"><i class="fa fa-warning"></i> Warning: Flight Segments is empty!</span>
                 <?php endif; ?>
             </li>

@@ -43,7 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
 
         <div class="row">
-            <?php if (!$checkShiftTime): ?>
+            <?php if (!$checkShiftTime) : ?>
                 <div class="col-md-12">
                     <div class="alert alert-warning alert-dismissible" role="alert">
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
@@ -53,7 +53,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 </div>
             <?php endif; ?>
 
-            <?php if (!$isAccessNewLead): ?>
+            <?php if (!$isAccessNewLead) : ?>
                 <div class="col-md-12">
                     <div class="alert alert-warning alert-dismissible" role="alert">
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
@@ -64,7 +64,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <?php endif; ?>
 
 
-            <?php if (!empty($accessLeadByFrequency) && $accessLeadByFrequency['access'] == false): ?>
+            <?php if (!empty($accessLeadByFrequency) && $accessLeadByFrequency['access'] == false) : ?>
                 <div class="col-md-12">
                     <div class="alert alert-warning alert-dismissible" role="alert">
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
@@ -200,7 +200,6 @@ $this->params['breadcrumbs'][] = $this->title;
                         }
                     }
                     return '-';
-
                 },
                 'format' => 'raw',
                 'contentOptions' => [

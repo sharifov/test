@@ -1,6 +1,5 @@
 <?php
 
-
 namespace frontend\widgets\centrifugo;
 
 use yii\base\InvalidConfigException;

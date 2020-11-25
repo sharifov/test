@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use common\components\grid\UserSelect2Column;
+
 /* @var $this yii\web\View */
 /* @var $csId int */
 /* @var $saleId int */
@@ -16,16 +17,16 @@ $addCreditCardBtnClass = 'btn-add-sale-cc-' . $saleId;
 $editCreditCardBtnClass = 'btn-edit-credit-card-' . $saleId;
 $deleteCreditCardBtnClass = 'btn-delete-credit-card-' . $saleId;
 $pjaxCreditCardTable = 'pjax-credit-card-table' . $saleId;
-$sendCcInfoBtnClass = 'btn-send-cc-info-'.$saleId;
+$sendCcInfoBtnClass = 'btn-send-cc-info-' . $saleId;
 ?>
 <div class="sale-credit-card">
 
     <h2>Credit Card (Optional)</h2>
-    <?php if ($caseModel->isProcessing()): ?>
+    <?php if ($caseModel->isProcessing()) : ?>
         <p>
             <?php
                 echo Html::button('<i class="fa fa-plus"></i> Add Credit Card', [
-                    'class' => $addCreditCardBtnClass.' btn btn-success btn-sm',
+                    'class' => $addCreditCardBtnClass . ' btn btn-success btn-sm',
                     'data-case-id' => $csId,
                     'data-case-sale-id' => $saleId,
                     'title' => 'Add Credit Card'
@@ -34,8 +35,8 @@ $sendCcInfoBtnClass = 'btn-send-cc-info-'.$saleId;
 
             <?= Html::button('<i class="fa fa-envelope"></i> Send CC Info', [
                 'class' => 'btn btn-success btn-sm ' . $sendCcInfoBtnClass,
-				'data-case-id' => $csId,
-				'data-case-sale-id' => $saleId,
+                'data-case-id' => $csId,
+                'data-case-sale-id' => $saleId,
                 'title' => 'Send CC Info'
             ]) ?>
         </p>
@@ -57,7 +58,7 @@ $sendCcInfoBtnClass = 'btn-send-cc-info-'.$saleId;
 
             [
                 'label' => 'Expired',
-                'value' => static function(\common\models\CreditCard $model) {
+                'value' => static function (\common\models\CreditCard $model) {
                     return $model->cc_expiration_month . ' / ' . $model->cc_expiration_year;
                 },
             ],
@@ -65,7 +66,7 @@ $sendCcInfoBtnClass = 'btn-send-cc-info-'.$saleId;
             //'cc_cvv',
             [
                 'attribute' => 'cc_type_id',
-                'value' => static function(\common\models\CreditCard $model) {
+                'value' => static function (\common\models\CreditCard $model) {
                     return $model->typeName;
                 },
             ],
@@ -79,43 +80,43 @@ $sendCcInfoBtnClass = 'btn-send-cc-info-'.$saleId;
             //'cc_bo_link',
             [
                 'attribute' => 'cc_bo_link',
-                'value' => static function(\common\models\CreditCard $model) {
+                'value' => static function (\common\models\CreditCard $model) {
                     return $model->cc_bo_link ? 'Yes' :  '-';
                 },
             ],
-			[
-				'attribute' => 'cc_is_sync_bo',
-				'value' => static function(\common\models\CreditCard $model) {
-					return $model->cc_is_sync_bo ? 'Yes' :  '-';
-				},
-			],
+            [
+                'attribute' => 'cc_is_sync_bo',
+                'value' => static function (\common\models\CreditCard $model) {
+                    return $model->cc_is_sync_bo ? 'Yes' :  '-';
+                },
+            ],
             'cc_created_dt:ByUserDateTime',
 
             [
                 'class' => 'yii\grid\ActionColumn',
-				'template' => '{edit} {delete} {sync}',
+                'template' => '{edit} {delete} {sync}',
 
                 'buttons' => [
                     'edit' => static function ($url, $model) use ($editCreditCardBtnClass, $pjaxCreditCardTable) {
                         /** @var $model \common\models\CreditCard*/
-						$editCreditCardUrl = \yii\helpers\Url::toRoute(['/credit-card/ajax-update', 'id' => $model->cc_id, 'pjaxId' => $pjaxCreditCardTable]);
-						return Html::a('<i class="fa fa-pencil"></i>', $editCreditCardUrl, [
-							'title' => 'Edit Credit Card', 'data-pjax' => 0, 'class' => $editCreditCardBtnClass
-						]);
+                        $editCreditCardUrl = \yii\helpers\Url::toRoute(['/credit-card/ajax-update', 'id' => $model->cc_id, 'pjaxId' => $pjaxCreditCardTable]);
+                        return Html::a('<i class="fa fa-pencil"></i>', $editCreditCardUrl, [
+                            'title' => 'Edit Credit Card', 'data-pjax' => 0, 'class' => $editCreditCardBtnClass
+                        ]);
                     },
                     'delete' => static function ($url, $model) use ($saleId, $deleteCreditCardBtnClass) {
-						/** @var $model \common\models\CreditCard*/
-						$deleteCreditCardUrl = \yii\helpers\Url::toRoute(['/credit-card/ajax-delete', 'id' => $model->cc_id, 'saleId' => $saleId]);
-						return Html::a('<i class="fa fa-trash"></i>', $deleteCreditCardUrl, [
-							'title' => 'Delete Credit Card', 'data-pjax' => 0, 'class' => $deleteCreditCardBtnClass
-						]);
+                        /** @var $model \common\models\CreditCard*/
+                        $deleteCreditCardUrl = \yii\helpers\Url::toRoute(['/credit-card/ajax-delete', 'id' => $model->cc_id, 'saleId' => $saleId]);
+                        return Html::a('<i class="fa fa-trash"></i>', $deleteCreditCardUrl, [
+                            'title' => 'Delete Credit Card', 'data-pjax' => 0, 'class' => $deleteCreditCardBtnClass
+                        ]);
                     },
                     'sync' => static function ($url, $model) {
-						/** @var $model \common\models\CreditCard*/
-//						$deleteCreditCardUrl = \yii\helpers\Url::toRoute(['/credit-card/ajax-sync', 'id' => $model->cc_id]);
-//						return Html::a('<i class="fa fa-trash"></i>', $deleteCreditCardUrl, [
-//							'title' => 'Delete Credit Card', 'data-pjax' => 0, 'class' => 'btn-delete-credit-card'
-//						]);
+                        /** @var $model \common\models\CreditCard*/
+//                      $deleteCreditCardUrl = \yii\helpers\Url::toRoute(['/credit-card/ajax-sync', 'id' => $model->cc_id]);
+//                      return Html::a('<i class="fa fa-trash"></i>', $deleteCreditCardUrl, [
+//                          'title' => 'Delete Credit Card', 'data-pjax' => 0, 'class' => 'btn-delete-credit-card'
+//                      ]);
                         return '';
                     }
                 ]

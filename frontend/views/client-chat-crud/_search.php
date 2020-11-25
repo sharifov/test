@@ -117,8 +117,11 @@ use yii\widgets\Pjax;
                 <div class="col-md-12">
                     <div class="form-group text-center">
                         <?= Html::submitButton('<i class="fa fa-search"></i> Search', ['class' => 'btn btn-primary search_qa_btn']) ?>
-                        <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset',
-                            ['index'], ['class' => 'btn btn-outline-secondary']) ?>
+                        <?= Html::a(
+                            '<i class="glyphicon glyphicon-repeat"></i> Reset',
+                            ['index'],
+                            ['class' => 'btn btn-outline-secondary']
+                        ) ?>
                     </div>
                 </div>
             </div>

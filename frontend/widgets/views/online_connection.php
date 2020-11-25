@@ -9,7 +9,7 @@ $controllerId = Yii::$app->controller->id;
 $actionId = Yii::$app->controller->action->id;
 $pageUrl = urlencode(\yii\helpers\Url::current());
 $ipAddress = Yii::$app->request->remoteIP;
-$webSocketHost = (Yii::$app->request->isSecureConnection ? 'wss': 'ws') . '://'.Yii::$app->request->serverName . '/ws';// . ':8888';
+$webSocketHost = (Yii::$app->request->isSecureConnection ? 'wss' : 'ws') . '://' . Yii::$app->request->serverName . '/ws';// . ':8888';
 ?>
     <li>
         <a href="javascript:;" class="info-number" title="Online Connection" id="online-connection-indicator">
@@ -261,9 +261,9 @@ JS;
 
 } else {*/
 
-    if (Yii::$app->controller->module->id != 'user-management') {
-        $this->registerJs($js, \yii\web\View::POS_READY);
-    }
+if (Yii::$app->controller->module->id != 'user-management') {
+    $this->registerJs($js, \yii\web\View::POS_READY);
+}
 //}
 
 

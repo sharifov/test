@@ -31,9 +31,9 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
-		'rowOptions'=> static function(UserPayment $model){
-			return ['class' => $model->getRowClass()];
-		},
+        'rowOptions' => static function (UserPayment $model) {
+            return ['class' => $model->getRowClass()];
+        },
         'columns' => [
             'upt_id',
 
@@ -46,8 +46,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'class' => UserPaymentCategoryIdColumn::class,
-				'attribute' => 'upt_category_id',
-				'relation' => 'uptCategory'
+                'attribute' => 'upt_category_id',
+                'relation' => 'uptCategory'
             ],
             [
                 'class' => UserPaymentStatusIdColumn::class,
@@ -55,11 +55,11 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'upt_amount',
             'upt_description',
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'upt_date',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'upt_date',
                 'format' => 'date'
-			],
+            ],
 
             [
                 'class' => UserSelect2Column::class,
@@ -79,22 +79,22 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => DateTimeColumn::class,
                 'attribute' => 'upt_created_dt',
             ],
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'upt_updated_dt',
-			],
-			[
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'upt_updated_dt',
+            ],
+            [
                 'attribute' => 'upt_payroll_id',
-				'value' => static function (UserPayment $model) {
-					$count = $model->upt_payroll_id ? 1 : 0;
-					$route = Url::toRoute(['/user-payroll-crud/view',  'id' => $model->upt_payroll_id]);
-					return ($count ? Html::a($model->upt_payroll_id, $route, [
-						'target' => '_blank',
-						'data-pjax' => 0
-					]) : null);
-				},
-				'format' => 'raw'
-			],
+                'value' => static function (UserPayment $model) {
+                    $count = $model->upt_payroll_id ? 1 : 0;
+                    $route = Url::toRoute(['/user-payroll-crud/view',  'id' => $model->upt_payroll_id]);
+                    return ($count ? Html::a($model->upt_payroll_id, $route, [
+                        'target' => '_blank',
+                        'data-pjax' => 0
+                    ]) : null);
+                },
+                'format' => 'raw'
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

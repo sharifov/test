@@ -4,6 +4,7 @@
 /* @var $content string */
 
 use yii\helpers\Html;
+
 $bundle = \frontend\themes\gentelella_v2\assets\SimpleAsset::register($this);
 ?>
 <?php $this->beginPage(); ?>
@@ -20,13 +21,13 @@ $bundle = \frontend\themes\gentelella_v2\assets\SimpleAsset::register($this);
     $this->metaTags[] = Html::csrfMetaTags();
     $this->registerMetaTag(['name' => 'robots', 'content' => 'noindex, nofollow']);
     //$this->registerLinkTag(['rel' => 'icon', 'type' => 'image/png', 'href' => Helper::publishStatic('images/favicons/16x16.png'), 'sizes' => '16x16']);
-    $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'href' => Yii::$app->request->baseUrl.'/favicon.ico']);
+    $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'href' => Yii::$app->request->baseUrl . '/favicon.ico']);
     $this->head();
 
     //$this->head();
 
     $host = str_replace(['http://','https://'], '', $_SERVER['HTTP_HOST']);
-    echo Html::tag('title', ucfirst($host). ' - AUTHORIZATION');
+    echo Html::tag('title', ucfirst($host) . ' - AUTHORIZATION');
     ?>
     <?php /*<link rel="stylesheet" href="<?= Yii::$app->getAssetManager()->publish(Yii::getAlias('@frontend').'/web/css/style_theme.css')[1];?>"/> ?>
     <?php //php $this->head() ?>

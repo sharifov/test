@@ -22,7 +22,7 @@ use yii\widgets\ActiveForm;
             'action' => ['client-chat/ajax-couch-note'],
             'method' => 'post',
         ]);
-    ?>
+        ?>
 
         <?php echo $form->field($couchNoteForm, 'rid')->hiddenInput()->label(false) ?>
         <?php echo $form->field($couchNoteForm, 'alias')->hiddenInput()->label(false) ?>

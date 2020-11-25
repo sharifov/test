@@ -568,7 +568,8 @@ class ClientChatController extends FController
      */
     public function actionDeleteNote(): string
     {
-        if (!Yii::$app->request->isAjax ||
+        if (
+            !Yii::$app->request->isAjax ||
             !Yii::$app->request->get('cch_id') ||
             !Yii::$app->request->get('ccn_id')
         ) {
@@ -612,7 +613,8 @@ class ClientChatController extends FController
      */
     public function actionAccessManage(): \yii\web\Response
     {
-        if (!Yii::$app->request->isAjax ||
+        if (
+            !Yii::$app->request->isAjax ||
             !Yii::$app->request->post('ccuaId') ||
             !Yii::$app->request->post('accessAction')
         ) {
@@ -903,9 +905,9 @@ class ClientChatController extends FController
 
         try {
             $clientChat = $this->clientChatRepository->findById($chatId);
-            //			if ($clientChat->isClosed()) {
-            //				$history = ClientChatMessage::find()->byChhId($clientChat->cch_id)->all();
-            //			}
+            //          if ($clientChat->isClosed()) {
+            //              $history = ClientChatMessage::find()->byChhId($clientChat->cch_id)->all();
+            //          }
 
             if (!Auth::can('client-chat/view', ['chat' => $clientChat])) {
                 throw new ForbiddenHttpException('You don\'t have access to this chat');
@@ -915,7 +917,7 @@ class ClientChatController extends FController
         }
 
         return $this->renderAjax('partial/_chat_history', [
-            //			'history' => $history ?? null,
+            //          'history' => $history ?? null,
             'clientChat' => $clientChat,
         ]);
     }
@@ -1102,7 +1104,7 @@ class ClientChatController extends FController
                 $this->guardCanProcessChat(Auth::id(), $cchId);
 
                 $takeClientChat = $this->clientChatService->takeClientChat($clientChat, Auth::user());
-                
+
                 Notifications::pub(
                     [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],
                     'refreshChatPage',
@@ -1864,10 +1866,12 @@ class ClientChatController extends FController
             return $this->asJson(['error' => true, 'message' => 'Owner incorrect']);
         }
 
-        if (!$activeConnection = UserConnectionActiveChat::find()->andWhere([
+        if (
+            !$activeConnection = UserConnectionActiveChat::find()->andWhere([
             'ucac_conn_id' => $connectionId,
             'ucac_chat_id' => $chatId
-        ])->one()) {
+            ])->one()
+        ) {
             return $this->asJson(['error' => false, 'message' => '']);
         }
 

@@ -47,8 +47,8 @@ if ($user->isAdmin()) {
 
             [
                 'attribute' => 'upp_user_id',
-                'value' => function(\common\models\UserProjectParams $model) {
-                    return $model->uppUser ? '<i class="fa fa-user"></i> '.Html::encode($model->uppUser->username).'' : '-';
+                'value' => function (\common\models\UserProjectParams $model) {
+                    return $model->uppUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->uppUser->username) . '' : '-';
                 },
                 'format' => 'raw',
                 'filter' => $userList
@@ -79,14 +79,14 @@ if ($user->isAdmin()) {
             ['class' => BooleanColumn::class, 'attribute' => 'upp_vm_enabled'],
             [
                 'attribute' => 'upp_vm_user_status_id',
-                'value' => static function(UserProjectParams $model) {
+                'value' => static function (UserProjectParams $model) {
                     return UserProjectParams::VM_USER_STATUS_LIST[$model->upp_vm_user_status_id] ?? null;
                 },
                 'filter' => UserProjectParams::VM_USER_STATUS_LIST,
             ],
             [
                 'attribute' => 'upp_vm_id',
-                'value' => static function(UserProjectParams $model) {
+                'value' => static function (UserProjectParams $model) {
                     return $model->upp_vm_id ? $model->voiceMail->uvm_name : null;
                 },
             ],

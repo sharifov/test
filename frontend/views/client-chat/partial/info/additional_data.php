@@ -7,7 +7,7 @@ use yii\widgets\DetailView;
 
 ?>
 
-<?php if ($clientChatVisitorData): ?>
+<?php if ($clientChatVisitorData) : ?>
     <?= DetailView::widget([
         'model' => $clientChatVisitorData,
         'attributes' => [
@@ -22,11 +22,11 @@ use yii\widgets\DetailView;
             'cvd_local_time'
         ]
     ]) ?>
-<?php else: ?>
+<?php else : ?>
     <?= Alert::widget([
         'body' => 'Client Chat Data not found.',
         'options' => [
             'class' => 'alert alert-warning'
         ]
     ]) ?>
-<?php endif; ?>
+<?php endif;

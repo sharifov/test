@@ -23,13 +23,13 @@ use yii\widgets\ActiveForm;
 
             <?= $form->field($model, 'upc_user_id')->dropDownList(Employee::getList(), ['prompt' => '---']) ?>
 
-			<?= $form->field($model, 'upc_year')->input('number', ['step' => 1]) ?>
+            <?= $form->field($model, 'upc_year')->input('number', ['step' => 1]) ?>
 
-			<?= $form->field($model, 'upc_month')->dropDownList(DateHelper::getMonthList(), ['prompt' => '--']) ?>
+            <?= $form->field($model, 'upc_month')->dropDownList(DateHelper::getMonthList(), ['prompt' => '--']) ?>
 
-			<?= $form->field($model, 'upc_performance')->input('number', ['step' => 1]) ?>
+            <?= $form->field($model, 'upc_performance')->input('number', ['step' => 1]) ?>
 
-			<?= $form->field($model, 'upc_commission_percent')->input('number', ['step' => 1]) ?>
+            <?= $form->field($model, 'upc_commission_percent')->input('number', ['step' => 1]) ?>
         </div>
     </div>
 

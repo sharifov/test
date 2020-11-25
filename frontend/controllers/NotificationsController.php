@@ -62,7 +62,7 @@ class NotificationsController extends FController
     {
         $searchModel = new NotificationsSearch();
         $params = Yii::$app->request->queryParams;
-        if(isset($params['reset'])){
+        if (isset($params['reset'])) {
             unset($params['NotificationsSearch']['date_range']);
         }
 
@@ -99,11 +99,11 @@ class NotificationsController extends FController
     public function actionView2($id)
     {
         $model = $this->findModel($id);
-        if($model->n_user_id != Yii::$app->user->id) {
+        if ($model->n_user_id != Yii::$app->user->id) {
             throw new ForbiddenHttpException('Access denied.');
         }
 
-        if(!$model->n_read_dt) {
+        if (!$model->n_read_dt) {
             $model->n_read_dt = date('Y-m-d H:i:s');
             $model->n_new = false;
             if ($model->save()) {
@@ -252,10 +252,10 @@ class NotificationsController extends FController
      */
     public function actionPjaxNotify()
     {
-        if(Yii::$app->request->isAjax) {
+        if (Yii::$app->request->isAjax) {
 //            $box = \frontend\widgets\Notifications::getInstance();
             return (new NotificationWidget(['userId' => Auth::id()]))->run();
-        } elseif(Yii::$app->request->referrer) {
+        } elseif (Yii::$app->request->referrer) {
             return $this->redirect(Yii::$app->request->referrer);
         }
         return $this->redirect(['/site/profile']);

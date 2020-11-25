@@ -30,13 +30,14 @@ use yii\helpers\Html;
 use yii\web\BadRequestHttpException;
 use yii\web\NotAcceptableHttpException;
 use yii\web\Response;
+
 use const Grpc\CALL_ERROR;
+
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\filters\VerbFilter;
 use Yii;
-
 
 class PhoneController extends FController
 {
@@ -94,7 +95,7 @@ class PhoneController extends FController
         if ($case && $case->isDepartmentSupport()) {
             $departmentPhones = DepartmentPhoneProject::find()->where(['dpp_project_id' => $project_id, 'dpp_dep_id' => $case->cs_dep_id, 'dpp_default' => DepartmentPhoneProject::DPP_DEFAULT_TRUE])->withPhoneList()->all();
             foreach ($departmentPhones as $departmentPhone) {
-//				$fromPhoneNumbers[$departmentPhone->dpp_phone_number] = $departmentPhone->dppProject->name . ' (' . $departmentPhone->dpp_phone_number . ')';
+//              $fromPhoneNumbers[$departmentPhone->dpp_phone_number] = $departmentPhone->dppProject->name . ' (' . $departmentPhone->dpp_phone_number . ')';
                 $fromPhoneNumbers[$departmentPhone->getPhone()] = $departmentPhone->dppProject->name . ' (' . $departmentPhone->getPhone() . ')';
             }
         } else if ($userParams = UserProjectParams::find()->where(['upp_user_id' => $userId])->withPhoneList()->all()) {
@@ -231,8 +232,6 @@ class PhoneController extends FController
                 if ($depId) {
                     $call->c_dep_id = $depId;
                 }
-
-
             }
 
             if (!$call->c_lead_id && $lead_id) {
@@ -260,7 +259,6 @@ class PhoneController extends FController
             //Notifications::create(Yii::$app->user->id, 'Outgoing Call from '.$call_from, 'Outgoing Call from ' . $call_from .' to '.$call_to, Notifications::TYPE_WARNING, true);
             //Notifications::socket(Yii::$app->user->id, null, 'getNewNotification', [], true);
             //Notifications::socket(Yii::$app->user->id, null, 'callUpdate', ['status' => Call::CALL_STATUS_RINGING, 'duration' => 0, 'snr' => 0], true);
-
         }
 
         return $out;
@@ -309,13 +307,10 @@ class PhoneController extends FController
                         $isReady = true;
                     }
                 }
-
             }
 
             $result['is_ready'] = $isReady;
-
         } catch (\Throwable $e) {
-
             $message = 'Error: ' . $e->getMessage() . ', Code: ' . $e->getCode() . ',   ' . $e->getFile() . ':' . $e->getLine();
             $result = [
                 'error' => true,
@@ -347,7 +342,6 @@ class PhoneController extends FController
         $to = Yii::$app->request->post('to');
 
         try {
-
             if (!$sid) {
                 throw new Exception('Error: Not found Call SID (actionAjaxCallRedirect)', 3);
             }
@@ -454,7 +448,6 @@ class PhoneController extends FController
 //            Yii::error(VarDumper::dumpAsString([$sid, $type, $from, $to, $firstTransferToNumber]));
 
             if ($originalCall->isConferenceType()) {
-
                 if ($originalCall->cParent) {
                     if ($originalCall->isOut()) {
                         if (!$firstChild = Call::find()->firstChild($originalCall->c_parent_id)->andWhere(['<>', 'c_call_type_id', Call::CALL_TYPE_JOIN])->one()) {
@@ -464,7 +457,6 @@ class PhoneController extends FController
                     } else {
                         $sid = $originalCall->cParent->c_call_sid;
                     }
-
                 } else {
                     if (!$firstChild = Call::find()->firstChild($originalCall->c_id)->andWhere(['<>', 'c_call_type_id', Call::CALL_TYPE_JOIN])->one()) {
                         throw new Exception('API Error: PhoneController/actionAjaxCallRedirect: Not found first child conference call ', 10);
@@ -509,7 +501,6 @@ class PhoneController extends FController
                 } else {
                     throw new Exception('API Error: PhoneController/actionAjaxCallRedirect: Not found resultApi[result][sid] - ' . VarDumper::dumpAsString($resultApi), 10);
                 }
-
             } else {
                 if ($call = Call::find()->andWhere(['c_call_sid' => $sid])->one()) {
                     /** @var Call $call */
@@ -528,13 +519,11 @@ class PhoneController extends FController
                 }
                 $resultApi = $communication->callRedirect($sid, $type, $from, $to, $firstTransferToNumber);
                 if ($resultApi && isset($resultApi['data']['result']['sid'])) {
-
                     $result = [
                         'error' => false,
                         'message' => 'ok',
                         'sid' => $resultApi['data']['result']['sid']
                     ];
-
                 } else {
                     throw new Exception('API Error: PhoneController/actionAjaxCallRedirect: Not found resultApi[data][result][sid] - ' . VarDumper::dumpAsString($resultApi), 10);
                 }
@@ -577,9 +566,7 @@ class PhoneController extends FController
 //            }
 
             //\Yii::info(VarDumper::dumpAsString([$result, \Yii::$app->request->post()]), 'PhoneController:actionAjaxCallRedirect:$result');
-
         } catch (\Throwable $e) {
-
             $message = 'Error: ' . $e->getMessage() . ', Code: ' . $e->getCode() . ',   ' . $e->getFile() . ':' . $e->getLine();
             $result = [
                 'error' => true,
@@ -610,7 +597,6 @@ class PhoneController extends FController
         $error = null;
 
         try {
-
             if (!$sid) {
                 throw new \Exception('Error: CallSID is empty', 2);
             }
@@ -653,7 +639,6 @@ class PhoneController extends FController
 
 //            $lead_id = $call->c_lead_id ?: 0;
 //            $case_id = $call->c_case_id ?: 0;
-
         } catch (\Throwable $e) {
             $call = null;
             $error = $e->getMessage();
@@ -673,7 +658,6 @@ class PhoneController extends FController
             'call' => $call,
             'error' => $error
         ]);
-
     }
 
     /**
@@ -685,7 +669,6 @@ class PhoneController extends FController
         $result = [];
 
         try {
-
             $sid = Yii::$app->request->post('sid');
             $type = Yii::$app->request->post('type');
             $id = (int)Yii::$app->request->post('id');
@@ -740,7 +723,6 @@ class PhoneController extends FController
                 if ($userDepartment) {
                     $data['dep_id'] = $userDepartment['upp_dep_id'];
                 }
-
             } elseif ($type === 'department') {
                 $department = DepartmentPhoneProject::findOne($id);
                 if (!$department) {
@@ -775,7 +757,6 @@ class PhoneController extends FController
             $createdUserId = $originCall->c_created_user_id;
 
             if ($originCall->cParent) {
-
                 if ($originCall->isOut() || ($originCall->isReturn() && $originCall->cParent->isOut())) {
                     $parent = Call::find()->firstChild($originCall->c_parent_id)->one();
                 } else {
@@ -815,8 +796,6 @@ class PhoneController extends FController
                 } else {
                     $result['error'] = 'Not found originCall->cParent->firstChild, Origin CallSid: ' . $originCall->c_call_sid;
                 }
-
-
             } else {
                 $childCall = Call::find()
                     ->andWhere(['c_parent_id' => $originCall->c_id])
@@ -824,7 +803,6 @@ class PhoneController extends FController
                     ->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
 
                 if ($childCall) {
-
                     $originCall->c_is_transfer = true;
                     $childCall->c_is_transfer = true;
 
@@ -923,7 +901,6 @@ class PhoneController extends FController
 
 
             // \Yii::info(VarDumper::dumpAsString(['call' => $call ? $call->attributes  : null, 'sid' => $sid, 'updateData' => $updateData, 'result' => $result, 'post' => \Yii::$app->request->post()]), 'info\PhoneController:actionAjaxCallRedirectToAgent');
-
         } catch (\Throwable $e) {
             $result = [
                 'error' => true,
@@ -936,7 +913,6 @@ class PhoneController extends FController
     public function actionAjaxHangup(): Response
     {
         try {
-
             $sid = (string)Yii::$app->request->post('sid');
 
             if (!$sid) {
@@ -974,7 +950,6 @@ class PhoneController extends FController
                     ]), 'PhoneController:AjaxHangup:Call:save');
                 }
             }
-
         } catch (\Throwable $e) {
             $result = [
                 'error' => true,
@@ -1088,7 +1063,6 @@ class PhoneController extends FController
             }
 
             $result = Yii::$app->communication->createCall($form);
-
         } catch (\Throwable $e) {
             $result = [
                 'error' => true,
@@ -1351,7 +1325,6 @@ class PhoneController extends FController
             }
 
             $result = Yii::$app->communication->sendDigitToConference($sid, $digit);
-
         } catch (\Throwable $e) {
             $result = [
                 'error' => true,
@@ -1384,7 +1357,6 @@ class PhoneController extends FController
     public function actionCreateInternalCall()
     {
         try {
-
             $createdUser = Auth::user();
             $key = 'call_user_to_user_' . $createdUser->id;
             $this->guardFromUserIsFree($createdUser->id, $key);
@@ -1430,7 +1402,6 @@ class PhoneController extends FController
                 ],
                 str_replace('-', '', UuidHelper::uuid())
             );
-
         } catch (\Throwable $e) {
             $result = [
                 'error' => true,

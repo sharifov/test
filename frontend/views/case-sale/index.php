@@ -5,6 +5,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\CaseSaleSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */

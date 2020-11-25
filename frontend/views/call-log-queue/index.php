@@ -5,6 +5,7 @@ use common\components\grid\BooleanColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\callLog\entity\callLogQueue\search\CallLogQueueSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */

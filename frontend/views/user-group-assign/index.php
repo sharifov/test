@@ -46,7 +46,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'ugs_group_id',
-                'value' => function(\common\models\UserGroupAssign $model) {
+                'value' => function (\common\models\UserGroupAssign $model) {
                     return $model->ugsGroup ? $model->ugsGroup->ug_name : '-' ;
                 },
                 'filter' => \common\models\UserGroup::getList()

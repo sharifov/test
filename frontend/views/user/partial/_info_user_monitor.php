@@ -1,8 +1,9 @@
 <?php
+
 use common\models\Employee;
 use sales\model\user\entity\monitor\UserMonitor;
 use yii\helpers\Html;
-use \yii\widgets\Pjax;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $data yii\data\ActiveDataProvider */
@@ -24,9 +25,9 @@ $user = Yii::$app->user->identity;
 ?>
 <div id="myTimeline">
     <ul class="timeline-events">
-        <?php if (!empty($data['items'])): ?>
+        <?php if (!empty($data['items'])) : ?>
             <?php /** @var UserMonitor $item */
-            foreach ($data['items'] as $item):
+            foreach ($data['items'] as $item) :
                 if (!array_key_exists($item->um_user_id, $data['users'])) {
                     continue;
                 }

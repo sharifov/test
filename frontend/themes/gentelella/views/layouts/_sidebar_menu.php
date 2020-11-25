@@ -1,7 +1,7 @@
 <?php
 
 use common\models\Employee;
-use \yii\helpers\Url;
+use yii\helpers\Url;
 
 /* @var $this \yii\web\View */
 /** @var \common\models\Employee $user */
@@ -162,7 +162,7 @@ $isSuperAdmin = $user->isSuperAdmin();
         $menuLItems[] = ['label' => 'Lead Trash <span id="badges-trash" class="label-danger label pull-right"></span>', 'url' => ['/queue/trash'], 'icon' => 'trash-o text-danger'];
 
 
-        if($isAdmin) {
+        if ($isAdmin) {
             $menuItems[] = [
                 'label' => 'Leads',
                 'url' => 'javascript:',
@@ -295,7 +295,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Site Settings', 'url' => ['/setting/index'], 'icon' => 'cogs'],
                 ['label' => 'User Site Activity', 'url' => ['/user-site-activity/index'], 'icon' => 'bars'],
                 ['label' => 'User Activity Report', 'url' => ['/user-site-activity/report'], 'icon' => 'bar-chart'],
-				['label' => 'Global Model Logs', 'url' => ['/global-log/index'], 'icon' => 'list'],
+                ['label' => 'Global Model Logs', 'url' => ['/global-log/index'], 'icon' => 'list'],
             ]
         ];
 
@@ -332,7 +332,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                     } else {
                         // for ex.: /rbac/route  =>   rbac/route  for search in app->urlManager->rules
                         $patternForRulesFromMainConfig =  substr($url, 1, strlen($url));
-                        $rulesFromMainConfig =\yii\helpers\ArrayHelper::map(Yii::$app->urlManager->rules, 'name', 'route');
+                        $rulesFromMainConfig = \yii\helpers\ArrayHelper::map(Yii::$app->urlManager->rules, 'name', 'route');
                         foreach ($rulesFromMainConfig as $pattern => $route) {
                             if ($patternForRulesFromMainConfig === $pattern || strpos($pattern, $patternForRulesFromMainConfig . '/<') === 0) {
                                 $item['visible'] = Yii::$app->user->can('/' . $route);
@@ -375,7 +375,7 @@ $isSuperAdmin = $user->isSuperAdmin();
 
 <?php
 
-$js =<<<JS
+$js = <<<JS
 function updateCounters(url, className, idName) {
     
     var types = [];

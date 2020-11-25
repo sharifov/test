@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
-        'layout'=>"{errors}\n{summary}\n{items}\n{pager}",
+        'layout' => "{errors}\n{summary}\n{items}\n{pager}",
         'columns' => [
             'ccf_id',
             'ccf_key',
@@ -70,7 +70,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'options' => [
                         'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date',
+                        'placeholder' => 'Choose Date',
                         'readonly' => '1',
                     ],
                     'clientEvents' => [

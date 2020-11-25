@@ -37,7 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             'name' => 'date',
                             'pluginOptions' => [
                                 'format' => 'yyyy-mm',
-                                'minViewMode'=>'months',
+                                'minViewMode' => 'months',
                                 'autoclose' => true,
                                 'todayHighlight' => true
                             ],
@@ -46,9 +46,9 @@ $this->params['breadcrumbs'][] = $this->title;
                         ]) ?>
                     </div>
                     <div class="col-md-6">
-						<?= Html::label('User', 'payroll-calc-form-user', [
-							'class' => 'control-label'
-						]) ?>
+                        <?= Html::label('User', 'payroll-calc-form-user', [
+                            'class' => 'control-label'
+                        ]) ?>
                         <?= Html::dropDownList('userId', null, \common\models\Employee::getList(), [
                             'class' => 'form-control',
                             'prompt' => '--',
@@ -76,9 +76,9 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
-		'rowOptions'=> static function(UserPayroll $model){
-			return ['class' => $model->getRowClass()];
-		},
+        'rowOptions' => static function (UserPayroll $model) {
+            return ['class' => $model->getRowClass()];
+        },
         'columns' => [
             'ups_id',
 
@@ -95,29 +95,29 @@ $this->params['breadcrumbs'][] = $this->title;
                     $count = count($model->userProfits);
                     $search = (new ReflectionClass(UserProfitSearch::class));
                     $route = Url::toRoute(['/user-profit-crud/index', $search->getShortName() . '[up_payroll_id]' => $model->ups_id]);
-					return ($count ? Html::a($count, $route, [
-						'target' => '_blank',
-						'data-pjax' => 0
-					]) : $count);
+                    return ($count ? Html::a($count, $route, [
+                        'target' => '_blank',
+                        'data-pjax' => 0
+                    ]) : $count);
                 },
                 'format' => 'raw'
             ],
-			[
-				'label' => 'Payment Count',
-				'value' => static function (UserPayroll $model) {
-					$count = count($model->userPayments);
-					$search = (new ReflectionClass(UserProfitSearch::class));
-					$route = Url::toRoute(['/user-payment-crud/index', $search->getShortName() . '[upt_payroll_id]' => $model->ups_id]);
-					return ($count ? Html::a($count, $route, [
-						'target' => '_blank',
-						'data-pjax' => 0
-					]) : $count);
-				},
-				'format' => 'raw'
-			],
             [
-				'class' => MonthColumn::class,
-				'attribute' => 'ups_month',
+                'label' => 'Payment Count',
+                'value' => static function (UserPayroll $model) {
+                    $count = count($model->userPayments);
+                    $search = (new ReflectionClass(UserProfitSearch::class));
+                    $route = Url::toRoute(['/user-payment-crud/index', $search->getShortName() . '[upt_payroll_id]' => $model->ups_id]);
+                    return ($count ? Html::a($count, $route, [
+                        'target' => '_blank',
+                        'data-pjax' => 0
+                    ]) : $count);
+                },
+                'format' => 'raw'
+            ],
+            [
+                'class' => MonthColumn::class,
+                'attribute' => 'ups_month',
             ],
 //            'ups_month:MonthNameByMonthNumber',
             'ups_year',
@@ -132,8 +132,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     return UserPayroll::asFormatAgent($model->ups_agent_status_id);
                 },
                 'filter' => UserPayroll::getAgentStatusList(),
-				'format' => 'raw'
-			],
+                'format' => 'raw'
+            ],
             [
                 'attribute' => 'ups_status_id',
                 'value' => static function (UserPayroll $model) {
@@ -142,14 +142,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => UserPayroll::getStatusList(),
                 'format' => 'raw'
             ],
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'ups_created_dt',
-			],
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'ups_updated_dt',
-			],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'ups_created_dt',
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'ups_updated_dt',
+            ],
 
             ['class' => ActionColumn::class],
         ],
@@ -214,7 +214,7 @@ $this->params['breadcrumbs'][] = $this->title;
             })
         });
 JS;
-$this->registerJs($js);
+    $this->registerJs($js);
     ?>
 
 </div>

@@ -1,5 +1,7 @@
 <?php
+
 use common\models\GlobalLog;
+
 /**
  * @var GlobalLog $model
  */
@@ -16,10 +18,10 @@ use common\models\GlobalLog;
     </tbody>
     <tbody>
     <?php $formattedAttributes = @json_decode($model->gl_formatted_attr, true); ?>
-	<?php foreach ($formattedAttributes as $fieldName => $data) : ?>
+    <?php foreach ($formattedAttributes as $fieldName => $data) : ?>
         <tr>
             <th>
-				<?= \yii\helpers\Html::encode($fieldName) ?>
+                <?= \yii\helpers\Html::encode($fieldName) ?>
             </th>
             <td style="width: 40%; word-break: break-word;">
                 <span class="item-new">
@@ -32,7 +34,7 @@ use common\models\GlobalLog;
                 </span>
             </td>
         </tr>
-	<?php endforeach; ?>
+    <?php endforeach; ?>
 
 
     </tbody>

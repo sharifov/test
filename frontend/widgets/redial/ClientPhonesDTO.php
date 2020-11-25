@@ -23,5 +23,4 @@ class ClientPhonesDTO
         $this->phone = $phone;
         $this->description = $description;
     }
-
 }

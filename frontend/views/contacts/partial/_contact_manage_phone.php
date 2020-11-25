@@ -24,7 +24,7 @@ use yii\web\View;
     <br />
 
 <table class="table table-condensed table-bordered" style="margin: 15px 0 0 0 ;" id="contact-phones">
-    <?php foreach ($clientPhones as $key => $phone): ?>
+    <?php foreach ($clientPhones as $key => $phone) : ?>
         <?php echo $this->render('_phone_row', [
                 'phone' => $phone,
             ]);

@@ -71,15 +71,15 @@ $pjaxId = 'pjax-create-credit-card'
             <div class="col-md-6">
                 <?= $form->field($model, 'cc_type_id')->dropDownList(\common\models\CreditCard::getTypeList(), ['prompt' => '---']) ?>
             </div>
-            <?php if(!$isAjax): ?>
+            <?php if (!$isAjax) : ?>
             <div class="col-md-6">
                 <?= $form->field($model, 'cc_status_id')->dropDownList(\common\models\CreditCard::getStatusList(), ['prompt' => '---']) ?>
             </div>
             <?php endif; ?>
         </div>
-		<?php if(!$isAjax): ?>
-        <?= $form->field($model, 'cc_is_expired')->checkbox() ?>
-		<?php endif; ?>
+        <?php if (!$isAjax) : ?>
+            <?= $form->field($model, 'cc_is_expired')->checkbox() ?>
+        <?php endif; ?>
 
         <!--    --><?php //= $form->field($model, 'cc_created_user_id')->textInput() ?>
     <!---->

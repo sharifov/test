@@ -31,7 +31,7 @@ use yii\helpers\Url;
                     <?php /*<input type="password" class="form-control" placeholder="Password" required="" />*/ ?>
                 </div>
 
-                <?php if ((new AntiBruteForceService())->checkCaptchaEnable()): ?>
+                <?php if ((new AntiBruteForceService())->checkCaptchaEnable()) : ?>
                     <div>
                         <?= $form->field($model, 'verifyCode')->widget(Captcha::class, [
                             'captchaAction' => Url::to('/site/captcha'),

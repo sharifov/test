@@ -1,6 +1,6 @@
 <?php
-namespace frontend\models\search;
 
+namespace frontend\models\search;
 
 use common\models\Log;
 use yii\base\Model;

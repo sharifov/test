@@ -1,12 +1,14 @@
 <?php
+
 use yii\bootstrap4\Html;
+
 /**
  * @var $centrifugoUrl
  * @var $token
  * @var $channels
  */
 
-$passChannelsToJs ='["' . implode('", "', $channels) . '"]';
+$passChannelsToJs = '["' . implode('", "', $channels) . '"]';
 
 $js = <<<JS
 

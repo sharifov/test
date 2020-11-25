@@ -13,6 +13,7 @@ use common\models\EmployeeContactInfo;
 use common\models\Employee;
 use common\models\Project;
 use borales\extensions\phoneInput\PhoneInput;
+
 //use frontend\extensions\PhoneInput;
 
 /** @var Employee $user */
@@ -112,7 +113,8 @@ $this->registerJs($js);
     <?= Html::button('Save', [
         'class' => 'btn btn-primary',
         'id' => 'seller-contact-info-btn',
-        'data-url' => sprintf('%s/employee/seller-contact-info?employeeId=%d',
+        'data-url' => sprintf(
+            '%s/employee/seller-contact-info?employeeId=%d',
             Yii::$app->urlManager->getHostInfo(),
             $model->id
         )

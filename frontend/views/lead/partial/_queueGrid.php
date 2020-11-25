@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $this \yii\web\View
  * @var $dataProvider ActiveDataProvider
@@ -22,7 +23,7 @@ $queueType = Yii::$app->request->get('type');
 $user = Yii::$app->user->identity;
 
 $is_manager = false;
-if($user->isAdmin() || $user->isSupervision()) {
+if ($user->isAdmin() || $user->isSupervision()) {
     $is_manager = true;
 }
 
@@ -33,8 +34,10 @@ if($user->isAdmin() || $user->isSupervision()) {
     //'layout' => $template,
     'filterModel' => $searchModel,
     'rowOptions' => function ($model) {
-        if ($model['status'] === Lead::STATUS_PROCESSING &&
-            Yii::$app->user->identity->getId() == $model['employee_id']) {
+        if (
+            $model['status'] === Lead::STATUS_PROCESSING &&
+            Yii::$app->user->identity->getId() == $model['employee_id']
+        ) {
             return ['class' => 'highlighted'];
         }
         if (in_array($model['status'], [Lead::STATUS_ON_HOLD, Lead::STATUS_BOOKED, Lead::STATUS_FOLLOW_UP])) {
@@ -131,12 +134,12 @@ if($user->isAdmin() || $user->isSupervision()) {
             'visible' => !in_array($queueType, ['booked']),
             'value' => static function ($model) {
 
-                if(isset($model['first_name'])) {
+                if (isset($model['first_name'])) {
                     $clientName = $model['first_name'] . ' ' . $model['last_name'];
                     if ($clientName === 'Client Name') {
                         $clientName = '- - - ';
                     } else {
-                        $clientName = '<i class="glyphicon glyphicon-user"></i> '. Html::encode($clientName);
+                        $clientName = '<i class="glyphicon glyphicon-user"></i> ' . Html::encode($clientName);
                     }
                 } else {
                     $clientName = '-';
@@ -190,7 +193,7 @@ if($user->isAdmin() || $user->isSupervision()) {
             'visible' => !in_array($queueType, ['booked', 'sold']),
             'content' => function ($model) use ($queueType) {
                 $content = '';
-                if($queueType === 'inbox' && Yii::$app->user->identity->canRole('agent')) {
+                if ($queueType === 'inbox' && Yii::$app->user->identity->canRole('agent')) {
                     $content .= '';
                 } else {
                     $content .= $model['flight_detail'];
@@ -210,7 +213,8 @@ if($user->isAdmin() || $user->isSupervision()) {
                 /**
                  * @var $model Lead
                  */
-                return sprintf('Total: <strong>%d</strong> <br> Sent: <strong>%d</strong>',
+                return sprintf(
+                    'Total: <strong>%d</strong> <br> Sent: <strong>%d</strong>',
                     ($model['send_q'] + $model['not_send_q']),
                     $model['send_q']
                 );
@@ -335,7 +339,7 @@ if($user->isAdmin() || $user->isSupervision()) {
         [
             'header' => 'Answered',
             //'attribute' => 'l_answered',
-            'value' => function($model) {
+            'value' => function ($model) {
                 return $model['l_answered'] ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
             },
             'contentOptions' => ['class' => 'text-center'],
@@ -345,8 +349,8 @@ if($user->isAdmin() || $user->isSupervision()) {
 
         [
             'header' => 'Task Info',
-            'value' => function($model){
-                return '<small style="font-size: 10px">'.Lead::getTaskInfo2($model['id']).'</small>';
+            'value' => function ($model) {
+                return '<small style="font-size: 10px">' . Lead::getTaskInfo2($model['id']) . '</small>';
             },
             'format' => 'html',
             'contentOptions' => ['class' => 'text-left'],
@@ -391,7 +395,8 @@ if($user->isAdmin() || $user->isSupervision()) {
                 'action' => function ($url, $model, $key) use ($queueType) {
                     $buttonsCnt = 0;
                     $buttons = '';
-                    if (in_array($queueType, ['inbox', 'follow-up']) ||
+                    if (
+                        in_array($queueType, ['inbox', 'follow-up']) ||
                         ($queueType === 'processing' &&
                             $model['status'] === Lead::STATUS_ON_HOLD)
                     ) {
@@ -406,13 +411,14 @@ if($user->isAdmin() || $user->isSupervision()) {
                     }
 
                     if ($queueType != 'inbox') { // && $queueType != 'follow-up'
-                        if (Yii::$app->user->identity->getId() == $model['employee_id'] &&
+                        if (
+                            Yii::$app->user->identity->getId() == $model['employee_id'] &&
                             $queueType = 'processing-all'
                         ) {
                             $queueType = 'processing';
                         }
                         $buttonsCnt++;
-                        $buttons .= ' '.Html::a('<i class="fa fa-search"></i>', ['lead/view', 'gid' => $model->gid], [
+                        $buttons .= ' ' . Html::a('<i class="fa fa-search"></i>', ['lead/view', 'gid' => $model->gid], [
                             'class' => 'btn btn-info btn-xs',
                             'target' => '_blank',
                             'data-pjax' => 0,
@@ -420,11 +426,12 @@ if($user->isAdmin() || $user->isSupervision()) {
                         ]);
                     }
 
-                    if (Yii::$app->user->identity->getId() != $model['employee_id'] &&
+                    if (
+                        Yii::$app->user->identity->getId() != $model['employee_id'] &&
                         in_array($model['status'], [Lead::STATUS_ON_HOLD, Lead::STATUS_PROCESSING])
                     ) {
                         $buttonsCnt++;
-                        $buttons .= ' '.Html::a('Take Over', [
+                        $buttons .= ' ' . Html::a('Take Over', [
                             'lead/take',
                             'gid' => $model->gid,
                             'over' => true
@@ -446,8 +453,8 @@ if($user->isAdmin() || $user->isSupervision()) {
                         ]);
                     }*/
 
-                    if($buttonsCnt > 2) {
-                    $html = Html::tag('div', Html::button('Action', [
+                    if ($buttonsCnt > 2) {
+                        $html = Html::tag('div', Html::button('Action', [
                             'class' => 'btn btn-sm dropdown-toggle',
                             'data-toggle' => 'dropdown',
                             'aria-expanded' => 'false'
@@ -460,7 +467,7 @@ if($user->isAdmin() || $user->isSupervision()) {
                         ]), [
                             'class' => 'btn-group'
                         ]);
-                    }else{
+                    } else {
                         $html = $buttons;
                     }
 
@@ -471,4 +478,4 @@ if($user->isAdmin() || $user->isSupervision()) {
     ]
 ])
 ?>
-<?php \yii\widgets\Pjax::end(); ?>
+<?php \yii\widgets\Pjax::end();

@@ -11,7 +11,6 @@ use yii\web\View;
 /** @var View $this */
 
 if (($count = LeadSearchByIp::count($lead->request_ip, Yii::$app->user->id)) > 1) {
-
     Modal::begin([
         'title' => '',
         'id' => 'modal-ip-cnt-ip',
@@ -45,14 +44,11 @@ if (($count = LeadSearchByIp::count($lead->request_ip, Yii::$app->user->id)) > 1
 JS;
 
     $this->registerJs($js);
-
 } else {
-
     $dataContent = '';
     $ipData = @json_decode($lead->request_ip_detail, true);
 
     if ($ipData) {
-
         $str = '<table class="table table-bordered">';
         $content = '';
         foreach ($ipData as $key => $val) {
@@ -64,9 +60,8 @@ JS;
         if ($content) {
             $dataContent = $str . $content . '</table>';
         }
-
     }
-    echo Html::button('<i class="fa fa-globe"></i> IP: ' . $lead->request_ip , [
+    echo Html::button('<i class="fa fa-globe"></i> IP: ' . $lead->request_ip, [
         'data-toggle' => 'popover',
         'data-placement' => 'bottom',
         'data-content' => $dataContent,

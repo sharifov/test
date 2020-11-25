@@ -27,7 +27,7 @@ $showContent = $showContent ?? false;
         <div class="x_title">
             <h2>Chat notes (<?php echo count($clientChat->notes) ?>) </h2>
             <ul class="nav navbar-right panel_toolbox">
-                <?php if ($actionPermissions->canNoteAdd($clientChat)): ?>
+                <?php if ($actionPermissions->canNoteAdd($clientChat)) : ?>
                     <li>
                         <a class="btn_toggle_form"><i class="fa fa-plus"></i> New Note</a>
                     </li>
@@ -44,12 +44,13 @@ $showContent = $showContent ?? false;
                 <?php foreach ($clientChat->notes as $note) :?>
                 <div class="_cc-chat-notes-item">
                     <div class="d-flex justify-content-between align-items-center" style="width: 100%;">
-                        <span class="_cc_agent_name"><?php echo $note->user ? Html::encode($note->user->username): '-' ?></span>
-                        <?php if ($actionPermissions->canNoteDelete($clientChat)): ?>
+                        <span class="_cc_agent_name"><?php echo $note->user ? Html::encode($note->user->username) : '-' ?></span>
+                        <?php if ($actionPermissions->canNoteDelete($clientChat)) : ?>
                             <span>
                                 <?php $class = $note->ccn_deleted ? 'fa-reply' : 'fa-remove' ?>
                                 <?php $textAlert = $note->ccn_deleted ? 'recover' : 'delete' ?>
-                                <?= Html::a('<i class="fa ' . $class . '"></i>',
+                                <?= Html::a(
+                                    '<i class="fa ' . $class . '"></i>',
                                     ['client-chat/delete-note', 'ccn_id' => $note->ccn_id, 'cch_id' => $clientChat->cch_id],
                                     [
                                         'class' => 'text-secondary',
@@ -57,16 +58,17 @@ $showContent = $showContent ?? false;
                                             'confirm' => 'Are you sure you want to ' . $textAlert . ' this note?',
                                             'method' => 'post',
                                         ],
-                                        'data-pjax'=> 1,
-                                ]) ?>
+                                        'data-pjax' => 1,
+                                    ]
+                                ) ?>
                             </span>
                         <?php endif;?>
                     </div>
                     <div class="_cc_chat_note_date_item">
-						<?= $note->ccn_created_dt ? Yii::$app->formatter->asDatetime(strtotime($note->ccn_created_dt)) : '' ?>
+                        <?= $note->ccn_created_dt ? Yii::$app->formatter->asDatetime(strtotime($note->ccn_created_dt)) : '' ?>
                     </div>
                     <div class="_cc_chat_note_item_content">
-						<?= OutHelper::formattedChatNote($note) ?>
+                        <?= OutHelper::formattedChatNote($note) ?>
                     </div>
                 </div>
                 <?php endforeach ?>
@@ -87,7 +89,7 @@ $showContent = $showContent ?? false;
             ],
         ]);
         $model->ccn_chat_id = $clientChat->cch_id;
-        ?>
+?>
         <div class="row" >
             <?= $form->field($model, 'ccn_chat_id')->hiddenInput()->label(false) ?>
 

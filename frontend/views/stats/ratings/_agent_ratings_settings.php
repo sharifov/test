@@ -1,10 +1,11 @@
 <?php
+
 use yii\helpers\Html;
 use common\components\ChartTools;
 
-$currentWeek = date("Y-m-d H:i",ChartTools::getWeek('0 week')['start']) .' - '. date("Y-m-d H:i", ChartTools::getWeek('0 week')['end']);
-$lastWeek = date("Y-m-d H:i",ChartTools::getWeek('-1 week')['start']) .' - '. date("Y-m-d H:i", ChartTools::getWeek('-1 week')['end']);
-$currentMonth = date("Y-m-d H:i",ChartTools::getCurrentMonth()['start']) .' - '. date("Y-m-d H:i", ChartTools::getCurrentMonth()['end']);
+$currentWeek = date("Y-m-d H:i", ChartTools::getWeek('0 week')['start']) . ' - ' . date("Y-m-d H:i", ChartTools::getWeek('0 week')['end']);
+$lastWeek = date("Y-m-d H:i", ChartTools::getWeek('-1 week')['start']) . ' - ' . date("Y-m-d H:i", ChartTools::getWeek('-1 week')['end']);
+$currentMonth = date("Y-m-d H:i", ChartTools::getCurrentMonth()['start']) . ' - ' . date("Y-m-d H:i", ChartTools::getCurrentMonth()['end']);
 
 $js = <<<JS
 

@@ -91,10 +91,8 @@ class SmsDistributionListController extends FController
     {
         $model = new SmsDistributionListAddMultipleForm();
 
-        if ($model->load(Yii::$app->request->post()) && $model->validate() ){
-
-
-            $phoneListTo = explode(',' , $model->sdl_phone_to_list);
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $phoneListTo = explode(',', $model->sdl_phone_to_list);
             $phoneListToValidate = [];
 
             if ($phoneListTo) {
@@ -122,18 +120,18 @@ class SmsDistributionListController extends FController
                     $smsModel->sdl_project_id = $model->sdl_project_id;
                     $smsModel->sdl_created_user_id = Yii::$app->user->id;
 
-                    if($smsModel->save()) {
+                    if ($smsModel->save()) {
                         $successItems[] = Html::encode($smsModel->sdl_phone_to);
                     } else {
                         $warningItems[] = Html::encode($smsModel->sdl_phone_to) . ' - ' . VarDumper::dumpAsString($smsModel->errors);
                     }
                 }
 
-                if($successItems) {
+                if ($successItems) {
                     Yii::$app->session->setFlash('success', 'Success added phones: ' . implode(', ', $successItems));
                 }
 
-                if($warningItems) {
+                if ($warningItems) {
                     Yii::$app->session->setFlash('warning', 'Warning: ' . implode(', ', $warningItems));
                 }
 
@@ -200,7 +198,6 @@ class SmsDistributionListController extends FController
 
         //VarDumper::dump($dataForm); exit;
         if ($smsList && $statusId) {
-
             $successItems = [];
             $warningItems = [];
 
@@ -210,7 +207,7 @@ class SmsDistributionListController extends FController
                     $smsModel->sdl_status_id = $statusId;
                     $smsModel->sdl_updated_user_id = Yii::$app->user->id;
 
-                    if($smsModel->save()) {
+                    if ($smsModel->save()) {
                         $successItems[] = Html::encode($smsModel->sdl_phone_to);
                     } else {
                         $warningItems[] = Html::encode($smsModel->sdl_phone_to) . ' - ' . VarDumper::dumpAsString($smsModel->errors);
@@ -218,11 +215,11 @@ class SmsDistributionListController extends FController
                     }
                 }
 
-                if($successItems) {
+                if ($successItems) {
                     Yii::$app->session->setFlash('success', 'Success multiple update: ' . implode(', ', $successItems));
                 }
 
-                if($warningItems) {
+                if ($warningItems) {
                     Yii::$app->session->setFlash('warning', 'Warning multiple update: ' . implode(', ', $warningItems));
                 }
             }

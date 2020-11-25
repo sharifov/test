@@ -24,11 +24,11 @@ use yii\helpers\Html;
         <td><?= \yii\helpers\Html::encode($client->middle_name) ?></td>
     </tr>
 
-    <?php if ($phones = $client->clientPhones): ?>
+    <?php if ($phones = $client->clientPhones) : ?>
         <tr>
             <td style="background-color: #eef3f9">Phones</td>
             <td>
-                <?php foreach ($phones as $phone): ?>
+                <?php foreach ($phones as $phone) : ?>
                     <span class="_rc-client-phone">
                         <i class="fa fa-phone"> </i>
                         <code><?= Html::encode($phone->phone) ?></code>
@@ -38,11 +38,11 @@ use yii\helpers\Html;
         </tr>
     <?php endif; ?>
 
-    <?php if ($emails = $client->clientEmails): ?>
+    <?php if ($emails = $client->clientEmails) : ?>
         <tr>
             <td style="background-color: #eef3f9">Emails</td>
             <td>
-                <?php foreach ($emails as $email): ?>
+                <?php foreach ($emails as $email) : ?>
                     <span class="_rc-client-email">
                         <i class="fa fa-envelope"> </i>
                         <code><?= Html::encode($email->email) ?></code>

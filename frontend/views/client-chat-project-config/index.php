@@ -5,6 +5,7 @@ use common\components\grid\DateTimeColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\clientChat\entity\projectConfig\search\ClientChatProjectConfigSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */

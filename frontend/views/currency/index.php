@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\CurrencySearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -55,7 +56,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'cur_app_rate',
             [
                 'attribute' => 'cur_app_percent',
-                'value' => static function(\common\models\Currency $model) {
+                'value' => static function (\common\models\Currency $model) {
                     return $model->cur_app_percent . ' %';
                 }
             ],

@@ -88,7 +88,7 @@ $this->registerJs($js);
     ]);
     ?>
 
-    <?php if (Auth::can('leads/index_MultipleUpdate')): ?>
+    <?php if (Auth::can('leads/index_MultipleUpdate')) : ?>
         <?= MultipleUpdateButtonWidget::widget([
             'modalId' => 'modal-df',
             'showUrl' => Url::to(['/lead-multiple-update/show']),
@@ -98,7 +98,7 @@ $this->registerJs($js);
         ]) ?>
     <?php endif;?>
 
-    <?php if (Auth::can('leads/index_Create_QA_Tasks')): ?>
+    <?php if (Auth::can('leads/index_Create_QA_Tasks')) : ?>
         <?= MultipleUpdateButtonWidget::widget([
             'modalId' => 'modal-df',
             'showUrl' => Url::to(['/qa-task/qa-task-multiple/create-lead']),

@@ -38,7 +38,7 @@ class LeadCallExpertController extends FController
     {
         $searchModel = new LeadCallExpertSearch();
         $params = Yii::$app->request->queryParams;
-        if(isset($params['reset'])){
+        if (isset($params['reset'])) {
             unset($params['LeadCallExpertSearch']['date_range']);
         }
 

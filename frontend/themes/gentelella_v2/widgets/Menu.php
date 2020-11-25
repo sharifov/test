@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright (c) 2015 Yiister
  * @license https://github.com/yiister/yii2-gentelella/blob/master/LICENSE
@@ -11,7 +12,6 @@ use rmrevin\yii\fontawesome\component\Icon;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use webvimark\modules\UserManagement\models\User;
-
 
 class Menu extends \yii\widgets\Menu
 {
@@ -54,21 +54,19 @@ class Menu extends \yii\widgets\Menu
     {
         $allVisible = false;
 
-        foreach ($items as &$item)
-        {
-            if ( isset( $item['url'] ) AND !isset( $item['visible'] ) AND !in_array($item['url'], ['', '#', 'javascript:'])) {
+        foreach ($items as &$item) {
+            if (isset($item['url']) and !isset($item['visible']) and !in_array($item['url'], ['', '#', 'javascript:'])) {
                 $item['visible'] = \Yii::$app->user->can($item['url']);
             }
 
-            if ( isset( $item['items'] ) ) {
+            if (isset($item['items'])) {
                 // If not children are visible - make invisible this node
-                if ( !$this->ensureVisibility($item['items']) AND !isset( $item['visible'] ) )
-                {
+                if (!$this->ensureVisibility($item['items']) and !isset($item['visible'])) {
                     $item['visible'] = false;
                 }
             }
 
-            if ( isset( $item['label'] ) AND ( !isset( $item['visible'] ) OR $item['visible'] === true ) ) {
+            if (isset($item['label']) and ( !isset($item['visible']) or $item['visible'] === true )) {
                 $allVisible = true;
             }
         }
@@ -90,11 +88,11 @@ class Menu extends \yii\widgets\Menu
         }
 
         if (isset($item['attributes']) && is_array($item['attributes'])) {
-        	$attributes = ' ';
-        	foreach ($item['attributes'] as $attribute => $value) {
-        		$attributes .= "{$attribute}='{$value}' ";
-			}
-		}
+            $attributes = ' ';
+            foreach ($item['attributes'] as $attribute => $value) {
+                $attributes .= "{$attribute}='{$value}' ";
+            }
+        }
         return strtr(
             $renderedItem,
             [
@@ -102,7 +100,7 @@ class Menu extends \yii\widgets\Menu
                     ? Html::tag('i', '', ['class' => ($item['iconPrefix'] ?? 'fa') . ' fa-' . $item['icon']])
 
                     //new Icon($item['iconPrefix'] ?? 'fa', $item['icon'])
-//                    ? new Icon($item['icon'], ArrayHelper::getValue($item, 'iconOptions', []))
+            //                    ? new Icon($item['icon'], ArrayHelper::getValue($item, 'iconOptions', []))
                     : '',
                 '{badge}' => (
                     isset($item['badge'])
@@ -113,10 +111,10 @@ class Menu extends \yii\widgets\Menu
                         ?
                         Html::tag('span', '', ['class' => 'fa fa-chevron-down'])
                         //(new Icon('fa','chevron-down', ['tag' => 'span']))
-//						? (new Icon('chevron-down'))->tag('span')
-						: ''
+            //                      ? (new Icon('chevron-down'))->tag('span')
+                        : ''
                     ),
-				'{attributes}' => $attributes ?? ''
+                '{attributes}' => $attributes ?? ''
             ]
         );
     }

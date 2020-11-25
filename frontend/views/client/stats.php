@@ -8,15 +8,15 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="row">
         <div class="col-md-4">
             <div id="chart_div_projects"></div>
-            <?php if ($data): ?>
+            <?php if ($data) : ?>
                 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
                 <script>
                     function drawBasic() {
                         var data = google.visualization.arrayToDataTable([
                             ['Project', 'Count'],
-                            <?php foreach($data as $item): ?>
+                            <?php foreach ($data as $item) : ?>
                             ['<?= \yii\helpers\Html::encode($item['projectName']) . ' (' . $item['countClients'] . ')\'' ?> , <?= $item['countClients'] ?>],
-                                <?php endforeach;?>
+                            <?php endforeach;?>
                             ]);
 
                         var options = {

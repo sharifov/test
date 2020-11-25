@@ -36,7 +36,7 @@ use yii\widgets\Pjax;
 
             <?= $form->field($transferForm, 'channelId')->dropDownList($transferForm->getChannels(), ['prompt' => '-- Select channel --']) ?>
 
-            <?php if ($transferForm->isAgentTransfer()): ?>
+            <?php if ($transferForm->isAgentTransfer()) : ?>
                 <?= $form->field($transferForm, 'agentId', ['options' => ['class' => 'form-group required']])->widget(Select2::class, [
                     'data' => $transferForm->getAgents(),
                     'options' => [
@@ -59,7 +59,7 @@ use yii\widgets\Pjax;
                 ]) ?>
             <?php endif;?>
 
-            <?php if ($transferForm->reasons): ?>
+            <?php if ($transferForm->reasons) : ?>
                 <?= $form->field($transferForm, 'reasonId')->dropDownList($transferForm->getReasonList()) ?>
 
                 <?= $form->field($transferForm, 'comment')->textarea(['max' => 100]) ?>

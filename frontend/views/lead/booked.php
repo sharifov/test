@@ -101,16 +101,16 @@ $this->params['breadcrumbs'][] = $this->title;
             'label' => 'Pending Time',
             'value' => static function (\common\models\Lead $model) {
                 $date = $model->getStatusDate(Lead::STATUS_BOOKED);
-                if(!$date)
+                if (!$date) {
                     $date = $model->updated;
+                }
 
                 $dateTS = strtotime($date);
 
                 $diffTime = time() - $dateTS;
                 $diffHours = (int) ($diffTime / (60 * 60));
 
-                return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($dateTS);
-
+                return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($dateTS);
             },
             'format' => 'raw'
         ],
@@ -154,7 +154,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         if (!empty($additionally->passengers)) {
                             $pax = [];
                             foreach ($additionally->passengers as $passenger) {
-                                $pax[] = '<i class="fa fa-user-o success"></i> '.strtoupper($passenger);
+                                $pax[] = '<i class="fa fa-user-o success"></i> ' . strtoupper($passenger);
                             }
                             $content[] = implode('<br/>', $pax);
                         }
@@ -163,7 +163,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 $divTag = Html::tag('div', '', [
                     'style' => 'border: 1px solid #a3b3bd; margin: 0px 0 5px;'
                 ]);
-                return '<small>'.implode($divTag, $content).'</small>';
+                return '<small>' . implode($divTag, $content) . '</small>';
             },
             'format' => 'raw',
             'contentOptions' => [
@@ -200,73 +200,72 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Profit',
                 'value' => static function (\common\models\Lead $model) {
-                $totalProfitTxt = '';
-                if ($model->getFinalProfit()) {
-                    $model->totalProfit = $model->getFinalProfit();
-                    $totalProfitTxt = "<strong>$" . number_format($model->getFinalProfit(), 2) . "</strong>";
-                }else{
-                    $quote = $model->getBookedQuote();
-                    if (empty($quote)) {
-                        $totalProfitTxt = "<strong>$" . number_format(0, 2) . "</strong>";
-                    }else{
-                        $model->totalProfit = $quote->getEstimationProfit();
-                        $totalProfitTxt = "<strong>$" . number_format($model->totalProfit, 2) . "</strong>";
+                    $totalProfitTxt = '';
+                    if ($model->getFinalProfit()) {
+                        $model->totalProfit = $model->getFinalProfit();
+                        $totalProfitTxt = "<strong>$" . number_format($model->getFinalProfit(), 2) . "</strong>";
+                    } else {
+                        $quote = $model->getBookedQuote();
+                        if (empty($quote)) {
+                            $totalProfitTxt = "<strong>$" . number_format(0, 2) . "</strong>";
+                        } else {
+                            $model->totalProfit = $quote->getEstimationProfit();
+                            $totalProfitTxt = "<strong>$" . number_format($model->totalProfit, 2) . "</strong>";
+                        }
                     }
-                }
 
-                $splitProfitTxt = '';
-                $splitProfit = $model->getAllProfitSplits();
-                $return = [];
-                foreach ($splitProfit as $split) {
-                    $model->splitProfitPercentSum += $split->ps_percent;
-                    $return[] = '<b>' . $split->psUser->username . '</b> (' . $split->ps_percent . '%) $' . number_format($split->countProfit($model->totalProfit), 2);
-                }
-                if (!empty($return)) {
-                    $splitProfitTxt = implode('<br/>', $return);
-                }
+                    $splitProfitTxt = '';
+                    $splitProfit = $model->getAllProfitSplits();
+                    $return = [];
+                    foreach ($splitProfit as $split) {
+                        $model->splitProfitPercentSum += $split->ps_percent;
+                        $return[] = '<b>' . $split->psUser->username . '</b> (' . $split->ps_percent . '%) $' . number_format($split->countProfit($model->totalProfit), 2);
+                    }
+                    if (!empty($return)) {
+                        $splitProfitTxt = implode('<br/>', $return);
+                    }
 
-                $mainAgentPercent = 100;
-                if ($model->splitProfitPercentSum > 0) {
-                    $mainAgentPercent -= $model->splitProfitPercentSum;
-                }
-                $mainAgentProfitTxt = "<strong>$" . number_format($model->totalProfit * $mainAgentPercent / 100, 2) . "</strong>";
+                    $mainAgentPercent = 100;
+                    if ($model->splitProfitPercentSum > 0) {
+                        $mainAgentPercent -= $model->splitProfitPercentSum;
+                    }
+                    $mainAgentProfitTxt = "<strong>$" . number_format($model->totalProfit * $mainAgentPercent / 100, 2) . "</strong>";
 
-                return 'Total profit: '.$totalProfitTxt.(($splitProfitTxt)?'<hr/>Split profit:<br/>'.$splitProfitTxt:'').
-                '<hr/> '.(($model->employee)?$model->employee->username:'Main agent').' profit: '.$mainAgentProfitTxt;
-
-            },
+                    return 'Total profit: ' . $totalProfitTxt . (($splitProfitTxt) ? '<hr/>Split profit:<br/>' . $splitProfitTxt : '') .
+                    '<hr/> ' . (($model->employee) ? $model->employee->username : 'Main agent') . ' profit: ' . $mainAgentProfitTxt;
+                },
             'format' => 'raw'
                     ],
                     [
                         'label' => 'Tips',
                         'value' => static function (\common\models\Lead $model) {
-                        if($model->getTotalTips() == 0) {
-                            return '-';
-                        }
-                        $totalTipsTxt = "<strong>$" . number_format($model->getTotalTips(), 2) . "</strong>";
+                            if ($model->getTotalTips() == 0) {
+                                return '-';
+                            }
+                            $totalTipsTxt = "<strong>$" . number_format($model->getTotalTips(), 2) . "</strong>";
 
-                        $splitTipsTxt = '';
-                        $splitTips = $model->getAllTipsSplits();
-                        $return = [];
-                        foreach ($splitTips as $split) {
-                            $model->splitTipsPercentSum += $split->ts_percent;
-                            $return[] = '<b>' . $split->tsUser->username . '</b> (' . $split->ts_percent . '%) $' . number_format($split->countTips($model->getTotalTips()), 2);
-                        }
-                        if (!empty($return)) {
-                            $splitTipsTxt = implode('<br/>', $return);
-                        }
+                            $splitTipsTxt = '';
+                            $splitTips = $model->getAllTipsSplits();
+                            $return = [];
+                            foreach ($splitTips as $split) {
+                                $model->splitTipsPercentSum += $split->ts_percent;
+                                $return[] = '<b>' . $split->tsUser->username . '</b> (' . $split->ts_percent . '%) $' . number_format($split->countTips($model->getTotalTips()), 2);
+                            }
+                            if (!empty($return)) {
+                                $splitTipsTxt = implode('<br/>', $return);
+                            }
 
-                        $mainAgentPercent = 100;
-                        if ($model->splitTipsPercentSum > 0) {
-                            $mainAgentPercent -= $model->splitTipsPercentSum;
-                        }
-                        $mainAgentTipsTxt = "<strong>$" . number_format($model->getTotalTips() * $mainAgentPercent / 100, 2) . "</strong>";
+                            $mainAgentPercent = 100;
+                            if ($model->splitTipsPercentSum > 0) {
+                                $mainAgentPercent -= $model->splitTipsPercentSum;
+                            }
+                            $mainAgentTipsTxt = "<strong>$" . number_format($model->getTotalTips() * $mainAgentPercent / 100, 2) . "</strong>";
 
-                        return 'Tips: '.$totalTipsTxt.(($splitTipsTxt)?'<hr/>Split tips:<br/>'.$splitTipsTxt:'').'<hr/> '.
-                            (($model->employee)?$model->employee->username:'Main agent').' tips: '.$mainAgentTipsTxt;
-                    },
+                            return 'Tips: ' . $totalTipsTxt . (($splitTipsTxt) ? '<hr/>Split tips:<br/>' . $splitTipsTxt : '') . '<hr/> ' .
+                            (($model->employee) ? $model->employee->username : 'Main agent') . ' tips: ' . $mainAgentTipsTxt;
+                        },
                     'format' => 'raw'
-       ],
+        ],
         [
             'attribute' => 'update',
             'label' => 'Last Update',
@@ -304,7 +303,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
 
                 return $labelVTF;
-
             },
             'format' => 'raw'
         ],
@@ -397,7 +395,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 $diffHours = (int) ($diffTime / (60 * 60));
 
 
-                $str = ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+                $str = ($diffHours > 3 && $diffHours < 73 ) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
                 $str .= '<br><i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
 
                 return $str;
@@ -418,7 +416,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 'options' => [
                     'autocomplete' => 'off',
-                    'placeholder' =>'Choose Date'
+                    'placeholder' => 'Choose Date'
                 ],
             ]),
         ],

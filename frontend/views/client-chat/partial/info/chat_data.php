@@ -11,7 +11,7 @@ use common\components\grid\DateTimeColumn;
 
 ?>
 
-<?php if ($clientChatData): ?>
+<?php if ($clientChatData) : ?>
     <?= DetailView::widget([
         'model' => $clientChatData,
         'attributes' => [
@@ -61,7 +61,7 @@ use common\components\grid\DateTimeColumn;
             [
                 'attribute' => 'cch_status_id',
                 'value' => static function (ClientChat $model) {
-                    return Html::tag('span', $model->getStatusName(), ['class' => 'badge badge-'.$model->getStatusClass()]);
+                    return Html::tag('span', $model->getStatusName(), ['class' => 'badge badge-' . $model->getStatusClass()]);
                 },
                 'format' => 'raw',
             ],
@@ -113,11 +113,11 @@ use common\components\grid\DateTimeColumn;
             ],
         ]
     ]) ?>
-<?php else: ?>
+<?php else : ?>
     <?= Alert::widget([
         'body' => 'Client Chat Data not found.',
         'options' => [
             'class' => 'alert alert-warning'
         ]
     ]) ?>
-<?php endif; ?>
+<?php endif;

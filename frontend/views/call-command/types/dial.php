@@ -23,6 +23,6 @@ $formId = $callCommandTypeService::viewNameFormatting($callCommandTypeService->g
         <?php echo $formType->field($model, 'sort')->hiddenInput()->label(false) ?>
         <?php echo $formType->field($model, 'typeId')->hiddenInput()->label(false) ?>
 
-    <?php $formType::end(); ?>
+    <?php $formType::end();
 
 

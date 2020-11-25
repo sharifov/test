@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $this \yii\web\View
  * @var $leadForm LeadForm
@@ -7,15 +8,12 @@
 use common\models\Employee;
 use common\models\User;
 use frontend\models\LeadForm;
-
 use frontend\themes\gentelella_v2\assets\groups\GentelellaAsset;
 use sales\access\EmployeeProductAccess;
 use sales\access\ListsAccess;
-
 use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use modules\qaTask\src\widgets\objectMenu\QaTaskObjectMenuWidget;
 use sales\auth\Auth;
-
 use yii\helpers\Html;
 use yii\helpers\Url;
 use common\models\Lead;
@@ -44,7 +42,7 @@ $user = Yii::$app->user->identity;
     $buttonTake = Html::a('<i class="fa fa-share fa-rotate-0"></i> Take', [
         'lead/take',
         'gid' => $leadModel->gid
-    ],[
+    ], [
         'class' => 'btn btn-sm btn-info',
     ]);
 
@@ -103,7 +101,7 @@ $user = Yii::$app->user->identity;
     $takeConditions = ($leadForm->viewPermission && ($leadModel->isOnHold() || $leadModel->isFollowUp() || $leadModel->isPending() || $leadModel->isProcessing()) && $leadModel->getAppliedAlternativeQuotes() === null);
     $processingConditions = $leadModel->isOwner($user->id) && $leadModel->isProcessing() && $leadModel->getAppliedAlternativeQuotes() === null;
 
-    if($processingConditions){
+    if ($processingConditions) {
     //    if ($user->isAdmin() || $user->isSupervision()) {
     //        $buttonsSubAction[] = $buttonAnswer;
     //    }
@@ -128,7 +126,7 @@ $user = Yii::$app->user->identity;
         $buttonsSubAction[] = $buttonReturnLead;
         $buttonsSubAction[] = $buttonReject;
     }
-    if ($viwModeSuperAdminCondition){
+    if ($viwModeSuperAdminCondition) {
         if ($leadModel->isSold()) {
             if ($user->isAdmin()) {
                 $buttonsSubAction[] = $buttonClone;
@@ -152,36 +150,36 @@ $user = Yii::$app->user->identity;
 
     $project = $leadModel->project;
     $projectStyles = '';
-    if($project){
+    if ($project) {
         $projectCustomData = $project->custom_data;
-        if(!empty($projectCustomData)){
+        if (!empty($projectCustomData)) {
             $projectCustomDataArr = json_decode($projectCustomData, true);
-            if(!empty($projectCustomDataArr)){
+            if (!empty($projectCustomDataArr)) {
                 $stylesArr = [];
-                foreach ($projectCustomDataArr as $styleKey => $styleEntry){
-                    if(!empty($styleEntry)){
-                        $stylesArr[] = $styleKey.':'.$styleEntry;
+                foreach ($projectCustomDataArr as $styleKey => $styleEntry) {
+                    if (!empty($styleEntry)) {
+                        $stylesArr[] = $styleKey . ':' . $styleEntry;
                     }
                 }
-                $stylesArr[] = 'background-image:url(https://communication.travelinsides.com/imgs/'. strtolower($project->name).'/logo_white.png);background-repeat: no-repeat;background-position: center right;background-size: 101px;background-origin: content-box;';
-                if(!empty($stylesArr)){
-                    $projectStyles = ' style="'.implode(';',$stylesArr).'"';
+                $stylesArr[] = 'background-image:url(https://communication.travelinsides.com/imgs/' . strtolower($project->name) . '/logo_white.png);background-repeat: no-repeat;background-position: center right;background-size: 101px;background-origin: content-box;';
+                if (!empty($stylesArr)) {
+                    $projectStyles = ' style="' . implode(';', $stylesArr) . '"';
                 }
             }
         }
     }
 
-?>
+    ?>
 <div class="panel-main__header" id="actions-header"<?= $projectStyles?>>
 
     <?php $productTypes = (new EmployeeProductAccess(Yii::$app->user))->getProductList(); ?>
-    <?php if(count($productTypes)): ?>
+    <?php if (count($productTypes)) : ?>
         <div class="dropdown">
             <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
                 <i class="fa fa-plus"></i> Product
             </button>
             <div class="dropdown-menu">
-                <?php foreach ($productTypes as $id => $name):?>
+                <?php foreach ($productTypes as $id => $name) :?>
                     <a class="dropdown-item add-product" href="#" data-product-type-id="<?=Html::encode($id)?>">add <?=Html::encode($name)?></a>
                 <?php endforeach; ?>
             </div>
@@ -189,18 +187,17 @@ $user = Yii::$app->user->identity;
     <?php endif; ?>
 
     <?php if (!$user->isQa()) : ?>
-
             <div class="panel-main__actions">
-    	<?php if ($takeConditions){
+        <?php if ($takeConditions) {
             if (!$leadModel->isOwner($user->id) && ($leadModel->isProcessing() || $leadModel->isOnHold())) {
-               echo $buttonTakeOver;
+                echo $buttonTakeOver;
             } elseif ($leadModel->isPending() || $leadModel->isFollowUp()) {
                 echo $buttonTake;
             }
         }?>
 
-        <?php if ($buttonsSubAction): ?>
-            <?php foreach ($buttonsSubAction as $btn):?>
+        <?php if ($buttonsSubAction) : ?>
+            <?php foreach ($buttonsSubAction as $btn) :?>
                 <?= $btn ?>
             <?php endforeach; ?>
         <?php endif; ?>
@@ -218,8 +215,8 @@ $user = Yii::$app->user->identity;
             echo Html::button('<i class="fa fa-plus"></i> ' . $title . '', $options);
         }  ?>
 
-        <?php if($leadModel->isSold() && ($user->isAdmin() || $user->isSupervision())):?>
-        	<?= Html::button('<i class="fa fa-money"></i> Split profit', [
+        <?php if ($leadModel->isSold() && ($user->isAdmin() || $user->isSupervision())) :?>
+            <?= Html::button('<i class="fa fa-money"></i> Split profit', [
                     'class' => 'btn btn-default',
                     'id' => 'split-profit',
                     'data-url' => Url::to(['lead/split-profit', 'id' => $leadModel->id]),
@@ -231,7 +228,7 @@ $user = Yii::$app->user->identity;
             ])?>
             <?php Modal::end()?>
 
-            <?php if($leadModel->tips > 0):?>
+            <?php if ($leadModel->tips > 0) :?>
                 <?= Html::button('<i class="fa fa-money"></i> Split tips', [
                         'class' => 'btn btn-default',
                         'id' => 'split-tips',
@@ -255,15 +252,14 @@ $user = Yii::$app->user->identity;
     $canVisitorLogs = Auth::can('/visitor-log/index');
     ?>
 
-    <?php if ($canStatusLog || $canDataLogs || $canVisitorLogs): ?>
-
+    <?php if ($canStatusLog || $canDataLogs || $canVisitorLogs) : ?>
         &nbsp; <div class="dropdown">
             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fa fa-bars"> </i> Logs
             </button>
             <div class="dropdown-menu">
 
-                <?php if ($canStatusLog): ?>
+                <?php if ($canStatusLog) : ?>
                     <?= Html::a('<i class="fa fa-bars"> </i> Status Logs', null, [
                         'id' => 'view-flow-transition',
                         'class' => 'dropdown-item',
@@ -271,7 +267,7 @@ $user = Yii::$app->user->identity;
                     ]) ?>
                 <?php endif;?>
 
-                <?php if ($canDataLogs): ?>
+                <?php if ($canDataLogs) : ?>
                     <?= Html::a('<i class="fa fa-list"> </i> Data Logs', null, [
                         'id' => 'btn-general-lead-log',
                         'class' => 'dropdown-item showModalButton',
@@ -281,7 +277,7 @@ $user = Yii::$app->user->identity;
                     ]) ?>
                 <?php endif; ?>
 
-                <?php if ($canVisitorLogs): ?>
+                <?php if ($canVisitorLogs) : ?>
                     <?= Html::a('<i class="fa fa-list"> </i> Visitor Logs', ['/visitor-log/index', 'VisitorLogSearch[vl_lead_id]' => $leadForm->lead->id], [
                         'class' => 'dropdown-item',
                         'title' => 'Visitor log #' . $leadForm->lead->id,
@@ -293,7 +289,7 @@ $user = Yii::$app->user->identity;
 
     <?php endif; ?>
 
-    <?php if (Auth::can('lead/view_QA_Tasks')): ?>
+    <?php if (Auth::can('lead/view_QA_Tasks')) : ?>
         <?= QaTaskObjectMenuWidget::widget([
                 'objectType' => QaTaskObjectType::LEAD,
                 'objectId' => $leadModel->id,
@@ -808,7 +804,7 @@ $this->registerJs($js);
 ?>
 
 
-<?php $this->registerCssFile('//cdnjs.cloudflare.com/ajax/libs/noUiSlider/11.1.0/nouislider.min.css',[
+<?php $this->registerCssFile('//cdnjs.cloudflare.com/ajax/libs/noUiSlider/11.1.0/nouislider.min.css', [
     'depends' => [GentelellaAsset::class],
 ]);?>
 <?php //$this->registerCssFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/css/bootstrap-modal.css',[

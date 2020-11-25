@@ -1,5 +1,7 @@
 <?php
+
 use yii\widgets\Pjax;
+
 /**
  *  @var $profitDataProvider yii\data\SqlDataProvider
  *  @var $soldDataProvider yii\data\SqlDataProvider
@@ -15,7 +17,7 @@ use yii\widgets\Pjax;
  *  @var $teamsBoardsSettings array
  *  @var $showRatingSettings boolean
  */
-$this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'href' => Yii::$app->request->baseUrl.'/favicon.ico']);
+$this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'href' => Yii::$app->request->baseUrl . '/favicon.ico']);
 
 ?>
 

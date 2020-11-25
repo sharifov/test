@@ -26,12 +26,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <style>
 .dropdown-menu {
-	z-index: 1010 !important;
+    z-index: 1010 !important;
 }
 </style>
 <h1>
     <i class="fa fa-recycle"></i>
-	<?=\yii\helpers\Html::encode($this->title)?>
+    <?=\yii\helpers\Html::encode($this->title)?>
 
 </h1>
 <div class="lead-bonus">
@@ -88,7 +88,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 'options' => [
                     'autocomplete' => 'off',
-                    'placeholder' =>'Choose Date'
+                    'placeholder' => 'Choose Date'
                 ],
             ]),
         ],
@@ -112,13 +112,12 @@ $this->params['breadcrumbs'][] = $this->title;
                     $str .= $lead->client && $lead->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($lead->client->clientPhones, 'phone', 'phone')) . '' : '';
 
 
-                    $clientName.= '<br>'. $str;
-
+                    $clientName .= '<br>' . $str;
                 } else {
                     $clientName = '-';
                 }
 
-                return $clientName.'<br/>'. ClientTimeFormatter::format($lead->getClientTime2(), $lead->offset_gmt);
+                return $clientName . '<br/>' . ClientTimeFormatter::format($lead->getClientTime2(), $lead->offset_gmt);
             },
             'options' => [
                 'style' => 'width:160px'
@@ -161,9 +160,9 @@ $this->params['breadcrumbs'][] = $this->title;
             'content' => static function (Lead $lead) {
                 $content = '';
                 $content .= $lead->getFlightDetails();
-                $pax = '<span title="adult"><i class="fa fa-male"></i> '. $lead->adults .'</span> / <span title="child"><i class="fa fa-child"></i> ' . $lead->children . '</span> / <span title="infant"><i class="fa fa-info"></i> ' . $lead->infants.'</span>';
+                $pax = '<span title="adult"><i class="fa fa-male"></i> ' . $lead->adults . '</span> / <span title="child"><i class="fa fa-child"></i> ' . $lead->children . '</span> / <span title="infant"><i class="fa fa-info"></i> ' . $lead->infants . '</span>';
 
-                $content .= '<br/>'.$pax.'<br/>';
+                $content .= '<br/>' . $pax . '<br/>';
 
                 $content .= sprintf('<strong>Cabin:</strong> %s', $lead->getCabinClassName());
 
@@ -201,7 +200,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'attribute' => 'l_last_action_dt',
             //'label' => 'Last Update',
             'value' => static function (Lead $lead) {
-                return $lead->l_last_action_dt ? '<b>'.Yii::$app->formatter->asRelativeTime(strtotime($lead->l_last_action_dt)).'</b><br>' .
+                return $lead->l_last_action_dt ? '<b>' . Yii::$app->formatter->asRelativeTime(strtotime($lead->l_last_action_dt)) . '</b><br>' .
                     Yii::$app->formatter->asDatetime(strtotime($lead->l_last_action_dt)) : $lead->l_last_action_dt;
             },
             'format' => 'raw',
@@ -217,7 +216,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 'options' => [
                     'autocomplete' => 'off',
-                    'placeholder' =>'Choose Date'
+                    'placeholder' => 'Choose Date'
                 ],
             ]),
         ],
@@ -229,7 +228,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'text-align:center;'
             ],
             'value' => static function (Lead $lead) {
-                return '<span style="cursor:help;" class="label label-warning" title="'.Html::encode($lead->getLastReasonFromLeadFlow()).'">&nbsp;<i class="fa fa-info-circle"></i>&nbsp;</span>';
+                return '<span style="cursor:help;" class="label label-warning" title="' . Html::encode($lead->getLastReasonFromLeadFlow()) . '">&nbsp;<i class="fa fa-info-circle"></i>&nbsp;</span>';
             },
             'format' => 'raw'
         ],

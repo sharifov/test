@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $lead \common\models\Lead
  * @var $errors []
@@ -46,14 +47,14 @@ function mainAgentProfit(){
 JS;
 $this->registerJs($js);?>
 <?php yii\widgets\Pjax::begin(['id' => 'profit' ,'enablePushState' => false]) ?>
-<?php if(!empty($errors)):?>
+<?php if (!empty($errors)) :?>
 <div class="alert alert-danger">Some errors happened!
-<?php if(isset($errors["profitsplitform-sumpercent"])):?>
+    <?php if (isset($errors["profitsplitform-sumpercent"])) :?>
 <br/> <?= $errors["profitsplitform-sumpercent"][0]?>
-<?php endif;?>
-<?php if(isset($errors["profitsplitform-mainagent"])):?>
+    <?php endif;?>
+    <?php if (isset($errors["profitsplitform-mainagent"])) :?>
 <br/> <?= $errors["profitsplitform-mainagent"][0]?>
-<?php endif;?>
+    <?php endif;?>
 </div>
 <?php endif;?>
 <div id="split-form-notification"></div>
@@ -62,23 +63,23 @@ $this->registerJs($js);?>
      'enableClientValidation' => false,
 ]); ?>
 <div class="row">
-	<div class="col-md-4">Total profit: $<?= number_format($totalProfit,2)?></div>
-	<div class="col-md-4">Profit for main agent (<b><?= $lead->employee->username?></b>): $<span id="main-agent-profit"><?= $mainAgentProfit?></span></div>
-	<div class="col-md-4">
-	<?= Html::button('<i class="fa fa-plus"></i> Add Agent', [
+    <div class="col-md-4">Total profit: $<?= number_format($totalProfit, 2)?></div>
+    <div class="col-md-4">Profit for main agent (<b><?= $lead->employee->username?></b>): $<span id="main-agent-profit"><?= $mainAgentProfit?></span></div>
+    <div class="col-md-4">
+    <?= Html::button('<i class="fa fa-plus"></i> Add Agent', [
             'id' => 'new-split-profit-button',
             'class' => 'btn btn-success pull-right' ,
         ]); ?>
-	</div>
+    </div>
 </div>
 <div class="row">
-	<div class="col-md-4"><label>Agent</label></div>
-	<div class="col-md-4"><label>Percentage of split</label></div>
-	<div class="col-md-4"><label>Profit</label></div>
+    <div class="col-md-4"><label>Agent</label></div>
+    <div class="col-md-4"><label>Percentage of split</label></div>
+    <div class="col-md-4"><label>Profit</label></div>
 </div>
 <div id="profit-splits">
     <?php
-    if(!empty($splitForm->getProfitSplit())){
+    if (!empty($splitForm->getProfitSplit())) {
         foreach ($splitForm->getProfitSplit() as $key => $_split) {
             echo $this->render('partial/_formSplitProfit', [
                 'key' => $_split->isNewRecord
@@ -101,8 +102,8 @@ $this->registerJs($js);?>
             'split' => $newSplit,
             'userList' => $userList,
             'totalProfit' => $totalProfit,
-			'leadId' => $lead->id
-		]) ?>
+            'leadId' => $lead->id
+        ]) ?>
     </div>
 </div>
 <?php ob_start(); // output buffer the javascript to register later ?>
@@ -116,9 +117,9 @@ $this->registerJs($js);?>
 
     // remove split button
     $(document).on('click', '.remove-split-button', function () {
-    	$(this).closest('div.split-row').remove();
-    	split_k -= 1;
-    	mainAgentProfit();
+        $(this).closest('div.split-row').remove();
+        split_k -= 1;
+        mainAgentProfit();
     });
 </script>
 <?php $this->registerJs(str_replace(['<script>', '</script>'], '', ob_get_clean())); ?>

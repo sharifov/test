@@ -10,9 +10,9 @@ use yii\widgets\ListView;
 /** @var ActiveDataProvider $dataProvider */
 
 ?>
-<?php if ($errorMessage): ?>
+<?php if ($errorMessage) : ?>
     <h3><?= $errorMessage ?></h3>
-<?php else: ?>
+<?php else : ?>
     <?= ListView::widget([
         'dataProvider' => $dataProvider,
         'itemView' => '_quote_item',

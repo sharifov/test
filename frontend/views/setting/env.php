@@ -78,7 +78,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </table>
     </div>
     <div class="col-md-6">
-        <?php if (!empty(Yii::$app->params['release'])): ?>
+        <?php if (!empty(Yii::$app->params['release'])) : ?>
             <h4>Release:</h4>
             <table class="table table-bordered table-hover">
                 <thead>

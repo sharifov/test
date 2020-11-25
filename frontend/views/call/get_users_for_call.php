@@ -18,8 +18,7 @@ use yii\widgets\Pjax;
 
     <?php Pjax::begin(['enableReplaceState' => false, 'enablePushState' => false]) ?>
 
-        <?php if ($users = $model->getRenderedUsers()): ?>
-
+        <?php if ($users = $model->getRenderedUsers()) : ?>
             <?php $form = ActiveForm::begin([
                 'action' => Url::to(['/call/get-users-for-call', 'id' => $call->c_id]),
                 'options' => [
@@ -42,7 +41,7 @@ use yii\widgets\Pjax;
 
             <?php ActiveForm::end(); ?>
 
-        <?php else: ?>
+        <?php else : ?>
             Users not found
         <?php endif;?>
 

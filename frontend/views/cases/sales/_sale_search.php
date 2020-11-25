@@ -83,7 +83,7 @@ use yii\widgets\Pjax;
                     [
                         'label' => 'Project',
                         'value' => static function ($model) {
-                            return $model['project'] ? '<span class="badge badge-info">'.Html::encode($model['project']).'</span>': '-';
+                            return $model['project'] ? '<span class="badge badge-info">' . Html::encode($model['project']) . '</span>' : '-';
                         },
                         'format' => 'raw'
                     ],
@@ -114,9 +114,9 @@ use yii\widgets\Pjax;
                         'label' => 'Trips',
                         'value' => static function ($model) {
                             $tripArr = [];
-                            if(isset($model['requestDetail']['trips'])) {
+                            if (isset($model['requestDetail']['trips'])) {
                                 foreach ($model['requestDetail']['trips'] as $trip) {
-                                    $tripArr[] = '<span class="label label-default">'.$trip['from'] . '</span> -> <span class="label label-default">' . $trip['to'] . '</span> ['.$trip['departure'].']';
+                                    $tripArr[] = '<span class="label label-default">' . $trip['from'] . '</span> -> <span class="label label-default">' . $trip['to'] . '</span> [' . $trip['departure'] . ']';
                                 }
                             }
                             return implode('<br>', $tripArr);
@@ -134,7 +134,7 @@ use yii\widgets\Pjax;
                     [
                         'label' => 'Pax',
                         'value' => static function ($model) {
-                            return isset($model['requestDetail']['passengersCnt']) ? $model['requestDetail']['passengersCnt']: '-';
+                            return isset($model['requestDetail']['passengersCnt']) ? $model['requestDetail']['passengersCnt'] : '-';
                         },
                     ],
 
@@ -171,12 +171,18 @@ use yii\widgets\Pjax;
                         'controller' => 'case',
                         'buttons' => [
                             'view' => function ($url, $model, $key) {
-                                return Html::a('<span class="fa fa-search"></span> View', ['sale/view', 'h' => base64_encode($model['confirmationNumber'] . '|' . $model['saleId'])],
-                                    ['title' => 'View', 'class' => 'btn btn-xs btn-info showModalCaseInfo', 'data-pjax' => 0]);
+                                return Html::a(
+                                    '<span class="fa fa-search"></span> View',
+                                    ['sale/view', 'h' => base64_encode($model['confirmationNumber'] . '|' . $model['saleId'])],
+                                    ['title' => 'View', 'class' => 'btn btn-xs btn-info showModalCaseInfo', 'data-pjax' => 0]
+                                );
                             },
                             'add' => function ($url, $model, $key) use ($caseModel) {
-                                return Html::a('<span class="fa fa-plus"></span> Add', ['cases/add-sale'],
-                                    ['title' => 'View', 'class' => 'btn btn-xs btn-success addSale', 'data-pjax' => 0, 'data-gid' => $caseModel->cs_gid, 'data-h' => base64_encode($model['confirmationNumber'] . '|' . $model['saleId'])]);
+                                return Html::a(
+                                    '<span class="fa fa-plus"></span> Add',
+                                    ['cases/add-sale'],
+                                    ['title' => 'View', 'class' => 'btn btn-xs btn-success addSale', 'data-pjax' => 0, 'data-gid' => $caseModel->cs_gid, 'data-h' => base64_encode($model['confirmationNumber'] . '|' . $model['saleId'])]
+                                );
                             },
                         ]
                     ]

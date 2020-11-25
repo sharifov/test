@@ -21,9 +21,9 @@ use yii\widgets\Pjax;
 
     <div class="row">
         <div class="col-md-3">
-			<?= $form->errorSummary($model) ?>
+            <?= $form->errorSummary($model) ?>
 
-			<?= $form->field($model, 'upc_name')->textInput(['maxlength' => true]) ?>
+            <?= $form->field($model, 'upc_name')->textInput(['maxlength' => true]) ?>
 
             <?= $form->field($model, 'upc_description')->textarea(['maxlength' => true]) ?>
 

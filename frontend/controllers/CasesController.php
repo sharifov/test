@@ -132,8 +132,7 @@ class CasesController extends FController
         QuoteRepository $quoteRepository,
         TransactionManager $transaction,
         $config = []
-    )
-    {
+    ) {
         parent::__construct($id, $module, $config);
         $this->casesCreateService = $casesCreateService;
         $this->casesManageService = $casesManageService;
@@ -183,20 +182,18 @@ class CasesController extends FController
 
         $dataProvider = $searchModel->search($params, $user);
 
-		if ($params['export_type']) {
-
-			return $this->render('_search', [
-				'model' => $searchModel,
-				'dataProvider' => $dataProvider,
-			]);
-		} else {
-			return $this->render('index', [
-				'searchModel' => $searchModel,
-				'dataProvider' => $dataProvider,
-				'user' => $user,
-			]);
-		}
-
+        if ($params['export_type']) {
+            return $this->render('_search', [
+                'model' => $searchModel,
+                'dataProvider' => $dataProvider,
+            ]);
+        } else {
+            return $this->render('index', [
+                'searchModel' => $searchModel,
+                'dataProvider' => $dataProvider,
+                'user' => $user,
+            ]);
+        }
     }
 
     /**
@@ -227,7 +224,6 @@ class CasesController extends FController
         if ($previewEmailForm->load(Yii::$app->request->post())) {
             $previewEmailForm->e_case_id = $model->cs_id;
             if ($previewEmailForm->validate()) {
-
                 $mail = new Email();
                 $mail->e_project_id = $model->cs_project_id;
                 $mail->e_case_id = $model->cs_id;
@@ -253,7 +249,6 @@ class CasesController extends FController
                 $mail->e_created_user_id = Yii::$app->user->id;
 
                 if ($mail->save()) {
-
                     $mail->e_message_id = $mail->generateMessageId();
                     $mail->update();
 
@@ -289,7 +284,6 @@ class CasesController extends FController
                     }
 
                     $this->refresh(); //'#communication-form'
-
                 } else {
                     $previewEmailForm->addError('e_email_subject', VarDumper::dumpAsString($mail->errors));
                     Yii::error(VarDumper::dumpAsString($mail->errors), 'CaseController:view:Email:save');
@@ -309,7 +303,6 @@ class CasesController extends FController
         if ($smsEnabled && $previewSmsForm->load(Yii::$app->request->post())) {
             $previewSmsForm->s_case_id = $model->cs_id;
             if ($previewSmsForm->validate()) {
-
                 $sms = new Sms();
                 $sms->s_project_id = $model->cs_project_id;
                 $sms->s_case_id = $model->cs_id;
@@ -333,7 +326,6 @@ class CasesController extends FController
                 $sms->s_created_user_id = Yii::$app->user->id;
 
                 if ($sms->save()) {
-
                     $previewSmsForm->is_send = true;
 
 
@@ -343,7 +335,6 @@ class CasesController extends FController
                         Yii::$app->session->setFlash('send-error', 'Error: <strong>SMS Message</strong> has not been sent to <strong>' . $sms->s_phone_to . '</strong>');
                         Yii::error('Error: SMS Message has not been sent to ' . $sms->s_phone_to . "\r\n " . $smsResponse['error'], 'CaseController:view:Sms:sendSms');
                     } else {
-
                         if ($quoteList = @json_decode($previewSmsForm->s_quote_list)) {
                             if (is_array($quoteList)) {
                                 foreach ($quoteList as $quoteId) {
@@ -363,7 +354,6 @@ class CasesController extends FController
                     }
 
                     $this->refresh('#communication-form');
-
                 } else {
                     $previewSmsForm->addError('s_sms_text', VarDumper::dumpAsString($sms->errors));
                     Yii::error(VarDumper::dumpAsString($sms->errors), 'CaseController:view:Sms:save');
@@ -380,7 +370,6 @@ class CasesController extends FController
 
 
         if ($comForm->load(Yii::$app->request->post())) {
-
             $comForm->c_case_id = $model->cs_id;
 
             $isTypeSMS = (int)$comForm->c_type_id === CaseCommunicationForm::TYPE_SMS && $smsEnabled;
@@ -388,20 +377,17 @@ class CasesController extends FController
             $isTypeEmail = (int)$comForm->c_type_id === CaseCommunicationForm::TYPE_EMAIL;
 
             if ($isTypeSMS && $model->isDepartmentSupport()) {
-            	$comForm->scenario = CaseCommunicationForm::SCENARIO_SMS_DEPARTMENT;
-			}
+                $comForm->scenario = CaseCommunicationForm::SCENARIO_SMS_DEPARTMENT;
+            }
 
             if ($isTypeEmail && $model->isDepartmentSupport()) {
-				$comForm->scenario = CaseCommunicationForm::SCENARIO_EMAIL_DEPARTMENT;
-			}
+                $comForm->scenario = CaseCommunicationForm::SCENARIO_EMAIL_DEPARTMENT;
+            }
 
             if ($comForm->validate()) {
-
                 $project = $model->project;
 
                 if ($isTypeEmail) {
-
-
                     //VarDumper::dump($comForm->quoteList, 10, true); exit;
 
                     $comForm->c_preview_email = 1;
@@ -426,10 +412,10 @@ class CasesController extends FController
 
 
                     $upp = null;
-					if ($model->isDepartmentSupport() && $departmentEmail = DepartmentEmailProject::find()->andWhere(['dep_id' => $comForm->dep_email_id])->withEmailList()->one()) {
-//						$mailFrom = $departmentEmail->dep_email;
-						$mailFrom = $departmentEmail->getEmail();
-					} else if ($model->cs_project_id) {
+                    if ($model->isDepartmentSupport() && $departmentEmail = DepartmentEmailProject::find()->andWhere(['dep_id' => $comForm->dep_email_id])->withEmailList()->one()) {
+//                      $mailFrom = $departmentEmail->dep_email;
+                        $mailFrom = $departmentEmail->getEmail();
+                    } else if ($model->cs_project_id) {
                         $upp = UserProjectParams::find()->where(['upp_project_id' => $model->cs_project_id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->one();
                         if ($upp) {
 //                            $mailFrom = $upp->upp_email;
@@ -454,7 +440,6 @@ class CasesController extends FController
                     $previewEmailForm->e_language_id = $comForm->c_language_id;
 
                     if ($comForm->c_email_tpl_id > 0) {
-
                         $previewEmailForm->e_email_tpl_id = $comForm->c_email_tpl_id;
 
                         $tpl = EmailTemplateType::findOne($comForm->c_email_tpl_id);
@@ -479,13 +464,11 @@ class CasesController extends FController
 
                         if ($mailPreview && isset($mailPreview['data'])) {
                             if (isset($mailPreview['error']) && $mailPreview['error']) {
-
                                 $errorJson = @json_decode($mailPreview['error'], true);
                                 $comForm->addError('c_email_preview', 'Communication Server response: ' . ($errorJson['message'] ?? $mailPreview['error']));
                                 Yii::error($mailPreview['error'], 'CaseController:view:mailPreview');
                                 $comForm->c_preview_email = 0;
                             } else {
-
                                 $emailBodyHtml = EmailService::prepareEmailBody($mailPreview['data']['email_body_html']);
                                 $keyCache = md5($emailBodyHtml);
                                 Yii::$app->cacheFile->set($keyCache, $emailBodyHtml, 60 * 60);
@@ -512,12 +495,10 @@ class CasesController extends FController
                         $previewEmailForm->e_email_from_name = $userModel->nickname;
                         $previewEmailForm->e_email_to_name = $model->client ? $model->client->full_name : '';
                     }
-
                 }
 
 
                 if ($isTypeSMS) {
-
                     $comForm->c_preview_sms = 1;
 
                     /** @var CommunicationService $communication */
@@ -532,11 +513,9 @@ class CasesController extends FController
                     $phoneFrom = '';
 
                     if ($model->isDepartmentSupport() && $departmentPhone = DepartmentPhoneProject::find()->andWhere(['dpp_id' => $comForm->dpp_phone_id])->withPhoneList()->one()) {
-
-//						$phoneFrom = $departmentPhone->dpp_phone_number;
-						$phoneFrom = $departmentPhone->getPhone();
-
-					} elseif ($model->cs_project_id) {
+//                      $phoneFrom = $departmentPhone->dpp_phone_number;
+                        $phoneFrom = $departmentPhone->getPhone();
+                    } elseif ($model->cs_project_id) {
                         $upp = UserProjectParams::find()->where(['upp_project_id' => $model->cs_project_id, 'upp_user_id' => Yii::$app->user->id])->withPhoneList()->one();
                         if ($upp) {
 //                            $phoneFrom = $upp->upp_tw_phone_number;
@@ -555,10 +534,7 @@ class CasesController extends FController
                     if (!$phoneFrom) {
                         $comForm->c_preview_sms = 0;
                         $comForm->addError('c_sms_preview', 'Config Error: Not found phone number for Project Id: ' . $model->cs_project_id . ', agent: "' . $userModel->username . '"');
-
                     } else {
-
-
                         $previewSmsForm->s_phone_to = $comForm->c_phone_number;
                         $previewSmsForm->s_phone_from = $phoneFrom;
 
@@ -568,7 +544,6 @@ class CasesController extends FController
 
 
                         if ($comForm->c_sms_tpl_id > 0) {
-
                             $previewSmsForm->s_sms_tpl_id = $comForm->c_sms_tpl_id;
 
                             //$content_data = []; //$lead->getEmailData2($comForm->quoteList, $projectContactInfo);
@@ -587,7 +562,6 @@ class CasesController extends FController
 
                             if ($smsPreview && isset($smsPreview['data'])) {
                                 if (isset($smsPreview['error']) && $smsPreview['error']) {
-
                                     $errorJson = @json_decode($smsPreview['error'], true);
                                     $comForm->addError('c_email_preview', 'Communication Server response: ' . ($errorJson['message'] ?? $smsPreview['error']));
                                     Yii::error($communication->url . "\r\n " . $smsPreview['error'], 'CaseController:view:smsPreview');
@@ -603,13 +577,9 @@ class CasesController extends FController
                             //VarDumper::dump($mailPreview, 10, true);// exit;
                         } else {
                             $previewSmsForm->s_sms_message = $comForm->c_sms_message;
-
                         }
                     }
-
                 }
-
-
             }
             //return $this->redirect(['view', 'id' => $model->al_id]);
         } else {
@@ -632,11 +602,11 @@ class CasesController extends FController
             }
             $dataProviderCommunication->pagination->page = $pageCount;
 
-			$pageCount = ceil($dataProviderCommunicationLog->totalCount / $dataProviderCommunicationLog->pagination->pageSize) - 1;
-			if ($pageCount < 0) {
-				$pageCount = 0;
-			}
-			$dataProviderCommunicationLog->pagination->page = $pageCount;
+            $pageCount = ceil($dataProviderCommunicationLog->totalCount / $dataProviderCommunicationLog->pagination->pageSize) - 1;
+            if ($pageCount < 0) {
+                $pageCount = 0;
+            }
+            $dataProviderCommunicationLog->pagination->page = $pageCount;
         }
 
         // Sale Search
@@ -691,7 +661,7 @@ class CasesController extends FController
 
         //VarDumper::dump($dataProvider->allModels); exit;
 
-		$fromPhoneNumbers = [];
+        $fromPhoneNumbers = [];
         if (SettingHelper::isLeadCommunicationNewCallWidgetEnabled()) {
             if (($department = $model->department) && $params = $department->getParams()) {
                 $phoneList = new AvailablePhoneList(Auth::id(), $model->cs_project_id, $department->dep_id, $params->defaultPhoneType);
@@ -728,10 +698,10 @@ class CasesController extends FController
             'modelNote' => $modelNote,
             'dataProviderNotes' => $dataProviderNotes,
 
-			'coupons' => $coupons,
-			'sendCouponsForm' => $sendCouponForm,
+            'coupons' => $coupons,
+            'sendCouponsForm' => $sendCouponForm,
 
-			'fromPhoneNumbers' => $fromPhoneNumbers,
+            'fromPhoneNumbers' => $fromPhoneNumbers,
             'smsEnabled' => $smsEnabled
         ]);
     }
@@ -788,45 +758,45 @@ class CasesController extends FController
     }
 
     private function getCommunicationLogDataProvider(Cases $model): ActiveDataProvider
-	{
-		$query1 = (new \yii\db\Query())
-			->select(['e_id AS id', new Expression('"email" AS type'), 'e_case_id AS case_id', 'e_created_dt AS created_dt'])
-			->from('email')
-			->where(['e_case_id' => $model->cs_id]);
+    {
+        $query1 = (new \yii\db\Query())
+            ->select(['e_id AS id', new Expression('"email" AS type'), 'e_case_id AS case_id', 'e_created_dt AS created_dt'])
+            ->from('email')
+            ->where(['e_case_id' => $model->cs_id]);
 
-		$query2 = (new \yii\db\Query())
-			->select(['s_id AS id', new Expression('"sms" AS type'), 's_case_id AS case_id', 's_created_dt AS created_dt'])
-			->from('sms')
-			->where(['s_case_id' => $model->cs_id]);
+        $query2 = (new \yii\db\Query())
+            ->select(['s_id AS id', new Expression('"sms" AS type'), 's_case_id AS case_id', 's_created_dt AS created_dt'])
+            ->from('sms')
+            ->where(['s_case_id' => $model->cs_id]);
 
-		$query3 = (new \yii\db\Query())
-			->select(['id' => new Expression('if (cl_group_id is null, cl_id, cl_group_id)')])
-			->addSelect(['type' => new Expression('"voice"')])
-			->addSelect(['case_id' => 'call_log_case.clc_case_id', 'created_dt' => 'MIN(call_log.cl_call_created_dt)'])
-			->from('call_log_case')
-			->innerJoin('call_log', 'call_log.cl_id = call_log_case.clc_cl_id')
-			->where(['clc_case_id' => $model->cs_id])
-			->andWhere(['call_log.cl_type_id' => [CallLogType::IN,CallLogType::OUT]])
-			->orderBy(['created_dt' => SORT_ASC])
-			->groupBy(['id', 'type', 'case_id']);
+        $query3 = (new \yii\db\Query())
+            ->select(['id' => new Expression('if (cl_group_id is null, cl_id, cl_group_id)')])
+            ->addSelect(['type' => new Expression('"voice"')])
+            ->addSelect(['case_id' => 'call_log_case.clc_case_id', 'created_dt' => 'MIN(call_log.cl_call_created_dt)'])
+            ->from('call_log_case')
+            ->innerJoin('call_log', 'call_log.cl_id = call_log_case.clc_cl_id')
+            ->where(['clc_case_id' => $model->cs_id])
+            ->andWhere(['call_log.cl_type_id' => [CallLogType::IN,CallLogType::OUT]])
+            ->orderBy(['created_dt' => SORT_ASC])
+            ->groupBy(['id', 'type', 'case_id']);
 
         $query4 = (new \yii\db\Query())
             ->select(['cccs_chat_id AS id', new Expression('"chat" AS type'), 'cccs_case_id AS case_id', 'cccs_created_dt AS created_dt'])
             ->from('{{%client_chat_case}}')
             ->where(['cccs_case_id' => $model->cs_id]);
 
-		$unionQuery = (new \yii\db\Query())
-			->from(['union_table' => $query1->union($query2)->union($query3)->union($query4)])
-			->orderBy(['created_dt' => SORT_ASC]);
+        $unionQuery = (new \yii\db\Query())
+            ->from(['union_table' => $query1->union($query2)->union($query3)->union($query4)])
+            ->orderBy(['created_dt' => SORT_ASC]);
 
 
-		return new ActiveDataProvider([
-			'query' => $unionQuery,
-			'pagination' => [
-				'pageSize' => 10,
-			],
-		]);
-	}
+        return new ActiveDataProvider([
+            'query' => $unionQuery,
+            'pagination' => [
+                'pageSize' => 10,
+            ],
+        ]);
+    }
 
     /**
      * @return array
@@ -840,7 +810,7 @@ class CasesController extends FController
         $hash = Yii::$app->request->post('h');
 
         try {
-			$transaction = Yii::$app->db->beginTransaction();
+            $transaction = Yii::$app->db->beginTransaction();
             $model = $this->findModelByGid($gid);
 
             if (!Auth::can('cases/update', ['case' => $model])) {
@@ -852,8 +822,8 @@ class CasesController extends FController
             $saleData = $this->casesSaleService->detailRequestToBackOffice($id, 0, 120, 1);
 
             $cs = CaseSale::find()->where(['css_cs_id' => $model->cs_id, 'css_sale_id' => $saleData['saleId']])->limit(1)->one();
-            if($cs) {
-                $out['error'] = 'This sale ('.$saleData['saleId'].') exist in this Case Id '.$model->cs_id;
+            if ($cs) {
+                $out['error'] = 'This sale (' . $saleData['saleId'] . ') exist in this Case Id ' . $model->cs_id;
             } else {
                 $cs = new CaseSale();
                 $cs->css_cs_id = $model->cs_id;
@@ -867,19 +837,18 @@ class CasesController extends FController
 
                 $cs = $this->casesSaleService->prepareAdditionalData($cs, $saleData);
 
-                if(!$cs->save()) {
-                    Yii::error(VarDumper::dumpAsString($cs->errors). ' Data: ' . VarDumper::dumpAsString($saleData), 'CasesController:actionAddSale:CaseSale:save');
-					throw new \RuntimeException($cs->getErrorSummary(false)[0]);
-				}
+                if (!$cs->save()) {
+                    Yii::error(VarDumper::dumpAsString($cs->errors) . ' Data: ' . VarDumper::dumpAsString($saleData), 'CasesController:actionAddSale:CaseSale:save');
+                    throw new \RuntimeException($cs->getErrorSummary(false)[0]);
+                }
 
-				$model->updateLastAction();
-				$this->saleTicketService->createSaleTicketBySaleData($cs, $saleData);
-			}
+                $model->updateLastAction();
+                $this->saleTicketService->createSaleTicketBySaleData($cs, $saleData);
+            }
 
             $out['data'] = ['sale_id' => $saleData['saleId'], 'gid' => $gid, 'h' => $hash];
 
             $transaction->commit();
-
         } catch (\Throwable $exception) {
             $out['error'] = $exception->getMessage();
             $transaction->rollBack();
@@ -903,9 +872,9 @@ class CasesController extends FController
             $model = $this->findModelByGid($gid);
             $lead = $this->findLeadModel($lead_gid);
 
-            if($model->cs_lead_id != $lead->id) {
+            if ($model->cs_lead_id != $lead->id) {
                 $model->cs_lead_id = $lead->id;
-                if(!$model->update()) {
+                if (!$model->update()) {
                     Yii::error(VarDumper::dumpAsString($model->errors), 'CasesController:actionAssignLead:Case:save');
                 } else {
                     $model->updateLastAction();
@@ -913,7 +882,6 @@ class CasesController extends FController
             }
 
             $out['data'] = ['lead_id' => $lead->id, 'gid' => $gid];
-
         } catch (\Throwable $exception) {
             $out['error'] = $exception->getMessage();
         }
@@ -950,7 +918,7 @@ class CasesController extends FController
                 $this->casesManageService->processing($case->cs_id, Yii::$app->user->id, Yii::$app->user->id);
                 Yii::$app->session->setFlash('success', 'Case created');
                 return $this->redirect(['view', 'gid' => $case->cs_gid]);
-            } catch (\Throwable $e){
+            } catch (\Throwable $e) {
                 Yii::$app->session->setFlash('error', $e->getMessage());
                 Yii::error($e, 'Case:Create:Web');
             }
@@ -973,9 +941,9 @@ class CasesController extends FController
             throw new NotFoundHttpException('Client chat not found');
         }
 
-		if (!Auth::can('client-chat/manage', ['chat' => $chat])) {
-			throw new ForbiddenHttpException('You do not have access to perform this action', 403);
-		}
+        if (!Auth::can('client-chat/manage', ['chat' => $chat])) {
+            throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+        }
 
         $user = Auth::user();
         $form = new CasesCreateByChatForm($user, $chat);
@@ -988,8 +956,8 @@ class CasesController extends FController
                     $this->casesManageService->processing($case->cs_id, $user->id, $user->id);
                     return $case;
                 });
-                return "<script> $('#modal-md').modal('hide');refreshChatInfo('".$chat->cch_id."')</script>";
-            } catch (\Throwable $e){
+                return "<script> $('#modal-md').modal('hide');refreshChatInfo('" . $chat->cch_id . "')</script>";
+            } catch (\Throwable $e) {
                 Yii::error(AppHelper::throwableFormatter($e), 'CasesController:actionCreateByChat');
                 return "<script> $('#modal-md').modal('hide');createNotify('Create Case', '" . $e->getMessage() . "', 'error');</script>";
             }
@@ -1158,7 +1126,6 @@ class CasesController extends FController
 
         if ($statusForm->load(Yii::$app->request->post()) && $statusForm->validate()) {
             try {
-
                 if ($user->isSimpleAgent() && empty($case->cs_category_id)) {
                     throw new \DomainException('Status of a case without a category cannot be changed!');
                 }
@@ -1168,19 +1135,19 @@ class CasesController extends FController
                 }
 
                 switch ((int)$statusForm->statusId) {
-                    case CasesStatus::STATUS_FOLLOW_UP :
+                    case CasesStatus::STATUS_FOLLOW_UP:
                         $this->casesManageService->followUp($case->cs_id, $user->id, $statusForm->message, $statusForm->getConvertedDeadline());
                         break;
-                    case CasesStatus::STATUS_TRASH :
+                    case CasesStatus::STATUS_TRASH:
                         $this->casesManageService->trash($case->cs_id, $user->id, $statusForm->message);
                         break;
-                    case CasesStatus::STATUS_SOLVED :
+                    case CasesStatus::STATUS_SOLVED:
                         $this->casesManageService->solved($case->cs_id, $user->id, $statusForm->message);
                         break;
-                    case CasesStatus::STATUS_PENDING :
+                    case CasesStatus::STATUS_PENDING:
                         $this->casesManageService->pending($case->cs_id, $user->id, $statusForm->message);
                         break;
-                    case CasesStatus::STATUS_PROCESSING :
+                    case CasesStatus::STATUS_PROCESSING:
                         $this->casesManageService->processing($case->cs_id, $statusForm->userId, $user->id, $statusForm->message);
                         break;
                     default:
@@ -1189,7 +1156,6 @@ class CasesController extends FController
                 }
 
                 Yii::$app->session->setFlash('success', 'Case Status changed successfully ("' . CasesStatus::getName($statusForm->statusId) . '")');
-
             } catch (\DomainException $e) {
                 Yii::$app->session->setFlash('error', $e->getMessage());
             } catch (\Throwable $e) {
@@ -1239,7 +1205,6 @@ class CasesController extends FController
         $form = new CasesAddPhoneForm($case);
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
-
             try {
                 $this->clientUpdateFromEntityService->addPhoneFromCase($case, $form);
                 Yii::$app->session->setFlash('success', 'Added new Phone ("' . $form->phone . '")');
@@ -1458,171 +1423,169 @@ class CasesController extends FController
         ]);
     }
 
-	/**
-	 * @param $caseId
-	 * @param $caseSaleId
-	 * @return array|string
-	 */
-	public function actionAjaxSaleListEditInfo($caseId, $caseSaleId)
-	{
-		Yii::$app->response->format = Response::FORMAT_JSON;
+    /**
+     * @param $caseId
+     * @param $caseSaleId
+     * @return array|string
+     */
+    public function actionAjaxSaleListEditInfo($caseId, $caseSaleId)
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
 
-		$out = [
-			'output' => '',
-			'message' => '',
-			'caseId' => $caseId,
-			'caseSaleId' => $caseSaleId
-		];
-		try {
+        $out = [
+            'output' => '',
+            'message' => '',
+            'caseId' => $caseId,
+            'caseSaleId' => $caseSaleId
+        ];
+        try {
+            $user = Yii::$app->user->identity;
 
-			$user = Yii::$app->user->identity;
+            if (
+                Yii::$app->request->isAjax &&
+                Yii::$app->request->isPost &&
+                Yii::$app->request->post('cssSaleData')
+            ) {
+                $caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$caseSaleId);
+                $this->checkAccessToManageCaseSaleInfo($caseSale);
 
-			if (Yii::$app->request->isAjax &&
-				Yii::$app->request->isPost &&
-				Yii::$app->request->post('cssSaleData')) {
+                $form = new CasesSaleForm($caseSale, $this->casesSaleService);
 
-				$caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$caseSaleId);
-				$this->checkAccessToManageCaseSaleInfo($caseSale);
+                if ($form->load(Yii::$app->request->post(), 'cssSaleData') && $form->validate()) {
+                    $decodedSaleData = JsonHelper::decode($form->caseSale->css_sale_data_updated);
 
-				$form = new CasesSaleForm($caseSale, $this->casesSaleService);
+                    $difference = $this->casesSaleService->compareSaleData($decodedSaleData, $form->validatedData);
+                    if (!$difference) {
+                        throw new \RuntimeException('Cannot save because value has not been changed');
+                    }
 
-				if ($form->load(Yii::$app->request->post(), 'cssSaleData') && $form->validate()) {
-					$decodedSaleData = JsonHelper::decode($form->caseSale->css_sale_data_updated);
+                    $this->casesSaleRepository->updateSaleData($caseSale, $decodedSaleData, $form->validatedData);
 
-					$difference = $this->casesSaleService->compareSaleData($decodedSaleData, $form->validatedData);
-					if (!$difference) {
-						throw new \RuntimeException('Cannot save because value has not been changed');
-					}
+                    $sync = !$this->casesSaleService->isDataBackedUpToOriginal($caseSale);
+                    $this->casesSaleRepository->updateSyncWithBOField($caseSale, $sync);
 
-					$this->casesSaleRepository->updateSaleData($caseSale, $decodedSaleData, $form->validatedData);
+                    if (!$caseSale->save()) {
+                        Yii::error(VarDumper::dumpAsString($caseSale->errors), 'CasesController:actionAjaxSaleListEditInfo:CaseSale:save');
+                        throw new \RuntimeException('Unsuccessful update');
+                    }
 
-					$sync = !$this->casesSaleService->isDataBackedUpToOriginal($caseSale);
-					$this->casesSaleRepository->updateSyncWithBOField($caseSale, $sync);
+                    if ($sync) {
+                        $out['success_message'] = 'Sale: ' . $caseSaleId . '; Now, you can sync data with b/o';
+                    } else {
+                        $out['success_message'] = 'Sale: ' . $caseSaleId . '; The data has been returned to its original form.';
+                    }
 
-					if (!$caseSale->save()) {
-						Yii::error(VarDumper::dumpAsString($caseSale->errors), 'CasesController:actionAjaxSaleListEditInfo:CaseSale:save');
-						throw new \RuntimeException('Unsuccessful update');
-					}
+                    $out['sync'] = $sync;
+                } else {
+                    $out['message'] = implode("; ", $form->getErrorSummary(false));
+                }
+            }
+        } catch (\RuntimeException $exception) {
+            $out['message'] = $exception->getMessage();
+        } catch (\Throwable $exception) {
+            $out['message'] = $exception->getMessage();
+            Yii::error($exception->getMessage() . '; File: ' . $exception->getFile() . '; On Line: ' . $exception->getLine(), 'CasesController:actionAjaxSaleListEditInfo:catch:Throwable');
+        }
 
-					if ($sync) {
-						$out['success_message'] = 'Sale: '. $caseSaleId .'; Now, you can sync data with b/o';
-					}else {
-						$out['success_message'] = 'Sale: '. $caseSaleId .'; The data has been returned to its original form.';
-					}
+        return $out;
+    }
 
-					$out['sync'] = $sync;
-				} else {
-					$out['message'] = implode("; ", $form->getErrorSummary(false));
-				}
-			}
+    /**
+     * @param $caseId
+     * @param $caseSaleId
+     * @return array|mixed
+     * @throws BadRequestHttpException
+     */
+    public function actionAjaxSyncWithBackOffice($caseId, $caseSaleId)
+    {
+        if (!Yii::$app->request->isAjax && !Yii::$app->request->isPost) {
+            throw new BadRequestHttpException();
+        }
 
-		} catch (\RuntimeException $exception) {
-			$out['message'] = $exception->getMessage();
-		} catch (\Throwable $exception) {
-			$out['message'] = $exception->getMessage();
-			Yii::error($exception->getMessage() . '; File: ' . $exception->getFile() . '; On Line: ' . $exception->getLine(), 'CasesController:actionAjaxSaleListEditInfo:catch:Throwable');
-		}
+        try {
+            Yii::$app->response->format = Response::FORMAT_JSON;
 
-		return $out;
-	}
+            $out = [
+                'error' => 0,
+                'message' => ''
+            ];
 
-	/**
-	 * @param $caseId
-	 * @param $caseSaleId
-	 * @return array|mixed
-	 * @throws BadRequestHttpException
-	 */
-	public function actionAjaxSyncWithBackOffice($caseId, $caseSaleId)
-	{
-		if (!Yii::$app->request->isAjax && !Yii::$app->request->isPost) {
-			throw new BadRequestHttpException();
-		}
+            $caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$caseSaleId);
+            $this->checkAccessToManageCaseSaleInfo($caseSale);
 
-		try {
+            $updatedData = $this->casesSaleService->prepareSaleData($caseSale);
+            $updatedData['sale_id'] = $caseSaleId;
 
-			Yii::$app->response->format = Response::FORMAT_JSON;
+            $response = BackOffice::sendRequest2('cs/update-passengers', $updatedData, 'POST', 90);
+            if ($response->isOk) {
+                $responseResult = json_decode($response->content, true)['results'];
 
-			$out = [
-				'error' => 0,
-				'message' => ''
-			];
+                $error = [];
+                foreach ($responseResult as $key => $result) {
+                    if ($result['success'] === false) {
+                        $error[$key] = $result;
+                    }
+                }
 
-			$caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$caseSaleId);
-			$this->checkAccessToManageCaseSaleInfo($caseSale);
+                if (!empty($error)) {
+                    $out['errorHtml'] =  \yii\bootstrap4\Alert::widget([
+                        'options' => [
+                            'class' => 'alert-danger'
+                        ],
+                        'body' => $this->renderAjax('/sale/partial/_sale_info_errors', [
+                            'errors' => $error
+                        ])
+                    ]);
+                    $out['message'] = 'Errors occurred while syncing sales data with B/O; See error dump;';
+                    $out['error']  = 1;
+                } else {
+                    $this->casesSaleRepository->updateSyncWithBOField($caseSale, false);
+                    $this->casesSaleRepository->updateOriginalSaleData($caseSale);
+                    $this->casesSaleRepository->save($caseSale);
 
-			$updatedData = $this->casesSaleService->prepareSaleData($caseSale);
-			$updatedData['sale_id'] = $caseSaleId;
+                    $out['message'] = 'Sale: ' . $caseSaleId . ' data was successfully synchronized with b/o.';
+                }
+            } else {
+                $out['error'] = 1;
+                $out['message'] = 'BO request Error: ' . (json_decode($response->content, true)['message'] ?? '');
+            }
+        } catch (\Throwable $throwable) {
+            $out['error'] = 1;
+            $out['message'] = 'An internal Sales error has occurred; Check system logs;';
+            if ($throwable->getCode() < 0 && $throwable->getCode() > -4) {
+                $out['message'] = $throwable->getMessage();
+            }
+            Yii::error(
+                \yii\helpers\VarDumper::dumpAsString($throwable, 10, true),
+                'CaseController:actionAjaxSyncWithBackOffice:catch:Throwable'
+            );
+        }
 
-			$response = BackOffice::sendRequest2('cs/update-passengers', $updatedData, 'POST', 90);
-			if ($response->isOk) {
+        return $out;
+    }
 
-				$responseResult = json_decode($response->content, true)['results'];
+    /**
+     * @param CaseSale $caseSale
+     * @param bool $isRefresh
+     * @return bool
+     * @throws \yii\base\InvalidConfigException
+     */
+    private function checkAccessToManageCaseSaleInfo(CaseSale $caseSale, bool $isRefresh = false): bool
+    {
+        $caseGuard = Yii::createObject(CaseManageSaleInfoGuard::class);
+        $canManageSaleInfo = $caseGuard->canManageSaleInfo(
+            $caseSale,
+            Yii::$app->user->identity,
+            JsonHelper::decode($caseSale->css_sale_data)['passengers'] ?? [],
+            $isRefresh
+        );
 
-				$error = [];
-				foreach ($responseResult as $key => $result) {
-					if ($result['success'] === false) {
-						$error[$key] = $result;
-					}
-				}
+        if ($canManageSaleInfo) {
+            throw new \DomainException($canManageSaleInfo, -3);
+        }
 
-				if (!empty($error)) {
-					$out['errorHtml'] =  \yii\bootstrap4\Alert::widget([
-						'options' => [
-							'class' => 'alert-danger'
-						],
-						'body' => $this->renderAjax('/sale/partial/_sale_info_errors', [
-							'errors' => $error
-						])
-					]);
-					$out['message'] = 'Errors occurred while syncing sales data with B/O; See error dump;';
-					$out['error']  = 1;
-				} else {
-					$this->casesSaleRepository->updateSyncWithBOField($caseSale, false);
-					$this->casesSaleRepository->updateOriginalSaleData($caseSale);
-					$this->casesSaleRepository->save($caseSale);
-
-					$out['message'] = 'Sale: '. $caseSaleId .' data was successfully synchronized with b/o.';
-				}
-			} else {
-				$out['error'] = 1;
-				$out['message'] = 'BO request Error: ' . (json_decode($response->content, true)['message'] ?? '');
-			}
-
-		} catch (\Throwable $throwable) {
-			$out['error'] = 1;
-			$out['message'] = 'An internal Sales error has occurred; Check system logs;';
-			if ($throwable->getCode() < 0 && $throwable->getCode() > -4) {
-				$out['message'] = $throwable->getMessage();
-			}
-			Yii::error(
-			    \yii\helpers\VarDumper::dumpAsString($throwable, 10, true),
-			    'CaseController:actionAjaxSyncWithBackOffice:catch:Throwable'
-			);
-		}
-
-		return $out;
-	}
-
-	/**
-	 * @param CaseSale $caseSale
-	 * @param bool $isRefresh
-	 * @return bool
-	 * @throws \yii\base\InvalidConfigException
-	 */
-	private function checkAccessToManageCaseSaleInfo(CaseSale $caseSale, bool $isRefresh = false): bool
-	{
-		$caseGuard = Yii::createObject(CaseManageSaleInfoGuard::class);
-		$canManageSaleInfo = $caseGuard->canManageSaleInfo(
-			$caseSale,
-			Yii::$app->user->identity,
-			JsonHelper::decode($caseSale->css_sale_data)['passengers'] ?? [], $isRefresh);
-
-		if ($canManageSaleInfo) {
-			throw new \DomainException($canManageSaleInfo, -3);
-		}
-
-		return true;
-	}
+        return true;
+    }
 
     /**
      * @param $caseId
@@ -1632,43 +1595,42 @@ class CasesController extends FController
      */
     public function actionAjaxRefreshSaleInfo($caseId, $caseSaleId): Response
     {
-		if (!Yii::$app->request->isAjax && !Yii::$app->request->isPost) {
-			throw new BadRequestHttpException();
-		}
+        if (!Yii::$app->request->isAjax && !Yii::$app->request->isPost) {
+            throw new BadRequestHttpException();
+        }
 
         $withFareRules = Yii::$app->request->post('check_fare_rules', 0);
 
-		try {
-			$out = [
-				'error' => 0,
-				'message' => ''
-			];
+        try {
+            $out = [
+                'error' => 0,
+                'message' => ''
+            ];
 
-			$case = $this->casesRepository->find((int)$caseId);
-			$caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$caseSaleId);
-			$this->checkAccessToManageCaseSaleInfo($caseSale, true);
+            $case = $this->casesRepository->find((int)$caseId);
+            $caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$caseSaleId);
+            $this->checkAccessToManageCaseSaleInfo($caseSale, true);
 
-			$saleData = $this->casesSaleService->detailRequestToBackOffice((int)$caseSale->css_sale_id, $withFareRules, 120, 1);
-			$caseSale = $this->casesSaleService->refreshOriginalSaleData($caseSale, $case, $saleData);
+            $saleData = $this->casesSaleService->detailRequestToBackOffice((int)$caseSale->css_sale_id, $withFareRules, 120, 1);
+            $caseSale = $this->casesSaleService->refreshOriginalSaleData($caseSale, $case, $saleData);
 
-			$this->saleTicketService->refreshSaleTicketBySaleData((int)$caseId, $caseSale, $saleData);
+            $this->saleTicketService->refreshSaleTicketBySaleData((int)$caseId, $caseSale, $saleData);
 
-			$out['message'] = 'Sale info: ' . $caseSale->css_sale_id . ' successfully refreshed';
+            $out['message'] = 'Sale info: ' . $caseSale->css_sale_id . ' successfully refreshed';
+        } catch (\Throwable $throwable) {
+            $out['error'] = 1;
+            $out['message'] = 'An internal Sales error has occurred; Check system logs;';
+            if ($throwable->getCode() <= 0 && $throwable->getCode() > -4) {
+                $out['message'] = $throwable->getMessage();
+            }
+            Yii::error(
+                \yii\helpers\VarDumper::dumpAsString($throwable->getMessage(), 20),
+                'CaseController:actionAjaxRefreshSaleInfo:Throwable'
+            );
+        }
 
-		} catch (\Throwable $throwable) {
-			$out['error'] = 1;
-			$out['message'] = 'An internal Sales error has occurred; Check system logs;';
-			if ($throwable->getCode() <= 0 && $throwable->getCode() > -4) {
-				$out['message'] = $throwable->getMessage();
-			}
-			Yii::error(
-			    \yii\helpers\VarDumper::dumpAsString($throwable->getMessage(), 20),
-			    'CaseController:actionAjaxRefreshSaleInfo:Throwable'
-			);
-		}
-
-		return $this->asJson($out);
-	}
+        return $this->asJson($out);
+    }
 
     /**
      * @param $gid
@@ -1695,5 +1657,5 @@ class CasesController extends FController
         }
 
         return $this->redirect(['/cases/view', 'gid' => $model->cs_gid]);
-	}
+    }
 }

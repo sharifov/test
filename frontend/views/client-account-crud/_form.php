@@ -1,7 +1,6 @@
 <?php
 
 use common\models\Currency;
-
 use dosamigos\datepicker\DatePicker;
 use sales\model\clientAccount\entity\ClientAccount;
 use sales\widgets\DateTimePicker;
@@ -43,7 +42,7 @@ use yii\widgets\ActiveForm;
                 ],
                 'options' => [
                     'autocomplete' => 'off',
-                    'placeholder' =>'Choose Date',
+                    'placeholder' => 'Choose Date',
                     'readonly' => '1',
                 ],
                 'clientEvents' => [

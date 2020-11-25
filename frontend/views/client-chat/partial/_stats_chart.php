@@ -7,7 +7,7 @@ use sales\viewmodel\chat\ViewModelChatGraph;
  */
 ?>
 
-<?php if ($viewModel->preparedData): ?>
+<?php if ($viewModel->preparedData) : ?>
     <div id="myChart"></div>
     <script type="text/javascript">
         $(document).ready( function () {
@@ -70,7 +70,7 @@ use sales\viewmodel\chat\ViewModelChatGraph;
             });
         });
     </script>
-<?php else: ?>
+<?php else : ?>
     <div class="row">
         <div class="col-md-12 text-center">
             <p style="margin: 0;">Not Found Data</p>

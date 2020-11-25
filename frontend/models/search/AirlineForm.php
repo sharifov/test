@@ -1,4 +1,5 @@
 <?php
+
 namespace frontend\models\search;
 
 use common\models\Airline;

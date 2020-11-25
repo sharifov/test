@@ -47,7 +47,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'ccom_name',
             [
                 'attribute' => 'ccom_type_id',
-                'value' => static function(CallCommand $model) {
+                'value' => static function (CallCommand $model) {
                     return $model::getTypeName($model->ccom_type_id) ?: Yii::$app->formatter->nullDisplay;
                 },
                 'format' => 'raw',

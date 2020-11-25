@@ -1,4 +1,5 @@
 <?php
+
 use sales\auth\Auth;
 use frontend\widgets\centrifugo\CentrifugoWidget;
 
@@ -10,4 +11,4 @@ use frontend\widgets\centrifugo\CentrifugoWidget;
     'userAllowedChannels' => [
         'realtimeClientChatChannel',
     ]
-]) ?>
+]);

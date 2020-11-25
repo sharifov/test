@@ -86,7 +86,7 @@ use yii\helpers\Url;
                     </div>
                     <div class="col-md-2">
                         <?php echo $form->field($modelCleaner, 'date')->widget(
-                    DatePicker::class,
+                            DatePicker::class,
                             [
                                 'clientOptions' => [
                                     'autoclose' => true,

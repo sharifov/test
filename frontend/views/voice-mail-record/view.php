@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ]) ?>
         </p>
 
-        <?php if($model->getRecordingUrl()):?>
+        <?php if ($model->getRecordingUrl()) :?>
             <div class="col-md-12">
                 <script>
                     window.WS_InitOptions = {

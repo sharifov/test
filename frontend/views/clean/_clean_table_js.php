@@ -19,7 +19,7 @@ $cleanBtnId = $cleanBtnId ?? 'js_btn_clean_records';
         'size' => Modal::SIZE_DEFAULT
     ]);
     Modal::end();
-?>
+    ?>
 
 <div id="info_data" style="display: none;">
     <p>The priority group is <strong>strict_date, datetime, date</strong>.</p>

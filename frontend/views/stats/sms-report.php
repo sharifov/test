@@ -1,5 +1,7 @@
 <?php
+
 use yii\widgets\Pjax;
+
 /**
  * @var $smsGraphData []
  */
@@ -75,24 +77,24 @@ $this->title = 'SMS Report';
                     <div class="x_panel">
                         <div class="col-md-3">
                             <?=\kartik\daterange\DateRangePicker::widget([
-                                'options'=>['id'=>'call-stats-picker'],
-                                'name'=>'callStatsRange',
-                                'convertFormat'=>true,
-                                'presetDropdown'=>true,
-                                'hideInput'=>true,
-                                'useWithAddon'=>true,
-                                'pluginOptions'=>[
+                                'options' => ['id' => 'call-stats-picker'],
+                                'name' => 'callStatsRange',
+                                'convertFormat' => true,
+                                'presetDropdown' => true,
+                                'hideInput' => true,
+                                'useWithAddon' => true,
+                                'pluginOptions' => [
                                     'minDate' => '2019-01-01',
                                     'maxDate' => date("Y-m-d"),
-                                    'timePicker'=> false,
-                                    'timePickerIncrement'=>15,
-                                    'locale'=>[
-                                        'format'=>'Y-m-d',
+                                    'timePicker' => false,
+                                    'timePickerIncrement' => 15,
+                                    'locale' => [
+                                        'format' => 'Y-m-d',
                                         'separator' => ' / '
                                     ],
                                 ],
-                                'pluginEvents'=>[
-                                    "apply.daterangepicker"=>"function(){ 
+                                'pluginEvents' => [
+                                    "apply.daterangepicker" => "function(){ 
                                      $('#chart_div').html(generateChartPreloader());                                   
                                      $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), smsType: $('#sms_type').val()}, type: 'POST', url: 'sms-graph', async:true, push: false});
                                      let dates = $('#call-stats-picker').val().split(' / ');
@@ -140,7 +142,7 @@ $this->title = 'SMS Report';
 
                         <?php Pjax::begin(['id' => 'calls-graph-pjax']); ?>
                         <div class="x_content">
-                            <?php if ($smsGraphData): ?>
+                            <?php if ($smsGraphData) : ?>
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div id="chart_div" style="height:550px">
@@ -163,18 +165,18 @@ $this->title = 'SMS Report';
                                                         {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
                                                         {role: 'annotation'}
                                                         ],
-                                                    <?php foreach($smsGraphData as $k => $item):?>
+                                                    <?php foreach ($smsGraphData as $k => $item) :?>
                                                     ['<?=  ($item['weeksInterval'] == null)
                                                         ? date($item['timeLine'], strtotime($item['time']))
-                                                        : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
+                                                        : date($item['timeLine'], strtotime($item['time'])) . ' / ' . date($item['timeLine'], strtotime($item['weeksInterval']));
 
-                                                        ?>', <?=$item['done']?>, createCustomHTMLContent('SMS Done:' ,'<?= ($item['weeksInterval'] == null)
+                                                    ?>', <?=$item['done']?>, createCustomHTMLContent('SMS Done:' ,'<?= ($item['weeksInterval'] == null)
                                                         ? date($item['timeLine'], strtotime($item['time']))
-                                                        : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
-                                                        ?>', <?=$item['done']?>, <?=$item['sd_TotalPrice']?>),
+                                                        : date($item['timeLine'], strtotime($item['time'])) . ' / ' . date($item['timeLine'], strtotime($item['weeksInterval']));
+?>', <?=$item['done']?>, <?=$item['sd_TotalPrice']?>),
                                                         <?=$item['error']?>, createCustomHTMLContent('SMS Error:' ,'<?= ($item['weeksInterval'] == null)
                                                         ? date($item['timeLine'], strtotime($item['time']))
-                                                        : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
+                                                        : date($item['timeLine'], strtotime($item['time'])) . ' / ' . date($item['timeLine'], strtotime($item['weeksInterval']));
                                                         ?>', <?=$item['error']?>, 0),
                                                         '<?=''?>'],
                                                     <?php endforeach;?>

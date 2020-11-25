@@ -18,8 +18,7 @@ use yii\widgets\ActiveForm;
                     'options' => [
                         'class' => 'form-group required',
                     ],
-                ]
-            )->widget(PhoneInput::class, [
+                ])->widget(PhoneInput::class, [
                 'options' => [
                     'required' => true,
                 ],

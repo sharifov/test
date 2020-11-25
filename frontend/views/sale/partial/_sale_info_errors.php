@@ -1,4 +1,5 @@
 <?php
+
 use yii\helpers\Html;
 
 /**
@@ -6,19 +7,19 @@ use yii\helpers\Html;
  */
 ?>
 
-<?php foreach ($errors as $error):?>
+<?php foreach ($errors as $error) :?>
     <ul>
         <li><?= $error['messages'] ?>:</li>
         <ol>
-            <?php if(is_array($error['errors'])): ?>
-                <?php foreach ($error['errors'] as $detailError): ?>
-                    <?php if(is_array($detailError)): ?>
+            <?php if (is_array($error['errors'])) : ?>
+                <?php foreach ($error['errors'] as $detailError) : ?>
+                    <?php if (is_array($detailError)) : ?>
                         <li><?= implode('; ', $detailError) ?></li>
-                    <?php else: ?>
+                    <?php else : ?>
                         <li><?= $detailError ?>;</li>
                     <?php endif; ?>
                 <?php endforeach; ?>
-            <?php else: ?>
+            <?php else : ?>
                 <li><?= $error['errors'] ?></li>
             <?php endif; ?>
         </ol>

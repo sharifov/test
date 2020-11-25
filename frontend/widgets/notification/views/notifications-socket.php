@@ -33,14 +33,14 @@ NotificationSocketAsset::register($this);
 
     <ul id="cc-notification-menu" class="dropdown-menu list-unstyled msg_list" role="menu" x-placement="bottom-end">
 
-        <?php if ($chatsWithUnreadMessages): ?>
-            <?php foreach ($chatsWithUnreadMessages as $clientChat): ?>
+        <?php if ($chatsWithUnreadMessages) : ?>
+            <?php foreach ($chatsWithUnreadMessages as $clientChat) : ?>
                 <?= $this->render('item_cc', [
                     'clientChat' => $clientChat
                 ]) ?>
             <?php endforeach; ?>
 
-        <?php else: ?>
+        <?php else : ?>
             <li>
                 <div class="text-center">
                     <?= Html::a('<i class="fa fa-warning"></i> <strong>You have no new notifications</strong>', ['#']) ?>
@@ -59,7 +59,7 @@ NotificationSocketAsset::register($this);
 
     <ul id="notification-menu" class="dropdown-menu list-unstyled msg_list" role="menu" x-placement="bottom-end">
 
-        <?php foreach ($notifications as $notification): ?>
+        <?php foreach ($notifications as $notification) : ?>
             <?= $this->render('item', [
                 'id' => $notification->n_id,
                 'title' => $notification->n_title,
@@ -79,4 +79,4 @@ NotificationSocketAsset::register($this);
 
 <?php
 
-$this->registerJs("notificationCount('" . $count . "', '".$totalUnreadMessages."')", View::POS_READY);
+$this->registerJs("notificationCount('" . $count . "', '" . $totalUnreadMessages . "')", View::POS_READY);

@@ -10,20 +10,20 @@ $totalInOutCalls = $totalInOutCallsAvg = $totalInOutCallsDuration = 0;
 
 $countIn = $countOut = $countInOut = 0;
 
-foreach ($totalCallsDbData as $results){
-    if ($results['callType'] === 'in'){
+foreach ($totalCallsDbData as $results) {
+    if ($results['callType'] === 'in') {
         $countIn++;
         $totalIncomingCalls = $totalIncomingCalls + $results['totalCalls'];
         $totalIncomingCallsAvg = $totalIncomingCallsAvg + $results['avgCallsPerGroup'];
         $totalIncomingDuration = $totalIncomingDuration + $results['totalCallsDuration'];
     }
-    if ($results['callType'] === 'out'){
+    if ($results['callType'] === 'out') {
         $countOut++;
         $totalOutgoingCalls = $totalOutgoingCalls + $results['totalCalls'];
         $totalOutgoingCallsAvg = $totalOutgoingCallsAvg + $results['avgCallsPerGroup'];
         $totalOutgoingDuration = $totalOutgoingDuration + $results['totalCallsDuration'];
     }
-    if ($results['callType'] === 'total'){
+    if ($results['callType'] === 'total') {
         $countInOut++;
         $totalInOutCalls = $totalInOutCalls + $results['totalCalls'];
         $totalInOutCallsAvg = $totalInOutCallsAvg + $results['avgCallsPerGroup'];

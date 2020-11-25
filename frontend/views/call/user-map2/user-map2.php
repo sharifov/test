@@ -5,7 +5,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
-use \common\models\CallUserAccess;
+use common\models\CallUserAccess;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\EmployeeSearch */
@@ -40,18 +40,19 @@ $dtNow = date('Y-m-d H:i:s');
  * @param \common\models\Call[] $calls
  * @throws \yii\base\InvalidConfigException
  */
-function renderChildCallsRecursive2($calls): void {
+function renderChildCallsRecursive2($calls): void
+{
     ?>
     <tr>
         <td colspan="8">
             <table class="table table-condensed">
-                <?php foreach ($calls as $callItem):?>
+                <?php foreach ($calls as $callItem) :?>
                     <tr>
                         <td style="width:70px; border: none">
                             <u><?=Html::a($callItem->c_id, ['call/view', 'id' => $callItem->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u><br>
                         </td>
                         <td style="width: 50px">
-                            <?php if ($callItem->c_source_type_id):?>
+                            <?php if ($callItem->c_source_type_id) :?>
                                 <span class="label label-info"><?=$callItem->getShortSourceName()?></span>
                             <?php endif; ?>
                         </td>
@@ -59,24 +60,23 @@ function renderChildCallsRecursive2($calls): void {
                             <?=$callItem->getStatusIcon()?> <?=$callItem->getStatusName()?>
                         </td>
                         <td style="width: 80px" class="text-left">
-                            <?php if($callItem->c_updated_dt): ?>
-                                <?php if ($callItem->isEnded()):?>
+                            <?php if ($callItem->c_updated_dt) : ?>
+                                <?php if ($callItem->isEnded()) :?>
                                     <?php $sec = $callItem->c_call_duration ?: strtotime($callItem->c_updated_dt) - strtotime($callItem->c_created_dt); ?>
                                     <span class="badge badge-primary timer" data-sec="<?=$sec?>" data-control="pause" data-format="%M:%S" style="font-size: 10px"><?=gmdate('i:s', $sec)?></span>
-                                <?php else: ?>
+                                <?php else : ?>
                                     <?php $sec = time() - strtotime($callItem->c_updated_dt); ?>
                                     <span class="badge badge-warning timer" data-sec="<?=$sec?>" data-control="start" data-format="%M:%S"><?=gmdate('i:s', $sec)?></span>
                                 <?php endif;?>
                             <?php endif;?>
-                            <?php if ($callItem->c_recording_sid):?>
+                            <?php if ($callItem->c_recording_sid) :?>
                                 <small><i class="fa fa-play-circle-o"></i></small>
                             <?php endif;?>
                         </td>
 
                         <td class="text-left">
-                            <?php if($callItem->cuaUsers):?>
-                                <?php foreach ($callItem->callUserAccesses as $cua):
-
+                            <?php if ($callItem->cuaUsers) :?>
+                                <?php foreach ($callItem->callUserAccesses as $cua) :
                                     switch ((int) $cua->cua_status_id) {
                                         case CallUserAccess::STATUS_TYPE_PENDING:
                                             $label = 'warning';
@@ -100,29 +100,29 @@ function renderChildCallsRecursive2($calls): void {
                             <i class="fa fa-clock-o"></i> <?=Yii::$app->formatter->asDatetime(strtotime($callItem->c_created_dt), 'php:H:i')?>
                         </td>
                         <td class="text-center" style="width:180px">
-                            <?php if($callItem->c_updated_dt): ?>
+                            <?php if ($callItem->c_updated_dt) : ?>
                                 <small>
-                                    <?php if ($callItem->isEnded()):?>
+                                    <?php if ($callItem->isEnded()) :?>
                                         <?=Yii::$app->formatter->asRelativeTime(strtotime($callItem->c_created_dt))?>
                                     <?php endif;?>
                                 </small>
                             <?php endif;?>
                         </td>
                         <td class="text-left" style="width:130px">
-                            <?php if($callItem->isIn()):?>
+                            <?php if ($callItem->isIn()) :?>
                                 <div>
-                                    <?php if($callItem->c_created_user_id):?>
+                                    <?php if ($callItem->c_created_user_id) :?>
                                         <i class="fa fa-user fa-border"></i> <?=Html::encode($callItem->cCreatedUser->username)?>
-                                    <?php else: ?>
+                                    <?php else : ?>
                                         <i class="fa fa-phone fa-border"></i> <?=Html::encode($callItem->c_to)?>
                                     <?php endif; ?>
                                 </div>
-                            <?php else: ?>
+                            <?php else : ?>
                                 <div>
 
-                                    <?php if($callItem->c_created_user_id):?>
+                                    <?php if ($callItem->c_created_user_id) :?>
                                         <i class="fa fa-user fa-border"></i> <?=Html::encode($callItem->cCreatedUser->username)?>
-                                    <?php else: ?>
+                                    <?php else : ?>
                                         <i class="fa fa-phone fa-border"></i> <?=Html::encode($callItem->c_to)?>
                                     <?php endif; ?>
 
@@ -131,7 +131,7 @@ function renderChildCallsRecursive2($calls): void {
                         </td>
                     </tr>
 
-                    <?php if ($callItem->calls):?>
+                    <?php if ($callItem->calls) :?>
                             <?php renderChildCallsRecursive2($callItem->calls)?>
                     <?php endif;?>
 
@@ -245,7 +245,7 @@ function renderChildCallsRecursive2($calls): void {
 
 
 
-                <?php if($dataProviderOnlineDep1):?>
+                <?php if ($dataProviderOnlineDep1) :?>
                 <div class="card card-default">
                     <div class="card-header"><i class="fa fa-users"></i> OnLine - Department SALES (<?=$dataProviderOnlineDep1->totalCount?>)</div>
                     <div class="card-body">
@@ -266,7 +266,7 @@ function renderChildCallsRecursive2($calls): void {
                 <?php endif;?>
 
 
-                <?php if($dataProviderOnlineDep2):?>
+                <?php if ($dataProviderOnlineDep2) :?>
                 <div class="card card-default">
                     <div class="card-header"><i class="fa fa-users"></i> OnLine - Department EXCHANGE (<?=$dataProviderOnlineDep2->totalCount?>)</div>
                     <div class="card-body">
@@ -286,7 +286,7 @@ function renderChildCallsRecursive2($calls): void {
                 </div>
                 <?php endif;?>
 
-                <?php if($dataProviderOnlineDep3):?>
+                <?php if ($dataProviderOnlineDep3) :?>
                 <div class="card card-default">
                     <div class="card-header"><i class="fa fa-users"></i> OnLine - Department SUPPORT (<?=$dataProviderOnlineDep3->totalCount?>)</div>
                     <div class="card-body">
@@ -306,7 +306,7 @@ function renderChildCallsRecursive2($calls): void {
                 </div>
                 <?php endif;?>
 
-                <?php if($dataProviderOnline):?>
+                <?php if ($dataProviderOnline) :?>
                 <div class="card card-default">
 <!--                    <div class="card-header"><i class="fa fa-users"></i> OnLine Users - W/O Department (--><?php //=$dataProviderOnline->totalCount?><!--)</div>-->
                     <div class="card-body">
@@ -338,7 +338,7 @@ function renderChildCallsRecursive2($calls): void {
                             'emptyText' => '<div class="text-center">Not found calls</div><br>',
                             'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
                             'itemView' => function ($model, $key, $index, $widget) {
-                                return $this->render('_list_item',['model' => $model]);
+                                return $this->render('_list_item', ['model' => $model]);
                             },
                             'itemOptions' => [
                                 //'class' => 'item',
@@ -366,7 +366,7 @@ function renderChildCallsRecursive2($calls): void {
                             //'layout' => "{summary}\n<div class=\"text-center\">{pager}</div>\n{items}<div class=\"text-center\">{pager}</div>\n",
                             'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
                             'itemView' => function ($model) {
-                               return $this->render('_list_item',['model' => $model]);
+                                return $this->render('_list_item', ['model' => $model]);
                             },
 
                             'itemOptions' => [

@@ -6,6 +6,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\LeadFlowSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -16,7 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
 
-if($user->isAdmin()) {
+if ($user->isAdmin()) {
     $userList = \common\models\Employee::getList();
 } else {
     $userList = \common\models\Employee::getListByUserId($user->id);
@@ -45,8 +46,8 @@ if($user->isAdmin()) {
 
             [
                 'attribute' => 'lf_from_status_id',
-                'value' => function(\common\models\LeadFlow $model) {
-                    return '<span class="label label-info">'.\common\models\Lead::getStatus($model->lf_from_status_id).'</span></h5>';
+                'value' => function (\common\models\LeadFlow $model) {
+                    return '<span class="label label-info">' . \common\models\Lead::getStatus($model->lf_from_status_id) . '</span></h5>';
                 },
                 'format' => 'raw',
                 'filter' => \common\models\Lead::STATUS_LIST,
@@ -55,8 +56,8 @@ if($user->isAdmin()) {
 
             [
                 'attribute' => 'status',
-                'value' => function(\common\models\LeadFlow $model) {
-                    return '<span class="label label-info">'.\common\models\Lead::getStatus($model->status).'</span></h5>';
+                'value' => function (\common\models\LeadFlow $model) {
+                    return '<span class="label label-info">' . \common\models\Lead::getStatus($model->status) . '</span></h5>';
                 },
                 'format' => 'raw',
                 'filter' => \common\models\Lead::STATUS_LIST,
@@ -66,7 +67,7 @@ if($user->isAdmin()) {
             [
                 //'label' => 'Lead UID',
                 'attribute' => 'lead_id',
-                'value' => function(\common\models\LeadFlow $model) {
+                'value' => function (\common\models\LeadFlow $model) {
                     return Html::a('' . $model->lead_id, ['lead/view', 'gid' => $model->lead->gid], ['target' => '_blank', 'data-pjax' => 0]);
                 },
                 'format' => 'raw',
@@ -133,7 +134,7 @@ if($user->isAdmin()) {
             [
                 //'label' => 'Status end date',
                 'attribute' => 'lf_time_duration',
-                'value' => function(\common\models\LeadFlow $model) {
+                'value' => function (\common\models\LeadFlow $model) {
                     return $model->lf_time_duration ?: '-';
                 },
                 //'format' => 'raw',
@@ -141,8 +142,8 @@ if($user->isAdmin()) {
             ],
             [
                 'attribute' => 'employee_id',
-                'value' => function(\common\models\LeadFlow $model) {
-                    return $model->employee ? '<i class="fa fa-user"></i> '. Html::encode($model->employee->username) : '-';
+                'value' => function (\common\models\LeadFlow $model) {
+                    return $model->employee ? '<i class="fa fa-user"></i> ' . Html::encode($model->employee->username) : '-';
                 },
                 'format' => 'raw',
                 'filter' => $userList
@@ -175,7 +176,8 @@ if($user->isAdmin()) {
                                             'lead-checklist/index',
                                             'LeadChecklistSearch[lc_lead_id]' => $model->lead_id,
                                             'LeadChecklistSearch[lc_user_id]' => $item->lfc_lc_user_id,
-                                        ], ['data-pjax' => 0]
+                                        ],
+                                        ['data-pjax' => 0]
                                     );
                                 } else {
                                     $userName = Html::encode($item->user->username);

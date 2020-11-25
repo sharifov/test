@@ -1,4 +1,5 @@
 <?php
+
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use sales\access\EmployeeDepartmentAccess;
@@ -39,7 +40,7 @@ use common\models\Employee;
                             ]
                         ]
                     ])->label('Call Log Created Date');
-                    ?>
+?>
                 </div>
             </div>
         </div>
@@ -54,13 +55,13 @@ use common\models\Employee;
                 ],
                 'pluginOptions' => ['allowClear' => true],
             ]);
-            ?>
+?>
         </div>
         <div class="col-md-3">
             <?php
             $hoursList = [];
-            foreach(range(0, 23) as $hour) {
-                $hoursList[sprintf("%02d:00", $hour )] = sprintf("%02d", $hour );
+            foreach (range(0, 23) as $hour) {
+                $hoursList[sprintf("%02d:00", $hour)] = sprintf("%02d", $hour);
             }
             ?>
             <div class="row">

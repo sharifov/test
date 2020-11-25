@@ -26,7 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php
     $filterProjects = \common\models\Project::getList();
-    $filterProjects['-1'] ='Without project';
+    $filterProjects['-1'] = 'Without project';
     ?>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -53,18 +53,18 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'header' => 'Phones',
                 'attribute' => 'client_phone',
-                'value' => function(\common\models\Client $model) {
+                'value' => function (\common\models\Client $model) {
 
                     $phones = $model->clientPhones;
                     $data = [];
-                    if($phones) {
+                    if ($phones) {
                         foreach ($phones as $k => $phone) {
-                            $data[] = '<i class="fa fa-phone"></i> <code>'.Html::encode($phone->phone).'</code>'; //<code>'.Html::a($phone->phone, ['client-phone/view', 'id' => $phone->id], ['target' => '_blank', 'data-pjax' => 0]).'</code>';
+                            $data[] = '<i class="fa fa-phone"></i> <code>' . Html::encode($phone->phone) . '</code>'; //<code>'.Html::a($phone->phone, ['client-phone/view', 'id' => $phone->id], ['target' => '_blank', 'data-pjax' => 0]).'</code>';
                         }
                     }
 
                     $str = implode('<br>', $data);
-                    return ''.$str.'';
+                    return '' . $str . '';
                 },
                 'format' => 'raw',
                 'contentOptions' => ['class' => 'text-left'],
@@ -73,18 +73,18 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'header' => 'Emails',
                 'attribute' => 'client_email',
-                'value' => function(\common\models\Client $model) {
+                'value' => function (\common\models\Client $model) {
 
                     $emails = $model->clientEmails;
                     $data = [];
-                    if($emails) {
+                    if ($emails) {
                         foreach ($emails as $k => $email) {
-                            $data[] = '<i class="fa fa-envelope"></i> <code>'.Html::encode($email->email).'</code>';
+                            $data[] = '<i class="fa fa-envelope"></i> <code>' . Html::encode($email->email) . '</code>';
                         }
                     }
 
                     $str = implode('<br>', $data);
-                    return ''.$str.'';
+                    return '' . $str . '';
                 },
                 'format' => 'raw',
                 'contentOptions' => ['class' => 'text-left'],
@@ -95,19 +95,19 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'header' => 'Leads',
-                'value' => function(\common\models\Client $model) {
+                'value' => function (\common\models\Client $model) {
 
                     $leads = $model->leads;
                     $data = [];
-                    if($leads) {
+                    if ($leads) {
                         foreach ($leads as $lead) {
-                            $data[] = '<i class="fa fa-link"></i> '. Html::a('lead: '.$lead->id, ['/leads/view', 'id' => $lead->id, 'showInPopUp' => 'modal'], ['title' => 'Lead: '. $lead->id, 'class'=>"show-modal", "data-id"=>$lead->id, 'target' => '_blank', 'data-pjax' => 0]).' (IP: '.$lead->request_ip.')';
+                            $data[] = '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $lead->id, ['/leads/view', 'id' => $lead->id, 'showInPopUp' => 'modal'], ['title' => 'Lead: ' . $lead->id, 'class' => "show-modal", "data-id" => $lead->id, 'target' => '_blank', 'data-pjax' => 0]) . ' (IP: ' . $lead->request_ip . ')';
                         }
                     }
 
                     $str = '';
-                    if($data) {
-                        $str = ''.implode('<br>', $data).'';
+                    if ($data) {
+                        $str = '' . implode('<br>', $data) . '';
                     }
 
                     return $str;

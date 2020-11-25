@@ -1,15 +1,17 @@
 <?php
+
 /* @var $menuItems array */
 /* @var $search_text string */
 /* @var $user \common\models\Employee  */
 
 use yii\helpers\Url;
 use yii\widgets\Pjax;
+
 ?>
 
     <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
 <?php Pjax::begin(['id' => 'pjax-sidebar-menu', 'timeout' => 5000, 'enablePushState' => true]); ?>
-<?php if ($search_text):?>
+<?php if ($search_text) :?>
     <!--        <hr style="margin: 5px 5px 5px 5px">-->
 
     <div class="row">
@@ -39,7 +41,7 @@ use yii\widgets\Pjax;
                 'activateParents' => true,
                 'linkTemplate' => '<a href="{url}" {attributes} data-pjax="0">{icon}<span>{label}</span>{badge}</a>'
             ]);
-        ?>
+            ?>
     </div>
 
 <?php Pjax::end(); ?>
@@ -47,7 +49,7 @@ use yii\widgets\Pjax;
 
 <?php
 
-$js =<<<JS
+$js = <<<JS
 function updateCounters(url, className, idName) {
     var types = [];
     $("." + className).each(function(i) {

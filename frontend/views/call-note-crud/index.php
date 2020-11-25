@@ -5,6 +5,7 @@ use common\components\grid\UserSelect2Column;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\callNote\entity\search\CallNoteSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -44,17 +45,17 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'class' => UserSelect2Column::class,
                 'attribute' => 'cn_created_user_id',
-				'relation' => 'cnCreatedUser',
+                'relation' => 'cnCreatedUser',
                 'format' => 'username',
-				'placeholder' => 'Select User'
+                'placeholder' => 'Select User'
             ],
-			[
-				'class' => UserSelect2Column::class,
-				'attribute' => 'cn_updated_user_id',
-				'relation' => 'cnUpdatedUser',
-				'format' => 'username',
-				'placeholder' => 'Select User'
-			],
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'cn_updated_user_id',
+                'relation' => 'cnUpdatedUser',
+                'format' => 'username',
+                'placeholder' => 'Select User'
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

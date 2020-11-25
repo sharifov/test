@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Alexandr <alex.connor@techork.com>
  */
@@ -186,11 +187,11 @@ class SideBarMenu extends \yii\bootstrap\Widget
             'icon' => 'user'
         ];
 
-        //		$menuItems[] = [
-        //			'label' => 'My Client Chat ' . '<span id="div-cnt-client-chat"><span class="label-success label pull-right _cc_unread_messages"></span></span>',
-        //			'url' => ['/client-chat/index'],
-        //			'icon' => 'comments'
-        //		];
+        //      $menuItems[] = [
+        //          'label' => 'My Client Chat ' . '<span id="div-cnt-client-chat"><span class="label-success label pull-right _cc_unread_messages"></span></span>',
+        //          'url' => ['/client-chat/index'],
+        //          'icon' => 'comments'
+        //      ];
 
 
         $menuItems[] = [
@@ -540,10 +541,10 @@ class SideBarMenu extends \yii\bootstrap\Widget
             'icon' => 'check-square-o',
             'items' => [
                 ['label' => 'Search', 'url' => ['/qa-task/qa-task-queue/search']],
-                ['label' => 'Pending <span id="qa-task-q-pending" data-type="pending" class="badge badge-'.QaTaskStatus::getCssClass(QaTaskStatus::PENDING).' pull-right qa-task-info"></span>', 'url' => ['/qa-task/qa-task-queue/pending']],
-                ['label' => 'Processing <span id="qa-task-q-processing" data-type="processing" class="badge badge-'.QaTaskStatus::getCssClass(QaTaskStatus::PROCESSING).' pull-right qa-task-info"></span>', 'url' => ['/qa-task/qa-task-queue/processing']],
-                ['label' => 'Escalated <span id="qa-task-q-escalated" data-type="escalated" class="badge badge-'.QaTaskStatus::getCssClass(QaTaskStatus::ESCALATED).' pull-right qa-task-info"></span>', 'url' => ['/qa-task/qa-task-queue/escalated']],
-                ['label' => 'Closed <span id="qa-task-q-closed" data-type="closed" class="badge badge-'.QaTaskStatus::getCssClass(QaTaskStatus::CLOSED).' pull-right qa-task-info"></span>', 'url' => ['/qa-task/qa-task-queue/closed']],
+                ['label' => 'Pending <span id="qa-task-q-pending" data-type="pending" class="badge badge-' . QaTaskStatus::getCssClass(QaTaskStatus::PENDING) . ' pull-right qa-task-info"></span>', 'url' => ['/qa-task/qa-task-queue/pending']],
+                ['label' => 'Processing <span id="qa-task-q-processing" data-type="processing" class="badge badge-' . QaTaskStatus::getCssClass(QaTaskStatus::PROCESSING) . ' pull-right qa-task-info"></span>', 'url' => ['/qa-task/qa-task-queue/processing']],
+                ['label' => 'Escalated <span id="qa-task-q-escalated" data-type="escalated" class="badge badge-' . QaTaskStatus::getCssClass(QaTaskStatus::ESCALATED) . ' pull-right qa-task-info"></span>', 'url' => ['/qa-task/qa-task-queue/escalated']],
+                ['label' => 'Closed <span id="qa-task-q-closed" data-type="closed" class="badge badge-' . QaTaskStatus::getCssClass(QaTaskStatus::CLOSED) . ' pull-right qa-task-info"></span>', 'url' => ['/qa-task/qa-task-queue/closed']],
                 ['label' => 'Tasks', 'url' => ['/qa-task/qa-task-crud/index']],
                 ['label' => 'Categories', 'url' => ['/qa-task/qa-task-category-crud/index']],
                 ['label' => 'Statuses', 'url' => ['/qa-task/qa-task-status-crud/index']],
@@ -708,7 +709,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 } else {
                     // for ex.: /rbac/route  =>   rbac/route  for search in app->urlManager->rules
                     $patternForRulesFromMainConfig =  substr($url, 1, strlen($url));
-                    $rulesFromMainConfig =\yii\helpers\ArrayHelper::map(Yii::$app->urlManager->rules, 'name', 'route');
+                    $rulesFromMainConfig = \yii\helpers\ArrayHelper::map(Yii::$app->urlManager->rules, 'name', 'route');
                     foreach ($rulesFromMainConfig as $pattern => $route) {
                         if ($patternForRulesFromMainConfig === $pattern || strpos($pattern, $patternForRulesFromMainConfig . '/<') === 0) {
                             $item['visible'] = Yii::$app->user->can('/' . $route);

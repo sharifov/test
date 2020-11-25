@@ -1,4 +1,5 @@
 <?php
+
 use yii\helpers\Html;
 use yii\jui\AutoComplete;
 use yii\jui\Dialog;
@@ -18,10 +19,10 @@ use yii\widgets\ActiveForm;
             ['text' => 'Cancel', 'click' => new JsExpression('function(){$(this).dialog("close");}')],
         ],
     ],
-]);
-echo 'Are you sure you want to change the type? Current data will be lost.';
-Dialog::end();
-?>
+    ]);
+    echo 'Are you sure you want to change the type? Current data will be lost.';
+    Dialog::end();
+    ?>
 
 <?php
 $js = <<<JS
@@ -111,8 +112,8 @@ $this->registerJs($js);
           'source' => ['USA', 'RUS', 'test'],
       ],
   ]);
-?>
+    ?>
 
-<?php ActiveForm::end(); ?>
+<?php ActiveForm::end();
 
 

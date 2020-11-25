@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $lead \common\models\Lead
  * @var $errors []
@@ -46,14 +47,14 @@ function mainAgentTips(){
 JS;
 $this->registerJs($js);?>
 <?php yii\widgets\Pjax::begin(['id' => 'tips' ,'enablePushState' => false]) ?>
-<?php if(!empty($errors)):?>
+<?php if (!empty($errors)) :?>
 <div class="alert alert-danger">Some errors happened!
-<?php if(isset($errors["tipssplitform-sumpercent"])):?>
+    <?php if (isset($errors["tipssplitform-sumpercent"])) :?>
 <br/> <?= $errors["tipssplitform-sumpercent"][0]?>
-<?php endif;?>
-<?php if(isset($errors["tipssplitform-mainagent"])):?>
+    <?php endif;?>
+    <?php if (isset($errors["tipssplitform-mainagent"])) :?>
 <br/> <?= $errors["tipssplitform-mainagent"][0]?>
-<?php endif;?>
+    <?php endif;?>
 </div>
 <?php endif;?>
  <?php $form = ActiveForm::begin([
@@ -61,23 +62,23 @@ $this->registerJs($js);?>
      'enableClientValidation' => false,
 ]); ?>
 <div class="row">
-	<div class="col-md-4">Total tips: $<?= number_format($totalTips,2)?></div>
-	<div class="col-md-4">Tips for main agent (<b><?= $lead->employee->username?></b>): $<span id="main-agent-tips"><?= $mainAgentTips?></span></div>
-	<div class="col-md-4">
-	<?= Html::button('<i class="fa fa-plus"></i> Add Agent', [
+    <div class="col-md-4">Total tips: $<?= number_format($totalTips, 2)?></div>
+    <div class="col-md-4">Tips for main agent (<b><?= $lead->employee->username?></b>): $<span id="main-agent-tips"><?= $mainAgentTips?></span></div>
+    <div class="col-md-4">
+    <?= Html::button('<i class="fa fa-plus"></i> Add Agent', [
             'id' => 'new-split-tips-button',
             'class' => 'btn btn-success pull-right' ,
         ]); ?>
-	</div>
+    </div>
 </div>
 <div class="row">
-	<div class="col-md-4"><label>Agent</label></div>
-	<div class="col-md-4"><label>Percentage of split</label></div>
-	<div class="col-md-4"><label>Tips</label></div>
+    <div class="col-md-4"><label>Agent</label></div>
+    <div class="col-md-4"><label>Percentage of split</label></div>
+    <div class="col-md-4"><label>Tips</label></div>
 </div>
 <div id="tips-splits">
     <?php
-    if(!empty($splitForm->getTipsSplit())){
+    if (!empty($splitForm->getTipsSplit())) {
         foreach ($splitForm->getTipsSplit() as $key => $_split) {
             echo $this->render('partial/_formSplitTips', [
                 'key' => $_split->isNewRecord
@@ -113,9 +114,9 @@ $this->registerJs($js);?>
 
     // remove split button
     $(document).on('click', '.remove-split-button', function () {
-    	$(this).closest('div.split-row').remove();
-    	split_k -= 1;
-    	mainAgentTips();
+        $(this).closest('div.split-row').remove();
+        split_k -= 1;
+        mainAgentTips();
     });
 </script>
 <?php $this->registerJs(str_replace(['<script>', '</script>'], '', ob_get_clean())); ?>

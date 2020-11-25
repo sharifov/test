@@ -5,6 +5,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\LeadTaskSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -32,20 +33,20 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="col-md-3">
             <?php
             echo  \kartik\daterange\DateRangePicker::widget([
-                'model'=> $searchModel,
+                'model' => $searchModel,
                 'attribute' => 'date_range',
-                'useWithAddon'=>true,
-                'presetDropdown'=>true,
-                'hideInput'=>true,
-                'convertFormat'=>true,
+                'useWithAddon' => true,
+                'presetDropdown' => true,
+                'hideInput' => true,
+                'convertFormat' => true,
                 'startAttribute' => 'datetime_start',
                 'endAttribute' => 'datetime_end',
-                'pluginOptions'=>[
-                    'timePicker'=> true,
-                    'timePickerIncrement'=>1,
+                'pluginOptions' => [
+                    'timePicker' => true,
+                    'timePickerIncrement' => 1,
                     'timePicker24Hour' => true,
-                    'locale'=>[
-                        'format'=>'Y-m-d H:i',
+                    'locale' => [
+                        'format' => 'Y-m-d H:i',
                         'separator' => ' - '
                     ]
                 ]
@@ -69,7 +70,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Lead UID',
                 'attribute' => 'lt_lead_id',
-                'value' => function(\common\models\LeadTask $model) {
+                'value' => function (\common\models\LeadTask $model) {
                     return Html::a($model->ltLead->uid, ['lead/view', 'gid' => $model->ltLead->gid], ['target' => '_blank', 'data-pjax' => 0]);
                 },
                 'format' => 'raw',
@@ -79,7 +80,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Task',
                 'attribute' => 'lt_task_id',
-                'value' => function(\common\models\LeadTask $model) {
+                'value' => function (\common\models\LeadTask $model) {
                     return $model->ltTask ? $model->ltTask->t_name : '-';
                 },
                 'filter' => \common\models\Task::getList()
@@ -93,7 +94,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Employee',
                 'attribute' => 'lt_user_id',
-                'value' => function(\common\models\LeadTask $model) {
+                'value' => function (\common\models\LeadTask $model) {
                     return $model->ltUser ? $model->ltUser->username : '-';
                 },
                 'filter' => \common\models\Employee::getList()

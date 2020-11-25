@@ -81,10 +81,11 @@ class Log extends \yii\db\ActiveRecord
             ->groupBy(["category"])
             ->orderBy('cnt DESC')->asArray()->all();
 
-        if($data)
+        if ($data) {
             foreach ($data as $v) {
-                $arr[$v['category']] = $v['category'].' - ['.$v['cnt'].']';
+                $arr[$v['category']] = $v['category'] . ' - [' . $v['cnt'] . ']';
             }
+        }
 
         return $arr;
     }
@@ -102,29 +103,30 @@ class Log extends \yii\db\ActiveRecord
      * @param $model Log
      * @return int|string
      */
-    public static function removeSysLogs($model){
+    public static function removeSysLogs($model)
+    {
         $beforeDelete = self::find()->count();
 
-        if ($model->level != '' && $model->category == '' && $model->days == ''){
+        if ($model->level != '' && $model->category == '' && $model->days == '') {
             self::deleteAll('level = :l', [':l' => $model->level]);
         }
-        if ($model->level == '' && $model->category != '' && $model->days == ''){
+        if ($model->level == '' && $model->category != '' && $model->days == '') {
             self::deleteAll('category = :c', [':c' => $model->category]);
         }
-        if ($model->level == '' && $model->category == '' && $model->days != ''){
-            self::deleteAll('log_time <= :d', [':d' => strtotime('-'.$model->days.' day')]);
+        if ($model->level == '' && $model->category == '' && $model->days != '') {
+            self::deleteAll('log_time <= :d', [':d' => strtotime('-' . $model->days . ' day')]);
         }
-        if ($model->level != '' && $model->category != '' && $model->days == ''){
+        if ($model->level != '' && $model->category != '' && $model->days == '') {
             self::deleteAll(['AND','level = :l', 'category = :c'], [':l' => $model->level, ':c' => $model->category]);
         }
-        if ($model->level != '' && $model->category == '' && $model->days != ''){
-            self::deleteAll(['AND','level = :l', 'log_time <= :d'], [':l' => $model->level, ':d' => strtotime('-'.$model->days.' day')]);
+        if ($model->level != '' && $model->category == '' && $model->days != '') {
+            self::deleteAll(['AND','level = :l', 'log_time <= :d'], [':l' => $model->level, ':d' => strtotime('-' . $model->days . ' day')]);
         }
-        if ($model->level == '' && $model->category != '' && $model->days != ''){
-            self::deleteAll(['AND','category = :c', 'log_time <= :d'], [':c' => $model->category, ':d' => strtotime('-'.$model->days.' day')]);
+        if ($model->level == '' && $model->category != '' && $model->days != '') {
+            self::deleteAll(['AND','category = :c', 'log_time <= :d'], [':c' => $model->category, ':d' => strtotime('-' . $model->days . ' day')]);
         }
-        if ($model->level != '' && $model->category != '' && $model->days != ''){
-            self::deleteAll('level = :l AND category = :c AND log_time <= :d', [':l' => $model->level, ':c' => $model->category, ':d' => strtotime('-'.$model->days.' day')]);
+        if ($model->level != '' && $model->category != '' && $model->days != '') {
+            self::deleteAll('level = :l AND category = :c AND log_time <= :d', [':l' => $model->level, ':c' => $model->category, ':d' => strtotime('-' . $model->days . ' day')]);
         }
         $afterDelete = self::find()->count();
 

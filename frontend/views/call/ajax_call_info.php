@@ -19,14 +19,14 @@ $this->title = 'Call Id: ' . $model->c_id;
     <h2>
         <i class="fa fa-phone-square"></i> <?= Html::encode($this->title) ?>
         <?=$model->getStatusLabel()?>
-        <?php if (($model->isStatusRinging() || $model->isStatusInProgress()) && Auth::can('/call/cancel-manual')): ?>
+        <?php if (($model->isStatusRinging() || $model->isStatusInProgress()) && Auth::can('/call/cancel-manual')) : ?>
             <?= Html::button('Cancel Call', ['class' => 'btn btn-danger cancel-call-btn']) ?>
-        <?php
-        $callCancelUrl = Url::to(['/call/cancel-manual']);
-        $callId = $model->c_id;
-        $cancelStatus = Call::STATUS_CANCELED;
+            <?php
+            $callCancelUrl = Url::to(['/call/cancel-manual']);
+            $callId = $model->c_id;
+            $cancelStatus = Call::STATUS_CANCELED;
 
-$js =<<<JS
+            $js = <<<JS
 $('.cancel-call-btn').click(function (e) {
    if (confirm('The call will be canceled. Proceed?')) {
         $.ajax({
@@ -56,14 +56,14 @@ $('.cancel-call-btn').click(function (e) {
    }
 });
 JS;
-$this->registerJs($js);
+            $this->registerJs($js);
 
             ?>
         <?php endif;?>
     </h2>
 
 
-    <?php if($model->recordingUrl):?>
+    <?php if ($model->recordingUrl) :?>
         <audio controls="controls" controlsList="nodownload" style="width: 100%;"><source src="<?=$model->recordingUrl?>" type="audio/mpeg"></audio>
     <?php endif;?>
 

@@ -1,4 +1,5 @@
 <?php
+
 /* @var $this yii\web\View */
 /* @var $offer \modules\offer\src\entities\offer\Offer */
 /* @var $index integer */
@@ -14,7 +15,7 @@ use yii\bootstrap4\Html;
 <div class="x_panel">
     <div class="x_title">
 
-            <?= Html::checkbox('offer_checkbox['.$offer->of_id.']', false, ['id' => 'off_ch' . $offer->of_id, 'class' => 'offer-checkbox', 'data-id' => $offer->of_id, 'style' => 'width: 16px; height: 16px;'])?>
+            <?= Html::checkbox('offer_checkbox[' . $offer->of_id . ']', false, ['id' => 'off_ch' . $offer->of_id, 'class' => 'offer-checkbox', 'data-id' => $offer->of_id, 'style' => 'width: 16px; height: 16px;'])?>
             <small><span class="badge badge-white">OF<?=($offer->of_id)?></span></small>
             "<b><?=\yii\helpers\Html::encode($offer->of_name)?></b>"
             (<span title="UID"><?=\yii\helpers\Html::encode($offer->of_uid)?></span>)
@@ -73,8 +74,7 @@ use yii\bootstrap4\Html;
     <div class="x_content" style="display: block">
 
         <table class="table table-bordered">
-        <?php if ($offer->offerProducts):
-
+        <?php if ($offer->offerProducts) :
             $originTotalPrice = 0;
             $clientTotalPrice = 0;
             $optionTotalPrice = 0;
@@ -93,8 +93,8 @@ use yii\bootstrap4\Html;
                 <th>Client Price</th>
                 <th></th>
             </tr>
-            <?php if ($offer->offerProducts):?>
-                <?php foreach ($offer->offerProducts as $product):
+            <?php if ($offer->offerProducts) :?>
+                <?php foreach ($offer->offerProducts as $product) :
                         $quote = $product->opProductQuote;
                         $originTotalPrice += $quote->pq_price;
                         $clientTotalPrice += $quote->pq_client_price;

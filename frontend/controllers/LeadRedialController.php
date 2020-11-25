@@ -64,8 +64,7 @@ class LeadRedialController extends FController
         MultipleUpdateService $multipleUpdate,
         UpdateAllService $updateAllService,
         $config = []
-    )
-    {
+    ) {
         parent::__construct($id, $module, $config);
         $this->leadRedialService = $leadRedialService;
         $this->multipleUpdate = $multipleUpdate;
@@ -78,8 +77,8 @@ class LeadRedialController extends FController
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
 
-		$params = Yii::$app->request->queryParams;
-		$params['is_test'] = Yii::$app->request->get('is_test', 0);
+        $params = Yii::$app->request->queryParams;
+        $params['is_test'] = Yii::$app->request->get('is_test', 0);
         $searchModel = new LeadQcallSearch();
         $dataProvider = $searchModel->searchByRedial($params, $user);
         $dataProviderLastCalls = $searchModel->searchLastCalls([], $user);
@@ -452,7 +451,7 @@ class LeadRedialController extends FController
         if (!$user->isAdmin()) {
             throw new ForbiddenHttpException('Access is denied.');
         }
-        
+
         $form = new UpdateAllForm();
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             $report = $this->updateAllService->update($form);

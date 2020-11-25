@@ -42,22 +42,21 @@ ClientChatAsset::register($this);
 $userRcAuthToken = Auth::user()->userProfile ? Auth::user()->userProfile->up_rc_auth_token : '';
 ?>
 
-<?php if ($filter->isEmptyChannels()): ?>
+<?php if ($filter->isEmptyChannels()) : ?>
     <?php echo Alert::widget([
         'options' => [
             'class' => 'alert-warning',
         ],
         'body' => 'You have no assigned channels.',
     ]); ?>
-<?php elseif (empty($userRcAuthToken)): ?>
-	<?php echo Alert::widget([
+<?php elseif (empty($userRcAuthToken)) : ?>
+    <?php echo Alert::widget([
         'options' => [
             'class' => 'alert-warning',
         ],
         'body' => 'You have no assigned token or the token is not valid.',
     ]); ?>
-<?php else: ?>
-
+<?php else : ?>
 <div class="row">
     <div class="col-md-3">
         <?php Pjax::begin(['id' => 'pjax-client-chat-channel-list']); ?>
@@ -72,44 +71,44 @@ $userRcAuthToken = Auth::user()->userProfile ? Auth::user()->userProfile->up_rc_
                 'listParams' => $listParams
             ]); ?>
         </div>
-		<?php Pjax::end(); ?>
+        <?php Pjax::end(); ?>
     </div>
 
     <?php
          $iframeData = null;
          $infoData = null;
          $noteData = null;
-         if ($accessChatError) {
-             $this->registerJs('createNotify("Client chat view", "You don\'t have access to this chat", "error")', View::POS_LOAD);
-         } elseif ($clientChat) {
-             $iframeData = (new ClientChatIframeHelper($clientChat))->generateIframe();
+    if ($accessChatError) {
+        $this->registerJs('createNotify("Client chat view", "You don\'t have access to this chat", "error")', View::POS_LOAD);
+    } elseif ($clientChat) {
+        $iframeData = (new ClientChatIframeHelper($clientChat))->generateIframe();
 
-             if ($client) {
-                 $infoData = $this->render(
-                     'partial/_client-chat-info',
-                     ['clientChat' => $clientChat, 'client' => $client, 'actionPermissions' => $actionPermissions]
-                 );
-             }
-             if ($actionPermissions->canNoteView($clientChat) || $actionPermissions->canNoteAdd($clientChat) || $actionPermissions->canNoteDelete($clientChat)) {
-                 $noteData = $this->render('partial/_client-chat-note', [
-                     'clientChat' => $clientChat,
-                     'model' => new ClientChatNote(),
-                     'actionPermissions' => $actionPermissions,
-                 ]);
-             }
-         }
+        if ($client) {
+            $infoData = $this->render(
+                'partial/_client-chat-info',
+                ['clientChat' => $clientChat, 'client' => $client, 'actionPermissions' => $actionPermissions]
+            );
+        }
+        if ($actionPermissions->canNoteView($clientChat) || $actionPermissions->canNoteAdd($clientChat) || $actionPermissions->canNoteDelete($clientChat)) {
+            $noteData = $this->render('partial/_client-chat-note', [
+                'clientChat' => $clientChat,
+                'model' => new ClientChatNote(),
+                'actionPermissions' => $actionPermissions,
+            ]);
+        }
+    }
     ?>
 
     <div class="col-md-6">
         <div id="_rc-iframe-wrapper">
             <?= $iframeData ?: '' ?>
         </div>
-        <?php if ($actionPermissions->canSendCannedResponse()): ?>
+        <?php if ($actionPermissions->canSendCannedResponse()) : ?>
             <?php echo $this->render('partial/_canned_response', ['clientChat' => $clientChat]) ?>
         <?php endif; ?>
 
         <div id="couch_note_box">
-            <?php if ($clientChat && $actionPermissions->canCouchNote($clientChat)): ?>
+            <?php if ($clientChat && $actionPermissions->canCouchNote($clientChat)) : ?>
                 <?php echo $this->render('partial/_couch_note', ['couchNoteForm' => $couchNoteForm]); ?>
             <?php endif; ?>
         </div>

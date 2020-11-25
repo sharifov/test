@@ -6,6 +6,7 @@ use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel \sales\model\kpi\entity\kpiUserPerformance\search\KpiUserPerformanceSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -37,10 +38,10 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             'up_year',
-			[
-				'class' => MonthColumn::class,
-				'attribute' => 'up_month',
-			],
+            [
+                'class' => MonthColumn::class,
+                'attribute' => 'up_month',
+            ],
             'up_performance:percentInteger',
 
             [
@@ -57,14 +58,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'placeholder' => 'Select User',
             ],
 
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'up_created_dt',
-			],
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'up_updated_dt',
-			],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'up_created_dt',
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'up_updated_dt',
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

@@ -79,7 +79,6 @@ class DepartmentPhoneProjectController extends FController
         $model = new DepartmentPhoneProject();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-
             if ($model->user_group_list) {
                 foreach ($model->user_group_list as $userGroupId) {
                     $dug = new DepartmentPhoneProjectUserGroup();
@@ -92,7 +91,6 @@ class DepartmentPhoneProjectController extends FController
 
             return $this->redirect(['view', 'id' => $model->dpp_id]);
         } else {
-
             $model->user_group_list = [];
 
             $model->dpp_params = '{
@@ -187,7 +185,6 @@ class DepartmentPhoneProjectController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-
             DepartmentPhoneProjectUserGroup::deleteAll(['dug_dpp_id' => $model->dpp_id]);
 
             if ($model->user_group_list) {
@@ -203,9 +200,9 @@ class DepartmentPhoneProjectController extends FController
             return $this->redirect(['view', 'id' => $model->dpp_id]);
         }
 
-		$model->user_group_list = ArrayHelper::map($model->dugUgs, 'ug_id', 'ug_id');
+        $model->user_group_list = ArrayHelper::map($model->dugUgs, 'ug_id', 'ug_id');
 
-		return $this->render('update', [
+        return $this->render('update', [
             'model' => $model,
         ]);
     }

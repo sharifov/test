@@ -15,38 +15,38 @@ $colMd = $isAjax ? 'col-md-12' : 'col-md-4';
 $pjaxId = 'pjax-create-credit-card'
 ?>
 
-	<script>pjaxOffFormSubmit('#<?= $pjaxId ?>');</script>
-	<div class="credit-card-form">
+    <script>pjaxOffFormSubmit('#<?= $pjaxId ?>');</script>
+    <div class="credit-card-form">
 
-		<div class="<?= $colMd ?>">
+        <div class="<?= $colMd ?>">
 
-			<?php \yii\widgets\Pjax::begin(['id' => $pjaxId, 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]) ?>
-
-
-			<?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1], 'id' => 'credit-card-create-form']); ?>
-
-			<?php echo $form->errorSummary($model); ?>
+            <?php \yii\widgets\Pjax::begin(['id' => $pjaxId, 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]) ?>
 
 
-			<div class="clearfix"></div>
+            <?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1], 'id' => 'credit-card-create-form']); ?>
 
-			<div class="row">
+            <?php echo $form->errorSummary($model); ?>
 
-			<div class="col-md-12">
-				<?= $form->field($model, 'cc_holder_name')->textInput(['id' => 'cc_holder_name', 'maxlength' => true]) ?>
-			</div>
 
-			<div class="col-md-12">
-				<?= $form->field($model, 'cc_type_id')->dropDownList(\common\models\CreditCard::getTypeList(), ['prompt' => '---']) ?>
-			</div>
+            <div class="clearfix"></div>
 
-			<div class="form-group">
-				<?= Html::submitButton('<i class="fa fa-save"></i> Save', ['class' => 'btn btn-success']) ?>
-			</div>
+            <div class="row">
 
-			<?php ActiveForm::end(); ?>
+            <div class="col-md-12">
+                <?= $form->field($model, 'cc_holder_name')->textInput(['id' => 'cc_holder_name', 'maxlength' => true]) ?>
+            </div>
 
-			<?php \yii\widgets\Pjax::end(); ?>
-		</div>
-	</div>
+            <div class="col-md-12">
+                <?= $form->field($model, 'cc_type_id')->dropDownList(\common\models\CreditCard::getTypeList(), ['prompt' => '---']) ?>
+            </div>
+
+            <div class="form-group">
+                <?= Html::submitButton('<i class="fa fa-save"></i> Save', ['class' => 'btn btn-success']) ?>
+            </div>
+
+            <?php ActiveForm::end(); ?>
+
+            <?php \yii\widgets\Pjax::end(); ?>
+        </div>
+    </div>
 <?php

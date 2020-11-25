@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $form ActiveForm
  * @var $this View
@@ -19,19 +20,19 @@ $addEmail->client_id = $lead->client_id;
 ?>
 
 <div class="edit-email-modal-content-ghj">
-	<?php $form = ActiveForm::begin([
-		'id' => 'client-add-email-form',
-		'action' => Url::to(['lead-view/ajax-add-client-email', 'gid' => $lead->gid]),
-		'enableClientValidation' => false,
-		'enableAjaxValidation' => true,
-		'validateOnChange' => false,
-		'validateOnBlur' => false,
-		'validationUrl' => Url::to(['lead-view/ajax-add-client-email-validation', 'gid' => $lead->gid])
-	]); ?>
+    <?php $form = ActiveForm::begin([
+        'id' => 'client-add-email-form',
+        'action' => Url::to(['lead-view/ajax-add-client-email', 'gid' => $lead->gid]),
+        'enableClientValidation' => false,
+        'enableAjaxValidation' => true,
+        'validateOnChange' => false,
+        'validateOnBlur' => false,
+        'validationUrl' => Url::to(['lead-view/ajax-add-client-email-validation', 'gid' => $lead->gid])
+    ]); ?>
 
-	<?= $form->errorSummary($addEmail) ?>
+    <?= $form->errorSummary($addEmail) ?>
 
-	<?php if ($lead->isOwner($user->id) || $user->isAnySupervision() || $user->isAdmin() || $user->isSuperAdmin()): ?>
+    <?php if ($lead->isOwner($user->id) || $user->isAnySupervision() || $user->isAdmin() || $user->isSuperAdmin()) : ?>
         <?=
         $form->field($addEmail, 'email', [
             'template' => '<div class="input-group"><span class="input-group-addon">@</span>{input}</div>{error}',
@@ -44,18 +45,18 @@ $addEmail->client_id = $lead->client_id;
             'required' => true
         ])
         ?>
-	<?php endif; ?>
+    <?php endif; ?>
 
-	<?=
-	$form->field($addEmail, 'type')->dropDownList(ClientEmail::getEmailTypeList())
-	?>
+    <?=
+    $form->field($addEmail, 'type')->dropDownList(ClientEmail::getEmailTypeList())
+    ?>
     <div class="text-center">
         <?= Html::submitButton('<i class="fa fa-plus"></i> Add Email', [
             'class' => 'btn btn-success'
         ])
-        ?>
+?>
     </div>
-	<?php ActiveForm::end(); ?>
+    <?php ActiveForm::end(); ?>
 </div>
 
 <?php

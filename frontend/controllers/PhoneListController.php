@@ -167,19 +167,18 @@ class PhoneListController extends FController
     {
         $result = PhoneListService::synchronizationPhoneNumbers();
 
-        if($result) {
-            if($result['error']) {
+        if ($result) {
+            if ($result['error']) {
                 Yii::$app->getSession()->setFlash('error', $result['error']);
             } else {
-
-                if($result['created']) {
+                if ($result['created']) {
                     $message = 'Synchronization successful<br>';
-                    $message .= 'Created Phones (' . count($result['created']) . '):<br> "'.Html::encode(implode(', ', $result['created'])).'"<br>';
+                    $message .= 'Created Phones (' . count($result['created']) . '):<br> "' . Html::encode(implode(', ', $result['created'])) . '"<br>';
                 } else {
                     $message = 'Synchronization: No new data<br>';
                 }
-                if($result['updated']) {
-                    $message .= 'Updated Phones: "'.implode(', ', $result['updated']).'"<br>';
+                if ($result['updated']) {
+                    $message .= 'Updated Phones: "' . implode(', ', $result['updated']) . '"<br>';
                 }
                 Yii::$app->getSession()->setFlash('success', $message);
             }

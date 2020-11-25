@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $form ActiveForm
  * @var $this View
@@ -17,36 +18,36 @@ $user = Yii::$app->user->identity;
 ?>
 
 <div class="edit-name-modal-content-ghj">
-	<?php $form = ActiveForm::begin([
-		'id' => 'client-edit-name-form',
-		'action' => Url::to(['lead-view/ajax-edit-client-name', 'gid' => $lead->gid]),
-		'enableClientValidation' => false,
-		'enableAjaxValidation' => true,
-		'validateOnChange' => false,
-		'validateOnBlur' => false,
-		'validationUrl' => Url::to(['lead-view/ajax-edit-client-name-validation', 'gid' => $lead->gid])
-	]);
-	?>
+    <?php $form = ActiveForm::begin([
+        'id' => 'client-edit-name-form',
+        'action' => Url::to(['lead-view/ajax-edit-client-name', 'gid' => $lead->gid]),
+        'enableClientValidation' => false,
+        'enableAjaxValidation' => true,
+        'validateOnChange' => false,
+        'validateOnBlur' => false,
+        'validationUrl' => Url::to(['lead-view/ajax-edit-client-name-validation', 'gid' => $lead->gid])
+    ]);
+?>
 
-	<?= $form->errorSummary($editName); ?>
+    <?= $form->errorSummary($editName); ?>
 
-	<?= $form->field($editName, 'firstName')->textInput(['required' => true]) ?>
+    <?= $form->field($editName, 'firstName')->textInput(['required' => true]) ?>
 
-	<?= $form->field($editName, 'lastName')->textInput() ?>
+    <?= $form->field($editName, 'lastName')->textInput() ?>
 
-	<?= $form->field($editName, 'middleName')->textInput() ?>
+    <?= $form->field($editName, 'middleName')->textInput() ?>
 
-	<?=
-	$form->field($editName, 'id')->hiddenInput()->label(false)->error(false);
-	?>
+    <?=
+    $form->field($editName, 'id')->hiddenInput()->label(false)->error(false);
+    ?>
 
     <div class="text-center">
         <?= Html::submitButton('<i class="fa fa-check-square-o"></i> Update client', [
             'class' => 'btn btn-warning'
         ])
-        ?>
+?>
     </div>
-	<?php ActiveForm::end(); ?>
+    <?php ActiveForm::end(); ?>
 </div>
 
 <?php

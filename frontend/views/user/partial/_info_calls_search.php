@@ -2,11 +2,10 @@
 
 use common\models\Call;
 use yii\helpers\Html;
-use \kartik\form\ActiveForm;
+use kartik\form\ActiveForm;
 use kartik\select2\Select2;
 use common\models\Department;
 use common\models\Project;
-
 
 /* @var $this yii\web\View */
 /* @var $model common\models\search\CallSearch */

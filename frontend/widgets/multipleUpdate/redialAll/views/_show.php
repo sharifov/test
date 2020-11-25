@@ -50,7 +50,7 @@ $form = ActiveForm::begin([
 <?php
 ActiveForm::end();
 
-$js =<<<JS
+$js = <<<JS
 $('body').find('#update-all-form').on('beforeSubmit', function (e) {
     e.preventDefault();
     $.ajax({

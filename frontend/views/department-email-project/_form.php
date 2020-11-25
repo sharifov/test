@@ -33,7 +33,7 @@ use yii\widgets\ActiveForm;
                 'options' => ['placeholder' => 'Select market', 'multiple' => false],
                 'pluginOptions' => ['allowClear' => true],
             ])
-            ?>
+?>
 
             <?= $form->field($model, 'user_group_list')->widget(\kartik\select2\Select2::class, [
                 'data' => \common\models\UserGroup::getList(),
@@ -41,7 +41,7 @@ use yii\widgets\ActiveForm;
                 'options' => ['placeholder' => 'Select User Groups', 'multiple' => true],
                 'pluginOptions' => ['allowClear' => true],
             ])
-            ?>
+?>
 
             <?= $form->field($model, 'dep_description')->textarea() ?>
 

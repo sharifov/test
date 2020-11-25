@@ -71,7 +71,7 @@ class UserSiteActivitySearch extends UserSiteActivity
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['usa_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['usa_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],

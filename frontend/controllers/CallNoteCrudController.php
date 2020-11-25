@@ -19,7 +19,7 @@ class CallNoteCrudController extends FController
     */
     public function behaviors(): array
     {
-       $behaviors = [
+        $behaviors = [
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [

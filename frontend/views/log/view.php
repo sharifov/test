@@ -34,8 +34,8 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'message',
                 'format' => 'raw',
-                'value' => static function(\frontend\models\Log $model) {
-                    return $model->message ? '<pre>'.$model->message.'</pre>' : '-';
+                'value' => static function (\frontend\models\Log $model) {
+                    return $model->message ? '<pre>' . $model->message . '</pre>' : '-';
                 },
             ],
         ],

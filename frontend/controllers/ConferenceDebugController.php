@@ -52,7 +52,6 @@ class ConferenceDebugController extends FController
         $content = '';
 
         if ($model->load(\Yii::$app->request->post()) && $model->validate()) {
-
             if ($model->action === DebugForm::ACTION_RAW_DATA) {
                 $content = $this->getDawData($model->conferenceSid);
             } elseif ($model->action === DebugForm::ACTION_SHOW_HISTORY) {
@@ -66,7 +65,6 @@ class ConferenceDebugController extends FController
                     $content = 'Conference not found';
                 }
             }
-
         }
 
         return $this->render('index', [

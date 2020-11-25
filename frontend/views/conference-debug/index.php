@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
 
     <div class="col-md-12">
-        <?php if ($content): ?>
+        <?php if ($content) : ?>
             <pre><?= $content ?></pre>
         <?php endif; ?>
     </div>

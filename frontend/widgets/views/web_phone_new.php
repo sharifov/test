@@ -15,10 +15,10 @@ NewWebPhoneAsset::register($this);
 ?>
 
 <?= $this->render('partial/_phone_widget', [
-	'userPhones' => $userPhones,
-	'userEmails' => $userEmails,
-	'userCallStatus' => $userCallStatus,
-	'countMissedCalls' => $countMissedCalls
+    'userPhones' => $userPhones,
+    'userEmails' => $userEmails,
+    'userCallStatus' => $userCallStatus,
+    'countMissedCalls' => $countMissedCalls
 ]) ?>
 <?= $this->render('partial/_phone_widget_icon') ?>
 
@@ -32,7 +32,7 @@ $getCallHistoryFromNumberUrl = Url::to(['/phone/get-call-history-from-number']);
 
 $conferenceBase = 0;
 if (isset(Yii::$app->params['settings']['voip_conference_base'])) {
-	$conferenceBase = Yii::$app->params['settings']['voip_conference_base'] ? 1 : 0;
+    $conferenceBase = Yii::$app->params['settings']['voip_conference_base'] ? 1 : 0;
 }
 
 $csrf_param = Yii::$app->request->csrfParam;

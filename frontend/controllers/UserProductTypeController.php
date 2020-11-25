@@ -174,7 +174,7 @@ class UserProductTypeController extends FController
         $model->upt_user_id = $userId;
 
         if ($model->load(Yii::$app->request->post())) {
-            if($model->save()) {
+            if ($model->save()) {
                 return 'Success <script>$("#modal-df").modal("hide")</script>';
             }
         }
@@ -196,7 +196,7 @@ class UserProductTypeController extends FController
         $model = $this->findModel($upp_user_id, $upp_project_id);
 
         if ($model->load(Yii::$app->request->post())) {
-            if($model->save()) {
+            if ($model->save()) {
                 return 'Success <script>$("#modal-df").modal("hide")</script>';
             }
         }

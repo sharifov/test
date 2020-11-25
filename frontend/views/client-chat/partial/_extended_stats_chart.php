@@ -1,11 +1,13 @@
 <?php
+
 use sales\entities\chat\ChatExtendedGraphsSearch;
+
 /**
  * @var $viewModel \sales\viewModel\chat\ViewModelChatExtendedGraph
  */
 ?>
 
-<?php if ($viewModel->preparedData): ?>
+<?php if ($viewModel->preparedData) : ?>
     <div class="btn-group" role="group">
         <button id="lineType" class="btn btn-outline-secondary btn-group ml-2" value="LineChart"><i class="fa fa-line-chart blue"></i></button>
         <button id="columnType" class="btn btn-outline-secondary btn-group" value="ColumnChart"><i class="fa fa-bar-chart blue"></i></button>
@@ -93,7 +95,7 @@ use sales\entities\chat\ChatExtendedGraphsSearch;
         'viewModel' => $viewModel,
     ]) ?>
 
-<?php else: ?>
+<?php else : ?>
     <div class="row">
         <div class="col-md-12 text-center">
             <p style="margin: 0;">Not Found Data</p>

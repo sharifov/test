@@ -38,7 +38,7 @@ $this->render('/layouts/_sidebar');
             ],
         ],
     ]);
-    ?>
+?>
 
     <?php Pjax::end(); ?>
 </div>

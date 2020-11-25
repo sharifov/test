@@ -47,8 +47,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     'attribute' => 'cvd_data',
                     'value' => static function (\sales\model\clientChatVisitorData\entity\ClientChatVisitorData $model) {
-						return Html::tag('pre', VarDumper::dumpAsString(Json::decode($model->cvd_data)));
-					},
+                        return Html::tag('pre', VarDumper::dumpAsString(Json::decode($model->cvd_data)));
+                    },
                     'format' => 'raw'
                 ],
                 'cvd_created_dt',

@@ -33,7 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
             't_name',
             [
                 'attribute' => 't_category_id',
-                'value' => function(\common\models\Task $model) {
+                'value' => function (\common\models\Task $model) {
                     return $model->getCategoryName();
                 },
             ],

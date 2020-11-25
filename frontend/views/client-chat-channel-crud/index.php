@@ -59,7 +59,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     'class' => 'danger'
                 ];
             }
-
         },
         'columns' => [
             ['attribute' => 'ccc_id',

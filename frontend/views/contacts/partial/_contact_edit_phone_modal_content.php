@@ -1,6 +1,5 @@
 <?php
 
-
 use borales\extensions\phoneInput\PhoneInput;
 use common\models\Client;
 use common\models\ClientPhone;
@@ -21,48 +20,48 @@ $user = Yii::$app->user->identity;
 ?>
 
 <div class="edit-phone-modal-content-ghj">
-	<?php $form = ActiveForm::begin([
-		'id' => 'client-edit-phone-form',
-		'action' => Url::to(['contacts/ajax-edit-contact-phone', 'client_id' => $client->id]),
-		'enableClientValidation' => false,
-		'enableAjaxValidation' => true,
-		'validateOnChange' => false,
-		'validateOnBlur' => false,
-		'validationUrl' => Url::to(['contacts/ajax-edit-contact-phone-validation', 'client_id' => $client->id])
-	]); ?>
+    <?php $form = ActiveForm::begin([
+        'id' => 'client-edit-phone-form',
+        'action' => Url::to(['contacts/ajax-edit-contact-phone', 'client_id' => $client->id]),
+        'enableClientValidation' => false,
+        'enableAjaxValidation' => true,
+        'validateOnChange' => false,
+        'validateOnBlur' => false,
+        'validationUrl' => Url::to(['contacts/ajax-edit-contact-phone-validation', 'client_id' => $client->id])
+    ]); ?>
 
-	<?= $form->errorSummary($editPhone); ?>
+    <?= $form->errorSummary($editPhone); ?>
 
-	<?php if ($user->isAdmin() || $user->isSuperAdmin()): ?>
-		<?= $form->field($editPhone, 'phone', [
-			'options' => [
-				'class' => 'form-group',
-			],
-		])->widget(PhoneInput::class, [
-			'options' => [
-				'class' => 'form-control lead-form-input-element',
-				'id' => 'edit-phone',
+    <?php if ($user->isAdmin() || $user->isSuperAdmin()) : ?>
+        <?= $form->field($editPhone, 'phone', [
+            'options' => [
+                'class' => 'form-group',
+            ],
+        ])->widget(PhoneInput::class, [
+            'options' => [
+                'class' => 'form-control lead-form-input-element',
+                'id' => 'edit-phone',
                 'required' => true
-			],
-			'jsOptions' => [
-				'nationalMode' => false,
-				'preferredCountries' => ['us'],
+            ],
+            'jsOptions' => [
+                'nationalMode' => false,
+                'preferredCountries' => ['us'],
                 'customContainer' => 'intl-tel-input'
-			]
-		]) ?>
-	<?php endif; ?>
+            ]
+        ]) ?>
+    <?php endif; ?>
 
-	<?= $form->field($editPhone, 'type')->dropDownList(ClientPhone::getPhoneTypeList()) ?>
-	<?= $form->field($editPhone, 'id')->hiddenInput()->label(false)->error(false) ?>
-	<?= $form->field($editPhone, 'client_id')->hiddenInput()->label(false)->error(false) ?>
+    <?= $form->field($editPhone, 'type')->dropDownList(ClientPhone::getPhoneTypeList()) ?>
+    <?= $form->field($editPhone, 'id')->hiddenInput()->label(false)->error(false) ?>
+    <?= $form->field($editPhone, 'client_id')->hiddenInput()->label(false)->error(false) ?>
 
     <div class="text-center">
         <?= Html::submitButton('<i class="fa fa-check-square-o"></i> Edit phone', [
             'class' => 'btn btn-warning'
         ])
-        ?>
+?>
     </div>
-	<?php ActiveForm::end(); ?>
+    <?php ActiveForm::end(); ?>
 </div>
 
 <?php

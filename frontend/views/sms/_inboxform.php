@@ -29,7 +29,8 @@ use yii\widgets\ActiveForm;
         </div>
         <div id="last_date_area">
             <?= $form->field($model, 'last_date')->widget(
-                \dosamigos\datepicker\DatePicker::class, [
+                \dosamigos\datepicker\DatePicker::class,
+                [
                 'inline' => false,
                 'clientOptions' => [
                     'autoclose' => true,
@@ -37,7 +38,8 @@ use yii\widgets\ActiveForm;
                     'todayBtn' => true
                 ]
 
-            ]); ?></div>
+                ]
+            ); ?></div>
     </div>
     </div>
 <?php ActiveForm::end(); ?>

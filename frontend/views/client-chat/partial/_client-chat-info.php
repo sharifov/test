@@ -69,7 +69,7 @@ $_self = $this;
                             'data-cch-id' => $clientChat->cch_id
                         ]) ?>
 
-                        <?php if ($actionPermissions->canCancelTransfer($clientChat)): ?>
+                        <?php if ($actionPermissions->canCancelTransfer($clientChat)) : ?>
                             <?php echo Html::a('<i class="fa fa-exchange"> </i> Cancel Transfer', null, [
                                 'class' => 'dropdown-item cc_cancel_transfer',
                                 'title' => 'Cancel Transfer',
@@ -77,7 +77,7 @@ $_self = $this;
                             ]) ?>
                         <?php endif; ?>
 
-                        <?php if ($actionPermissions->canClose($clientChat)): ?>
+                        <?php if ($actionPermissions->canClose($clientChat)) : ?>
                             <?php echo Html::a('<i class="fa fa-times-circle"> </i> Close Chat', null, [
                                 'class' => 'dropdown-item text-danger cc_close',
                                 'title' => 'Close',
@@ -85,7 +85,7 @@ $_self = $this;
                             ]) ?>
                         <?php endif;?>
 
-                        <?php if ($actionPermissions->canTransfer($clientChat)): ?>
+                        <?php if ($actionPermissions->canTransfer($clientChat)) : ?>
                             <?php echo Html::a('<i class="fa fa-exchange"> </i> Transfer', null, [
                                 'class' => 'dropdown-item text-warning cc_transfer',
                                 'title' => 'Transfer',
@@ -93,7 +93,7 @@ $_self = $this;
                             ]) ?>
                         <?php endif;?>
 
-                        <?php if ($actionPermissions->canReopenChat($clientChat)): ?>
+                        <?php if ($actionPermissions->canReopenChat($clientChat)) : ?>
                             <?php echo Html::a('<i class="fa fa-undo"> </i> Reopen', null, [
                                 'class' => 'dropdown-item text-warning cc_reopen',
                                 'title' => 'Reopen',
@@ -101,13 +101,13 @@ $_self = $this;
                             ]) ?>
                         <?php endif; ?>
 
-                        <?php if ($actionPermissions->canHold($clientChat)): ?>
+                        <?php if ($actionPermissions->canHold($clientChat)) : ?>
                             <?php echo Html::a('<i class="fa fa-pause"> </i> Hold', null, [
                                 'class' => 'dropdown-item text-secondary cc_hold',
                                 'title' => 'Hold',
                                 'data-cch-id' => $clientChat->cch_id
                             ]) ?>
-                        <?php elseif ($actionPermissions->canUnHold($clientChat)): ?>
+                        <?php elseif ($actionPermissions->canUnHold($clientChat)) : ?>
                             <?php echo Html::a('<i class="fa fa-play"> </i> UnHold', null, [
                                 'class' => 'dropdown-item text-nowrap text-info cc_un_hold',
                                 'title' => 'UnHold',
@@ -115,7 +115,7 @@ $_self = $this;
                             ]) ?>
                         <?php endif; ?>
 
-                        <?php if ($actionPermissions->canReturn($clientChat)): ?>
+                        <?php if ($actionPermissions->canReturn($clientChat)) : ?>
                             <?php echo Html::a('<i class="fa fa-arrows-h"> </i> Return', null, [
                                 'class' => 'dropdown-item text-info cc_return',
                                 'title' => 'Return the chat to In Progress',
@@ -123,7 +123,7 @@ $_self = $this;
                             ]) ?>
                         <?php endif; ?>
 
-                        <?php if ($actionPermissions->canTake($clientChat)): ?>
+                        <?php if ($actionPermissions->canTake($clientChat)) : ?>
                             <?php echo Html::a('<i class="fa fa-arrows-h"> </i> Take', null, [
                                 'class' => 'dropdown-item text-info cc_take ',
                                 'title' => 'Take',
@@ -152,19 +152,19 @@ $_self = $this;
                             <span><?= Html::encode($client->full_name ?: 'Client-' . $client->id); ?></span>
                         </span>
 
-                        <?php if ($emails = $client->clientEmails): ?>
+                        <?php if ($emails = $client->clientEmails) : ?>
                             <span class="_rc-client-email">
                                 <i class="fa fa-envelope"></i>
-                                <?php foreach ($emails as $email): ?>
+                                <?php foreach ($emails as $email) : ?>
                                     <code><?= Html::encode($email->email); ?></code>
                                 <?php endforeach; ?>
                             </span>
                         <?php endif; ?>
 
-                        <?php if ($phones = $client->clientPhones): ?>
+                        <?php if ($phones = $client->clientPhones) : ?>
                             <span class="_rc-client-phone">
                                 <i class="fa fa-phone"></i>
-                                <?php foreach ($phones as $phone): ?>
+                                <?php foreach ($phones as $phone) : ?>
                                     <code><?= Html::encode($phone->phone); ?></code>
                                 <?php endforeach; ?>
                             </span>
@@ -176,7 +176,7 @@ $_self = $this;
 
     </div>
 
-    <?php if ($clientChat->isShowDeadlineProgress() && $clientChatHold = $clientChat->clientChatHold): ?>
+    <?php if ($clientChat->isShowDeadlineProgress() && $clientChatHold = $clientChat->clientChatHold) : ?>
         <div class="_rc-block-wrapper" id="progress_bar_box">
             <div class="x_panel">
                 <div class="x_title">
@@ -209,7 +209,7 @@ $_self = $this;
 
     <?php endif; ?>
 
-    <?php if ($clientChat->feedback): ?>
+    <?php if ($clientChat->feedback) : ?>
         <?php $feedback = $clientChat->feedback; ?>
         <div class="_rc-block-wrapper">
             <div class="x_panel">
@@ -226,11 +226,11 @@ $_self = $this;
                 <div class="x_content">
                     <div>
                         <strong>Rating</strong>:
-                        <?php if ($feedback->ccf_rating): ?>
-                            <?php for ($i = 1; $i <= $feedback->ccf_rating; $i++): ?>
+                        <?php if ($feedback->ccf_rating) : ?>
+                            <?php for ($i = 1; $i <= $feedback->ccf_rating; $i++) : ?>
                                 <i class="fa fa-star text-warning"></i>
                             <?php endfor; ?>
-                        <?php else: ?>
+                        <?php else : ?>
                             -
                         <?php endif; ?>
                     </div>
@@ -238,7 +238,7 @@ $_self = $this;
                         <strong>Message</strong>: <?php echo Html::encode($feedback->ccf_message) ?>
                     </div>
                     <div class="_cc_chat_note_date_item">
-						<?php echo $feedback->ccf_created_dt ? Yii::$app->formatter->asDatetime(strtotime($feedback->ccf_created_dt)) : ''; ?>
+                        <?php echo $feedback->ccf_created_dt ? Yii::$app->formatter->asDatetime(strtotime($feedback->ccf_created_dt)) : ''; ?>
                     </div>
                 </div>
             </div>
@@ -250,7 +250,7 @@ $_self = $this;
             <div class="x_title">
                 <h2>Cases </h2>
                 <ul class="nav navbar-right panel_toolbox">
-                    <?php if (!$clientChat->isClosed() && Auth::can('/cases/create-by-chat')): ?>
+                    <?php if (!$clientChat->isClosed() && Auth::can('/cases/create-by-chat')) : ?>
                     <li>
                         <a class="create_case" data-link="<?= Url::to(['/cases/create-by-chat', 'chat_id' => $clientChat->cch_id]); ?>"><i class="fa fa-plus"></i> Create Case</a>
                     </li>
@@ -261,16 +261,16 @@ $_self = $this;
 
             <div class="x_content">
                 <div id="chat-info-case-info">
-                <?php if ($cases = $clientChat->cases): ?>
-                        <?php foreach ($cases as $case): ?>
+                <?php if ($cases = $clientChat->cases) : ?>
+                        <?php foreach ($cases as $case) : ?>
                             <div class="_cc-case-item">
                                 <span>
-								    <?= Yii::$app->formatter->format($case, 'case'); ?>
+                                    <?= Yii::$app->formatter->format($case, 'case'); ?>
                                 </span>
                                 <?= CasesStatus::getLabel($case->cs_status); ?>
                             </div>
                         <?php endforeach; ?>
-                <?php else: ?>
+                <?php else : ?>
                     <p>Cases are not found</p>
                 <?php endif; ?>
                 </div>
@@ -283,34 +283,34 @@ $_self = $this;
             <div class="x_title">
                 <h2>Leads </h2>
                 <ul class="nav navbar-right panel_toolbox">
-					<?php if (!$clientChat->isClosed() && Auth::can('/lead/create-by-chat')): ?>
+                    <?php if (!$clientChat->isClosed() && Auth::can('/lead/create-by-chat')) : ?>
                         <li>
                             <a class="create_lead" data-link="<?= Url::to(['/lead/create-by-chat', 'chat_id' => $clientChat->cch_id]); ?>"><i class="fa fa-plus"></i> Create Lead</a>
                         </li>
-					<?php endif; ?>
+                    <?php endif; ?>
                 </ul>
                 <div class="clearfix"></div>
             </div>
 
             <div class="x_content">
                 <div id="chat-info-lead-info">
-				<?php if ($leads = $clientChat->leads): ?>
-						<?php foreach ($leads as $lead): ?>
+                <?php if ($leads = $clientChat->leads) : ?>
+                        <?php foreach ($leads as $lead) : ?>
                         <div class="_cc-lead-item">
                             <span>
                                 <?= Yii::$app->formatter->format($lead, 'lead'); ?>
                             </span>
                             <span>
-                                <?php if (!$clientChat->isClosed() && $lead->isExistQuotesForSend()): ?>
+                                <?php if (!$clientChat->isClosed() && $lead->isExistQuotesForSend()) : ?>
                                     <?= \yii\helpers\Html::tag('span', '<i class="fa fa-plane"></i> Offer', ['class' => 'chat-offer', 'data-chat-id' => $clientChat->cch_id, 'data-lead-id' => $lead->id]); ?>
                                 <?php endif; ?>
                                 <?= $lead->getStatusLabel($lead->status); ?>
                             </span>
                         </div>
-						<?php endforeach; ?>
-				<?php else: ?>
+                        <?php endforeach; ?>
+                <?php else : ?>
                     <p>Leads are not found</p>
-				<?php endif; ?>
+                <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -322,7 +322,7 @@ $_self = $this;
         'enablePushState' => false,
     ]); */ ?>
 
-        <?php if ($clientChat->ccv && $clientChat->ccv->ccvCvd): ?>
+        <?php if ($clientChat->ccv && $clientChat->ccv->ccvCvd) : ?>
             <div class="_rc-block-wrapper">
                 <div class="x_panel">
                     <div class="x_title">
@@ -378,13 +378,12 @@ $_self = $this;
     <?php // Pjax::end();?>
 </div>
 
-<?php if (isset($clientChatHold)): ?>
+<?php if (isset($clientChatHold)) : ?>
+    <?php
 
-<?php
+    $formatTimer = ClientChatHoldService::isMoreThanHourLeft($clientChatHold) ? '%H:%M:%S' : '%M:%S';
 
-   $formatTimer = ClientChatHoldService::isMoreThanHourLeft($clientChatHold) ? '%H:%M:%S' : '%M:%S';
-
-$js = <<<JS
+    $js = <<<JS
 
     var maxProgressBar = {$clientChatHold->deadlineStartDiffInSeconds()};
     var leftProgressBar = {$clientChatHold->deadlineNowDiffInSeconds()};
@@ -429,6 +428,6 @@ $js = <<<JS
     }, 1000);
     
 JS;
-$this->registerJs($js);
-?>
+    $this->registerJs($js);
+    ?>
 <?php endif; ?>

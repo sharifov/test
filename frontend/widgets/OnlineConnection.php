@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @link http://www.yiiframework.com/
  * @copyright Copyright (c) 2008 Yii Software LLC
@@ -86,7 +87,7 @@ class OnlineConnection extends \yii\bootstrap\Widget
         $actionId = Yii::$app->controller->action->id;
         $pageUrl = urlencode(\yii\helpers\Url::current());
         $ipAddress = Yii::$app->request->remoteIP;
-        $webSocketHost = (Yii::$app->request->isSecureConnection ? 'wss': 'ws') . '://'.Yii::$app->request->serverName . '/ws';// . ':8888';
+        $webSocketHost = (Yii::$app->request->isSecureConnection ? 'wss' : 'ws') . '://' . Yii::$app->request->serverName . '/ws';// . ':8888';
 
         return $this->render('online_connection2', [
             'userId' =>  $userId,

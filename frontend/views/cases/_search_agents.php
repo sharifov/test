@@ -51,7 +51,8 @@ use yii\widgets\ActiveForm;
                 </div>
                 <div class="col-md-1">
                     <?php echo $form->field($model, 'csStatuses')
-                        ->widget(MultiSelect::class,
+                        ->widget(
+                            MultiSelect::class,
                             [
                                 'data' => CasesStatus::STATUS_LIST,
                                 'options' => ['multiple' => 'multiple'],
@@ -99,7 +100,7 @@ use yii\widgets\ActiveForm;
                     'options' => ['multiple' => true],
                     'pluginOptions' => ['allowClear' => true],
                 ]);
-            ?>
+                ?>
         </div>
         <div class="col-md-1">
             <?php
@@ -109,7 +110,7 @@ use yii\widgets\ActiveForm;
                     'options' => ['multiple' => true],
                     'pluginOptions' => ['allowClear' => true],
                 ]);
-            ?>
+                ?>
         </div>
         <div class="col-md-1">
             <?php
@@ -119,7 +120,7 @@ use yii\widgets\ActiveForm;
                     'options' => ['multiple' => true],
                     'pluginOptions' => ['allowClear' => true],
                 ]);
-            ?>
+                ?>
         </div>
         <div class="col-md-1">
             <?php
@@ -129,7 +130,7 @@ use yii\widgets\ActiveForm;
                     'options' => ['multiple' => true],
                     'pluginOptions' => ['allowClear' => true],
                 ]);
-            ?>
+                ?>
         </div>
         <div class="col-md-2">
             <?= $form->field($model, 'cssInOutDate', [
@@ -154,22 +155,25 @@ use yii\widgets\ActiveForm;
             <?php
                 $types = ArrayHelper::map(
                     CaseSale::find()->select('css_charge_type')->distinct()->where(['NOT', ['css_charge_type' => null]])->all(),
-                    'css_charge_type','css_charge_type'
+                    'css_charge_type',
+                    'css_charge_type'
                 )
-            ?>
+                ?>
             <?= $form->field($model, 'cssChargeType')->dropDownList($types, ['prompt' => '---']) ?>
         </div>
         <div class="col-md-2">
-			<?= $form->field($model, 'saleTicketSendEmailDate', [
-				'options' => ['class' => 'form-group'],
-			])->widget(
-				\dosamigos\datepicker\DatePicker::class, [
-				'inline' => false,
-				'clientOptions' => [
-					'autoclose' => true,
-					'format' => 'yyyy-mm-dd',
-				]
-			])->label('Send Email Date') ?>
+            <?= $form->field($model, 'saleTicketSendEmailDate', [
+                'options' => ['class' => 'form-group'],
+            ])->widget(
+                \dosamigos\datepicker\DatePicker::class,
+                [
+                'inline' => false,
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'yyyy-mm-dd',
+                ]
+                ]
+            )->label('Send Email Date') ?>
         </div>
         <div class="col-md-1">
             <?= $form->field($model, 'airlinePenalty')->dropDownList(SaleTicket::getAirlinePenaltyList(), ['prompt' => '---']) ?>
@@ -207,42 +211,42 @@ use yii\widgets\ActiveForm;
     </div>
 
     <div class="form-group text-center">
-		<?= Html::submitButton('<i class="fa fa-search"></i> Search cases', ['class' => 'btn btn-primary']) ?>
-		<?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset form', ['cases/index'], ['class' => 'btn btn-warning']) ?>
-		<?php if ($model->saleTicketSendEmailDate) : ?>
-			<?php echo \kartik\export\ExportMenu::widget([
-				'dataProvider' => $dataProvider,
-				'columns' => [
-					['attribute' => 'cs_id', 'label' => 'Case Id'],
-					['attribute' => 'cssSaleId', 'label' => 'Sale Id'],
-					['attribute' => 'cssBookId', 'label' => 'Booking Id'],
-					['attribute' => 'salePNR', 'label' => 'PNR'],
-					['attribute' => 'saleTicketSendEmailDate'],
-					['attribute' => 'sentEmailBy'],
-					['attribute' => 'userGroup'],
-				],
-				'exportConfig' => [
-					\kartik\export\ExportMenu::FORMAT_PDF => [
-						'pdfConfig' => [
-							'mode' => 'c',
-							'format' => 'A4-L',
-						]
-					]
-				],
-				'target' => \kartik\export\ExportMenu::TARGET_BLANK,
-				'fontAwesome' => true,
-				'dropdownOptions' => [
-					'label' => 'Full Export'
-				],
-				'columnSelectorOptions' => [
-					'label' => 'Export Fields'
-				],
-				'showConfirmAlert' => false,
-				'options' => [
-					'id' => 'export-links'
-				],
-			]); ?>
-		<?php endif; ?>
+        <?= Html::submitButton('<i class="fa fa-search"></i> Search cases', ['class' => 'btn btn-primary']) ?>
+        <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset form', ['cases/index'], ['class' => 'btn btn-warning']) ?>
+        <?php if ($model->saleTicketSendEmailDate) : ?>
+            <?php echo \kartik\export\ExportMenu::widget([
+                'dataProvider' => $dataProvider,
+                'columns' => [
+                    ['attribute' => 'cs_id', 'label' => 'Case Id'],
+                    ['attribute' => 'cssSaleId', 'label' => 'Sale Id'],
+                    ['attribute' => 'cssBookId', 'label' => 'Booking Id'],
+                    ['attribute' => 'salePNR', 'label' => 'PNR'],
+                    ['attribute' => 'saleTicketSendEmailDate'],
+                    ['attribute' => 'sentEmailBy'],
+                    ['attribute' => 'userGroup'],
+                ],
+                'exportConfig' => [
+                    \kartik\export\ExportMenu::FORMAT_PDF => [
+                        'pdfConfig' => [
+                            'mode' => 'c',
+                            'format' => 'A4-L',
+                        ]
+                    ]
+                ],
+                'target' => \kartik\export\ExportMenu::TARGET_BLANK,
+                'fontAwesome' => true,
+                'dropdownOptions' => [
+                    'label' => 'Full Export'
+                ],
+                'columnSelectorOptions' => [
+                    'label' => 'Export Fields'
+                ],
+                'showConfirmAlert' => false,
+                'options' => [
+                    'id' => 'export-links'
+                ],
+            ]); ?>
+        <?php endif; ?>
     </div>
 
     <?php ActiveForm::end(); ?>

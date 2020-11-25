@@ -360,7 +360,8 @@ class LeadController extends FController
             throw new UnauthorizedHttpException('Not permissions view lead ID: ' . $lead->id);
         }
         $leadForm = new LeadForm($lead);
-        if ($leadForm->getLead()->status != Lead::STATUS_PROCESSING ||
+        if (
+            $leadForm->getLead()->status != Lead::STATUS_PROCESSING ||
             $leadForm->getLead()->employee_id != Yii::$app->user->identity->getId()
         ) {
             $leadForm->mode = $leadForm::VIEW_MODE;
@@ -388,7 +389,6 @@ class LeadController extends FController
 
             $errors = [];
             if (empty($data['errors']) && $data['load'] && $leadForm->save($errors)) {
-
                 /*if ($lead->called_expert) {
                     $lead = Lead::findOne(['id' => $lead->id]);
                     $data = $lead->getLeadInformationForExpert();
@@ -568,8 +568,6 @@ class LeadController extends FController
                 $project = $lead->project;
 
                 if ($comForm->c_type_id == CommunicationForm::TYPE_EMAIL) {
-
-
                     //VarDumper::dump($comForm->quoteList, 10, true); exit;
 
                     $comForm->c_preview_email = 1;
@@ -780,7 +778,6 @@ class LeadController extends FController
                 }
 
                 if ($comForm->c_type_id == CommunicationForm::TYPE_VOICE) {
-
                     //$comForm->c_voice_status = 0;
                     /** @var CommunicationService $communication */
                     $communication = Yii::$app->communication;
@@ -796,15 +793,12 @@ class LeadController extends FController
 
 
                     if ($upp && $userModel) {
-
 //                        if (!$upp->upp_tw_phone_number) {
                         if (!$upp->getPhone()) {
                             $comForm->addError('c_sms_preview', 'Config Error: Not found TW phone number for Project Id: ' . $lead->project_id . ', agent: "' . Yii::$app->user->identity->username . '"');
                         } elseif (!$userModel->userProfile->up_sip) {
                             $comForm->addError('c_sms_preview', 'Config Error: Not found TW SIP account for Project Id: ' . $lead->project_id . ', agent: "' . Yii::$app->user->identity->username . '"');
                         } else {
-
-
                             /*if($comForm->c_voice_status == 1) {
                                 $comForm->c_voice_sid = 'test';
                             }*/
@@ -1080,7 +1074,7 @@ class LeadController extends FController
             }
             $dataProviderCommunicationLog->pagination->page = $pageCountLog;
         }
-        //		$query = (new Query())->select(['cl.*'])->from('call_log_lead')->leftJoin('call_log cl', 'cl.cl_id = cll_cl_id')->where(['cll_lead_id' => $lead->id])->all();
+        //      $query = (new Query())->select(['cl.*'])->from('call_log_lead')->leftJoin('call_log cl', 'cl.cl_id = cll_cl_id')->where(['cll_lead_id' => $lead->id])->all();
 
 //        $enableCommunication = false;
 //
@@ -1148,13 +1142,13 @@ class LeadController extends FController
             if ($modelLeadChecklist->save()) {
                 $modelLeadChecklist->lc_notes = null;
             } else {
-                Yii::error('Lead id: '.$lead->id . ', ' . VarDumper::dumpAsString($modelLeadCallExpert->errors), 'Lead:view:LeadChecklist:save');
+                Yii::error('Lead id: ' . $lead->id . ', ' . VarDumper::dumpAsString($modelLeadCallExpert->errors), 'Lead:view:LeadChecklist:save');
             }
 
             //return $this->redirect(['view', 'id' => $model->lce_id]);
         }
 
-        $searchModelLeadChecklist= new LeadChecklistSearch();
+        $searchModelLeadChecklist = new LeadChecklistSearch();
         $params = Yii::$app->request->queryParams;
         $params['LeadChecklistSearch']['lc_lead_id'] = $lead->id;
         if ($is_agent) {
@@ -1168,7 +1162,7 @@ class LeadController extends FController
             $modelNote->lead_id = $lead->id;
             $modelNote->created = date('Y-m-d H:i:s');
             if (!$modelNote->save()) {
-                Yii::error('Lead id: '.$lead->id . ', ' . VarDumper::dumpAsString($modelNote->errors), 'Lead:view:Note:save');
+                Yii::error('Lead id: ' . $lead->id . ', ' . VarDumper::dumpAsString($modelNote->errors), 'Lead:view:Note:save');
             } else {
                 $modelNote->message = '';
             }
@@ -2072,9 +2066,9 @@ class LeadController extends FController
             throw new NotFoundHttpException('Client chat not found');
         }
 
-		if (!Auth::can('client-chat/manage', ['chat' => $chat])) {
-			throw new ForbiddenHttpException('You do not have access to perform this action', 403);
-		}
+        if (!Auth::can('client-chat/manage', ['chat' => $chat])) {
+            throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+        }
 
         if ($chat->isClosed()) {
             return 'Client Chat is closed';
@@ -2098,7 +2092,7 @@ class LeadController extends FController
             try {
                 $leadManageService = Yii::createObject(\sales\model\lead\useCases\lead\create\LeadManageService::class);
                 $lead = $leadManageService->createByClientChat($form, $chat, $userId);
-                return "<script> $('#modal-md').modal('hide');refreshChatInfo('".$chat->cch_id."')</script>";
+                return "<script> $('#modal-md').modal('hide');refreshChatInfo('" . $chat->cch_id . "')</script>";
             } catch (\Throwable $e) {
                 Yii::error(AppHelper::throwableFormatter($e), 'LeadController:actionCreateByChat');
                 return "<script> $('#modal-md').modal('hide');createNotify('Create Lead', '" . $e->getMessage() . "', 'error');</script>";
@@ -2507,7 +2501,7 @@ class LeadController extends FController
      */
     public function actionGetTemplate()
     {
-        $keyCache =Yii::$app->request->get('key_cache');
+        $keyCache = Yii::$app->request->get('key_cache');
         return Yii::$app->cacheFile->get($keyCache);
     }
 

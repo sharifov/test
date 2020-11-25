@@ -8,29 +8,29 @@ use yii\widgets\Pjax;
 /** @var ClientChatCloseForm $closeForm */
 ?>
 
-	<div class="row">
-		<div class="col-md-12">
-			<?php Pjax::begin(['id' => 'pjax-cc-submit-close', 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]) ?>
-			<?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1, 'id' => 'cc-submit-close-form'], 'enableClientValidation' => false]); ?>
-			<?= $form->errorSummary($closeForm) ?>
+    <div class="row">
+        <div class="col-md-12">
+            <?php Pjax::begin(['id' => 'pjax-cc-submit-close', 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]) ?>
+            <?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1, 'id' => 'cc-submit-close-form'], 'enableClientValidation' => false]); ?>
+            <?= $form->errorSummary($closeForm) ?>
 
-			<?= $form->field($closeForm, 'cchId')->hiddenInput()->label(false) ?>
+            <?= $form->field($closeForm, 'cchId')->hiddenInput()->label(false) ?>
 
-            <?php if ($closeForm->reasons): ?>
-			    <?= $form->field($closeForm, 'reasonId')->dropDownList($closeForm->getReasonList()) ?>
+            <?php if ($closeForm->reasons) : ?>
+                <?= $form->field($closeForm, 'reasonId')->dropDownList($closeForm->getReasonList()) ?>
 
-			    <?= $form->field($closeForm, 'comment')->textarea(['max' => 100]) ?>
+                <?= $form->field($closeForm, 'comment')->textarea(['max' => 100]) ?>
             <?php endif ?>
 
-			<div class="text-center" style="width: 100%">
-				<?= Html::submitButton('Submit', ['class' => 'btn btn-success _cc_submit_close']) ?>
-				<?= Html::button('Cancel', ['class' => 'btn btn-default', 'data-dismiss' => 'modal']) ?>
-			</div>
+            <div class="text-center" style="width: 100%">
+                <?= Html::submitButton('Submit', ['class' => 'btn btn-success _cc_submit_close']) ?>
+                <?= Html::button('Cancel', ['class' => 'btn btn-default', 'data-dismiss' => 'modal']) ?>
+            </div>
 
-			<?php $form::end(); ?>
-			<?php Pjax::end() ?>
-		</div>
-	</div>
+            <?php $form::end(); ?>
+            <?php Pjax::end() ?>
+        </div>
+    </div>
 
 <?php
 

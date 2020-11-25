@@ -19,7 +19,7 @@ $pjaxListId = 'pjax-log';
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?php if (Auth::can('global/clean/table')): ?>
+    <?php if (Auth::can('global/clean/table')) : ?>
         <div class="row">
             <div class="col-md-12" style="margin-bottom: 12px;">
                 <?php echo Html::a(
@@ -58,15 +58,15 @@ $pjaxListId = 'pjax-log';
                     //'id',
                     [
                         'attribute' => 'id',
-                        'contentOptions'=>['style'=>'width: 70px;text-align:center;']
+                        'contentOptions' => ['style' => 'width: 70px;text-align:center;']
                     ],
                     //'level',
                     [
-                        'attribute'=>'level',
-                        'value'=> static function (\frontend\models\Log $model) {
-                            return \yii\log\Logger::getLevelName($model->level).' ('.$model->level.')';
+                        'attribute' => 'level',
+                        'value' => static function (\frontend\models\Log $model) {
+                            return \yii\log\Logger::getLevelName($model->level) . ' (' . $model->level . ')';
                         },
-                        'filter'=>[
+                        'filter' => [
                             \yii\log\Logger::LEVEL_ERROR            => 'error',
                             \yii\log\Logger::LEVEL_WARNING          => 'warning',
                             \yii\log\Logger::LEVEL_INFO             => 'info',
@@ -74,21 +74,21 @@ $pjaxListId = 'pjax-log';
                             \yii\log\Logger::LEVEL_PROFILE_BEGIN    => 'profile begin',
                             \yii\log\Logger::LEVEL_PROFILE_END      => 'profile end'
                         ],
-                        'contentOptions'=>['style'=>'width: 120px;text-align:center;']
+                        'contentOptions' => ['style' => 'width: 120px;text-align:center;']
                     ],
 
                     //'category',
                     [
                         'attribute' => 'category',
                         'filter' => \frontend\models\Log::getCategoryFilter(),
-                        'contentOptions'=>['style'=>'width: 200px;text-align:center;']
+                        'contentOptions' => ['style' => 'width: 200px;text-align:center;']
                     ],
                     [
                         'attribute' => 'message',
                         'format' => 'raw',
                         'value' => static function (\frontend\models\Log $model) {
-                            $str = '<pre><small>'.(\yii\helpers\StringHelper::truncate($model->message, 400, '...', null, true)).'</small></pre> 
-                            <a href="'.\yii\helpers\Url::to(['log/view', 'id' => $model->id]).'" title="Log '.$model->id.'" class="btn btn-sm btn-success showModalButton" data-pjax="0"><i class="fas fa-eye"></i> details</a>';
+                            $str = '<pre><small>' . (\yii\helpers\StringHelper::truncate($model->message, 400, '...', null, true)) . '</small></pre> 
+                            <a href="' . \yii\helpers\Url::to(['log/view', 'id' => $model->id]) . '" title="Log ' . $model->id . '" class="btn btn-sm btn-success showModalButton" data-pjax="0"><i class="fas fa-eye"></i> details</a>';
                             return ($str);
                         },
                         //'contentOptions'=>['style'=>'width: 100px;text-align:left;']
@@ -106,16 +106,16 @@ $pjaxListId = 'pjax-log';
                                 'format' => 'dd-M-yyyy'
                             ]
                         ]),
-                        'contentOptions'=>['style'=>'width: 180px;text-align:center;']
+                        'contentOptions' => ['style' => 'width: 180px;text-align:center;']
                     ],
 
                     [
                         'attribute' => 'prefix',
                         'format' => 'html',
                         'value' => static function (\frontend\models\Log $model) {
-                            return '<small>'.($model->prefix).'</small>';
+                            return '<small>' . ($model->prefix) . '</small>';
                         },
-                        'contentOptions'=>['style'=>'width: 100px;text-align:left;']
+                        'contentOptions' => ['style' => 'width: 100px;text-align:left;']
                     ],
 
                     //'log_time:datetime',

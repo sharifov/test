@@ -1,4 +1,5 @@
 <?php
+
 /* @var $leadId integer */
 
 use common\models\UserConnection;
@@ -48,19 +49,19 @@ $dtNow = date('Y-m-d H:i:s');
             }
         </script>
     </li>
-    <?php if (UserConnection::isIdleMonitorEnabled()): ?>
+    <?php if (UserConnection::isIdleMonitorEnabled()) : ?>
     <li>
         <a href="javascript:;" class="info-number" title="User Monitor" id="user-monitor-indicator">
             <div class="text-success"><i class="fa fa-clock-o"></i> <span id="user-monitor-timer"></span></div>
         </a>
     </li>
-    <?php
+        <?php
         //$this->registerJs("$('#user-monitor-timer').timer({format: '%M:%S', seconds: 0}).timer('start');", \yii\web\View::POS_READY, 'user-monitor-timer');
-    ?>
+        ?>
     <?php endif; ?>
 
 
-<?php if (UserMonitor::isAutologoutEnabled()): ?>
+<?php if (UserMonitor::isAutologoutEnabled()) : ?>
     <?php Modal::begin([
         'id' => 'modal-autologout',
         'closeButton' => false,
@@ -70,7 +71,7 @@ $dtNow = date('Y-m-d H:i:s');
     ])?>
         <div class="text-center">
             <p>You are not active for a long time (<?=UserMonitor::autologoutIdlePeriodMin()?> min.). After a few seconds, the system will automatically log out.</p>
-            <?php if(UserMonitor::isAutologoutTimerSec()): ?>
+            <?php if (UserMonitor::isAutologoutTimerSec()) : ?>
                 <h1 id="autologout-timer" class="text-danger">00:00</h1>
             <?php endif; ?>
             <p><b>Do you want to continue working?</b></p>
@@ -566,7 +567,6 @@ $this->registerJs($js, \yii\web\View::POS_READY, 'connection-js');
 
 
 if (UserMonitor::isAutologoutEnabled()) {
-
     $isAutologoutShowMessage = UserMonitor::isAutologoutShowMessage() ? 'true' : 'false';
     $isAutologoutTimerSec = UserMonitor::isAutologoutTimerSec();
 
@@ -635,9 +635,8 @@ JS;
 
 
 if (UserConnection::isIdleMonitorEnabled()) {
-
     $idleMs = UserConnection::idleSeconds() * 1000;
-$js = <<<JS
+    $js = <<<JS
 
 function setIdle() {
     let objDiv = $('#user-monitor-indicator div');

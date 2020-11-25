@@ -1,4 +1,6 @@
-<?php use common\models\Employee;
+<?php
+
+use common\models\Employee;
 use yii\grid\ActionColumn;
 /**
  * @var $this \yii\web\View
@@ -105,18 +107,21 @@ $this->registerJs($js);
                                     'id' => $model->id
                                 ], [
                                 'title' => 'Edit'
-                            ]).'&nbsp;'.
-                            Html::a('<span class="glyphicon glyphicon-cog"></span>',
-                                ['settings/project-data', 'id' => $model->id], [
+                            ]) . '&nbsp;' .
+                            Html::a(
+                                '<span class="glyphicon glyphicon-cog"></span>',
+                                ['settings/project-data', 'id' => $model->id],
+                                [
                                 'title' => 'Custom params',
                                 'class' => 'project-data-btn',
-                            ]);
+                                ]
+                            );
                         }
                     ]
                 ],
             ]
         ])
-        ?>
+?>
     </div>
 </div>
 

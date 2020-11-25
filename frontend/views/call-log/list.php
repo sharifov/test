@@ -4,8 +4,8 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
-use \sales\model\callLog\entity\callLog\search\CallLogSearch;
-use \common\models\Project;
+use sales\model\callLog\entity\callLog\search\CallLogSearch;
+use common\models\Project;
 
 /**
  * @var $searchModel sales\model\callLog\entity\callLog\search\CallLogSearch
@@ -58,13 +58,13 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'cl_duration',
-                'value' => static function(CallLogSearch $log){
+                'value' => static function (CallLogSearch $log) {
                     if ($log->cl_duration && $log->cl_duration >= 3600) {
                         $format = 'H:i:s';
                     } else {
                         $format = 'i:s';
                     }
-                    return $log->cl_duration ? '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($log->cl_duration).'">' . gmdate($format, $log->cl_duration) . '</span>' : null;
+                    return $log->cl_duration ? '<i class="fa fa-clock-o"></i> <span title="' . Yii::$app->formatter->asDuration($log->cl_duration) . '">' . gmdate($format, $log->cl_duration) . '</span>' : null;
                 },
                 'format' => 'raw',
                 'filter' => false

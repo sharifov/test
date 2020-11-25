@@ -7,6 +7,7 @@ use yii\widgets\Pjax;
 use yii\helpers\Url;
 use dosamigos\datepicker\DatePicker;
 use yii\widgets\ActiveForm;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\ApiLogSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -28,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
     <?php Pjax::begin(); ?>
-    <?php if(!$isAgent):?>
+    <?php if (!$isAgent) :?>
         <div class="form-inline">
             <?php
             $form = ActiveForm::begin([
@@ -36,7 +37,8 @@ $this->params['breadcrumbs'][] = $this->title;
             ]);
             ?>
             <?= $form->field($model, 'date_dt', ['template' => "{label}{input}"])
-                ->widget(\dosamigos\datepicker\DatePicker::class,
+                ->widget(
+                    \dosamigos\datepicker\DatePicker::class,
                     [
                         'inline' => false,
                         'clientOptions' => [
@@ -47,11 +49,12 @@ $this->params['breadcrumbs'][] = $this->title;
                         ],
                         'options' => [
                             'autocomplete' => 'off',
-                            'placeholder' =>'Choose Date'
+                            'placeholder' => 'Choose Date'
                         ],
-                    ])->label('Date');?>
+                    ]
+                )->label('Date');?>
             <div class="form-group">
-                <?= Html::submitButton('<i class="fa fa-search"></i> Calculate salary by month', ['class' => 'btn btn-info','style'=>'margin-bottom:10px;']) ?>
+                <?= Html::submitButton('<i class="fa fa-search"></i> Calculate salary by month', ['class' => 'btn btn-info','style' => 'margin-bottom:10px;']) ?>
             </div>
             <?php ActiveForm::end(); ?>
         </div>
@@ -62,7 +65,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'rowOptions' => function (\common\models\KpiHistory $model) {
             if (!empty($model->kh_super_approved_dt) && !empty($model->kh_agent_approved_dt)) {
                 return ['class' => 'info'];
-            }elseif(!empty($model->kh_super_approved_dt) || !empty($model->kh_agent_approved_dt)){
+            } elseif (!empty($model->kh_super_approved_dt) || !empty($model->kh_agent_approved_dt)) {
                 return ['class' => 'warning'];
             }
         },
@@ -105,7 +108,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'options' => [
                         'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
+                        'placeholder' => 'Choose Date'
                     ],
                 ]),
                 'contentOptions' => [
@@ -118,7 +121,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'kh_bonus_active',
                 'label' => 'Bonus active',
                 'value' => static function (\common\models\KpiHistory $model) {
-                    return ($model->kh_bonus_active)?"Yes":"No";
+                    return ($model->kh_bonus_active) ? "Yes" : "No";
                 },
                 'format' => 'raw',
                 //'contentOptions' => ['class' => 'text-center'],
@@ -152,7 +155,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'options' => [
                         'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
+                        'placeholder' => 'Choose Date'
                     ],
                 ]),
                 'contentOptions' => [
@@ -174,7 +177,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'options' => [
                         'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
+                        'placeholder' => 'Choose Date'
                     ],
                 ]),
                 'contentOptions' => [

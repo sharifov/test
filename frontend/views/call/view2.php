@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model common\models\Call */
 
-$this->title = 'Call Id: ' . $model->c_id . ' ('.$model->c_from.' ... '.$model->c_to.')';
+$this->title = 'Call Id: ' . $model->c_id . ' (' . $model->c_from . ' ... ' . $model->c_to . ')';
 $this->params['breadcrumbs'][] = ['label' => 'Calls', 'url' => ['list']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
@@ -27,7 +27,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <div class="col-md-6">
-        <?php if($model->recordingUrl):?>
+        <?php if ($model->recordingUrl) :?>
             <audio controls="controls" controlsList="nodownload" style="width: 100%;"><source src="<?=$model->recordingUrl?>" type="audio/mpeg"></>
         <?php endif;?>
 

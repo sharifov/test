@@ -50,5 +50,4 @@ class LeadFlowChecklistController extends FController
             'dataProvider' => $dataProvider,
         ]);
     }
-
 }

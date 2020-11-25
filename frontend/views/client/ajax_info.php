@@ -13,7 +13,7 @@ use yii\widgets\Pjax;
 
     <?= $this->render('_client_info', ['model' => $model]) ?>
 
-    <?php if ($model->isClient()): ?>
+    <?php if ($model->isClient()) : ?>
         <?php //if (Yii::$app->user->can('leadSection')): ?>
             <?php Pjax::begin(['id' => 'client_leads_info', 'timeout' => 2000, 'enablePushState' => false]); ?>
                 <?= $this->render('_leads_info', ['dataProvider' => $leadsDataProvider]) ?>

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $this \yii\web\View
  * @var $dataProvider ArrayDataProvider
@@ -91,7 +92,8 @@ $this->registerJs($js);
                                             ],
                                             'template' => '{input}'
                                         ])->widget(
-                                            DatePicker::class, [
+                                            DatePicker::class,
+                                            [
                                             'options' => [
                                                 'data-opened' => 'false'
                                             ],
@@ -102,7 +104,8 @@ $this->registerJs($js);
                                                 'format' => 'dd-M-yyyy',
                                                 'todayHighlight' => true
                                             ]
-                                        ]) ?>
+                                            ]
+                                        ) ?>
                                     </td>
                                 </tr>
                                 </tbody>
@@ -122,7 +125,8 @@ $this->registerJs($js);
                                             ],
                                             'template' => '{input}'
                                         ])->widget(
-                                            DatePicker::class, [
+                                            DatePicker::class,
+                                            [
                                             'options' => [
                                                 'data-opened' => 'false'
                                             ],
@@ -133,7 +137,8 @@ $this->registerJs($js);
                                                 'format' => 'dd-M-yyyy',
                                                 'todayHighlight' => true
                                             ]
-                                        ]) ?>
+                                            ]
+                                        ) ?>
                                     </td>
                                 </tr>
                                 </tbody>

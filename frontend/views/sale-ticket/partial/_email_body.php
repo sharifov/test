@@ -4,10 +4,10 @@
 use common\models\CaseSale;
 use common\models\CreditCard;
 use common\models\Employee;
-use frontend\helpers\JsonHelper;use sales\helpers\cases\CaseSaleHelper;
+use frontend\helpers\JsonHelper;
+use sales\helpers\cases\CaseSaleHelper;
 use sales\model\saleTicket\entity\SaleTicket;
 use yii\helpers\Html;
-
 
 /** @var $saleTickets SaleTicket[] */
 /** @var $caseSale CaseSale */
@@ -47,7 +47,7 @@ $groups = $user->getUserGroupList();
         <?php
         $totalUpfrontCharge = 0;
         $totalRefundableAmount = 0;
-        foreach($saleTickets as $key => $ticket): ?>
+        foreach ($saleTickets as $key => $ticket) : ?>
             <tr>
                 <td style="border: 1px solid; padding: 10px;"><?=Html::encode($ticket->st_client_name)?></td>
                 <td style="border: 1px solid; padding: 10px;"><?=Html::encode($ticket->st_ticket_number)?></td>
@@ -55,7 +55,7 @@ $groups = $user->getUserGroupList();
                 <td style="border: 1px solid; padding: 10px;"><?=Html::encode($ticket->getFormattedOriginalFop())?></td>
                 <td style="border: 1px solid; padding: 10px;"><?=Html::encode($ticket->st_charge_system)?></td>
                 <td style="border: 1px solid; padding: 10px;"><?=Html::encode(SaleTicket::getPenaltyTypeName($ticket->st_penalty_type))?></td>
-                <td style="border: 1px solid; padding: 10px;"><?=Html::encode('$'.$ticket->st_penalty_amount)?></td>
+                <td style="border: 1px solid; padding: 10px;"><?=Html::encode('$' . $ticket->st_penalty_amount)?></td>
                 <td style="border: 1px solid; padding: 10px;">$<?=Html::encode($ticket->st_selling)?></td>
                 <td style="border: 1px solid; padding: 10px;">$<?=Html::encode($ticket->st_service_fee)?></td>
                 <td style="border: 1px solid; padding: 10px;">$<?=Html::encode($ticket->st_recall_commission)?></td>
@@ -63,7 +63,7 @@ $groups = $user->getUserGroupList();
                 <td style="border: 1px solid; padding: 10px;">$<?=Html::encode($ticket->st_upfront_charge)?></td>
                 <td style="border: 1px solid; padding: 10px;">$<?=Html::encode($ticket->st_refundable_amount)?></td>
             </tr>
-        <?php
+            <?php
             $totalUpfrontCharge += $ticket->st_upfront_charge;
             $totalRefundableAmount += $ticket->st_refundable_amount;
             $chargeSystem = $ticket->st_charge_system;
@@ -73,8 +73,7 @@ $groups = $user->getUserGroupList();
             if (!$isNeedAdditionalInfoForEmail) {
                 $isNeedAdditionalInfoForEmail = $ticket->isNeedAdditionalInfoForEmail();
             }
-
-            endforeach;
+        endforeach;
         ?>
     </tbody>
     <tfoot>
@@ -103,7 +102,7 @@ $groups = $user->getUserGroupList();
 <table>
     <tr>
         <td>
-			<?php if($isNeedAdditionalInfoForEmail && $caseSale): ?>
+            <?php if ($isNeedAdditionalInfoForEmail && $caseSale) : ?>
                 <table width="25%" cellpadding="0" cellspacing="0" style="width:25%;">
                     <tr>
                         <th style="border: 1px solid; padding: 10px;">Sale Id</th>
@@ -134,10 +133,10 @@ $groups = $user->getUserGroupList();
                         <td style="border: 1px solid; padding: 10px;">$<?= $totalRefundableAmount ?></td>
                     </tr>
                 </table>
-			<?php endif; ?>
+            <?php endif; ?>
         </td>
         <td style="vertical-align: top;">
-			<?php if($creditCards): ?>
+            <?php if ($creditCards) : ?>
                 <table width="40%" cellpadding="0" cellspacing="0" style="width:40%;">
                     <thead>
                     <tr>
@@ -147,16 +146,16 @@ $groups = $user->getUserGroupList();
                     </tr>
                     </thead>
                     <tbody>
-					<?php foreach($creditCards as $card): ?>
+                    <?php foreach ($creditCards as $card) : ?>
                         <tr>
                             <td style="border: 1px solid; padding: 10px;"><?= $card->cc_display_number ?></td>
                             <td style="border: 1px solid; padding: 10px;"><?= $card->cc_holder_name ?></td>
                             <td style="border: 1px solid; padding: 10px;"><?= $card->cc_is_sync_bo ? 'Yes' : '--' ?></td>
                         </tr>
-					<?php endforeach; ?>
+                    <?php endforeach; ?>
                     </tbody>
                 </table>
-			<?php endif; ?>
+            <?php endif; ?>
         </td>
     </tr>
 </table>

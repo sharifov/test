@@ -36,34 +36,34 @@ use yii\filters\VerbFilter;
  */
 class CreditCardController extends FController
 {
-	/**
-	 * @var CasesSaleService
-	 */
-	private $casesSaleService;
+    /**
+     * @var CasesSaleService
+     */
+    private $casesSaleService;
 
-	/**
-	 * @var CasesSaleRepository
-	 */
-	private $casesSaleRepository;
-	/**
-	 * @var CasesRepository
-	 */
-	private CasesRepository $casesRepository;
-	/**
-	 * @var ClientRepository
-	 */
-	private ClientRepository $clientRepository;
+    /**
+     * @var CasesSaleRepository
+     */
+    private $casesSaleRepository;
+    /**
+     * @var CasesRepository
+     */
+    private CasesRepository $casesRepository;
+    /**
+     * @var ClientRepository
+     */
+    private ClientRepository $clientRepository;
 
-	public function __construct($id, $module, CasesSaleService $casesSaleService, CasesSaleRepository $casesSaleRepository, CasesRepository $casesRepository, ClientRepository $clientRepository, $config = [])
-	{
-		parent::__construct($id, $module, $config);
-		$this->casesSaleService = $casesSaleService;
-		$this->casesSaleRepository = $casesSaleRepository;
-		$this->casesRepository = $casesRepository;
-		$this->clientRepository = $clientRepository;
-	}
+    public function __construct($id, $module, CasesSaleService $casesSaleService, CasesSaleRepository $casesSaleRepository, CasesRepository $casesRepository, ClientRepository $clientRepository, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->casesSaleService = $casesSaleService;
+        $this->casesSaleRepository = $casesSaleRepository;
+        $this->casesRepository = $casesRepository;
+        $this->clientRepository = $clientRepository;
+    }
 
-	/**
+    /**
      * @return array
      */
     public function behaviors(): array
@@ -145,7 +145,6 @@ class CreditCardController extends FController
         $model = new CreditCardForm();
 
         if ($model->load(Yii::$app->request->post())) {
-
             if ($model->validate()) {
                 $modelCc->attributes = $model->attributes;
 
@@ -164,9 +163,7 @@ class CreditCardController extends FController
             $model->attributes = $modelCc->attributes;
             $model->cc_number = $modelCc->initNumber;
             $model->cc_cvv = $modelCc->initCvv;
-            $model->cc_expiration = date('m / y', strtotime($modelCc->cc_expiration_year.'-'.$modelCc->cc_expiration_month.'-01'));
-
-
+            $model->cc_expiration = date('m / y', strtotime($modelCc->cc_expiration_year . '-' . $modelCc->cc_expiration_month . '-01'));
         }
 
         $model->cc_id = $modelCc->cc_id;
@@ -177,163 +174,162 @@ class CreditCardController extends FController
     }
 
     public function actionAjaxUpdate()
-	{
-		$id = Yii::$app->request->get('id');
-		$pjaxId = Yii::$app->request->get('pjaxId');
+    {
+        $id = Yii::$app->request->get('id');
+        $pjaxId = Yii::$app->request->get('pjaxId');
 
-		try {
-			$modelCc = $this->findModel($id);
+        try {
+            $modelCc = $this->findModel($id);
 
-			if (!$modelCc) {
-				throw new NotFoundException('Credit Card data is not found');
-			}
+            if (!$modelCc) {
+                throw new NotFoundException('Credit Card data is not found');
+            }
 
-			$modelCc->scenario = CreditCard::SCENARIO_CASE_AJAX_UPDATE;
+            $modelCc->scenario = CreditCard::SCENARIO_CASE_AJAX_UPDATE;
 
-			if ($modelCc->load(Yii::$app->request->post()) && $modelCc->validate()) {
-				if ($modelCc->save()) {
-					return '<script>$("#modal-sm").modal("hide"); pjaxReload({container: "#'.$pjaxId.'"}); createNotify("Success Updated", "Credit Card Successfully updated", "success")</script>';
-				}
-				throw new \RuntimeException($modelCc->getErrorSummary(false)[0]);
-			}
-		} catch (\Throwable $e) {
-			if (!$modelCc) {
-				$modelCc = new CreditCard();
-			}
-			$modelCc->addError('general', $e->getMessage());
-		}
+            if ($modelCc->load(Yii::$app->request->post()) && $modelCc->validate()) {
+                if ($modelCc->save()) {
+                    return '<script>$("#modal-sm").modal("hide"); pjaxReload({container: "#' . $pjaxId . '"}); createNotify("Success Updated", "Credit Card Successfully updated", "success")</script>';
+                }
+                throw new \RuntimeException($modelCc->getErrorSummary(false)[0]);
+            }
+        } catch (\Throwable $e) {
+            if (!$modelCc) {
+                $modelCc = new CreditCard();
+            }
+            $modelCc->addError('general', $e->getMessage());
+        }
 
-		return $this->renderAjax('_form_ajax_update', [
-			'model' => $modelCc,
-			'isAjax' => true
-		]);
-	}
+        return $this->renderAjax('_form_ajax_update', [
+            'model' => $modelCc,
+            'isAjax' => true
+        ]);
+    }
 
     public function actionAjaxAddCreditCard()
-	{
-		$caseId = Yii::$app->request->get('caseId');
-		$saleId = Yii::$app->request->get('saleId');
-		$pjaxId = Yii::$app->request->get('pjaxId');
+    {
+        $caseId = Yii::$app->request->get('caseId');
+        $saleId = Yii::$app->request->get('saleId');
+        $pjaxId = Yii::$app->request->get('pjaxId');
 
-		if (!$caseId || !$saleId) {
-			throw new BadRequestHttpException();
-		}
+        if (!$caseId || !$saleId) {
+            throw new BadRequestHttpException();
+        }
 
-		try {
-			$form = new CreditCardForm();
+        try {
+            $form = new CreditCardForm();
 
-			if ($form->load(Yii::$app->request->post()) && $form->validate()) {
-				$caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$saleId);
+            if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+                $caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$saleId);
 
-				$model = new CreditCard();
-				$model->attributes = $form->attributes;
-				$model->cc_status_id = CreditCard::STATUS_VALID;
-				$model->updateSecureCardNumber();
-				$model->updateSecureCvv();
+                $model = new CreditCard();
+                $model->attributes = $form->attributes;
+                $model->cc_status_id = CreditCard::STATUS_VALID;
+                $model->updateSecureCardNumber();
+                $model->updateSecureCvv();
 
-				if ($model->save()) {
+                if ($model->save()) {
+                    $saleCreditCard = new SaleCreditCard();
+                    $saleCreditCard->scc_sale_id = $saleId;
+                    $saleCreditCard->scc_cc_id = $model->primaryKey;
 
-					$saleCreditCard = new SaleCreditCard();
-					$saleCreditCard->scc_sale_id = $saleId;
-					$saleCreditCard->scc_cc_id = $model->primaryKey;
+                    if (!$saleCreditCard->save()) {
+                        throw new \RuntimeException($saleCreditCard->getErrorSummary(false)[0]);
+                    } else {
+                        $apiKey = $this->casesSaleRepository->getProjectApiKey($caseSale);
 
-					if (!$saleCreditCard->save()) {
-						throw new \RuntimeException($saleCreditCard->getErrorSummary(false)[0]);
-					} else {
-						$apiKey = $this->casesSaleRepository->getProjectApiKey($caseSale);
+                        if (!$bookId = $caseSale->css_sale_book_id) {
+                            $bookId = $caseSale->css_sale_data['bookingId'] ?? '';
+                        }
 
-						if (!$bookId = $caseSale->css_sale_book_id) {
-						    $bookId = $caseSale->css_sale_data['bookingId'] ?? '';
-						}
+                        $result = $this->casesSaleService->sendAddedCreditCardToBO($apiKey, $bookId, $caseSale->css_sale_id, $form);
 
-						$result = $this->casesSaleService->sendAddedCreditCardToBO($apiKey, $bookId, $caseSale->css_sale_id, $form);
-
-						if ($result['error']) {
-						    $message = Html::encode(str_replace(['"', "'"], '', $result['message']));
-							$notify = 'createNotify("B/O add card notice", "' . $message . '", "warning")';
-							return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#'.$pjaxId.'"}); ' . $notify . '</script>';
-						}
+                        if ($result['error']) {
+                            $message = Html::encode(str_replace(['"', "'"], '', $result['message']));
+                            $notify = 'createNotify("B/O add card notice", "' . $message . '", "warning")';
+                            return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#' . $pjaxId . '"}); ' . $notify . '</script>';
+                        }
 
                         $model->cc_is_sync_bo = 1;
                         $model->save();
 
-                        return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#'.$pjaxId.'"}); createNotify("Success", "Credit Card Successfully created", "success");</script>';
-					}
-				}
-			}
-		} catch (\Throwable $e) {
-			$form->addError('general', $e->getMessage());
-		}
+                        return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#' . $pjaxId . '"}); createNotify("Success", "Credit Card Successfully created", "success");</script>';
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            $form->addError('general', $e->getMessage());
+        }
 
-		return $this->renderAjax('_form', [
-			'caseId' => $caseId,
-			'saleId' => $saleId,
-			'model' => $form,
-			'isAjax' => true
-		]);
-	}
+        return $this->renderAjax('_form', [
+            'caseId' => $caseId,
+            'saleId' => $saleId,
+            'model' => $form,
+            'isAjax' => true
+        ]);
+    }
 
-	public function actionAjaxSendCcInfo()
-	{
-		$caseId = Yii::$app->request->get('caseId', null);
-		$saleId = Yii::$app->request->get('saleId', null);
+    public function actionAjaxSendCcInfo()
+    {
+        $caseId = Yii::$app->request->get('caseId', null);
+        $saleId = Yii::$app->request->get('saleId', null);
 
-		$form = new CaseSaleSendCcInfoForm();
-		$caseSale = null;
-		try {
-			$caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$saleId);
-			$case = $this->casesRepository->find((int)$caseId);
-			$client = $this->clientRepository->find($case->cs_client_id);
-			$customerEmail = CaseSaleHelper::getCustomerEmail(JsonHelper::decode($caseSale->css_sale_data));
-			if ($customerEmail) {
-				$form->emailList[$customerEmail] = $customerEmail;
-			}
-			$clientEmailList = ArrayHelper::merge($form->emailList, $client->emailList);
-			$form->emailList = $clientEmailList;
+        $form = new CaseSaleSendCcInfoForm();
+        $caseSale = null;
+        try {
+            $caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$saleId);
+            $case = $this->casesRepository->find((int)$caseId);
+            $client = $this->clientRepository->find($case->cs_client_id);
+            $customerEmail = CaseSaleHelper::getCustomerEmail(JsonHelper::decode($caseSale->css_sale_data));
+            if ($customerEmail) {
+                $form->emailList[$customerEmail] = $customerEmail;
+            }
+            $clientEmailList = ArrayHelper::merge($form->emailList, $client->emailList);
+            $form->emailList = $clientEmailList;
 
-			if (Yii::$app->request->isPjax && $form->load(Yii::$app->request->post()) && $form->validate()) {
-				$apiKey = $this->casesSaleRepository->getProjectApiKey($caseSale);
-				$dataSale = JsonHelper::decode($caseSale->css_sale_data_updated);
-				$result = $this->casesSaleService->sendCcInfo($apiKey, $caseSale->css_sale_id, (string)($dataSale['bookingId'] ?? ''), $form->email);
-				if ($result['error']) {
-					throw new \RuntimeException('B/O error has occurred: ' . $result['message']);
-				}
-				return '<script>$("#modal-sm").modal("hide"); createNotify("Success", "Email sent to customer successfully", "success")</script>';
-			}
-		} catch (NotFoundException | \RuntimeException $e) {
-			$form->addError('general', $e->getMessage());
-		} catch (\Throwable $e) {
-			Yii::error(AppHelper::throwableFormatter($e), 'CreditCardController::actionAjaxSendCcInfo::Throwable');
-			$form->addError('general', 'Internal Server Error');
-		}
+            if (Yii::$app->request->isPjax && $form->load(Yii::$app->request->post()) && $form->validate()) {
+                $apiKey = $this->casesSaleRepository->getProjectApiKey($caseSale);
+                $dataSale = JsonHelper::decode($caseSale->css_sale_data_updated);
+                $result = $this->casesSaleService->sendCcInfo($apiKey, $caseSale->css_sale_id, (string)($dataSale['bookingId'] ?? ''), $form->email);
+                if ($result['error']) {
+                    throw new \RuntimeException('B/O error has occurred: ' . $result['message']);
+                }
+                return '<script>$("#modal-sm").modal("hide"); createNotify("Success", "Email sent to customer successfully", "success")</script>';
+            }
+        } catch (NotFoundException | \RuntimeException $e) {
+            $form->addError('general', $e->getMessage());
+        } catch (\Throwable $e) {
+            Yii::error(AppHelper::throwableFormatter($e), 'CreditCardController::actionAjaxSendCcInfo::Throwable');
+            $form->addError('general', 'Internal Server Error');
+        }
 
-		return $this->renderAjax('partial/_send_cc_info_form', [
-			'formCaseSale' => $form,
-		]);
-	}
+        return $this->renderAjax('partial/_send_cc_info_form', [
+            'formCaseSale' => $form,
+        ]);
+    }
 
-	public function actionAjaxDelete()
-	{
-		$id = Yii::$app->request->get('id');
-		$saleId = Yii::$app->request->get('saleId');
+    public function actionAjaxDelete()
+    {
+        $id = Yii::$app->request->get('id');
+        $saleId = Yii::$app->request->get('saleId');
 
-		try {
-			$model = SaleCreditCard::findOne(['scc_cc_id' => $id, 'scc_sale_id' => $saleId]);
+        try {
+            $model = SaleCreditCard::findOne(['scc_cc_id' => $id, 'scc_sale_id' => $saleId]);
 
-			if (!$model) {
-				throw new NotFoundException('Credit Card data is not found');
-			}
+            if (!$model) {
+                throw new NotFoundException('Credit Card data is not found');
+            }
 
-			if (!$model->delete()) {
-				throw new \RuntimeException($model->getErrorSummary(false)[0]);
-			}
+            if (!$model->delete()) {
+                throw new \RuntimeException($model->getErrorSummary(false)[0]);
+            }
 
-			return $this->asJson(['error' => false, 'message' => 'Credit Card Successfully deleted']);
-		} catch (\Throwable $e) {
-			$message = $e->getMessage();
-		}
-		return $this->asJson(['error' => true, 'message' => $message]);
-	}
+            return $this->asJson(['error' => false, 'message' => 'Credit Card Successfully deleted']);
+        } catch (\Throwable $e) {
+            $message = $e->getMessage();
+        }
+        return $this->asJson(['error' => true, 'message' => $message]);
+    }
 
     /**
      * Deletes an existing CreditCard model.

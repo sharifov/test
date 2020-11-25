@@ -52,7 +52,7 @@ ActiveForm::end();
 
 EditToolAsset::register($this);
 
-$js =<<<JS
+$js = <<<JS
 $('body').find('#edit-lead-form').on('beforeSubmit', function (e) {
     e.preventDefault();
     var script = "var pjaxId = 'pjax-leads-view'; var pjax = $('#' + pjaxId); if (pjax.length) { $.pjax.reload({container: '#' + pjaxId, async: false}); }";

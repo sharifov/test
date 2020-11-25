@@ -11,7 +11,6 @@ use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\grid\ActionColumn;
-
 /**
  * @var $this \yii\web\View
  * @var $modelUserParams \common\models\UserParams
@@ -37,10 +36,10 @@ $dataProjects = [];
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
 
-if($model->isNewRecord) {
+if ($model->isNewRecord) {
     $this->title = 'Create new User';
 } else {
-    $this->title ='Update user: ' . $model->username.' (ID:  '.$model->id.')';
+    $this->title = 'Update user: ' . $model->username . ' (ID:  ' . $model->id . ')';
 }
 
 $this->params['breadcrumbs'][] = ['label' => 'User List', 'url' => ['list']];
@@ -64,7 +63,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
         'enableClientValidation' => false,
         'enableAjaxValidation' => true,
         'validateOnChange' => false,
-		'validateOnBlur' => false,
+        'validateOnBlur' => false,
         'validationUrl' => Url::to(['employee/employee-validation', 'id' => (int) $model->id]),
     ]) ?>
             <div class="well">
@@ -109,7 +108,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
                 <div class="row">
                     <div class="col-sm-6">
-                        <?php if($model->isNewRecord || $user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision() || $user->isUserManager()): ?>
+                        <?php if ($model->isNewRecord || $user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision() || $user->isUserManager()) : ?>
                             <?php //= $form->field($model, 'roles')->dropDownList($model::getAllRoles(), ['prompt' => '']) ?>
 
                             <?php
@@ -121,7 +120,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                                 ]);
                             ?>
 
-                        <?php else: ?>
+                        <?php else : ?>
                             <div>
                             <label class="control-label">Role</label>:
                                 <b><?=implode(', ', $model->getRoles())?></b>
@@ -137,14 +136,13 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
                 <div class="row">
                     <div class="col-sm-12">
-                        <?php if($model->isNewRecord || $user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision() || $user->isUserManager() || $user->isAgent()):
-
-                            if($user->isAdmin() || $user->isSuperAdmin() || $user->isUserManager()) {
+                        <?php if ($model->isNewRecord || $user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision() || $user->isUserManager() || $user->isAgent()) :
+                            if ($user->isAdmin() || $user->isSuperAdmin() || $user->isUserManager()) {
                                 $data = \common\models\UserGroup::getList();
                                 $dataProjects = \common\models\Project::getList();
                             }
 
-                            if($user->isSupervision()) {
+                            if ($user->isSupervision()) {
                                 $data = $user->getUserGroupList();
                                 $dataProjects = \yii\helpers\ArrayHelper::map($user->projects, 'id', 'name');
                                 //\yii\helpers\VarDumper::dump($dataProjects, 10, true);                             //exit;
@@ -173,9 +171,9 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                             ?>
 
                             <?php
-                                if ($model->isNewRecord) {
-                                    echo $form->field($model, 'make_user_project_params')->checkbox();
-                                }
+                            if ($model->isNewRecord) {
+                                echo $form->field($model, 'make_user_project_params')->checkbox();
+                            }
                             ?>
 
                             <?php
@@ -196,21 +194,20 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                                 ]);
                             ?>
 
-                        <?php else: ?>
-
+                        <?php else : ?>
                             <div class="col-md-12">
                                 <label class="control-label">User Groups</label>:
                                 <?php
                                     $groupsValue = '';
-                                    if( $groupsModel =  $model->ugsGroups) {
-                                        $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
+                                if ($groupsModel =  $model->ugsGroups) {
+                                    $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
 
-                                        $groupsValueArr = [];
-                                        foreach ($groups as $group) {
-                                            $groupsValueArr[] = Html::tag('span', Html::encode($group), ['class' => 'label label-default']);
-                                        }
-                                        $groupsValue = implode(' ', $groupsValueArr);
+                                    $groupsValueArr = [];
+                                    foreach ($groups as $group) {
+                                        $groupsValueArr[] = Html::tag('span', Html::encode($group), ['class' => 'label label-default']);
                                     }
+                                    $groupsValue = implode(' ', $groupsValueArr);
+                                }
                                     echo $groupsValue;
                                 ?>
                             </div>
@@ -220,11 +217,11 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                                 <?php
                                     $projectsValueArr = [];
 
-                                    if($projects = $model->projects) {
-                                        foreach ($projects as $project) {
-                                            $projectsValueArr[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-list']) . ' ' . Html::encode($project->name), ['class' => 'label label-info']);
-                                        }
+                                if ($projects = $model->projects) {
+                                    foreach ($projects as $project) {
+                                        $projectsValueArr[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-list']) . ' ' . Html::encode($project->name), ['class' => 'label label-info']);
                                     }
+                                }
 
                                     $projectsValue = implode(' ', $projectsValueArr);
                                     echo $projectsValue;
@@ -236,8 +233,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
                 </div>
 
-                <?php if($user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision() || $user->isUserManager()): ?>
-
+                <?php if ($user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision() || $user->isUserManager()) : ?>
                     <div class="row">
                         <div class="col-md-12">
                             <?php  echo Html::errorSummary($modelUserParams) ?>
@@ -247,11 +243,13 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     <div class="row">
                         <div class="col-md-3">
                             <?= $form->field($modelUserParams, 'up_work_start_tm')->widget(
-                                \kartik\time\TimePicker::class, [
+                                \kartik\time\TimePicker::class,
+                                [
                                 'pluginOptions' => [
                                     'showSeconds' => false,
                                     'showMeridian' => false,
-                                ]])?>
+                                ]]
+                            )?>
                         </div>
                         <div class="col-md-3">
                             <?= $form->field($modelUserParams, 'up_work_minutes')->input('number', ['step' => 10, 'min' => 0])?>
@@ -271,7 +269,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
                 <?php endif;?>
 
-                <?php if($user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision()): ?>
+                <?php if ($user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision()) : ?>
                     <div class="row">
                         <div class="col-md-3">
                             <?= $form->field($modelUserParams, 'up_base_amount')->input('number', ['step' => 0.01, 'min' => 0, 'max' => 1000]) ?>
@@ -287,7 +285,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                         </div>
                     </div>
 
-                    <?php if(!Yii::$app->user->identity->canRole('supervision')): ?>
+                    <?php if (!Yii::$app->user->identity->canRole('supervision')) : ?>
                         <hr>
                         <div class="row">
                             <div class="col-md-3">
@@ -307,8 +305,8 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
                 <?php endif; ?>
 
-                <?php if ($user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision() || $user->isUserManager()): ?>
-                    <?php if (!Yii::$app->user->identity->canRole('supervision')): ?>
+                <?php if ($user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision() || $user->isUserManager()) : ?>
+                    <?php if (!Yii::$app->user->identity->canRole('supervision')) : ?>
                         <div class="row">
                             <div class="col-md-3">
                                 <?= $form->field($modelUserParams, 'up_call_expert_limit')->input('number', ['step' => 1, 'min' => -1, 'max' => 1000]) ?>
@@ -414,7 +412,9 @@ JS;
         <div class="form-group">
             <div class="row">
                 <div class="col-md-3">
-                    <?php if ($modelProfile->up_join_date === null): $modelProfile->up_join_date = date('Y-m-d'); endif; ?>
+                    <?php if ($modelProfile->up_join_date === null) :
+                        $modelProfile->up_join_date = date('Y-m-d');
+                    endif; ?>
                     <?= $form->field($modelProfile, 'up_join_date')->widget(\dosamigos\datepicker\DatePicker::class, [
                         'clientOptions' => [
                             'autoclose' => true,
@@ -422,7 +422,7 @@ JS;
                         ],
                         'options' => [
                             'autocomplete' => 'off',
-                            'placeholder' =>'Choose Date',
+                            'placeholder' => 'Choose Date',
                         ],
                     ]) ?>
                     <?= $form->field($modelProfile, 'up_skill')->dropDownList(\common\models\UserProfile::SKILL_TYPE_LIST, ['prompt' => '---']) ?>
@@ -448,7 +448,7 @@ JS;
             </div>
         </div>
     </div>
-    <?php if (!$model->isNewRecord && (Auth::can('/employee/register-to-rocket-chat') && Auth::can('/employee/un-register-from-rocket-chat'))): ?>
+    <?php if (!$model->isNewRecord && (Auth::can('/employee/register-to-rocket-chat') && Auth::can('/employee/un-register-from-rocket-chat'))) : ?>
         <h5>Rocket Chat Credentials</h5>
         <div class="well">
             <div class="form-group">
@@ -502,7 +502,7 @@ JS;
                     )
                 ?>
                     </div>
-                    <?php if ($modelProfile->up_rc_user_id && $modelProfile->up_rc_auth_token && Auth::can('/employee/validate-rocket-chat-credential')): ?>
+                    <?php if ($modelProfile->up_rc_user_id && $modelProfile->up_rc_auth_token && Auth::can('/employee/validate-rocket-chat-credential')) : ?>
                         <div class="col-md-6" style="text-align: right">
                             <button class="btn btn-success refresh_token" data-user-id="<?= $modelProfile->up_user_id ?>">Refresh Token</button>
                             <button class="btn btn-success validate_credential" data-user-id="<?= $modelProfile->up_user_id ?>">Validate credential</button>
@@ -530,7 +530,9 @@ JS;
             <p>
                 <?php //= Html::a('Create User Project Params', ['user-project-params/create'], ['class' => 'btn btn-success']) ?>
 
-                <?php echo Html::a('<i class="glyphicon glyphicon-plus"></i> Create Project Params',null,
+                <?php echo Html::a(
+                    '<i class="glyphicon glyphicon-plus"></i> Create Project Params',
+                    null,
                     [
                         'class' => 'btn btn-success btn-xs act-create-upp',
                         'title' => 'Create Project Params',
@@ -554,8 +556,8 @@ JS;
 
                     [
                         'attribute' => 'upp_project_id',
-                        'value' => function(\common\models\UserProjectParams $model) {
-                            return $model->uppProject ? ''.$model->uppProject->name.'' : '-';
+                        'value' => function (\common\models\UserProjectParams $model) {
+                            return $model->uppProject ? '' . $model->uppProject->name . '' : '-';
                         },
                         'filter' => $projectList
                         //'format' => 'raw'
@@ -564,8 +566,8 @@ JS;
 
                     [
                         'attribute' => 'upp_dep_id',
-                        'value' => function(\common\models\UserProjectParams $model) {
-                            return $model->uppDep ? ''.$model->uppDep->dep_name.'' : '-';
+                        'value' => function (\common\models\UserProjectParams $model) {
+                            return $model->uppDep ? '' . $model->uppDep->dep_name . '' : '-';
                         },
                     ],
 
@@ -587,7 +589,7 @@ JS;
                     [
                         'attribute' => 'upp_allow_general_line',
                         'format' => 'raw',
-                        'value' => function(\common\models\UserProjectParams $model) {
+                        'value' => function (\common\models\UserProjectParams $model) {
                             if ($model->upp_allow_general_line) {
                                 return '<i class="fa fa-check-square-o"></i>';
                             }
@@ -597,7 +599,7 @@ JS;
                     [
                         'attribute' => 'upp_vm_enabled',
                         'format' => 'raw',
-                        'value' => function(\common\models\UserProjectParams $model) {
+                        'value' => function (\common\models\UserProjectParams $model) {
                             if ($model->upp_vm_enabled) {
                                 return '<i class="fa fa-check-square-o"></i>';
                             }
@@ -606,13 +608,13 @@ JS;
                     ],
                     [
                         'attribute' => 'upp_vm_user_status_id',
-                        'value' => static function(UserProjectParams $model) {
+                        'value' => static function (UserProjectParams $model) {
                             return UserProjectParams::VM_USER_STATUS_LIST[$model->upp_vm_user_status_id] ?? null;
                         },
                     ],
                     [
                         'attribute' => 'upp_vm_id',
-                        'value' => static function(UserProjectParams $model) {
+                        'value' => static function (UserProjectParams $model) {
                             return $model->upp_vm_id ? $model->voiceMail->uvm_name : null;
                         },
                     ],
@@ -656,7 +658,7 @@ JS;
                         //'headerOptions' => ['width' => '20%', 'class' => '',],
                         'buttons' => [
                             'update' => static function ($url, $model, $key) {
-                                return Html::a('<span class="glyphicon glyphicon-edit"></span>','#', [
+                                return Html::a('<span class="glyphicon glyphicon-edit"></span>', '#', [
                                     'class' => 'act-update-upp text-warning',
                                     'title' => 'Update Project params',
                                     'data-id' => $key,
@@ -673,56 +675,58 @@ JS;
 
         <div class="user-voice-mail">
             <h4>User Voice Mail</h4>
-			<?php \yii\widgets\Pjax::begin(['id' => 'pjax-grid-voice-mail']); ?>
+            <?php \yii\widgets\Pjax::begin(['id' => 'pjax-grid-voice-mail']); ?>
 
             <p>
-				<?php echo Html::a('<i class="glyphicon glyphicon-plus"></i> Add Voice Mail',null,
-					[
-						'class' => 'btn btn-success btn-xs add-voice-mail',
-						'title' => 'Add Voice Mail',
-						'data-user_id' => $model->id,
-						'data-pjax' => '0',
-					]
-				)?>
+                <?php echo Html::a(
+                    '<i class="glyphicon glyphicon-plus"></i> Add Voice Mail',
+                    null,
+                    [
+                        'class' => 'btn btn-success btn-xs add-voice-mail',
+                        'title' => 'Add Voice Mail',
+                        'data-user_id' => $model->id,
+                        'data-pjax' => '0',
+                    ]
+                )?>
             </p>
 
-			<?= \yii\grid\GridView::widget([
-				'dataProvider' => $userVoiceMailProvider,
-				'columns' => [
-					'uvm_name',
-					'uvm_say_language',
-					'uvm_record_enable:booleanByLabel',
-					'uvm_max_recording_time',
-//					'uvm_transcribe_enable:booleanByLabel',
-//					'uvm_enabled:booleanByLabel',
-					'uvm_created_dt:byUserDateTime',
-					'uvm_updated_dt:byUserDateTime',
-					[
-						'class' => ActionColumn::class,
-						'template' => '{view} {update} {delete}',
-						'controller' => 'user-voice-mail',
-						'buttons' => [
-							'update' => static function ($key) {
-								return Html::a('<span class="glyphicon glyphicon-edit"></span>','#', [
+            <?= \yii\grid\GridView::widget([
+                'dataProvider' => $userVoiceMailProvider,
+                'columns' => [
+                    'uvm_name',
+                    'uvm_say_language',
+                    'uvm_record_enable:booleanByLabel',
+                    'uvm_max_recording_time',
+//                  'uvm_transcribe_enable:booleanByLabel',
+//                  'uvm_enabled:booleanByLabel',
+                    'uvm_created_dt:byUserDateTime',
+                    'uvm_updated_dt:byUserDateTime',
+                    [
+                        'class' => ActionColumn::class,
+                        'template' => '{view} {update} {delete}',
+                        'controller' => 'user-voice-mail',
+                        'buttons' => [
+                            'update' => static function ($key) {
+                                return Html::a('<span class="glyphicon glyphicon-edit"></span>', '#', [
                                     'class' => 'update-user-voice-mail',
                                     'title' => 'Update Voice Mail',
                                     'data-id' => $key,
                                     'data-pjax' => '0',
                                 ]);
-							},
-							'delete' => static function ($url) {
+                            },
+                            'delete' => static function ($url) {
                                 return Html::a('<span class="glyphicon glyphicon-trash"></span>', '#', [
                                     'class' => 'delete-user-voice-mail',
                                     'title' => 'Delete Voice Mail',
                                     'data-pjax' => '0'
                                 ]);
-							},
-						],
-					],
-				],
-			]); ?>
+                            },
+                        ],
+                    ],
+                ],
+            ]); ?>
 
-			<?php \yii\widgets\Pjax::end(); ?>
+            <?php \yii\widgets\Pjax::end(); ?>
         </div>
 
         <?php if (Auth::can('user-product-type/list')) :?>
@@ -732,7 +736,9 @@ JS;
 
                 <?php if (Auth::can('user-product-type/create')) :?>
                     <p>
-                        <?php echo Html::a('<i class="glyphicon glyphicon-plus"></i> Add Product Type',null,
+                        <?php echo Html::a(
+                            '<i class="glyphicon glyphicon-plus"></i> Add Product Type',
+                            null,
                             [
                                 'class' => 'btn btn-success btn-xs add-product-type',
                                 'title' => 'Add Product Type',
@@ -749,7 +755,7 @@ JS;
                     'columns' => [
                         [
                             'attribute' => 'upt_product_type_id',
-                            'value' => function(UserProductType $model) {
+                            'value' => function (UserProductType $model) {
                                 return $model->productType->pt_name;
                             },
                         ],
@@ -762,7 +768,7 @@ JS;
                             'buttons' => [
                                 'update' => static function ($key) {
                                     if (Auth::can('user-product-type/update')) {
-                                        $updateButton = Html::a('<span class="glyphicon glyphicon-edit"></span>','#', [
+                                        $updateButton = Html::a('<span class="glyphicon glyphicon-edit"></span>', '#', [
                                             'class' => 'update-product-type',
                                             'title' => 'Update Product Type',
                                             'data-id' => $key,
@@ -797,7 +803,6 @@ JS;
 
 
         <?php if (Auth::user()->isAdmin() || Auth::user()->isSuperAdmin()) :?>
-
             <div class="user-failed-login">
                 <h5>User Failed Login</h5>
 
@@ -835,25 +840,25 @@ JS;
 
         <?php endif ?>
 
-		<?php /*if (Auth::user()->isAdmin() || Auth::user()->isSuperAdmin()) :*/?><!--
+        <?php /*if (Auth::user()->isAdmin() || Auth::user()->isSuperAdmin()) :*/?><!--
             <div class="user-failed-login">
                 <h5>Rocket Chat Credentials</h5>
 
-				<?/*= \yii\widgets\DetailView::widget([
-					'model' => $user->userProfile,
+                <?/*= \yii\widgets\DetailView::widget([
+                    'model' => $user->userProfile,
                     'options' => [
                         ''
                     ],
                     'attributes' => [
-						'up_rc_auth_token',
-						'up_rc_user_id',
-						'up_rc_user_password',
-						'up_rc_token_expired'
+                        'up_rc_auth_token',
+                        'up_rc_user_id',
+                        'up_rc_user_password',
+                        'up_rc_token_expired'
                     ]
-				]); */?>
+                ]); */?>
             </div>
 
-		--><?php /*endif */?>
+        --><?php /*endif */?>
 
         <?php /*
         <div class="card card-default">

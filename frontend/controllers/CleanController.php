@@ -56,7 +56,7 @@ class CleanController extends FController
     /**
      * @return Response
      */
-    public function actionIndex() : string
+    public function actionIndex(): string
     {
         return $this->render('index');
     }
@@ -65,11 +65,11 @@ class CleanController extends FController
      * @return Response
      * @throws \yii\base\ErrorException
      */
-    public function actionAssets() : Response
+    public function actionAssets(): Response
     {
         foreach ((array)$this->assetPaths as $path) {
             $this->cleanDir($path);
-            Yii::$app->session->addFlash('cleaner', 'Assets path "'	. $path .	'" is cleaned.');
+            Yii::$app->session->addFlash('cleaner', 'Assets path "' . $path .   '" is cleaned.');
         }
         //exit;
         return $this->redirect(['index']);
@@ -79,11 +79,11 @@ class CleanController extends FController
      * @return Response
      * @throws \yii\base\ErrorException
      */
-    public function actionRuntime() : Response
+    public function actionRuntime(): Response
     {
         foreach ((array)$this->runtimePaths as $path) {
             $this->cleanDir($path);
-            Yii::$app->session->addFlash('cleaner', 'Runtime path "'	. $path .	'" is cleaned.');
+            Yii::$app->session->addFlash('cleaner', 'Runtime path "'    . $path .   '" is cleaned.');
         }
         return $this->redirect(['index']);
     }
@@ -92,7 +92,7 @@ class CleanController extends FController
     {
         foreach ((array)$this->caches as $cache) {
             Yii::$app->get($cache)->flush();
-            Yii::$app->session->addFlash('cleaner','Cache "'	. $cache . '" is cleaned.');
+            Yii::$app->session->addFlash('cleaner','Cache "'    . $cache . '" is cleaned.');
         }
         return $this->redirect(['index']);
     }*/
@@ -102,7 +102,7 @@ class CleanController extends FController
      * @return \yii\web\Response
      * @throws \yii\base\ErrorException
      */
-    public function actionCache() : Response
+    public function actionCache(): Response
     {
         $successItems = [];
         $warningItems = [];
@@ -127,9 +127,9 @@ class CleanController extends FController
             FileHelper::removeDirectory($dir);
 
             if (!file_exists($dir)) {
-                $successItems[] = 'Removed dir '.$dir;
+                $successItems[] = 'Removed dir ' . $dir;
             } else {
-                $warningItems[] = 'Not Removed dir '.$dir;
+                $warningItems[] = 'Not Removed dir ' . $dir;
             }
         }
 
@@ -195,7 +195,7 @@ class CleanController extends FController
      * @param $dir
      * @throws \yii\base\ErrorException
      */
-    private function cleanDir($dir) : void
+    private function cleanDir($dir): void
     {
         $iterator = new \DirectoryIterator(Yii::getAlias($dir));
         foreach ($iterator as $sub) {

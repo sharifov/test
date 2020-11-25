@@ -16,21 +16,21 @@ use yii\filters\VerbFilter;
  */
 class UserPaymentCrudController extends FController
 {
-	/**
-	 * @return array
-	 */
-	public function behaviors(): array
-	{
-		$behaviors =  [
-			'verbs' => [
-				'class' => VerbFilter::class,
-				'actions' => [
-					'delete' => ['POST'],
-				],
-			],
-		];
-		return ArrayHelper::merge(parent::behaviors(), $behaviors);
-	}
+    /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        $behaviors =  [
+            'verbs' => [
+                'class' => VerbFilter::class,
+                'actions' => [
+                    'delete' => ['POST'],
+                ],
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
 
     public function init(): void
     {
@@ -38,7 +38,7 @@ class UserPaymentCrudController extends FController
         $this->layoutCrud();
     }
 
-	/**
+    /**
      * @return mixed
      */
     public function actionIndex()
@@ -98,15 +98,15 @@ class UserPaymentCrudController extends FController
         ]);
     }
 
-	/**
-	 * @param $id
-	 * @return \yii\web\Response
-	 * @throws NotFoundHttpException
-	 * @throws \Throwable
-	 * @throws \yii\db\StaleObjectException
-	 */
+    /**
+     * @param $id
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
     public function actionDelete($id): \yii\web\Response
-	{
+    {
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
@@ -118,7 +118,7 @@ class UserPaymentCrudController extends FController
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id): UserPayment
-	{
+    {
         if (($model = UserPayment::findOne($id)) !== null) {
             return $model;
         }

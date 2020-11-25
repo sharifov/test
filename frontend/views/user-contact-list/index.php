@@ -33,7 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'ucl_description:ntext',
             [
                 'attribute' => 'ucl_favorite',
-                'value' => function(\common\models\UserContactList $model) {
+                'value' => function (\common\models\UserContactList $model) {
                     $out = '<span class="not-set">(not set)</span>';
                     if (isset($model->ucl_favorite)) {
                         $out = $model->ucl_favorite ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';

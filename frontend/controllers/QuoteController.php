@@ -159,7 +159,7 @@ class QuoteController extends FController
 
                                         if (!$trip->validate()) {
                                             $result['error'] = VarDumper::dumpAsString($trip->errors);
-                                            Yii::error(VarDumper::dumpAsString($entry)."\n".VarDumper::dumpAsString($trip->getErrors()), 'QuoteController:create-quote-from-search:trip:save');
+                                            Yii::error(VarDumper::dumpAsString($entry) . "\n" . VarDumper::dumpAsString($trip->getErrors()), 'QuoteController:create-quote-from-search:trip:save');
                                             $transaction->rollBack();
                                             return $result;
                                         }
@@ -207,14 +207,14 @@ class QuoteController extends FController
 
                                                 $segment->qs_stop = $segmentEntry['stop'];
                                                 $segment->qs_air_equip_type = $segmentEntry['airEquipType'];
-                                                $segment->qs_key = '#'.$segmentEntry['flightNumber'].
-                                                    ($segmentEntry['stop']>0?'('.$segmentEntry['stop'].')':'').
-                                                    $segmentEntry['departureAirportCode'].'-'.$segmentEntry['arrivalAirportCode'].' '.$segmentEntry['departureTime'];
+                                                $segment->qs_key = '#' . $segmentEntry['flightNumber'] .
+                                                    ($segmentEntry['stop'] > 0 ? '(' . $segmentEntry['stop'] . ')' : '') .
+                                                    $segmentEntry['departureAirportCode'] . '-' . $segmentEntry['arrivalAirportCode'] . ' ' . $segmentEntry['departureTime'];
                                                 $keys[] = $segment->qs_key;
 
                                                 if (!$segment->validate()) {
                                                     $result['error'] = VarDumper::dumpAsString($segment->errors);
-                                                    Yii::error(VarDumper::dumpAsString($entry)."\n".VarDumper::dumpAsString($segment->getErrors()), 'QuoteController:create-quote-from-search:segment:save');
+                                                    Yii::error(VarDumper::dumpAsString($entry) . "\n" . VarDumper::dumpAsString($segment->getErrors()), 'QuoteController:create-quote-from-search:segment:save');
                                                     $transaction->rollBack();
                                                     return $result;
                                                 }
@@ -237,7 +237,7 @@ class QuoteController extends FController
                                                         }
                                                         if (!$stop->validate()) {
                                                             $result['error'] = VarDumper::dumpAsString($stop->errors);
-                                                            Yii::error(VarDumper::dumpAsString($entry)."\n".VarDumper::dumpAsString($stop->getErrors()), 'QuoteController:create-quote-from-search:stop:save');
+                                                            Yii::error(VarDumper::dumpAsString($entry) . "\n" . VarDumper::dumpAsString($stop->getErrors()), 'QuoteController:create-quote-from-search:stop:save');
                                                             $transaction->rollBack();
                                                             return $result;
                                                         }
@@ -272,7 +272,7 @@ class QuoteController extends FController
                                                         }
                                                         if (!$baggage->validate()) {
                                                             $result['error'] = VarDumper::dumpAsString($baggage->errors);
-                                                            Yii::error(VarDumper::dumpAsString($entry)."\n".VarDumper::dumpAsString($baggage->getErrors()), 'QuoteController:create-quote-from-search:baggage:save');
+                                                            Yii::error(VarDumper::dumpAsString($entry) . "\n" . VarDumper::dumpAsString($baggage->getErrors()), 'QuoteController:create-quote-from-search:baggage:save');
 
                                                             $transaction->rollBack();
                                                             return $result;
@@ -303,7 +303,7 @@ class QuoteController extends FController
                                                                 }
                                                                 if (!$baggageCharge->validate()) {
                                                                     $result['error'] = VarDumper::dumpAsString($baggageCharge->errors);
-                                                                    Yii::error(VarDumper::dumpAsString($entry)."\n".VarDumper::dumpAsString($baggageCharge->getErrors()), 'QuoteController:create-quote-from-search:baggage_charge:save');
+                                                                    Yii::error(VarDumper::dumpAsString($entry) . "\n" . VarDumper::dumpAsString($baggageCharge->getErrors()), 'QuoteController:create-quote-from-search:baggage_charge:save');
                                                                     $transaction->rollBack();
                                                                     return $result;
                                                                 }
@@ -320,7 +320,7 @@ class QuoteController extends FController
                                         $trip->qt_key = implode('|', $keys);
                                         if (!$trip->save()) {
                                             $result['error'] = VarDumper::dumpAsString($trip->errors);
-                                            Yii::error(VarDumper::dumpAsString($entry)."\n".VarDumper::dumpAsString($trip->getErrors()), 'QuoteController:create-quote-from-search:trip:savekey');
+                                            Yii::error(VarDumper::dumpAsString($entry) . "\n" . VarDumper::dumpAsString($trip->getErrors()), 'QuoteController:create-quote-from-search:trip:savekey');
                                             $transaction->rollBack();
                                             return $result;
                                         }
@@ -336,12 +336,12 @@ class QuoteController extends FController
                                         $price->net = $price->fare + $price->taxes;
                                         $price->mark_up = $paxEntry['markup'];
                                         $price->selling = $price->net + $price->mark_up + $price->extra_mark_up;
-                                        $price->service_fee = ($quote->check_payment)?round($price->selling * (new Quote())->serviceFee, 2):0;
+                                        $price->service_fee = ($quote->check_payment) ? round($price->selling * (new Quote())->serviceFee, 2) : 0;
                                         $price->selling += $price->service_fee;
 
                                         if (!$price->validate()) {
                                             $result['error'] = VarDumper::dumpAsString($price->errors);
-                                            Yii::error(VarDumper::dumpAsString($entry)."\n".VarDumper::dumpAsString($price->getErrors()), 'QuoteController:create-quote-from-search:price:save');
+                                            Yii::error(VarDumper::dumpAsString($entry) . "\n" . VarDumper::dumpAsString($price->getErrors()), 'QuoteController:create-quote-from-search:price:save');
                                             $transaction->rollBack();
                                             return $result;
                                         }
@@ -574,8 +574,10 @@ class QuoteController extends FController
 
                     if ((new ReservationService($gds))->parseReservation($post['prepare_dump'], true, $quote->itinerary)) {
                         $itinerary = Quote::createDump($quote->itinerary);
-                    } elseif (!empty($post['reservation_result']) &&
-                        (new ReservationService('sabre'))->parseReservation(str_replace('&nbsp;', ' ', $post['reservation_result']), true, $quote->itinerary)) {
+                    } elseif (
+                        !empty($post['reservation_result']) &&
+                        (new ReservationService('sabre'))->parseReservation(str_replace('&nbsp;', ' ', $post['reservation_result']), true, $quote->itinerary)
+                    ) {
                         $itinerary = Quote::createDump($quote->itinerary);
                     } else {
                         throw new \DomainException('Parse "reservation dump" failed', -3);
@@ -757,7 +759,7 @@ class QuoteController extends FController
                             $quote->created_by_seller = false;
                         } else {
                             $employee = Employee::findIdentity($quote->employee_id);
-                            $quote->employee_name = (!empty($employee))?$employee->username:Yii::$app->user->identity->username;
+                            $quote->employee_name = (!empty($employee)) ? $employee->username : Yii::$app->user->identity->username;
                         }
                     }
 
@@ -847,8 +849,8 @@ class QuoteController extends FController
                                         $segment = QuoteSegment::find()->innerJoin(QuoteTrip::tableName(), 'qs_trip_id = qt_id')
                                         ->andWhere(['qt_quote_id' =>  $quote->id])
                                         ->andWhere(['or',
-                                            ['qs_departure_airport_code'=>$origin],
-                                            ['qs_arrival_airport_code'=>$destination]
+                                            ['qs_departure_airport_code' => $origin],
+                                            ['qs_arrival_airport_code' => $destination]
                                         ])
                                         ->one();
                                         $segments = [];
@@ -948,7 +950,7 @@ class QuoteController extends FController
                 $quote->employee_name = Yii::$app->user->identity->username;
             } else {
                 $employee = Employee::findIdentity($quote->employee_id);
-                $quote->employee_name = (!empty($employee))?$employee->username:Yii::$app->user->identity->username;
+                $quote->employee_name = (!empty($employee)) ? $employee->username : Yii::$app->user->identity->username;
             }
             return $this->renderAjax('_quote', [
                 'lead' => $lead,
@@ -997,7 +999,7 @@ class QuoteController extends FController
         throw new BadRequestHttpException('Not found POST request');
     }
 
-    private function logQuote(Quote $quote):void
+    private function logQuote(Quote $quote): void
     {
         $data = (new Quote())->getDataForProfit($quote->id);
         (\Yii::createObject(GlobalLogInterface::class))->log(

@@ -8,6 +8,7 @@ use sales\services\cleaner\form\DbCleanerParamsForm;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\user\entity\monitor\search\UserMonitorSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -26,7 +27,7 @@ $pjaxListId = 'pjax-user-monitor';
     </p>
     <?php echo $this->render('_search', ['model' => $searchModel]); ?>
 
-    <?php if (Auth::can('global/clean/table')): ?>
+    <?php if (Auth::can('global/clean/table')) : ?>
         <?php echo $this->render('../clean/_clean_table_form', [
             'modelCleaner' => $modelCleaner,
             'pjaxIdForReload' => $pjaxListId,

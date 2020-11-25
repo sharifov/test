@@ -146,7 +146,7 @@ class BadgesController extends FController
     private function getPending(): ?int
     {
         if (!Yii::$app->user->can('/lead/pending')) {
-           return null;
+            return null;
         }
         /** @var Employee $user */
         $user = Yii::$app->user->identity;

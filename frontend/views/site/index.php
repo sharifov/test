@@ -64,7 +64,7 @@ $this->title = 'Home Page'; // . $user->username;
                             <td>
                                 <?php
                                 $groupsValue = '';
-                                if( $groupsModel =  $user->ugsGroups) {
+                                if ($groupsModel =  $user->ugsGroups) {
                                     $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
                                     $groupsValueArr = [];
                                     foreach ($groups as $group) {
@@ -87,8 +87,7 @@ $this->title = 'Home Page'; // . $user->username;
                                 //$projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee();
                                 $projectList = $user->projects;
 
-                                if($projectList) {
-
+                                if ($projectList) {
                                     $groupsValueArr = [];
                                     foreach ($projectList as $project) {
                                         $groupsValueArr[] = Html::tag('span', Html::encode($project->name), ['class' => 'label label-default']);
@@ -132,7 +131,7 @@ $this->title = 'Home Page'; // . $user->username;
 
 
         <div class="col-md-6">
-            <?php if ($user->userProjectParams): ?>
+            <?php if ($user->userProjectParams) : ?>
             <div class="x_panel">
                 <div class="x_title" >
                     <h2><i class="fa fa-sticky-note-o"></i> Project params</h2>

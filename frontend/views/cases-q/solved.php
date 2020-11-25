@@ -105,17 +105,17 @@ $lists = new ListsAccess($user->id);
                 'value' => static function (CasesQSearch $model) {
                     return $model->cs_created_dt ? Yii::$app->formatter->asDatetime(strtotime($model->cs_created_dt)) : '-';
                 },
-				'filter' => DatePicker::widget([
-					'model' => $searchModel,
-					'attribute' => 'cs_created_dt',
-					'clientOptions' => [
-						'autoclose' => true,
-						'format' => 'yyyy-mm-dd'
-					],
-					'options' => [
-						'autocomplete' => 'off'
-					]
-				]),
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'cs_created_dt',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd'
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off'
+                    ]
+                ]),
             ],
             [
                 'label' => 'Communication',
@@ -137,25 +137,25 @@ $lists = new ListsAccess($user->id);
                     $diffTime = time() - $createdTS;
                     $diffHours = (int) ($diffTime / (60 * 60));
 
-                    return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+                    return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
                 },
             ],
             [
                 'attribute' => 'solved_date',
                 'value' => static function (CasesQSearch $model) {
-					return $model->solved_date ? Yii::$app->formatter->asDatetime(strtotime($model->solved_date)) : '-';
-				},
-				'filter' => DatePicker::widget([
-					'model' => $searchModel,
-					'attribute' => 'solved_date',
-					'clientOptions' => [
-						'autoclose' => true,
-						'format' => 'yyyy-mm-dd'
-					],
-					'options' => [
-						'autocomplete' => 'off'
-					]
-				]),
+                    return $model->solved_date ? Yii::$app->formatter->asDatetime(strtotime($model->solved_date)) : '-';
+                },
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'solved_date',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd'
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off'
+                    ]
+                ]),
             ],
             [
                 'class' => 'yii\grid\ActionColumn',

@@ -109,7 +109,7 @@ $this->params['breadcrumbs'][] = $this->title;
                              'data' => [
                                 'confirm' => 'Are you sure you want to set default this item?',
                                 'method' => 'post',
-                            ],
+                             ],
                         ]);
                     },
                 ],

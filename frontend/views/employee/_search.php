@@ -61,7 +61,9 @@ use common\models\Project;
 
                 <div class="col-md-1">
                     <?php echo $form->field($model, 'status')->dropDownList(
-                        \common\models\Employee::STATUS_LIST, ['prompt' => '---']) ?>
+                        \common\models\Employee::STATUS_LIST,
+                        ['prompt' => '---']
+                    ) ?>
                 </div>
 
                 <div class="col-md-1">

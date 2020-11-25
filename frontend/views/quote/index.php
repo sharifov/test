@@ -4,6 +4,7 @@ use common\components\SearchService;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\QuoteSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -32,15 +33,15 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'lead_id',
                 'format' => 'raw',
-                'value' => function(\common\models\Quote $model) {
-                    return '<i class="fa fa-arrow-right"></i> '.Html::a('lead: '.$model->lead_id, ['leads/view', 'id' => $model->lead_id], ['target' => '_blank', 'data-pjax' => 0]);
+                'value' => function (\common\models\Quote $model) {
+                    return '<i class="fa fa-arrow-right"></i> ' . Html::a('lead: ' . $model->lead_id, ['leads/view', 'id' => $model->lead_id], ['target' => '_blank', 'data-pjax' => 0]);
                 },
             ],
             [
                 'attribute' => 'employee_id',
                 'format' => 'raw',
-                'value' => function(\common\models\Quote $model) {
-                    return $model->employee ? '<i class="fa fa-user"></i> '.$model->employee->username : '-';
+                'value' => function (\common\models\Quote $model) {
+                    return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
                 },
                 'filter' => \common\models\Employee::getList()
             ],
@@ -49,8 +50,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'gds',
-                'value' => function(\common\models\Quote $model) {
-                    return '<i class="fa fa-plane"></i> '.$model->getGdsName2();
+                'value' => function (\common\models\Quote $model) {
+                    return '<i class="fa fa-plane"></i> ' . $model->getGdsName2();
                 },
                 'format' => 'raw',
                 'filter' => SearchService::GDS_LIST
@@ -58,14 +59,14 @@ $this->params['breadcrumbs'][] = $this->title;
             'pcc',
             [
                 'attribute' => 'trip_type',
-                'value' => function(\common\models\Quote $model) {
+                'value' => function (\common\models\Quote $model) {
                     return \common\models\Lead::getFlightType($model->trip_type) ?? '-';
                 },
                 'filter' => \common\models\Lead::getFlightTypeList()
             ],
             [
                 'attribute' => 'cabin',
-                'value' => function(\common\models\Quote $model) {
+                'value' => function (\common\models\Quote $model) {
                     return \common\models\Lead::getCabin($model->cabin) ?? '-';
                 },
                 'filter' => \common\models\Lead::getCabinList()
@@ -74,14 +75,14 @@ $this->params['breadcrumbs'][] = $this->title;
             //'reservation_dump:ntext',
             [
                 'attribute' => 'reservation_dump',
-                'value' => function(\common\models\Quote $model) {
-                    return '<pre style="font-size: 9px">'.$model->reservation_dump.'</pre>';
+                'value' => function (\common\models\Quote $model) {
+                    return '<pre style="font-size: 9px">' . $model->reservation_dump . '</pre>';
                 },
                 'format' => 'html',
             ],
             [
                 'attribute' => 'status',
-                'value' => function(\common\models\Quote $model) {
+                'value' => function (\common\models\Quote $model) {
                     return $model->getStatusName(true);
                 },
                 'format' => 'html',
@@ -91,7 +92,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'fare_type',
             [
                 'header' => 'Prices',
-                'value' => function(\common\models\Quote $model) {
+                'value' => function (\common\models\Quote $model) {
                     return $model->quotePricesCount ? Html::a($model->quotePricesCount, ['quote-price/index', "QuotePriceSearch[quote_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0]) : '-' ;
                 },
                 'format' => 'raw',
@@ -105,16 +106,16 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'created',
-                'value' => function(\common\models\Quote $model) {
-                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
+                'value' => function (\common\models\Quote $model) {
+                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
                 },
                 'format' => 'html',
             ],
 
             [
                 'attribute' => 'updated',
-                'value' => function(\common\models\Quote $model) {
-                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
+                'value' => function (\common\models\Quote $model) {
+                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->updated));
                 },
                 'format' => 'html',
             ],

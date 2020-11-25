@@ -6,9 +6,9 @@
 
 use common\models\Department;
 use yii\bootstrap\Html;
-use \yii\widgets\ActiveForm;
-use \common\widgets\Alert;
-use \sales\helpers\lead\LeadHelper;
+use yii\widgets\ActiveForm;
+use common\widgets\Alert;
+use sales\helpers\lead\LeadHelper;
 
 $this->title = 'Create Lead';
 
@@ -97,7 +97,7 @@ $this->title = 'Create Lead';
                                 'form' => $form,
                                 'leadForm' => $leadForm,
                             ])
-                            ?>
+?>
                         </div>
                     </div>
                 </div>
@@ -117,12 +117,12 @@ $this->title = 'Create Lead';
                                 'form' => $form,
                                 'leadForm' => $leadForm
                             ])
-                            ?>
+?>
                         </div>
                         <div class="offset-xl-1 col-xl-9 col-lg-12 col-md-12 col-sm-12 col-xs-12">
                             <div class="row">
                                 <div class="col-md-12 text-center">
-							        <?=Html::submitButton('<i class="fa fa-save"></i> Create Lead', ['class' => 'btn btn-success']) ?>
+                                    <?=Html::submitButton('<i class="fa fa-save"></i> Create Lead', ['class' => 'btn btn-success']) ?>
                                 </div>
                             </div>
                         </div>
@@ -130,6 +130,6 @@ $this->title = 'Create Lead';
                 </div>
             </div>
         </div>
-		<?php ActiveForm::end() ?>
+        <?php ActiveForm::end() ?>
     </div>
 </div>

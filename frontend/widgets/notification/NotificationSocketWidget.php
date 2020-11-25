@@ -28,21 +28,21 @@ class NotificationSocketWidget extends Widget
         }, null, new TagDependency(['tags' => NotificationCache::getTags($this->userId)]));
 
 //        $clientChatNotifResult = NotificationCache::getCache()->getOrSet(NotificationCache::getClientChatKey($this->userId), function () {
-//        	$clientChatMessageService = \Yii::createObject(ClientChatMessageService::class);
+//          $clientChatMessageService = \Yii::createObject(ClientChatMessageService::class);
 //            return [
-//				'totalUnreadMessages' => $clientChatMessageService->getCountOfTotalUnreadMessages($this->userId) ?: '',
-//				'chatsWithUnreadMessages' => ClientChat::find()->byIds($clientChatMessageService->getChatWithUnreadMessages($this->userId))->all()
+//              'totalUnreadMessages' => $clientChatMessageService->getCountOfTotalUnreadMessages($this->userId) ?: '',
+//              'chatsWithUnreadMessages' => ClientChat::find()->byIds($clientChatMessageService->getChatWithUnreadMessages($this->userId))->all()
 //            ];
 //        }, null, new TagDependency(['tags' => NotificationCache::getClientChatTags($this->userId)]));
 
         $totalUnreadMessages = ClientChat::find()->select(['sum(ccu_count) as count'])->byOwner($this->userId)->withUnreadMessage()->asArray()->one();
         $chatsWithUnreadMessages = ClientChat::find()->select(['*', 'ccu_count as countUnreadMessage'])->byOwner($this->userId)->withUnreadMessage()->all();
 
-		return $this->render('notifications-socket', [
-        	'notifications' => $result['notifications'],
-			'count' => $result['count'],
+        return $this->render('notifications-socket', [
+            'notifications' => $result['notifications'],
+            'count' => $result['count'],
             'totalUnreadMessages' => $totalUnreadMessages['count'] ?: '',
             'chatsWithUnreadMessages' => $chatsWithUnreadMessages
-		]);
+        ]);
     }
 }

@@ -11,7 +11,6 @@ use yii\widgets\Pjax;
 $ipData = @json_decode($lead->request_ip_detail, true);
 
 if ($ipData) {
-
     $str = '<pre>';
     $str .= '<table class="table table-bordered">';
     $content = '';
@@ -24,7 +23,6 @@ if ($ipData) {
     if ($content) {
         echo $str . $content . '</table></pre>';
     }
-
 }
 
 Pjax::begin(['id' => 'pjax-leads-ip-info', 'timeout' => 2000, 'enablePushState' => false]);

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $this View
  * @var $lead Lead
@@ -10,7 +11,7 @@ use common\models\Lead;
 use yii\helpers\Html;
 use frontend\models\LeadForm;
 use yii\web\View;
-use \yii\helpers\Url;
+use yii\helpers\Url;
 use yii\bootstrap4\Modal;
 use sales\auth\Auth;
 
@@ -26,9 +27,9 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
         <div class="x_title" >
             <h2><i class="fa fa-user-circle-o"></i> Client Info</h2>
             <ul class="nav navbar-right panel_toolbox">
-                <?php if ($leadForm->mode !== $leadForm::VIEW_MODE || $manageClientInfoAccess): ?>
+                <?php if ($leadForm->mode !== $leadForm::VIEW_MODE || $manageClientInfoAccess) : ?>
                     <li>
-                        <?=Html::a('<i class="fas fa-info-circle"></i> Details', '#',  [
+                        <?=Html::a('<i class="fas fa-info-circle"></i> Details', '#', [
                             'id' => 'btn-client-info-details',
                             'data-client-id' => $leadForm->getClient()->id,
                             'title' => 'Client Info',
@@ -44,7 +45,7 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                         ])?>
                     </li>
                     <li>
-                        <?=Html::a('<i class="fas fa-plus-circle success"></i> Add Email', '#',  [
+                        <?=Html::a('<i class="fas fa-plus-circle success"></i> Add Email', '#', [
                             'id' => 'client-new-email-button',
                             'data-modal_id' => 'client-manage-info',
                             'title' => 'Add Email',
@@ -53,7 +54,7 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                         ])?>
                     </li>
                     <li>
-                        <?=Html::a('<i class="fas fa-edit warning"></i> Update Client', '#',  [
+                        <?=Html::a('<i class="fas fa-edit warning"></i> Update Client', '#', [
                             'id' => 'client-edit-user-name-button',
                             'data-modal_id' => 'client-manage-info',
                             'title' => 'Update user name',
@@ -62,10 +63,10 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                         ])?>
                     </li>
 
-                    <?php if($unsubscribe): ?>
-                        <?php if (Auth::can('client-project/subscribe-client-ajax')): ?>
+                    <?php if ($unsubscribe) : ?>
+                        <?php if (Auth::can('client-project/subscribe-client-ajax')) : ?>
                             <li>
-                                <?=Html::a('<i class="far fa-bell-slash info"></i> Subscribe', '#',  [
+                                <?=Html::a('<i class="far fa-bell-slash info"></i> Subscribe', '#', [
                                     'id' => 'client-unsubscribe-button',
                                     'title' => 'Allow communication with client',
                                     'data-unsubscribe-url' => Url::to(['client-project/unsubscribe-client-ajax',
@@ -76,10 +77,10 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                                 ])?>
                             </li>
                         <?php endif; ?>
-                    <?php else: ?>
-                        <?php if (Auth::can('client-project/unsubscribe-client-ajax')): ?>
+                    <?php else : ?>
+                        <?php if (Auth::can('client-project/unsubscribe-client-ajax')) : ?>
                             <li>
-                                <?=Html::a('<i class="far fa-bell-slash info"></i> Unsubscribe', '#',  [
+                                <?=Html::a('<i class="far fa-bell-slash info"></i> Unsubscribe', '#', [
                                     'id' => 'client-unsubscribe-button',
                                     'title' => 'Restrict communication with client',
                                     'data-unsubscribe-url' => Url::to(['client-project/unsubscribe-client-ajax',
@@ -111,7 +112,7 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
 
                 <div class="col-md-4">
                     <div id="client-manage-phone">
-                        <?php if ($phones = $lead->client->clientPhones): ?>
+                        <?php if ($phones = $lead->client->clientPhones) : ?>
                             <?php
                             if ($leadForm->viewPermission) {
                                 echo $this->render('_client_manage_phone', [
@@ -124,7 +125,7 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                         <?php endif; ?>
                     </div>
                     <div id="client-manage-email">
-                        <?php if ($emails = $lead->client->clientEmails): ?>
+                        <?php if ($emails = $lead->client->clientEmails) : ?>
                             <?php
                             if ($leadForm->viewPermission) {
                                 echo $this->render('_client_manage_email', [
@@ -144,7 +145,7 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                         'userId' => $user->id
                     ]) ?>
 
-                    <?php if (!empty($leadForm->getLead()->request_ip)): ?>
+                    <?php if (!empty($leadForm->getLead()->request_ip)) : ?>
                         <?= $this->render('_client_ip_info', ['lead' => $leadForm->getLead()]) ?>
                     <?php endif; ?>
 

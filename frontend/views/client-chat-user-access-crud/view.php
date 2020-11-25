@@ -38,7 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     'attribute' => 'ccua_status_id',
                     'value' => static function (ClientChatUserAccess $model) {
-                        return $model->ccua_status_id ?  Html::tag('span', ClientChatUserAccess::STATUS_LIST[$model->ccua_status_id], ['class' => 'badge badge-'.ClientChatUserAccess::STATUS_CLASS_LIST[$model->ccua_status_id]]) : null;
+                        return $model->ccua_status_id ?  Html::tag('span', ClientChatUserAccess::STATUS_LIST[$model->ccua_status_id], ['class' => 'badge badge-' . ClientChatUserAccess::STATUS_CLASS_LIST[$model->ccua_status_id]]) : null;
                     },
                     'format' => 'raw',
                 ],

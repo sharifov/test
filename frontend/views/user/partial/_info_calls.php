@@ -4,8 +4,8 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
-use \sales\model\callLog\entity\callLog\search\CallLogSearch;
-use \common\models\Project;
+use sales\model\callLog\entity\callLog\search\CallLogSearch;
+use common\models\Project;
 
 /**
  * @var $callLogDataProvider yii\data\ActiveDataProvider

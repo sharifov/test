@@ -4,7 +4,6 @@ namespace frontend\models;
 
 use yii\base\Model;
 
-
 /**
  * Class SmsInboxForm
  * @package frontend\models
@@ -44,12 +43,11 @@ class SmsInboxForm extends Model
     /**
      * @return array
      */
-    public function attributeLabels() : array
+    public function attributeLabels(): array
     {
         return [
             'last_n'         => 'Limit items',
             'last_date'        => 'Date From',
         ];
     }
-
 }

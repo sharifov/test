@@ -1,4 +1,5 @@
 <?php
+
 use yii\helpers\Html;
 
 /**
@@ -21,16 +22,16 @@ $class = 'text-success';
         <div class="col-md-4">
             <?php if (isset($model['finalProfit']) && $model['finalProfit'] > 0) : ?>
                 <?= '$ ' . number_format($model['finalProfit']) ?>
-            <?php elseif (isset($model['soldLeads'])  && $model['soldLeads'] > 0 ) :?>
+            <?php elseif (isset($model['soldLeads'])  && $model['soldLeads'] > 0) :?>
                 <?= $model['soldLeads'] ?>
-            <?php elseif (isset($model['profitPerPax'])  && $model['profitPerPax'] > 0 ) :?>
+            <?php elseif (isset($model['profitPerPax'])  && $model['profitPerPax'] > 0) :?>
                 <?= '$ ' . number_format($model['profitPerPax']) ?>
-            <?php elseif (isset($model['tips'])  && $model['tips'] > 0 ) :?>
+            <?php elseif (isset($model['tips'])  && $model['tips'] > 0) :?>
                 <?= '$ ' . number_format($model['tips'])?>
             <?php elseif (isset($model['leadConversion']) && $model['leadConversion'] > 0) :?>
                 <?= Yii::$app->formatter->asPercent($model['leadConversion']) ?>
-                <?= '&nbsp;'.'[' . number_format($model['leadsToProcessing']) .'/' . number_format($model['leadsWithoutRTS']) .']' ?>
-            <?php else:?>
+                <?= '&nbsp;' . '[' . number_format($model['leadsToProcessing']) . '/' . number_format($model['leadsWithoutRTS']) . ']' ?>
+            <?php else :?>
                 <?= '-' ?>
             <?php endif;?>
         </div>

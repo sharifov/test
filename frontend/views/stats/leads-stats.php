@@ -1,4 +1,5 @@
 <?php
+
 use yii\helpers\Html;
 use kartik\grid\GridView;
 use kartik\export\ExportMenu;
@@ -28,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="clearfix"></div>
             </div>
             <div class="x_content" style="display: block">
-                <?= $this->render('partial/_search_leads_stats' , ['model' => $searchModel]);  ?>
+                <?= $this->render('partial/_search_leads_stats', ['model' => $searchModel]);  ?>
             </div>
         </div>
     </div>
@@ -49,7 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'New Total',
             'attribute' => 'newTotal',
-            'value' => static function($data) {
+            'value' => static function ($data) {
                 return $data['newTotal'] ?: '-';
             },
             'contentOptions' => [
@@ -59,7 +60,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'Inbox Leads Taken',
             'attribute' => 'inboxLeadsTaken',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['inboxLeadsTaken'] ?: '-';
             },
             'contentOptions' => [
@@ -69,7 +70,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'Call Leads Taken',
             'attribute' => 'callLeadsTaken',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['callLeadsTaken'] ?: '-';
             },
             'contentOptions' => [
@@ -79,7 +80,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'Redial Leads Taken',
             'attribute' => 'redialLeadsTaken',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['redialLeadsTaken'] ?: '-';
             },
             'contentOptions' => [
@@ -89,7 +90,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'Leads Created',
             'attribute' => 'leadsCreated',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['leadsCreated'] ?: '-';
             },
             'contentOptions' => [
@@ -99,7 +100,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'Leads Cloned',
             'attribute' => 'leadsCloned',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['leadsCloned'] ?: '-';
             },
             'contentOptions' => [
@@ -109,7 +110,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'Follow Up Total',
             'attribute' => 'followUpTotal',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['followUpTotal'] ?: '-';
             },
             'contentOptions' => [
@@ -119,7 +120,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'To Follow Up',
             'attribute' => 'toFollowUp',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['toFollowUp'] ?: '-';
             },
             'contentOptions' => [
@@ -129,7 +130,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'Follow Up Leads Taken',
             'attribute' => 'followUpLeadsTaken',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['followUpLeadsTaken'] ?: '-';
             },
             'contentOptions' => [
@@ -148,7 +149,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'Trash Leads',
             'attribute' => 'trashLeads',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['trashLeads'] ?: '-';
             },
             'contentOptions' => [
@@ -158,7 +159,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'Sold Leads',
             'attribute' => 'soldLeads',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['soldLeads'] ?: '-';
             },
             'contentOptions' => [
@@ -168,7 +169,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'Profit',
             'attribute' => 'profit',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return number_format($data['profit']) ?: '-';
             },
             'contentOptions' => [
@@ -178,7 +179,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'Tips',
             'attribute' => 'tips',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return number_format($data['tips']) ?: '-';
             },
             'contentOptions' => [
@@ -237,7 +238,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'json' => [],
         ],
         'toolbar' => [
-            'content' =>'<div class="btn-group">' . Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['report/leads-report'], ['class' => 'btn btn-outline-secondary', 'title'=>'Reset Grid']) .'</div>',
+            'content' => '<div class="btn-group">' . Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['report/leads-report'], ['class' => 'btn btn-outline-secondary', 'title' => 'Reset Grid']) . '</div>',
             '{export}',
             $fullExportMenu,
         ],

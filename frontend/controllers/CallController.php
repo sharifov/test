@@ -22,7 +22,6 @@ use frontend\widgets\CallBox;
 use frontend\widgets\newWebPhone\call\socket\MissedCallMessage;
 use http\Exception\InvalidArgumentException;
 use sales\auth\Auth;
-
 use sales\helpers\call\CallHelper;
 use sales\model\call\services\currentQueueCalls\CurrentQueueCallsService;
 use sales\model\call\useCase\assignUsers\UsersForm;
@@ -63,24 +62,24 @@ class CallController extends FController
     private $callService;
     private $callRepository;
     private $callUserAccessRepository;
-	private $callNoteRepository;
+    private $callNoteRepository;
     private $currentQueueCalls;
 
     public function __construct(
-    	$id,
-		$module,
-		CallService $callService,
-		CallRepository $callRepository,
-		CallUserAccessRepository $callUserAccessRepository,
-		CallNoteRepository $callNoteRepository,
-		CurrentQueueCallsService $currentQueueCalls,
-		$config = []
-	) {
+        $id,
+        $module,
+        CallService $callService,
+        CallRepository $callRepository,
+        CallUserAccessRepository $callUserAccessRepository,
+        CallNoteRepository $callNoteRepository,
+        CurrentQueueCallsService $currentQueueCalls,
+        $config = []
+    ) {
         parent::__construct($id, $module, $config);
         $this->callService = $callService;
         $this->callRepository = $callRepository;
         $this->callUserAccessRepository = $callUserAccessRepository;
-		$this->callNoteRepository = $callNoteRepository;
+        $this->callNoteRepository = $callNoteRepository;
         $this->currentQueueCalls = $currentQueueCalls;
     }
 
@@ -183,7 +182,7 @@ class CallController extends FController
         $model = $this->findModel($id);
         $this->checkAccess($model);
 
-        if($model->c_is_new) {
+        if ($model->c_is_new) {
             //$model->c_read_dt = date('Y-m-d H:i:s');
             $model->c_is_new = false;
             $model->save();
@@ -276,7 +275,7 @@ class CallController extends FController
      * @param Call $model
      * @throws ForbiddenHttpException
      */
-    protected function checkAccess(Call $model) : void
+    protected function checkAccess(Call $model): void
     {
         /*$phoneList = [];
 
@@ -290,7 +289,7 @@ class CallController extends FController
         $access = $model->c_created_user_id === Yii::$app->user->id ? true : false;
 
 
-        if(!$access) {
+        if (!$access) {
             throw new ForbiddenHttpException('Access denied for this Call. '); // Check User Project Params phones
         }
     }
@@ -510,14 +509,14 @@ class CallController extends FController
 
     public function actionRealtimeUserMap()
     {
-        if (Yii::$app->request->isPost){
+        if (Yii::$app->request->isPost) {
             $user = Auth::user();
             $searchUserConnectionModel = new UserConnectionSearch();
             $searchUserCallModel = new CallSearch();
             //$params = Yii::$app->request->queryParams;
 
             $accessDepartmentModels = $user->udDeps;
-            if($accessDepartmentModels) {
+            if ($accessDepartmentModels) {
                 $accessDepartments = ArrayHelper::map($accessDepartmentModels, 'dep_id', 'dep_id');
             } else {
                 $accessDepartments = [];
@@ -618,7 +617,7 @@ class CallController extends FController
 
         $accessDepartmentModels = $user->udDeps;
 
-        if($accessDepartmentModels) {
+        if ($accessDepartmentModels) {
             $accessDepartments = ArrayHelper::map($accessDepartmentModels, 'dep_id', 'dep_id');
         } else {
             $accessDepartments = [];
@@ -695,7 +694,6 @@ class CallController extends FController
             'dataProvider3' => $dataProvider3,
             //'searchModel' => $searchModel,
         ]);
-
     }
 
 
@@ -744,10 +742,7 @@ class CallController extends FController
 
         //echo Call::find()->where(['c_call_status' => [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]])->andWhere(['c_created_user_id' => Yii::$app->user->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->createCommand()->getRawSql(); exit;
 
-        if(Yii::$app->request->get('act') === 'find') {
-
-
-
+        if (Yii::$app->request->get('act') === 'find') {
             $query = Lead::getPendingQuery($user->id);
             $query->limit(1);
 
@@ -755,20 +750,20 @@ class CallController extends FController
 
             //$leadModel = $query->one();
 
-            if(!$callModel) {
+            if (!$callModel) {
                 $leadModel = $query->one();
             }
 
-            if($leadModel) {
+            if ($leadModel) {
                 $callData['error'] = null;
                 $callData['project_id'] = $leadModel->project_id;
                 $callData['lead_id'] = $leadModel->id;
                 $callData['phone_to'] = null;
                 $callData['phone_from'] = null;
 
-                if($leadModel->client && $leadModel->client->clientPhones) {
+                if ($leadModel->client && $leadModel->client->clientPhones) {
                     foreach ($leadModel->client->clientPhones as $phone) {
-                        if(!$phone->phone) {
+                        if (!$phone->phone) {
                             continue;
                         }
                         $callData['phone_to'] = trim($phone->phone);
@@ -778,31 +773,30 @@ class CallController extends FController
 
                 $upp = UserProjectParams::find()->where(['upp_project_id' => $leadModel->project_id, 'upp_user_id' => $user->id])->withPhoneList()->one();
 //                if($upp && $upp->upp_tw_phone_number) {
-                if($upp && $upp->getPhone()) {
-
+                if ($upp && $upp->getPhone()) {
                     //$callData['phone_from'] = $upp->upp_tw_phone_number;
                     //$callData['phone_from'] = $upp->$upp->getPhone();
 
 //                    $dpp = DepartmentPhoneProject::find()->where(['dpp_project_id' => $leadModel->project_id])->limit(1)->one();
                     $dpp = DepartmentPhoneProject::find()->where(['dpp_project_id' => $leadModel->project_id])->withPhoneList()->limit(1)->one();
 //                    if($dpp && $dpp->dpp_phone_number) {
-                    if($dpp && $dpp->getPhone()) {
+                    if ($dpp && $dpp->getPhone()) {
 //                        $callData['phone_from'] = $dpp->dpp_phone_number;
                         $callData['phone_from'] = $dpp->getPhone();
                     } else {
-                        Yii::error('Not found Project Source, Project Id: '. $leadModel->project_id, 'CallController:actionAutoRedial:DepartmentPhoneProject');
+                        Yii::error('Not found Project Source, Project Id: ' . $leadModel->project_id, 'CallController:actionAutoRedial:DepartmentPhoneProject');
                     }
 
-                    if(!$callData['phone_from']) {
-                        $callData['error'] = 'Not found source phone number for project ('.$leadModel->project->name.')';
+                    if (!$callData['phone_from']) {
+                        $callData['error'] = 'Not found source phone number for project (' . $leadModel->project->name . ')';
                     }
                 } else {
-                    $callData['error'] = 'Not found agent phone number for project ('.$leadModel->project->name.')';
+                    $callData['error'] = 'Not found agent phone number for project (' . $leadModel->project->name . ')';
                 }
 
 
 
-                if(!$callData['phone_to']) {
+                if (!$callData['phone_to']) {
                     $callData['error'] = 'Not found client number';
                 }
                 //$callData['error'] = 'Not found client number';
@@ -832,7 +826,7 @@ class CallController extends FController
 
         $checkShiftTime = true;
 
-        if($isAgent) {
+        if ($isAgent) {
             $checkShiftTime = $user->checkShiftTime();
             /*$userParams = $user->userParams;
 
@@ -878,9 +872,9 @@ class CallController extends FController
         $isAccessNewLead = $user->accessTakeNewLead();
         $accessLeadByFrequency = [];
 
-        if($isAccessNewLead){
+        if ($isAccessNewLead) {
             $accessLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes();
-            if(!$accessLeadByFrequency['access']){
+            if (!$accessLeadByFrequency['access']) {
                 $isAccessNewLead = $accessLeadByFrequency['access'];
             }
         }
@@ -934,7 +928,6 @@ class CallController extends FController
             'dataProviderCall' => $dataProviderCall,
             'projectList'       => $projectList,
         ]);
-
     }
 
     /**
@@ -951,11 +944,10 @@ class CallController extends FController
 
         $result = Yii::$app->cache->get($keyCache);
 
-        if($result === false) {
-
+        if ($result === false) {
             $box = CallBox::getInstance();
             $result = $box->run();
-            if($result) {
+            if ($result) {
                 Yii::$app->cache->set($keyCache, $result, 30);
             }
         }
@@ -1017,7 +1009,7 @@ class CallController extends FController
         $dataProvider = $searchModel->searchAgent($params);
 
         foreach ($dataProvider->models as $model) {
-            if($model->c_is_new) {
+            if ($model->c_is_new) {
                 $model->c_is_new = false;
                 $model->update(false);
             }
@@ -1070,7 +1062,7 @@ class CallController extends FController
 
         $this->checkAccess($model);
 
-        if($model->c_is_new) {
+        if ($model->c_is_new) {
             //$model->c_read_dt = date('Y-m-d H:i:s');
             $model->c_is_new = false;
             $model->update();
@@ -1141,26 +1133,26 @@ class CallController extends FController
     }
 
     public function actionAjaxAcceptIncomingCall(): Response
-	{
-		$action = \Yii::$app->request->post('act');
-		$call_sid = \Yii::$app->request->post('call_sid');
+    {
+        $action = \Yii::$app->request->post('act');
+        $call_sid = \Yii::$app->request->post('call_sid');
 
-		$response = [
-			'error' => true,
-			'message' => 'Internal Server Error'
-		];
-		if ($action && $call_sid) {
-			try {
-				$call = $this->callRepository->findBySid($call_sid);
+        $response = [
+            'error' => true,
+            'message' => 'Internal Server Error'
+        ];
+        if ($action && $call_sid) {
+            try {
+                $call = $this->callRepository->findBySid($call_sid);
 
-				$callUserAccess = CallUserAccess::find()->where([
+                $callUserAccess = CallUserAccess::find()->where([
                     'cua_user_id' => Auth::id(),
                     'cua_call_id' => $call->c_id,
                     'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING
                 ])->one();
 
-				if ($callUserAccess) {
-				    $userId = Auth::id();
+                if ($callUserAccess) {
+                    $userId = Auth::id();
                     switch ($action) {
                         case 'accept':
                             $key = 'accept_call_' . $callUserAccess->cua_call_id;
@@ -1206,26 +1198,26 @@ class CallController extends FController
                         'message' => '',
                     ];
                 }
-			} catch (\RuntimeException | NotFoundException $e) {
-				$response['message'] = $e->getMessage();
-			}
-		}
+            } catch (\RuntimeException | NotFoundException $e) {
+                $response['message'] = $e->getMessage();
+            }
+        }
 
-		return $this->asJson($response);
-	}
+        return $this->asJson($response);
+    }
 
     public function actionReturnHoldCall(): Response
-	{
-		$call_sid = \Yii::$app->request->post('call_sid');
+    {
+        $call_sid = \Yii::$app->request->post('call_sid');
 
-		$response = [
-			'error' => true,
-			'message' => 'Internal Server Error'
-		];
+        $response = [
+            'error' => true,
+            'message' => 'Internal Server Error'
+        ];
 
-		if ($call_sid) {
-			try {
-				$call = $this->callRepository->findBySid($call_sid);
+        if ($call_sid) {
+            try {
+                $call = $this->callRepository->findBySid($call_sid);
                 $callUserAccess = CallUserAccess::find()->where(['cua_user_id' => Auth::id(), 'cua_call_id' => $call->c_id, 'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING])->one();
                 if (!$callUserAccess) {
                     throw new \DomainException('Not found call user access');
@@ -1248,13 +1240,13 @@ class CallController extends FController
                     'error' => false,
                     'message' => ''
                 ];
-			} catch (\DomainException $e) {
-				$response['message'] = $e->getMessage();
-			}
-		}
+            } catch (\DomainException $e) {
+                $response['message'] = $e->getMessage();
+            }
+        }
 
-		return $this->asJson($response);
-	}
+        return $this->asJson($response);
+    }
 
     /**
      * @param string $sid
@@ -1291,38 +1283,38 @@ class CallController extends FController
         }
     }*/
 
-	public function actionAjaxAddNote(): Response
-	{
-		$callSid = Yii::$app->request->post('callSid');
-		$note = Yii::$app->request->post('note');
-		$callId = Yii::$app->request->post('callId');
+    public function actionAjaxAddNote(): Response
+    {
+        $callSid = Yii::$app->request->post('callSid');
+        $note = Yii::$app->request->post('note');
+        $callId = Yii::$app->request->post('callId');
 
-		$result = [
-			'error' => false,
-			'message' => 'Note successfully added'
-		];
+        $result = [
+            'error' => false,
+            'message' => 'Note successfully added'
+        ];
 
-		try {
-			$call = $this->callRepository->findByCallSidOrCallId((string)$callSid, (int)$callId);
-			if (!$call->isOwner(Auth::id())) {
+        try {
+            $call = $this->callRepository->findByCallSidOrCallId((string)$callSid, (int)$callId);
+            if (!$call->isOwner(Auth::id())) {
                 throw new \RuntimeException('Is not your call');
             }
-			$this->callNoteRepository->add($call->c_id, $note);
-		} catch (\RuntimeException $e) {
-			$result['error'] = true;
-			$result['message'] = $e->getMessage();
-		} catch (\Throwable $e) {
-			$result['error'] = true;
-			$result['message'] = 'Internal Server Error;';
-		}
+            $this->callNoteRepository->add($call->c_id, $note);
+        } catch (\RuntimeException $e) {
+            $result['error'] = true;
+            $result['message'] = $e->getMessage();
+        } catch (\Throwable $e) {
+            $result['error'] = true;
+            $result['message'] = 'Internal Server Error;';
+        }
 
-		return $this->asJson($result);
-	}
+        return $this->asJson($result);
+    }
 
     /**
      * @return array|\yii\db\ActiveRecord|null
      */
-	public function actionReactInitCallWidget()
+    public function actionReactInitCallWidget()
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         $calls = Call::find()->where(['c_created_user_id' => Yii::$app->user->id])->orderBy(['c_id' => SORT_DESC])->limit(3)->all();

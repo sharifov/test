@@ -17,7 +17,7 @@ class UserPaymentCategoryCrudController extends FController
      */
     public function behaviors()
     {
-		$behaviors =  [
+        $behaviors =  [
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
@@ -25,8 +25,8 @@ class UserPaymentCategoryCrudController extends FController
                 ],
             ],
         ];
-		return ArrayHelper::merge(parent::behaviors(), $behaviors);
-	}
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
 
     public function init(): void
     {
@@ -67,9 +67,9 @@ class UserPaymentCategoryCrudController extends FController
     {
         $model = new UserPaymentCategory();
 
-		if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			return $this->redirect(['view', 'id' => $model->upc_id]);
-		}
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            return $this->redirect(['view', 'id' => $model->upc_id]);
+        }
 
         return $this->render('create', [
             'model' => $model,
@@ -94,13 +94,13 @@ class UserPaymentCategoryCrudController extends FController
         ]);
     }
 
-	/**
-	 * @param $id
-	 * @return \yii\web\Response
-	 * @throws NotFoundHttpException
-	 * @throws \Throwable
-	 * @throws \yii\db\StaleObjectException
-	 */
+    /**
+     * @param $id
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
     public function actionDelete($id)
     {
         $this->findModel($id)->delete();
@@ -114,7 +114,7 @@ class UserPaymentCategoryCrudController extends FController
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id): UserPaymentCategory
-	{
+    {
         if (($model = UserPaymentCategory::findOne($id)) !== null) {
             return $model;
         }

@@ -1,6 +1,5 @@
 <?php
 
-
 namespace frontend\widgets\clientChat;
 
 use common\components\i18n\Formatter;
@@ -77,11 +76,11 @@ class ClientChatAccessWidget extends Widget
         if (!SettingHelper::isClientChatEnabled() || !$user || !$user->can('/client-chat/index')) {
             return false;
         }
-        //		$result = ClientChatCache::getCache()->getOrSet(ClientChatCache::getKey($this->userId), static function () use ($_self) {
-        //			return [
-        //				'access' => ClientChatUserAccess::pendingRequests($_self->userId),
-        //			];
-        //		}, null, new TagDependency(['tags' => ClientChatCache::getTags($this->userId)]));
+        //      $result = ClientChatCache::getCache()->getOrSet(ClientChatCache::getKey($this->userId), static function () use ($_self) {
+        //          return [
+        //              'access' => ClientChatUserAccess::pendingRequests($_self->userId),
+        //          ];
+        //      }, null, new TagDependency(['tags' => ClientChatCache::getTags($this->userId)]));
 
         if ($user) {
             $formatter = new Formatter();
@@ -90,8 +89,8 @@ class ClientChatAccessWidget extends Widget
             $formatter = \Yii::$app->formatter;
         }
 
-        //		$search = new ClientChatUserAccessSearch();
-        //		$result = $search->searchPendingRequests($this->userId, $this->page, $this->limit * ($this->page+1));
+        //      $search = new ClientChatUserAccessSearch();
+        //      $result = $search->searchPendingRequests($this->userId, $this->page, $this->limit * ($this->page+1));
         return $this->render('cc_request', ['access' => [], 'open' => $this->open, 'formatter' => $formatter, 'page' => $this->page]);
     }
 
@@ -142,7 +141,7 @@ class ClientChatAccessWidget extends Widget
 
     private function getOffset()
     {
-        //		$offset = $this->page * $this->limit;
+        //      $offset = $this->page * $this->limit;
         return $this->countDisplayedRequests;
     }
 }

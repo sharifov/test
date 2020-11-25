@@ -1,16 +1,17 @@
     <?php
+
 /* @var $this yii\web\View */
 /* @var $order \modules\order\src\entities\order\Order */
 /* @var $index integer */
 
-	use common\models\Currency;
-	use modules\invoice\src\entities\invoice\InvoiceStatus;
-use modules\order\src\entities\order\OrderPayStatus;
-use modules\order\src\entities\order\OrderStatus;
-use modules\product\src\entities\productQuote\ProductQuoteStatus;
-use yii\bootstrap4\Html;
+    use common\models\Currency;
+    use modules\invoice\src\entities\invoice\InvoiceStatus;
+    use modules\order\src\entities\order\OrderPayStatus;
+    use modules\order\src\entities\order\OrderStatus;
+    use modules\product\src\entities\productQuote\ProductQuoteStatus;
+    use yii\bootstrap4\Html;
 
-?>
+    ?>
 
 <div class="x_panel">
     <div class="x_title">
@@ -32,11 +33,11 @@ use yii\bootstrap4\Html;
                     'class' => 'text-success btn-split',
                     'data-url' => \yii\helpers\Url::to(['/order/order-user-profit/ajax-manage-order-user-profit']),
                     'data-order-id' => $order->or_id,
-					'data-title' => 'Order User Profit',
-				]) ?>
+                    'data-title' => 'Order User Profit',
+                ]) ?>
             </li>
 
-			<?php if($order->orderTips): ?>
+            <?php if ($order->orderTips) : ?>
                 <li>
                     <?= Html::a('<i class="fas fa-dollar-sign text-success"></i> Split Tips', null, [
                         'class' => 'text-success btn-split',
@@ -88,9 +89,7 @@ use yii\bootstrap4\Html;
         ?>
 
         <table class="table table-bordered">
-            <?php if ($order->productQuotes):
-
-
+            <?php if ($order->productQuotes) :
                 ?>
                 <tr>
                     <th>Quote ID</th>
@@ -104,7 +103,7 @@ use yii\bootstrap4\Html;
                     <th>Client Price</th>
                     <th></th>
                 </tr>
-                <?php foreach ($order->productQuotes as $productQuote):
+                <?php foreach ($order->productQuotes as $productQuote) :
                     $quote = $productQuote;
                     $ordTotalPrice += $quote->pq_price;
                     $ordTotalFee += $quote->pq_service_fee_sum;
@@ -189,7 +188,7 @@ use yii\bootstrap4\Html;
                 $invClientTotalPrice = 0;
             ?>
             <table class="table table-bordered">
-                <?php if ($order->invoices): ?>
+                <?php if ($order->invoices) : ?>
                     <tr>
                         <th style="width: 100px">Invoice ID</th>
                         <th>Status</th>
@@ -199,12 +198,11 @@ use yii\bootstrap4\Html;
                         <th>Client Amount</th>
                         <th style="width: 60px"></th>
                     </tr>
-                    <?php if ($order->invoices):?>
-                    <?php foreach ($order->invoices as $invoice):
-
-                        $invTotalPrice += $invoice->inv_sum;
-                        $invClientTotalPrice += $invoice->inv_client_sum;
-                        ?>
+                    <?php if ($order->invoices) :?>
+                        <?php foreach ($order->invoices as $invoice) :
+                            $invTotalPrice += $invoice->inv_sum;
+                            $invClientTotalPrice += $invoice->inv_client_sum;
+                            ?>
                         <tr>
                             <td title="Invoice ID"><?=Html::encode($invoice->inv_id)?></td>
                             <td><?= InvoiceStatus::asFormat($invoice->inv_status_id) ?></td>
@@ -253,23 +251,22 @@ use yii\bootstrap4\Html;
 
                             </td>
                         </tr>
-                    <?php endforeach; ?>
-                    <?php
+                        <?php endforeach; ?>
+                        <?php
                         $invTotalPrice = round($invTotalPrice, 2);
                         $invClientTotalPrice = round($invClientTotalPrice, 2);
-                    ?>
+                        ?>
                     <tr>
                         <th class="text-right" colspan="4">Total: </th>
                         <th class="text-right"><?=number_format($invTotalPrice, 2)?></th>
                         <th class="text-right"><?=number_format($invClientTotalPrice, 2)?> <?=Html::encode($invoice->inv_client_currency)?></th>
                         <th></th>
                     </tr>
-                <?php endif; ?>
+                    <?php endif; ?>
                 <?php endif; ?>
             </table>
 
-        <?php if($order->orderTips): ?>
-
+        <?php if ($order->orderTips) : ?>
             <table class="table table-bordered">
                 <thead>
                     <tr>
@@ -291,9 +288,9 @@ use yii\bootstrap4\Html;
         <?php endif; ?>
 
 
-            <?php if ($invTotalPrice !== $ordTotalPrice):
+            <?php if ($invTotalPrice !== $ordTotalPrice) :
                 $newInvoiceAmount = round($ordTotalPrice - $invTotalPrice, 2);
-            ?>
+                ?>
                 <table class="table table-bordered">
                     <tbody>
                         <tr>

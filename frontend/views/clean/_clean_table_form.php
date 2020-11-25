@@ -74,22 +74,22 @@ $cleanTableUrl = Url::to(['clean/clean-table-ajax']);
                     </div>
                     <div class="col-md-2">
                         <?php echo $form->field($modelCleaner, 'date')->widget(
-                    DatePicker::class,
-                    [
-                        'clientOptions' => [
+                            DatePicker::class,
+                            [
+                            'clientOptions' => [
                             'autoclose' => true,
                             'format' => 'yyyy-mm-dd',
                             'clearBtn' => true,
-                        ],
-                        'options' => [
+                            ],
+                            'options' => [
                             'autocomplete' => 'off',
                             'readonly' => '1',
-                        ],
-                        'clientEvents' => [
+                            ],
+                            'clientEvents' => [
                             'clearDate' => 'function (e) {$(e.target).find("input").change();}',
-                        ],
-                    ]
-                ) ?>
+                            ],
+                            ]
+                        ) ?>
                     </div>
 
 

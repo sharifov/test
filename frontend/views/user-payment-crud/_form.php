@@ -33,10 +33,10 @@ use yii\widgets\Pjax;
             <?= $form->field($model, 'upt_description')->textarea(['maxlength' => true]) ?>
 
             <?= $form->field($model, 'upt_date')->widget(\kartik\date\DatePicker::class, [
-				'pluginOptions' => [
-					'format' => 'yyyy-mm-dd',
-					'autoclose' => true,
-				]
+                'pluginOptions' => [
+                    'format' => 'yyyy-mm-dd',
+                    'autoclose' => true,
+                ]
             ]) ?>
 
             <?= $form->field($model, 'upt_payroll_id')->textInput() ?>

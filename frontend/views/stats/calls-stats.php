@@ -34,7 +34,7 @@ $this->title = 'Calls Stats';
 
                         <div class="row">
                             <div class="col-md-4">
-								<?= $form->field($model, 'createTimeRange', [
+                                <?= $form->field($model, 'createTimeRange', [
                                     'options' => ['class' => 'form-group'],
                                 ])->widget(\kartik\daterange\DateRangePicker::class, [
                                     'presetDropdown' => false,
@@ -55,7 +55,7 @@ $this->title = 'Calls Stats';
                             </div>
 
                             <div class="col-md-2">
-								<?= $form->field($model, 'timeZone')->widget(\kartik\select2\Select2::class, [
+                                <?= $form->field($model, 'timeZone')->widget(\kartik\select2\Select2::class, [
                                     'data' => Employee::timezoneList(true),
                                     'size' => \kartik\select2\Select2::SMALL,
                                     'options' => [
@@ -79,7 +79,7 @@ $this->title = 'Calls Stats';
                             </div>
 
                             <div class="col-md-2">
-								<?= $form->field($model, 'dep_ids', [
+                                <?= $form->field($model, 'dep_ids', [
                                     'options' => ['class' => 'form-group']
                                 ])->widget(Select2::class, [
                                     'data' => Department::getList(),
@@ -90,7 +90,7 @@ $this->title = 'Calls Stats';
                             </div>
 
                             <div class="col-md-2">
-								<?= $form->field($model, 'callGraphGroupBy', [
+                                <?= $form->field($model, 'callGraphGroupBy', [
                                     'options' => ['class' => 'form-group']
                                 ])->dropDownList($model::getDateFormatTextList())->label('Group By') ?>
                             </div>
@@ -104,7 +104,7 @@ $this->title = 'Calls Stats';
                             </div>
 
                             <div class="col-md-2">
-								<?= $form->field($model, 'userGroupIds', [
+                                <?= $form->field($model, 'userGroupIds', [
                                     'options' => ['class' => 'form-group']
                                 ])->widget(Select2::class, [
                                     'data' => UserGroup::getList(),
@@ -133,7 +133,7 @@ $this->title = 'Calls Stats';
                             </div>
 
                             <div class="col-md-2">
-								<?= $form->field($model, 'recordingDurationTo', [
+                                <?= $form->field($model, 'recordingDurationTo', [
                                     'options' => ['class' => 'form-group']
                                 ])->input('number', ['class' => 'form-control'])->label('Duration Seconds To') ?>
                             </div>
@@ -148,14 +148,14 @@ $this->title = 'Calls Stats';
                             </div>
                         </div>
 
-                        <?= \yii\helpers\Html::checkboxList($model->formName().'[totalChartColumns]', $model->totalChartColumns, $model::getChartTotalCallTextList(), [
+                        <?= \yii\helpers\Html::checkboxList($model->formName() . '[totalChartColumns]', $model->totalChartColumns, $model::getChartTotalCallTextList(), [
                             'itemOptions' => [
                                 'style' => 'display: none',
                                 'label' => false
                             ],
                         ]) ?>
 
-                        <?= \yii\helpers\Html::dropDownList($model->formName().'[chartTotalCallsVaxis]', $model->chartTotalCallsVaxis, $model::getChartTotalCallsVaxisTextList(), [
+                        <?= \yii\helpers\Html::dropDownList($model->formName() . '[chartTotalCallsVaxis]', $model->chartTotalCallsVaxis, $model::getChartTotalCallsVaxisTextList(), [
                             'style' => 'display: none',
                             'label' => false
                         ]) ?>

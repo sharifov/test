@@ -11,6 +11,7 @@ use frontend\widgets\notification\NotificationWidget;
 use sales\auth\Auth;
 use yii\helpers\Html;
 use sales\helpers\setting\SettingHelper;
+
 //$bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
 //$bundle = \frontend\assets\AppAsset::register($this);
 $bundle = \frontend\assets\AppAsset::register($this);
@@ -36,13 +37,13 @@ $bundle = \frontend\assets\AppAsset::register($this);
         $this->registerMetaTag(['name' => 'robots', 'content' => 'noindex, nofollow']);
         $this->registerMetaTag(['name' => 'msapplication-TileColor', 'content' => '#a9e04b']);
         //$this->registerLinkTag(['rel' => 'icon', 'type' => 'image/png', 'href' => Helper::publishStatic('images/favicons/16x16.png'), 'sizes' => '16x16']);
-        $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'href' => Yii::$app->request->baseUrl.'/favicon.ico']);
+        $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'href' => Yii::$app->request->baseUrl . '/favicon.ico']);
         $this->head();
 
         //$this->head();
 
         $host = 'CRM';
-        echo Html::tag('title', ucfirst($host).' - '.Html::encode($this->title));
+        echo Html::tag('title', ucfirst($host) . ' - ' . Html::encode($this->title));
     ?>
     <?php /*<link rel="stylesheet" href="<?= Yii::$app->getAssetManager()->publish(Yii::getAlias('@frontend').'/web/css/style_theme.css')[1];?>"/>*/ ?>
     <?php //php $this->head()?>
@@ -62,7 +63,7 @@ $bundle = \frontend\assets\AppAsset::register($this);
             'username' => Auth::user()->username ?? '',
         ];
         $this->registerJs(
-            "let extraInfo = ".\yii\helpers\Json::htmlEncode($options).";",
+            "let extraInfo = " . \yii\helpers\Json::htmlEncode($options) . ";",
             \yii\web\View::POS_HEAD,
             'extraInfo'
         );
@@ -93,7 +94,7 @@ $bundle = \frontend\assets\AppAsset::register($this);
 
 <div class="container body">
     <div class="main_container">
-        <?php if (!Yii::$app->user->isGuest):?>
+        <?php if (!Yii::$app->user->isGuest) :?>
         <div class="col-md-3 left_col">
             <div class="left_col scroll-view">
 
@@ -108,7 +109,7 @@ $bundle = \frontend\assets\AppAsset::register($this);
                 <!-- /navbar left -->
 
                 <div class="grav-img-sm">
-					<?=Html::img($gravUrl, ['alt' => 'avatar', 'class' => 'img-circle profile_img', 'title' => $user->full_name])?>
+                    <?=Html::img($gravUrl, ['alt' => 'avatar', 'class' => 'img-circle profile_img', 'title' => $user->full_name])?>
                 </div>
 
                 <!-- sidebar menu -->
@@ -145,17 +146,17 @@ $bundle = \frontend\assets\AppAsset::register($this);
                             <ul class="dropdown-menu dropdown-usermenu pull-right">
                                 <li>
                                     <?=Html::a(
-                    '<i class="fa fa-user pull-right"></i> My Profile',
-                    ['/site/profile'],
-                    ['title' => 'My Profile']
-                ) ?>
+                                        '<i class="fa fa-user pull-right"></i> My Profile',
+                                        ['/site/profile'],
+                                        ['title' => 'My Profile']
+                                    ) ?>
                                 </li>
                                 <li>
                                     <?=Html::a(
-                    '<i class="fa fa-sign-out pull-right"></i> Log Out',
-                    ['/site/logout'],
-                    ['title' => 'Logout']
-                ) ?>
+                                        '<i class="fa fa-sign-out pull-right"></i> Log Out',
+                                        ['/site/logout'],
+                                        ['title' => 'Logout']
+                                    ) ?>
                                 </li>
                             </ul>
                         </li>
@@ -165,11 +166,11 @@ $bundle = \frontend\assets\AppAsset::register($this);
                             <?= frontend\widgets\OnlineConnection::widget() ?>
                             <?php //= frontend\widgets\Notifications::widget()?>
                             <?php
-                                if (Yii::$app->params['settings']['notification_web_socket']) {
-                                    echo NotificationSocketWidget::widget(['userId' => Auth::id()]);
-                                } else {
-                                    echo NotificationWidget::widget(['userId' => Auth::id()]);
-                                }
+                            if (Yii::$app->params['settings']['notification_web_socket']) {
+                                echo NotificationSocketWidget::widget(['userId' => Auth::id()]);
+                            } else {
+                                echo NotificationWidget::widget(['userId' => Auth::id()]);
+                            }
                             ?>
                         <?php /*= CentrifugoNotificationWidget::widget([
                             'userId' => Auth::id(),
@@ -246,7 +247,7 @@ $bundle = \frontend\assets\AppAsset::register($this);
 <!--                </div>-->
             </div>
 
-            <?php if (isset($this->params['h1'])): ?>
+            <?php if (isset($this->params['h1'])) : ?>
                 <div class="page-title">
                     <div class="title_left">
                         <h1><?= $this->params['h1'] ?></h1>
@@ -318,7 +319,7 @@ $bundle = \frontend\assets\AppAsset::register($this);
 
 <?= frontend\widgets\CallBox::widget() ?>
 <?= frontend\widgets\WebPhone::widget() ?>
-<?php if (Auth::can('PhoneWidget')): ?>
+<?php if (Auth::can('PhoneWidget')) : ?>
     <?= frontend\widgets\NewWebPhoneWidget::widget(['userId' => Auth::id()]) ?>
 <?php endif; ?>
 

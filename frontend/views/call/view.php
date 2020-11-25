@@ -7,7 +7,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model common\models\Call */
 
-$this->title = 'Call Id: ' . $model->c_id . ' ('.$model->c_from.' ... '.$model->c_to.')';
+$this->title = 'Call Id: ' . $model->c_id . ' (' . $model->c_from . ' ... ' . $model->c_to . ')';
 $this->params['breadcrumbs'][] = ['label' => 'Calls', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ]) ?>
     </p>
 
-    <?php if($model->recordingUrl):?>
+    <?php if ($model->recordingUrl) :?>
     <div class="col-md-12">
         <script>
             window.WS_InitOptions = {
@@ -185,7 +185,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'c_price',
                 'value' => static function (\common\models\Call $model) {
-                    return $model->c_price ? '$'.number_format($model->c_price, 5) : '-';
+                    return $model->c_price ? '$' . number_format($model->c_price, 5) : '-';
                 },
             ],
         ],

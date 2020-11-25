@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $leadForm LeadForm
  * @var $comForm \frontend\models\CommunicationForm
@@ -32,7 +33,7 @@ $is_admin = $user->isAdmin();
 $is_qa = $user->isQa();
 $is_supervision = $user->isSupervision();
 
-if($is_admin || $is_supervision) {
+if ($is_admin || $is_supervision) {
     $is_manager = true;
 }
 ?>
@@ -44,8 +45,7 @@ if($is_admin || $is_supervision) {
             <?= Html::encode($this->title) ?>
             <?php
             $lead = $leadForm->getLead();
-            if(!empty($lead->clone_id)){
-
+            if (!empty($lead->clone_id)) {
                 $cloneLead = \common\models\Lead::findOne($lead->clone_id);
 
                 /*printf(" <a title=\"%s\" href=\"%s\">(Cloned from %s)</a> ",
@@ -55,16 +55,15 @@ if($is_admin || $is_supervision) {
                     'uid' => $cloneLead->uid
                 ]),$lead->clone_id);*/
 
-                if($cloneLead) {
+                if ($cloneLead) {
                     echo \yii\helpers\Html::a('(Cloned from ' . $lead->clone_id . ' )', ['lead/view', 'gid' => $cloneLead->gid], ['title' => 'Clone reason: ' . $lead->description]);
                 }
-
             }
             ?>
             <?php if ($leadForm->getLead()->isNewRecord) : ?>
-            	<span class="label status-label label-info">New</span>
-            <?php else:?>
-            	<?= $leadForm->getLead()->getStatusLabel() ?>
+                <span class="label status-label label-info">New</span>
+            <?php else :?>
+                <?= $leadForm->getLead()->getStatusLabel() ?>
             <?php endif;?>
             </h2>
             <div class="page-header__general">
@@ -100,7 +99,7 @@ if($is_admin || $is_supervision) {
         <?= $this->render('partial/_actions', [
             'leadForm' => $leadForm
         ]);
-        ?>
+?>
 
         <div class="col-md-12">
             <?= \common\widgets\Alert::widget() ?>
@@ -112,11 +111,10 @@ if($is_admin || $is_supervision) {
                 'itineraryForm' => $itineraryForm,
                 'leadForm' => $leadForm
             ]);
-            ?>
+?>
         </div>
         <div class="col-md-12">
             <?php if (!$leadForm->getLead()->isNewRecord) : ?>
-
                 <?php /* $this->render('checklist/lead_checklist', [
                     'lead' => $leadForm->getLead(),
                     'comForm'       => $comForm,
@@ -142,7 +140,7 @@ if($is_admin || $is_supervision) {
                         'lead'          => $lead
                     ]);
                     ?>
-                <?php else: ?>
+                <?php else : ?>
                     <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
                 <?php endif;?>
 

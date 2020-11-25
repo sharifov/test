@@ -24,7 +24,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?php if ((new ContactUpdateAccess())->isUserCanUpdateContact($model, Auth::user())): ?>
+        <?php if ((new ContactUpdateAccess())->isUserCanUpdateContact($model, Auth::user())) : ?>
             <?php echo Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
             <?php echo Html::a('Delete', ['delete', 'id' => $model->id], [
                 'class' => 'btn btn-danger',
@@ -60,7 +60,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'ucl_favorite',
-                'value' => static function(Client $model) {
+                'value' => static function (Client $model) {
                     $out = '<span class="not-set">(not set)</span>';
                     if ($model->contact) {
                         $out = $model->contact->ucl_favorite ? '<span class="badge badge-success">Yes</span>' : '<span class="badge badge-danger">No</span>';
@@ -78,15 +78,17 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attributes' => [
                     [
                         'label' => 'Phones',
-                        'value' => static function(Client $model) {
+                        'value' => static function (Client $model) {
                             $phones = $model->clientPhones;
                             $data = [];
-                            if($phones) {
+                            if ($phones) {
                                 foreach ($phones as $k => $phone) {
                                     $title = $phone->cp_title ? ' <em>(' . $phone->cp_title . ')</em>' : '' ;
                                     $data[] =
-                                        CallHelper::callNumber($phone->phone, CallAccess::isUserCanDial(Auth::id(),
-                                        UserProfile::CALL_TYPE_WEB), '',  ['data-title' => $model->getNameByType(), 'disable-icon' => true], 'code') .
+                                        CallHelper::callNumber($phone->phone, CallAccess::isUserCanDial(
+                                            Auth::id(),
+                                            UserProfile::CALL_TYPE_WEB
+                                        ), '', ['data-title' => $model->getNameByType(), 'disable-icon' => true], 'code') .
                                         $title;
                                 }
                             }
@@ -98,10 +100,10 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     [
                         'label' => 'Emails',
-                        'value' => static function(Client $model) {
+                        'value' => static function (Client $model) {
                             $emails = $model->clientEmails;
                             $data = [];
-                            if($emails) {
+                            if ($emails) {
                                 foreach ($emails as $k => $email) {
                                     $title = $email->ce_title ? ' <em>(' . $email->ce_title . ')</em>' : '' ;
                                     $data[] = ' <code>' . Html::encode($email->email) . '</code>' . $title ;
@@ -127,15 +129,15 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],*/
                     [
                         'attribute' => 'created',
-                        'value' => function(Client $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
+                        'value' => function (Client $model) {
+                            return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
                         },
                         'format' => 'html',
                     ],
                     [
                         'attribute' => 'updated',
-                        'value' => function(Client $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
+                        'value' => function (Client $model) {
+                            return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->updated));
                         },
                         'format' => 'html',
                     ],

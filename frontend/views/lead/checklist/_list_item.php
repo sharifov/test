@@ -13,9 +13,9 @@
         <span class="fa fa-check-square-o success"></span>
         <?=$model->lcType ? \yii\helpers\Html::encode($model->lcType->lct_name) : '-'?>
         <?php
-            if ($model->lc_notes) {
-                echo \yii\helpers\Html::tag('i', '', ['class' => 'fa fa-info-circle', 'title' => 'Notes: ' . \yii\helpers\Html::encode($model->lc_notes), 'data-toggle' => 'tooltip', 'data-placement' => 'top']);
-            }
+        if ($model->lc_notes) {
+            echo \yii\helpers\Html::tag('i', '', ['class' => 'fa fa-info-circle', 'title' => 'Notes: ' . \yii\helpers\Html::encode($model->lc_notes), 'data-toggle' => 'tooltip', 'data-placement' => 'top']);
+        }
         ?>
     </td>
     <?php /*<td>

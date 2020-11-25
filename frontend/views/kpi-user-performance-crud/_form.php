@@ -24,9 +24,9 @@ use yii\widgets\Pjax;
 
             <?= $form->field($model, 'up_year')->input('number', ['step' => 1]) ?>
 
-			<?= $form->field($model, 'up_month')->dropDownList(DateHelper::getMonthList(), ['prompt' => '--']) ?>
+            <?= $form->field($model, 'up_month')->dropDownList(DateHelper::getMonthList(), ['prompt' => '--']) ?>
 
-			<?= $form->field($model, 'up_performance')->input('number', ['step' => 1]) ?>
+            <?= $form->field($model, 'up_performance')->input('number', ['step' => 1]) ?>
 
         </div>
 

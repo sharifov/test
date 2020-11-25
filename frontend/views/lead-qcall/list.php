@@ -5,6 +5,7 @@ use common\components\grid\DateTimeColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\LeadQcallSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -54,7 +55,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'lqcLead.source_id',
-                'value' => function(\common\models\LeadQcall $model) {
+                'value' => function (\common\models\LeadQcall $model) {
                     return $model->lqcLead->source ? $model->lqcLead->source->name : '-';
                 },
                 'filter' => \common\models\Sources::getList(true)
@@ -63,7 +64,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'header' => 'Client time',
                 'format' => 'raw',
-                'value' => function(\common\models\LeadQcall $model) {
+                'value' => function (\common\models\LeadQcall $model) {
                     return ClientTimeFormatter::format($model->lqcLead->getClientTime2(), $model->lqcLead->offset_gmt);
                 },
                 'options' => ['style' => 'width:90px'],
@@ -89,7 +90,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     $diffHours = (int) ($diffTime / (60 * 60));
 
 
-                    $str = ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+                    $str = ($diffHours > 3 && $diffHours < 73 ) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
                     $str .= '<br><i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lqcLead->created));
 
                     return $str;

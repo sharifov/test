@@ -1,4 +1,5 @@
 <?php
+
 namespace frontend\models;
 
 use common\models\Client;
@@ -85,7 +86,6 @@ class LeadForm extends Model
 
             if ($lead->leadPreferences === null) {
                 $this->setLeadPreferences(new LeadPreferences());
-
             } else {
                 $this->setLeadPreferences($lead->leadPreferences);
             }
@@ -212,7 +212,6 @@ class LeadForm extends Model
         return ($this->_leadPreferences !== null)
             ? $this->_leadPreferences
             : new LeadPreferences();
-
     }
 
     /**
@@ -429,7 +428,7 @@ class LeadForm extends Model
             if (is_int($key)) {
                 return $this->getAllModels()[$model][$key];
             } else {
-                return new $mapping[$model];
+                return new $mapping[$model]();
             }
         }
 

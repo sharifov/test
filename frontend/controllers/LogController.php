@@ -145,7 +145,6 @@ class LogController extends FController
         } else {
             return $this->render('view', ['model' => $model]);
         }
-
     }
 
     /**

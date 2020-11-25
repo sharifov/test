@@ -61,13 +61,13 @@ class CreditCardForm extends Model
     }
 
     public function validateDateFormat(): void
-	{
-		$fPattern = '/^\d{2}\/\d{2}$/';
-		$sPattern = '/^\d{2} \/ \d{2}$/';
-		if (!preg_match($fPattern, trim($this->cc_expiration)) && !preg_match($sPattern, trim($this->cc_expiration))) {
-			$this->addError('cc_expiration', 'The format of Expiration is invalid');
-		}
-	}
+    {
+        $fPattern = '/^\d{2}\/\d{2}$/';
+        $sPattern = '/^\d{2} \/ \d{2}$/';
+        if (!preg_match($fPattern, trim($this->cc_expiration)) && !preg_match($sPattern, trim($this->cc_expiration))) {
+            $this->addError('cc_expiration', 'The format of Expiration is invalid');
+        }
+    }
 
     public function parseDate()
     {
@@ -88,8 +88,6 @@ class CreditCardForm extends Model
         } else {
             $this->addError('cc_expiration', 'Incorrect expire year');
         }
-
-
     }
 
     /**

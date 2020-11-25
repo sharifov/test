@@ -15,7 +15,7 @@ use yii\widgets\Pjax;
 
     <?php Pjax::begin() ?>
 
-    <?php $form = ActiveForm::begin(['options' => ['data-pjax'=> 1]]); ?>
+    <?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1]]); ?>
 
     <div class="row">
         <div class="col-md-3">

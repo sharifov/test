@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright (c) 2015 Yiister
  * @license https://github.com/yiister/yii2-gentelella/blob/master/LICENSE

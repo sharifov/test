@@ -11,11 +11,10 @@ use yii\helpers\Html;
 /* @var $error string */
 ?>
 <div class="ajax-redirect-call">
-    <?php if($error):?>
+    <?php if ($error) :?>
         <pre><?=$error?></pre>
-    <?php else: ?>
-
-        <?php if ($phones):?>
+    <?php else : ?>
+        <?php if ($phones) :?>
             <h2><i class="fa fa-phone"></i> Phone Numbers:</h2>
             <table class="table table-bordered table-hover" style="margin: 0">
                 <thead>
@@ -28,7 +27,7 @@ use yii\helpers\Html;
                 </thead>
                 <tbody>
                 <?php $n = 1; ?>
-                <?php foreach ($phones as $pk => $phone): ?>
+                <?php foreach ($phones as $pk => $phone) : ?>
                     <tr>
                         <td class="text-right"><?=$n++?>.</td>
 
@@ -52,7 +51,7 @@ use yii\helpers\Html;
 
 
 
-        <?php if ($departments):?>
+        <?php if ($departments) :?>
             <h2><i class="fa fa-list"></i> Departments:</h2>
             <table class="table table-bordered table-hover" style="margin: 0">
                 <thead>
@@ -67,7 +66,7 @@ use yii\helpers\Html;
                 </thead>
                 <tbody>
                 <?php $n = 1; ?>
-                <?php foreach ($departments as $department): ?>
+                <?php foreach ($departments as $department) : ?>
                     <tr>
                         <td class="text-right"><?=$n++?>.</td>
 
@@ -76,11 +75,11 @@ use yii\helpers\Html;
                         <td>
                             <?php
                                 $userGroupList = [];
-                                if ($department->dugUgs) {
-                                    foreach ($department->dugUgs as $userGroup) {
-                                        $userGroupList[] =  '<span class="label label-info"><i class="fa fa-users"></i> ' . Html::encode($userGroup->ug_name) . '</span>';
-                                    }
+                            if ($department->dugUgs) {
+                                foreach ($department->dugUgs as $userGroup) {
+                                    $userGroupList[] =  '<span class="label label-info"><i class="fa fa-users"></i> ' . Html::encode($userGroup->ug_name) . '</span>';
                                 }
+                            }
                                 echo $userGroupList ? implode(' ', $userGroupList) : '-';
                             ?>
                         </td>
@@ -102,7 +101,7 @@ use yii\helpers\Html;
 
 
 
-        <?php if ($users):?>
+        <?php if ($users) :?>
             <h2><i class="fa fa-users"></i> Users:</h2>
             <table class="table table-bordered table-hover" style="margin: 0">
                 <thead>
@@ -115,16 +114,16 @@ use yii\helpers\Html;
                 </thead>
                 <tbody>
                 <?php $n = 1; ?>
-                <?php foreach ($users as $userModel): ?>
+                <?php foreach ($users as $userModel) : ?>
                     <?php
                         $roles = $userModel->getRoles();
                         $isReady = $userModel->isCallStatusReady();
 
                         $btnClass = 'btn-success';
 
-                        if (!$isReady) {
-                            $btnClass = 'btn-warning';
-                        }
+                    if (!$isReady) {
+                        $btnClass = 'btn-warning';
+                    }
 
                     ?>
                     <tr>

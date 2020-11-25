@@ -42,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'stp_updated_user_id',
                 'value' => static function (\common\models\SmsTemplateType $model) {
-                    return ($model->stpUpdatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->stpUpdatedUser->username) : $model->stp_updated_user_id);
+                    return ($model->stpUpdatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->stpUpdatedUser->username) : $model->stp_updated_user_id);
                 },
                 'format' => 'raw'
             ],
@@ -57,7 +57,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'stp_created_user_id',
                 'value' => static function (\common\models\SmsTemplateType $model) {
-                    return  ($model->stpCreatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->stpCreatedUser->username) : $model->stp_created_user_id);
+                    return  ($model->stpCreatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->stpCreatedUser->username) : $model->stp_created_user_id);
                 },
                 'format' => 'raw'
             ],

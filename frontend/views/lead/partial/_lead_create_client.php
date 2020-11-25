@@ -15,16 +15,16 @@ use borales\extensions\phoneInput\PhoneInput;
 ?>
 
 <div class="row">
-	<div class="col-md-4 col-sm-12">
-		<div id="create-lead-email">
-			<?= $form->field($leadForm->email, 'email')->textInput([
+    <div class="col-md-4 col-sm-12">
+        <div id="create-lead-email">
+            <?= $form->field($leadForm->email, 'email')->textInput([
                 'type' => 'email'
-			])->label(true) ?>
-		</div>
-	</div>
-	<div class="col-md-4 col-sm-12">
-		<?php
-		$js = <<<JS
+            ])->label(true) ?>
+        </div>
+    </div>
+    <div class="col-md-4 col-sm-12">
+        <?php
+        $js = <<<JS
             document.validationField = {
                 isNumeric: function(event) {
                     return !!(event.shiftKey || (event.keyCode < 48 || event.keyCode > 57));
@@ -58,10 +58,10 @@ use borales\extensions\phoneInput\PhoneInput;
                 }
             };
 JS;
-		$this->registerJs($js);
-		?>
-		<div id="create-lead-phone">
-			<?= $form->field($leadForm->phone, 'phone')->widget(PhoneInput::class, [
+        $this->registerJs($js);
+        ?>
+        <div id="create-lead-phone">
+            <?= $form->field($leadForm->phone, 'phone')->widget(PhoneInput::class, [
                 'jsOptions' => [
                     'nationalMode' => false,
                     'preferredCountries' => ['us'],
@@ -76,24 +76,24 @@ JS;
                                     $(this).val(value.replace(/[^0-9\+]+/g, ""));
                                 '
                 ]
-			])->label(true) ?>
-		</div>
-	</div>
-	<div class="col-md-4">
-		<?= $form->field($leadForm, 'requestIp')->textInput() ?>
-	</div>
+            ])->label(true) ?>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <?= $form->field($leadForm, 'requestIp')->textInput() ?>
+    </div>
 </div>
 
 <div class="row">
     <div class="col-md-4">
-		<?= $form->field($leadForm->client, 'firstName')->textInput() ?>
+        <?= $form->field($leadForm->client, 'firstName')->textInput() ?>
     </div>
 
     <div class="col-md-4">
-		<?= $form->field($leadForm->client, 'middleName')->textInput() ?>
+        <?= $form->field($leadForm->client, 'middleName')->textInput() ?>
     </div>
 
     <div class="col-md-4">
-		<?= $form->field($leadForm->client, 'lastName')->textInput() ?>
+        <?= $form->field($leadForm->client, 'lastName')->textInput() ?>
     </div>
 </div>

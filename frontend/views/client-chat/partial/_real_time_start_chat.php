@@ -11,8 +11,8 @@ use yii\widgets\Pjax;
 
 <script>pjaxOffFormSubmit('#_cc_real_time_start_chat_pjax')</script>
 <div class="row">
-	<div class="col-md-12">
-        <?php if (!$domainError): ?>
+    <div class="col-md-12">
+        <?php if (!$domainError) : ?>
             <?php Pjax::begin(['enableReplaceState' => false, 'enablePushState' => false, 'timeout' => 5000, 'id' => '_cc_real_time_start_chat_pjax']) ?>
                 <?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1]]); ?>
 
@@ -39,15 +39,15 @@ use yii\widgets\Pjax;
 
                 <?php ActiveForm::end() ?>
             <?php Pjax::end(); ?>
-        <?php else: ?>
+        <?php else : ?>
             <?= \yii\bootstrap4\Alert::widget([
-				'options' => [
-					'class' => 'alert alert-danger'
-				],
-				'body' => $domainError
-			]) ?>
+                'options' => [
+                    'class' => 'alert alert-danger'
+                ],
+                'body' => $domainError
+            ]) ?>
         <?php endif; ?>
-	</div>
+    </div>
 </div>
 
 <?php

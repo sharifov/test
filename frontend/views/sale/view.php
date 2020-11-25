@@ -32,10 +32,10 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
 $caseGuard = Yii::createObject(CaseManageSaleInfoGuard::class);
 if (!empty($caseSaleModel)) {
     $canManageSaleInfo =  $caseGuard->canManageSaleInfo($caseSaleModel, Yii::$app->user->identity, $data['passengers'] ?? []);
-    $pjaxCaseSaleTicketContainerId = 'pjax-case-sale-tickets-'.$caseSaleModel->css_cs_id.'-'.$caseSaleModel->css_sale_id;
+    $pjaxCaseSaleTicketContainerId = 'pjax-case-sale-tickets-' . $caseSaleModel->css_cs_id . '-' . $caseSaleModel->css_sale_id;
 } else {
     $canManageSaleInfo = true;
-    $pjaxCaseSaleTicketContainerId = 'pjax-case-sale-tickets-'.$data['saleId'];
+    $pjaxCaseSaleTicketContainerId = 'pjax-case-sale-tickets-' . $data['saleId'];
 }
 
 $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_id' => !empty($caseModel) ? $caseModel->cs_id : 0, 'sale_id' => $data['saleId'], 'booking_id' => $data['bookingId']]);
@@ -53,10 +53,10 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
         <?php if (!empty($additionalData) && $additionalData['withFareRules'] === 0) :?>
             <div class="col-md-12">
                 <?php echo Html::a(
-    'Check Fare rules',
-    ['sale/view', 'h' => $additionalData['hash'], 'wfr' => 1],
-    ['class' => 'btn btn-info']
-) ?>
+                    'Check Fare rules',
+                    ['sale/view', 'h' => $additionalData['hash'], 'wfr' => 1],
+                    ['class' => 'btn btn-info']
+                ) ?>
             </div>
         <?php endif ?>
 
@@ -122,12 +122,12 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
         </div>
 
         <div class="col-md-9">
-            <?php if (!empty($caseSaleModel) && $saleTicket = $caseSaleModel->cssSaleTicket): ?>
+            <?php if (!empty($caseSaleModel) && $saleTicket = $caseSaleModel->cssSaleTicket) : ?>
                 <div class="row">
                     <div class="col-md-12">
                         <div class="d-flex justify-content-between align-items-center">
                             <h2>Sale Tickets</h2>
-                            <?= Html::a('<i class="fa fa-envelope"></i> Send Email', $saleTicketGenerateEmail, ['class' => 'btn btn-success sale-ticket-generate-email-btn report-send-email-'.$caseSaleModel->css_sale_id, 'title' => SaleTicketHelper::getTitleForSendEmailBtn($saleTicket), 'data-pjax' => 0, 'data-credit-card-exist' => $dataProviderCc->totalCount]) ?>
+                            <?= Html::a('<i class="fa fa-envelope"></i> Send Email', $saleTicketGenerateEmail, ['class' => 'btn btn-success sale-ticket-generate-email-btn report-send-email-' . $caseSaleModel->css_sale_id, 'title' => SaleTicketHelper::getTitleForSendEmailBtn($saleTicket), 'data-pjax' => 0, 'data-credit-card-exist' => $dataProviderCc->totalCount]) ?>
                         </div>
                         <?php Pjax::begin(['id' => $pjaxCaseSaleTicketContainerId, 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]) ?>
                         <table class="table table-bordered table-hover">
@@ -146,9 +146,9 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                 <th>Upfront Charge</th>
                                 <th>Refundable Amount</th>
                             </tr>
-							<?php
+                            <?php
                             /** @var $saleTicket SaleTicket[] */
-                            foreach ($saleTicket as $key => $ticket): ?>
+                            foreach ($saleTicket as $key => $ticket) : ?>
                                 <tr>
                                     <td><?=Html::encode($ticket->st_client_name)?></td>
                                     <td><?=Html::encode($ticket->st_ticket_number)?></td>
@@ -156,7 +156,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                     <td><?=Html::encode($ticket->getFormattedOriginalFop())?></td>
                                     <td><?=Html::encode($ticket->st_charge_system)?></td>
                                     <td>
-                                        <?php if ($ticket->isPenaltyCheckWithRefTeam()):
+                                        <?php if ($ticket->isPenaltyCheckWithRefTeam()) :
                                             echo Editable::widget([
                                                 'model' => $ticket,
                                                 'attribute' => 'st_penalty_type',
@@ -175,13 +175,13 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                                     }',
                                                 ],
                                             ]);
-                                        else:
+                                        else :
                                             echo Html::encode(SaleTicket::getPenaltyTypeName($ticket->st_penalty_type));
                                         endif;
                                         ?>
                                     </td>
                                     <td>
-										<?php
+                                        <?php
                                             echo Editable::widget([
                                                 'model' => $ticket,
                                                 'attribute' => 'st_penalty_amount',
@@ -190,11 +190,11 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                                 'inputType' => Editable::INPUT_HTML5,
                                                 'formOptions' => [ 'action' => [Url::to(['/sale-ticket/ajax-sale-ticket-edit-info/', 'st_id' => $ticket->st_id])] ],
                                                 'options' => [
-                                                    'id' => 'sale-ticket-penalty-amount-'.$key . '-' . $ticket->st_case_sale_id
+                                                    'id' => 'sale-ticket-penalty-amount-' . $key . '-' . $ticket->st_case_sale_id
                                                 ],
                                                 'pluginEvents' => [
                                                     'editableSuccess' => 'function (event, val, form, data) {
-                                                        pjaxReload({container: "#'.$pjaxCaseSaleTicketContainerId.'"});
+                                                        pjaxReload({container: "#' . $pjaxCaseSaleTicketContainerId . '"});
                                                     }',
                                                 ],
                                             ]);
@@ -203,7 +203,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                     <td><?=Html::encode($ticket->st_selling)?></td>
                                     <td><?=Html::encode($ticket->st_service_fee)?></td>
                                     <td>
-										<?php
+                                        <?php
                                             echo Editable::widget([
                                                 'model' => $ticket,
                                                 'attribute' => 'st_recall_commission',
@@ -212,18 +212,18 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                                 'inputType' => Editable::INPUT_HTML5,
                                                 'formOptions' => [ 'action' => [Url::to(['/sale-ticket/ajax-sale-ticket-edit-info/', 'st_id' => $ticket->st_id])] ],
                                                 'options' => [
-                                                    'id' => 'sale-ticket-recall-commission-'.$key . '-' . $ticket->st_case_sale_id
+                                                    'id' => 'sale-ticket-recall-commission-' . $key . '-' . $ticket->st_case_sale_id
                                                 ],
                                                 'pluginEvents' => [
                                                     'editableSuccess' => 'function (event, val, form, data) {
-                                                        pjaxReload({container: "#'.$pjaxCaseSaleTicketContainerId.'"});
+                                                        pjaxReload({container: "#' . $pjaxCaseSaleTicketContainerId . '"});
                                                     }',
                                                 ],
                                             ]);
                                         ?>
                                     </td>
                                     <td>
-										<?php
+                                        <?php
                                             echo Editable::widget([
                                                 'model' => $ticket,
                                                 'attribute' => 'st_markup',
@@ -232,11 +232,11 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                                 'inputType' => Editable::INPUT_HTML5,
                                                 'formOptions' => [ 'action' => [Url::to(['/sale-ticket/ajax-sale-ticket-edit-info/', 'st_id' => $ticket->st_id])] ],
                                                 'options' => [
-                                                    'id' => 'sale-ticket-markup-'.$key . '-' . $ticket->st_case_sale_id
+                                                    'id' => 'sale-ticket-markup-' . $key . '-' . $ticket->st_case_sale_id
                                                 ],
                                                 'pluginEvents' => [
                                                     'editableSuccess' => 'function (event, val, form, data) {
-                                                        pjaxReload({container: "#'.$pjaxCaseSaleTicketContainerId.'"});
+                                                        pjaxReload({container: "#' . $pjaxCaseSaleTicketContainerId . '"});
                                                     }',
                                                 ],
                                             ]);
@@ -245,19 +245,19 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                     <td>
                                         <?php if ($ticket->isPenaltyHideChargeAndAmount()) : ?>
                                             N/A
-                                        <?php else: ?>
+                                        <?php else : ?>
                                             <?=Html::encode($ticket->st_upfront_charge)?>
                                         <?php endif; ?>
                                     </td>
                                     <td>
                                         <?php if ($ticket->isPenaltyHideChargeAndAmount()) : ?>
                                             N/A
-                                        <?php else: ?>
+                                        <?php else : ?>
                                             <?=Html::encode($ticket->st_refundable_amount)?>
                                         <?php endif; ?>
                                     </td>
                                 </tr>
-							<?php endforeach;?>
+                            <?php endforeach;?>
                         </table>
                         <?php Pjax::end(); ?>
                     </div>
@@ -267,13 +267,13 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                 <div class="col-md-5">
 
                     <h2>Processing Teams Status</h2>
-                    <?php if (isset($data['processingTeamsStatus']) && $data['processingTeamsStatus']): ?>
+                    <?php if (isset($data['processingTeamsStatus']) && $data['processingTeamsStatus']) : ?>
                         <table class="table table-bordered table-hover">
                             <tr>
                                 <th>Type</th>
                                 <th>Value</th>
                             </tr>
-                            <?php foreach ($data['processingTeamsStatus'] as $pStatusKey => $pStatusValue): ?>
+                            <?php foreach ($data['processingTeamsStatus'] as $pStatusKey => $pStatusValue) : ?>
                                 <tr>
                                     <td><?=Html::encode($pStatusKey)?></td>
                                     <td><?=Html::encode($pStatusValue)?></td>
@@ -284,7 +284,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
 
                     <h2>Notes</h2>
                     <div style="width: 100%;overflow-x: auto;">
-                        <?php if (isset($data['notes']) && $data['notes']): ?>
+                        <?php if (isset($data['notes']) && $data['notes']) : ?>
                             <table class="table table-bordered table-hover">
                                 <tr>
                                     <th>Created</th>
@@ -292,7 +292,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                     <th>Agent</th>
                                     <th>Team</th>
                                 </tr>
-                                <?php foreach ($data['notes'] as $note): ?>
+                                <?php foreach ($data['notes'] as $note) : ?>
                                     <tr>
                                         <td><?=Yii::$app->formatter->asDatetime(strtotime($note['created']))?></td>
                                         <td><?=Html::encode($note['message'])?></td>
@@ -306,7 +306,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
 
                     <h2>Customer Information</h2>
                     <div style="width: 100%; overflow-x: auto;">
-                        <?php if (!empty($data['customerInfo'])): ?>
+                        <?php if (!empty($data['customerInfo'])) : ?>
                             <table class="table table-bordered table-hover">
                                 <tr>
                                     <th>First Name</th>
@@ -328,9 +328,8 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
 
                 <div class="col-md-7">
                     <h2>Price</h2>
-                    <?php if (isset($data['price']) && $data['price']): ?>
-
-                        <?php if (isset($data['price']['priceQuotes']) && $data['price']['priceQuotes']): ?>
+                    <?php if (isset($data['price']) && $data['price']) : ?>
+                        <?php if (isset($data['price']['priceQuotes']) && $data['price']['priceQuotes']) : ?>
                         <table class="table table-bordered table-hover">
                             <tr>
                                 <th>Pax Type</th>
@@ -342,7 +341,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                 <th>Over Cap</th>
                                 <th>Source Fee</th>
                             </tr>
-                            <?php foreach ($data['price']['priceQuotes'] as $paxType => $price): ?>
+                            <?php foreach ($data['price']['priceQuotes'] as $paxType => $price) : ?>
                                 <tr>
                                     <td><?=Html::encode($paxType)?></td>
                                     <td><?=Html::encode($price['selling'])?></td>
@@ -372,7 +371,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                     <?php endif;?>
 
                     <h2>Auth List</h2>
-                    <?php if (isset($data['authList']) && $data['authList']): ?>
+                    <?php if (isset($data['authList']) && $data['authList']) : ?>
                         <table class="table table-bordered table-hover table-striped">
                             <tr>
                                 <th>Created</th>
@@ -383,7 +382,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                 <th>Message</th>
                                 <th>CC Number</th>
                             </tr>
-                            <?php foreach ($data['authList'] as $list): ?>
+                            <?php foreach ($data['authList'] as $list) : ?>
                                 <tr>
                                     <td><?=Yii::$app->formatter->asDatetime(strtotime($list['created']))?></td>
                                     <td><?=Html::encode($list['auth_system'])?></td>
@@ -398,15 +397,15 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                     <?php endif;?>
 
                     <?php
-                        if (!empty($csId)) {
-                            echo $this->render('partial/_sale_credit_card', [
-                                'csId' => $csId,
-                                'saleId' => $data['saleId'],
-                                'dataProvider' => $dataProviderCc,
-                                'caseSaleModel' => $caseSaleModel,
-                                'caseModel' => $caseModel
-                            ]);
-                        }
+                    if (!empty($csId)) {
+                        echo $this->render('partial/_sale_credit_card', [
+                            'csId' => $csId,
+                            'saleId' => $data['saleId'],
+                            'dataProvider' => $dataProviderCc,
+                            'caseSaleModel' => $caseSaleModel,
+                            'caseModel' => $caseModel
+                        ]);
+                    }
                     ?>
 
                 </div>
@@ -416,12 +415,12 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
     <div class="row">
         <div class="col-md-12">
             <h2>Passengers</h2>
-			<?php if (!empty($data['passengers'])): ?>
+            <?php if (!empty($data['passengers'])) : ?>
 <!--            --><?php //echo '<pre>';print_r($data);die;?>
                 <table class="table table-bordered table-hover" id="passengers">
                     <thead>
                     <tr>
-                        <?php if (!empty($csId) && $canManageSaleInfo): ?>
+                        <?php if (!empty($csId) && $canManageSaleInfo) : ?>
                             <th></th>
                         <?php endif; ?>
                         <th>First name</th>
@@ -437,13 +436,13 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                     </tr>
                     </thead>
                     <tbody>
-					<?php foreach ($data['passengers'] as $key => $passenger): ?>
+                    <?php foreach ($data['passengers'] as $key => $passenger) : ?>
                         <tr>
-							<?php if (!empty($csId) &&  $canManageSaleInfo): ?>
+                            <?php if (!empty($csId) &&  $canManageSaleInfo) : ?>
                                 <td style="width: 30px;" class="text-center"><span data-toggle="tooltip" title="<?= $canManageSaleInfo ?>" class="label label-default bg-orange"><i class="fa fa-info"></i></span></td>
-							<?php endif; ?>
+                            <?php endif; ?>
                             <td>
-								<?php
+                                <?php
                                 /*
                                     $editable = Editable::begin([
                                         'name' => 'cssSaleData[passengers]['.$key.'][last_name]',
@@ -460,15 +459,15 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                     Editable::end();
                                 */
                                 ?>
-								<?= Html::encode($passenger['first_name'] . ' ' . $passenger['last_name'] . ' ' . $passenger['middle_name']) ?>
+                                <?= Html::encode($passenger['first_name'] . ' ' . $passenger['last_name'] . ' ' . $passenger['middle_name']) ?>
                             </td>
                             <td><?=Html::encode($passenger['ticket_number'])?></td>
                             <td><?=Html::encode($passenger['type'])?></td>
                             <td>
-								<?php
-                                if (!$canManageSaleInfo):
+                                <?php
+                                if (!$canManageSaleInfo) :
                                     $editable = Editable::begin([
-                                        'name' => 'cssSaleData[passengers]['.$key.'][birth_date]',
+                                        'name' => 'cssSaleData[passengers][' . $key . '][birth_date]',
                                         'header' => 'Date of Birth',
                                         'asPopover' => false,
                                         'inputType' => Editable::INPUT_DATE,
@@ -476,10 +475,10 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                         'value' => date('d M Y', strtotime($passenger['birth_date'])),
                                         'formOptions' => [ 'action' => [Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
                                         'options' => [
-                                            'convertFormat'=>true,
-                                            'pluginOptions'=>[
-                                                'format'=>'php:d M Y',
-                                                'autoclose'=>true,
+                                            'convertFormat' => true,
+                                            'pluginOptions' => [
+                                                'format' => 'php:d M Y',
+                                                'autoclose' => true,
     //                                            'type' =>
                                             ],
                                             'class' => 'cssSaleData_passengers_birth_date'
@@ -491,16 +490,17 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                         ],
                                         'pjaxContainerId' => 'pjax-sale-list'
                                     ]);
-                                ?>
-                                <?php  $editable->beforeInput = Html::hiddenInput('cssSaleData[passengers][' .$key. '][type]', Html::encode($passenger['type'])); ?>
-                                <?php  Editable::end(); else: ?>
+                                    ?>
+                                    <?php  $editable->beforeInput = Html::hiddenInput('cssSaleData[passengers][' . $key . '][type]', Html::encode($passenger['type'])); ?>
+                                    <?php  Editable::end();
+                                else : ?>
                                     <?= date('d M Y', strtotime($passenger['birth_date'])) ?>
                                 <?php endif; ?>
                             </td>
                             <td>
-								<?php if (!$canManageSaleInfo):
+                                <?php if (!$canManageSaleInfo) :
                                     echo Editable::widget([
-                                            'name' => 'cssSaleData[passengers]['.$key.'][gender]',
+                                            'name' => 'cssSaleData[passengers][' . $key . '][gender]',
                                             'header' => 'Gender',
                                             'asPopover' => false,
                                             'inputType' => Editable::INPUT_DROPDOWN_LIST,
@@ -514,20 +514,20 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                             ],
                                             'pjaxContainerId' => 'pjax-sale-list'
                                         ]);
-                                    else:
+                                else :
                                         echo Html::encode($passenger['gender']);
-                                    endif;
+                                endif;
                                 ?>
                             </td>
                             <td>
-								<?php if (!$canManageSaleInfo) {
+                                <?php if (!$canManageSaleInfo) {
                                     echo Editable::widget([
-                                        'name' => 'cssSaleData[passengers]['.$key.'][meal]',
+                                        'name' => 'cssSaleData[passengers][' . $key . '][meal]',
                                         'header' => 'Meal',
                                         'asPopover' => false,
                                         'inputType' => Editable::INPUT_DROPDOWN_LIST,
                                         'data' => CaseSale::PASSENGER_MEAL,
-                                        'options' => ['prompt'=>'Select meal...'],
+                                        'options' => ['prompt' => 'Select meal...'],
                                         'value' => Html::encode(!empty($passenger['meal']) && is_array($passenger['meal']) ? reset($passenger['meal']) : null),
                                         'formOptions' => [ 'action' => [Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
                                         'pluginEvents' => [
@@ -548,7 +548,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                 ?>
                             </td>
                             <td>
-								<?php if (!$canManageSaleInfo) {
+                                <?php if (!$canManageSaleInfo) {
                                     echo Editable::widget([
                                         'name' => 'cssSaleData[passengers][' . $key . '][wheelchair]',
                                         'header' => 'Wheelchair',
@@ -563,7 +563,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
 										    document.activateButtonSync(data);
 										}',
                                         ],
-//										'placement' => PopoverX::ALIGN_TOP_LEFT,
+//                                      'placement' => PopoverX::ALIGN_TOP_LEFT,
                                         'pjaxContainerId' => 'pjax-sale-list'
                                     ]);
                                 } else {
@@ -576,7 +576,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                 ?>
                             </td>
                             <td>
-								<?php if (!$canManageSaleInfo && empty($passenger['ff_numbers'])) {
+                                <?php if (!$canManageSaleInfo && empty($passenger['ff_numbers'])) {
                                     echo Editable::widget([
                                         'name' => 'cssSaleData[passengers][' . $key . '][ff_airline]',
                                         'header' => 'Frequent Flyer Airline',
@@ -591,7 +591,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
 										        document.activateButtonSync(data);
 										    }',
                                         ],
-//										'placement' => PopoverX::ALIGN_TOP_LEFT,
+//                                      'placement' => PopoverX::ALIGN_TOP_LEFT,
                                         'pjaxContainerId' => 'pjax-sale-list'
                                     ]);
                                 } elseif (!empty($passenger['ff_airline'])) {
@@ -617,7 +617,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
 										    document.activateButtonSync(data);
 										}',
                                         ],
-//										'placement' => PopoverX::ALIGN_TOP_LEFT,
+//                                      'placement' => PopoverX::ALIGN_TOP_LEFT,
                                         'pjaxContainerId' => 'pjax-sale-list'
                                     ]);
                                 } else {
@@ -630,9 +630,9 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                 ?>
                             </td>
                             <td>
-								<?php if (!$canManageSaleInfo) {
+                                <?php if (!$canManageSaleInfo) {
                                     echo Editable::widget([
-                                        'name' => 'cssSaleData[passengers]['.$key.'][kt_numbers]',
+                                        'name' => 'cssSaleData[passengers][' . $key . '][kt_numbers]',
                                         'header' => 'KTN',
                                         'asPopover' => false,
                                         'inputType' => Editable::INPUT_TEXT,
@@ -653,23 +653,23 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                         echo !empty($passenger['kt_numbers']) ? Html::encode($passenger['kt_numbers']) : '(not set)';
                                     }
                                 }
-////								Html::encode($passenger['kt_numbers'] ?? null)
+////                                Html::encode($passenger['kt_numbers'] ?? null)
                                 ?>
                             </td>
                         </tr>
-					<?php endforeach;?>
+                    <?php endforeach;?>
                     </tbody>
                 </table>
-			<?php endif;?>
+            <?php endif;?>
         </div>
     </div>
 
     <div class="row">
         <div class="col-md-12" style="overflow-x: auto;">
-            <?php if (isset($data['itinerary']) && $data['itinerary']): ?>
-                <?php foreach ($data['itinerary'] as $itNr => $itinerary): ?>
+            <?php if (isset($data['itinerary']) && $data['itinerary']) : ?>
+                <?php foreach ($data['itinerary'] as $itNr => $itinerary) : ?>
                 <h4>Itinerary <?=($itNr + 1)?></h4>
-                <?php if ($itinerary['segments']): ?>
+                    <?php if ($itinerary['segments']) : ?>
                     <table class="table table-bordered table-hover table-striped">
                         <tr>
                             <th>Airline</th>
@@ -687,7 +687,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                             <th>Air craft</th>
                             <th>Baggage</th>
                         </tr>
-                        <?php foreach ($itinerary['segments'] as $segment): ?>
+                        <?php foreach ($itinerary['segments'] as $segment) : ?>
                             <tr>
                                 <td><?=Html::encode($segment['airline'])?></td>
                                 <td><?=Html::encode($segment['airlineName'])?></td>
@@ -737,39 +737,37 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
 
 
 
-                <?php endif;?>
+                    <?php endif;?>
                 <?php endforeach;?>
             <?php endif;?>
         </div>
     </div>
 
-    <?php if (!empty($data['fareRules'])): ?>
-
+    <?php if (!empty($data['fareRules'])) : ?>
         <?php
-            try {
-                ?>
+        try {
+            ?>
 
             <h4>Fare Rules</h4>
-            <?php foreach ($data['fareRules'] as $rule): ?>
+            <?php foreach ($data['fareRules'] as $rule) : ?>
                 <div class="row">
                     <div class="col-md-12 ">
                         <div class="card">
                             <div class="card-body">
 
-                                <?php foreach ($rule as $key => $value): ?>
-
-                                    <?php if ($key !== 'rules'): ?>
+                                <?php foreach ($rule as $key => $value) : ?>
+                                    <?php if ($key !== 'rules') : ?>
                                         <br> <b><?= $key ?></b>: <?= Html::encode($value) ?>
-                                    <?php else: ?>
-                                        <?php foreach ($value as $item): ?>
+                                    <?php else : ?>
+                                        <?php foreach ($value as $item) : ?>
                                             <b>Rules:</b>
                                             <div class="card">
                                                 <div class="card-body">
-                                                    <?php if (isset($item['details'])): ?>
+                                                    <?php if (isset($item['details'])) : ?>
                                                         <b>Details</b>
                                                         <div class="card">
                                                             <div class="card-body">
-                                                                <?php foreach ($item['details'] as $detailKey => $detailValue): ?>
+                                                                <?php foreach ($item['details'] as $detailKey => $detailValue) : ?>
                                                                     <b><?= $detailKey ?></b>
                                                                     <div class="row">
                                                                         <div class="col-md-6">
@@ -782,7 +780,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                                                                 </tr>
                                                                                 </thead>
                                                                                 <tbody>
-                                                                                <?php foreach ($detailValue as $elem): ?>
+                                                                                <?php foreach ($detailValue as $elem) : ?>
                                                                                     <tr>
                                                                                         <td><?= $elem['for'] ?></td>
                                                                                         <td><?= $elem['title'] ?></td>
@@ -805,14 +803,14 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                                                 <div class="col-md-6">
                                                                     <table class="table table-bordered table-hover table-striped">
 
-                                                                        <?php if (isset($item['category'])): ?>
+                                                                        <?php if (isset($item['category'])) : ?>
                                                                             <tr>
                                                                                 <td>category</b></td>
                                                                                 <td> <?= Html::encode($item['category']) ?> </td>
                                                                             </tr>
                                                                         <?php endif; ?>
 
-                                                                        <?php if (isset($item['fullText'])): ?>
+                                                                        <?php if (isset($item['fullText'])) : ?>
                                                                             <tr>
                                                                                 <td>fullText</b></td>
                                                                                 <td> <?= Yii::$app->formatter->format($item['fullText'], 'ntext') ?> </td>
@@ -820,7 +818,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
 
                                                                         <?php endif; ?>
 
-                                                                        <?php if (isset($item['categoryTitle'])): ?>
+                                                                        <?php if (isset($item['categoryTitle'])) : ?>
                                                                             <tr>
                                                                                 <td>categoryTitle</b></td>
                                                                                 <td> <?= Html::encode($item['categoryTitle']) ?> </td>
@@ -847,10 +845,10 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                 <br>
             <?php endforeach; ?>
 
-        <?php
-            } catch (Throwable $e) {
-                Yii::error($e->getMessage() . VarDumper::dumpAsString($data['fareRules']), 'Parsing:fareRules');
-            }
+            <?php
+        } catch (Throwable $e) {
+            Yii::error($e->getMessage() . VarDumper::dumpAsString($data['fareRules']), 'Parsing:fareRules');
+        }
 
         ?>
     <?php endif; ?>
@@ -971,6 +969,6 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
     $('#passengers span[data-toggle="tooltip"]').tooltip();
     
 JS;
-$this->registerJs($js);
+    $this->registerJs($js);
     ?>
 </div>

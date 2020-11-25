@@ -7,6 +7,7 @@ use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\kpi\entity\kpiUserProductCommission\search\KpiUserProductCommissionSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -30,10 +31,10 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
 
-			[
-				'class' => ProductTypeColumn::class,
-				'attribute' => 'upc_product_type_id',
-			],
+            [
+                'class' => ProductTypeColumn::class,
+                'attribute' => 'upc_product_type_id',
+            ],
 
             [
                 'class' => UserSelect2Column::class,
@@ -43,10 +44,10 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             'upc_year',
-			[
-				'class' => MonthColumn::class,
-				'attribute' => 'upc_month',
-			],
+            [
+                'class' => MonthColumn::class,
+                'attribute' => 'upc_month',
+            ],
             'upc_performance:percentInteger',
             'upc_commission_percent:percentInteger',
 
@@ -64,14 +65,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'placeholder' => 'Select User',
             ],
 
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'upc_created_dt',
-			],
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'upc_updated_dt',
-			],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'upc_created_dt',
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'upc_updated_dt',
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

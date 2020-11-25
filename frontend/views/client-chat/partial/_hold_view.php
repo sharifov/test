@@ -13,7 +13,7 @@ use yii\widgets\Pjax;
 ?>
 
 <div class="row">
-	<div class="col-md-12">
+    <div class="col-md-12">
         <?php Pjax::begin(
             [
                 'id' => 'pjax-cc-submit-hold',
@@ -32,9 +32,10 @@ use yii\widgets\Pjax;
 
                 <?php echo $form->field($holdForm, 'minuteToDeadline')->dropDownList(
                     (new ClientChatHoldService())->formattedDeadlineOptions(),
-                    ['prompt' => '---']) ?>
+                    ['prompt' => '---']
+                ) ?>
 
-                <?php if ($holdForm->reasons): ?>
+                <?php if ($holdForm->reasons) : ?>
                     <?= $form->field($holdForm, 'reasonId')->dropDownList($holdForm->getReasonList()) ?>
 
                     <?= $form->field($holdForm, 'comment', ['enableClientValidation' => false])->textarea(['max' => 100]) ?>
@@ -45,7 +46,7 @@ use yii\widgets\Pjax;
                 </div>    
             <?php $form::end() ?>
         <?php Pjax::end() ?>
-	</div>
+    </div>
 </div>
 
 <?php

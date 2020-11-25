@@ -80,20 +80,20 @@ class SettingsController extends FController
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\httpclient\Exception
      */
-    public function actionSynchronization() : Response
+    public function actionSynchronization(): Response
     {
         $result = Project::synchronizationProjects();
 
-        if($result) {
-            if($result['error']) {
+        if ($result) {
+            if ($result['error']) {
                 Yii::$app->getSession()->setFlash('error', $result['error']);
             } else {
                 $message = 'Synchronization successful<br>';
-                if($result['created']) {
-                    $message .= 'Created projects: "'.implode(', ', $result['created']).'"<br>';
+                if ($result['created']) {
+                    $message .= 'Created projects: "' . implode(', ', $result['created']) . '"<br>';
                 }
-                if($result['updated']) {
-                    $message .= 'Updated projects: "'.implode(', ', $result['updated']).'"<br>';
+                if ($result['updated']) {
+                    $message .= 'Updated projects: "' . implode(', ', $result['updated']) . '"<br>';
                 }
                 Yii::$app->getSession()->setFlash('success', $message);
             }
@@ -242,14 +242,13 @@ class SettingsController extends FController
         $errors = [];
         $project = Project::findOne(['id' => $id]);
         if ($project !== null) {
-
             if (Yii::$app->request->isPost || Yii::$app->request->isAjax) {
                 if ($project->load(Yii::$app->request->post())) {
-                    if($project->save()){
+                    if ($project->save()) {
                         return $this->redirect(['settings/projects']);
                     }
-                }else{
-                    if(empty($project->custom_data)){
+                } else {
+                    if (empty($project->custom_data)) {
                         $project->custom_data = @json_encode(['background-color' => '#f4f7fa', 'color' => '#000000']);
                     }
                 }

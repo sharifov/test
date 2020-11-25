@@ -35,7 +35,7 @@ $pjaxListId = 'pjax-api-log';
         ]) ?>
     </p>
 
-    <?php if (Auth::can('global/clean/table')): ?>
+    <?php if (Auth::can('global/clean/table')) : ?>
         <?php echo $this->render('../clean/_clean_table_form', [
             'modelCleaner' => $modelCleaner,
             'pjaxIdForReload' => $pjaxListId,
@@ -63,7 +63,7 @@ $pjaxListId = 'pjax-api-log';
             [
                 'attribute' => 'al_action',
                 'value' => function (\common\models\ApiLog $model) {
-                    return '<b>'.Html::encode($model->al_action).'</b>';
+                    return '<b>' . Html::encode($model->al_action) . '</b>';
                 },
                 'format' => 'raw',
                 'filter' => \common\models\ApiLog::getActionFilter()
@@ -180,7 +180,7 @@ $pjaxListId = 'pjax-api-log';
                 //'format' => 'html',
                 'value' => function (\common\models\ApiLog $model) {
                     $apiUser = \common\models\ApiUser::findOne($model->al_user_id);
-                    return $apiUser ? $apiUser->au_name . ' ('.$model->al_user_id.')' : $model->al_user_id;
+                    return $apiUser ? $apiUser->au_name . ' (' . $model->al_user_id . ')' : $model->al_user_id;
                 },
                 'filter' => \common\models\ApiUser::getList()
             ],

@@ -107,7 +107,7 @@ class EmployeeController extends FController
         if (empty($roles)) {
             throw new ForbiddenHttpException('Not found roles');
         } elseif (!$user->isAdmin() && $user->id != $employeeId) {
-            throw new ForbiddenHttpException('AccessDenied ('.$employeeId.')');
+            throw new ForbiddenHttpException('AccessDenied (' . $employeeId . ')');
         }
 
         if (Yii::$app->request->isPost && Yii::$app->request->isAjax) {
@@ -133,7 +133,6 @@ class EmployeeController extends FController
 
                 if ($model->needSave()) {
                     if (!$model->save()) {
-
                         //print_r($model->errors); exit;
 
                         if ($model->hasErrors('email_user')) {
@@ -201,7 +200,6 @@ class EmployeeController extends FController
         $multipleErrors = [];
 
         if ($multipleForm->load(Yii::$app->request->post()) && $multipleForm->validate()) {
-
             //VarDumper::dump(json_decode($multipleForm->user_list_json)); exit;
             //VarDumper::dump($multipleForm->user_list); exit;
             //var_dump($multipleForm->timeZone); die();
@@ -483,7 +481,6 @@ class EmployeeController extends FController
                     if ($model->make_user_project_params) {
                         if (!empty($attr['user_projects'])) {
                             foreach ($attr['user_projects'] as $projectId) {
-
                                     //VarDumper::dump($projectId, 10, true);
 
                                 $project = Project::findOne($projectId);
@@ -627,7 +624,7 @@ class EmployeeController extends FController
 
             if (!$user->isSuperAdmin()) {
                 if ($model->isSuperAdmin()) {
-                    throw new NotFoundHttpException('Access denied for Superadmin user: '.$model->id);
+                    throw new NotFoundHttpException('Access denied for Superadmin user: ' . $model->id);
                 }
             }
 
@@ -639,7 +636,7 @@ class EmployeeController extends FController
 
             if ($user->isAnySupervision()) {
                 if ($model->isAdmin()) {
-                    throw new NotFoundHttpException('Access denied for Admin user: '.$model->id);
+                    throw new NotFoundHttpException('Access denied for Admin user: ' . $model->id);
                 }
             }
 
@@ -836,7 +833,7 @@ class EmployeeController extends FController
 
         $dataLastFailedLogin = new ActiveDataProvider([
             'query' => UserFailedLogin::find()->andFilterWhere(['ufl_user_id' => $model->id]),
-            'sort'=> ['defaultOrder' => ['ufl_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['ufl_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 10,
             ],
@@ -922,7 +919,7 @@ class EmployeeController extends FController
 
             if ($data) {
                 foreach ($data as $n => $item) {
-                    $text = $item['text'] . ' ('.$item['id'].')';
+                    $text = $item['text'] . ' (' . $item['id'] . ')';
                     $data[$n]['text'] = self::formatText($text, $q);
                     $data[$n]['selection'] = $item['text'];
                 }
@@ -1076,7 +1073,7 @@ class EmployeeController extends FController
      */
     public static function formatText(string $str, string $term): string
     {
-        return preg_replace('~'.$term.'~i', '<b style="color: #e15554"><u>$0</u></b>', $str);
+        return preg_replace('~' . $term . '~i', '<b style="color: #e15554"><u>$0</u></b>', $str);
     }
 
     public function actionValidateRocketChatCredential()

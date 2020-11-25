@@ -32,22 +32,34 @@ $user = Yii::$app->user->identity;
         ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'Logout'])*/ ?>
 
 
-    <?=Html::a('<span class="fa fa-search"></span>', null,
-        ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'Search menu', 'id' => 'btn-search-menu-toggle']) ?>
+    <?=Html::a(
+        '<span class="fa fa-search"></span>',
+        null,
+        ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'Search menu', 'id' => 'btn-search-menu-toggle']
+    ) ?>
 
-    <?php if($user->canRoute('/user-connection/index')):?>
-    <?=Html::a('<span class="fa fa-plug"></span>', ['/user-connection/index'],
-        ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'User Connections']) ?>
+    <?php if ($user->canRoute('/user-connection/index')) :?>
+        <?=Html::a(
+            '<span class="fa fa-plug"></span>',
+            ['/user-connection/index'],
+            ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'User Connections']
+        ) ?>
     <?php endif; ?>
 
-    <?php if($user->canRoute('/call/user-map')):?>
-    <?=Html::a('<span class="fa fa-map"></span>', ['/call/user-map'],
-        ['target' => '_blank', 'data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'Call Map']) ?>
+    <?php if ($user->canRoute('/call/user-map')) :?>
+        <?=Html::a(
+            '<span class="fa fa-map"></span>',
+            ['/call/user-map'],
+            ['target' => '_blank', 'data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'Call Map']
+        ) ?>
     <?php endif; ?>
 
-    <?php if($user->canRoute('/user-connection/stats')):?>
-        <?=Html::a('<span class="fa fa-users"></span>', ['/user-connection/stats'],
-            ['target' => '_blank', 'data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'User Stats']) ?>
+    <?php if ($user->canRoute('/user-connection/stats')) :?>
+        <?=Html::a(
+            '<span class="fa fa-users"></span>',
+            ['/user-connection/stats'],
+            ['target' => '_blank', 'data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'User Stats']
+        ) ?>
     <?php endif; ?>
 </div>
 <?php

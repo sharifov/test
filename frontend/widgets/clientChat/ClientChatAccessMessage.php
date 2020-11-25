@@ -1,4 +1,5 @@
 <?php
+
 namespace frontend\widgets\clientChat;
 
 use common\models\Employee;

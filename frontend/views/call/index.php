@@ -35,7 +35,7 @@ $pjaxListId = 'pjax-call-index';
     <p>
         <?php /*= Html::a('Create Call', ['create'], ['class' => 'btn btn-success'])*/ ?>
     </p>
-    <?php if (Auth::can('global/clean/table')): ?>
+    <?php if (Auth::can('global/clean/table')) : ?>
         <?php echo $this->render('../clean/_clean_table_form', [
             'modelCleaner' => $modelCleaner,
             'pjaxIdForReload' => $pjaxListId,

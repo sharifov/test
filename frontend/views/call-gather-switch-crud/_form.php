@@ -21,7 +21,7 @@ use yii\widgets\ActiveForm;
             'options' => ['placeholder' => 'Select Command', 'multiple' => false],
             'pluginOptions' => ['allowClear' => true],
         ])
-        ?>
+?>
 
     <?= $form->field($model, 'cgs_step')->dropDownList(array_combine(range(1, 10), range(1, 10)), ['prompt' => '-']) ?>
 
@@ -35,7 +35,7 @@ use yii\widgets\ActiveForm;
             'options' => ['placeholder' => 'Select Command', 'multiple' => false],
             'pluginOptions' => ['allowClear' => true],
         ])
-        ?>
+?>
 
     <div class="form-group">
         <?= Html::submitButton('<i class="fa fa-save"></i> Save', ['class' => 'btn btn-success']) ?>

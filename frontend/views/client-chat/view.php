@@ -24,15 +24,14 @@ use yii\helpers\Html;
 ClientChatAsset::register($this);
 ?>
 
-<?php if (empty($userRcAuthToken)): ?>
-	<?php echo Alert::widget([
+<?php if (empty($userRcAuthToken)) : ?>
+    <?php echo Alert::widget([
         'options' => [
             'class' => 'alert-warning',
         ],
         'body' => 'You have no assigned token or the token is not valid.',
     ]); ?>
-<?php else: ?>
-
+<?php else : ?>
     <?php
         $this->title = ' ' . $clientChat->cchClient->full_name . ' - Chat';
         $this->params['breadcrumbs'][] = ['label' => 'My Client Chat', 'url' => ['index', 'chid' => $clientChat->cch_id]];
@@ -44,12 +43,12 @@ ClientChatAsset::register($this);
             <div id="_rc-iframe-wrapper">
                 <?= $iframe ?: '' ?>
             </div>
-            <?php if (!$isClosed && $actionPermissions->canSendCannedResponse()): ?>
+            <?php if (!$isClosed && $actionPermissions->canSendCannedResponse()) : ?>
                 <?php echo $this->render('partial/_canned_response', ['clientChat' => $clientChat]) ?>
             <?php endif; ?>
 
             <div id="couch_note_box">
-                <?php if (!$isClosed && $actionPermissions->canCouchNote($clientChat)): ?>
+                <?php if (!$isClosed && $actionPermissions->canCouchNote($clientChat)) : ?>
                     <?php echo $this->render('partial/_couch_note', ['couchNoteForm' => $couchNoteForm]); ?>
                 <?php endif; ?>
             </div>
@@ -58,7 +57,7 @@ ClientChatAsset::register($this);
         <div class="col-md-3">
             <div id="_cc_additional_info_wrapper" style="position: relative;">
                 <div id="_client-chat-info">
-                    <?php if ($client): ?>
+                    <?php if ($client) : ?>
                         <?php echo $this->render('partial/_client-chat-info', [
                             'clientChat' => $clientChat,
                             'client' => $client,
@@ -67,7 +66,7 @@ ClientChatAsset::register($this);
                     <?php endif; ?>
                 </div>
                 <div id="_client-chat-note">
-                    <?php if ($actionPermissions->canNoteShow($clientChat)): ?>
+                    <?php if ($actionPermissions->canNoteShow($clientChat)) : ?>
                         <?php echo $this->render('partial/_client-chat-note', [
                             'clientChat' => $clientChat,
                             'model' => new ClientChatNote(),

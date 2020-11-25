@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use common\components\grid\UserSelect2Column;
+
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\clientChatMessage\entity\search\ClientChatMessageSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -47,7 +48,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'ccm_body',
             [
                 'attribute' => 'message',
-                'value' => function(\sales\model\clientChatMessage\entity\ClientChatMessage $model) {
+                'value' => function (\sales\model\clientChatMessage\entity\ClientChatMessage $model) {
                     if (is_null($model->ccm_body) || is_null($model->ccm_body['msg'])) {
                         return "";
                     }

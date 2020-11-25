@@ -7,7 +7,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model common\models\UserProjectParams */
 
-$this->title = $model->uppUser->username . ' - '. $model->uppProject->name;
+$this->title = $model->uppUser->username . ' - ' . $model->uppProject->name;
 $this->params['breadcrumbs'][] = ['label' => 'User Project Params', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -32,8 +32,8 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             [
                 'attribute' => 'upp_user_id',
-                'value' => function(\common\models\UserProjectParams $model) {
-                    return $model->uppUser ? '<i class="fa fa-user"></i> '.Html::encode($model->uppUser->username).'' : '-';
+                'value' => function (\common\models\UserProjectParams $model) {
+                    return $model->uppUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->uppUser->username) . '' : '-';
                 },
                 'format' => 'raw',
             ],
@@ -42,8 +42,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'upp_dep_id',
-                'value' => function(\common\models\UserProjectParams $model) {
-                    return $model->uppDep ? ''.$model->uppDep->dep_name.'' : '-';
+                'value' => function (\common\models\UserProjectParams $model) {
+                    return $model->uppDep ? '' . $model->uppDep->dep_name . '' : '-';
                 },
             ],
 
@@ -55,21 +55,21 @@ $this->params['breadcrumbs'][] = $this->title;
             'upp_vm_enabled:booleanByLabel',
             [
                 'attribute' => 'upp_vm_user_status_id',
-                'value' => static function(UserProjectParams $model) {
+                'value' => static function (UserProjectParams $model) {
                     return UserProjectParams::VM_USER_STATUS_LIST[$model->upp_vm_user_status_id] ?? null;
                 },
             ],
             [
                 'attribute' => 'upp_vm_id',
-                'value' => static function(UserProjectParams $model) {
+                'value' => static function (UserProjectParams $model) {
                     return $model->upp_vm_id ? $model->voiceMail->uvm_name : null;
                 },
             ],
             //'upp_tw_sip_id',
             [
                 'attribute' => 'upp_updated_dt',
-                'value' => function(\common\models\UserProjectParams $model) {
-                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->upp_updated_dt));
+                'value' => function (\common\models\UserProjectParams $model) {
+                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->upp_updated_dt));
                 },
                 'format' => 'raw',
             ],

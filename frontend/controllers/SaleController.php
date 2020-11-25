@@ -39,8 +39,7 @@ class SaleController extends FController
         $module,
         CasesSaleService $casesSaleService,
         $config = []
-    )
-    {
+    ) {
         parent::__construct($id, $module, $config);
         $this->casesSaleService = $casesSaleService;
     }
@@ -103,7 +102,6 @@ class SaleController extends FController
             $id = (int) ($arr[1] ?? 0);
 
             $saleData = $this->casesSaleService->detailRequestToBackOffice($id, $withFareRules);
-
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableFormatter($throwable), 'SaleController:actionView:ErrorBoRequest');
         }

@@ -1,4 +1,5 @@
 <?php
+
 /* @var $clientId string */
 /* @var $token string */
 /* @var $fromAgentPhone string */
@@ -14,13 +15,13 @@ use yii\helpers\Html;
 \frontend\assets\WebPhoneAsset::register($this);
 
 ?>
-<?php if (SettingHelper::isOriginalPhoneWidgetEnabled()): ?>
+<?php if (SettingHelper::isOriginalPhoneWidgetEnabled()) : ?>
 <div class="fabs2" style="<?=((isset($_COOKIE['web-phone-widget-close']) && $_COOKIE['web-phone-widget-close']) ? '' : 'display: none')?>">
     <a id="prime2" class="fab2"><i class="fa fa-phone"></i></a>
 </div>
 
 <div id="web-phone-widget">
-    <?php if($token): ?>
+    <?php if ($token) : ?>
         <div id="web-phone-token" style="display: none"><?=$token?></div>
             <table class="table" style="margin: 0; background-color: rgba(255,255,255,.3);">
                 <tr>
@@ -120,7 +121,7 @@ use yii\helpers\Html;
                     </tr>
                 </table>
             </div>
-    <?php else: ?>
+    <?php else : ?>
         <div class="alert alert-danger alert-dismissible" role="alert">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <strong>Warning!</strong> WebCall token is empty.
@@ -129,21 +130,21 @@ use yii\helpers\Html;
 </div>
 
 
-<?php Modal::begin([
+    <?php Modal::begin([
     'id' => 'web-phone-dial-modal',
     'title' => 'Phone Dial',
     //'footer' => '<a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>',
     'size' => Modal::SIZE_LARGE
-]); ?>
-<?php Modal::end(); ?>
+    ]); ?>
+    <?php Modal::end(); ?>
 
 
-<?php Modal::begin([
+    <?php Modal::begin([
     'id' => 'web-phone-send-digit-modal',
     'title' => 'Send digit',
     'size' => 'modal-sm',
-]);
-?>
+    ]);
+    ?>
     <div class="container container-digit" id="container-digit">
         <div id="output"></div>
         <div class="row">
@@ -170,7 +171,7 @@ use yii\helpers\Html;
             <i class="fa fa-eraser dig reset-digit" aria-hidden="true"></i>
         </div>
     </div>
-<?php Modal::end(); ?>
+    <?php Modal::end(); ?>
 
 <?php endif; ?>
 
@@ -196,14 +197,14 @@ use yii\helpers\Html;
     $ajaxCreateCallUrl = Url::to(['/phone/ajax-create-call']);
 
     $conferenceBase = 0;
-    if (isset(Yii::$app->params['settings']['voip_conference_base'])) {
-        $conferenceBase = Yii::$app->params['settings']['voip_conference_base'] ? 1 : 0;
-    }
+if (isset(Yii::$app->params['settings']['voip_conference_base'])) {
+    $conferenceBase = Yii::$app->params['settings']['voip_conference_base'] ? 1 : 0;
+}
 
     $callOutBackendSide = 0;
-    if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
-        $callOutBackendSide = Yii::$app->params['settings']['call_out_backend_side'] ? 1 : 0;
-    }
+if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
+    $callOutBackendSide = Yii::$app->params['settings']['call_out_backend_side'] ? 1 : 0;
+}
 
     $csrf_param = Yii::$app->request->csrfParam;
     $csrf_token = Yii::$app->request->csrfToken;
@@ -1661,24 +1662,23 @@ JS;
 
 } else {*/
 
-    if (Yii::$app->controller->module->id != 'user-management') {
-        $this->registerJs($js, \yii\web\View::POS_READY);
+if (Yii::$app->controller->module->id != 'user-management') {
+    $this->registerJs($js, \yii\web\View::POS_READY);
 
-        $cookies = Yii::$app->request->cookies;
+    $cookies = Yii::$app->request->cookies;
 
-        //\yii\helpers\VarDumper::dump($cookies, 10, true);
-        /*echo '<h1>+++++++++';
-        \yii\helpers\VarDumper::dump($_COOKIE['web-phone-widget-close'], 10, true);
-        echo '--------</h1>';*/
+    //\yii\helpers\VarDumper::dump($cookies, 10, true);
+    /*echo '<h1>+++++++++';
+    \yii\helpers\VarDumper::dump($_COOKIE['web-phone-widget-close'], 10, true);
+    echo '--------</h1>';*/
 
 
-        //if (($cookie = $cookies->get('web-phone-widget-close')) !== null) {
-            if(!isset($_COOKIE['web-phone-widget-close'])) {
-                $this->registerJs("$('#web-phone-widget').slideDown();", \yii\web\View::POS_READY);
-            }
-        //}
-
+    //if (($cookie = $cookies->get('web-phone-widget-close')) !== null) {
+    if (!isset($_COOKIE['web-phone-widget-close'])) {
+        $this->registerJs("$('#web-phone-widget').slideDown();", \yii\web\View::POS_READY);
     }
+        //}
+}
 //}
 
 

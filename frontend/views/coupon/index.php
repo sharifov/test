@@ -8,6 +8,7 @@ use common\components\grid\UserSelect2Column;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\coupon\entity\coupon\search\CouponSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
