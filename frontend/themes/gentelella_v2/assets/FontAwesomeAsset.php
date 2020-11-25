@@ -7,13 +7,12 @@
 
 namespace frontend\themes\gentelella_v2\assets;
 
-use rmrevin\yii\fontawesome\NpmFreeAssetBundle;
 use kivork\bootstrap4glyphicons\assets\GlyphiconAsset;
 use yii\web\AssetBundle;
 
 class FontAwesomeAsset extends AssetBundle
 {
-    public $sourcePath = '@frontend/themes/gentelella_v2/font-awesome/';
+    public $sourcePath = '@webroot/font-awesome/';
     public $css = [
         'font-awesome.min.css',
     ];
