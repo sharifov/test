@@ -62,14 +62,17 @@ class QaTaskReturnNotifierListener
             $reason = $reasonModel->tar_name;
         }
 
-        $body = Yii::t('email', "You task (Id: {id}) has been returned to {status} by {username} ({role}). Reason: {reason}.",
+        $body = Yii::t(
+            'email',
+            "You task (Id: {id}) has been returned to {status} by {username} ({role}). Reason: {reason}.",
             [
                 'id' => Purifier::createQaTaskShortLink($task),
                 'status' => QaTaskStatus::getName($event->getChangeStateLog()->endStatusId),
                 'username' => $creator->username,
                 'role' => implode(',', $creator->getRoles(true)),
                 'reason' => $reason,
-            ]);
+            ]
+        );
 
         if ($ntf = Notifications::create($oldAssigned->id, $subject, $body, Notifications::TYPE_INFO, true)) {
             //Notifications::socket($oldAssigned->id, null, 'getNewNotification', [], true);

@@ -45,7 +45,6 @@ class OfferController extends FController
 
 
         if ($model->load(Yii::$app->request->post())) {
-
             //Yii::$app->response->format = Response::FORMAT_JSON;
 
             if ($model->validate()) {
@@ -78,11 +77,9 @@ class OfferController extends FController
 
                 //$model->errors = $offer->errors;
                 Yii::error(VarDumper::dumpAsString($offer->errors), 'OfferController:CreateAjax:Offer:save');
-
             }
             //return ['errors' => \yii\widgets\ActiveForm::validate($model)];
         } else {
-
             $leadId = (int) Yii::$app->request->get('id');
 
             if (!$leadId) {
@@ -114,7 +111,6 @@ class OfferController extends FController
         Yii::$app->response->format = Response::FORMAT_JSON;
 
         try {
-
             if (!$leadId) {
                 throw new Exception('Not found Lead ID params', 2);
             }
@@ -125,14 +121,13 @@ class OfferController extends FController
 
             $lead = Lead::findOne($leadId);
             if (!$lead) {
-                throw new Exception('Lead ('.$leadId.') not found', 4);
+                throw new Exception('Lead (' . $leadId . ') not found', 4);
             }
 
             $offers = Offer::find()->where(['of_lead_id' => $lead->id])->orderBy(['of_id' => SORT_DESC])->all();
 
             if ($offers) {
                 foreach ($offers as $offer) {
-
                     $exist = OfferProduct::find()->where(['op_offer_id' => $offer->of_id, 'op_product_quote_id' => $productQuoteId])->exists();
 
                     $offerList[] = Html::a(($exist ? '<i class="fa fa-check-square-o success"></i> ' : '<i class="fa fa-square-o"></i> ') . $offer->of_name, null, [
@@ -144,7 +139,6 @@ class OfferController extends FController
                     ]);
                 }
             }
-
         } catch (\Throwable $throwable) {
             return ['error' => 'Error: ' . $throwable->getMessage()];
         }
@@ -178,7 +172,6 @@ class OfferController extends FController
         $model->of_id       = $modelOffer->of_id;
 
         if ($model->load(Yii::$app->request->post())) {
-
             if ($model->validate()) {
                 $modelOffer->of_name = $model->of_name;
                 $modelOffer->of_status_id = $model->of_status_id;
@@ -202,7 +195,6 @@ class OfferController extends FController
         return $this->renderAjax('forms/update_ajax_form', [
             'model' => $model,
         ]);
-
     }
 
     /**
@@ -216,7 +208,7 @@ class OfferController extends FController
         try {
             $model = $this->findModel($id);
             if (!$model->delete()) {
-                throw new Exception('Offer ('.$id.') not deleted', 2);
+                throw new Exception('Offer (' . $id . ') not deleted', 2);
             }
         } catch (\Throwable $throwable) {
             return ['error' => 'Error: ' . $throwable->getMessage()];

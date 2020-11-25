@@ -38,8 +38,7 @@ class QaTaskQueueController extends FController
         ProjectAccessService $projectAccessService,
         QueryAccessService $queryAccessService,
         $config = []
-    )
-    {
+    ) {
         parent::__construct($id, $module, $config);
         $this->projectAccessService = $projectAccessService;
         $this->queryAccessService = $queryAccessService;

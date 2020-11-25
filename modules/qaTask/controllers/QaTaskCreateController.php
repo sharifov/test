@@ -31,8 +31,7 @@ class QaTaskCreateController extends FController
         $module,
         QaTaskCreateManuallyService $createManuallyService,
         $config = []
-    )
-    {
+    ) {
         parent::__construct($id, $module, $config);
         $this->createManuallyService = $createManuallyService;
     }

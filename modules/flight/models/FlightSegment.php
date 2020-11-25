@@ -24,17 +24,17 @@ use Yii;
  */
 class FlightSegment extends \yii\db\ActiveRecord
 {
-	use EventTrait;
+    use EventTrait;
 
-	public CONST FLEX_TYPE_MINUS = 1;
-	public CONST FLEX_TYPE_PLUS = 2;
-	public CONST FLEX_TYPE_PLUS_MINUS = 3;
+    public const FLEX_TYPE_MINUS = 1;
+    public const FLEX_TYPE_PLUS = 2;
+    public const FLEX_TYPE_PLUS_MINUS = 3;
 
-	public CONST FLEX_TYPE_LIST = [
-		self::FLEX_TYPE_MINUS => '-',
-		self::FLEX_TYPE_PLUS => '+',
-		self::FLEX_TYPE_PLUS_MINUS => '+/-',
-	];
+    public const FLEX_TYPE_LIST = [
+        self::FLEX_TYPE_MINUS => '-',
+        self::FLEX_TYPE_PLUS => '+',
+        self::FLEX_TYPE_PLUS_MINUS => '+/-',
+    ];
 
     /**
      * {@inheritdoc}
@@ -83,40 +83,42 @@ class FlightSegment extends \yii\db\ActiveRecord
         return $this->hasOne(Flight::class, ['fl_id' => 'fs_flight_id']);
     }
 
-	/**
-	 * @param SegmentDTO $segmentDTO
-	 * @return static
-	 */
-	public static function create(SegmentDTO $segmentDTO): self
-	{
-		$segment = new static();
-		$segment->fs_flight_id = $segmentDTO->flightId;
-		$segment->fs_origin_iata = $segmentDTO->origin;
-		$segment->fs_destination_iata = $segmentDTO->destination;
-		$segment->fs_departure_date = $segmentDTO->departure;
-		$segment->fs_flex_days = $segmentDTO->flexDays;
-		$segment->fs_flex_type_id = $segmentDTO->flexTypeId;
-		$segment->fs_origin_iata_label = $segmentDTO->originLabel;
-		$segment->fs_destination_iata_label = $segmentDTO->destinationLabel;
-		return $segment;
-	}
+    /**
+     * @param SegmentDTO $segmentDTO
+     * @return static
+     */
+    public static function create(SegmentDTO $segmentDTO): self
+    {
+        $segment = new static();
+        $segment->fs_flight_id = $segmentDTO->flightId;
+        $segment->fs_origin_iata = $segmentDTO->origin;
+        $segment->fs_destination_iata = $segmentDTO->destination;
+        $segment->fs_departure_date = $segmentDTO->departure;
+        $segment->fs_flex_days = $segmentDTO->flexDays;
+        $segment->fs_flex_type_id = $segmentDTO->flexTypeId;
+        $segment->fs_origin_iata_label = $segmentDTO->originLabel;
+        $segment->fs_destination_iata_label = $segmentDTO->destinationLabel;
+        return $segment;
+    }
 
-	/**
-	 * @param SegmentDTO $segmentDTO
-	 */
-	public function edit(SegmentDTO $segmentDTO): void
-	{
-		if ($this->fs_origin_iata !== $segmentDTO->origin ||
-			$this->fs_destination_iata !== $segmentDTO->destination ||
-			$this->fs_departure_date !== $segmentDTO->departure) {
-			$this->recordEvent(new FlightRequestUpdateEvent($this->fsFlight), FlightRequestUpdateEvent::EVENT_KEY);
-		}
-		$this->fs_origin_iata = $segmentDTO->origin;
-		$this->fs_destination_iata = $segmentDTO->destination;
-		$this->fs_departure_date = $segmentDTO->departure;
-		$this->fs_flex_days = $segmentDTO->flexDays;
-		$this->fs_flex_type_id = $segmentDTO->flexTypeId;
-	}
+    /**
+     * @param SegmentDTO $segmentDTO
+     */
+    public function edit(SegmentDTO $segmentDTO): void
+    {
+        if (
+            $this->fs_origin_iata !== $segmentDTO->origin ||
+            $this->fs_destination_iata !== $segmentDTO->destination ||
+            $this->fs_departure_date !== $segmentDTO->departure
+        ) {
+            $this->recordEvent(new FlightRequestUpdateEvent($this->fsFlight), FlightRequestUpdateEvent::EVENT_KEY);
+        }
+        $this->fs_origin_iata = $segmentDTO->origin;
+        $this->fs_destination_iata = $segmentDTO->destination;
+        $this->fs_departure_date = $segmentDTO->departure;
+        $this->fs_flex_days = $segmentDTO->flexDays;
+        $this->fs_flex_type_id = $segmentDTO->flexTypeId;
+    }
 
     /**
      * {@inheritdoc}

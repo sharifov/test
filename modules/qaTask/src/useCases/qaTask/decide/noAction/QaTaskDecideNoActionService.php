@@ -17,8 +17,7 @@ class QaTaskDecideNoActionService
 
     public function __construct(
         QaTaskDecideService $decideService
-    )
-    {
+    ) {
         $this->decideService = $decideService;
     }
 

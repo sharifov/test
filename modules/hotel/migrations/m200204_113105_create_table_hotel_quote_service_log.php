@@ -42,12 +42,22 @@ class m200204_113105_create_table_hotel_quote_service_log extends Migration
         ]);
 
         $this->addForeignKey(
-            'FK-hotel-quote-service-log_hotel-quote', $this->tableName,'hqsl_hotel_quote_id',
-            '{{%hotel_quote}}','hq_id','CASCADE','CASCADE'
+            'FK-hotel-quote-service-log_hotel-quote',
+            $this->tableName,
+            'hqsl_hotel_quote_id',
+            '{{%hotel_quote}}',
+            'hq_id',
+            'CASCADE',
+            'CASCADE'
         );
         $this->addForeignKey(
-            'FK-hotel-quote-service-log_employees', $this->tableName,'hqsl_created_user_id',
-            '{{%employees}}','id','SET NULL','CASCADE'
+            'FK-hotel-quote-service-log_employees',
+            $this->tableName,
+            'hqsl_created_user_id',
+            '{{%employees}}',
+            'id',
+            'SET NULL',
+            'CASCADE'
         );
 
         $this->dropColumn('{{%hotel_quote}}', 'hq_json_response');

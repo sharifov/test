@@ -77,31 +77,31 @@ class ProductType extends \yii\db\ActiveRecord
         return new Scopes(static::class);
     }
 
-	/**
-	 * @return \yii\db\ActiveQuery
-	 */
-	public function getProductTypePaymentMethod(): \yii\db\ActiveQuery
-	{
-		return $this->hasMany(ProductTypePaymentMethod::class, ['ptpm_produt_type_id' => 'pt_id']);
-	}
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProductTypePaymentMethod(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(ProductTypePaymentMethod::class, ['ptpm_produt_type_id' => 'pt_id']);
+    }
 
-	/**
-	 * @return \yii\db\ActiveQuery
-	 */
-	public function getProducts(): \yii\db\ActiveQuery
-	{
-		return $this->hasMany(Product::class, ['pr_type_id' => 'pt_id']);
-	}
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProducts(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(Product::class, ['pr_type_id' => 'pt_id']);
+    }
 
-	/**
-	 * @return float
-	 */
+    /**
+     * @return float
+     */
     public function getProcessingFeeAmount(): float
-	{
-		$setting = json_decode((string)$this->pt_settings, true);
+    {
+        $setting = json_decode((string)$this->pt_settings, true);
 
-		return ProductQuoteHelper::roundPrice(isset($setting['processing_fee_amount']) ? (float)$setting['processing_fee_amount'] : SettingHelper::processingFee());
-	}
+        return ProductQuoteHelper::roundPrice(isset($setting['processing_fee_amount']) ? (float)$setting['processing_fee_amount'] : SettingHelper::processingFee());
+    }
 
     /**
      * @return array

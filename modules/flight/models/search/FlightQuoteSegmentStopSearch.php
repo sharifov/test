@@ -47,7 +47,7 @@ class FlightQuoteSegmentStopSearch extends FlightQuoteSegmentStop
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['qss_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['qss_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ]

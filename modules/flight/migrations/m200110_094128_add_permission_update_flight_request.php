@@ -1,4 +1,5 @@
 <?php
+
 namespace modules\flight\migrations;
 
 use sales\rbac\rules\ProductOwnerRule;
@@ -10,52 +11,52 @@ use yii\db\Migration;
  */
 class m200110_094128_add_permission_update_flight_request extends Migration
 {
-	public $permissions = [
-		'updateProduct',
-	];
+    public $permissions = [
+        'updateProduct',
+    ];
 
-	public $roles = [
-		\common\models\Employee::ROLE_ADMIN,
-		\common\models\Employee::ROLE_SUPER_ADMIN,
-//		\common\models\Employee::ROLE_AGENT,
-//		\common\models\Employee::ROLE_EX_AGENT,
-//		\common\models\Employee::ROLE_EX_SUPER,
-//		\common\models\Employee::ROLE_SUP_AGENT,
-//		\common\models\Employee::ROLE_SUP_SUPER,
-//		\common\models\Employee::ROLE_SUPERVISION,
-	];
+    public $roles = [
+        \common\models\Employee::ROLE_ADMIN,
+        \common\models\Employee::ROLE_SUPER_ADMIN,
+//      \common\models\Employee::ROLE_AGENT,
+//      \common\models\Employee::ROLE_EX_AGENT,
+//      \common\models\Employee::ROLE_EX_SUPER,
+//      \common\models\Employee::ROLE_SUP_AGENT,
+//      \common\models\Employee::ROLE_SUP_SUPER,
+//      \common\models\Employee::ROLE_SUPERVISION,
+    ];
 
-	/**
-	 * {@inheritdoc}
-	 * @throws \yii\base\Exception
-	 */
+    /**
+     * {@inheritdoc}
+     * @throws \yii\base\Exception
+     */
     public function safeUp()
     {
-		$auth = Yii::$app->authManager;
+        $auth = Yii::$app->authManager;
 
-		$admin = $auth->getRole('admin');
+        $admin = $auth->getRole('admin');
 
-		$updateProduct = $auth->createPermission('updateProduct');
-		$updateProduct->description = 'Update Product';
-		$auth->add($updateProduct);
+        $updateProduct = $auth->createPermission('updateProduct');
+        $updateProduct->description = 'Update Product';
+        $auth->add($updateProduct);
 
-		$auth->addChild($admin, $updateProduct);
-		//----------------------------------------------------------
+        $auth->addChild($admin, $updateProduct);
+        //----------------------------------------------------------
 
-		//----------------------------------------------------------
-		$updateProductRule = new ProductOwnerRule();
-		$auth->add($updateProductRule);
+        //----------------------------------------------------------
+        $updateProductRule = new ProductOwnerRule();
+        $auth->add($updateProductRule);
 
-		$updateOwnProduct = $auth->createPermission('updateOwnProduct');
-		$updateOwnProduct->description = 'Update Own Product';
-		$updateOwnProduct->ruleName = $updateProductRule->name;
-		$auth->add($updateOwnProduct);
+        $updateOwnProduct = $auth->createPermission('updateOwnProduct');
+        $updateOwnProduct->description = 'Update Own Product';
+        $updateOwnProduct->ruleName = $updateProductRule->name;
+        $auth->add($updateOwnProduct);
 
-		$auth->addChild($updateOwnProduct, $updateProduct);
+        $auth->addChild($updateOwnProduct, $updateProduct);
 
-		if (Yii::$app->cache) {
-			Yii::$app->cache->flush();
-		}
+        if (Yii::$app->cache) {
+            Yii::$app->cache->flush();
+        }
     }
 
     /**
@@ -63,18 +64,18 @@ class m200110_094128_add_permission_update_flight_request extends Migration
      */
     public function safeDown()
     {
-		$auth = Yii::$app->authManager;
+        $auth = Yii::$app->authManager;
 
-		$updateProduct = $auth->getPermission('updateProduct');
-		$updateOwnProduct = $auth->getPermission('updateOwnProduct');
+        $updateProduct = $auth->getPermission('updateProduct');
+        $updateOwnProduct = $auth->getPermission('updateOwnProduct');
 
-		$productOwnerRule = $auth->getRule('isProductOwner');
-		$auth->remove($productOwnerRule);
-		$auth->remove($updateProduct);
-		$auth->remove($updateOwnProduct);
+        $productOwnerRule = $auth->getRule('isProductOwner');
+        $auth->remove($productOwnerRule);
+        $auth->remove($updateProduct);
+        $auth->remove($updateOwnProduct);
 
-		if (Yii::$app->cache) {
-			Yii::$app->cache->flush();
-		}
-	}
+        if (Yii::$app->cache) {
+            Yii::$app->cache->flush();
+        }
+    }
 }

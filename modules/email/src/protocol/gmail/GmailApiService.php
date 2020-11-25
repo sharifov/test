@@ -32,7 +32,7 @@ class GmailApiService
     private $logger;
     private $useBatchRequest;
 
-    public function __construct(Google_Client $client, string  $userId, Logger $logger, bool $useBatchRequest)
+    public function __construct(Google_Client $client, string $userId, Logger $logger, bool $useBatchRequest)
     {
         $this->client = $client;
         $this->service = new Google_Service_Gmail($this->client);
@@ -118,7 +118,7 @@ class GmailApiService
         return $messages;
     }
 
-    public  function getMessage(string $messageId, array $optParams = [])
+    public function getMessage(string $messageId, array $optParams = [])
     {
         try {
             return $this->service->users_messages->get($this->userId, $messageId, $optParams);

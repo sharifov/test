@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
+
 /* @var $this yii\web\View */
 /* @var $searchModel modules\flight\models\search\FlightQuoteStatusLogSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */

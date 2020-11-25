@@ -1,4 +1,5 @@
 <?php
+
 namespace modules\product\src\services;
 
 use common\models\Currency;
@@ -13,27 +14,27 @@ use modules\product\src\entities\productQuote\ProductQuoteRepository;
  */
 class ProductQuoteService
 {
-	/**
-	 * @var ProductQuoteRepository
-	 */
-	private $productQuoteRepository;
+    /**
+     * @var ProductQuoteRepository
+     */
+    private $productQuoteRepository;
 
-	/**
-	 * ProductQuoteService constructor.
-	 * @param ProductQuoteRepository $productQuoteRepository
-	 */
-	public function __construct(ProductQuoteRepository $productQuoteRepository)
-	{
-		$this->productQuoteRepository = $productQuoteRepository;
-	}
+    /**
+     * ProductQuoteService constructor.
+     * @param ProductQuoteRepository $productQuoteRepository
+     */
+    public function __construct(ProductQuoteRepository $productQuoteRepository)
+    {
+        $this->productQuoteRepository = $productQuoteRepository;
+    }
 
-	/**
-	 * @param ProductQuote $productQuote
-	 * @param Currency $clientCurrency
-	 */
-	public function recountProductQuoteClientPrice(ProductQuote $productQuote, Currency $clientCurrency): void
-	{
-		$productQuote->recountClientPrice($clientCurrency);
-		$this->productQuoteRepository->save($productQuote);
-	}
+    /**
+     * @param ProductQuote $productQuote
+     * @param Currency $clientCurrency
+     */
+    public function recountProductQuoteClientPrice(ProductQuote $productQuote, Currency $clientCurrency): void
+    {
+        $productQuote->recountClientPrice($clientCurrency);
+        $this->productQuoteRepository->save($productQuote);
+    }
 }

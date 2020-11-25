@@ -90,7 +90,6 @@ class FlightQuotePaxPriceController extends FController
         $model = new FlightQuotePaxPrice();
 
         if ($model->load(Yii::$app->request->post())) {
-
             $transaction = Yii::$app->db->beginTransaction();
             try {
                 if (!$model->save()) {
@@ -103,7 +102,7 @@ class FlightQuotePaxPriceController extends FController
                 $transaction->commit();
             } catch (\Throwable $throwable) {
                 $transaction->rollBack();
-                Yii::error(AppHelper::throwableFormatter($throwable), self::class . ':' . __FUNCTION__ );
+                Yii::error(AppHelper::throwableFormatter($throwable), self::class . ':' . __FUNCTION__);
             }
 
             return $this->redirect(['view', 'id' => $model->qpp_id]);
@@ -126,7 +125,6 @@ class FlightQuotePaxPriceController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post())) {
-
             $checkProfit = $model->isAttributeChanged('qpp_system_mark_up') || $model->isAttributeChanged('qpp_agent_mark_up');
             $transaction = Yii::$app->db->beginTransaction();
             try {
@@ -141,7 +139,7 @@ class FlightQuotePaxPriceController extends FController
                 $transaction->commit();
             } catch (\Throwable $throwable) {
                 $transaction->rollBack();
-                Yii::error(AppHelper::throwableFormatter($throwable), self::class . ':' . __FUNCTION__ );
+                Yii::error(AppHelper::throwableFormatter($throwable), self::class . ':' . __FUNCTION__);
             }
             return $this->redirect(['view', 'id' => $model->qpp_id]);
         }
@@ -171,7 +169,7 @@ class FlightQuotePaxPriceController extends FController
             $transaction->commit();
         } catch (\Throwable $throwable) {
             $transaction->rollBack();
-            Yii::error(AppHelper::throwableFormatter($throwable), self::class . ':' . __FUNCTION__ );
+            Yii::error(AppHelper::throwableFormatter($throwable), self::class . ':' . __FUNCTION__);
         }
 
         return $this->redirect(['index']);

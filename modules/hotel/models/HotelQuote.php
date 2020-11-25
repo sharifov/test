@@ -40,7 +40,7 @@ class HotelQuote extends ActiveRecord implements Quotable
 {
     use EventTrait;
 
-	public const SERVICE_FEE = 0.035;
+    public const SERVICE_FEE = 0.035;
 
     public static function clone(HotelQuote $quote, int $hotelId, int $productQuoteId): self
     {
@@ -154,7 +154,7 @@ class HotelQuote extends ActiveRecord implements Quotable
         $hQuote = null;
 
         if (isset($quoteData['rates']) && $rooms = $quoteData['rates']) {
-			$totalAmount = 0;
+            $totalAmount = 0;
             if (isset($quoteData['groupKey'])) {
                 $hashKey = self::getHashKey($quoteData['groupKey']);
 
@@ -165,7 +165,6 @@ class HotelQuote extends ActiveRecord implements Quotable
                 ])->one();
 
                 if (!$hQuote) {
-
                     $nameArray = [];
                     foreach ($rooms as $room) {
                         $totalAmount += $room['amount'];
@@ -189,7 +188,6 @@ class HotelQuote extends ActiveRecord implements Quotable
                     $prQuote->pq_name = mb_substr(implode(' & ', $nameArray), 0, 40);
 
                     if ($prQuote->save()) {
-
                         $hQuote = new self();
                         $hQuote->hq_hash_key = $hashKey;
                         $hQuote->hq_hotel_id = $hotelRequest->ph_id;
@@ -200,16 +198,18 @@ class HotelQuote extends ActiveRecord implements Quotable
                         $hQuote->hq_request_hash = $hotelRequest->ph_request_hash_key;
 
                         if (!$hQuote->save()) {
-                            Yii::error(VarDumper::dumpAsString($hQuote->errors),
-                                'Model:HotelQuote:findOrCreateByData:HotelQuote:save');
+                            Yii::error(
+                                VarDumper::dumpAsString($hQuote->errors),
+                                'Model:HotelQuote:findOrCreateByData:HotelQuote:save'
+                            );
                         }
                     }
                 }
             }
 
             if ($hQuote && !$hQuote->hotelQuoteRooms) {
-            	$totalSystemPrice = 0;
-            	$totalServiceFeeSum = 0;
+                $totalSystemPrice = 0;
+                $totalServiceFeeSum = 0;
                 foreach ($rooms as $room) {
                     $importedHotelRoomIds = [];
                     $importHotelRoomStatus = false;
@@ -237,7 +237,7 @@ class HotelQuote extends ActiveRecord implements Quotable
                     $qRoom->hqr_payment_type = $room['paymentType'] ?? null;
                     $qRoom->hqr_board_code = $room['boardCode'] ?? null;
                     $qRoom->hqr_board_name = $room['boardName'] ?? null;
-                    $qRoom->hqr_amount = $room['amount']-$room['markup'] ?? null;
+                    $qRoom->hqr_amount = $room['amount'] - $room['markup'] ?? null;
                     $qRoom->hqr_rate_comments = $qRoom->prepareRateComments($room);
                     $qRoom->hqr_currency = $currency;
                     $qRoom->hqr_service_fee_percent = ProductTypePaymentMethodQuery::getDefaultPercentFeeByProductType($hQuote->hqProductQuote->pqProduct->pr_type_id) ?? (self::SERVICE_FEE * 100);
@@ -254,14 +254,16 @@ class HotelQuote extends ActiveRecord implements Quotable
                         $qRoom->hqr_cancel_amount = $room['cancellationPolicies']['amount'] ?? null;
                     }
                     if ($room['cancellationPolicies'][0]['from']) {
-                        $qRoom->hqr_cancel_from_dt = date ("Y-m-d H:i:s", strtotime($room['cancellationPolicies'][0]['from']));
+                        $qRoom->hqr_cancel_from_dt = date("Y-m-d H:i:s", strtotime($room['cancellationPolicies'][0]['from']));
                     } else {
                         $qRoom->hqr_cancel_from_dt = $room['cancellationPolicies']['from'] ?? null;
                     }
 
                     if (!$qRoom->save()) {
-                        Yii::error(VarDumper::dumpAsString($qRoom->errors),
-                            'Model:HotelQuote:findOrCreateByData:HotelQuoteRoom:save');
+                        Yii::error(
+                            VarDumper::dumpAsString($qRoom->errors),
+                            'Model:HotelQuote:findOrCreateByData:HotelQuoteRoom:save'
+                        );
                     }
 
                     $hotelRoomsQuery = (new Query())
@@ -280,7 +282,7 @@ class HotelQuote extends ActiveRecord implements Quotable
                             if (
                                 (int) $summaryRoom['adults'] === (int) $qRoom->hqr_adults &&
                                 (int) $summaryRoom['children'] === (int) $qRoom->hqr_children &&
-								isset($summaryRoom['childrenAges']) &&
+                                isset($summaryRoom['childrenAges']) &&
                                 $summaryRoom['childrenAges'] === $childrenAges
                             ) { // port info from hotel_room_pax
                                 $hotelRoomPaxes = $hotelRoomPax::find()
@@ -333,17 +335,17 @@ class HotelQuote extends ActiveRecord implements Quotable
                     }
                 }
 
-				if (isset($prQuote)) {
-					$systemPrice = ProductQuoteHelper::calcSystemPrice((float)$totalSystemPrice, $prQuote->pq_origin_currency);
-					$prQuote->setQuotePrice(
-						(float)$totalAmount,
-						(float)$systemPrice,
-						ProductQuoteHelper::roundPrice($systemPrice * $prQuote->pq_client_currency_rate),
-						ProductQuoteHelper::roundPrice((float)$totalServiceFeeSum)
-					);
-					$prQuote->recalculateProfitAmount();
-					$prQuote->save();
-				}
+                if (isset($prQuote)) {
+                    $systemPrice = ProductQuoteHelper::calcSystemPrice((float)$totalSystemPrice, $prQuote->pq_origin_currency);
+                    $prQuote->setQuotePrice(
+                        (float)$totalAmount,
+                        (float)$systemPrice,
+                        ProductQuoteHelper::roundPrice($systemPrice * $prQuote->pq_client_currency_rate),
+                        ProductQuoteHelper::roundPrice((float)$totalServiceFeeSum)
+                    );
+                    $prQuote->recalculateProfitAmount();
+                    $prQuote->save();
+                }
             }
         }
 
@@ -427,11 +429,11 @@ class HotelQuote extends ActiveRecord implements Quotable
      * @return float
      */
     public function getProcessingFee(): float
-	{
-		$processingFeeAmount = $this->hqProductQuote->pqProduct->prType->getProcessingFeeAmount();
+    {
+        $processingFeeAmount = $this->hqProductQuote->pqProduct->prType->getProcessingFeeAmount();
         $result = ($this->getAdults() + $this->getChildren()) * $processingFeeAmount;
-		return ProductQuoteHelper::roundPrice($result);
-	}
+        return ProductQuoteHelper::roundPrice($result);
+    }
 
     /**
      * @return bool
@@ -441,16 +443,16 @@ class HotelQuote extends ActiveRecord implements Quotable
         return $this->save();
     }
 
-	/**
+    /**
      * @return float
      */
     public function getSystemMarkUp(): float
     {
-		$result = 0.00;
-		foreach ($this->hotelQuoteRooms as $room) {
-			$result += $room->hqr_system_mark_up;
-		}
-		return $result;
+        $result = 0.00;
+        foreach ($this->hotelQuoteRooms as $room) {
+            $result += $room->hqr_system_mark_up;
+        }
+        return $result;
     }
 
     /**
@@ -458,10 +460,10 @@ class HotelQuote extends ActiveRecord implements Quotable
      */
     public function getAgentMarkUp(): float
     {
-		$result = 0.00;
-		foreach ($this->hotelQuoteRooms as $room) {
-			$result += $room->hqr_agent_mark_up;
-		}
-		return $result;
+        $result = 0.00;
+        foreach ($this->hotelQuoteRooms as $room) {
+            $result += $room->hqr_agent_mark_up;
+        }
+        return $result;
     }
 }

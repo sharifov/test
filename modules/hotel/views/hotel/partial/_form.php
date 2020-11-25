@@ -16,25 +16,29 @@ use yii\widgets\ActiveForm;
 
 
     <?= $form->field($model, 'ph_check_in_date')->widget(
-        \dosamigos\datepicker\DatePicker::class, [
+        \dosamigos\datepicker\DatePicker::class,
+        [
         'inline' => false,
         'clientOptions' => [
             'autoclose' => true,
             'format' => 'yyyy-mm-dd',
             'todayBtn' => true
         ]
-    ])?>
+        ]
+    )?>
 
 
     <?= $form->field($model, 'ph_check_out_date')->widget(
-        \dosamigos\datepicker\DatePicker::class, [
+        \dosamigos\datepicker\DatePicker::class,
+        [
         'inline' => false,
         'clientOptions' => [
             'autoclose' => true,
             'format' => 'yyyy-mm-dd',
             'todayBtn' => true
         ]
-    ])?>
+        ]
+    )?>
 
 
     <?= $form->field($model, 'ph_destination_code')->textInput(['maxlength' => true]) ?>

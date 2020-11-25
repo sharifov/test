@@ -47,16 +47,16 @@ class HotelForm extends Model
             [['ph_check_in_date', 'ph_check_out_date', 'ph_destination_code'], 'required'],
             [['ph_product_id', 'ph_min_star_rate', 'ph_max_star_rate', 'ph_max_price_rate', 'ph_min_price_rate', 'ph_zone_code', 'ph_hotel_code'], 'integer'],
             [['ph_check_in_date', 'ph_check_out_date'], 'safe'],
-			[['ph_zone_code', 'ph_hotel_code'], 'string', 'max' => 11],
-			[['ph_destination_code'], 'string', 'max' => 10],
+            [['ph_zone_code', 'ph_hotel_code'], 'string', 'max' => 11],
+            [['ph_destination_code'], 'string', 'max' => 10],
             [['ph_destination_label'], 'string', 'max' => 100],
             [['ph_product_id'], 'exist', 'skipOnError' => true, 'targetClass' => Product::class, 'targetAttribute' => ['ph_product_id' => 'pr_id']],
-			[['ph_check_in_date', 'ph_check_out_date'], 'filter', 'filter' => static function ($value) {
-        		return date('Y-m-d', strtotime($value));
-			}],
-			[['ph_check_in_date', 'ph_check_out_date'], 'date', 'format' => 'php:Y-m-d'],
-			['ph_check_in_date', 'compare', 'compareAttribute' => 'ph_check_out_date', 'operator' => '<', 'enableClientValidation' => true]
-		];
+            [['ph_check_in_date', 'ph_check_out_date'], 'filter', 'filter' => static function ($value) {
+                return date('Y-m-d', strtotime($value));
+            }],
+            [['ph_check_in_date', 'ph_check_out_date'], 'date', 'format' => 'php:Y-m-d'],
+            ['ph_check_in_date', 'compare', 'compareAttribute' => 'ph_check_out_date', 'operator' => '<', 'enableClientValidation' => true]
+        ];
     }
 
     /**
@@ -64,19 +64,18 @@ class HotelForm extends Model
      */
     public function attributeLabels()
     {
-		return [
-			'ph_product_id' => 'Product ID',
-			'ph_check_in_date' => 'Check In',
-			'ph_check_out_date' => 'Check Out',
-			'ph_zone_code' => 'Zone Code',
-			'ph_hotel_code' => 'Hotel Code',
-			'ph_destination_code' => 'Destination',
-			'ph_destination_label' => 'Destination',
-			'ph_min_star_rate' => 'Min. Rate',
-			'ph_max_star_rate' => 'Max. Rate',
-			'ph_max_price_rate' => 'Max Price Rate',
-			'ph_min_price_rate' => 'Min Price Rate',
-		];
+        return [
+            'ph_product_id' => 'Product ID',
+            'ph_check_in_date' => 'Check In',
+            'ph_check_out_date' => 'Check Out',
+            'ph_zone_code' => 'Zone Code',
+            'ph_hotel_code' => 'Hotel Code',
+            'ph_destination_code' => 'Destination',
+            'ph_destination_label' => 'Destination',
+            'ph_min_star_rate' => 'Min. Rate',
+            'ph_max_star_rate' => 'Max. Rate',
+            'ph_max_price_rate' => 'Max Price Rate',
+            'ph_min_price_rate' => 'Min Price Rate',
+        ];
     }
-
 }

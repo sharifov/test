@@ -45,10 +45,10 @@ use common\components\grid\DateTimeColumn;
                     if (strlen($message) < 600) {
                         return '<pre><small>' . $message . '</small></pre>';
                     } else {
-                        $out = '<button class="btn btn-secondary" type="button" data-toggle="collapse" data-target="#item_'. $model->hqsl_id .'" aria-expanded="false" aria-controls="item_'. $model->hqsl_id .'">
+                        $out = '<button class="btn btn-secondary" type="button" data-toggle="collapse" data-target="#item_' . $model->hqsl_id . '" aria-expanded="false" aria-controls="item_' . $model->hqsl_id . '">
                                     <i class="fas fa-eye"></i>  Api Response
                                 </button>';
-                        $out .= '<div class="collapse" id="item_'. $model->hqsl_id .'">';
+                        $out .= '<div class="collapse" id="item_' . $model->hqsl_id . '">';
                         $out .= '<pre><small>' . $message . '</small></pre>';
                         $out .= '</div>';
                         return $out;
@@ -104,7 +104,7 @@ use common\components\grid\DateTimeColumn;
                 ]) : null,
             ],*/
         ];
-    ?>
+        ?>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $filterModel,

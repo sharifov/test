@@ -106,7 +106,7 @@ $pjaxId = 'pjax-hotel-room-form';
                         ],
                         'options' => [
                             'autocomplete' => 'off',
-                            'placeholder' =>'Choose Date'
+                            'placeholder' => 'Choose Date'
                         ],
                         'clientEvents' => [
                             'change' => 'function (e, elem) {

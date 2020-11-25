@@ -2,7 +2,6 @@
 
 namespace modules\hotel\controllers;
 
-
 use Yii;
 use modules\hotel\models\HotelQuoteRoomPax;
 use modules\hotel\models\search\HotelQuoteRoomPaxSearch;

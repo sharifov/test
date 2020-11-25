@@ -21,7 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <?= $this->render('partial/actions', [
                 'model' => $model,
             ])
-            ?>
+?>
         </div>
     </div>
 
@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <?= $this->render('partial/general_info', [
                 'model' => $model,
             ])
-            ?>
+?>
         </div>
     </div>
 </div>

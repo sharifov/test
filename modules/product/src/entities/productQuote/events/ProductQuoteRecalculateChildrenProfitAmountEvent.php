@@ -16,7 +16,8 @@ class ProductQuoteRecalculateChildrenProfitAmountEvent
      * ProductQuoteRecalculateChildrenProfitAmountEvent constructor.
      * @param ProductQuote $productQuote
      */
-    public function __construct(ProductQuote $productQuote) {
+    public function __construct(ProductQuote $productQuote)
+    {
         $this->productQuote = $productQuote;
     }
 }

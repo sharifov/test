@@ -25,13 +25,13 @@ class ProductQuoteChangeStatusLogListener
     {
         try {
             $this->logger->log(new CreateDto(
-                 $event->getId(),
-                 $event->getStartStatus(),
-                 $event->getEndStatus(),
-                 $event->getDescription(),
-                 $event->getActionId(),
-                 $event->getOwnerId(),
-                 $event->getCreatorId()
+                $event->getId(),
+                $event->getStartStatus(),
+                $event->getEndStatus(),
+                $event->getDescription(),
+                $event->getActionId(),
+                $event->getOwnerId(),
+                $event->getCreatorId()
             ));
         } catch (\Throwable $e) {
             Yii::error($e, 'Listeners:ProductQuoteChangeStatusLogListener');

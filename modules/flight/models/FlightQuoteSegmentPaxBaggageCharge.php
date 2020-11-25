@@ -109,28 +109,28 @@ class FlightQuoteSegmentPaxBaggageCharge extends \yii\db\ActiveRecord
         return new \modules\flight\models\query\FlightQuoteSegmentPaxBaggageChargeQuery(static::class);
     }
 
-	/**
-	 * @param FlightQuoteSegmentPaxBaggageChargeDTO $dto
-	 * @return FlightQuoteSegmentPaxBaggageCharge
-	 */
+    /**
+     * @param FlightQuoteSegmentPaxBaggageChargeDTO $dto
+     * @return FlightQuoteSegmentPaxBaggageCharge
+     */
     public static function create(FlightQuoteSegmentPaxBaggageChargeDTO $dto): self
-	{
-		$baggageCharge = new self();
+    {
+        $baggageCharge = new self();
 
-		$baggageCharge->qsbc_flight_pax_code_id = $dto->flightPaxCodeId;
-		$baggageCharge->qsbc_flight_quote_segment_id = $dto->flightQuoteSegmentId;
-		$baggageCharge->qsbc_first_piece = $dto->firstPiece;
-		$baggageCharge->qsbc_last_piece = $dto->lastPiece;
-		$baggageCharge->qsbc_origin_price = $dto->originPrice;
-		$baggageCharge->qsbc_origin_currency = $dto->originCurrency;
-		$baggageCharge->qsbc_price = $dto->price;
-		$baggageCharge->qsbc_client_price = $dto->clientPrice;
-		$baggageCharge->qsbc_client_currency = $dto->clientCurrency;
-		$baggageCharge->qsbc_max_weight = $dto->maxWeight;
-		$baggageCharge->qsbc_max_size = $dto->maxSize;
+        $baggageCharge->qsbc_flight_pax_code_id = $dto->flightPaxCodeId;
+        $baggageCharge->qsbc_flight_quote_segment_id = $dto->flightQuoteSegmentId;
+        $baggageCharge->qsbc_first_piece = $dto->firstPiece;
+        $baggageCharge->qsbc_last_piece = $dto->lastPiece;
+        $baggageCharge->qsbc_origin_price = $dto->originPrice;
+        $baggageCharge->qsbc_origin_currency = $dto->originCurrency;
+        $baggageCharge->qsbc_price = $dto->price;
+        $baggageCharge->qsbc_client_price = $dto->clientPrice;
+        $baggageCharge->qsbc_client_currency = $dto->clientCurrency;
+        $baggageCharge->qsbc_max_weight = $dto->maxWeight;
+        $baggageCharge->qsbc_max_size = $dto->maxSize;
 
-		return $baggageCharge;
-	}
+        return $baggageCharge;
+    }
 
     public static function clone(FlightQuoteSegmentPaxBaggageCharge $baggageCharge, int $segmentId): self
     {
@@ -142,9 +142,9 @@ class FlightQuoteSegmentPaxBaggageCharge extends \yii\db\ActiveRecord
         $clone->qsbc_flight_quote_segment_id = $segmentId;
 
         return $clone;
-	}
+    }
 
-	public function serialize(): array
+    public function serialize(): array
     {
         return (new FlightQuoteSegmentPaxBaggageChargeSerializer($this))->getData();
     }

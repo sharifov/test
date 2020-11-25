@@ -5,7 +5,6 @@ namespace modules\offer\controllers;
 use modules\offer\src\entities\offer\events\OfferRecalculateProfitAmountEvent;
 use modules\offer\src\entities\offerProduct\OfferProductRepository;
 use sales\auth\Auth;
-
 use sales\dispatchers\EventDispatcher;
 use sales\helpers\app\AppHelper;
 use Yii;
@@ -105,7 +104,7 @@ class OfferProductCrudController extends FController
                 ]);
             } catch (\Throwable $throwable) {
                 $transaction->rollBack();
-                Yii::error(AppHelper::throwableFormatter($throwable),  'OfferProductCrudController:' . __FUNCTION__ );
+                Yii::error(AppHelper::throwableFormatter($throwable), 'OfferProductCrudController:' . __FUNCTION__);
             }
         }
         return $this->render('create', [
@@ -137,7 +136,7 @@ class OfferProductCrudController extends FController
                 ]);
             } catch (\Throwable $throwable) {
                 $transaction->rollBack();
-                Yii::error(AppHelper::throwableFormatter($throwable), 'OfferProductCrudController:' . __FUNCTION__ );
+                Yii::error(AppHelper::throwableFormatter($throwable), 'OfferProductCrudController:' . __FUNCTION__);
             }
         }
         return $this->render('update', [
@@ -163,7 +162,7 @@ class OfferProductCrudController extends FController
             $transaction->commit();
         } catch (\Throwable $throwable) {
             $transaction->rollBack();
-            Yii::error(AppHelper::throwableFormatter($throwable),'OfferProductCrudController:' . __FUNCTION__  . ':Exception');
+            Yii::error(AppHelper::throwableFormatter($throwable), 'OfferProductCrudController:' . __FUNCTION__  . ':Exception');
         }
 
         return $this->redirect(['index']);

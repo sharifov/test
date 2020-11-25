@@ -25,8 +25,7 @@ class ProductableRepository
     public function __construct(
         FlightRepository $flightRepository,
         HotelRepository $hotelRepository
-    )
-    {
+    ) {
         $this->flightRepository = $flightRepository;
         $this->hotelRepository = $hotelRepository;
     }

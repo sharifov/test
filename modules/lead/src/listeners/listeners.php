@@ -128,5 +128,5 @@ return [
     LeadNewEvent::class => [LeadNewEventLogListener::class],
 
     LeadQuoteCloneEvent::class => [LeadQuoteCloneEventListener::class],
-	LeadPreferencesUpdateCurrencyEvent::class => [LeadPreferencesUpdateCurrencyEventListener::class]
+    LeadPreferencesUpdateCurrencyEvent::class => [LeadPreferencesUpdateCurrencyEventListener::class]
 ];

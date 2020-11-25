@@ -27,11 +27,11 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
             <h2>
                 <a class="collapse-link">
                     <i class="fas fa-hotel" title="ID: <?=$product->pr_id?>"></i> <?=Html::encode($product->prType->pt_name)?> <?=$product->pr_name ? ' - ' . Html::encode($product->pr_name) : ''?>
-                    <?php if ($product->productQuotes):?>
+                    <?php if ($product->productQuotes) :?>
                         <sup title="Number of quotes">(<?=count($product->productQuotes)?>)</sup>
                     <?php endif;?>
                 </a>
-                <?php if ($product->pr_description):?>
+                <?php if ($product->pr_description) :?>
                     <a  id="product_description_<?=$product->pr_id?>"
                         class="popover-class fa fa-info-circle text-info"
                         data-toggle="popover" data-html="true" data-trigger="hover" data-placement="top"
@@ -49,7 +49,7 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
                         <span style="font-size: 13px; padding: 5px; display: flex; align-items: center;color: #596b7d;">
 
 
-                            <?php if ($product->hotel->ph_destination_code):?>
+                            <?php if ($product->hotel->ph_destination_code) :?>
                                 (<b><?= Html::encode($product->hotel->ph_destination_code) ?></b>)
                                 <?= Html::encode($product->hotel->ph_destination_label) ?>
                             <?php endif; ?>
@@ -59,7 +59,7 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
                     </li>
                     <li>
                         <span style="font-size: 13px; padding: 5px; display: flex; align-items: center;color: #596b7d;">
-                             <?php if ($product->hotel->ph_check_in_date):?>
+                             <?php if ($product->hotel->ph_check_in_date) :?>
                                  <b><?= Yii::$app->formatter->asDate(strtotime($product->hotel->ph_check_in_date)) ?></b>
                              <?php endif; ?>
                         </span>
@@ -111,11 +111,14 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
                             'class' => 'dropdown-item text-warning btn-update-product',
                             'data-product-id' => $product->pr_id,
                         ]) ?>
-                        <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete Hotel',
-                            null, [
+                        <?= Html::a(
+                            '<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete Hotel',
+                            null,
+                            [
                                 'class' => 'dropdown-item text-danger btn-delete-product',
                                 'data-product-id' => $product->pr_id
-                            ]) ?>
+                            ]
+                        ) ?>
 
                     </div>
                 </li>

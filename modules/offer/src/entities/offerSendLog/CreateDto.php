@@ -24,8 +24,7 @@ class CreateDto
         int $ofsndl_type_id,
         ?int $ofsndl_created_user_id,
         ?string $ofsndl_send_to
-    )
-    {
+    ) {
         $this->ofsndl_offer_id = $ofsndl_offer_id;
         $this->ofsndl_type_id = $ofsndl_type_id;
         $this->ofsndl_created_user_id = $ofsndl_created_user_id;

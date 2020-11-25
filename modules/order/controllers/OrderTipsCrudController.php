@@ -19,32 +19,32 @@ use yii\filters\VerbFilter;
 class OrderTipsCrudController extends FController
 {
 
-	/**
-	 * @var OrderTipsManageService
-	 */
-	private $orderTipsManageService;
+    /**
+     * @var OrderTipsManageService
+     */
+    private $orderTipsManageService;
 
-	public function __construct($id, $module, OrderTipsManageService $orderTipsManageService, $config = [])
-	{
-		parent::__construct($id, $module, $config);
-		$this->orderTipsManageService = $orderTipsManageService;
-	}
+    public function __construct($id, $module, OrderTipsManageService $orderTipsManageService, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->orderTipsManageService = $orderTipsManageService;
+    }
 
-	/**
-	 * @return array
-	 */
-	public function behaviors(): array
-	{
-		$behaviors = [
-			'verbs' => [
-				'class' => VerbFilter::class,
-				'actions' => [
-					'delete' => ['POST'],
-				],
-			],
-		];
-		return ArrayHelper::merge(parent::behaviors(), $behaviors);
-	}
+    /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'verbs' => [
+                'class' => VerbFilter::class,
+                'actions' => [
+                    'delete' => ['POST'],
+                ],
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
 
     /**
      * Lists all OrderTips models.
@@ -84,18 +84,16 @@ class OrderTipsCrudController extends FController
         $model = new OrderTips();
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            try {
+                $this->orderTipsManageService->create($model);
 
-			try {
-				$this->orderTipsManageService->create($model);
-
-            	return $this->redirect(['view', 'id' => $model->ot_order_id]);
-			} catch (\RuntimeException $e) {
-				$model->addError('runtimeError', $e->getMessage());
-			} catch (\Throwable $e) {
-				Yii::error($e->getMessage(), 'OrderTipsCrudController::actionCreate::Throwable');
-				$model->addError('internalServerError', 'Internal Server Error');
-			}
-
+                return $this->redirect(['view', 'id' => $model->ot_order_id]);
+            } catch (\RuntimeException $e) {
+                $model->addError('runtimeError', $e->getMessage());
+            } catch (\Throwable $e) {
+                Yii::error($e->getMessage(), 'OrderTipsCrudController::actionCreate::Throwable');
+                $model->addError('internalServerError', 'Internal Server Error');
+            }
         }
 
         return $this->render('create', [
@@ -115,18 +113,16 @@ class OrderTipsCrudController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            try {
+                $this->orderTipsManageService->update($model);
 
-        	try {
-        		$this->orderTipsManageService->update($model);
-
-            	return $this->redirect(['view', 'id' => $model->ot_order_id]);
-			} catch (\RuntimeException $e) {
-				$model->addError('runtimeError', $e->getMessage());
-			} catch (\Throwable $e) {
-				Yii::error($e->getMessage(), 'OrderTipsCrudController::actionCreate::Throwable');
-				$model->addError('internalServerError', 'Internal Server Error');
-			}
-
+                return $this->redirect(['view', 'id' => $model->ot_order_id]);
+            } catch (\RuntimeException $e) {
+                $model->addError('runtimeError', $e->getMessage());
+            } catch (\Throwable $e) {
+                Yii::error($e->getMessage(), 'OrderTipsCrudController::actionCreate::Throwable');
+                $model->addError('internalServerError', 'Internal Server Error');
+            }
         }
 
         return $this->render('update', [
@@ -134,13 +130,13 @@ class OrderTipsCrudController extends FController
         ]);
     }
 
-	/**
-	 * @param $id
-	 * @return \yii\web\Response
-	 * @throws NotFoundHttpException
-	 * @throws \Throwable
-	 * @throws \yii\db\StaleObjectException
-	 */
+    /**
+     * @param $id
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
     public function actionDelete($id)
     {
         $this->findModel($id)->delete();

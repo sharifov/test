@@ -43,11 +43,9 @@ class InvoiceController extends FController
 
 
         if ($model->load(Yii::$app->request->post())) {
-
             //Yii::$app->response->format = Response::FORMAT_JSON;
 
             if ($model->validate()) {
-
                 $order = Order::findOne($model->inv_order_id);
 
                 $invoice = new Invoice();
@@ -70,11 +68,9 @@ class InvoiceController extends FController
 
                 //$model->errors = $offer->errors;
                 Yii::error(VarDumper::dumpAsString($invoice->errors), 'InvoiceController:CreateAjax:Invoice:save');
-
             }
             //return ['errors' => \yii\widgets\ActiveForm::validate($model)];
         } else {
-
             $orderId = (int) Yii::$app->request->get('id');
             $invoiceAmount = (float) Yii::$app->request->get('amount', 0);
 
@@ -113,7 +109,6 @@ class InvoiceController extends FController
         $model->inv_order_id = $modelInvoice->inv_order_id; //$modelInvoice->inv_order_id;
 
         if ($model->load(Yii::$app->request->post())) {
-
             if ($model->validate()) {
                 $modelInvoice->inv_description = $model->inv_description;
                 $modelInvoice->inv_status_id = $model->inv_status_id;
@@ -121,7 +116,7 @@ class InvoiceController extends FController
                 $modelInvoice->calculateClientAmount();
 
                 if ($modelInvoice->save()) {
-                    return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-order-invoice-'.$modelInvoice->inv_order_id.'"});</script>';
+                    return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-order-invoice-' . $modelInvoice->inv_order_id . '"});</script>';
                 }
 
                 Yii::error(VarDumper::dumpAsString($modelInvoice->errors), 'InvoiceController:actionUpdateAjax:Invoice:save');
@@ -137,7 +132,6 @@ class InvoiceController extends FController
         return $this->renderAjax('forms/update_ajax_form', [
             'model' => $model,
         ]);
-
     }
 
     /**
@@ -151,7 +145,7 @@ class InvoiceController extends FController
         try {
             $model = $this->findModel($id);
             if (!$model->delete()) {
-                throw new Exception('Invoice ('.$id.') not deleted', 2);
+                throw new Exception('Invoice (' . $id . ') not deleted', 2);
             }
         } catch (\Throwable $throwable) {
             return ['error' => 'Error: ' . $throwable->getMessage()];

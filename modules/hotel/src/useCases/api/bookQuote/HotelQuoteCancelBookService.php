@@ -13,7 +13,6 @@ use sales\auth\Auth;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
 
-
 /**
  * Class HotelQuoteBookService
  * @package modules\hotel\src\useCases\api\bookQuote
@@ -24,20 +23,20 @@ use sales\services\TransactionManager;
  */
 class HotelQuoteCancelBookService
 {
-	public $status = 0;
+    public $status = 0;
     public $message = '';
     /**
-	 * @var TransactionManager
-	 */
-	private $transactionManager;
+     * @var TransactionManager
+     */
+    private $transactionManager;
     /**
-	 * @var ProductQuoteRepository
-	 */
-	private $productQuoteRepository;
-	/**
-	 * @var ApiHotelService
-	 */
-	private $apiService;
+     * @var ProductQuoteRepository
+     */
+    private $productQuoteRepository;
+    /**
+     * @var ApiHotelService
+     */
+    private $apiService;
 
     /**
      * HotelQuoteBookService constructor.
@@ -45,11 +44,11 @@ class HotelQuoteCancelBookService
      * @param TransactionManager $transactionManager
      */
     public function __construct(ProductQuoteRepository $productQuoteRepository, TransactionManager $transactionManager)
-	{
-		$this->apiService = \Yii::$app->getModule('hotel')->apiService;
-		$this->productQuoteRepository = $productQuoteRepository;
-		$this->transactionManager = $transactionManager;
-	}
+    {
+        $this->apiService = \Yii::$app->getModule('hotel')->apiService;
+        $this->productQuoteRepository = $productQuoteRepository;
+        $this->transactionManager = $transactionManager;
+    }
 
     /**
      * @param HotelQuote $model
@@ -60,7 +59,7 @@ class HotelQuoteCancelBookService
     {
         $params = ['bookingId' => $model->hq_booking_id];
 
-        $createDto = new CreateDto($model->hq_id,LogStatus::ACTION_TYPE_CANCEL, $params);
+        $createDto = new CreateDto($model->hq_id, LogStatus::ACTION_TYPE_CANCEL, $params);
         $hotelQuoteServiceLog = HotelQuoteServiceLog::create($createDto);
 
         $apiResponse = $this->apiService->requestBookingHandler('booking/book', $params, 'delete');

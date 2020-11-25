@@ -67,8 +67,8 @@ class HotelSearch extends Hotel
             'ph_max_star_rate' => $this->ph_max_star_rate,
             'ph_max_price_rate' => $this->ph_max_price_rate,
             'ph_min_price_rate' => $this->ph_min_price_rate,
-			'ph_zone_code' => $this->ph_zone_code,
-			'ph_hotel_code' => $this->ph_hotel_code,
+            'ph_zone_code' => $this->ph_zone_code,
+            'ph_hotel_code' => $this->ph_hotel_code,
             'ph_request_hash_key' => $this->ph_request_hash_key
         ]);
 

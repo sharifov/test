@@ -1,5 +1,7 @@
 <?php
+
 namespace modules\hotel\migrations;
+
 use yii\base\NotSupportedException;
 use yii\db\Migration;
 use Yii;

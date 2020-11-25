@@ -29,13 +29,13 @@ use yii\web\Response;
 class ProductQuoteCrudController extends FController
 {
     /**
-	 * @var EventDispatcher
-	 */
+     * @var EventDispatcher
+     */
     private $eventDispatcher;
     /**
-	 * @var ProductQuoteRepository
-	 */
-	private $productQuoteRepository;
+     * @var ProductQuoteRepository
+     */
+    private $productQuoteRepository;
 
     /**
      * ProductQuoteCrudController constructor.
@@ -109,7 +109,7 @@ class ProductQuoteCrudController extends FController
                 $transaction->commit();
             } catch (\Throwable $throwable) {
                 $transaction->rollBack();
-                Yii::error(AppHelper::throwableFormatter($throwable),  'ProductQuoteCrudController:' . __FUNCTION__ );
+                Yii::error(AppHelper::throwableFormatter($throwable), 'ProductQuoteCrudController:' . __FUNCTION__);
             }
             return $this->redirect(['view', 'id' => $model->pq_id]);
         }
@@ -129,7 +129,6 @@ class ProductQuoteCrudController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post())) {
-
             $recalculateProfitAmount = ($model->isAttributeChanged('pq_status_id') || $model->isAttributeChanged('pq_profit_amount'));
 
             $transaction = Yii::$app->db->beginTransaction();
@@ -143,7 +142,7 @@ class ProductQuoteCrudController extends FController
                 $transaction->commit();
             } catch (\Throwable $throwable) {
                 $transaction->rollBack();
-                Yii::error(AppHelper::throwableFormatter($throwable),  'ProductQuoteCrudController:' . __FUNCTION__ );
+                Yii::error(AppHelper::throwableFormatter($throwable), 'ProductQuoteCrudController:' . __FUNCTION__);
             }
             return $this->redirect(['view', 'id' => $model->pq_id]);
         }
@@ -168,10 +167,9 @@ class ProductQuoteCrudController extends FController
             $model->prepareRemove();
             $this->productQuoteRepository->remove($model);
             $transaction->commit();
-
         } catch (\Throwable $throwable) {
             $transaction->rollBack();
-            Yii::error(AppHelper::throwableFormatter($throwable),  'ProductQuoteCrudController:' . __FUNCTION__ );
+            Yii::error(AppHelper::throwableFormatter($throwable), 'ProductQuoteCrudController:' . __FUNCTION__);
         }
 
         return $this->redirect(['index']);

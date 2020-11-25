@@ -31,8 +31,7 @@ class QaTaskMultipleController extends FController
         $module,
         QaTaskMultipleCreateService $multipleCreateService,
         $config = []
-    )
-    {
+    ) {
         parent::__construct($id, $module, $config);
         $this->multipleCreateService = $multipleCreateService;
     }
@@ -68,7 +67,6 @@ class QaTaskMultipleController extends FController
         );
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
-
             foreach (Lead::find()->select(['project_id'])->andWhere(['id' => $form->ids])->asArray()->all() as $project) {
                 QaTaskGuard::guard($project['project_id'], Auth::id());
             }
@@ -87,7 +85,6 @@ class QaTaskMultipleController extends FController
                     'text' => '',
                 ]);
             }
-
         }
 
         $form->convertIdsToString();

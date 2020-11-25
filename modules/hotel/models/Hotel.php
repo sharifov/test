@@ -42,28 +42,28 @@ class Hotel extends ActiveRecord implements Productable
 {
     use EventTrait;
 
-	private const DESTINATION_TYPE_COUNTRY  = 0;
-	private const DESTINATION_TYPE_CITY     = 1;
-	private const DESTINATION_TYPE_HOTEL    = 2;
+    private const DESTINATION_TYPE_COUNTRY  = 0;
+    private const DESTINATION_TYPE_CITY     = 1;
+    private const DESTINATION_TYPE_HOTEL    = 2;
 
-	private const DESTINATION_TYPE_LIST = [
-		self::DESTINATION_TYPE_COUNTRY  => 'Countries',
-		self::DESTINATION_TYPE_CITY     => 'Cities/Zones',
-		self::DESTINATION_TYPE_HOTEL    => 'Hotels'
-	];
+    private const DESTINATION_TYPE_LIST = [
+        self::DESTINATION_TYPE_COUNTRY  => 'Countries',
+        self::DESTINATION_TYPE_CITY     => 'Cities/Zones',
+        self::DESTINATION_TYPE_HOTEL    => 'Hotels'
+    ];
 
     public static function create(int $productId): self
     {
         $hotel = new static();
         $hotel->ph_product_id = $productId;
         return $hotel;
-	}
+    }
 
     public function updateRequest(HotelUpdateRequestForm $form): void
     {
         $this->attributes = $form->attributes;
         $this->recordEvent(new HotelUpdateRequestEvent($this));
-	}
+    }
 
     /**
      * @return string
@@ -86,9 +86,9 @@ class Hotel extends ActiveRecord implements Productable
             [['ph_request_hash_key'], 'string', 'max' => 32],
             [['ph_destination_label'], 'string', 'max' => 100],
             [['ph_product_id'], 'exist', 'skipOnError' => true, 'targetClass' => Product::class, 'targetAttribute' => ['ph_product_id' => 'pr_id']],
-			[['ph_check_in_date', 'ph_check_out_date'], 'date', 'format' => 'php:Y-m-d'],
-			['ph_check_out_date', 'compare', 'compareAttribute' => 'ph_check_in_date', 'operator' => '>=', 'enableClientValidation' => true]
-		];
+            [['ph_check_in_date', 'ph_check_out_date'], 'date', 'format' => 'php:Y-m-d'],
+            ['ph_check_out_date', 'compare', 'compareAttribute' => 'ph_check_in_date', 'operator' => '>=', 'enableClientValidation' => true]
+        ];
     }
 
     /**
@@ -175,7 +175,7 @@ class Hotel extends ActiveRecord implements Productable
     }
 
     /**
-     * Find invalid request quotes and update status 
+     * Find invalid request quotes and update status
      */
     public function updateInvalidRequestQuotes(): void
     {
@@ -210,57 +210,56 @@ class Hotel extends ActiveRecord implements Productable
     /**
      * @return array
      */
-	public function getSearchData(): array
-	{
-		$keyCache = $this->ph_request_hash_key;
-		$result = Yii::$app->cache->get($keyCache);
+    public function getSearchData(): array
+    {
+        $keyCache = $this->ph_request_hash_key;
+        $result = Yii::$app->cache->get($keyCache);
 
-		if ($result === false) {
-			$params = [];
+        if ($result === false) {
+            $params = [];
 
-			$apiHotelService = Yii::$app->getModule('hotel')->apiService;
-			// $service = $hotel->apiService;
+            $apiHotelService = Yii::$app->getModule('hotel')->apiService;
+            // $service = $hotel->apiService;
 
-			$rooms = [];
+            $rooms = [];
 
-			if ($this->hotelRooms) {
-				foreach ($this->hotelRooms as $room) {
-					$rooms[] = $room->getDataSearch();
-				}
+            if ($this->hotelRooms) {
+                foreach ($this->hotelRooms as $room) {
+                    $rooms[] = $room->getDataSearch();
+                }
+            }
 
-			}
+            /*$rooms[] = ['rooms' => 1, 'adults' => 1];
+            $rooms[] = ['rooms' => 1, 'adults' => 2, 'children' => 2, 'paxes' => [
+                ['paxType' => 1, 'age' => 6],
+                ['paxType' => 1, 'age' => 14],
+            ]];*/
 
-			/*$rooms[] = ['rooms' => 1, 'adults' => 1];
-			$rooms[] = ['rooms' => 1, 'adults' => 2, 'children' => 2, 'paxes' => [
-				['paxType' => 1, 'age' => 6],
-				['paxType' => 1, 'age' => 14],
-			]];*/
+            //            if ($this->ph_max_star_rate) {
+            //
+            //            }
 
-			//            if ($this->ph_max_star_rate) {
-			//
-			//            }
+            if ($this->ph_max_price_rate) {
+                $params['maxRate'] = $this->ph_max_price_rate;
+            }
 
-			if ($this->ph_max_price_rate) {
-				$params['maxRate'] = $this->ph_max_price_rate;
-			}
+            if ($this->ph_min_price_rate) {
+                $params['minRate'] = $this->ph_min_price_rate;
+            }
 
-			if ($this->ph_min_price_rate) {
-				$params['minRate'] = $this->ph_min_price_rate;
-			}
+            $response = $apiHotelService->search($this->ph_check_in_date, $this->ph_check_out_date, $this->ph_destination_code, $rooms, $params);
 
-			$response = $apiHotelService->search($this->ph_check_in_date, $this->ph_check_out_date, $this->ph_destination_code, $rooms, $params);
+            if (isset($response['data']['hotels'])) {
+                $result = $response['data'];
+                Yii::$app->cache->set($keyCache, $result, 100);
+            } else {
+                $result = [];
+                Yii::error('Not found response[data][hotels]', 'Model:Hotel:getSearchData:apiService');
+            }
+        }
 
-			if (isset($response['data']['hotels'])) {
-				$result = $response['data'];
-				Yii::$app->cache->set($keyCache, $result, 100);
-			} else {
-				$result = [];
-				Yii::error('Not found response[data][hotels]', 'Model:Hotel:getSearchData:apiService');
-			}
-		}
-
-		return $result;
-	}
+        return $result;
+    }
 
 
     /**
@@ -272,7 +271,6 @@ class Hotel extends ActiveRecord implements Productable
     {
         $hotelList = [];
         if (isset($result['hotels']) && $result['hotels']) {
-
             foreach ($result['hotels'] as $hotel) {
                 $hotelList[$hotel['code']] = $hotel;
             }
@@ -325,20 +323,20 @@ class Hotel extends ActiveRecord implements Productable
         return false;
     }
 
-	/**
-	 * @return array
-	 */
+    /**
+     * @return array
+     */
     public static function getDestinationList(): array
-	{
-		return self::DESTINATION_TYPE_LIST;
-	}
+    {
+        return self::DESTINATION_TYPE_LIST;
+    }
 
-    public function getId():int
+    public function getId(): int
     {
         return $this->ph_id;
-	}
+    }
 
-	public function serialize(): array
+    public function serialize(): array
     {
         return (new HotelSerializer($this))->getData();
     }

@@ -26,6 +26,4 @@ class OfferCodeException
     public const API_OFFER_VIEW_NOT_FOUND_DATA_ON_REQUEST = Module::OFFER . 300;
     public const API_OFFER_VIEW_VALIDATE = Module::OFFER . 301;
     public const API_OFFER_VIEW_NOT_FOUND = Module::OFFER . 302;
-
-
 }

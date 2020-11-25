@@ -28,42 +28,42 @@ use yii\web\Response;
  */
 class FlightController extends FController
 {
-	private $service;
-	/**
-	 * @var FlightRepository
-	 */
-	private $flightRepository;
+    private $service;
+    /**
+     * @var FlightRepository
+     */
+    private $flightRepository;
 
-	/**
-	 * FlightController constructor.
-	 * @param $id
-	 * @param $module
-	 * @param FlightManageService $flightManageService
-	 * @param FlightRepository $flightRepository
-	 * @param array $config
-	 */
-	public function __construct($id, $module, FlightManageService $flightManageService, FlightRepository $flightRepository, $config = [])
-	{
-		parent::__construct($id, $module, $config);
+    /**
+     * FlightController constructor.
+     * @param $id
+     * @param $module
+     * @param FlightManageService $flightManageService
+     * @param FlightRepository $flightRepository
+     * @param array $config
+     */
+    public function __construct($id, $module, FlightManageService $flightManageService, FlightRepository $flightRepository, $config = [])
+    {
+        parent::__construct($id, $module, $config);
 
-		$this->service = $flightManageService;
-		$this->flightRepository = $flightRepository;
-	}
+        $this->service = $flightManageService;
+        $this->flightRepository = $flightRepository;
+    }
 
-	/**
+    /**
      * {@inheritdoc}
      */
     public function behaviors()
     {
-    	$behaviors = [
-			'verbs' => [
-				'class' => VerbFilter::class,
-				'actions' => [
-					'delete' => ['POST'],
-				],
-			],
-		];
-		return ArrayHelper::merge(parent::behaviors(), $behaviors);
+        $behaviors = [
+            'verbs' => [
+                'class' => VerbFilter::class,
+                'actions' => [
+                    'delete' => ['POST'],
+                ],
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**
@@ -132,74 +132,74 @@ class FlightController extends FController
         ]);
     }
 
-	/**
-	 * @return string
-	 * @throws ForbiddenHttpException
-	 * @throws NotFoundHttpException
-	 */
+    /**
+     * @return string
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     */
     public function actionAjaxUpdateItineraryView(): string
-	{
-		$id = Yii::$app->request->get('id');
-		$pjaxIdWrap = Yii::$app->request->post('pjaxIdWrap');
-
-		$flight = Flight::findOne($id);
-
-		if (!$flight) {
-			throw new NotFoundHttpException();
-		}
-
-		$form = new ItineraryEditForm($flight);
-		return $this->renderAjax('update_ajax', [
-			'itineraryForm' => $form,
-			'pjaxIdWrap' => $pjaxIdWrap
-		]);
-	}
-
-	/**
-	 * @return string
-	 * @throws ForbiddenHttpException
-	 * @throws NotFoundHttpException
-	 */
-    public function actionAjaxUpdateItinerary(): string
     {
-		$id = Yii::$app->request->post('flightId');
-		$pjaxIdWrap = Yii::$app->request->post('pjaxIdWrap');
-		$flight = $this->findModel($id);
+        $id = Yii::$app->request->get('id');
+        $pjaxIdWrap = Yii::$app->request->post('pjaxIdWrap');
 
-		$data = CompositeFormHelper::prepareDataForMultiInput(
-			Yii::$app->request->post(),
-			'ItineraryEditForm',
-			['segments' => 'FlightSegmentEditForm']
-		);
-		$form = new ItineraryEditForm($flight, count($data['post']['FlightSegmentEditForm']));
+        $flight = Flight::findOne($id);
 
-		if ($form->load($data['post']) && $form->validate()) {
-			try {
-				$this->service->editItinerary($id, $form);
-				Yii::$app->session->setFlash('success', 'Segments saved.');
+        if (!$flight) {
+            throw new NotFoundHttpException();
+        }
 
-				return '<script>$("#modal-md").modal("hide"); $.pjax.reload({container: "#'.$pjaxIdWrap.'", url: "/flight/flight/pjax-flight-request-view?pr_id='.$flight->fl_product_id.'", pushState: false, replace: false, timeout: 2000})</script>';
-			} catch (\Exception | \Throwable $e) {
-				Yii::$app->errorHandler->logException($e);
-				Yii::$app->session->setFlash('error', $e->getMessage());
-			}
-		}
-
+        $form = new ItineraryEditForm($flight);
         return $this->renderAjax('update_ajax', [
             'itineraryForm' => $form,
-			'pjaxIdWrap' => $pjaxIdWrap
+            'pjaxIdWrap' => $pjaxIdWrap
         ]);
     }
 
-	/**
-	 * @throws NotFoundHttpException
-	 */
+    /**
+     * @return string
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     */
+    public function actionAjaxUpdateItinerary(): string
+    {
+        $id = Yii::$app->request->post('flightId');
+        $pjaxIdWrap = Yii::$app->request->post('pjaxIdWrap');
+        $flight = $this->findModel($id);
+
+        $data = CompositeFormHelper::prepareDataForMultiInput(
+            Yii::$app->request->post(),
+            'ItineraryEditForm',
+            ['segments' => 'FlightSegmentEditForm']
+        );
+        $form = new ItineraryEditForm($flight, count($data['post']['FlightSegmentEditForm']));
+
+        if ($form->load($data['post']) && $form->validate()) {
+            try {
+                $this->service->editItinerary($id, $form);
+                Yii::$app->session->setFlash('success', 'Segments saved.');
+
+                return '<script>$("#modal-md").modal("hide"); $.pjax.reload({container: "#' . $pjaxIdWrap . '", url: "/flight/flight/pjax-flight-request-view?pr_id=' . $flight->fl_product_id . '", pushState: false, replace: false, timeout: 2000})</script>';
+            } catch (\Exception | \Throwable $e) {
+                Yii::$app->errorHandler->logException($e);
+                Yii::$app->session->setFlash('error', $e->getMessage());
+            }
+        }
+
+        return $this->renderAjax('update_ajax', [
+            'itineraryForm' => $form,
+            'pjaxIdWrap' => $pjaxIdWrap
+        ]);
+    }
+
+    /**
+     * @throws NotFoundHttpException
+     */
     public function actionPjaxFlightRequestView(): string
-	{
-		$id = Yii::$app->request->get('pr_id');
-		$product = Product::findOne($id);
-		return $this->renderAjax('partial/_product_flight', ['product' => $product, 'pjaxRequest' => true]);
-	}
+    {
+        $id = Yii::$app->request->get('pr_id');
+        $product = Product::findOne($id);
+        return $this->renderAjax('partial/_product_flight', ['product' => $product, 'pjaxRequest' => true]);
+    }
 
     /**
      * Deletes an existing Flight model.
@@ -228,7 +228,7 @@ class FlightController extends FController
         try {
             $model = $this->findModel($id);
             if (!$model->delete()) {
-                throw new Exception('Product ('.$id.') not deleted', 2);
+                throw new Exception('Product (' . $id . ') not deleted', 2);
             }
 
             if ((int) $model->pr_type_id === ProductType::PRODUCT_HOTEL && class_exists('\modules\hotel\HotelModule')) {
@@ -239,7 +239,6 @@ class FlightController extends FController
                     }
                 }
             }
-
         } catch (\Throwable $throwable) {
             return ['error' => 'Error: ' . $throwable->getMessage()];
         }

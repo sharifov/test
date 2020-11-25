@@ -29,8 +29,7 @@ class CreateDto
         $hqsl_message,
         int $hqsl_status_id = HotelQuoteServiceLogStatus::STATUS_SEND_REQUEST,
         $toString = true
-    )
-    {
+    ) {
         $this->hqsl_hotel_quote_id = $hqsl_hotel_quote_id;
         $this->hqsl_action_type_id = $hqsl_action_type_id;
         $this->hqsl_message = ($toString) ? VarDumper::dumpAsString($hqsl_message) : $hqsl_message;

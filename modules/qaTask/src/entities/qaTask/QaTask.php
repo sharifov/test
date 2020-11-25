@@ -65,8 +65,7 @@ class QaTask extends \yii\db\ActiveRecord
         int $categoryId,
         int $createType,
         ?string $description
-    ): self
-    {
+    ): self {
         $task = new static();
         $task->t_gid = self::generateGid();
         $task->t_object_type_id = $objectType;

@@ -35,7 +35,7 @@ return [
     ProductQuoteExpiredEvent::class => [ProductQuoteExpiredEventListener::class],
     ProductQuoteRecalculateProfitAmountEvent::class => [ProductQuoteRecalculateProfitAmountListener::class],
     ProductQuoteRecalculateChildrenProfitAmountEvent::class => [ProductQuoteRecalculateChildrenProfitAmountListener::class],
-	UserProfitCalculateByOrderUserProfitEvent::class => [UserProfitCalculateByOrderUserProfitEventListener::class],
+    UserProfitCalculateByOrderUserProfitEvent::class => [UserProfitCalculateByOrderUserProfitEventListener::class],
     ProductMarketPriceChangedEvent::class => [],
     ProductClientBudgetChangedEvent::class => [],
 ];

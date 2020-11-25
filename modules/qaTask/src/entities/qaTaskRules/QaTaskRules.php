@@ -118,13 +118,12 @@ class QaTaskRules extends \yii\db\ActiveRecord
                     }
                 } else {
                     if ($subKey !== null) {
-                        \Yii::error('Key: ' . $key . ' Value is not array. subKey: ' . $subKey , 'QaTaskRules:getRule');
+                        \Yii::error('Key: ' . $key . ' Value is not array. subKey: ' . $subKey, 'QaTaskRules:getRule');
                         return null;
                     }
                 }
 
                 return new QaTaskRule($rule['tr_enabled'], $value);
-
             } catch (\Throwable $e) {
                 \Yii::error('Key: ' . $key . PHP_EOL . $e, 'QaTaskRules:getRule');
                 return null;

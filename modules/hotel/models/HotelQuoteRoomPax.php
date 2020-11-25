@@ -113,5 +113,4 @@ class HotelQuoteRoomPax extends ActiveRecord
 
         return $paxes;
     }
-
 }

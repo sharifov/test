@@ -76,20 +76,20 @@ class FlightQuoteTrip extends \yii\db\ActiveRecord
         return new \modules\flight\models\query\FlightQuoteTripQuery(static::class);
     }
 
-	/**
-	 * @param FlightQuote $flightQuote
-	 * @param string $duration
-	 * @return FlightQuoteTrip
-	 */
+    /**
+     * @param FlightQuote $flightQuote
+     * @param string $duration
+     * @return FlightQuoteTrip
+     */
     public static function create(FlightQuote $flightQuote, string $duration): self
-	{
-		$trip = new self();
+    {
+        $trip = new self();
 
-		$trip->fqt_flight_quote_id = $flightQuote->fq_id;
-		$trip->fqt_duration = $duration;
+        $trip->fqt_flight_quote_id = $flightQuote->fq_id;
+        $trip->fqt_duration = $duration;
 
-		return $trip;
-	}
+        return $trip;
+    }
 
     public static function clone(FlightQuoteTrip $trip, int $quoteId): self
     {
@@ -101,6 +101,5 @@ class FlightQuoteTrip extends \yii\db\ActiveRecord
         $clone->fqt_flight_quote_id = $quoteId;
 
         return $clone;
-	}
-
+    }
 }

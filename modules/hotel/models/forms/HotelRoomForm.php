@@ -53,14 +53,13 @@ class HotelRoomForm extends Model
         } else {
             //$dataErrors = [];
             foreach ($this->hr_pax_list as $nr => $paxData) {
-
                 $model = new HotelRoomPaxForm();
                 $model->attributes = $paxData;
 
                 if (!$model->validate()) {
                     if ($model->errors) {
                         //VarDumper::dump($model->errors); //exit;
-                        foreach ($model->errors as $keyError =>  $error) {
+                        foreach ($model->errors as $keyError => $error) {
                             $errorValue = $error[0];
                             $key = $attribute . '[' . $nr . '][' . $keyError . ']';
                             $this->addError($key, 'Pax ' . ($nr + 1) . ': ' . $errorValue);
@@ -88,5 +87,4 @@ class HotelRoomForm extends Model
             'hr_pax_list'   => 'Pax list'
         ];
     }
-
 }

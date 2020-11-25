@@ -30,7 +30,7 @@ class ProductTypeCrudSearch extends ProductType
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['pt_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['pt_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 10,
             ],

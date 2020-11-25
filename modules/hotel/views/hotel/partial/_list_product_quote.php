@@ -1,4 +1,5 @@
 <?php
+
 /* @var $this yii\web\View */
 /* @var $index int */
 /* @var $key int */
@@ -18,10 +19,9 @@ use yii\widgets\Pjax;
 
 ?>
 
-<?php if ($model->hqProductQuote): ?>
-
-<?php
-$js = <<<JS
+<?php if ($model->hqProductQuote) : ?>
+    <?php
+    $js = <<<JS
     $('body').off('click', '.btn-book-quote').on('click', '.btn-book-quote', function (e) {
 
         if(!confirm('Are you sure you want to book this quote?')) {
@@ -134,10 +134,10 @@ $js = <<<JS
      });
 JS;
 
-$this->registerJs($js, \yii\web\View::POS_READY);
-?>
+    $this->registerJs($js, \yii\web\View::POS_READY);
+    ?>
 
-<?php Pjax::begin(['id' => 'pjax-product-quote-' . $model->hqProductQuote->pq_id, 'timeout' => 2000, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
+    <?php Pjax::begin(['id' => 'pjax-product-quote-' . $model->hqProductQuote->pq_id, 'timeout' => 2000, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
 <div class="x_panel">
     <div class="x_title">
 
@@ -151,7 +151,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
 
         <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $model->hqProductQuote->pq_profit_amount ?>
 
-        <?php if ($model->hqProductQuote->pq_clone_id): ?>
+        <?php if ($model->hqProductQuote->pq_clone_id) : ?>
             <span class="badge badge-warning" style="padding-left: 5px">CLONE</span>
         <?php endif;?>
 
@@ -216,10 +216,10 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                         //'data-product-id' => $model->hqProductQuote->pq_product_id,
                     ]) ?>
 
-                    <?php if ($model->isBookable()): ?>
+                    <?php if ($model->isBookable()) : ?>
                         <?= Html::a(
                             '<i class="fa fa-share-square"></i> Book',
-                             null,
+                            null,
                             [
                                 'class' => 'dropdown-item btn-book-quote',
                                 'data-url' => Url::to('/hotel/hotel-quote/ajax-book'),
@@ -228,8 +228,10 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                             ]
                         ) ?>
                     <?php endif; ?>
-                    <?php if ($model->isBooking()): ?>
-                        <?= Html::a('<i class="fa fa-share-square"></i> Cancel Book',null,
+                    <?php if ($model->isBooking()) : ?>
+                        <?= Html::a(
+                            '<i class="fa fa-share-square"></i> Cancel Book',
+                            null,
                             [
                                 'class' => 'dropdown-item text-danger btn-cancel-book-quote',
                                 'data-url' => Url::to('/hotel/hotel-quote/ajax-cancel-book'),
@@ -239,7 +241,9 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                         ) ?>
                     <?php endif; ?>
 
-                    <?= Html::a('<i class="fa fa-list"></i> API Service Log', null,
+                    <?= Html::a(
+                        '<i class="fa fa-list"></i> API Service Log',
+                        null,
                         [
                             'class' => 'dropdown-item text-secondary btn-product-api-service-log',
                             'data-url' => Url::to(['/hotel/hotel-quote-service-log/hotel-quote-log', 'id' => $model->hq_id]),
@@ -278,7 +282,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
         <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($model->hqProductQuote->pq_created_dt)) ?>,
         <i title="code: <?=\yii\helpers\Html::encode($model->hq_hash_key)?>">Hash: <?=\yii\helpers\Html::encode($model->hq_hash_key)?></i>
 
-        <?php if ($model->hotelQuoteRooms):
+        <?php if ($model->hotelQuoteRooms) :
             $totalAmountRoom = 0;
             $adlTotalCount = 0;
             $chdTotalCount = 0;
@@ -302,8 +306,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                         <th>SFS, $</th>
                         <th>SP, $</th>
                     </tr>
-                    <?php foreach ($model->hotelQuoteRooms as $room):
-
+                    <?php foreach ($model->hotelQuoteRooms as $room) :
                         $totalAmountRoom += (float) $room->hqr_amount;
                         $adlTotalCount += $room->hqr_adults;
                         $chdTotalCount += $room->hqr_children;
@@ -321,38 +324,38 @@ $this->registerJs($js, \yii\web\View::POS_READY);
 
                         <td title="code: <?=Html::encode($room->hqr_board_code)?>">
                             <?=Html::encode($room->hqr_board_name)?>
-                            <?php if ($room->hqr_rate_comments):?>
+                            <?php if ($room->hqr_rate_comments) :?>
                                 <i class="fa fa-info-circle green" title="Rate Comments: <?=Html::encode($room->hqr_rate_comments)?>"></i>
                             <?php endif;?>
                         </td>
                         <td class="text-center"><?=$room->hqr_adults ? '<i class="fa fa-user"></i> ' . ($room->hqr_adults) : '-'?></td>
                         <td class="text-center"><?=$room->hqr_children ? '<i class="fa fa-child"></i> ' . ($room->hqr_children) : '-'?></td>
                         <td>
-                            <?php if ($room->hqr_cancel_amount): ?>
-                            <?=Html::encode($room->hqr_cancel_amount)?>, <?=Html::encode($room->hqr_cancel_from_dt)?>
+                            <?php if ($room->hqr_cancel_amount) : ?>
+                                <?=Html::encode($room->hqr_cancel_amount)?>, <?=Html::encode($room->hqr_cancel_from_dt)?>
                             <?php endif; ?>
                         </td>
                         <td><?= Html::encode($room->hqr_amount) ?></td>
                         <td><?= Html::encode($room->hqr_system_mark_up) ?></td>
                         <td>
-							<?= Editable::widget([
-								'name'=>'extra_markup['.$room->hqr_id.']',
-								'asPopover' => false,
-								'pjaxContainerId' => 'pjax-product-quote-'.$model->hqProductQuote->pq_id,
-								'value' => number_format($room->hqr_agent_mark_up, 2),
-								'header' => 'Extra markup',
-								'size'=>'sm',
-								'inputType' => Editable::INPUT_TEXT,
-								'buttonsTemplate' => '{submit}',
-								'pluginEvents' => ['editableSuccess' => "function(event, val, form, data) { pjaxReload({container: '#pjax-product-quote-{$model->hqProductQuote->pq_id}'}); }",],
-								'inlineSettings' => [
-									'templateBefore' => '<div class="editable-pannel">{loading}',
-									'templateAfter' => '{buttons}{close}</div>'],
-								'options' => ['class'=>'form-control','style'=>'width:50px;', 'placeholder'=>'Enter extra markup','resetButton' => '<i class="fa fa-ban"></i>'],
-								'formOptions' => [
-									'action' => Url::toRoute(['/hotel/hotel-quote/ajax-update-agent-markup'])
-								]
-							]) ?>
+                            <?= Editable::widget([
+                                'name' => 'extra_markup[' . $room->hqr_id . ']',
+                                'asPopover' => false,
+                                'pjaxContainerId' => 'pjax-product-quote-' . $model->hqProductQuote->pq_id,
+                                'value' => number_format($room->hqr_agent_mark_up, 2),
+                                'header' => 'Extra markup',
+                                'size' => 'sm',
+                                'inputType' => Editable::INPUT_TEXT,
+                                'buttonsTemplate' => '{submit}',
+                                'pluginEvents' => ['editableSuccess' => "function(event, val, form, data) { pjaxReload({container: '#pjax-product-quote-{$model->hqProductQuote->pq_id}'}); }",],
+                                'inlineSettings' => [
+                                    'templateBefore' => '<div class="editable-pannel">{loading}',
+                                    'templateAfter' => '{buttons}{close}</div>'],
+                                'options' => ['class' => 'form-control','style' => 'width:50px;', 'placeholder' => 'Enter extra markup','resetButton' => '<i class="fa fa-ban"></i>'],
+                                'formOptions' => [
+                                    'action' => Url::toRoute(['/hotel/hotel-quote/ajax-update-agent-markup'])
+                                ]
+                            ]) ?>
                         </td>
                         <td><?= Html::encode($room->hqr_service_fee_percent) ?>%</td>
                         <td><?= $sfs ?></td>
@@ -362,8 +365,8 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                     <?php endforeach; ?>
                     <tr>
                         <td colspan="3" class="text-right">Room Total: </td>
-                        <td class="text-center"><?=$adlTotalCount ? '<i class="fa fa-user"></i> '. $adlTotalCount : '-'?></td>
-                        <td class="text-center"><?=$chdTotalCount ? '<i class="fa fa-child"></i> '. $chdTotalCount : '-'?></td>
+                        <td class="text-center"><?=$adlTotalCount ? '<i class="fa fa-user"></i> ' . $adlTotalCount : '-'?></td>
+                        <td class="text-center"><?=$chdTotalCount ? '<i class="fa fa-child"></i> ' . $chdTotalCount : '-'?></td>
                         <td class="text-right"></td>
                         <td class="text-right"><?= number_format($totalNp, 2) ?></td>
                         <td class="text-right"><?= number_format($totalMkp, 2) ?></td>
@@ -376,7 +379,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                             $totalAmountRoom = round($totalAmountRoom, 2);
                         ?>
 
-                        <td class="text-right <?=( $totalAmountRoom !== $price) ? 'danger': ''?>">
+                        <td class="text-right <?=( $totalAmountRoom !== $price) ? 'danger' : ''?>">
                             <b title="<?=$totalAmountRoom?> & <?=$price?>"><?=number_format($price, 2)?> USD</b>
                         </td>
                     </tr>
@@ -389,6 +392,6 @@ $this->registerJs($js, \yii\web\View::POS_READY);
 
     </div>
 </div>
-<?php Pjax::end(); ?>
+    <?php Pjax::end(); ?>
 
 <?php endif; ?>

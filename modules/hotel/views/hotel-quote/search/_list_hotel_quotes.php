@@ -1,4 +1,5 @@
 <?php
+
 /* @var $this yii\web\View */
 /* @var $dataHotel array */
 /* @var $index int */

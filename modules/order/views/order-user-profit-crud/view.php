@@ -34,10 +34,10 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'oup_order_id',
                 'value' => static function (OrderUserProfit $orderUserProfit) {
-					return Html::a($orderUserProfit->oup_order_id, Url::toRoute(['/order/order-crud/view', 'id' => $orderUserProfit->oup_order_id]), [
-						'target' => '_blank',
-						'data-pjax' => 0
-					]);
+                    return Html::a($orderUserProfit->oup_order_id, Url::toRoute(['/order/order-crud/view', 'id' => $orderUserProfit->oup_order_id]), [
+                        'target' => '_blank',
+                        'data-pjax' => 0
+                    ]);
                 },
                 'format' => 'raw'
             ],

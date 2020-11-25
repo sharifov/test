@@ -21,13 +21,13 @@ class FlightQuoteTripRepository extends Repository
         throw new NotFoundException('Flight Quote Trip is not found', FlightCodeException::FLIGHT_QUOTE_TRIP_NOT_FOUND);
     }
 
-	public function save(FlightQuoteTrip $trip): int
-	{
-		if (!$trip->save()) {
-			throw new \RuntimeException($trip->getErrorSummary(false)[0]);
-		}
-		return $trip->fqt_id;
-	}
+    public function save(FlightQuoteTrip $trip): int
+    {
+        if (!$trip->save()) {
+            throw new \RuntimeException($trip->getErrorSummary(false)[0]);
+        }
+        return $trip->fqt_id;
+    }
 
     public function remove(FlightQuoteTrip $trip): void
     {

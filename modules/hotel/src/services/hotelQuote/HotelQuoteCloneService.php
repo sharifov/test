@@ -25,8 +25,7 @@ class HotelQuoteCloneService
         HotelQuoteRepository $hotelQuoteRepository,
         HotelQuoteRoomRepository $hotelQuoteRoomRepository,
         HotelRepository $hotelRepository
-    )
-    {
+    ) {
         $this->hotelQuoteRepository = $hotelQuoteRepository;
         $this->hotelQuoteRoomRepository = $hotelQuoteRoomRepository;
         $this->hotelRepository = $hotelRepository;

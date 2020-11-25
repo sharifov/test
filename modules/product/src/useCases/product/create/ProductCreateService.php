@@ -33,8 +33,7 @@ class ProductCreateService
         ProductRepository $productRepository,
         ProductableRepository $productableRepository,
         LeadRepository $leadRepository
-    )
-    {
+    ) {
         $this->factory = $factory;
         $this->transactionManager = $transactionManager;
         $this->productRepository = $productRepository;
@@ -57,7 +56,6 @@ class ProductCreateService
             $this->productableRepository->save($form->pr_type_id, $productItem);
 
             return $product->pr_id;
-
         });
 
         return $productId;

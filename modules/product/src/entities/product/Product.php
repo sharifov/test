@@ -268,16 +268,16 @@ class Product extends \yii\db\ActiveRecord implements Serializable
         return new Scopes(static::class);
     }
 
-	/**
-	 * @param int $employeeId
-	 * @return bool
-	 */
-	public function canAgentEdit(int $employeeId): bool
-	{
-		return ($this->prLead->employee_id && $this->prLead->employee_id === $employeeId);
-	}
+    /**
+     * @param int $employeeId
+     * @return bool
+     */
+    public function canAgentEdit(int $employeeId): bool
+    {
+        return ($this->prLead->employee_id && $this->prLead->employee_id === $employeeId);
+    }
 
-	public function serialize(): array
+    public function serialize(): array
     {
         return (new ProductSerializer($this))->getData();
     }

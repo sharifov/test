@@ -28,8 +28,7 @@ class CreateDto
         ?string $description,
         ?int $actionId,
         ?int $creatorId
-    )
-    {
+    ) {
         $this->invoiceId = $invoiceId;
         $this->startStatusId = $startStatusId;
         $this->endStatusId = $endStatusId;

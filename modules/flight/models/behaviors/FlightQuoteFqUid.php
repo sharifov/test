@@ -26,4 +26,4 @@ class FlightQuoteFqUid extends Behavior
     {
         $this->owner->fq_uid = empty($this->owner->fq_uid) ? uniqid('', true) : $this->owner->fq_uid;
     }
-}   
+}

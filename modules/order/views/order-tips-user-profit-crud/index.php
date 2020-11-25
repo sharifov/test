@@ -6,6 +6,7 @@ use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel modules\order\src\entities\orderTipsUserProfit\search\OrderTipsUserProfitSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -30,11 +31,11 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
-			[
-				'class' => OrderColumn::class,
-				'attribute' => 'otup_order_id',
-				'relation' => 'otupOrder',
-			],
+            [
+                'class' => OrderColumn::class,
+                'attribute' => 'otup_order_id',
+                'relation' => 'otupOrder',
+            ],
 
             [
                 'class' => UserSelect2Column::class,
@@ -45,14 +46,14 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'otup_percent:percentInteger',
             'otup_amount',
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'otup_created_dt',
-			],
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'otup_updated_dt',
-			],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'otup_created_dt',
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'otup_updated_dt',
+            ],
 
             [
                 'class' => UserSelect2Column::class,

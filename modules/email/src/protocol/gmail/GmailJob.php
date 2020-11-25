@@ -47,7 +47,6 @@ class GmailJob extends BaseObject implements JobInterface
         }
 
         try {
-
             $logger->timerStart('gmail_service')->log(Message::info('Start Gmail Service'));
 
             $api = new GmailApiService(GmailClient::createByAccount($account), $account->ea_email, $logger, $this->useBatchRequest);
@@ -63,7 +62,6 @@ class GmailJob extends BaseObject implements JobInterface
             }
 
             $logger->timerStop('gmail_service')->log(Message::info('End Gmail Service'));
-
         } catch (\Throwable $e) {
             \Yii::error(AppHelper::throwableFormatter($e), 'GmailJob');
             $logger->log(Message::error($e->getMessage()));

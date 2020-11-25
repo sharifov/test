@@ -47,7 +47,7 @@ class FlightSegmentSearch extends FlightSegment
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['fs_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['fs_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ]

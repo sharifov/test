@@ -1,4 +1,5 @@
 <?php
+
 namespace modules\flight\src\helpers;
 
 /**
@@ -20,16 +21,16 @@ namespace modules\flight\src\helpers;
  */
 class FlightQuotePaxPriceDataDTO
 {
-	public $fare = 0;
-	public $taxes = 0;
-	public $net = 0;
-	public $tickets = 0;
-	public $markUp = 0;
-	public $extraMarkUp = 0;
-	public $serviceFee = 0;
-	public $selling = 0;
-	public $serviceFeeSum = 0;
-	public $clientSelling = 0;
-	public $paxCodeId;
-	public $paxCode;
+    public $fare = 0;
+    public $taxes = 0;
+    public $net = 0;
+    public $tickets = 0;
+    public $markUp = 0;
+    public $extraMarkUp = 0;
+    public $serviceFee = 0;
+    public $selling = 0;
+    public $serviceFeeSum = 0;
+    public $clientSelling = 0;
+    public $paxCodeId;
+    public $paxCode;
 }

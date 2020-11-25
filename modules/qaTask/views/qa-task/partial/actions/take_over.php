@@ -10,7 +10,7 @@ use yii\helpers\Url;
 
 ?>
 
-<?php if (QaTaskTakeOverService::can(Auth::user(), $model)): ?>
+<?php if (QaTaskTakeOverService::can(Auth::user(), $model)) : ?>
     <?= Html::button(
         'Take over',
         [

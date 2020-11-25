@@ -5,6 +5,7 @@ namespace modules\hotel\migrations;
 use common\models\Employee;
 use console\migrations\RbacMigrationService;
 use yii\db\Migration;
+
 /**
  * Class m200127_155405_create_table_hotel_quote_room_pax
  */
@@ -47,10 +48,13 @@ class m200127_155405_create_table_hotel_quote_room_pax extends Migration
 
         $this->addForeignKey(
             'FK-hotel_quote_room_pax-hqrp_hotel_quote_room_id',
-            '{{%hotel_quote_room_pax}}', ['hqrp_hotel_quote_room_id'],
-            '{{%hotel_quote_room}}', ['hqr_id'],
+            '{{%hotel_quote_room_pax}}',
+            ['hqrp_hotel_quote_room_id'],
+            '{{%hotel_quote_room}}',
+            ['hqr_id'],
             'CASCADE',
-            'CASCADE');
+            'CASCADE'
+        );
 
         $this->createIndex('IDX-hotel_quote_room_pax-hqrp_type_id', '{{%hotel_quote_room_pax}}', ['hqrp_type_id']);
 

@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use dosamigos\datepicker\DatePicker;
+
 /* @var $this yii\web\View */
 /* @var $searchModel modules\flight\models\search\FlightSegmentSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -46,7 +47,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'options' => [
                         'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
+                        'placeholder' => 'Choose Date'
                     ],
                     'containerOptions' => [
                         'class' => (array_key_exists('fs_departure_date', $searchModel->errors)) ? 'has-error' : null,

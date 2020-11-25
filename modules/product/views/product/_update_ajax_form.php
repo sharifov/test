@@ -21,9 +21,9 @@ $modalId = 'modal-sm';
             'id' => $formId,
             'action' => ['/product/product/update-ajax?id=' . $model->productId],
             'clientBeforeSubmit' => new ClientBeforeSubmit(
-                    'Product update',
-                    true,
-                    'modal-sm',
+                'Product update',
+                true,
+                'modal-sm',
                 'pjaxReload({container: \'#pjax-product-\' + \'' . $model->productId . '\'}); ',
                 null,
                 null

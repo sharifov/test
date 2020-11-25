@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use dosamigos\datepicker\DatePicker;
+
 /* @var $this yii\web\View */
 /* @var $searchModel modules\flight\models\search\FlightQuoteSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -72,7 +73,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'options' => [
                         'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
+                        'placeholder' => 'Choose Date'
                     ],
                     'containerOptions' => [
                         'class' => (array_key_exists('fq_last_ticket_date', $searchModel->errors)) ? 'has-error' : null,

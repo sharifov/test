@@ -41,8 +41,8 @@ class ProductController extends FController
         ProductCreateService $productCreateService,
         ProductRepository $productRepository,
         ProductUpdateService $productUpdateService,
-        $config = [])
-    {
+        $config = []
+    ) {
         parent::__construct($id, $module, $config);
         $this->productCreateService = $productCreateService;
         $this->productRepository = $productRepository;
@@ -74,7 +74,6 @@ class ProductController extends FController
         $form = new ProductCreateForm();
 
         if ($form->load(Yii::$app->request->post())) {
-
             Yii::$app->response->format = Response::FORMAT_JSON;
 
             if (!$form->validate()) {
@@ -91,9 +90,7 @@ class ProductController extends FController
                 Yii::error($e, 'ProductController:actionCreateAjax:Throwable');
                 return ['errors' => 'Server error'];
             }
-
         } else {
-
             $leadId = (int)Yii::$app->request->get('id');
             $typeId = (int)Yii::$app->request->get('typeId');
 
@@ -134,7 +131,7 @@ class ProductController extends FController
                 } catch (\DomainException $e) {
                     return $this->asJson(['success' => false, 'message' => $e->getMessage()]);
                 } catch (\Throwable $e) {
-                    Yii::error(AppHelper::throwableFormatter($e), 'ProductController:' . __FUNCTION__ );
+                    Yii::error(AppHelper::throwableFormatter($e), 'ProductController:' . __FUNCTION__);
                     return $this->asJson(['success' => false, 'message' => 'Server error']);
                 }
             }
@@ -169,7 +166,6 @@ class ProductController extends FController
                     }
                 }
             }
-
         } catch (\Throwable $throwable) {
             return ['error' => 'Error: ' . $throwable->getMessage()];
         }

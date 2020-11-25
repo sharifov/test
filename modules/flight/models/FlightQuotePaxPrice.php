@@ -118,30 +118,30 @@ class FlightQuotePaxPrice extends \yii\db\ActiveRecord
         return new \modules\flight\models\query\FlightQuotePaxPriceQuery(static::class);
     }
 
-	/**
-	 * @param FlightQuotePaxPriceDTO $dto
-	 * @return FlightQuotePaxPrice
-	 */
+    /**
+     * @param FlightQuotePaxPriceDTO $dto
+     * @return FlightQuotePaxPrice
+     */
     public static function create(FlightQuotePaxPriceDTO $dto): self
-	{
-		$paxPrice = new self();
+    {
+        $paxPrice = new self();
 
-		$paxPrice->qpp_flight_quote_id = $dto->flightQuoteId;
-		$paxPrice->qpp_flight_pax_code_id = $dto->flightPaxCodeId;
-		$paxPrice->qpp_cnt = $dto->cnt;
-		$paxPrice->qpp_fare = $dto->fare;
-		$paxPrice->qpp_tax = $dto->tax;
-		$paxPrice->qpp_system_mark_up = $dto->systemMarkUp;
-		$paxPrice->qpp_agent_mark_up = $dto->agentMarkUp;
-		$paxPrice->qpp_origin_fare = $dto->originFare;
-		$paxPrice->qpp_origin_currency = $dto->originCurrency;
-		$paxPrice->qpp_origin_tax = $dto->originTax;
-		$paxPrice->qpp_client_fare = $dto->clientFare;
-		$paxPrice->qpp_client_currency = $dto->clientCurrency;
-		$paxPrice->qpp_client_tax = $dto->clientTax;
+        $paxPrice->qpp_flight_quote_id = $dto->flightQuoteId;
+        $paxPrice->qpp_flight_pax_code_id = $dto->flightPaxCodeId;
+        $paxPrice->qpp_cnt = $dto->cnt;
+        $paxPrice->qpp_fare = $dto->fare;
+        $paxPrice->qpp_tax = $dto->tax;
+        $paxPrice->qpp_system_mark_up = $dto->systemMarkUp;
+        $paxPrice->qpp_agent_mark_up = $dto->agentMarkUp;
+        $paxPrice->qpp_origin_fare = $dto->originFare;
+        $paxPrice->qpp_origin_currency = $dto->originCurrency;
+        $paxPrice->qpp_origin_tax = $dto->originTax;
+        $paxPrice->qpp_client_fare = $dto->clientFare;
+        $paxPrice->qpp_client_currency = $dto->clientCurrency;
+        $paxPrice->qpp_client_tax = $dto->clientTax;
 
-		return $paxPrice;
-	}
+        return $paxPrice;
+    }
 
     public static function clone(FlightQuotePaxPrice $paxPrice, int $quoteId): self
     {
@@ -153,35 +153,35 @@ class FlightQuotePaxPrice extends \yii\db\ActiveRecord
         $clone->qpp_flight_quote_id = $quoteId;
 
         return $clone;
-	}
+    }
 
-	/**
-	 * @param string $currencyCode
-	 */
-	public function updateClientCurrency(string $currencyCode): void
-	{
-		$this->qpp_client_currency = $currencyCode;
-	}
+    /**
+     * @param string $currencyCode
+     */
+    public function updateClientCurrency(string $currencyCode): void
+    {
+        $this->qpp_client_currency = $currencyCode;
+    }
 
     public function serialize(): array
     {
         return (new FlightQuotePaxPriceSerializer($this))->getData();
-	}
+    }
 
-	public static function createWithDefaultValues(int $paxCodeId): self
-	{
-		$paxPrice = new self();
+    public static function createWithDefaultValues(int $paxCodeId): self
+    {
+        $paxPrice = new self();
 
-		$paxPrice->qpp_fare = 0;
-		$paxPrice->qpp_tax = 0;
-		$paxPrice->qpp_system_mark_up = 0;
-		$paxPrice->qpp_agent_mark_up = 0;
-		$paxPrice->qpp_origin_fare = 0;
-		$paxPrice->qpp_origin_tax = 0;
-		$paxPrice->qpp_client_fare = 0;
-		$paxPrice->qpp_client_tax = 0;
-		$paxPrice->qpp_flight_pax_code_id = $paxCodeId;
+        $paxPrice->qpp_fare = 0;
+        $paxPrice->qpp_tax = 0;
+        $paxPrice->qpp_system_mark_up = 0;
+        $paxPrice->qpp_agent_mark_up = 0;
+        $paxPrice->qpp_origin_fare = 0;
+        $paxPrice->qpp_origin_tax = 0;
+        $paxPrice->qpp_client_fare = 0;
+        $paxPrice->qpp_client_tax = 0;
+        $paxPrice->qpp_flight_pax_code_id = $paxCodeId;
 
-		return $paxPrice;
-	}
+        return $paxPrice;
+    }
 }

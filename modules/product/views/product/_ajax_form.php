@@ -24,7 +24,7 @@ $pjaxId = 'add-product-pjax'; // . uniqid();
             'action' => ['/product/product/create-ajax'],
             'method' => 'POST'
         ]);
-    ?>
+        ?>
     <?php //php $this->registerJs('$(document).off("submit", "#add-product-pjax form[data-pjax]");alert(12);', \yii\web\View::POS_READY)?>
 
     <?= $form->field($model, 'pr_type_id')->dropDownList($model->pr_type_id ? [$model->pr_type_id => ProductTypeQuery::getListEnabled()[$model->pr_type_id]] : ProductTypeQuery::getListEnabled()) ?>

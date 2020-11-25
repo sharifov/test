@@ -44,7 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => ProductTypeCountPaymentMethodsColumn::class,
             ],
             [
-				'class' => ProductTypeDefaultPaymentMethodServiceFeeColumn::class,
+                'class' => ProductTypeDefaultPaymentMethodServiceFeeColumn::class,
             ],
             [
                 'class' => BooleanColumn::class,

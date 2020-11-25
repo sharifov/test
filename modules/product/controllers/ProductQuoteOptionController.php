@@ -66,7 +66,6 @@ class ProductQuoteOptionController extends FController
         $productTypeId = null;
 
         if ($form->load(Yii::$app->request->post())) {
-
             $form->pqo_status_id = ProductQuoteOptionStatus::PENDING;
 
             if ($form->validate()) {
@@ -86,7 +85,7 @@ class ProductQuoteOptionController extends FController
                     $transaction->commit();
                 } catch (\Throwable $throwable) {
                     $transaction->rollBack();
-                    Yii::error(AppHelper::throwableFormatter($throwable),'ProductQuoteOptionController:' . __FUNCTION__ );
+                    Yii::error(AppHelper::throwableFormatter($throwable), 'ProductQuoteOptionController:' . __FUNCTION__);
                 }
                 return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-product-quote-list-' . $model->pqoProductQuote->pq_product_id . '"});</script>';
             }
@@ -136,7 +135,6 @@ class ProductQuoteOptionController extends FController
         $form->pqo_product_quote_id = $model->pqo_product_quote_id;
 
         if ($form->load(Yii::$app->request->post())) {
-
             if ($form->validate()) {
                 $model->attributes = $form->attributes;
 
@@ -156,7 +154,7 @@ class ProductQuoteOptionController extends FController
                     $transaction->commit();
                 } catch (\Throwable $throwable) {
                     $transaction->rollBack();
-                    Yii::error(AppHelper::throwableFormatter($throwable), 'ProductQuoteOptionController:' . __FUNCTION__ );
+                    Yii::error(AppHelper::throwableFormatter($throwable), 'ProductQuoteOptionController:' . __FUNCTION__);
                 }
                 return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-product-quote-list-' . $model->pqoProductQuote->pq_product_id . '"});</script>';
             }
@@ -184,7 +182,7 @@ class ProductQuoteOptionController extends FController
             $model = $this->findModel($id);
             $productQuote = $model->pqoProductQuote;
             if (!$model->delete()) {
-                throw new Exception('Product Quote Option ('.$id.') not deleted', 2);
+                throw new Exception('Product Quote Option (' . $id . ') not deleted', 2);
             }
             $productQuote->recalculateProfitAmount();
             $this->eventDispatcher->dispatchAll($productQuote->releaseEvents());
@@ -192,7 +190,7 @@ class ProductQuoteOptionController extends FController
             $transaction->commit();
         } catch (\Throwable $throwable) {
             $transaction->rollBack();
-            Yii::error(AppHelper::throwableFormatter($throwable), 'ProductQuoteOptionController:' . __FUNCTION__ );
+            Yii::error(AppHelper::throwableFormatter($throwable), 'ProductQuoteOptionController:' . __FUNCTION__);
 
             return ['error' => 'Error: ' . $throwable->getMessage()];
         }

@@ -11,17 +11,17 @@ use sales\helpers\email\TextConvertingHelper;
  */
 class HotelApiMessageHelper
 {
-	public $title;
-	public $urlMethod;
-	public $arguments;
-	public $message;
-	public $code;
-	public $additional;
-	public $separator = ' ';
-	public $forHuman = '';
-	public $forLog = [];
+    public $title;
+    public $urlMethod;
+    public $arguments;
+    public $message;
+    public $code;
+    public $additional;
+    public $separator = ' ';
+    public $forHuman = '';
+    public $forLog = [];
 
-	public $urlMethodMap = [
+    public $urlMethodMap = [
         'booking/book_post' => 'Booking Confirm',
         'booking/checkrate_post' => 'Booking CheckRate',
         'booking/book_delete' => 'Booking Cancel',
@@ -33,10 +33,10 @@ class HotelApiMessageHelper
      * @param $arguments
      */
     public function __construct(string $urlMethod, array $arguments)
-	{
-		$this->urlMethod = $urlMethod;
-		$this->arguments = $arguments;
-	}
+    {
+        $this->urlMethod = $urlMethod;
+        $this->arguments = $arguments;
+    }
 
     /**
      * @return $this
@@ -84,7 +84,7 @@ class HotelApiMessageHelper
                 $info = 'Please recheck url(' . $url . ')';
                 break;
             case '405':
-                $info = 'Host(' . $url . ') does not work correctly with this method('. $method .')';
+                $info = 'Host(' . $url . ') does not work correctly with this method(' . $method . ')';
                 break;
             case '401':
                 $info = 'Please recheck in config(username and password)';

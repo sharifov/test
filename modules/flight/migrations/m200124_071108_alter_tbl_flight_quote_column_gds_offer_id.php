@@ -1,4 +1,5 @@
 <?php
+
 namespace modules\flight\migrations;
 
 use yii\db\Migration;
@@ -13,7 +14,7 @@ class m200124_071108_alter_tbl_flight_quote_column_gds_offer_id extends Migratio
      */
     public function safeUp()
     {
-		$this->alterColumn('{{%flight_quote}}', 'fq_gds_offer_id', $this->string());
+        $this->alterColumn('{{%flight_quote}}', 'fq_gds_offer_id', $this->string());
     }
 
     /**
@@ -21,6 +22,6 @@ class m200124_071108_alter_tbl_flight_quote_column_gds_offer_id extends Migratio
      */
     public function safeDown()
     {
-    	$this->alterColumn('{{%flight_quote}}', 'fq_gds_offer_id', $this->tinyInteger(1));
+        $this->alterColumn('{{%flight_quote}}', 'fq_gds_offer_id', $this->tinyInteger(1));
     }
 }

@@ -1,5 +1,7 @@
 <?php
+
 namespace modules\hotel\migrations;
+
 use yii\db\Migration;
 
 /**
@@ -33,7 +35,7 @@ class m191122_171249_create_tables_for_hotel_module extends Migration
             $tableOptions = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE=InnoDB';
         }
 
-        $this->createTable('{{%hotel}}',	[
+        $this->createTable('{{%hotel}}', [
             'ph_id'                    => $this->primaryKey(),
             'ph_product_id'            => $this->integer(),
             'ph_check_in_date'         => $this->date(),
@@ -49,7 +51,7 @@ class m191122_171249_create_tables_for_hotel_module extends Migration
         //$this->createIndex('IND-offer-of_gid', '{{%offer}}', ['of_gid'], true);
 
 
-        $this->createTable('{{%hotel_room}}',	[
+        $this->createTable('{{%hotel_room}}', [
             'hr_id'             => $this->primaryKey(),
             'hr_hotel_id'       => $this->integer()->notNull(),
             'hr_room_name'      => $this->string(200),
@@ -57,7 +59,7 @@ class m191122_171249_create_tables_for_hotel_module extends Migration
 
         $this->addForeignKey('FK-hotel_room-hr_hotel_id', '{{%hotel_room}}', ['hr_hotel_id'], '{{%hotel}}', ['ph_id'], 'CASCADE', 'CASCADE');
 
-        $this->createTable('{{%hotel_room_pax}}',	[
+        $this->createTable('{{%hotel_room_pax}}', [
             'hrp_id'                => $this->primaryKey(),
             'hrp_hotel_room_id'     => $this->integer()->notNull(),
             'hrp_type_id'           => $this->tinyInteger()->notNull(),
@@ -71,7 +73,7 @@ class m191122_171249_create_tables_for_hotel_module extends Migration
         $this->createIndex('IND-hotel_room_pax-hrp_type_id', '{{%hotel_room_pax}}', ['hrp_type_id']);
 
 
-        $this->createTable('{{%hotel_list}}',	[
+        $this->createTable('{{%hotel_list}}', [
             'hl_id'                 => $this->primaryKey(),
             'hl_code'               => $this->integer()->unique(),
             'hl_hash_key'           => $this->string(32)->unique(),
@@ -116,7 +118,7 @@ class m191122_171249_create_tables_for_hotel_module extends Migration
         $this->createIndex('IND-hotel_list-hl_hash_key', '{{%hotel_list}}', ['hl_hash_key'], true);
 
 
-        $this->createTable('{{%hotel_quote}}',	[
+        $this->createTable('{{%hotel_quote}}', [
             'hq_id'                     => $this->primaryKey(),
             'hq_hotel_id'               => $this->integer()->notNull(),
             'hq_hash_key'               => $this->string(32)->unique(),
@@ -133,7 +135,7 @@ class m191122_171249_create_tables_for_hotel_module extends Migration
         $this->addForeignKey('FK-hotel_quote-hq_hotel_list_id', '{{%hotel_quote}}', ['hq_hotel_list_id'], '{{%hotel_list}}', ['hl_id'], 'SET NULL', 'CASCADE');
         //$this->createIndex('IND-hotel_room_pax-hrp_type_id', '{{%hotel_quote}}', ['hrp_type_id']);
 
-        $this->createTable('{{%hotel_quote_room}}',	[
+        $this->createTable('{{%hotel_quote_room}}', [
             'hqr_id'                    => $this->primaryKey(),
             'hqr_hotel_quote_id'        => $this->integer()->notNull(),
             'hqr_room_name'             => $this->string(150),
@@ -156,7 +158,6 @@ class m191122_171249_create_tables_for_hotel_module extends Migration
         $this->addForeignKey('FK-hotel_quote_room-hqr_currency', '{{%hotel_quote_room}}', ['hqr_currency'], '{{%currency}}', ['cur_code'], 'SET NULL', 'CASCADE');
 
         (new \console\migrations\RbacMigrationService())->up($this->routes, $this->roles);
-
     }
 
     /**
@@ -173,5 +174,4 @@ class m191122_171249_create_tables_for_hotel_module extends Migration
 
         (new \console\migrations\RbacMigrationService())->down($this->routes, $this->roles);
     }
-
 }

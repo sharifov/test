@@ -127,7 +127,6 @@ class HotelController extends FController
         $form = new HotelUpdateRequestForm($hotel);
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
-
             $out = '<script>$("#modal-sm").modal("hide"); pjaxReload({container: "#pjax-product-search-' . $hotel->ph_product_id . '"});';
             try {
                 $this->hotelRequestUpdateService->update($form);
@@ -140,7 +139,6 @@ class HotelController extends FController
             }
 
             return $out . '</script>';
-
         }
 
         return $this->renderAjax('update_ajax', [
@@ -159,7 +157,7 @@ class HotelController extends FController
         try {
             $model = $this->findModel($id);
             if (!$model->delete()) {
-                throw new Exception('Product ('.$id.') not deleted', 2);
+                throw new Exception('Product (' . $id . ') not deleted', 2);
             }
 
             if ((int) $model->pr_type_id === ProductType::PRODUCT_HOTEL && class_exists('\modules\hotel\HotelModule')) {
@@ -170,7 +168,6 @@ class HotelController extends FController
                     }
                 }
             }
-
         } catch (\Throwable $throwable) {
             return ['error' => 'Error: ' . $throwable->getMessage()];
         }
@@ -179,40 +176,40 @@ class HotelController extends FController
     }
 
 
-	/**
-	 * @param $id
-	 * @return Response
-	 * @throws NotFoundHttpException
-	 * @throws \Throwable
-	 * @throws StaleObjectException
-	 */
+    /**
+     * @param $id
+     * @return Response
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     * @throws StaleObjectException
+     */
     public function actionDelete($id): Response
-	{
+    {
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
     }
 
-	/**
-	 * @param string $term
-	 * @param array $destType
-	 * @return Response
-	 */
+    /**
+     * @param string $term
+     * @param array $destType
+     * @return Response
+     */
     public function actionAjaxGetDestinationList(string $term = null, array $destType = []): Response
-	{
-		$keyCache = $term . implode('_', $destType);
-		$result = Yii::$app->cache->get($keyCache);
+    {
+        $keyCache = $term . implode('_', $destType);
+        $result = Yii::$app->cache->get($keyCache);
 
-		if($result === false) {
-			$apiHotelService = Yii::$app->getModule('hotel')->apiService;
-			$result = $apiHotelService->searchDestination($term, '', '', '', $destType);
-			if($result) {
-				Yii::$app->cache->set($keyCache, $result, 600);
-			}
-		}
+        if ($result === false) {
+            $apiHotelService = Yii::$app->getModule('hotel')->apiService;
+            $result = $apiHotelService->searchDestination($term, '', '', '', $destType);
+            if ($result) {
+                Yii::$app->cache->set($keyCache, $result, 600);
+            }
+        }
 
-		return $this->asJson(['results' => HotelFormatHelper::formatRows($result, $term)]);
-	}
+        return $this->asJson(['results' => HotelFormatHelper::formatRows($result, $term)]);
+    }
 
     /**
      * Finds the Hotel model based on its primary key value.
@@ -222,7 +219,7 @@ class HotelController extends FController
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id): Hotel
-	{
+    {
         if (($model = Hotel::findOne($id)) !== null) {
             return $model;
         }

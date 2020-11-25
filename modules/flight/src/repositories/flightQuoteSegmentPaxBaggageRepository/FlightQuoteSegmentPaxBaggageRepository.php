@@ -11,13 +11,13 @@ use sales\repositories\Repository;
  */
 class FlightQuoteSegmentPaxBaggageRepository extends Repository
 {
-	public function save(FlightQuoteSegmentPaxBaggage $baggage): int
-	{
-		if (!$baggage->save()) {
-			throw new \RuntimeException($baggage->getErrorSummary(false)[0]);
-		}
-		return $baggage->qsb_id;
- 	}
+    public function save(FlightQuoteSegmentPaxBaggage $baggage): int
+    {
+        if (!$baggage->save()) {
+            throw new \RuntimeException($baggage->getErrorSummary(false)[0]);
+        }
+        return $baggage->qsb_id;
+    }
 
     public function remove(FlightQuoteSegmentPaxBaggage $baggage): void
     {

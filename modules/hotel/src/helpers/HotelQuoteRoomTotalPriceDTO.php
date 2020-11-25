@@ -1,4 +1,5 @@
 <?php
+
 namespace modules\hotel\src\helpers;
 
 /**
@@ -13,24 +14,23 @@ namespace modules\hotel\src\helpers;
  */
 class HotelQuoteRoomTotalPriceDTO
 {
-	public $net;
-	public $systemMarkup;
-	public $agentMarkup;
-	public $sellingPrice;
-	public $serviceFeeSum;
+    public $net;
+    public $systemMarkup;
+    public $agentMarkup;
+    public $sellingPrice;
+    public $serviceFeeSum;
 
-	public function __construct(
-		?float $net = null,
-		?float $systemMarkup = null,
-		?float $agentMarkup = null,
-		?float $sellingPrice = null,
-		?float $serviceFeeSum = null
-	)
-	{
-		$this->net = $net;
-		$this->systemMarkup = $systemMarkup;
-		$this->agentMarkup = $agentMarkup;
-		$this->sellingPrice = $sellingPrice;
-		$this->serviceFeeSum = $serviceFeeSum;
-	}
+    public function __construct(
+        ?float $net = null,
+        ?float $systemMarkup = null,
+        ?float $agentMarkup = null,
+        ?float $sellingPrice = null,
+        ?float $serviceFeeSum = null
+    ) {
+        $this->net = $net;
+        $this->systemMarkup = $systemMarkup;
+        $this->agentMarkup = $agentMarkup;
+        $this->sellingPrice = $sellingPrice;
+        $this->serviceFeeSum = $serviceFeeSum;
+    }
 }

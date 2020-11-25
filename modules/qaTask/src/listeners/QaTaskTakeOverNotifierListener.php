@@ -53,13 +53,16 @@ class QaTaskTakeOverNotifierListener
             $reason = $reasonModel->tar_name;
         }
 
-        $body = Yii::t('email', "You task (Id: {id}) has been taken by {username} ({role}). Reason: {reason}.",
+        $body = Yii::t(
+            'email',
+            "You task (Id: {id}) has been taken by {username} ({role}). Reason: {reason}.",
             [
                 'id' => Purifier::createQaTaskShortLink($task),
                 'username' => $newOwner->username,
                 'role' => implode(',', $newOwner->getRoles(true)),
                 'reason' => $reason,
-            ]);
+            ]
+        );
 
         if ($ntf = Notifications::create($oldOwner->id, $subject, $body, Notifications::TYPE_INFO, true)) {
             //Notifications::socket($oldOwner->id, null, 'getNewNotification', [], true);

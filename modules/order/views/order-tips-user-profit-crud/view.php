@@ -31,16 +31,16 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
-			[
-				'attribute' => 'otup_order_id',
-				'value' => static function (OrderTipsUserProfit $orderUserProfit) {
-					return Html::a($orderUserProfit->otup_order_id, Url::toRoute(['/order/order-crud/view', 'id' => $orderUserProfit->otup_order_id]), [
-						'target' => '_blank',
-						'data-pjax' => 0
-					]);
-				},
-				'format' => 'raw'
-			],
+            [
+                'attribute' => 'otup_order_id',
+                'value' => static function (OrderTipsUserProfit $orderUserProfit) {
+                    return Html::a($orderUserProfit->otup_order_id, Url::toRoute(['/order/order-crud/view', 'id' => $orderUserProfit->otup_order_id]), [
+                        'target' => '_blank',
+                        'data-pjax' => 0
+                    ]);
+                },
+                'format' => 'raw'
+            ],
             'otup_user_id:userName',
             'otup_percent',
             'otup_amount',

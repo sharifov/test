@@ -27,18 +27,18 @@ use yii\web\Response;
  */
 class OrderController extends FController
 {
-	/**
-	 * @var OrderManageService
-	 */
-	private $orderManageService;
+    /**
+     * @var OrderManageService
+     */
+    private $orderManageService;
 
-	public function __construct($id, $module, OrderManageService $orderManageService, $config = [])
-	{
-		parent::__construct($id, $module, $config);
-		$this->orderManageService = $orderManageService;
-	}
+    public function __construct($id, $module, OrderManageService $orderManageService, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->orderManageService = $orderManageService;
+    }
 
-	/**
+    /**
      * @return array
      */
     public function behaviors(): array
@@ -64,22 +64,18 @@ class OrderController extends FController
 
 
         if ($model->load(Yii::$app->request->post())) {
-
             //Yii::$app->response->format = Response::FORMAT_JSON;
 
             if ($model->validate()) {
+                try {
+                    $this->orderManageService->createOrder((new CreateOrderDTO($model->or_lead_id)));
 
-            	try {
-            		$this->orderManageService->createOrder((new CreateOrderDTO($model->or_lead_id)));
-
-					return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-orders", push: false, replace: false, async: false, timeout: 2000});</script>';
-				} catch (\Throwable $e) {
-                	Yii::error(VarDumper::dumpAsString($e->getMessage()), 'OrderController:CreateAjax:orderManageService:createOrder');
-				}
-
+                    return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-orders", push: false, replace: false, async: false, timeout: 2000});</script>';
+                } catch (\Throwable $e) {
+                    Yii::error(VarDumper::dumpAsString($e->getMessage()), 'OrderController:CreateAjax:orderManageService:createOrder');
+                }
             }
         } else {
-
             $leadId = (int) Yii::$app->request->get('id');
 
             if (!$leadId) {
@@ -117,7 +113,6 @@ class OrderController extends FController
         $model->or_id = $modelOrder->or_id;
 
         if ($model->load(Yii::$app->request->post())) {
-
             if ($model->validate()) {
                 //$modelOrder->attributes = $model->attributes;
 
@@ -147,7 +142,6 @@ class OrderController extends FController
         return $this->renderAjax('forms/update_ajax_form', [
             'model' => $model,
         ]);
-
     }
 
      /**
@@ -161,7 +155,7 @@ class OrderController extends FController
         try {
             $model = $this->findModel($id);
             if (!$model->delete()) {
-                throw new Exception('Order ('.$id.') not deleted', 2);
+                throw new Exception('Order (' . $id . ') not deleted', 2);
             }
         } catch (\Throwable $throwable) {
             return ['error' => 'Error: ' . $throwable->getMessage()];
@@ -182,7 +176,6 @@ class OrderController extends FController
         Yii::$app->response->format = Response::FORMAT_JSON;
 
         try {
-
             if (!$leadId) {
                 throw new Exception('Not found Lead ID params', 2);
             }
@@ -193,14 +186,13 @@ class OrderController extends FController
 
             $lead = Lead::findOne($leadId);
             if (!$lead) {
-                throw new Exception('Lead ('.$leadId.') not found', 4);
+                throw new Exception('Lead (' . $leadId . ') not found', 4);
             }
 
             $orders = Order::find()->where(['or_lead_id' => $lead->id])->orderBy(['or_id' => SORT_DESC])->all();
 
             if ($orders) {
                 foreach ($orders as $order) {
-
                     $exist = ProductQuote::find()->where(['pq_order_id' => $order->or_id, 'pq_id' => $productQuoteId])->exists();
 
                     $offerList[] = Html::a(($exist ? '<i class="fa fa-check-square-o success"></i> ' : '') . $order->or_name, null, [
@@ -212,7 +204,6 @@ class OrderController extends FController
                     ]);
                 }
             }
-
         } catch (\Throwable $throwable) {
             return ['error' => 'Error: ' . $throwable->getMessage()];
         }

@@ -1,4 +1,5 @@
 <?php
+
 namespace modules\hotel\src\helpers;
 
 /**
@@ -10,19 +11,19 @@ namespace modules\hotel\src\helpers;
  */
 class HotelQuoteRoomPriceDataDTO
 {
-	/**
-	 * @var HotelQuoteRoomTotalPriceDTO
-	 */
-	public $total;
+    /**
+     * @var HotelQuoteRoomTotalPriceDTO
+     */
+    public $total;
 
-	/**
-	 * @var HotelQuoteRoomPriceDTO[]
-	 */
-	public $prices;
+    /**
+     * @var HotelQuoteRoomPriceDTO[]
+     */
+    public $prices;
 
-	public function __construct(HotelQuoteRoomTotalPriceDTO $total, array $prices)
-	{
-		$this->total = $total;
-		$this->prices = $prices;
-	}
+    public function __construct(HotelQuoteRoomTotalPriceDTO $total, array $prices)
+    {
+        $this->total = $total;
+        $this->prices = $prices;
+    }
 }

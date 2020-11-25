@@ -22,7 +22,7 @@ $pjaxId = 'pjax-product-quote-list-' . $hotelProduct->ph_product_id;
         <div class="x_title">
             <h2>
                 <i class="fa fa-folder-o"></i> Hotel Quotes
-                <?php if($dataProviderQuotes->totalCount): ?>
+                <?php if ($dataProviderQuotes->totalCount) : ?>
                     <sup>(<?=$dataProviderQuotes->totalCount?>)</sup>
                 <?php endif; ?>
             </h2>

@@ -26,31 +26,31 @@ use yii\web\Response;
 class OrderProductController extends FController
 {
     private $eventDispatcher;
-	/**
-	 * @var OrderManageService
-	 */
-	private $orderManageService;
-	/**
-	 * @var ProductQuoteRepository
-	 */
-	private $productQuoteRepository;
+    /**
+     * @var OrderManageService
+     */
+    private $orderManageService;
+    /**
+     * @var ProductQuoteRepository
+     */
+    private $productQuoteRepository;
 
-	/**
-	 * OrderProductController constructor.
-	 * @param $id
-	 * @param $module
-	 * @param ProductQuoteRepository $productQuoteRepository
-	 * @param OrderManageService $orderManageService
-	 * @param EventDispatcher $eventDispatcher
-	 * @param array $config
-	 */
+    /**
+     * OrderProductController constructor.
+     * @param $id
+     * @param $module
+     * @param ProductQuoteRepository $productQuoteRepository
+     * @param OrderManageService $orderManageService
+     * @param EventDispatcher $eventDispatcher
+     * @param array $config
+     */
     public function __construct($id, $module, ProductQuoteRepository $productQuoteRepository, OrderManageService $orderManageService, EventDispatcher $eventDispatcher, $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->eventDispatcher = $eventDispatcher;
-		$this->orderManageService = $orderManageService;
-		$this->productQuoteRepository = $productQuoteRepository;
-	}
+        $this->orderManageService = $orderManageService;
+        $this->productQuoteRepository = $productQuoteRepository;
+    }
 
 
     /**
@@ -79,7 +79,6 @@ class OrderProductController extends FController
         Yii::$app->response->format = Response::FORMAT_JSON;
 
         try {
-
             if (!$productQuoteId) {
                 throw new Exception('Not found Product Quote ID param', 3);
             }
@@ -91,7 +90,7 @@ class OrderProductController extends FController
             }
 
             if (!$productQuote->pqProduct) {
-                throw new Exception('Not found Product for Quote ID ('. $productQuoteId .')', 5);
+                throw new Exception('Not found Product for Quote ID (' . $productQuoteId . ')', 5);
             }
 
             if ($orderId) {
@@ -101,25 +100,22 @@ class OrderProductController extends FController
                 }
 
                 if ($productQuote->isRelatedWithOrder() && $productQuote->isTheSameOrder($orderId)) {
-                	$productQuote->removeOrderRelation();
-                	$this->productQuoteRepository->save($productQuote);
-					return ['message' => 'Successfully deleted Product Quote ID ('.$productQuoteId.') from order: "'.Html::encode($order->or_name).'" ('.$order->or_id.')'];
-				}
-
+                    $productQuote->removeOrderRelation();
+                    $this->productQuoteRepository->save($productQuote);
+                    return ['message' => 'Successfully deleted Product Quote ID (' . $productQuoteId . ') from order: "' . Html::encode($order->or_name) . '" (' . $order->or_id . ')'];
+                }
             } else {
-				$order = $this->orderManageService->createOrder((new CreateOrderDTO($productQuote->pqProduct->pr_lead_id)));
+                $order = $this->orderManageService->createOrder((new CreateOrderDTO($productQuote->pqProduct->pr_lead_id)));
             }
 
             $productQuote->setOrderRelation($order->or_id);
             $this->productQuoteRepository->save($productQuote);
-
-
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableFormatter($throwable),'OrderProductController:' . __FUNCTION__  );
+            Yii::error(AppHelper::throwableFormatter($throwable), 'OrderProductController:' . __FUNCTION__);
             return ['error' => 'Error: ' . $throwable->getMessage()];
         }
 
-        return ['message' => 'Successfully added Product Quote ID ('.$productQuoteId.') to order: "'.Html::encode($order->or_name).'"  ('.$order->or_id.')'];
+        return ['message' => 'Successfully added Product Quote ID (' . $productQuoteId . ') to order: "' . Html::encode($order->or_name) . '"  (' . $order->or_id . ')'];
     }
 
     /**
@@ -133,17 +129,17 @@ class OrderProductController extends FController
         Yii::$app->response->format = Response::FORMAT_JSON;
         $transaction = Yii::$app->db->beginTransaction();
         try {
-			$model = $this->productQuoteRepository->find($productQuoteId);
-			$order = $model->pqOrder;
-			$model->removeOrderRelation();
-			$this->productQuoteRepository->save($model);
-			if ($order) {
-            	$this->eventDispatcher->dispatchAll([new OrderRecalculateProfitAmountEvent([$order])]);
-			}
+            $model = $this->productQuoteRepository->find($productQuoteId);
+            $order = $model->pqOrder;
+            $model->removeOrderRelation();
+            $this->productQuoteRepository->save($model);
+            if ($order) {
+                $this->eventDispatcher->dispatchAll([new OrderRecalculateProfitAmountEvent([$order])]);
+            }
             $transaction->commit();
         } catch (\Throwable $throwable) {
             $transaction->rollBack();
-            Yii::error(AppHelper::throwableFormatter($throwable),'OrderProductController:' . __FUNCTION__  );
+            Yii::error(AppHelper::throwableFormatter($throwable), 'OrderProductController:' . __FUNCTION__);
             return ['error' => 'Error: ' . $throwable->getMessage()];
         }
 

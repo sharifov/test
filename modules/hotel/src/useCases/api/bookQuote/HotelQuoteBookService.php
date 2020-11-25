@@ -26,20 +26,20 @@ use sales\services\TransactionManager;
  */
 class HotelQuoteBookService
 {
-	public $status = 0; // 0 failed : 1 success
+    public $status = 0; // 0 failed : 1 success
     public $message = '';
     /**
-	 * @var TransactionManager
-	 */
-	private $transactionManager;
+     * @var TransactionManager
+     */
+    private $transactionManager;
     /**
-	 * @var ProductQuoteRepository
-	 */
-	private $productQuoteRepository;
-	/**
-	 * @var ApiHotelService
-	 */
-	private $apiService;
+     * @var ProductQuoteRepository
+     */
+    private $productQuoteRepository;
+    /**
+     * @var ApiHotelService
+     */
+    private $apiService;
 
     /**
      * HotelQuoteBookService constructor.
@@ -47,11 +47,11 @@ class HotelQuoteBookService
      * @param TransactionManager $transactionManager
      */
     public function __construct(ProductQuoteRepository $productQuoteRepository, TransactionManager $transactionManager)
-	{
-		$this->apiService = \Yii::$app->getModule('hotel')->apiService;
-		$this->productQuoteRepository = $productQuoteRepository;
-		$this->transactionManager = $transactionManager;
-	}
+    {
+        $this->apiService = \Yii::$app->getModule('hotel')->apiService;
+        $this->productQuoteRepository = $productQuoteRepository;
+        $this->transactionManager = $transactionManager;
+    }
 
     /**
      * @param HotelQuote $model
@@ -80,7 +80,7 @@ class HotelQuoteBookService
             'rooms' => $rooms,
         ];
 
-        $createDto = new CreateDto($model->hq_id,LogStatus::ACTION_TYPE_BOOK, $params);
+        $createDto = new CreateDto($model->hq_id, LogStatus::ACTION_TYPE_BOOK, $params);
         $hotelQuoteServiceLog = HotelQuoteServiceLog::create($createDto);
 
         $apiResponse = $this->apiService->requestBookingHandler('booking/book', $params);

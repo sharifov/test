@@ -73,5 +73,4 @@ class InvoiceForm extends Model
             'inv_description' => 'Description',
         ];
     }
-
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace modules\product\migrations;
 
 use yii\db\Migration;
@@ -13,15 +14,15 @@ class m200131_091915_add_new_setting_processing_fee_amount_tbl_product_type_colu
      */
     public function safeUp()
     {
-		$productFlight = \modules\product\src\entities\productType\ProductType::find()->where(['like', 'pt_name', '%flight%', false])->one();
+        $productFlight = \modules\product\src\entities\productType\ProductType::find()->where(['like', 'pt_name', '%flight%', false])->one();
 
-		$settings = json_decode($productFlight->pt_settings, true);
+        $settings = json_decode($productFlight->pt_settings, true);
 
-		$settings['processing_fee_amount'] = 25.00;
+        $settings['processing_fee_amount'] = 25.00;
 
-		$productFlight->pt_settings = json_encode($settings);
+        $productFlight->pt_settings = json_encode($settings);
 
-		$productFlight->save();
+        $productFlight->save();
     }
 
     /**
@@ -29,14 +30,14 @@ class m200131_091915_add_new_setting_processing_fee_amount_tbl_product_type_colu
      */
     public function safeDown()
     {
-		$productFlight = \modules\product\src\entities\productType\ProductType::find()->where(['like', 'pt_name', '%flight%', false])->one();
+        $productFlight = \modules\product\src\entities\productType\ProductType::find()->where(['like', 'pt_name', '%flight%', false])->one();
 
-		$settings = json_decode($productFlight->pt_settings, true);
+        $settings = json_decode($productFlight->pt_settings, true);
 
-		if (isset($settings['processing_fee_amount'])) {
-			unset($settings['processing_fee_amount']);
-			$productFlight->pt_settings = json_encode($settings);
-			$productFlight->save();
-		}
+        if (isset($settings['processing_fee_amount'])) {
+            unset($settings['processing_fee_amount']);
+            $productFlight->pt_settings = json_encode($settings);
+            $productFlight->save();
+        }
     }
 }

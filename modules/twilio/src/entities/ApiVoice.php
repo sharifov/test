@@ -51,7 +51,7 @@ class ApiVoice extends Model
             'CallerId' => $options['callerId'],
      */
 
-    public function formName() : string
+    public function formName(): string
     {
         return 'voice';
     }
@@ -73,7 +73,7 @@ class ApiVoice extends Model
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels() : array
+    public function attributeLabels(): array
     {
         return [
             'project_id' => 'Project ID',
@@ -84,5 +84,4 @@ class ApiVoice extends Model
             'options'   => 'Options',
         ];
     }
-
 }

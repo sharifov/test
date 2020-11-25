@@ -43,11 +43,8 @@ class OfferSerializer extends Serializer
         $data = $this->toArray();
 
         if ($offerProducts = $this->model->offerProducts) {
-
             foreach ($offerProducts as $offerProduct) {
-
                 if ($quote = $offerProduct->opProductQuote) {
-
                     $quoteData = $quote->serialize();
                     $quoteData['product'] = $quote->pqProduct->serialize();
 

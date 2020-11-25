@@ -1,4 +1,5 @@
 <?php
+
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -11,7 +12,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><i class="fa fa-plane"></i> <?= Html::encode($this->title) ?></h1>
     <div class="row">
         <div class="col-lg-6">
-            <?php if ($links): ?>
+            <?php if ($links) : ?>
                 <table class="table table-striped">
                     <thead>
                         <tr>
@@ -21,7 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($links as $n => $link):?>
+                        <?php foreach ($links as $n => $link) :?>
                         <tr>
                             <td><?=($n + 1)?></td>
                             <td><?=Html::encode($link['label'])?></td>

@@ -12,18 +12,18 @@ use modules\flight\models\Flight;
  */
 class FlightRequestUpdateEvent
 {
-	public const EVENT_KEY = 'FlightRequestUpdate';
+    public const EVENT_KEY = 'FlightRequestUpdate';
 
-	/**
-	 * @var Flight
-	 */
-	public $flight;
+    /**
+     * @var Flight
+     */
+    public $flight;
 
-	/**
-	 * @param Flight $flight
-	 */
-	public function __construct(Flight $flight)
-	{
-		$this->flight = $flight;
-	}
+    /**
+     * @param Flight $flight
+     */
+    public function __construct(Flight $flight)
+    {
+        $this->flight = $flight;
+    }
 }

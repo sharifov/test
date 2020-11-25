@@ -1,4 +1,5 @@
 <?php
+
 /* @var $this yii\web\View */
 /* @var $index int */
 /* @var $key int */
@@ -15,8 +16,7 @@ use yii\helpers\Html;
 
 ?>
 
-<?php if ($model->hqProductQuote): ?>
-
+<?php if ($model->hqProductQuote) : ?>
 <div class="x_panel">
     <div class="x_title">
 
@@ -106,14 +106,13 @@ use yii\helpers\Html;
         <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($model->hqProductQuote->pq_created_dt)) ?>,
         <i title="code: <?=\yii\helpers\Html::encode($model->hq_hash_key)?>">Hash: <?=\yii\helpers\Html::encode($model->hq_hash_key)?></i>
 
-        <?php if ($model->hotelQuoteRooms):
+        <?php if ($model->hotelQuoteRooms) :
             $totalAmountRoom = 0;
             $adlTotalCount = 0;
             $chdTotalCount = 0;
             ?>
             <table class="table table-striped table-bordered">
-                <?php foreach ($model->hotelQuoteRooms as $room):
-
+                <?php foreach ($model->hotelQuoteRooms as $room) :
                     $totalAmountRoom += (float) $room->hqr_amount;
                     $adlTotalCount += $room->hqr_adults;
                     $chdTotalCount += $room->hqr_children;
@@ -153,8 +152,8 @@ use yii\helpers\Html;
                     <td class="text-center"><?=$room->hqr_adults ? '<i class="fa fa-user"></i> ' . ($room->hqr_adults) : '-'?></td>
                     <td class="text-center"><?=$room->hqr_children ? '<i class="fa fa-child"></i> ' . ($room->hqr_children) : '-'?></td>
                     <td>
-                        <?php if ($room->hqr_cancel_amount): ?>
-                        <?=Html::encode($room->hqr_cancel_amount)?>, <?=Html::encode($room->hqr_cancel_from_dt)?>
+                        <?php if ($room->hqr_cancel_amount) : ?>
+                            <?=Html::encode($room->hqr_cancel_amount)?>, <?=Html::encode($room->hqr_cancel_from_dt)?>
                         <?php endif; ?>
                     </td>
 <!--                    <td>--><?php ////=Html::encode($room->hqr_id)?><!--</td>-->
@@ -163,8 +162,8 @@ use yii\helpers\Html;
                 <?php endforeach; ?>
                 <tr>
                     <td colspan="3" class="text-right">Room Total: </td>
-                    <td class="text-center"><?=$adlTotalCount ? '<i class="fa fa-user"></i> '. $adlTotalCount : '-'?></td>
-                    <td class="text-center"><?=$chdTotalCount ? '<i class="fa fa-child"></i> '. $chdTotalCount : '-'?></td>
+                    <td class="text-center"><?=$adlTotalCount ? '<i class="fa fa-user"></i> ' . $adlTotalCount : '-'?></td>
+                    <td class="text-center"><?=$chdTotalCount ? '<i class="fa fa-child"></i> ' . $chdTotalCount : '-'?></td>
                     <td class="text-right"></td>
 
                     <?php
@@ -172,7 +171,7 @@ use yii\helpers\Html;
                         $totalAmountRoom = round($totalAmountRoom, 2);
                     ?>
 
-                    <td class="text-right <?=( $totalAmountRoom !== $originPrice) ? 'danger': ''?>">
+                    <td class="text-right <?=( $totalAmountRoom !== $originPrice) ? 'danger' : ''?>">
                         <b title="<?=$totalAmountRoom?> & <?=$originPrice?>"><?=number_format($originPrice, 2)?> USD</b>
                     </td>
                 </tr>
@@ -187,7 +186,7 @@ use yii\helpers\Html;
         ?>
 
 
-        <?php if ($model->hqProductQuote->productQuoteOptions): ?>
+        <?php if ($model->hqProductQuote->productQuoteOptions) : ?>
             <h2>Options</h2>
             <table class="table table-striped table-bordered">
                 <tr>
@@ -200,7 +199,7 @@ use yii\helpers\Html;
                     <th style="width: 52px"></th>
 
                 </tr>
-                <?php foreach ($model->hqProductQuote->productQuoteOptions as $quoteOption):
+                <?php foreach ($model->hqProductQuote->productQuoteOptions as $quoteOption) :
                     $totalAmountOption += (float) $quoteOption->pqo_price;
                     $totalClientAmountOption += (float) $quoteOption->pqo_client_price;
                     $totalExtraMarkupOption += (float) $quoteOption->pqo_extra_markup;
@@ -210,7 +209,7 @@ use yii\helpers\Html;
                     <td style="width: 120px"><?=$quoteOption->pqoProductOption ? Html::encode($quoteOption->pqoProductOption->po_name) : '' ?></td>
                     <td>
                         <b><?=Html::encode($quoteOption->pqo_name)?></b>
-                        <?=$quoteOption->pqo_description ? '<br>'. Html::encode($quoteOption->pqo_description) . '' : ''?>
+                        <?=$quoteOption->pqo_description ? '<br>' . Html::encode($quoteOption->pqo_description) . '' : ''?>
                     </td>
                     <td class="text-center" style="width: 120px"><?= ProductQuoteOptionStatus::asFormat($quoteOption->pqo_status_id) ?></td>
                     <td class="text-right" title="Extra Markup"><?=number_format($quoteOption->pqo_extra_markup, 2)?> USD</td>

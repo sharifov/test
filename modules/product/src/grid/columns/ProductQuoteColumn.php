@@ -4,7 +4,6 @@ namespace modules\product\src\grid\columns;
 
 use yii\grid\DataColumn;
 
-
 /**
  * Class ProductQuoteColumn
  *

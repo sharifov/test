@@ -16,7 +16,7 @@ use yii\widgets\DetailView;
     </div>
     <div class="x_content" style="display: block;">
 
-        <?php if ($model): ?>
+        <?php if ($model) : ?>
             <div class="row">
                 <div class="col-md-6">
                     <?= DetailView::widget([
@@ -27,13 +27,15 @@ use yii\widgets\DetailView;
                             [
                                 'attribute' => 't_object_id',
                                 'value' => function (QaTask $model) {
-                                    return Html::a($model->t_object_id,
+                                    return Html::a(
+                                        $model->t_object_id,
                                         ['/qa-task/qa-task/view-object', 'typeId' => $model->t_object_type_id, 'id' => $model->t_object_id],
                                         [
                                             'target' => '_blank',
                                             'data-pjax' => 0,
                                             'title' => 'View Object',
-                                        ]);
+                                        ]
+                                    );
                                 },
                                 'format' => 'raw',
                             ],

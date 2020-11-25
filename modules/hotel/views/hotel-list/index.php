@@ -61,16 +61,16 @@ $this->params['breadcrumbs'][] = $this->title;
             //'hl_updated_dt',
             [
                 'attribute' => 'hl_created_dt',
-                'value' => static function(HotelList $model) {
-                    return $model->hl_created_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->hl_created_dt)) : '-';
+                'value' => static function (HotelList $model) {
+                    return $model->hl_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->hl_created_dt)) : '-';
                 },
                 'format' => 'raw',
             ],
 
             [
                 'attribute' => 'hl_updated_dt',
-                'value' => static function(HotelList $model) {
-                    return $model->hl_updated_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->hl_updated_dt)) : '-';
+                'value' => static function (HotelList $model) {
+                    return $model->hl_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->hl_updated_dt)) : '-';
                 },
                 'format' => 'raw',
             ],

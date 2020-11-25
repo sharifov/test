@@ -35,7 +35,7 @@ use yii\db\ActiveQuery;
  */
 class Flight extends \yii\db\ActiveRecord implements Productable
 {
-	use EventTrait;
+    use EventTrait;
 
     public const TRIP_TYPE_ONE_WAY           = 1;
     public const TRIP_TYPE_ROUND_TRIP        = 2;
@@ -59,19 +59,19 @@ class Flight extends \yii\db\ActiveRecord implements Productable
         self::CABIN_CLASS_FIRST       => 'First',
     ];
 
-	public const CABIN_ECONOMY = 'Y';
-	public const CABIN_PREMIUM_ECONOMY = 'S';
-	public const CABIN_BUSINESS = 'C';
-	public const CABIN_PREMIUM_BUSINESS = 'J';
-	public const CABIN_FIRST = 'F';
-	public const CABIN_PREMIUM_FIRST = 'P';
+    public const CABIN_ECONOMY = 'Y';
+    public const CABIN_PREMIUM_ECONOMY = 'S';
+    public const CABIN_BUSINESS = 'C';
+    public const CABIN_PREMIUM_BUSINESS = 'J';
+    public const CABIN_FIRST = 'F';
+    public const CABIN_PREMIUM_FIRST = 'P';
 
     public const CABIN_CLASS_REAL_LIST = [
-		self::CABIN_CLASS_ECONOMY => self::CABIN_ECONOMY,
-		self::CABIN_CLASS_PREMIUM => self::CABIN_PREMIUM_ECONOMY,
-		self::CABIN_CLASS_BUSINESS => self::CABIN_BUSINESS ,
-		self::CABIN_CLASS_FIRST => self::CABIN_FIRST,
-	];
+        self::CABIN_CLASS_ECONOMY => self::CABIN_ECONOMY,
+        self::CABIN_CLASS_PREMIUM => self::CABIN_PREMIUM_ECONOMY,
+        self::CABIN_CLASS_BUSINESS => self::CABIN_BUSINESS ,
+        self::CABIN_CLASS_FIRST => self::CABIN_FIRST,
+    ];
 
     public static function create(int $productId): self
     {
@@ -87,8 +87,7 @@ class Flight extends \yii\db\ActiveRecord implements Productable
         int $adults,
         int $children,
         int $infants
-    ): self
-    {
+    ): self {
         $flight = new static();
         $flight->fl_product_id = $productId;
         $flight->fl_trip_type_id = $tripTypeId;
@@ -264,8 +263,7 @@ class Flight extends \yii\db\ActiveRecord implements Productable
         int $infants,
         ?int $stops,
         bool $delayedCharge
-    ): void
-    {
+    ): void {
         if ($this->fl_cabin_class !== $cabin) {
             $this->recordEvent(new FlightRequestUpdateEvent($this), FlightRequestUpdateEvent::EVENT_KEY);
         }
@@ -275,7 +273,7 @@ class Flight extends \yii\db\ActiveRecord implements Productable
         $this->updateDelayedCharge($delayedCharge);
     }
 
-	public function updateStops(?int $value)
+    public function updateStops(?int $value)
     {
         if ($this->fl_stops !== $value) {
             $this->recordEvent(new FlightChangedStopsEvent($this));
@@ -283,7 +281,7 @@ class Flight extends \yii\db\ActiveRecord implements Productable
         $this->fl_stops = $value;
     }
 
-	public function updateDelayedCharge(bool $value)
+    public function updateDelayedCharge(bool $value)
     {
         if ($this->fl_delayed_charge !== $value) {
             $this->recordEvent(new FlightChangedDelayedChargeEvent($this));
@@ -291,101 +289,101 @@ class Flight extends \yii\db\ActiveRecord implements Productable
         $this->fl_delayed_charge = $value;
     }
 
-	/**
-	 * @param int $adults
-	 * @param int $children
-	 * @param int $infants
-	 */
-	public function editPassengers(int $adults, int $children, int $infants): void
-	{
-		if ($this->fl_adults !== $adults || $this->fl_children !== $children || $this->fl_infants !== $infants) {
-			$this->recordEvent(new FlightRequestUpdateEvent($this), FlightRequestUpdateEvent::EVENT_KEY);
-		}
-		$this->fl_adults = $adults;
-		$this->fl_children = $children;
-		$this->fl_infants = $infants;
-	}
+    /**
+     * @param int $adults
+     * @param int $children
+     * @param int $infants
+     */
+    public function editPassengers(int $adults, int $children, int $infants): void
+    {
+        if ($this->fl_adults !== $adults || $this->fl_children !== $children || $this->fl_infants !== $infants) {
+            $this->recordEvent(new FlightRequestUpdateEvent($this), FlightRequestUpdateEvent::EVENT_KEY);
+        }
+        $this->fl_adults = $adults;
+        $this->fl_children = $children;
+        $this->fl_infants = $infants;
+    }
 
-	/**
-	 * @param int|null $type
-	 */
-	public function setTripType(?int $type = null): void
-	{
-		$list = self::getTripTypeList();
-		if (isset($list[$type])) {
-			if ($this->fl_trip_type_id !== $type) {
-				$this->recordEvent((new FlightRequestUpdateEvent($this)), FlightRequestUpdateEvent::EVENT_KEY);
-			}
+    /**
+     * @param int|null $type
+     */
+    public function setTripType(?int $type = null): void
+    {
+        $list = self::getTripTypeList();
+        if (isset($list[$type])) {
+            if ($this->fl_trip_type_id !== $type) {
+                $this->recordEvent((new FlightRequestUpdateEvent($this)), FlightRequestUpdateEvent::EVENT_KEY);
+            }
 
-			$this->fl_trip_type_id = $type;
-		} else {
-			$this->fl_trip_type_id = null;
-			$this->recordEvent((new FlightRequestUpdateEvent($this)), FlightRequestUpdateEvent::EVENT_KEY);
-		}
-	}
+            $this->fl_trip_type_id = $type;
+        } else {
+            $this->fl_trip_type_id = null;
+            $this->recordEvent((new FlightRequestUpdateEvent($this)), FlightRequestUpdateEvent::EVENT_KEY);
+        }
+    }
 
-	/**
-	 * @return array
-	 */
-	public static function getCabinClassRealList(): array
-	{
-		return self::CABIN_CLASS_REAL_LIST;
-	}
+    /**
+     * @return array
+     */
+    public static function getCabinClassRealList(): array
+    {
+        return self::CABIN_CLASS_REAL_LIST;
+    }
 
-	/**
-	 * @param string $code
-	 * @return mixed|string
-	 */
-	public function getCabinRealCode(string $code)
-	{
-		return self::getCabinClassRealList()[$code] ?? '';
-	}
+    /**
+     * @param string $code
+     * @return mixed|string
+     */
+    public function getCabinRealCode(string $code)
+    {
+        return self::getCabinClassRealList()[$code] ?? '';
+    }
 
-	public static function getCabinByRealCode(string $code): string
-	{
-		return array_search($code, self::getCabinClassRealList(), false) ?? $code;
-	}
+    public static function getCabinByRealCode(string $code): string
+    {
+        return array_search($code, self::getCabinClassRealList(), false) ?? $code;
+    }
 
-	/**
-	 * @return int
-	 */
-	public function updateLastAction() : int
-	{
-		return 1;
-//		return self::updateAll(['l_last_action_dt' => date('Y-m-d H:i:s')], ['id' => $this->id]);
-	}
+    /**
+     * @return int
+     */
+    public function updateLastAction(): int
+    {
+        return 1;
+//      return self::updateAll(['l_last_action_dt' => date('Y-m-d H:i:s')], ['id' => $this->id]);
+    }
 
-	/**
-	 * @param int|null $excludeQuoteId
-	 * @return bool
-	 */
-	public function originalQuoteExist(int $excludeQuoteId = null): bool
-	{
-		foreach ($this->flightQuotes as $quote) {
-			if ($quote->isOriginal()) {
-				if ($excludeQuoteId) {
-					if ($quote->fq_id !== $excludeQuoteId) {
-						return true;
-					}
-				} else {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
+    /**
+     * @param int|null $excludeQuoteId
+     * @return bool
+     */
+    public function originalQuoteExist(int $excludeQuoteId = null): bool
+    {
+        foreach ($this->flightQuotes as $quote) {
+            if ($quote->isOriginal()) {
+                if ($excludeQuoteId) {
+                    if ($quote->fq_id !== $excludeQuoteId) {
+                        return true;
+                    }
+                } else {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     public function serialize(): array
     {
         return (new FlightSerializer($this))->getData();
-	}
+    }
 
     public function getId(): int
     {
         return $this->fl_id;
-	}
+    }
 
-	public static function findByProduct(int $productId): ?Productable
+    public static function findByProduct(int $productId): ?Productable
     {
         return self::find()->byProduct($productId)->limit(1)->one();
     }

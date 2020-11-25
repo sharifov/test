@@ -9,5 +9,5 @@ use modules\order\src\listeners\orderUserProfit\OrderUserProfitUpdateProfitAmoun
 
 return [
     OrderRecalculateProfitAmountEvent::class => [OrderRecalculateProfitAmountListener::class],
-	OrderUserProfitUpdateProfitAmountEvent::class => [OrderUserProfitUpdateProfitAmountEventListener::class],
+    OrderUserProfitUpdateProfitAmountEvent::class => [OrderUserProfitUpdateProfitAmountEventListener::class],
 ];

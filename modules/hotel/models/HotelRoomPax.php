@@ -33,14 +33,14 @@ class HotelRoomPax extends \yii\db\ActiveRecord
     ];
 
     public const PAX_AGE_RANGE = [
-    	self::PAX_TYPE_CHD => [
-    		'min' => 1,
-			'max' => 12
-		],
-		self::PAX_TYPE_ADL => [
-			'min' => 13
-		]
-	];
+        self::PAX_TYPE_CHD => [
+            'min' => 1,
+            'max' => 12
+        ],
+        self::PAX_TYPE_ADL => [
+            'min' => 13
+        ]
+    ];
 
         /**
      * {@inheritdoc}
@@ -59,7 +59,7 @@ class HotelRoomPax extends \yii\db\ActiveRecord
             [['hrp_hotel_room_id', 'hrp_type_id'], 'required'],
             [['hrp_hotel_room_id', 'hrp_type_id', 'hrp_age'], 'integer'],
             [['hrp_dob'], 'filter', 'filter' => static function ($value) {
-				return date('Y-m-d', strtotime($value));
+                return date('Y-m-d', strtotime($value));
             }, 'skipOnEmpty' => true],
             //[['hrp_dob'], 'safe'],
             [['hrp_first_name', 'hrp_last_name'], 'string', 'max' => 40],
@@ -132,14 +132,14 @@ class HotelRoomPax extends \yii\db\ActiveRecord
         return (int) $this->hrp_type_id === self::PAX_TYPE_CHD;
     }
 
-	/**
-	 * @param int $paxId
-	 * @return array|null
-	 */
+    /**
+     * @param int $paxId
+     * @return array|null
+     */
     public function getPaxAgeRangeByPaxId(int $paxId): ?array
-	{
-		return self::PAX_AGE_RANGE[$paxId] ?? null;
-	}
+    {
+        return self::PAX_AGE_RANGE[$paxId] ?? null;
+    }
 
     /**
      * @param int $roomId
@@ -192,5 +192,5 @@ class HotelRoomPax extends \yii\db\ActiveRecord
     public function getSummaryByRoom(int $roomId)
     {
         return (ArrayHelper::merge($this->getQtyByRoom($roomId), $this->getChildrenAgesByRoom($roomId)));
-	}
+    }
 }

@@ -13,23 +13,24 @@ use modules\product\src\entities\productQuote\ProductQuote;
  */
 class ProductQuoteRecalculateProfitAmountEvent
 {
-	/**
-	 * @var ProductQuote
-	 */
+    /**
+     * @var ProductQuote
+     */
     public $productQuote;
 
-	/**
-	 * @var bool
-	 */
-	public $resetDispatcherQueue;
+    /**
+     * @var bool
+     */
+    public $resetDispatcherQueue;
 
-	/**
-	 * ProductQuoteRecalculateProfitAmountEvent constructor.
-	 * @param ProductQuote $productQuote
-	 * @param bool $resetDispatcherQueue
-	 */
-    public function __construct(ProductQuote $productQuote, bool $resetDispatcherQueue = false) {
+    /**
+     * ProductQuoteRecalculateProfitAmountEvent constructor.
+     * @param ProductQuote $productQuote
+     * @param bool $resetDispatcherQueue
+     */
+    public function __construct(ProductQuote $productQuote, bool $resetDispatcherQueue = false)
+    {
         $this->productQuote = $productQuote;
-		$this->resetDispatcherQueue = $resetDispatcherQueue;
-	}
+        $this->resetDispatcherQueue = $resetDispatcherQueue;
+    }
 }

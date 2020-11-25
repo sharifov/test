@@ -48,7 +48,7 @@ $this->params['breadcrumbs'][] = $this->title;
             't_object_id',
             [
                 'attribute' => 't_category_id',
-                'value' => static function(QaTask $task) {
+                'value' => static function (QaTask $task) {
                     return $task->t_category_id ? $task->category->tc_name : null;
                 },
                 'filter' => $searchModel->getCategoryList(),

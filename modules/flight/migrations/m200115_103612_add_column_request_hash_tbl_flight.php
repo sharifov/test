@@ -1,4 +1,5 @@
 <?php
+
 namespace modules\flight\migrations;
 
 use yii\base\NotSupportedException;

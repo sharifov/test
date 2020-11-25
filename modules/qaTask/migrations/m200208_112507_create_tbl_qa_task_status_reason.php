@@ -20,7 +20,7 @@ class m200208_112507_create_tbl_qa_task_status_reason extends Migration
             $tableOptions = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE=InnoDB';
         }
 
-        $this->createTable('{{%qa_task_status_reason}}',	[
+        $this->createTable('{{%qa_task_status_reason}}', [
             'tsr_id' => $this->primaryKey(),
             'tsr_object_type_id' => $this->tinyInteger()->notNull(),
             'tsr_status_id' => $this->tinyInteger()->notNull(),
@@ -44,7 +44,6 @@ class m200208_112507_create_tbl_qa_task_status_reason extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     /**

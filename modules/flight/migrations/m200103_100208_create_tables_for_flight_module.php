@@ -1,5 +1,7 @@
 <?php
+
 namespace modules\flight\migrations;
+
 use yii\db\Migration;
 
 /**
@@ -37,7 +39,7 @@ class m200103_100208_create_tables_for_flight_module extends Migration
             $tableOptions = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE=InnoDB';
         }
 
-        $this->createTable('{{%flight}}',	[
+        $this->createTable('{{%flight}}', [
             'fl_id'                 => $this->primaryKey(),
             'fl_product_id'         => $this->integer(),
             'fl_trip_type_id'       => $this->tinyInteger(1),
@@ -52,7 +54,7 @@ class m200103_100208_create_tables_for_flight_module extends Migration
         //$this->createIndex('IND-offer-of_gid', '{{%offer}}', ['of_gid'], true);
 
 
-        $this->createTable('{{%flight_segment}}',	[
+        $this->createTable('{{%flight_segment}}', [
             'fs_id'                     => $this->primaryKey(),
             'fs_flight_id'              => $this->integer()->notNull(),
             'fs_origin_iata'            => $this->tinyInteger(3)->notNull(),
@@ -64,7 +66,7 @@ class m200103_100208_create_tables_for_flight_module extends Migration
 
         $this->addForeignKey('FK-flight_segment-fs_flight_id', '{{%flight_segment}}', ['fs_flight_id'], '{{%flight}}', ['fl_id'], 'CASCADE', 'CASCADE');
 
-        $this->createTable('{{%flight_quote}}',	[
+        $this->createTable('{{%flight_quote}}', [
             'fq_id'                     => $this->primaryKey(),
             'fq_flight_id'              => $this->integer()->notNull(),
             'fq_source_id'              => $this->tinyInteger(1),
@@ -100,7 +102,7 @@ class m200103_100208_create_tables_for_flight_module extends Migration
 
 
 
-        $this->createTable('{{%flight_quote_trip}}',	[
+        $this->createTable('{{%flight_quote_trip}}', [
             'fqt_id'                => $this->primaryKey(),
             'fqt_key'               => $this->string(255),
             'fqt_flight_quote_id'   => $this->integer()->notNull(),
@@ -112,7 +114,7 @@ class m200103_100208_create_tables_for_flight_module extends Migration
 
 
 
-        $this->createTable('{{%flight_quote_segment}}',	[
+        $this->createTable('{{%flight_quote_segment}}', [
             'fqs_id'                        => $this->primaryKey(),
             'fqs_flight_quote_id'           => $this->integer()->notNull(),
             'fqs_flight_quote_trip_id'      => $this->integer(),
@@ -144,7 +146,7 @@ class m200103_100208_create_tables_for_flight_module extends Migration
         $this->addForeignKey('FK-flight_quote_segment-fqs_flight_quote_trip_id', '{{%flight_quote_segment}}', ['fqs_flight_quote_trip_id'], '{{%flight_quote_trip}}', ['fqt_id'], 'SET NULL', 'CASCADE');
 
 
-        $this->createTable('{{%flight_quote_segment_stop}}',	[
+        $this->createTable('{{%flight_quote_segment_stop}}', [
             'qss_id'                        => $this->primaryKey(),
             'qss_quote_segment_id'          => $this->integer()->notNull(),
             'qss_location_iata'             => $this->string(3),
@@ -158,7 +160,7 @@ class m200103_100208_create_tables_for_flight_module extends Migration
         $this->addForeignKey('FK-flight_quote_segment_stop-qss_quote_segment_id', '{{%flight_quote_segment_stop}}', ['qss_quote_segment_id'], '{{%flight_quote_segment}}', ['fqs_id'], 'CASCADE', 'CASCADE');
 
 
-         $this->createTable('{{%flight_pax}}',	[
+         $this->createTable('{{%flight_pax}}', [
              'fp_id'                        => $this->primaryKey(),
              'fp_flight_id'                 => $this->integer()->notNull(),
              'fp_pax_id'                    => $this->integer(),
@@ -174,7 +176,7 @@ class m200103_100208_create_tables_for_flight_module extends Migration
         //$this->addForeignKey('FK-flight_pax-fq_product_quote_id', '{{%flight_pax}}', ['fq_product_quote_id'], '{{%product_quote}}', ['pq_id'], 'CASCADE', 'CASCADE');
 
 
-        $this->createTable('{{%flight_quote_segment_pax_baggage}}',	[
+        $this->createTable('{{%flight_quote_segment_pax_baggage}}', [
             'qsb_id'                        => $this->primaryKey(),
             'qsb_flight_pax_code_id'        => $this->tinyInteger(1)->notNull(),
             'qsb_flight_quote_segment_id'   => $this->integer()->notNull(),
@@ -192,7 +194,7 @@ class m200103_100208_create_tables_for_flight_module extends Migration
 
 
 
-        $this->createTable('{{%flight_quote_segment_pax_baggage_charge}}',	[
+        $this->createTable('{{%flight_quote_segment_pax_baggage_charge}}', [
             'qsbc_id'                       => $this->primaryKey(),
             'qsbc_flight_pax_id'            => $this->integer()->notNull(),
             'qsbc_flight_quote_segment_id'  => $this->integer()->notNull(),
@@ -214,7 +216,7 @@ class m200103_100208_create_tables_for_flight_module extends Migration
         $this->addForeignKey('FK-flight_quote_segment_pax_baggage_charge-qsbc_origin_currency', '{{%flight_quote_segment_pax_baggage_charge}}', ['qsbc_origin_currency'], '{{%currency}}', ['cur_code'], 'SET NULL', 'CASCADE');
 
 
-        $this->createTable('{{%flight_quote_pax_price}}',	[
+        $this->createTable('{{%flight_quote_pax_price}}', [
             'qpp_id'                    => $this->primaryKey(),
             'qpp_flight_quote_id'       => $this->integer()->notNull(),
             'qpp_flight_pax_code_id'    => $this->tinyInteger(1)->notNull(),
@@ -241,7 +243,7 @@ class m200103_100208_create_tables_for_flight_module extends Migration
         //$this->addForeignKey('FK-flight_quote_pax_price-qpp_flight_pax_code_id', '{{%flight_quote_pax_price}}', ['qpp_flight_pax_code_id'], '{{%flight_pax_code}}', ['fpc_id'], 'CASCADE', 'CASCADE');
 
 
-        $this->createTable('{{%flight_quote_status_log}}',	[
+        $this->createTable('{{%flight_quote_status_log}}', [
             'qsl_id'                   => $this->primaryKey(),
             'qsl_created_user_id'      => $this->integer(),
             'qsl_flight_quote_id'      => $this->integer()->notNull(),
@@ -254,7 +256,6 @@ class m200103_100208_create_tables_for_flight_module extends Migration
         $this->createIndex('IND-flight_quote_status_log-qsl_flight_quote_id', '{{%flight_quote_status_log}}', ['qsl_flight_quote_id', 'qsl_status_id']);
 
         (new \console\migrations\RbacMigrationService())->up($this->routes, $this->roles);
-
     }
 
     /**

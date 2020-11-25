@@ -36,17 +36,17 @@ class FlightQuotePaxPriceRepository extends Repository
         throw new NotFoundException('Flight Quote Pax Price is not found', FlightCodeException::FLIGHT_QUOTE_PAX_PRICE_NOT_FOUND);
     }
 
-	/**
-	 * @param FlightQuotePaxPrice $flightQuotePaxPrice
-	 * @return int
-	 */
-	public function save(FlightQuotePaxPrice $flightQuotePaxPrice): int
-	{
-		if (!$flightQuotePaxPrice->save()) {
-			throw new \RuntimeException($flightQuotePaxPrice->getErrorSummary(false)[0]);
-		}
-		return $flightQuotePaxPrice->qpp_id;
-	}
+    /**
+     * @param FlightQuotePaxPrice $flightQuotePaxPrice
+     * @return int
+     */
+    public function save(FlightQuotePaxPrice $flightQuotePaxPrice): int
+    {
+        if (!$flightQuotePaxPrice->save()) {
+            throw new \RuntimeException($flightQuotePaxPrice->getErrorSummary(false)[0]);
+        }
+        return $flightQuotePaxPrice->qpp_id;
+    }
 
     public function remove(FlightQuotePaxPrice $paxPrice): void
     {
