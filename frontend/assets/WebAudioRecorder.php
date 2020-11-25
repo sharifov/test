@@ -8,7 +8,7 @@ use yii\web\JqueryAsset;
 
 class WebAudioRecorder extends AssetBundle
 {
-    public $basePath = '@frontend';
+    public $basePath = '@webroot';
     public $baseUrl = '@web';
 
     public $js = [

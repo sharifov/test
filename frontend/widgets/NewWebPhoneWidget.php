@@ -35,6 +35,7 @@ class NewWebPhoneWidget extends Widget
             return '';
         }
 
+
         return $this->render('web_phone_new', [
             'formattedPhoneProject' => json_encode($this->formatDataForSelectList($userPhoneProject)),
             'userPhones' => array_keys($this->getUserPhones()),

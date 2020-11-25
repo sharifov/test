@@ -21,6 +21,8 @@ use frontend\assets\overridden\KartikGridViewAsset;
 use frontend\assets\overridden\KDNJsonEditorAsset;
 use frontend\assets\Timeline2Asset;
 use frontend\assets\TimelineAsset;
+use frontend\assets\WebAudioRecorder;
+use frontend\assets\WebPhoneAsset;
 use frontend\themes\gentelella_v2\assets\ClientChatAsset;
 use frontend\themes\gentelella_v2\assets\FontAwesomeAsset;
 use frontend\themes\gentelella_v2\assets\groups\GentelellaCrudGroupAsset;
@@ -118,7 +120,9 @@ return [
 
         MaskedInputAsset::class,
         DialogYiiAsset::class,
-        KartikGridExportAsset::class
+        KartikGridExportAsset::class,
+        WebAudioRecorder::class,
+        WebPhoneAsset::class,
     ],
 
     'targets' => [
@@ -206,7 +210,7 @@ return [
 
         'CallBoxAsset' => [
             'class' => CallBoxAsset::class,
-            'basePath' => '@webroot/all_shared/build',
+            'basePath' => '@webroot/client_chat/build',
             'baseUrl' => '@web/client_chat/build',
             'js' => 'call_box-{hash}.js',
             'css' => 'call_box-{hash}.css',
@@ -215,7 +219,7 @@ return [
         'EditToolAsset' => [
             'class' => EditToolAsset::class,
             'basePath' => '@webroot/all_shared/build',
-            'baseUrl' => '@web/client_chat/build',
+            'baseUrl' => '@web/all_shared/build',
             'js' => 'edit_tool-{hash}.js',
             'css' => 'edit_tool-{hash}.css',
             'depends' => [ EditToolAsset::class ]
@@ -515,6 +519,22 @@ return [
             'js' => 'maskedinput-{hash}.js',
             'css' => 'maskedinput-{hash}.css',
             'depends' => [ MaskedInputAsset::class ],
+        ],
+        'WebAudioRecorder' => [
+            'class' => WebAudioRecorder::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'webaudiorecorder-{hash}.js',
+            'css' => 'webaudiorecorder-{hash}.css',
+            'depends' => [ WebAudioRecorder::class ],
+        ],
+        'WebPhoneAsset' => [
+            'class' => WebPhoneAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'web-phone-{hash}.js',
+            'css' => 'web-phone-{hash}.css',
+            'depends' => [ WebPhoneAsset::class ],
         ]
     ],
 
