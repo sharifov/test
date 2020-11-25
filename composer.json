@@ -156,6 +156,7 @@
 			"vendor/bin/php-cs-fixer fix --config=.php_cs --verbose --show-progress=dots"
 		],
 		"cs-check": "phpcs",
-		"cs-fix2": "phpcbf"
+		"cs-fix2": "phpcbf",
+        "assets-compressor": "php yii asset frontend/config/assets-config.php frontend/config/assets-prod.php"
 	}
 }
