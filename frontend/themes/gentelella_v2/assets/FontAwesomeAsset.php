@@ -18,8 +18,8 @@ class FontAwesomeAsset extends AssetBundle
         'font-awesome.min.css',
     ];
 
-//    public $depends = [
-//        FontAwesomeAllAsset::class,
-//        GlyphiconAsset::class,
-//    ];
+    public $depends = [
+        FontAwesomeAllAsset::class,
+        GlyphiconAsset::class,
+    ];
 }

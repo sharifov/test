@@ -10,6 +10,7 @@ class SimpleAsset extends \yii\web\AssetBundle
 {
     public $depends = [
         AllSharedAsset::class,
+        FontAwesomeAsset::class,
         GentelellaGroupAsset::class,
         SentryAsset::class
     ];

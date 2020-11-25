@@ -14,7 +14,6 @@ use frontend\widgets\notification\NotificationSocketAsset;
 class GentelellaAsset extends \yii\web\AssetBundle
 {
     public $depends = [
-        FontAwesomeAllAsset::class,
         FontAwesomeAsset::class,
         AllSharedDependenciesAsset::class,
         AllSharedGroupAsset::class,
