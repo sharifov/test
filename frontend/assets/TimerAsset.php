@@ -17,8 +17,8 @@ class TimerAsset extends AssetBundle
     public $js = [
         'https://cdnjs.cloudflare.com/ajax/libs/timer.jquery/0.9.0/timer.jquery.min.js'
     ];
-//    public $depends = [
-//        'yii\web\YiiAsset',
-//        'yii\bootstrap4\BootstrapPluginAsset',
-//    ];
+    public $depends = [
+        'yii\web\YiiAsset',
+        'yii\bootstrap4\BootstrapPluginAsset',
+    ];
 }
