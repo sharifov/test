@@ -240,23 +240,13 @@ $(document).on('click', '#btn-load-channels', function (e) {
     });
 });
 
-// if ($('#_rc-iframe-wrapper').find('._rc-iframe').length) {
-//     let iframe = $($('#_rc-iframe-wrapper').find('._rc-iframe')[0]);
-//     let windowHeight = $(window)[0].innerHeight;
-//     let offsetTop = $("#_rc-iframe-wrapper").offset().top;
-//     let iframeHeight = windowHeight - offsetTop - 20;
-//     $(iframe).css('height', iframeHeight+'px');
-// }
-
 $(document).on('click', '.cc_btn_group_filter', function () {
     let newValue = $(this).attr('data-group-id');
     let groupInput = $(document).find('#{$filter->getGroupInputId()}');
     groupInput.val(newValue);
     window.updateClientChatFilter('{$filter->getId()}', '{$filter->formName()}', '{$loadChannelsUrl}');
     sessionStorage.selectedChats = '{}';
-    refreshUserSelectedState();
-    $('#canned-response-wrap').addClass('disabled');
-    $('#couch_note_box').html('');
+    refreshUserSelectedState();    
 });
 
 $(document).on('click', '#{$filter->getReadUnreadInputId()}', function () {
