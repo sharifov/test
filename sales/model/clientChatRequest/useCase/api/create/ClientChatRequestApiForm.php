@@ -68,14 +68,14 @@ class ClientChatRequestApiForm extends Model
 
     public function validateProjectParam($attribute): void
     {
-        if (!isset($this->data['visitor']['project']) || empty(trim($this->data['visitor']['project']))) {
-            $this->addError('data', 'Project parameter is not found');
+        if (empty(trim($this->data['visitor']['project']))) {
+            $this->addError('data', 'Project parameter is empty');
             return;
         }
 
-        $project = Project::findOne(['id' => $this->data['visitor']['project']]);
+        $project = Project::findOne(['api_key' => $this->data['visitor']['project']]);
         if (!$project) {
-            $this->addError('data', 'Project is not found');
+            $this->addError('data', 'Invalid Project');
             return;
         }
     }
