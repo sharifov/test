@@ -97,7 +97,7 @@ return [
             'username' => '{{ common.config.main.components.communication.username:str }}',
             'password' => '{{ common.config.main.components.communication.password:str }}',
             'recording_url' => '{{ common.config.main.components.communication.recording_url:str }}',
-            'voipApiUsername' => 'sales'
+            'voipApiUsername' => '{{ common.config.main.components.communication.voipApiUsername:str }}'
         ],
         'airsearch' => [
             'class' => \common\components\AirSearchService::class,
