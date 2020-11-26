@@ -70,11 +70,13 @@ class ClientChatRequestApiForm extends Model
     {
         if (empty(trim($this->data['visitor']['project']))) {
             $this->addError('data', 'Project parameter is not found');
+            return;
         }
 
         $project = Project::findOne(['id' => $this->data['visitor']['project']]);
         if (!$project) {
             $this->addError('data', 'Project is not found');
+            return;
         }
     }
 
