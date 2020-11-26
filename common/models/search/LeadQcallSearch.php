@@ -272,6 +272,12 @@ class LeadQcallSearch extends LeadQcall
 //                'is_in_day_time_hours' => SORT_DESC
 //            ]);
 
+            $query->addSelect(['is_in_client_current_time' =>
+                new Expression('if (' . $clientGmt . ' >= \'' . $dayTimeHours->getStart() . '\' AND ' . $clientGmt . ' <= \'' . $dayTimeHours->getEnd() . '\', 1, 0) ')
+            ]);
+            $query->andHaving(['is_in_client_current_time' => 1]);
+            $query->andHaving(['isFresh' => 1]);
+
             $defaultOrder = array_merge($defaultOrder, [
                 'isFresh' => SORT_DESC,
                 'is_in_day_time_hours' => SORT_DESC
@@ -286,6 +292,7 @@ class LeadQcallSearch extends LeadQcall
 //            $query->addOrderBy([
 //                'is_in_day_time_hours' => SORT_DESC
 //            ]);
+            $query->andHaving(['is_in_day_time_hours' => 1]);
 
             $defaultOrder = array_merge($defaultOrder, [
                 'is_in_day_time_hours' => SORT_DESC
