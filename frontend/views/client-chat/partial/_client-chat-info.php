@@ -1,14 +1,17 @@
 <?php
 
 use common\models\Client;
+use frontend\widgets\clientChat\ClientChatClientInfoWidget;
 use sales\auth\Auth;
 use sales\entities\cases\CasesStatus;
 use sales\helpers\clientChat\ClientChatHelper;
+use sales\model\client\query\ClientLeadCaseCounter;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatHold\service\ClientChatHoldService;
 use sales\model\clientChat\permissions\ClientChatActionPermission;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
+use yii\bootstrap4\Modal;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\JqueryAsset;
@@ -24,6 +27,8 @@ use yii\widgets\Pjax;
  */
 
 $_self = $this;
+
+$counter = new ClientLeadCaseCounter($client->id, Auth::id());
 
 ?>
 
@@ -138,40 +143,51 @@ $_self = $this;
     </div>
     <div class="_rc-block-wrapper">
         <div class="row">
+            <div class="client-chat-client-info-wrapper">
+                <?= ClientChatClientInfoWidget::widget(['chat' => $clientChat]) ?>
+            </div>
+            <?php if (Auth::can('client-chat/manage', ['chat' => $clientChat])): ?>
             <div class="col-md-12">
-                <div style="display: flex; margin-bottom: 15px;">
-                    <span class="_rc-client-icon _cc-item-icon-round">
-                        <span class="_cc_client_name"><?= ClientChatHelper::getFirstLetterFromName(ClientChatHelper::getClientName($clientChat)); ?></span>
-                        <span class="_cc-status-wrapper">
-                            <span class="_cc-status" data-is-online="<?= (int) $clientChat->cch_client_online; ?>"></span>
-                        </span>
-                    </span>
-                    <div class="_rc-client-info">
+                <div class="dropdown " style="margin-top: 10px; float: left;">
+                    <button class="btn text-warning dropdown-toggle" type="button" id="menuClientInfoActions" data-toggle="dropdown"
+                            aria-haspopup="true" aria-expanded="false"
+                            style="box-shadow: 0 0 0 0.2rem rgba(240, 184, 81, 0.25); height: 25px; margin-top: 3px;" >
+                        <i class="fa fa-bars warning"> </i> <span class="text-warning">Actions</span>
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="menuClientInfoActions">
 
-                        <span class="_rc-client-name">
-                            <span><?= Html::encode($client->full_name ?: 'Client-' . $client->id); ?></span>
-                        </span>
+                        <?php echo Html::a('<i class="fas fa-edit warning"> </i> Update Client', null, [
+                            'class' => 'dropdown-item showModalButton',
+                            'title' => 'Update Client',
+                            'data-modal_id' => "client-manage-info",
+                            'data-content-url' => Url::to(['/client-chat-client-actions/ajax-edit-client-name-modal-content', 'id' => $clientChat->cch_id])
+                        ]) ?>
 
-                        <?php if ($emails = $client->clientEmails) : ?>
-                            <span class="_rc-client-email">
-                                <i class="fa fa-envelope"></i>
-                                <?php foreach ($emails as $email) : ?>
-                                    <code><?= Html::encode($email->email); ?></code>
-                                <?php endforeach; ?>
-                            </span>
-                        <?php endif; ?>
+                        <?php echo Html::a('<i class="fas fa-plus-circle success"> </i> Add Email', null, [
+                            'class' => 'dropdown-item showModalButton',
+                            'title' => 'Add Email',
+                            'data-modal_id' => "client-manage-info",
+                            'data-content-url' => Url::to(['/client-chat-client-actions/ajax-add-client-email-modal-content', 'id' => $clientChat->cch_id])
+                        ]) ?>
 
-                        <?php if ($phones = $client->clientPhones) : ?>
-                            <span class="_rc-client-phone">
-                                <i class="fa fa-phone"></i>
-                                <?php foreach ($phones as $phone) : ?>
-                                    <code><?= Html::encode($phone->phone); ?></code>
-                                <?php endforeach; ?>
-                            </span>
-                        <?php endif; ?>
+                        <?php echo Html::a('<i class="fas fa-plus-circle success"> </i> Add Phone', null, [
+                            'class' => 'dropdown-item showModalButton',
+                            'title' => 'Add Phone',
+                            'data-modal_id' => "client-manage-info",
+                            'data-content-url' => Url::to(['/client-chat-client-actions/ajax-add-client-phone-modal-content', 'id' => $clientChat->cch_id])
+                        ]) ?>
+
+                        <?php echo Html::a('<i class="fas fa-info-circle"> </i> Details', null, [
+                            'id' => 'btn-client-info-details',
+                            'data-client-id' => $client->id,
+                            'class' => 'dropdown-item',
+                            'title' => 'Details',
+                        ]) ?>
+
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
         </div>
 
     </div>
@@ -248,7 +264,7 @@ $_self = $this;
     <div class="_rc-block-wrapper">
         <div class="x_panel">
             <div class="x_title">
-                <h2>Cases </h2>
+                <h2>Cases (<?= $counter->countActiveCases()?> / <?= $counter->countAllCases()?>) </h2>
                 <ul class="nav navbar-right panel_toolbox">
                     <?php if (!$clientChat->isClosed() && Auth::can('/cases/create-by-chat')) : ?>
                     <li>
@@ -281,7 +297,7 @@ $_self = $this;
 
         <div class="x_panel">
             <div class="x_title">
-                <h2>Leads </h2>
+                <h2>Leads (<?= $counter->countActiveLeads()?> / <?= $counter->countAllLeads()?>) </h2>
                 <ul class="nav navbar-right panel_toolbox">
                     <?php if (!$clientChat->isClosed() && Auth::can('/lead/create-by-chat')) : ?>
                         <li>
@@ -436,3 +452,49 @@ JS;
 $this->registerJs($js);
 ?>
 <?php endif; ?>
+
+<?php
+$clientInfoUrl = \yii\helpers\Url::to(['/client/ajax-get-info']);
+$js =<<<JS
+$(document).on('click', '#btn-client-info-details', function(e) {
+    e.preventDefault();
+    var client_id = $(this).data('client-id');
+    $('#modalChat .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+    $('#modalChat-label').html('Client Details (' + client_id + ')');
+    $('#modalChat').modal();
+    $.post('$clientInfoUrl', {client_id: client_id},
+            function (data) {
+                $('#modalChat .modal-body').html(data);
+            }
+        );
+    });
+
+   $(document).on('click', '.showModalButton', function(e){
+       e.preventDefault();
+        let id = $(this).data('modal_id');
+        let url = $(this).data('content-url');
+
+        $('#modal-' + id + '-label').html($(this).attr('title'));
+        $('#modal-' + id).modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+
+        $.post(url, function(data) {
+            $('#modal-' + id).find('.modal-body').html(data);
+        });
+    });
+JS;
+$this->registerJs($js);
+
+Modal::begin([
+    'title' => '',
+    'id' => 'modal-client-manage-info',
+    'size' => Modal::SIZE_SMALL,
+]);
+Modal::end();
+
+Modal::begin([
+    'id' => 'modalChat',
+    'title' => '',
+    'size' => Modal::SIZE_LARGE,
+    'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
+]);
+Modal::end();
