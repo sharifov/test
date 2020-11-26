@@ -125,7 +125,7 @@ class ClientChatAccessMessage
     public static function chatAutoReturn(int $chatId): array
     {
         return [
-            'message' => 'This chat is auto return. Client wrote a message.',
+            'message' => 'The chat has been returned to In Progress.',
             'cchId' => $chatId,
         ];
     }
