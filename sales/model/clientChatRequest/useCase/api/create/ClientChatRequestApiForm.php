@@ -2,6 +2,7 @@
 
 namespace sales\model\clientChatRequest\useCase\api\create;
 
+use common\models\Project;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
@@ -67,8 +68,13 @@ class ClientChatRequestApiForm extends Model
 
     public function validateProjectParam($attribute): void
     {
-        if (empty($this->data['visitor']['project'])) {
+        if (empty(trim($this->data['visitor']['project']))) {
             $this->addError('data', 'Project parameter is not found');
+        }
+
+        $project = Project::findOne(['id' => $this->data['visitor']['project']]);
+        if (!$project) {
+            $this->addError('data', 'Project is not found');
         }
     }
 
