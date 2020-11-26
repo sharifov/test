@@ -180,7 +180,7 @@ class Scopes extends \yii\db\ActiveQuery
         return $this->byOwner(null)
             ->andWhere(['cch_status_id' => ClientChat::STATUS_PENDING])
             ->orWhere(['cch_status_id' => ClientChat::STATUS_TRANSFER])
-            ->orWhere(['NOT IN', 'cch_status_id', ClientChat::CLOSED_STATUS_GROUP]);
+            ->andWhere(['NOT IN', 'cch_status_id', ClientChat::CLOSED_STATUS_GROUP]);
     }
 
     public function withUnreadMessage(bool $edgerLoading = false): self
