@@ -73,7 +73,7 @@ class ClientChatRequestApiForm extends Model
             return;
         }
 
-        $project = Project::findOne(['api_key' => $this->data['visitor']['project']]);
+        $project = Project::findOne(['project_key' => $this->data['visitor']['project']]);
         if (!$project) {
             $this->addError('data', 'Invalid Project');
             return;
