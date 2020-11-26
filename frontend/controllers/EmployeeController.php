@@ -548,19 +548,19 @@ class EmployeeController extends FController
                         }
                     }
 
-//                    if (isset($attr['client_chat_user_channel'])) {
-//                        if ($attr['client_chat_user_channel']) {
-//                            foreach ($attr['client_chat_user_channel'] as $chId) {
-//                                $clientChatChanel = new ClientChatUserChannel();
-//                                $clientChatChanel->ccuc_user_id = $model->id;
-//                                $clientChatChanel->ccuc_channel_id = (int)$chId;
-//                                $clientChatChanel->ccuc_created_dt = date('Y-m-d H:i:s');
-//                                $clientChatChanel->ccuc_created_user_id = Auth::id();
-//                                $clientChatChanel->save();
-//                            }
+                    if (isset($attr['client_chat_user_channel'])) {
+                        if ($attr['client_chat_user_channel']) {
+                            foreach ($attr['client_chat_user_channel'] as $chId) {
+                                $clientChatChanel = new ClientChatUserChannel();
+                                $clientChatChanel->ccuc_user_id = $model->id;
+                                $clientChatChanel->ccuc_channel_id = (int)$chId;
+                                $clientChatChanel->ccuc_created_dt = date('Y-m-d H:i:s');
+                                $clientChatChanel->ccuc_created_user_id = Auth::id();
+                                $clientChatChanel->save();
+                            }
 //                            $this->clientChatUserAccessService->setUserAccessToAllChatsByChannelIds($attr['client_chat_user_channel'], $model->id);
-//                        }
-//                    }
+                        }
+                    }
 
                     $transaction->commit();
                     Yii::$app->getSession()->setFlash('success', 'User created');
