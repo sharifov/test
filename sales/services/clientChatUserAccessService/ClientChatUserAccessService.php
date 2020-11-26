@@ -175,7 +175,8 @@ class ClientChatUserAccessService
     public function setUserAccessToAllChatsByChannelIds(array $channelIds, int $userId)
     {
         $eventDispatcher = \Yii::createObject(EventDispatcher::class);
-        if ($chats = ClientChat::find()->select(['cch_id'])->conditionSetUserAccess()->byChannelIds($channelIds)->asArray()->all()) {
+        $chatIds = ClientChatUserAccess::find()->select(['ccua_cch_id'])->byUserId($userId)->pending()->column();
+        if ($chats = ClientChat::find()->select(['cch_id'])->conditionSetUserAccess()->byChannelIds($channelIds)->excludeChatIds($chatIds)->asArray()->all()) {
             $data = [];
             foreach ($chats as $chat) {
                 $data[] = [
