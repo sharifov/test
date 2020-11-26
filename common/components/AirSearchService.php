@@ -92,7 +92,7 @@ class AirSearchService extends Component
         if ($response->isOk) {
             $metrics->serviceCounter('air_search', ['type' => 'success', 'action' => $action]);
         } else {
-            $metrics->serviceCounter('air_search', ['type' => 'success', 'action' => $action]);
+            $metrics->serviceCounter('air_search', ['type' => 'error', 'action' => $action]);
         }
         unset($metrics);
 
