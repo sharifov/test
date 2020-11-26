@@ -8,6 +8,7 @@ use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeGroupAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\helpers\user\UserFinder;
+use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use yii\db\ActiveQuery;
 
 /**
@@ -36,6 +37,11 @@ class Scopes extends \yii\db\ActiveQuery
     public function byChannelIds(array $ids): self
     {
         return $this->andWhere(['IN', 'cch_channel_id', $ids]);
+    }
+
+    public function excludeChatIds(array $ids): self
+    {
+        return $this->andWhere(['NOT IN', 'cch_id', $ids]);
     }
 
     public function byIds(array $ids): self

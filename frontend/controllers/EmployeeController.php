@@ -307,7 +307,7 @@ class EmployeeController extends FController
                             try {
                                 $user->removeAllClientChatChanels();
                                 $user->addClientChatChanels($multipleForm->userClientChatChanels, Auth::id());
-                                $this->clientChatUserAccessService->disableUserAccessToAllChats($user->id);
+//                                $this->clientChatUserAccessService->disableUserAccessToAllChats($user->id);
                                 $this->clientChatUserAccessService->setUserAccessToAllChatsByChannelIds($multipleForm->userClientChatChanels, $user->id);
                                 $transaction->commit();
                             } catch (\Throwable $e) {
@@ -766,7 +766,7 @@ class EmployeeController extends FController
                         }
 
                         if (!empty($modelProfile->up_rc_user_id)) {
-                            $this->clientChatUserAccessService->disableUserAccessToAllChats($model->id);
+//                            $this->clientChatUserAccessService->disableUserAccessToAllChats($model->id);
                             $this->clientChatUserAccessService->setUserAccessToAllChatsByChannelIds($attr['client_chat_user_channel'], $model->id);
                         } else {
                             $this->clientChatUserAccessService->disableUserAccessToAllChats($model->id);
