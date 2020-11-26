@@ -275,8 +275,11 @@ class LeadQcallSearch extends LeadQcall
             $query->addSelect(['is_in_client_current_time' =>
                 new Expression('if (' . $clientGmt . ' >= \'' . $dayTimeHours->getStart() . '\' AND ' . $clientGmt . ' <= \'' . $dayTimeHours->getEnd() . '\', 1, 0) ')
             ]);
-            $query->andHaving(['is_in_client_current_time' => 1]);
-            $query->andHaving(['isFresh' => 1]);
+            $query->andHaving([
+                'OR',
+                ['is_in_client_current_time' => 1],
+                ['isFresh' => 1],
+            ]);
 
             $defaultOrder = array_merge($defaultOrder, [
                 'isFresh' => SORT_DESC,
