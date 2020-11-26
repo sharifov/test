@@ -1,5 +1,4 @@
 <?php
-
 use borales\extensions\phoneInput\PhoneInputAsset;
 use dosamigos\ckeditor\CKEditorAsset;
 use dosamigos\ckeditor\CKEditorWidgetAsset;
@@ -24,6 +23,7 @@ use frontend\assets\TimelineAsset;
 use frontend\assets\WebAudioRecorder;
 use frontend\assets\WebPhoneAsset;
 use frontend\themes\gentelella_v2\assets\ClientChatAsset;
+use frontend\themes\gentelella_v2\assets\FontAwesomeAllAsset;
 use frontend\themes\gentelella_v2\assets\FontAwesomeAsset;
 use frontend\themes\gentelella_v2\assets\groups\GentelellaCrudGroupAsset;
 use frontend\themes\gentelella_v2\assets\groups\GentelellaGroupAsset;
@@ -54,6 +54,14 @@ use yii\validators\ValidationAsset;
 use yii\web\JqueryAsset;
 use yii\widgets\ActiveFormAsset;
 use yii\widgets\MaskedInputAsset;
+
+$params = array_merge(
+    require __DIR__ . '/../../common/config/params.php',
+    require __DIR__ . '/../../common/config/params-local.php',
+    require __DIR__ . '/params.php',
+    require __DIR__ . '/params-local.php'
+);
+$appVersion = $params['release']['version'] ?? '';
 
 Yii::setAlias('@webroot', __DIR__ . '/../../frontend/web');
 Yii::setAlias('@web', '/');
@@ -127,6 +135,28 @@ return [
 
     'targets' => [
 
+        'FontAwesomeAsset' => [
+            'class' => FontAwesomeAsset::class,
+            'basePath' => '@webroot/fontawesome/build',
+            'baseUrl' => '@web/fontawesome/build',
+            'js' => 'fontawesome-{hash}.js',
+            'css' => 'fontawesome-{hash}.css',
+            'depends' => [
+                FontAwesomeAsset::class,
+            ]
+        ],
+
+        'GlyphiconAsset' => [
+            'class' => GlyphiconAsset::class,
+            'basePath' => '@webroot/fontawesome/build',
+            'baseUrl' => '@web/fontawesome/build',
+            'js' => 'glyphicon-{hash}.js',
+            'css' => 'glyphicon-{hash}.css',
+            'depends' => [
+                GlyphiconAsset::class,
+            ]
+        ],
+
         'AllSharedAsset' => [
             'class' => AllSharedAsset::class,
             'basePath' => '@webroot/all_shared/build',
@@ -164,17 +194,17 @@ return [
             'depends' => [GentelellaCrudGroupAsset::class]
         ],
 
-        'FontAwesomeAsset' => [
-            'class' => FontAwesomeAsset::class,
-            'basePath' => '@webroot/fontawesome/build',
-            'baseUrl' => '@web/fontawesome/build',
-            'js' => 'fontawesome-{hash}.js',
-            'css' => 'fontawesome-{hash}.css',
-            'depends' => [
-                FontAwesomeAsset::class,
-                GlyphiconAsset::class,
-            ]
-        ],
+//        'FontAwesomeAsset' => [
+//            'class' => FontAwesomeAsset::class,
+//            'basePath' => '@webroot/fontawesome/build',
+//            'baseUrl' => '@web/fontawesome/build',
+//            'js' => 'fontawesome-{hash}.js',
+//            'css' => 'fontawesome-{hash}.css',
+//            'depends' => [
+//                FontAwesomeAsset::class,
+//                GlyphiconAsset::class,
+//            ]
+//        ],
         'NotificationSocketAsset' => [
             'class' => NotificationSocketAsset::class,
             'basePath' => '@webroot/all_shared/build',
@@ -539,8 +569,8 @@ return [
     ],
 
     'assetManager' => [
-        'basePath' => '@webroot/assets',
-        'baseUrl' => '@web/assets',
+        'basePath' => '@webroot/all_shared/build',
+        'baseUrl' => '@web/all_shared/build',
         'bundles' => [
             yii\bootstrap\BootstrapAsset::class => [
                 'sourcePath' => '@npm/bootstrap/dist',
@@ -688,6 +718,15 @@ return [
                 'bsDependencyEnabled' => false,
                 'depends' => []
             ],
-        ]
+            FontAwesomeAsset::class => [
+                'depends' => [
+                    FontAwesomeAllAsset::class,
+                    GlyphiconAsset::class,
+                ]
+            ]
+        ],
+        'hashCallback' => static function ($path) use ($appVersion) {
+            return hash('md4', $path . $appVersion);
+        },
     ],
 ];
