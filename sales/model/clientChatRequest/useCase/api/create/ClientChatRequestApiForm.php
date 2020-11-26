@@ -68,7 +68,7 @@ class ClientChatRequestApiForm extends Model
 
     public function validateProjectParam($attribute): void
     {
-        if (empty(trim($this->data['visitor']['project']))) {
+        if (!isset($this->data['visitor']['project']) || empty(trim($this->data['visitor']['project']))) {
             $this->addError('data', 'Project parameter is not found');
             return;
         }
