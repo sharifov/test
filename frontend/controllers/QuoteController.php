@@ -360,7 +360,7 @@ class QuoteController extends FController
 
                                 $chat = ClientChatLead::find()->andWhere(['ccl_lead_id' => $lead->id])->one();
                                 if ($chat) {
-                                    ClientChatSocketCommands::addClientChatAddOfferButton($chat->chat, $lead->id);
+                                    ClientChatSocketCommands::clientChatAddOfferButton($chat->chat, $lead->id);
                                 }
                             }
 
@@ -404,6 +404,16 @@ class QuoteController extends FController
                     }
                 }
             }
+            if ($leadId = (int)$attr['leadId']) {
+                $lead = Lead::findOne($leadId);
+                $chat = ClientChatLead::find()->andWhere(['ccl_lead_id' => $leadId])->one();
+                if ($lead && $chat) {
+                    if (!(!$chat->chat->isClosed() && $lead->isExistQuotesForSend())) {
+                        ClientChatSocketCommands::clientChatRemoveOfferButton($chat->chat, $leadId);
+                    }
+                }
+            }
+
         }
         return $result;
     }
@@ -794,7 +804,7 @@ class QuoteController extends FController
                                 }
                                 $chat = ClientChatLead::find()->andWhere(['ccl_lead_id' => $lead->id])->one();
                                 if ($chat) {
-                                    ClientChatSocketCommands::addClientChatAddOfferButton($chat->chat, $lead->id);
+                                    ClientChatSocketCommands::clientChatAddOfferButton($chat->chat, $lead->id);
                                 }
                             }
 

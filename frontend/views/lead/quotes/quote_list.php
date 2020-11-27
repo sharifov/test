@@ -193,6 +193,7 @@ JS;
 }
 
 if ($leadForm->mode !== $leadForm::VIEW_MODE || $is_manager) {
+    $leadId = $leadForm->getLead()->id;
     $js = <<<JS
 
 
@@ -240,7 +241,7 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || $is_manager) {
             createNotify('Warning', 'Check necessary quotes!', 'warning');
             return false;
         }
-        var dataPost = {quotes: quotes};
+        var dataPost = {quotes: quotes, leadId: $leadId};
         $('#preloader').removeClass('hidden');
         $.ajax({
             type: 'post',

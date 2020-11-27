@@ -528,6 +528,12 @@ $js = <<<JS
                             let content = '<span class="chat-offer" data-chat-id="' + chatId + '" data-lead-id="' + leadId + '"><i class="fa fa-plane"> </i> Offer</span>';
                             $(document).find('span[data-cc-lead-info-offer="' + leadId + '"]').html(content);
                         }
+                        
+                        if(obj.cmd === 'clientChatRemoveOfferButton') {                            
+                            let chatId = parseInt(obj.data.chatId, 10);
+                            let leadId = parseInt(obj.data.leadId, 10);
+                            $(document).find('span[data-cc-lead-info-offer="' + leadId + '"]').html("");
+                        }
                     }
                     // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
                 } catch (error) {
