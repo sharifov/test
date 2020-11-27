@@ -1513,8 +1513,9 @@ class ClientChatController extends FController
         $visitorId = Yii::$app->request->get('visitorId', '');
         $projectName = Yii::$app->request->get('projectName', '');
         $visitorName = Yii::$app->request->get('visitorName', '');
+        $visitorEmail = Yii::$app->request->get('visitorEmail', '');
 
-        $form = new RealTimeStartChatForm($visitorId, $projectName, $visitorName);
+        $form = new RealTimeStartChatForm($visitorId, $projectName, $visitorName, $visitorEmail);
 
         if ($form->projectName) {
             $form->projectId = $this->projectRepository->getIdByProjectKey($form->projectName);
