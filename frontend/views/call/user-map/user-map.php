@@ -503,7 +503,8 @@ $js = <<<JS
 
     $('#btn-user-call-map-refresh').on('click', function () {
         // $('#modal-dialog').find('.modal-content').html('');
-        $.pjax.reload({container:'#pjax-call-list'});
+        // $.pjax.reload({container:'#pjax-call-list'});
+         pjaxReload({container: '#pjax-call-list', 'timeout': 4000});
     });
 
     $(document).on('pjax:start', function() {
