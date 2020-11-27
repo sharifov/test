@@ -152,7 +152,7 @@ use yii\web\JsExpression;
                 <?php endif; ?>
 
                 <?php if ($filter->permissions->canCreatedDate()) : ?>
-                    <div class="col-md-12">
+                    <div class="col-md-12 js-created_box">
                         <?= Html::label('Created:', null, ['class' => 'control-label']); ?>
                         <?= \kartik\daterange\DateRangePicker::widget([
                         'model' => $filter,
@@ -165,6 +165,7 @@ use yii\web\JsExpression;
                             'endAttribute' => 'toDate',
                             'pluginOptions' => [
                                 'timePicker' => false,
+                                'maxDate' => date("Y-m-d"),
                                 'locale' => [
                                     'format' => 'Y-m-d',
                                     'separator' => ' / ',

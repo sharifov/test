@@ -1319,6 +1319,9 @@ $css = <<<CSS
     }
     #pjax-notes .x_panel {
         margin-top: 10px;
-    }      
+    }
+    .js-created_box .kv-clear {
+        display: none;
+    }       
 CSS;
 $this->registerCss($css);
