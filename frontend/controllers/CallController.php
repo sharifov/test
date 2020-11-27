@@ -1359,7 +1359,7 @@ class CallController extends FController
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $result = $this->addUsersForCall($call, $model->selectedUsers);
             if ($result) {
-                return "<script> $('#modal-df').modal('hide');createNotify('Add users to call', 'Done', 'success');pjaxReload({container: '#pjax-call-list'});</script>";
+                return "<script> $('#modal-df').modal('hide');createNotify('Add users to call', 'Done', 'success');pjaxReload({container: '#pjax-call-list', 'timeout': 4000});</script>";
             }
             return "<script> $('#modal-df').modal('hide');createNotify('Add users to call', 'Server error. Please try again later.', 'danger');</script>";
         }
