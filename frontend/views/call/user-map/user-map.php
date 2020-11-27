@@ -211,7 +211,7 @@ function getJoinTemplate($model)
 
 <div id="call-map-page" class="col-md-12">
 
-    <?php Pjax::begin(['id' => 'pjax-call-list']); ?>
+    <?php Pjax::begin(['id' => 'pjax-call-list', 'timeout' => 4000]); ?>
 
         <div class="row">
             <?php /*<div class="animated flipInY col-md-4 col-sm-6 col-xs-12">
