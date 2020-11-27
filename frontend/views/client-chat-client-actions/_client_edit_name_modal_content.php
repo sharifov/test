@@ -60,6 +60,8 @@ $('#client-edit-name-form').on('beforeSubmit', function (e) {
             if (!data.error) {
                 $(document).find('.client-chat-client-info-wrapper').html(data.html);
                 $('#modal-client-manage-info').modal('hide');
+                $(document).find('span[data-cc-client-name-id="' + data.client.id + '"]').html(data.client.name);                
+                $(document).find('span[data-cc-client-fl-name-id="' + data.client.id + '"]').html(data.client.name.charAt(0).toUpperCase());                
                 
                 new PNotify({
                     title: 'User name successfully updated',

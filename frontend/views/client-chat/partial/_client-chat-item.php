@@ -16,6 +16,7 @@ use yii\helpers\StringHelper;
 ?>
 
 <?php foreach ($clientChats as $clientChat) : ?>
+
     <?php
         $isClosed = ArrayHelper::isIn((int)$clientChat['cch_status_id'], ClientChat::CLOSED_STATUS_GROUP);
 
@@ -36,14 +37,14 @@ use yii\helpers\StringHelper;
 
         <div class="_cc-item-icon-wrapper">
             <span class="_cc-item-icon-round">
-                <span class="_cc_client_name"><?= ClientChatHelper::getFirstLetterFromName($clientFullName) ?></span>
+                <span class="_cc_client_name"><span data-cc-client-fl-name-id="<?= $clientChat['client_id']?>"><?= ClientChatHelper::getFirstLetterFromName($clientFullName) ?></span></span>
                 <span class="_cc-status-wrapper">
                     <span class="_cc-status" data-is-online="<?= (int)$clientChat['cch_client_online'] ?>"> </span>
                 </span>
 
             </span>
             <span>
-                <div title="Client name"><b><?= Html::encode($clientFullName) ?></b></div>
+                <div title="Client name"><b><span data-cc-client-name-id="<?= $clientChat['client_id']?>"><?= Html::encode($clientFullName) ?></span></b></div>
                 <span title="Chat creation date"><small><?= $formatter->asByUserDateTime($clientChat['cch_created_dt'], 'php:F d Y, H:i') ?></small></span>
                 <?php if (!empty($clientChat['cch_owner_user_id'])) : ?>
                     , <span title="Owner"><small><i class="fa fa-user"> </i> <?= Html::encode($clientChat['owner_username']) ?></small></span>

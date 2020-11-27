@@ -127,6 +127,7 @@ class ClientChatClientActionsController extends FController
             'error' => false,
             'message' => '',
             'html' => '',
+            'client' => [],
         ];
 
         try {
@@ -136,6 +137,11 @@ class ClientChatClientActionsController extends FController
                 $response['error'] = false;
                 $response['message'] = 'User name was successfully updated';
                 $response['html'] = ClientChatClientInfoWidget::widget(['chat' => $chat]);
+                $clientFullName = trim($chat->cchClient->first_name . ($chat->cchClient->last_name ? ' ' . $chat->cchClient->last_name : ''));
+                $response['client'] = [
+                    'id' => $chat->cch_client_id,
+                    'name' => $clientFullName ?: 'Client-' . $chat->cch_client_id,
+                ];
             } else {
                 $response['error'] = true;
                 $response['message'] = $this->getParsedErrors($form->getErrors());
