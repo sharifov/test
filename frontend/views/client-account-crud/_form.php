@@ -54,6 +54,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'ca_phone')->textInput(['maxlength' => true]) ?>
 
+        <?= $form->field($model, 'ca_email')->textInput(['maxlength' => true]) ?>
+
         <?= $form->field($model, 'ca_subscription')->checkbox() ?>
 
         <?= $form->field($model, 'ca_language_id')->dropDownList(\common\models\Language::getList(), ['prompt' => '--']) ?>

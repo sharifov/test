@@ -38,6 +38,7 @@ use yii\db\ActiveRecord;
  * @property string|null $ca_origin_updated_dt
  * @property string|null $ca_created_dt
  * @property string|null $ca_updated_dt
+ * @property string|null $ca_email
  *
  * @property Currency $currency
  * @property Language $language
@@ -93,6 +94,9 @@ class ClientAccount extends ActiveRecord
 
             'ca_username_required' => ['ca_username', 'required'],
             ['ca_username', 'string', 'max' => 100],
+
+            ['ca_email', 'string', 'max' => 100],
+            ['ca_email', 'email'],
 
             'ca_uuid_required' => ['ca_uuid', 'required'],
             ['ca_uuid', 'string', 'max' => 36],
@@ -174,6 +178,7 @@ class ClientAccount extends ActiveRecord
             'ca_origin_updated_dt' => 'Origin Updated Dt',
             'ca_created_dt' => 'Created Dt',
             'ca_updated_dt' => 'Updated Dt',
+            'ca_email' => 'Email',
         ];
     }
 

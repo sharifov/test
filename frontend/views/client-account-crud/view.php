@@ -56,6 +56,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'format' => 'raw',
                 ],
                 'ca_phone',
+                'ca_email',
                 'ca_subscription:booleanByLabel',
                 'ca_language_id',
                 'ca_currency_code',
