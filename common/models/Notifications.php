@@ -432,7 +432,7 @@ class Notifications extends ActiveRecord
             ->select('uc_id')
             ->andWhere(['uc_controller_id' => 'call', 'uc_action_id' => 'user-map'])
             ->orWhere(['uc_controller_id' => 'call', 'uc_action_id' => 'realtime-user-map'])
-            ->cache(60)
+//            ->cache(60)
             ->column();
 
         if ($userConnections) {
