@@ -64,6 +64,8 @@ class Quote extends \yii\db\ActiveRecord
 {
     use EventTrait;
 
+    public const SCENARIO_API_UPDATE = 'api_update';
+
     public const CHECKOUT_URL_PAGE = 'checkout/quote';
 
     public const
@@ -194,7 +196,8 @@ class Quote extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['uid', 'reservation_dump', 'main_airline_code'], 'required'],
+            ['main_airline_code', 'required', 'on' => self::SCENARIO_DEFAULT],
+            [['uid', 'reservation_dump'], 'required'],
             [['lead_id', 'status' ], 'integer'],
             [[ 'check_payment'], 'boolean'],
             [['created', 'updated', 'created_by_seller', 'employee_name', 'employee_id', 'pcc', 'gds', 'last_ticket_date', 'service_fee_percent'], 'safe'],
@@ -211,6 +214,13 @@ class Quote extends \yii\db\ActiveRecord
         ];
     }
 
+    public function scenarios()
+    {
+        $scenarios = parent::scenarios();
+        $defaultAttributes = $scenarios[self::SCENARIO_DEFAULT];
+        $scenarios[self::SCENARIO_API_UPDATE] = $defaultAttributes;
+        return $scenarios;
+    }
 
     /**
      * {@inheritdoc}

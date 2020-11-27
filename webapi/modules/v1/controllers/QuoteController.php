@@ -401,11 +401,17 @@ class QuoteController extends ApiBaseController
             throw new BadRequestHttpException((new Quote())->formName() . ' is required', 1);
         }
 
+        if (empty($quoteAttributes['uid'])) {
+            throw new BadRequestHttpException((new Quote())->formName() . '.uid is required', 1);
+        }
+
         $model = Quote::findOne(['uid' => $quoteAttributes['uid']]);
 
         if (!$model) {
             throw new NotFoundHttpException('Not found Quote UID: ' . $quoteAttributes['uid'], 2);
         }
+
+        $model->setScenario(Quote::SCENARIO_API_UPDATE);
 
         $oldQuoteType = $model->type_id;
 
