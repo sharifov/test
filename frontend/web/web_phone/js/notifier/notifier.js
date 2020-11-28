@@ -268,12 +268,22 @@
         this.$container = document.getElementById('desktop-phone-notifications');
 
         this.notify = function (notifications) {
+            if (this.containerIsEmpty()) {
+                return;
+            }
             ReactDOM.render(React.createElement(DesktopNotification, {notifications: notifications}), this.$container);
         };
 
         this.reset = function () {
+            if (this.containerIsEmpty()) {
+                return;
+            }
             ReactDOM.unmountComponentAtNode(this.$container);
             this.$container.innerHTML = '';
+        }
+
+        this.containerIsEmpty = function () {
+            return this.$container === null;
         }
     }
 
@@ -282,11 +292,17 @@
         this.notificationKey = null;
 
         this.notify = function (notification) {
+            if (this.containerIsEmpty()) {
+                return;
+            }
             this.notificationKey = notification.key;
             ReactDOM.render(React.createElement(PhoneWidgetNotification, {notification: notification}), this.$container);
         };
 
         this.reset = function () {
+            if (this.containerIsEmpty()) {
+                return;
+            }
             ReactDOM.unmountComponentAtNode(this.$container);
             this.$container.innerHTML = '';
             this.notificationKey = null;
@@ -295,6 +311,10 @@
         this.isEqual = function (key) {
             return this.notificationKey === key;
         };
+
+        this.containerIsEmpty = function () {
+            return this.$container === null;
+        }
     }
 
     window.phoneWidget.notifier = new Notifier();
