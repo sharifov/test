@@ -156,7 +156,7 @@ $js = <<<JS
     const onlineObj = $('#online-connection-indicator');
     
     window.sendCommandUpdatePhoneWidgetCurrentCalls = function () {
-        socketSend('Call', 'GetCurrentQueueCalls', {'userId': userId});
+        socketSend('GetCurrentQueueCalls', '', {'userId': userId});
     };
     
     function wsInitConnect(){

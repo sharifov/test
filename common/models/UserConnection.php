@@ -282,4 +282,17 @@ class UserConnection extends \yii\db\ActiveRecord
             ->indexBy('uc_user_id')
             ->column();
     }
+
+    public function getSubList(): array
+    {
+        if (!empty($this->uc_sub_list)) {
+            return @json_decode($this->uc_sub_list, true);
+        }
+        return [];
+    }
+
+    public function setSubList(array $subList): void
+    {
+        $this->uc_sub_list = $subList ? @json_encode($subList) : null;
+    }
 }

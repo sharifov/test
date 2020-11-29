@@ -374,6 +374,7 @@ $(document).on('click', '._cc-list-item', function () {
     iframeWrapperEl.append(loaderIframe);
 
     let cch_id = $(this).attr('data-cch-id');
+    let preChatId = currentChatId; 
     currentChatId = cch_id;
     let ownerId = $(this).attr('data-owner-id');
     currentChatOwnerId = ownerId;
@@ -390,6 +391,8 @@ $(document).on('click', '._cc-list-item', function () {
     
     let ref = this;
     window.refreshChatInfo(cch_id, loadClientChatData, ref);
+    
+    socketSend('ChatSubscribe', '', {"subscribe":[cch_id], "unSubscribe":[preChatId]});
     
     setTimeout(function () {
         $('#cc-dialogs-wrapper #_cc-load').remove();

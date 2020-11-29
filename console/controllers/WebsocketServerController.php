@@ -5,11 +5,14 @@ namespace console\controllers;
 use common\models\UserCallStatus;
 use common\models\UserConnection;
 use common\models\UserOnline;
+use console\socket\Commands\Connectionable;
+use console\socket\Commands\Serverable;
 use sales\auth\Auth;
 use sales\model\call\services\currentQueueCalls\CurrentQueueCallsService;
 use sales\model\user\entity\monitor\UserMonitor;
 use Swoole\Redis;
 use Swoole\Table;
+use Swoole\WebSocket\Frame;
 use Swoole\WebSocket\Server;
 use yii\console\Controller;
 use yii\helpers\ArrayHelper;
@@ -427,9 +430,9 @@ class WebsocketServerController extends Controller
             $out['errors'][] = 'Error: Not isset "c" param';
         }
 
-        if (empty($data['a'])) {
-            $out['errors'][] = 'Error: Not isset "a" param';
-        }
+//        if (empty($data['a'])) {
+//            $out['errors'][] = 'Error: Not isset "a" param';
+//        }
 
         if (empty($data['p'])) {
             $out['errors'][] = 'Error: Not isset "p" param';
@@ -498,26 +501,33 @@ class WebsocketServerController extends Controller
             $out['dt'] = date('Y-m-d H:i:s');
         }
 
-        if ($controller = $this->resolveController($controller, $action)) {
+        if ($handler = $this->resolveHandler($controller, $server, (int)$frame->fd)) {
             try {
-                $out = $controller($params);
+                $out = $handler($params);
             } catch (\Throwable $e) {
                 $out ['errors'][] = $e->getMessage();
             }
-            unset($controller);
+            unset($handler);
         }
 
         return $out;
     }
 
-    private function resolveController(string $controllerName, string $actionName): ?callable
+    private function resolveHandler(string $command, Server $server, int $connectionId): ?callable
     {
-        $controllerClass = '\console\socket\controllers' . '\\' . $controllerName . 'Controller';
-        if (class_exists($controllerClass)) {
-            $controller = \Yii::$container->get($controllerClass);
-            if (method_exists($controller, 'action' . $actionName)) {
-                return [$controller, 'action' . $actionName];
+        $handlerClass = '\console\socket\Commands' . '\\' . $command . '\\Handler';
+        if (class_exists($handlerClass)) {
+            $handler = \Yii::$container->get($handlerClass);
+            if (method_exists($handler, 'handle')) {
+                if ($handler instanceof Serverable) {
+                    $handler->setServer($server);
+                }
+                if ($handler instanceof Connectionable) {
+                    $handler->setConnectionId($connectionId);
+                }
+                return [$handler, 'handle'];
             }
+            unset($handler);
         }
         return null;
     }

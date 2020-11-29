@@ -327,7 +327,7 @@ class ClientChatChannel extends \yii\db\ActiveRecord
 
     public static function getPubSubKey(?int $channelId): string
     {
-        return 'channel-' . (int) $channelId;
+        return 'chat-channel-' . (int) $channelId;
     }
 
     public function validateDefaultDevice($attribute, $params)
