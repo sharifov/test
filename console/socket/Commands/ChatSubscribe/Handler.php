@@ -43,9 +43,9 @@ class Handler implements Serverable, Connectionable
             $this->unSubscribe($reallySubscribe);
 
             return [
-                'subList' => $subList,
-                'subscribe' => $reallySubscribe,
-                'unSubscribe' => $reallyUnSubscribe,
+//                'subList' => $subList,
+//                'subscribe' => $reallySubscribe,
+//                'unSubscribe' => $reallyUnSubscribe,
             ];
         } catch (ErrorsException $e) {
             $errors = $e->getErrors();
