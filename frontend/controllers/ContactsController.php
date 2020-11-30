@@ -251,7 +251,7 @@ class ContactsController extends FController
         }
 
         foreach ($client->getAttributes() as $name => $value) {
-            if ($name !== 'cl_type_create') {
+            if (property_exists($form, $name)) {
                 $form->{$name} = $value;
             }
         }
