@@ -125,6 +125,13 @@ $(document).ready( function () {
         }
     });
     
+    $('textarea.canned-response').on('keypress', function (e) {
+        if (e.keyCode === 13 && e.originalEvent.shiftKey === false) {
+            document.getElementById("send-canned-response").click();
+            e.preventDefault();
+        }
+    });
+    
     $('#send-canned-response').on('click', function () {
         let message = $('#canned-response').val();
         let chatId = $('#canned-response').attr('data-chat-id');

@@ -18,7 +18,7 @@ class ClientChatIframeHelper
     private int $randInt;
     private bool $readOnly;
 
-    public const DEFAULT_STYLE = 'border: none; width: 100%; height: 100%;';
+    public const DEFAULT_STYLE = 'border: none; width: 100%;';
     public const DEFAULT_CLASS = '_rc-iframe';
     public const DEFAULT_ONLOAD_FUNCTION = 'removeCcLoadFromIframe();';
 
