@@ -24,6 +24,6 @@ class SetUp implements BootstrapInterface
         });
 
         $container->setSingleton(Metrics::class, Metrics::class);
-        $container->setSingleton(DateTimePicker::class, DateTimePickerWidget::class);
+        $container->set(DateTimePicker::class, DateTimePickerWidget::class);
     }
 }
