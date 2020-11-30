@@ -403,7 +403,7 @@ class ClientChatController extends Controller
                 Notifications::pub(
                     ['chat-' . $clientChat->cch_id],
                     'refreshChatPage',
-                    ['data' => ClientChatAccessMessage::chatArchive($clientChat->cch_id)]
+                    ['data' => ClientChatAccessMessage::chatInProgress($clientChat->cch_id)]
                 );
 
                 $processed++;
