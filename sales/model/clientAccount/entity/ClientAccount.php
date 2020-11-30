@@ -63,6 +63,7 @@ class ClientAccount extends ActiveRecord
 
             ['ca_currency_code', 'string', 'max' => 3],
             ['ca_currency_code', 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['ca_currency_code' => 'cur_code']],
+            ['ca_currency_code', 'default', 'value' => null],
 
             ['ca_enabled', 'boolean'],
 
@@ -76,6 +77,7 @@ class ClientAccount extends ActiveRecord
 
             ['ca_language_id', 'string', 'max' => 5],
             ['ca_language_id', 'exist', 'skipOnError' => true, 'targetClass' => Language::class, 'targetAttribute' => ['ca_language_id' => 'language_id']],
+            ['ca_language_id', 'default', 'value' => null],
 
             ['ca_last_name', 'string', 'max' => 100],
 
