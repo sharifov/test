@@ -7,6 +7,7 @@ use frontend\assets\groups\AllSharedAsset;
 use frontend\assets\groups\AllSharedDependenciesAsset;
 use frontend\assets\groups\AllSharedGroupAsset;
 use frontend\themes\gentelella_v2\assets\groups\GentelellaGroupAsset;
+use frontend\assets\CentrifugeAsset;
 
 class SimpleAsset extends \yii\web\AssetBundle
 {
@@ -16,6 +17,7 @@ class SimpleAsset extends \yii\web\AssetBundle
         AllSharedGroupAsset::class,
         FontAwesomeAsset::class,
         GentelellaGroupAsset::class,
-        SentryAsset::class
+        SentryAsset::class,
+        CentrifugeAsset::class
     ];
 }
