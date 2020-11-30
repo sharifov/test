@@ -908,7 +908,7 @@ class CommunicationController extends ApiBaseController
             'error' => '',
         ];
 
-        if (isset($post['callData']['CallSid']) && $post['callData']['CallSid']) {
+        if (!empty($post['callData']['CallSid'])) {
             $callData = $post['callData'];
             try {
                 $call = $this->findOrCreateCallByData($callData);
@@ -945,21 +945,6 @@ class CommunicationController extends ApiBaseController
                     }
                 }
             }
-            /*if ($call->c_source_type_id === Call::SOURCE_CONFERENCE_CALL && isset($callData['CallStatus'])) {
-                $call->c_call_status = $callData['CallStatus'];
-                $call->setStatusByTwilioStatus($call->c_call_status);
-            } else {
-                $call->c_call_status = $call_status;
-                $call->setStatusByTwilioStatus($call_status);
-            }*/
-            /*if (!$call->c_price && isset($post['call']['c_tw_price']) && $post['call']['c_tw_price']) {
-                $call->c_price = abs((float) $post['call']['c_tw_price']);
-            }*/
-            /*if(isset($post['call']['c_call_duration']) && $post['call']['c_call_duration']) {
-                $call->c_call_duration = (int) $post['call']['c_call_duration'];
-            } else {
-                $call->c_call_duration = 1;
-            }*/
 
             if (!$call->save()) {
                 Yii::error(VarDumper::dumpAsString(['errors' => $call->errors, 'call' => $call->getAttributes()]), 'API:Communication:voiceDefault:Call:save');
@@ -1140,14 +1125,6 @@ class CommunicationController extends ApiBaseController
     {
         $call = null;
         $parentCall = null;
-        // $clientPhone = null;
-
-//        if (isset($callData['From']) && $callData['From']) {
-//            $clientPhoneNumber = $callData['From'];
-//            if ($clientPhoneNumber) {
-//                $clientPhone = ClientPhone::find()->where(['phone' => $clientPhoneNumber])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-//            }
-//        }
 
         $callSid = $callData['CallSid'] ?? '';
 
@@ -1205,54 +1182,13 @@ class CommunicationController extends ApiBaseController
 
                 $call->c_conference_id = $parentCall->c_conference_id;
                 $call->c_conference_sid = $parentCall->c_conference_sid;
-
-                /*if ($parentCall->c_lead_id) {
-
-                }*/
-
-//                if ($parentCall->callUserGroups && !$call->callUserGroups) {
-//                    foreach ($parentCall->callUserGroups as $cugItem) {
-//                        $cug = new CallUserGroup();
-//                        $cug->cug_ug_id = $cugItem->cug_ug_id;
-//                        $cug->cug_c_id = $call->c_id;
-//                        if (!$cug->save()) {
-//                            \Yii::error(VarDumper::dumpAsString($cug->errors), 'API:CommunicationController:findOrCreateCall:CallUserGroup:save');
-//                        }
-//                    }
-//                }
-                //$call->c_u_id = $parentCall->c_dep_id;
             }
-
-//            if ($call_project_id) {
-//                $call->c_project_id = $call_project_id;
-//            }
-//            if ($call_dep_id) {
-//                $call->c_dep_id = $call_dep_id;
-//            }
 
             $call->c_is_new = true;
             $call->c_created_dt = date('Y-m-d H:i:s');
             $call->c_from = $callData['From'];
             $call->c_to = $callData['To']; //Called
             $call->c_created_user_id = null;
-
-            /*if ($clientPhone && $clientPhone->client_id) {
-                $call->c_client_id = $clientPhone->client_id;
-            }*/
-
-//            if ($call->c_dep_id === Department::DEPARTMENT_SALES) {
-//                /*$lead = Lead::findLastLeadByClientPhone($call->c_from, $call->c_project_id);
-//                if ($lead) {
-//                    $call->c_lead_id = $lead->id;
-//                }*////
-//            } elseif ($call->c_dep_id === Department::DEPARTMENT_EXCHANGE || $call->c_dep_id === Department::DEPARTMENT_SUPPORT) {
-//
-//            }
-
-            /*if (!$call->save()) {
-                \Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:findOrCreateCallByData:Call:save');
-                throw new \Exception('findOrCreateCallByData: Can not save call in db', 1);
-            }*/
 
             if ($custom_parameters->type_id) {
                 if ($custom_parameters->type_id === Call::CALL_TYPE_JOIN) {
@@ -1368,16 +1304,9 @@ class CommunicationController extends ApiBaseController
             }
         }
 
-
-
-        /*if ($call->isFailed() || $call->isNoAnswer() || $call->isBusy() || $call->isCanceled()) {
-            $call->c_call_status = $callData['CallStatus'];
-
-        } else {*/
-
         $preCallStatus = $call->c_call_status;
 
-        if (isset($callData['Command']) && $callData['Command'] === 'change_call_status') {
+        if (!empty($callData['Command']) && $callData['Command'] === 'change_call_status') {
             if ($call->isStatusRinging()) {
                 $call->c_call_status = $callData['CallStatus'];
             }
@@ -1390,51 +1319,40 @@ class CommunicationController extends ApiBaseController
         }
 
         $call->setStatusByTwilioStatus($call->c_call_status);
-            //$statusId = $call->setStatusByTwilioStatus($call->c_call_status);
-            //$call->c_status_id = $statusId;
-        //}
-
 
         $agentId = null;
 
-        if (isset($callData['Called']) && $callData['Called']) {
-            if (UserCallIdentity::canParse($callData['Called'])) {
-                $agentId = UserCallIdentity::parseUserId($callData['Called']);
-            }
+        if (!empty($callData['Called']) && UserCallIdentity::canParse($callData['Called'])) {
+            $agentId = UserCallIdentity::parseUserId($callData['Called']);
         }
 
-        if (!$agentId) {
-            if (isset($callData['c_user_id']) && $callData['c_user_id']) {
-                $agentId = (int) $callData['c_user_id'];
-            }
+        if (!$agentId && !empty($callData['c_user_id'])) {
+            $agentId = (int) $callData['c_user_id'];
         }
 
         if ($custom_parameters->user_id) {
             $call->c_created_user_id = $custom_parameters->user_id;
-        } else {
-            if ($agentId) {
-                $call->c_created_user_id = $agentId;
-            }
+        } elseif ($agentId) {
+            $call->c_created_user_id = $agentId;
         }
 
         if (!$call->c_created_user_id && $parentCall && $call->isOut()) {
             $call->c_created_user_id = $parentCall->c_created_user_id;
         }
 
-        if (isset($callData['SequenceNumber'])) {
-            $call->c_sequence_number = (int) ( $callData['SequenceNumber'] ?? 0 );
+        if (!empty($callData['SequenceNumber'])) {
+            $call->c_sequence_number = (int) $callData['SequenceNumber'];
         }
 
-        if (isset($callData['CallDuration'])) {
+        if (!empty($callData['CallDuration'])) {
             $call->c_call_duration = (int) $callData['CallDuration'];
         }
 
-        if (isset($callData['ForwardedFrom']) && $callData['ForwardedFrom']) {
+        if (!empty($callData['ForwardedFrom'])) {
             $call->c_forwarded_from = $callData['ForwardedFrom'];
-            // $call->c_source_type_id = Call::SOURCE_TRANSFER_CALL;
         }
 
-        if (!$call->c_recording_sid && isset($callData['RecordingSid']) && $callData['RecordingSid']) {
+        if (!$call->c_recording_sid && !empty($callData['RecordingSid'])) {
             $call->c_recording_sid = $callData['RecordingSid'];
         }
 
