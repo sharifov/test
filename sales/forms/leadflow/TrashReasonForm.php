@@ -90,7 +90,7 @@ class TrashReasonForm extends Model
                 return $this->reason === self::REASON_OTHER;
             }],
             ['other', 'filter', 'filter' => 'trim', 'skipOnArray' => true],
-            ['other', 'string']
+            ['other', 'string', 'max' => 250],
         ];
     }
 

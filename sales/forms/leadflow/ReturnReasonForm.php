@@ -71,7 +71,7 @@ class ReturnReasonForm extends Model
                 return $this->isOtherReason();
             }],
             ['other', 'filter', 'filter' => 'trim', 'skipOnArray' => true],
-            ['other', 'string'],
+            ['other', 'string', 'max' => 250],
 
             ['return', 'required'],
             ['return', 'in', 'range' => array_keys(self::RETURN_LIST)],
