@@ -411,7 +411,9 @@ class Client extends ActiveRecord
 
     public function getShortName(): string
     {
-        return trim($this->first_name . ' ' . $this->last_name);
+        return $this->is_company ?
+            $this->company_name :
+            trim($this->first_name . ' ' . $this->last_name);
     }
 
     public function isClient(): bool
