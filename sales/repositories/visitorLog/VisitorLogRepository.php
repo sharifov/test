@@ -3,13 +3,14 @@
 namespace sales\repositories\visitorLog;
 
 use common\models\VisitorLog;
+use Hoa\Event\Source;
 use sales\repositories\NotFoundException;
 use sales\repositories\Repository;
 use yii\helpers\VarDumper;
 
 class VisitorLogRepository extends Repository
 {
-    public function createByClientChatRequest(int $cvdId, array $data): void
+    public function createByClientChatRequest(int $cvdId, array $data): VisitorLog
     {
         $visitorLog = VisitorLog::createByClientChatRequest($cvdId, $data);
         if (!$visitorLog->validate()) {
@@ -24,6 +25,8 @@ class VisitorLogRepository extends Repository
         } catch (\RuntimeException $e) {
             \Yii::error('VisitorLog save failed: ' . VarDumper::dumpAsString($visitorLog->errors), 'ClientChatRequestService::createByClientChatRequest::visitorLog::save');
         }
+
+        return $visitorLog;
     }
 
     public function updateByClientChatRequest(VisitorLog $visitorLog, array $data): void

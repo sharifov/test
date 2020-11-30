@@ -784,7 +784,10 @@ class Lead extends ActiveRecord implements Objectable
         $sourceId,
         $projectId,
         $depId,
-        ?int $creatorId
+        ?int $creatorId,
+        int $visitorLogId,
+        ?string $ip,
+        ?string $gmtOffset
     ): self {
         $lead = self::create();
         $lead->client_id = $clientId;
@@ -796,6 +799,9 @@ class Lead extends ActiveRecord implements Objectable
         $lead->l_dep_id = $depId;
         $lead->status = null;
         $lead->l_type_create = self::TYPE_CREATE_CLIENT_CHAT;
+        $lead->l_visitor_log_id = $visitorLogId;
+        $lead->request_ip = $ip;
+        $lead->offset_gmt = $gmtOffset;
         $lead->recordEvent(new LeadCreatedClientChatEvent($lead, $creatorId));
         return $lead;
     }

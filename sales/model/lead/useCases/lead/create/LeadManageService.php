@@ -6,8 +6,10 @@ use common\models\Client;
 use common\models\Lead;
 use common\models\LeadFlow;
 use common\models\LeadPreferences;
+use common\models\Sources;
 use common\models\VisitorLog;
 use sales\forms\lead\PreferencesCreateForm;
+use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\clientChatLead\entity\ClientChatLeadRepository;
@@ -227,15 +229,47 @@ class LeadManageService
                 throw new \DomainException('Client Chat not assigned with Client');
             }
 
+            $chatVisitorData = $this->clientChatVisitorDataRepository->getOneByChatId($chat->cch_id);
+
+            if ($chatVisitorData->getSourceCid()) {
+                $visitorLog = VisitorLog::createByClientChatRequest($chatVisitorData->cvd_id, $chatVisitorData->decodedData);
+                $visitorLog->vl_ga_client_id = $visitorLog->vl_ga_client_id ?? UuidHelper::uuid();
+                $visitorLog->vl_ga_user_id = $visitorLog->vl_ga_user_id ?? $client->uuid;
+            } else {
+                try {
+                    $lastVisitorLog = $this->visitorLogRepository->findLastByClientAndProject($chat->cch_client_id, $chat->cch_project_id);
+                    $visitorLog = new VisitorLog();
+                    $visitorLog->fillInByChatOrLogData($chatVisitorData->decodedData, $lastVisitorLog);
+                    $visitorLog->vl_ga_user_id = $client->uuid;
+                } catch (NotFoundException $e) {
+                    $visitorLog = VisitorLog::createByClientChatRequest($chatVisitorData->cvd_id, $chatVisitorData->decodedData);
+                    $visitorLog->vl_ga_client_id = UuidHelper::uuid();
+                    $visitorLog->vl_ga_user_id = $client->uuid;
+                }
+            }
+            $visitorLog->vl_client_id = $client->id;
+            $this->visitorLogRepository->save($visitorLog);
+
+            $source = Sources::find()->select(['id'])->where(['cid' => $visitorLog->vl_source_cid])->one();
+            $ip = null;
+            $gmtOffset = null;
+            if ($chatVisitorData) {
+                $ip = $chatVisitorData->getRequestIp();
+                $gmtOffset = ClientChatHelper::formatOffsetUtcToLeadOffsetGmt($chatVisitorData->getOffsetUtc());
+            }
+
             $lead = Lead::createByClientChat(
                 $client->id,
                 $client->first_name,
                 $client->last_name,
                 $chat->cch_ip,
-                $form->source,
+                $source['id'] ?? null,
                 $form->projectId,
                 $chat->cchChannel->ccc_dep_id,
-                $userId
+                $userId,
+                $visitorLog->vl_id,
+                $ip,
+                $gmtOffset
             );
 
             $lead->processing($userId, $userId, LeadFlow::DESCRIPTION_CLIENT_CHAT_CREATE);
@@ -257,28 +291,14 @@ class LeadManageService
 
             $leadId = $this->leadRepository->save($lead);
 
+            $visitorLog->vl_lead_id = $leadId;
+            $this->visitorLogRepository->save($visitorLog);
+
             $this->createLeadPreferences($leadId, new PreferencesCreateForm());
 
             $clientChatLead = ClientChatLead::create($chat->cch_id, $lead->id, new \DateTimeImmutable('now'));
 
             $this->clientChatLeadRepository->save($clientChatLead);
-
-
-            if (($chatVisitorData = $this->clientChatVisitorDataRepository->getOneByChatId($chat->cch_id)) && $chatVisitorData->getSourceCid()) {
-                $this->visitorLogRepository->createByClientChatRequest($chatVisitorData->cvd_id, $chatVisitorData->decodedData);
-            } else {
-                try {
-                    $visitorLog = $this->visitorLogRepository->findLastByClientAndProject($chat->cch_client_id, $chat->cch_project_id);
-                    $newVisitorLog = $this->visitorLogRepository->clone($visitorLog);
-                    $newVisitorLog->vl_source_cid = null;
-                    $newVisitorLog->vl_ga_user_id = $client->uuid;
-                } catch (NotFoundException $e) {
-                    $newVisitorLog = new VisitorLog();
-                    $newVisitorLog->vl_ga_client_id = UuidHelper::uuid();
-                    $newVisitorLog->vl_ga_user_id = $client->uuid;
-                }
-                $this->visitorLogRepository->save($newVisitorLog);
-            }
 
             return $lead;
         });

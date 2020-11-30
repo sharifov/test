@@ -9,12 +9,12 @@ use yii\helpers\VarDumper;
 
 class ClientChatVisitorDataRepository extends Repository
 {
-    public function findOrCreateByVisitorId(string $visitorRcId): ClientChatVisitorData
+    public function findOrCreateByVisitorId(string $id): ClientChatVisitorData
     {
         try {
-            $visitorData = $this->findByVisitorRcId($visitorRcId);
+            $visitorData = $this->findByVisitorRcId($id);
         } catch (NotFoundException $e) {
-            $visitorData = $this->createByVisitorId($visitorRcId);
+            $visitorData = $this->createByVisitorId($id);
         }
         return $visitorData;
     }
@@ -83,8 +83,11 @@ class ClientChatVisitorDataRepository extends Repository
         return $clientChatVisitorData->cvd_id;
     }
 
-    public function getOneByChatId(int $id): ?ClientChatVisitorData
+    public function getOneByChatId(int $id): ClientChatVisitorData
     {
-        return ClientChatVisitorData::find()->joinWithChat($id)->one();
+        if ($visitorData = ClientChatVisitorData::find()->joinWithChat($id)->one()) {
+            return $visitorData;
+        }
+        throw new NotFoundException('Chat Visitor Data is not found');
     }
 }

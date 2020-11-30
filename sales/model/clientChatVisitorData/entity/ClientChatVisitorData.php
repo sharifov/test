@@ -188,7 +188,7 @@ class ClientChatVisitorData extends \yii\db\ActiveRecord
     public function getDecodedData(): array
     {
         if (!$this->data || !is_array($this->data)) {
-            return $this->data = Json::decode($this->cvd_data);
+            return $this->data = $this->cvd_data ? Json::decode($this->cvd_data) : [];
         }
         return $this->data;
     }
@@ -196,5 +196,15 @@ class ClientChatVisitorData extends \yii\db\ActiveRecord
     public function getSourceCid(): ?string
     {
         return $this->decodedData['sources']['cid'] ?? null;
+    }
+
+    public function getRequestIp(): ?string
+    {
+        return $this->decodedData['geo']['ip'] ?? null;
+    }
+
+    public function getOffsetUtc(): ?string
+    {
+        return $this->decodedData['geo']['utc_offset'] ?? null;
     }
 }

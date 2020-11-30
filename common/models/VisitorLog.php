@@ -37,6 +37,7 @@ use yii\db\ActiveRecord;
  * @property Client $client
  * @property Lead $lead
  * @property Project $project
+ * @property Sources $projectSourceByCid
  */
 class VisitorLog extends \yii\db\ActiveRecord
 {
@@ -172,6 +173,11 @@ class VisitorLog extends \yii\db\ActiveRecord
         return $this->hasOne(Project::class, ['id' => 'vl_project_id']);
     }
 
+    public function getProjectSourceByCid(): ActiveQuery
+    {
+        return $this->hasOne(Sources::class, ['cid' => 'vl_source_cid']);
+    }
+
     public static function getVisitorLogsByLead(int $leadId): array
     {
         return self::find()->limitFields()->byLead($leadId)->asArray()->all();
@@ -192,29 +198,56 @@ class VisitorLog extends \yii\db\ActiveRecord
         $log = new self();
         $log->scenario = self::SCENARIO_CLIENT_CHAT_CREATE;
         $log->vl_cvd_id = $cvdId;
-        self::fillInData($log, $data);
+        $log->fillInByChatData($data);
         return $log;
     }
 
     public function updateByClientChatRequest(array $data): void
     {
         $this->scenario = self::SCENARIO_CLIENT_CHAT_CREATE;
-        self::fillInData($this, $data);
+        $this->fillInByChatData($data);
     }
 
-    private static function fillInData(self $_self, $data): void
+    public function fillInByChatData($data): void
     {
-        $_self->vl_source_cid = $data['sources']['cid'] ?? null;
-        $_self->vl_utm_source = $data['sources']['utm_source'] ?? null;
-        $_self->vl_ga_client_id = $data['visitor']['ga_client_id'] ?? null;
-        $_self->vl_gclid = $data['sources']['gclid'] ?? null;
-        $_self->vl_dclid = $data['sources']['dclid'] ?? null;
-        $_self->vl_utm_source = $data['sources']['utm_source'] ?? null;
-        $_self->vl_utm_medium = $data['sources']['utm_medium'] ?? null;
-        $_self->vl_utm_content = $data['sources']['utm_content'] ?? null;
-        $_self->vl_utm_term = $data['sources']['utm_term'] ?? null;
-        $_self->vl_utm_campaign = $data['sources']['utm_campaign'] ?? null;
-        $_self->vl_user_agent = $data['system']['user_agent'] ?? null;
-        $_self->vl_ip_address = $data['geo']['ip'] ?? null;
+        $this->vl_source_cid = $data['sources']['cid'] ?? null;
+        $this->vl_ga_client_id = $data['visitor']['client_id'] ?? null;
+        $this->vl_ga_user_id = $data['visitor']['uuid'] ?? null;
+        $this->vl_gclid = $data['sources']['gclid'] ?? null;
+        $this->vl_dclid = $data['sources']['dclid'] ?? null;
+        $this->vl_utm_source = $data['sources']['initial_utm_source'] ?? null;
+        $this->vl_utm_medium = $data['sources']['initial_utm_medium'] ?? null;
+        $this->vl_utm_content = $data['sources']['initial_utm_content'] ?? null;
+        $this->vl_utm_term = $data['sources']['initial_utm_term'] ?? null;
+        $this->vl_utm_campaign = $data['sources']['initial_utm_campaign'] ?? null;
+        $this->vl_user_agent = $data['system']['user_agent'] ?? null;
+        $this->vl_ip_address = $data['geo']['ip'] ?? null;
+        $this->vl_visit_dt = date('Y-m-d H:i:s');
+        $this->assignProjectId();
+    }
+
+    public function fillInByChatOrLogData(array $chatData, VisitorLog $log): void
+    {
+        $this->vl_source_cid = $chatData['sources']['cid'] ?? $log->vl_source_cid;
+        $this->vl_ga_client_id = $chatData['visitor']['client_id'] ?? $log->vl_ga_client_id;
+        $this->vl_ga_user_id = $data['visitor']['uuid'] ?? null;
+        $this->vl_gclid = $chatData['sources']['gclid'] ?? $log->vl_gclid;
+        $this->vl_dclid = $chatData['sources']['dclid'] ?? $log->vl_dclid;
+        $this->vl_utm_source = $chatData['sources']['initial_utm_source'] ?? $log->vl_utm_source;
+        $this->vl_utm_medium = $chatData['sources']['initial_utm_medium'] ?? $log->vl_utm_medium;
+        $this->vl_utm_content = $chatData['sources']['initial_utm_content'] ?? $log->vl_utm_content;
+        $this->vl_utm_term = $chatData['sources']['initial_utm_term'] ?? $log->vl_utm_term;
+        $this->vl_utm_campaign = $chatData['sources']['initial_utm_campaign'] ?? $log->vl_utm_campaign;
+        $this->vl_user_agent = $chatData['system']['user_agent'] ?? $log->vl_user_agent;
+        $this->vl_ip_address = $chatData['geo']['ip'] ?? $log->vl_ip_address;
+        $this->vl_visit_dt = date('Y-m-d H:i:s');
+        $this->assignProjectId();
+    }
+
+    public function assignProjectId(): void
+    {
+        if ($this->vl_source_cid && $source = $this->projectSourceByCid) {
+            $this->vl_project_id = $source->project_id;
+        }
     }
 }
