@@ -3,6 +3,7 @@
 
 namespace frontend\themes\gentelella_v2\assets;
 
+use frontend\assets\CentrifugeAsset;
 use frontend\assets\groups\AllSharedAsset;
 use frontend\assets\groups\AllSharedDependenciesAsset;
 use frontend\assets\groups\AllSharedGroupAsset;

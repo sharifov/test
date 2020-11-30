@@ -3,12 +3,15 @@
 use dosamigos\ckeditor\CKEditorAsset;
 use frontend\assets\overridden\ImperaviAsset;
 use frontend\assets\overridden\KartikActiveFormAsset;
+use frontend\assets\overridden\KartikCheckboxColumnAsset;
 use frontend\assets\overridden\KartikDialogBootstrapAsset;
 use frontend\assets\overridden\KartikEditableAsset;
 use frontend\assets\overridden\KartikEditablePjaxAsset;
 use frontend\assets\overridden\KartikExportMenuAsset;
 use frontend\assets\overridden\KartikGridExportAsset;
+use frontend\assets\overridden\KartikGridFloatHeadAsset;
 use frontend\assets\overridden\KartikGridResizeColumnsAsset;
+use frontend\assets\overridden\KartikGridToggleDataAsset;
 use frontend\assets\overridden\KartikGridViewAsset;
 use frontend\assets\overridden\KDNJsonEditorAsset;
 use kartik\daterange\MomentAsset;
@@ -17,8 +20,11 @@ use kartik\editable\EditableAsset;
 use kartik\editable\EditablePjaxAsset;
 use kartik\export\ExportMenuAsset;
 use kartik\form\ActiveFormAsset;
+use kartik\grid\CheckboxColumnAsset;
 use kartik\grid\GridExportAsset;
+use kartik\grid\GridFloatHeadAsset;
 use kartik\grid\GridResizeColumnsAsset;
+use kartik\grid\GridToggleDataAsset;
 use kartik\grid\GridViewAsset;
 use kdn\yii2\assets\JsonEditorFullAsset;
 use kdn\yii2\assets\JsonEditorMinimalistAsset;
@@ -122,7 +128,31 @@ return array_merge($assetsProd, [
             KartikGridExportAsset::class,
         ]
     ],
-    MomentAsset::class => [
-        'class' => \frontend\assets\MomentAsset::class
+//    MomentAsset::class => [
+//        'class' => \frontend\assets\MomentAsset::class
+//    ],
+    CheckboxColumnAsset::class => [
+        'class' => KartikCheckboxColumnAsset::class,
+        'css' => [],
+        'js' => [],
+        'depends' => [
+            KartikCheckboxColumnAsset::class,
+        ]
+    ],
+    GridToggleDataAsset::class => [
+        'class' => KartikGridToggleDataAsset::class,
+        'css' => [],
+        'js' => [],
+        'depends' => [
+            KartikGridToggleDataAsset::class,
+        ]
+    ],
+    GridFloatHeadAsset::class => [
+        'class' => KartikGridFloatHeadAsset::class,
+        'css' => [],
+        'js' => [],
+        'depends' => [
+            KartikGridFloatHeadAsset::class,
+        ]
     ]
 ]);

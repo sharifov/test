@@ -2,6 +2,8 @@
 use borales\extensions\phoneInput\PhoneInputAsset;
 use dosamigos\ckeditor\CKEditorAsset;
 use dosamigos\ckeditor\CKEditorWidgetAsset;
+use dosamigos\datetimepicker\DateTimePickerAsset;
+use dosamigos\multiselect\MultiSelectAsset;
 use frontend\assets\CallBoxAsset;
 use frontend\assets\CentrifugeAsset;
 use frontend\assets\EditToolAsset;
@@ -10,12 +12,15 @@ use frontend\assets\groups\AllSharedGroupAsset;
 use frontend\assets\MomentAsset;
 use frontend\assets\overridden\ImperaviAsset;
 use frontend\assets\overridden\KartikActiveFormAsset;
+use frontend\assets\overridden\KartikCheckboxColumnAsset;
 use frontend\assets\overridden\KartikDialogBootstrapAsset;
 use frontend\assets\overridden\KartikEditableAsset;
 use frontend\assets\overridden\KartikEditablePjaxAsset;
 use frontend\assets\overridden\KartikExportMenuAsset;
 use frontend\assets\overridden\KartikGridExportAsset;
+use frontend\assets\overridden\KartikGridFloatHeadAsset;
 use frontend\assets\overridden\KartikGridResizeColumnsAsset;
+use frontend\assets\overridden\KartikGridToggleDataAsset;
 use frontend\assets\overridden\KartikGridViewAsset;
 use frontend\assets\overridden\KDNJsonEditorAsset;
 use frontend\assets\Timeline2Asset;
@@ -35,7 +40,6 @@ use kartik\bs4dropdown\DropdownAsset;
 use kartik\date\DatePickerAsset;
 use kartik\daterange\DateRangePickerAsset;
 use kartik\dialog\DialogAsset;
-use kartik\dialog\DialogBootstrapAsset;
 use kartik\dialog\DialogYiiAsset;
 use kartik\export\ExportColumnAsset;
 use kartik\export\ExportMenuAsset;
@@ -44,9 +48,14 @@ use kartik\select2\Select2Asset;
 use kartik\select2\Select2KrajeeAsset;
 use kartik\select2\ThemeKrajeeAsset;
 use kartik\select2\ThemeKrajeeBs4Asset;
+use kartik\time\TimePickerAsset;
 use kdn\yii2\assets\JsonEditorFullAsset;
 use kdn\yii2\assets\JsonEditorMinimalistAsset;
 use kivork\bootstrap4glyphicons\assets\GlyphiconAsset;
+use lajax\translatemanager\bundles\LanguageAsset;
+use lajax\translatemanager\bundles\LanguagePluginAsset;
+use lajax\translatemanager\bundles\ScanPluginAsset;
+use lajax\translatemanager\bundles\TranslationPluginAsset;
 use unclead\multipleinput\assets\MultipleInputAsset;
 use yii\bootstrap4\BootstrapPluginAsset;
 use yii\grid\GridViewAsset;
@@ -131,6 +140,18 @@ return [
         KartikGridExportAsset::class,
         WebAudioRecorder::class,
         WebPhoneAsset::class,
+
+        KartikCheckboxColumnAsset::class,
+        KartikGridToggleDataAsset::class,
+        \kartik\daterange\MomentAsset::class,
+        MultiSelectAsset::class,
+        DateTimePickerAsset::class,
+        KartikGridFloatHeadAsset::class,
+        TimePickerAsset::class,
+        LanguagePluginAsset::class,
+        LanguageAsset::class,
+        ScanPluginAsset::class,
+        TranslationPluginAsset::class,
     ],
 
     'targets' => [
@@ -542,6 +563,104 @@ return [
             'bsPluginEnabled' => false,
             'bsDependencyEnabled' => false
         ],
+        'KartikCheckboxColumnAsset' => [
+            'class' => KartikCheckboxColumnAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'kartik-grid-checkbox-{hash}.js',
+            'css' => 'kartik-grid-checkbox-{hash}.css',
+            'depends' => [ KartikCheckboxColumnAsset::class ],
+            'bsPluginEnabled' => false,
+            'bsDependencyEnabled' => false
+        ],
+        'KartikGridToggleDataAsset' => [
+            'class' => KartikGridToggleDataAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'kartik-grid-toggle-{hash}.js',
+            'css' => 'kartik-grid-toggle-{hash}.css',
+            'depends' => [ KartikGridToggleDataAsset::class ],
+            'bsPluginEnabled' => false,
+            'bsDependencyEnabled' => false
+        ],
+        'KartikMomentAsset' => [
+            'class' => \kartik\daterange\MomentAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'kartik-moment-{hash}.js',
+            'css' => 'kartik-moment-{hash}.css',
+            'depends' => [ \kartik\daterange\MomentAsset::class ],
+            'bsPluginEnabled' => false,
+            'bsDependencyEnabled' => false
+        ],
+        'KartikGridFloatHeadAsset' => [
+            'class' => KartikGridFloatHeadAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'kartik-gridfloathead-{hash}.js',
+            'css' => 'kartik-gridfloathead-{hash}.css',
+            'depends' => [ KartikGridFloatHeadAsset::class ],
+            'bsPluginEnabled' => false,
+            'bsDependencyEnabled' => false
+        ],
+        'TimePickerAsset' => [
+            'class' => TimePickerAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'kartik-timepicker-{hash}.js',
+            'css' => 'kartik-timepicker-{hash}.css',
+            'depends' => [ TimePickerAsset::class ],
+            'bsPluginEnabled' => false,
+            'bsDependencyEnabled' => false
+        ],
+        'MultiSelectAsset' => [
+            'class' => MultiSelectAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'dosamigos-multiselect-{hash}.js',
+            'css' => 'dosamigos-multiselect-{hash}.css',
+            'depends' => [ MultiSelectAsset::class ],
+        ],
+        'LanguagePluginAsset' => [
+            'class' => LanguagePluginAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'language-plugin-{hash}.js',
+            'css' => 'language-plugin-{hash}.css',
+            'depends' => [ LanguagePluginAsset::class ],
+        ],
+        'ScanPluginAsset' => [
+            'class' => ScanPluginAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'scan-plugin-{hash}.js',
+            'css' => 'scan-plugin-{hash}.css',
+            'depends' => [ ScanPluginAsset::class ],
+        ],
+        'TranslationPluginAsset' => [
+            'class' => TranslationPluginAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'translation-plugin-{hash}.js',
+            'css' => 'translation-plugin-{hash}.css',
+            'depends' => [ TranslationPluginAsset::class ],
+        ],
+        'LanguageAsset' => [
+            'class' => LanguageAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'language-{hash}.js',
+            'css' => 'language-{hash}.css',
+            'depends' => [ LanguageAsset::class ],
+        ],
+        'DateTimePickerAsset' => [
+            'class' => DateTimePickerAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'dosamigos-datetimepicker-{hash}.js',
+            'css' => 'dosamigos-datetimepicker-{hash}.css',
+            'depends' => [ DateTimePickerAsset::class ],
+        ],
         'MaskedInputAsset' => [
             'class' => MaskedInputAsset::class,
             'basePath' => '@webroot/all_shared/build',
@@ -591,8 +710,10 @@ return [
                 'bsDependencyEnabled' => false,
                 'depends' => []
             ],
-            PhoneInputAsset::class => [
-                'depends' => []
+            MultiSelectAsset::class => [
+                'depends' => [
+                    BootstrapPluginAsset::class
+                ]
             ],
             \kartik\form\ActiveFormAsset::class => [
                 'bsPluginEnabled' => false,
@@ -602,9 +723,6 @@ return [
             DateRangePickerAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
-                'depends' => [
-                    MomentAsset::class
-                ]
             ],
             \dosamigos\datepicker\DatePickerAsset::class => [
                 'depends' => [JqueryAsset::class]
@@ -622,7 +740,28 @@ return [
             KartikActiveFormAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
+                'depends' => [JqueryAsset::class]
+            ],
+            KartikGridFloatHeadAsset::class => [
+                'bsPluginEnabled' => false,
+                'bsDependencyEnabled' => false,
+                'depends' => [JqueryAsset::class]
+            ],
+            TimePickerAsset::class => [
+                'bsPluginEnabled' => false,
+                'bsDependencyEnabled' => false,
                 'depends' => []
+            ],
+            \kartik\daterange\MomentAsset::class => [
+                'bsPluginEnabled' => false,
+                'bsDependencyEnabled' => false,
+                'depends' => []
+            ],
+            DateTimePickerAsset::class => [
+                'baseUrl' => '@web/all_shared/build',
+                'depends' => [
+                    BootstrapPluginAsset::class
+                ]
             ],
             ThemeKrajeeBs4Asset::class => [
                 'bsPluginEnabled' => false,

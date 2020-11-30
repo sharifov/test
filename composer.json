@@ -157,6 +157,9 @@
 		],
 		"cs-check": "phpcs",
 		"cs-fix2": "phpcbf",
-        "assets-compressor": "php yii asset frontend/config/assets-config.php frontend/config/assets-prod.php"
+        "assets-compressor": [
+          "./compressed-assets-flush.sh",
+          "php yii asset frontend/config/assets-config.php frontend/config/assets-prod.php"
+        ]
 	}
 }

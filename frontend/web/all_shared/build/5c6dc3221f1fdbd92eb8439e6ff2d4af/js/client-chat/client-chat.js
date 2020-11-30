@@ -69,6 +69,8 @@
         $('._rc-iframe').hide();
         $('#_client-chat-info').html('');
         $('#_client-chat-note').html('');
+        $('#canned-response-wrap').addClass('disabled');
+        $('#couch_note_box').html('');
         pjaxReload({container: '#pjax-client-chat-channel-list'});
         window.removeChatFromActiveConnection();
     };

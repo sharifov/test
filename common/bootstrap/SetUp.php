@@ -3,7 +3,9 @@
 namespace common\bootstrap;
 
 use common\components\Metrics;
+use dosamigos\datetimepicker\DateTimePicker;
 use frontend\assets\overridden\ImperaviAsset;
+use frontend\widgets\DateTimePickerWidget;
 use sales\services\log\GlobalLogDBService;
 use sales\logger\db\GlobalLogInterface;
 use vova07\imperavi\Asset;
@@ -22,5 +24,6 @@ class SetUp implements BootstrapInterface
         });
 
         $container->setSingleton(Metrics::class, Metrics::class);
+        $container->setSingleton(DateTimePicker::class, DateTimePickerWidget::class);
     }
 }

@@ -9,6 +9,7 @@ use yii\helpers\Html;
 
 //\frontend\themes\gentelella_v2\assets\Asset::register($this);
 $bundle = \frontend\themes\gentelella_v2\assets\SimpleAsset::register($this);
+
 //\frontend\assets\NotifyAsset::register($this);
 
 
@@ -36,6 +37,12 @@ $bundle = \frontend\themes\gentelella_v2\assets\SimpleAsset::register($this);
 </head>
 <body>
 <?php $this->beginBody(); ?>
+<div id="page-loader" class="overlay" style="display: block">
+    <div class="preloader">
+        <span class="fas fa-circle-o-notch fa-spin fa-10x"></span>
+        <div class="preloader__text">Loading ...<br>"<?= Html::encode($this->title)?>"</div>
+    </div>
+</div>
 <div class="body">
     <div class="main_container">
         <!-- top navigation -->
