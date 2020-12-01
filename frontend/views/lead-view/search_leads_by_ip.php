@@ -25,7 +25,7 @@ if ($ipData) {
     }
 }
 
-Pjax::begin(['id' => 'pjax-leads-ip-info', 'timeout' => 2000, 'enablePushState' => false]);
+Pjax::begin(['id' => 'pjax-leads-ip-info', 'timeout' => 5000, 'enablePushState' => false]);
 
 echo GridView::widget([
     'dataProvider' => $dataProvider,

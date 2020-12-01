@@ -15,7 +15,7 @@ if (($count = LeadSearchByIp::count($lead->request_ip, Yii::$app->user->id)) > 1
         'title' => '',
         'id' => 'modal-ip-cnt-ip',
         'size' => Modal::SIZE_LARGE,
-        'clientOptions' => ['backdrop' => 'static'],
+        //'clientOptions' => ['backdrop' => 'static'],
         'footer' => '<a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>'
     ]);
     Modal::end();
@@ -34,7 +34,8 @@ if (($count = LeadSearchByIp::count($lead->request_ip, Yii::$app->user->id)) > 1
     $(document).on('click', '#button-cnt-ip', function(e) {
         e.preventDefault();
         $('#modal-ip-cnt-ip .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
-        $('#modal-ip-cnt-ip .modal-header').html('<h2>Leads</h2>');
+        //$('#modal-ip-cnt-ip .modal-header').html('<h2>Leads</h2>');
+        $('#modal-ip-cnt-ip .modal-title').html('Leads');
         $('#modal-ip-cnt-ip').modal();
         $.get('$url', {gid:'$gid'}, function (data) {
                 $('#modal-ip-cnt-ip .modal-body').html(data);

@@ -26,6 +26,7 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
     <div class="x_panel">
         <div class="x_title" >
             <h2><i class="fa fa-user-circle-o"></i> Client Info</h2>
+            <?php yii\widgets\Pjax::begin(['id' => 'pjax-client-info', 'enablePushState' => false, 'enableReplaceState' => false]) ?>
             <ul class="nav navbar-right panel_toolbox">
                 <?php if ($leadForm->mode !== $leadForm::VIEW_MODE || $manageClientInfoAccess) : ?>
                     <li>
@@ -98,6 +99,7 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                     <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                 </li>
             </ul>
+            <?php \yii\widgets\Pjax::end(); ?>
             <div class="clearfix"></div>
         </div>
         <div class="x_content">

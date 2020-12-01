@@ -139,14 +139,12 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
             --><?php /*endif;*/?>
 
             <?php if (Auth::can('lead-view/client-info/view', ['lead' => $lead])) : ?>
-                <?php yii\widgets\Pjax::begin(['id' => 'pjax-client-info', 'enablePushState' => false, 'enableReplaceState' => false]) ?>
                 <?= $this->render('client-info/client_info', [
                     'lead' => $lead,
                     'leadForm' => $leadForm,
                     'is_manager' => $is_manager,
                     'unsubscribe' => $unsubscribe
                 ]) ?>
-                <?php \yii\widgets\Pjax::end(); ?>
             <?php endif; ?>
 
             <?php /*if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && !$lead->isOwner($user->id)):*/?><!--
