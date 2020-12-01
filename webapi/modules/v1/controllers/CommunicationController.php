@@ -1116,6 +1116,23 @@ class CommunicationController extends ApiBaseController
         return false;
     }
 
+    private static function copyDataFromParentCall(Call $call, Call $parentCall): void
+    {
+        $call->c_parent_id = $parentCall->c_id;
+        $call->c_project_id = $parentCall->c_project_id;
+        $call->c_dep_id = $parentCall->c_dep_id;
+        $call->c_source_type_id = $parentCall->c_source_type_id;
+        $call->c_lead_id = $parentCall->c_lead_id;
+        $call->c_case_id = $parentCall->c_case_id;
+        $call->c_client_id = $parentCall->c_client_id;
+        $call->c_group_id = $parentCall->c_group_id;
+        $call->c_queue_start_dt = $parentCall->c_queue_start_dt;
+        $call->c_created_user_id = $parentCall->c_created_user_id;
+        $call->c_call_type_id = $parentCall->c_call_type_id;
+        $call->c_conference_id = $parentCall->c_conference_id;
+        $call->c_conference_sid = $parentCall->c_conference_sid;
+    }
+
     /**
      * @param array $callData
      * @return Call
@@ -1162,26 +1179,8 @@ class CommunicationController extends ApiBaseController
             $call->c_com_call_id = $callData['c_com_call_id'] ?? null;
             $call->setTypeIn();
 
-
             if ($parentCall) {
-                $call->c_parent_id = $parentCall->c_id;
-                $call->c_project_id = $parentCall->c_project_id;
-                $call->c_dep_id = $parentCall->c_dep_id;
-                $call->c_source_type_id = $parentCall->c_source_type_id;
-
-
-                $call->c_lead_id = $parentCall->c_lead_id;
-                $call->c_case_id = $parentCall->c_case_id;
-                $call->c_client_id = $parentCall->c_client_id;
-                $call->c_group_id = $parentCall->c_group_id;
-                $call->c_queue_start_dt = $parentCall->c_queue_start_dt;
-
-                $call->c_created_user_id = $parentCall->c_created_user_id;
-
-                $call->c_call_type_id = $parentCall->c_call_type_id;
-
-                $call->c_conference_id = $parentCall->c_conference_id;
-                $call->c_conference_sid = $parentCall->c_conference_sid;
+                self::copyDataFromParentCall($call, $parentCall);
             }
 
             $call->c_is_new = true;
