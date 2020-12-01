@@ -203,57 +203,10 @@ class CommunicationService extends Component implements CommunicationServiceInte
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::mailCapture');
-        }
-
-        return $out;
-    }
-
-    /**
-     * @param int $project_id
-     * @param string $template_type
-     * @param string $email_from
-     * @param string $email_to
-     * @param array $email_data
-     * @param string $language
-     * @param array $capture_options
-     * @return array
-     * @throws Exception
-     */
-    public function clientChatOfferCapture(int $project_id, string $template_type, string $email_from, string $email_to, array $email_data = [], string $language = 'en-US', array $capture_options = []): array
-    {
-        $out = ['error' => false, 'data' => []];
-
-        $data['project_id'] = $project_id;
-        $data['mail']['email_from'] = $email_from;
-        $data['mail']['email_to'] = $email_to;
-        $data['mail']['type_key'] = $template_type;
-        $data['mail']['language_id'] = $language;
-        $data['mail']['email_data'] = $email_data;
-        $data['mail']['capture_options'] = $capture_options;
-
-        if (isset($email_data['email_from_name']) && $email_data['email_from_name']) {
-            $data['mail']['email_from_name'] = $email_data['email_from_name'];
-        }
-
-        if (isset($email_data['email_to_name']) && $email_data['email_to_name']) {
-            $data['mail']['email_to_name'] = $email_data['email_to_name'];
-        }
-
-        $response = $this->sendRequest('client-chat/create-offer-capture', $data);
-
-        if ($response->isOk) {
-            if (isset($response->data['data']['response'])) {
-                $out['data'] = $response->data['data']['response'];
-            } else {
-                $out['error'] = 'Not found in response array data key [data][response]';
-            }
-        } else {
-            $out['error'] = $response->content;
         }
 
         if ($out['error']) {
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::clientChatOfferCapture');
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::mailCapture');
         }
 
         return $out;
