@@ -3587,7 +3587,7 @@
             "source": {
                 "type": "git",
                 "url": "https://stash.travelinsides.com/scm/lib/yii2-virtual-cron.git",
-                "reference": "0fc5a96439afd7c9697ed8e59b683386dd2e6e57"
+                "reference": "ee55f59d04793bae7eb590ef613aee3017ce79e4"
             },
             "require": {
                 "mtdowling/cron-expression": "^1.2",
@@ -3623,7 +3623,7 @@
             "support": {
                 "source": "https://stash.travelinsides.com/scm/lib/yii2-virtual-cron.git"
             },
-            "time": "2020-10-28T13:52:09+00:00"
+            "time": "2020-12-01T19:51:22+00:00"
         },
         {
             "name": "lajax/yii2-translate-manager",
