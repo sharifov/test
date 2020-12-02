@@ -108,7 +108,7 @@ class ClientChatMessageService
             \Yii::error([
                 'message' => 'Client chat discard unread messages',
                 'model' => $unread->getAttributes(),
-                'errors' => $e->getErrors(),
+                'errors' => $e->getMessage(),
             ], 'ClientChatMessageService:discardUnreadMessages');
         }
 
