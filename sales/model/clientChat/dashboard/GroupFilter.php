@@ -13,7 +13,7 @@ class GroupFilter
         self::NOTHING => 'Nothing',
         self::MY => 'My Chats',
         self::OTHER => 'Other Chats',
-        self::FREE_TO_TAKE => 'Requests',
+        self::FREE_TO_TAKE => 'Inbox',
     ];
 
     public static function isMy(int $value): bool

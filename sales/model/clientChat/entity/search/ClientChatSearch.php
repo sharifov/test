@@ -447,7 +447,7 @@ class ClientChatSearch extends ClientChat
         } elseif (GroupFilter::isFreeToTake($filter->group)) {
             $query->freeToTake();
             $query->orderBy([
-                '(cch_status_id = ' . ClientChat::STATUS_TRANSFER . ')' => SORT_DESC,
+//                '(cch_status_id = ' . ClientChat::STATUS_TRANSFER . ')' => SORT_DESC,
                 'cch_created_dt' => SORT_ASC,
             ]);
         } else {
