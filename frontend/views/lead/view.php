@@ -271,13 +271,13 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
 //                    'is_manager' => $is_manager,
 //                ]);?>
 
-
+            <?php if (Auth::can('lead-view/notes/view', ['lead' => $lead])): ?>
                 <?= $this->render('notes/agent_notes', [
                     'lead' => $lead,
                     'dataProviderNotes'  => $dataProviderNotes,
                     'modelNote'  => $modelNote,
                 ]) ?>
-
+            <?php endif;?>
         </div>
 
         <div class="clearfix"></div>
