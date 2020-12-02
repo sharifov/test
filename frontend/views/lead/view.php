@@ -213,9 +213,8 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
             <?php //php \yii\helpers\VarDumper::dump(Yii::$app->user->identity->callExpertCountByShiftTime)?>
 
 
-
-            <?php if (Auth::can('lead/view_BO_Expert')) : ?>
-                <?php  if (Yii::$app->user->identity->isAllowCallExpert) : ?>
+            <?php if (Auth::can('lead-view/call-expert/view', ['lead' => $lead])): ?>
+                <?php  if (Yii::$app->user->identity->isAllowCallExpert): ?>
                     <?= $this->render('call-expert/lead_call_expert', [
                         'lead' => $lead,
                         'comForm'       => $comForm,
