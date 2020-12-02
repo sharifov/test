@@ -174,8 +174,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
                 </div>
             <?php endif; ?>
 
-
-            <?php if (Auth::can('lead/view_Check_List')) : ?>
+            <?php if (Auth::can('lead-view/check-list/view',['lead' => $lead])): ?>
                 <?= $this->render('checklist/lead_checklist', [
                     'lead' => $lead,
                     'comForm'       => $comForm,
