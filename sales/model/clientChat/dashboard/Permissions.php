@@ -4,6 +4,23 @@ namespace sales\model\clientChat\dashboard;
 
 use sales\auth\Auth;
 
+/**
+ * Class Permissions
+ *
+ * @property $channel
+ * @property $status
+ * @property $show
+ * @property $user
+ * @property $created_date
+ * @property $department
+ * @property $project
+ * @property $read_unread
+ * @property $group_my_chats
+ * @property $group_other_chats
+ * @property $group_free_to_take
+ * @property $group_team_chats
+ * @property $client_name
+ */
 class Permissions
 {
     private $channel;
@@ -17,6 +34,7 @@ class Permissions
     private $group_my_chats;
     private $group_other_chats;
     private $group_free_to_take;
+    private $group_team_chats;
     private $client_name;
 
     public function canChannel(): bool
@@ -118,14 +136,23 @@ class Permissions
         return $this->group_free_to_take;
     }
 
+    public function canGroupTeamChats(): bool
+    {
+        if ($this->group_team_chats !== null) {
+            return $this->group_team_chats;
+        }
+        $this->group_team_chats = Auth::can('client-chat/dashboard/filter/group/team_chats');
+        return $this->group_team_chats;
+    }
+
     public function canOneOfGroup(): bool
     {
-        return $this->canGroupMyChats() || $this->canGroupOtherChats() || $this->canGroupFreeToTake();
+        return $this->canGroupMyChats() || $this->canGroupOtherChats() || $this->canGroupFreeToTake() || $this->canGroupTeamChats();
     }
 
     public function canAllOfGroup(): bool
     {
-        return $this->canGroupMyChats() && $this->canGroupOtherChats() && $this->canGroupFreeToTake();
+        return $this->canGroupMyChats() && $this->canGroupOtherChats() && $this->canGroupFreeToTake() && $this->canGroupTeamChats();
     }
 
     public function canClientName(): bool

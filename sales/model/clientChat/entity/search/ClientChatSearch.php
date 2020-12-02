@@ -6,6 +6,7 @@ use common\models\Client;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Project;
+use sales\access\EmployeeGroupAccess;
 use sales\helpers\query\QueryHelper;
 use sales\model\clientChat\dashboard\FilterForm;
 use sales\model\clientChat\dashboard\GroupFilter;
@@ -20,6 +21,7 @@ use yii\data\ArrayDataProvider;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  * Class ClientChatSearch
@@ -449,6 +451,20 @@ class ClientChatSearch extends ClientChat
             $query->orderBy([
 //                '(cch_status_id = ' . ClientChat::STATUS_TRANSFER . ')' => SORT_DESC,
                 'cch_created_dt' => SORT_ASC,
+            ]);
+        } elseif (GroupFilter::isTeamChats($filter->group)) {
+            $commonUsers = EmployeeGroupAccess::getUsersIdsInCommonGroups($user->id);
+            if (isset($commonUsers[$user->id])) {
+                unset($commonUsers[$user->id]);
+            }
+            $query->andWhere(['OR',
+                ['cch_owner_user_id' => array_keys($commonUsers)],
+                ['IS', 'cch_owner_user_id', null]
+            ]);
+            $query->orderBy([
+                '(cch_status_id = ' . ClientChat::STATUS_ARCHIVE .
+                ' OR cch_status_id = ' . ClientChat::STATUS_CLOSED . ')' => SORT_ASC,
+                'cch_created_dt' => SORT_DESC,
             ]);
         } else {
             $query->byOwner($user->id);

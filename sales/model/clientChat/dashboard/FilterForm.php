@@ -277,6 +277,9 @@ class FilterForm extends Model
         if ($this->permissions->canGroupFreeToTake()) {
             return GroupFilter::FREE_TO_TAKE;
         }
+        if ($this->permissions->canGroupTeamChats()) {
+            return GroupFilter::TEAM_CHATS;
+        }
 
         return GroupFilter::NOTHING;
     }
@@ -304,6 +307,9 @@ class FilterForm extends Model
         }
         if (isset($filter[GroupFilter::FREE_TO_TAKE]) && !$this->permissions->canGroupFreeToTake()) {
             unset($filter[GroupFilter::FREE_TO_TAKE]);
+        }
+        if (isset($filter[GroupFilter::TEAM_CHATS]) && !$this->permissions->canGroupTeamChats()) {
+            unset($filter[GroupFilter::TEAM_CHATS]);
         }
 
         return $filter;
