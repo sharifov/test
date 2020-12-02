@@ -85,6 +85,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
         </div>
 
         <div class="col-md-6">
+<?php if (Auth::can('lead-view/flight-default/view', ['lead' => $lead])): ?>
         <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-products-wrap', 'enablePushState' => false, 'enableReplaceState' => false]) ?>
 
             <?= $this->render('products/_products', [
@@ -111,7 +112,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
                 ]) ?>
             <?php endif; ?>
         <?php \yii\widgets\Pjax::end(); ?>
-
+<?php endif; ?>
         </div>
         <div class="col-md-6">
             <?php /*if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && !$lead->isOwner($user->id)):*/?><!--
