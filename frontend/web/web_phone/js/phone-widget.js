@@ -17,7 +17,7 @@ $(document).ready(function() {
         };
     }
 
-    var tabHistoryLoaded = false;
+    window.tabHistoryLoaded = false;
     $phoneTabAnchor.on("click", function () {
         $current = "#" + $(this).data("toggle-tab");
 
@@ -33,8 +33,8 @@ $(document).ready(function() {
         filterCalls.reset();
 
         if ($(this).data("toggle-tab") === 'tab-history') {
-            if (!tabHistoryLoaded) {
-                tabHistoryLoaded = true;
+            if (!window.tabHistoryLoaded) {
+                window.tabHistoryLoaded = true;
                 $.ajax({
                     url: '/call-log/ajax-get-call-history',
                     type: 'post',

@@ -485,8 +485,12 @@ $js = <<<JS
                         }
                         
                         if (obj.cmd === 'addCallToHistory') {
-                            if (typeof PhoneWidgetCall === "object") {
-                                PhoneWidgetCall.socket(obj.data);
+                            if (window.tabHistoryLoaded) {
+                                if (typeof PhoneWidgetCall === "object") {
+                                    PhoneWidgetCall.socket(obj.data);
+                                }
+                            } else {
+                                console.log('History not loaded.');
                             }
                         }
                         

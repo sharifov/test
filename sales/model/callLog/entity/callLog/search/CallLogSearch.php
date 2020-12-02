@@ -306,7 +306,7 @@ class CallLogSearch extends CallLog
 
         $clientTableName = Client::tableName();
         $query->addSelect([
-            "if (" . $clientTableName . ".first_name is not null, if (" . $clientTableName . ".last_name is not null, concat(" . $clientTableName . ".first_name, ' ', " . $clientTableName . ".last_name), " . $clientTableName . ".first_name), null) as client_name",
+            "if (" . $clientTableName . ".is_company = 1, " . $clientTableName . ".company_name, if (" . $clientTableName . ".first_name is not null, if (" . $clientTableName . ".last_name is not null, concat(" . $clientTableName . ".first_name, ' ', " . $clientTableName . ".last_name), " . $clientTableName . ".first_name), null)) as client_name",
             'cn_note as callNote'
         ]);
 

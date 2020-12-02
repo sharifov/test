@@ -477,7 +477,7 @@ class CallLogTransferService
         $call['client_name'] = null;
         if ($call['cl_client_id']) {
             $client = Client::find()
-                ->addSelect(new Expression("if (first_name is not null, if (last_name is not null, concat(first_name, ' ', last_name), first_name), null) as client_name"))
+                ->addSelect(new Expression("if (is_company = 1, company_name, if (first_name is not null, if (last_name is not null, concat(first_name, ' ', last_name), first_name), null)) as client_name"))
                 ->andWhere(['id' => $call['cl_client_id']])
                 ->asArray()
                 ->one();
