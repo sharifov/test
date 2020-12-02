@@ -26,7 +26,8 @@ $params = array_merge(
 $appVersion = $params['release']['version'] ?? '';
 $gitHash = $params['release']['git_hash'] ?? '';
 
-$bundles = (YII_ENV === 'prod' || YII_ENV === 'stage' || (YII_ENV === 'dev' && ($params['minifiedAssetsEnabled'] ?? true))) ? require __DIR__ . '/assets-bundle.php' : [];
+//$bundles = (YII_ENV === 'prod' || YII_ENV === 'stage' || (YII_ENV === 'dev' && ($params['minifiedAssetsEnabled'] ?? true))) ? require __DIR__ . '/assets-bundle.php' : [];
+$bundles = [];
 
 return [
     'id' => 'app-frontend',
