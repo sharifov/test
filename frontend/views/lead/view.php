@@ -185,7 +185,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
                 ]) ?>
             <?php endif; ?>
 
-            <?php if (Auth::can('lead/view_Task_List')) : ?>
+            <?php if (Auth::can('lead-view/task-list/view', ['lead' => $lead])): ?>
                 <?= $this->render('partial/_task_list', [
                     'lead' => $lead
                 ]) ?>
