@@ -328,11 +328,11 @@ class CasesSaleService
             $caseSale = $this->prepareAdditionalData($caseSale, $saleData);
 
             if (!$caseSale->save()) {
-                \Yii::error(
-                    VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]),
-                    'CasesSaleService:saveAdditionalData'
-                );
-                throw new \RuntimeException('Error. Additional data not saved');
+                throw new \RuntimeException(VarDumper::dumpAsString([
+                    'message' => 'Additional data not saved',
+                    'errors' => $caseSale->errors,
+                    'saleData' => $saleData
+                ]), -1);
             }
             $case->updateLastAction();
             if ($createTicket) {
@@ -340,7 +340,7 @@ class CasesSaleService
             }
             return $caseSale;
         }
-        throw new \RuntimeException('Error. Additional data not saved. Broken saleData params');
+        throw new \RuntimeException('Error. Additional data not saved. Broken saleData params', -2);
     }
 
     /**
@@ -555,11 +555,11 @@ class CasesSaleService
                     $caseSale = $this->saveAdditionalData($caseSale, $case, $refreshSaleData);
 
                     if (!$caseSale->save(false)) {
-                        \Yii::error(
-                            VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $refreshSaleData]),
-                            'CasesSaleService:createSale:Update'
-                        );
-                        throw new \RuntimeException('Error. CaseSale not saved from detailRequestToBackOffice.');
+                        throw new \RuntimeException(VarDumper::dumpAsString([
+                            'message' => 'CaseSale not saved from detailRequestToBackOffice',
+                            'errors' => $caseSale->errors,
+                            'saleData' => $refreshSaleData
+                        ]));
                     }
                 } else {
                     throw new \RuntimeException('Error. Broken response from detailRequestToBackOffice. CaseSale not updated.');
@@ -568,10 +568,7 @@ class CasesSaleService
             }
             throw new \RuntimeException('Error. Param saleId is empty or Case not found');
         } catch (\Throwable $throwable) {
-            Yii::error(
-                VarDumper::dumpAsString(['throwable' => AppHelper::throwableFormatter($throwable), 'saleData' => $saleData]),
-                'CasesSaleService:createSale:Throwable'
-            );
+            AppHelper::throwableLogger($throwable, 'CasesSaleService:createSale:Throwable');
         }
         return null;
     }
