@@ -7,6 +7,8 @@ use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\UserContactList;
 use http\Exception\RuntimeException;
+use sales\model\clientAccount\entity\ClientAccount;
+use sales\model\clientAccount\form\ClientAccountCreateApiForm;
 use sales\repositories\client\ClientsCollection;
 use sales\repositories\client\ClientsQuery;
 use sales\services\client\ClientCreateForm;
@@ -507,5 +509,29 @@ class ClientManageService
         if ($userContactList = UserContactList::findOne(['ucl_client_id' => $clientId])) {
             $userContactList->delete();
         }
+    }
+
+    public function createOrLinkByClientAccount(ClientAccount $clientAccount): Client
+    {
+        if ($client = Client::findOne(['uuid' => $clientAccount->ca_uuid])) {
+            $client->cl_ca_id = $clientAccount->ca_id;
+        } else {
+            $client = Client::createByClientAccount($clientAccount);
+        }
+        $this->clientRepository->save($client);
+
+        if ($clientAccount->ca_email) {
+            $clientEmailForm = new EmailCreateForm();
+            $clientEmailForm->email = $clientAccount->ca_email;
+            $this->addEmail($client, $clientEmailForm);
+        }
+
+        if ($clientAccount->ca_phone) {
+            $clientPhoneForm = new PhoneCreateForm();
+            $clientPhoneForm->phone = $clientAccount->ca_phone;
+            $this->addPhone($client, $clientPhoneForm);
+        }
+
+        return $client;
     }
 }

@@ -252,6 +252,482 @@
   },
   {
     "type": "post",
+    "url": "/v2/client-account/create",
+    "title": "Create Client Account",
+    "version": "0.2.0",
+    "name": "CreateClientAccount",
+    "group": "ClientAccount",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "36",
+            "optional": true,
+            "field": "uuid",
+            "description": "<p>Client Uuid</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "hid",
+            "description": "<p>Origin Id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "100",
+            "optional": false,
+            "field": "username",
+            "description": "<p>Username</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "100",
+            "optional": true,
+            "field": "first_name",
+            "description": "<p>First name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "100",
+            "optional": true,
+            "field": "middle_name",
+            "description": "<p>Middle name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": true,
+            "field": "nationality_country_code",
+            "description": "<p>Nationality country code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "datetime",
+            "size": "YYYY-MM-DD",
+            "optional": true,
+            "field": "dob",
+            "description": "<p>Dob</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "size": "1..2",
+            "optional": true,
+            "field": "gender",
+            "description": "<p>Gender</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "100",
+            "optional": true,
+            "field": "phone",
+            "description": "<p>Phone</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "size": "0..1",
+            "optional": true,
+            "field": "subscription",
+            "description": "<p>Subscription</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "5",
+            "optional": true,
+            "field": "language_id",
+            "description": "<p>Language</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": true,
+            "field": "currency_code",
+            "description": "<p>Currency code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": true,
+            "field": "timezone",
+            "description": "<p>Timezone</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "40",
+            "optional": true,
+            "field": "created_ip",
+            "description": "<p>Created ip</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "size": "0..1",
+            "optional": true,
+            "field": "enabled",
+            "description": "<p>Enabled</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "datetime",
+            "size": "YYYY-MM-DD HH:II:SS",
+            "optional": true,
+            "field": "origin_created_dt",
+            "description": "<p>Origin Created dt</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "datetime",
+            "size": "YYYY-MM-DD HH:II:SS",
+            "optional": true,
+            "field": "origin_updated_dt",
+            "description": "<p>Origin Updated dt</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n         \"uuid\": \"f04f9609-31e1-4dba-bffd-a689d4391fef\",\n         \"hid\": 2,\n         \"username\": \"example\",\n         \"first_name\": \"\",\n         \"middle_name\": \"\",\n         \"last_name\": \"\",\n         \"nationality_country_code\": \"\",\n         \"dob\": \"2001-09-09\",\n         \"gender\": 1,\n         \"phone\": \"\",\n         \"subscription\": 1,\n         \"language_id\": \"en-PI\",\n         \"currency_code\": \"EUR\",\n         \"timezone\": \"\",\n         \"created_ip\": \"127.0.0.1\",\n         \"enabled\": 1,\n         \"origin_created_dt\": \"2020-11-19 10:45:17\",\n         \"origin_updated_dt\": \"2020-11-04 05:25:18\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n  {\n      \"status\": 200,\n      \"message\": \"OK\",\n      \"data\": {\n         \"ClientAccount created successfully\": 123\n      },\n      \"technical\": {\n          \"action\": \"/v2/client-account/create\",\n          \"response_id\": 11934216,\n          \"request_dt\": \"2020-03-17 08:31:30\",\n          \"response_dt\": \"2020-03-17 08:31:30\",\n          \"execution_time\": 0.156,\n          \"memory_usage\": 979248\n      },\n      \"request\": {\n          \"uuid\": \"f04f9609-31e1-4dba-bffd-a689d4391fef\"\n      }\n  }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response(Validation error) (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n  {\n      \"status\": 422,\n      \"message\": \"Validation error\",\n      \"errors\": {\n          ...\n      },\n      \"code\": \"21301\",\n      \"technical\": {\n         ...\n      },\n      \"request\": {\n         ...\n      }\n  }",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/ClientAccountController.php",
+    "groupTitle": "ClientAccount"
+  },
+  {
+    "type": "post",
+    "url": "/v2/client-account/get",
+    "title": "Get Client Account",
+    "version": "0.2.0",
+    "name": "GetClientAccount",
+    "group": "ClientAccount",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "36",
+            "optional": false,
+            "field": "uuid",
+            "description": "<p>Client Uuid</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n     \"uuid\": \"f04f9609-31e1-4dba-bffd-a689d4391fef\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n  {\n      \"status\": 200,\n      \"message\": \"OK\",\n      \"data\": {\n         \"ca_uuid\": \"f04f9609-31e1-4dba-bffd-a689d4391fef\",\n         \"ca_hid\": 2,\n         \"ca_username\": \"example\",\n         \"ca_first_name\": \"\",\n         \"ca_middle_name\": \"\",\n         \"ca_last_name\": \"\",\n         \"ca_nationality_country_code\": \"\",\n         \"ca_dob\": \"2001-09-09\",\n         \"ca_gender\": 1,\n         \"ca_phone\": \"\",\n         \"ca_subscription\": 1,\n         \"ca_language_id\": \"en-PI\",\n         \"ca_currency_code\": \"EUR\",\n         \"ca_timezone\": \"\",\n         \"ca_created_ip\": \"\",\n         \"ca_enabled\": 1,\n         \"ca_origin_created_dt\": \"2020-11-19 10:45:17\",\n         \"ca_origin_updated_dt\": \"2020-11-04 05:25:18\"\n      },\n      \"technical\": {\n          \"action\": \"/v2/client-account/get\",\n          \"response_id\": 11934216,\n          \"request_dt\": \"2020-03-17 08:31:30\",\n          \"response_dt\": \"2020-03-17 08:31:30\",\n          \"execution_time\": 0.156,\n          \"memory_usage\": 979248\n      },\n      \"request\": {\n          \"uuid\": \"f04f9609-31e1-4dba-bffd-a689d4391fef\"\n      }\n  }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response(Validation error) (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n  {\n      \"status\": 422,\n      \"message\": \"Validation error\",\n      \"errors\": {\n          ...\n      },\n      \"code\": \"21301\",\n      \"technical\": {\n         ...\n      },\n      \"request\": {\n         ...\n      }\n  }",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/ClientAccountController.php",
+    "groupTitle": "ClientAccount"
+  },
+  {
+    "type": "post",
+    "url": "/v2/client-account/update",
+    "title": "Update Client Account",
+    "version": "0.2.0",
+    "name": "UpdateClientAccount",
+    "group": "ClientAccount",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "36",
+            "optional": false,
+            "field": "uuid",
+            "description": "<p>Client Uuid</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "hid",
+            "description": "<p>Origin Id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "100",
+            "optional": true,
+            "field": "username",
+            "description": "<p>Username</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "100",
+            "optional": true,
+            "field": "first_name",
+            "description": "<p>First name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "100",
+            "optional": true,
+            "field": "middle_name",
+            "description": "<p>Middle name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": true,
+            "field": "nationality_country_code",
+            "description": "<p>Nationality country code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "datetime",
+            "size": "YYYY-MM-DD",
+            "optional": true,
+            "field": "dob",
+            "description": "<p>Dob</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "size": "1..2",
+            "optional": true,
+            "field": "gender",
+            "description": "<p>Gender</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "100",
+            "optional": true,
+            "field": "phone",
+            "description": "<p>Phone</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "size": "0..1",
+            "optional": true,
+            "field": "subscription",
+            "description": "<p>Subscription</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "5",
+            "optional": true,
+            "field": "language_id",
+            "description": "<p>Language</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": true,
+            "field": "currency_code",
+            "description": "<p>Currency code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": true,
+            "field": "timezone",
+            "description": "<p>Timezone</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "40",
+            "optional": true,
+            "field": "created_ip",
+            "description": "<p>Created ip</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "size": "0..1",
+            "optional": true,
+            "field": "enabled",
+            "description": "<p>Enabled</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "datetime",
+            "size": "YYYY-MM-DD HH:II:SS",
+            "optional": true,
+            "field": "origin_created_dt",
+            "description": "<p>Origin Created dt</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "datetime",
+            "size": "YYYY-MM-DD HH:II:SS",
+            "optional": true,
+            "field": "origin_updated_dt",
+            "description": "<p>Origin Updated dt</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n         \"uuid\": \"f04f9609-31e1-4dba-bffd-a689d4391fef\",\n         \"hid\": 2,\n         \"username\": \"example\",\n         \"first_name\": \"\",\n         \"middle_name\": \"\",\n         \"last_name\": \"\",\n         \"nationality_country_code\": \"\",\n         \"dob\": \"2001-09-09\",\n         \"gender\": 1,\n         \"phone\": \"\",\n         \"subscription\": 1,\n         \"language_id\": \"en-PI\",\n         \"currency_code\": \"EUR\",\n         \"timezone\": \"\",\n         \"created_ip\": \"127.0.0.1\",\n         \"enabled\": 1,\n         \"origin_created_dt\": \"2020-11-19 10:45:17\",\n         \"origin_updated_dt\": \"2020-11-04 05:25:18\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n  {\n      \"status\": 200,\n      \"message\": \"OK\",\n      \"data\": {\n         \"ClientAccount updated successfully\": 123\n      },\n      \"technical\": {\n          \"action\": \"/v2/client-account/update\",\n          \"response_id\": 11934216,\n          \"request_dt\": \"2020-03-17 08:31:30\",\n          \"response_dt\": \"2020-03-17 08:31:30\",\n          \"execution_time\": 0.156,\n          \"memory_usage\": 979248\n      },\n      \"request\": {\n          \"uuid\": \"f04f9609-31e1-4dba-bffd-a689d4391fef\"\n      }\n  }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response(Validation error) (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n  {\n      \"status\": 422,\n      \"message\": \"Validation error\",\n      \"errors\": {\n          ...\n      },\n      \"code\": \"21301\",\n      \"technical\": {\n         ...\n      },\n      \"request\": {\n         ...\n      }\n  }",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/ClientAccountController.php",
+    "groupTitle": "ClientAccount"
+  },
+  {
+    "type": "post",
     "url": "/v1/client-chat-request/feedback",
     "title": "Client Chat Feedback",
     "version": "0.1.0",

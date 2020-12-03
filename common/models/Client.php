@@ -78,6 +78,7 @@ class Client extends ActiveRecord
     public const TYPE_CREATE_SMS = 5;
     public const TYPE_CREATE_EMAIL = 6;
     public const TYPE_CREATE_CLIENT_CHAT = 7;
+    public const TYPE_CREATE_CLIENT_ACCOUNT = 8;
 
     public const TYPE_CREATE_LIST = [
         self::TYPE_CREATE_MANUALLY => 'Manually',
@@ -86,7 +87,8 @@ class Client extends ActiveRecord
         self::TYPE_CREATE_CALL => 'Call',
         self::TYPE_CREATE_SMS => 'Sms',
         self::TYPE_CREATE_EMAIL => 'Email',
-        self::TYPE_CREATE_CLIENT_CHAT => 'Client chat'
+        self::TYPE_CREATE_CLIENT_CHAT => 'Client chat',
+        self::TYPE_CREATE_CLIENT_ACCOUNT => 'Client account',
     ];
 
     /**
@@ -439,5 +441,19 @@ class Client extends ActiveRecord
     public function isWithoutProject(): bool
     {
         return $this->cl_project_id === null;
+    }
+
+    public static function createByClientAccount(ClientAccount $clientAccount): self
+    {
+        $client = new static();
+        $client->first_name = $clientAccount->ca_first_name;
+        $client->middle_name = $clientAccount->ca_middle_name;
+        $client->last_name = $clientAccount->ca_last_name;
+        $client->cl_project_id = $clientAccount->ca_project_id;
+        $client->uuid = $clientAccount->ca_uuid;
+        $client->cl_ca_id = $clientAccount->ca_id;
+        $client->cl_type_create = self::TYPE_CREATE_CLIENT_ACCOUNT;
+        
+        return $client;
     }
 }
