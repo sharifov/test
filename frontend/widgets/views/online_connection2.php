@@ -156,7 +156,7 @@ $js = <<<JS
     const onlineObj = $('#online-connection-indicator');
     
     window.sendCommandUpdatePhoneWidgetCurrentCalls = function () {
-        socketSend('GetCurrentQueueCalls', '', {'userId': userId});
+         socketSend('Call', 'GetCurrentQueueCalls', {'userId': userId});
     };
     
     function wsInitConnect(){
@@ -164,7 +164,7 @@ $js = <<<JS
         try {
     
             //const socket = new WebSocket(wsUrl);
-            var socket = new ReconnectingWebSocket(wsUrl, null, {debug: false, reconnectInterval: 15000});
+            var socket = new ReconnectingWebSocket(wsUrl, null, {debug: false, reconnectInterval: 10000});
             window.socket = socket;
             
             socket.onopen = function (e) {

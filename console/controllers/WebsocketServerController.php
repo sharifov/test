@@ -430,9 +430,9 @@ class WebsocketServerController extends Controller
             $out['errors'][] = 'Error: Not isset "c" param';
         }
 
-//        if (empty($data['a'])) {
-//            $out['errors'][] = 'Error: Not isset "a" param';
-//        }
+        if (empty($data['a'])) {
+            $out['errors'][] = 'Error: Not isset "a" param';
+        }
 
         if (empty($data['p'])) {
             $out['errors'][] = 'Error: Not isset "p" param';
@@ -501,33 +501,26 @@ class WebsocketServerController extends Controller
             $out['dt'] = date('Y-m-d H:i:s');
         }
 
-        if ($handler = $this->resolveHandler($controller, $server, (int)$frame->fd)) {
+        if ($controller = $this->resolveController($controller, $action)) {
             try {
-                $out = $handler($params);
+                $out = $controller($params);
             } catch (\Throwable $e) {
                 $out ['errors'][] = $e->getMessage();
             }
-            unset($handler);
+            unset($controller);
         }
 
         return $out;
     }
 
-    private function resolveHandler(string $command, Server $server, int $connectionId): ?callable
+    private function resolveController(string $controllerName, string $actionName): ?callable
     {
-        $handlerClass = '\console\socket\Commands' . '\\' . $command . '\\Handler';
-        if (class_exists($handlerClass)) {
-            $handler = \Yii::$container->get($handlerClass);
-            if (method_exists($handler, 'handle')) {
-                if ($handler instanceof Serverable) {
-                    $handler->setServer($server);
-                }
-                if ($handler instanceof Connectionable) {
-                    $handler->setConnectionId($connectionId);
-                }
-                return [$handler, 'handle'];
+        $controllerClass = '\console\socket\controllers' . '\\' . $controllerName . 'Controller';
+        if (class_exists($controllerClass)) {
+            $controller = \Yii::$container->get($controllerClass);
+            if (method_exists($controller, 'action' . $actionName)) {
+                return [$controller, 'action' . $actionName];
             }
-            unset($handler);
         }
         return null;
     }
