@@ -1175,16 +1175,16 @@ class ClientChatController extends FController
         throw new BadRequestHttpException();
     }
 
-    private function guardCanProcessChat(int $userId, int $chatId): void
+    private function guardCanProcessChat(int $userId, int $chatId, int $seconds = 20): void
     {
         $redis = Yii::$app->redis;
         $key = self::RESERVE_CHAT_TO_PROCESS_KEY . $chatId;
         $redis->setnx($key, $userId);
         $value = $redis->get($key);
         if ((int)$value === $userId) {
-            $redis->expire($key, 20);
+            $redis->expire($key, $seconds);
         } else {
-            throw new \RuntimeException('Chat is already being processed');
+            throw new \RuntimeException('Chat is already being processed. Please try again in ' . $seconds . ' seconds.');
         }
     }
 
