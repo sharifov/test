@@ -174,3 +174,26 @@ function checkRequiredFiles(array $files, string $root, bool $exit = true)
     }
     return $errors ? false : true;
 }
+
+/**
+ * @param array $data
+ * @param string $contentComparison
+ * @return array ['tagsNotExist' => $tagsNotExist, 'allTags' => $allTags]
+ */
+function searchDiff(array $data, string $contentComparison): array
+{
+    $tagsNotExist = $allTags = [];
+    foreach ($data as $key => $row) {
+        $row = trim($row);
+        if ($row === '') {
+            continue;
+        }
+        if ($tag = substr($row, 0, strpos($row, '='))) {
+            $allTags[] = $tag;
+            if (strpos($contentComparison, $tag) === false) {
+                $tagsNotExist[$key] = $row;
+            }
+        }
+    }
+    return ['tagsNotExist' => $tagsNotExist, 'allTags' => $allTags];
+}

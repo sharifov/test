@@ -20,7 +20,8 @@ $contentEnvExample = file_get_contents($envExamplePatchToFile);
 $rowsEnv = explode("\n", $contentEnv);
 $rowsEnvExample = explode("\n", $contentEnvExample);
 
-$notExistInEnv = array_diff($rowsEnvExample, $rowsEnv);
+$resultSearchNotExistInEnv = searchDiff($rowsEnvExample, $contentEnv);
+$notExistInEnv = $resultSearchNotExistInEnv['tagsNotExist'];
 if ($notExistInEnv) {
     echo formatMessage('Need to Add (' . count($notExistInEnv) . '):', ['fg-blue']) . " \n";
     foreach ($notExistInEnv as $row) {
@@ -28,7 +29,8 @@ if ($notExistInEnv) {
     }
 }
 
-$notExistInEnvExample = array_diff($rowsEnv, $rowsEnvExample);
+$resultSearchNotExistInEnvExample = searchDiff($rowsEnv, $contentEnvExample);
+$notExistInEnvExample = $resultSearchNotExistInEnvExample['tagsNotExist'];
 if ($notExistInEnvExample) {
     echo formatMessage('Need to Remove (' . count($notExistInEnvExample) . '):', ['fg-red']) . " \n";
     foreach ($notExistInEnvExample as $row) {
@@ -36,8 +38,8 @@ if ($notExistInEnvExample) {
     }
 }
 
-echo formatMessage('Count rows in "' . $envExampleFile . '" (' . count($rowsEnvExample) . ')', ['fg-magenta']) . " \n";
-echo formatMessage('Count rows in "' . $envFile . '" (' . count($rowsEnv) . ')', ['fg-magenta']) . " \n";
+echo formatMessage('Count rows in "' . $envExampleFile . '" (' . count($resultSearchNotExistInEnv['allTags']) . ')', ['fg-magenta']) . " \n";
+echo formatMessage('Count rows in "' . $envFile . '" (' . count($resultSearchNotExistInEnvExample['allTags']) . ')', ['fg-magenta']) . " \n";
 
 if (!$notExistInEnv && !$notExistInEnvExample) {
     echo formatMessage('Everything is fine and there is no data with tag discrepancies.', ['bg-green']) . " \n";
