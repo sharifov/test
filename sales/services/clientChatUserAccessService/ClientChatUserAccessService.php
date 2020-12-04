@@ -130,9 +130,9 @@ class ClientChatUserAccessService
                 new Expression(
                     'ccua_cch_id = :chatId and ccua_user_id <> :userId and ccua_status_id = :status',
                     [
-                    'chatId' => $chatId,
-                    'userId' => $ownerId,
-                    'status' => ClientChatUserAccess::STATUS_PENDING
+                        'chatId' => $chatId,
+                        'userId' => $ownerId,
+                        'status' => ClientChatUserAccess::STATUS_PENDING
                     ]
                 )
             )
