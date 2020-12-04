@@ -159,6 +159,7 @@ return [
         'prometheus' => [
             'class' => \kivork\PrometheusClient\components\PrometheusClient::class,
             'redisOptions' => [
+                'prefix' => php_uname('n'),
                 'host' => 'localhost',
                 'port' => 6379,
                 'password' => null,

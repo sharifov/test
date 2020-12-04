@@ -172,5 +172,21 @@ return [
             'secret' => '{{ common.config.main.components.centrifugo.secret:str }}',
             'apikey' => '{{ common.config.main.components.centrifugo.apikey:str }}'
         ],
+        'prometheus' => [
+            'class' => \kivork\PrometheusClient\components\PrometheusClient::class,
+            'redisOptions' => [
+                'prefix' => php_uname('n'),
+                'host' => '{{ common.config.main.components.prometheus.redisOptions.host:str }}',
+                'port' => '{{ common.config.main.components.prometheus.redisOptions.port:int }}',
+                'password' => null,
+                'timeout' => 0.1,
+                'read_timeout' => 10,
+                'persistent_connections' => false,
+                'database' => 3,
+            ],
+            'useHttpBasicAuth' => '{{ common.config.main.components.prometheus.useHttpBasicAuth:bool }}',
+            'authUsername' => '{{ common.config.main.components.prometheus.authUsername:str }}',
+            'authPassword' => '{{ common.config.main.components.prometheus.authPassword:str }}',
+        ],
     ],
 ];
