@@ -59,7 +59,7 @@ class ClientChatVisitorData extends \yii\db\ActiveRecord
 
             ['cvd_city', 'string', 'max' => 50],
 
-            ['cvd_country', 'string', 'max' => 50],
+            ['cvd_country', 'string', 'max' => 100],
 
             ['cvd_created_dt', 'safe'],
 
