@@ -355,6 +355,7 @@ class ClientChatController extends FController
                         'clientChatId' => $clientChat ? $clientChat->cch_id : '',
                         'formatter' => $formatter,
                         'resetUnreadMessagesChatId' => $resetUnreadMessagesChatId,
+                        'userId' => Auth::id(),
                     ]);
                     $response['page'] = $page + 1;
                 }
