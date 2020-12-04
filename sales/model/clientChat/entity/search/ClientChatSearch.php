@@ -429,7 +429,6 @@ class ClientChatSearch extends ClientChat
 
         if (GroupFilter::isMy($filter->group)) {
             $query->byOwner($user->id);
-            $query->notInStatus(ClientChat::STATUS_IDLE);
             $query->orderBy([
                 '(cch_status_id = ' . ClientChat::STATUS_ARCHIVE .
                     ' OR cch_status_id = ' . ClientChat::STATUS_CLOSED . ')' => SORT_ASC,
@@ -447,7 +446,7 @@ class ClientChatSearch extends ClientChat
                 'cch_created_dt' => SORT_ASC,
             ]);
         } elseif (GroupFilter::isFreeToTake($filter->group)) {
-            $query->freeToTake();
+            $query->freeToTake($user->id);
             $query->orderBy([
 //                '(cch_status_id = ' . ClientChat::STATUS_TRANSFER . ')' => SORT_DESC,
                 'cch_created_dt' => SORT_ASC,
@@ -550,7 +549,7 @@ class ClientChatSearch extends ClientChat
 
     public function countFreeToTake(Employee $user, array $channelsIds, FilterForm $filter): int
     {
-        $query = ClientChat::find()->freeToTake();
+        $query = ClientChat::find()->freeToTake($user->id);
 
         if ($filter->channelId) {
             $query->byChannel($filter->channelId);

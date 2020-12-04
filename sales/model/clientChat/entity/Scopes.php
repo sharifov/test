@@ -220,8 +220,14 @@ class Scopes extends \yii\db\ActiveQuery
         return $this->andWhere(['cch_parent_id' => $parentId]);
     }
 
-    public function freeToTake(): self
+    public function freeToTake(int $userId): self
     {
-        return $this->byStatuses(ClientChat::FREE_TO_TAKE_STATUS_GROUP);
+        return $this
+            ->byStatuses(ClientChat::FREE_TO_TAKE_STATUS_GROUP)
+            ->andWhere([
+                'OR',
+                ['!=', 'cch_owner_user_id', $userId],
+                ['IS', 'cch_owner_user_id', null]
+            ]);
     }
 }

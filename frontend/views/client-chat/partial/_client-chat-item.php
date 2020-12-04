@@ -19,6 +19,7 @@ use yii\helpers\StringHelper;
 
     <?php
         $isClosed = ArrayHelper::isIn((int)$clientChat['cch_status_id'], ClientChat::CLOSED_STATUS_GROUP);
+        $isIdle = (int)$clientChat['cch_status_id'] === ClientChat::STATUS_IDLE;
 
         $clientFullName = $clientChat['client_full_name'] ?: ('Client-' . $clientChat['client_id']);
         $unreadMessages = $clientChat['count_unread_messages'] ?: null;
@@ -30,7 +31,7 @@ use yii\helpers\StringHelper;
     <div
         id="dialog-<?= $clientChat['cch_id'] ?>"
         data-owner-id="<?= $clientChat['cch_owner_user_id'] ?>"
-        class="_cc-list-item <?= $isClosed ? 'cc_closed' : '' ?> <?= $clientChatId && $clientChatId === (int)$clientChat['cch_id'] ? '_cc_active' : '' ?>"
+        class="_cc-list-item <?= $isClosed ? 'cc_closed' : ($isIdle ? 'cc_idle' : '') ?> <?= $clientChatId && $clientChatId === (int)$clientChat['cch_id'] ? '_cc_active' : '' ?>"
         data-rid="<?= $clientChat['cch_rid'] ?>"
         data-cch-id="<?= $clientChat['cch_id'] ?>"
         data-is-closed="<?= (int) $isClosed ?>">

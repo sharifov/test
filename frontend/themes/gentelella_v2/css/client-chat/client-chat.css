@@ -553,6 +553,9 @@
 ._cc-list-wrapper ._cc-list-item.cc_closed {
     background: #ffefed;
 }
+._cc-list-wrapper ._cc-list-item.cc_idle {
+    background: #fbeed6;
+}
 .check_uncheck_btns .btn:focus {
     outline: none !important;
     box-shadow: none !important;
