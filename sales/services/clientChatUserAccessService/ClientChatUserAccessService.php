@@ -5,13 +5,9 @@ namespace sales\services\clientChatUserAccessService;
 use common\components\purifier\Purifier;
 use common\models\Employee;
 use common\models\Notifications;
-use frontend\widgets\clientChat\ClientChatAccessMessage;
-use sales\auth\Auth;
 use sales\dispatchers\EventDispatcher;
-use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
-use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserAccess\event\ResetChatUserAccessWidgetEvent;
@@ -128,10 +124,33 @@ class ClientChatUserAccessService
 
     public function disableAccessForOtherUsersBatch(int $chatId, int $ownerId): bool
     {
-        $users = ClientChatUserAccess::find()->select(['ccua_user_id', 'ccua_id'])->where(new Expression('ccua_cch_id = :chatId and ccua_user_id <> :userId and ccua_status_id = :status', ['chatId' => $chatId, 'userId' => $ownerId, 'status' => ClientChatUserAccess::STATUS_PENDING]))->asArray()->all();
-        if ($query = (bool)ClientChatUserAccess::updateAll(['ccua_status_id' => ClientChatUserAccess::STATUS_CANCELED], new Expression('ccua_cch_id = :chatId and ccua_user_id <> :userId and ccua_status_id = :status', ['chatId' => $chatId, 'userId' => $ownerId, 'status' => ClientChatUserAccess::STATUS_PENDING]))) {
+        if (
+            $query = (bool) ClientChatUserAccess::updateAll(
+                ['ccua_status_id' => ClientChatUserAccess::STATUS_CANCELED],
+                new Expression(
+                    'ccua_cch_id = :chatId and ccua_user_id <> :userId and ccua_status_id = :status',
+                    [
+                    'chatId' => $chatId,
+                    'userId' => $ownerId,
+                    'status' => ClientChatUserAccess::STATUS_PENDING
+                    ]
+                )
+            )
+        ) {
+            $users = ClientChatUserAccess::find()->select(['ccua_user_id', 'ccua_id'])->where(
+                new Expression(
+                    'ccua_cch_id = :chatId and ccua_user_id <> :userId and ccua_status_id = :status',
+                    ['chatId' => $chatId, 'userId' => $ownerId, 'status' => ClientChatUserAccess::STATUS_PENDING]
+                )
+            )->asArray()->all();
+
             foreach ($users as $user) {
-                $this->clientChatUserAccessRepository->updateChatUserAccessWidget($chatId, (int)$user['ccua_user_id'], ClientChatUserAccess::STATUS_CANCELED, (int)$user['ccua_id']);
+                $this->clientChatUserAccessRepository->updateChatUserAccessWidget(
+                    $chatId,
+                    (int) $user['ccua_user_id'],
+                    ClientChatUserAccess::STATUS_CANCELED,
+                    (int) $user['ccua_id']
+                );
             }
             return true;
         }
