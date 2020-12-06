@@ -89,5 +89,4 @@ class m201123_155545_add_lead_view_check_list_block_permissions extends Migratio
             $auth->update('lead-view/check-list/view', $leadViewCheckListView);
         }
     }
-
 }

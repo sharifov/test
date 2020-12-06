@@ -89,6 +89,4 @@ class m201124_070405_add_lead_view_task_list_block_permissions extends Migration
             $auth->update('lead-view/task-list/view', $leadViewTaskListView);
         }
     }
-
-
 }

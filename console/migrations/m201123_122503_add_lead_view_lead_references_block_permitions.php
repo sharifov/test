@@ -89,5 +89,4 @@ class m201123_122503_add_lead_view_lead_references_block_permitions extends Migr
             $auth->update('lead-view/lead-preferences/view', $leadViewLeadPreferenceView);
         }
     }
-
 }

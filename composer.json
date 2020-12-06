@@ -176,8 +176,7 @@
 	"extra": {
 		"hooks": {
 			"pre-commit": [
-				"composer cs-check",
-				"composer lint"
+				
 			]
 		}
 	}
