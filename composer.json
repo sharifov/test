@@ -176,7 +176,7 @@
 	"extra": {
 		"hooks": {
 			"pre-commit": [
-				
+				"bash pre-commit.sh"
 			]
 		}
 	}
