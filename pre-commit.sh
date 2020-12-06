@@ -14,6 +14,10 @@ then
 fi
 SFILES=${SFILES:-$STAGED_FILES_CMD}
 
+if [[ "$SFILES" = "" ]]; then
+  exit 0
+fi
+
 ### PHP Linter
 
 which ./vendor/bin/phplint &> /dev/null
