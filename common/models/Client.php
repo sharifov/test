@@ -55,9 +55,9 @@ use yii\db\ActiveQuery;
  */
 class Client extends ActiveRecord
 {
-    public const SCENARIO_MANUALLY = 'manually';
-
     use EventTrait;
+
+    public const SCENARIO_MANUALLY = 'manually';
 
     public $full_name;
 
@@ -453,7 +453,6 @@ class Client extends ActiveRecord
         $client->uuid = $clientAccount->ca_uuid;
         $client->cl_ca_id = $clientAccount->ca_id;
         $client->cl_type_create = self::TYPE_CREATE_CLIENT_ACCOUNT;
-        
         return $client;
     }
 }

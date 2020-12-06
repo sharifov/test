@@ -2541,7 +2541,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $dateTime;
     }
 
-    public static function getUtcOffsetDst($time_zone = 'Europe/Chisinau', $dateToCheck)
+    /**
+     * $time_zone ex. = 'Europe/Chisinau'
+     */
+    public static function getUtcOffsetDst($time_zone, $dateToCheck)
     {
         // Set UTC as default time zone.
         //date_default_timezone_set( 'UTC' );

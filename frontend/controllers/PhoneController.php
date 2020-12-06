@@ -30,9 +30,6 @@ use yii\helpers\Html;
 use yii\web\BadRequestHttpException;
 use yii\web\NotAcceptableHttpException;
 use yii\web\Response;
-
-use const Grpc\CALL_ERROR;
-
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;

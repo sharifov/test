@@ -5,7 +5,7 @@ namespace sales\model\clientChat\entity\actionReason\search;
 use yii\data\ActiveDataProvider;
 use sales\model\clientChat\entity\actionReason\ClientChatActionReason;
 
-class actionReasonSearch extends ClientChatActionReason
+class ActionReasonSearch extends ClientChatActionReason
 {
     public function rules(): array
     {

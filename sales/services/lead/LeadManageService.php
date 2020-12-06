@@ -131,19 +131,19 @@ class LeadManageService
 
     /**
      * @param string $phoneNumber
-     * @param int $projectId
-     * @param int $sourceId
-     * @param string $gmt
-     * @param bool $isTest
+     * @param int|null $projectId
+     * @param int|null $sourceId
+     * @param int $departmentId
+     * @param $gmt
      * @return Lead
      * @throws \Throwable
      */
     public function createByIncomingCall(
-        string $phoneNumber = '',
-        ?int $projectId = null,
-        ?int $sourceId = null,
+        string $phoneNumber,
+        ?int $projectId,
+        ?int $sourceId,
         int $departmentId,
-        $gmt = ''
+        $gmt
     ): Lead {
         $lead = $this->transaction->wrap(function () use ($phoneNumber, $projectId, $sourceId, $departmentId, $gmt) {
 

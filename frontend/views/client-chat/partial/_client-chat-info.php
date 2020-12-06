@@ -146,7 +146,7 @@ $counter = new ClientLeadCaseCounter($client->id, Auth::id());
             <div class="client-chat-client-info-wrapper">
                 <?= ClientChatClientInfoWidget::widget(['chat' => $clientChat]) ?>
             </div>
-            <?php if (Auth::can('client-chat/manage', ['chat' => $clientChat])): ?>
+            <?php if (Auth::can('client-chat/manage', ['chat' => $clientChat])) : ?>
             <div class="col-md-12">
                 <div class="dropdown " style="margin-top: 10px; float: left;">
                     <button class="btn text-warning dropdown-toggle" type="button" id="menuClientInfoActions" data-toggle="dropdown"
@@ -397,12 +397,11 @@ $counter = new ClientLeadCaseCounter($client->id, Auth::id());
 </div>
 
 <?php if (isset($clientChatHold)) : ?>
+    <?php
 
-<?php
+    $formatTimer = ClientChatHoldService::isMoreThanHourLeft($clientChatHold) ? '%H:%M:%S' : '%M:%S';
 
-$formatTimer = ClientChatHoldService::isMoreThanHourLeft($clientChatHold) ? '%H:%M:%S' : '%M:%S';
-
-$js = <<<JS
+    $js = <<<JS
 
     clearInterval(timerProgressBar);
 
@@ -449,13 +448,13 @@ $js = <<<JS
     }, 1000);
     
 JS;
-$this->registerJs($js);
-?>
+    $this->registerJs($js);
+    ?>
 <?php endif; ?>
 
 <?php
 $clientInfoUrl = \yii\helpers\Url::to(['/client/ajax-get-info']);
-$js =<<<JS
+$js = <<<JS
 $(document).on('click', '#btn-client-info-details', function(e) {
     e.preventDefault();
     var client_id = $(this).data('client-id');

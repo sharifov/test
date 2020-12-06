@@ -17,7 +17,6 @@ use yii\helpers\StringHelper;
 ?>
 
 <?php foreach ($clientChats as $clientChat) : ?>
-
     <?php
         $isClosed = ArrayHelper::isIn((int)$clientChat['cch_status_id'], ClientChat::CLOSED_STATUS_GROUP);
         $isIdle = (int)$clientChat['cch_status_id'] === ClientChat::STATUS_IDLE;

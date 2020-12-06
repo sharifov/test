@@ -364,7 +364,7 @@ class Email extends \yii\db\ActiveRecord
      * @param $text
      * @return mixed
      */
-    public static function strip_html_tags($text)
+    public static function stripHtmlTags($text)
     {
         $text = preg_replace(
             [

@@ -200,7 +200,7 @@ class EmailTemplateType extends \yii\db\ActiveRecord
      * @param int|null $dep_id
      * @return array
      */
-    public static function getList(?bool $withHidden = true, ?int $dep_id): array
+    public static function getList(bool $withHidden, ?int $dep_id): array
     {
         $query = self::find()->orderBy(['etp_name' => SORT_ASC]);
         if (!$withHidden) {
@@ -220,7 +220,7 @@ class EmailTemplateType extends \yii\db\ActiveRecord
      * @param int|null $dep_id
      * @return array
      */
-    public static function getKeyList(?bool $withHidden = true, ?int $dep_id): array
+    public static function getKeyList(bool $withHidden, ?int $dep_id): array
     {
         $query = self::find()->orderBy(['etp_name' => SORT_ASC]);
         if (!$withHidden) {

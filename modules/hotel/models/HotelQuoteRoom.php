@@ -44,6 +44,8 @@ use yii\db\ActiveRecord;
  */
 class HotelQuoteRoom extends ActiveRecord implements Serializable
 {
+    use EventTrait;
+
     public const TYPE_RECHECK = 0;
     public const TYPE_BOOKABLE = 1;
 
@@ -51,8 +53,6 @@ class HotelQuoteRoom extends ActiveRecord implements Serializable
         self::TYPE_RECHECK => 'RECHECK',
         self::TYPE_BOOKABLE => 'BOOKABLE',
     ];
-
-    use EventTrait;
 
     public static function clone(HotelQuoteRoom $room, int $quoteId)
     {

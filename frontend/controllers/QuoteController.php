@@ -413,7 +413,6 @@ class QuoteController extends FController
                     }
                 }
             }
-
         }
         return $result;
     }

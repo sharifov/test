@@ -127,7 +127,7 @@ $fromType = 'client';
             <div class="card-body">
                 <h5 class="chat__subtitle"><?= wordwrap(Html::encode($mail->e_email_subject), 60, '<br />', true)?></h5>
                 <div class="">
-                    <?php echo \yii\helpers\StringHelper::truncate(Email::strip_html_tags($mail->getEmailBodyHtml()), 300, '...', null, true)?>
+                    <?php echo \yii\helpers\StringHelper::truncate(Email::stripHtmlTags($mail->getEmailBodyHtml()), 300, '...', null, true)?>
                 </div>
                 <?php if (Auth::can('email/view', ['email' => $mail])) : ?>
                     <div class="chat__message-footer">

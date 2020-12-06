@@ -47,8 +47,6 @@ use webapi\src\Messages;
  */
 class ClientChatRequestController extends ApiBaseController
 {
-    private const category = "ClientChatRequestController";
-
     private ClientChatRequestService $clientChatRequestService;
 
     public function __construct($id, $module, ClientChatRequestService $clientChatRequestService, $config = [])

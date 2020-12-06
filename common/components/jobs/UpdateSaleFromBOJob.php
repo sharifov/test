@@ -43,12 +43,13 @@ class UpdateSaleFromBOJob extends BaseObject implements JobInterface
                 $refreshSaleData = Yii::$app->cache->get($cacheKeySale);
 
                 if ($refreshSaleData === false) {
-                    if ($refreshSaleData = $casesSaleService->detailRequestToBackOffice(
-                        $this->saleId,
-                        $this->withFareRules,
-                        $this->requestTime,
-                        $this->withRefundRules
-                    )
+                    if (
+                        $refreshSaleData = $casesSaleService->detailRequestToBackOffice(
+                            $this->saleId,
+                            $this->withFareRules,
+                            $this->requestTime,
+                            $this->withRefundRules
+                        )
                     ) {
                         Yii::$app->cache->set($cacheKeySale, $refreshSaleData, $this->cacheDuration);
                     } else {

@@ -167,7 +167,8 @@ function renderChildCallsRecursive($calls): void
 
 
     <?php
-}?>
+}
+?>
 
 <?php
 

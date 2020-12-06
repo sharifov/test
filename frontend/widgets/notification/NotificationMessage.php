@@ -37,7 +37,7 @@ class NotificationMessage
                 'id' => $ntf->n_id,
                 'title' => Html::encode($ntf->n_title),
                 'time' => strtotime($ntf->n_created_dt),
-                'message' => StringHelper::truncate(Email::strip_html_tags($message), 80, '...'),
+                'message' => StringHelper::truncate(Email::stripHtmlTags($message), 80, '...'),
                 'type' => $ntf->getNotifyType(),
                 'popup' => (int)$ntf->n_popup,
                 'notifyMessage' => (int)$ntf->n_popup ? str_replace(["\r\n", "\n", '"'], ['', '', '\"'], strip_tags($message)) : '',

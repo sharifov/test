@@ -6,7 +6,6 @@ use sales\model\clientAccount\entity\ClientAccount;
 use sales\model\clientAccount\form\ClientAccountUpdateApiForm;
 use sales\repositories\Repository;
 
-
 /**
  * Class ClientAccountRepository
  */

@@ -65,7 +65,7 @@ class CallGraphsSearch extends CallLogSearch
 
     private const DAYS_DIFF_MAX_RANGE = 7;
     private const MONTH_DIFF_MAX_RANGE = 2;
-    private const Year_DIFF_MAX_RANGE = 1;
+    private const YEAR_DIFF_MAX_RANGE = 1;
 
     public const DATE_FORMAT_DAYS = 0;
     public const DATE_FORMAT_HOURS = 4;
@@ -231,8 +231,8 @@ class CallGraphsSearch extends CallLogSearch
         } else if ((int)$this->callGraphGroupBy === self::DATE_FORMAT_WEEKS && $this->createTimeStart && $this->createTimeEnd) {
             $yearsDiff = $dateEnd->diff($dateStart)->format('%y');
 
-            if ($yearsDiff >= self::Year_DIFF_MAX_RANGE) {
-                $this->addError('callGraphGroupBy', 'The difference between two dates cannot be more than ' . self::Year_DIFF_MAX_RANGE . ' year when grouped by Weeks');
+            if ($yearsDiff >= self::YEAR_DIFF_MAX_RANGE) {
+                $this->addError('callGraphGroupBy', 'The difference between two dates cannot be more than ' . self::YEAR_DIFF_MAX_RANGE . ' year when grouped by Weeks');
                 return false;
             }
         }*/
