@@ -25,8 +25,11 @@
     <arg name="extensions" value="php"/>
     <arg name="cache" value=".phpcs-cache"/>
     <!-- ignore warnings and display ERRORS only -->
-    <arg  value="np"/>
+    <arg value="np"/>
 
     <!-- Our base rule: set to PSR12-->
-    <rule  ref="PSR12"/>
+    <rule ref="PSR12"/>
+    <rule ref="Squiz.Classes.ValidClassName">
+        <exclude-pattern>m\d{6}_\d{6}_\S+</exclude-pattern>
+    </rule>
 </ruleset>
