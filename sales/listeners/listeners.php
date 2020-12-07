@@ -16,6 +16,7 @@ use sales\model\clientChat\event\listener\ClientChatHoldStatusLogListener;
 use sales\model\clientChat\event\listener\ClientChatIdleStatusLogListener;
 use sales\model\clientChat\event\listener\ClientChatInProgressStatusLogListener;
 use sales\model\clientChat\event\listener\ClientChatPendingStatusLogListener;
+use sales\model\clientChat\event\listener\ClientChatRefreshListListener;
 use sales\model\clientChat\event\listener\ClientChatRemoveLastMessageListener;
 use sales\model\clientChat\event\listener\ClientChatTransferStatusLogListener;
 use sales\model\clientChat\event\listener\ClientChatUserAccessSetStatusCancelListener;
@@ -44,7 +45,8 @@ return [
         ClientChatArchiveStatusLogListener::class,
         ClientChatEndConversationListener::class,
         ClientChatRemoveLastMessageListener::class,
-        ClientChatUserAccessSetStatusCancelListener::class
+        ClientChatUserAccessSetStatusCancelListener::class,
+        ClientChatRefreshListListener::class,
     ],
     ClientChatTransferEvent::class => [
         ClientChatTransferStatusLogListener::class
