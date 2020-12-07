@@ -920,6 +920,7 @@ class CommunicationController extends ApiBaseController
             $call = $this->findOrCreateCallByData($callData);
 
             $callSaved = false;
+            $isNewRecord = $call->isNewRecord;
 
             $call->validate();
 
@@ -927,12 +928,29 @@ class CommunicationController extends ApiBaseController
                 $isOnlyUniqueError = $this->checkOnlyUniqueCallSidError($errors, $call->c_call_sid);
                 if ($isOnlyUniqueError) {
                     $tmpCallSid = $call->c_call_sid;
-                    $call = Call::find()->andWhere(['c_call_sid' => $tmpCallSid])->one();
-                    if (!$call) {
+                    $oldCall = Call::find()->andWhere(['c_call_sid' => $tmpCallSid])->one();
+                    if (!$oldCall) {
                         throw new UniqueCallNotFoundException($tmpCallSid);
                     }
-                    if ($call->isTwFinishStatus()) {
-                        throw new CallFinishedException($call->c_call_sid);
+                    if ($oldCall->isTwFinishStatus()) {
+                        throw new CallFinishedException($oldCall->c_call_sid);
+                    }
+                    if ($oldCall->isStatusInProgress() && $call->isStatusRinging()) {
+                        $call = $oldCall;
+                        Yii::info([
+                            'message' => 'Detected Ringing call after InProgress',
+                            'callSid' => $call->c_call_sid
+                        ], 'info\ProcessCallCallback');
+                    } else {
+                        self::copyUpdatedData($call, $oldCall);
+                        $call = $oldCall;
+                        if (!$call->save()) {
+                            \Yii::error([
+                                'message' => 'Copy new Call to old Call',
+                                'errors' => $call->getErrors(),
+                                'call' => $call->getAttributes(),
+                            ], 'info\ProcessCallCallback');
+                        }
                     }
                     Yii::info([
                         'message' => 'Detected duplicate call',
@@ -951,12 +969,29 @@ class CommunicationController extends ApiBaseController
                 } catch (\yii\db\IntegrityException $e) {
                     if (!empty($e->errorInfo[2]) && strpos($e->errorInfo[2], 'Duplicate entry', 0) === 0) {
                         $tmpCallSid = $call->c_call_sid;
-                        $call = Call::find()->andWhere(['c_call_sid' => $tmpCallSid])->one();
-                        if (!$call) {
+                        $oldCall = Call::find()->andWhere(['c_call_sid' => $tmpCallSid])->one();
+                        if (!$oldCall) {
                             throw new UniqueCallNotFoundException($tmpCallSid);
                         }
-                        if ($call->isTwFinishStatus()) {
-                            throw new CallFinishedException($call->c_call_sid);
+                        if ($oldCall->isTwFinishStatus()) {
+                            throw new CallFinishedException($oldCall->c_call_sid);
+                        }
+                        if ($oldCall->isStatusInProgress() && $call->isStatusRinging()) {
+                            $call = $oldCall;
+                            Yii::info([
+                                'message' => 'Detected Ringing call after InProgress',
+                                'callSid' => $call->c_call_sid
+                            ], 'info\ProcessCallCallback');
+                        } else {
+                            self::copyUpdatedData($call, $oldCall);
+                            $call = $oldCall;
+                            if (!$call->save()) {
+                                \Yii::error([
+                                    'message' => 'Copy new Call to old Call',
+                                    'errors' => $call->getErrors(),
+                                    'call' => $call->getAttributes(),
+                                ], 'info\ProcessCallCallback');
+                            }
                         }
                         Yii::info([
                             'message' => 'Detected duplicate call',
@@ -968,7 +1003,7 @@ class CommunicationController extends ApiBaseController
                 }
             }
 
-            if ($callSaved) {
+            if ($isNewRecord && $callSaved) {
                 if (($parentCall = $call->cParent) && $parentCall->callUserGroups && !$call->callUserGroups) {
                     foreach ($parentCall->callUserGroups as $cugItem) {
                         $cug = new CallUserGroup();
@@ -1001,14 +1036,6 @@ class CommunicationController extends ApiBaseController
             ], 'CallCallBackProcessingError');
             $response['status'] = 'Success';
             return $response;
-        }
-
-        if (!$call->save()) {
-            Yii::error([
-                'errors' => $call->getErrors(),
-                'call' => $call->getAttributes()
-            ], 'API:Communication:voiceDefault:Call:save');
-            $response['error'] = 'Error in method voiceDefault. ' . $call->getErrorSummary(false)[0];
         }
 
         if (!$call->isJoin()) {
@@ -1251,6 +1278,18 @@ class CommunicationController extends ApiBaseController
         if ($customParameters->to) {
             $call->c_to = $customParameters->to;
         }
+    }
+
+    private static function copyUpdatedData(Call $from, Call $to): void
+    {
+        $to->c_call_status = $from->c_call_status;
+        $to->c_status_id = $from->c_status_id;
+        $to->c_created_user_id = $from->c_created_user_id;
+        $to->c_sequence_number = $from->c_sequence_number;
+        $to->c_call_duration = $from->c_call_duration;
+        $to->c_forwarded_from = $from->c_forwarded_from;
+        $to->c_recording_sid = $from->c_recording_sid;
+        $to->c_is_conference = $from->c_is_conference;
     }
 
     /**
