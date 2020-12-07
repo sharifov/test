@@ -7,6 +7,7 @@ use Prometheus\Counter;
 use Prometheus\Gauge;
 use Prometheus\Histogram;
 use sales\helpers\app\AppHelper;
+use sales\helpers\setting\SettingHelper;
 use yii\base\Component;
 
 /**
@@ -28,15 +29,16 @@ class Metrics extends Component
     private array $histogramList = [];
     private array $gaugeList = [];
     private CollectorRegistry $registry;
-
+    private bool $isMetricsEnabled = false;
 
     public function init(): void
     {
-        // parent::init();
-        try {
-            $this->registry = \Yii::$app->prometheus->registry;
-        } catch (\Throwable $throwable) {
-            \Yii::error(AppHelper::throwableLog($throwable), 'Metrics:init:Throwable');
+        if ($this->isMetricsEnabled = SettingHelper::metricsEnabled()) {
+            try {
+                $this->registry = \Yii::$app->prometheus->registry;
+            } catch (\Throwable $throwable) {
+                \Yii::error(AppHelper::throwableLog($throwable), 'Metrics:init:Throwable');
+            }
         }
     }
 
@@ -47,22 +49,24 @@ class Metrics extends Component
      */
     public function jobCounter(string $name, array $labels = [], int $value = 1): void
     {
-        $name = strtolower($name);
-        $keyName = 'job_' . $name . '_cnt';
-        try {
-            $counter = $this->getCounterMetric($keyName);
-            if (!$counter) {
-                $counter = $this->registry->registerCounter(
-                    self::NAMESPACE_CONSOLE,
-                    $keyName,
-                    'Job ' . $name,
-                    array_keys($labels)
-                );
-                $this->setCounterMetric($keyName, $counter);
+        if ($this->isMetricsEnabled) {
+            $name = strtolower($name);
+            $keyName = 'job_' . $name . '_cnt';
+            try {
+                $counter = $this->getCounterMetric($keyName);
+                if (!$counter) {
+                    $counter = $this->registry->registerCounter(
+                        self::NAMESPACE_CONSOLE,
+                        $keyName,
+                        'Job ' . $name,
+                        array_keys($labels)
+                    );
+                    $this->setCounterMetric($keyName, $counter);
+                }
+                $counter->incBy($value, array_values($labels));
+            } catch (\Throwable $throwable) {
+                \Yii::error(AppHelper::throwableLog($throwable), 'Metrics:jobCounter:Throwable');
             }
-            $counter->incBy($value, array_values($labels));
-        } catch (\Throwable $throwable) {
-            \Yii::error(AppHelper::throwableLog($throwable), 'Metrics:jobCounter:Throwable');
         }
     }
 
@@ -73,22 +77,24 @@ class Metrics extends Component
      */
     public function jobGauge(string $name, float $value, array $labels = []): void
     {
-        $name = strtolower($name);
-        $keyName = 'job_' . $name;
-        try {
-            $gauge = $this->getGaugeMetric($keyName);
-            if (!$gauge) {
-                $gauge = $this->registry->getOrRegisterGauge(
-                    self::NAMESPACE_CONSOLE,
-                    $keyName,
-                    'Job ' . $name,
-                    array_keys($labels)
-                );
-                $this->setGaugeMetric($keyName, $gauge);
+        if ($this->isMetricsEnabled) {
+            $name = strtolower($name);
+            $keyName = 'job_' . $name;
+            try {
+                $gauge = $this->getGaugeMetric($keyName);
+                if (!$gauge) {
+                    $gauge = $this->registry->getOrRegisterGauge(
+                        self::NAMESPACE_CONSOLE,
+                        $keyName,
+                        'Job ' . $name,
+                        array_keys($labels)
+                    );
+                    $this->setGaugeMetric($keyName, $gauge);
+                }
+                $gauge->set($value, array_values($labels));
+            } catch (\Throwable $throwable) {
+                \Yii::error(AppHelper::throwableLog($throwable), 'Metrics:jobGauge:Throwable');
             }
-            $gauge->set($value, array_values($labels));
-        } catch (\Throwable $throwable) {
-            \Yii::error(AppHelper::throwableLog($throwable), 'Metrics:jobGauge:Throwable');
         }
     }
 
@@ -99,23 +105,25 @@ class Metrics extends Component
      */
     public function jobHistogram(string $name, float $value, array $labels = []): void
     {
-        $name = strtolower($name);
-        $keyName = 'job_' . $name;
-        try {
-            $histogram = $this->getHistogramMetric($keyName);
-            if (!$histogram) {
-                $histogram = $this->registry->getOrRegisterHistogram(
-                    self::NAMESPACE_CONSOLE,
-                    $keyName,
-                    'Job ' . $name,
-                    array_keys($labels),
-                    [0.4, 0.5, 0.7, 0.8, 0.9, 1, 3]
-                );
-                $this->setHistogramMetric($keyName, $histogram);
+        if ($this->isMetricsEnabled) {
+            $name = strtolower($name);
+            $keyName = 'job_' . $name;
+            try {
+                $histogram = $this->getHistogramMetric($keyName);
+                if (!$histogram) {
+                    $histogram = $this->registry->getOrRegisterHistogram(
+                        self::NAMESPACE_CONSOLE,
+                        $keyName,
+                        'Job ' . $name,
+                        array_keys($labels),
+                        [0.4, 0.5, 0.7, 0.8, 0.9, 1, 3]
+                    );
+                    $this->setHistogramMetric($keyName, $histogram);
+                }
+                $histogram->observe($value, array_values($labels));
+            } catch (\Throwable $throwable) {
+                \Yii::error(AppHelper::throwableLog($throwable), 'Metrics:jobHistogram:Throwable');
             }
-            $histogram->observe($value, array_values($labels));
-        } catch (\Throwable $throwable) {
-            \Yii::error(AppHelper::throwableLog($throwable), 'Metrics:jobHistogram:Throwable');
         }
     }
 
@@ -126,22 +134,24 @@ class Metrics extends Component
      */
     public function serviceCounter(string $name, array $labels = [], int $value = 1): void
     {
-        $name = strtolower($name);
-        $keyName = 'service_' . $name . '_cnt';
-        try {
-            $counter = $this->getCounterMetric($keyName);
-            if (!$counter) {
-                $counter = $this->registry->registerCounter(
-                    self::NAMESPACE_CONSOLE,
-                    $keyName,
-                    'Service ' . $name,
-                    array_keys($labels)
-                );
-                $this->setCounterMetric($keyName, $counter);
+        if ($this->isMetricsEnabled) {
+            $name = strtolower($name);
+            $keyName = 'service_' . $name . '_cnt';
+            try {
+                $counter = $this->getCounterMetric($keyName);
+                if (!$counter) {
+                    $counter = $this->registry->registerCounter(
+                        self::NAMESPACE_CONSOLE,
+                        $keyName,
+                        'Service ' . $name,
+                        array_keys($labels)
+                    );
+                    $this->setCounterMetric($keyName, $counter);
+                }
+                $counter->incBy($value, array_values($labels));
+            } catch (\Throwable $throwable) {
+                \Yii::error(AppHelper::throwableLog($throwable), 'Metrics:serviceCounter:Throwable');
             }
-            $counter->incBy($value, array_values($labels));
-        } catch (\Throwable $throwable) {
-            \Yii::error(AppHelper::throwableLog($throwable), 'Metrics:serviceCounter:Throwable');
         }
     }
 
