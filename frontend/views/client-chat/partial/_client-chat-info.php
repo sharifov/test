@@ -5,6 +5,7 @@ use frontend\widgets\clientChat\ClientChatClientInfoWidget;
 use sales\auth\Auth;
 use sales\entities\cases\CasesStatus;
 use sales\helpers\clientChat\ClientChatHelper;
+use sales\model\client\query\ClientChatCounter;
 use sales\model\client\query\ClientLeadCaseCounter;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatHold\service\ClientChatHoldService;
@@ -29,6 +30,7 @@ use yii\widgets\Pjax;
 $_self = $this;
 
 $counter = new ClientLeadCaseCounter($client->id, Auth::id());
+$chatCounter = new ClientChatCounter($client->id);
 
 ?>
 
@@ -147,46 +149,60 @@ $counter = new ClientLeadCaseCounter($client->id, Auth::id());
                 <?= ClientChatClientInfoWidget::widget(['chat' => $clientChat]) ?>
             </div>
             <?php if (Auth::can('client-chat/manage', ['chat' => $clientChat])) : ?>
-            <div class="col-md-12">
-                <div class="dropdown " style="margin-top: 10px; float: left;">
-                    <button class="btn text-warning dropdown-toggle" type="button" id="menuClientInfoActions" data-toggle="dropdown"
-                            aria-haspopup="true" aria-expanded="false"
-                            style="box-shadow: 0 0 0 0.2rem rgba(240, 184, 81, 0.25); height: 25px; margin-top: 3px;" >
-                        <i class="fa fa-bars warning"> </i> <span class="text-warning">Actions</span>
-                    </button>
-                    <div class="dropdown-menu" aria-labelledby="menuClientInfoActions">
+                <div class="col-md-6">
+                    <div class="dropdown " style="margin-top: 10px; float: left;">
+                        <button class="btn text-warning dropdown-toggle" type="button" id="menuClientInfoActions" data-toggle="dropdown"
+                                aria-haspopup="true" aria-expanded="false"
+                                style="box-shadow: 0 0 0 0.2rem rgba(240, 184, 81, 0.25); height: 25px; margin-top: 3px;" >
+                            <i class="fa fa-bars warning"> </i> <span class="text-warning">Actions</span>
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="menuClientInfoActions">
 
-                        <?php echo Html::a('<i class="fas fa-edit warning"> </i> Update Client', null, [
-                            'class' => 'dropdown-item showModalButton',
-                            'title' => 'Update Client',
-                            'data-modal_id' => "client-manage-info",
-                            'data-content-url' => Url::to(['/client-chat-client-actions/ajax-edit-client-name-modal-content', 'id' => $clientChat->cch_id])
-                        ]) ?>
+                            <?php echo Html::a('<i class="fas fa-edit warning"> </i> Update Client', null, [
+                                'class' => 'dropdown-item showModalButton',
+                                'title' => 'Update Client',
+                                'data-modal_id' => "client-manage-info",
+                                'data-content-url' => Url::to(['/client-chat-client-actions/ajax-edit-client-name-modal-content', 'id' => $clientChat->cch_id])
+                            ]) ?>
 
-                        <?php echo Html::a('<i class="fas fa-plus-circle success"> </i> Add Email', null, [
-                            'class' => 'dropdown-item showModalButton',
-                            'title' => 'Add Email',
-                            'data-modal_id' => "client-manage-info",
-                            'data-content-url' => Url::to(['/client-chat-client-actions/ajax-add-client-email-modal-content', 'id' => $clientChat->cch_id])
-                        ]) ?>
+                            <?php echo Html::a('<i class="fas fa-plus-circle success"> </i> Add Email', null, [
+                                'class' => 'dropdown-item showModalButton',
+                                'title' => 'Add Email',
+                                'data-modal_id' => "client-manage-info",
+                                'data-content-url' => Url::to(['/client-chat-client-actions/ajax-add-client-email-modal-content', 'id' => $clientChat->cch_id])
+                            ]) ?>
 
-                        <?php echo Html::a('<i class="fas fa-plus-circle success"> </i> Add Phone', null, [
-                            'class' => 'dropdown-item showModalButton',
-                            'title' => 'Add Phone',
-                            'data-modal_id' => "client-manage-info",
-                            'data-content-url' => Url::to(['/client-chat-client-actions/ajax-add-client-phone-modal-content', 'id' => $clientChat->cch_id])
-                        ]) ?>
+                            <?php echo Html::a('<i class="fas fa-plus-circle success"> </i> Add Phone', null, [
+                                'class' => 'dropdown-item showModalButton',
+                                'title' => 'Add Phone',
+                                'data-modal_id' => "client-manage-info",
+                                'data-content-url' => Url::to(['/client-chat-client-actions/ajax-add-client-phone-modal-content', 'id' => $clientChat->cch_id])
+                            ]) ?>
 
-                        <?php echo Html::a('<i class="fas fa-info-circle"> </i> Details', null, [
-                            'id' => 'btn-client-info-details',
-                            'data-client-id' => $client->id,
-                            'class' => 'dropdown-item',
-                            'title' => 'Details',
-                        ]) ?>
+                            <?php echo Html::a('<i class="fas fa-info-circle"> </i> Details', null, [
+                                'id' => 'btn-client-info-details',
+                                'data-client-id' => $client->id,
+                                'class' => 'dropdown-item',
+                                'title' => 'Details',
+                            ]) ?>
 
+                        </div>
                     </div>
                 </div>
-            </div>
+                <div class="col-md-6">
+                    <div style="margin-top: 10px; float: right;">
+                        <?php ?>
+                        <?= Html::button(
+                            '<i class="fa fa-comment"> </i> Chats (' . $chatCounter->countActiveChats() . '/' . $chatCounter->countAllChats() . ')',
+                            [
+                                'class' => 'btn btn-default',
+                                'id' => 'btn-client-chats',
+                                'data-chat-id' => $clientChat->cch_id,
+                                'data-client-id' => $clientChat->cch_client_id
+                            ]
+                        ) ?>
+                    </div>
+                </div>
             <?php endif; ?>
         </div>
 
@@ -454,6 +470,7 @@ JS;
 
 <?php
 $clientInfoUrl = \yii\helpers\Url::to(['/client/ajax-get-info']);
+$clientChatsUrl = \yii\helpers\Url::to(['/client-chat-client/get-chats']);
 $js = <<<JS
 $(document).on('click', '#btn-client-info-details', function(e) {
     e.preventDefault();
@@ -480,6 +497,22 @@ $(document).on('click', '#btn-client-info-details', function(e) {
             $('#modal-' + id).find('.modal-body').html(data);
         });
     });
+   
+   $(document).on('click', '#btn-client-chats', function(e) {
+    e.preventDefault();
+    var chatId = $(this).data('chat-id');
+    var clientId = $(this).data('client-id');
+    $('#modalChat .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+    $('#modalChat-label').html('Client Details (' + clientId + ')');
+    $('#modalChat').modal();
+    $.post('$clientChatsUrl' + '?chatId=' + chatId, {},
+            function (data) {
+                $('#modalChat .modal-body').html(data);
+            }
+        );
+    });
+   
+   
 JS;
 $this->registerJs($js);
 
