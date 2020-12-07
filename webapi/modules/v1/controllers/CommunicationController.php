@@ -1018,9 +1018,6 @@ class CommunicationController extends ApiBaseController
                     }
                 }
             }
-
-
-
         } catch (UniqueCallNotFoundException $e) {
             Yii::error([
                 'message' => $e->getMessage(),
