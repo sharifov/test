@@ -659,5 +659,18 @@ class ClientChatService
             'refreshChatPage',
             ['data' => ClientChatAccessMessage::chatAutoReopen($clientChat->cch_id)]
         );
+        Notifications::pub(
+            [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],
+            'reloadClientChatList'
+        );
+        if ($clientChat->cch_owner_user_id) {
+            Notifications::createAndPublish(
+                $clientChat->cch_owner_user_id,
+                'Chat has been reopened',
+                'Chat (' . $clientChat->cch_id . ') from ' . $clientChat->cchClient->getShortName() . ' has been reopened by client',
+                Notifications::TYPE_INFO,
+                true
+            );
+        }
     }
 }
