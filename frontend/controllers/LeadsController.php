@@ -101,15 +101,6 @@ class LeadsController extends FController
             $session->remove('LeadSearch');
         }
 
-        /*if (empty($params) && $session->has('LeadSearch')){
-            $params = $session->get('LeadSearch');
-
-            //VarDumper::dump($params, 10, true);
-
-        } elseif (!empty($params)){
-            $session->set('LeadSearch', $params);
-        }*/
-
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
 
@@ -132,12 +123,6 @@ class LeadsController extends FController
         } else {
             $dataProvider = $searchModel->search($params);
         }
-
-        /*if($isAgent) {
-            $user = Yii::$app->user->identity;
-            $checkShiftTime = $user->checkShiftTime();
-
-        }*/
 
         return $this->render('index', [
             'searchModel' => $searchModel,

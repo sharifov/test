@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use borales\extensions\phoneInput\PhoneInputValidator;
 use common\models\Airports;
 use common\models\Call;
 use common\models\Client;
@@ -162,7 +163,7 @@ class LeadSearch extends Lead
             [['email_status', 'quote_status', 'l_is_test'], 'integer'],
             [['lfOwnerId', 'userGroupId', 'departmentId', 'projectId', 'createdType'], 'integer'],
 
-            [['client_name', 'client_email', 'client_phone','quote_pnr', 'gid', 'origin_airport','destination_airport', 'origin_country', 'destination_country', 'l_request_hash'], 'string'],
+            [['client_name', 'client_email', 'quote_pnr', 'gid', 'origin_airport','destination_airport', 'origin_country', 'destination_country', 'l_request_hash'], 'string'],
 
             //['created_date_from', 'default', 'value' => '2018-01-01'],
             //['created_date_to', 'default', 'value' => date('Y-m-d')],
@@ -193,9 +194,15 @@ class LeadSearch extends Lead
                 ],
                 'integer', 'min' => 0, 'max' => 1000
             ],
+
+            ['client_phone', 'filter', 'filter' => static function ($value) {
+                $value = preg_replace('~[^0-9\+]~', '', $value);
+                $value = (strpos($value, '+') === 0 ? '+' : '') . str_replace('+', '', $value);
+                return (string) $value;
+            }, 'skipOnEmpty' => true],
+            [['client_phone'], 'string', 'max' => 20],
         ];
     }
-
 
     public function attributeLabels(): array
     {
@@ -365,12 +372,9 @@ class LeadSearch extends Lead
         }
 
         if ($this->client_phone) {
-            $this->client_phone = preg_replace('~[^0-9\+]~', '', $this->client_phone);
-            if ($this->client_phone) {
-                $this->client_phone = (strpos($this->client_phone, '+') === 0 ? '+' : '') . str_replace('+', '', $this->client_phone);
-                $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['like', 'phone', $this->client_phone]);
-                $query->andWhere(['IN', 'client_id', $subQuery]);
-            }
+            $this->client_phone = (strpos($this->client_phone, '+') === 0 ? '+' : '') . str_replace('+', '', $this->client_phone);
+            $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['like', 'phone', $this->client_phone]);
+            $query->andWhere(['IN', 'client_id', $subQuery]);
         }
 
         //echo $this->created_date_from;
@@ -682,7 +686,7 @@ class LeadSearch extends Lead
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
@@ -791,12 +795,9 @@ class LeadSearch extends Lead
         }
 
         if ($this->client_phone) {
-            $this->client_phone = preg_replace('~[^0-9\+]~', '', $this->client_phone);
-            if ($this->client_phone) {
-                $this->client_phone = (strpos($this->client_phone, '+') === 0 ? '+' : '') . str_replace('+', '', $this->client_phone);
-                $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['like', 'phone', $this->client_phone]);
-                $query->andWhere(['IN', 'client_id', $subQuery]);
-            }
+            $this->client_phone = (strpos($this->client_phone, '+') === 0 ? '+' : '') . str_replace('+', '', $this->client_phone);
+            $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['like', 'phone', $this->client_phone]);
+            $query->andWhere(['IN', 'client_id', $subQuery]);
         }
 
         //echo $this->created_date_from;
@@ -1074,12 +1075,9 @@ class LeadSearch extends Lead
         }
 
         if ($this->client_phone) {
-            $this->client_phone = preg_replace('~[^0-9\+]~', '', $this->client_phone);
-            if ($this->client_phone) {
-                $this->client_phone = (strpos($this->client_phone, '+') === 0 ? '+' : '') . str_replace('+', '', $this->client_phone);
-                $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['like', 'phone', $this->client_phone]);
-                $query->andWhere(['IN', 'client_id', $subQuery]);
-            }
+            $this->client_phone = (strpos($this->client_phone, '+') === 0 ? '+' : '') . str_replace('+', '', $this->client_phone);
+            $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['like', 'phone', $this->client_phone]);
+            $query->andWhere(['IN', 'client_id', $subQuery]);
         }
 
         //echo $this->created_date_from;
@@ -1393,7 +1391,6 @@ class LeadSearch extends Lead
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
             $query->where('0=1');
             return $dataProvider;
         }
@@ -1477,18 +1474,11 @@ class LeadSearch extends Lead
         }
 
         if ($this->client_phone) {
-            $this->client_phone = preg_replace('~[^0-9\+]~', '', $this->client_phone);
-            if ($this->client_phone) {
-                $this->client_phone = (strpos($this->client_phone, '+') === 0 ? '+' : '') . str_replace('+', '', $this->client_phone);
-                $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['phone' => $this->client_phone]);
-                $query->andWhere(['IN', 'client_id', $subQuery]);
-            }
+            $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['phone' => $this->client_phone]);
+            $query->andWhere(['IN', 'client_id', $subQuery]);
         }
 
         if ($this->quote_pnr) {
-            /* $subQuery = Quote::find()->select(['DISTINCT(lead_id)'])->where(['=', 'record_locator', mb_strtoupper($this->quote_pnr)]);
-            $query->andWhere(['IN', 'leads.id', $subQuery]); */
-
             $query->andWhere(['LIKE','leads.additional_information', new Expression('\'%"pnr":%"' . $this->quote_pnr . '"%\'')]);
         }
 
@@ -1631,12 +1621,9 @@ class LeadSearch extends Lead
         }
 
         if ($this->client_phone) {
-            $this->client_phone = preg_replace('~[^0-9\+]~', '', $this->client_phone);
-            if ($this->client_phone) {
-                $this->client_phone = (strpos($this->client_phone, '+') === 0 ? '+' : '') . str_replace('+', '', $this->client_phone);
-                $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['=', 'phone', $this->client_phone]);
-                $query->andWhere(['IN', 'client_id', $subQuery]);
-            }
+            $this->client_phone = (strpos($this->client_phone, '+') === 0 ? '+' : '') . str_replace('+', '', $this->client_phone);
+            $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['=', 'phone', $this->client_phone]);
+            $query->andWhere(['IN', 'client_id', $subQuery]);
         }
 
         if ($this->quote_pnr) {
