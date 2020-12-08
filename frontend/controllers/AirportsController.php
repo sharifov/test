@@ -123,7 +123,7 @@ class AirportsController extends FController
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\httpclient\Exception
      */
-    public function actionSynchronization()
+    public function actionSynchronization(): \yii\web\Response
     {
         $result = Airports::synchronization(10000);
 
@@ -131,13 +131,19 @@ class AirportsController extends FController
             if ($result['error']) {
                 Yii::$app->getSession()->setFlash('error', $result['error']);
             } else {
+                if ($result['info']) {
+                    $message = '<b>Information</b>:<br>';
+                    $message .= implode(', ', $result['info']);
+                    Yii::$app->getSession()->setFlash('info', $message);
+                }
+
                 if ($result['created']) {
-                    $message = 'Synchronization successful<br>';
+                    $message = 'Synchronization successful: created<br>';
                     $message .= 'Created Airports (' . count($result['created']) . '): "' . implode(', ', $result['created']);
                     Yii::$app->getSession()->setFlash('success', $message);
                 }
                 if ($result['updated']) {
-                    $message = 'Synchronization successful<br>';
+                    $message = 'Synchronization successful: updated<br>';
                     $message .= 'Updated Airports (' . count($result['updated']) . '): "' . implode(', ', $result['updated']);
                     Yii::$app->getSession()->setFlash('warning', $message);
                 }
@@ -145,6 +151,12 @@ class AirportsController extends FController
                     $message = 'Synchronization error<br>';
                     $message .= 'Errored Airports (' . count($result['errored']) . '): "' . implode(', ', $result['errored']);
                     Yii::$app->getSession()->setFlash('error', $message);
+                }
+
+                if ($result['deleted']) {
+                    $message = 'Need for deleted<br>';
+                    $message .= 'Need Deleted Airports (' . count($result['deleted']) . '): "' . implode(', ', $result['deleted']);
+                    Yii::$app->getSession()->setFlash('danger', $message);
                 }
             }
         }

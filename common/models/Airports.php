@@ -26,9 +26,9 @@ use yii\helpers\VarDumper;
  * @property string|null $a_city_code
  * @property string|null $a_state
  * @property float|null $a_rank
- * @property int|null $a_multicity
- * @property int|null $a_close
- * @property int|null $a_disabled
+ * @property bool|null $a_multicity
+ * @property bool|null $a_close
+ * @property bool|null $a_disabled
  * @property string|null $a_created_dt
  * @property string|null $a_updated_dt
  * @property int|null $a_created_user_id
@@ -37,12 +37,15 @@ use yii\helpers\VarDumper;
  * @property Employee $aCreatedUser
  * @property Employee $aUpdatedUser
  * @property QuoteSegment[] $quoteSegments
+ * @property-read string $text
+ * @property-read string $selection
+ * @property-read string $cityName
  * @property QuoteSegment[] $quoteSegments0
  */
 class Airports extends \yii\db\ActiveRecord
 {
     /**
-     * {@inheritdoc}
+     * @return string
      */
     public static function tableName()
     {
@@ -50,7 +53,7 @@ class Airports extends \yii\db\ActiveRecord
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
     public function rules()
     {
@@ -96,7 +99,7 @@ class Airports extends \yii\db\ActiveRecord
     }
 
     /**
-     * {@inheritdoc}
+     * @return string[]
      */
     public function attributeLabels()
     {
@@ -267,13 +270,17 @@ class Airports extends \yii\db\ActiveRecord
     public static function synchronization(int $limit = 0): array
     {
         $data = [
+            'info' => [],
             'created' => [],
             'updated' => [],
+            'deleted' => [],
             'errored' => [],
             'error' => false
         ];
 
-        $airportsData = Yii::$app->travelServices->airportExport(0, $limit);
+        $lastRecord = self::find()->select('a_updated_dt')->orderBy(['a_updated_dt' => SORT_ASC])->limit(1)->one();
+        $lastUpdated = ($lastRecord && $lastRecord->a_updated_dt) ? strtotime($lastRecord->a_updated_dt) : 0;
+        $airportsData = Yii::$app->travelServices->airportExport($lastUpdated, $limit);
 
         //$data = $airportsData['data']['Data'] ?? [];
 
@@ -283,26 +290,29 @@ class Airports extends \yii\db\ActiveRecord
         if ($airportsData) {
             if ($airportsData['error']) {
                 $data['error'] = 'Error: ' . $airportsData['error'];
-            } else {
-                if (!empty($airportsData['data']['Data'])) {
-                    foreach ($airportsData['data']['Data'] as $item) {
-                        if (empty($item['Iata'])) {
-                            continue;
-                        }
-                        $airport = self::findOne(['iata' => $item['Iata']]);
+            } elseif (!empty($airportsData['data']['Data'])) {
+                foreach ($airportsData['data']['Data'] as $item) {
+                    if (empty($item['Iata'])) {
+                        continue;
+                    }
 
-                        if (!$airport) {
-                            $airport = new self();
-                            $airport->iata = $item['Iata'];
-                            $airport->name = $item['Name'];
-                            $airport->city = $item['CityAscii'];
-                            $data['created'][] = $item['Iata'];
-                        } else {
-                            $data['updated'][] = $item['Iata'];
-                        }
+                    $airport = self::find()->where(['iata' => $item['Iata']])->limit(1)->one();
+                    $iataCodes = [];
 
-                        $airport->latitude = $item['Latitude'];
-                        $airport->longitude = $item['Longitude'];
+                    if (!$airport) {
+                        $airport = new self();
+                        $airport->iata = $item['Iata'];
+                        $airport->name = $item['Name'];
+                        $airport->city = $item['CityAscii'];
+                        $airport->a_close = (bool) $item['IsClosed'];
+                        $airport->a_disabled = (bool) $item['IsDisabled'];
+
+                        if (!empty($item['Latitude'])) {
+                            $airport->latitude = round($item['Latitude'], 14);
+                        }
+                        if (!empty($item['Longitude'])) {
+                            $airport->longitude = round($item['Longitude'], 14);
+                        }
                         $airport->country = $item['Country'];
                         $airport->timezone = $item['TimezoneId'];
 
@@ -312,26 +322,132 @@ class Airports extends \yii\db\ActiveRecord
                         $airport->a_state = $item['State'] ?? null;
                         $airport->a_rank = $item['Rank'];
                         $airport->a_multicity = (bool) $item['IsMulticity'];
-                        $airport->a_close = (bool) $item['IsClosed'];
-                        $airport->a_disabled = (bool) $item['IsDisabled'];
 
                         if ($airport->timezone) {
                             $currentTimezone = new \DateTimeZone($airport->timezone);
                             $airport->dst = (int) ($currentTimezone->getOffset($utcTime) / 3600);
                         }
 
+                        $iataCodes[$airport->iata] = $airport->iata;
                         if (!$airport->save()) {
                             $data['errored'][] = $item['Iata'];
                             Yii::error(
-                                VarDumper::dumpAsString(['data' => $item, 'errors' => $airport->errors]),
-                                'Airports:synchronization:Airports:save'
+                                ['data' => $item, 'errors' => $airport->errors],
+                                'Airports:synchronization:Airports:created'
                             );
+                        } else {
+                            $data['created'][] = $item['Iata'];
+                        }
+                    } else {
+                        $diff = '';
+                        if ($airport->name !== $item['Name']) {
+                            $airport->name = $item['Name'];
+                            $diff .= ', ' . $airport->name . ' => ' . $item['Name'];
+                        }
+
+                        if ($airport->city !== $item['CityAscii']) {
+                            $airport->city = $item['CityAscii'];
+                            $diff .= ', ' . $airport->city . ' => ' . $item['CityAscii'];
+                        }
+
+                        if ((bool) $airport->a_close !== (bool) $item['IsClosed']) {
+                            $airport->a_close = (bool) $item['IsClosed'];
+                            $diff .= ', close = ' . ($airport->a_close ? 'true' : 'false');
+                        }
+
+                        if ((bool) $airport->a_disabled !== (bool) $item['IsDisabled']) {
+                            $airport->a_disabled = (bool) $item['IsDisabled'];
+                            $diff .= ', disabled = ' . ($airport->a_disabled ? 'true' : 'false');
+                        }
+
+                        $latitude = $item['Latitude'] ? round($item['Latitude'], 14) : 0;
+                        $curLatitude = strval(round($airport->latitude, 14));
+                        if ($latitude && $curLatitude !== strval($latitude)) {
+                            $diff .= ', lat=' . $curLatitude . ' => ' . $latitude;
+                            $airport->latitude = $latitude;
+                        }
+
+                        $longitude = $item['Longitude'] ? round($item['Longitude'], 14) : 0;
+                        $curLongitude = strval(round($airport->longitude, 14));
+                        if ($longitude && $curLongitude !== strval($longitude)) {
+                            $diff .= ', long=' . $curLongitude . ' => ' . $longitude;
+                            $airport->longitude = $longitude;
+                        }
+                        if ($airport->country !== $item['Country']) {
+                            $airport->country = $item['Country'];
+                            $diff .= ', country = ' . $airport->country;
+                        }
+
+                        if (!empty($item['Icao']) && $airport->a_icao !== $item['Icao']) {
+                            $airport->a_icao = $item['Icao'];
+                            $diff .= ', Icao = ' . $airport->a_icao;
+                        }
+
+                        if ($airport->a_country_code !== $item['CountryIso2']) {
+                            $airport->a_country_code = $item['CountryIso2'];
+                            $diff .= ', CountryCode = ' . $airport->a_country_code;
+                        }
+
+                        if ($airport->a_city_code !== $item['CityCode']) {
+                            $airport->a_city_code = $item['CityCode'];
+                            $diff .= ', CityCode = ' . $airport->a_city_code;
+                        }
+
+                        if (!empty($item['State']) && $airport->a_state !== $item['State']) {
+                            $airport->a_state = $item['State'];
+                            $diff .= ', State = ' . $airport->a_state;
+                        }
+
+                        if ((float) $airport->a_rank !== (float) $item['Rank']) {
+                            $diff .= ', Rank = ' . $airport->a_rank . ' => ' . $item['Rank'];
+                            $airport->a_rank = $item['Rank'];
+                        }
+
+                        if ((bool) $airport->a_multicity !== (bool) $item['IsMulticity']) {
+                            $airport->a_multicity = (bool)$item['IsMulticity'];
+                            $diff .= ', multicity = ' . ($airport->a_multicity ? 'true' : 'false');
+                        }
+
+                        if ($airport->timezone !== $item['TimezoneId']) {
+                            $airport->timezone = $item['TimezoneId'];
+                            $diff .= ', timezone = ' . $airport->timezone;
+                            if ($airport->timezone) {
+                                $currentTimezone = new \DateTimeZone($airport->timezone);
+                                $dst = (int)($currentTimezone->getOffset($utcTime) / 3600);
+                                if ((int)$airport->dst !== $dst) {
+                                    $airport->dst = $dst;
+                                    $diff .= ', dst = ' . $dst;
+                                }
+                            }
+                        }
+
+                        if (!empty($diff)) {
+                            if (!$airport->save()) {
+                                $iataCodes[$airport->iata] = $airport->iata;
+                                $data['errored'][] = $item['Iata'];
+                                Yii::error(
+                                    ['data' => $item, 'errors' => $airport->errors],
+                                    'Airports:synchronization:Airports:update'
+                                );
+                            } else {
+                                $data['updated'][] = $item['Iata'] . $diff;
+                            }
                         }
                     }
                 }
+
+                //                    if ($iataCodes) {
+//                        $airportsForDelete = self::find()->select(['iata'])->where(['NOT IN', 'iata', $iataCodes])->column();
+//                        $data['deleted'] = $airportsForDelete;
+//                    }
+
+                $data['info'][] = 'Import total IATA codes: ' . ($airportsData['data']['Data'] ? count($airportsData['data']['Data']) : 0);
+                $data['info'][] = 'Old updated: ' . $lastUpdated;
+            } else {
+                $data['info'][] = 'Data Response is empty';
             }
         } else {
-            $data['error'] = 'Not found response Data';
+            $data['error'] = 'Invalid Data response';
         }
 
         return $data;
