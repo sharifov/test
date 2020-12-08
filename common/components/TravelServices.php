@@ -140,10 +140,10 @@ class TravelServices extends Component
         $response = $this->sendRequest('airport/export?' . $params, [], 'get');
 
         if ($response->isOk) {
-            if (!empty($response->data['Data'])) {
+            if (isset($response->data['Data'])) {
                 $out['data'] = $response->data;
             } else {
-                $out['error'] = 'Not found in response array data key [data]';
+                $out['error'] = 'Not found in response array data key [Data]';
             }
         } else {
             $out['error'] = $response->content;
