@@ -559,6 +559,16 @@ class ClientChatSearch extends ClientChat
         if ($filter->userId) {
             $query->andWhere(['cch_owner_user_id' => $filter->userId]);
         }
+        if ($filter->status) {
+            $query->byStatus($filter->status);
+        }
+        if ($filter->clientName) {
+            $query->join('JOIN', ['client' => Client::tableName()], 'cch_client_id = client.id');
+            $query->andWhere(['OR',
+                ['like', 'client.first_name', $filter->clientName],
+                ['like', 'client.last_name', $filter->clientName]
+            ]);
+        }
         if ($filter->fromDate && $filter->toDate) {
             $fromDate = date('Y-m-d', strtotime($filter->fromDate));
             $toDate = date('Y-m-d', strtotime($filter->toDate));
