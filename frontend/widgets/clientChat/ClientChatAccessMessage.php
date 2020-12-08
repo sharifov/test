@@ -13,6 +13,7 @@ class ClientChatAccessMessage
     private const COMMAND_SKIP = 'skip';
     private const COMMAND_DELETED = 'deleted';
     private const COMMAND_RESET = 'reset';
+    private const COMMAND_ACCEPT_TRANSFER = 'accept_transfer';
 
     public static function accept(int $chatId, int $userId, int $chatUserAccessId): array
     {
@@ -189,5 +190,22 @@ class ClientChatAccessMessage
         $widget->open = true;
         $widget->userAccessId = $chatUserAccessId;
         return $widget->fetchOneItem();
+    }
+
+    public static function acceptTransfer(int $chatId, int $userId, int $chatUserAccessId): array
+    {
+        if ($clientChatOld = ClientChat::findOne($chatId)) {
+            if ($clientChatTransfer = ClientChat::find()->byRid($clientChatOld->cch_rid)->orderBy(['cch_id' => SORT_DESC])->one()) {
+                /** @var ClientChat $clientChatTransfer */
+                $chatId = $clientChatTransfer->cch_id;
+            }
+        }
+        return [
+            'command' => self::COMMAND_ACCEPT_TRANSFER,
+            'url' => Url::toRoute(['/client-chat/index', 'chid' => $chatId]),
+            'userId' => $userId,
+            'chatId' => $chatId,
+            'chatUserAccessId' => $chatUserAccessId
+        ];
     }
 }
