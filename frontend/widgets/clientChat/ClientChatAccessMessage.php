@@ -53,13 +53,14 @@ class ClientChatAccessMessage
         ];
     }
 
-    public static function deleted(int $userId): array
+    public static function deleted(int $cchId, int $userId, int $chatUserAccessId): array
     {
         return [
             'command' => self::COMMAND_DELETED,
             'status_id' => null,
-            'user_id' => $userId,
-            'cch_id' => null,
+            'userId' => $userId,
+            'chatId' => $cchId,
+            'chatUserAccessId' => $chatUserAccessId,
             'pjaxUrl' => Url::to('/client-chat/pjax-update-chat-widget'),
             'html' => self::refresh($userId)
         ];

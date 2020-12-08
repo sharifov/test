@@ -5,6 +5,7 @@ namespace sales\services\clientChatUserAccessService;
 use common\components\purifier\Purifier;
 use common\models\Employee;
 use common\models\Notifications;
+use frontend\widgets\clientChat\ClientChatAccessMessage;
 use sales\dispatchers\EventDispatcher;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
@@ -17,8 +18,10 @@ use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessReposi
 use sales\repositories\clientChatUserChannel\ClientChatUserChannelRepository;
 use sales\services\clientChatService\ClientChatService;
 use sales\services\TransactionManager;
+use Yii;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  * Class ClientChatUserAccessService
@@ -134,6 +137,41 @@ class ClientChatUserAccessService
         return false;
     }
 
+    public function deleteAccessForOtherUsersBatch(int $chatId, int $ownerId): bool
+    {
+        $users = ClientChatUserAccess::find()->select(['ccua_user_id', 'ccua_id'])->where(
+            new Expression(
+                'ccua_cch_id = :chatId and ccua_user_id <> :userId and ccua_status_id = :status',
+                ['chatId' => $chatId, 'userId' => $ownerId, 'status' => ClientChatUserAccess::STATUS_PENDING]
+            )
+        )->asArray()->all();
+
+        if (
+            $users &&
+            $deleted = (bool) ClientChatUserAccess::deleteAll(
+                new Expression(
+                    'ccua_cch_id = :chatId and ccua_user_id <> :userId and ccua_status_id = :status',
+                    [
+                        'chatId' => $chatId,
+                        'userId' => $ownerId,
+                        'status' => ClientChatUserAccess::STATUS_PENDING
+                    ]
+                )
+            )
+        ) {
+            foreach ($users as $user) {
+                $data = ClientChatAccessMessage::deleted($chatId, (int) $user['ccua_user_id'], (int) $user['ccua_id']);
+                Yii::info(
+                    'UserId: ' .  $user['ccua_user_id'] . '; ' . VarDumper::dumpAsString($data),
+                    'info\updateChatUserAccessWidget'
+                );
+                Notifications::publish('clientChatRequest', ['user_id' => $user['ccua_user_id']], ['data' => $data]);
+            }
+            return true;
+        }
+        return false;
+    }
+
     /**
      * @param int $userId
      * @throws \Throwable
@@ -142,7 +180,7 @@ class ClientChatUserAccessService
     {
         $this->transactionManager->wrap(static function () use ($userId) {
             /** @var ClientChatUserAccess[] $userAccess  */
-            $eventDispatcher = \Yii::createObject(EventDispatcher::class);
+            $eventDispatcher = Yii::createObject(EventDispatcher::class);
             $userAccess = ClientChatUserAccess::find()->select(['ccua_cch_id'])->byUserId($userId)->pending()->asArray()->all();
             $chats = ArrayHelper::getColumn($userAccess, 'ccua_cch_id');
             ClientChatUserAccess::updateAll(['ccua_status_id' => ClientChatUserAccess::STATUS_CANCELED], ['ccua_cch_id' => $chats, 'ccua_user_id' => $userId, 'ccua_status_id' => ClientChatUserAccess::STATUS_PENDING]);
@@ -170,7 +208,7 @@ class ClientChatUserAccessService
 
     public function setUserAccessToAllChatsByChannelIds(array $channelIds, int $userId)
     {
-        $eventDispatcher = \Yii::createObject(EventDispatcher::class);
+        $eventDispatcher = Yii::createObject(EventDispatcher::class);
         $chatIds = ClientChatUserAccess::find()->select(['ccua_cch_id'])->byUserId($userId)->pending()->column();
         if ($chats = ClientChat::find()->select(['cch_id'])->conditionSetUserAccess()->byChannelIds($channelIds)->excludeChatIds($chatIds)->asArray()->all()) {
             $data = [];
@@ -183,14 +221,14 @@ class ClientChatUserAccessService
                     'ccua_updated_dt' => date('Y-m-d H:i:s'),
                 ];
             }
-            \Yii::$app->db->createCommand()->batchInsert(ClientChatUserAccess::tableName(), ['ccua_cch_id', 'ccua_user_id', 'ccua_status_id', 'ccua_created_dt', 'ccua_updated_dt'], $data)->execute();
+            Yii::$app->db->createCommand()->batchInsert(ClientChatUserAccess::tableName(), ['ccua_cch_id', 'ccua_user_id', 'ccua_status_id', 'ccua_created_dt', 'ccua_updated_dt'], $data)->execute();
         }
         $eventDispatcher->dispatch(new ResetChatUserAccessWidgetEvent($userId), 'ResetChatUserAccessWidgetEvent_' . $userId);
     }
 
     public function disableUserAccessToAllChatsByChannelIds(array $channelIds, int $userId): void
     {
-        $eventDispatcher = \Yii::createObject(EventDispatcher::class);
+        $eventDispatcher = Yii::createObject(EventDispatcher::class);
         if ($chats = ClientChat::find()->select(['cch_id'])->byOwner(null)->byChannelIds($channelIds)->asArray()->all()) {
             $chats = ArrayHelper::getColumn($chats, 'cch_id');
             ClientChatUserAccess::updateAll(['ccua_status_id' => ClientChatUserAccess::STATUS_CANCELED], ['ccua_cch_id' => $chats, 'ccua_status_id' => ClientChatUserAccess::STATUS_PENDING, 'ccua_user_id' => $userId]);
