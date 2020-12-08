@@ -8,6 +8,7 @@ use yii\helpers\StringHelper;
 use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
+use kartik\daterange\DateRangePicker;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\ApiLogSearch */
@@ -47,6 +48,7 @@ $pjaxListId = 'pjax-api-log';
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'layout' => "{errors}\n{summary}\n{items}\n{pager}",
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
 
@@ -84,7 +86,7 @@ $pjaxListId = 'pjax-api-log';
                     if ($decodedData = @json_decode($model->al_request_data, true, 512, JSON_THROW_ON_ERROR)) {
                         $truncatedStr = StringHelper::truncate(
                             Html::encode(VarDumper::dumpAsString($decodedData)),
-                            1600,
+                            1200,
                             '...',
                             null,
                             false
@@ -99,50 +101,46 @@ $pjaxListId = 'pjax-api-log';
                     return '<small>' . $resultStr . '</small>';
                 },
             ],
-
             [
-                'class' => DateTimeColumn::class,
-                'attribute' => 'al_request_dt'
-            ],
-
-            /*[
                 'attribute' => 'al_request_dt',
                 'value' => static function (\common\models\ApiLog $model) {
-                    return $model->al_request_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->al_request_dt), 'php:Y-m-d [H:i:s]') : '-';
+                    if (!$model->al_request_dt) {
+                        return Yii::$app->formatter->nullDisplay;
+                    }
+                    return Html::tag('i', '', ['class' => 'fa fa-calendar']) . ' ' .
+                        Yii::$app->formatter->asDatetime(strtotime($model->al_request_dt), 'php:d-M-Y [H:i]');
                 },
-                'format' => 'raw'
-            ],*/
-
-            //'al_response_data:ntext',
-//            [
-//                'attribute' => 'al_response_data',
-//                'format' => 'html',
-//                'value' => function(\common\models\ApiLog $model) {
-//                    $data = \yii\helpers\VarDumper::dumpAsString(@json_decode($model->al_response_data, true));
-//                    //if($data) $data = end($data);
-//                    return $data ? '<pre style="font-size: 10px">'.(\yii\helpers\StringHelper::truncate($data, 500, '...', null, true)).'</pre>' : '-';
-//                },
-//            ],
-
+                'format' => 'raw',
+                'headerOptions' => ['style' => 'width:180px;'],
+                'filter' => DateRangePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'createTimeRange',
+                    'useWithAddon' => true,
+                    'presetDropdown' => true,
+                    'hideInput' => true,
+                    'convertFormat' => true,
+                    'startAttribute' => 'createTimeStart',
+                    'endAttribute' => 'createTimeEnd',
+                    'pluginOptions' => [
+                        'maxDate' => date("Y-m-d 23:59"),
+                        'applyButtonClasses' => 'applyBtn btn btn-sm btn-success',
+                        'timePicker' => true,
+                        'timePickerIncrement' => 1,
+                        'timePicker24Hour' => true,
+                        'locale' => [
+                            'format' => 'Y-m-d H:i',
+                            'separator' => ' - '
+                        ],
+                    ],
+                ]),
+            ],
             [
                 'attribute' => 'al_response_data',
                 'format' => 'raw',
                 'value' => function (\common\models\ApiLog $model) {
                     return Yii::$app->formatter->asShortSize(mb_strlen($model->al_response_data), 1);
-                //$data = \yii\helpers\VarDumper::dumpAsString(@json_decode($model->al_response_data, true));
-                    //if($data) $data = end($data);
-                    //return $data ? '<small>'.\yii\helpers\StringHelper::truncate(Html::encode($data), 500, '...', null, false).'</small>' : '-';
                 },
             ],
-
-            //'al_response_dt',
-//            [
-//                'attribute' => 'al_response_dt',
-//                'value' => static function (\common\models\ApiLog $model) {
-//                    return $model->al_response_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->al_response_dt), 'php:Y-m-d [H:i:s]') : '-';
-//                },
-//                'format' => 'raw'
-//            ],
 
             [
                 'attribute' => 'al_execution_time',
