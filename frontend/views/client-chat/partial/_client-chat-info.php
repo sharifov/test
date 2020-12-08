@@ -389,13 +389,11 @@ $chatCounter = new ClientChatCounter($client->id);
                                         if ($clientChat->ccv && $clientChat->ccv->ccvCvd) {
                                             $visitorId = $clientChat->ccv->ccvCvd->cvd_visitor_rc_id ?? '';
                                         }
-
-                                        if ($chatRequest = ClientChatRequest::getLastRequestByVisitorId($visitorId, ClientChatRequest::EVENT_TRACK)) {
+                                        if ($chatRequest = ClientChatRequest::getLastRequestPageByVisitorId($visitorId)) {
                                             if ($pageUrl = $chatRequest->getPageUrl()) {
                                                 return Yii::$app->formatter->asUrl($pageUrl, ['target' => '_blank']);
                                             }
                                         }
-
                                         return Yii::$app->formatter->nullDisplay;
                                     },
                                     'format' => 'raw',
