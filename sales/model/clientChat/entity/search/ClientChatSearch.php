@@ -456,10 +456,7 @@ class ClientChatSearch extends ClientChat
             if (isset($commonUsers[$user->id])) {
                 unset($commonUsers[$user->id]);
             }
-            $query->andWhere(['OR',
-                ['cch_owner_user_id' => array_keys($commonUsers)],
-                ['IS', 'cch_owner_user_id', null]
-            ]);
+            $query->andWhere(['cch_owner_user_id' => array_keys($commonUsers)]);
             $query->orderBy([
                 '(cch_status_id = ' . ClientChat::STATUS_ARCHIVE .
                 ' OR cch_status_id = ' . ClientChat::STATUS_CLOSED . ')' => SORT_ASC,
