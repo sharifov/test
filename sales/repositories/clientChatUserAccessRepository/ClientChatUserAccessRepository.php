@@ -76,8 +76,6 @@ class ClientChatUserAccessRepository extends Repository
             $data = ClientChatAccessMessage::pending($userId, (int)$chatUserAccessId);
         } elseif (ClientChatUserAccess::isInStatusSkipGroupList($statusId)) {
             $data = ClientChatAccessMessage::skip($chatId, $userId, (int)$chatUserAccessId);
-        } elseif ($statusId === ClientChatUserAccess::STATUS_TRANSFER_ACCEPT) {
-            $data = ClientChatAccessMessage::acceptTransfer($chatId, $userId, (int)$chatUserAccessId);
         }
 
         \Yii::info('UserId: ' . $userId . '; ' . VarDumper::dumpAsString($data), 'info\updateChatUserAccessWidget');

@@ -84,7 +84,6 @@ function refreshClientChatWidget(obj) {
 
     switch (data.command) {
         case 'accept':
-        case 'accept_transfer':
             if (document.visibilityState == "visible") {
                 if (window.name === 'chat') {
                     window.location.href = data.url;

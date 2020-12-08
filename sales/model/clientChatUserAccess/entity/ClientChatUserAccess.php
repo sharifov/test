@@ -67,7 +67,8 @@ class ClientChatUserAccess extends \yii\db\ActiveRecord
 
     public const STATUS_ACCEPT_GROUP = [
         self::STATUS_ACCEPT,
-        self::STATUS_TAKE,
+        self::STATUS_TRANSFER_ACCEPT,
+        self::STATUS_TAKE
     ];
 
     public const STATUS_SKIP_GROUP = [
