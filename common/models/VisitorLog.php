@@ -230,7 +230,7 @@ class VisitorLog extends \yii\db\ActiveRecord
     {
         $this->vl_source_cid = $chatData['sources']['cid'] ?? $log->vl_source_cid;
         $this->vl_ga_client_id = $chatData['visitor']['client_id'] ?? $log->vl_ga_client_id;
-        $this->vl_ga_user_id = $data['visitor']['uuid'] ?? null;
+        $this->vl_ga_user_id = $chatData['visitor']['uuid'] ?? null;
         $this->vl_gclid = $chatData['sources']['gclid'] ?? $log->vl_gclid;
         $this->vl_dclid = $chatData['sources']['dclid'] ?? $log->vl_dclid;
         $this->vl_utm_source = $chatData['sources']['initial_utm_source'] ?? $log->vl_utm_source;
