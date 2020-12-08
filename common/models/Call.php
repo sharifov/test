@@ -801,7 +801,8 @@ class Call extends \yii\db\ActiveRecord
         $conferenceBase = (bool)(\Yii::$app->params['settings']['voip_conference_base'] ?? false);
 
 //        $userListSocketNotification = [];
-        $isChangedStatus = isset($changedAttributes['c_status_id']);
+//        $isChangedStatus = isset($changedAttributes['c_status_id']);
+        $isChangedStatus = array_key_exists('c_status_id', $changedAttributes);
         $isChangedStatusFromEmptyInclude = array_key_exists('c_status_id', $changedAttributes);
 
         if ($this->c_parent_id && $this->isOut() && ($lead = $this->cLead) && $lead->isCallPrepare()) {
@@ -1028,22 +1029,6 @@ class Call extends \yii\db\ActiveRecord
                                 );
                             }
                         }
-//                    $lead = $this->cLead;
-//
-//                    if ($lead && !$lead->employee_id && $this->c_created_user_id && $lead->status === Lead::STATUS_PENDING) {
-//                        Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $lead->attributes]), 'info\Call:Lead:afterSave');
-//                        $lead->employee_id = $this->c_created_user_id;
-//                        $lead->status = Lead::STATUS_PROCESSING;
-//                        // $lead->l_call_status_id = Lead::CALL_STATUS_PROCESS;
-//                        $lead->l_answered = true;
-//                        if ($lead->save()) {
-//                            Notifications::create($lead->employee_id, 'AutoCreated new Lead (' . $lead->id . ')', 'A new lead (' . $lead->id . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);
-//                            $userListSocketNotification[$lead->employee_id] = $lead->employee_id;
-//                            Notifications::sendSocket('openUrl', ['user_id' => $lead->employee_id], ['url' => $host . '/lead/view/' . $lead->gid], false);
-//                        } else {
-//                            Yii::error(VarDumper::dumpAsString($lead->errors), 'Call:afterSave:Lead:update');
-//                        }
-//                    }
                     }
 
 
@@ -1051,18 +1036,6 @@ class Call extends \yii\db\ActiveRecord
                         $case = $this->cCase;
 
                         if ($case && !$case->cs_user_id && $this->c_created_user_id && $case->isPending()) {
-                            // Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Case' => $case->attributes]), 'info\Call:Case:afterSave');
-//                        $case->cs_user_id = $this->c_created_user_id;
-//                        $case->cs_status = CasesStatus::STATUS_PROCESSING;
-
-//                        if ($case->save()) {
-//                            Notifications::create($case->cs_user_id, 'AutoCreated new Case (' . $case->cs_id . ')', 'A new Case (' . $case->cs_id . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);
-//                            $userListSocketNotification[$case->cs_user_id] = $case->cs_user_id;
-//                            Notifications::sendSocket('openUrl', ['user_id' => $case->cs_user_id], ['url' => $host . '/cases/view/' . $case->cs_gid], false);
-//                        } else {
-//                            Yii::error(VarDumper::dumpAsString($case->errors), 'Call:afterSave:Case:update');
-//                        }
-
                             try {
                                 $casesManageService = Yii::createObject(CasesManageService::class);
                                 $casesManageService->callAutoTake(
