@@ -25,7 +25,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
-    <?php echo $this->render('../hotel-quote-service-log/hotel_quote_log',
+    <?php echo $this->render(
+        '../hotel-quote-service-log/hotel_quote_log',
         [
             'dataProvider' => $dataProvider,
             'filterModel' => $searchModel,

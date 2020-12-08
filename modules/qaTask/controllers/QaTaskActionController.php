@@ -75,8 +75,7 @@ class QaTaskActionController extends FController
         QaTaskDecideLeadReAssignService $decideLeadReAssignService,
         QaTaskDecideService $qaTaskDecideService,
         $config = []
-    )
-    {
+    ) {
         parent::__construct($id, $module, $config);
         $this->takeService = $takeService;
         $this->takeOverService = $takeOverService;

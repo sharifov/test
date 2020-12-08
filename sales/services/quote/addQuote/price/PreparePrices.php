@@ -1,8 +1,6 @@
 <?php
 
-
 namespace sales\services\quote\addQuote\price;
-
 
 use common\models\Lead;
 use common\models\Quote;

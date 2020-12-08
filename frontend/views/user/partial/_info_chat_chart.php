@@ -3,8 +3,7 @@
 ?>
 <h5>Client Chat Chart</h5>
 <div class="well">
-    <?php if (isset($chatInfoGraph) && $chatInfoGraph): ?>
-
+    <?php if (isset($chatInfoGraph) && $chatInfoGraph) : ?>
         <div id="info-chat-chart"></div>
 
         <script type="text/javascript">
@@ -48,7 +47,7 @@
                         'Closed',
                         {role: 'annotation'}
                     ],
-                    <?php foreach($chatInfoGraph as $k => $item): ?>
+                    <?php foreach ($chatInfoGraph as $k => $item) : ?>
                     [
                         '<?=($item['createdDate']) ?>',
                         <?= $item['chatNew'] ?>,
@@ -71,7 +70,7 @@
 
             })
         </script>
-    <?php else: ?>
+    <?php else : ?>
         <div class="row">
             <div class="col-md-12 text-center">
                 <p style="margin: 0;">No results found.</p>

@@ -13,7 +13,7 @@ class ClientChatUserChannelSearch extends ClientChatUserChannel
         return [
             ['ccuc_channel_id', 'integer'],
 
-            ['ccuc_created_dt', 'safe'],
+            [['ccuc_created_dt'], 'date', 'format' => 'php:Y-m-d'],
 
             ['ccuc_created_user_id', 'integer'],
 
@@ -27,7 +27,7 @@ class ClientChatUserChannelSearch extends ClientChatUserChannel
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['ccuc_created_dt' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['ccuc_created_dt' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -51,41 +51,41 @@ class ClientChatUserChannelSearch extends ClientChatUserChannel
     }
 
     public function searchByUser(array $params)
-	{
-		$query = static::find();
+    {
+        $query = static::find();
 
-		$dataProvider = new ActiveDataProvider([
-			'query' => $query
-		]);
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query
+        ]);
 
-		if (!$this->validate()) {
-			$query->where('0=1');
-			return $dataProvider;
-		}
+        if (!$this->validate()) {
+            $query->where('0=1');
+            return $dataProvider;
+        }
 
-		$query->andFilterWhere([
-			'ccc_user_id' => $this->ccuc_user_id
-		]);
+        $query->andFilterWhere([
+            'ccc_user_id' => $this->ccuc_user_id
+        ]);
 
-		return $dataProvider;
-	}
+        return $dataProvider;
+    }
 
-	/**
-	 * @param int $channelId
-	 * @return array|\yii\db\ActiveRecord[]
-	 */
-	public function getAvailableAgentForTransfer(int $channelId): array
-	{
-		$query = self::find()->select([
-			'user_id' => 'ccuc_user_id',
-			new Expression('if (nickname_client_chat is null or nickname_client_chat = \'\', username, nickname_client_chat) as `nickname`')
-		]);
+    /**
+     * @param int $channelId
+     * @return array|\yii\db\ActiveRecord[]
+     */
+    public function getAvailableAgentForTransfer(int $channelId): array
+    {
+        $query = self::find()->select([
+            'user_id' => 'ccuc_user_id',
+            new Expression('if (nickname_client_chat is null or nickname_client_chat = \'\', username, nickname_client_chat) as `nickname`')
+        ]);
 
-		$query->byChannelId($channelId);
-		$query->joinUser();
-		$query->hasRcProfile();
-		$query->onlineUsers();
+        $query->byChannelId($channelId);
+        $query->joinUser();
+        $query->hasRcProfile();
+        $query->onlineUsers();
 
-		return $query->asArray()->all();
-	}
+        return $query->asArray()->all();
+    }
 }

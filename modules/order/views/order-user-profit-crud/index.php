@@ -7,6 +7,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel modules\order\src\entities\orderUserProfit\search\OrderUserProfitSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -33,9 +34,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'oup_order_id',
                 'value' => static function (OrderUserProfit $orderUserProfit) {
                     return Html::a($orderUserProfit->oup_order_id, Url::toRoute(['/order/order-crud/view', 'id' => $orderUserProfit->oup_order_id]), [
-						'target' => '_blank',
-						'data-pjax' => 0
-					]);
+                        'target' => '_blank',
+                        'data-pjax' => 0
+                    ]);
                 },
                 'format' => 'raw'
             ],
@@ -49,14 +50,14 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'oup_percent',
             'oup_amount',
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'oup_created_dt',
-			],
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'oup_updated_dt',
-			],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'oup_created_dt',
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'oup_updated_dt',
+            ],
 
             [
                 'class' => UserSelect2Column::class,

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $model ProductQuote
  */
@@ -31,7 +32,7 @@ $totalAmountQuote = 0.0;
             <!--            <li>-->
             <!--                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>-->
             <!--            </li>-->
-            <?php if(!$model->isDeclined()): ?>
+            <?php if (!$model->isDeclined()) : ?>
                 <li class="dropdown dropdown-offer-menu" data-product-quote-id="<?=($model->pq_id)?>" data-lead-id="<?=($model->pqProduct->pr_lead_id)?>" data-url="<?=\yii\helpers\Url::to(['/offer/offer/list-menu-ajax'])?>">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="far fa-handshake"></i> Offers</a>
                     <div class="dropdown-menu" role="menu">
@@ -94,37 +95,37 @@ $totalAmountQuote = 0.0;
                         'title' => 'View status log'
                     ]) ?>
 
-                    <?php if($flightQuote): ?>
+                    <?php if ($flightQuote) : ?>
                         <?php
                             $tripsInfo = [];
                             $needRecheck = false;
                             $firstSegment = null;
                             $lastSegment = null;
                         ?>
-                        <?php foreach ($flightQuote->flightQuoteTrips as $trip):?>
+                        <?php foreach ($flightQuote->flightQuoteTrips as $trip) :?>
                             <?php
                             $segments = $trip->flightQuoteSegments;
                             $segmentsCnt = count($segments);
 
-                            if( $segments ) {
+                            if ($segments) {
                                 $stopCnt = $segmentsCnt - 1;
                                 $firstSegment = $segments[0];
-                                $lastSegment = $segments[$segmentsCnt-1];
-                                //					$lastSegment = end($segments);
+                                $lastSegment = $segments[$segmentsCnt - 1];
+                                //                  $lastSegment = end($segments);
                                 $cabins = [];
                                 $marketingAirlines = [];
                                 $airlineNames = [];
-                                foreach ($segments as $segment){
-                                    if(!in_array(SearchService::getCabin($segment->fqs_cabin_class), $cabins, false)){
+                                foreach ($segments as $segment) {
+                                    if (!in_array(SearchService::getCabin($segment->fqs_cabin_class), $cabins, false)) {
                                         $cabins[] = SearchService::getCabin($segment->fqs_cabin_class);
                                     }
-                                    if (isset($segment->fqs_recheck_baggage) && $segment->fqs_recheck_baggage){
+                                    if (isset($segment->fqs_recheck_baggage) && $segment->fqs_recheck_baggage) {
                                         $needRecheck = true;
                                     }
-                                    if(isset($segment->fqs_stop) && $segment->fqs_stop > 0){
+                                    if (isset($segment->fqs_stop) && $segment->fqs_stop > 0) {
                                         $stopCnt += $segment->fqs_stop;
                                     }
-                                    if(!in_array($segment->fqs_marketing_airline, $marketingAirlines)){
+                                    if (!in_array($segment->fqs_marketing_airline, $marketingAirlines)) {
                                         $marketingAirlines[] = $segment->fqs_marketing_airline;
 
                                         $airlineNames[] = $segment->marketingAirline ? $segment->marketingAirline->name : $segment->fqs_marketing_airline;
@@ -135,19 +136,18 @@ $totalAmountQuote = 0.0;
                                         }else{
                                             $airlineNames[] = $segment->qs_marketing_airline;
                                         }*/
-
                                     }
                                 }
 
-                                $tripsInfo[] = $firstSegment->fqs_departure_airport_iata.' → '.$lastSegment->fqs_arrival_airport_iata;
+                                $tripsInfo[] = $firstSegment->fqs_departure_airport_iata . ' → ' . $lastSegment->fqs_arrival_airport_iata;
                             }
 
 
 
 
-                            //		$tripsInfo[] = ($firstSegment->fqs_departure_airport_iata && $lastSegment->fqs_arrival_airport_iata)?
-                            //			$firstSegment->fqs_departure_airport_iata.' → '.$lastSegment->fqs_arrival_airport_iata:
-                            //			$firstSegment->fqs_ departure_airport_iata.' → '.$lastSegment->fqs_arrival_airport_iata;
+                            //      $tripsInfo[] = ($firstSegment->fqs_departure_airport_iata && $lastSegment->fqs_arrival_airport_iata)?
+                            //          $firstSegment->fqs_departure_airport_iata.' → '.$lastSegment->fqs_arrival_airport_iata:
+                            //          $firstSegment->fqs_ departure_airport_iata.' → '.$lastSegment->fqs_arrival_airport_iata;
                             ?>
                         <?php endforeach;?>
 
@@ -155,7 +155,7 @@ $totalAmountQuote = 0.0;
                         <?= Html::a('<i class="fa fa-search"></i> Details', null, [
                             'class' => 'btn-flight-quote-details dropdown-item',
                             'data-id' => $model->pq_id,
-                            'data-title' => implode(', ',$tripsInfo),
+                            'data-title' => implode(', ', $tripsInfo),
                             'data-url' => Url::to(['/flight/flight-quote/ajax-quote-details', 'id' => $model->pq_id]),
                             //'data-target' => '#quote_detail_'.$model->uid,
                             'title' => 'Details'
@@ -186,26 +186,26 @@ $totalAmountQuote = 0.0;
                         ]) ?>
 
                         <!---->
-                        <!--					--><?php //= Html::a('<i class="fa fa-list-alt"></i> Reserv. dump', null, [
-                        //						'class' => 'btn-reservation-dump dropdown-item',
-                        //						'title' => 'Reservation Dump quote: ' . $model->uid,
-                        //						'data-content' => \yii\helpers\Html::encode($model->reservation_dump)
-                        //					]) ?>
+                        <!--                    --><?php //= Html::a('<i class="fa fa-list-alt"></i> Reserv. dump', null, [
+                        //                      'class' => 'btn-reservation-dump dropdown-item',
+                        //                      'title' => 'Reservation Dump quote: ' . $model->uid,
+                        //                      'data-content' => \yii\helpers\Html::encode($model->reservation_dump)
+                        //                  ]) ?>
                         <!---->
                         <!---->
-                        <!--					--><?php //if (!$appliedQuote): ?>
+                        <!--                    --><?php //if (!$appliedQuote): ?>
                         <!---->
-                        <!--						--><?php // echo Html::a('<i class="fa fa-copy"></i> Clone', null, [
-                        //							'class' => 'clone-quote-by-uid-self dropdown-item',
-                        //							'data-uid' => $model->uid,
-                        //							// 'data-url' => Url::to(['quote/clone', 'leadId' => $leadId, 'qId' => $model->id]),
-                        //							'title' => 'Clone'
-                        //						]);
-                        //						?>
+                        <!--                        --><?php // echo Html::a('<i class="fa fa-copy"></i> Clone', null, [
+                        //                          'class' => 'clone-quote-by-uid-self dropdown-item',
+                        //                          'data-uid' => $model->uid,
+                        //                          // 'data-url' => Url::to(['quote/clone', 'leadId' => $leadId, 'qId' => $model->id]),
+                        //                          'title' => 'Clone'
+                        //                      ]);
+                        //                      ?>
                         <!---->
-                        <!--					--><?php //endif; ?>
+                        <!--                    --><?php //endif; ?>
                         <!---->
-                        <!--					--><?php //if(!$model->isDeclined()):?>
+                        <!--                    --><?php //if(!$model->isDeclined()):?>
                         <!---->
                         <?php  echo Html::a('<i class="fa fa-eye"></i> Checkout Page', $model->getCheckoutUrlPage(), [
                             'class' => 'dropdown-item',
@@ -237,7 +237,7 @@ $totalAmountQuote = 0.0;
             'is_manager' => $is_manager,
         ])*/ ?>
         <i class="fa fa-user"></i> <?=$model->pqOwnerUser ? Html::encode($model->pqOwnerUser->username) : '-'?>,
-        <?php if($flightQuote && $flightQuote->fq_created_expert_name): ?>
+        <?php if ($flightQuote && $flightQuote->fq_created_expert_name) : ?>
             <i class="fa fa-user-secret"></i> <?= Html::encode($flightQuote->fq_created_expert_name)?>,
         <?php endif; ?>
         <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($model->pqProduct->pr_created_dt)) ?>,
@@ -247,14 +247,14 @@ $totalAmountQuote = 0.0;
 
         <table class="table table-striped table-striped">
                 <tr>
-                    <?php if ($flightQuote->isAlternative()): ?>
+                    <?php if ($flightQuote->isAlternative()) : ?>
                     <td>
                         <?=$flightQuote->isAlternative() ? \yii\helpers\Html::tag('i', '', ['class' => 'fa fa-font', 'title' => 'Alternative quote']) : ''?>
                     </td>
                     <?php endif;?>
 
 
-                    <?php if ($model->pq_clone_id): ?>
+                    <?php if ($model->pq_clone_id) : ?>
                     <td>
                         <span class="badge badge-warning" style="padding-left: 5px">CLONE</span>
                     </td>
@@ -267,15 +267,19 @@ $totalAmountQuote = 0.0;
                             </span>
 
                             <?php $airline = $flightQuote->mainAirline;
-                            if($airline) { echo \yii\helpers\Html::encode($airline->name); }
+                            if ($airline) {
+                                echo \yii\helpers\Html::encode($airline->name);
+                            }
                             ?> &nbsp;[<strong><?= $flightQuote->fq_main_airline?></strong>]
                         </span>
                     </td>
 
                     <td>
-                        <div class="quote__gds" title="GDS / <?php if (!empty($flightQuote->fq_gds_offer_id)): echo 'GDS Offer ID: ' . \yii\helpers\Html::encode($flightQuote->fq_gds_offer_id) . ' /'; endif; ?> PCC">
+                        <div class="quote__gds" title="GDS / <?php if (!empty($flightQuote->fq_gds_offer_id)) :
+                            echo 'GDS Offer ID: ' . \yii\helpers\Html::encode($flightQuote->fq_gds_offer_id) . ' /';
+                                                             endif; ?> PCC">
                             <strong><?= SearchService::getGDSName($flightQuote->fq_gds)?></strong>
-                            <?php if (!empty($flightQuote->fq_gds_offer_id)): ?>
+                            <?php if (!empty($flightQuote->fq_gds_offer_id)) : ?>
                                 <i class="fas fa-passport success"></i>
                             <?php endif; ?>
                             / <i><?= Html::encode($flightQuote->fq_gds_pcc)?></i>
@@ -288,7 +292,7 @@ $totalAmountQuote = 0.0;
                             <strong><?= $flightQuote->getEmployeeName() ?></strong>
                         </span>
                     </td>*/ ?>
-                        <?php Pjax::begin(['id' => 'pjax-quote_estimation_profit-'.$flightQuote->fq_id, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
+                        <?php Pjax::begin(['id' => 'pjax-quote_estimation_profit-' . $flightQuote->fq_id, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
                             <?php $priceData = FlightQuoteHelper::getPricesData($flightQuote); ?>
                             <?php /*if($model->isApplied() && $model->pqProduct->prLead->final_profit !== null): ?>
                             <td>
@@ -321,7 +325,7 @@ $totalAmountQuote = 0.0;
                             <?php $meta = FlightQuoteHelper::getMetaInfo($flightQuote); ?>
                             <?php $penalties = FlightQuoteHelper::getPenaltiesInfo($flightQuote); ?>
 
-                            <?php if($ticketSegments):?>
+                            <?php if ($ticketSegments) :?>
                                 <span title="Separate Ticket (<?=count($ticketSegments)?>)" data-toggle="tooltip">
                                     <i class="fa fa-ticket fa-border text-info"> <?=count($ticketSegments)?></i>
                                 </span>
@@ -330,21 +334,21 @@ $totalAmountQuote = 0.0;
                             <?php echo FlightQuoteHelper::formattedFreeBaggage($meta, 'success') ?>
 
                             <span class="<?=$baggageInfo['hasFreeBaggage'] ? ($baggageInfo['freeBaggageInfo'] ? 'success' : 'warning') : ''?>" data-toggle="tooltip"
-                                  title="<?= ($baggageInfo['freeBaggageInfo'])?'Free baggage - '.$baggageInfo['freeBaggageInfo']:'No free baggage'?>"
-                                  data-original-title="<?= ($baggageInfo['freeBaggageInfo'])?'Free baggage - '.$baggageInfo['freeBaggageInfo']:'No free baggage'?>">
+                                  title="<?= ($baggageInfo['freeBaggageInfo']) ? 'Free baggage - ' . $baggageInfo['freeBaggageInfo'] : 'No free baggage'?>"
+                                  data-original-title="<?= ($baggageInfo['freeBaggageInfo']) ? 'Free baggage - ' . $baggageInfo['freeBaggageInfo'] : 'No free baggage'?>">
                                     <i class="fa fa-suitcase fa-border"></i><span class="quote__badge-num"></span>
                             </span>
 
-                            <?php if($needRecheck): ?>
+                            <?php if ($needRecheck) : ?>
                                 <span class="<?=$needRecheck ? 'warning' : ''?>" data-toggle="tooltip"
-                                      title="<?= ($needRecheck)?'Bag re-check may be required' : 'Bag re-check not required'?>"
-                                      data-original-title="<?= ($needRecheck)?'Bag re-check may be required' : 'Bag re-check not required'?>">
+                                      title="<?= ($needRecheck) ? 'Bag re-check may be required' : 'Bag re-check not required'?>"
+                                      data-original-title="<?= ($needRecheck) ? 'Bag re-check may be required' : 'Bag re-check not required'?>">
                                       <i class="fas fa-warning fa-border"></i>
                                 </span>
                             <?php endif; ?>
 
 
-                            <?php if($hasAirportChange): ?>
+                            <?php if ($hasAirportChange) : ?>
                                 <span class="<?=$hasAirportChange ? 'warning' : 'default'?>" data-toggle="tooltip"
                                       title="<?= ($hasAirportChange) ? 'Airports Change' : 'No Airports Change'?>"
                                       data-original-title="<?= ($hasAirportChange) ? 'Airports Change' : 'No Airports Change'?>">
@@ -365,34 +369,34 @@ $totalAmountQuote = 0.0;
 
             </table>
 
-            <?php if($flightQuote): ?>
+            <?php if ($flightQuote) : ?>
                 <div class="col-md-12">
                     <div class="quote__trip">
 
-                        <?php foreach ($flightQuote->flightQuoteTrips as $trip):?>
+                        <?php foreach ($flightQuote->flightQuoteTrips as $trip) :?>
                             <?php
 
                             $segments = $trip->flightQuoteSegments;
-                            if( $segments ) {
+                            if ($segments) {
                                 $segmentsCnt = count($segments);
                                 $stopCnt = $segmentsCnt - 1;
                                 $firstSegment = $segments[0];
-                                $lastSegment = $segments[$segmentsCnt-1];
-            //					$lastSegment = end($segments);
+                                $lastSegment = $segments[$segmentsCnt - 1];
+            //                  $lastSegment = end($segments);
                                 $cabins = [];
                                 $marketingAirlines = [];
                                 $airlineNames = [];
-                                foreach ($segments as $segment){
-                                    if(!in_array(SearchService::getCabin($segment->fqs_cabin_class), $cabins, false)){
+                                foreach ($segments as $segment) {
+                                    if (!in_array(SearchService::getCabin($segment->fqs_cabin_class), $cabins, false)) {
                                         $cabins[] = SearchService::getCabin($segment->fqs_cabin_class);
                                     }
-                                    if (isset($segment->fqs_recheck_baggage) && $segment->fqs_recheck_baggage){
+                                    if (isset($segment->fqs_recheck_baggage) && $segment->fqs_recheck_baggage) {
                                         $needRecheck = true;
                                     }
-                                    if(isset($segment->fqs_stop) && $segment->fqs_stop > 0){
+                                    if (isset($segment->fqs_stop) && $segment->fqs_stop > 0) {
                                         $stopCnt += $segment->fqs_stop;
                                     }
-                                    if(!in_array($segment->fqs_marketing_airline, $marketingAirlines)){
+                                    if (!in_array($segment->fqs_marketing_airline, $marketingAirlines)) {
                                         $marketingAirlines[] = $segment->fqs_marketing_airline;
 
                                         $airlineNames[] = $segment->marketingAirline ? $segment->marketingAirline->name : $segment->fqs_marketing_airline;
@@ -403,7 +407,6 @@ $totalAmountQuote = 0.0;
                                         }else{
                                             $airlineNames[] = $segment->qs_marketing_airline;
                                         }*/
-
                                     }
                                 }
                             } else {
@@ -412,37 +415,37 @@ $totalAmountQuote = 0.0;
                             ?>
                             <div class="quote__segment">
                                 <div class="quote__info">
-                                    <?php if(count($marketingAirlines) == 1):?>
+                                    <?php if (count($marketingAirlines) == 1) :?>
                                         <img src="//www.gstatic.com/flights/airline_logos/70px/<?= $marketingAirlines[0]?>.png" alt="<?= $marketingAirlines[0]?>" class="quote__airline-logo">
-                                    <?php else:?>
-                                        <img src="/img/multiple_airlines.png" alt="<?= implode(', ',$marketingAirlines)?>" class="quote__airline-logo">
+                                    <?php else :?>
+                                        <img src="/img/multiple_airlines.png" alt="<?= implode(', ', $marketingAirlines)?>" class="quote__airline-logo">
                                     <?php endif;?>
                                     <div class="quote__info-options">
                                         <div class="quote__duration"><?= SearchService::durationInMinutes($trip->fqt_duration)?></div>
-                                        <div class="quote__airline-name"><?= implode(', ',$airlineNames);?></div>
+                                        <div class="quote__airline-name"><?= implode(', ', $airlineNames);?></div>
                                     </div>
                                 </div>
                                 <div class="quote__itinerary">
                                     <div class="quote__itinerary-col quote__itinerary-col--from">
                                         <div class="quote__datetime">
-                                            <span class="quote__time"><?= Yii::$app->formatter_search->asDatetime(strtotime($firstSegment->fqs_departure_dt),'h:mm a')?></span>
-                                            <span class="quote__date"><?= Yii::$app->formatter_search->asDatetime(strtotime($firstSegment->fqs_departure_dt),'MMM d')?></span>
+                                            <span class="quote__time"><?= Yii::$app->formatter_search->asDatetime(strtotime($firstSegment->fqs_departure_dt), 'h:mm a')?></span>
+                                            <span class="quote__date"><?= Yii::$app->formatter_search->asDatetime(strtotime($firstSegment->fqs_departure_dt), 'MMM d')?></span>
                                         </div>
                                         <div class="quote__location">
                                             <div class="quote__airport">
-                                                <span class="quote__city"><?= ($firstSegment->fqs_departure_airport_iata)?$firstSegment->departureAirport->city:$firstSegment->fqs_departure_airport_iata?></span>
+                                                <span class="quote__city"><?= ($firstSegment->fqs_departure_airport_iata) ? $firstSegment->departureAirport->city : $firstSegment->fqs_departure_airport_iata?></span>
                                                 <span class="quote__iata"><?= $firstSegment->fqs_departure_airport_iata?></span>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="quote__itinerary-col quote__itinerary-col--to">
                                         <div class="quote__datetime">
-                                            <span class="quote__time"><?= Yii::$app->formatter_search->asDatetime(strtotime($lastSegment->fqs_arrival_dt),'h:mm a')?></span>
-                                            <span class="quote__date"><?= Yii::$app->formatter_search->asDatetime(strtotime($lastSegment->fqs_arrival_dt),'MMM d')?></span>
+                                            <span class="quote__time"><?= Yii::$app->formatter_search->asDatetime(strtotime($lastSegment->fqs_arrival_dt), 'h:mm a')?></span>
+                                            <span class="quote__date"><?= Yii::$app->formatter_search->asDatetime(strtotime($lastSegment->fqs_arrival_dt), 'MMM d')?></span>
                                         </div>
                                         <div class="quote__location">
                                             <div class="quote__airport">
-                                                <span class="quote__city"><?= ($lastSegment->arrivalAirport)?$lastSegment->arrivalAirport->city:$lastSegment->fqs_arrival_airport_iata?></span>
+                                                <span class="quote__city"><?= ($lastSegment->arrivalAirport) ? $lastSegment->arrivalAirport->city : $lastSegment->fqs_arrival_airport_iata?></span>
                                                 <span class="quote__iata"><?= $lastSegment->fqs_arrival_airport_iata?></span>
                                             </div>
                                         </div>
@@ -452,14 +455,14 @@ $totalAmountQuote = 0.0;
                                     <div class="quote__stops">
                                         <span class="quote__stop-quantity"><?= \Yii::t('search', '{n, plural, =0{Nonstop} one{# stop} other{# stops}}', ['n' => $stopCnt]);?></span>
                                     </div>
-                                    <div class="quote__cabin"><?= implode(', ',$cabins)?></div>
+                                    <div class="quote__cabin"><?= implode(', ', $cabins)?></div>
                                 </div>
                             </div>
                         <?php endforeach;?>
                     </div>
                 </div>
 
-                <?php Pjax::begin(['id' => 'pjax-quote_prices-'.$flightQuote->fq_id, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
+                <?php Pjax::begin(['id' => 'pjax-quote_prices-' . $flightQuote->fq_id, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
                 <?= $this->render('_quote_prices', [
                     'quote' => $model,
                     'flightQuote' => $flightQuote,
@@ -468,7 +471,7 @@ $totalAmountQuote = 0.0;
                 <?php Pjax::end(); ?>
 
 
-            <?php else: ?>
+            <?php else : ?>
                 <div class="d-flex justify-content-center align-items-center">
                     <p style="margin: 20px 0;">Not found quote data</p>
                 </div>

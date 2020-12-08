@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @link http://www.yiiframework.com/
  * @copyright Copyright (c) 2008 Yii Software LLC
@@ -107,21 +108,21 @@ class Notifications extends \yii\bootstrap\Widget
         $content = $this->render('notifications', ['model' => $result['model'], 'newCount' => $result['newCount']]);
 
         $removeCache = false;
-        if($result['model']) {
+        if ($result['model']) {
             /** @var \common\models\Notifications $notify */
             foreach ($result['model'] as $notify) {
-                if($notify->n_popup && !$notify->n_popup_show) {
+                if ($notify->n_popup && !$notify->n_popup_show) {
                     $notify->n_popup_show = true;
-                    if( $notify->save())  {
+                    if ($notify->save()) {
                         $removeCache = true;
                     }
                 }
             }
         }
 
-        if($removeCache) {
+        if ($removeCache) {
 //            $cache->delete($key);
-           self::cacheInvalidate($user_id);
+            self::cacheInvalidate($user_id);
         }
 
 

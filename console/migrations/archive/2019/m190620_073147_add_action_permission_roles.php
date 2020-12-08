@@ -80,6 +80,4 @@ class m190620_073147_add_action_permission_roles extends Migration
             Yii::$app->cache->flush();
         }
     }
-
-
 }

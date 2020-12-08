@@ -3,6 +3,8 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\DateTimeColumn;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\PaymentSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -31,7 +33,11 @@ $this->params['breadcrumbs'][] = $this->title;
             'pay_type_id',
             'pay_method_id',
             'pay_status_id',
-            'pay_date',
+            //'pay_date',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'pay_date'
+            ],
             //'pay_amount',
             //'pay_currency',
             //'pay_invoice_id',

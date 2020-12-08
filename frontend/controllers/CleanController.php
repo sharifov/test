@@ -2,11 +2,19 @@
 
 namespace frontend\controllers;
 
+use sales\auth\Auth;
+use sales\helpers\app\AppHelper;
+use sales\helpers\ErrorsToStringHelper;
+use sales\services\cleaner\DbCleanerService;
+use sales\services\cleaner\form\DbCleanerParamsForm;
 use Yii;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\FileHelper;
 use yii\filters\VerbFilter;
+use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\Response;
 
 /**
@@ -39,7 +47,6 @@ class CleanController extends FController
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
-
     public function init(): void
     {
         parent::init();
@@ -49,7 +56,7 @@ class CleanController extends FController
     /**
      * @return Response
      */
-    public function actionIndex() : string
+    public function actionIndex(): string
     {
         return $this->render('index');
     }
@@ -58,11 +65,11 @@ class CleanController extends FController
      * @return Response
      * @throws \yii\base\ErrorException
      */
-    public function actionAssets() : Response
+    public function actionAssets(): Response
     {
         foreach ((array)$this->assetPaths as $path) {
             $this->cleanDir($path);
-            Yii::$app->session->addFlash('cleaner', 'Assets path "'	. $path .	'" is cleaned.');
+            Yii::$app->session->addFlash('cleaner', 'Assets path "' . $path .   '" is cleaned.');
         }
         //exit;
         return $this->redirect(['index']);
@@ -72,11 +79,11 @@ class CleanController extends FController
      * @return Response
      * @throws \yii\base\ErrorException
      */
-    public function actionRuntime() : Response
+    public function actionRuntime(): Response
     {
         foreach ((array)$this->runtimePaths as $path) {
             $this->cleanDir($path);
-            Yii::$app->session->addFlash('cleaner', 'Runtime path "'	. $path .	'" is cleaned.');
+            Yii::$app->session->addFlash('cleaner', 'Runtime path "'    . $path .   '" is cleaned.');
         }
         return $this->redirect(['index']);
     }
@@ -85,7 +92,7 @@ class CleanController extends FController
     {
         foreach ((array)$this->caches as $cache) {
             Yii::$app->get($cache)->flush();
-            Yii::$app->session->addFlash('cleaner','Cache "'	. $cache . '" is cleaned.');
+            Yii::$app->session->addFlash('cleaner','Cache "'    . $cache . '" is cleaned.');
         }
         return $this->redirect(['index']);
     }*/
@@ -95,7 +102,7 @@ class CleanController extends FController
      * @return \yii\web\Response
      * @throws \yii\base\ErrorException
      */
-    public function actionCache() : Response
+    public function actionCache(): Response
     {
         $successItems = [];
         $warningItems = [];
@@ -120,9 +127,9 @@ class CleanController extends FController
             FileHelper::removeDirectory($dir);
 
             if (!file_exists($dir)) {
-                $successItems[] = 'Removed dir '.$dir;
+                $successItems[] = 'Removed dir ' . $dir;
             } else {
-                $warningItems[] = 'Not Removed dir '.$dir;
+                $warningItems[] = 'Not Removed dir ' . $dir;
             }
         }
 
@@ -137,12 +144,58 @@ class CleanController extends FController
         return $this->redirect(['index']); //Yii::$app->request->referrer
     }
 
+    /**
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function actionCleanTableAjax(): array
+    {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $result = ['message' => '', 'status' => 0];
+
+            try {
+                if (!Auth::can('global/clean/table')) {
+                    throw new ForbiddenHttpException('You don\'t have access to this page', -1);
+                }
+                $form = new DbCleanerParamsForm();
+                if (!$form->load(Yii::$app->request->post())) {
+                    throw new BadRequestHttpException('Form not loaded from post request', -2);
+                }
+                if (!$form->validate()) {
+                    throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($form), -3);
+                }
+
+                $dbCleanerService = new DbCleanerService();
+                $cleaner = $dbCleanerService->initClass($form->table);
+                $processed = $cleaner->runDeleteByForm($form);
+
+                if ($processed) {
+                    $message = 'Processed ' . $processed . ' records';
+                } else {
+                    $message = 'No records found matching the specified criteria';
+                }
+
+                $result['message'] = $message;
+                $result['status'] = 1;
+            } catch (\Throwable $throwable) {
+                AppHelper::throwableLogger(
+                    $throwable,
+                    'CleanController:actionCleanTableAjax:throwable'
+                );
+                $result['message'] = VarDumper::dumpAsString($throwable->getMessage());
+            }
+            return $result;
+        }
+        throw new BadRequestHttpException();
+    }
+
 
     /**
      * @param $dir
      * @throws \yii\base\ErrorException
      */
-    private function cleanDir($dir) : void
+    private function cleanDir($dir): void
     {
         $iterator = new \DirectoryIterator(Yii::getAlias($dir));
         foreach ($iterator as $sub) {

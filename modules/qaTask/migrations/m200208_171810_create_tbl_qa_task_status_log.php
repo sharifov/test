@@ -5,7 +5,6 @@ namespace modules\qaTask\migrations;
 use Yii;
 use yii\db\Migration;
 
-
 /**
  * Class m200208_171810_create_tbl_qa_task_status_log
  */

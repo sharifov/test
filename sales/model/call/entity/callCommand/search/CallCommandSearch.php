@@ -19,7 +19,8 @@ class CallCommandSearch extends CallCommand
     {
         return [
             [['ccom_id', 'ccom_parent_id', 'ccom_project_id', 'ccom_type_id', 'ccom_sort_order', 'ccom_user_id', 'ccom_created_user_id', 'ccom_updated_user_id'], 'integer'],
-            [['ccom_lang_id', 'ccom_name', 'ccom_params_json', 'ccom_created_dt', 'ccom_updated_dt'], 'safe'],
+            [['ccom_lang_id', 'ccom_name', 'ccom_params_json'], 'safe'],
+            [['ccom_created_dt', 'ccom_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -68,7 +69,7 @@ class CallCommandSearch extends CallCommand
             'ccom_updated_dt' => $this->ccom_updated_dt,
         ]);
 
-        if ($this->ccom_created_dt){
+        if ($this->ccom_created_dt) {
             $query->andFilterWhere(['>=', 'ccom_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ccom_created_dt))])
                 ->andFilterWhere(['<=', 'ccom_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ccom_created_dt) + 3600 * 24)]);
         }

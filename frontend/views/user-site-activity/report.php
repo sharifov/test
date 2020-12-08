@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel frontend\models\search\UserSiteActivitySearch */
 /* @var $data array */
@@ -32,7 +33,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
 
     <?php //\yii\helpers\VarDumper::dump($data, 10, true)?>
 
-    <?php if (isset($data['byHour']) && $data['byHour']): ?>
+    <?php if (isset($data['byHour']) && $data['byHour']) : ?>
         <div class="row">
             <div class="col-md-12">
 
@@ -46,7 +47,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                     function drawChart() {
                         var data = google.visualization.arrayToDataTable([
                             ['Days', 'Count', {role: 'annotation'}],
-                            <?php foreach($data['byHour'] as $k => $item):?>
+                            <?php foreach ($data['byHour'] as $k => $item) :?>
                             ['<?=($item['created_hour'])?>:00, <?=date('d-M', strtotime($item['created_date']))?> ', <?=$item['cnt']?>, '<?='--'?>'],
                             <?php endforeach;?>
                         ]);
@@ -81,8 +82,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
 
             <div class="col-md-6">
                 <div id="chart_div2"></div>
-                <?php if (isset($data['byUser']) && $data['byUser']): ?>
-
+                <?php if (isset($data['byUser']) && $data['byUser']) : ?>
                     <?php
                     $this->registerJs('google.charts.setOnLoadCallback(drawBasic2);', \yii\web\View::POS_READY);
                     ?>
@@ -91,10 +91,12 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                         function drawBasic2() {
                             var data = google.visualization.arrayToDataTable([
                                 ['Agent', 'Count of Requests'],
-                                <?php foreach($data['byUser'] as $k => $item):
+                                <?php foreach ($data['byUser'] as $k => $item) :
                                     $employee = \common\models\Employee::find()->where(['id' => $item['user_id']])->limit(1)->one();
-                                    if(!$employee) continue;
-                                ?>
+                                    if (!$employee) {
+                                        continue;
+                                    }
+                                    ?>
                                 ['<?php echo \yii\helpers\Html::encode($employee->username) ?>', <?=$item['cnt']?>],
                                 <?php endforeach;?>
                             ]);
@@ -114,8 +116,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
 
         <div class="col-md-6">
             <div id="chart_div3"></div>
-            <?php if (isset($data['byPage']) && $data['byPage']): ?>
-
+            <?php if (isset($data['byPage']) && $data['byPage']) : ?>
                 <?php
                 $this->registerJs('google.charts.setOnLoadCallback(drawBasic3);', \yii\web\View::POS_READY);
                 ?>
@@ -124,7 +125,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                     function drawBasic3() {
                         var data = google.visualization.arrayToDataTable([
                             ['Page URL', 'Count of Requests'],
-                            <?php foreach($data['byPage'] as $k => $item): ?>
+                            <?php foreach ($data['byPage'] as $k => $item) : ?>
                             ['<?php echo \yii\helpers\Html::encode($item['page_url']) ?>', <?=$item['cnt']?>],
                             <?php endforeach;?>
                         ]);

@@ -1,4 +1,5 @@
 <?php
+
 namespace modules\flight\src\helpers;
 
 /**
@@ -13,28 +14,28 @@ namespace modules\flight\src\helpers;
  */
 class FlightQuotePriceDataDTO
 {
-	/**
-	 * @var $prices FlightQuotePaxPriceDataDTO[]
-	 */
-	public $prices;
+    /**
+     * @var $prices FlightQuotePaxPriceDataDTO[]
+     */
+    public $prices;
 
-	/**
-	 * @var FlightQuoteTotalPriceDTO
-	 */
-	public $total;
+    /**
+     * @var FlightQuoteTotalPriceDTO
+     */
+    public $total;
 
-	/**
-	 * @var float
-	 */
-	public $serviceFeePercent;
+    /**
+     * @var float
+     */
+    public $serviceFeePercent;
 
-	/**
-	 * @var float
-	 */
-	public $serviceFee;
+    /**
+     * @var float
+     */
+    public $serviceFee;
 
-	/**
-	 * @var float
-	 */
-	public $processingFee;
+    /**
+     * @var float
+     */
+    public $processingFee;
 }

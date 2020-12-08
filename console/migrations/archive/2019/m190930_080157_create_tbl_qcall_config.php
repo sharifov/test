@@ -48,7 +48,7 @@ class m190930_080157_create_tbl_qcall_config extends Migration
             $tableOptions = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE=InnoDB';
         }
 
-        $this->createTable('{{%qcall_config}}',	[
+        $this->createTable('{{%qcall_config}}', [
             'qc_status_id'              => $this->integer()->notNull(),
             'qc_call_att'               => $this->integer()->notNull(),
             'qc_client_time_enable'     => $this->boolean()->defaultValue(false),
@@ -85,7 +85,7 @@ class m190930_080157_create_tbl_qcall_config extends Migration
 
 
 
-        $this->createTable('{{%lead_qcall}}',	[
+        $this->createTable('{{%lead_qcall}}', [
             'lqc_lead_id'   => $this->integer()->notNull(),
             'lqc_dt_from'   => $this->dateTime()->notNull(),
             'lqc_dt_to'     => $this->dateTime()->notNull(),
@@ -99,9 +99,8 @@ class m190930_080157_create_tbl_qcall_config extends Migration
         $auth = Yii::$app->authManager;
 
         foreach ($this->routes as $route) {
-
             $permission = $auth->getPermission($route);
-            if(!$permission) {
+            if (!$permission) {
                 $permission = $auth->createPermission($route);
                 $auth->add($permission);
             }
@@ -114,9 +113,8 @@ class m190930_080157_create_tbl_qcall_config extends Migration
         }
 
         foreach ($this->routes2 as $route) {
-
             $permission = $auth->getPermission($route);
-            if(!$permission) {
+            if (!$permission) {
                 $permission = $auth->createPermission($route);
                 $auth->add($permission);
             }
@@ -131,7 +129,6 @@ class m190930_080157_create_tbl_qcall_config extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     /**

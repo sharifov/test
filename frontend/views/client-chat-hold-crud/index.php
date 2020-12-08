@@ -6,6 +6,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use dosamigos\datepicker\DatePicker;
+use common\components\grid\DateTimeColumn;
 
 /* @var yii\web\View $this */
 /* @var sales\model\clientChatHold\entity\ClientChatHoldSearch $searchModel */
@@ -32,50 +33,15 @@ $this->params['breadcrumbs'][] = $this->title;
             'cchd_cch_id',
             'cchd_cch_status_log_id',
             [
+                'class' => DateTimeColumn::class,
                 'attribute' => 'cchd_start_dt',
-                'value' => static function (ClientChatHold $model) {
-                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->cchd_start_dt));
-                },
-                'format' => 'raw',
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel,
-                    'attribute' => 'cchd_start_dt',
-                    'clientOptions' => [
-                        'autoclose' => true,
-                        'format' => 'yyyy-mm-dd',
-                        'clearBtn' => true,
-                    ],
-                    'options' => [
-                        'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
-                    ],
-                    'clientEvents' => [
-                        'clearDate' => 'function (e) {$(e.target).find("input").change();}',
-                    ],
-                ]),
+                'format' => 'byUserDateTime'
             ],
+
             [
+                'class' => DateTimeColumn::class,
                 'attribute' => 'cchd_deadline_dt',
-                'value' => static function (ClientChatHold $model) {
-                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->cchd_deadline_dt));
-                },
-                'format' => 'raw',
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel,
-                    'attribute' => 'cchd_deadline_dt',
-                    'clientOptions' => [
-                        'autoclose' => true,
-                        'format' => 'yyyy-mm-dd',
-                        'clearBtn' => true,
-                    ],
-                    'options' => [
-                        'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
-                    ],
-                    'clientEvents' => [
-                        'clearDate' => 'function (e) {$(e.target).find("input").change();}',
-                    ],
-                ]),
+                'format' => 'byUserDateTime'
             ],
 
             ['class' => ActionColumn::class],

@@ -55,8 +55,7 @@ class GmailService
         Logger $logger,
         EmailService $emailService,
         Projects $projects
-    )
-    {
+    ) {
         $this->api = $api;
         $this->emailAccount = $account;
         $this->logger = $logger;
@@ -179,7 +178,6 @@ class GmailService
 
         $savedError = false;
         foreach ($emailsTo as $emailTo) {
-
             $this->logger->log(Message::info('.'));
 
             if ($this->emailExist($messageId, $emailTo)) {
@@ -226,7 +224,6 @@ class GmailService
         if ($savedError === false) {
             $this->addProcessedEmail($gmail->getId());
         }
-
     }
 
     private function processEmail(Email $email): void

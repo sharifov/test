@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $this yii\web\View
  * @var $dataProvider yii\data\ActiveDataProvider
@@ -29,6 +30,7 @@ use vova07\imperavi\Widget;
 $c_type_id = $comForm->c_type_id;
 
 $pjaxContainerId = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled ? 'pjax-lead-communication-log' : 'pjax-lead-communication';
+$pjaxContainerIdForm = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled ? 'pjax-lead-communication-log-form' : 'pjax-lead-communication-form';
 $listItemView = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled ? '_list_item_log' : '_list_item';
 
 $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscribes, 'eu_email'));
@@ -57,13 +59,15 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
         </div>
         <div class="x_content" style="display: block;">
 
-            <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerId , 'timeout' => 5000]) ?>
-
-            <?php $statistics = new StatisticsHelper($lead->id, StatisticsHelper::TYPE_LEAD) ?>
-            <?php echo $this->render('/partial/_communication_statistic', ['statistics' => $statistics->setCountAll()]) ?>
-
             <div class="panel">
                 <div class="chat__list">
+
+                    <div class="communication-block-scroll">
+
+                    <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerId , 'timeout' => 5000]) ?>
+
+                    <?php $statistics = new StatisticsHelper($lead->id, StatisticsHelper::TYPE_LEAD) ?>
+                    <?php echo $this->render('/partial/_communication_statistic', ['statistics' => $statistics->setCountAll()]) ?>
 
                     <?= \yii\widgets\ListView::widget([
                         'dataProvider' => $dataProvider,
@@ -94,7 +98,13 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
 
                     ]) ?>
 
-                    <?php if(!Yii::$app->user->identity->canRole('qa')) : ?>
+                    <?php yii\widgets\Pjax::end() ?>
+
+                    </div>
+
+                    <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerIdForm , 'timeout' => 5000]) ?>
+
+                    <?php if (!Yii::$app->user->identity->canRole('qa')) : ?>
                         <?php if ($unsubscribe) : ?>
                             <div class="chat__form panel">
                                 <div class="alert alert-warning" role="alert">
@@ -150,7 +160,8 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                             <div class="form-group">
 
                                 <?php echo $form2->field($previewEmailForm, 'e_email_message')->textarea(
-                                    ['style' => 'display:none', 'id' => 'e_email_message']) ?>
+                                    ['style' => 'display:none', 'id' => 'e_email_message']
+                                ) ?>
 
                                 <div style="max-height: 800px; overflow-x: auto;">
                                     <iframe id="email_view" src="/lead/get-template?key_cache=<?php echo $previewEmailForm->keyCache?>"
@@ -158,12 +169,12 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                                 </div>
 
                             </div>
-                            <?php if($isAdmin):?>
+                            <?php if ($isAdmin) :?>
                                 <div class="row" style="display: none" id="email-data-content-div">
                         <pre><?php
                             //\yii\helpers\VarDumper::dump($previewEmailForm->e_content_data, 10, true);
                             echo json_encode($previewEmailForm->e_content_data);
-                            ?>
+                        ?>
                         </pre>
                                 </div>
                             <?php endif; ?>
@@ -172,7 +183,7 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                                 <div class="col-md-12">
                                     <?php $messageSize = mb_strlen($previewEmailForm->e_email_message) ?>
                                     <b>Content size: <?=Yii::$app->formatter->asShortSize($messageSize, 1) ?></b>
-                                    <?php if($messageSize > 102 * 1024): ?>
+                                    <?php if ($messageSize > 102 * 1024) : ?>
                                         &nbsp;&nbsp;&nbsp;<span class="danger">Warning: recommended MAX content size: <b><?=Yii::$app->formatter->asShortSize(102 * 1024, 1) ?></b>.</span>
                                     <?php endif; ?>
 
@@ -181,9 +192,11 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                             </div>
 
                             <div class="btn-wrapper text-right">
-                                <?= Html::submitButton('<i class="fa fa-envelope-o"></i> Send Email',
-                                    ['class' => 'btn btn-lg btn-primary', 'id' => 'send_email_btn']) ?>
-                                <?php if($isAdmin):?>
+                                <?= Html::submitButton(
+                                    '<i class="fa fa-envelope-o"></i> Send Email',
+                                    ['class' => 'btn btn-lg btn-primary', 'id' => 'send_email_btn']
+                                ) ?>
+                                <?php if ($isAdmin) :?>
                                     <?= Html::button('<i class="fa fa-list"></i> Show Email data (for Admins)', ['class' => 'btn btn-lg btn-warning', 'onclick' => '$("#email-data-content-div").toggle()']) ?>
                                 <?php endif; ?>
                             </div>
@@ -266,21 +279,21 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
 
                             $clientPhones = $leadForm->getClient()->getPhoneNumbersSms(); //\yii\helpers\ArrayHelper::map($leadForm->getClientPhone(), 'phone', 'phone');
 
-                            if(Yii::$app->session->hasFlash('send-success')) {
+                            if (Yii::$app->session->hasFlash('send-success')) {
                                 echo '<div class="alert alert-success alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
                                 echo Yii::$app->session->getFlash('send-success');
                                 echo '</div>';
                                 $this->registerJs('$("body").removeClass("modal-open"); $(".modal-backdrop").remove();');
                             }
 
-                            if(Yii::$app->session->hasFlash('sms-send-success')) {
+                            if (Yii::$app->session->hasFlash('sms-send-success')) {
                                 echo '<div class="alert alert-success alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
                                 echo Yii::$app->session->getFlash('sms-send-success');
                                 echo '</div>';
                                 $this->registerJs('$("body").removeClass("modal-open"); $(".modal-backdrop").remove();');
                             }
 
-                            if(Yii::$app->session->hasFlash('send-error')) {
+                            if (Yii::$app->session->hasFlash('send-error')) {
                                 echo '<div class="alert alert-danger alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
                                 echo Yii::$app->session->getFlash('send-error');
                                 echo '</div>';
@@ -305,20 +318,17 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                                     $call_type = \common\models\UserProfile::find()->select('up_call_type_id')->where(['up_user_id' => Yii::$app->user->id])->one();
 
 
-                                    if($call_type && $call_type->up_call_type_id) {
+                                    if ($call_type && $call_type->up_call_type_id) {
                                         $call_type_id = $call_type->up_call_type_id;
-
                                     } else {
                                         $call_type_id = \common\models\UserProfile::CALL_TYPE_OFF;
                                     }
 
                                     //\yii\helpers\VarDumper::dump($leadForm->getLead()->id, 10, true); exit;
 
-                                    if($agentParams) {
+                                    if ($agentParams) {
                                         foreach (CommunicationForm::TYPE_LIST as $tk => $itemName) {
-
                                             if ($tk == CommunicationForm::TYPE_EMAIL) {
-
 //                                                if ($agentParams->upp_email) {
                                                 if ($agentParams->getEmail()) {
 //                                                    $typeList[$tk] = $itemName . ' (' . $agentParams->upp_email . ')';
@@ -328,7 +338,6 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
 
 //                                            if ($agentParams->upp_tw_phone_number) {
                                             if ($agentParams->getPhone()) {
-
                                                 if ($tk == CommunicationForm::TYPE_SMS && $smsEnabled) {
 //                                                    $typeList[$tk] = $itemName . ' (' . $agentParams->upp_tw_phone_number . ')';
                                                     $typeList[$tk] = $itemName . ' (' . $agentParams->getPhone() . ')';
@@ -350,12 +359,10 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
 //                                                    }
 //                                                }
                                             }
-
                                         }
                                     }
 
                                     if ($call_type_id) {
-
                                         $callTypeName = \common\models\UserProfile::CALL_TYPE_LIST[$call_type_id] ?? '-';
 
                                         if ($call_type_id == \common\models\UserProfile::CALL_TYPE_SIP && $userModel->userProfile && !$userModel->userProfile->up_sip) {
@@ -388,8 +395,10 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
 
                                 <div class="col-sm-3 form-group message-field-sms message-field-email" id="language-group" style="display: block;">
                                     <?= $form->field($comForm, 'c_language_id')
-                                        ->dropDownList(\common\models\Language::getLanguages(true),
-                                            ['prompt' => '---', 'class' => 'form-control', 'id' => 'language']) ?>
+                                        ->dropDownList(
+                                            \common\models\Language::getLanguages(true),
+                                            ['prompt' => '---', 'class' => 'form-control', 'id' => 'language']
+                                        ) ?>
                                 </div>
 
                                 <div class="col-sm-3 form-group message-field-email" id="email-address" style="display: none;">
@@ -405,7 +414,7 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                                     <?= $form->field($comForm, 'c_phone_number')->dropDownList($clientPhones, ['prompt' => '---', 'class' => 'form-control', 'id' => !SettingHelper::isLeadCommunicationNewCallWidgetEnabled() ? 'c_phone_number' : 'call-to-number']) ?>
                                 </div>
 
-                                <?php if (SettingHelper::isLeadCommunicationNewCallWidgetEnabled()): ?>
+                                <?php if (SettingHelper::isLeadCommunicationNewCallWidgetEnabled()) : ?>
                                     <div class="col-sm-3 form-group message-field-phone" style="display: block;">
                                         <?= Html::label('Phone from', null, ['class' => 'control-label']) ?>
                                         <?= Html::dropDownList('call-from-number', null, $fromPhoneNumbers, ['prompt' => '---', 'id' => 'call-from-number', 'class' => 'form-control', 'label'])?>
@@ -478,41 +487,43 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
 
                                 </div>
                                 <div class="btn-wrapper">
-                                    <?= Html::submitButton('<i class="fa fa-envelope-o"></i> Preview and Send Email',
-                                        ['class' => 'btn btn-lg btn-primary', 'id' => 'preview_email_btn']) ?>
+                                    <?= Html::submitButton(
+                                        '<i class="fa fa-envelope-o"></i> Preview and Send Email',
+                                        ['class' => 'btn btn-lg btn-primary', 'id' => 'preview_email_btn']
+                                    ) ?>
                                 </div>
                             </div>
-                            <?php if (!SettingHelper::isLeadCommunicationNewCallWidgetEnabled()): ?>
+                            <?php if (!SettingHelper::isLeadCommunicationNewCallWidgetEnabled()) : ?>
                                 <div class="chat__call call-box message-field-phone" id="call-box" style="display: none;">
 
                                     <div class="call-box__interlocutor">
-                                        <div class="call-box__interlocutor-name"><?php echo Html::encode($leadForm->getClient()->first_name.' ' . $leadForm->getClient()->last_name); ?></div>
+                                        <div class="call-box__interlocutor-name"><?php echo Html::encode($leadForm->getClient()->first_name . ' ' . $leadForm->getClient()->last_name); ?></div>
                                         <div class="call-box__interlocutor-number" id="div-call-phone-number"><?=$comForm->c_phone_number?></div>
                                     </div>
-                                    <div class="call-box__img <?=$comForm->c_voice_status == 1 ? 'call-box__img--waiting':''?>" id="div-call-img">
+                                    <div class="call-box__img <?=$comForm->c_voice_status == 1 ? 'call-box__img--waiting' : ''?>" id="div-call-img">
                                         <?=Html::img('/img/user.png', ['class' => 'img-circle img-responsive', 'alt' => 'client'])?>
                                     </div>
 
                                     <div class="call-box__status call-box__status--waiting" style="display: block" id="div-call-message">
-                                        <?php if($comForm->c_voice_status == 0):?>
+                                        <?php if ($comForm->c_voice_status == 0) :?>
                                             Waiting
                                         <?php endif;?>
-                                        <?php if($comForm->c_voice_status == 1):?>
+                                        <?php if ($comForm->c_voice_status == 1) :?>
                                             Connection ... <?=$comForm->c_voice_sid?>
                                         <?php endif;?>
-                                        <?php if($comForm->c_voice_status == 2):?>
+                                        <?php if ($comForm->c_voice_status == 2) :?>
                                             Canceled Call
                                         <?php endif;?>
-                                        <?php if($comForm->c_voice_status == 5):?>
+                                        <?php if ($comForm->c_voice_status == 5) :?>
                                             Error Call
                                         <?php endif;?>
                                     </div>
-                                    <?php if($comForm->c_voice_status == 1):?>
+                                    <?php if ($comForm->c_voice_status == 1) :?>
                                         <div class="call-box__status call-box__status--call" style="display: block" id="div-call-time"><i class="fa fa-clock-o"></i>&nbsp;<strong id="div-call-timer">00:00</strong></div>
                                     <?php endif;?>
 
 
-                                    <?php if($call_type_id == \common\models\UserProfile::CALL_TYPE_WEB): ?>
+                                    <?php if ($call_type_id == \common\models\UserProfile::CALL_TYPE_WEB) : ?>
                                         <div class="call-box__btns">
 
                                             <?= Html::a('<i class="fa fa-phone"></i>', '#', ['class' => 'btn call-box__btn call-box__btn--call', 'id' => 'btn-start-web-call',
@@ -527,7 +538,7 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                                             <?php //= Html::button('<i class="fa fa-microphone-slash"></i>', ['class' => 'btn call-box__btn call-box__btn--mute']) ?>
                                             <?php /*= Html::button('<i class="fa fa-pause"></i>', ['class' => 'btn call-box__btn call-box__btn--pause', 'disabled' => true, 'id' => 'btn-pause'])*/ ?>
                                         </div>
-                                    <?php else: ?>
+                                    <?php else : ?>
                                         <div class="call-box__btns">
                                             <?= Html::submitButton('<i class="fa fa-phone"></i>', ['class' => 'btn call-box__btn call-box__btn--call', 'id' => 'btn-start-call', 'disabled' => ($comForm->c_voice_status == 1 ? true : false), 'onclick' => '$("#c_voice_status").val(1)']) ?>
                                             <?= Html::submitButton('<i class="fa fa-stop"></i>', ['class' => 'btn call-box__btn call-box__btn--stop', 'disabled' => $comForm->c_voice_status == 1 ? false : true, 'id' => 'btn-stop-call', 'onclick' => '$("#c_voice_status").val(2)']) ?>
@@ -637,10 +648,10 @@ JS;
                         </div>
                     <?php endif; ?>
 
+                    <?php yii\widgets\Pjax::end() ?>
                 </div>
             </div>
 
-            <?php yii\widgets\Pjax::end() ?>
         </div>
     </div>
 
@@ -657,7 +668,7 @@ JS;
 
 <?php
 $currentUrl = \yii\helpers\Url::current();
-$jsPath = Yii::$app->request->baseUrl.'/js/sounds/';
+$jsPath = Yii::$app->request->baseUrl . '/js/sounds/';
 ?>
 
     <script>

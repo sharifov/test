@@ -21,5 +21,4 @@ class QuoteSegmentRepository
         }
         return $quoteSegment->qs_id;
     }
-
 }

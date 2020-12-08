@@ -1,8 +1,9 @@
 <?php
+
 return [
     'components' => [
         'request' => [
-            'cookieValidationKey' => 'YNQtkeRBtplq97uEj9ZrrqPDuHWMCe4n',
+            'cookieValidationKey' => '{{ webapi.config.main.components.request.cookieValidationKey:str }}',
         ],
     ],
 ];

@@ -46,15 +46,15 @@ class TipsSplitForm extends Model
     public function checkSumPercentage($attribute, $params)
     {
         $profitSplit = $this->getTipsSplit();
-        if(!empty($profitSplit)){
+        if (!empty($profitSplit)) {
             $sum = 0;
-            foreach ($profitSplit as $entry){
-                if(!empty($entry->ts_percent)){
+            foreach ($profitSplit as $entry) {
+                if (!empty($entry->ts_percent)) {
                     $sum += $entry->ts_percent;
                 }
             }
         }
-        if($sum > 100){
+        if ($sum > 100) {
             $this->addError('sumPercent', \Yii::t('user', 'Sum of percent more than 100'));
             return false;
         }
@@ -70,10 +70,10 @@ class TipsSplitForm extends Model
         //var_dump($attribute);die;
         $employee = $this->getLead()->employee;
         $profitSplit = $this->getTipsSplit();
-        if(!empty($profitSplit)){
-            foreach ($profitSplit as $entry){
-                if(!empty($entry->ts_user_id) && $employee->id == $entry->ts_user_id){
-                    $this->addError('mainAgent', \Yii::t('user', $employee->username.' already is main agent'));
+        if (!empty($profitSplit)) {
+            foreach ($profitSplit as $entry) {
+                if (!empty($entry->ts_user_id) && $employee->id == $entry->ts_user_id) {
+                    $this->addError('mainAgent', \Yii::t('user', $employee->username . ' already is main agent'));
                     return false;
                 }
             }
@@ -85,7 +85,7 @@ class TipsSplitForm extends Model
     {
         $this->setLead($lead);
        // $this->setTipsSplit([(new TipsSplit())]);
-        if(!empty($lead->tipsSplits)){
+        if (!empty($lead->tipsSplits)) {
             $this->setTipsSplit($lead->tipsSplits);
         }
 
@@ -132,11 +132,11 @@ class TipsSplitForm extends Model
             'Lead' => $this->getLead(),
         ];
         $profitSplit = $this->getTipsSplit();
-        if(!empty($profitSplit)){
+        if (!empty($profitSplit)) {
             foreach ($profitSplit as $id => $split) {
                 $models['TipsSplit'][$id] = $profitSplit[$id];
             }
-        }else{
+        } else {
             $models['TipsSplit'][] = new TipsSplit();
         }
         return $models;
@@ -191,7 +191,7 @@ class TipsSplitForm extends Model
             $lead = $this->getLead();
 
             $keep = [];
-            if(!empty($this->getTipsSplit())){
+            if (!empty($this->getTipsSplit())) {
                 foreach ($this->getTipsSplit() as $key => $split) {
                     $split->ts_lead_id = $lead->id;
                     if (!$split->save()) {
@@ -245,7 +245,6 @@ class TipsSplitForm extends Model
                         $modelsPopulate[$key] = $m;
                     }
                     $this->modelsPopulate($modelsPopulate, $modelName);
-
                 } else {
                     if (!empty($attributes) && $models[$modelName]->load($attributes, '')) {
                         $success = true;
@@ -274,7 +273,7 @@ class TipsSplitForm extends Model
             if (is_int($key)) {
                 return $this->getAllModels()[$model][$key];
             } else {
-                return new $mapping[$model];
+                return new $mapping[$model]();
             }
         }
 
@@ -291,5 +290,4 @@ class TipsSplitForm extends Model
             $this->setTipsSplit($modelsPopulate);
         }
     }
-
 }

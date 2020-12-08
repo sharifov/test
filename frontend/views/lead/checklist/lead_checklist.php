@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $this \yii\web\View
  * @var $lead \common\models\Lead
@@ -28,17 +29,17 @@ $user = Yii::$app->user->identity;
                 <?php //=Html::a('<i class="fa fa-comment"></i>', ['lead/view', 'gid' => $lead->gid, 'act' => 'call-expert-message'], ['class' => ''])?>
                 <?php //php if(!$lastModel || $lastModel->lce_status_id === LeadCallExpert::STATUS_DONE):?>
 
-                <?php if($lead->isProcessing() && ($lead->isOwner($user->id) || $user->isAdmin())): ?>
-                    <?php if(Yii::$app->request->get('act') === 'add-checklist-form'): ?>
+                <?php if ($lead->isProcessing() && ($lead->isOwner($user->id) || $user->isAdmin())) : ?>
+                    <?php if (Yii::$app->request->get('act') === 'add-checklist-form') : ?>
                         <?php /*=Html::a('<i class="fa fa-minus-circle success"></i> Refresh', ['lead/view', 'gid' => $lead->gid])*/?>
-                    <?php else: ?>
+                    <?php else : ?>
                         <?=Html::a('<i class="fa fa-plus-circle success"></i> Add', ['lead/view', 'gid' => $lead->gid, 'act' => 'add-checklist-form'], ['id' => 'btn-checklist-form2'])?>
                     <?php endif; ?>
                 <?php endif; ?>
 
                 <?php //php endif; ?>
             </li>
-            <?php if($user->isAdmin()):?>
+            <?php if ($user->isAdmin()) :?>
                 <li>
                     <?=Html::a('<i class="fa fa-search warning"></i> Details', ['lead-checklist/index', 'LeadChecklistSearch[lc_lead_id]' => $lead->id], ['data-pjax' => 0, 'target' => '_blank'])?>
                 </li>
@@ -97,16 +98,16 @@ $user = Yii::$app->user->identity;
 
             $currentCheckList = $dataProvider->getModels();
 
-            foreach ($currentCheckList as $currentCheck) {
-                if($currentCheck->lc_user_id === Yii::$app->user->id && isset($checkListTypes[$currentCheck->lc_type_id])) {
-                    unset($checkListTypes[$currentCheck->lc_type_id]);
-                }
+        foreach ($currentCheckList as $currentCheck) {
+            if ($currentCheck->lc_user_id === Yii::$app->user->id && isset($checkListTypes[$currentCheck->lc_type_id])) {
+                unset($checkListTypes[$currentCheck->lc_type_id]);
             }
+        }
         ?>
 
-        <?php if($checkListTypes):?>
+        <?php if ($checkListTypes) :?>
             <table class="table table-bordered">
-                <?php foreach ($checkListTypes as $n => $checkListType):?>
+                <?php foreach ($checkListTypes as $n => $checkListType) :?>
                     <tr>
                         <td style="width: 40px">
 
@@ -121,9 +122,8 @@ $user = Yii::$app->user->identity;
         <?php endif; ?>
 
 
-        <?php if(Yii::$app->request->get('act') === 'add-checklist-form'): ?>
-
-        <?php $form = ActiveForm::begin([
+        <?php if (Yii::$app->request->get('act') === 'add-checklist-form') : ?>
+            <?php $form = ActiveForm::begin([
             //'action' => ['index'],
             'id' => 'checklist-form',
             'method' => 'post',
@@ -134,7 +134,7 @@ $user = Yii::$app->user->identity;
 
             echo $form->errorSummary($modelLeadChecklist);
 
-        ?>
+            ?>
 
         <div class="row" id="div-checklist-form">
             <div class="col-md-5">
@@ -152,7 +152,7 @@ $user = Yii::$app->user->identity;
             </div>
         </div>
 
-        <?php ActiveForm::end(); ?>
+            <?php ActiveForm::end(); ?>
         <?php endif; ?>
 
     </div>

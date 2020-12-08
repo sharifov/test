@@ -35,8 +35,7 @@ class ProductQuoteCloneCreatedEvent implements ProductQuoteChangeStatusInterface
         ?int $actionId,
         ?int $ownerId,
         ?int $creatorId
-    )
-    {
+    ) {
         $this->quote = $quote;
         $this->startStatusId = $startStatusId;
         $this->endStatusId = $endStatusId;

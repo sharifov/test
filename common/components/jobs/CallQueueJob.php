@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by Alex Connor.
  * User: alexandr
@@ -7,10 +8,9 @@
 
 namespace common\components\jobs;
 
+use common\components\Metrics;
 use common\models\Call;
-use common\models\CallUserAccess;
 use common\models\Client;
-use common\models\Department;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Notifications;
@@ -35,7 +35,7 @@ use yii\queue\Queue;
  *
  * @property int $call_id
  * @property int $delay
- * @property int $source_id
+ * @property int|null $source_id
  * @property bool $callFromInternalPhone
  *
  * @property CasesCreateService $casesCreateService
@@ -47,15 +47,15 @@ use yii\queue\Queue;
 
 class CallQueueJob extends BaseObject implements JobInterface
 {
-    public $call_id;
-    public $source_id = 0;
-    public $delay;
-    public $callFromInternalPhone = false;
+    public int $call_id;
+    public ?int $source_id = null;
+    public int $delay;
+    public bool $callFromInternalPhone = false;
 
-    private $casesCreateService;
-    private $casesRepository;
-    private $clientManageService;
-    private $casesSaleService;
+    private CasesCreateService $casesCreateService;
+    private CasesRepository $casesRepository;
+    private ClientManageService $clientManageService;
+    private CasesSaleService $casesSaleService;
 
     /*public function __construct(CasesCreateService $casesCreateService, ClientManageService $clientManageService, $config = [])
     {
@@ -69,27 +69,24 @@ class CallQueueJob extends BaseObject implements JobInterface
      * @param Queue $queue
      * @return bool
      */
-    public function execute($queue) : bool
+    public function execute($queue): bool
     {
+        $metrics = \Yii::$container->get(Metrics::class);
+        $timeStart = microtime(true);
 
         try {
-
             $this->casesCreateService = Yii::createObject(CasesCreateService::class);
             $this->clientManageService = Yii::createObject(ClientManageService::class);
             $this->casesRepository = Yii::createObject(CasesRepository::class);
             $this->casesSaleService = Yii::createObject(CasesSaleService::class);
 
-            $createLeadOnIncoming = $this->callFromInternalPhone ? false : (bool)(Yii::$app->params['settings']['create_lead_on_incoming_call'] ?? true);
-            $createCaseOnIncoming = $this->callFromInternalPhone ? false : (bool)(Yii::$app->params['settings']['create_case_on_incoming_call'] ?? true);
-
-			// Yii::info('CallQueueJob - CallId: ' . $this->call_id ,'info\CallQueueJob');
+            // Yii::info('CallQueueJob - CallId: ' . $this->call_id ,'info\CallQueueJob');
 
             if ($this->delay) {
                 sleep($this->delay);
             }
 
             if ($this->call_id) {
-
                 $originalAgentId = null;
 
                 $call = Call::find()->where(['c_id' => $this->call_id])->limit(1)->one();
@@ -106,8 +103,9 @@ class CallQueueJob extends BaseObject implements JobInterface
                     $call->setStatusQueue();
                 }
 
-                if ((int) $call->c_dep_id === Department::DEPARTMENT_SALES) {
-                    if ($call->c_from) {
+                if ($call->c_dep_id && ($departmentParams = $call->cDep->getParams())) {
+                    if ($departmentParams->object->type->isLead()) {
+                        if ($call->c_from) {
 //                        $lead = Lead::findLastLeadByClientPhone($call->c_from, $call->c_project_id);
 //                        if (!$lead) {
 //                            $lead = Lead::createNewLeadByPhone($call->c_from, $call->c_project_id, $this->source_id, $call->c_offset_gmt);
@@ -122,96 +120,112 @@ class CallQueueJob extends BaseObject implements JobInterface
 //                                }
 //                            }
 //
-////                            if(!$call->update()) {
-////                                Yii::error(VarDumper::dumpAsString($call->errors), 'CallQueueJob:execute:Call:update2');
-////                            }
+                            ////                            if(!$call->update()) {
+                            ////                                Yii::error(VarDumper::dumpAsString($call->errors), 'CallQueueJob:execute:Call:update2');
+                            ////                            }
 //                        }
 //
 //                        if (!$originalAgentId && $lead && $lead->employee_id) {
 //                            $originalAgentId = $lead->employee_id;
 //                        }
 
-                        try {
-                            $lead = Lead::findLastLeadByClientPhone($call->c_from, $call->c_project_id);
-                            if (!$lead && $createLeadOnIncoming) {
-                                $lead = (Yii::createObject(LeadManageService::class))->createByIncomingCall($call->c_from, $call->c_project_id, $this->source_id, $call->c_offset_gmt);
-                            }
+                            try {
+                                $lead = Lead::findLastLeadByClientPhone($call->c_from, $call->c_project_id);
+                                if (!$lead && $departmentParams->object->lead->createOnCall) {
+                                    $lead = (Yii::createObject(LeadManageService::class))
+                                        ->createByIncomingCall(
+                                            $call->c_from,
+                                            $call->c_project_id,
+                                            $this->source_id,
+                                            $call->c_dep_id,
+                                            $call->c_offset_gmt
+                                        );
+                                }
 
 //                            if (!$lead) {
-//                            	return true;
-//							}
+//                              return true;
+                                //                          }
 
-                            $call->c_lead_id = $lead->id ?? null;
+                                $call->c_lead_id = $lead->id ?? null;
 
-                            if (!$createLeadOnIncoming) {
+                                if (!$departmentParams->object->lead->createOnCall) {
+                                    $clientForm = ClientCreateForm::createWidthDefaultName();
+                                    $clientForm->projectId = $call->c_project_id;
+                                    $clientForm->typeCreate = Client::TYPE_CREATE_CALL;
+                                    $client = $this->clientManageService->getOrCreateByPhones([
+                                        new PhoneCreateForm([
+                                            'phone' => $call->c_from,
+                                            'comments' => 'incoming'
+                                        ])
+                                    ], $clientForm);
+                                    $call->c_client_id = $client->id;
+                                }
+
+                                if (!$call->c_client_id) {
+                                    $call->c_client_id = $lead->client_id ?? null;
+                                }
+                                if (($lead && !$lead->isCallReady()) && $call->isEnded()) {
+                                    $leadRepository = Yii::createObject(LeadRepository::class);
+                                    $lead->callReady();
+                                    $leadRepository->save($lead);
+                                }
+                                if (!$originalAgentId && $lead && $lead->employee_id) {
+                                    $originalAgentId = $lead->employee_id;
+                                }
+                            } catch (\Throwable $e) {
+                                Yii::error($e, 'CallQueueJob:execute:Call');
+                            }
+                        }
+                    } elseif ($departmentParams->object->type->isCase()) {
+                        try {
+                            $case = $this->casesCreateService->getOrCreateByCall(
+                                [new PhoneCreateForm(['phone' => $call->c_from])],
+                                $call->c_id,
+                                $call->c_project_id,
+                                (int)$call->c_dep_id,
+                                $departmentParams->object->case->createOnCall,
+                                $departmentParams->object->case->trashActiveDaysLimit
+                            );
+                            $call->c_case_id = $case->cs_id ?? null;
+
+                            if (!$departmentParams->object->case->createOnCall) {
                                 $clientForm = ClientCreateForm::createWidthDefaultName();
                                 $clientForm->projectId = $call->c_project_id;
                                 $clientForm->typeCreate = Client::TYPE_CREATE_CALL;
-								$client = $this->clientManageService->getOrCreateByPhones([new PhoneCreateForm(['phone' => $call->c_from, 'comments' => 'incoming'])], $clientForm);
-								$call->c_client_id = $client->id;
-							}
+                                $client = $this->clientManageService->getOrCreateByPhones(
+                                    [new PhoneCreateForm(['phone' => $call->c_from])],
+                                    $clientForm
+                                );
+                                $call->c_client_id = $client->id;
+                            }
 
                             if (!$call->c_client_id) {
-                                $call->c_client_id = $lead->client_id ?? null;
+                                $call->c_client_id = $case->cs_client_id ?? null;
                             }
-                            if (($lead && !$lead->isCallReady()) && $call->isEnded()) {
-                                $leadRepository = Yii::createObject(LeadRepository::class);
-                                $lead->callReady();
-                                $leadRepository->save($lead);
-                            }
-                            if (!$originalAgentId && $lead && $lead->employee_id) {
-                                $originalAgentId = $lead->employee_id;
-                            }
-                        } catch (\Throwable $e) {
-                            Yii::error($e, 'CallQueueJob:execute:Call');
-                        }
-
-                    }
-
-                } elseif(((int) $call->c_dep_id === Department::DEPARTMENT_EXCHANGE || (int) $call->c_dep_id === Department::DEPARTMENT_SUPPORT)) {
-
-                    try {
-                        $case = $this->casesCreateService->getOrCreateByCall(
-                            [new PhoneCreateForm(['phone' => $call->c_from])],
-                            $call->c_id,
-                            $call->c_project_id,
-                            (int)$call->c_dep_id,
-							$createCaseOnIncoming
-                        );
-                        $call->c_case_id = $case->cs_id ?? null;
-
-						if (!$createCaseOnIncoming) {
-                            $clientForm = ClientCreateForm::createWidthDefaultName();
-                            $clientForm->projectId = $call->c_project_id;
-                            $clientForm->typeCreate = Client::TYPE_CREATE_CALL;
-							$client = $this->clientManageService->getOrCreateByPhones([new PhoneCreateForm(['phone' => $call->c_from])], $clientForm);
-							$call->c_client_id = $client->id;
-						}
-
-                        if (!$call->c_client_id) {
-                            $call->c_client_id = $case->cs_client_id ?? null;
-                        }
 //                        if (!$call->update()) {
 //                            Yii::error(VarDumper::dumpAsString($call->errors), 'CallQueueJob:execute:Call:update3');
 //                        }
 
-                        if (!$originalAgentId && $case && $case->cs_user_id) {
-                            $originalAgentId = $case->cs_user_id;
-                        }
-
-                        if ($case) {
-                            try {
-                                $job = new CreateSaleFromBOJob();
-                                $job->case_id = $case->cs_id;
-                                $job->phone = $call->c_from;
-                                Yii::$app->queue_job->priority(100)->push($job);
-                            } catch (\Throwable $throwable) {
-                                Yii::error(AppHelper::throwableFormatter($throwable), 'CallQueueJob:addToJobFailed');
+                            if (!$originalAgentId && $case && $case->cs_user_id) {
+                                $originalAgentId = $case->cs_user_id;
                             }
-                        }
 
-                    } catch (\Throwable $exception) {
-                        Yii::error(VarDumper::dumpAsString($exception), 'CallQueueJob:createClient:catch');
+                            if ($case) {
+                                try {
+                                    $job = new CreateSaleFromBOJob();
+                                    $job->case_id = $case->cs_id;
+                                    $job->phone = $call->c_from;
+                                    Yii::$app->queue_job->priority(100)->push($job);
+                                } catch (\Throwable $throwable) {
+                                    Yii::error(
+                                        AppHelper::throwableFormatter($throwable),
+                                        'CallQueueJob:addToJobFailed'
+                                    );
+                                }
+                            }
+                        } catch (\Throwable $exception) {
+                            Yii::error(VarDumper::dumpAsString($exception), 'CallQueueJob:createClient:catch');
+                        }
                     }
                 }
 
@@ -223,8 +237,10 @@ class CallQueueJob extends BaseObject implements JobInterface
 
 
                 if ($call->isStatusQueue() || $call->isStatusIvr()) {
-
                     if ($call->checkCancelCall()) {
+                        $seconds = round(microtime(true) - $timeStart, 1);
+                        $metrics->jobHistogram(substr(strrchr(get_class($this), '\\'), 1) . '_seconds', $seconds, ['type' => 'cancel']);
+                        unset($metrics);
                         return true;
                     }
 
@@ -233,23 +249,20 @@ class CallQueueJob extends BaseObject implements JobInterface
                     $isCalled = false;
 
                     if ($originalAgentId) {
-
                         $user = Employee::findOne($originalAgentId);
 
                         if ($user && $user->isOnline() /*&& $user->isCallStatusReady() && $user->isCallFree()*/) {
-
                             $depListIds = array_keys($user->getUserDepartmentList());
                             if (in_array($call->c_dep_id, $depListIds, true)) {
-
                                 $isCalled = Call::applyCallToAgentAccess($call, $user->id);
 
                                 // Yii::info('Accept one user ('. ($isCalled ? 'isCalled' : 'NotIsCalled' ) .') - CallId: ' . $this->call_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-Accept-one');
 
 
                                 if ((int)$call->c_source_type_id === Call::SOURCE_GENERAL_LINE) {
-                                    $timeStartCallUserAccess = (int)Yii::$app->params['settings']['time_start_call_user_access_general'] ?? 0;
+                                    $timeStartCallUserAccess = (int) (Yii::$app->params['settings']['time_start_call_user_access_general'] ?? 0);
                                 } else {
-                                    $timeStartCallUserAccess = (int)Yii::$app->params['settings']['time_start_call_user_access_direct'] ?? 0;
+                                    $timeStartCallUserAccess = (int) (Yii::$app->params['settings']['time_start_call_user_access_direct'] ?? 0);
                                 }
 
                                 if ($timeStartCallUserAccess) {
@@ -262,7 +275,6 @@ class CallQueueJob extends BaseObject implements JobInterface
                     }
 
                     if (!$isCalled) {
-
                         // Yii::info('Accept multiple users - CallId: ' . $call->c_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-Accept-multi');
 
                         $last_hours = (int)(Yii::$app->params['settings']['general_line_last_hours'] ?? 1);
@@ -278,14 +290,13 @@ class CallQueueJob extends BaseObject implements JobInterface
                         }
 
 
-                        $timeStartCallUserAccess = (int) Yii::$app->params['settings']['time_start_call_user_access_general'] ?? 0;
+                        $timeStartCallUserAccess = (int) (Yii::$app->params['settings']['time_start_call_user_access_general'] ?? 0);
 
                         if ($timeStartCallUserAccess) {
                             $job = new CallUserAccessJob();
                             $job->call_id = $call->c_id;
                             $jobId = Yii::$app->queue_job->delay($timeStartCallUserAccess)->priority(100)->push($job);
                         }
-
                     }
 
                     Notifications::pingUserMap();
@@ -294,13 +305,19 @@ class CallQueueJob extends BaseObject implements JobInterface
 //                        'info\CallQueueJob:notRun');
                 }
             }
-
         } catch (\Throwable $e) {
             Yii::error(VarDumper::dumpAsString($e->getMessage()), 'CallQueueJob:execute:catch');
         }
+        $seconds = round(microtime(true) - $timeStart, 1);
+        $metrics->jobHistogram(substr(strrchr(get_class($this), '\\'), 1) . '_seconds', $seconds, ['type' => 'execute']);
+        unset($metrics);
+
         return false;
     }
 
+    /**
+     * @return float|int
+     */
     public function getTtr()
     {
         return 1 * 5;

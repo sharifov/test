@@ -127,28 +127,25 @@ class AirportsController extends FController
     {
         $result = Airports::synchronization(10000);
 
-        if($result) {
-            if($result['error']) {
+        if ($result) {
+            if ($result['error']) {
                 Yii::$app->getSession()->setFlash('error', $result['error']);
             } else {
-
-                if($result['created']) {
+                if ($result['created']) {
                     $message = 'Synchronization successful<br>';
-                    $message .= 'Created Airports (' . count($result['created']) . '): "'.implode(', ', $result['created']);
+                    $message .= 'Created Airports (' . count($result['created']) . '): "' . implode(', ', $result['created']);
                     Yii::$app->getSession()->setFlash('success', $message);
                 }
-                if($result['updated']) {
+                if ($result['updated']) {
                     $message = 'Synchronization successful<br>';
-                    $message .= 'Updated Airports (' . count($result['updated']) . '): "'.implode(', ', $result['updated']);
+                    $message .= 'Updated Airports (' . count($result['updated']) . '): "' . implode(', ', $result['updated']);
                     Yii::$app->getSession()->setFlash('warning', $message);
                 }
-                if($result['errored']) {
+                if ($result['errored']) {
                     $message = 'Synchronization error<br>';
-                    $message .= 'Errored Airports (' . count($result['errored']) . '): "'.implode(', ', $result['errored']);
+                    $message .= 'Errored Airports (' . count($result['errored']) . '): "' . implode(', ', $result['errored']);
                     Yii::$app->getSession()->setFlash('error', $message);
                 }
-
-
             }
         }
 

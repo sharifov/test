@@ -48,5 +48,4 @@ class m190821_081604_update_user_departments extends Migration
         echo 'Count updated users: ' . $count;
         echo PHP_EOL;
     }
-
 }

@@ -10,6 +10,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\QuoteSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -38,20 +39,20 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="col-md-3">
             <?php
             echo  \kartik\daterange\DateRangePicker::widget([
-                'model'=> $searchModel,
+                'model' => $searchModel,
                 'attribute' => 'date_range',
-                'useWithAddon'=>true,
-                'presetDropdown'=>true,
-                'hideInput'=>true,
-                'convertFormat'=>true,
+                'useWithAddon' => true,
+                'presetDropdown' => true,
+                'hideInput' => true,
+                'convertFormat' => true,
                 'startAttribute' => 'datetime_start',
                 'endAttribute' => 'datetime_end',
-                'pluginOptions'=>[
-                    'timePicker'=> true,
-                    'timePickerIncrement' =>1,
+                'pluginOptions' => [
+                    'timePicker' => true,
+                    'timePickerIncrement' => 1,
                     'timePicker24Hour' => true,
-                    'locale'=>[
-                        'format'=>'Y-m-d H:i',
+                    'locale' => [
+                        'format' => 'Y-m-d H:i',
                         'separator' => ' - '
                     ]
                 ]
@@ -90,8 +91,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'gds',
-                'value' => function(\common\models\Quote $model) {
-                    return '<i class="fa fa-plane"></i> '.$model->getGdsName2();
+                'value' => function (\common\models\Quote $model) {
+                    return '<i class="fa fa-plane"></i> ' . $model->getGdsName2();
                 },
                 'format' => 'raw',
                 'filter' => SearchService::GDS_LIST
@@ -99,14 +100,14 @@ $this->params['breadcrumbs'][] = $this->title;
             'pcc',
             [
                 'attribute' => 'trip_type',
-                'value' => function(\common\models\Quote $model) {
+                'value' => function (\common\models\Quote $model) {
                     return \common\models\Lead::getFlightType($model->trip_type) ?? '-';
                 },
                 'filter' => \common\models\Lead::TRIP_TYPE_LIST
             ],
             [
                 'attribute' => 'cabin',
-                'value' => function(\common\models\Quote $model) {
+                'value' => function (\common\models\Quote $model) {
                     return \common\models\Lead::getCabin($model->cabin) ?? '-';
                 },
                 'filter' => \common\models\Lead::CABIN_LIST
@@ -115,14 +116,14 @@ $this->params['breadcrumbs'][] = $this->title;
             //'reservation_dump:ntext',
             [
                 'attribute' => 'reservation_dump',
-                'value' => function(\common\models\Quote $model) {
-                    return '<pre style="font-size: 9px">'.$model->reservation_dump.'</pre>';
+                'value' => function (\common\models\Quote $model) {
+                    return '<pre style="font-size: 9px">' . $model->reservation_dump . '</pre>';
                 },
                 'format' => 'html',
             ],
             [
                 'attribute' => 'status',
-                'value' => function(\common\models\Quote $model) {
+                'value' => function (\common\models\Quote $model) {
                     return $model->getStatusName(true);
                 },
                 'format' => 'html',
@@ -133,7 +134,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'fare_type',
             [
                 'header' => 'Prices',
-                'value' => function(\common\models\Quote $model) {
+                'value' => function (\common\models\Quote $model) {
                     return $model->quotePricesCount ? Html::a($model->quotePricesCount, ['quote-price/index', "QuotePriceSearch[quote_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0]) : '-' ;
                 },
                 'format' => 'raw',

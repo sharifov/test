@@ -51,5 +51,4 @@ class FollowUpGuard
             ->andWhere(['>', 'c_created_dt', $date])
             ->count();
     }
-
 }

@@ -4,6 +4,7 @@ use unclead\multipleinput\MultipleInput;
 use yii\widgets\ActiveForm;
 use unclead\multipleinput\MultipleInputColumn;
 use borales\extensions\phoneInput\PhoneInput;
+
 //use frontend\extensions\PhoneInput;
 
 /**
@@ -82,8 +83,8 @@ use borales\extensions\phoneInput\PhoneInput;
         }
     };
 JS;
-$this->registerJs($js);
-?>
+    $this->registerJs($js);
+    ?>
     <div class="sidebar__subsection">
         <div id="client-phones">
             <?= $form->field($leadForm, 'phones')->widget(MultipleInput::class, [

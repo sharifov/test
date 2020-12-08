@@ -37,5 +37,4 @@ class m200109_110131_add_permissions_call_record extends Migration
     {
         (new RbacMigrationService())->down($this->routes, $this->roles);
     }
-
 }

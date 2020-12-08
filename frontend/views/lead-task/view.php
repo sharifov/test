@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model common\models\LeadTask */
 
-$this->title = $model->lt_lead_id.' '.$model->lt_task_id.' '.$model->lt_date;
+$this->title = $model->lt_lead_id . ' ' . $model->lt_task_id . ' ' . $model->lt_date;
 $this->params['breadcrumbs'][] = ['label' => 'Lead Tasks', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -32,7 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Task',
                 'attribute' => 'lt_task_id',
-                'value' => function(\common\models\LeadTask $model) {
+                'value' => function (\common\models\LeadTask $model) {
                     return $model->ltTask ? $model->ltTask->t_name : '-';
                 },
             ],
@@ -45,7 +45,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Employee',
                 'attribute' => 'lt_user_id',
-                'value' => function(\common\models\LeadTask $model) {
+                'value' => function (\common\models\LeadTask $model) {
                     return $model->ltUser ? $model->ltUser->username : '-';
                 },
             ],
@@ -55,16 +55,16 @@ $this->params['breadcrumbs'][] = $this->title;
             //'lt_updated_dt',
             [
                 'attribute' => 'lt_completed_dt',
-                'value' => function(\common\models\LeadTask $model) {
-                    return $model->lt_completed_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->lt_completed_dt)) : '-';
+                'value' => function (\common\models\LeadTask $model) {
+                    return $model->lt_completed_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lt_completed_dt)) : '-';
                 },
                 'format' => 'html',
             ],
 
             [
                 'attribute' => 'lt_updated_dt',
-                'value' => function(\common\models\LeadTask $model) {
-                    return $model->lt_updated_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->lt_updated_dt)) : '-';
+                'value' => function (\common\models\LeadTask $model) {
+                    return $model->lt_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lt_updated_dt)) : '-';
                 },
                 'format' => 'html',
             ],

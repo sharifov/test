@@ -17,8 +17,9 @@ class EmailUnsubscribeSearch extends EmailUnsubscribe
     public function rules()
     {
         return [
-            [['eu_email', 'eu_created_dt'], 'safe'],
+            [['eu_email'], 'safe'],
             [['eu_project_id', 'eu_created_user_id'], 'integer'],
+            [['eu_created_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -60,7 +61,7 @@ class EmailUnsubscribeSearch extends EmailUnsubscribe
         $query->andFilterWhere([
             'eu_project_id' => $this->eu_project_id,
             'eu_created_user_id' => $this->eu_created_user_id,
-            'eu_created_dt' => $this->eu_created_dt,
+            'DATE(eu_created_dt)' => $this->eu_created_dt,
         ]);
 
         $query->andFilterWhere(['like', 'eu_email', $this->eu_email]);

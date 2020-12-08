@@ -26,8 +26,9 @@ class NotificationsSearch extends Notifications
             [['datetime_start', 'datetime_end'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['n_id', 'n_user_id', 'n_type_id'], 'integer'],
-            [['n_title', 'n_message', 'n_read_dt', 'n_created_dt'], 'safe'],
+            [['n_title', 'n_message'], 'safe'],
             [['n_new', 'n_deleted', 'n_popup', 'n_popup_show'], 'boolean'],
+            [['n_created_dt', 'n_read_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -55,7 +56,7 @@ class NotificationsSearch extends Notifications
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['n_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['n_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 40,
             ],
@@ -65,11 +66,11 @@ class NotificationsSearch extends Notifications
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
-        if(empty($this->n_created_dt) && isset($params['NotificationsSearch']['date_range'])){
+        if (empty($this->n_created_dt) && isset($params['NotificationsSearch']['date_range'])) {
             $query->andFilterWhere(['>=', 'n_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
                 ->andFilterWhere(['<=', 'n_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         }

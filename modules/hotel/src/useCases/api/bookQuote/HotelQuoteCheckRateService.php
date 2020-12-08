@@ -22,20 +22,20 @@ use sales\services\TransactionManager;
  */
 class HotelQuoteCheckRateService
 {
-	public $status = 0; // 0 failed : 1 success
+    public $status = 0; // 0 failed : 1 success
     public $message = '';
-	/**
-	 * @var TransactionManager
-	 */
-	private $transactionManager;
     /**
-	 * @var ProductQuoteRepository
-	 */
-	private $productQuoteRepository;
-	/**
-	 * @var ApiHotelService
-	 */
-	private $apiService;
+     * @var TransactionManager
+     */
+    private $transactionManager;
+    /**
+     * @var ProductQuoteRepository
+     */
+    private $productQuoteRepository;
+    /**
+     * @var ApiHotelService
+     */
+    private $apiService;
 
     /**
      * HotelQuoteBookService constructor.
@@ -43,11 +43,11 @@ class HotelQuoteCheckRateService
      * @param TransactionManager $transactionManager
      */
     public function __construct(ProductQuoteRepository $productQuoteRepository, TransactionManager $transactionManager)
-	{
-		$this->apiService = \Yii::$app->getModule('hotel')->apiService;
-		$this->productQuoteRepository = $productQuoteRepository;
-		$this->transactionManager = $transactionManager;
-	}
+    {
+        $this->apiService = \Yii::$app->getModule('hotel')->apiService;
+        $this->productQuoteRepository = $productQuoteRepository;
+        $this->transactionManager = $transactionManager;
+    }
 
     /**
      * @param HotelQuote $model
@@ -82,16 +82,15 @@ class HotelQuoteCheckRateService
             'rooms' => $rooms,
         ];
 
-        $createDto = new CreateDto($model->hq_id,LogStatus::ACTION_TYPE_CHECK, $params);
+        $createDto = new CreateDto($model->hq_id, LogStatus::ACTION_TYPE_CHECK, $params);
         $hotelQuoteServiceLog = HotelQuoteServiceLog::create($createDto);
 
         $apiResponse = $this->apiService->requestBookingHandler('booking/checkrate', $params);
 
         if ($apiResponse['statusApi'] === HotelQuoteServiceLogStatus::STATUS_SUCCESS) {
-
             if (count($apiResponse['data']['rooms'])) {
                 foreach ($apiResponse['data']['rooms'] as $room) {
-                    if ($hotelQuoteRoom = HotelQuoteRoom::findOne(['hqr_key' => $room['key']])){
+                    if ($hotelQuoteRoom = HotelQuoteRoom::findOne(['hqr_key' => $room['key']])) {
                         $hotelQuoteRoom->setAdditionalInfo($room);
                     }
                 }

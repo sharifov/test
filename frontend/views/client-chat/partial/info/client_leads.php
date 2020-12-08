@@ -32,4 +32,4 @@ use yii\widgets\Pjax;
         ],
     ]) ?>
 
-<?php Pjax::end() ?>
+<?php Pjax::end();

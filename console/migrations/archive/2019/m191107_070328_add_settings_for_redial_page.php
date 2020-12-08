@@ -64,7 +64,6 @@ class m191107_070328_add_settings_for_redial_page extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     /**
@@ -81,5 +80,4 @@ class m191107_070328_add_settings_for_redial_page extends Migration
             Yii::$app->cache->flush();
         }
     }
-
 }

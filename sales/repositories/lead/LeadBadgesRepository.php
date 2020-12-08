@@ -220,7 +220,6 @@ class LeadBadgesRepository
         }
 
         if ($user->isAgent() || $user->isSupervision()) {
-
             $employees = Employee::find()->select('id')
                 ->andWhere(['or',
                     [
@@ -247,7 +246,6 @@ class LeadBadgesRepository
                 ->asArray()->indexBy('id')->all();
 
             $query->andWhere([Lead::tableName() . '.employee_id' => array_keys($employees)]);
-
         }
 
 //        if ($myGroups = $user->getUserGroupList()) {
@@ -330,7 +328,7 @@ class LeadBadgesRepository
     {
         $query = Lead::find()
             ->andWhere([Lead::tableName() . '.status' => Lead::STATUS_TRASH])
-            ->andWhere(['IS NOT', 'l_duplicate_lead_id', NULL]);
+            ->andWhere(['IS NOT', 'l_duplicate_lead_id', null]);
 
         return $query;
     }
@@ -427,5 +425,4 @@ class LeadBadgesRepository
             ]
         ];
     }
-
 }

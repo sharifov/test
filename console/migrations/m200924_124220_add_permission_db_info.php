@@ -23,7 +23,6 @@ class m200924_124220_add_permission_db_info extends Migration
     public function safeUp()
     {
         (new RbacMigrationService())->up($this->route, $this->roles);
-
     }
 
     /**

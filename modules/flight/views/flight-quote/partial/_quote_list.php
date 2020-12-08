@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $this \yii\web\View
  * @var $product Product
@@ -9,7 +10,6 @@ use modules\product\src\entities\product\Product;
 use yii\widgets\ListView;
 use yii\widgets\Pjax;
 
-
 $dataProvider = FlightQuoteHelper::generateDataProviderForQuoteList($product);
 ?>
 
@@ -18,7 +18,7 @@ $dataProvider = FlightQuoteHelper::generateDataProviderForQuoteList($product);
 <div class="x_panel">
     <div class="x_title">
         <h2><i class="fa fa-folder-o"></i> Flight Quotes
-            <?php if($dataProvider->totalCount): ?>
+            <?php if ($dataProvider->totalCount) : ?>
                 <sup>(<?=$dataProvider->totalCount?>)</sup>
             <?php endif; ?>
         </h2>

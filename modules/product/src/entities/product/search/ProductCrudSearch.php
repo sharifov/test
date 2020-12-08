@@ -44,8 +44,7 @@ class ProductCrudSearch extends Product
 
             ['pr_name', 'string', 'max' => 40],
 
-            ['pr_created_dt', 'date', 'format' => 'php:Y-m-d'],
-            ['pr_updated_dt', 'date', 'format' => 'php:Y-m-d'],
+            [['pr_created_dt', 'pr_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

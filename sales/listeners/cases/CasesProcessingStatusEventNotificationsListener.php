@@ -23,7 +23,7 @@ class CasesProcessingStatusEventNotificationsListener
                 $creator = Employee::findOne($event->creatorId);
                 $title = 'Title: New Case Assigned';
                 $linkToCase = Purifier::createCaseShortLink($event->case);
-                $message = 'Message: Case (' . $linkToCase . ') has been assigned to you by user ' . Html::encode( $creator ? $creator->username : '');
+                $message = 'Message: Case (' . $linkToCase . ') has been assigned to you by user ' . Html::encode($creator ? $creator->username : '');
 
                 if ($ntf = Notifications::create($event->newOwnerId, $title, $message, Notifications::TYPE_WARNING, true)) {
                     $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];

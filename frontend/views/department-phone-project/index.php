@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\DepartmentPhoneProjectSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -75,7 +76,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => static function (\common\models\DepartmentPhoneProject $model) {
                     return $model->dppLanguage ? $model->dppLanguage->language_id : '-';
                 },
-                'filter' => \common\models\Language::getLanguages(true,  'language')
+                'filter' => \common\models\Language::getLanguages(true, 'language')
             ],
             [
                 'attribute' => 'dpp_source_id',

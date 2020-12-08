@@ -234,7 +234,6 @@ class Email extends \yii\db\ActiveRecord
                 'updatedByAttribute' => 'e_updated_user_id',
             ],*/
         ];
-
     }
 
     public function isInbox(): bool
@@ -328,9 +327,9 @@ class Email extends \yii\db\ActiveRecord
     }
 
     public function getClient(): \yii\db\ActiveQuery
-	{
-		return $this->hasOne(Client::class, ['id' => 'e_client_id']);
-	}
+    {
+        return $this->hasOne(Client::class, ['id' => 'e_client_id']);
+    }
 
     /**
      * {@inheritdoc}
@@ -393,7 +392,8 @@ class Email extends \yii\db\ActiveRecord
                 "\n\$0", "\n\$0", "\n\$0", "\n\$0", "\n\$0", "\n\$0",
                 "\n\$0", "\n\$0",
             ],
-            $text);
+            $text
+        );
 
         $text = strip_tags($text);
         $text = preg_replace('!\s+!', ' ', $text);
@@ -455,8 +455,6 @@ class Email extends \yii\db\ActiveRecord
                 $this->save();
                 $out['error'] = $this->e_error_message;
             }
-
-
         } catch (\Throwable $exception) {
             $error = VarDumper::dumpAsString($exception->getMessage());
             $out['error'] = $error;
@@ -640,7 +638,7 @@ class Email extends \yii\db\ActiveRecord
             if ($m && is_array($m) && isset($m[0], $m[1])) {
                 if (count($m[0]) > 1) {
                     $cnt = 0;
-                    foreach ($m[0] AS $repl) {
+                    foreach ($m[0] as $repl) {
                         if (isset($m[0][$cnt + 1])) {
                             $from = '/' . preg_quote($repl, '/') . '/';
                             $str = preg_replace($from, '', $str, 1);
@@ -781,10 +779,10 @@ class Email extends \yii\db\ActiveRecord
                 $smsUpdatedTime = date($dateFormat, strtotime($emailItem->e_created_dt));
                 if ($smsUpdatedTime >= $timeSignature && $smsUpdatedTime <= $EndPoint) {
                     switch ($emailItem->e_status_id) {
-                        case self::STATUS_DONE :
+                        case self::STATUS_DONE:
                             $done++;
                             break;
-                        case self::STATUS_ERROR :
+                        case self::STATUS_ERROR:
                             $error++;
                             break;
                     }
@@ -811,7 +809,6 @@ class Email extends \yii\db\ActiveRecord
         if ($this->e_case_id && $this->eCase) {
             $this->eCase->updateLastAction();
         }
-
     }
 
     /**
@@ -820,17 +817,16 @@ class Email extends \yii\db\ActiveRecord
      */
     public function beforeSave($insert): bool
     {
-         if (parent::beforeSave($insert)) {
-
+        if (parent::beforeSave($insert)) {
             if (!empty($this->body_html)) {
                 $this->e_email_body_text = TextConvertingHelper::htmlToText($this->body_html);
                 $this->e_email_body_blob = TextConvertingHelper::compress($this->body_html);
             }
 
             if (!$this->e_client_id) {
-				$emailService = Yii::createObject(EmailService::class);
-				$this->e_client_id = $emailService->detectClientId($this->e_email_to);
-			}
+                $emailService = Yii::createObject(EmailService::class);
+                $this->e_client_id = $emailService->detectClientId($this->e_email_to);
+            }
 
             return true;
         }

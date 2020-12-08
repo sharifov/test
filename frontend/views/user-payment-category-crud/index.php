@@ -6,6 +6,7 @@ use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\user\entity\paymentCategory\search\UserPaymentCategorySearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -33,10 +34,10 @@ $this->params['breadcrumbs'][] = $this->title;
             'upc_id',
             'upc_name',
             'upc_description',
-			[
-				'class' => BooleanColumn::class,
-				'attribute' => 'upc_enabled',
-			],
+            [
+                'class' => BooleanColumn::class,
+                'attribute' => 'upc_enabled',
+            ],
 
             [
                 'class' => UserSelect2Column::class,
@@ -52,14 +53,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'placeholder' => 'Select User',
             ],
 
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'upc_created_dt',
-			],
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'upc_updated_dt',
-			],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'upc_created_dt',
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'upc_updated_dt',
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

@@ -75,5 +75,4 @@ class SourceRepository extends Repository
         }
         $this->eventDispatcher->dispatchAll($source->releaseEvents());
     }
-
 }

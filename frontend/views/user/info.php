@@ -29,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
         <p>
-            <?php if (\sales\auth\Auth::can('/employee/edit')): ?>
+            <?php if (\sales\auth\Auth::can('/employee/edit')) : ?>
                 <?= Html::a('<i class="fa fa-edit"></i> Update', ['employee/update', 'id' => $model->id], ['class' => 'btn btn-warning']) ?>
             <?php endif; ?>
         </p>
@@ -64,7 +64,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     $gravUrl = $model->getGravatarUrl(200);
                     $roles = $model->getRoles();
                     ?>
-                    <?php if ($gravUrl): ?>
+                    <?php if ($gravUrl) : ?>
                         <div class="profile_img">
                             <div id="crop-avatar">
                                 <?= Html::img($gravUrl, ['alt' => 'Avatar', 'class' => 'img-responsive avatar-view', 'title' => $model->nickname]) ?>
@@ -141,8 +141,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'endDateTime' => $endDateTime,
                     ]) */ ?> -->
 
-                    <?php if (isset($userActivity['byHour']) && $userActivity['byHour']): ?>
-
+                    <?php if (isset($userActivity['byHour']) && $userActivity['byHour']) : ?>
                         <div id="chart_div"></div>
 
                         <script type="text/javascript">
@@ -197,7 +196,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                                 let data = google.visualization.arrayToDataTable([
                                     ['Days', 'Requests', {role: 'annotation'}],
-                                    <?php foreach ($userActivity['byHour'] as $k => $item): ?>
+                                    <?php foreach ($userActivity['byHour'] as $k => $item) : ?>
                                     ['<?=($item['created_hour']) ?>:00, <?=date('d-M', strtotime($item['created_date'])) ?> ', <?= $item['cnt'] ?>, '<?= ' ' ?>'],
                                     <?php endforeach; ?>
                                 ]);

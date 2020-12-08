@@ -36,5 +36,4 @@ class m190401_113734_add_column_tbl_user_profile extends Migration
         $this->dropColumn('{{%leads}}', 'l_call_status_id');
         $this->dropColumn('{{%leads}}', 'l_pending_delay_dt');
     }
-
 }

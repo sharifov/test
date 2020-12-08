@@ -26,7 +26,6 @@ class m190812_074112_add_use_ivr_setting_param extends Migration
         }
 
         Yii::$app->db->getSchema()->refreshTableSchema('{{%setting}}');
-
     }
 
     /**

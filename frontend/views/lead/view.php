@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $leadForm LeadForm
  * @var $comForm CommunicationForm
@@ -30,9 +31,10 @@ use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
 use sales\auth\Auth;
-use yii\bootstrap4\Modal;use yii\data\ActiveDataProvider;
+use yii\bootstrap4\Modal;
+use yii\data\ActiveDataProvider;
 
-\frontend\themes\gentelella\assets\AssetLeadCommunication::register($this);
+\frontend\themes\gentelella_v2\assets\AssetLeadCommunication::register($this);
 
 // $this->params['breadcrumbs'][] = $this->title;
 
@@ -44,7 +46,7 @@ $is_admin = $user->isAdmin();
 $is_qa = $user->isQa();
 $is_supervision = $user->canRole('supervision');
 
-if($is_admin || $is_supervision) {
+if ($is_admin || $is_supervision) {
     $is_manager = true;
 } else {
     $is_manager = false;
@@ -54,9 +56,9 @@ $lead = $leadForm->getLead();
 
 $clientProjectInfo = $lead->client->clientProjects;
 $unsubscribe = false;
-if (isset($clientProjectInfo) && $clientProjectInfo){
-    foreach ($clientProjectInfo as $item){
-        if ($lead->project_id == $item['cp_project_id']){
+if (isset($clientProjectInfo) && $clientProjectInfo) {
+    foreach ($clientProjectInfo as $item) {
+        if ($lead->project_id == $item['cp_project_id']) {
             $unsubscribe = $item['cp_unsubscribe'];
         }
     }
@@ -76,7 +78,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
         <?= $this->render('partial/_actions', [
             'leadForm' => $leadForm
         ]);
-        ?>
+?>
 
         <div class="col-md-12">
             <?= \common\widgets\Alert::widget() ?>
@@ -85,7 +87,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
         <div class="col-md-6">
         <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-products-wrap', 'enablePushState' => false, 'enableReplaceState' => false]) ?>
 
-			<?= $this->render('products/_products', [
+            <?= $this->render('products/_products', [
                 'lead' => $lead,
                 'itineraryForm' => $itineraryForm,
                 'quotesProvider' => $quotesProvider,
@@ -93,7 +95,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
                 'is_manager' => $is_manager,
             ]) ?>
 
-            <?php if ($lead->products): ?>
+            <?php if ($lead->products) : ?>
                 <?= $this->render('offers/lead_offers', [
                     'lead' => $lead,
                     'leadForm' => $leadForm,
@@ -136,15 +138,13 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
                 <?php /*\yii\widgets\Pjax::end(); */?>
             --><?php /*endif;*/?>
 
-            <?php if (Auth::can('lead/view_Client_Info')): ?>
-                <?php yii\widgets\Pjax::begin(['id' => 'pjax-client-info', 'enablePushState' => false, 'enableReplaceState' => false]) ?>
+            <?php if (Auth::can('lead-view/client-info/view', ['lead' => $lead])) : ?>
                 <?= $this->render('client-info/client_info', [
                     'lead' => $lead,
                     'leadForm' => $leadForm,
                     'is_manager' => $is_manager,
                     'unsubscribe' => $unsubscribe
                 ]) ?>
-                <?php \yii\widgets\Pjax::end(); ?>
             <?php endif; ?>
 
             <?php /*if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && !$lead->isOwner($user->id)):*/?><!--
@@ -166,7 +166,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
                 </div>
             --><?php /*endif; */?>
 
-            <?php if (Auth::can('lead/view_Lead_Preferences')): ?>
+            <?php if (Auth::can('lead/view_Lead_Preferences')) : ?>
                 <div id="lead-preferences">
                     <?= $this->render('partial/_lead_preferences', [
                         'lead' => $lead
@@ -175,7 +175,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
             <?php endif; ?>
 
 
-            <?php if (Auth::can('lead/view_Check_List')): ?>
+            <?php if (Auth::can('lead/view_Check_List')) : ?>
                 <?= $this->render('checklist/lead_checklist', [
                     'lead' => $lead,
                     'comForm'       => $comForm,
@@ -186,7 +186,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
                 ]) ?>
             <?php endif; ?>
 
-            <?php if (Auth::can('lead/view_Task_List')): ?>
+            <?php if (Auth::can('lead/view_Task_List')) : ?>
                 <?= $this->render('partial/_task_list', [
                     'lead' => $lead
                 ]) ?>
@@ -207,16 +207,16 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
                     'unsubscribe' => $unsubscribe,
                     'smsEnabled' => $smsEnabled,
                 ]); ?>
-            <?php else: ?>
+            <?php else : ?>
                 <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
             <?php endif;?>
 
-            <?php //php \yii\helpers\VarDumper::dump(Yii::$app->user->identity->callExpertCountByShiftTime) ?>
+            <?php //php \yii\helpers\VarDumper::dump(Yii::$app->user->identity->callExpertCountByShiftTime)?>
 
 
 
-            <?php if (Auth::can('lead/view_BO_Expert')): ?>
-                <?php  if(Yii::$app->user->identity->isAllowCallExpert): ?>
+            <?php if (Auth::can('lead/view_BO_Expert')) : ?>
+                <?php  if (Yii::$app->user->identity->isAllowCallExpert) : ?>
                     <?= $this->render('call-expert/lead_call_expert', [
                         'lead' => $lead,
                         'comForm'       => $comForm,
@@ -234,10 +234,10 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
 
         <div class="col-md-6">
 
-<!--            --><?php //if (!$lead->isNewRecord) : ?>
+<!--            --><?php //if (!$lead->isNewRecord) :?>
 <!--                <div class="row">-->
 <!--                    <div class="col-md-12">-->
-<!--                        --><?php //if(!$lead->l_answered): ?>
+<!--                        --><?php //if(!$lead->l_answered):?>
 <!---->
 <!--                            --><?php //if($lead->isProcessing()):?>
 <!--                                --><?php //= Html::a(($lead->l_answered ? '<i class="fa fa-commenting-o"></i>Make UnAnswered' : '<i class="fa fa-commenting"></i> Make Answered'), ['lead/update2', 'id' => $lead->id, 'act' => 'answer'], [
@@ -248,19 +248,19 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
 //                                        'method' => 'post',
 //                                        'pjax' => 0
 //                                    ],
-//                                ]) ?>
-<!--                            --><?php //else: ?>
+//                                ])?>
+<!--                            --><?php //else:?>
 <!--                                <span class="badge badge-warning"><i class="fa fa-commenting-o"></i> ANSWERED: false</span>-->
 <!--                            --><?php //endif;?>
 <!---->
-<!--                        --><?php //else: ?>
+<!--                        --><?php //else:?>
 <!--                            <span class="badge badge-success"><i class="fa fa-commenting-o"></i> ANSWERED: true</span>-->
-<!--                        --><?php //endif; ?>
+<!--                        --><?php //endif;?>
 <!---->
 <!--                    </div>-->
 <!---->
 <!--                </div>-->
-<!--            --><?php //endif; ?>
+<!--            --><?php //endif;?>
 
 
 
@@ -271,7 +271,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
 //                    'lead' => $lead,
 //                    'leadForm' => $leadForm,
 //                    'is_manager' => $is_manager,
-//                ]); ?>
+//                ]);?>
 
 
                 <?= $this->render('notes/agent_notes', [
@@ -288,6 +288,16 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
 
     </div>
 </div>
+
+<?php
+Modal::begin([
+    'id' => 'modalLead',
+    'title' => '',
+    'size' => Modal::SIZE_LARGE,
+    'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
+]);
+Modal::end();
+?>
 
 <?php
 

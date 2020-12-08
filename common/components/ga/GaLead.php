@@ -81,10 +81,11 @@ class GaLead
             $this->postData['cd9'] = $this->lead->getFlightTypeName();
 
             $this->postData = GaHelper::preparePostData($this->postData, $this->lead);
-
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableFormatter($throwable),
-            'GaLead:prepareData:Throwable');
+            Yii::error(
+                AppHelper::throwableFormatter($throwable),
+                'GaLead:prepareData:Throwable'
+            );
             $this->postData = [];
         }
         return $this;

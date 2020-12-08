@@ -9,7 +9,8 @@ use yii\db\Migration;
  * Class m200127_142349_add_column_pqsl_action_id_tbl_product_quote_status_log
  */
 class m200127_142349_add_column_pqsl_action_id_tbl_product_quote_status_log extends Migration
-{    /**
+{
+    /**
  * {@inheritdoc}
  */
     public function safeUp()

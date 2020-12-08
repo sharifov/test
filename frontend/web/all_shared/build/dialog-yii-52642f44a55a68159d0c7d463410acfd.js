@@ -1,0 +1,1 @@
+var krajeeYiiConfirm;!function(){"use strict";krajeeYiiConfirm=function(i){i=i||"krajeeDialog";var n=window[i]||"";n&&(yii.confirm=function(i,o,r){n.confirm(i,function(i){i?!o||o():!r||r()})})}}();

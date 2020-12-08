@@ -75,14 +75,12 @@ class CompleteAllJoinCalls
     private function log(int $userId): void
     {
         foreach ($this->messages as $message) {
-
             if ($ntf = Notifications::create($userId, 'Complete Join call', $message['error'], Notifications::TYPE_DANGER, true)) {
                 $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
                 Notifications::publish('getNewNotification', ['user_id' => $userId], $dataNotification);
             }
 
             \Yii::error(VarDumper::dumpAsString($message), static::class);
-
         }
     }
 }

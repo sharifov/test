@@ -137,20 +137,20 @@ class CurrencyController extends FController
      * @return Response
      * @throws \yii\httpclient\Exception
      */
-    public function actionSynchronization() : Response
+    public function actionSynchronization(): Response
     {
         $result = Currency::synchronization();
 
         if ($result) {
-            if($result['error']) {
+            if ($result['error']) {
                 Yii::$app->getSession()->setFlash('error', $result['error']);
             } else {
                 $message = 'Synchronization successful<br>';
-                if($result['created']) {
-                    $message .= 'Created currency: "'.implode(', ', $result['created']).'"<br>';
+                if ($result['created']) {
+                    $message .= 'Created currency: "' . implode(', ', $result['created']) . '"<br>';
                 }
-                if($result['updated']) {
-                    $message .= 'Updated currency: "'.implode(', ', $result['updated']).'"<br>';
+                if ($result['updated']) {
+                    $message .= 'Updated currency: "' . implode(', ', $result['updated']) . '"<br>';
                 }
                 Yii::$app->getSession()->setFlash('success', $message);
             }

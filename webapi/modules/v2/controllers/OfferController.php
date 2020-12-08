@@ -35,8 +35,7 @@ class OfferController extends BaseController
         OfferRepository $offerRepository,
         OfferViewLogService $offerViewLogService,
         $config = []
-    )
-    {
+    ) {
         parent::__construct($id, $module, $logger, $config);
         $this->offerRepository = $offerRepository;
         $this->offerViewLogService = $offerViewLogService;

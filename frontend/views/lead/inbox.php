@@ -94,17 +94,17 @@ $this->params['breadcrumbs'][] = $this->title;
             </table>
         </div>*/ ?>
 
-        <div class="col-md-1" title="Сompleted Tasks Percent">
-            <input type="text" value="<?=$taskSummary['completedTasksPercent']?>" data-width="120" data-height="120" data-fgColor="<?=($taskSummary['completedTasksPercent']>=$user->userParams->up_min_percent_for_take_leads?'#66CC66':'#f3a72d')?>" class="knob_element" readonly="readonly" title="Сompleted Tasks Percent">
+        <div class="col-md-1" title="Completed Tasks Percent">
+            <input type="text" value="<?=$taskSummary['completedTasksPercent']?>" data-width="120" data-height="120" data-fgColor="<?=($taskSummary['completedTasksPercent'] >= $user->userParams->up_min_percent_for_take_leads ? '#66CC66' : '#f3a72d')?>" class="knob_element" readonly="readonly" title="Completed Tasks Percent">
         </div>
 
         <div class="col-md-1" title="Taked leads">
             <?php
-                if($user->userParams->up_default_take_limit_leads && $newLeadsCount > $user->userParams->up_default_take_limit_leads) {
-                    $maxVal = $isAccessNewLead ? $newLeadsCount + 1 : $newLeadsCount;
-                }  else {
-                    $maxVal = $user->userParams->up_default_take_limit_leads;
-                }
+            if ($user->userParams->up_default_take_limit_leads && $newLeadsCount > $user->userParams->up_default_take_limit_leads) {
+                $maxVal = $isAccessNewLead ? $newLeadsCount + 1 : $newLeadsCount;
+            } else {
+                $maxVal = $user->userParams->up_default_take_limit_leads;
+            }
             ?>
             <input type="text" value="<?=$newLeadsCount?>" data-max="<?=$maxVal?>" data-width="120" data-height="120" data-fgColor="#337ab7" class="knob_element" readonly="readonly" title="Taked leads">
         </div>
@@ -113,7 +113,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'user' => $user,
                 'completedTasksPercent' => $taskSummary['completedTasksPercent'],
                 'newLeadsCount' => $newLeadsCount
-        ] )?>
+        ])?>
 
     </div>
 
@@ -122,8 +122,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
 
 
-	<div class="row">
-    <?php if(!$checkShiftTime): ?>
+    <div class="row">
+    <?php if (!$checkShiftTime) : ?>
         <div class="col-md-4">
                 <div class="alert alert-warning alert-dismissible" role="alert">
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -135,7 +135,7 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
     <?php endif; ?>
 
-    <?php if(!$isAccessNewLead): ?>
+    <?php if (!$isAccessNewLead) : ?>
         <div class="col-md-4">
             <div class="alert alert-warning alert-dismissible" role="alert">
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -145,7 +145,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php endif; ?>
 
 
-    <?php if(!empty($accessLeadByFrequency) && $accessLeadByFrequency['access'] == false): ?>
+    <?php if (!empty($accessLeadByFrequency) && $accessLeadByFrequency['access'] == false) : ?>
         <div class="col-md-4">
             <div class="alert alert-warning alert-dismissible" role="alert">
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -153,7 +153,7 @@ $this->params['breadcrumbs'][] = $this->title;
                  </div>
         </div>
     <?php endif; ?>
-	</div>
+    </div>
 
     <?php
 
@@ -179,7 +179,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 $diffTime = time() - $createdTS;
                 $diffHours = (int) ($diffTime / (60 * 60));
 
-                return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+                return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
             },
             'options' => [
                 'style' => 'width:180px'
@@ -207,7 +207,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 'options' => [
                     'autocomplete' => 'off',
-                    'placeholder' =>'Choose Date'
+                    'placeholder' => 'Choose Date'
                 ],
             ]),
             'enableSorting' => ! $isAgent
@@ -279,7 +279,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
                 }
                 return '-';
-
             },
             'format' => 'raw',
             'contentOptions' => [
@@ -319,7 +318,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'Pax',
             'value' => static function (\common\models\Lead $model) {
-                return '<span title="adult"><i class="fa fa-male"></i> '. $model->adults .'</span> / <span title="child"><i class="fa fa-child"></i> ' . $model->children . '</span> / <span title="infant"><i class="fa fa-info"></i> ' . $model->infants.'</span>';
+                return '<span title="adult"><i class="fa fa-male"></i> ' . $model->adults . '</span> / <span title="child"><i class="fa fa-child"></i> ' . $model->children . '</span> / <span title="infant"><i class="fa fa-info"></i> ' . $model->infants . '</span>';
             },
             'format' => 'raw',
             'visible' => ! $isAgent,
@@ -357,7 +356,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'header' => 'Client time',
             'format' => 'raw',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) {
                 return ClientTimeFormatter::format($model->getClientTime2(), $model->offset_gmt);
             },
             //'options' => ['style' => 'width:80px'],
@@ -392,7 +391,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'action' => function ($url, \common\models\Lead $model, $key) use ($checkShiftTime, $isAccessNewLead, $isAgent) {
                     $buttons = '';
 
-                    if($isAgent) {
+                    if ($isAgent) {
                         if (!$isAccessNewLead) {
                             $buttons .= '<i class="fa fa-warning warning"></i> Access is denied (limit) - "Take lead"<br/>';
                         }
@@ -403,13 +402,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
 
 
-                    if(!$buttons) {
+                    if (!$buttons) {
                         $buttons .= Html::a('<i class="fa fa-download"></i> Take', ['lead/take', 'gid' => $model->gid], [
                             'class' => 'btn btn-primary btn-xs take-btn',
                             'data-pjax' => 0
                         ]);
 
-                        if(!$isAgent) {
+                        if (!$isAgent) {
                             $buttons .= Html::a('<i class="fa fa-search"></i> View', ['lead/view', 'gid' => $model->gid], [
                                 'class' => 'btn btn-info btn-xs',
                                 'data-pjax' => 0

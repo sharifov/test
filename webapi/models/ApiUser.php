@@ -6,7 +6,6 @@ use yii\web\IdentityInterface;
 
 class ApiUser implements IdentityInterface
 {
-
     private static $users = [
         1 => [
             'id' => 1,
@@ -63,6 +62,4 @@ class ApiUser implements IdentityInterface
     {
         return ''; //$this->authKey === $authKey;
     }
-
-
 }

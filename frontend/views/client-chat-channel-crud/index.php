@@ -59,7 +59,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     'class' => 'danger'
                 ];
             }
-
         },
         'columns' => [
             ['attribute' => 'ccc_id',
@@ -125,6 +124,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => BooleanColumn::class, 'attribute' => 'ccc_frontend_enabled'],
             //'ccc_default:boolean',
             ['class' => BooleanColumn::class, 'attribute' => 'ccc_default'],
+            ['class' => BooleanColumn::class, 'attribute' => 'ccc_default_device'],
             'ccc_priority',
             [
                 'class' => DateTimeColumn::class,

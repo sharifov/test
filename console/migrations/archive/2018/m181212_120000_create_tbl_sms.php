@@ -17,7 +17,7 @@ class m181212_120000_create_tbl_sms extends Migration
             $tableOptions = 'CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE=InnoDB';
         }
 
-        $this->createTable('{{%sms_template_type}}',	[
+        $this->createTable('{{%sms_template_type}}', [
             'stp_id'                     => $this->primaryKey(),
             'stp_key'                    => $this->string(50)->unique()->notNull(),
             'stp_origin_name'            => $this->string(100)->notNull(),
@@ -33,7 +33,7 @@ class m181212_120000_create_tbl_sms extends Migration
         $this->addForeignKey('FK-sms_template_type_stp_updated_user_id', '{{%sms_template_type}}', ['stp_updated_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
 
 
-        $this->createTable('{{%sms}}',	[
+        $this->createTable('{{%sms}}', [
             's_id'                     => $this->primaryKey(),
             's_reply_id'               => $this->integer(),
             's_lead_id'                => $this->integer(),
@@ -84,7 +84,6 @@ class m181212_120000_create_tbl_sms extends Migration
 
         $this->createIndex('IND-sms_s_tw_message_sid', '{{%sms}}', ['s_tw_message_sid']);
         $this->createIndex('IND-sms_s_communication_id', '{{%sms}}', ['s_communication_id']);
-
     }
 
     /**
@@ -95,6 +94,4 @@ class m181212_120000_create_tbl_sms extends Migration
         $this->dropTable('{{%sms}}');
         $this->dropTable('{{%sms_template_type}}');
     }
-
-
 }

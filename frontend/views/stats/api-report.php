@@ -1,10 +1,12 @@
 <?php
+
 /**
  * @var $apiStats []
  * @var $format string
  * @var $actions []
  */
 use yii\helpers\Html;
+
 $js = <<<JS
 
 $('#viewMode0').click(function() {
@@ -78,24 +80,24 @@ use yii\widgets\Pjax; ?>
                     <div class="x_panel">
                         <div class="col-md-3">
                             <?=\kartik\daterange\DateRangePicker::widget([
-                                'options'=>['id'=>'api-stats-picker'],
-                                'name'=>'callStatsRange',
-                                'convertFormat'=>true,
-                                'presetDropdown'=>true,
-                                'hideInput'=>true,
-                                'useWithAddon'=>true,
-                                'pluginOptions'=>[
+                                'options' => ['id' => 'api-stats-picker'],
+                                'name' => 'callStatsRange',
+                                'convertFormat' => true,
+                                'presetDropdown' => true,
+                                'hideInput' => true,
+                                'useWithAddon' => true,
+                                'pluginOptions' => [
                                     'minDate' => '2019-01-01',
                                     'maxDate' => date("Y-m-d"),
-                                    'timePicker'=> false,
-                                    'timePickerIncrement'=>15,
-                                    'locale'=>[
-                                        'format'=>'Y-m-d',
+                                    'timePicker' => false,
+                                    'timePickerIncrement' => 15,
+                                    'locale' => [
+                                        'format' => 'Y-m-d',
                                         'separator' => ' / '
                                     ],
                                 ],
-                                'pluginEvents'=>[
-                                    "apply.daterangepicker"=>"function(){
+                                'pluginEvents' => [
+                                    "apply.daterangepicker" => "function(){
                                      $('#chart_div').html(generateChartPreloader());                                    
                                      $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), project: $('#projects').val(), action: $('#apiList').val()}, type: 'POST', url: 'api-graph', async:true, push: false});
                                      let dates = $('#api-stats-picker').val().split(' / ');
@@ -129,7 +131,7 @@ use yii\widgets\Pjax; ?>
                         </div>
 
                         <div class="col-xs-1">
-                            <?= Html::dropDownList('projectsList', null,  \common\models\ApiUser::getList(), [
+                            <?= Html::dropDownList('projectsList', null, \common\models\ApiUser::getList(), [
                                 'prompt' => 'All',
                                 'id' => 'projects',
                                 'class' => 'form-control'
@@ -137,7 +139,7 @@ use yii\widgets\Pjax; ?>
                         </div>
 
                         <div class="col-xs-1">
-                            <?= Html::dropDownList('actionList', null,  \common\models\ApiLog::getActionFilter(), [
+                            <?= Html::dropDownList('actionList', null, \common\models\ApiLog::getActionFilter(), [
                                 'prompt' => 'All',
                                 'id' => 'apiList',
                                 'class' => 'form-control'
@@ -146,7 +148,7 @@ use yii\widgets\Pjax; ?>
 
                         <?php Pjax::begin(['id' => 'api-graph-pjax']); ?>
                         <div class="x_content">
-                            <?php if ($apiStats): ?>
+                            <?php if ($apiStats) : ?>
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div id="chart_div" style="height:550px">
@@ -166,10 +168,10 @@ use yii\widgets\Pjax; ?>
                                                         {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
                                                         <?php endforeach; ?>
                                                     ],
-                                                    <?php foreach($apiStats as $k => $item): ?>
+                                                    <?php foreach ($apiStats as $k => $item) : ?>
                                                     ['<?= date($format, strtotime($item['timeLine']))?>',
                                                         <?php foreach ($actions as $k => $action) :?>
-                                                        <?= isset($item['cnt' . $k]) ? $item['cnt' . $k] : 0 ?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', '<?=$action['al_action']?>', '<?= isset($item['cnt' . $k]) ? $item['cnt' . $k] : 0 ?>', '<?= isset($item['exeTime' . $k]) ? round($item['exeTime' . $k], 2) : ''?>', '<?= isset($item['memUsage' . $k]) ? Yii::$app->formatter->asShortSize($item['memUsage' . $k],2) : '' ?>'),
+                                                            <?= isset($item['cnt' . $k]) ? $item['cnt' . $k] : 0 ?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', '<?=$action['al_action']?>', '<?= isset($item['cnt' . $k]) ? $item['cnt' . $k] : 0 ?>', '<?= isset($item['exeTime' . $k]) ? round($item['exeTime' . $k], 2) : ''?>', '<?= isset($item['memUsage' . $k]) ? Yii::$app->formatter->asShortSize($item['memUsage' . $k], 2) : '' ?>'),
                                                         <?php endforeach; ?>
                                                     ],
                                                     <?php endforeach; ?>

@@ -45,8 +45,8 @@ class m200323_204153_m200323_195015_add_email_list_id_columns extends Migration
      */
     public function safeDown()
     {
-        $this->dropForeignKey('FK-user_project_params-upp_email_list_id','{{%user_project_params}}');
-        $this->dropForeignKey('FK-department_email_project-dep_email_list_id','{{%department_email_project}}');
+        $this->dropForeignKey('FK-user_project_params-upp_email_list_id', '{{%user_project_params}}');
+        $this->dropForeignKey('FK-department_email_project-dep_email_list_id', '{{%department_email_project}}');
         $this->dropColumn('{{%department_email_project}}', 'dep_email_list_id');
         $this->dropColumn('{{%user_project_params}}', 'upp_email_list_id');
         $schema = Yii::$app->db->getSchema();

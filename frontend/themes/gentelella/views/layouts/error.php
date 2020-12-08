@@ -4,6 +4,7 @@
 /* @var $content string */
 
 use yii\helpers\Html;
+
 $bundle = yiister\gentelella\assets\Asset::register($this);
 ?>
 <?php $this->beginPage(); ?>
@@ -16,8 +17,8 @@ $bundle = yiister\gentelella\assets\Asset::register($this);
         $this->registerMetaTag(['charset' => Yii::$app->charset]);
         $this->registerMetaTag(['name' => 'viewport', 'content' => 'width=device-width, initial-scale=1']);
         $this->registerMetaTag(['name' => 'robots', 'content' => 'noindex, nofollow']);
-        $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'href' => Yii::$app->request->baseUrl.'/error.ico']);
-        $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii::$app->request->baseUrl.'/error.ico']);
+        $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'href' => Yii::$app->request->baseUrl . '/error.ico']);
+        $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii::$app->request->baseUrl . '/error.ico']);
         $this->metaTags[] = Html::csrfMetaTags();
         $this->head();
         echo Html::tag('title', Html::encode($this->title));

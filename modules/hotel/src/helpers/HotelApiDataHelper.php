@@ -34,7 +34,7 @@ class HotelApiDataHelper
                 break;
         }
         return $result;
-	}
+    }
 
     /**
      * @param string $urlMethod

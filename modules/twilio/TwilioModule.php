@@ -18,8 +18,8 @@ class TwilioModule extends \yii\base\Module
 
     public $viewPath = '@modules/twilio/views';
 
-	public static function t($category, $message, $params = [], $language = null): string
-	{
-		return \Yii::t('modules/twilio/' . $category, $message, $params, $language);
-	}
+    public static function t($category, $message, $params = [], $language = null): string
+    {
+        return \Yii::t('modules/twilio/' . $category, $message, $params, $language);
+    }
 }

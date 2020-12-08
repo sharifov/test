@@ -5,7 +5,7 @@ use common\models\ConferenceParticipant;
 use common\models\search\CallSearch;
 use sales\auth\Auth;
 use yii\helpers\Html;
-use \common\models\Call;
+use common\models\Call;
 use yii\helpers\VarDumper;
 
 /* @var $this yii\web\View */
@@ -15,11 +15,11 @@ use yii\helpers\VarDumper;
 
 <div class="col-md-12" style="margin-bottom: 2px">
     <?php
-        if ($model->isIn()) {
-            $trClass = 'warning';
-        } else {
-            $trClass = 'info';
-        }
+    if ($model->isIn()) {
+        $trClass = 'warning';
+    } else {
+        $trClass = 'info';
+    }
     ?>
 
     <table class="table table-condensed">
@@ -34,11 +34,11 @@ use yii\helpers\VarDumper;
                     <?=Html::tag('i', '', ['class' => 'fa fa-arrow-circle-o-left fa-lg text-info'])?>
                 <?php endif;*/ ?>
 
-                <?php if ($model->isIn()):?>
+                <?php if ($model->isIn()) :?>
                     <span class="badge badge-danger">In</span>
-                <?php elseif ($model->isOut()):?>
+                <?php elseif ($model->isOut()) :?>
                     <span class="badge badge-blue">Out</span>
-                <?php elseif ($model->isReturn()):?>
+                <?php elseif ($model->isReturn()) :?>
                     <span class="badge badge-blue">Return</span>
                 <?php endif;?>
 
@@ -46,29 +46,28 @@ use yii\helpers\VarDumper;
             <td class="text-left" style="width:180px">
 
 
-                <?php if($model->isIn()):?>
+                <?php if ($model->isIn()) :?>
                     <div class="col-md-3">
                         <i class="fa fa-male text-info fa-2x fa-border"></i>
                     </div>
                     <div class="col-md-9">
-                    <?php if ($model->cClient):?>
+                    <?php if ($model->cClient) :?>
                         <?=Html::encode(str_replace('ClientName', '...', $model->cClient->full_name))?><br/>
                     <?php endif; ?>
                     <?=Html::encode($model->c_from)?>
                     </div>
-                <?php else: ?>
-                    <?php if($model->c_created_user_id):?>
+                <?php else : ?>
+                    <?php if ($model->c_created_user_id) :?>
                         <i class="fa fa-user fa-2x fa-border"></i>
                         <?=Html::encode($model->cCreatedUser->username)?>
-                    <?php else: ?>
+                    <?php else : ?>
                         <i class="fa fa-phone fa-2x fa-border"></i>
                         <?=Html::encode($model->c_from)?>
                     <?php endif; ?>
                 <?php endif; ?>
             </td>
             <td class="text-center" style="width:130px">
-                <?php if ($model->c_source_type_id === Call::SOURCE_CONFERENCE_CALL):?>
-
+                <?php if ($model->c_source_type_id === Call::SOURCE_CONFERENCE_CALL) :?>
                     <?php
                     $roomName = null;
                     if ($model->conferenceParticipants) {
@@ -79,24 +78,24 @@ use yii\helpers\VarDumper;
                     }
                     ?>
 
-                    <?php if ($roomName):?>
+                    <?php if ($roomName) :?>
                         <span class="badge badge-blue"><?= Html::encode($roomName) ?></span>
                     <?php endif; ?>
-                <?php else: ?>
+                <?php else : ?>
                     <span class="badge badge-info"><?=$model->cProject ? Html::encode($model->cProject->name) : '-'?></span>
                 <?php endif; ?><br>
-                <?php if($model->cDep):?>
+                <?php if ($model->cDep) :?>
                     <span class="label label-warning"><?=$model->cDep ? Html::encode($model->cDep->dep_name) : '-'?></span>
                 <?php endif; ?>
-                <?php if ($model->c_source_type_id):?>
+                <?php if ($model->c_source_type_id) :?>
                     <span class="label label-info"><?=$model->getShortSourceName()?></span>
                 <?php endif; ?>
-                <?php if ($model->c_forwarded_from):?>
+                <?php if ($model->c_forwarded_from) :?>
                     <span class="label label-info" title="Forwarded from: <?=Html::encode($model->c_forwarded_from)?>">F</span>
                 <?php endif; ?>
             </td>
             <td class="text-left">
-                <?php if($model->c_lead_id && $model->cLead):?>
+                <?php if ($model->c_lead_id && $model->cLead) :?>
                     <i>l:<?=Html::a($model->c_lead_id, ['lead/view', 'gid' => $model->cLead->gid], ['data-pjax' => 0, 'target' => '_blank'])?>
 
                         <?php //=$model->cLead->l_init_price ? ' - ' . number_format($model->cLead->l_init_price, 0) : ''?>
@@ -118,15 +117,15 @@ use yii\helpers\VarDumper;
                     <?php //=$model->c_lead_id?>
                 <?php endif; ?>
 
-                <?php if($model->c_case_id && $model->cCase):?>
+                <?php if ($model->c_case_id && $model->cCase) :?>
                     <i>c:<?=Html::a($model->c_case_id, ['cases/view', 'gid' => $model->cCase->cs_gid], ['data-pjax' => 0, 'target' => '_blank'])?></i><br>
                 <?php endif; ?>
 
-                <?php if($model->isIn() && $model->cugUgs):?>
+                <?php if ($model->isIn() && $model->cugUgs) :?>
                     <?php $userGroupList = [];
-                        foreach ($model->cugUgs as $userGroup) {
-                            $userGroupList[] =  '<span class="label label-info"><i class="fa fa-users"></i> ' . Html::encode($userGroup->ug_name) . '</span>';
-                        }
+                    foreach ($model->cugUgs as $userGroup) {
+                        $userGroupList[] =  '<span class="label label-info"><i class="fa fa-users"></i> ' . Html::encode($userGroup->ug_name) . '</span>';
+                    }
                         echo $userGroupList ? implode('<br>', $userGroupList) : '-';
                     ?>
                 <?php endif; ?>
@@ -143,22 +142,24 @@ use yii\helpers\VarDumper;
 
                 <?php
                     $sec = 0;
-                    if($model->c_updated_dt) {
-                        if($model->isEnded()) {
-                            $sec = $model->c_call_duration ?: strtotime($model->c_updated_dt) - strtotime($model->c_created_dt);
-                        } else {
-                            $sec = time() - strtotime($model->c_updated_dt);
-                        }
+                if ($model->c_updated_dt) {
+                    if ($model->isEnded()) {
+                        $sec = $model->c_call_duration ?: strtotime($model->c_updated_dt) - strtotime($model->c_created_dt);
+                    } elseif ($model->isStatusQueue()) {
+                        $sec = time() - strtotime($model->c_queue_start_dt);
+                    } else {
+                        $sec = time() - strtotime($model->c_updated_dt);
                     }
+                }
                 ?>
 
-                <?php if ($model->isEnded()):?>
+                <?php if ($model->isEnded()) :?>
                     <span class="badge badge-default"><?=gmdate('i:s', $sec)?></span> <?php //data-sec="<?=$sec" data-control="pause" data-format="%M:%S"?>
-                    <?php if ($model->c_recording_sid):?>
+                    <?php if ($model->c_recording_sid) :?>
                         <small><i class="fa fa-play-circle-o"></i></small>
                     <?php endif;?>
                     <?php //=Yii::$app->formatter->asRelativeTime(strtotime($model->c_created_dt))?>
-                <?php else: ?>
+                <?php else : ?>
                     <span class="badge badge-warning timer" data-sec="<?=$sec?>" data-control="start" data-format="%M:%S"><?=gmdate('i:s', $sec)?></span>
                 <?php endif;?>
 
@@ -167,36 +168,36 @@ use yii\helpers\VarDumper;
 
                 <i class="fa fa-clock-o"></i>
                 <?=Yii::$app->formatter->asDatetime(strtotime($model->c_created_dt), 'php:H:i:s')?><br>
-                <?php if ($model->isEnded()):?>
+                <?php if ($model->isEnded()) :?>
                     <?=Yii::$app->formatter->asRelativeTime(strtotime($model->c_created_dt))?>
                 <?php endif;?>
 
 
             </td>
             <td class="text-left" style="width:160px">
-                <?php if($model->isIn()):?>
+                <?php if ($model->isIn()) :?>
                     <div>
 
-                        <?php if((int) $model->c_source_type_id === Call::SOURCE_GENERAL_LINE):?>
+                        <?php if ((int) $model->c_source_type_id === Call::SOURCE_GENERAL_LINE) :?>
                                 <i class="fa fa-fax fa-1x fa-border"></i>
                                 <?=Html::encode($model->c_to)?><br>
                         <?php endif;?>
 
 
-                        <?php if($model->c_created_user_id):?>
+                        <?php if ($model->c_created_user_id) :?>
                             <i class="fa fa-user fa-1x fa-border"></i>
                             <?=Html::encode($model->cCreatedUser->username)?>
-                        <?php else: ?>
+                        <?php else : ?>
                             <i class="fa fa-phone fa-1x fa-border"></i>
                             <?=Html::encode($model->c_to)?>
                         <?php endif; ?>
                     </div>
-                <?php else: ?>
+                <?php else : ?>
                     <div class="col-md-3">
                         <i class="fa fa-male text-info fa-2x fa-border"></i>
                     </div>
                     <div class="col-md-9">
-                        <?php if ($model->cClient):?>
+                        <?php if ($model->cClient) :?>
                             <?=Html::encode(str_replace('ClientName', '...', $model->cClient->full_name))?><br/>
                         <?php endif; ?>
                         <small><?=Html::encode($model->c_to)?></small>
@@ -204,17 +205,21 @@ use yii\helpers\VarDumper;
 
                 <?php endif; ?>
             </td>
+            <?php if (Auth::can('call/assignUsers', ['call' => $model])) : ?>
+                <td>
+                    <button class="btn btn-success add_users_btn" data-call-id="<?= $model->c_id?>"><i class="fa fa-plus"> </i> add users </button>
+                </td>
+            <?php endif;?>
             <td>
                 <?php getJoinTemplate($model); ?>
             </td>
         </tr>
 
-        <?php if($model->cuaUsers):?>
+        <?php if ($model->cuaUsers) :?>
             <tr class="<?=$trClass?>">
                 <td class="text-center"><i class="fa fa-users"></i> </td>
                 <td colspan="6">
-                    <?php foreach ($model->callUserAccesses as $cua):
-
+                    <?php foreach ($model->callUserAccesses as $cua) :
                         switch ((int) $cua->cua_status_id) {
                             case CallUserAccess::STATUS_TYPE_PENDING:
                                 $label = 'warning';
@@ -236,13 +241,13 @@ use yii\helpers\VarDumper;
         <?php endif; ?>
 
         <?php
-            if ($children = getChildrenForRecursiveRender($model->c_id)): ?>
+        if ($children = getChildrenForRecursiveRender($model->c_id)) : ?>
                 <tr class="<?=$trClass?>">
                     <td colspan="7">
                         <?php renderChildCallsRecursive($children) ?>
                     </td>
                 </tr>
-            <?php endif;?>
+        <?php endif;?>
     </table>
 </div>
 

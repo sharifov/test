@@ -43,8 +43,7 @@ class ClientUpdateFromEntityService
         CasesManageService $casesManageService,
         TransactionManager $transactionManager,
         ClientPhoneRepository $clientPhoneRepository
-    )
-    {
+    ) {
         $this->finder = $finder;
         $this->clientEmailRepository = $clientEmailRepository;
         $this->clientManageService = $clientManageService;
@@ -70,11 +69,10 @@ class ClientUpdateFromEntityService
             throw new \DomainException('This email already exists ("' . $form->email . '"), Client Id: ' . $case->client->id);
         }
 
-        $this->transactionManager->wrap(function() use ($client, $form, $case) {
+        $this->transactionManager->wrap(function () use ($client, $form, $case) {
 
             $this->clientManageService->addEmail($client, new EmailCreateForm(['email' => $form->email, 'type' => ClientEmail::EMAIL_NOT_SET]));
             $case->updateLastAction();
-
         });
     }
 
@@ -95,11 +93,10 @@ class ClientUpdateFromEntityService
             throw new \DomainException('This phone already exists ("' . $form->phone . '"), Client Id: ' . $case->client->id);
         }
 
-        $this->transactionManager->wrap(function() use ($client, $form, $case) {
+        $this->transactionManager->wrap(function () use ($client, $form, $case) {
 
             $this->clientManageService->addPhone($client, new PhoneCreateForm(['phone' => $form->phone, 'type' => ClientPhone::PHONE_NOT_SET]));
             $case->updateLastAction();
-
         });
     }
 
@@ -116,7 +113,7 @@ class ClientUpdateFromEntityService
             throw new \DomainException('Client not found (Client Id: ' . $case->cs_client_id . ')');
         }
 
-        $this->transactionManager->wrap(function() use ($client, $form, $case) {
+        $this->transactionManager->wrap(function () use ($client, $form, $case) {
 
             $this->clientManageService->updateClient($client, new ClientCreateForm([
                 'firstName' => $form->first_name,
@@ -124,7 +121,6 @@ class ClientUpdateFromEntityService
                 'middleName' => $form->middle_name,
             ]));
             $case->updateLastAction();
-
         });
     }
 }

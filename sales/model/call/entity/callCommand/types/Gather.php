@@ -173,8 +173,7 @@ class Gather extends Model implements CommandTypeInterface
     }
 
     public function getSort()
-{
-    return $this->sort;
-}
-
+    {
+        return $this->sort;
+    }
 }

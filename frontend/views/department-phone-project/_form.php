@@ -30,7 +30,7 @@ use yii\widgets\ActiveForm;
             <?= $form->field($model, 'dpp_redial')->dropDownList([0 => 'No', 1 => 'Yes']) ?>
         </div>
         <div class="col-md-6">
-            <?= $form->field($model, 'dpp_language_id')->dropDownList(\common\models\Language::getLanguages(true,  'language'), ['prompt' => '---']) ?>
+            <?= $form->field($model, 'dpp_language_id')->dropDownList(\common\models\Language::getLanguages(true, 'language'), ['prompt' => '---']) ?>
         </div>
 
         <?php //= $form->field($model, 'dpp_source_id')->dropDownList(Sour) ?>
@@ -42,7 +42,7 @@ use yii\widgets\ActiveForm;
                 'options' => ['placeholder' => 'Select market', 'multiple' => false],
                 'pluginOptions' => ['allowClear' => true],
             ]);
-        ?>
+            ?>
 
         <?php
         echo $form->field($model, 'user_group_list')->widget(\kartik\select2\Select2::class, [

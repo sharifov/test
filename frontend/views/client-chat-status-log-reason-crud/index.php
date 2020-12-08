@@ -4,6 +4,7 @@ use sales\model\clientChat\entity\statusLogReason\ClientChatStatusLogReason;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\clientChat\entity\statusLogReason\search\ClientChatStatusLogReasonSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -37,10 +38,10 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'cslr_action_reason_id',
                 'value' => static function (ClientChatStatusLogReason $model) {
-					return Html::a('<i class="fa fa-link"> ' . $model->cslr_action_reason_id, ['/client-chat-action-reason-crud/view', 'id' => $model->cslr_action_reason_id], ['data-pjax' => 0, 'target' => '_blank']);
-				},
-				'format' => 'raw'
-			],
+                    return Html::a('<i class="fa fa-link"> ' . $model->cslr_action_reason_id, ['/client-chat-action-reason-crud/view', 'id' => $model->cslr_action_reason_id], ['data-pjax' => 0, 'target' => '_blank']);
+                },
+                'format' => 'raw'
+            ],
             'cslr_comment',
 
             ['class' => 'yii\grid\ActionColumn'],

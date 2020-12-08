@@ -4,6 +4,8 @@ use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\DateTimeColumn;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\QuotePriceSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -47,7 +49,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'quote.status',
                 'header'    => 'Quote Status',
-                'value' => function(\common\models\QuotePrice $model) {
+                'value' => function (\common\models\QuotePrice $model) {
                     return $model->quote ? $model->quote->getStatusName(true) : '-';
                 },
                 'format' => 'html',
@@ -57,8 +59,8 @@ $this->params['breadcrumbs'][] = $this->title;
             //'passenger_type',
             [
                 'attribute' => 'passenger_type',
-                'value' => function(\common\models\QuotePrice $model) {
-                    return '<i class="fa fa-user"></i> '.$model->getPassengerTypeName();
+                'value' => function (\common\models\QuotePrice $model) {
+                    return '<i class="fa fa-user"></i> ' . $model->getPassengerTypeName();
                 },
                 'format' => 'raw',
                 'filter' => \common\models\QuotePrice::PASSENGER_TYPE_LIST
@@ -104,7 +106,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'currency'
             ],
 
-            [
+            /*[
                 'attribute' => 'created',
                 'value' => function(\common\models\QuotePrice $model) {
                     return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
@@ -122,9 +124,14 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
 
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'created'
+            ],
+
+            /*[
                 'attribute' => 'updated',
                 'value' => function(\common\models\QuotePrice $model) {
                     return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
@@ -142,6 +149,11 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
+            ],*/
+
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'updated'
             ],
 
             ['class' => 'yii\grid\ActionColumn', 'template' => '{view}'],

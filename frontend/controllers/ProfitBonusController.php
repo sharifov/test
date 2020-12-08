@@ -39,7 +39,7 @@ class ProfitBonusController extends FController
     {
         $searchModel = new ProfitBonusSearch();
         $params = Yii::$app->request->queryParams;
-        if($user_id !== null){
+        if ($user_id !== null) {
             $params['ProfitBonusSearch']['pb_user_id'] = $user_id;
         }
         $dataProvider = $searchModel->search($params);
@@ -67,13 +67,13 @@ class ProfitBonusController extends FController
     public function actionCreate($user_id = null)
     {
         $model = new ProfitBonus();
-        if($user_id !== null){
+        if ($user_id !== null) {
             $model->pb_user_id = $user_id;
         }
 
         if ($model->load(Yii::$app->request->post())) {
             $model->pb_updated_user_id = Yii::$app->user->id;
-            if($model->save()){
+            if ($model->save()) {
                 return $this->redirect(['index','user_id' => $user_id]);
             }
         }
@@ -90,16 +90,15 @@ class ProfitBonusController extends FController
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($id,$user_id = null)
+    public function actionUpdate($id, $user_id = null)
     {
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post())) {
             $model->pb_updated_user_id = Yii::$app->user->id;
-            if($model->save()) {
+            if ($model->save()) {
                 return $this->redirect(['index','user_id' => $user_id]);
             }
-
         }
 
         return $this->render('update', [
@@ -114,7 +113,7 @@ class ProfitBonusController extends FController
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($id,$user_id = null)
+    public function actionDelete($id, $user_id = null)
     {
         $this->findModel($id)->delete();
 

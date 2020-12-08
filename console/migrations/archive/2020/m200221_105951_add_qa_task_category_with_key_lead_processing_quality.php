@@ -29,7 +29,6 @@ class m200221_105951_add_qa_task_category_with_key_lead_processing_quality exten
         }
 
         Yii::$app->db->getSchema()->refreshTableSchema('{{%qa_task_category}}');
-
     }
 
     /**

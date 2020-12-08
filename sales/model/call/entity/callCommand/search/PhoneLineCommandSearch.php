@@ -17,7 +17,7 @@ class PhoneLineCommandSearch extends PhoneLineCommand
     {
         return [
             [['plc_id', 'plc_line_id', 'plc_ccom_id', 'plc_sort_order', 'plc_created_user_id'], 'integer'],
-            [['plc_created_dt'], 'safe'],
+            [['plc_created_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -51,7 +51,7 @@ class PhoneLineCommandSearch extends PhoneLineCommand
             'plc_created_user_id' => $this->plc_created_user_id,
         ]);
 
-        if ($this->plc_created_dt){
+        if ($this->plc_created_dt) {
             $query->andFilterWhere(['>=', 'plc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->plc_created_dt))])
                 ->andFilterWhere(['<=', 'plc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->plc_created_dt) + 3600 * 24)]);
         }

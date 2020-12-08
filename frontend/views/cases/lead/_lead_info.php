@@ -28,12 +28,12 @@ $isAgent = false;
         <ul class="nav navbar-right panel_toolbox">
 
             <?php if (true) : ?>
-                <?php if(!$leadModel && (int) $caseModel->cs_dep_id === \common\models\Department::DEPARTMENT_EXCHANGE): ?>
+                <?php if (!$leadModel && (int) $caseModel->cs_dep_id === \common\models\Department::DEPARTMENT_EXCHANGE) : ?>
                 <li>
                     <?= \yii\bootstrap\Html::a('<i class="fa fa-plus-circle success"></i> Create Lead', ['lead/create-case', 'case_gid' => $caseModel->cs_gid], ['data-pjax' => 0, 'target' => '_blank'])?>
                 </li>
                 <?php endif; ?>
-                <?php if($caseModel->isProcessing()):?>
+                <?php if ($caseModel->isProcessing()) :?>
                 <li>
                     <?=Html::a('<i class="fa fa-search warning"></i> Search Lead', null, ['class' => 'modal', 'id' => 'search-lead-btn', 'title' => 'Search Lead for Case'])?>
                 </li>
@@ -56,7 +56,7 @@ $isAgent = false;
         <div class="clearfix"></div>
     </div>
     <div class="x_content" style="display: block;">
-        <?php if($leadModel):?>
+        <?php if ($leadModel) :?>
         <div class="row">
             <div class="col-md-6">
                 <?= \yii\widgets\DetailView::widget([
@@ -139,15 +139,15 @@ $isAgent = false;
                         ],
                         [
                             'attribute' => 'created',
-                            'value' => function(\common\models\Lead $model) {
-                                return $model->created ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created)) : '';
+                            'value' => function (\common\models\Lead $model) {
+                                return $model->created ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created)) : '';
                             },
                             'format' => 'raw',
                         ],
                         [
                             'attribute' => 'updated',
-                            'value' => function(\common\models\Lead $model) {
-                                return $model->updated ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated)) : '';
+                            'value' => function (\common\models\Lead $model) {
+                                return $model->updated ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->updated)) : '';
                             },
                             'format' => 'raw',
                         ],
@@ -179,7 +179,7 @@ $isAgent = false;
                             'label' => 'Pax',
                             'value' => static function (\common\models\Lead $model) {
                                 //$str = '';
-                                $str = '<i class="fa fa-male"></i> <span title="adult">'. $model->adults .'</span> / <span title="child">' . $model->children . '</span> / <span title="infant">' . $model->infants.'</span>';
+                                $str = '<i class="fa fa-male"></i> <span title="adult">' . $model->adults . '</span> / <span title="child">' . $model->children . '</span> / <span title="infant">' . $model->infants . '</span>';
                                 return $str;
                             },
                             'format' => 'raw',
@@ -231,7 +231,6 @@ $isAgent = false;
                                     }
                                 }
                                 return '-';
-
                             },
                             'format' => 'raw',
                         ],
@@ -303,9 +302,9 @@ echo $this->render('_search_lead_form', [
             'contentOptions' => [
                 'class' => 'text-center'
             ]
-        ],
+            ],
 
-        [
+            [
             'attribute' => 'uid',
             'options' => [
                 'style' => 'width:100px'
@@ -313,7 +312,7 @@ echo $this->render('_search_lead_form', [
             'contentOptions' => [
                 'class' => 'text-center'
             ]
-        ],
+            ],
 
         /*[
             'attribute' => 'client_id',
@@ -329,7 +328,7 @@ echo $this->render('_search_lead_form', [
             ]
         ],*/
 
-        [
+            [
             'header' => 'Client / Emails / Phones',
             'format' => 'raw',
             'value' => static function (\common\models\Lead $model) {
@@ -345,7 +344,7 @@ echo $this->render('_search_lead_form', [
                     $clientName = '-';
                 }
 
-                $str = $clientName.'<br>';
+                $str = $clientName . '<br>';
 
                 if (Auth::id() !== $model->employee_id && Auth::user()->isAgent()) {
                     $str .= '- // - // - // -';
@@ -359,7 +358,7 @@ echo $this->render('_search_lead_form', [
             'options' => [
                 'style' => 'width:180px'
             ]
-        ],
+            ],
 
             [
             'attribute' => 'status',
@@ -398,8 +397,8 @@ echo $this->render('_search_lead_form', [
                 'class' => 'text-center'
             ]
 
-        ],
-        [
+            ],
+            [
             'attribute' => 'created',
             'label' => 'Pending Time',
             'value' => static function (\common\models\Lead $model) {
@@ -407,30 +406,30 @@ echo $this->render('_search_lead_form', [
             },
             'visible' => !$isAgent,
             'format' => 'raw'
-        ],
-        [
+            ],
+            [
             'attribute' => 'project_id',
             'value' => static function (\common\models\Lead $model) {
                 return $model->project ? $model->project->name : '-';
             },
             'filter' => \common\models\Project::getList()
-        ],
+            ],
 
-        [
+            [
             'attribute' => 'cabin',
             'value' => static function (\common\models\Lead $model) {
                 return $model->getCabinClassName();
             },
             'filter' => \common\models\Lead::CABIN_LIST
-        ],
+            ],
 
         //'trip_type',
 
-        [
+            [
             'label' => 'Pax / Communication',
             'value' => static function (\common\models\Lead $model) {
                 //$str = '';
-                $str = '<i class="fa fa-male"></i> <span title="adult">'. $model->adults .'</span> / <span title="child">' . $model->children . '</span> / <span title="infant">' . $model->infants.'</span><br>';
+                $str = '<i class="fa fa-male"></i> <span title="adult">' . $model->adults . '</span> / <span title="child">' . $model->children . '</span> / <span title="infant">' . $model->infants . '</span><br>';
                 $str .= $model->getCommunicationInfo();
                 return $str;
             },
@@ -438,9 +437,9 @@ echo $this->render('_search_lead_form', [
             'contentOptions' => [
                 'class' => 'text-center'
             ]
-        ],
+            ],
 
-        [
+            [
             'header' => 'Quotes',
             'value' => static function (\common\models\Lead $model) use ($isAgent) {
                 return $model->quotesCount;
@@ -449,9 +448,9 @@ echo $this->render('_search_lead_form', [
             'contentOptions' => [
                 'class' => 'text-center'
             ]
-        ],
+            ],
 
-        [
+            [
             'header' => 'Segments',
             'value' => static function (\common\models\Lead $model) {
 
@@ -473,9 +472,9 @@ echo $this->render('_search_lead_form', [
             'options' => [
                 'style' => 'width:140px'
             ]
-        ],
+            ],
 
-        [
+            [
             'header' => 'Depart',
             'value' => static function (\common\models\Lead $model) {
 
@@ -487,7 +486,6 @@ echo $this->render('_search_lead_form', [
                     }
                 }
                 return '-';
-
             },
             'format' => 'raw',
             'contentOptions' => [
@@ -496,23 +494,23 @@ echo $this->render('_search_lead_form', [
             'options' => [
                 'style' => 'width:100px'
             ]
-        ],
+            ],
 
-        [
+            [
             'attribute' => 'employee_id',
             'format' => 'raw',
             'value' => static function (\common\models\Lead $model) {
                 return $model->employee ? '<i class="fa fa-user"></i> ' . Html::encode($model->employee->username) : '-';
             },
             //'filter' => $userList
-        ],
-        [
+            ],
+            [
             'attribute' => 'created',
             'value' => static function (\common\models\Lead $model) {
                 return $model->created ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created)) : '-';
             },
             'format' => 'raw'
-        ],
+            ],
         // 'created:date',
 
         /*[
@@ -531,11 +529,11 @@ echo $this->render('_search_lead_form', [
             ],
         ],*/
 
-        [
+            [
             'attribute' => 'l_last_action_dt',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) {
                 $str = '-';
-                if($model->l_last_action_dt) {
+                if ($model->l_last_action_dt) {
                     $str = '<b>' . Yii::$app->formatter->asRelativeTime(strtotime($model->l_last_action_dt)) . '</b>';
                     $str .= '<br><i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->l_last_action_dt));
                 }
@@ -545,10 +543,10 @@ echo $this->render('_search_lead_form', [
             'contentOptions' => [
                 'class' => 'text-center'
             ],
-        ],
+            ],
         // 'bo_flight_id',
 
-        [
+            [
             'class' => 'yii\grid\ActionColumn',
             'template' => '{assign}',
             'controller' => 'case',
@@ -558,14 +556,17 @@ echo $this->render('_search_lead_form', [
                         ['title' => 'View', 'class' => 'btn btn-xs btn-info showModalCaseInfo', 'data-pjax' => 0]);
                 },*/
                 'assign' => function ($url, $model, $key) use ($caseModel) {
-                    return Html::a('<span class="fa fa-check"></span> Assign', ['cases/assign-lead'],
-                        ['title' => 'Assign', 'class' => 'btn btn-xs btn-success assignLead', 'data-pjax' => 0, 'data-gid' => $caseModel->cs_gid, 'data-lead-gid' => $model->gid]);
+                    return Html::a(
+                        '<span class="fa fa-check"></span> Assign',
+                        ['cases/assign-lead'],
+                        ['title' => 'Assign', 'class' => 'btn btn-xs btn-success assignLead', 'data-pjax' => 0, 'data-gid' => $caseModel->cs_gid, 'data-lead-gid' => $model->gid]
+                    );
                 },
             ]
-        ]
+            ]
 
     ];
-?>
+    ?>
 
 <?php
     echo \yii\grid\GridView::widget([
@@ -573,7 +574,7 @@ echo $this->render('_search_lead_form', [
         'filterModel' => false, //$isAgent ? false : $searchModel,
         'columns' => $gridColumns,
     ]);
-?>
+    ?>
 <?php Pjax::end(); ?>
 
 

@@ -1,4 +1,5 @@
 <?php
+
 namespace webapi\modules\v1\controllers;
 
 use Yii;
@@ -20,23 +21,21 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        echo  '<h1>API - '.Yii::$app->request->serverName.'</h1> '.date('Y-m-d H:i:s');
+        echo  '<h1>API - ' . Yii::$app->request->serverName . '</h1> ' . date('Y-m-d H:i:s');
         exit;
     }
 
     public function actionTest()
     {
         $headers = [];
-        foreach ($_SERVER as $name => $value)
-        {
-            if (strpos($name, 'HTTP_') === 0)
-            {
+        foreach ($_SERVER as $name => $value) {
+            if (strpos($name, 'HTTP_') === 0) {
                 $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
             }
         }
 
         $out = [
-            'message'   => 'Server Name: '.Yii::$app->request->serverName,
+            'message'   => 'Server Name: ' . Yii::$app->request->serverName,
             'code'      => 0,
             'date'      => date('Y-m-d'),
             'time'      => date('H:i:s'),
@@ -50,5 +49,4 @@ class SiteController extends Controller
         Yii::info(VarDumper::dumpAsString($out), 'info\API:AppController:Test');
         VarDumper::dump($out);
     }
-
 }

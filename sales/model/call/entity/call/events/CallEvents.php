@@ -1,4 +1,5 @@
 <?php
+
 namespace sales\model\call\entity\call\events;
 
 use common\models\Call;
@@ -27,7 +28,6 @@ class CallEvents extends Component
 
 
         if ($call && $call->c_created_user_id) {
-
             if ($call->isStatusInProgress() || $call->isStatusRinging()) { // || $call->isStatusQueue()
                 //\Yii::warning(VarDumper::dumpAsString($params->data),'CallEvents:updateUserStatus:debug');
                 $onCall = true;
@@ -50,10 +50,11 @@ class CallEvents extends Component
             $userStatus->us_is_on_call = $onCall;
 
             if (!$userStatus->save()) {
-                \Yii::error(VarDumper::dumpAsString($userStatus->errors),
-                    'CallEvents:updateUserStatus:UserStatus:save');
+                \Yii::error(
+                    VarDumper::dumpAsString($userStatus->errors),
+                    'CallEvents:updateUserStatus:UserStatus:save'
+                );
             }
         }
     }
-
 }

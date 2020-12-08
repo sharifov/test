@@ -27,7 +27,5 @@ class EmployeeAccess
      */
     public static function caseAccess(Lead $lead, Employee $user): void
     {
-
     }
-
 }

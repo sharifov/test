@@ -1,0 +1,1 @@
+var kvToggleData;!function(i){"use strict";kvToggleData=function(e){i("#"+e.id).off("click").on("click",function(t,c){var r=i(this);c&&c.redirect?e.pjax||window.location.replace(r.attr("href")):"page"===e.mode&&(t.preventDefault(),e.lib.confirm(e.msg,function(i){i&&r.trigger("click",{redirect:!0})}))})}}(window.jQuery);

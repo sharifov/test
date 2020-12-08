@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $this \yii\web\View
  * @var $lead \common\models\Lead
@@ -25,35 +26,34 @@ $user = Yii::$app->user->identity;
         /** @var LeadCallExpert $lastModel */
         $lastModel = null;
         $label = '';
-        if($dataProvider->count > 0) {
+        if ($dataProvider->count > 0) {
             //$lastKey = array_key_last($dataProvider->models); php 7.3
-            $lastKey = array_keys($dataProvider->models)[count($dataProvider->models)-1];
-            if(isset($dataProvider->models[$lastKey])) {
+            $lastKey = array_keys($dataProvider->models)[count($dataProvider->models) - 1];
+            if (isset($dataProvider->models[$lastKey])) {
                 $lastModel = $dataProvider->models[$lastKey];
             }
 
-            if($lastModel) {
-                if($lastModel->lce_status_id === LeadCallExpert::STATUS_PENDING) {
+            if ($lastModel) {
+                if ($lastModel->lce_status_id === LeadCallExpert::STATUS_PENDING) {
                     $label = 'warning';
-                } else if($lastModel->lce_status_id === LeadCallExpert::STATUS_DONE) {
+                } else if ($lastModel->lce_status_id === LeadCallExpert::STATUS_DONE) {
                     $label = 'success';
-                } else if($lastModel->lce_status_id === LeadCallExpert::STATUS_PROCESSING) {
+                } else if ($lastModel->lce_status_id === LeadCallExpert::STATUS_PROCESSING) {
                     $label = 'info';
                 }
             }
-
         }
         ?>&nbsp;
 
         <h2><i class="fa fa-bell-o <?=$label?>"></i> BO Expert (<?=$dataProvider->count?>)
 
             <?php
-                if($lastModel) {
-                    echo ' : ' . $lastModel->getStatusLabel() . '';
-                }
+            if ($lastModel) {
+                echo ' : ' . $lastModel->getStatusLabel() . '';
+            }
             ?>
 
-            <?php if($user->userParams && $user->userParams->up_call_expert_limit > 0):?>
+            <?php if ($user->userParams && $user->userParams->up_call_expert_limit > 0) :?>
                 [limit: <?=$user->callExpertCount?> /  <?= $user->userParams->up_call_expert_limit?>]
             <?php endif;?>
 
@@ -65,13 +65,13 @@ $user = Yii::$app->user->identity;
             </li>
             <li>
                 <?php //=Html::a('<i class="fa fa-comment"></i>', ['lead/view', 'gid' => $lead->gid, 'act' => 'call-expert-message'], ['class' => ''])?>
-                <?php if($lead->leadFlightSegmentsCount):?>
-                    <?php if(!$lastModel || $lastModel->lce_status_id === LeadCallExpert::STATUS_DONE):?>
-                        <?php if($user->isEnableCallExpert() && $lead->isProcessing()): ?>
+                <?php if ($lead->leadFlightSegmentsCount) :?>
+                    <?php if (!$lastModel || $lastModel->lce_status_id === LeadCallExpert::STATUS_DONE) :?>
+                        <?php if ($user->isEnableCallExpert() && $lead->isProcessing()) : ?>
                             <?=Html::a('<i class="fa fa-plus-circle success"></i> New Call', null, ['id' => 'btn-call-expert-form'])?>
                         <?php endif; ?>
                     <?php endif; ?>
-                <?php else: ?>
+                <?php else : ?>
                     <span class="badge badge-warning"><i class="fa fa-warning"></i> Warning: Flight Segments is empty!</span>
                 <?php endif; ?>
             </li>
@@ -136,12 +136,12 @@ $user = Yii::$app->user->identity;
         ]);
 
         echo $form->errorSummary($modelLeadCallExpert);
-        ?>
+?>
 
         <div class="row" style="display: <?=$modelLeadCallExpert->hasErrors() ? 'block' : 'none'?>" id="div-call-expert-form">
 
             <?php $products = (new Product())->getByLeadAndType($lead->id) ?>
-            <?php if ($products):?>
+            <?php if ($products) :?>
                 <div class="col-sm-3">
                     <?= $form->field($modelLeadCallExpert, 'lce_product_id')->dropDownList(
                         ArrayHelper::map($products, 'pr_id', 'pr_name'),
@@ -157,13 +157,15 @@ $user = Yii::$app->user->identity;
             <div class="col-md-12">
                 <div class="form-group text-center">
                     <?= Html::submitButton('<i class="fa fa-plus"></i> Create call Expert', ['class' => 'btn btn-success', 'id' => 'btn-submit-call-expert']) ?>
-                    <?= Html::button('<i class="fa fa-copy"></i>',
+                    <?= Html::button(
+                        '<i class="fa fa-copy"></i>',
                         [
                             'title' => 'Past from Lead Notes',
                             'class' => 'btn-note-from-client btn btn-primary',
                         ]
                     ) ?>
-                    <?= Html::button('<i class="fas fa-copy"></i>',
+                    <?= Html::button(
+                        '<i class="fas fa-copy"></i>',
                         [
                             'title' => 'Past from product description',
                             'class' => 'btn-product-description btn btn-primary d-none',

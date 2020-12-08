@@ -314,6 +314,118 @@
   },
   {
     "type": "get",
+    "url": "/v1/client-chat-request/chat-form",
+    "title": "Client Chat Form",
+    "version": "0.1.0",
+    "name": "ClientChatForm",
+    "group": "ClientChat",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "100",
+            "optional": false,
+            "field": "form_key",
+            "description": "<p>Form Key</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "5",
+            "optional": false,
+            "field": "language_id",
+            "description": "<p>Language ID (en-US)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "allowedValues": [
+              "0",
+              "1"
+            ],
+            "optional": true,
+            "field": "cache",
+            "description": "<p>Cache (not required, default eq 1)</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n    \"form_key\": \"example_form\",\n    \"language_id\": \"ru-RU\",\n    \"cache\": 1\n}",
+          "type": "get"
+        }
+      ]
+    },
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          },
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Accept-Encoding",
+            "description": ""
+          },
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "If-Modified-Since",
+            "description": "<p>Format <code> day-name, day month year hour:minute:second GMT</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Header-Example (If-Modified-Since):",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\",\n    \"If-Modified-Since\": \"Mon, 23 Dec 2019 08:17:54 GMT\",\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n\"status\": 200,\n\"message\": \"OK\",\n\"data\": {\n        \"data_form\": [\n            {\n                \"type\": \"textarea\",\n                \"name\": \"example_name\",\n                \"className\": \"form-control\",\n                \"label\": \"Please, describe problem\",\n                \"required\": true,\n                \"rows\": 5\n            },\n            {\n                \"type\": \"select\",\n                \"name\": \"destination\",\n                \"className\": \"form-control\",\n                \"label\": \"Куда летим?\",\n                \"values\": [\n                    \"label\": \"Амстердам\",\n                    \"value\": \"AMS\",\n                    \"selected\": true\n                ],\n                [\n                    \"label\": \"Магадан\",\n                    \"value\": \"GDX\",\n                    \"selected\": false\n                ]\n            },\n            {\n                \"type\": \"button\",\n                \"name\": \"button-123\",\n                \"className\": \"btn-success btn\",\n                \"label\": \"Submit\"\n            }\n        ],\n        \"from_cache\" : true\n     }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n  {\n    \"status\": 400,\n    \"message\": \"Validate failed\",\n    \"code\": \"13110\",\n    \"errors\": []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v1/controllers/ClientChatRequestController.php",
+    "groupTitle": "ClientChat"
+  },
+  {
+    "type": "get",
     "url": "/v1/client-chat-request/project-config",
     "title": "Project Config",
     "version": "0.1.0",

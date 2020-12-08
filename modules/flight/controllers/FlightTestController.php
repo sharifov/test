@@ -13,50 +13,49 @@ use yii\web\Response;
 
 class FlightTestController extends FController
 {
-	public $enableCsrfValidation = false;
+    public $enableCsrfValidation = false;
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function behaviors()
-	{
-		$behaviors = [
-			'access' => [
-				'class' => AccessControl::class,
-				'only' => ['login', 'logout', 'signup'],
-				'rules' => [
-					[
-						'allow' => true,
-						'actions' => ['TestAddQuote', 'testAddQuote'],
-						'roles' => ['?'],
-					],
-				],
-			]
-		];
+    /**
+     * {@inheritdoc}
+     */
+    public function behaviors()
+    {
+        $behaviors = [
+            'access' => [
+                'class' => AccessControl::class,
+                'only' => ['login', 'logout', 'signup'],
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'actions' => ['TestAddQuote', 'testAddQuote'],
+                        'roles' => ['?'],
+                    ],
+                ],
+            ]
+        ];
 
-		return ArrayHelper::merge(parent::behaviors(), $behaviors);
-	}
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
 
     public function actionTestAddQuote()
-	{
-		$data = @json_decode(\Yii::$app->request->rawBody, true);
+    {
+        $data = @json_decode(\Yii::$app->request->rawBody, true);
 
-		$flightQuoteManageService = \Yii::createObject(FlightQuoteManageService::class);
-		$flightRepository = \Yii::createObject(FlightRepository::class);
+        $flightQuoteManageService = \Yii::createObject(FlightQuoteManageService::class);
+        $flightRepository = \Yii::createObject(FlightRepository::class);
 
-		$userId = 464;
-		$flightId = 31;
+        $userId = 464;
+        $flightId = 31;
 
-		$flight = $flightRepository->find($flightId);
+        $flight = $flightRepository->find($flightId);
 
-		try {
-			$flightQuoteManageService->create($flight, $data, $userId);
-		} catch (\Throwable $e) {
-			echo $e->getMessage() . '; In File: ' . $e->getFile() . '; On Line: ' . $e->getLine();
-			die;
-		}
+        try {
+            $flightQuoteManageService->create($flight, $data, $userId);
+        } catch (\Throwable $e) {
+            echo $e->getMessage() . '; In File: ' . $e->getFile() . '; On Line: ' . $e->getLine();
+            die;
+        }
 
-		die('success');
-	}
-
+        die('success');
+    }
 }

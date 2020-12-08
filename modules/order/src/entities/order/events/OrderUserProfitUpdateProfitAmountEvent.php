@@ -1,4 +1,5 @@
 <?php
+
 namespace modules\order\src\entities\order\events;
 
 use modules\order\src\entities\order\Order;
@@ -11,10 +12,10 @@ use modules\order\src\entities\order\Order;
  */
 class OrderUserProfitUpdateProfitAmountEvent
 {
-	public $order;
+    public $order;
 
-	public function __construct(Order $order)
-	{
-		$this->order = $order;
-	}
+    public function __construct(Order $order)
+    {
+        $this->order = $order;
+    }
 }

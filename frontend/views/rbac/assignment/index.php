@@ -29,7 +29,7 @@ $this->render('/layouts/_sidebar');
                 'class' => 'yii\grid\ActionColumn',
                 'template' => '{view}',
                 'buttons' => [
-                    'view' => function ($url,\common\models\Employee $model) {
+                    'view' => function ($url, \common\models\Employee $model) {
                         return $model->isActive() ? Html::a('<span class="glyphicon glyphicon-eye-open"></span>', $url, [
                             'title' => Yii::t('app', 'lead-view')
                         ]) : '';

@@ -24,5 +24,4 @@ class m190814_132928_add_column_case_id_tbl_user_connections extends Migration
         $this->dropForeignKey('FK-user_connection_uc_case_id', '{{%user_connection}}');
         $this->dropColumn('{{%user_connection}}', 'FK-user_connection_uc_case_id');
     }
-
 }

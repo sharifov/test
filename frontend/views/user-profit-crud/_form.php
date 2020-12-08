@@ -26,12 +26,12 @@ use yii\widgets\ActiveForm;
             <?= $form->field($model, 'up_user_id')->widget(\kartik\select2\Select2::class, [
                 'data' => Employee::getList(),
                 'pluginOptions' => [
-					'placeholder' => 'Select user...'
+                    'placeholder' => 'Select user...'
                 ],
                 'pluginEvents' => [
-                    'change' => New \yii\web\JsExpression(' function (event) {
+                    'change' => new \yii\web\JsExpression(' function (event) {
                         let userId = $(this).val();
-                        $.post( "'.$url.'", {userId: userId}, function (data) {
+                        $.post( "' . $url . '", {userId: userId}, function (data) {
                             let agentCommission = data.agentCommission || 0;
                             $("#agentCommission").val(agentCommission);
                         });

@@ -29,5 +29,4 @@ class SegmentDTO
         $this->destination = $destination;
         $this->departure = $departure;
     }
-
 }

@@ -4,6 +4,7 @@ use common\models\SettingCategory;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 
 $this->title = 'Site Environments';
@@ -67,11 +68,17 @@ $this->params['breadcrumbs'][] = $this->title;
             <td><?=Html::encode(Yii::$app->gaRequestService->url)?></td>
             <td>-</td>
         </tr>
+        <tr>
+            <td>8</td>
+            <td>centrifugo</td>
+            <td><?=Html::encode(Yii::$app->centrifugo->host)?></td>
+            <td>-</td>
+        </tr>
         </tbody>
     </table>
     </div>
     <div class="col-md-6">
-        <?php if (!empty(Yii::$app->params['release'])): ?>
+        <?php if (!empty(Yii::$app->params['release'])) : ?>
             <h4>Release:</h4>
             <table class="table table-bordered table-hover">
                 <thead>
@@ -164,9 +171,23 @@ $this->params['breadcrumbs'][] = $this->title;
                 <td><?=Yii::$app->params['global_phone'] ?? ''?></td>
             </tr>
 
+            <tr>
+                <td>11</td>
+                <td>centrifugo</td>
+                <td>
+                    <table class="table table-bordered table-hover">
+                    <?php
+                    foreach (Yii::$app->params['centrifugo'] ?? [] as $key => $item) {
+                        echo "<tr><td>$key</td><td>$item</td></tr>";
+                    }
+                    ?>
+                    </table>
+                </td>
+            </tr>
+
             </tbody>
         </table>
-        <?php //\yii\helpers\VarDumper::dump(Yii::$app->params, 10 ,true) ?>
+        <?php //\yii\helpers\VarDumper::dump(Yii::$app->params, 10 ,true)?>
     </div>
 
 </div>

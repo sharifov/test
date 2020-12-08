@@ -1,4 +1,5 @@
 <?php
+
 //\frontend\assets\TimerAsset::register($this);
 \frontend\assets\CallWidgetAsset::register($this);
 ?>

@@ -45,5 +45,4 @@ class LeadFollowUpEventLogListener
             Yii::error($e, 'Listeners:LeadFollowUpEventLogListener');
         }
     }
-
 }

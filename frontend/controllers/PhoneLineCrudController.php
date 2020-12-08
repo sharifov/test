@@ -19,15 +19,15 @@ class PhoneLineCrudController extends FController
     */
     public function behaviors(): array
     {
-		$behaviors = [
-			'verbs' => [
-				'class' => VerbFilter::class,
-				'actions' => [
-					'delete' => ['POST'],
-				],
-			],
-		];
-		return ArrayHelper::merge(parent::behaviors(), $behaviors);
+        $behaviors = [
+            'verbs' => [
+                'class' => VerbFilter::class,
+                'actions' => [
+                    'delete' => ['POST'],
+                ],
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     public function init(): void

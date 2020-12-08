@@ -252,4 +252,4 @@ use yii\helpers\Url;
             ]
         ],
     ],
-]); ?>
+]);

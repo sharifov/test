@@ -38,5 +38,4 @@ class LeadChecklistRepository
             throw new \RuntimeException('Removing error');
         }
     }
-
 }

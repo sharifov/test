@@ -20,6 +20,7 @@ class SourcesSearch extends Sources
         return [
             [['id', 'project_id', 'default', 'hidden'], 'integer'],
             [['name', 'cid', 'last_update'], 'safe'],
+            [['last_update'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -47,7 +48,7 @@ class SourcesSearch extends Sources
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['hidden' => SORT_ASC, 'last_update' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['hidden' => SORT_ASC, 'last_update' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],

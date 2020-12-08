@@ -68,7 +68,9 @@ class LeadSoldNotificationsListener
 
         $subject = Yii::t('email', 'Lead-{id} to SOLD', ['id' => $lead->id]);
 
-        $body = Yii::t('email', "Booked quote with UID : {quote_uid}, Source: {name}, Lead: (Id: {lead_id}) {name} made \${profit} on {airline} to {destination}",
+        $body = Yii::t(
+            'email',
+            "Booked quote with UID : {quote_uid}, Source: {name}, Lead: (Id: {lead_id}) {name} made \${profit} on {airline} to {destination}",
             [
                 'name' => $owner->username,
                 'lead_id' => Purifier::createLeadShortLink($lead),
@@ -76,7 +78,8 @@ class LeadSoldNotificationsListener
                 'destination' => $flightSegment ? $flightSegment->destination : '-',
                 'airline' => $airlineName,
                 'profit' => $profit
-            ]);
+            ]
+        );
 
         if ($ntf = Notifications::create($owner->id, $subject, $body, Notifications::TYPE_INFO, true)) {
             // Notifications::socket($owner->id, null, 'getNewNotification', [], true);
@@ -88,7 +91,5 @@ class LeadSoldNotificationsListener
                 'LeadSoldNotificationsListener:sendNotification'
             );
         }
-
     }
-
 }

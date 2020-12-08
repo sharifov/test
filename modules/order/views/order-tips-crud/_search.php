@@ -28,7 +28,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'ot_user_profit') ?>
 
-	<?= $form->field($model, 'ot_user_profit_percent') ?>
+    <?= $form->field($model, 'ot_user_profit_percent') ?>
 
     <?php // echo $form->field($model, 'ot_description') ?>
 

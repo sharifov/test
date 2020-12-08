@@ -157,22 +157,8 @@ class ClientChatCrudController extends FController
     {
         $model = $this->findModel($id);
         $model->cch_updated_user_id = Auth::id();
-        $oldStatus = $model->cch_status_id;
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-
-            if ((ClientChat::STATUS_IDLE !== $oldStatus) && $model->isIdle()) { /* TODO:: FOR TEST  */
-                Notifications::pub(
-                    ['chat-' . $model->cch_id],
-                    'reloadChatInfo',
-                    ['data' => ClientChatAccessMessage::chatIdle($model->cch_id)]
-                );
-                Notifications::pub(
-                    [ClientChatChannel::getPubSubKey($model->cch_channel_id)],
-                    'reloadClientChatList'
-                );
-            }
-
             return $this->redirect(['view', 'id' => $model->cch_id]);
         }
 

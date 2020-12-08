@@ -34,8 +34,7 @@ class Handler
         ProductRepository $productRepository,
         FlightRepository $flightRepository,
         FlightSegmentRepository $flightSegmentRepository
-    )
-    {
+    ) {
         $this->transactionManager = $transactionManager;
         $this->productRepository = $productRepository;
         $this->flightRepository = $flightRepository;
@@ -49,8 +48,7 @@ class Handler
         int $children,
         int $infants,
         SegmentDTO ...$segments
-    ): void
-    {
+    ): void {
         $this->transactionManager->wrap(function () use ($leadId, $cabinClass, $adults, $children, $infants, $segments) {
 
             $product = Product::create(new CreateDto($leadId, ProductType::PRODUCT_FLIGHT, null, null));
@@ -73,7 +71,6 @@ class Handler
             }
 
             return $product->pr_id;
-
         });
     }
 }

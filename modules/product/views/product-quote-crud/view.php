@@ -55,7 +55,7 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
         <div class="col-md-9">
 
-            <?php if ($model->flightQuote && $model->flightQuote->flightQuotePaxPrices): ?>
+            <?php if ($model->flightQuote && $model->flightQuote->flightQuotePaxPrices) : ?>
             <div>
                 <label for="" class="control-label">Flight Quote Pax Price</label>
                 <?= \yii\grid\GridView::widget([
@@ -70,14 +70,14 @@ $this->params['breadcrumbs'][] = $this->title;
                             'value' => static function (FlightQuotePaxPrice $flightQuotePaxPrice) {
                                 return FlightPax::getPaxTypeById($flightQuotePaxPrice->qpp_flight_pax_code_id);
                             },
-						],
+                        ],
                         'qpp_cnt:ntext:X',
                         'qpp_origin_fare',
                         'qpp_origin_tax',
                         [
                             'label' => 'System Rate',
                             'value' => static function (FlightQuotePaxPrice $flightQuotePaxPrice) use ($model) {
-                                return $model->pq_origin_currency . ' - ' .$model->pq_origin_currency_rate;
+                                return $model->pq_origin_currency . ' - ' . $model->pq_origin_currency_rate;
                             }
                         ],
                         'qpp_fare',
@@ -99,9 +99,9 @@ $this->params['breadcrumbs'][] = $this->title;
                         [
                             'label' => 'SFA',
                             'value' => static function (FlightQuotePaxPrice $flightQuotePaxPrice) use ($model) {
-								$net = $flightQuotePaxPrice->qpp_fare + $flightQuotePaxPrice->qpp_tax;
-								$selling = ($net + $flightQuotePaxPrice->qpp_system_mark_up + $flightQuotePaxPrice->qpp_agent_mark_up);
-								return number_format($selling * $flightQuotePaxPrice->qppFlightQuote->fq_service_fee_percent / 100, 2);
+                                $net = $flightQuotePaxPrice->qpp_fare + $flightQuotePaxPrice->qpp_tax;
+                                $selling = ($net + $flightQuotePaxPrice->qpp_system_mark_up + $flightQuotePaxPrice->qpp_agent_mark_up);
+                                return number_format($selling * $flightQuotePaxPrice->qppFlightQuote->fq_service_fee_percent / 100, 2);
                             }
                         ],
                         [
@@ -121,11 +121,11 @@ $this->params['breadcrumbs'][] = $this->title;
                         ],
                         [
                             'label' => 'Client Price = SSP * CR',
-                            'value' => static function (FlightQuotePaxPrice $flightQuotePaxPrice) use ($model){
+                            'value' => static function (FlightQuotePaxPrice $flightQuotePaxPrice) use ($model) {
                                 $net = $flightQuotePaxPrice->qpp_fare + $flightQuotePaxPrice->qpp_tax;
                                 $selling = ($net + $flightQuotePaxPrice->qpp_system_mark_up + $flightQuotePaxPrice->qpp_agent_mark_up);
                                 $sfp = $selling * $flightQuotePaxPrice->qppFlightQuote->fq_service_fee_percent / 100;
-                                return number_format( ($sfp + $selling) * $model->pq_client_currency_rate, 2);
+                                return number_format(($sfp + $selling) * $model->pq_client_currency_rate, 2);
                             }
                         ],
                     ],
@@ -133,20 +133,20 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
             <?php endif; ?>
             <div>
-				<?= DetailView::widget([
-					'model' => $model,
-					'attributes' => [
-						'pq_origin_price:ntext:Origin Price = Origin Fare + Origin Tax',
-						'pq_service_fee_sum:ntext:Service Fee Sum = SFA SUM',
-						'pq_price:ntext:Price = SSP SUM',
-						'pq_client_price:ntext:Client Price = Price * Client Currency Rate',
-						'pq_origin_currency',
-						'pq_client_currency',
-						'pq_origin_currency_rate',
-						'pq_client_currency_rate',
-						'pq_profit_amount',
-					],
-				]) ?>
+                <?= DetailView::widget([
+                    'model' => $model,
+                    'attributes' => [
+                        'pq_origin_price:ntext:Origin Price = Origin Fare + Origin Tax',
+                        'pq_service_fee_sum:ntext:Service Fee Sum = SFA SUM',
+                        'pq_price:ntext:Price = SSP SUM',
+                        'pq_client_price:ntext:Client Price = Price * Client Currency Rate',
+                        'pq_origin_currency',
+                        'pq_client_currency',
+                        'pq_origin_currency_rate',
+                        'pq_client_currency_rate',
+                        'pq_profit_amount',
+                    ],
+                ]) ?>
             </div>
         </div>
     </div>

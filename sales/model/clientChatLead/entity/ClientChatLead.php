@@ -66,11 +66,11 @@ class ClientChatLead extends ActiveRecord
     }
 
     public static function create(int $chatId, int $leadId, \DateTimeImmutable $time): self
-	{
-		$model = new self();
-		$model->ccl_chat_id = $chatId;
-		$model->ccl_lead_id = $leadId;
-		$model->ccl_created_dt = $time->format('Y-m-d H:i:s');
-		return $model;
-	}
+    {
+        $model = new self();
+        $model->ccl_chat_id = $chatId;
+        $model->ccl_lead_id = $leadId;
+        $model->ccl_created_dt = $time->format('Y-m-d H:i:s');
+        return $model;
+    }
 }

@@ -7,7 +7,6 @@ use yii\base\Component;
 use yii\base\Event;
 use yii\helpers\VarDumper;
 
-
 //class MessageEvent extends Event
 //{
 //    public $message;

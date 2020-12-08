@@ -24,7 +24,7 @@ class UserCallStatusSearch extends UserCallStatus
             [['datetime_start', 'datetime_end'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['us_id', 'us_type_id', 'us_user_id'], 'integer'],
-            [['us_created_dt'], 'safe'],
+            [['us_created_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -69,7 +69,7 @@ class UserCallStatusSearch extends UserCallStatus
             return $dataProvider;
         }
 
-        if(isset($params['UserCallStatusSearch']['date_range'])){
+        if (isset($params['UserCallStatusSearch']['date_range'])) {
             $query->andFilterWhere(['>=', 'us_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
                 ->andFilterWhere(['<=', 'us_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         }

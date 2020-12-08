@@ -68,13 +68,12 @@ class Pricing implements ParseDumpInterface
                 preg_match($pricePattern, $row, $matches);
 
                 if (isset($matches[1], $matchesCount[1])) {
-
                     for ($i = 0; $i < (int) $matchesCount[1]; $i++) {
                         $type = $matches[6] ?? null;
                         $result[$j]['type'] = PricingService::passengerTypeMapping($type);
                         $result[$j]['fare'] = $matches[2] ?? null;
                         $result[$j]['taxes'] = !empty($matches[4]) ? $matches[4] : '0.00';
-                        $j ++;
+                        $j++;
                     }
                 }
             }
@@ -89,14 +88,32 @@ class Pricing implements ParseDumpInterface
     private function typeMapping(?string $source): string
     {
         switch ($source) {
-            case 'ADT': case 'JCB': case 'PFA': case 'ITX': case 'JWZ': case 'WEB':
-                $result = 'ADT';
+            case 'ADT':
+            case 'JCB':
+            case 'PFA':
+            case 'ITX':
+            case 'JWZ':
+            case 'WEB':
+                                $result = 'ADT';
                 break;
-            case 'CNN': case 'JNN':case 'CBC': case 'INN': case 'PNN': case 'JWC': case 'UNN':
-                $result = 'CHD';
+            case 'CNN':
+            case 'JNN':
+            case 'CBC':
+            case 'INN':
+            case 'PNN':
+            case 'JWC':
+            case 'UNN':
+                                    $result = 'CHD';
                 break;
-            case 'INF': case 'INS': case 'JNS':case 'CBI': case 'JNF': case 'PNF': case 'ITF': case 'ITS':
-                $result = 'INF';
+            case 'INF':
+            case 'INS':
+            case 'JNS':
+            case 'CBI':
+            case 'JNF':
+            case 'PNF':
+            case 'ITF':
+            case 'ITS':
+                                        $result = 'INF';
                 break;
             default:
                 $result = 'ADT';

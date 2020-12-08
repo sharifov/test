@@ -37,26 +37,26 @@ use yii\bootstrap4\Html;
                 ])->widget(Select2::class, [
                     'options' => [
                         'placeholder' => $searchFrom->getAttributeLabel('fareType'),
-						'multiple' => true,
-					],
+                        'multiple' => true,
+                    ],
                     'data' => FlightQuote::getFareTypeList(),
                     'size' => Select2::SIZE_SMALL
                 ]) ?>
             </div>
 
             <div class="col-md-9">
-				<?= $form->field($searchFrom, 'airlines', [
-					'labelOptions' => [
-						'class' => 'control-label'
-					]
-				])->widget(Select2::class, [
-					'options' => [
-						'placeholder' => $searchFrom->getAttributeLabel('airlines'),
-						'multiple' => true,
-					],
-					'data' => $airlines,
-					'size' => Select2::SIZE_SMALL
-				]) ?>
+                <?= $form->field($searchFrom, 'airlines', [
+                    'labelOptions' => [
+                        'class' => 'control-label'
+                    ]
+                ])->widget(Select2::class, [
+                    'options' => [
+                        'placeholder' => $searchFrom->getAttributeLabel('airlines'),
+                        'multiple' => true,
+                    ],
+                    'data' => $airlines,
+                    'size' => Select2::SIZE_SMALL
+                ]) ?>
             </div>
 
             <div class="col-md-1">
@@ -73,28 +73,28 @@ use yii\bootstrap4\Html;
             </div>
 
             <div class="col-md-2">
-				<?= $form->field($searchFrom, 'stops', [
-					'labelOptions' => [
-						'class' => 'control-label'
-					],
-				])->dropDownList(FlightQuote::getStopsLIst(), [
+                <?= $form->field($searchFrom, 'stops', [
+                    'labelOptions' => [
+                        'class' => 'control-label'
+                    ],
+                ])->dropDownList(FlightQuote::getStopsLIst(), [
                     'prompt' => '--'
                 ]) ?>
             </div>
 
             <div class="col-md-2">
                 <?= $form->field($searchFrom, 'airportChange', [
-					'labelOptions' => [
-						'class' => 'control-label'
-					]
+                    'labelOptions' => [
+                        'class' => 'control-label'
+                    ]
                 ])->dropDownList(FlightQuote::getChangeAirportList()) ?>
             </div>
 
             <div class="col-md-2">
                 <?= $form->field($searchFrom, 'baggage', [
-					'labelOptions' => [
-						'class' => 'control-label'
-					]
+                    'labelOptions' => [
+                        'class' => 'control-label'
+                    ]
                 ])->dropDownList(FlightQuote::getBaggageList()) ?>
             </div>
 
@@ -138,27 +138,27 @@ use yii\bootstrap4\Html;
             </div>
 
             <div class="col-md-2">
-				<?= $form->field($searchFrom, 'sortBy', [
-					'labelOptions' => [
-						'class' => 'control-label'
-					]
-				])->dropDownList(FlightQuote::getSortList()) ?>
+                <?= $form->field($searchFrom, 'sortBy', [
+                    'labelOptions' => [
+                        'class' => 'control-label'
+                    ]
+                ])->dropDownList(FlightQuote::getSortList()) ?>
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-2">
-				<?= $form->field($searchFrom, 'topCriteria', [
-					'labelOptions' => [
-						'class' => 'control-label'
-					]
-				])->dropDownList(QuoteHelper::TOP_META_LIST, [
+                <?= $form->field($searchFrom, 'topCriteria', [
+                    'labelOptions' => [
+                        'class' => 'control-label'
+                    ]
+                ])->dropDownList(QuoteHelper::TOP_META_LIST, [
                     'prompt' => '--'
                 ]) ?>
             </div>
 
             <div class="col-md-2" id="rank-slider-filter">
-				<div class="form-group">
+                <div class="form-group">
                     <div class="d-flex align-items-center justify-content-between">
                         <label for="" class="control-label">Rank</label>
                         <span id="current-rank-value"></span>
@@ -204,10 +204,10 @@ use yii\bootstrap4\Html;
 
         <div class="row">
             <div class="col-md-12 d-flex align-items-center justify-content-center">
-				<?= Html::submitButton('<i class="fa fa-filter"></i> Apply filter', [
-					'class' => 'btn btn-success',
+                <?= Html::submitButton('<i class="fa fa-filter"></i> Apply filter', [
+                    'class' => 'btn btn-success',
                     'id' => 'flight-quote-search-submit'
-				]) ?>
+                ]) ?>
             </div>
         </div>
 

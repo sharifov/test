@@ -56,9 +56,6 @@ class m180927_125528_create_tbl_lead_task extends Migration
                 't_hidden'          => $task['t_hidden'],
             ]);
         }
-
-
-
     }
 
     /**
@@ -69,5 +66,4 @@ class m180927_125528_create_tbl_lead_task extends Migration
         $this->dropTable('{{%lead_task}}');
         $this->dropTable('{{%task}}');
     }
-
 }

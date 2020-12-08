@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by Alex Connor.
  * User: alexandr
@@ -29,11 +30,11 @@ class UpdateLeadBOJob extends BaseObject implements JobInterface
      * @param Queue $queue
      * @return bool
      */
-    public function execute($queue) : bool
+    public function execute($queue): bool
     {
 
         try {
-            if($this->lead_id) {
+            if ($this->lead_id) {
                 $lead = Lead::findOne($this->lead_id);
 
                 if ($lead) {
@@ -58,7 +59,6 @@ class UpdateLeadBOJob extends BaseObject implements JobInterface
                     }
                 }
             }
-
         } catch (\Throwable $e) {
             Yii::error(VarDumper::dumpAsString($e->getMessage()), 'UpdateLeadBOJob:execute:catch');
         }

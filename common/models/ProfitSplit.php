@@ -38,10 +38,10 @@ class ProfitSplit extends \yii\db\ActiveRecord
     {
         return [
             [['ps_lead_id', 'ps_user_id'], 'required'],
-            ['ps_percent', 'required', 'when' => function($model) {
+            ['ps_percent', 'required', 'when' => function ($model) {
                 return empty($model->ps_amount);
             }],
-            ['ps_amount', 'required', 'when' => function($model) {
+            ['ps_amount', 'required', 'when' => function ($model) {
                 return empty($model->ps_percent);
             }],
             ['ps_percent', 'integer', 'max' => 100 , 'min' => 0],
@@ -125,7 +125,7 @@ class ProfitSplit extends \yii\db\ActiveRecord
 
     public function countProfit($total)
     {
-        if(!empty($this->ps_percent)){
+        if (!empty($this->ps_percent)) {
             return $total * $this->ps_percent / 100;
         }
 

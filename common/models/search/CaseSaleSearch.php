@@ -21,7 +21,8 @@ class CaseSaleSearch extends CaseSale
     {
         return [
             [['css_cs_id', 'css_sale_id', 'css_sale_pax', 'css_created_user_id', 'css_updated_user_id'], 'integer'],
-            [['css_sale_book_id', 'css_sale_pnr', 'css_sale_created_dt', 'css_sale_data', 'css_created_dt', 'css_updated_dt'], 'safe'],
+            [['css_sale_book_id', 'css_sale_pnr', 'css_sale_data'], 'safe'],
+            [['css_sale_created_dt', 'css_created_dt', 'css_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -59,17 +60,17 @@ class CaseSaleSearch extends CaseSale
             return $dataProvider;
         }
 
-        if ($this->css_sale_created_dt){
+        if ($this->css_sale_created_dt) {
             $query->andFilterWhere(['>=', 'css_sale_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->css_sale_created_dt))])
                 ->andFilterWhere(['<=', 'css_sale_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->css_sale_created_dt) + 3600 * 24)]);
         }
 
-        if ($this->css_created_dt){
+        if ($this->css_created_dt) {
             $query->andFilterWhere(['>=', 'css_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->css_created_dt))])
                 ->andFilterWhere(['<=', 'css_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->css_created_dt) + 3600 * 24)]);
         }
 
-        if ($this->css_updated_dt){
+        if ($this->css_updated_dt) {
             $query->andFilterWhere(['>=', 'css_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->css_updated_dt))])
                 ->andFilterWhere(['<=', 'css_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->css_updated_dt) + 3600 * 24)]);
         }
@@ -104,7 +105,7 @@ class CaseSaleSearch extends CaseSale
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['css_created_dt' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['css_created_dt' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 10,
             ],
@@ -138,26 +139,25 @@ class CaseSaleSearch extends CaseSale
     }
 
     public function searchForExport($params)
-	{
-		$query = CaseSale::find()->where(new Expression('css_send_email_dt is not null'));
+    {
+        $query = CaseSale::find()->where(new Expression('css_send_email_dt is not null'));
 
-		$dataProvider = new ActiveDataProvider([
-			'query' => $query,
-			'sort'=> ['defaultOrder' => ['css_created_dt' => SORT_DESC]],
-			'pagination' => [
-				'pageSize' => 10,
-			],
-		]);
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => ['defaultOrder' => ['css_created_dt' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 10,
+            ],
+        ]);
 
-		$this->load($params);
+        $this->load($params);
 
-		if (!$this->validate()) {
-			return $dataProvider;
-		}
+        if (!$this->validate()) {
+            return $dataProvider;
+        }
 
-		$query->andWhere(['css_cs_id' => $this->css_cs_id]);
+        $query->andWhere(['css_cs_id' => $this->css_cs_id]);
 
-		return $dataProvider;
-	}
-
+        return $dataProvider;
+    }
 }

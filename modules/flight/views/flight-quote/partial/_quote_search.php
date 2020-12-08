@@ -23,8 +23,8 @@ use yii\widgets\Pjax;
  * @var $pjaxId string
  */
 
-if($quotes && (isset($quotes['count']) && $quotes['count'] > 0)):
-	$js = <<<JS
+if ($quotes && (isset($quotes['count']) && $quotes['count'] > 0)) :
+    $js = <<<JS
     $(document).on('click','.search_details__btn', function (e) {
         e.preventDefault();
         let modal = $('#flight-details__modal');
@@ -57,10 +57,10 @@ if($quotes && (isset($quotes['count']) && $quotes['count'] > 0)):
     // searchResult.init();
 
 JS;
-	$this->registerJs($js);
+    $this->registerJs($js);
 
-	$flightQuotes = ArrayHelper::getColumn($flight->flightQuotes, 'fq_hash_key');
-	?>
+    $flightQuotes = ArrayHelper::getColumn($flight->flightQuotes, 'fq_hash_key');
+    ?>
     <script>
         pjaxOffFormSubmit('#pjax-quote-filter');
     </script>
@@ -88,10 +88,10 @@ JS;
                         'tag' => false,
                     ]
                 ]) ?>
-	    </div>
-<?php
-$urlCreateFlightQuoteFromSearch = Url::to(['/flight/flight-quote/ajax-add-quote']);
-$js = <<<JS
+        </div>
+    <?php
+    $urlCreateFlightQuoteFromSearch = Url::to(['/flight/flight-quote/ajax-add-quote']);
+    $js = <<<JS
     $(document).on('click', '.js-filter .dropdown-menu', function(e) {
         if (!$(e.target).hasClass("js-dropdown-close")) {
             // e.preventDefault();
@@ -167,24 +167,24 @@ $js = <<<JS
         });
     });
 JS;
-$this->registerJs($js);
-?>
+    $this->registerJs($js);
+    ?>
     <?php Pjax::end(); ?>
 
-<?php else:?>
-	<div class="search-results__wrapper">
-		<?php if (!empty($errorMessage)): ?>
+<?php else :?>
+    <div class="search-results__wrapper">
+        <?php if (!empty($errorMessage)) : ?>
             <div class="row">
                 <div class="col-md-12">
-					<?= Alert::widget([
-						'options' => [
-							'class' => 'alert-error',
-						],
-						'body' => $errorMessage,
-					]) ?>
+                    <?= Alert::widget([
+                        'options' => [
+                            'class' => 'alert-error',
+                        ],
+                        'body' => $errorMessage,
+                    ]) ?>
                 </div>
             </div>
-		<?php endif; ?>
-		<p>No search results</p>
-	</div>
+        <?php endif; ?>
+        <p>No search results</p>
+    </div>
 <?php endif;?>

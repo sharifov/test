@@ -20,7 +20,7 @@ class m200208_093944_create_tbl_qa_task_status extends Migration
             $tableOptions = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE=InnoDB';
         }
 
-        $this->createTable('{{%qa_task_status}}',	[
+        $this->createTable('{{%qa_task_status}}', [
             'ts_id' => $this->tinyInteger()->unique()->notNull(),
             'ts_name' => $this->string(30)->notNull(),
             'ts_description' => $this->string(255)->null(),

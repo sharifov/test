@@ -48,5 +48,4 @@ class EmailUnsubscribeRepository extends Repository
             throw new \RuntimeException('Removing error');
         }
     }
-
 }

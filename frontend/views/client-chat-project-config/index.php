@@ -1,9 +1,11 @@
 <?php
 
 use common\components\grid\UserSelect2Column;
+use common\components\grid\DateTimeColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\clientChat\entity\projectConfig\search\ClientChatProjectConfigSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -54,8 +56,18 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 //            'ccpc_created_user_id',
 //            'ccpc_updated_user_id',
-            'ccpc_created_dt:byUserDateTime',
-            'ccpc_updated_dt:byUserDateTime',
+//            'ccpc_created_dt:byUserDateTime',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'ccpc_created_dt',
+                'format' => 'byUserDateTime'
+            ],
+//            'ccpc_updated_dt:byUserDateTime',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'ccpc_updated_dt',
+                'format' => 'byUserDateTime'
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

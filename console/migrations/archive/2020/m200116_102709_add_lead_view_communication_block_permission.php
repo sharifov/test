@@ -55,13 +55,13 @@ class m200116_102709_add_lead_view_communication_block_permission extends Migrat
         if ($admin = $auth->getRole(Employee::ROLE_ADMIN)) {
             $auth->addChild($admin, $leadViewCommunicationBlock);
         }
-         if ($admin = $auth->getRole(Employee::ROLE_SUPPORT_SENIOR)) {
+        if ($admin = $auth->getRole(Employee::ROLE_SUPPORT_SENIOR)) {
             $auth->addChild($admin, $leadViewCommunicationBlock);
         }
-         if ($admin = $auth->getRole(Employee::ROLE_EXCHANGE_SENIOR)) {
+        if ($admin = $auth->getRole(Employee::ROLE_EXCHANGE_SENIOR)) {
             $auth->addChild($admin, $leadViewCommunicationBlock);
         }
-         if ($admin = $auth->getRole(Employee::ROLE_SALES_SENIOR)) {
+        if ($admin = $auth->getRole(Employee::ROLE_SALES_SENIOR)) {
             $auth->addChild($admin, $leadViewCommunicationBlock);
         }
         if ($qa = $auth->getRole(Employee::ROLE_QA)) {

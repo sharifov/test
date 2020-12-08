@@ -3,6 +3,8 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use dosamigos\datepicker\DatePicker;
+
 /* @var $this yii\web\View */
 /* @var $searchModel modules\flight\models\search\FlightSegmentSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -31,7 +33,30 @@ $this->params['breadcrumbs'][] = $this->title;
             'fs_flight_id',
             'fs_origin_iata',
             'fs_destination_iata',
-            'fs_departure_date',
+            //'fs_departure_date',
+            [
+                'attribute' => 'fs_departure_date',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'fs_departure_date',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                        'clearBtn' => true,
+                        'endDate' => date('Y-m-d', time())
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' => 'Choose Date'
+                    ],
+                    'containerOptions' => [
+                        'class' => (array_key_exists('fs_departure_date', $searchModel->errors)) ? 'has-error' : null,
+                    ],
+                    'clientEvents' => [
+                        'clearDate' => 'function (e) {$(e.target).find("input").change();}',
+                    ],
+                ]),
+            ],
             'fs_flex_type_id',
             'fs_flex_days',
 

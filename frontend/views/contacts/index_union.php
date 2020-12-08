@@ -68,7 +68,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         if ($model['type'] === Client::TYPE_INTERNAL) {
                             /** @var Employee $user */
                             $user = $model['model'];
-                            if($user && $user->isOnline()) {
+                            if ($user && $user->isOnline()) {
                                 $onlineClass = 'text-success';
                             }
                         }
@@ -131,7 +131,6 @@ $this->params['breadcrumbs'][] = $this->title;
                         }
                         $out .= ($model['type'] === Client::TYPE_INTERNAL ? '<i class="fa fa-user"></i>&nbsp;&nbsp; ' : '') . '<b>' . Html::encode($model['full_name']) . '</b>';
                         return $out;
-
                     },
                     'format' => 'raw',
                     'filter' => false,
@@ -170,7 +169,6 @@ $this->params['breadcrumbs'][] = $this->title;
                         $data = [];
                         if ($phones) {
                             foreach ($phones as $k => $phone) {
-
                                 $access = CallAccess::isUserCanDial(Auth::id(), UserProfile::CALL_TYPE_WEB);
 
                                 $out = '<span data-toggle="tooltip" 
@@ -209,7 +207,6 @@ $this->params['breadcrumbs'][] = $this->title;
                             }
 
                             return implode('<br>', $data);
-
                         }
 
                         /** @var Client $phones */

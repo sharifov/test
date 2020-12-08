@@ -55,8 +55,6 @@ class m201013_131854_create_tbl_client_chat_channel_transfer extends Migration
             'CASCADE',
             'CASCADE'
         );
-
-
     }
 
     /**

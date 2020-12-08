@@ -2,6 +2,7 @@
 
 namespace sales\model\phoneLine\phoneLineUserAssign\entity\search;
 
+use common\models\Employee;
 use yii\data\ActiveDataProvider;
 use sales\model\phoneLine\phoneLineUserAssign\entity\PhoneLineUserAssign;
 
@@ -14,7 +15,7 @@ class PhoneLineUserAssignSearch extends PhoneLineUserAssign
 
             ['plus_allow_out', 'integer'],
 
-            ['plus_created_dt', 'safe'],
+            ['plus_created_dt', 'date', 'format' => 'php:Y-m-d'],
 
             ['plus_created_user_id', 'integer'],
 
@@ -24,7 +25,7 @@ class PhoneLineUserAssignSearch extends PhoneLineUserAssign
 
             ['plus_settings_json', 'safe'],
 
-            ['plus_updated_dt', 'safe'],
+            ['plus_updated_dt', 'date', 'format' => 'php:Y-m-d'],
 
             ['plus_updated_user_id', 'integer'],
 
@@ -34,7 +35,7 @@ class PhoneLineUserAssignSearch extends PhoneLineUserAssign
         ];
     }
 
-    public function search($params): ActiveDataProvider
+    public function search($params, Employee $user): ActiveDataProvider
     {
         $query = static::find();
 
@@ -49,6 +50,14 @@ class PhoneLineUserAssignSearch extends PhoneLineUserAssign
             return $dataProvider;
         }
 
+        if ($this->plus_created_dt) {
+            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'plus_created_dt', $this->plus_created_dt, $user->timezone);
+        }
+
+        if ($this->plus_updated_dt) {
+            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'plus_updated_dt', $this->plus_updated_dt, $user->timezone);
+        }
+
         $query->andFilterWhere([
             'plus_line_id' => $this->plus_line_id,
             'plus_user_id' => $this->plus_user_id,
@@ -58,8 +67,6 @@ class PhoneLineUserAssignSearch extends PhoneLineUserAssign
             'plus_enabled' => $this->plus_enabled,
             'plus_created_user_id' => $this->plus_created_user_id,
             'plus_updated_user_id' => $this->plus_updated_user_id,
-            'plus_created_dt' => $this->plus_created_dt,
-            'plus_updated_dt' => $this->plus_updated_dt,
         ]);
 
         $query->andFilterWhere(['like', 'plus_settings_json', $this->plus_settings_json]);

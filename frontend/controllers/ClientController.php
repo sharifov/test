@@ -167,8 +167,8 @@ class ClientController extends FController
 
         return $this->renderAjax('ajax_info', ArrayHelper::merge(
             ['model' => $client],
-            $providers)
-        );
+            $providers
+        ));
     }
 
     /**
@@ -244,5 +244,4 @@ class ClientController extends FController
 
         return $this->render('stats', ['data' => $data]);
     }
-
 }

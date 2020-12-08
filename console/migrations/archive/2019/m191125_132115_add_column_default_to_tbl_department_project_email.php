@@ -12,13 +12,13 @@ class m191125_132115_add_column_default_to_tbl_department_project_email extends 
      */
     public function safeUp()
     {
-		$this->addColumn('{{%department_email_project}}', 'dep_default', $this->tinyInteger(1)->defaultValue('0')->after('dep_description'));
+        $this->addColumn('{{%department_email_project}}', 'dep_default', $this->tinyInteger(1)->defaultValue('0')->after('dep_description'));
 
-		Yii::$app->db->getSchema()->refreshTableSchema('{{%department_email_project}}');
+        Yii::$app->db->getSchema()->refreshTableSchema('{{%department_email_project}}');
 
-		if (Yii::$app->cache) {
-			Yii::$app->cache->flush();
-		}
+        if (Yii::$app->cache) {
+            Yii::$app->cache->flush();
+        }
     }
 
     /**
@@ -26,12 +26,12 @@ class m191125_132115_add_column_default_to_tbl_department_project_email extends 
      */
     public function safeDown()
     {
-		$this->dropColumn('{{%department_email_project}}', 'dep_default');
+        $this->dropColumn('{{%department_email_project}}', 'dep_default');
 
-		Yii::$app->db->getSchema()->refreshTableSchema('{{%department_email_project}}');
+        Yii::$app->db->getSchema()->refreshTableSchema('{{%department_email_project}}');
 
-		if (Yii::$app->cache) {
-			Yii::$app->cache->flush();
-		}
+        if (Yii::$app->cache) {
+            Yii::$app->cache->flush();
+        }
     }
 }

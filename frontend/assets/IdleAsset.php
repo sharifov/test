@@ -9,8 +9,9 @@ use yii\web\AssetBundle;
  */
 class IdleAsset extends AssetBundle
 {
-    public $basePath = '@webroot';
-    public $baseUrl = '@web';
+//    public $basePath = '@webroot';
+//    public $baseUrl = '@web';
+
     public $css = [
         //'/js/timer.css',
     ];
@@ -18,8 +19,8 @@ class IdleAsset extends AssetBundle
         'https://cdn.jsdelivr.net/npm/jquery.idle@1.3.0/jquery.idle.min.js',
 //        '/js/idle.js'
     ];
-    public $depends = [
-        'yii\web\YiiAsset',
-        'yii\bootstrap4\BootstrapPluginAsset',
-    ];
+//    public $depends = [
+//        'yii\web\YiiAsset',
+//        'yii\bootstrap4\BootstrapPluginAsset',
+//    ];
 }

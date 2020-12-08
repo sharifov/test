@@ -55,5 +55,4 @@ class FlightForm extends Model
             'fl_infants' => 'Infants',
         ];
     }
-
 }

@@ -2,6 +2,8 @@
 
 namespace frontend\controllers;
 
+use sales\services\cleaner\form\DbCleanerParamsForm;
+use sales\services\cleaner\cleaners\UserSiteActivityCleaner;
 use Yii;
 use frontend\models\UserSiteActivity;
 use frontend\models\search\UserSiteActivitySearch;
@@ -46,9 +48,15 @@ class UserSiteActivityController extends FController
         $searchModel = new UserSiteActivitySearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
+        $cleaner = new UserSiteActivityCleaner();
+        $dbCleanerParamsForm = (new DbCleanerParamsForm())
+            ->setTable($cleaner->getTable())
+            ->setColumn($cleaner->getColumn());
+
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'modelCleaner' => $dbCleanerParamsForm,
         ]);
     }
 

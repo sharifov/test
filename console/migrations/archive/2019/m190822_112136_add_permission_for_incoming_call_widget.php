@@ -24,9 +24,8 @@ class m190822_112136_add_permission_for_incoming_call_widget extends Migration
         $auth = Yii::$app->authManager;
 
         foreach ($this->routes as $route) {
-
             $permission = $auth->getPermission($route);
-            if(!$permission) {
+            if (!$permission) {
                 $permission = $auth->createPermission($route);
                 $auth->add($permission);
             }
@@ -48,7 +47,6 @@ class m190822_112136_add_permission_for_incoming_call_widget extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     /**
@@ -72,6 +70,5 @@ class m190822_112136_add_permission_for_incoming_call_widget extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 }

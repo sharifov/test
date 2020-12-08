@@ -8,7 +8,7 @@ use yii\db\Migration;
 class m190815_084624_create_tbl_case_sale extends Migration
 {
 
-    public  $routes = ['/case-sale/*'];
+    public $routes = ['/case-sale/*'];
 
     /**
      * {@inheritdoc}

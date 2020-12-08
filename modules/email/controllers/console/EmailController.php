@@ -27,7 +27,6 @@ class EmailController extends Controller
         if ($accounts) {
             foreach ($accounts as $account) {
                 try {
-
                     if ($account->isGmailApiProtocol()) {
                         $logger->log(Message::info('-- GMAIL API protocol start --'));
                         $job = new GmailJob([
@@ -62,12 +61,11 @@ class EmailController extends Controller
             if ($failed) {
                 $logger->log(Message::error('Failed accounts: ' . $failed));
             }
-
         } else {
             $logger->log(Message::error('Not found active accounts'));
         }
 
-        $logger->timerStop('email_download_index')->log(Message::finish('--- Stop: ' . date('Y-m-d H:i:s') . '  ' . (new \ReflectionClass(self::class))->getShortName() . ':' . __FUNCTION__ ));
+        $logger->timerStop('email_download_index')->log(Message::finish('--- Stop: ' . date('Y-m-d H:i:s') . '  ' . (new \ReflectionClass(self::class))->getShortName() . ':' . __FUNCTION__));
 
         $logger->release();
     }

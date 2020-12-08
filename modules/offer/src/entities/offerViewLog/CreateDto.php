@@ -24,8 +24,7 @@ class CreateDto
         ?string $visitorId,
         ?string $ipAddress,
         ?string $userAgent
-    )
-    {
+    ) {
         $this->ofvwl_offer_id = $offerId;
         $this->ofvwl_visitor_id = $visitorId;
         $this->ofvwl_ip_address = $ipAddress;

@@ -1,4 +1,5 @@
 <?php
+
 return [
     'components' => [
         'db' => [
@@ -34,6 +35,12 @@ return [
         'gaRequestService' => [
             'class' => \common\components\ga\GaRequestService::class,
             'url' => 'https://www.google-analytics.com/collect',
+        ],
+        'centrifugo' => [
+            'class'  => \sorokinmedia\centrifugo\Client::class,
+            'host'   => '{{ common.config.main.components.centrifugo.host:str }}',
+            'secret' => '{{ common.config.main.components.centrifugo.secret:str }}',
+            'apikey' => '{{ common.config.main.components.centrifugo.apikey:str }}'
         ],
     ],
 ];

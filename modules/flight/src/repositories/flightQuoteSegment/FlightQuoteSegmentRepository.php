@@ -1,4 +1,5 @@
 <?php
+
 namespace modules\flight\src\repositories\flightQuoteSegment;
 
 use modules\flight\models\FlightQuoteSegment;
@@ -19,13 +20,13 @@ class FlightQuoteSegmentRepository extends Repository
         throw new NotFoundException('Flight Quote Segment is not found', FlightCodeException::FLIGHT_QUOTE_SEGMENT_NOT_FOUND);
     }
 
-	public function save(FlightQuoteSegment $segment): int
-	{
-		if (!$segment->save()) {
-			throw new \RuntimeException($segment->getErrorSummary(false)[0]);
-		}
-		return $segment->fqs_id;
-	}
+    public function save(FlightQuoteSegment $segment): int
+    {
+        if (!$segment->save()) {
+            throw new \RuntimeException($segment->getErrorSummary(false)[0]);
+        }
+        return $segment->fqs_id;
+    }
 
     public function remove(FlightQuoteSegment $segment): void
     {

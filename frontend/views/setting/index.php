@@ -4,6 +4,8 @@ use common\models\SettingCategory;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\DateTimeColumn;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\SettingSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -66,12 +68,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     $val = Html::encode($model->s_value);
 
-                    if($model->s_type == \common\models\Setting::TYPE_BOOL) {
+                    if ($model->s_type == \common\models\Setting::TYPE_BOOL) {
                         $val = $model->s_value ? '<span class="label label-success">true</span>' : '<span class="label label-danger">false</span>';
                     }
 
-                    if($model->s_type == \common\models\Setting::TYPE_ARRAY) {
-                        $val = '<pre>' . ($model->s_value ? print_r(@json_decode($model->s_value, true), true) : '-') .'</pre>';
+                    if ($model->s_type == \common\models\Setting::TYPE_ARRAY) {
+                        $val = '<pre>' . ($model->s_value ? print_r(@json_decode($model->s_value, true), true) : '-') . '</pre>';
                     }
 
                     return $val;
@@ -97,12 +99,17 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 's_updated_dt'
+            ],
+
+            /*[
                 'attribute' => 's_updated_dt',
                 'value' => static function (\common\models\Setting $model) {
                     return $model->s_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->s_updated_dt)) : $model->s_updated_dt;
                 },
                 'format' => 'raw'
-            ],
+            ],*/
 
 
         ],

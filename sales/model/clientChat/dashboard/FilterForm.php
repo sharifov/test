@@ -27,6 +27,7 @@ use yii\helpers\Html;
  * @property $fromDate
  * @property $toDate
  * @property $rangeDate
+ * @property $clientName
  * @property $resetAdditionalFilter
  * @property array       $channels
  * @property Permissions $permissions
@@ -34,7 +35,7 @@ use yii\helpers\Html;
 class FilterForm extends Model
 {
     public const DEFAULT_VALUE_CHANNEL_ID = 0;
-    public const DEFAULT_VALUE_STATUS = 0;
+    public const DEFAULT_VALUE_STATUS = null;
     public const DEFAULT_VALUE_DEP = 0;
     public const DEFAULT_VALUE_PROJECT = 0;
     public const DEFAULT_VALUE_READ_UNREAD = ReadUnreadFilter::ALL;
@@ -43,6 +44,8 @@ class FilterForm extends Model
     public const DEFAULT_VALUE_CREATED_DATE = null;
     public const DEFAULT_VALUE_FROM_DATE = null;
     public const DEFAULT_VALUE_TO_DATE = null;
+    public const DEFAULT_VALUE_SHOW_FILTER = 0;
+    public const DEFAULT_VALUE_CLIENT_NAME = null;
 
     public $channelId;
     public $status;
@@ -57,6 +60,8 @@ class FilterForm extends Model
     public $toDate;
     public $rangeDate;
     public $resetAdditionalFilter = false;
+    public $showFilter;
+    public $clientName;
 
     private array $channels;
 
@@ -66,6 +71,8 @@ class FilterForm extends Model
         'project',
         'userId',
         'rangeDate',
+        'status',
+        'clientName',
     ];
 
     public function __construct(array $channels, $config = [])
@@ -86,7 +93,12 @@ class FilterForm extends Model
             ['status', 'integer'],
             ['status', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             ['status', 'default', 'value' => self::DEFAULT_VALUE_STATUS],
-            ['status', 'in', 'range' => array_keys($this->getShowFilter())],
+            ['status', 'in', 'range' => array_keys(ClientChat::getStatusList())],
+
+            ['showFilter', 'integer'],
+            ['showFilter', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['showFilter', 'default', 'value' => self::DEFAULT_VALUE_SHOW_FILTER],
+            ['showFilter', 'in', 'range' => array_keys($this->getShowFilter())],
 
             ['dep', 'integer'],
             ['dep', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
@@ -123,6 +135,8 @@ class FilterForm extends Model
 
             ['rangeDate', 'safe'],
             ['resetAdditionalFilter', 'boolean'],
+
+            [['clientName'], 'string', 'max' => 30],
         ];
     }
 
@@ -143,6 +157,11 @@ class FilterForm extends Model
     public function getShowFilter(): array
     {
         return ClientChat::getTabList();
+    }
+
+    public function getStatuses(): array
+    {
+        return ArrayHelper::merge(['All'], ClientChat::getStatusList());
     }
 
     public function getDepartments(): array
@@ -182,6 +201,9 @@ class FilterForm extends Model
         if ($this->status === null || $this->hasErrors('status')) {
             $this->status = self::DEFAULT_VALUE_STATUS;
         }
+        if ($this->showFilter === null || $this->hasErrors('showFilter')) {
+            $this->showFilter = self::DEFAULT_VALUE_SHOW_FILTER;
+        }
         if ($this->dep === null || $this->hasErrors('dep')) {
             $this->dep = self::DEFAULT_VALUE_DEP;
         }
@@ -201,15 +223,21 @@ class FilterForm extends Model
         if ($this->createdDate === null || $this->hasErrors('createdDate')) {
             $this->createdDate = self::DEFAULT_VALUE_CREATED_DATE;
         }
+        if ($this->clientName === null || $this->hasErrors('clientName')) {
+            $this->clientName = self::DEFAULT_VALUE_CLIENT_NAME;
+        }
     }
 
-    public function loadDefaultValuesByPermissions(): void
+    public function loadDefaultValuesByPermissions(): FilterForm
     {
         if (!$this->permissions->canChannel()) {
             $this->channelId = self::DEFAULT_VALUE_CHANNEL_ID;
         }
         if (!$this->permissions->canStatus()) {
-            $this->status = ClientChat::TAB_ALL;
+            $this->status = self::DEFAULT_VALUE_STATUS;
+        }
+        if (!$this->permissions->canShow()) {
+            $this->showFilter = ClientChat::TAB_ALL;
         }
         if (!$this->permissions->canDepartment()) {
             $this->dep = self::DEFAULT_VALUE_DEP;
@@ -230,6 +258,7 @@ class FilterForm extends Model
         if (!$this->permissions->canCreatedDate()) {
             $this->createdDate = self::DEFAULT_VALUE_CREATED_DATE;
         }
+        return $this;
     }
 
     public function getAvailableGroup(): array
@@ -313,6 +342,7 @@ class FilterForm extends Model
             'project' => 'Project',
             'userId' => 'User ID',
             'rangeDate' => 'Created range dates',
+            'clientName' => 'Client Name',
         ];
     }
 
@@ -337,6 +367,8 @@ class FilterForm extends Model
         $this->userId = self::DEFAULT_VALUE_USER_ID;
         $this->fromDate = self::DEFAULT_VALUE_FROM_DATE;
         $this->toDate = self::DEFAULT_VALUE_TO_DATE;
+        $this->status = self::DEFAULT_VALUE_STATUS;
+        $this->clientName = self::DEFAULT_VALUE_CLIENT_NAME;
         return $this;
     }
 }

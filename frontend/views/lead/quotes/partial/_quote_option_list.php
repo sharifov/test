@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $this View
  * @var $productQuote ProductQuote
@@ -17,7 +18,7 @@ $totalExtraMarkupOption = 0;
 ?>
 
 
-<?php if ($productQuote->productQuoteOptions): ?>
+<?php if ($productQuote->productQuoteOptions) : ?>
     <h2>Options</h2>
     <table class="table table-striped table-bordered">
         <tr>
@@ -30,7 +31,7 @@ $totalExtraMarkupOption = 0;
             <th style="width: 120px">Client Price</th>
             <th style="width: 52px"></th>
         </tr>
-        <?php foreach ($productQuote->productQuoteOptions as $quoteOption):
+        <?php foreach ($productQuote->productQuoteOptions as $quoteOption) :
             $totalAmountOption += (float) $quoteOption->pqo_price;
             $totalClientAmountOption += (float) $quoteOption->pqo_client_price;
             $totalExtraMarkupOption += (float) $quoteOption->pqo_extra_markup;
@@ -40,7 +41,7 @@ $totalExtraMarkupOption = 0;
                 <td style="width: 120px"><?=$quoteOption->pqoProductOption ? Html::encode($quoteOption->pqoProductOption->po_name) : '' ?></td>
                 <td>
                     <b><?=Html::encode($quoteOption->pqo_name)?></b>
-                    <?=$quoteOption->pqo_description ? '<br>'. Html::encode($quoteOption->pqo_description) . '' : ''?>
+                    <?=$quoteOption->pqo_description ? '<br>' . Html::encode($quoteOption->pqo_description) . '' : ''?>
                 </td>
                 <td class="text-center" style="width: 120px"><?= ProductQuoteOptionStatus::asFormat($quoteOption->pqo_status_id)?></td>
                 <td class="text-right" title="Extra Markup"><?=number_format($quoteOption->pqo_extra_markup, 2)?> USD</td>

@@ -51,9 +51,9 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'Duration',
             'format' => 'raw',
-            'value' => function($data) {
+            'value' => function ($data) {
                 $totalDuration =  $data['outgoingCallsDuration'] + $data['incomingCallsDuration'] + $data['redialCallsDuration'];
-                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($totalDuration).'">' . gmdate('H:i:s', $totalDuration) . '</span>';
+                return '<i class="fa fa-clock-o"></i> <span title="' . Yii::$app->formatter->asDuration($totalDuration) . '">' . gmdate('H:i:s', $totalDuration) . '</span>';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
             'contentOptions' => [
@@ -65,7 +65,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'label' => 'Completed',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['outgoingCallsCompleted'] + $data['incomingCompletedCalls'] + $data['redialCompleted'] ?: '-';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3'],
@@ -77,20 +77,20 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
 
         [
-            'label' =>'Duration',
+            'label' => 'Duration',
             'attribute' => 'outgoingCallsDuration',
             'headerOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
             'contentOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
             'filterOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
             'format' => 'raw',
-            'value' => function($data) {
-                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['outgoingCallsDuration']).'">' . gmdate('H:i:s', $data['outgoingCallsDuration']) . '</span>';
+            'value' => function ($data) {
+                return '<i class="fa fa-clock-o"></i> <span title="' . Yii::$app->formatter->asDuration($data['outgoingCallsDuration']) . '">' . gmdate('H:i:s', $data['outgoingCallsDuration']) . '</span>';
             }
         ],
         [
-            'label' =>'Total',
+            'label' => 'Total',
             'attribute' => 'outgoingCalls',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['outgoingCalls'] ?: '-';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3'],
@@ -101,9 +101,9 @@ $this->params['breadcrumbs'][] = $this->title;
             'filterOptions' => ['style' => 'background-color:#fcf8e3']
         ],
         [
-            'label' =>'Completed',
+            'label' => 'Completed',
             'attribute' => 'outgoingCallsCompleted',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['outgoingCallsCompleted'] ?: '-';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3'],
@@ -114,9 +114,9 @@ $this->params['breadcrumbs'][] = $this->title;
             'filterOptions' => ['style' => 'background-color:#fcf8e3']
         ],
         [
-            'label' =>'NoAnswer',
+            'label' => 'NoAnswer',
             'attribute' => 'outgoingCallsNoAnswer',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['outgoingCallsNoAnswer'] ?: '-';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3'],
@@ -127,9 +127,9 @@ $this->params['breadcrumbs'][] = $this->title;
             'filterOptions' => ['style' => 'background-color:#fcf8e3']
         ],
         [
-            'label' =>'Busy',
+            'label' => 'Busy',
             'attribute' => 'outgoingCallsBusy',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['outgoingCallsBusy'] ?: '-';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3'],
@@ -140,20 +140,20 @@ $this->params['breadcrumbs'][] = $this->title;
             'filterOptions' => ['style' => 'background-color:#fcf8e3']
         ],
         [
-            'label' =>'Duration',
+            'label' => 'Duration',
             'attribute' => 'incomingCallsDuration',
             'headerOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
             'contentOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
             'filterOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
             'format' => 'raw',
-            'value' => function($data) {
-                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['incomingCallsDuration']).'">' . gmdate('H:i:s', $data['incomingCallsDuration']) . '</span>';
+            'value' => function ($data) {
+                return '<i class="fa fa-clock-o"></i> <span title="' . Yii::$app->formatter->asDuration($data['incomingCallsDuration']) . '">' . gmdate('H:i:s', $data['incomingCallsDuration']) . '</span>';
             }
         ],
         [
-            'label' =>'Completed',
+            'label' => 'Completed',
             'attribute' => 'incomingCompletedCalls',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['incomingCompletedCalls'] ?: '-';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3'],
@@ -164,9 +164,9 @@ $this->params['breadcrumbs'][] = $this->title;
             'filterOptions' => ['style' => 'background-color:#fcf8e3']
         ],
         [
-            'label' =>'Direct Line',
+            'label' => 'Direct Line',
             'attribute' => 'incomingDirectLine',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['incomingDirectLine'] ?: '-';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3'],
@@ -177,9 +177,9 @@ $this->params['breadcrumbs'][] = $this->title;
             'filterOptions' => ['style' => 'background-color:#fcf8e3']
         ],
         [
-            'label' =>'General Line',
+            'label' => 'General Line',
             'attribute' => 'incomingGeneralLine',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['incomingGeneralLine'] ?: '-';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3'],
@@ -191,21 +191,21 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
 
         [
-            'label' =>'Duration',
+            'label' => 'Duration',
             'attribute' => 'redialCallsDuration',
             'headerOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
             'contentOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
             'filterOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
             'format' => 'raw',
-            'value' => function($data) {
-                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['redialCallsDuration']).'">' . gmdate('H:i:s', $data['redialCallsDuration']) . '</span>';
+            'value' => function ($data) {
+                return '<i class="fa fa-clock-o"></i> <span title="' . Yii::$app->formatter->asDuration($data['redialCallsDuration']) . '">' . gmdate('H:i:s', $data['redialCallsDuration']) . '</span>';
             }
         ],
 
         [
-            'label' =>'Total Attempts',
+            'label' => 'Total Attempts',
             'attribute' => 'totalAttempts',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['totalAttempts'] ?: '-';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3;'],
@@ -217,9 +217,9 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
 
         [
-            'label' =>'Completed',
+            'label' => 'Completed',
             'attribute' => 'redialCompleted',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['redialCompleted'] ?: '-';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3'],
@@ -278,7 +278,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'json' => [],
         ],
         'toolbar' => [
-            'content' =>'<div class="btn-group">'. Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['stats/calls-stats'], ['class' => 'btn btn-outline-secondary', 'title'=>'Reset Grid']) .'</div>',
+            'content' => '<div class="btn-group">' . Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['stats/calls-stats'], ['class' => 'btn btn-outline-secondary', 'title' => 'Reset Grid']) . '</div>',
             '{export}',
             $fullExportMenu,
         ],

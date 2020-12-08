@@ -1,4 +1,5 @@
 <?php
+
 namespace common\components;
 
 use common\models\Employee;
@@ -13,7 +14,7 @@ class KpiService
         $messages = [];
 
         $date = new \DateTime($dateParam);
-        if($date->format('d') == 1){
+        if ($date->format('d') == 1) {
             $date->sub(new \DateInterval('P1D'));
         }
         $start = clone $date;
@@ -23,16 +24,15 @@ class KpiService
 
         $agents = Employee::getAllEmployeesByRole(Employee::ROLE_AGENT);
 
-        foreach ($agents as $agent){
+        foreach ($agents as $agent) {
             $kpiHistory = KpiHistory::recalculateSalary($agent, $start, $end);
-            if(!$kpiHistory->save()){
+            if (!$kpiHistory->save()) {
                 $errors[] = $kpiHistory->errors;
-            }else{
-                $messages[] = "Salary for ".$agent->username.': $'.$kpiHistory->getSalary();
+            } else {
+                $messages[] = "Salary for " . $agent->username . ': $' . $kpiHistory->getSalary();
             }
         }
 
         return ['start' => $start, 'end' => $end, 'errors' => $errors, 'messages' => $messages];
-
     }
 }

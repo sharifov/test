@@ -72,7 +72,7 @@ class ViewModelTotalCallGraph
         $this->gridColumns = $this->fetchGridColumns();
     }
 
-    private function prepareStatsExport():void
+    private function prepareStatsExport(): void
     {
         $data = [];
         $finalData = [];
@@ -581,7 +581,7 @@ class ViewModelTotalCallGraph
      * @param array $data
      * @return array
      */
-    private function setWeekDayName(array $data):array
+    private function setWeekDayName(array $data): array
     {
         $week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -597,7 +597,7 @@ class ViewModelTotalCallGraph
      * @param array $data
      * @return array
      */
-    private function setMonthName(array $data):array
+    private function setMonthName(array $data): array
     {
         foreach ($data as $key => $arr) {
             $firstKey = array_key_first($arr);

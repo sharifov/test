@@ -26,7 +26,7 @@ class m180814_070719_create_tbl_api_user extends Migration
         foreach ($tables as $table) {
             $tableName = $table['table_name'];
             $db->createCommand("ALTER TABLE `$tableName` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci")->execute();
-            echo "tbl: ".$tableName. "\r\n";
+            echo "tbl: " . $tableName . "\r\n";
         }
         $db->createCommand('SET FOREIGN_KEY_CHECKS=1;')->execute();
 
@@ -83,6 +83,4 @@ class m180814_070719_create_tbl_api_user extends Migration
     {
         $this->dropTable('{{%api_user}}');
     }
-
-
 }

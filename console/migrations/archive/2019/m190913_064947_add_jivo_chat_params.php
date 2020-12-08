@@ -38,5 +38,4 @@ class m190913_064947_add_jivo_chat_params extends Migration
             Yii::$app->cache->flush();
         }
     }
-
 }

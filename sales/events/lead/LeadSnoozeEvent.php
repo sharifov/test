@@ -37,14 +37,15 @@ class LeadSnoozeEvent
      * @param string|null $reason
      * @param string|null $snoozeFor
      */
-    public function __construct(Lead $lead,
-                                ?int $oldStatus,
-                                ?int $oldOwnerId,
-                                ?int $newOwnerId,
-                                ?int $creatorId,
-                                ?string $reason,
-                                ?string $snoozeFor)
-    {
+    public function __construct(
+        Lead $lead,
+        ?int $oldStatus,
+        ?int $oldOwnerId,
+        ?int $newOwnerId,
+        ?int $creatorId,
+        ?string $reason,
+        ?string $snoozeFor
+    ) {
         $this->lead = $lead;
         $this->oldStatus = $oldStatus;
         $this->oldOwnerId = $oldOwnerId;
@@ -54,5 +55,4 @@ class LeadSnoozeEvent
         $this->snoozeFor = $snoozeFor;
         $this->created = date('Y-m-d H:i:s');
     }
-
 }

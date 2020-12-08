@@ -3,6 +3,8 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\DateTimeColumn;
+
 /* @var $this yii\web\View */
 /* @var $searchModel modules\flight\models\search\FlightQuoteSegmentSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -30,8 +32,16 @@ $this->params['breadcrumbs'][] = $this->title;
             'fqs_id',
             'fqs_flight_quote_id',
             'fqs_flight_quote_trip_id',
-            'fqs_departure_dt',
-            'fqs_arrival_dt',
+            //'fqs_departure_dt',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'fqs_departure_dt'
+            ],
+            //'fqs_arrival_dt',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'fqs_arrival_dt'
+            ],
             'fqs_stop',
             'fqs_flight_number',
             'fqs_booking_class',

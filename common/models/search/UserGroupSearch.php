@@ -20,8 +20,9 @@ class UserGroupSearch extends UserGroup
     {
         return [
             [['ug_id', 'ug_disable'], 'integer'],
-            [['ug_key', 'ug_name', 'ug_description', 'ug_updated_dt'], 'safe'],
+            [['ug_key', 'ug_name', 'ug_description'], 'safe'],
             ['ug_user_group_set_id', 'integer'],
+            [['ug_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -59,7 +60,7 @@ class UserGroupSearch extends UserGroup
             return $dataProvider;
         }
 
-        if ($this->ug_updated_dt){
+        if ($this->ug_updated_dt) {
             $query->andFilterWhere(['>=', 'ug_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ug_updated_dt))])
                 ->andFilterWhere(['<=', 'ug_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ug_updated_dt) + 3600 * 24)]);
         }

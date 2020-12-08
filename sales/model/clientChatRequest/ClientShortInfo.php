@@ -35,9 +35,9 @@ class ClientShortInfo
             $utc_offset = (string)$data['geo']['utc_offset'];
             $strlen = strlen($utc_offset);
             if ($strlen === 4) {
-                $this->utc_offset = substr($utc_offset, 0,2) . ':' . substr($utc_offset, 2,2);
+                $this->utc_offset = substr($utc_offset, 0, 2) . ':' . substr($utc_offset, 2, 2);
             } elseif ($strlen === 5) {
-                $this->utc_offset = substr($utc_offset, 0,3) . ':' . substr($utc_offset, 3,2);
+                $this->utc_offset = substr($utc_offset, 0, 3) . ':' . substr($utc_offset, 3, 2);
             } else {
                 \Yii::error(VarDumper::dumpAsString(['error' => 'Undefined utc_offset', 'data' => $data, 'ClientChatRequestId' => $request->ccr_id]), 'ClientShortInfo');
             }

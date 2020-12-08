@@ -5,7 +5,6 @@ use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
-
 /* @var $this yii\web\View */
 /* @var $model sales\model\clientChatStatusLog\entity\ClientChatStatusLog */
 
@@ -36,22 +35,27 @@ $this->params['breadcrumbs'][] = $this->title;
             'attributes' => [
                 'csl_id',
                 'csl_cch_id',
+                'csl_rid',
                 //'csl_from_status',
                 [
                     'attribute' => 'csl_from_status',
                     'value' => static function (ClientChatStatusLog $model) {
-                        return $model->csl_from_status ? Html::tag('span',
+                        return $model->csl_from_status ? Html::tag(
+                            'span',
                             ClientChat::getStatusNameById($model->csl_from_status),
-                            ['class' => 'badge badge-' . ClientChat::getStatusClassById($model->csl_from_status)]) : null;
+                            ['class' => 'badge badge-' . ClientChat::getStatusClassById($model->csl_from_status)]
+                        ) : null;
                     },
                     'format' => 'raw',
                 ],
                 //'csl_to_status',
                 [   'attribute' => 'csl_to_status',
                     'value' => static function (ClientChatStatusLog $model) {
-                        return $model->csl_to_status ? Html::tag('span',
+                        return $model->csl_to_status ? Html::tag(
+                            'span',
                             ClientChat::getStatusNameById($model->csl_to_status),
-                            ['class' => 'badge badge-' . ClientChat::getStatusClassById($model->csl_to_status)]) : null;
+                            ['class' => 'badge badge-' . ClientChat::getStatusClassById($model->csl_to_status)]
+                        ) : null;
                     },
                     'format' => 'raw',
                 ],
@@ -64,15 +68,15 @@ $this->params['breadcrumbs'][] = $this->title;
                     'value' => static function (ClientChatStatusLog $model) {
                         return $model->cslPrevChannel ? Html::a('<i class="fa fa-link"></i> ' . $model->cslPrevChannel->ccc_name, ['/client-chat-channel-crud/view', 'id' => $model->csl_prev_channel_id], ['target' => '_blank', 'data-pjax' => 0]) : null;
                     },
-					'format' => 'raw',
-				],
-				[
-					'attribute' => 'csl_action_type',
-					'value' => static function (ClientChatStatusLog $model) {
-						return ClientChatStatusLog::getActionLabel($model->csl_action_type);
-					},
-					'format' => 'raw',
-				],
+                    'format' => 'raw',
+                ],
+                [
+                    'attribute' => 'csl_action_type',
+                    'value' => static function (ClientChatStatusLog $model) {
+                        return ClientChatStatusLog::getActionLabel($model->csl_action_type);
+                    },
+                    'format' => 'raw',
+                ],
                 'csl_user_id:username',
             ],
         ]) ?>

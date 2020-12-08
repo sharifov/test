@@ -88,11 +88,11 @@ class ClientChatNote extends ActiveRecord
     }
 
     public static function create(int $chatId, int $userId, string $note): ClientChatNote
-	{
-		$model = new self();
-		$model->ccn_chat_id = $chatId;
-		$model->ccn_user_id = $userId;
-		$model->ccn_note = $note;
-		return $model;
-	}
+    {
+        $model = new self();
+        $model->ccn_chat_id = $chatId;
+        $model->ccn_user_id = $userId;
+        $model->ccn_note = $note;
+        return $model;
+    }
 }

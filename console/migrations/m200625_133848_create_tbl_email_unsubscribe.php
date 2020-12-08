@@ -28,9 +28,15 @@ class m200625_133848_create_tbl_email_unsubscribe extends Migration
 
         $this->addColumn('{{%client_project}}', 'cp_unsubscribe', $this->boolean()->defaultValue(false));
 
-        $this->addForeignKey('FK-email_unsubscribe-eu_project_id_fk',
-            '{{%email_unsubscribe}}', 'eu_project_id',
-            '{{%projects}}', 'id','CASCADE', 'CASCADE');
+        $this->addForeignKey(
+            'FK-email_unsubscribe-eu_project_id_fk',
+            '{{%email_unsubscribe}}',
+            'eu_project_id',
+            '{{%projects}}',
+            'id',
+            'CASCADE',
+            'CASCADE'
+        );
     }
 
     /**

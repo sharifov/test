@@ -11,7 +11,10 @@ use yii\web\View;
 /** @var Cases $model */
 /** @var \frontend\models\CasePreviewEmailForm $previewEmailForm */
 
-$urlRequestCoupons = Url::to(['/coupon/request', 'caseId' => $model->cs_id]);
+if ($model) {
+    $urlRequestCoupons = Url::to(['/coupon/request', 'caseId' => $model->cs_id]);
+}
+
 $urlSendCoupons = !isset($previewEmailForm) ? Url::to(['/coupon/preview']) : null;
 
 $clientEmails = $model->client ? $model->client->getEmailList() : [];
@@ -23,35 +26,37 @@ $clientEmails = $model->client ? $model->client->getEmailList() : [];
     }
 </script>
 <div class="x_panel">
-	<div class="x_title" >
-		<h2><i class="fa fa-sticky-note-o"></i> Coupons </h2>
-		<ul class="nav navbar-right panel_toolbox">
+    <div class="x_title" >
+        <h2><i class="fa fa-sticky-note-o"></i> Coupons </h2>
+        <ul class="nav navbar-right panel_toolbox">
+            <?php if ($model) : ?>
+                <li>
+                    <?= \yii\bootstrap\Html::a('<i class="fa fa-plus-circle success"></i> Generate coupons', '#', ['id' => 'btn-request-coupons', 'title' => 'Request coupons'])?>
+                </li>
+            <?php endif; ?>
             <li>
-                <?= \yii\bootstrap\Html::a('<i class="fa fa-plus-circle success"></i> Generate coupons', '#', ['id' => 'btn-request-coupons', 'title' => 'Request coupons'])?>
+                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
             </li>
-			<li>
-				<a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-			</li>
-		</ul>
-		<div class="clearfix"></div>
-	</div>
-	<div class="x_content" style="margin-top: -10px;">
+        </ul>
+        <div class="clearfix"></div>
+    </div>
+    <div class="x_content" style="margin-top: -10px;">
         <div class="row">
             <div class="col-md-12">
             </div>
         </div>
         <br>
             <?php \yii\widgets\Pjax::begin(['id' => 'pjax-case-coupons-table', 'enableReplaceState' => false, 'enablePushState' => false, 'timeout' => 10000]) ?>
-            <?php if ($coupons): ?>
-				<?php if(isset($previewEmailForm)): ?>
-					<?= $this->render('_email_preview', [
-						'previewEmailForm' => $previewEmailForm,
+            <?php if ($coupons) : ?>
+                <?php if (isset($previewEmailForm)) : ?>
+                    <?= $this->render('_email_preview', [
+                        'previewEmailForm' => $previewEmailForm,
                         'case' => $model
-					]) ?>
-				<?php else: ?>
-                <?php $form = \yii\widgets\ActiveForm::begin(['options' => ['data-pjax' => 1], 'id' => 'case_send_coupons', 'action' => [$urlSendCoupons]]); ?>
-                <?= $form->field($sendCouponsForm, 'caseId')->hiddenInput()->label(false) ?>
-                <?= $form->errorSummary($sendCouponsForm) ?>
+                    ]) ?>
+                <?php else : ?>
+                    <?php $form = \yii\widgets\ActiveForm::begin(['options' => ['data-pjax' => 1], 'id' => 'case_send_coupons', 'action' => [$urlSendCoupons]]); ?>
+                    <?= $form->field($sendCouponsForm, 'caseId')->hiddenInput()->label(false) ?>
+                    <?= $form->errorSummary($sendCouponsForm) ?>
                 <table class="table table-bordered table-hover table-condensed">
                     <thead>
                     <tr>
@@ -67,12 +72,12 @@ $clientEmails = $model->client ? $model->client->getEmailList() : [];
                     </thead>
                     <tbody>
 
-                            <?php foreach($coupons as $key => $coupon): ?>
+                            <?php foreach ($coupons as $key => $coupon) : ?>
                                 <tr>
-                                    <td><?= $key+1 ?></td>
+                                    <td><?= $key + 1 ?></td>
                                     <td>
-                                        <?php if (!$coupon->coupon->isSend()): ?>
-                                            <?= Html::checkbox($sendCouponsForm->formName() . '[couponIds]['.$key.']', false, ['value' => $coupon->cc_coupon_id]) ?>
+                                        <?php if (!$coupon->coupon->isSend()) : ?>
+                                            <?= Html::checkbox($sendCouponsForm->formName() . '[couponIds][' . $key . ']', false, ['value' => $coupon->cc_coupon_id]) ?>
                                         <?php  endif; ?>
                                     </td>
                                     <td><?= $coupon->coupon->c_code ?></td>
@@ -89,7 +94,7 @@ $clientEmails = $model->client ? $model->client->getEmailList() : [];
                 <div class="row">
 <!--                    <div class="col-md-5">-->
                     <?= $form->field($sendCouponsForm, 'emailTemplateType')->hiddenInput(['value' => 'cl_coupon'])->label(false) ?>
-<!--                        --><?php // $form->field($sendCouponsForm, 'emailTemplateType')->dropDownList(\common\models\EmailTemplateType::getKeyList(false, null), ['prompt' => '---', 'class' => 'form-control', 'id' => 'email_tpl_key']) ?>
+<!--                        --><?php // $form->field($sendCouponsForm, 'emailTemplateType')->dropDownList(\common\models\EmailTemplateType::getKeyList(false, null), ['prompt' => '---', 'class' => 'form-control', 'id' => 'email_tpl_key'])?>
 
 <!--                    </div>-->
 
@@ -103,17 +108,18 @@ $clientEmails = $model->client ? $model->client->getEmailList() : [];
                         <?= Html::submitButton('<i class="fa fa-envelope"></i> Preview Email', ['id' => 'preview-case-coupons', 'class' => 'btn btn-success']) ?>
                     </div>
                 </div>
-                <?php \yii\widgets\ActiveForm::end() ?>
+                    <?php \yii\widgets\ActiveForm::end() ?>
                 <?php endif; ?>
-            <?php else: ?>
+            <?php else : ?>
                 <p>Not found coupons</p>
-        <?php endif; ?>
+            <?php endif; ?>
             <?php \yii\widgets\Pjax::end()?>
     </div>
 </div>
 
 <?php
-$js = <<<JS
+if ($model) {
+    $js = <<<JS
     $('body').on('click', '#btn-request-coupons', function(e) {
         e.preventDefault();
         $('#preloader').removeClass('d-none');
@@ -139,5 +145,5 @@ $js = <<<JS
     
 JS;
 
-$this->registerJs($js);
-
+    $this->registerJs($js);
+}

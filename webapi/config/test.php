@@ -1,4 +1,5 @@
 <?php
+
 return [
     'id' => 'app-webapi-tests',
     'basePath' => dirname(__DIR__),

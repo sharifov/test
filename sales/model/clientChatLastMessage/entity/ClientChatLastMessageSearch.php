@@ -16,7 +16,8 @@ class ClientChatLastMessageSearch extends ClientChatLastMessage
     {
         return [
             [['cclm_id', 'cclm_cch_id', 'cclm_type_id'], 'integer'],
-            [['cclm_message', 'cclm_dt'], 'safe'],
+            [['cclm_message'], 'safe'],
+            [['cclm_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -30,7 +31,7 @@ class ClientChatLastMessageSearch extends ClientChatLastMessage
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cclm_dt' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['cclm_dt' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -51,7 +52,7 @@ class ClientChatLastMessageSearch extends ClientChatLastMessage
 
         $query->andFilterWhere(['like', 'cclm_message', $this->cclm_message]);
 
-        if ($this->cclm_dt){
+        if ($this->cclm_dt) {
             $query->andFilterWhere(['>=', 'cclm_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->cclm_dt))])
                 ->andFilterWhere(['<=', 'cclm_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->cclm_dt) + 3600 * 24)]);
         }

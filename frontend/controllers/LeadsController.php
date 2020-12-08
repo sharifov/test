@@ -57,7 +57,7 @@ class LeadsController extends FController
                 $this->toolService->edit($lead, $form);
                 return $this->asJson(['success' => true]);
             } catch (\DomainException $e) {
-                return $this->asJson(['success' => false, 'text'=> $e->getMessage()]);
+                return $this->asJson(['success' => false, 'text' => $e->getMessage()]);
             }
         } else {
             return $this->asJson(['data' => $this->renderAjax('_tool_edit', ['lead' => $lead])]);
@@ -184,7 +184,7 @@ class LeadsController extends FController
         //$queryIterations = ceil($totalLeads / $limit);
         $queryIterations = 5;
 
-        $fpath = fopen(Yii::getAlias('@runtime'. '/file.csv'), 'w');
+        $fpath = fopen(Yii::getAlias('@runtime' . '/file.csv'), 'w');
 
         for ($i = 0; $i < $queryIterations; $i++) {
             $offset = $i * $limit;

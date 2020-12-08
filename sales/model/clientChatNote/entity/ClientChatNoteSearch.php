@@ -16,7 +16,8 @@ class ClientChatNoteSearch extends ClientChatNote
     {
         return [
             [['ccn_id', 'ccn_chat_id', 'ccn_user_id', 'ccn_deleted'], 'integer'],
-            [['ccn_note', 'ccn_created_dt', 'ccn_updated_dt'], 'safe'],
+            [['ccn_note'], 'safe'],
+            [['ccn_created_dt', 'ccn_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -35,7 +36,7 @@ class ClientChatNoteSearch extends ClientChatNote
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['ccn_id' => SORT_ASC]],
+            'sort' => ['defaultOrder' => ['ccn_id' => SORT_ASC]],
             'pagination' => [
                 'pageSize' => 30,
             ],

@@ -39,8 +39,7 @@ class QaTaskDecideLeadSendToRedialQueue extends QaTaskActionsService
         QaTaskDecideService $decideService,
         LeadRepository $leadRepository,
         QCallService $qCallService
-    )
-    {
+    ) {
         parent::__construct($taskRepository, $userRepository, $eventDispatcher, $projectAccessService, $accessChecker, $transactionManager);
         $this->decideService = $decideService;
         $this->leadRepository = $leadRepository;

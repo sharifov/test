@@ -41,11 +41,14 @@ class LeadFollowUpNotificationsListener
         }
 
         $subject = Yii::t('email', "Lead-{id} to FOLLOW-UP", ['id' => $event->lead->id]);
-        $body = Yii::t('email', 'Your Lead (Id: {lead_id}) has been changed status to FOLLOW-UP! Reason: {reason}',
+        $body = Yii::t(
+            'email',
+            'Your Lead (Id: {lead_id}) has been changed status to FOLLOW-UP! Reason: {reason}',
             [
                 'lead_id' => Purifier::createLeadShortLink($event->lead),
                 'reason' => $event->reason ?: '-',
-            ]);
+            ]
+        );
 
         if ($ntf = Notifications::create($newOwner->id, $subject, $body, Notifications::TYPE_INFO, true)) {
             $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];

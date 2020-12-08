@@ -18,7 +18,8 @@ class FlightQuoteSegmentSearch extends FlightQuoteSegment
     {
         return [
             [['fqs_id', 'fqs_flight_quote_id', 'fqs_flight_quote_trip_id', 'fqs_stop', 'fqs_flight_number', 'fqs_duration', 'fqs_ticket_id', 'fqs_recheck_baggage', 'fqs_mileage'], 'integer'],
-            [['fqs_departure_dt', 'fqs_arrival_dt', 'fqs_booking_class', 'fqs_departure_airport_iata', 'fqs_departure_airport_terminal', 'fqs_arrival_airport_iata', 'fqs_arrival_airport_terminal', 'fqs_operating_airline', 'fqs_marketing_airline', 'fqs_air_equip_type', 'fqs_marriage_group', 'fqs_cabin_class', 'fqs_meal', 'fqs_fare_code', 'fqs_key'], 'safe'],
+            [['fqs_booking_class', 'fqs_departure_airport_iata', 'fqs_departure_airport_terminal', 'fqs_arrival_airport_iata', 'fqs_arrival_airport_terminal', 'fqs_operating_airline', 'fqs_marketing_airline', 'fqs_air_equip_type', 'fqs_marriage_group', 'fqs_cabin_class', 'fqs_meal', 'fqs_fare_code', 'fqs_key'], 'safe'],
+            [['fqs_departure_dt', 'fqs_arrival_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -46,7 +47,7 @@ class FlightQuoteSegmentSearch extends FlightQuoteSegment
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['fqs_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['fqs_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ]
@@ -65,8 +66,8 @@ class FlightQuoteSegmentSearch extends FlightQuoteSegment
             'fqs_id' => $this->fqs_id,
             'fqs_flight_quote_id' => $this->fqs_flight_quote_id,
             'fqs_flight_quote_trip_id' => $this->fqs_flight_quote_trip_id,
-            'fqs_departure_dt' => $this->fqs_departure_dt,
-            'fqs_arrival_dt' => $this->fqs_arrival_dt,
+            'DATE(fqs_departure_dt)' => $this->fqs_departure_dt,
+            'DATE(fqs_arrival_dt)' => $this->fqs_arrival_dt,
             'fqs_stop' => $this->fqs_stop,
             'fqs_flight_number' => $this->fqs_flight_number,
             'fqs_duration' => $this->fqs_duration,

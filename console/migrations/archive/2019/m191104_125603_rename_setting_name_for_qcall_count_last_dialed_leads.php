@@ -21,7 +21,5 @@ class m191104_125603_rename_setting_name_for_qcall_count_last_dialed_leads exten
      */
     public function safeDown()
     {
-
     }
-
 }

@@ -169,4 +169,3 @@ class HotelQuoteServiceLog extends ActiveRecord
         return $this->save();
     }
 }
-

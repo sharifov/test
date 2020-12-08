@@ -16,7 +16,6 @@ class m190816_145016_add_column_tbl_email_types extends Migration
         $this->addForeignKey('FK-email_template_type_etp_dep_id', '{{%email_template_type}}', ['etp_dep_id'], '{{%department}}', ['dep_id'], 'SET NULL', 'CASCADE');
 
         $this->execute('UPDATE email_template_type SET etp_dep_id = 1');
-
     }
 
     /**

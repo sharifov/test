@@ -113,14 +113,16 @@ class UserCallStatus extends \yii\db\ActiveRecord
             NativeEventDispatcher::recordEvent(UserCallStatusEvents::class, UserCallStatusEvents::INSERT, [UserCallStatusEvents::class, 'updateUserStatus'], $this);
             NativeEventDispatcher::trigger(UserCallStatusEvents::class, UserCallStatusEvents::INSERT);
         } else {
-
             if (isset($changedAttributes['us_type_id'])) {
-                NativeEventDispatcher::recordEvent(UserCallStatusEvents::class, UserCallStatusEvents::UPDATE,
-                    [UserCallStatusEvents::class, 'updateUserStatus'], $this);
+                NativeEventDispatcher::recordEvent(
+                    UserCallStatusEvents::class,
+                    UserCallStatusEvents::UPDATE,
+                    [UserCallStatusEvents::class, 'updateUserStatus'],
+                    $this
+                );
                 NativeEventDispatcher::trigger(UserCallStatusEvents::class, UserCallStatusEvents::UPDATE);
             }
         }
-
     }
 
     /**
@@ -137,9 +139,9 @@ class UserCallStatus extends \yii\db\ActiveRecord
     }
 
     public function isReady(): bool
-	{
-		return $this->us_type_id === self::STATUS_TYPE_READY;
-	}
+    {
+        return $this->us_type_id === self::STATUS_TYPE_READY;
+    }
 
 
     /**
@@ -150,6 +152,4 @@ class UserCallStatus extends \yii\db\ActiveRecord
         parent::afterDelete();
         NativeEventDispatcher::trigger(UserCallStatusEvents::class, UserCallStatusEvents::DELETE);
     }
-
-
 }

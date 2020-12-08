@@ -4,6 +4,8 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use common\components\grid\UserSelect2Column;
+use common\components\grid\DateTimeColumn;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\CreditCardSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -53,14 +55,14 @@ $this->params['breadcrumbs'][] = $this->title;
             //'cc_type_id',
             [
                 'attribute' => 'cc_type_id',
-                'value' => static function(\common\models\CreditCard $model) {
+                'value' => static function (\common\models\CreditCard $model) {
                     return $model->typeName;
                 },
                 'filter' => \common\models\CreditCard::getTypeList()
             ],
             [
                 'attribute' => 'cc_status_id',
-                'value' => static function(\common\models\CreditCard $model) {
+                'value' => static function (\common\models\CreditCard $model) {
                     return $model->statusName;
                 },
                 'filter' => \common\models\CreditCard::getStatusList()
@@ -84,7 +86,11 @@ $this->params['breadcrumbs'][] = $this->title;
 //                'placeholder' => 'Select User',
 //            ],
 
-            'cc_created_dt:ByUserDateTime',
+            //'cc_created_dt:ByUserDateTime',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'cc_created_dt'
+            ],
 //            'cc_updated_dt:ByUserDateTime',
 
             ['class' => 'yii\grid\ActionColumn'],

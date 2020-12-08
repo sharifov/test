@@ -29,19 +29,19 @@ use yii\db\ActiveRecord;
  */
 class PhoneLinePhoneNumber extends \yii\db\ActiveRecord
 {
-	public function behaviors(): array
-	{
-		return [
-			'timestamp' => [
-				'class' => TimestampBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['plpn_created_dt', 'plpn_updated_dt'],
-					ActiveRecord::EVENT_BEFORE_UPDATE => ['plpn_updated_dt'],
-				],
-				'value' => date('Y-m-d H:i:s'),
-			],
-		];
-	}
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['plpn_created_dt', 'plpn_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['plpn_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s'),
+            ],
+        ];
+    }
 
     public function rules(): array
     {

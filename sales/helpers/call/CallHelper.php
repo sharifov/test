@@ -1,6 +1,6 @@
 <?php
-namespace sales\helpers\call;
 
+namespace sales\helpers\call;
 
 use common\models\Call;
 use common\models\Department;
@@ -12,34 +12,34 @@ use yii\helpers\Html;
 
 class CallHelper
 {
-	/**
-	 * @param string $phone
-	 * @param bool $access
-	 * @param string|null $title
-	 * @param array $dataParams
-	 * @param string|null $tag
-	 * @return string
-	 */
-	public static function callNumber(string $phone, bool $access, string $title = '', array $dataParams = [], ?string $tag = 'span'): string
-	{
-		$title = $title ?: $phone;
+    /**
+     * @param string $phone
+     * @param bool $access
+     * @param string|null $title
+     * @param array $dataParams
+     * @param string|null $tag
+     * @return string
+     */
+    public static function callNumber(string $phone, bool $access, string $title = '', array $dataParams = [], ?string $tag = 'span'): string
+    {
+        $title = $title ?: $phone;
 
-		$options = [
-			'data-phone-number' => $phone,
-			'data-confirm' => isset($dataParams['confirm']) ? 1 : 0,
-			'data-call' => isset($dataParams['call']) ? 1 : 0,
-			'class' => $access ? 'wg-call badge badge-pill badge-light' : ''
-		];
+        $options = [
+            'data-phone-number' => $phone,
+            'data-confirm' => isset($dataParams['confirm']) ? 1 : 0,
+            'data-call' => isset($dataParams['call']) ? 1 : 0,
+            'class' => $access ? 'wg-call badge badge-pill badge-light' : ''
+        ];
 
-		if (!empty($dataParams['data-title'])) {
-		    $options['data-title'] = $dataParams['data-title'];
+        if (!empty($dataParams['data-title'])) {
+            $options['data-title'] = $dataParams['data-title'];
         }
 
-		if (!empty($dataParams['phone-from-id'])) {
+        if (!empty($dataParams['phone-from-id'])) {
             $options['data-phone-from-id'] = $dataParams['phone-from-id'];
         }
 
-		if (!empty($dataParams['data-user-id'])) {
+        if (!empty($dataParams['data-user-id'])) {
             $options['data-user-id'] = $dataParams['data-user-id'];
         } else {
             $options['data-user-id'] = null;
@@ -50,54 +50,54 @@ class CallHelper
             return Html::tag($tag, $title, $options);
         }
 
-		$iconClass = $dataParams['icon-class'] ?? 'fa fa-phone';
-		$iconTag = Html::tag('i', '', [
-			'class' => $iconClass
-		]);
+        $iconClass = $dataParams['icon-class'] ?? 'fa fa-phone';
+        $iconTag = Html::tag('i', '', [
+            'class' => $iconClass
+        ]);
 
-		return Html::tag($tag, $iconTag . ' ' . $title, $options);
-	}
+        return Html::tag($tag, $iconTag . ' ' . $title, $options);
+    }
 
-	/**
-	 * @param array $phoneNumbers
-	 * @param string|null $dropdownBtnContent
-	 * @param bool $access
-	 * @param array $buttonOptions
-	 * @return string
-	 * @throws \Exception
-	 */
-	public static function callNumbersDropdownList(array $phoneNumbers, ?string $dropdownBtnContent, bool $access, $buttonOptions = []): string
-	{
-		$dropdownBtnContent = $dropdownBtnContent ?? '<i class="fa fa-phone"></i> Phone List';
-		$dropdownBtn = Html::tag('button', $dropdownBtnContent, [
-			'class' => 'btn dropdown-toggle ' . ($buttonOptions['class'] ?? 'btn-secondary'),
-			'type' => 'button',
-			'data-toggle' => 'dropdown',
-			'aria-haspopup' => 'true',
-			'aria-expanded' => 'false'
-		]);
+    /**
+     * @param array $phoneNumbers
+     * @param string|null $dropdownBtnContent
+     * @param bool $access
+     * @param array $buttonOptions
+     * @return string
+     * @throws \Exception
+     */
+    public static function callNumbersDropdownList(array $phoneNumbers, ?string $dropdownBtnContent, bool $access, $buttonOptions = []): string
+    {
+        $dropdownBtnContent = $dropdownBtnContent ?? '<i class="fa fa-phone"></i> Phone List';
+        $dropdownBtn = Html::tag('button', $dropdownBtnContent, [
+            'class' => 'btn dropdown-toggle ' . ($buttonOptions['class'] ?? 'btn-secondary'),
+            'type' => 'button',
+            'data-toggle' => 'dropdown',
+            'aria-haspopup' => 'true',
+            'aria-expanded' => 'false'
+        ]);
 
-		$numbers = [];
-		foreach ($phoneNumbers as $phoneNumber) {
-			$numbers = [
-				'label' => self::callNumber(
-					$phoneNumber['phone'] ?? '',
-					$access,
-					$phoneNumber['title'] ?? '',
-					$phoneNumbers['dataParams'] ?? []
-				),
-				'encode' => false
-			];
-		}
+        $numbers = [];
+        foreach ($phoneNumbers as $phoneNumber) {
+            $numbers = [
+                'label' => self::callNumber(
+                    $phoneNumber['phone'] ?? '',
+                    $access,
+                    $phoneNumber['title'] ?? '',
+                    $phoneNumbers['dataParams'] ?? []
+                ),
+                'encode' => false
+            ];
+        }
 
-		$widget = Dropdown::widget([
-			'items' => [
-				$numbers
-			],
-		]);
+        $widget = Dropdown::widget([
+            'items' => [
+                $numbers
+            ],
+        ]);
 
-		return Html::tag('div', $dropdownBtn . $widget, ['class' => 'dropdown']);
-	}
+        return Html::tag('div', $dropdownBtn . $widget, ['class' => 'dropdown']);
+    }
 
     public static function formatCallHistoryByDate(array $callHistory, string $userTimezone): array
     {
@@ -167,7 +167,7 @@ class CallHelper
                     <div class="contact-info-card__line history-details">
                         <strong class="contact-info-card__name phone-dial-history" style="cursor:pointer;"
                                 data-call-sid="' . $call['cl_call_sid'] . '"
-                                data-title="' .  $title  .'"
+                                data-title="' .  $title  . '"
                                 data-user-id="' . $call['user_id'] . '"
                                 data-phone="' . Html::encode($phone) . '"
                                 data-project-id="' . Html::encode($call['cl_project_id']) . '"
@@ -179,15 +179,18 @@ class CallHelper
             $tpl .= ' data-case-id="' . $call['case_id'] . '"';
         } elseif ((int)$call['cl_type_id'] === Call::CALL_TYPE_IN) {
             $department = (int)$call['cl_department_id'];
-            if ($department === Department::DEPARTMENT_SALES) {
-                if ($call['lead_id']) {
-                    $tpl .= ' data-source-type-id="' . Call::SOURCE_LEAD . '"';
-                    $tpl .= ' data-lead-id="' . $call['lead_id'] . '"';
-                }
-            } elseif ($department) {
-                if ($call['case_id']) {
-                    $tpl .= ' data-source-type-id="' . Call::SOURCE_CASE . '"';
-                    $tpl .= ' data-case-id="' . $call['case_id'] . '"';
+            $dep = Department::findOne($department);
+            if ($dep && ($departmentParams = $dep->getParams())) {
+                if ($departmentParams->object->type->isLead()) {
+                    if ($call['lead_id']) {
+                        $tpl .= ' data-source-type-id="' . Call::SOURCE_LEAD . '"';
+                        $tpl .= ' data-lead-id="' . $call['lead_id'] . '"';
+                    }
+                } elseif ($departmentParams->object->type->isCase()) {
+                    if ($call['case_id']) {
+                        $tpl .= ' data-source-type-id="' . Call::SOURCE_CASE . '"';
+                        $tpl .= ' data-case-id="' . $call['case_id'] . '"';
+                    }
                 }
             }
         }
@@ -223,15 +226,15 @@ class CallHelper
      * @param string $delimiter
      * @return string
      */
-    public static function customizedDuration(string $sec, string $delimiter = ':'):string
+    public static function customizedDuration(string $sec, string $delimiter = ':'): string
     {
         $seconds = $sec % 60;
         $minutes = floor($sec / 60 % 60);
         $hours   = floor($sec / 3600);
 
         $seconds = ($seconds > 0) ? str_pad($seconds, 2, "0", STR_PAD_LEFT) : '00';
-        $minutes = ($minutes > 0) ? str_pad($minutes, 2, "0", STR_PAD_LEFT).$delimiter : '00'.$delimiter;
-        $hours   = ($hours > 0) ? str_pad($hours, 2, "0", STR_PAD_LEFT).$delimiter : '00'.$delimiter;
+        $minutes = ($minutes > 0) ? str_pad($minutes, 2, "0", STR_PAD_LEFT) . $delimiter : '00' . $delimiter;
+        $hours   = ($hours > 0) ? str_pad($hours, 2, "0", STR_PAD_LEFT) . $delimiter : '00' . $delimiter;
 
         return "$hours$minutes$seconds";
     }

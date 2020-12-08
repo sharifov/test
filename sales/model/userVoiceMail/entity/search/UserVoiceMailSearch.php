@@ -10,7 +10,7 @@ class UserVoiceMailSearch extends UserVoiceMail
     public function rules(): array
     {
         return [
-            ['uvm_created_dt', 'safe'],
+            [['uvm_created_dt', 'uvm_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
 
             ['uvm_created_user_id', 'integer'],
 
@@ -32,8 +32,6 @@ class UserVoiceMailSearch extends UserVoiceMail
 
             ['uvm_transcribe_enable', 'integer'],
 
-            ['uvm_updated_dt', 'safe'],
-
             ['uvm_updated_user_id', 'integer'],
 
             ['uvm_user_id', 'integer'],
@@ -48,11 +46,11 @@ class UserVoiceMailSearch extends UserVoiceMail
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-			'sort' => [
-				'defaultOrder' => [
-					'uvm_id' => SORT_DESC
-				]
-			]
+            'sort' => [
+                'defaultOrder' => [
+                    'uvm_id' => SORT_DESC
+                ]
+            ]
         ]);
 
         $this->load($params);

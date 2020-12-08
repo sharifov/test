@@ -18,8 +18,8 @@ use yii\web\YiiAsset;
  */
 class Select2Asset extends AssetBundle
 {
-    public $basePath = '@webroot';
-    public $baseUrl = '@web';
+//    public $basePath = '@webroot';
+//    public $baseUrl = '@web';
 
     public $css = [
         'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.10/css/select2.min.css'
@@ -30,11 +30,11 @@ class Select2Asset extends AssetBundle
         'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.10/js/select2.full.min.js',
     ];
 
-    public $depends = [
-        YiiAsset::class,
-        JqueryAsset::class,
-        BootstrapAsset::class,
-    ];
+//    public $depends = [
+//        YiiAsset::class,
+//        JqueryAsset::class,
+//        BootstrapAsset::class,
+//    ];
 
     /*public $jsOptions = [
         'position' => \yii\web\View::POS_END

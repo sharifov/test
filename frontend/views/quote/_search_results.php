@@ -1,4 +1,5 @@
 <?php
+
 use common\models\Lead;
 
 /**
@@ -9,7 +10,7 @@ use common\models\Lead;
  * @var $gds string
  * @var $lead Lead
  */
-if ($result && !empty($result['data']['results'])):
+if ($result && !empty($result['data']['results'])) :
     $result = $result['data'];
     $js = <<<JS
     $(document).on('click','.search_details__btn', function (e) {
@@ -195,7 +196,7 @@ JS;
                                 </label>
                             </div>
                             <ul class="search-filters__airlines-list">
-                                <?php foreach ($airlines as $iata => $airline):?>
+                                <?php foreach ($airlines as $iata => $airline) :?>
                                     <li class="search-filters__airlines-item custom-checkbox form-group js-filter-airl-item">
                                         <input type="checkbox" id="<?= $iata?>" checked>
                                         <label for="<?= $iata?>"></label>
@@ -247,12 +248,18 @@ JS;
                             <div class="search-filters__flight">
                                 <?php $tabTtl = ['Depart','Return'];?>
                                 <?php $cntTrips = count($lead->leadFlightSegments);?>
-                                <?php if ($cntTrips > 1):?>
+                                <?php if ($cntTrips > 1) :?>
                                     <ul class="nav nav-tabs search-filters__tabs">
-                                        <?php foreach ($lead->leadFlightSegments as $idx => $flSegment):?>
-                                            <li<?php if ($idx == 0):?> class="active"<?php endif;?>>
+                                        <?php foreach ($lead->leadFlightSegments as $idx => $flSegment) :?>
+                                            <li<?php if ($idx == 0) :
+                                                ?> class="active"<?php
+                                               endif;?>>
                                                 <a href="#filter-time-<?= $idx?>" data-toggle="tab">
-                                                    <?php if ($cntTrips > 2):?>Trip <?= $idx+1?><?php else:?><?= $tabTtl[$idx]?><?php endif;?>
+                                                    <?php if ($cntTrips > 2) :
+                                                        ?>Trip <?= $idx + 1?><?php
+                                                    else :
+                                                        ?><?= $tabTtl[$idx]?><?php
+                                                    endif;?>
                                                 </a>
                                             </li>
                                         <?php endforeach;?>
@@ -260,8 +267,10 @@ JS;
                                 <?php endif;?>
 
                                 <div class="tab-content search-filters__tab-content">
-                                    <?php foreach ($lead->leadFlightSegments as $idx => $flSegment):?>
-                                        <div class="tab-pane<?php if ($idx == 0):?> active<?php endif;?>" id="filter-time-<?= $idx?>" data-index="<?= $idx?>">
+                                    <?php foreach ($lead->leadFlightSegments as $idx => $flSegment) :?>
+                                        <div class="tab-pane<?php if ($idx == 0) :
+                                            ?> active<?php
+                                                            endif;?>" id="filter-time-<?= $idx?>" data-index="<?= $idx?>">
                                             <div class="search-filters__time-section">
                                                 <h4 class="search-filters__flight-title"><?= $flSegment->origin?> &#8594; <?= $flSegment->destination?></h4>
                                                 <div class="search-filters__time-item takeoff" data-id="landing-time">
@@ -415,7 +424,7 @@ JS;
             $n = 0;
             $groupKeys = [];
         ?>
-        <?php foreach ($result['results'] as $key => $resultItem):?>
+        <?php foreach ($result['results'] as $key => $resultItem) :?>
             <?= $this->render('_search_result_item', ['resultKey' => $key,'result' => $resultItem,'locations' => $locations,'airlines' => $airlines]);?>
             <?php
             $n++;
@@ -424,28 +433,28 @@ JS;
             }
             ?>
         <?php endforeach;?>
-<?php
-$js = <<<JS
+    <?php
+    $js = <<<JS
     
     $('[data-toggle="tooltip"]').tooltip({html:true});
 JS;
-$this->registerJs($js);
+    $this->registerJs($js);
 
-$css = <<<CSS
+    $css = <<<CSS
     .quote__trip { 
         width: 624px;
     }
 CSS;
-$this->registerCss($css);
-?>
+    $this->registerCss($css);
+    ?>
     </div>
-<?php else:?>
-    <?php if (!empty($result['error'])): ?>
+<?php else :?>
+    <?php if (!empty($result['error'])) : ?>
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <pre><?= \yii\helpers\VarDumper::dumpAsString(\yii\helpers\Json::decode($result['error']), 10) ?></pre>
         </div>
 
-       <?php else: ?>
+    <?php else : ?>
     <div class="search-results__wrapper">
         <p>No search results</p>
     </div>

@@ -30,8 +30,7 @@ class MultipleUpdateService
         QCallService $service,
         LeadQcallRepository $qCallRepository,
         LeadFlowRepository $leadFlowRepository
-    )
-    {
+    ) {
         $this->service = $service;
         $this->qCallRepository = $qCallRepository;
         $this->leadFlowRepository = $leadFlowRepository;

@@ -158,14 +158,16 @@ class UserGroup extends ActiveRecord
             NativeEventDispatcher::recordEvent(UserGroupEvents::class, UserGroupEvents::INSERT, [UserGroupEvents::class, 'webHookInsert'], $this->exportData());
             NativeEventDispatcher::trigger(UserGroupEvents::class, UserGroupEvents::INSERT);
         } else {
-
             if (isset($changedAttributes['ug_name']) || isset($changedAttributes['ug_key']) || isset($changedAttributes['ug_disable'])) {
-                NativeEventDispatcher::recordEvent(UserGroupEvents::class, UserGroupEvents::UPDATE,
-					[UserGroupEvents::class, 'webHookUpdate'], $this->exportData());
+                NativeEventDispatcher::recordEvent(
+                    UserGroupEvents::class,
+                    UserGroupEvents::UPDATE,
+                    [UserGroupEvents::class, 'webHookUpdate'],
+                    $this->exportData()
+                );
                 NativeEventDispatcher::trigger(UserGroupEvents::class, UserGroupEvents::UPDATE);
             }
         }
-
     }
 
     /**
@@ -208,9 +210,9 @@ class UserGroup extends ActiveRecord
     /**
      * @return array
      */
-    public static function getList() : array
+    public static function getList(): array
     {
         $data = self::find()->orderBy(['ug_name' => SORT_ASC])->asArray()->all();
-        return ArrayHelper::map($data,'ug_id', 'ug_name');
+        return ArrayHelper::map($data, 'ug_id', 'ug_name');
     }
 }

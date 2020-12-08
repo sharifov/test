@@ -59,7 +59,9 @@ class m200401_093524_add_setting_to_log_cleaner extends Migration
                     'ringing_minutes' => 5,
                     'queue_minutes' => 60,
                     'in_progress_minutes' => 90,
-                ],JSON_THROW_ON_ERROR),
+                ],
+                JSON_THROW_ON_ERROR
+            ),
             's_updated_dt' => date('Y-m-d H:i:s'),
             's_category_id' => $settingCategory ? $settingCategory->sc_id : null,
         ]);

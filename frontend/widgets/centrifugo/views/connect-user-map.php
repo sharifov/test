@@ -1,6 +1,7 @@
 <?php
+
 use yii\helpers\Html;
-use \common\models\Call;
+use common\models\Call;
 use common\models\CallUserAccess;
 
 /**
@@ -28,7 +29,7 @@ $pending = CallUserAccess::STATUS_TYPE_PENDING;
 $accept = CallUserAccess::STATUS_TYPE_ACCEPT;
 $busy = CallUserAccess::STATUS_TYPE_BUSY;
 
-$passChannelsToJs ='["' . implode('", "', $channels) . '"]';
+$passChannelsToJs = '["' . implode('", "', $channels) . '"]';
 
 $js = <<<JS
 let channels = $passChannelsToJs;

@@ -79,7 +79,7 @@ class ApiUserController extends FController
             $model->au_updated_dt = date('Y-m-d H:i:s');
             $model->au_updated_user_id = Yii::$app->user->id;
 
-            if($model->save()) {
+            if ($model->save()) {
                 return $this->redirect(['view', 'id' => $model->au_id]);
             }
         }
@@ -101,18 +101,20 @@ class ApiUserController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post())) {
-
-            if($model->au_api_password) $model->setPassword($model->au_api_password);
-                else unset($model->au_api_password);
+            if ($model->au_api_password) {
+                $model->setPassword($model->au_api_password);
+            } else {
+                unset($model->au_api_password);
+            }
 
                 $model->au_updated_dt = date('Y-m-d H:i:s');
                 $model->au_updated_user_id = Yii::$app->user->id;
 
-                if($model->save()) {
-                    return $this->redirect(['view', 'id' => $model->au_id]);
-                }
+            if ($model->save()) {
+                return $this->redirect(['view', 'id' => $model->au_id]);
+            }
         } else {
-            $model->au_api_password = NULL;
+            $model->au_api_password = null;
         }
 
         return $this->render('update', [

@@ -30,5 +30,4 @@ class LeadRedialViewWidget extends Widget
     {
         return $this->render('lead_redial_view', ['lead' => $this->lead]);
     }
-
 }

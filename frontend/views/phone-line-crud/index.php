@@ -1,10 +1,11 @@
 <?php
 
-use frontend\extensions\DatePicker;
+use common\components\grid\DateTimeColumn;
 use sales\model\phoneLine\phoneLine\entity\PhoneLine;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel \sales\model\phoneLine\phoneLine\entity\search\PhoneLineSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -35,9 +36,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     'attribute' => 'line_project_id'
                 ]),
                 'format' =>  'projectName',
-				'options' => [
-					'width' => '150px'
-				]
+                'options' => [
+                    'width' => '150px'
+                ]
             ],
             [
                 'attribute' => 'line_dep_id',
@@ -46,36 +47,36 @@ $this->params['breadcrumbs'][] = $this->title;
                     'attribute' => 'line_dep_id'
                 ]),
                 'format' =>  'departmentName',
-				'options' => [
-					'width' => '150px'
-				]
+                'options' => [
+                    'width' => '150px'
+                ]
             ],
             'line_language_id',
-			[
-				'attribute' => 'line_personal_user_id',
-				'filter' => \sales\widgets\UserSelect2Widget::widget([
-					'model' => $searchModel,
-					'attribute' => 'line_personal_user_id'
-				]),
-				'format' => 'username',
-				'options' => [
-					'width' => '150px'
-				]
-			],
+            [
+                'attribute' => 'line_personal_user_id',
+                'filter' => \sales\widgets\UserSelect2Widget::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'line_personal_user_id'
+                ]),
+                'format' => 'username',
+                'options' => [
+                    'width' => '150px'
+                ]
+            ],
             'line_uvm_id',
             'line_allow_in:BooleanByLabel',
             'line_allow_out:BooleanByLabel',
             'line_enabled:BooleanByLabel',
-			[
+            [
                 'attribute' => 'line_created_user_id',
                 'filter' => \sales\widgets\UserSelect2Widget::widget([
                     'model' => $searchModel,
                     'attribute' => 'line_created_user_id'
                 ]),
                 'format' => 'username',
-				'options' => [
-					'width' => '150px'
-				]
+                'options' => [
+                    'width' => '150px'
+                ]
             ],
             [
                 'attribute' => 'line_updated_user_id',
@@ -88,45 +89,56 @@ $this->params['breadcrumbs'][] = $this->title;
                     'width' => '150px'
                 ]
             ],
-			[
-				'attribute' => 'line_created_dt',
-				'format' => 'byUserDateTime',
-				'filter' => DatePicker::widget([
-					'model' => $searchModel,
-					'attribute' => 'line_created_dt',
-					'clientOptions' => [
-						'autoclose' => true,
-						'format' => 'yyyy-mm-dd',
-					],
-					'options' => [
-						'autocomplete' => 'off',
-						'placeholder' =>'Choose Date',
+            /*[
+                'attribute' => 'line_created_dt',
+                'format' => 'byUserDateTime',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'line_created_dt',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' =>'Choose Date',
 
-					],
-				]),
-				'options' => [
-					'width' => '150px'
-				]
-			],
+                    ],
+                ]),
+                'options' => [
+                    'width' => '150px'
+                ]
+            ],*/
+
             [
-				'attribute' => 'line_updated_dt',
-				'format' => 'byUserDateTime',
-				'filter' => DatePicker::widget([
-					'model' => $searchModel,
-					'attribute' => 'line_updated_dt',
-					'clientOptions' => [
-						'autoclose' => true,
-						'format' => 'yyyy-mm-dd',
-					],
-					'options' => [
-						'autocomplete' => 'off',
-						'placeholder' =>'Choose Date'
-					],
-				]),
-				'options' => [
-					'width' => '150px'
-				]
-			],
+                'class' => DateTimeColumn::class,
+                'attribute' => 'line_created_dt'
+            ],
+
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'line_updated_dt'
+            ],
+
+            /*[
+                'attribute' => 'line_updated_dt',
+                'format' => 'byUserDateTime',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'line_updated_dt',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' =>'Choose Date'
+                    ],
+                ]),
+                'options' => [
+                    'width' => '150px'
+                ]
+            ],*/
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

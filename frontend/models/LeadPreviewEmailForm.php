@@ -1,4 +1,5 @@
 <?php
+
 namespace frontend\models;
 
 use common\models\EmailTemplateType;
@@ -52,7 +53,7 @@ class LeadPreviewEmailForm extends Model
     /**
      * @return array
      */
-    public function rules() : array
+    public function rules(): array
     {
         return [
             [['e_lead_id', 'e_email_from', 'e_email_to', 'e_email_message', 'e_email_subject'], 'required'],
@@ -83,7 +84,7 @@ class LeadPreviewEmailForm extends Model
     /**
      * @return array
      */
-    public function attributeLabels() : array
+    public function attributeLabels(): array
     {
         return [
             'e_lead_id'         => 'Lead Id',
@@ -98,5 +99,4 @@ class LeadPreviewEmailForm extends Model
             'e_user_id'         => 'Agent ID',
         ];
     }
-
 }

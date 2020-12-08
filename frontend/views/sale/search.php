@@ -1,4 +1,5 @@
 <?php
+
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use yii\grid\GridView;
@@ -58,7 +59,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Project',
                 'value' => static function ($model) {
-                    return $model['project'] ? '<span class="badge badge-info">'.Html::encode($model['project']).'</span>': '-';
+                    return $model['project'] ? '<span class="badge badge-info">' . Html::encode($model['project']) . '</span>' : '-';
                 },
                 'format' => 'raw'
             ],
@@ -95,9 +96,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => 'Trips',
                 'value' => static function ($model) {
                     $tripArr = [];
-                    if(isset($model['requestDetail']['trips'])) {
+                    if (isset($model['requestDetail']['trips'])) {
                         foreach ($model['requestDetail']['trips'] as $trip) {
-                            $tripArr[] = '<span class="label label-default">'.$trip['from'] . '</span> -> <span class="label label-default">' . $trip['to'] . '</span> ['.$trip['departure'].']';
+                            $tripArr[] = '<span class="label label-default">' . $trip['from'] . '</span> -> <span class="label label-default">' . $trip['to'] . '</span> [' . $trip['departure'] . ']';
                         }
                     }
                     return implode('<br>', $tripArr);
@@ -115,7 +116,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Passengers',
                 'value' => static function ($model) {
-                    return isset($model['requestDetail']['passengersCnt']) ? $model['requestDetail']['passengersCnt']: '-';
+                    return isset($model['requestDetail']['passengersCnt']) ? $model['requestDetail']['passengersCnt'] : '-';
                 },
             ],
 

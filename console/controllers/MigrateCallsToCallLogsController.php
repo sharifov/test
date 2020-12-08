@@ -409,7 +409,6 @@ class MigrateCallsToCallLogsController extends Controller
         }
 
         $this->createCallLogs($call, $log, [], []);
-
     }
 
     private function outParentCalls($call, array &$log): void
@@ -474,7 +473,7 @@ class MigrateCallsToCallLogsController extends Controller
         } else {
             $callData['cl_call_created_dt'] = date('Y-m-d H:i:s', (strtotime($call['last_child_c_created_dt']) + $call['last_child_c_call_duration']));
         }
-        $callData['cl_call_finished_dt'] = date('Y-m-d H:i:s',(strtotime($call['c_created_dt']) + $call['c_call_duration']));
+        $callData['cl_call_finished_dt'] = date('Y-m-d H:i:s', (strtotime($call['c_created_dt']) + $call['c_call_duration']));
         $callData['cl_duration'] = strtotime($callData['cl_call_finished_dt']) - strtotime($callData['cl_call_created_dt']);
         $callData['cl_category_id'] = Call::SOURCE_GENERAL_LINE;
 

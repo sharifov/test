@@ -38,31 +38,35 @@ class CasesRepository extends Repository
      */
     public function findByClient(int $clientId): Cases
     {
-        if ($case = Cases::find()
+        if (
+            $case = Cases::find()
             ->andWhere(['cs_client_id' => $clientId])
             ->andWhere(['<>', CasesStatus::STATUS_TRASH, 'cs_status'])
             ->andWhere(['<>', CasesStatus::STATUS_SOLVED, 'cs_status'])
             ->orderBy(['cs_id' => SORT_DESC])
-            ->limit(1)->one()) {
+            ->limit(1)->one()
+        ) {
             return $case;
         }
         throw new NotFoundException('Case is not found');
     }
 
-	/**
-	 * @param int $clientId
-	 * @return Cases
-	 */
+    /**
+     * @param int $clientId
+     * @return Cases
+     */
     public function findByClientWithAnyStatus(int $clientId): Cases
-	{
-		if ($case = Cases::find()
-			->andWhere(['cs_client_id' => $clientId])
-			->orderBy(['cs_id' => SORT_DESC])
-			->limit(1)->one()) {
-			return $case;
-		}
-		throw new NotFoundException('Case is not found');
-	}
+    {
+        if (
+            $case = Cases::find()
+            ->andWhere(['cs_client_id' => $clientId])
+            ->orderBy(['cs_id' => SORT_DESC])
+            ->limit(1)->one()
+        ) {
+            return $case;
+        }
+        throw new NotFoundException('Case is not found');
+    }
 
     /**
      * @param int $clientId
@@ -72,11 +76,13 @@ class CasesRepository extends Repository
      */
     public function findByClientProjectDepartment(int $clientId, int $projectId, ?int $departmentId): Cases
     {
-        if ($case = Cases::find()
+        if (
+            $case = Cases::find()
             ->andWhere(['cs_client_id' => $clientId, 'cs_project_id' => $projectId, 'cs_dep_id' => $departmentId])
             ->andWhere(['NOT IN', 'cs_status', [CasesStatus::STATUS_TRASH, CasesStatus::STATUS_SOLVED]])
             ->orderBy(['cs_id' => SORT_DESC])
-            ->limit(1)->one()) {
+            ->limit(1)->one()
+        ) {
             return $case;
         }
         throw new NotFoundException('Case is not found');
@@ -150,18 +156,20 @@ class CasesRepository extends Repository
         $this->eventDispatcher->dispatchAll($case->releaseEvents());
     }
 
-	/**
-	 * @param string $phone
-	 * @return array
-	 */
-	public function findOpenCasesByPhone(string $phone)
-	{
-		if ($cases = Cases::find()
-			->join('join', 'client_phone', 'cs_client_id = client_id and phone = :phone', ['phone' => $phone])
-			->where(['cs_status' => [CasesStatus::STATUS_PENDING, CasesStatus::STATUS_PROCESSING, CasesStatus::STATUS_FOLLOW_UP]])
-			->all()) {
-			return $cases;
-		}
-		throw new NotFoundException('Cases is not found');
-	}
+    /**
+     * @param string $phone
+     * @return array
+     */
+    public function findOpenCasesByPhone(string $phone)
+    {
+        if (
+            $cases = Cases::find()
+            ->join('join', 'client_phone', 'cs_client_id = client_id and phone = :phone', ['phone' => $phone])
+            ->where(['cs_status' => [CasesStatus::STATUS_PENDING, CasesStatus::STATUS_PROCESSING, CasesStatus::STATUS_FOLLOW_UP]])
+            ->all()
+        ) {
+            return $cases;
+        }
+        throw new NotFoundException('Cases is not found');
+    }
 }

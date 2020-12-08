@@ -2,7 +2,6 @@
 
 namespace common\components;
 
-
 use yii\base\BaseObject;
 use yii\helpers\VarDumper;
 use Yii;
@@ -14,10 +13,8 @@ use yii\httpclient\CurlTransport;
 use yii\httpclient\Request;
 use yii\httpclient\Response;
 
-
 class CheckPhoneNumberJob extends BaseObject implements \yii\queue\JobInterface
 {
-
     public $client_id = 0;
 
     public $client_phone_id = 0;
@@ -32,7 +29,7 @@ class CheckPhoneNumberJob extends BaseObject implements \yii\queue\JobInterface
     {
         $debug = false;
         //\Yii::info(VarDumper::dumpAsString(['client_id' =>  $this->client_id , 'client_phone_id' => $this->client_phone_id]), 'info\CheckPhoneNumberJob:execute:34');
-        if($debug) {
+        if ($debug) {
             echo 'Start debug' . PHP_EOL;
         }
 
@@ -41,30 +38,33 @@ class CheckPhoneNumberJob extends BaseObject implements \yii\queue\JobInterface
             'message' => 'init checking',
         ];
         try {
+            if ($debug) {
+                echo 'client_id: ' . $this->client_id . ' client_phone_id: ' . $this->client_phone_id . PHP_EOL;
+            }
 
-            if($debug) { echo 'client_id: ' . $this->client_id . ' client_phone_id: ' . $this->client_phone_id . PHP_EOL;  }
-
-            if(!$this->client_id || !$this->client_phone_id ) {
+            if (!$this->client_id || !$this->client_phone_id) {
                 throw new \Exception('Error CheckPhoneNumberJob: (client_id < 1 || client_phone_id < 1)');
             }
             $clientPhone = ClientPhone::findOne(['client_id' => $this->client_id, 'id' => $this->client_phone_id ]);
-            if(!$clientPhone ) {
-                throw new \Exception('Error CheckPhoneNumberJob: ClientPhone not found in db (client_id: '.$this->client_id.', phone_id: '.$this->client_phone_id.')');
+            if (!$clientPhone) {
+                throw new \Exception('Error CheckPhoneNumberJob: ClientPhone not found in db (client_id: ' . $this->client_id . ', phone_id: ' . $this->client_phone_id . ')');
             }
 
-            if(strlen($clientPhone->phone) < 8 ) {
-                throw new \Exception('Error CheckPhoneNumberJob: ClientPhone is < 8 ('.$clientPhone->phone.', clientId: '.$clientPhone->client_id.')');
+            if (strlen($clientPhone->phone) < 8) {
+                throw new \Exception('Error CheckPhoneNumberJob: ClientPhone is < 8 (' . $clientPhone->phone . ', clientId: ' . $clientPhone->client_id . ')');
             }
 
-            if($debug) { echo 'clientPhone->validate_dt: ' . $clientPhone->validate_dt . PHP_EOL;  }
+            if ($debug) {
+                echo 'clientPhone->validate_dt: ' . $clientPhone->validate_dt . PHP_EOL;
+            }
 
             /*if($clientPhone->validate_dt !== null) {
                  return true;
             }*/
 
             $data = [];
-            $url = Yii::$app->communication->url .'phone/index/?phone=' . $clientPhone->phone;
-            if($debug) {
+            $url = Yii::$app->communication->url . 'phone/index/?phone=' . $clientPhone->phone;
+            if ($debug) {
                 echo $url . PHP_EOL;
             }
             $client = new Client();
@@ -76,34 +76,36 @@ class CheckPhoneNumberJob extends BaseObject implements \yii\queue\JobInterface
                     CURLOPT_CONNECTTIMEOUT => 30,
                     CURLOPT_TIMEOUT => 30,
                 ]);
-                //->setData($data);
+            //->setData($data);
 
             $response = $request->send();
             //print_r($response->data); exit;
 
-            if($debug) {
-                echo "isOk: ". $response->isOk . PHP_EOL;
+            if ($debug) {
+                echo "isOk: " . $response->isOk . PHP_EOL;
             }
 
             if ($response->isOk) {
                 //\Yii::info(VarDumper::dumpAsString(['client_phone' => $clientPhone->phone, 'response_data' => $response->data]), 'info\CheckPhoneNumberJob:execute:84');
-                if(!isset($response->data['data']['response'])) {
+                if (!isset($response->data['data']['response'])) {
                     throw new \Exception('Error CheckPhoneNumberJob: Not found in response array data key [data][response] :: ' . VarDumper::dumpAsString(['client_phone' => $clientPhone->phone, 'response_data' => $response->data]));
                 }
             } else {
-                throw new \Exception('Error CheckPhoneNumberJob: ClientPhone error response from communication: '. $response->content);
+                throw new \Exception('Error CheckPhoneNumberJob: ClientPhone error response from communication: ' . $response->content);
             }
 
             $is_error = false;
-            if(isset($response->data['data']['response'], $response->data['data']['response']['numbers'])
-                && count($response->data['data']['response']['numbers'])) {
-                foreach ($response->data['data']['response']['numbers'] AS $phoneNumber => $phoneData) {
-                    if(isset($phoneData['internationalNumber'], $phoneData['numberType'])) {
+            if (
+                isset($response->data['data']['response'], $response->data['data']['response']['numbers'])
+                && count($response->data['data']['response']['numbers'])
+            ) {
+                foreach ($response->data['data']['response']['numbers'] as $phoneNumber => $phoneData) {
+                    if (isset($phoneData['internationalNumber'], $phoneData['numberType'])) {
                         $phone = str_replace(' ', '', $phoneNumber);
-                        if($phone === $clientPhone->phone) {
+                        if ($phone === $clientPhone->phone) {
                             //$clientPhone->is_sms = ($phoneData['numberType'] == 'mobile') ? 1 : 0;
                             //$clientPhone->validate_dt = date("Y-m-d H:i:s");
-                            if(!count($phoneData['errors'])) {
+                            if (!count($phoneData['errors'])) {
                                 $clientPhone->updateAttributes([
                                     'is_sms' => ($phoneData['numberType'] == 'mobile') ? 1 : 0,
                                     'validate_dt' => date('Y-m-d H:i:s'),
@@ -115,12 +117,11 @@ class CheckPhoneNumberJob extends BaseObject implements \yii\queue\JobInterface
             } else {
                 $is_error = true;
                 throw new \Exception('Error CheckPhoneNumberJob: Not found in response array data key [data][response][numbers] :: ' . VarDumper::dumpAsString(['client_phone' => $clientPhone->phone, 'response_data' => $response->data]));
-             }
+            }
 
-            if(!$is_error) return true;
-
-
-
+            if (!$is_error) {
+                return true;
+            }
         } catch (\Throwable $e) {
             $out['status'] = 'error';
             $out['message'] = $e->getMessage() . ': ' . $e->getFile() . ' : ' . $e->getLine();

@@ -19,7 +19,8 @@ class FlightQuotePaxPriceSearch extends FlightQuotePaxPrice
         return [
             [['qpp_id', 'qpp_flight_quote_id', 'qpp_flight_pax_code_id', 'qpp_cnt'], 'integer'],
             [['qpp_fare', 'qpp_tax', 'qpp_system_mark_up', 'qpp_agent_mark_up', 'qpp_origin_fare', 'qpp_origin_tax', 'qpp_client_fare', 'qpp_client_tax'], 'number'],
-            [['qpp_origin_currency', 'qpp_client_currency', 'qpp_created_dt', 'qpp_updated_dt'], 'safe'],
+            [['qpp_origin_currency', 'qpp_client_currency'], 'safe'],
+            [['qpp_created_dt', 'qpp_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -47,7 +48,7 @@ class FlightQuotePaxPriceSearch extends FlightQuotePaxPrice
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['qpp_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['qpp_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ]
@@ -75,8 +76,8 @@ class FlightQuotePaxPriceSearch extends FlightQuotePaxPrice
             'qpp_client_fare' => $this->qpp_client_fare,
             'qpp_client_tax' => $this->qpp_client_tax,
             'qpp_cnt' => $this->qpp_cnt,
-            'qpp_created_dt' => $this->qpp_created_dt,
-            'qpp_updated_dt' => $this->qpp_updated_dt,
+            'DATE(qpp_created_dt)' => $this->qpp_created_dt,
+            'DATE(qpp_updated_dt)' => $this->qpp_updated_dt,
         ]);
 
         $query->andFilterWhere(['like', 'qpp_origin_currency', $this->qpp_origin_currency])

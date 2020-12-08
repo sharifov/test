@@ -65,7 +65,6 @@ class m190619_110832_create_roles_for_manage_lead extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     /**
@@ -93,5 +92,4 @@ class m190619_110832_create_roles_for_manage_lead extends Migration
             Yii::$app->cache->flush();
         }
     }
-
 }

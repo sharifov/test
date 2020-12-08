@@ -1,8 +1,6 @@
 <?php
 
-
 namespace console\controllers;
-
 
 use common\models\Lead;
 use sales\temp\LeadFlowUpdate;
@@ -79,5 +77,4 @@ class UpdateLeadFlowController extends Controller
         echo 'Done: ' . (time() - $timer1) . ' sec' . PHP_EOL;
         echo 'All Duration: ' . (time() - $start) . PHP_EOL;
     }
-
 }

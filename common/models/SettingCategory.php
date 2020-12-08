@@ -23,7 +23,7 @@ class SettingCategory extends ActiveRecord
     /**
      * @return string
      */
-    public static function tableName():string
+    public static function tableName(): string
     {
         return 'setting_category';
     }
@@ -31,7 +31,7 @@ class SettingCategory extends ActiveRecord
     /**
      * @return array
      */
-    public function rules():array
+    public function rules(): array
     {
         return [
             [['sc_enabled'], 'boolean'],
@@ -45,7 +45,7 @@ class SettingCategory extends ActiveRecord
     /**
      * @return array
      */
-    public function attributeLabels():array
+    public function attributeLabels(): array
     {
         return [
             'sc_id' => 'ID',

@@ -28,5 +28,4 @@ class m181129_133248_add_columns_tbl_email extends Migration
         $this->dropColumn('{{%email}}', 'e_ref_message_id');
         $this->dropColumn('{{%email}}', 'e_message_id');
     }
-
 }

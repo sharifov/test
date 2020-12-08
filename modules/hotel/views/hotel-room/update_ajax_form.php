@@ -101,7 +101,7 @@ $pjaxId = 'pjax-hotel-room-form';
                         'style' => 'max-width: 130px;',
                     ],
                     'options' => [
-						'class' => 'form-control input_hrp_age',
+                        'class' => 'form-control input_hrp_age',
                     ],
                 ],
 
@@ -119,7 +119,7 @@ $pjaxId = 'pjax-hotel-room-form';
                         ],
                         'options' => [
                             'autocomplete' => 'off',
-                            'placeholder' =>'Choose Date'
+                            'placeholder' => 'Choose Date'
                         ],
                         'clientEvents' => [
                             'change' => 'function (e, elem) {

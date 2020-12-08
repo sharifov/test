@@ -1,7 +1,7 @@
 <?php
 
 use common\models\Employee;
-use dosamigos\datepicker\DatePicker;
+use common\components\grid\DateTimeColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -28,7 +28,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
 
-if($user->isAdmin() || $user->isQa()) {
+if ($user->isAdmin() || $user->isQa()) {
     $userList = \common\models\Employee::getList();
     $projectList = \common\models\Project::getList();
 } else {
@@ -55,20 +55,20 @@ if($user->isAdmin() || $user->isQa()) {
                     <div class="col-md-3">
                         <?php
                         echo  \kartik\daterange\DateRangePicker::widget([
-                            'model'=> $searchModel,
+                            'model' => $searchModel,
                             'attribute' => 'date_range',
-                            'useWithAddon'=>true,
-                            'presetDropdown'=>true,
-                            'hideInput'=>true,
-                            'convertFormat'=>true,
+                            'useWithAddon' => true,
+                            'presetDropdown' => true,
+                            'hideInput' => true,
+                            'convertFormat' => true,
                             'startAttribute' => 'datetime_start',
                             'endAttribute' => 'datetime_end',
-                            'pluginOptions'=>[
-                                'timePicker'=> true,
-                                'timePickerIncrement'=>1,
-                                'timePicker24Hour'=>true,
-                                'locale'=>[
-                                    'format'=>'Y-m-d H:i',
+                            'pluginOptions' => [
+                                'timePicker' => true,
+                                'timePickerIncrement' => 1,
+                                'timePicker24Hour' => true,
+                                'locale' => [
+                                    'format' => 'Y-m-d H:i',
                                     'separator' => ' - '
                                 ]
                             ]
@@ -78,7 +78,7 @@ if($user->isAdmin() || $user->isQa()) {
 
                     <div class="form-group">
                         <?= Html::submitButton('<i class="fa fa-search"></i> Show result', ['class' => 'btn btn-success']) ?>
-                        <?php //= Html::resetButton('Reset', ['class' => 'btn btn-default']) ?>
+                        <?php //= Html::resetButton('Reset', ['class' => 'btn btn-default'])?>
                     </div>
 
                     <?php ActiveForm::end(); ?>
@@ -149,12 +149,10 @@ if($user->isAdmin() || $user->isQa()) {
                         [
                             'label' => 'Type / Status',
                             'value' => static function ($model) {
-
                                 $type = '';
                                 $statusTitle = '';
 
-                                if($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_VOICE) {
-
+                                if ($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_VOICE) {
                                     $call = \common\models\Call::findOne($model['id']);
                                     if ($call) {
                                         $type = $call->getCallTypeName();
@@ -166,11 +164,9 @@ if($user->isAdmin() || $user->isQa()) {
                                             $type = 'Outgoing';
                                         }*/
                                     }
-                                } elseif($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_SMS) {
-
+                                } elseif ($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_SMS) {
                                     $sms = \common\models\Sms::findOne($model['id']);
                                     if ($sms) {
-
                                         $type = $sms->getTypeName();
                                         $statusTitle = $sms->getStatusName(); //'INIT';
 
@@ -181,13 +177,19 @@ if($user->isAdmin() || $user->isQa()) {
                                         }*/
                                     }
                                 }
-                                return $type . ' / '.$statusTitle.'';
+                                return $type . ' / ' . $statusTitle . '';
                             },
                             'format' => 'raw',
                             //'filter' => $user->isAdmin() ? \common\models\UserGroup::getList() : $user->getUserGroupList()
                         ],
 
                         [
+                            'label' => 'Created Date',
+                            'class' => DateTimeColumn::class,
+                            'attribute' => 'created_dt'
+                        ],
+
+                        /*[
                             'label' => 'Created Date',
                             'attribute' => 'created_dt',
                             'value' => static function ($model) {
@@ -202,30 +204,27 @@ if($user->isAdmin() || $user->isQa()) {
                                     'format' => 'yyyy-mm-dd'
                                 ]
                             ]),
-                        ],
+                        ],*/
 
                         [
                             'label' => 'Agent Phone',
                             'value' => static function ($model) {
                                 $phone = '-';
-                                if($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_VOICE) {
-
+                                if ($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_VOICE) {
                                     $call = \common\models\Call::findOne($model['id']);
                                     if ($call) {
-                                        if($call->c_call_status == \common\models\Call::CALL_TYPE_IN) {
+                                        if ($call->c_call_status == \common\models\Call::CALL_TYPE_IN) {
                                             $phone = $call->c_from;
                                         } else {
                                             $phone = $call->c_to;
                                         }
                                     }
-
-                                } elseif($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_SMS) {
-
+                                } elseif ($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_SMS) {
                                     $sms = \common\models\Sms::findOne($model['id']);
                                     if ($sms) {
                                         if ($sms->s_type_id == \common\models\Sms::TYPE_INBOX) {
                                             $phone = $sms->s_phone_from;
-                                        } else if ($sms->s_type_id == \common\models\Sms::TYPE_OUTBOX) {
+                                        } elseif ($sms->s_type_id == \common\models\Sms::TYPE_OUTBOX) {
                                             $phone = $sms->s_phone_to;
                                         }
                                     }
@@ -240,24 +239,19 @@ if($user->isAdmin() || $user->isQa()) {
                             'label' => 'Agent Name',
                             'attribute' => 'created_user_id',
                             'value' => static function ($model) {
-
                                 $agent = '-';
 
-                                if($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_VOICE) {
-
+                                if ($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_VOICE) {
                                     $call = \common\models\Call::findOne($model['id']);
                                     if ($call) {
-                                        if($call->cCreatedUser) {
+                                        if ($call->cCreatedUser) {
                                             $agent = $call->cCreatedUser->username;
                                         }
                                     }
-                                }
-
-                                elseif($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_SMS) {
-
+                                } elseif ($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_SMS) {
                                     $sms = \common\models\Sms::findOne($model['id']);
                                     if ($sms) {
-                                        if($sms->sCreatedUser) {
+                                        if ($sms->sCreatedUser) {
                                             $agent = $sms->sCreatedUser->username;
                                         }
                                     }
@@ -275,28 +269,24 @@ if($user->isAdmin() || $user->isQa()) {
                             'value' => static function ($model) {
                                 $user = null;
 
-                                if($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_VOICE) {
-
+                                if ($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_VOICE) {
                                     $call = \common\models\Call::findOne($model['id']);
                                     if ($call) {
-                                        if($call->cCreatedUser) {
+                                        if ($call->cCreatedUser) {
                                             $user = $call->cCreatedUser;
                                         }
                                     }
-                                }
-
-                                elseif($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_SMS) {
-
+                                } elseif ($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_SMS) {
                                     $sms = \common\models\Sms::findOne($model['id']);
                                     if ($sms) {
-                                        if($sms->sCreatedUser) {
+                                        if ($sms->sCreatedUser) {
                                             $user = $sms->sCreatedUser;
                                         }
                                     }
                                 }
 
 
-                                if($user) {
+                                if ($user) {
                                     $groups = $user->getUserGroupList();
                                     $groupsValueArr = [];
 
@@ -321,25 +311,21 @@ if($user->isAdmin() || $user->isQa()) {
                                 $phone = '-';
 
 
-                                if($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_VOICE) {
-
+                                if ($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_VOICE) {
                                     $call = \common\models\Call::findOne($model['id']);
                                     if ($call) {
-                                        if($call->c_call_status == \common\models\Call::CALL_TYPE_IN) {
+                                        if ($call->c_call_status == \common\models\Call::CALL_TYPE_IN) {
                                             $phone = $call->c_to;
                                         } else {
                                             $phone = $call->c_from;
                                         }
                                     }
-                                }
-
-                                elseif($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_SMS) {
-
+                                } elseif ($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_SMS) {
                                     $sms = \common\models\Sms::findOne($model['id']);
                                     if ($sms) {
                                         if ($sms->s_type_id == \common\models\Sms::TYPE_INBOX) {
                                             $phone = $sms->s_phone_to;
-                                        } else if ($sms->s_type_id == \common\models\Sms::TYPE_OUTBOX) {
+                                        } elseif ($sms->s_type_id == \common\models\Sms::TYPE_OUTBOX) {
                                             $phone = $sms->s_phone_from;
                                         }
                                     }
@@ -367,32 +353,27 @@ if($user->isAdmin() || $user->isQa()) {
                             'value' => static function ($model) {
                                 $project = null;
 
-                                if($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_VOICE) {
-
+                                if ($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_VOICE) {
                                     $call = \common\models\Call::findOne($model['id']);
                                     if ($call) {
-                                        if($call->cProject) {
+                                        if ($call->cProject) {
                                             $project = $call->cProject;
                                         }
                                     }
-                                }
-
-                                elseif($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_SMS) {
-
+                                } elseif ($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_SMS) {
                                     $sms = \common\models\Sms::findOne($model['id']);
                                     if ($sms) {
-                                        if($sms->sProject) {
+                                        if ($sms->sProject) {
                                             $project = $sms->sProject;
                                         }
                                     }
                                 }
 
-                                if($project) {
+                                if ($project) {
                                     return $project->name;
                                 } else {
                                     return '-';
                                 }
-
                             },
                             'filter' => $projectList
                             //'format' => 'raw',
@@ -401,22 +382,19 @@ if($user->isAdmin() || $user->isQa()) {
                         [
                             'label' => 'Length',
                             'value' => static function ($model) {
-
                                 $duration = '-';
 
-                                if($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_VOICE) {
-
+                                if ($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_VOICE) {
                                     $call = \common\models\Call::findOne($model['id']);
                                     if ($call) {
-                                        if($call->c_call_duration) {
+                                        if ($call->c_call_duration) {
                                             $duration = Yii::$app->formatter->asDuration($call->c_call_duration);
                                         }
                                     }
-                                } elseif($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_SMS) {
-
+                                } elseif ($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_SMS) {
                                     $sms = \common\models\Sms::findOne($model['id']);
                                     if ($sms) {
-                                        if($sms->s_sms_text) {
+                                        if ($sms->s_sms_text) {
                                             $duration = mb_strlen($sms->s_sms_text);
                                         }
                                     }
@@ -429,18 +407,16 @@ if($user->isAdmin() || $user->isQa()) {
                         [
                             'label' => 'View',
                             'value' => static function ($model) {
-
                                 $view = '-';
 
-                                if($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_VOICE) {
+                                if ($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_VOICE) {
                                     $call = \common\models\Call::findOne($model['id']);
                                     if ($call && $call->recordingUrl) {
-                                        $view =  '<audio controls="controls" controlsList="nodownload" style="width: 300px; height: 25px"><source src="'.$call->recordingUrl.'" type="audio/mpeg"> </audio>';
+                                        $view =  '<audio controls="controls" controlsList="nodownload" style="width: 300px; height: 25px"><source src="' . $call->recordingUrl . '" type="audio/mpeg"> </audio>';
                                     }
-                                } else if($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_SMS) {
+                                } elseif ($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_SMS) {
                                     $sms = \common\models\Sms::findOne($model['id']);
                                     if ($sms) {
-
                                         $view =  Html::button('<i class="fa fa-search"></i> View', [
 
                                             'class' => 'btn btn-xs btn-info view_sms',
@@ -479,7 +455,7 @@ if($user->isAdmin() || $user->isQa()) {
 
                     ]
                 ])
-                ?>
+?>
 
 
             </div>
@@ -506,4 +482,3 @@ $js = <<<JS
 JS;
 
 $this->registerJs($js);
-

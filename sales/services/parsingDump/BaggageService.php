@@ -2,8 +2,6 @@
 
 namespace sales\services\parsingDump;
 
-
-
 use common\models\Airports;
 use common\models\QuotePrice;
 use sales\services\parsingDump\lib\ParsingDump;
@@ -17,10 +15,10 @@ class BaggageService
     public string $gds;
     public array $baggageFromDump;
 
-    public CONST TYPE_FREE = 'free';
-    public CONST TYPE_PAID = 'paid';
+    public const TYPE_FREE = 'free';
+    public const TYPE_PAID = 'paid';
 
-    public CONST TYPE_LIST = [
+    public const TYPE_LIST = [
         self::TYPE_FREE => 'Free',
         self::TYPE_PAID => 'Paid'
     ];
@@ -29,9 +27,9 @@ class BaggageService
      * @param string $gds
      */
     public function __construct(string $gds)
-	{
-		$this->gds = ParsingDump::setGdsForParsing($gds);
-	}
+    {
+        $this->gds = ParsingDump::setGdsForParsing($gds);
+    }
 
     /**
      * @param $dump
@@ -57,7 +55,6 @@ class BaggageService
     {
         foreach ($segments as $key => $segment) {
             if ($baggageSource = $this->searchByIata($segment)) {
-
                 $baggage = [];
 
                 if (!empty($baggageSource['paid_baggage'])) {

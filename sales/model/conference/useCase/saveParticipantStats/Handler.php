@@ -34,7 +34,8 @@ class Handler
                     'error' => $e->getMessage(),
                     'message' => 'Aggregation error',
                 ]),
-                'saveParticipantStats');
+                'saveParticipantStats'
+            );
             return;
         }
 

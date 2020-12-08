@@ -22,5 +22,4 @@ class m181108_141334_alter_quote_add_sfp extends Migration
     {
         $this->dropColumn('{{%quotes}}', 'service_fee_percent');
     }
-
 }

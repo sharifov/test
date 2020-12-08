@@ -62,7 +62,7 @@ class SmsController extends FController
         $searchModel = new SmsSearch();
 
         $params = Yii::$app->request->queryParams;
-        if(Yii::$app->user->identity->canRole('supervision')) {
+        if (Yii::$app->user->identity->canRole('supervision')) {
             $params['SmsSearch']['supervision_id'] = Yii::$app->user->id;
         }
 
@@ -131,7 +131,7 @@ class SmsController extends FController
         $model = $this->findModel($id);
         $this->checkAccess($model);
 
-        if($model->s_is_new) {
+        if ($model->s_is_new) {
             $model->s_read_dt = date('Y-m-d H:i:s');
             $model->s_is_new = false;
             $model->save();
@@ -152,10 +152,9 @@ class SmsController extends FController
         $model = new Sms();
 
         if ($model->load(Yii::$app->request->post())) {
-
 //            $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $model->s_phone_from])->limit(1)->one();
             $upp = UserProjectParams::find()->byPhone($model->s_phone_from, false)->limit(1)->one();
-            if($upp && $upp->upp_project_id) {
+            if ($upp && $upp->upp_project_id) {
                 $model->s_project_id = $upp->upp_project_id;
             } else {
                 $model->s_project_id = null;
@@ -166,18 +165,17 @@ class SmsController extends FController
             $model->s_status_id = Sms::STATUS_PROCESS;
             $model->s_type_id = Sms::TYPE_OUTBOX;
 
-            if($model->save()) {
+            if ($model->save()) {
                 $smsResponse = $model->sendSms();
 
-                if(isset($smsResponse['error']) && $smsResponse['error']) {
-                    Yii::$app->session->setFlash('danger', 'Error: <strong>SMS Message</strong> has not been sent to <strong>'.$model->s_phone_to.'</strong>');
-                    Yii::error('Error: SMS Message has not been sent to '.$model->s_phone_to."\r\n ".$smsResponse['error'], 'SmsController:create:Sms:sendSms');
-                    $model->addError('s_sms_text', 'Error: SMS Message has not been sent to '.$model->s_phone_to.".\r\n ".$smsResponse['error']);
+                if (isset($smsResponse['error']) && $smsResponse['error']) {
+                    Yii::$app->session->setFlash('danger', 'Error: <strong>SMS Message</strong> has not been sent to <strong>' . $model->s_phone_to . '</strong>');
+                    Yii::error('Error: SMS Message has not been sent to ' . $model->s_phone_to . "\r\n " . $smsResponse['error'], 'SmsController:create:Sms:sendSms');
+                    $model->addError('s_sms_text', 'Error: SMS Message has not been sent to ' . $model->s_phone_to . ".\r\n " . $smsResponse['error']);
                 } else {
-                    Yii::$app->session->setFlash('success', '<strong>SMS Message</strong> has been successfully sent to <strong>'.$model->s_phone_to.'</strong>');
+                    Yii::$app->session->setFlash('success', '<strong>SMS Message</strong> has been successfully sent to <strong>' . $model->s_phone_to . '</strong>');
                     return $this->redirect(['view2', 'id' => $model->s_id]);
                 }
-
             }
         }
 
@@ -202,10 +200,9 @@ class SmsController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post())) {
-
 //            $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $model->s_phone_from])->limit(1)->one();
             $upp = UserProjectParams::find()->byPhone($model->s_phone_from, false)->limit(1)->one();
-            if($upp && $upp->upp_project_id) {
+            if ($upp && $upp->upp_project_id) {
                 $model->s_project_id = $upp->upp_project_id;
             } else {
                 $model->s_project_id = null;
@@ -214,7 +211,7 @@ class SmsController extends FController
             $model->s_updated_user_id = Yii::$app->user->id;
             $model->s_updated_dt = date('Y-m-d H:i:s');
 
-            if($model->save()) {
+            if ($model->save()) {
                 return $this->redirect(['view', 'id' => $model->s_id]);
             }
         }
@@ -305,7 +302,7 @@ class SmsController extends FController
      * @param Sms $model
      * @throws ForbiddenHttpException
      */
-    protected function checkAccess(Sms $model) : void
+    protected function checkAccess(Sms $model): void
     {
         $phoneList = [];
 
@@ -315,7 +312,7 @@ class SmsController extends FController
 //        $access = UserProjectParams::find()->where(['upp_user_id' => Yii::$app->user->id])->andWhere(['upp_tw_phone_number' => $phoneList])->exists();
         $access = UserProjectParams::find()->byUserId(Yii::$app->user->id)->byPhone($phoneList, false)->exists();
 
-        if(!$access) {
+        if (!$access) {
             throw new ForbiddenHttpException('Access denied for this SMS. Check User Project Params phones');
         }
     }
@@ -363,9 +360,9 @@ class SmsController extends FController
             $data = $com->smsGetMessages($filter);
 
             if (isset($data['data'], $data['data']['sms']) && count($data['data']['sms'])) {
-                foreach ($data['data']['sms'] AS $key => $smsItem) {
+                foreach ($data['data']['sms'] as $key => $smsItem) {
                     $find = Sms::findOne(['s_tw_message_sid' => $smsItem['si_message_sid']]);
-                    if (NULL === $find) {
+                    if (null === $find) {
                         $total++;
                         $sms = new Sms();
                         $sms->s_type_id = Sms::TYPE_INBOX;
@@ -427,9 +424,7 @@ class SmsController extends FController
         ];
 
         if ($form->load(Yii::$app->request->post())) {
-
             if ($form->validate()) {
-
                 $result['success'] = true;
                 $result['contact'] = [
                     'id' => $form->getContactId(),
@@ -453,11 +448,9 @@ class SmsController extends FController
                 foreach ($smsList as $sms) {
                     $result['smses'][] = (new SmsDto($sms, $form->user, $form->getContact()))->toArray();
                 }
-
             } else {
                 $result['errors'] = $form->getErrors();
             }
-
         } else {
             $result['errors'] = ['data' => ['Not found post data']];
         }
@@ -480,9 +473,7 @@ class SmsController extends FController
         ];
 
         if ($form->load(Yii::$app->request->post())) {
-
             if ($form->validate()) {
-
                 $result['contact'] = [
                     'id' => $form->getContactId(),
                     'name' => $form->getContactName(),
@@ -498,11 +489,9 @@ class SmsController extends FController
                 } elseif ($form->contactIsInternal()) {
                     $result = array_merge($result, $this->smsSender->sendToInternalNumber($form));
                 }
-
             } else {
                 $result['errors'] = $form->getErrors();
             }
-
         } else {
             $result['errors'] = ['data' => ['Not found post data']];
         }

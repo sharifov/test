@@ -17,9 +17,10 @@ class CurrencySearch extends Currency
     public function rules()
     {
         return [
-            [['cur_code', 'cur_name', 'cur_symbol', 'cur_created_dt', 'cur_updated_dt', 'cur_synch_dt'], 'safe'],
+            [['cur_code', 'cur_name', 'cur_symbol'], 'safe'],
             [['cur_base_rate', 'cur_app_rate', 'cur_app_percent'], 'number'],
             [['cur_enabled', 'cur_default', 'cur_sort_order'], 'integer'],
+            [['cur_created_dt', 'cur_updated_dt', 'cur_synch_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -47,7 +48,7 @@ class CurrencySearch extends Currency
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cur_sort_order' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['cur_sort_order' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],

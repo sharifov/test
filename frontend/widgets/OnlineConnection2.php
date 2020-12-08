@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @link http://www.yiiframework.com/
  * @copyright Copyright (c) 2008 Yii Software LLC
@@ -6,7 +7,6 @@
  */
 
 namespace frontend\widgets;
-
 
 use common\models\Lead;
 use sales\entities\cases\Cases;
@@ -33,12 +33,11 @@ class OnlineConnection2 extends \yii\bootstrap\Widget
         $caseId = null;
         $subList = [];
 
-        if(Yii::$app->controller->action->uniqueId === 'lead/view') {
-
+        if (Yii::$app->controller->action->uniqueId === 'lead/view') {
             $leadId = Yii::$app->request->get('id');
-            if(!$leadId) {
+            if (!$leadId) {
                 $gid = Yii::$app->request->get('gid');
-                if($gid) {
+                if ($gid) {
                     $lead = Lead::find()->select(['id'])->where(['gid' => $gid])->asArray()->one();
                     if ($lead && $lead['id']) {
                         $leadId = $lead['id'];
@@ -49,9 +48,9 @@ class OnlineConnection2 extends \yii\bootstrap\Widget
             }
         }
 
-        if(Yii::$app->controller->action->uniqueId === 'cases/view') {
+        if (Yii::$app->controller->action->uniqueId === 'cases/view') {
             $gid = Yii::$app->request->get('gid');
-            if($gid) {
+            if ($gid) {
                 $case = Cases::find()->select(['cs_id'])->where(['cs_gid' => $gid])->limit(1)->asArray()->one();
                 if ($case && $case['cs_id']) {
                     $caseId = $case['cs_id'];
@@ -66,7 +65,7 @@ class OnlineConnection2 extends \yii\bootstrap\Widget
         $actionId = Yii::$app->controller->action->id;
         $pageUrl = urlencode(\yii\helpers\Url::current());
         $ipAddress = Yii::$app->request->remoteIP;
-        $webSocketHost = (Yii::$app->request->isSecureConnection ? 'wss': 'ws') . '://'.Yii::$app->request->serverName . '/ws';// . ':8888';
+        $webSocketHost = (Yii::$app->request->isSecureConnection ? 'wss' : 'ws') . '://' . Yii::$app->request->serverName . '/ws';// . ':8888';
 
 
 

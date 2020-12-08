@@ -37,8 +37,7 @@ class ProductQuoteCloneService
         HotelQuoteCloneService $hotelQuoteCloneService,
         ProductRepository $productRepository,
         FlightQuoteCloneService $flightQuoteCloneService
-    )
-    {
+    ) {
         $this->productQuoteRepository = $productQuoteRepository;
         $this->transactionManager = $transactionManager;
         $this->productQuoteOptionRepository = $productQuoteOptionRepository;
@@ -84,7 +83,6 @@ class ProductQuoteCloneService
             }
 
             return $productQuote;
-
         });
 
         return $clone;

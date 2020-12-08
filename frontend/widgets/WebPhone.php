@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @link http://www.yiiframework.com/
  * @copyright Copyright (c) 2008 Yii Software LLC
@@ -38,11 +39,11 @@ class WebPhone extends \yii\bootstrap\Widget
 
         //$sipExist = \common\models\UserProjectParams::find()->where(['upp_user_id' => $user_id])->andWhere(['AND', ['IS NOT', 'upp_tw_sip_id', null], ['!=', 'upp_tw_sip_id', '']])->one();
 
-//		if (!SettingHelper::isOriginalPhoneWidgetEnabled()) {
-//			return '';
-//		}
+//      if (!SettingHelper::isOriginalPhoneWidgetEnabled()) {
+//          return '';
+//      }
 
-        if(!$userProfile || (int) $userProfile->up_call_type_id !== UserProfile::CALL_TYPE_WEB) {
+        if (!$userProfile || (int) $userProfile->up_call_type_id !== UserProfile::CALL_TYPE_WEB) {
             return '';
         }
 
@@ -56,7 +57,7 @@ class WebPhone extends \yii\bootstrap\Widget
         $tokenData = \Yii::$app->communication->getJwtTokenCache($clientId, true);
 
 
-        if($tokenData && isset($tokenData['data']['token'])) {
+        if ($tokenData && isset($tokenData['data']['token'])) {
             $token = $tokenData['data']['token'];
         } else {
             $token = false;

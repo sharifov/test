@@ -32,6 +32,5 @@ class CasesStatusChangeEvent
         $this->toStatus = $toStatus;
         $this->fromStatus = $fromStatus;
         $this->ownerId = $ownerId;
-     }
-
+    }
 }

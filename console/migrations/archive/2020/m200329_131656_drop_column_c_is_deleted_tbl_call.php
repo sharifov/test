@@ -18,7 +18,6 @@ class m200329_131656_drop_column_c_is_deleted_tbl_call extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     /**
@@ -33,6 +32,4 @@ class m200329_131656_drop_column_c_is_deleted_tbl_call extends Migration
             Yii::$app->cache->flush();
         }
     }
-
-
 }

@@ -91,10 +91,10 @@ class Task extends \yii\db\ActiveRecord
     /**
      * @return array
      */
-    public static function getList() : array
+    public static function getList(): array
     {
         $data = self::find()->orderBy(['t_id' => SORT_ASC])->asArray()->all();
-        return ArrayHelper::map($data,'t_id', 't_name');
+        return ArrayHelper::map($data, 't_id', 't_name');
     }
 
     /**

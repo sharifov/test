@@ -145,7 +145,7 @@ class SmsTemplateType extends \yii\db\ActiveRecord
      * @return array
      * @throws \yii\httpclient\Exception
      */
-    public static function synchronizationTypes() : array
+    public static function synchronizationTypes(): array
     {
         $data = [
             'created' => [],
@@ -157,17 +157,16 @@ class SmsTemplateType extends \yii\db\ActiveRecord
         $communication = Yii::$app->communication;
         $smsTypes = $communication->smsTypes();
 
-        if($smsTypes && isset($smsTypes['data']['types'])) {
-
+        if ($smsTypes && isset($smsTypes['data']['types'])) {
             foreach ($smsTypes['data']['types'] as $type) {
                 $t = self::findOne($type['stp_id']);
-                if(!$t) {
+                if (!$t) {
                     $t = new self();
                     $t->stp_id = $type['stp_id'];
                     $t->stp_created_dt = date('Y-m-d H:i:s');
                     $t->stp_name = $type['stp_name'];
 
-                    if(isset(Yii::$app->user) && Yii::$app->user->id) {
+                    if (isset(Yii::$app->user) && Yii::$app->user->id) {
                         $t->stp_created_user_id = Yii::$app->user->id;
                     }
 
@@ -180,14 +179,13 @@ class SmsTemplateType extends \yii\db\ActiveRecord
                 $t->stp_origin_name = $type['stp_name'];
                 $t->stp_updated_dt = date('Y-m-d H:i:s');
 
-                if(isset(Yii::$app->user) && Yii::$app->user->id) {
+                if (isset(Yii::$app->user) && Yii::$app->user->id) {
                     $t->stp_updated_user_id = Yii::$app->user->id;
                 }
-                if(!$t->save()) {
+                if (!$t->save()) {
                     Yii::error(VarDumper::dumpAsString($t->errors), 'SmsTemplateType:synchronizationTypes:save');
                 }
             }
-
         } else {
             $data['error'] = 'Not found response data';
         }
@@ -202,7 +200,7 @@ class SmsTemplateType extends \yii\db\ActiveRecord
     public static function getList($withHidden = true): array
     {
         $query = self::find()->orderBy(['stp_name' => SORT_ASC]);
-        if(!$withHidden) {
+        if (!$withHidden) {
             $query->andWhere(['stp_hidden' => false]);
         }
         $data = $query->asArray()->all();
@@ -215,14 +213,14 @@ class SmsTemplateType extends \yii\db\ActiveRecord
      * @param int|null $dep_id
      * @return array
      */
-    public static function getKeyList($withHidden = true, ?int $dep_id = null ): array
+    public static function getKeyList($withHidden = true, ?int $dep_id = null): array
     {
         $query = self::find()->orderBy(['stp_name' => SORT_ASC]);
-        if(!$withHidden) {
+        if (!$withHidden) {
             $query->andWhere(['stp_hidden' => false]);
         }
 
-        if($dep_id !== null) {
+        if ($dep_id !== null) {
             $query->andWhere(['stp_dep_id' => $dep_id]);
         }
         $data = $query->asArray()->all();

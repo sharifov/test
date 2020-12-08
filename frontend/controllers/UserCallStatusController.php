@@ -40,7 +40,7 @@ class UserCallStatusController extends FController
     {
         $searchModel = new UserCallStatusSearch();
         $params = Yii::$app->request->queryParams;
-        if(isset($params['reset'])){
+        if (isset($params['reset'])) {
             unset($params['UserCallStatusSearch']['date_range']);
         }
 
@@ -148,8 +148,7 @@ class UserCallStatusController extends FController
                 Yii::error(VarDumper::dumpAsString($ucs->errors), 'UserCallStatusController:actionUpdateStatus:save');
             } else {
                 // Notifications::socket($ucs->us_user_id, null, 'updateUserCallStatus', ['id' => 'ucs'.$ucs->us_id, 'type_id' => $type_id]);
-                Notifications::publish('updateUserCallStatus', ['user_id' =>$ucs->us_user_id], ['id' => 'ucs'.$ucs->us_id, 'type_id' => $type_id]);
-
+                Notifications::publish('updateUserCallStatus', ['user_id' => $ucs->us_user_id], ['id' => 'ucs' . $ucs->us_id, 'type_id' => $type_id]);
             }
         }
 

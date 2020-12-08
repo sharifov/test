@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @link http://www.yiiframework.com/
  * @copyright Copyright (c) 2008 Yii Software LLC
@@ -13,6 +14,7 @@ use sales\helpers\UserCallIdentity;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * OnlineConnection widget
@@ -21,6 +23,11 @@ use Yii;
  */
 class OnlineConnection extends \yii\bootstrap\Widget
 {
+    public const CHAT_SUBSCRIBE_LIST = [
+        'client-chat/index',
+        'client-chat/view',
+    ];
+
     public function init()
     {
         parent::init();
@@ -33,6 +40,32 @@ class OnlineConnection extends \yii\bootstrap\Widget
         $subList = [];
         $userId = Yii::$app->user->id;
 
+        $this->subscribeToLeadChannel($leadId, $subList);
+        $this->subscribeToCaseChannel($caseId, $subList);
+        $this->subscribeToClientChatChannel($userId, $subList);
+
+        $controllerId = Yii::$app->controller->id;
+        $actionId = Yii::$app->controller->action->id;
+        $pageUrl = urlencode(\yii\helpers\Url::current());
+        $ipAddress = Yii::$app->request->remoteIP;
+        $webSocketHost = (Yii::$app->request->isSecureConnection ? 'wss' : 'ws') . '://' . Yii::$app->request->serverName . '/ws';// . ':8888';
+
+        return $this->render('online_connection2', [
+            'userId' =>  $userId,
+            'userIdentity' =>  UserCallIdentity::getClientId($userId),
+            'controllerId' => $controllerId,
+            'actionId' => $actionId,
+            'pageUrl' => $pageUrl,
+            'ipAddress' =>  $ipAddress,
+            'webSocketHost' => $webSocketHost,
+            'subList' => $subList,
+            'leadId' => $leadId,
+            'caseId' => $caseId
+        ]);
+    }
+
+    private function subscribeToLeadChannel(&$leadId, &$subList): void
+    {
         if (Yii::$app->controller->action->uniqueId === 'lead/view') {
             $leadId = Yii::$app->request->get('id');
             if (!$leadId) {
@@ -47,7 +80,10 @@ class OnlineConnection extends \yii\bootstrap\Widget
                 }
             }
         }
+    }
 
+    private function subscribeToCaseChannel(&$caseId, &$subList): void
+    {
         if (Yii::$app->controller->action->uniqueId === 'cases/view') {
             $gid = Yii::$app->request->get('gid');
             if ($gid) {
@@ -59,8 +95,11 @@ class OnlineConnection extends \yii\bootstrap\Widget
                 }
             }
         }
+    }
 
-        if (Yii::$app->controller->action->uniqueId === 'client-chat/index') {
+    private function subscribeToClientChatChannel($userId, &$subList): void
+    {
+        if (ArrayHelper::isIn(Yii::$app->controller->action->uniqueId, self::CHAT_SUBSCRIBE_LIST)) {
             $cchId = Yii::$app->request->get('chid');
             if ($cchId) {
                 $chat = ClientChat::find()->select(['cch_id'])->byId($cchId)->asArray()->one();
@@ -70,29 +109,10 @@ class OnlineConnection extends \yii\bootstrap\Widget
                 }
             }
             if ($channels = ClientChatChannel::getListByUserId($userId)) {
-                foreach ($channels as $channelId => $chanelName) {
+                foreach ($channels as $channelId => $channelName) {
                     $subList[] = ClientChatChannel::getPubSubKey($channelId);
                 }
             }
         }
-
-        $controllerId = Yii::$app->controller->id;
-        $actionId = Yii::$app->controller->action->id;
-        $pageUrl = urlencode(\yii\helpers\Url::current());
-        $ipAddress = Yii::$app->request->remoteIP;
-        $webSocketHost = (Yii::$app->request->isSecureConnection ? 'wss': 'ws') . '://'.Yii::$app->request->serverName . '/ws';// . ':8888';
-
-        return $this->render('online_connection2', [
-            'userId' =>  $userId,
-            'userIdentity' =>  UserCallIdentity::getClientId($userId),
-            'controllerId' => $controllerId,
-            'actionId' => $actionId,
-            'pageUrl' => $pageUrl,
-            'ipAddress' =>  $ipAddress,
-            'webSocketHost' => $webSocketHost,
-            'subList' => $subList,
-            'leadId' => $leadId,
-            'caseId' => $caseId
-        ]);
     }
 }

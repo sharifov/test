@@ -61,12 +61,12 @@ class FilterShortCodeToLink implements Filter
         }, $this->content);
     }
 
-	private function processChat(): void
-	{
-		$this->content = preg_replace_callback('|{chat-([\d]+)}|iU', function ($matches) {
-			return Html::a('Chat Link', $this->host . '/client-chat/index?chid=' . $matches[1]);
-		}, $this->content);
-	}
+    private function processChat(): void
+    {
+        $this->content = preg_replace_callback('|{chat-([\d]+)}|iU', function ($matches) {
+            return Html::a('Chat Link', $this->host . '/client-chat/index?chid=' . $matches[1]);
+        }, $this->content);
+    }
     private function processNotification(): void
     {
         $this->content = preg_replace_callback('|id:([\d]+)|', function ($matches) {

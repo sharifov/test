@@ -73,5 +73,4 @@ class CallForm extends Model
             ['c_project_id', 'integer'],
         ];
     }
-
 }

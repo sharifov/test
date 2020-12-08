@@ -144,16 +144,16 @@ class ProjectController extends FController
     {
         $result = Project::synchronizationProjects();
 
-        if($result) {
-            if($result['error']) {
+        if ($result) {
+            if ($result['error']) {
                 Yii::$app->getSession()->setFlash('error', $result['error']);
             } else {
                 $message = 'Synchronization successful<br>';
-                if($result['created']) {
-                    $message .= 'Created projects: "'.implode(', ', $result['created']).'"<br>';
+                if ($result['created']) {
+                    $message .= 'Created projects: "' . implode(', ', $result['created']) . '"<br>';
                 }
-                if($result['updated']) {
-                    $message .= 'Updated projects: "'.implode(', ', $result['updated']).'"<br>';
+                if ($result['updated']) {
+                    $message .= 'Updated projects: "' . implode(', ', $result['updated']) . '"<br>';
                 }
                 Yii::$app->getSession()->setFlash('success', $message);
             }
@@ -163,47 +163,46 @@ class ProjectController extends FController
     }
 
     public function actionListAjax(?string $q = null, ?int $id = null, ?string $selection = 'id')
-	{
-		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+    {
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
-		$out = ['results' => ['id' => '', 'name' => '', 'selection' => '']];
+        $out = ['results' => ['id' => '', 'name' => '', 'selection' => '']];
 
-		ProjectSelect2Widget::checkSelection($selection);
+        ProjectSelect2Widget::checkSelection($selection);
 
-		if ($q !== null) {
-			$query = Project::find();
-			$data = $query->select(['id', 'name'])
-				->where(['like', 'name', $q])
-				->orWhere(['id' => (int) $q])
-				->limit(20)
-				//->indexBy('id')
-				->asArray()
-				->all();
+        if ($q !== null) {
+            $query = Project::find();
+            $data = $query->select(['id', 'name'])
+                ->where(['like', 'name', $q])
+                ->orWhere(['id' => (int) $q])
+                ->limit(20)
+                //->indexBy('id')
+                ->asArray()
+                ->all();
 
-			if ($data) {
-				foreach ($data as $n => $item) {
-					$text = $item['name'] . ' ('.$item['id'].')';
-					$data[$n]['text'] = self::formatText($text, $q);
-					$data[$n]['selection'] = $item[$selection];
-				}
-			}
+            if ($data) {
+                foreach ($data as $n => $item) {
+                    $text = $item['name'] . ' (' . $item['id'] . ')';
+                    $data[$n]['text'] = self::formatText($text, $q);
+                    $data[$n]['selection'] = $item[$selection];
+                }
+            }
 
-			$out['results'] = $data; //array_values($data);
-		}
-		elseif ($id > 0) {
-			$project = Project::findOne($id);
-			$out['results'] = ['id' => $id, 'text' => $project ? $project->name : '', 'selection' => $project ? $project->{$selection} : ''];
-		}
-		return $out;
-	}
+            $out['results'] = $data; //array_values($data);
+        } elseif ($id > 0) {
+            $project = Project::findOne($id);
+            $out['results'] = ['id' => $id, 'text' => $project ? $project->name : '', 'selection' => $project ? $project->{$selection} : ''];
+        }
+        return $out;
+    }
 
-	/**
-	 * @param string $str
-	 * @param string $term
-	 * @return string
-	 */
-	private static function formatText(string $str, string $term): string
-	{
-		return preg_replace('~'.$term.'~i', '<b style="color: #e15554"><u>$0</u></b>', $str);
-	}
+    /**
+     * @param string $str
+     * @param string $term
+     * @return string
+     */
+    private static function formatText(string $str, string $term): string
+    {
+        return preg_replace('~' . $term . '~i', '<b style="color: #e15554"><u>$0</u></b>', $str);
+    }
 }

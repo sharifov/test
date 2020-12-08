@@ -36,7 +36,6 @@ class m181003_125732_add_column_category_tbl_lead_task extends Migration
                 't_sort_order'          => $sort++,
             ]);
         }
-
     }
 
     /**

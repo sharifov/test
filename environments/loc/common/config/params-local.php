@@ -1,4 +1,5 @@
 <?php
+
 return [
     'getAirportUrl' => 'https://backoffice.travelinsides.com/api/v2/airport/search',
     'sync' => [
@@ -19,10 +20,8 @@ return [
         'iv'        => '',
     ],
     'centrifugo' => [
-        'apiKey' => '{{ common.config.params.centrifugo.apiKey:str }}',
-        'jsClientUrl' => '{{ common.config.params.centrifugo.jsClientUrl:str }}',
-        'serviceUrl' => '{{ common.config.params.centrifugo.serviceUrl:str }}',
-        'tokenHmacSecretKey' => '{{ common.config.params.centrifugo.tokenHmacSecretKey:str }}'
+        'enabled' => '{{ common.config.params.centrifugo.enabled:bool }}',
+        'wsConnectionUrl' => '{{ common.config.params.centrifugo.wsConnectionUrl:str }}',
     ],
     'appEnv' => 'loc',
 ];

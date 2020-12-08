@@ -235,26 +235,39 @@ function setInitConfig($root, $paths)
 
                     switch ($type) {
                         case 'bool':
-                            $val = (bool)$value;
-                            $patternList[$nl] = '~(\'?)(\{\{[ ]*' . $keyVal . '[ ]*\}\})(\'?)~';
-                            $replaceList[$nl] = $val ? 'true' : 'false';
+                            $val = strtolower($value) === 'true';
+//                                $patternList[$nl] = '~(\'?)(\{\{[ ]*' . $keyVal . '[ ]*\}\})(\'?)~';
+                            $patternList[] = '\'{{ ' . $keyVal . ' }}\'';
+                            $replaceList[] = $val ? 'true' : 'false';
+                            $patternList[] = '{{ ' . $keyVal . ' }}';
+                            $replaceList[] = $val ? 'true' : 'false';
                             break;
                         case 'int':
                             $val = (int)$value;
-                            $patternList[$nl] = '~(\'?)(\{\{[ ]*' . $keyVal . '[ ]*\}\})(\'?)~';
-                            $replaceList[$nl] = $val;
+//                                $patternList[$nl] = '~(\'?)(\{\{[ ]*' . $keyVal . '[ ]*\}\})(\'?)~';
+                            $patternList[] = '\'{{ ' . $keyVal . ' }}\'';
+                            $replaceList[] = $val;
+                            $patternList[] = '{{ ' . $keyVal . ' }}';
+                            $replaceList[] = $val;
                             break;
                         case 'str':
                             $val = (string) str_replace("'", "\'", $value);
-                            $patternList[$nl] = '~(\'?)(\{\{[ ]*' . $keyVal . '[ ]*\}\})(\'?)~';
-                            $replaceList[$nl] = '\\1' . $val . '\\3';
+//                                $patternList[$nl] = '~(\'?)(\{\{[ ]*' . $keyVal . '[ ]*\}\})(\'?)~';
+//                                $replaceList[$nl] = '\\1' . $val . '\\3';
+                            $patternList[] = '\'{{ ' . $keyVal . ' }}\'';
+                            $replaceList[] = '\'' . $val . '\'';
+                            $patternList[] = '{{ ' . $keyVal . ' }}';
+                            $replaceList[] = $val;
                             break;
                         default:
-                            $val = str_replace("'", "\'", $value);
-                            $patternList[$nl] = '~(\{\{[ ]*' . $keyVal . '[ ]*\}\})~';
-                            $replaceList[$nl] = $val;
+                            $val = (string)str_replace("'", "\'", $value);
+//                                $patternList[$nl] = '~(\{\{[ ]*' . $keyVal . '[ ]*\}\})~';
+                            $patternList[] = '\'{{ ' . $keyVal . ' }}\'';
+                            $replaceList[] = '\'' . $val . '\'';
+                            $patternList[] = '{{ ' . $keyVal . ' }}';
+                            $replaceList[] = $val;
                     }
-                    $envData[$keyVal] = [$nl, $patternList[$nl], $replaceList[$nl]];
+//                    $envData[$keyVal] = [$nl, $patternList[$nl], $replaceList[$nl]];
                 }
             }
         }
@@ -262,8 +275,7 @@ function setInitConfig($root, $paths)
         foreach ($paths as $file) {
             echo "  set config key in '$file'\n";
             $file = $root . '/' . $file;
-            $content = preg_replace($patternList, $replaceList,
-                file_get_contents($file));
+            $content = str_replace($patternList, $replaceList, file_get_contents($file));
             file_put_contents($file, $content);
         }
         // print_r($envData);

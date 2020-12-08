@@ -29,5 +29,4 @@ class LeadOwnerChangedEvent
         $this->oldOwnerId = $oldOwnerId;
         $this->newOwnerId = $newOwnerId;
     }
-
 }

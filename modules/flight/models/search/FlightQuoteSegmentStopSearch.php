@@ -18,7 +18,8 @@ class FlightQuoteSegmentStopSearch extends FlightQuoteSegmentStop
     {
         return [
             [['qss_id', 'qss_quote_segment_id', 'qss_elapsed_time', 'qss_duration'], 'integer'],
-            [['qss_location_iata', 'qss_equipment', 'qss_departure_dt', 'qss_arrival_dt'], 'safe'],
+            [['qss_location_iata', 'qss_equipment'], 'safe'],
+            [['qss_departure_dt', 'qss_arrival_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -46,7 +47,7 @@ class FlightQuoteSegmentStopSearch extends FlightQuoteSegmentStop
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['qss_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['qss_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ]
@@ -66,8 +67,8 @@ class FlightQuoteSegmentStopSearch extends FlightQuoteSegmentStop
             'qss_quote_segment_id' => $this->qss_quote_segment_id,
             'qss_elapsed_time' => $this->qss_elapsed_time,
             'qss_duration' => $this->qss_duration,
-            'qss_departure_dt' => $this->qss_departure_dt,
-            'qss_arrival_dt' => $this->qss_arrival_dt,
+            'DATE(qss_departure_dt)' => $this->qss_departure_dt,
+            'DATE(qss_arrival_dt)' => $this->qss_arrival_dt,
         ]);
 
         $query->andFilterWhere(['like', 'qss_location_iata', $this->qss_location_iata])

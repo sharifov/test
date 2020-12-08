@@ -48,11 +48,11 @@ class ClientChatVisitorSearch extends ClientChatVisitorData
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-			'sort' => [
-				'defaultOrder' => [
-					'cvd_id' => SORT_DESC
-				]
-			]
+            'sort' => [
+                'defaultOrder' => [
+                    'cvd_id' => SORT_DESC
+                ]
+            ]
         ]);
 
         $this->load($params);

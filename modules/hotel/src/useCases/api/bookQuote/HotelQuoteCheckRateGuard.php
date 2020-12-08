@@ -16,22 +16,22 @@ class HotelQuoteCheckRateGuard
      * @return Hotel
      */
     public static function hotel(HotelQuote $model): Hotel
-	{
-		if (!$hotel = $model->hqHotel) {
+    {
+        if (!$hotel = $model->hqHotel) {
             throw new \DomainException('Hotel not found. (ID:' . $model->hq_id . ');');
         }
-		return $hotel;
-	}
+        return $hotel;
+    }
 
     /**
      * @param HotelQuote $model
      * @return array
      */
     public static function hotelQuoteRooms(HotelQuote $model): array
-	{
+    {
         if (!$hotelQuoteRooms = $model->hotelQuoteRooms) {
             throw new \DomainException('Hotel Quote Rooms not found. (ID:' . $model->hq_id . ');');
         }
-		return $hotelQuoteRooms;
-	}
+        return $hotelQuoteRooms;
+    }
 }

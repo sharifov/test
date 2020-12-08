@@ -21,7 +21,7 @@ use yii\widgets\ActiveForm;
             'options' => ['placeholder' => 'Select Line', 'multiple' => false],
             'pluginOptions' => ['allowClear' => true],
         ])
-        ?>
+?>
 
 
         <?= $form->field($model, 'plc_ccom_id')->widget(\kartik\select2\Select2::class, [
@@ -30,7 +30,7 @@ use yii\widgets\ActiveForm;
             'options' => ['placeholder' => 'Select Command', 'multiple' => false],
             'pluginOptions' => ['allowClear' => true],
         ])
-        ?>
+?>
 
     <?php //= $form->field($model, 'plc_ccom_id')->textInput() ?>
 

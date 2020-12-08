@@ -99,9 +99,14 @@ class CallService
             ($upp = UserProjectParams::find()->byPhone($internalPhoneNumber, false)->limit(1)->one())
             && ($user = $upp->uppUser)
         ) {
-            if ($ntf = Notifications::create($user->id, 'Declined Call',
-                'Declined Call Id: ' . $call->c_id . ' Reason: Blacklisted',
-                Notifications::TYPE_WARNING, true)
+            if (
+                $ntf = Notifications::create(
+                    $user->id,
+                    'Declined Call',
+                    'Declined Call Id: ' . $call->c_id . ' Reason: Blacklisted',
+                    Notifications::TYPE_WARNING,
+                    true
+                )
             ) {
                 $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
                 Notifications::publish('getNewNotification', ['user_id' => $user->id], $dataNotification);
@@ -111,39 +116,39 @@ class CallService
         throw new CallDeclinedException('Declined Call Id: ' . $call->c_id . '. Reason: Blacklisted');
     }
 
-	/**
-	 * @param CallUserAccess $callUserAccess
-	 * @param Employee $user
-	 * @return bool
-	 */
+    /**
+     * @param CallUserAccess $callUserAccess
+     * @param Employee $user
+     * @return bool
+     */
     public function acceptCall(CallUserAccess $callUserAccess, Employee $user): bool
-	{
-		$callUserAccess->acceptCall();
-		$this->callUserAccessRepository->save($callUserAccess);
-		if (($call = $callUserAccess->cuaCall) && Call::applyCallToAgent($call, $user->id)) {
-			Notifications::pingUserMap();
-			return true;
-		}
-		return false;
-	}
+    {
+        $callUserAccess->acceptCall();
+        $this->callUserAccessRepository->save($callUserAccess);
+        if (($call = $callUserAccess->cuaCall) && Call::applyCallToAgent($call, $user->id)) {
+            Notifications::pingUserMap();
+            return true;
+        }
+        return false;
+    }
 
-	/**
-	 * @param CallUserAccess $callUserAccess
-	 * @param Employee $user
-	 */
-	public function busyCall(CallUserAccess $callUserAccess, Employee $user): void
-	{
-		$callUserAccess->busyCall();
-		$ucs = new UserCallStatus();
-		$ucs->us_type_id = UserCallStatus::STATUS_TYPE_OCCUPIED;
-		$ucs->us_user_id = $user->id;
-		$ucs->us_created_dt = date('Y-m-d H:i:s');
-		if($ucs->save()) {
-			$callUserAccess->save();
-			Notifications::publish('updateUserCallStatus', ['user_id' =>$ucs->us_user_id], ['id' => 'ucs'.$ucs->us_id, 'type_id' => $ucs->us_type_id]);
-			Notifications::pingUserMap();
-		} else {
-			\Yii::error(VarDumper::dumpAsString($ucs->errors), 'CallService:busyCall:save');
-		}
-	}
+    /**
+     * @param CallUserAccess $callUserAccess
+     * @param Employee $user
+     */
+    public function busyCall(CallUserAccess $callUserAccess, Employee $user): void
+    {
+        $callUserAccess->busyCall();
+        $ucs = new UserCallStatus();
+        $ucs->us_type_id = UserCallStatus::STATUS_TYPE_OCCUPIED;
+        $ucs->us_user_id = $user->id;
+        $ucs->us_created_dt = date('Y-m-d H:i:s');
+        if ($ucs->save()) {
+            $callUserAccess->save();
+            Notifications::publish('updateUserCallStatus', ['user_id' => $ucs->us_user_id], ['id' => 'ucs' . $ucs->us_id, 'type_id' => $ucs->us_type_id]);
+            Notifications::pingUserMap();
+        } else {
+            \Yii::error(VarDumper::dumpAsString($ucs->errors), 'CallService:busyCall:save');
+        }
+    }
 }

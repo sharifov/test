@@ -2,7 +2,6 @@
 
 namespace sales\model\clientChatRequest\useCase\api\create;
 
-use common\components\CentrifugoService;
 use common\components\purifier\Purifier;
 use common\models\Notifications;
 use frontend\widgets\notification\NotificationMessage;
@@ -166,7 +165,7 @@ class ClientChatRequestService
             } elseif ($clientChatRequest->isGuestDisconnected()) {
                 $this->guestDisconnected($clientChatRequest);
             } elseif ($clientChatRequest->isTrackEvent()) {
-                $this->createOrUpdateVisitorData($clientChatRequest);
+                $this->updateVisitorData($clientChatRequest);
             } else {
                 throw new \RuntimeException('Unknown event provided');
             }
@@ -189,6 +188,14 @@ class ClientChatRequestService
 //            $clientChat = $this->findClientChatByCache($form->data['rid'] ?? '');
             if ($clientChat) {
                 $this->assignMessageToChat($message, $clientChat);
+            }
+            if ($clientChat && $clientChatRequest->isGuestUttered()) {
+                if ($clientChat->isClosed()) {
+                    $this->clientChatService->autoReopen($clientChat);
+                }
+            }
+            if (($clientChat && $clientChat->isIdle()) && $clientChatRequest->isAgentUttered()) {
+                $this->clientChatService->autoReturn($clientChat);
             }
         } else {
             $this->clientChatRequestRepository->save($clientChatRequest);
@@ -249,13 +256,15 @@ class ClientChatRequestService
     private static function sendFeedbackNotifications(ClientChat $clientChat): void
     {
         $clientChatLink = Purifier::createChatShortLink($clientChat);
-        if ($notification = Notifications::create(
-            $clientChat->cch_owner_user_id,
-            'Feedback received',
-            'Feedback received. ' . 'Client Chat; ' . $clientChatLink,
-            Notifications::TYPE_INFO,
-            true
-        )) {
+        if (
+            $notification = Notifications::create(
+                $clientChat->cch_owner_user_id,
+                'Feedback received',
+                'Feedback received. ' . 'Client Chat; ' . $clientChatLink,
+                Notifications::TYPE_INFO,
+                true
+            )
+        ) {
             $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ?
                 NotificationMessage::add($notification) : [];
 
@@ -315,7 +324,7 @@ class ClientChatRequestService
             }
 
             $this->clientChatRepository->save($clientChat);
-            $this->clientChatService->sendRequestToUsers($clientChat, $channel);
+            $this->clientChatService->sendRequestToUsers($clientChat);
         } else {
             if (!$clientChat->cch_id) {
                 $clientChat->pending(null, ClientChatStatusLog::ACTION_OPEN);
@@ -413,24 +422,17 @@ class ClientChatRequestService
         ]);
     }
 
-    public function createOrUpdateVisitorData(ClientChatRequest $request): void
+    public function updateVisitorData(ClientChatRequest $request): void
     {
         $cchVisitorData = $this->clientChatVisitorDataRepository->findByVisitorRcId($request->getClientRcId());
         $this->clientChatVisitorDataRepository->updateByClientChatRequest($cchVisitorData, $request->getDecodedData());
-
-        try {
-            $visitorLog = $this->visitorLogRepository->findByVisitorDataId($cchVisitorData->cvd_id);
-            $this->visitorLogRepository->updateByClientChatRequest($visitorLog, $request->getDecodedData());
-        } catch (NotFoundException $e) {
-            $this->visitorLogRepository->createByClientChatRequest($cchVisitorData->cvd_id, $request->getDecodedData());
-        }
     }
 
     public function updateDateTimeLastMessageNotification(ClientChat $clientChat, ClientChatMessage $message): void
     {
         $user = $clientChat->cchOwnerUser;
         $dateTime = $message->ccm_sent_dt;
-        $formatter = new \Yii::$app->formatter;
+        $formatter = new \Yii::$app->formatter();
         if ($user->timezone) {
             $formatter->timeZone = $user->timezone;
         }
@@ -449,14 +451,14 @@ class ClientChatRequestService
         $data['chat_id'] = $message->ccm_cch_id;
         $data['client_id'] = $message->ccm_client_id;
         $data['user_id'] = $message->ccm_user_id;
-        $data['sent_dt'] = \Yii::$app->formatter->asDatetime(strtotime($message->ccm_sent_dt), 'php: Y-m-d H:i:s');
-        $data['period'] = \Yii::$app->formatter->asRelativeTime(strtotime($message->ccm_sent_dt));
+        $data['sent_dt'] = Yii::$app->formatter->asDatetime(strtotime($message->ccm_sent_dt), 'php: Y-m-d H:i:s');
+        $data['period'] = Yii::$app->formatter->asRelativeTime(strtotime($message->ccm_sent_dt));
         $data['msg'] = $message->message;
 
         try {
-            CentrifugoService::sendMsg(json_encode([
+            Yii::$app->centrifugo->setSafety(false)->publish('realtimeClientChatChannel', ['message' => json_encode([
                 'chatMessageData' => $data,
-            ]), 'realtimeClientChatChannel');
+            ])]);
         } catch (\Throwable $throwable) {
             Yii::error(
                 VarDumper::dumpAsString($throwable),
@@ -483,14 +485,6 @@ class ClientChatRequestService
         } catch (NotFoundException $e) {
             $visitorData = $this->clientChatVisitorDataRepository->createByClientChatRequest($visitorRcId, $data);
             $this->clientChatVisitorRepository->create($chatId, $visitorData->cvd_id, $clientId);
-        }
-
-        try {
-            $visitorLog = $this->visitorLogRepository->findByVisitorDataId($visitorData->cvd_id);
-            $visitorLog->updateByClientChatRequest($data);
-            $this->visitorLogRepository->save($visitorLog);
-        } catch (NotFoundException $e) {
-            $this->visitorLogRepository->createByClientChatRequest($visitorData->cvd_id, $data);
         }
     }
 }

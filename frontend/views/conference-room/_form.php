@@ -56,7 +56,7 @@ use common\models\ConferenceRoom;
             'todayBtn' => true
         ]
     ]);
-    ?>
+?>
 
 
     <?= $form->field($model, 'cr_end_dt')->widget(\dosamigos\datetimepicker\DateTimePicker::class, [
@@ -76,7 +76,7 @@ use common\models\ConferenceRoom;
             'todayBtn' => true
         ]
     ]);
-    ?>
+?>
 
 
 
@@ -126,7 +126,7 @@ use common\models\ConferenceRoom;
 
         <?= $form->field($model, 'cr_param_wait_url')->textInput(['maxlength' => true]) ?>
 
-        <p>TwiML URL, empty string	(default Twilio hold music)</p>
+        <p>TwiML URL, empty string  (default Twilio hold music)</p>
 
 
     <!---->

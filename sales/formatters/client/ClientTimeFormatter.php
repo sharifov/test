@@ -49,5 +49,4 @@ class ClientTimeFormatter
         }
         return '<b title="TZ (' . $dt->format("P") . ')' . (!$offsetGmt ? ' by IATA' : '') . '"><i class="fa fa-clock-o' . ($offsetGmt ? ' success' : '') . '"></i> ' . Html::encode($dt->format('H:i')) . '</b>';
     }
-
 }

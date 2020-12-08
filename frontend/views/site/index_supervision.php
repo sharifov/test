@@ -61,7 +61,7 @@ $user = Yii::$app->user->identity;
                     <td><i class="fa fa-users"></i>
                         <?php
                         $groupsValue = '';
-                        if( $groupsModel =  Yii::$app->user->identity->ugsGroups) {
+                        if ($groupsModel =  Yii::$app->user->identity->ugsGroups) {
                             $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
 
                             $groupsValueArr = [];
@@ -82,8 +82,7 @@ $user = Yii::$app->user->identity;
 
                         $projectList = Yii::$app->user->identity->projects;
 
-                        if($projectList) {
-
+                        if ($projectList) {
                             $groupsValueArr = [];
                             foreach ($projectList as $project) {
                                 $groupsValueArr[] = Html::tag('span', Html::encode($project->name), ['class' => 'label label-default']);
@@ -103,7 +102,7 @@ $user = Yii::$app->user->identity;
 
             /** @var \common\models\UserParams $modelUserParams */
             $modelUserParams = Yii::$app->user->identity->userParams;
-            if($modelUserParams) {
+            if ($modelUserParams) {
                 echo \yii\widgets\DetailView::widget([
                     'model' => $modelUserParams ?? null,
                     'attributes' => [
@@ -142,8 +141,7 @@ $user = Yii::$app->user->identity;
 
     </div>
 
-    <?php if($modelUserParams):
-
+    <?php if ($modelUserParams) :
         $js = <<<JS
     //google.charts.load('current', {packages: ['corechart', 'bar']});
     $("#myTimeline").timeline({
@@ -167,19 +165,19 @@ JS;
             <ul class="timeline-events">
                 <?php
                 $currentDateTS = strtotime(Yii::$app->formatter->asDate(time()));
-                $startTime = date('Y-m-d '.$modelUserParams->up_work_start_tm);
+                $startTime = date('Y-m-d ' . $modelUserParams->up_work_start_tm);
                 echo $startTime;
                 $endTime = date('Y-m-d H:i', strtotime($startTime) + ($modelUserParams->up_work_minutes * 60));
                 ?>
-                <li data-timeline-node="{ start:'<?=$startTime?>',end:'<?=$endTime?>',content:'1 shift',bgColor:'rgb(137, 201, 151)',color:'#fff',row:1,extend:{'post_id':1,'permalink':'https://google.com/'} }"><?=date('d-M [H:i]', strtotime($startTime))?> ........ <?=date('d-M [H:i]', strtotime($endTime))?> ..... (<?=round($modelUserParams->up_work_minutes/60, 1)?> hours)</li>
+                <li data-timeline-node="{ start:'<?=$startTime?>',end:'<?=$endTime?>',content:'1 shift',bgColor:'rgb(137, 201, 151)',color:'#fff',row:1,extend:{'post_id':1,'permalink':'https://google.com/'} }"><?=date('d-M [H:i]', strtotime($startTime))?> ........ <?=date('d-M [H:i]', strtotime($endTime))?> ..... (<?=round($modelUserParams->up_work_minutes / 60, 1)?> hours)</li>
 
                 <?php
                 $currentDateTS = strtotime(Yii::$app->formatter->asDate(strtotime("+1 day")));
-                $startTime = date('Y-m-d '.$modelUserParams->up_work_start_tm, $currentDateTS);
+                $startTime = date('Y-m-d ' . $modelUserParams->up_work_start_tm, $currentDateTS);
                 echo $startTime;
                 $endTime = date('Y-m-d H:i', strtotime($startTime) + ($modelUserParams->up_work_minutes * 60));
                 ?>
-                <li data-timeline-node="{ start:'<?=$startTime?>',end:'<?=$endTime?>',content:'2 shift',row:1 }"><?=date('d-M [H:i]', strtotime($startTime))?> ........ <?=date('d-M [H:i]', strtotime($endTime))?> ..... (<?=round($modelUserParams->up_work_minutes/60, 1)?> hours)</li>
+                <li data-timeline-node="{ start:'<?=$startTime?>',end:'<?=$endTime?>',content:'2 shift',row:1 }"><?=date('d-M [H:i]', strtotime($startTime))?> ........ <?=date('d-M [H:i]', strtotime($endTime))?> ..... (<?=round($modelUserParams->up_work_minutes / 60, 1)?> hours)</li>
 
             </ul>
         </div>
@@ -209,26 +207,26 @@ JS;
                 <div class="col-md-3">
                 <?php
                     echo  \kartik\daterange\DateRangePicker::widget([
-                        'model'=> $searchModel,
+                        'model' => $searchModel,
                         'attribute' => 'timeRange',
                         //'name'=>'date_range',
-                        'useWithAddon'=>true,
+                        'useWithAddon' => true,
                         //'value'=>'2015-10-19 12:00 AM - 2015-11-03 01:00 PM',
-                        'presetDropdown'=>true,
-                        'hideInput'=>true,
-                        'convertFormat'=>true,
+                        'presetDropdown' => true,
+                        'hideInput' => true,
+                        'convertFormat' => true,
                         'startAttribute' => 'timeStart',
                         'endAttribute' => 'timeEnd',
                         //'startInputOptions' => ['value' => date('Y-m-d', strtotime('-5 days'))],
                         //'endInputOptions' => ['value' => '2017-07-20'],
-                        'pluginOptions'=>[
-                            'timePicker'=> true,
-                            'timePickerIncrement'=>1,
+                        'pluginOptions' => [
+                            'timePicker' => true,
+                            'timePickerIncrement' => 1,
                             'timePicker24Hour' => true,
-                            'locale'=>['format'=>'Y-m-d H:i']
+                            'locale' => ['format' => 'Y-m-d H:i']
                         ]
                     ]);
-                ?>
+                    ?>
                 </div>
 
                 <div class="form-group">
@@ -257,7 +255,7 @@ JS;
                     [
                         'attribute' => 'username',
                         'value' => static function (\common\models\Employee $model) {
-                            return Html::tag('i', '', ['class' => 'fa fa-user']).' '.Html::encode($model->username);
+                            return Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' . Html::encode($model->username);
                         },
                         'format' => 'raw',
                         //'contentOptions' => ['title' => 'text-center'],
@@ -307,7 +305,7 @@ JS;
 
                     [
                         'label' => 'Tasks Result for Period',
-                        'value' => function(\common\models\Employee $model) use ($searchModel) {
+                        'value' => function (\common\models\Employee $model) use ($searchModel) {
                             return $model->getTaskStats($searchModel->timeStart, $searchModel->timeEnd);
                         },
                         'format' => 'raw',
@@ -415,7 +413,7 @@ JS;
 
                 ]
             ])
-            ?>
+?>
 
 
         </div>

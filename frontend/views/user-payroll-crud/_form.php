@@ -24,7 +24,7 @@ use yii\widgets\ActiveForm;
 
             <?= $form->field($model, 'ups_month')->dropDownList(\sales\helpers\DateHelper::getMonthList(), ['prompt' => '--']) ?>
 
-			<?= $form->field($model, 'ups_year')->input('number') ?>
+            <?= $form->field($model, 'ups_year')->input('number') ?>
 
             <?= $form->field($model, 'ups_base_amount')->textInput(['maxlength' => true, 'type' => 'number', 'step' => 0.01]) ?>
 

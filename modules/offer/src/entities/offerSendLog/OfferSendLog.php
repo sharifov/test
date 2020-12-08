@@ -74,7 +74,7 @@ class OfferSendLog extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Employee::class, ['id' => 'ofsndl_created_user_id']);
     }
-    
+
     public function getOffer(): ActiveQuery
     {
         return $this->hasOne(Offer::class, ['of_id' => 'ofsndl_offer_id']);

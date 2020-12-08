@@ -1,4 +1,5 @@
 <?php
+
 namespace sales\model\user\entity\userConnection\events;
 
 use common\models\CallUserAccess;
@@ -69,5 +70,4 @@ class UserConnectionEvents extends Component
 //            }
 //        }
     }
-
 }

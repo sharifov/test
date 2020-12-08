@@ -1,11 +1,13 @@
 <?php
 
+use sales\entities\chat\ChatExtendedGraphsSearch;
+
 /**
  * @var $viewModel \sales\viewModel\chat\ViewModelChatExtendedGraph
  */
 ?>
 
-<?php if ($viewModel->preparedData): ?>
+<?php if ($viewModel->preparedData) : ?>
     <div class="btn-group" role="group">
         <button id="lineType" class="btn btn-outline-secondary btn-group ml-2" value="LineChart"><i class="fa fa-line-chart blue"></i></button>
         <button id="columnType" class="btn btn-outline-secondary btn-group" value="ColumnChart"><i class="fa fa-bar-chart blue"></i></button>
@@ -15,12 +17,13 @@
     <script type="text/javascript">
         $(document).ready(function () {
             var graphData = <?= $viewModel->preparedData ?>;
-
+            let timeRange = '<?= $viewModel->chatExtendedGraphsSearch->createTimeRange ?>';
+            let groupBy = 'Grouped by ' + '<?= ChatExtendedGraphsSearch::DATE_FORMAT_TEXT[$viewModel->chatExtendedGraphsSearch->graphGroupBy] ?>';
             google.charts.load('current', {'packages': ['corechart', 'bar']});
             google.charts.setOnLoadCallback(function () {
                 //var colors = ['#8ec5ff', '#dd4b4e', '#587ca6'];
                 var options = {
-                    title: 'Dynamic of New Initiated Chats by Client / Agent',
+                    title: 'Dynamic of New Initiated Chats by Client / Agent: ' + timeRange + ' ' + groupBy,
                     chartArea: {width: '95%', right: 10},
                     textStyle: {
                         color: '#596b7d'
@@ -92,7 +95,7 @@
         'viewModel' => $viewModel,
     ]) ?>
 
-<?php else: ?>
+<?php else : ?>
     <div class="row">
         <div class="col-md-12 text-center">
             <p style="margin: 0;">Not Found Data</p>

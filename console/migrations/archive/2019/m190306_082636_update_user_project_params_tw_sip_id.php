@@ -4,7 +4,6 @@ use yii\db\Migration;
 use common\models\Employee;
 use common\models\UserProfile;
 
-
 /**
  * Class m190306_082636_update_user_project_params_tw_sip_id
  */
@@ -20,14 +19,14 @@ class m190306_082636_update_user_project_params_tw_sip_id extends Migration
         $items = [];
         $dtNow = new \DateTime('now');
         $dateFormatNow = $dtNow->format("Y-m-d H:i:s");
-        if(count($users)) {
-            foreach ($users AS $user) {
+        if (count($users)) {
+            foreach ($users as $user) {
                 $upps = $user->userProjectParams;
-                if(count($upps)) {
-                    foreach ($upps AS $upp) {
-                        if(!isset($items[$user->id]) && $upp->upp_tw_sip_id && (strlen($upp->upp_tw_sip_id) > 2)) {
+                if (count($upps)) {
+                    foreach ($upps as $upp) {
+                        if (!isset($items[$user->id]) && $upp->upp_tw_sip_id && (strlen($upp->upp_tw_sip_id) > 2)) {
                             $items[$user->id] = $upp->upp_tw_sip_id;
-                            if(!$user->userProfile) {
+                            if (!$user->userProfile) {
                                 $userProfile = new UserProfile();
                                 $userProfile->up_call_type_id = 2;
                                 $userProfile->up_user_id = $user->id;
@@ -50,7 +49,6 @@ class m190306_082636_update_user_project_params_tw_sip_id extends Migration
      */
     public function safeDown()
     {
-        $this->addColumn('{{%user_project_params}}', 'upp_tw_sip_id', $this->string(100) );
+        $this->addColumn('{{%user_project_params}}', 'upp_tw_sip_id', $this->string(100));
     }
-
 }

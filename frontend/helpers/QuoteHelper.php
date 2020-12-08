@@ -67,7 +67,6 @@ class QuoteHelper
     public static function formattedRanking(?array $meta, string $class = 'quote__badge bg-info'): string
     {
         if (!empty($meta['rank'])) {
-
             $rank = number_format($meta['rank'], 1, '.', '');
             $rank = ($rank === '10.0') ? 10 : $rank;
 

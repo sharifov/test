@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $lead Lead
  * @var $this \yii\web\View

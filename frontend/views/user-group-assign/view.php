@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model common\models\UserGroupAssign */
 
-$this->title = ($model->ugsUser ? $model->ugsUser->username : '').' / '.($model->ugsGroup ? $model->ugsGroup->ug_name : '');
+$this->title = ($model->ugsUser ? $model->ugsUser->username : '') . ' / ' . ($model->ugsGroup ? $model->ugsGroup->ug_name : '');
 $this->params['breadcrumbs'][] = ['label' => 'User Group Assigns', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -31,14 +31,14 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'ugs_user_id',
-                'value' => function(\common\models\UserGroupAssign $model) {
+                'value' => function (\common\models\UserGroupAssign $model) {
                     return $model->ugsUser ? $model->ugsUser->username : '-' ;
                 },
             ],
 
             [
                 'attribute' => 'ugs_group_id',
-                'value' => function(\common\models\UserGroupAssign $model) {
+                'value' => function (\common\models\UserGroupAssign $model) {
                     return $model->ugsGroup ? $model->ugsGroup->ug_name : '-' ;
                 },
             ],
@@ -46,8 +46,8 @@ $this->params['breadcrumbs'][] = $this->title;
             //'ugs_updated_dt',
             [
                 'attribute' => 'ugs_updated_dt',
-                'value' => function(\common\models\UserGroupAssign $model) {
-                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->ugs_updated_dt));
+                'value' => function (\common\models\UserGroupAssign $model) {
+                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->ugs_updated_dt));
                 },
                 'format' => 'html',
             ],

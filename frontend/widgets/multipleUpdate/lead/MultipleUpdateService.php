@@ -28,8 +28,7 @@ class MultipleUpdateService
     public function __construct(
         LeadStateService $leadStateService,
         QCallService $qCallService
-    )
-    {
+    ) {
         $this->leadStateService = $leadStateService;
         $this->qCallService = $qCallService;
         $this->report = [];
@@ -44,7 +43,6 @@ class MultipleUpdateService
         $creatorId = $form->authUserId();
 
         foreach ($form->ids as $leadId) {
-
             if (!$lead = Lead::findOne($leadId)) {
                 $this->addMessage('Not found Lead: ' . $leadId);
                 continue;
@@ -74,7 +72,6 @@ class MultipleUpdateService
             } else {
                 \Yii::warning('Undefined action for multi update ', 'lead\MultipleUpdateService:undefinedStatus:LeadId:' . $lead->id);
             }
-
         }
 
         return $this->report;
@@ -146,7 +143,7 @@ class MultipleUpdateService
             }
         } elseif ($lead->isNew()) {
             try {
-                $this->leadStateService->new($lead, $newOwner->id, $creatorId,$form->message);
+                $this->leadStateService->new($lead, $newOwner->id, $creatorId, $form->message);
                 $this->addMessage($this->changeOwnerMessage($lead, $newOwner->userName));
             } catch (\DomainException $e) {
                 $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());

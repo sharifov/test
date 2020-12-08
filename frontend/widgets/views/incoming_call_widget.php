@@ -56,20 +56,18 @@ use yii\widgets\Pjax;
 
 <?php Pjax::begin(['id' => 'incoming-call-pjax', 'timeout' => 10000, 'enablePushState' => false, 'enableReplaceState' => false, 'options' => []])?>
 
-    <?php if ($directCallUserAccessList || $generalCallUserAccessList):?>
-
-    <?php if(($generalCallUserAccessList || ($directCallUserAccessList && $userModel->isCallFree() && $userModel->isCallStatusReady())) && $onSound): ?>
+    <?php if ($directCallUserAccessList || $generalCallUserAccessList) :?>
+        <?php if (($generalCallUserAccessList || ($directCallUserAccessList && $userModel->isCallFree() && $userModel->isCallStatusReady())) && $onSound) : ?>
         <audio id="incomingCallAudio" loop="loop" style="display: none;" <?= $userModel->userStatus->us_is_on_call ? 'muted' : '' ?> ><source src="/js/sounds/incoming_call.mp3" type="audio/mpeg"></audio>
-		<?php
+            <?php
             //$this->registerJs('ion.sound.play("incoming_call", {loop: 10});', \yii\web\View::POS_READY);
             $this->registerJs('getVisible();', \yii\web\View::POS_READY);
-        ?>
-    <?php endif; ?>
+            ?>
+        <?php endif; ?>
 
     <div id="incoming-call-widget" style="background-color: rgba(255,255,255,.3);">
-        <?php if ($directCallUserAccessList):?>
-
-            <?php foreach ($directCallUserAccessList as $directCallUserAccess):
+        <?php if ($directCallUserAccessList) :?>
+            <?php foreach ($directCallUserAccessList as $directCallUserAccess) :
                     $call = $directCallUserAccess->cuaCall;
 
 
@@ -78,40 +76,50 @@ use yii\widgets\Pjax;
                     <div class="col-md-4" style="padding-top: 5px;">
                         <?php //=$call->c_id?>
 
-                        <?php if($call->isHold()):?> <span class="badge badge-danger">Hold</span> <?php endif; ?>
-                        <?php if($call->cProject):?> <span class="badge badge-info"><?= Html::encode($call->cProject->name)?></span> <?php endif; ?>
-                        <?php if($call->cDep):?> <span class="badge badge-info"><?= Html::encode($call->cDep->dep_name)?></span> <?php endif; ?>
-                        <?php if($call->c_source_type_id):?> <span class="label label-warning"><?= Html::encode($call->getSourceName())?></span> <?php endif; ?>
-                        <?php if($call->c_language_id):?> <span class="label label-default"><?= Html::encode($call->c_language_id)?></span> <?php endif; ?>
+                        <?php if ($call->isHold()) :
+                            ?> <span class="badge badge-danger">Hold</span> <?php
+                        endif; ?>
+                        <?php if ($call->cProject) :
+                            ?> <span class="badge badge-info"><?= Html::encode($call->cProject->name)?></span> <?php
+                        endif; ?>
+                        <?php if ($call->cDep) :
+                            ?> <span class="badge badge-info"><?= Html::encode($call->cDep->dep_name)?></span> <?php
+                        endif; ?>
+                        <?php if ($call->c_source_type_id) :
+                            ?> <span class="label label-warning"><?= Html::encode($call->getSourceName())?></span> <?php
+                        endif; ?>
+                        <?php if ($call->c_language_id) :
+                            ?> <span class="label label-default"><?= Html::encode($call->c_language_id)?></span> <?php
+                        endif; ?>
 
                     </div>
                     <div class="col-md-5 text-right" style="padding-top: 3px; padding-bottom: 4px; ">
 
                         <?php
-                            if($call->c_lead_id && $call->cLead && $call->cLead->isOwner($userModel->id)) {
-                                echo '<span class="label label-info">Your Lead</span>';
-                            }
+                        if ($call->c_lead_id && $call->cLead && $call->cLead->isOwner($userModel->id)) {
+                            echo '<span class="label label-info">Your Lead</span>';
+                        }
                         ?>
 
                         <?php
-                            if($call->c_case_id && $call->cCase && $call->cCase->cs_user_id === $userModel->id) {
-                                echo '<span class="label label-info">Your Case</span>';
-                            }
+                        if ($call->c_case_id && $call->cCase && $call->cCase->cs_user_id === $userModel->id) {
+                            echo '<span class="label label-info">Your Case</span>';
+                        }
                         ?>
 
-                        <?php if ($call->isIn()): ?>
+                        <?php if ($call->isIn()) : ?>
                             <span class="badge badge-awake" style="font-size: 14px"><span class="fa fa-phone fa-spin"></span>
-                                <?php if ($call->c_client_id && $call->cClient && $call->cClient->first_name !== 'ClientName'): ?>
+                                <?php if ($call->c_client_id && $call->cClient && $call->cClient->first_name !== 'ClientName') : ?>
                                     <i title="phone: <?= Html::encode($call->c_from)?>"><?= Html::encode($call->cClient->full_name)?></i>
-                                <?php else: ?>
+                                <?php else : ?>
                                     <?= Html::encode($call->c_from)?>
                                 <?php endif;?>
                             </span>
-                        <?php elseif ($call->isOut() && $call->isHold()): ?>
+                        <?php elseif ($call->isOut() && $call->isHold()) : ?>
                             <span class="badge badge-awake" style="font-size: 14px"><span class="fa fa-phone fa-spin"></span>
-                            <?php if ($call->c_client_id && $call->cClient && $call->cClient->first_name !== 'ClientName'): ?>
+                            <?php if ($call->c_client_id && $call->cClient && $call->cClient->first_name !== 'ClientName') : ?>
                                 <i title="phone: <?= Html::encode($call->c_to)?>"><?= Html::encode($call->cClient->full_name)?></i>
-                            <?php else: ?>
+                            <?php else : ?>
                                 <?= Html::encode($call->c_to)?>
                             <?php endif;?>
                         </span>
@@ -126,11 +134,11 @@ use yii\widgets\Pjax;
                     </div>
                     <div class="col-md-3 text-right">
                         <?php
-                            if ($call->isHold()) {
-                                echo Html::a('<i class="fa fa-check"></i> Return', ['/call/incoming-call-widget', 'act' => 'return', 'call_id' => $call->c_id], ['onClick' => 'return incomingCallWidgetAccept($(this));', 'class' => 'btn btn-sm btn-warning']);
-                            } else {
-                                echo Html::a('<i class="fa fa-check"></i> Accept', ['/call/incoming-call-widget', 'act' => 'accept', 'call_id' => $call->c_id], ['onClick' => 'return incomingCallWidgetAccept($(this));', 'class' => 'btn btn-sm btn-success']);
-                            }
+                        if ($call->isHold()) {
+                            echo Html::a('<i class="fa fa-check"></i> Return', ['/call/incoming-call-widget', 'act' => 'return', 'call_id' => $call->c_id], ['onClick' => 'return incomingCallWidgetAccept($(this));', 'class' => 'btn btn-sm btn-warning']);
+                        } else {
+                            echo Html::a('<i class="fa fa-check"></i> Accept', ['/call/incoming-call-widget', 'act' => 'accept', 'call_id' => $call->c_id], ['onClick' => 'return incomingCallWidgetAccept($(this));', 'class' => 'btn btn-sm btn-success']);
+                        }
                         ?>
                         <?php //=\yii\helpers\Html::a('<i class="fa fa-angle-double-right"></i> Skip', ['call/incoming-call-widget', 'act' => 'skip', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-info', 'id' => 'btn-incoming-call-skip'])?>
                         <?php //=\yii\helpers\Html::a('<i class="fa fa-close"></i> Busy', ['call/incoming-call-widget', 'act' => 'busy', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-danger', 'id' => 'btn-incoming-call-busy'])?>
@@ -154,15 +162,14 @@ use yii\widgets\Pjax;
                 ?>
 
             <?php endforeach; ?>
-        <?php else: ?>
-
+        <?php else : ?>
             <?php
             //$this->registerJs('ion.sound.play("incoming_call"); ', \yii\web\View::POS_READY);
             ?>
         <?php endif; ?>
 
-        <?php if ($generalCallUserAccessList):?>
-            <?php foreach ($generalCallUserAccessList as $generalCallUserAccess):
+        <?php if ($generalCallUserAccessList) :?>
+            <?php foreach ($generalCallUserAccessList as $generalCallUserAccess) :
                 $call = $generalCallUserAccess->cuaCall;
 
                 if ((int) $call->c_source_type_id === \common\models\Call::SOURCE_DIRECT_CALL && $call->c_created_user_id != $userModel->id) {
@@ -172,28 +179,34 @@ use yii\widgets\Pjax;
                 ?>
                 <div class="row" style="margin-top: 4px;  margin-right: 0px; margin-left: 1px; /*background-color: rgba(135,200,72,0.26)*/">
                     <div class="col-md-4" style="padding-top: 5px;">
-                        <?php if($call->cProject):?> <span class="badge badge-info"><?= Html::encode($call->cProject->name)?></span> <?php endif; ?>
-                        <?php if($call->cDep):?> <span class="badge badge-info"><?= Html::encode($call->cDep->dep_name)?></span> <?php endif; ?>
-                        <?php if($call->c_source_type_id):?> <span class="label label-warning"><?= Html::encode($call->getSourceName())?></span> <?php endif; ?>
+                        <?php if ($call->cProject) :
+                            ?> <span class="badge badge-info"><?= Html::encode($call->cProject->name)?></span> <?php
+                        endif; ?>
+                        <?php if ($call->cDep) :
+                            ?> <span class="badge badge-info"><?= Html::encode($call->cDep->dep_name)?></span> <?php
+                        endif; ?>
+                        <?php if ($call->c_source_type_id) :
+                            ?> <span class="label label-warning"><?= Html::encode($call->getSourceName())?></span> <?php
+                        endif; ?>
                     </div>
                     <div class="col-md-4 text-right" style="padding-top: 3px; padding-bottom: 4px; ">
 
                         <?php
-                        if($call->c_lead_id && $call->cLead && $call->cLead->isOwner($userModel->id)) {
+                        if ($call->c_lead_id && $call->cLead && $call->cLead->isOwner($userModel->id)) {
                             echo '<span class="label label-info">Your Lead</span>';
                         }
                         ?>
 
                         <?php
-                        if($call->c_case_id && $call->cCase && $call->cCase->cs_user_id === $userModel->id) {
+                        if ($call->c_case_id && $call->cCase && $call->cCase->cs_user_id === $userModel->id) {
                             echo '<span class="label label-info">Your Case</span>';
                         }
                         ?>
 
                         <span class="badge badge-awake" style="font-size: 14px"><span class="fa fa-phone fa-spin"></span>
-                            <?php if ($call->c_client_id && $call->cClient && $call->cClient->first_name !== 'ClientName'): ?>
+                            <?php if ($call->c_client_id && $call->cClient && $call->cClient->first_name !== 'ClientName') : ?>
                                 <i title="phone: <?= Html::encode($call->c_from)?>"><?= Html::encode($call->cClient->full_name)?></i>
-                            <?php else: ?>
+                            <?php else : ?>
                                 <?= Html::encode($call->c_from)?>
                             <?php endif;?>
                         </span>
@@ -215,7 +228,7 @@ use yii\widgets\Pjax;
             <?php endforeach; ?>
 
 
-        <?php else: ?>
+        <?php else : ?>
             <?php
             //$this->registerJs('ion.sound.play("incoming_call"); ', \yii\web\View::POS_READY);
             ?>

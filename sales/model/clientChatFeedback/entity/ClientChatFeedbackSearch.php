@@ -16,7 +16,8 @@ class ClientChatFeedbackSearch extends ClientChatFeedback
     {
         return [
             [['ccf_id', 'ccf_client_chat_id', 'ccf_user_id', 'ccf_client_id', 'ccf_rating'], 'integer'],
-            [['ccf_message', 'ccf_created_dt', 'ccf_updated_dt'], 'safe'],
+            [['ccf_message'], 'safe'],
+            [['ccf_created_dt', 'ccf_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -26,7 +27,7 @@ class ClientChatFeedbackSearch extends ClientChatFeedback
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['ccf_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['ccf_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -49,11 +50,11 @@ class ClientChatFeedbackSearch extends ClientChatFeedback
 
         $query->andFilterWhere(['like', 'ccf_message', $this->ccf_message]);
 
-        if ($this->ccf_created_dt){
+        if ($this->ccf_created_dt) {
             $query->andFilterWhere(['>=', 'ccf_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ccf_created_dt))])
                 ->andFilterWhere(['<=', 'ccf_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ccf_created_dt) + 3600 * 24)]);
         }
-        if ($this->ccf_updated_dt){
+        if ($this->ccf_updated_dt) {
             $query->andFilterWhere(['>=', 'ccf_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ccf_updated_dt))])
                 ->andFilterWhere(['<=', 'ccf_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ccf_updated_dt) + 3600 * 24)]);
         }

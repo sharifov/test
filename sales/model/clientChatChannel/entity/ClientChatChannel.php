@@ -38,6 +38,7 @@ use yii\helpers\Json;
  * @property string|null $ccc_settings
  * @property array $settings
  * @property bool $ccc_registered
+ * @property bool $ccc_default_device
  *
  * @property Employee $cccCreatedUser
  * @property Department $cccDep
@@ -83,7 +84,9 @@ class ClientChatChannel extends \yii\db\ActiveRecord
             ['ccc_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ccc_created_user_id' => 'id']],
 
             ['ccc_default', 'integer'],
-            ['ccc_frontend_enabled', 'boolean'],
+            [['ccc_frontend_enabled', 'ccc_default_device'], 'boolean'],
+
+            ['ccc_default_device', 'validateDefaultDevice'],
 
             ['ccc_dep_id', 'integer'],
             ['ccc_dep_id', 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['ccc_dep_id' => 'dep_id']],
@@ -196,6 +199,7 @@ class ClientChatChannel extends \yii\db\ActiveRecord
             'ccc_frontend_enabled' => 'Frontend Enabled',
             'ccc_settings' => 'Settings',
             'ccc_registered' => 'Registered',
+            'ccc_default_device' => 'Default Device'
         ];
     }
 
@@ -226,19 +230,19 @@ class ClientChatChannel extends \yii\db\ActiveRecord
     /**
      * @return array
      */
-    public static function getList() : array
+    public static function getList(): array
     {
         $data = self::find()->orderBy(['ccc_name' => SORT_ASC])->asArray()->all();
         return ArrayHelper::map($data, 'ccc_id', 'ccc_name');
     }
 
-    public static function getListWithNames() : array
+    public static function getListWithNames(): array
     {
         $data = self::find()->where('LENGTH(ccc_name) > 0')->distinct()->orderBy(['ccc_name' => SORT_ASC])->asArray()->all();
         return ArrayHelper::map($data, 'ccc_name', 'ccc_name');
     }
 
-    public static function getListWithFrontedNames() : array
+    public static function getListWithFrontedNames(): array
     {
         $data = self::find()->where('LENGTH(ccc_frontend_name) > 0')->distinct()->orderBy(['ccc_frontend_name' => SORT_ASC])->asArray()->all();
         return ArrayHelper::map($data, 'ccc_frontend_name', 'ccc_frontend_name');
@@ -279,8 +283,9 @@ class ClientChatChannel extends \yii\db\ActiveRecord
                     'id' => $channelItem->ccc_id,
                     'name' => $translateName ?: $channelItem->ccc_frontend_name,
                     'priority' => $channelItem->ccc_priority,
-                    'default' => (boolean) $channelItem->ccc_default,
-                    'enabled' => (boolean) $channelItem->ccc_frontend_enabled,
+                    'default' => (bool) $channelItem->ccc_default,
+                    'enabled' => (bool) $channelItem->ccc_frontend_enabled,
+                    'defaultDevice' => (bool) $channelItem->ccc_default_device,
                     'settings' => $settings
                 ];
             }
@@ -322,6 +327,13 @@ class ClientChatChannel extends \yii\db\ActiveRecord
 
     public static function getPubSubKey(?int $channelId): string
     {
-        return 'channel-' . (int) $channelId;
+        return 'chat-channel-' . (int) $channelId;
+    }
+
+    public function validateDefaultDevice($attribute, $params)
+    {
+        if (self::find()->where(['ccc_project_id' => $this->ccc_project_id])->andWhere(['ccc_default_device' => true])->exists() && $this->ccc_default_device && $this->isNewRecord) {
+            $this->addError($attribute, 'Default Device already set for project ' . ($this->cccProject ? $this->cccProject->name : ''));
+        }
     }
 }

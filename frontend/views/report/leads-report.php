@@ -1,4 +1,5 @@
 <?php
+
 use yii\helpers\Html;
 use kartik\grid\GridView;
 use sales\access\ListsAccess;
@@ -28,7 +29,7 @@ $list = new ListsAccess(Yii::$app->user->id);
                 <div class="clearfix"></div>
             </div>
             <div class="x_content" style="display: block">
-                <?= $this->render('_search_leads_report' , ['model' => $searchModel, 'list' => $list]);  ?>
+                <?= $this->render('_search_leads_report', ['model' => $searchModel, 'list' => $list]);  ?>
             </div>
         </div>
     </div>
@@ -52,7 +53,7 @@ $list = new ListsAccess(Yii::$app->user->id);
         [
             'label' => 'New Total',
             'attribute' => 'newTotal',
-            'value' => static function($data) {
+            'value' => static function ($data) {
                 return $data['newTotal'] ?: '-';
             },
             'contentOptions' => [
@@ -62,7 +63,7 @@ $list = new ListsAccess(Yii::$app->user->id);
         [
             'label' => 'Inbox Leads Taken',
             'attribute' => 'inboxLeadsTaken',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['inboxLeadsTaken'] ?: '-';
             },
             'contentOptions' => [
@@ -72,7 +73,7 @@ $list = new ListsAccess(Yii::$app->user->id);
         [
             'label' => 'Call Leads Taken',
             'attribute' => 'callLeadsTaken',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['callLeadsTaken'] ?: '-';
             },
             'contentOptions' => [
@@ -82,7 +83,7 @@ $list = new ListsAccess(Yii::$app->user->id);
         [
             'label' => 'Redial Leads Taken',
             'attribute' => 'redialLeadsTaken',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['redialLeadsTaken'] ?: '-';
             },
             'contentOptions' => [
@@ -92,7 +93,7 @@ $list = new ListsAccess(Yii::$app->user->id);
         [
             'label' => 'Leads Created',
             'attribute' => 'leadsCreated',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['leadsCreated'] ?: '-';
             },
             'contentOptions' => [
@@ -102,7 +103,7 @@ $list = new ListsAccess(Yii::$app->user->id);
         [
             'label' => 'Leads Cloned',
             'attribute' => 'leadsCloned',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['leadsCloned'] ?: '-';
             },
             'contentOptions' => [
@@ -112,7 +113,7 @@ $list = new ListsAccess(Yii::$app->user->id);
         [
             'label' => 'Follow Up Total',
             'attribute' => 'followUpTotal',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['followUpTotal'] ?: '-';
             },
             'contentOptions' => [
@@ -122,7 +123,7 @@ $list = new ListsAccess(Yii::$app->user->id);
         [
             'label' => 'To Follow Up',
             'attribute' => 'toFollowUp',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['toFollowUp'] ?: '-';
             },
             'contentOptions' => [
@@ -132,7 +133,7 @@ $list = new ListsAccess(Yii::$app->user->id);
         [
             'label' => 'Follow Up Leads Taken',
             'attribute' => 'followUpLeadsTaken',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['followUpLeadsTaken'] ?: '-';
             },
             'contentOptions' => [
@@ -151,7 +152,7 @@ $list = new ListsAccess(Yii::$app->user->id);
         [
             'label' => 'Trash Leads',
             'attribute' => 'trashLeads',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['trashLeads'] ?: '-';
             },
             'contentOptions' => [
@@ -161,7 +162,7 @@ $list = new ListsAccess(Yii::$app->user->id);
         [
             'label' => 'Sold Leads',
             'attribute' => 'soldLeads',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return $data['soldLeads'] ?: '-';
             },
             'contentOptions' => [
@@ -171,7 +172,7 @@ $list = new ListsAccess(Yii::$app->user->id);
         [
             'label' => 'Profit',
             'attribute' => 'profit',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return number_format($data['profit']) ?: '-';
             },
             'contentOptions' => [
@@ -181,7 +182,7 @@ $list = new ListsAccess(Yii::$app->user->id);
         [
             'label' => 'Tips',
             'attribute' => 'tips',
-            'value' => function($data) {
+            'value' => function ($data) {
                 return number_format($data['tips']) ?: '-';
             },
             'contentOptions' => [
@@ -240,7 +241,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             'json' => [],
         ],
         'toolbar' => [
-            'content' =>'<div class="btn-group">' . Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['report/leads-report'], ['class' => 'btn btn-outline-secondary', 'title'=>'Reset Grid']) .'</div>',
+            'content' => '<div class="btn-group">' . Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['report/leads-report'], ['class' => 'btn btn-outline-secondary', 'title' => 'Reset Grid']) . '</div>',
             '{export}',
             $fullExportMenu,
         ],

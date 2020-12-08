@@ -22,8 +22,8 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
         [
             'attribute' => 'lead_id',
             'label' => 'Lead ID',
-            'value' => function(\common\models\LeadFlow $model) {
-                return $model->lead_id ? Html::a($model->lead_id,[
+            'value' => function (\common\models\LeadFlow $model) {
+                return $model->lead_id ? Html::a($model->lead_id, [
                     'lead/view',
                     'gid' => $model->lead->gid
                 ]) : '-';
@@ -45,8 +45,8 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
         [
             'label' => 'Reason',
             'value' => static function (\common\models\LeadFlow $model) {
-            return $model->lead ? $model->lead->description : '-';
-        },
+                return $model->lead ? $model->lead->description : '-';
+            },
         'format' => 'raw',
         ],
     ];

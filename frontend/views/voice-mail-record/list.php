@@ -2,12 +2,12 @@
 
 use common\components\grid\BooleanColumn;
 use common\components\grid\DateTimeColumn;
-
 use sales\model\voiceMailRecord\entity\VoiceMailRecord;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\voiceMailRecord\entity\search\VoiceMailRecordSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -30,15 +30,15 @@ $this->params['breadcrumbs'][] = $this->title;
                     'label' => 'Recording',
                     'value' => static function (VoiceMailRecord $model) {
                         {
-                            if (!$model->vmr_record_sid) {
-                                return '-';
-                            }
+                        if (!$model->vmr_record_sid) {
+                            return '-';
+                        }
 
-                            if ($model->vmr_duration && $model->vmr_duration >= 3600) {
-                                $format = 'H:i:s';
-                            } else {
-                                $format = 'i:s';
-                            }
+                        if ($model->vmr_duration && $model->vmr_duration >= 3600) {
+                            $format = 'H:i:s';
+                        } else {
+                            $format = 'i:s';
+                        }
 
                             return  \yii\helpers\Html::button(gmdate($format, $model->vmr_duration) . ' <i class="fa fa-volume-up"></i>', ['title' => $model->vmr_duration . ' (sec)', 'class' => 'btn btn-' . ($model->vmr_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url' . ($model->vmr_new ? ' btn-voice-mail-showed' : ''), 'data-call-id' => $model->vmr_call_id, 'data-source_src' => $model->getRecordingUrl()]);
                         }

@@ -6,6 +6,7 @@ use sales\model\call\useCase\reports\CallReport;
 use sales\model\call\useCase\reports\Credential;
 use yii\console\Controller;
 use yii\console\ExitCode;
+use yii\console\widgets\Table;
 use yii\helpers\Console;
 
 class CallReportController extends Controller
@@ -19,7 +20,10 @@ class CallReportController extends Controller
 
     public function actionPriceline()
     {
-        printf("\n --- Start %s ---\n\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+        printf(
+            "\n --- Start %s ---\n\n",
+            $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW)
+        );
 
         if ($this->date === null) {
             $this->date = date('Y-m-d', strtotime('-1 day'));
@@ -29,7 +33,10 @@ class CallReportController extends Controller
 
         if (!$this->validateDate($this->date)) {
             echo 'Date is invalid: ' . $this->date . PHP_EOL;
-            printf("\n --- End %s ---\n\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+            printf(
+                "\n --- End %s ---\n\n",
+                $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW)
+            );
             return ExitCode::UNSPECIFIED_ERROR;
         }
 
@@ -51,8 +58,28 @@ class CallReportController extends Controller
         ];
         $fileName = 'Call_Priceline_report_' . $this->date . '.csv';
 
-        $report->generate($phones, $fileName, $this->date);
-        echo 'OK' . PHP_EOL;
+        $results = $report->generate($phones, $fileName, $this->date);
+
+        if ($results) {
+            unset($results[0]);
+        }
+
+        $rows = [];
+        foreach ($results as $result) {
+            $rows[] = [
+                $result['Time Stamp (UTC)'],
+                $result['Call ID'],
+                $result['Call Length'],
+                $result['Phone number'],
+            ];
+        }
+
+        echo 'Saved in file: ' . $fileName . PHP_EOL;
+
+        echo Table::widget([
+            'headers' => ['Time Stamp (UTC)', 'Call ID', 'Call Length', 'Phone number'],
+            'rows' => $rows,
+        ]);
 
         printf("\n --- End %s ---\n\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
         return ExitCode::OK;

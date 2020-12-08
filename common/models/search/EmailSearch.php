@@ -40,8 +40,9 @@ class EmailSearch extends Email
             [['datetime_start', 'datetime_end'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['e_id', 'e_reply_id', 'e_lead_id', 'e_project_id', 'e_type_id', 'e_template_type_id', 'e_communication_id', 'e_is_deleted', 'e_is_new', 'e_delay', 'e_priority', 'e_status_id', 'e_created_user_id', 'e_updated_user_id', 'e_inbox_email_id', 'email_type_id', 'supervision_id', 'e_case_id', 'e_client_id'], 'integer'],
-			[['e_template_type_name'], 'string'],
-            [['e_email_from', 'e_email_to', 'e_email_cc', 'e_email_bc', 'e_email_subject', 'e_email_body_text', 'e_attach', 'e_email_data', 'e_language_id', 'e_status_done_dt', 'e_read_dt', 'e_error_message', 'e_created_dt', 'e_updated_dt', 'e_message_id', 'e_ref_message_id', 'e_inbox_created_dt'], 'safe'],
+            [['e_template_type_name'], 'string'],
+            [['e_email_from', 'e_email_to', 'e_email_cc', 'e_email_bc', 'e_email_subject', 'e_email_body_text', 'e_attach', 'e_email_data', 'e_language_id', 'e_status_done_dt', 'e_read_dt', 'e_error_message', 'e_message_id', 'e_ref_message_id', 'e_inbox_created_dt'], 'safe'],
+            [['e_created_dt', 'e_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -74,27 +75,27 @@ class EmailSearch extends Email
         $query = self::find()->with('eCreatedUser', 'eProject', 'eTemplateType');
 
         $query->addSelect([
-        	'e_id',
-			'e_lead_id',
-			'e_case_id',
-			'e_project_id',
-			'e_email_from',
-			'e_email_to',
-			'e_type_id',
-			'e_template_type_id',
-			'e_language_id',
-			'e_communication_id',
-			'e_status_id',
-			'e_created_user_id',
-			'e_created_dt',
-			'e_client_id'
-		]);
+            'e_id',
+            'e_lead_id',
+            'e_case_id',
+            'e_project_id',
+            'e_email_from',
+            'e_email_to',
+            'e_type_id',
+            'e_template_type_id',
+            'e_language_id',
+            'e_communication_id',
+            'e_status_id',
+            'e_created_user_id',
+            'e_created_dt',
+            'e_client_id'
+        ]);
 
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['e_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['e_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -108,7 +109,7 @@ class EmailSearch extends Email
             return $dataProvider;
         }
 
-        if($this->datetime_start && $this->datetime_end){
+        if ($this->datetime_start && $this->datetime_end) {
             $query->andFilterWhere(['>=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
                 ->andFilterWhere(['<=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         }
@@ -117,7 +118,7 @@ class EmailSearch extends Email
             $query->andFilterWhere(['DATE(e_created_dt)' => date('Y-m-d', strtotime($this->e_created_dt))]);
         }
 
-        if($this->supervision_id > 0) {
+        if ($this->supervision_id > 0) {
             $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
             $query->andWhere(['IN', 'e_created_user_id', $subQuery]);
@@ -148,15 +149,15 @@ class EmailSearch extends Email
             'e_email_from' => $this->e_email_from,
             'e_email_to' => $this->e_email_to,
             'e_language_id' => $this->e_language_id,
-			'e_client_id' => $this->e_client_id,
+            'e_client_id' => $this->e_client_id,
         ]);
 
         if ($this->e_template_type_name) {
-        	$templateIds = EmailTemplateType::find()->select(['DISTINCT(etp_id) as e_template_type_id'])->where(['like', 'etp_name', $this->e_template_type_name])->asArray()->all();
-        	if($templateIds) {
-				$query->andFilterWhere(['e_template_type_id' => $templateIds]);
-			}
-		}
+            $templateIds = EmailTemplateType::find()->select(['DISTINCT(etp_id) as e_template_type_id'])->where(['like', 'etp_name', $this->e_template_type_name])->asArray()->all();
+            if ($templateIds) {
+                $query->andFilterWhere(['e_template_type_id' => $templateIds]);
+            }
+        }
 
         $query
             ->andFilterWhere(['like', 'e_email_cc', $this->e_email_cc])
@@ -170,22 +171,22 @@ class EmailSearch extends Email
             ->andFilterWhere(['like', 'e_ref_message_id', $this->e_ref_message_id]);
 
 //        $dataProvider->setSort([
-//        	'attributes' => array_merge(
-//        		$dataProvider->getSort()->attributes,
-//				[
-//					'e_template_type_name' => [
-//						'asc' => ['e_template_type_id' => SORT_ASC],
-//						'desc' => ['e_template_type_id' => SORT_DESC],
-//						'label'   => 'e_template_type_id',
-//						'default' => SORT_DESC,
-//					]
-//				]
-//			)
-//		]);
+//          'attributes' => array_merge(
+//              $dataProvider->getSort()->attributes,
+//              [
+//                  'e_template_type_name' => [
+//                      'asc' => ['e_template_type_id' => SORT_ASC],
+//                      'desc' => ['e_template_type_id' => SORT_DESC],
+//                      'label'   => 'e_template_type_id',
+//                      'default' => SORT_DESC,
+//                  ]
+//              ]
+//          )
+//      ]);
 
-		$dataProvider->totalCount = $query->count('distinct e_id');
+        $dataProvider->totalCount = $query->count('distinct e_id');
 
-		return $dataProvider;
+        return $dataProvider;
     }
 
     /**
@@ -201,7 +202,7 @@ class EmailSearch extends Email
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['e_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['e_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 12,
             ],
@@ -209,30 +210,25 @@ class EmailSearch extends Email
 
         $this->load($params);
 
-        if(isset($params['email_type_id']) && $params['email_type_id'] > 0) {
-
+        if (isset($params['email_type_id']) && $params['email_type_id'] > 0) {
             $this->email_type_id = (int) $params['email_type_id'];
 
-            if($this->email_type_id == Email::FILTER_TYPE_ALL) {
+            if ($this->email_type_id == Email::FILTER_TYPE_ALL) {
                 $query->where(['e_is_deleted' => false]);
-            }
-            elseif($this->email_type_id == Email::FILTER_TYPE_INBOX) {
-               $query->where(['e_type_id' => Email::TYPE_INBOX, 'e_is_deleted' => false]);
-            }
-            elseif($this->email_type_id == Email::FILTER_TYPE_OUTBOX) {
+            } elseif ($this->email_type_id == Email::FILTER_TYPE_INBOX) {
+                $query->where(['e_type_id' => Email::TYPE_INBOX, 'e_is_deleted' => false]);
+            } elseif ($this->email_type_id == Email::FILTER_TYPE_OUTBOX) {
                 $query->where(['e_type_id' => Email::TYPE_OUTBOX, 'e_is_deleted' => false]);
-            }
-            elseif($this->email_type_id == Email::FILTER_TYPE_DRAFT) {
+            } elseif ($this->email_type_id == Email::FILTER_TYPE_DRAFT) {
                 $query->where(['e_type_id' => Email::TYPE_DRAFT, 'e_is_deleted' => false]);
-            }
-            elseif($this->email_type_id == Email::FILTER_TYPE_TRASH) {
+            } elseif ($this->email_type_id == Email::FILTER_TYPE_TRASH) {
                 $query->where(['e_is_deleted' => true]);
             }
         }
 
 
 
-        if(isset($params['EmailSearch']['user_id']) && $params['EmailSearch']['user_id'] > 0) {
+        if (isset($params['EmailSearch']['user_id']) && $params['EmailSearch']['user_id'] > 0) {
 //            $subQuery = UserProjectParams::find()->select(['upp_email'])->where(['upp_user_id' => $params['EmailSearch']['user_id']])->andWhere(['!=', 'upp_email', '']);
 //            $subQuery = UserProjectParams::find()->select(['el_email'])->joinWith('emailList', false, 'INNER JOIN')->where(['upp_user_id' => $params['EmailSearch']['user_id']]);
             $query->andWhere([
@@ -248,7 +244,7 @@ class EmailSearch extends Email
         }
 
 
-        if(isset($params['EmailSearch']['email']) && $params['EmailSearch']['email']) {
+        if (isset($params['EmailSearch']['email']) && $params['EmailSearch']['email']) {
             $params['EmailSearch']['email'] = strtolower(trim($params['EmailSearch']['email']));
             $query->andWhere(['or', ['e_email_from' => $params['EmailSearch']['email']], ['and', ['e_email_to' => $params['EmailSearch']['email']], ['e_type_id' => Email::TYPE_INBOX]]]);
         }
@@ -314,7 +310,7 @@ class EmailSearch extends Email
         $query->from(static::tableName());
         $query->where('e_status_id IS NOT NULL');
         $query->andWhere(['e_created_user_id' => $user_id]);
-        if($this->datetime_start && $this->datetime_end){
+        if ($this->datetime_start && $this->datetime_end) {
             $query->andWhere(['>=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))]);
             $query->andWhere(['<=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         }

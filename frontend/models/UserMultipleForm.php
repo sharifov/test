@@ -59,7 +59,7 @@ class UserMultipleForm extends Model
                 try {
                     $data = \yii\helpers\Json::decode($value);
 
-                    if(!is_array($data)) {
+                    if (!is_array($data)) {
                         $this->addError('user_list_json', 'Invalid JSON data for decode');
                         return null;
                     }
@@ -67,7 +67,7 @@ class UserMultipleForm extends Model
                     foreach ($data as $userId) {
                         $model = Employee::findOne($userId);
                         if (!$model) {
-                            $this->addError('user_list_json', 'Not found Employee ID: '.$userId);
+                            $this->addError('user_list_json', 'Not found Employee ID: ' . $userId);
                             return null;
                         }
                     }

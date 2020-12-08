@@ -1,4 +1,5 @@
 <?php
+
 /***
  * @var \sales\forms\clientChat\MultipleUpdateForm $formMultipleUpdate
  * @var string $alertMessage
@@ -12,38 +13,38 @@ use yii\widgets\Pjax;
 
 ?>
 
-<?php if (!$alertMessage): ?>
-<?php Pjax::begin([
+<?php if (!$alertMessage) : ?>
+    <?php Pjax::begin([
     'id' => 'chat-multiple-update',
     'enableReplaceState' => false,
     'enablePushState' => false,
     'timeout' => 5000,
     'clientOptions' => ['async' => false]
-]); ?>
+    ]); ?>
 
-<?php $form = ActiveForm::begin([
+    <?php $form = ActiveForm::begin([
     'id' => 'cc-submit-multiple-update-form',
     'options' => ['data-pjax' => 1],
     'enableClientValidation' => false
-]) ?>
+    ]) ?>
 
-<?php $form->errorSummary($formMultipleUpdate); ?>
+    <?php $form->errorSummary($formMultipleUpdate); ?>
 
-<?= $form->field($formMultipleUpdate, 'chatIds')->hiddenInput()->label(false); ?>
+    <?= $form->field($formMultipleUpdate, 'chatIds')->hiddenInput()->label(false); ?>
 
-<?= $form->field($formMultipleUpdate, 'statusId')->dropDownList(ClientChat::getStatusList(), ['prompt' => '---']) ?>
+    <?= $form->field($formMultipleUpdate, 'statusId')->dropDownList(ClientChat::getStatusList(), ['prompt' => '---']) ?>
 
 <div class="text-center">
     <?= Html::submitButton('<i class="fa fa-save"></i> Update', ['class' => 'btn btn-sm btn-success', 'id' => 'submit-multiple-update', 'data-pjax' => 1]) ?>
 </div>
 
-<?php ActiveForm::end() ?>
+    <?php ActiveForm::end() ?>
 
-<?php Pjax::end(); ?>
+    <?php Pjax::end(); ?>
 
-<?php
+    <?php
 
-$js = <<<JS
+    $js = <<<JS
 (function() {
     let btnHtml = '';
     $('#chat-multiple-update').on('pjax:end', function (data, xhr) {
@@ -55,10 +56,10 @@ $js = <<<JS
     });
 })();
 JS;
-$this->registerJs($js);
-?>
+    $this->registerJs($js);
+    ?>
 
-<?php else: ?>
+<?php else : ?>
     <?= \yii\bootstrap4\Alert::widget([
         'options' => [
             'class' => 'alert-danger',

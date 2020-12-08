@@ -13,7 +13,7 @@ class m200911_082917_add_column_settings_tbl_chat_channel extends Migration
         $this->addColumn('{{%client_chat_channel}}', 'ccc_frontend_enabled', $this->boolean()->defaultValue(false));
         $this->addColumn('{{%client_chat_channel}}', 'ccc_settings', $this->json());
 
-        $this->createIndex('IND-client_chat_channel-ccc_frontend_enabled','{{%client_chat_channel}}', 'ccc_frontend_enabled');
+        $this->createIndex('IND-client_chat_channel-ccc_frontend_enabled', '{{%client_chat_channel}}', 'ccc_frontend_enabled');
 
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
@@ -27,7 +27,7 @@ class m200911_082917_add_column_settings_tbl_chat_channel extends Migration
      */
     public function safeDown()
     {
-        $this->dropIndex('IND-client_chat_channel-ccc_frontend_enabled','{{%client_chat_channel}}');
+        $this->dropIndex('IND-client_chat_channel-ccc_frontend_enabled', '{{%client_chat_channel}}');
 
         $this->dropColumn('{{%client_chat_channel}}', 'ccc_settings');
         $this->dropColumn('{{%client_chat_channel}}', 'ccc_frontend_enabled');

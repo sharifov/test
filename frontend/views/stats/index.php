@@ -59,7 +59,7 @@ $user = Yii::$app->user->identity;
                     <td><i class="fa fa-users"></i>
                         <?php
                         $groupsValue = '';
-                        if( $groupsModel =  Yii::$app->user->identity->ugsGroups) {
+                        if ($groupsModel =  Yii::$app->user->identity->ugsGroups) {
                             $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
 
                             $groupsValueArr = [];
@@ -80,8 +80,7 @@ $user = Yii::$app->user->identity;
 
                         $projectList = Yii::$app->user->identity->projects;
 
-                        if($projectList) {
-
+                        if ($projectList) {
                             $groupsValueArr = [];
                             foreach ($projectList as $project) {
                                 $groupsValueArr[] = Html::tag('span', Html::encode($project->name), ['class' => 'label label-default']);
@@ -112,20 +111,20 @@ $user = Yii::$app->user->identity;
                 <div class="col-md-3">
                     <?php
                     echo  \kartik\daterange\DateRangePicker::widget([
-                        'model'=> $searchModel,
+                        'model' => $searchModel,
                         'attribute' => 'timeRange',
-                        'useWithAddon'=>true,
-                        'presetDropdown'=>true,
-                        'hideInput'=>true,
-                        'convertFormat'=>true,
+                        'useWithAddon' => true,
+                        'presetDropdown' => true,
+                        'hideInput' => true,
+                        'convertFormat' => true,
                         'startAttribute' => 'timeStart',
                         'endAttribute' => 'timeEnd',
-                        'pluginOptions'=>[
-                            'timePicker'=> true,
-                            'timePickerIncrement'=>1,
-                            'timePicker24Hour'=>true,
-                            'locale'=>[
-                                    'format'=>'Y-m-d H:i'
+                        'pluginOptions' => [
+                            'timePicker' => true,
+                            'timePickerIncrement' => 1,
+                            'timePicker24Hour' => true,
+                            'locale' => [
+                                    'format' => 'Y-m-d H:i'
                             ]
                         ]
                     ]);
@@ -208,7 +207,7 @@ $user = Yii::$app->user->identity;
 
                     [
                         'label' => 'Tasks Result for Period',
-                        'value' => function(\common\models\Employee $model) use ($searchModel) {
+                        'value' => function (\common\models\Employee $model) use ($searchModel) {
                             return $model->getTaskStats($searchModel->timeStart, $searchModel->timeEnd);
                         },
                         'format' => 'raw',
@@ -319,7 +318,7 @@ $user = Yii::$app->user->identity;
 
                 ]
             ])
-            ?>
+?>
         </div>
     </div>
     <?php Pjax::end(); ?>

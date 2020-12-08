@@ -24,7 +24,6 @@ class LeadTripTypeCalculator
         }
 
         if ($countSegments === 2) {
-
             reset($segments);
 
             $segmentOne = current($segments);
@@ -51,10 +50,8 @@ class LeadTripTypeCalculator
                     return Lead::TRIP_TYPE_ROUND_TRIP;
                 }
             }
-
         }
 
         return Lead::TRIP_TYPE_MULTI_DESTINATION;
     }
-
 }

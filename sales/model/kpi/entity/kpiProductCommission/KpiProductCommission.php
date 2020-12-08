@@ -35,28 +35,28 @@ class KpiProductCommission extends \yii\db\ActiveRecord
         return 'kpi_product_commission';
     }
 
-	/**
-	 * @return array
-	 */
-	public function behaviors(): array
-	{
-		return [
-			'timestamp' => [
-				'class' => TimestampBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['pc_created_dt', 'pc_updated_dt'],
-					ActiveRecord::EVENT_BEFORE_UPDATE => ['pc_updated_dt'],
-				],
-				'value' => date('Y-m-d H:i:s'),
-				'preserveNonEmptyValues' => true
-			],
-			'user' => [
-				'class' => BlameableBehavior::class,
-				'createdByAttribute' => 'pc_created_user_id',
-				'updatedByAttribute' => 'pc_updated_user_id',
-			],
-		];
-	}
+    /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['pc_created_dt', 'pc_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['pc_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s'),
+                'preserveNonEmptyValues' => true
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'pc_created_user_id',
+                'updatedByAttribute' => 'pc_updated_user_id',
+            ],
+        ];
+    }
 
     /**
      * {@inheritdoc}

@@ -11,7 +11,7 @@ use yii\helpers\Html;
 
 $this->title = 'Client Chat Room: ' . $clientChat->cch_rid;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chats QA', 'url' => ['index']];
-$this->params['breadcrumbs'][] = 'Room';
+$this->params['breadcrumbs'][] = 'Chat';
 
 ?>
 
@@ -20,7 +20,7 @@ $this->params['breadcrumbs'][] = 'Room';
     <div class="col-md-8">
         <h5><?= Html::encode($this->title) ?></h5>
         <div id="_rc-iframe-wrapper" style="height: 95%; width: 100%; position: relative; min-height: 740px;">
-            <?php if ($clientChat): ?>
+            <?php if ($clientChat) : ?>
                 <?php echo $this->render('../client-chat/partial/_chat_history', ['clientChat' => $clientChat]) ?>
             <?php endif; ?>
         </div>

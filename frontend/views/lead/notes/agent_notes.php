@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $this \yii\web\View
  * @var $lead \common\models\Lead
@@ -22,10 +23,10 @@ $user = Yii::$app->user->identity;
             <h2><i class="fa fa-sticky-note-o"></i> Notes (<?=$dataProviderNotes->query->count('message')?>)</h2>
             <ul class="nav navbar-right panel_toolbox">
                 <li>
-                    <?php if($lead->isProcessing() && ($lead->isOwner($user->id) || $user->isAdmin())): ?>
-                        <?php if(Yii::$app->request->get('act') === 'add-note-form'): ?>
+                    <?php if ($lead->isProcessing() && ($lead->isOwner($user->id) || $user->isAdmin())) : ?>
+                        <?php if (Yii::$app->request->get('act') === 'add-note-form') : ?>
                             <?php /*=Html::a('<i class="fa fa-minus-circle success"></i> Refresh', ['lead/view', 'gid' => $lead->gid])*/?>
-                        <?php else: ?>
+                        <?php else : ?>
                             <?=Html::a('<i class="fa fa-plus-circle success"></i> Add', ['lead/view', 'gid' => $lead->gid, 'act' => 'add-note-form'], ['id' => 'btn-notes-form'])?>
                         <?php endif; ?>
                     <?php endif; ?>
@@ -54,8 +55,7 @@ $user = Yii::$app->user->identity;
                 ],
             ]) ?>
 
-            <?php if(Yii::$app->request->get('act') === 'add-note-form'): ?>
-
+            <?php if (Yii::$app->request->get('act') === 'add-note-form') : ?>
                 <?php $form = ActiveForm::begin([
                     'id' => 'notes-form',
                     'method' => 'post',

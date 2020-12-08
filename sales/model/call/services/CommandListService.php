@@ -27,7 +27,6 @@ class CommandListService
 
         if (is_array($model->ccom_params_json) && !empty($model->ccom_params_json)) {
             foreach ($model->ccom_params_json as $key => $item) {
-
                 if (is_string($key)) {
                     continue;
                 }
@@ -43,11 +42,12 @@ class CommandListService
                     $childrenModel->ccom_params_json = $item;
 
                     if (!$childrenModel->save()) {
-                        Yii::error(VarDumper::dumpAsString($childrenModel->errors),
-                        'CommandListService:childrenSaver::save');
+                        Yii::error(
+                            VarDumper::dumpAsString($childrenModel->errors),
+                            'CommandListService:childrenSaver::save'
+                        );
                         $result['failed']++;
                     } else {
-
                         $items = (array) $model->ccom_params_json;
                         $items[$key]['additional']['model_id'] = $childrenModel->ccom_id;
                         $model->ccom_params_json = $items;
@@ -57,8 +57,10 @@ class CommandListService
                         }
                     }
                 } catch (\Throwable $throwable) {
-                    AppHelper::throwableLogger($throwable,
-                    'CommandListService:childrenSaver:throwable');
+                    AppHelper::throwableLogger(
+                        $throwable,
+                        'CommandListService:childrenSaver:throwable'
+                    );
                     $result['failed']++;
                 }
             }

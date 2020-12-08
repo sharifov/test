@@ -23,18 +23,18 @@ class ClientQuery extends ActiveQuery
     }
 
     public function byUuid(string $uuid): self
-	{
-		return $this->andWhere(['uuid' => $uuid]);
-	}
+    {
+        return $this->andWhere(['uuid' => $uuid]);
+    }
 
-	public function joinWithCcVisitor(string $visitorId): self
-	{
-		return $this->join('INNER JOIN', ClientChatVisitor::tableName(), 'ccv_client_id = id')
-			->join('INNER JOIN', ClientChatVisitorData::tableName(), 'cvd_visitor_rc_id = :visitorId and ccv_cvd_id = cvd_id', ['visitorId' => $visitorId]);
-	}
+    public function joinWithCcVisitor(string $visitorId): self
+    {
+        return $this->join('INNER JOIN', ClientChatVisitor::tableName(), 'ccv_client_id = id')
+            ->join('INNER JOIN', ClientChatVisitorData::tableName(), 'cvd_visitor_rc_id = :visitorId and ccv_cvd_id = cvd_id', ['visitorId' => $visitorId]);
+    }
 
-	public function byProject(int $projectId): ClientQuery
-	{
-		return $this->andWhere(['cl_project_id' => $projectId]);
-	}
+    public function byProject(int $projectId): ClientQuery
+    {
+        return $this->andWhere(['cl_project_id' => $projectId]);
+    }
 }

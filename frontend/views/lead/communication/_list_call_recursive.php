@@ -2,7 +2,7 @@
 
 use common\models\Employee;
 use yii\helpers\Html;
-use \common\models\Call;
+use common\models\Call;
 
 /* @var $callList Call[] */
 
@@ -10,16 +10,16 @@ use \common\models\Call;
 $user = Yii::$app->user->identity;
 
 ?>
-<?php if ($callList):?>
+<?php if ($callList) :?>
     <table class="table table-condensed" style="background-color: rgba(255, 255,255, .7)">
-        <?php foreach ($callList as $callItem):?>
+        <?php foreach ($callList as $callItem) :?>
             <tr>
                 <td style="width:80px">
-                    <?php if ($user->isAdmin()):?>
+                    <?php if ($user->isAdmin()) :?>
                         <u title="SID: <?=Html::encode($callItem->c_call_sid)?>"><?=Html::a($callItem->c_id, ['call/view', 'id' => $callItem->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u>
                     <?php endif; ?>
 
-                    <?php if ($callItem->cDep):?>
+                    <?php if ($callItem->cDep) :?>
                         <br>
                         <?= Html::encode($callItem->cDep->dep_name)?>
                     <?php endif; ?>
@@ -28,14 +28,16 @@ $user = Yii::$app->user->identity;
                     <?=$callItem->getStatusIcon()?>  <?=$callItem->getStatusName()?>
                 </td>
                 <td class="text-center" style="width: 70px">
-                    <?php if ($callItem->c_call_duration):?>
+                    <?php if ($callItem->c_call_duration) :?>
                         <span class="badge badge-warning" title="Duration: <?=Yii::$app->formatter->asDuration($callItem->c_call_duration)?>"><?=gmdate('i:s', $callItem->c_call_duration)?></span>
                     <?php endif;?>
                 </td>
                 <td>
-                    <?php if ($callItem->recordingUrl):?>
-                        <?=Html::button(gmdate('i:s', $callItem->c_recording_duration) . ' <i class="fa fa-play-circle-o"></i>',
-                            ['class' => 'btn btn-' . ($callItem->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $callItem->recordingUrl /*yii\helpers\Url::to(['call/record', 'sid' =>  $callItem->c_call_sid ])*/ ]) ?>
+                    <?php if ($callItem->recordingUrl) :?>
+                        <?=Html::button(
+                            gmdate('i:s', $callItem->c_recording_duration) . ' <i class="fa fa-play-circle-o"></i>',
+                            ['class' => 'btn btn-' . ($callItem->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $callItem->recordingUrl /*yii\helpers\Url::to(['call/record', 'sid' =>  $callItem->c_call_sid ])*/ ]
+                        ) ?>
                     <?php endif;?>
                 </td>
                 <td class="text-center">
@@ -47,19 +49,19 @@ $user = Yii::$app->user->identity;
                 </td>
 
                 <td class="text-left" style="width:150px">
-                    <?php if($callItem->isIn()):?>
+                    <?php if ($callItem->isIn()) :?>
                         <div>
-                            <?php if($callItem->c_created_user_id):?>
+                            <?php if ($callItem->c_created_user_id) :?>
                                 <i class="fa fa-user fa-border"></i> <?=Html::encode($callItem->cCreatedUser->username)?>
-                            <?php else: ?>
+                            <?php else : ?>
                                 <i class="fa fa-phone fa-border"></i> <?=Html::encode($callItem->c_to)?>
                             <?php endif; ?>
                         </div>
-                    <?php else: ?>
+                    <?php else : ?>
                         <div>
-                            <?php if($callItem->c_created_user_id):?>
+                            <?php if ($callItem->c_created_user_id) :?>
                                 <i class="fa fa-user fa-border"></i> <?=Html::encode($callItem->cCreatedUser->username)?>
-                            <?php else: ?>
+                            <?php else : ?>
                                 <i class="fa fa-male fa-border"></i> <?=Html::encode($callItem->c_to)?>
                             <?php endif; ?>
                         </div>
@@ -67,7 +69,7 @@ $user = Yii::$app->user->identity;
 
                 </td>
             </tr>
-            <?php if ($callItem->calls):?>
+            <?php if ($callItem->calls) :?>
                 <tr>
                     <td colspan="7">
                         <?php \sales\helpers\communication\CommunicationHelper::renderChildCallsRecursive($callItem->calls)?>

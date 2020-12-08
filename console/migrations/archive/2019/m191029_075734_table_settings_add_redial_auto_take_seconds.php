@@ -26,7 +26,6 @@ class m191029_075734_table_settings_add_redial_auto_take_seconds extends Migrati
         }
 
         Yii::$app->db->getSchema()->refreshTableSchema('{{%setting}}');
-
     }
 
     /**
@@ -42,6 +41,4 @@ class m191029_075734_table_settings_add_redial_auto_take_seconds extends Migrati
             Yii::$app->cache->flush();
         }
     }
-
-
 }

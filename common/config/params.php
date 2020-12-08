@@ -1,4 +1,5 @@
 <?php
+
 return [
     'serviceName' => 'crm',
     'serviceVersion' => '1.0.0',
@@ -30,9 +31,9 @@ return [
         'apiKey' => '5394bbedf41dd2c0403897ca621f188b',
         'serverUrl' => 'https://backoffice.travelinsides.com/api/sync',
         'webHookEndpoint' => 'webhook/ping',
-		'serverUrlV3' => 'https://backoffice.travelinsides.com/api/v3',
-		'username' => '',
-		'password' => ''
+        'serverUrlV3' => 'https://backoffice.travelinsides.com/api/v3',
+        'username' => '',
+        'password' => ''
     ],
     'global_phone' => '+16692011799',
 
@@ -43,18 +44,18 @@ return [
         'webhook_url'   => 'https://sales.api.travelinsides.com/v1/telegram/webhook'
     ],
     'use_browser_call_access' => true,
-	'test_phone_list' => [
-	],
-	'test_allow_ip_address_list' => [
-//		'127.0.0.1'
-	],
+    'test_phone_list' => [
+    ],
+    'test_allow_ip_address_list' => [
+//      '127.0.0.1'
+    ],
     'crypt' => [
         'method'    => 'aes-256-cbc',
         'password'  => '',
         'iv'        => '',
     ],
-	'user_voice_mail_alias' => '@frontend/web/',
-	'liveChatRealTimeVisitors' => 'https://livechat.travelinsides.com/visitors',
+    'user_voice_mail_alias' => '@frontend/web/',
+    'liveChatRealTimeVisitors' => 'https://livechat.travelinsides.com/visitors',
     'price_line_ftp_credential' => [
         'url' => "priceline-reports.travelinsides.com",
         'port' => "22",
@@ -63,4 +64,10 @@ return [
         'user' => "priceline",
         'pass' => "ajfhiuEfbhvRyfbb(_&*^@31emdiow2rdfn2",
     ],
+
+    'centrifugo' => [
+        'enabled' => false,
+        'wsConnectionUrl' => 'wss://app.sales.com/centrifugo/connection/websocket',
+    ],
+
 ];

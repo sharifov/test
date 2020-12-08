@@ -19,7 +19,6 @@ use Yii;
  */
 class Note extends \yii\db\ActiveRecord
 {
-
     use EventTrait;
 
     public static function create($userId, $leadId, $message): self
@@ -88,9 +87,8 @@ class Note extends \yii\db\ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
 
-        if($this->lead_id && $this->lead) {
+        if ($this->lead_id && $this->lead) {
             $this->lead->updateLastAction();
         }
-
     }
 }

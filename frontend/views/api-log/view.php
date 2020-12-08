@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model common\models\ApiLog */
 
-$this->title = 'Request-Response '.$model->al_id;
+$this->title = 'Request-Response ' . $model->al_id;
 $this->params['breadcrumbs'][] = ['label' => 'Api Logs', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -51,28 +51,28 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     'attribute' => 'al_execution_time',
                     //'format' => 'html',
-                    'value' => function(\common\models\ApiLog $model) {
+                    'value' => function (\common\models\ApiLog $model) {
                         return $model->al_execution_time;
                     },
                 ],
                 [
                     'attribute' => 'al_memory_usage',
                     'format' => 'raw',
-                    'value' => function(\common\models\ApiLog $model) {
+                    'value' => function (\common\models\ApiLog $model) {
                         return Yii::$app->formatter->asShortSize($model->al_memory_usage, 2);
                     },
                 ],
 
                 [
                     'attribute' => 'al_db_execution_time',
-                    'value' => function(\common\models\ApiLog $model) {
+                    'value' => function (\common\models\ApiLog $model) {
                         return $model->al_db_execution_time;
                     },
                 ],
 
                 [
                     'attribute' => 'al_db_query_count',
-                    'value' => function(\common\models\ApiLog $model) {
+                    'value' => function (\common\models\ApiLog $model) {
                         return $model->al_db_query_count;
                     },
                 ],

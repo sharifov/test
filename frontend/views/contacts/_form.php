@@ -48,13 +48,16 @@ $projectList = EmployeeProjectAccess::getProjects(Auth::id());
 
             <?php
                 $favorite = false;
-                if ($model->id !== null && $contact = UserContactList::findOne(['ucl_client_id' => $model->id])) {
-                    $favorite = $contact->ucl_favorite;
-                }
+            if ($model->id !== null && $contact = UserContactList::findOne(['ucl_client_id' => $model->id])) {
+                $favorite = $contact->ucl_favorite;
+            }
             ?>
 
-            <?php echo Html::checkbox('ucl_favorite', 0,
-                ['id' => 'ucl_favorite', ]) ?> Favorite
+            <?php echo Html::checkbox(
+                'ucl_favorite',
+                0,
+                ['id' => 'ucl_favorite', ]
+            ) ?> Favorite
 
             <!--<div style="width: 320px;">
                 <?php
@@ -82,7 +85,7 @@ $projectList = EmployeeProjectAccess::getProjects(Auth::id());
 
 </div>
 <?php
-$js =<<<JS
+$js = <<<JS
 
     $(document).on('click', '.is_company', function(e) {                
         let isCompany = $(this).prop("checked") ? 1 : 0;

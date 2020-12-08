@@ -19,7 +19,8 @@ class CaseNoteSearch extends CaseNote
     {
         return [
             [['cn_id', 'cn_cs_id', 'cn_user_id'], 'integer'],
-            [['cn_text', 'cn_created_dt', 'cn_updated_dt'], 'safe'],
+            [['cn_text'], 'safe'],
+            [['cn_created_dt', 'cn_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -47,7 +48,7 @@ class CaseNoteSearch extends CaseNote
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cn_id' => SORT_ASC]],
+            'sort' => ['defaultOrder' => ['cn_id' => SORT_ASC]],
             'pagination' => [
                 'pageSize' => 15,
             ],
@@ -71,7 +72,7 @@ class CaseNoteSearch extends CaseNote
             'cn_id' => $this->cn_id,
             'cn_cs_id' => $this->cn_cs_id,
             'cn_user_id' => $this->cn_user_id,
-            'cn_updated_dt' => $this->cn_updated_dt,
+            'DATE(cn_updated_dt)' => $this->cn_updated_dt,
         ]);
 
         $query->andFilterWhere(['like', 'cn_text', $this->cn_text]);

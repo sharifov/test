@@ -143,9 +143,9 @@ class ClientChatMessageCrudController extends FController
     {
         $url = base64_decode($url);
         $result = \Yii::$app->rchat->downloadFile($url);
-         if ($result['error'] == false) {
-             $link_array = explode('/', $url);
-             $fileName = urldecode(end($link_array));
+        if ($result['error'] == false) {
+            $link_array = explode('/', $url);
+            $fileName = urldecode(end($link_array));
             return Yii::$app->response->sendContentAsFile($result['data'], $fileName);
         }
         Yii::$app->getResponse()->setStatusCode(500);

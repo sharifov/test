@@ -31,28 +31,28 @@ $this->params['breadcrumbs'][] = $this->title;
             'ubr_kpi_percent:percentInteger',
             'ubr_order_profit',
             'ubr_value',
-			[
-				'class' => \common\components\grid\UserSelect2Column::class,
-				'attribute' => 'ubr_created_user_id',
-				'relation' => 'ubrCreatedUser',
-				'url' => '/employee/list-ajax',
-				'headerOptions' => ['style' => 'width:13%'],
-			],
-			[
-				'class' => \common\components\grid\UserSelect2Column::class,
-				'attribute' => 'ubr_updated_user_id',
-				'relation' => 'ubrUpdatedUser',
-				'url' => '/employee/list-ajax',
-				'headerOptions' => ['style' => 'width:13%'],
-			],
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'ubr_created_dt',
-			],
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'ubr_updated_dt',
-			],
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'attribute' => 'ubr_created_user_id',
+                'relation' => 'ubrCreatedUser',
+                'url' => '/employee/list-ajax',
+                'headerOptions' => ['style' => 'width:13%'],
+            ],
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'attribute' => 'ubr_updated_user_id',
+                'relation' => 'ubrUpdatedUser',
+                'url' => '/employee/list-ajax',
+                'headerOptions' => ['style' => 'width:13%'],
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'ubr_created_dt',
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'ubr_updated_dt',
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

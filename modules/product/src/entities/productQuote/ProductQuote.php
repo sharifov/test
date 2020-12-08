@@ -85,9 +85,9 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 
     private $childQuote;
 
-	public const CHECKOUT_URL_PAGE = 'checkout/quote';
+    public const CHECKOUT_URL_PAGE = 'checkout/quote';
 
-	public static function tableName(): string
+    public static function tableName(): string
     {
         return 'product_quote';
     }
@@ -112,7 +112,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
             [['pq_product_id'], 'exist', 'skipOnError' => true, 'targetClass' => Product::class, 'targetAttribute' => ['pq_product_id' => 'pr_id']],
             [['pq_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pq_updated_user_id' => 'id']],
 
-            ['pq_clone_id', 'exist', 'skipOnError' => true, 'targetClass' => static::class, 'targetAttribute' => ['pq_clone_id' => 'pq_id'], 'filter' => function($query) {
+            ['pq_clone_id', 'exist', 'skipOnError' => true, 'targetClass' => static::class, 'targetAttribute' => ['pq_clone_id' => 'pq_id'], 'filter' => function ($query) {
                 $query->andWhere(['not', ['pq_id' => $this->pq_id]]);
             }],
 
@@ -216,9 +216,9 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     }
 
     public function getFlightQuote()
-	{
-		return $this->hasOne(FlightQuote::class, ['fq_product_quote_id' => 'pq_id']);
-	}
+    {
+        return $this->hasOne(FlightQuote::class, ['fq_product_quote_id' => 'pq_id']);
+    }
 
     /**
      * @return ActiveQuery
@@ -385,42 +385,41 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return $isChanged;
     }
 
-	/**
-	 * @param ProductQuoteDTO $dto
-	 * @return ProductQuote
-	 */
+    /**
+     * @param ProductQuoteDTO $dto
+     * @return ProductQuote
+     */
     public static function create(ProductQuoteDTO $dto): ProductQuote
-	{
-		$quote = new self();
+    {
+        $quote = new self();
 
-		$quote->pq_gid = self::generateGid();
-		$quote->pq_name = $dto->name;
-		$quote->pq_product_id = $dto->productId;
-		$quote->pq_order_id = $dto->orderId;
-		$quote->pq_description = $dto->description;
-		$quote->pq_status_id = ProductQuoteStatus::NEW;
-		$quote->pq_price = $dto->price;
-		$quote->pq_origin_price = $dto->originPrice;
-		$quote->pq_client_price = $dto->clientPrice;
-		$quote->pq_service_fee_sum = $dto->serviceFeeSum;
-		$quote->pq_origin_currency = $dto->originCurrency;
-		$quote->pq_client_currency = $dto->clientCurrency;
-		$quote->pq_origin_currency_rate = $dto->originCurrencyRate;
-		$quote->pq_client_currency_rate = $dto->clientCurrencyRate;
-		$quote->pq_owner_user_id = $dto->ownerUserId;
-		$quote->pq_created_user_id = $dto->createdUserId;
-		$quote->pq_updated_user_id = $dto->updatedUserId;
+        $quote->pq_gid = self::generateGid();
+        $quote->pq_name = $dto->name;
+        $quote->pq_product_id = $dto->productId;
+        $quote->pq_order_id = $dto->orderId;
+        $quote->pq_description = $dto->description;
+        $quote->pq_status_id = ProductQuoteStatus::NEW;
+        $quote->pq_price = $dto->price;
+        $quote->pq_origin_price = $dto->originPrice;
+        $quote->pq_client_price = $dto->clientPrice;
+        $quote->pq_service_fee_sum = $dto->serviceFeeSum;
+        $quote->pq_origin_currency = $dto->originCurrency;
+        $quote->pq_client_currency = $dto->clientCurrency;
+        $quote->pq_origin_currency_rate = $dto->originCurrencyRate;
+        $quote->pq_client_currency_rate = $dto->clientCurrencyRate;
+        $quote->pq_owner_user_id = $dto->ownerUserId;
+        $quote->pq_created_user_id = $dto->createdUserId;
+        $quote->pq_updated_user_id = $dto->updatedUserId;
 
-		return $quote;
-	}
+        return $quote;
+    }
 
     public static function clone(
         ProductQuote $quote,
         int $productId,
         ?int $ownerId,
         ?int $creatorId
-    ): self
-    {
+    ): self {
         $clone = new self();
 
         $clone->attributes = $quote->attributes;
@@ -446,88 +445,88 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return $clone;
     }
 
-	/**
-	 * @return string
-	 */
-	private static function generateGid(): string
-	{
-		return md5(uniqid('fq', true));
-	}
+    /**
+     * @return string
+     */
+    private static function generateGid(): string
+    {
+        return md5(uniqid('fq', true));
+    }
 
-	/**
-	 * @return string
-	 */
-	public function getCheckoutUrlPage(): string
-	{
-		$url = '#';
-		$lead = $this->pqProduct->prLead;
-		if($lead && $lead->project && $lead->project->link) {
-			$url = $lead->project->link . '/' . self::CHECKOUT_URL_PAGE . '/' . $this->pq_gid;
-		}
-		return $url;
-	}
+    /**
+     * @return string
+     */
+    public function getCheckoutUrlPage(): string
+    {
+        $url = '#';
+        $lead = $this->pqProduct->prLead;
+        if ($lead && $lead->project && $lead->project->link) {
+            $url = $lead->project->link . '/' . self::CHECKOUT_URL_PAGE . '/' . $this->pq_gid;
+        }
+        return $url;
+    }
 
-	public function serialize(): array
+    public function serialize(): array
     {
         return (new ProductQuoteSerializer($this))->getData();
     }
 
-	/**
-	 * @return bool
-	 */
-	public function isApplied(): bool
-	{
-		return $this->pq_status_id === ProductQuoteStatus::APPLIED;
-	}
+    /**
+     * @return bool
+     */
+    public function isApplied(): bool
+    {
+        return $this->pq_status_id === ProductQuoteStatus::APPLIED;
+    }
 
-	/**
-	 * @return bool
-	 */
-	public function isNew(): bool
-	{
-		return $this->pq_status_id === ProductQuoteStatus::NEW;
-	}
+    /**
+     * @return bool
+     */
+    public function isNew(): bool
+    {
+        return $this->pq_status_id === ProductQuoteStatus::NEW;
+    }
 
-	public function isDeclined(): bool
-	{
-		return $this->pq_status_id === ProductQuoteStatus::DECLINED;
-	}
+    public function isDeclined(): bool
+    {
+        return $this->pq_status_id === ProductQuoteStatus::DECLINED;
+    }
 
-	/**
-	 * @param Currency $currency
-	 */
-	public function recountClientPrice(Currency $currency): void
-	{
-		$this->pq_client_currency = $currency->cur_code;
-		$this->pq_client_currency_rate = $currency->cur_app_rate;
-		$this->pq_client_price = ProductQuoteHelper::roundPrice($this->pq_price * $this->pq_client_currency_rate);
-	}
+    /**
+     * @param Currency $currency
+     */
+    public function recountClientPrice(Currency $currency): void
+    {
+        $this->pq_client_currency = $currency->cur_code;
+        $this->pq_client_currency_rate = $currency->cur_app_rate;
+        $this->pq_client_price = ProductQuoteHelper::roundPrice($this->pq_price * $this->pq_client_currency_rate);
+    }
 
-	/**
-	 * @param float $originPrice
-	 * @param float $price
-	 * @param float $clientPrice
-	 * @param float $serviceFeeSum
-	 */
-	public function setQuotePrice(float $originPrice, float $price, float $clientPrice, float $serviceFeeSum)
-	{
-		$this->pq_origin_price = $originPrice;
-		$this->pq_price = $price;
-		$this->pq_client_price = $clientPrice;
-		$this->pq_service_fee_sum = $serviceFeeSum;
-	}
+    /**
+     * @param float $originPrice
+     * @param float $price
+     * @param float $clientPrice
+     * @param float $serviceFeeSum
+     */
+    public function setQuotePrice(float $originPrice, float $price, float $clientPrice, float $serviceFeeSum)
+    {
+        $this->pq_origin_price = $originPrice;
+        $this->pq_price = $price;
+        $this->pq_client_price = $clientPrice;
+        $this->pq_service_fee_sum = $serviceFeeSum;
+    }
 
     public function isHotel(): bool
     {
         return $this->pqProduct->isHotel();
-	}
+    }
 
     public function isFlight(): bool
     {
         return $this->pqProduct->isFlight();
-	}
+    }
 
-	/**
+    /**
      * @param int|null $creatorId
      * @param string|null $description
      */
@@ -592,13 +591,13 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
      */
     public function declined(?int $creatorId = null, ?string $description = null): void
     {
-       $this->recordEvent(
+        $this->recordEvent(
             new ProductQuoteDeclinedEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)
-       );
-       if ($this->pq_status_id !== ProductQuoteStatus::DECLINED) {
+        );
+        if ($this->pq_status_id !== ProductQuoteStatus::DECLINED) {
             $this->setStatus(ProductQuoteStatus::DECLINED);
             $this->recordEvent(new ProductQuoteRecalculateChildrenProfitAmountEvent($this));
-       }
+        }
     }
 
     /**
@@ -616,19 +615,19 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         }
     }
 
-	/**
-	 * @param int|null $creatorId
-	 * @param string|null $description
-	 */
+    /**
+     * @param int|null $creatorId
+     * @param string|null $description
+     */
     public function sold(?int $creatorId = null, ?string $description = null): void
-	{
-		$this->recordEvent(
-			new ProductQuoteExpiredEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)
-		);
-		if ($this->pq_status_id !== ProductQuoteStatus::SOLD) {
-			$this->setStatus(ProductQuoteStatus::SOLD);
-		}
-	}
+    {
+        $this->recordEvent(
+            new ProductQuoteExpiredEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)
+        );
+        if ($this->pq_status_id !== ProductQuoteStatus::SOLD) {
+            $this->setStatus(ProductQuoteStatus::SOLD);
+        }
+    }
 
     /**
      * @param int|null $status
@@ -647,32 +646,32 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     {
         $this->recordEvent(new ProductQuoteRecalculateChildrenProfitAmountEvent($this));
 
-        if ($childQuote = $this->getChildQuote()){
+        if ($childQuote = $this->getChildQuote()) {
             $childQuote->delete();
         }
     }
 
     public function removeOrderRelation(): void
-	{
-		if ($this->pq_order_id) {
-			$this->recordEvent((new OrderRecalculateProfitAmountEvent([$this->pqOrder])));
-		}
-		$this->pq_order_id = null;
-	}
+    {
+        if ($this->pq_order_id) {
+            $this->recordEvent((new OrderRecalculateProfitAmountEvent([$this->pqOrder])));
+        }
+        $this->pq_order_id = null;
+    }
 
-	public function setOrderRelation(int $orderId): void
-	{
-		$this->pq_order_id = $orderId;
-		$this->recordEvent((new OrderRecalculateProfitAmountEvent([$this->pqOrder])));
-	}
+    public function setOrderRelation(int $orderId): void
+    {
+        $this->pq_order_id = $orderId;
+        $this->recordEvent((new OrderRecalculateProfitAmountEvent([$this->pqOrder])));
+    }
 
-	public function isRelatedWithOrder(): bool
-	{
-		return !($this->pq_order_id === null);
-	}
+    public function isRelatedWithOrder(): bool
+    {
+        return !($this->pq_order_id === null);
+    }
 
-	public function isTheSameOrder(int $orderId): bool
-	{
-		return $this->pq_order_id === $orderId;
-	}
+    public function isTheSameOrder(int $orderId): bool
+    {
+        return $this->pq_order_id === $orderId;
+    }
 }

@@ -33,7 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'n_id',
                     [
                         'attribute' => 'n_type_id',
-                        'value' => function(\common\models\Notifications $model) {
+                        'value' => function (\common\models\Notifications $model) {
                             return $model->getType();
                         }
                     ],
@@ -43,7 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     [
                         'attribute' => 'n_user_id',
-                        'value' => function(\common\models\Notifications $model){
+                        'value' => function (\common\models\Notifications $model) {
                             return $model->nUser->username;
                         },
                     ],

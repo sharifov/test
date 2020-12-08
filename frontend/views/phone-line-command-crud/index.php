@@ -1,11 +1,12 @@
 <?php
 
 use yii\grid\ActionColumn;
-use dosamigos\datepicker\DatePicker;
+use common\components\grid\DateTimeColumn;
 use sales\model\call\entity\callCommand\PhoneLineCommand;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\call\entity\callCommand\search\PhoneLineCommandSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -46,7 +47,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     'width' => '150px'
                 ]
             ],
+
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'plc_created_dt'
+            ],
+
+            /*[
                 'attribute' => 'plc_created_dt',
                 'value' => static function (PhoneLineCommand $model) {
                     return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->plc_created_dt));
@@ -68,7 +75,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'clearDate' => 'function (e) {$(e.target).find("input").change();}',
                     ],
                 ]),
-            ],
+            ],*/
             ['class' => ActionColumn::class],
         ],
     ]); ?>

@@ -27,9 +27,9 @@ use yii\widgets\ActiveForm;
                 ]) ?>
 
                 <?= $form->field($model, 'ucr_kpi_percent')->input('number', [
-					'min' => UserCommissionRules::VALUE_MIN,
-					'max' => UserCommissionRules::VALUE_MAX,
-					'step' => 1
+                    'min' => UserCommissionRules::VALUE_MIN,
+                    'max' => UserCommissionRules::VALUE_MAX,
+                    'step' => 1
                 ]) ?>
 
                 <?= $form->field($model, 'ucr_order_profit')->input('number', [
@@ -37,9 +37,9 @@ use yii\widgets\ActiveForm;
                 ]) ?>
 
                 <?= $form->field($model, 'ucr_value')->input('number', [
-					'min' => UserCommissionRules::VALUE_MIN,
-					'max' => UserCommissionRules::VALUE_MAX,
-					'step' => 0.01
+                    'min' => UserCommissionRules::VALUE_MIN,
+                    'max' => UserCommissionRules::VALUE_MAX,
+                    'step' => 0.01
                 ]) ?>
 
                 <div class="form-group">

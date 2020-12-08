@@ -3,6 +3,8 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\DateTimeColumn;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\PaymentMethodSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -37,7 +39,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => \common\models\PaymentMethod::getCategoryList()
             ],
             'pm_updated_user_id:UserName',
-            'pm_updated_dt:ByUserDateTime',
+            //'pm_updated_dt:ByUserDateTime',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'pm_updated_dt'
+            ],
             ['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>

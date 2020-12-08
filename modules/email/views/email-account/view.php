@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
             ]) ?>
             <?= Html::a('Request Gmail API access token', ['email-account/request-access-token', 'id' => $model->ea_id], ['class' => 'btn btn-success']) ?>
-            <?php if ($model->ea_gmail_token): ?>
+            <?php if ($model->ea_gmail_token) : ?>
                 <?= Html::a('Remove Gmail API access token', ['email-account/remove-access-token', 'id' => $model->ea_id], [
                     'class' => 'btn btn-danger',
                     'data' => [

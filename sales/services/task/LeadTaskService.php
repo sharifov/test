@@ -38,7 +38,9 @@ class LeadTaskService
      */
     private function deleteUnnecessaryTasks(int $leadId): void
     {
-        LeadTask::deleteAll('lt_lead_id = :lead_id AND lt_date >= :date AND lt_completed_dt IS NULL',
-            [':lead_id' => $leadId, ':date' => date('Y-m-d')]);
+        LeadTask::deleteAll(
+            'lt_lead_id = :lead_id AND lt_date >= :date AND lt_completed_dt IS NULL',
+            [':lead_id' => $leadId, ':date' => date('Y-m-d')]
+        );
     }
 }

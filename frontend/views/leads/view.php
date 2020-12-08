@@ -19,7 +19,7 @@ use yii\widgets\Pjax;
 /* @var $dataProviderSegments yii\data\ActiveDataProvider */
 
 
-$this->title = 'Lead ID: ' . $model->id . ', UID: '.$model->uid;
+$this->title = 'Lead ID: ' . $model->id . ', UID: ' . $model->uid;
 $this->params['breadcrumbs'][] = ['label' => 'Leads', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
@@ -38,7 +38,7 @@ $isAgent = Auth::user()->isAgent();
         <?= ButtonWidget::widget([
             'modalId' => 'modal-df',
             'url' => new \frontend\widgets\lead\editTool\Url(Url::to(['leads/edit']), ['id' => $model->id])])
-        ?>
+?>
 
         <?php /*= Html::a('Delete', ['delete', 'id' => $model->id], [
             'class' => 'btn btn-danger',
@@ -79,13 +79,13 @@ $isAgent = Auth::user()->isAgent();
                         'attribute' => 'client.name',
                         'header' => 'Client name',
                         'format' => 'raw',
-                        'value' => function(\common\models\Lead $model) {
-                            if($model->client) {
+                        'value' => function (\common\models\Lead $model) {
+                            if ($model->client) {
                                 $clientName = $model->client->first_name . ' ' . $model->client->last_name;
                                 if ($clientName === 'Client Name') {
                                     $clientName = '- - - ';
                                 } else {
-                                    $clientName = '<i class="fa fa-user"></i> '. Html::encode($clientName);
+                                    $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName);
                                 }
                             } else {
                                 $clientName = '-';
@@ -101,8 +101,8 @@ $isAgent = Auth::user()->isAgent();
                         'attribute' => 'client.phone',
                         'header' => 'Client Phones',
                         'format' => 'raw',
-                        'value' => function(\common\models\Lead $model) use ($isAgent) {
-                            if($model->client && $model->client->clientPhones) {
+                        'value' => function (\common\models\Lead $model) use ($isAgent) {
+                            if ($model->client && $model->client->clientPhones) {
                                 if ($isAgent && Yii::$app->user->id !== $model->employee_id) {
                                     $str = '- // - // - // -';
                                 } else {
@@ -122,13 +122,13 @@ $isAgent = Auth::user()->isAgent();
                         'attribute' => 'client.email',
                         'header' => 'Client Emails',
                         'format' => 'raw',
-                        'value' => function(\common\models\Lead $model) use ($isAgent) {
+                        'value' => function (\common\models\Lead $model) use ($isAgent) {
 
-                            if($model->client && $model->client->clientEmails) {
+                            if ($model->client && $model->client->clientEmails) {
                                 if ($isAgent && Yii::$app->user->id !== $model->employee_id) {
                                     $str = '- // - // - // -';
                                 } else {
-                                    $str = '<i class="fa fa-envelope"></i> '.implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email'));
+                                    $str = '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email'));
                                 }
                             } else {
                                 $str = '-';
@@ -155,8 +155,8 @@ $isAgent = Auth::user()->isAgent();
                         [
                             'attribute' => 'employee_id',
                             'format' => 'raw',
-                            'value' => function(\common\models\Lead $model) {
-                                return $model->employee ? '<i class="fa fa-user"></i> '.$model->employee->username : '-';
+                            'value' => function (\common\models\Lead $model) {
+                                return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
                             },
                         ],
 
@@ -165,14 +165,14 @@ $isAgent = Auth::user()->isAgent();
                         [
                             'attribute' => 'l_init_price',
                             //'format' => 'raw',
-                            'value' => function(\common\models\Lead $model) {
+                            'value' => function (\common\models\Lead $model) {
                                 return $model->l_init_price ? number_format($model->l_init_price, 2) : '-';
                             },
                         ],
 
                         [
                             'attribute' => 'status',
-                            'value' => function(\common\models\Lead $model) {
+                            'value' => function (\common\models\Lead $model) {
                                 return $model->getStatusName(true);
                             },
                             'format' => 'raw',
@@ -181,8 +181,8 @@ $isAgent = Auth::user()->isAgent();
 
                         [
                             'attribute' => 'l_call_status_id',
-                            'value' => function(\common\models\Lead $model) {
-                                return Lead::CALL_STATUS_LIST[$model->l_call_status_id]?? 'undefined';
+                            'value' => function (\common\models\Lead $model) {
+                                return Lead::CALL_STATUS_LIST[$model->l_call_status_id] ?? 'undefined';
                             },
                             'format' => 'raw',
                         ],
@@ -199,14 +199,14 @@ $isAgent = Auth::user()->isAgent();
 
                         [
                             'label' => 'Department',
-                            'value' => function(\common\models\Lead $model) {
+                            'value' => function (\common\models\Lead $model) {
                                 return Department::DEPARTMENT_LIST[$model->l_dep_id] ?? 'undefined';
                             },
                         ],
 
                         [
                             'attribute' => 'l_dep_id',
-                            'value' => function(\common\models\Lead $model) {
+                            'value' => function (\common\models\Lead $model) {
                                 return $model->project ? $model->project->name : '-';
                             },
 
@@ -214,7 +214,7 @@ $isAgent = Auth::user()->isAgent();
 
                         [
                             'attribute' => 'source_id',
-                            'value' => function(\common\models\Lead $model) {
+                            'value' => function (\common\models\Lead $model) {
                                 return $model->source ? $model->source->name : '-';
                             },
                             'visible' => !$isAgent
@@ -242,7 +242,7 @@ $isAgent = Auth::user()->isAgent();
                     'attributes' => [
                         [
                             'attribute' => 'trip_type',
-                            'value' => function(\common\models\Lead $model) {
+                            'value' => function (\common\models\Lead $model) {
                                 return $model->getFlightTypeName();
                             },
 
@@ -250,7 +250,7 @@ $isAgent = Auth::user()->isAgent();
 
                         [
                             'attribute' => 'cabin',
-                            'value' => function(\common\models\Lead $model) {
+                            'value' => function (\common\models\Lead $model) {
                                 return $model->getCabinClassName();
                             },
 
@@ -268,24 +268,24 @@ $isAgent = Auth::user()->isAgent();
 
                         [
                             'attribute' => 'created',
-                            'value' => function(\common\models\Lead $model) {
-                                return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
+                            'value' => function (\common\models\Lead $model) {
+                                return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
                             },
                             'format' => 'raw',
                         ],
 
                         [
                             'attribute' => 'updated',
-                            'value' => function(\common\models\Lead $model) {
-                                return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
+                            'value' => function (\common\models\Lead $model) {
+                                return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->updated));
                             },
                             'format' => 'raw',
                         ],
 
                         [
                             'attribute' => 'l_last_action_dt',
-                            'value' => function(\common\models\Lead $model) {
-                                return $model->l_last_action_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->l_last_action_dt)) : $model->l_last_action_dt;
+                            'value' => function (\common\models\Lead $model) {
+                                return $model->l_last_action_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->l_last_action_dt)) : $model->l_last_action_dt;
                             },
                             'format' => 'raw',
                         ],
@@ -308,7 +308,7 @@ $isAgent = Auth::user()->isAgent();
                     //'request_ip',
                     [
                         'attribute' => 'request_ip',
-                        'value' => function(\common\models\Lead $model) {
+                        'value' => function (\common\models\Lead $model) {
                             return $model->request_ip ? Html::button($model->request_ip, ['class' => 'btn btn-info',  'id' => 'btn_show_modal', 'title' => 'Detail IP info: ' . $model->request_ip]) : '-';
                         },
                         'format' => 'raw'
@@ -361,37 +361,37 @@ $isAgent = Auth::user()->isAgent();
                     'destination',
                     [
                         'attribute' => 'departure',
-                        'value' => function(\common\models\LeadFlightSegment $model) {
-                            return '<i class="fa fa-calendar"></i> '.date("Y-m-d", strtotime($model->departure));
+                        'value' => function (\common\models\LeadFlightSegment $model) {
+                            return '<i class="fa fa-calendar"></i> ' . date("Y-m-d", strtotime($model->departure));
                         },
                         'format' => 'html',
                     ],
                     [
                         'attribute' => 'flexibility',
-                        'value' => function(\common\models\LeadFlightSegment $model) {
+                        'value' => function (\common\models\LeadFlightSegment $model) {
                             return $model->flexibility;
                         },
                         'filter' => array_combine(range(0, 5), range(0, 5)),
                     ],
                     [
                         'attribute' => 'flexibility_type',
-                        'value' => function(\common\models\LeadFlightSegment $model) {
+                        'value' => function (\common\models\LeadFlightSegment $model) {
                             return $model->flexibility_type;
                         },
                         'filter' => \common\models\LeadFlightSegment::FLEX_TYPE_LIST
                     ],
                     [
                         'attribute' => 'created',
-                        'value' => function(\common\models\LeadFlightSegment $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
+                        'value' => function (\common\models\LeadFlightSegment $model) {
+                            return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
                         },
                         'format' => 'html',
                     ],
 
                     [
                         'attribute' => 'updated',
-                        'value' => function(\common\models\LeadFlightSegment $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
+                        'value' => function (\common\models\LeadFlightSegment $model) {
+                            return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->updated));
                         },
                         'format' => 'html',
                     ],
@@ -428,8 +428,8 @@ $isAgent = Auth::user()->isAgent();
                 [
                     'attribute' => 'employee_id',
                     'format' => 'raw',
-                    'value' => function(\common\models\Quote $model) {
-                        return $model->employee ? '<i class="fa fa-user"></i> '.$model->employee->username : '-';
+                    'value' => function (\common\models\Quote $model) {
+                        return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
                     },
                     'filter' => \common\models\Employee::getList()
                 ],
@@ -440,8 +440,8 @@ $isAgent = Auth::user()->isAgent();
 
                 [
                     'attribute' => 'gds',
-                    'value' => function(\common\models\Quote $model) {
-                        return '<i class="fa fa-plane"></i> '.$model->getGdsName2();
+                    'value' => function (\common\models\Quote $model) {
+                        return '<i class="fa fa-plane"></i> ' . $model->getGdsName2();
                     },
                     'format' => 'raw',
                     'filter' => SearchService::GDS_LIST
@@ -451,7 +451,7 @@ $isAgent = Auth::user()->isAgent();
 
                 [
                     'attribute' => 'trip_type',
-                    'value' => function(\common\models\Quote $model) {
+                    'value' => function (\common\models\Quote $model) {
                         return \common\models\Lead::getFlightType($model->trip_type) ?? '-';
                     },
                     'filter' => \common\models\Lead::TRIP_TYPE_LIST
@@ -459,7 +459,7 @@ $isAgent = Auth::user()->isAgent();
 
                 [
                     'attribute' => 'cabin',
-                    'value' => function(\common\models\Quote $model) {
+                    'value' => function (\common\models\Quote $model) {
                         return \common\models\Lead::getCabin($model->cabin) ?? '-';
                     },
                     'filter' => \common\models\Lead::CABIN_LIST
@@ -470,8 +470,8 @@ $isAgent = Auth::user()->isAgent();
 
                 [
                     'attribute' => 'reservation_dump',
-                    'value' => function(\common\models\Quote $model) {
-                        return '<pre style="font-size: 9px">'. $model->reservation_dump . '</pre>';
+                    'value' => function (\common\models\Quote $model) {
+                        return '<pre style="font-size: 9px">' . $model->reservation_dump . '</pre>';
                     },
                     'format' => 'html',
                 ],
@@ -479,7 +479,7 @@ $isAgent = Auth::user()->isAgent();
                 //'status',
                 [
                     'attribute' => 'status',
-                    'value' => function(\common\models\Quote $model) {
+                    'value' => function (\common\models\Quote $model) {
                         return $model->getStatusName(true);
                     },
                     'format' => 'html',
@@ -491,7 +491,7 @@ $isAgent = Auth::user()->isAgent();
 
                 [
                     'header' => 'Prices',
-                    'value' => function(\common\models\Quote $model) {
+                    'value' => function (\common\models\Quote $model) {
                         return $model->quotePricesCount ? Html::a($model->quotePricesCount, ['quote-price/index', "QuotePriceSearch[quote_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0]) : '-' ;
                     },
                     'format' => 'raw',
@@ -503,16 +503,16 @@ $isAgent = Auth::user()->isAgent();
 
                 [
                     'attribute' => 'created',
-                    'value' => function(\common\models\Quote $model) {
-                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
+                    'value' => function (\common\models\Quote $model) {
+                        return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
                     },
                     'format' => 'html',
                 ],
 
                 [
                     'attribute' => 'updated',
-                    'value' => function(\common\models\Quote $model) {
-                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
+                    'value' => function (\common\models\Quote $model) {
+                        return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->updated));
                     },
                     'format' => 'html',
                 ],
@@ -539,10 +539,10 @@ yii\bootstrap4\Modal::begin([
     'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
 ]);
 
-if($model->request_ip_detail){
+if ($model->request_ip_detail) {
     $data = @json_decode($model->request_ip_detail);
 
-    if($data) {
+    if ($data) {
         echo '<pre>';
         \yii\helpers\VarDumper::dump($data, 10, true);
         echo '</pre>';

@@ -24,8 +24,7 @@ class QaTaskMultipleCreateService
     public function __construct(
         QaTaskRepository $taskRepository,
         QaTaskCreateManuallyService $createManuallyService
-    )
-    {
+    ) {
         $this->log = new Log();
         $this->taskRepository = $taskRepository;
         $this->createManuallyService = $createManuallyService;
@@ -43,7 +42,7 @@ class QaTaskMultipleCreateService
 
             /** @var Objectable $object */
             if (!$object = $objectClass::findOne($id)) {
-                $this->log->add(new ErrorMessage($form->objectType, $id,'not found'));
+                $this->log->add(new ErrorMessage($form->objectType, $id, 'not found'));
                 continue;
             }
 
@@ -59,14 +58,13 @@ class QaTaskMultipleCreateService
                         ['categoryId' => $form->categoryId]
                     )
                 );
-                $this->log->add(new SuccessMessage($form->objectType, $id,'Task created'));
+                $this->log->add(new SuccessMessage($form->objectType, $id, 'Task created'));
             } catch (\DomainException $e) {
                 $this->log->add(new ErrorMessage($form->objectType, $id, $e->getMessage()));
             } catch (\Throwable $e) {
                 \Yii::error(QaTaskObjectType::getName($form->objectType) . ' Id: ' . $id  . PHP_EOL . $e, 'QaTaskMultipleCreateService:create');
                 $this->log->add(new ErrorMessage($form->objectType, $id, 'Server error'));
             }
-
         }
 
         return $this->log;

@@ -27,7 +27,7 @@ class m191217_065524_create_tbl_product_option extends Migration
             $tableOptions = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE=InnoDB';
         }
 
-        $this->createTable('{{%product_option}}',	[
+        $this->createTable('{{%product_option}}', [
             'po_id'                     => $this->primaryKey(),
             'po_key'                    => $this->string(30)->unique()->notNull(),
             'po_product_type_id'        => $this->integer()->notNull(),
@@ -58,7 +58,7 @@ class m191217_065524_create_tbl_product_option extends Migration
 
 
 
-        $this->createTable('{{%product_quote_option}}',	[
+        $this->createTable('{{%product_quote_option}}', [
             'pqo_id'                    => $this->primaryKey(),
             'pqo_product_quote_id'      => $this->integer()->notNull(),
             'pqo_product_option_id'     => $this->integer(),
@@ -67,9 +67,9 @@ class m191217_065524_create_tbl_product_option extends Migration
             //'pqo_price'                 => $this->decimal(8, 2),
             'pqo_status_id'             => $this->tinyInteger(1),
 
-            'pqo_price'                 => $this->decimal(8,2),
-            'pqo_client_price'          => $this->decimal(8,2),
-            'pqo_extra_markup'          => $this->decimal(8,2),
+            'pqo_price'                 => $this->decimal(8, 2),
+            'pqo_client_price'          => $this->decimal(8, 2),
+            'pqo_extra_markup'          => $this->decimal(8, 2),
 
             'pqo_created_user_id'       => $this->integer(),
             'pqo_updated_user_id'       => $this->integer(),

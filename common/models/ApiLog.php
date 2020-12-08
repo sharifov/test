@@ -3,10 +3,12 @@
 namespace common\models;
 
 use common\models\query\ApiLogQuery;
+use DateTime;
 use webapi\src\logger\EndDTO;
 use webapi\src\logger\StartDTO;
-
 use Yii;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
 use yii\db\Query;
 use yii\helpers\VarDumper;
 
@@ -25,6 +27,7 @@ use yii\helpers\VarDumper;
  * @property integer $al_memory_usage
  * @property float $al_db_execution_time
  * @property integer $al_db_query_count
+ * @property string $al_created_dt
  *
  * @property $start_microtime
  * @property $end_microtime
@@ -35,12 +38,35 @@ use yii\helpers\VarDumper;
  */
 class ApiLog extends \yii\db\ActiveRecord
 {
-
     public $start_microtime = 0;
     public $end_microtime = 0;
 
     public $start_memory_usage = 0;
     public $end_memory_usage = 0;
+
+    private $attempts = 0;
+
+    /**
+     * @return object
+     * @throws \yii\base\InvalidConfigException
+     */
+    public static function getDb()
+    {
+        return \Yii::$app->get('db_postgres');
+    }
+
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['al_created_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s'),
+            ],
+        ];
+    }
 
     public static function start(StartDTO $dto): self
     {
@@ -114,13 +140,32 @@ class ApiLog extends \yii\db\ActiveRecord
     {
         return [
             [['al_request_data', 'al_request_dt'], 'required'],
-            [['al_request_data', 'al_response_data'], 'string'],
+            [['al_request_data', 'al_response_data', 'al_created_dt'], 'string'],
             [['al_user_id', 'al_memory_usage', 'al_db_query_count'], 'integer'],
             [['al_execution_time', 'al_db_execution_time'], 'double'],
             [['al_request_dt', 'al_response_dt'], 'safe'],
             [['al_ip_address'], 'string', 'max' => 40],
             [['al_action'], 'string', 'max' => 255],
         ];
+    }
+
+    public function save($runValidation = true, $attributeNames = null): bool
+    {
+        try {
+            $result = parent::save($runValidation, $attributeNames);
+        } catch (\Throwable $e) {
+            if (strpos($e->getMessage(), "no partition of relation")) {
+                $dates = self::partitionDatesFrom(date_create_from_format('Y-m-d H:i:s', $this->al_created_dt));
+                self::createMonthlyPartition($dates[0], $dates[1]);
+                if ($this->attempts > 0) {
+                    throw new \RuntimeException("unable to create api_log partition");
+                }
+                ++$this->attempts;
+                return $this->save($runValidation, $attributeNames);
+            }
+            return false;
+        }
+        return $result;
     }
 
     /**
@@ -141,6 +186,7 @@ class ApiLog extends \yii\db\ActiveRecord
             'al_memory_usage' => 'Memory usage',
             'al_db_query_count' => 'Query count',
             'al_db_execution_time' => 'DB execution time',
+            'al_created_dt' => 'Created DT'
         ];
     }
 
@@ -173,17 +219,17 @@ class ApiLog extends \yii\db\ActiveRecord
         $this->end_microtime = microtime(true);
         $this->end_memory_usage = memory_get_usage();
 
-        if($this->start_microtime) {
+        if ($this->start_microtime) {
             $time = round($this->end_microtime - $this->start_microtime, 3);
         } else {
             $time = 0;
         }
 
-        if($time > 999) {
+        if ($time > 999) {
             $time = 999;
         }
 
-        if($this->start_memory_usage) {
+        if ($this->start_memory_usage) {
             $memory_usage = $this->end_memory_usage - $this->start_memory_usage;
         } else {
             $memory_usage = 0;
@@ -197,7 +243,7 @@ class ApiLog extends \yii\db\ActiveRecord
 
         $profiling = Yii::getLogger()->getDbProfiling();
 
-        if($profiling) {
+        if ($profiling) {
             if (isset($profiling[0])) {
                 $this->al_db_query_count = (int) $profiling[0];
             }
@@ -210,15 +256,13 @@ class ApiLog extends \yii\db\ActiveRecord
 
         //VarDumper::dump($profiling);exit;
 
-        if($this->save()) {
-
+        if ($this->save()) {
             $responseData['action']             = $this->al_action;
             $responseData['response_id']        = $this->al_id;
             $responseData['request_dt']         = $this->al_request_dt;
             $responseData['response_dt']        = $this->al_response_dt;
             $responseData['execution_time']     = $this->al_execution_time;
             $responseData['memory_usage']       = $this->al_memory_usage;
-
         } else {
             Yii::error(print_r($this->errors, true), 'ApiLog:endApiLog:save');
         }
@@ -238,7 +282,7 @@ class ApiLog extends \yii\db\ActiveRecord
             ->groupBy(['al_action'])
             ->orderBy('cnt DESC')->asArray()->all();
 
-        if($data) {
+        if ($data) {
             foreach ($data as $v) {
                 $arr[$v['al_action']] = $v['al_action'] . ' - [' . $v['cnt'] . ']';
             }
@@ -260,15 +304,15 @@ class ApiLog extends \yii\db\ActiveRecord
      * @param string $selectedAction
      * @return array
      */
-    public static function getApiLogStats(string $fromDate, string $todate, string $range, string $apiUserId, string $selectedAction) : array
+    public static function getApiLogStats(string $fromDate, string $todate, string $range, string $apiUserId, string $selectedAction): array
     {
-        if ($range == 'H'){
+        if ($range == 'H') {
             $queryDateFormat = '%H:00';
-        } elseif ($range == 'D'){
+        } elseif ($range == 'D') {
             $queryDateFormat = '%Y-%m-%d';
-        } elseif ($range == 'M'){
+        } elseif ($range == 'M') {
             $queryDateFormat = '%Y-%m';
-        } elseif ($range == 'HD'){
+        } elseif ($range == 'HD') {
             $queryDateFormat = '%Y-%m-%d %H:00';
         }
 
@@ -279,10 +323,10 @@ class ApiLog extends \yii\db\ActiveRecord
         $apiStatsQuery->from('api_log');
         $apiStatsQuery->where(['between','DATE(al_request_dt)', $fromDate, $todate]);
         $apiStatsQuery->andWhere('al_execution_time IS NOT NULL');
-        if($apiUserId != ''){
+        if ($apiUserId != '') {
             $apiStatsQuery->andWhere(['=', 'al_user_id', $apiUserId]);
         }
-        if($selectedAction != ''){
+        if ($selectedAction != '') {
             $apiStatsQuery->andWhere(['=', 'al_action', $selectedAction]);
         }
         $apiStatsQuery->groupBy(["al_action, create_date, DATE_FORMAT(al_request_dt, '$queryDateFormat')"]);
@@ -293,7 +337,7 @@ class ApiLog extends \yii\db\ActiveRecord
 
         foreach ($actionList as $actionKey => $action) {
             foreach ($result as $key => $item) {
-                if ($action['al_action'] == $item['al_action']){
+                if ($action['al_action'] == $item['al_action']) {
                     $apiStats[$item['timeLine']]['action' . $actionKey] = $item['al_action'];
                     $apiStats[$item['timeLine']]['exeTime' . $actionKey] = $item['execution_time'];
                     $apiStats[$item['timeLine']]['memUsage' . $actionKey] = $item['memUsage'];
@@ -305,5 +349,59 @@ class ApiLog extends \yii\db\ActiveRecord
 
         ksort($apiStats);
         return $apiStats;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function primaryKey(): array
+    {
+        return ["al_id"];
+    }
+
+    public function getId()
+    {
+        return $this->getPrimaryKey();
+    }
+
+    /**
+     * Calculate from and to dates from a given date.
+     * Given date -> from = start of the month, to = next month start date
+     *
+     * @param DateTime $date partition start date
+     * @return array DateTime table_name created table
+     * @throws \RuntimeException any errors occurred during execution
+     */
+    public static function partitionDatesFrom(DateTime $date): array
+    {
+        $monthBegin = date('Y-m-d', strtotime(date_format($date, 'Y-m-1')));
+        if (!$monthBegin) {
+            throw new \RuntimeException("invalid partition start date");
+        }
+
+        $partitionStartDate = date_create_from_format('Y-m-d', $monthBegin);
+        $partitionEndDate = date_create_from_format('Y-m-d', $monthBegin);
+
+        date_add($partitionEndDate, date_interval_create_from_date_string("1 month"));
+
+        return [$partitionStartDate, $partitionEndDate];
+    }
+
+    /**
+     * Create a partition table with indicated from and to date
+     *
+     * @param DateTime $partFromDateTime partition start date
+     * @param DateTime $partToDateTime partition end date
+     * @return string table_name created table
+     * @throws \yii\db\Exception
+     */
+    public static function createMonthlyPartition(DateTime $partFromDateTime, DateTime $partToDateTime): string
+    {
+        $db = self::getDb();
+        $partTableName = self::tableName() . "_" . date_format($partFromDateTime, "Y_m");
+        $cmd = $db->createCommand("create table " . $partTableName . " PARTITION OF " . self::tableName() .
+            " FOR VALUES FROM ('" . date_format($partFromDateTime, "Y-m-d") . "') TO ('" . date_format($partToDateTime, "Y-m-d") . "')");
+        $cmd->execute();
+        return $partTableName;
     }
 }

@@ -36,8 +36,7 @@ class LeadAssignService
         ServiceFinder $serviceFinder,
         TransactionManager $transactionManager,
         TakeGuard $takeGuard
-    )
-    {
+    ) {
         $this->leadRepository = $leadRepository;
         $this->userRepository = $userRepository;
         $this->serviceFinder = $serviceFinder;

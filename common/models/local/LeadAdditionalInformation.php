@@ -2,7 +2,6 @@
 
 namespace common\models\local;
 
-
 use yii\base\Model;
 
 /**

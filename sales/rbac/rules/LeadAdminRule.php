@@ -12,5 +12,4 @@ class LeadAdminRule extends LeadRule
     {
         return $lead->canAdminEdit();
     }
-
 }

@@ -24,5 +24,4 @@ class m191127_153711_create_fk_tbl_product extends Migration
 
         return false;
     }
-
 }

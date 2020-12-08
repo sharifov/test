@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $this \yii\web\View
  * @var $dataProviderNotes \yii\data\ActiveDataProvider
@@ -24,12 +25,15 @@ $showAddNote = Auth::can('cases/update', ['case' => $caseModel]);
             <h2><i class="fa fa-sticky-note-o"></i> Notes (<?=$dataProviderNotes->count?>)</h2>
             <ul class="nav navbar-right panel_toolbox">
                 <li>
-                    <?php if ($showAddNote): ?>
-                        <?php if(Yii::$app->request->get('act') === 'add-note-form'): ?>
+                    <?php if ($showAddNote) : ?>
+                        <?php if (Yii::$app->request->get('act') === 'add-note-form') : ?>
                             <?php /*=Html::a('<i class="fa fa-minus-circle success"></i> Refresh', ['cases/view', 'gid' => $caseModel->gid])*/?>
-                        <?php else: ?>
-                            <?=Html::a('<i class="fa fa-plus-circle success"></i> Add',
-                                ['cases/view', 'gid' => $caseModel->cs_gid, 'act' => 'add-note-form'], ['id' => 'btn-notes-form']) ?>
+                        <?php else : ?>
+                            <?=Html::a(
+                                '<i class="fa fa-plus-circle success"></i> Add',
+                                ['cases/view', 'gid' => $caseModel->cs_gid, 'act' => 'add-note-form'],
+                                ['id' => 'btn-notes-form']
+                            ) ?>
                         <?php endif; ?>
                     <?php endif; ?>
                 </li>
@@ -57,8 +61,7 @@ $showAddNote = Auth::can('cases/update', ['case' => $caseModel]);
                 ],
             ]) ?>
 
-            <?php if($showAddNote && (Yii::$app->request->get('act') === 'add-note-form')): ?>
-
+            <?php if ($showAddNote && (Yii::$app->request->get('act') === 'add-note-form')) : ?>
                 <?php $form = ActiveForm::begin([
                     'id' => 'notes-form',
                     'method' => 'post',

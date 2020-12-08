@@ -12,15 +12,15 @@ use sales\repositories\Repository;
 class FlightQuoteSegmentStopRepository extends Repository
 {
 
-	/**
-	 * @param FlightQuoteSegmentStop $flightQuoteSegmentStop
-	 * @return int
-	 */
-	public function save(FlightQuoteSegmentStop $flightQuoteSegmentStop): int
-	{
-		if (!$flightQuoteSegmentStop->save()) {
-			throw new \RuntimeException($flightQuoteSegmentStop->getErrorSummary(false)[0]);
-		}
-		return $flightQuoteSegmentStop->qss_id;
-	}
+    /**
+     * @param FlightQuoteSegmentStop $flightQuoteSegmentStop
+     * @return int
+     */
+    public function save(FlightQuoteSegmentStop $flightQuoteSegmentStop): int
+    {
+        if (!$flightQuoteSegmentStop->save()) {
+            throw new \RuntimeException($flightQuoteSegmentStop->getErrorSummary(false)[0]);
+        }
+        return $flightQuoteSegmentStop->qss_id;
+    }
 }

@@ -22,11 +22,9 @@ class ClientChatUserAccessSearch extends ClientChatUserAccess
 
             ['ccua_cch_id', 'integer'],
 
-            ['ccua_created_dt', 'safe'],
+            [['ccua_created_dt', 'ccua_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
 
             ['ccua_status_id', 'integer'],
-
-            ['ccua_updated_dt', 'safe'],
 
             ['ccua_user_id', 'integer'],
         ];
@@ -38,7 +36,7 @@ class ClientChatUserAccessSearch extends ClientChatUserAccess
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['ccua_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['ccua_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -92,7 +90,9 @@ class ClientChatUserAccessSearch extends ClientChatUserAccess
             'ccua_cch_id',
             'ccua_user_id',
             'cch_status_id',
-            'is_transfer' => 'if (cch_status_id=:status, 1, 0)',
+            'is_pending' => 'if (cch_status_id=:statusPending, 1, 0)',
+            'is_transfer' => 'if (cch_status_id=:statusTransfer, 1, 0)',
+            'is_idle' => 'if (cch_status_id=:statusIdle, 1, 0)',
             'cch_client_id',
             'full_name' => 'trim(concat_ws(\' \', client.first_name, client.last_name))',
             'cch_project_id',
@@ -111,8 +111,12 @@ class ClientChatUserAccessSearch extends ClientChatUserAccess
         $query->leftJoin(Employee::tableName() . ' as owner', 'cch_owner_user_id = owner.id');
 
         $query->pending();
-        $query->andWhere(new Expression('cch_status_id = :statusPending or cch_status_id = :statusTransfer', ['statusTransfer' => ClientChat::STATUS_TRANSFER, 'statusPending' => ClientChat::STATUS_PENDING]));
-        $query->orderBy(['cch_status_id' => SORT_DESC, 'ccua_created_dt' => SORT_ASC,  'cch_created_dt' => SORT_ASC]);
+        $query->andWhere([
+            'OR',
+            ['cch_status_id' => ClientChat::STATUS_PENDING],
+            ['cch_status_id' => ClientChat::STATUS_TRANSFER],
+            ['cch_status_id' => ClientChat::STATUS_IDLE]]);
+        $query->orderBy(['is_transfer' => SORT_DESC, 'ccua_created_dt' => SORT_ASC,  'cch_created_dt' => SORT_ASC]);
 
         $query->groupBy([
             'ccua_id',
@@ -130,7 +134,11 @@ class ClientChatUserAccessSearch extends ClientChatUserAccess
             'owner_nickname'
         ]);
 
-        $query->params([':status' => ClientChat::STATUS_TRANSFER]);
+        $query->params([
+            ':statusTransfer' => ClientChat::STATUS_TRANSFER,
+            ':statusPending' => ClientChat::STATUS_PENDING,
+            ':statusIdle' => ClientChat::STATUS_IDLE,
+        ]);
 
         return $query;
     }

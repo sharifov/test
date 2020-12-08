@@ -27,7 +27,6 @@ use yii\helpers\ArrayHelper;
  */
 class Sources extends \yii\db\ActiveRecord
 {
-
     use EventTrait;
 
     public const RULE_PHONE_REQUIRED = 1;
@@ -154,7 +153,7 @@ class Sources extends \yii\db\ActiveRecord
             ->innerJoin('projects', 'projects.id = sources.project_id')
             ->orderBy(['project_name' => SORT_ASC, 'sources_name' => SORT_ASC]);
 
-        if($noHidden) {
+        if ($noHidden) {
             $query->andWhere(['sources.hidden' => false]);
         }
         $data = $query->asArray()->all();
@@ -179,5 +178,13 @@ class Sources extends \yii\db\ActiveRecord
             $map[$project->name] = $child_map;
         }
         return $map;
+    }
+
+    public static function getByProjectId(int $projectId): ?Sources
+    {
+        if ($defaultSource = self::findOne(['project_id' => $projectId, 'default' => true])) {
+            return $defaultSource;
+        }
+        return self::findOne(['project_id' => $projectId]);
     }
 }

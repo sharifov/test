@@ -14,9 +14,9 @@ use sales\viewModel\call\ViewModelTotalCallGraph;
 </script>
 
 <div class="d-flex">
-	<?php echo ExportMenu::widget([
-		'dataProvider' => $viewModel->dataProvider,
-		'columns' => $viewModel->gridColumns,
+    <?php echo ExportMenu::widget([
+        'dataProvider' => $viewModel->dataProvider,
+        'columns' => $viewModel->gridColumns,
         'exportConfig' => [
             ExportMenu::FORMAT_PDF => [
                 'pdfConfig' => [
@@ -25,17 +25,18 @@ use sales\viewModel\call\ViewModelTotalCallGraph;
                 ]
             ]
         ],
-		'target' => \kartik\export\ExportMenu::TARGET_BLANK,
-		'fontAwesome' => true,
-		'dropdownOptions' => [
-			'label' => 'Full Export'
-		],
-		'columnSelectorOptions' => [
-			'label' => 'Export Fields'
-		],
+        'target' => \kartik\export\ExportMenu::TARGET_BLANK,
+        'bsVersion' => '3.x',
+        'fontAwesome' => true,
+        'dropdownOptions' => [
+            'label' => 'Full Export'
+        ],
+        'columnSelectorOptions' => [
+            'label' => 'Export Fields'
+        ],
         'showConfirmAlert' => false,
         'options' => [
             'id' => 'export-links'
         ],
-	]); ?>
+    ]); ?>
 </div>

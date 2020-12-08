@@ -66,7 +66,7 @@ class m200120_132807_add_lead_global_permissions extends Migration
      */
     public function safeDown()
     {
-       $auth = Yii::$app->authManager;
+        $auth = Yii::$app->authManager;
 
         if ($permission = $auth->getPermission('global/lead/isOwnerMyGroup')) {
             $auth->remove($permission);

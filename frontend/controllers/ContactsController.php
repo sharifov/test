@@ -35,26 +35,26 @@ use yii\web\Response;
 class ContactsController extends FController
 {
     /**
-	 * @var ClientManageService
-	 */
-	private $clientManageService;
+     * @var ClientManageService
+     */
+    private $clientManageService;
 
-	/**
-	 * LeadViewController constructor.
-	 * @param $id
-	 * @param $module
-	 * @param ClientManageService $clientManageService
-	 * @param array $config
-	 */
-	public function __construct(
-		$id,
-		$module,
-		ClientManageService $clientManageService,
-		$config = [])
-	{
-		$this->clientManageService = $clientManageService;
-		parent::__construct($id, $module, $config);
-	}
+    /**
+     * LeadViewController constructor.
+     * @param $id
+     * @param $module
+     * @param ClientManageService $clientManageService
+     * @param array $config
+     */
+    public function __construct(
+        $id,
+        $module,
+        ClientManageService $clientManageService,
+        $config = []
+    ) {
+        $this->clientManageService = $clientManageService;
+        parent::__construct($id, $module, $config);
+    }
 
     /**
      * @return array
@@ -152,19 +152,18 @@ class ContactsController extends FController
         $form = new ContactForm(count($data['post']['EmailCreateForm']), count($data['post']['PhoneCreateForm']));
 
         if ($form->load($data['post']) && $form->validate()) {
-
             try {
-
                 if ($client->load(Yii::$app->request->post(), $contactForm->formName()) && $client->save()) {
-
                     $userContactList = new UserContactList();
                     $userContactList->ucl_client_id = $client->id;
                     $userContactList->ucl_user_id = Auth::id();
                     $userContactList->ucl_favorite = (isset($post['ucl_favorite'])) ? (bool)$post['ucl_favorite'] : false;
 
-                    if(!$userContactList->save()) {
-                        Yii::error(VarDumper::dumpAsString($userContactList->errors),
-                            'ContactsController:actionCreate:saveUserContactList');
+                    if (!$userContactList->save()) {
+                        Yii::error(
+                            VarDumper::dumpAsString($userContactList->errors),
+                            'ContactsController:actionCreate:saveUserContactList'
+                        );
                     }
 
                     $this->clientManageService->addEmails($client, $form->emails);
@@ -175,8 +174,10 @@ class ContactsController extends FController
                 }
 
                 if ($client->errors) {
-                    Yii::error( VarDumper::dumpAsString($client->errors),
-                        'ContactsController:actionCreate:updateClient');
+                    Yii::error(
+                        VarDumper::dumpAsString($client->errors),
+                        'ContactsController:actionCreate:updateClient'
+                    );
                 }
             } catch (\Throwable $e) {
                 Yii::$app->errorHandler->logException($e);
@@ -203,8 +204,8 @@ class ContactsController extends FController
         $client = $this->findModel($id);
 
         if (!(new ContactUpdateAccess())->isUserCanUpdateContact($client, Auth::user())) {
-			throw new HttpException(403, 'Access Denied');
-		}
+            throw new HttpException(403, 'Access Denied');
+        }
 
         $post = Yii::$app->request->post();
         $data = CompositeFormHelper::prepareDataForMultiInput(
@@ -215,15 +216,15 @@ class ContactsController extends FController
         $form = new ContactForm(count($data['post']['EmailCreateForm']), count($data['post']['PhoneCreateForm']));
 
         if ($form->load($data['post']) && $form->validate()) {
-
             try {
                 if ($client->load(Yii::$app->request->post(), (new ContactForm())->formName()) && $client->save()) {
-
                     if ($userContactList = UserContactList::findOne(['ucl_client_id' => $client->id])) {
                         $userContactList->ucl_favorite = (isset($post['ucl_favorite'])) ? (bool)$post['ucl_favorite'] : false;
-                        if(!$userContactList->save()) {
-                            Yii::error(VarDumper::dumpAsString($userContactList->errors),
-                                'ContactsController:actionUpdate:saveUserContactList');
+                        if (!$userContactList->save()) {
+                            Yii::error(
+                                VarDumper::dumpAsString($userContactList->errors),
+                                'ContactsController:actionUpdate:saveUserContactList'
+                            );
                         }
                     }
 
@@ -238,8 +239,10 @@ class ContactsController extends FController
                 }
 
                 if ($client->errors) {
-                    Yii::error( VarDumper::dumpAsString($client->errors),
-                        'ContactsController:actionCreate:updateClient');
+                    Yii::error(
+                        VarDumper::dumpAsString($client->errors),
+                        'ContactsController:actionCreate:updateClient'
+                    );
                 }
             } catch (\Throwable $e) {
                 Yii::$app->errorHandler->logException($e);
@@ -247,8 +250,8 @@ class ContactsController extends FController
             }
         }
 
-        foreach ($client->getAttributes() AS $name => $value) {
-            if ($name !== 'cl_type_create') {
+        foreach ($client->getAttributes() as $name => $value) {
+            if (property_exists($form, $name)) {
                 $form->{$name} = $value;
             }
         }
@@ -301,10 +304,10 @@ class ContactsController extends FController
         $client = $this->findModel($id);
 
         if (!(new ContactUpdateAccess())->isUserCanUpdateContact($client, Auth::user())) {
-			throw new HttpException(403, 'Access Denied');
-		}
+            throw new HttpException(403, 'Access Denied');
+        }
 
-		$this->clientManageService->removeContact($client);
+        $this->clientManageService->removeContact($client);
 
         return $this->redirect(['index']);
     }
@@ -328,10 +331,12 @@ class ContactsController extends FController
                 if ($userContactList->save()) {
                     $result['status'] = 1;
                     $result['favorite'] = (int)$ucl_favorite;
-                }  else {
+                } else {
                     $result['message'] = $userContactList->getErrorSummary(false)[0];
-                    Yii::error(VarDumper::dumpAsString($userContactList->errors),
-                        'ContactsController:actionSetFavoriteAjax:saveUserContactList');
+                    Yii::error(
+                        VarDumper::dumpAsString($userContactList->errors),
+                        'ContactsController:actionSetFavoriteAjax:saveUserContactList'
+                    );
                 }
             } else {
                 $result['message'] = 'Client not found';
@@ -360,7 +365,7 @@ class ContactsController extends FController
                     if ($client->save()) {
                         $result['status'] = 1;
                         $result['disabled'] = (int)$disabled;
-                    }  else {
+                    } else {
                         throw new \DomainException($client->getErrorSummary(false)[0]);
                     }
                 } else {
@@ -435,7 +440,6 @@ class ContactsController extends FController
         $out = ['results' => []];
 
         if ($q !== null) {
-
             if (strlen($q) < 2) {
                 return $this->asJson($out);
             }
@@ -476,7 +480,6 @@ class ContactsController extends FController
         $out = ['results' => []];
 
         if ($q !== null) {
-
             if (strlen($q) < 3) {
                 return $this->asJson($out);
             }

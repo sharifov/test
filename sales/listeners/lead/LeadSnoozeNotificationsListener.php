@@ -56,12 +56,15 @@ class LeadSnoozeNotificationsListener
 
         $subject = Yii::t('email', "Lead-{id} to SNOOZE", ['id' => $lead->id]);
 
-        $body = Yii::t('email', "Your Lead (Id: {lead_id}) has been changed status to SNOOZE! Snooze for: {datetime}. Reason: {reason}",
+        $body = Yii::t(
+            'email',
+            "Your Lead (Id: {lead_id}) has been changed status to SNOOZE! Snooze for: {datetime}. Reason: {reason}",
             [
                 'lead_id' => Purifier::createLeadShortLink($lead),
                 'datetime' => Yii::$app->formatter->asDatetime(strtotime($event->snoozeFor)),
                 'reason' => $event->reason ?: '-',
-            ]);
+            ]
+        );
 
         if ($ntf = Notifications::create($owner->id, $subject, $body, Notifications::TYPE_INFO, true)) {
             //Notifications::socket($owner->id, null, 'getNewNotification', [], true);
@@ -74,5 +77,4 @@ class LeadSnoozeNotificationsListener
             );
         }
     }
-
 }

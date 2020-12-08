@@ -4,6 +4,8 @@ use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\DateTimeColumn;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\LeadFlightSegmentSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -32,8 +34,8 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'lead_id',
                 'format' => 'raw',
-                'value' => function(\common\models\LeadFlightSegment $model) {
-                    return '<i class="fa fa-arrow-right"></i> '.Html::a('lead: '.$model->lead_id, ['leads/view', 'id' => $model->lead_id], ['target' => '_blank', 'data-pjax' => 0]);
+                'value' => function (\common\models\LeadFlightSegment $model) {
+                    return '<i class="fa fa-arrow-right"></i> ' . Html::a('lead: ' . $model->lead_id, ['leads/view', 'id' => $model->lead_id], ['target' => '_blank', 'data-pjax' => 0]);
                 },
             ],
             'origin',
@@ -42,8 +44,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'departure',
-                'value' => function(\common\models\LeadFlightSegment $model) {
-                    return '<i class="fa fa-calendar"></i> '.date("Y-m-d", strtotime($model->departure));
+                'value' => function (\common\models\LeadFlightSegment $model) {
+                    return '<i class="fa fa-calendar"></i> ' . date("Y-m-d", strtotime($model->departure));
                 },
                 'format' => 'html',
             ],
@@ -52,7 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'flexibility',
             [
                 'attribute' => 'flexibility',
-                'value' => function(\common\models\LeadFlightSegment $model) {
+                'value' => function (\common\models\LeadFlightSegment $model) {
                     return $model->flexibility;
                 },
                 'filter' => array_combine(range(0, 5), range(0, 5)),
@@ -61,13 +63,19 @@ $this->params['breadcrumbs'][] = $this->title;
             //'flexibility_type',
             [
                 'attribute' => 'flexibility_type',
-                'value' => function(\common\models\LeadFlightSegment $model) {
+                'value' => function (\common\models\LeadFlightSegment $model) {
                     return $model->flexibility_type;
                 },
                 'filter' => \common\models\LeadFlightSegment::FLEX_TYPE_LIST
                 //'format' => 'html',
             ],
+
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'created'
+            ],
+
+            /*[
                 'attribute' => 'created',
                 'value' => function(\common\models\LeadFlightSegment $model) {
                     return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
@@ -85,9 +93,14 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
 
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'updated'
+            ],
+
+            /*[
                 'attribute' => 'updated',
                 'value' => function(\common\models\LeadFlightSegment $model) {
                     return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
@@ -105,7 +118,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
 
             'origin_label',
             'destination_label',

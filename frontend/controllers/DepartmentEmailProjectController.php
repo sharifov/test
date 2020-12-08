@@ -75,20 +75,20 @@ class DepartmentEmailProjectController extends FController
         $model = new DepartmentEmailProject();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			if ($model->user_group_list) {
-				foreach ($model->user_group_list as $userGroupId) {
-					$dug = new DepartmentEmailProjectUserGroup();
-					$dug->dug_ug_id = $userGroupId;
-					$dug->link('dugDep', $model);
-				}
-			}
+            if ($model->user_group_list) {
+                foreach ($model->user_group_list as $userGroupId) {
+                    $dug = new DepartmentEmailProjectUserGroup();
+                    $dug->dug_ug_id = $userGroupId;
+                    $dug->link('dugDep', $model);
+                }
+            }
 
             return $this->redirect(['view', 'id' => $model->dep_id]);
         }
 
-		$model->user_group_list = [];
+        $model->user_group_list = [];
 
-		return $this->render('create', [
+        return $this->render('create', [
             'model' => $model,
         ]);
     }
@@ -105,37 +105,35 @@ class DepartmentEmailProjectController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            if ($model->user_group_list) {
+                DepartmentEmailProjectUserGroup::deleteAll(['dug_dep_id' => $model->dep_id]);
 
-			if ($model->user_group_list) {
-
-				DepartmentEmailProjectUserGroup::deleteAll(['dug_dep_id' => $model->dep_id]);
-
-				foreach ($model->user_group_list as $userGroupId) {
-					$dug = new DepartmentEmailProjectUserGroup();
-					$dug->dug_ug_id = $userGroupId;
-					$dug->link('dugDep', $model);
-				}
-			}
+                foreach ($model->user_group_list as $userGroupId) {
+                    $dug = new DepartmentEmailProjectUserGroup();
+                    $dug->dug_ug_id = $userGroupId;
+                    $dug->link('dugDep', $model);
+                }
+            }
 
             return $this->redirect(['view', 'id' => $model->dep_id]);
         }
 
-		$model->user_group_list = ArrayHelper::map($model->dugUgs, 'ug_id', 'ug_id');
+        $model->user_group_list = ArrayHelper::map($model->dugUgs, 'ug_id', 'ug_id');
 
-		return $this->render('update', [
+        return $this->render('update', [
             'model' => $model,
         ]);
     }
 
-	/**
-	 * Deletes an existing DepartmentEmailProject model.
-	 * If deletion is successful, the browser will be redirected to the 'index' page.
-	 * @param integer $id
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
-	 * @throws \Throwable
-	 * @throws \yii\db\StaleObjectException
-	 */
+    /**
+     * Deletes an existing DepartmentEmailProject model.
+     * If deletion is successful, the browser will be redirected to the 'index' page.
+     * @param integer $id
+     * @return mixed
+     * @throws NotFoundHttpException if the model cannot be found
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
     public function actionDelete($id)
     {
         $this->findModel($id)->delete();

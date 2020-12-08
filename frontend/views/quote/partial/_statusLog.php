@@ -23,7 +23,7 @@ use common\models\QuoteStatusLog;
         <?php endif; ?>
         <tbody>
         <?php if (!empty($data)) :
-        foreach ($data as $item) : ?>
+            foreach ($data as $item) : ?>
                 <tr>
                     <th><?= \common\models\Quote::getLabelByStatus($item->status) ?></th>
                     <th><?= empty($item->employee) ? 'System' : $item->employee->username ?></th>

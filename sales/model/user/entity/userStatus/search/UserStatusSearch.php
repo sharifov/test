@@ -22,6 +22,7 @@ class UserStatusSearch extends UserStatus
         return [
             [['us_user_id', 'us_gl_call_count', 'us_call_phone_status', 'us_is_on_call', 'us_has_call_access'], 'integer'],
             [['us_updated_dt', 'online'], 'safe'],
+            [['us_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -49,7 +50,7 @@ class UserStatusSearch extends UserStatus
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['us_updated_dt' => SORT_DESC, 'us_user_id' => SORT_ASC]],
+            'sort' => ['defaultOrder' => ['us_updated_dt' => SORT_DESC, 'us_user_id' => SORT_ASC]],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -80,7 +81,7 @@ class UserStatusSearch extends UserStatus
             'us_call_phone_status' => $this->us_call_phone_status,
             'us_is_on_call' => $this->us_is_on_call,
             'us_has_call_access' => $this->us_has_call_access,
-            'us_updated_dt' => $this->us_updated_dt,
+            'DATE(us_updated_dt)' => $this->us_updated_dt,
         ]);
 
         return $dataProvider;

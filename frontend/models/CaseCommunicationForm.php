@@ -1,4 +1,5 @@
 <?php
+
 namespace frontend\models;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
@@ -110,7 +111,7 @@ class CaseCommunicationForm extends Model
     /**
      * @return array
      */
-    public function rules() : array
+    public function rules(): array
     {
         return [
             [['c_type_id', 'c_case_id'], 'required'],
@@ -199,12 +200,12 @@ class CaseCommunicationForm extends Model
             [['c_sms_tpl_id'], 'exist', 'skipOnError' => true, 'targetClass' => SmsTemplateType::class, 'targetAttribute' => ['c_sms_tpl_id' => 'stp_id']],
             [['c_call_id'], 'exist', 'skipOnError' => true, 'targetClass' => Call::class, 'targetAttribute' => ['c_call_id' => 'c_id']],
 
-			[['dpp_phone_id', 'dep_email_id'], 'safe'],
-			['dpp_phone_id', 'required', 'on' => self::SCENARIO_SMS_DEPARTMENT],
-			[['dpp_phone_id'], 'exist', 'on' => self::SCENARIO_SMS_DEPARTMENT, 'targetClass' => DepartmentPhoneProject::class, 'targetAttribute' => ['dpp_phone_id' => 'dpp_id'], 'message' => 'Not found Department phone'],
+            [['dpp_phone_id', 'dep_email_id'], 'safe'],
+            ['dpp_phone_id', 'required', 'on' => self::SCENARIO_SMS_DEPARTMENT],
+            [['dpp_phone_id'], 'exist', 'on' => self::SCENARIO_SMS_DEPARTMENT, 'targetClass' => DepartmentPhoneProject::class, 'targetAttribute' => ['dpp_phone_id' => 'dpp_id'], 'message' => 'Not found Department phone'],
 
-			['dep_email_id', 'required', 'on' => self::SCENARIO_EMAIL_DEPARTMENT],
-			[['dep_email_id'], 'exist', 'on' => self::SCENARIO_EMAIL_DEPARTMENT, 'targetClass' => DepartmentEmailProject::class, 'targetAttribute' => ['dep_email_id' => 'dep_id'], 'message' => 'Not found Department email'],
+            ['dep_email_id', 'required', 'on' => self::SCENARIO_EMAIL_DEPARTMENT],
+            [['dep_email_id'], 'exist', 'on' => self::SCENARIO_EMAIL_DEPARTMENT, 'targetClass' => DepartmentEmailProject::class, 'targetAttribute' => ['dep_email_id' => 'dep_id'], 'message' => 'Not found Department email'],
 
 
         ];
@@ -219,7 +220,7 @@ class CaseCommunicationForm extends Model
     {
         if (!empty($this->c_quotes)) {
             $this->quoteList = @json_decode($this->c_quotes, true);
-            if(!is_array($this->quoteList)) {
+            if (!is_array($this->quoteList)) {
                 $this->quoteList = [];
             }
         }
@@ -259,7 +260,7 @@ class CaseCommunicationForm extends Model
     /**
      * @return array
      */
-    public function attributeLabels() : array
+    public function attributeLabels(): array
     {
         return [
             'c_type_id'         => 'Message Type',
@@ -273,12 +274,11 @@ class CaseCommunicationForm extends Model
             'c_email_message'   => 'Email Message',
             'c_email_subject'   => 'Subject',
             'c_phone_number'    => 'Phone number',
-			'dpp_phone_id'		=> 'Department Phone',
-			'dep_email_id'		=> 'Department Email',
+            'dpp_phone_id'      => 'Department Phone',
+            'dep_email_id'      => 'Department Email',
             'c_language_id'     => 'Language',
             'c_user_id'         => 'Agent ID',
             'c_quotes'          => 'Checked Quotes'
         ];
     }
-
 }

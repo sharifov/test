@@ -60,24 +60,24 @@ $this->params['breadcrumbs'][] = $this->title;
             'hl_last_update',
             [
                 'attribute' => 'hl_created_dt',
-                'value' => static function(HotelList $model) {
-                    return $model->hl_created_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->hl_created_dt)) : '-';
+                'value' => static function (HotelList $model) {
+                    return $model->hl_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->hl_created_dt)) : '-';
                 },
                 'format' => 'raw',
             ],
 
             [
                 'attribute' => 'hl_updated_dt',
-                'value' => static function(HotelList $model) {
-                    return $model->hl_updated_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->hl_updated_dt)) : '-';
+                'value' => static function (HotelList $model) {
+                    return $model->hl_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->hl_updated_dt)) : '-';
                 },
                 'format' => 'raw',
             ],
 
             [
                 'attribute' => 'hl_last_update',
-                'value' => static function(HotelList $model) {
-                    return $model->hl_last_update ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDate(strtotime($model->hl_last_update)) : '-';
+                'value' => static function (HotelList $model) {
+                    return $model->hl_last_update ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDate(strtotime($model->hl_last_update)) : '-';
                 },
                 'format' => 'raw',
             ],

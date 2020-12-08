@@ -50,8 +50,7 @@ class FlightQuoteCloneService
         FlightQuoteSegmentPaxBaggageRepository $flightQuoteSegmentPaxBaggageRepository,
         FlightQuoteSegmentPaxBaggageChargeRepository $flightQuoteSegmentPaxBaggageChargeRepository,
         FlightQuoteSegmentStopRepository $flightQuoteSegmentStopRepository
-    )
-    {
+    ) {
         $this->flightRepository = $flightRepository;
         $this->flightQuoteRepository = $flightQuoteRepository;
         $this->flightQuotePaxPriceRepository = $flightQuotePaxPriceRepository;
@@ -83,7 +82,6 @@ class FlightQuoteCloneService
         }
 
         foreach ($originalQuote->flightQuoteSegments as $originalSegment) {
-
             $tripId = $tripsMap[$originalSegment->fqs_flight_quote_trip_id] ?? null;
             $segment = FlightQuoteSegment::clone($originalSegment, $quote->fq_id, $tripId);
             $this->flightQuoteSegmentRepository->save($segment);

@@ -10,7 +10,7 @@ use yii\helpers\Url;
 
 ?>
 
-<?php if (QaTaskEscalateService::can(Auth::user(), $model)): ?>
+<?php if (QaTaskEscalateService::can(Auth::user(), $model)) : ?>
     <?= Html::button(
         'Escalate',
         [

@@ -17,18 +17,18 @@ class CurrencyHistoryController extends FController
     /**
      * {@inheritdoc}
      */
-	public function behaviors()
-	{
-		$behaviors = [
-			'verbs' => [
-				'class' => VerbFilter::class,
-				'actions' => [
-					'delete' => ['POST'],
-				],
-			],
-		];
-		return ArrayHelper::merge(parent::behaviors(), $behaviors);
-	}
+    public function behaviors()
+    {
+        $behaviors = [
+            'verbs' => [
+                'class' => VerbFilter::class,
+                'actions' => [
+                    'delete' => ['POST'],
+                ],
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
 
     public function init(): void
     {
@@ -104,16 +104,16 @@ class CurrencyHistoryController extends FController
         ]);
     }
 
-	/**
-	 * Deletes an existing CurrencyHistory model.
-	 * If deletion is successful, the browser will be redirected to the 'index' page.
-	 * @param string $ch_code
-	 * @param string $ch_created_date
-	 * @return mixed
-	 * @throws NotFoundHttpException if the model cannot be found
-	 * @throws \Throwable
-	 * @throws \yii\db\StaleObjectException
-	 */
+    /**
+     * Deletes an existing CurrencyHistory model.
+     * If deletion is successful, the browser will be redirected to the 'index' page.
+     * @param string $ch_code
+     * @param string $ch_created_date
+     * @return mixed
+     * @throws NotFoundHttpException if the model cannot be found
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
     public function actionDelete($ch_code, $ch_created_date)
     {
         $this->findModel($ch_code, $ch_created_date)->delete();

@@ -21,7 +21,7 @@ $user = Yii::$app->user->identity;
 ?>
 <div class="phone-update">
 
-    <?php if($model): ?>
+    <?php if ($model) : ?>
     <div class="row">
         <div class="col-md-6">
             <?= \yii\widgets\DetailView::widget([
@@ -40,18 +40,18 @@ $user = Yii::$app->user->identity;
                 'attributes' => [
                     [
                         'label' => 'Phones',
-                        'value' => function(\common\models\Client $model) {
+                        'value' => function (\common\models\Client $model) {
 
                             $phones = $model->clientPhones;
                             $data = [];
-                            if($phones) {
+                            if ($phones) {
                                 foreach ($phones as $k => $phone) {
-                                    $data[] = '<i class="fa fa-phone"></i> <code>'.Html::encode($phone->phone).'</code>'; //<code>'.Html::a($phone->phone, ['client-phone/view', 'id' => $phone->id], ['target' => '_blank', 'data-pjax' => 0]).'</code>';
+                                    $data[] = '<i class="fa fa-phone"></i> <code>' . Html::encode($phone->phone) . '</code>'; //<code>'.Html::a($phone->phone, ['client-phone/view', 'id' => $phone->id], ['target' => '_blank', 'data-pjax' => 0]).'</code>';
                                 }
                             }
 
                             $str = implode('<br>', $data);
-                            return ''.$str.'';
+                            return '' . $str . '';
                         },
                         'format' => 'raw',
                         'contentOptions' => ['class' => 'text-left'],
@@ -59,18 +59,18 @@ $user = Yii::$app->user->identity;
 
                     [
                         'label' => 'Emails',
-                        'value' => function(\common\models\Client $model) {
+                        'value' => function (\common\models\Client $model) {
 
                             $emails = $model->clientEmails;
                             $data = [];
-                            if($emails) {
+                            if ($emails) {
                                 foreach ($emails as $k => $email) {
-                                    $data[] = '<i class="fa fa-envelope"></i> <code>'.Html::encode($email->email).'</code>';
+                                    $data[] = '<i class="fa fa-envelope"></i> <code>' . Html::encode($email->email) . '</code>';
                                 }
                             }
 
                             $str = implode('<br>', $data);
-                            return ''.$str.'';
+                            return '' . $str . '';
                         },
                         'format' => 'raw',
                         'contentOptions' => ['class' => 'text-left'],
@@ -81,15 +81,15 @@ $user = Yii::$app->user->identity;
 
                     [
                         'attribute' => 'created',
-                        'value' => function(\common\models\Client $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDate(strtotime($model->created));
+                        'value' => function (\common\models\Client $model) {
+                            return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDate(strtotime($model->created));
                         },
                         'format' => 'html',
                     ],
                     [
                         'attribute' => 'updated',
-                        'value' => function(\common\models\Client $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDate(strtotime($model->updated));
+                        'value' => function (\common\models\Client $model) {
+                            return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDate(strtotime($model->updated));
                         },
                         'format' => 'html',
                     ],
@@ -101,18 +101,17 @@ $user = Yii::$app->user->identity;
 
     <div class="row">
         <div class="col-md-12">
-        <?php if($currentCall): ?>
-
+        <?php if ($currentCall) : ?>
             <div class="alert alert-warning" role="alert">
                 <h5><i class="fa fa-warning"></i> Warning!</h5>
                 <b>You can not call now. At the moment you have a call ID (<?=$currentCall->c_id?>). Please check that your web-phone line is free.</b>
 
             </div>
 
-            <?php if (Auth::can('/call/ajax-call-cancel')): ?>
+            <?php if (Auth::can('/call/ajax-call-cancel')) : ?>
                 <div class="text-center">
                     <?=Html::a('<i class="fa fa-remove"></i> Emergency Cancel Call Process', ['/call/ajax-call-cancel', 'id' => $currentCall->c_id], ['class' => 'btn btn-sm btn-danger', 'data' => [
-                        'confirm' => 'Attention! This function is used only for emergency cases. ' . "\r\n". 'Are you sure you want to cancel this Call?',
+                        'confirm' => 'Attention! This function is used only for emergency cases. ' . "\r\n" . 'Are you sure you want to cancel this Call?',
                         'method' => 'post',
                     ] ])?>
                 </div>
@@ -173,7 +172,7 @@ $user = Yii::$app->user->identity;
 
 
 
-        <?php else: ?>
+        <?php else : ?>
             <h2>Call</h2>
             <table class="table table-bordered">
                 <tr>

@@ -1,4 +1,5 @@
 <?php
+
 namespace frontend\widgets\clientChat;
 
 use common\models\Employee;
@@ -121,12 +122,36 @@ class ClientChatAccessMessage
         ];
     }
 
+    public static function chatAutoReturn(int $chatId): array
+    {
+        return [
+            'message' => 'The chat has been returned to In Progress.',
+            'cchId' => $chatId,
+        ];
+    }
+
+    public static function chatAutoReopen(int $chatId): array
+    {
+        return [
+            'message' => 'This chat is auto reopen. Client wrote a message.',
+            'cchId' => $chatId,
+        ];
+    }
+
     public static function chatTaken(ClientChat $chat, string $newOwnerNickname): array
     {
         return [
             'message' => 'Chat was taken by ' . $newOwnerNickname ,
             'cchId' => $chat->cch_id,
             'tab' => ClientChat::TAB_ACTIVE
+        ];
+    }
+
+    public static function chatArchive(int $chatId): array
+    {
+        return [
+            'message' => 'Chat changed status to ' . ClientChat::getStatusNameById(ClientChat::STATUS_ARCHIVE),
+            'cchId' => $chatId,
         ];
     }
 

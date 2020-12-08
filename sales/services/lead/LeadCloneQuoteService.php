@@ -68,8 +68,7 @@ class LeadCloneQuoteService
         QuoteSegmentBaggageChargeRepository $quoteSegmentBaggageChargeRepository,
         TransactionManager $transactionManager,
         DeferredEventDispatcher $eventDispatcher
-    )
-    {
+    ) {
         $this->quoteRepository = $quoteRepository;
         $this->leadRepository = $leadRepository;
         $this->quotePriceRepository = $quotePriceRepository;
@@ -115,7 +114,6 @@ class LeadCloneQuoteService
             }
 
             return ['quote' => $quote, 'selling' => $selling];
-
         });
 
         /** @var Quote $quote */
@@ -217,7 +215,6 @@ class LeadCloneQuoteService
         $this->quoteTripRepository->save($newTrip);
 
         foreach ($trip->quoteSegments as $segment) {
-
             $newSegment = QuoteSegment::clone($segment->attributes, $newTrip->qt_id);
             $this->quoteSegmentRepository->save($newSegment);
 
@@ -235,7 +232,6 @@ class LeadCloneQuoteService
                 $newBaggage = QuoteSegmentBaggageCharge::clone($baggage->attributes, $newSegment->qs_id);
                 $this->quoteSegmentBaggageChargeRepository->save($newBaggage);
             }
-
         }
     }
 
@@ -256,7 +252,6 @@ class LeadCloneQuoteService
 
         if (!$lead->equalsSegments($leadQuoteSegments)) {
             throw new \DomainException('Different segments');
-
         }
     }
 
@@ -320,5 +315,4 @@ class LeadCloneQuoteService
             }
         }
     }
-
 }

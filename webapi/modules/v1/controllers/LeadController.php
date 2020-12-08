@@ -30,7 +30,6 @@ use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\UnprocessableEntityHttpException;
 
-
 class LeadController extends ApiBaseController
 {
     private $leadHashGenerator;
@@ -39,15 +38,16 @@ class LeadController extends ApiBaseController
     private $leadCreateApiService;
     private $createProductFlightHandler;
 
-    public function __construct($id,
-                                $module,
-                                LeadHashGenerator $leadHashGenerator,
-                                LeadRepository $leadRepository,
-                                TransactionManager $transactionManager,
-                                LeadCreateApiService $leadCreateApiService,
-                                Handler $createProductFlightHandler,
-                                $config = [])
-    {
+    public function __construct(
+        $id,
+        $module,
+        LeadHashGenerator $leadHashGenerator,
+        LeadRepository $leadRepository,
+        TransactionManager $transactionManager,
+        LeadCreateApiService $leadCreateApiService,
+        Handler $createProductFlightHandler,
+        $config = []
+    ) {
         parent::__construct($id, $module, $config);
         $this->leadHashGenerator = $leadHashGenerator;
         $this->leadRepository = $leadRepository;
@@ -352,7 +352,6 @@ class LeadController extends ApiBaseController
         $lead = Yii::$app->request->post('Lead');
 
         if ($lead) {
-
             if (isset($lead['client_id'])) {
                 unset($lead['client_id']);
             }
@@ -386,8 +385,6 @@ class LeadController extends ApiBaseController
                 if (isset($client['client_ip']) && $client['client_ip']) {
                     $lead['request_ip'] = $client['client_ip'];
                 }
-
-
             }
 
             $post['lead'] = $lead;
@@ -413,27 +410,26 @@ class LeadController extends ApiBaseController
         }
 
         if ($modelLead->load($post)) {
-
-            if($modelLead->project_id) {
-
+            if ($modelLead->project_id) {
                 $source = Sources::findOne(['cid' => $modelLead->sub_sources_code, 'project_id' => $modelLead->project_id]);
 
-                if(!$source) {
+                if (!$source) {
                     $old_sub_sources_code = $modelLead->sub_sources_code;
                     $source = Sources::find()->where(['project_id' => $modelLead->project_id])->orderBy(['id' => SORT_ASC])->one();
-                    if($source) {
+                    if ($source) {
                         $modelLead->source_id = $source->id;
                         $modelLead->sub_sources_code = $source->cid;
                     }
-                    Yii::warning('Not found Source Code ('.$old_sub_sources_code.') Set Default Source ('.$modelLead->sub_sources_code.') Project Id: '.$modelLead->project_id, 'API:Lead:create:ApiLead:validate');
+                    Yii::warning('Not found Source Code (' . $old_sub_sources_code . ') Set Default Source (' . $modelLead->sub_sources_code . ') Project Id: ' . $modelLead->project_id, 'API:Lead:create:ApiLead:validate');
                 }
-
             }
 
             if (!$modelLead->validate()) {
                 if ($errors = $modelLead->getErrors()) {
                     throw new UnprocessableEntityHttpException($this->errorToString($errors), 5);
-                } else throw new UnprocessableEntityHttpException('Not validate Api Lead data', 5);
+                } else {
+                    throw new UnprocessableEntityHttpException('Not validate Api Lead data', 5);
+                }
             }
             $modelLead->checkIsSourceCode();
         } else {
@@ -763,20 +759,20 @@ class LeadController extends ApiBaseController
                 ),
             ];
         } catch (\Throwable $e) {
-
 //            $transaction->rollBack();
             Yii::error($e->getTraceAsString(), 'API:lead:create:try');
-            if (Yii::$app->request->get('debug')) $message = $e->getTraceAsString();
-            else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
+            if (Yii::$app->request->get('debug')) {
+                $message = $e->getTraceAsString();
+            } else {
+                $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
+            }
 
             $response['error'] = $message;
             $response['error_code'] = 30;
-
         }
 
 
         if (isset($response['error']) && $response['error']) {
-
         } else {
             /*$responseData['status']     = 200;
             $responseData['name']       = 'Success';
@@ -935,7 +931,9 @@ class LeadController extends ApiBaseController
             if (!$modelLead->validate()) {
                 if ($errors = $modelLead->getErrors()) {
                     throw new UnprocessableEntityHttpException($this->errorToString($errors), 5);
-                } else throw new UnprocessableEntityHttpException('Not validate Api Lead data', 5);
+                } else {
+                    throw new UnprocessableEntityHttpException('Not validate Api Lead data', 5);
+                }
             }
         } else {
             throw new BadRequestHttpException('Not found Lead data on POST request', 6);
@@ -955,102 +953,100 @@ class LeadController extends ApiBaseController
         $transaction = Yii::$app->db->beginTransaction();
 
         try {
-
-
-
-        foreach ($modelLead->attributes as $attrKey => $attrValue) {
-            if ($attrValue === null) {
-                continue;
-            }
-            if (isset($lead->$attrKey)) {
-                $lead->$attrKey = $attrValue;
-            }
-        }
-
-        $client = $lead->client;
-
-        if ($modelLead->client_first_name || $modelLead->client_last_name || $modelLead->client_middle_name) {
-            if ($client) {
-                if ($modelLead->client_first_name) {
-                    $client->first_name = $modelLead->client_first_name;
+            foreach ($modelLead->attributes as $attrKey => $attrValue) {
+                if ($attrValue === null) {
+                    continue;
                 }
-                if ($modelLead->client_last_name) {
-                    $client->last_name = $modelLead->client_last_name;
-                }
-                if ($modelLead->client_middle_name) {
-                    $client->middle_name = $modelLead->client_middle_name;
-                }
-
-                $client->save();
-            }
-        }
-
-
-        if (!$lead->validate()) {
-            if ($errors = $lead->getErrors()) {
-                throw new UnprocessableEntityHttpException($this->errorToString($errors), 7);
-            } else throw new UnprocessableEntityHttpException('Not validate Lead data', 7);
-        }
-
-        if (!$lead->save()) {
-            Yii::error(print_r($lead->errors, true), 'API:Lead:update:Lead:save');
-            $transaction->rollBack();
-            throw new UnprocessableEntityHttpException($this->errorToString($modelLead->errors), 8);
-        }
-
-
-        if ($modelLead->flights) {
-
-            LeadFlightSegment::deleteAll(['lead_id' => $lead->id]);
-
-            foreach ($modelLead->flights as $flight) {
-                $flightModel = new LeadFlightSegment();
-                $flightModel->scenario = LeadFlightSegment::SCENARIO_UPDATE_API;
-
-                $flightModel->lead_id = $lead->id;
-                $flightModel->origin = $flight['origin'];
-                $flightModel->destination = $flight['destination'];
-                $flightModel->departure = $flight['departure'];
-
-                if (!$flightModel->save()) {
-                    Yii::error(print_r($flightModel->errors, true), 'API:Lead:update:LeadFlightSegment:save');
-                    $transaction->rollBack();
+                if (isset($lead->$attrKey)) {
+                    $lead->$attrKey = $attrValue;
                 }
             }
-        }
 
+            $client = $lead->client;
 
-        if ($modelLead->emails && $client) {
-            ClientEmail::deleteAll(['client_id' => $client->id]);
-            foreach ($modelLead->emails as $email) {
-                $emailModel = new ClientEmail();
+            if ($modelLead->client_first_name || $modelLead->client_last_name || $modelLead->client_middle_name) {
+                if ($client) {
+                    if ($modelLead->client_first_name) {
+                        $client->first_name = $modelLead->client_first_name;
+                    }
+                    if ($modelLead->client_last_name) {
+                        $client->last_name = $modelLead->client_last_name;
+                    }
+                    if ($modelLead->client_middle_name) {
+                        $client->middle_name = $modelLead->client_middle_name;
+                    }
 
-                $emailModel->client_id = $client->id;
-                $emailModel->email = $email;
-                $emailModel->created = date('Y-m-d H:i:s');
-
-                if (!$emailModel->save()) {
-                    Yii::error(print_r($emailModel->errors, true), 'API:Lead:update:ClientEmail:save');
-                    $transaction->rollBack();
+                    $client->save();
                 }
             }
-        }
 
-        if ($modelLead->phones && $client) {
-            ClientPhone::deleteAll(['client_id' => $client->id]);
-            foreach ($modelLead->phones as $phone) {
-                $phoneModel = new ClientPhone();
 
-                $phoneModel->client_id = $client->id;
-                $phoneModel->phone = $phone;
-                $phoneModel->created = date('Y-m-d H:i:s');
-
-                if (!$phoneModel->save()) {
-                    Yii::error(print_r($phoneModel->errors, true), 'API:Lead:update:ClientPhone:save');
-                    $transaction->rollBack();
+            if (!$lead->validate()) {
+                if ($errors = $lead->getErrors()) {
+                    throw new UnprocessableEntityHttpException($this->errorToString($errors), 7);
+                } else {
+                    throw new UnprocessableEntityHttpException('Not validate Lead data', 7);
                 }
             }
-        }
+
+            if (!$lead->save()) {
+                Yii::error(print_r($lead->errors, true), 'API:Lead:update:Lead:save');
+                $transaction->rollBack();
+                throw new UnprocessableEntityHttpException($this->errorToString($modelLead->errors), 8);
+            }
+
+
+            if ($modelLead->flights) {
+                LeadFlightSegment::deleteAll(['lead_id' => $lead->id]);
+
+                foreach ($modelLead->flights as $flight) {
+                    $flightModel = new LeadFlightSegment();
+                    $flightModel->scenario = LeadFlightSegment::SCENARIO_UPDATE_API;
+
+                    $flightModel->lead_id = $lead->id;
+                    $flightModel->origin = $flight['origin'];
+                    $flightModel->destination = $flight['destination'];
+                    $flightModel->departure = $flight['departure'];
+
+                    if (!$flightModel->save()) {
+                        Yii::error(print_r($flightModel->errors, true), 'API:Lead:update:LeadFlightSegment:save');
+                        $transaction->rollBack();
+                    }
+                }
+            }
+
+
+            if ($modelLead->emails && $client) {
+                ClientEmail::deleteAll(['client_id' => $client->id]);
+                foreach ($modelLead->emails as $email) {
+                    $emailModel = new ClientEmail();
+
+                    $emailModel->client_id = $client->id;
+                    $emailModel->email = $email;
+                    $emailModel->created = date('Y-m-d H:i:s');
+
+                    if (!$emailModel->save()) {
+                        Yii::error(print_r($emailModel->errors, true), 'API:Lead:update:ClientEmail:save');
+                        $transaction->rollBack();
+                    }
+                }
+            }
+
+            if ($modelLead->phones && $client) {
+                ClientPhone::deleteAll(['client_id' => $client->id]);
+                foreach ($modelLead->phones as $phone) {
+                    $phoneModel = new ClientPhone();
+
+                    $phoneModel->client_id = $client->id;
+                    $phoneModel->phone = $phone;
+                    $phoneModel->created = date('Y-m-d H:i:s');
+
+                    if (!$phoneModel->save()) {
+                        Yii::error(print_r($phoneModel->errors, true), 'API:Lead:update:ClientPhone:save');
+                        $transaction->rollBack();
+                    }
+                }
+            }
 
         //$transaction->commit();
 
@@ -1059,22 +1055,21 @@ class LeadController extends ApiBaseController
             $response['emails'] = $lead->client->clientEmails;
             $response['phones'] = $lead->client->clientPhones;
             $response['client'] = $lead->client;
-
         } catch (\Throwable $e) {
-
             $transaction->rollBack();
             Yii::error($e->getTraceAsString(), 'API:lead:update:try');
-            if (Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
-            else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
+            if (Yii::$app->request->get('debug')) {
+                $message = ($e->getTraceAsString());
+            } else {
+                $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
+            }
 
             $response['error'] = $message;
             $response['error_code'] = 30;
-
         }
 
 
         if (isset($response['error']) && $response['error']) {
-
         } else {
             $responseData['status'] = 200;
             $responseData['name'] = 'Success';
@@ -1091,8 +1086,11 @@ class LeadController extends ApiBaseController
 
         if (isset($response['error']) && $response['error']) {
             $json = @json_encode($response['error']);
-            if (isset($response['error_code']) && $response['error_code']) $error_code = $response['error_code'];
-            else $error_code = 0;
+            if (isset($response['error_code']) && $response['error_code']) {
+                $error_code = $response['error_code'];
+            } else {
+                $error_code = 0;
+            }
             throw new UnprocessableEntityHttpException($json, $error_code);
         }
 
@@ -1167,13 +1165,17 @@ class LeadController extends ApiBaseController
         $modelLead = new ApiLead();
         $modelLead->scenario = ApiLead::SCENARIO_GET;
 
-        if ($this->apiProject) $modelLead->project_id = $this->apiProject->id;
+        if ($this->apiProject) {
+            $modelLead->project_id = $this->apiProject->id;
+        }
 
         if ($modelLead->load(Yii::$app->request->post())) {
             if (!$modelLead->validate()) {
                 if ($errors = $modelLead->getErrors()) {
                     throw new UnprocessableEntityHttpException($this->errorToString($errors), 5);
-                } else throw new UnprocessableEntityHttpException('Not validate Api Lead data', 5);
+                } else {
+                    throw new UnprocessableEntityHttpException('Not validate Api Lead data', 5);
+                }
             }
         } else {
             throw new BadRequestHttpException('Not found Lead data on POST request', 6);
@@ -1195,12 +1197,13 @@ class LeadController extends ApiBaseController
             $response['emails'] = $lead->client->clientEmails;
             $response['phones'] = $lead->client->clientPhones;
             $response['client'] = $lead->client;
-
         } catch (\Throwable $e) {
-
             Yii::error($e->getTraceAsString(), 'API:lead:get:try');
-            if (Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
-            else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
+            if (Yii::$app->request->get('debug')) {
+                $message = ($e->getTraceAsString());
+            } else {
+                $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
+            }
 
             $response['error'] = $message;
             $response['error_code'] = 30;
@@ -1208,7 +1211,6 @@ class LeadController extends ApiBaseController
 
 
         if (isset($response['error']) && $response['error']) {
-
         } else {
             $responseData['status'] = 200;
             $responseData['name'] = 'Success';
@@ -1225,8 +1227,11 @@ class LeadController extends ApiBaseController
 
         if (isset($response['error']) && $response['error']) {
             $json = @json_encode($response['error']);
-            if (isset($response['error_code']) && $response['error_code']) $error_code = $response['error_code'];
-            else $error_code = 0;
+            if (isset($response['error_code']) && $response['error_code']) {
+                $error_code = $response['error_code'];
+            } else {
+                $error_code = 0;
+            }
             throw new UnprocessableEntityHttpException($json, $error_code);
         }
 
@@ -1259,7 +1264,6 @@ class LeadController extends ApiBaseController
         ];
 
         try {
-
             $isSold = $lead->isSold();
             $isReject = $lead->isReject();
             $lastStatus = $lead->status;
@@ -1269,8 +1273,7 @@ class LeadController extends ApiBaseController
             if (!$lead->validate()) {
                 $response['errors'][] = $lead->getErrors();
             } else {
-
-                $result = $this->transactionManager->wrap(function() use ($lead, $leadAttributes, $isSold, $isReject, $lastStatus) {
+                $result = $this->transactionManager->wrap(function () use ($lead, $leadAttributes, $isSold, $isReject, $lastStatus) {
 
                     $response = [];
 
@@ -1287,7 +1290,8 @@ class LeadController extends ApiBaseController
 
                     $this->leadRepository->save($lead);
 
-                    if (!empty($leadAttributes['additional_information']) &&
+                    if (
+                        !empty($leadAttributes['additional_information']) &&
                         !empty($leadAttributes['additional_information']['pnr'])
                     ) {
                         $aplliend = $lead->getAppliedAlternativeQuotes();
@@ -1313,7 +1317,6 @@ class LeadController extends ApiBaseController
                     }
 
                     return $response;
-
                 });
 
                 if (isset($result['status'])) {
@@ -1323,7 +1326,6 @@ class LeadController extends ApiBaseController
                 if (isset($result['errors'])) {
                     $response['errors'][] = $result['errors'];
                 }
-
             }
         } catch (\Throwable $e) {
             Yii::error($e->getTraceAsString(), 'API:LeadSoldUpdate:try');
@@ -1391,8 +1393,11 @@ class LeadController extends ApiBaseController
 
         if (isset($response['error']) && $response['error']) {
             $json = @json_encode($response['error']);
-            if (isset($response['error_code']) && $response['error_code']) $error_code = $response['error_code'];
-            else $error_code = 0;
+            if (isset($response['error_code']) && $response['error_code']) {
+                $error_code = $response['error_code'];
+            } else {
+                $error_code = 0;
+            }
             throw new UnprocessableEntityHttpException($json, $error_code);
         }
 
@@ -1559,37 +1564,39 @@ class LeadController extends ApiBaseController
         $leadCallExpert->lce_response_dt = date('Y-m-d H:i:s');
         $leadCallExpert->lce_updated_dt = date('Y-m-d H:i:s');
 
-        if($model->lce_response_lead_quotes && is_array($model->lce_response_lead_quotes)) {
+        if ($model->lce_response_lead_quotes && is_array($model->lce_response_lead_quotes)) {
             $leadCallExpert->lce_response_lead_quotes = json_encode($model->lce_response_lead_quotes);
         }
 
-        if($model->lce_response_text) {
+        if ($model->lce_response_text) {
             $leadCallExpert->lce_response_text = $model->lce_response_text;
         }
 
-        if($model->lce_expert_username) {
+        if ($model->lce_expert_username) {
             $leadCallExpert->lce_expert_username = $model->lce_expert_username;
         }
 
-        if($model->lce_expert_user_id) {
+        if ($model->lce_expert_user_id) {
             $leadCallExpert->lce_expert_user_id = $model->lce_expert_user_id;
         }
 
         $leadCallExpert->lce_status_id = $model->lce_status_id;
 
-        if($leadCallExpert->save()) {
-
-
-            if($leadCallExpert->lce_agent_user_id) {
-                if ($ntf = Notifications::create(
-                    $leadCallExpert->lce_agent_user_id,
-                    'Expert Response',
-                    'Expert (' . Html::encode($leadCallExpert->lce_expert_username) . ') Response (' . $leadCallExpert->getStatusName() . '). Lead (Id: ' . ($leadCallExpert->lceLead ? Purifier::createLeadShortLink($leadCallExpert->lceLead) : 'nof found') . ')', Notifications::TYPE_INFO, true)) {
+        if ($leadCallExpert->save()) {
+            if ($leadCallExpert->lce_agent_user_id) {
+                if (
+                    $ntf = Notifications::create(
+                        $leadCallExpert->lce_agent_user_id,
+                        'Expert Response',
+                        'Expert (' . Html::encode($leadCallExpert->lce_expert_username) . ') Response (' . $leadCallExpert->getStatusName() . '). Lead (Id: ' . ($leadCallExpert->lceLead ? Purifier::createLeadShortLink($leadCallExpert->lceLead) : 'nof found') . ')',
+                        Notifications::TYPE_INFO,
+                        true
+                    )
+                ) {
                     // Notifications::socket($leadCallExpert->lce_agent_user_id, $leadCallExpert->lce_lead_id, 'getNewNotification', [], true);
                     $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
                     Notifications::publish('getNewNotification', ['user_id' => $leadCallExpert->lce_agent_user_id], $dataNotification);
                 }
-
             }
 
             $response = $leadCallExpert->attributes;
@@ -1598,7 +1605,6 @@ class LeadController extends ApiBaseController
             $responseData['name']       = 'Success';
             $responseData['code']       = 0;
             $responseData['message']    = '';
-
         } else {
             $response['error'] = $this->errorToString($leadCallExpert->errors); //VarDumper::dumpAsString($leadCallExpert->errors, 10);
             $response['error_code'] = 10;
@@ -1615,6 +1621,5 @@ class LeadController extends ApiBaseController
         }
 
         return $responseData;
-
     }
 }

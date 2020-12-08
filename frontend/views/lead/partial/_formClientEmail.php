@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $form ActiveForm
  * @var $email ClientEmail
@@ -20,10 +21,10 @@ use yii\bootstrap4\Modal;
 
     $template = '<div class="input-group"><span class="input-group-addon">@</span>{input}';
     if (($key == '__id__' || strpos($key, 'new') !== false) && $nr != 0) {
-        $template .= '<span class="input-group-btn">'.
-            Html::button('<i class="fa fa-trash"></i>',[
+        $template .= '<span class="input-group-btn">' .
+            Html::button('<i class="fa fa-trash"></i>', [
                 'class' => 'btn btn-danger client-remove-email-button'
-            ]).
+            ]) .
             '</span>';
     }
     $template .= '</div>{error}';
@@ -58,8 +59,6 @@ use yii\bootstrap4\Modal;
         $emailCount = $dataProvider->count;
 
         if ($emailCount > 0) {
-
-
             $emailContent = \yii\grid\GridView::widget([
                 'dataProvider' => $dataProvider,
                 'filterModel' => null,
@@ -152,14 +151,12 @@ use yii\bootstrap4\Modal;
             echo $emailContent; //"<div id='modalContent'></div>";
             Modal::end();
 
-            echo Html::button('<i class="fa fa-user"></i> '.$emailCount, [
+            echo Html::button('<i class="fa fa-user"></i> ' . $emailCount, [
                 'id' => 'email-cnt-' . $key,
                 'data-modal_id' => 'email-cnt-' . $key,
                 'title' => $email->email,
                 'class' => 'btn btn-primary showModalButton',
             ]);
-
-
         }
 
 

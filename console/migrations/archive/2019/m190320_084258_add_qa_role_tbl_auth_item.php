@@ -48,7 +48,6 @@ class m190320_084258_add_qa_role_tbl_auth_item extends Migration
 
         $authorRole = $auth->getRole('qa');
         $auth->assign($authorRole, $employee->getId());
-
     }
 
     /**
@@ -61,10 +60,8 @@ class m190320_084258_add_qa_role_tbl_auth_item extends Migration
         $auth->remove($qa);
 
         $qa = \common\models\Employee::find()->where(['username' => 'qa.test'])->one();
-        if($qa) {
+        if ($qa) {
             $qa->delete();
         }
     }
-
-
 }

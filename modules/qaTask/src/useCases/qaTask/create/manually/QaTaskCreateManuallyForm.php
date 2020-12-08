@@ -36,8 +36,7 @@ class QaTaskCreateManuallyForm extends Model
         array $categoryList,
         int $createdUserId,
         $config = []
-    )
-    {
+    ) {
         $this->objectType = $objectType;
         $this->objectId = $objectId;
         $this->projectId = $projectId;

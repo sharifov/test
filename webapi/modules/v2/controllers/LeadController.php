@@ -36,8 +36,7 @@ class LeadController extends BaseController
         ApiLogger $logger,
         LeadCreateHandler $leadCreateHandler,
         $config = []
-    )
-    {
+    ) {
         parent::__construct($id, $module, $logger, $config);
         $this->leadCreateHandler = $leadCreateHandler;
     }

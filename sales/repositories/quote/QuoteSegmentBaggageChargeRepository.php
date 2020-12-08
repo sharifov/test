@@ -21,5 +21,4 @@ class QuoteSegmentBaggageChargeRepository
         }
         return $quoteSegmentBaggageCharge->qsbc_id;
     }
-
 }

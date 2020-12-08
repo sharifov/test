@@ -182,7 +182,5 @@ class m130524_201442_init extends Migration
         $this->dropTable('{{%leads}}');
         $this->dropTable('{{%employee_profile}}');
         $this->dropTable('{{%employees}}');
-
-
     }
 }

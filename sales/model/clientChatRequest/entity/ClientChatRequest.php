@@ -218,7 +218,7 @@ class ClientChatRequest extends \yii\db\ActiveRecord
         return $this->decodedData['visitor']['phone'] ?? null;
     }
 
-    public function getNameFromData():?string
+    public function getNameFromData(): ?string
     {
         return $this->decodedData['visitor']['name'] ?? null;
     }
@@ -246,6 +246,11 @@ class ClientChatRequest extends \yii\db\ActiveRecord
     public function getPageUrl(): string
     {
         return $this->decodedData['page']['url'] ?? '';
+    }
+
+    public function getSourceCid(): string
+    {
+        return $this->decodedData['sources']['cid'] ?? '';
     }
 
     /**
@@ -306,7 +311,7 @@ class ClientChatRequest extends \yii\db\ActiveRecord
      * @return array DateTime table_name created table
      * @throws \RuntimeException any errors occurred during execution
      */
-    public static function partitionDatesFrom(DateTime $date) : array
+    public static function partitionDatesFrom(DateTime $date): array
     {
         $monthBegin = date('Y-m-d', strtotime(date_format($date, 'Y-m-1')));
         if (!$monthBegin) {
@@ -329,12 +334,12 @@ class ClientChatRequest extends \yii\db\ActiveRecord
      * @return string table_name created table
      * @throws \yii\db\Exception
      */
-    public static function createMonthlyPartition(DateTime $partFromDateTime, DateTime $partToDateTime) : string
+    public static function createMonthlyPartition(DateTime $partFromDateTime, DateTime $partToDateTime): string
     {
         $db = self::getDb();
-        $partTableName = self::tableName()."_".date_format($partFromDateTime, "Y_m");
-        $cmd = $db->createCommand("create table ".$partTableName." PARTITION OF ".self::tableName().
-            " FOR VALUES FROM ('". date_format($partFromDateTime, "Y-m-d") . "') TO ('".date_format($partToDateTime, "Y-m-d")."')");
+        $partTableName = self::tableName() . "_" . date_format($partFromDateTime, "Y_m");
+        $cmd = $db->createCommand("create table " . $partTableName . " PARTITION OF " . self::tableName() .
+            " FOR VALUES FROM ('" . date_format($partFromDateTime, "Y-m-d") . "') TO ('" . date_format($partToDateTime, "Y-m-d") . "')");
         $cmd->execute();
         return $partTableName;
     }

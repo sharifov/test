@@ -31,7 +31,7 @@ class m190905_073451_drop_columns_tbl_call extends Migration
         $this->createIndex('IND-call_c_status_id', '{{%call}}', ['c_status_id']);
 
 
-//        $this->createTable('{{%call}}',	[
+//        $this->createTable('{{%call}}',   [
 //            'c_id'                 => $this->primaryKey(),
 //            'c_call_sid'           => $this->string(34)->notNull(),
 //            'c_account_sid'        => $this->string(34)->notNull(),
@@ -95,8 +95,5 @@ class m190905_073451_drop_columns_tbl_call extends Migration
         }
 
         Yii::$app->db->getSchema()->refreshTableSchema('{{%call}}');
-
     }
-
-
 }

@@ -5,24 +5,25 @@ use common\models\ConferenceParticipant;
 use common\models\Department;
 use common\models\search\CallSearch;
 use sales\auth\Auth;
+use yii\bootstrap4\Modal;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
-use \common\models\CallUserAccess;
+use common\models\CallUserAccess;
 
 /* @var $this yii\web\View */
-/* @var $searchModel common\models\search\EmployeeSearch */
 
-/* @var $dataProviderOnlineDep1 yii\data\ActiveDataProvider */
-/* @var $dataProviderOnlineDep2 yii\data\ActiveDataProvider */
-/* @var $dataProviderOnlineDep3 yii\data\ActiveDataProvider */
-/* @var $dataProviderOnline yii\data\ActiveDataProvider */
+/* @var $salesOnline yii\data\ActiveDataProvider */
+/* @var $exchangeOnline yii\data\ActiveDataProvider */
+/* @var $supportOnline yii\data\ActiveDataProvider */
+/* @var $scheduleChangeOnline yii\data\ActiveDataProvider */
+/* @var $withoutDepartmentOnline yii\data\ActiveDataProvider */
 
-/* @var $dataProvider2 yii\data\ActiveDataProvider */
-/* @var $dataProvider3 yii\data\ActiveDataProvider */
+/* @var $historyCalls yii\data\ActiveDataProvider */
+/* @var $activeCalls yii\data\ActiveDataProvider */
 /* @var $form yii\widgets\ActiveForm */
 
 $this->title = 'User Call Map';
@@ -47,24 +48,25 @@ $dtNow = date('Y-m-d H:i:s');
  * @param \common\models\Call[] $calls
  * @throws \yii\base\InvalidConfigException
  */
-function renderChildCallsRecursive($calls): void {
+function renderChildCallsRecursive($calls): void
+{
     ?>
 
             <table class="table table-condensed">
-                <?php foreach ($calls as $callItem):?>
+                <?php foreach ($calls as $callItem) :?>
                     <tr>
                         <td style="width:70px; border: none">
                             <u><?=Html::a($callItem->c_id, ['call/view', 'id' => $callItem->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u><br>
-                            <?php if ($callItem->isIn()): ?>
+                            <?php if ($callItem->isIn()) : ?>
                                 <span class="badge badge-danger">In</span>
-                            <?php elseif($callItem->isOut()): ?>
+                            <?php elseif ($callItem->isOut()) : ?>
                                 <span class="badge badge-danger">Out</span>
-                            <?php elseif($callItem->isReturn()): ?>
+                            <?php elseif ($callItem->isReturn()) : ?>
                                 <span class="badge badge-danger">Return</span>
                             <?php endif; ?>
                         </td>
                         <td style="width: 50px">
-                            <?php if ($callItem->c_source_type_id):?>
+                            <?php if ($callItem->c_source_type_id) :?>
                                 <span class="label label-info"><?=$callItem->getShortSourceName()?></span>
                             <?php endif; ?>
 
@@ -75,24 +77,23 @@ function renderChildCallsRecursive($calls): void {
                             <?=$callItem->getStatusIcon()?> <?=$callItem->getStatusName()?>
                         </td>
                         <td style="width: 80px" class="text-left">
-                            <?php if($callItem->c_updated_dt): ?>
-                                <?php if ($callItem->isEnded()):?>
+                            <?php if ($callItem->c_updated_dt) : ?>
+                                <?php if ($callItem->isEnded()) :?>
                                     <?php $sec = $callItem->c_call_duration ?: strtotime($callItem->c_updated_dt) - strtotime($callItem->c_created_dt); ?>
                                     <span class="badge badge-primary timer" data-sec="<?=$sec?>" data-control="pause" data-format="%M:%S" style="font-size: 10px"><?=gmdate('i:s', $sec)?></span>
-                                <?php else: ?>
+                                <?php else : ?>
                                     <?php $sec = time() - strtotime($callItem->c_updated_dt); ?>
                                     <span class="badge badge-warning timer" data-sec="<?=$sec?>" data-control="start" data-format="%M:%S"><?=gmdate('i:s', $sec)?></span>
                                 <?php endif;?>
                             <?php endif;?>
-                            <?php if ($callItem->c_recording_sid):?>
+                            <?php if ($callItem->c_recording_sid) :?>
                                 <small><i class="fa fa-play-circle-o"></i></small>
                             <?php endif;?>
                         </td>
 
                         <td class="text-left">
-                            <?php if($callItem->cuaUsers):?>
-                                <?php foreach ($callItem->callUserAccesses as $cua):
-
+                            <?php if ($callItem->cuaUsers) :?>
+                                <?php foreach ($callItem->callUserAccesses as $cua) :
                                     switch ((int) $cua->cua_status_id) {
                                         case CallUserAccess::STATUS_TYPE_PENDING:
                                             $label = 'warning';
@@ -116,29 +117,29 @@ function renderChildCallsRecursive($calls): void {
                             <i class="fa fa-clock-o"></i> <?=Yii::$app->formatter->asDatetime(strtotime($callItem->c_created_dt), 'php:H:i')?>
                         </td>
                         <td class="text-center" style="width:180px">
-                            <?php if($callItem->c_updated_dt): ?>
+                            <?php if ($callItem->c_updated_dt) : ?>
                                 <small>
-                                    <?php if ($callItem->isEnded()):?>
+                                    <?php if ($callItem->isEnded()) :?>
                                         <?=Yii::$app->formatter->asRelativeTime(strtotime($callItem->c_created_dt))?>
                                     <?php endif;?>
                                 </small>
                             <?php endif;?>
                         </td>
                         <td class="text-left" style="width:130px">
-                            <?php if($callItem->isIn()):?>
+                            <?php if ($callItem->isIn()) :?>
                                 <div>
-                                    <?php if($callItem->c_created_user_id):?>
+                                    <?php if ($callItem->c_created_user_id) :?>
                                         <i class="fa fa-user fa-border"></i> <?=Html::encode($callItem->cCreatedUser->username)?>
-                                    <?php else: ?>
+                                    <?php else : ?>
                                         <i class="fa fa-phone fa-border"></i> <?=Html::encode($callItem->c_to)?>
                                     <?php endif; ?>
                                 </div>
-                            <?php else: ?>
+                            <?php else : ?>
                                 <div>
 
-                                    <?php if($callItem->c_created_user_id):?>
+                                    <?php if ($callItem->c_created_user_id) :?>
                                         <i class="fa fa-user fa-border"></i> <?=Html::encode($callItem->cCreatedUser->username)?>
-                                    <?php else: ?>
+                                    <?php else : ?>
                                         <i class="fa fa-phone fa-border"></i> <?=Html::encode($callItem->c_to)?>
                                     <?php endif; ?>
 
@@ -152,7 +153,7 @@ function renderChildCallsRecursive($calls): void {
 
                     <?php
 
-                        if ($children = getChildrenForRecursiveRender($callItem->c_id)):?>
+                    if ($children = getChildrenForRecursiveRender($callItem->c_id)) :?>
                             <tr>
                                 <td colspan="8">
                                     <?php renderChildCallsRecursive($children)?>
@@ -210,7 +211,7 @@ function getJoinTemplate($model)
 
 <div id="call-map-page" class="col-md-12">
 
-    <?php Pjax::begin(['id' => 'pjax-call-list']); ?>
+    <?php Pjax::begin(['id' => 'pjax-call-list', 'timeout' => 4000]); ?>
 
         <div class="row">
             <?php /*<div class="animated flipInY col-md-4 col-sm-6 col-xs-12">
@@ -307,15 +308,12 @@ function getJoinTemplate($model)
             <div class="col-md-2">
                 <?php /*<h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>*/?>
 
-
-
-
-                <?php if($dataProviderOnlineDep1):?>
+                <?php if ($salesOnline) : ?>
                 <div class="card card-default" style="margin-bottom: 20px;">
-                    <div class="card-header"><i class="fa fa-users"></i> OnLine - Department SALES (<?=$dataProviderOnlineDep1->totalCount?>)</div>
+                    <div class="card-header"><i class="fa fa-users"> </i> OnLine - Department SALES (<?= $salesOnline->totalCount?>)</div>
                     <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
-                            'dataProvider' => $dataProviderOnlineDep1,
+                            'dataProvider' => $salesOnline,
                             'emptyText' => '<div class="text-center">Not found online users</div><br>',
                             'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
                             'itemView' => function ($model, $key, $index, $widget) {
@@ -330,13 +328,12 @@ function getJoinTemplate($model)
                 </div>
                 <?php endif;?>
 
-
-                <?php if($dataProviderOnlineDep2):?>
+                <?php if ($exchangeOnline) : ?>
                 <div class="card card-default" style="margin-bottom: 20px;">
-                    <div class="card-header"><i class="fa fa-users"></i> OnLine - Department EXCHANGE (<?=$dataProviderOnlineDep2->totalCount?>)</div>
+                    <div class="card-header"><i class="fa fa-users"></i> OnLine - Department EXCHANGE (<?= $exchangeOnline->totalCount?>)</div>
                     <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
-                            'dataProvider' => $dataProviderOnlineDep2,
+                            'dataProvider' => $exchangeOnline,
                             'emptyText' => '<div class="text-center">Not found online users</div><br>',
                             'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
                             'itemView' => function ($model, $key, $index, $widget) {
@@ -351,12 +348,12 @@ function getJoinTemplate($model)
                 </div>
                 <?php endif;?>
 
-                <?php if($dataProviderOnlineDep3):?>
+                <?php if ($supportOnline) : ?>
                 <div class="card card-default" style="margin-bottom: 20px;">
-                    <div class="card-header"><i class="fa fa-users"></i> OnLine - Department SUPPORT (<?=$dataProviderOnlineDep3->totalCount?>)</div>
+                    <div class="card-header"><i class="fa fa-users"></i> OnLine - Department SUPPORT (<?= $supportOnline->totalCount ?>)</div>
                     <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
-                            'dataProvider' => $dataProviderOnlineDep3,
+                            'dataProvider' => $supportOnline,
                             'emptyText' => '<div class="text-center">Not found online users</div><br>',
                             'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
                             'itemView' => function ($model, $key, $index, $widget) {
@@ -371,12 +368,32 @@ function getJoinTemplate($model)
                 </div>
                 <?php endif;?>
 
-                <?php if($dataProviderOnline):?>
+                <?php if ($scheduleChangeOnline) : ?>
                 <div class="card card-default" style="margin-bottom: 20px;">
-<!--                    <div class="card-header"><i class="fa fa-users"></i> OnLine Users - W/O Department (--><?php //=$dataProviderOnline->totalCount?><!--)</div>-->
+                    <div class="card-header"><i class="fa fa-users"></i> OnLine - Department Schedule Change (<?= $scheduleChangeOnline->totalCount ?>)</div>
                     <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
-                            'dataProvider' => $dataProviderOnline,
+                            'dataProvider' => $scheduleChangeOnline,
+                            'emptyText' => '<div class="text-center">Not found online users</div><br>',
+                            'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
+                            'itemView' => function ($model, $key, $index, $widget) {
+                                return $this->render('_list_item_online', ['model' => $model, 'index' => $index]);
+                            },
+                            'itemOptions' => [
+                                //'class' => 'item',
+                                //'tag' => false,
+                            ],
+                        ])?>
+                    </div>
+                </div>
+                <?php endif;?>
+
+                <?php if ($withoutDepartmentOnline) : ?>
+                <div class="card card-default" style="margin-bottom: 20px;">
+<!--                    <div class="card-header"><i class="fa fa-users"></i> OnLine Users - W/O Department (--><?php //=$withoutDepartmentOnline->totalCount?><!--)</div>-->
+                    <div class="card-body">
+                        <?= \yii\widgets\ListView::widget([
+                            'dataProvider' => $withoutDepartmentOnline,
                             'emptyText' => '<div class="text-center">Not found online users</div><br>',
                             'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
                             'itemView' => function ($model, $key, $index, $widget) {
@@ -399,11 +416,11 @@ function getJoinTemplate($model)
                     <div class="card-header"><i class="fa fa-list"></i> Calls in IVR, DELAY, QUEUE, RINGING, PROGRESS (Updated: <i class="fa fa-clock-o"></i> <?= Yii::$app->formatter->asTime(time(), 'php:H:i:s') ?>)</div>
                     <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
-                            'dataProvider' => $dataProvider3,
+                            'dataProvider' => $activeCalls,
                             'emptyText' => '<div class="text-center">Not found calls</div><br>',
                             'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
                             'itemView' => function ($model, $key, $index, $widget) {
-                                return $this->render('_list_item',['model' => $model]);
+                                return $this->render('_list_item', ['model' => $model]);
                             },
                             'itemOptions' => [
                                 //'class' => 'item',
@@ -417,10 +434,10 @@ function getJoinTemplate($model)
             <div class="col-md-5">
                 <?php /*<h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>*/?>
                 <div class="card card-default">
-                    <div class="card-header"><i class="fa fa-list"></i> Last <?=$dataProvider2->count?> ended Calls</div>
+                    <div class="card-header"><i class="fa fa-list"></i> Last <?= $historyCalls->count ?> ended Calls</div>
                     <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
-                            'dataProvider' => $dataProvider2,
+                            'dataProvider' => $historyCalls,
 
                             /*'options' => [
                                 'tag' => 'div',
@@ -431,7 +448,7 @@ function getJoinTemplate($model)
                             //'layout' => "{summary}\n<div class=\"text-center\">{pager}</div>\n{items}<div class=\"text-center\">{pager}</div>\n",
                             'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
                             'itemView' => function ($model) {
-                               return $this->render('_list_item',['model' => $model]);
+                                return $this->render('_list_item', ['model' => $model]);
                             },
 
                             'itemOptions' => [
@@ -486,7 +503,8 @@ $js = <<<JS
 
     $('#btn-user-call-map-refresh').on('click', function () {
         // $('#modal-dialog').find('.modal-content').html('');
-        $.pjax.reload({container:'#pjax-call-list'});
+        // $.pjax.reload({container:'#pjax-call-list'});
+         pjaxReload({container: '#pjax-call-list', 'timeout': 4000});
     });
 
     $(document).on('pjax:start', function() {
@@ -504,6 +522,28 @@ $js = <<<JS
       setTimeout(runTimerRefresh, 30000);
     }, 30000);*/
 
+    $(document).on('click', '.add_users_btn', function (e) {
+        e.preventDefault();
+        let callId = $(this).data('call-id');
+        let modal = $('#modal-df');
+        modal.find('.modal-title').html('Add users');
+        modal.find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+        modal.modal('show');
+       
+        $.get('/call/get-users-for-call?id=' + callId)
+            .done(function( data ) {
+                modal.find('.modal-body').html(data);
+            }
+        );       
+        
+    });
 
 JS;
 $this->registerJs($js);
+
+echo Modal::widget([
+    'id' => 'modal-df',
+    'title' => '',
+    //'footer' => '<a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>',
+    'size' => Modal::SIZE_DEFAULT
+]);

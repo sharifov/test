@@ -16,21 +16,21 @@ use yii\filters\VerbFilter;
  */
 class OrderTipsUserProfitCrudController extends FController
 {
-	/**
-	 * @return array
-	 */
-	public function behaviors(): array
-	{
-		$behaviors = [
-			'verbs' => [
-				'class' => VerbFilter::class,
-				'actions' => [
-					'delete-ajax' => ['POST'],
-				],
-			],
-		];
-		return ArrayHelper::merge(parent::behaviors(), $behaviors);
-	}
+    /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'verbs' => [
+                'class' => VerbFilter::class,
+                'actions' => [
+                    'delete-ajax' => ['POST'],
+                ],
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
 
     /**
      * Lists all OrderTipsUserProfit models.
@@ -69,9 +69,9 @@ class OrderTipsUserProfitCrudController extends FController
     public function actionCreate()
     {
         $model = new OrderTipsUserProfit();
-		$model->setScenario(OrderUserProfit::SCENARIO_CRUD);
+        $model->setScenario(OrderUserProfit::SCENARIO_CRUD);
 
-		if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'otup_order_id' => $model->otup_order_id, 'otup_user_id' => $model->otup_user_id]);
         }
 
@@ -91,9 +91,9 @@ class OrderTipsUserProfitCrudController extends FController
     public function actionUpdate($otup_order_id, $otup_user_id)
     {
         $model = $this->findModel($otup_order_id, $otup_user_id);
-		$model->setScenario(OrderUserProfit::SCENARIO_CRUD);
+        $model->setScenario(OrderUserProfit::SCENARIO_CRUD);
 
-		if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'otup_order_id' => $model->otup_order_id, 'otup_user_id' => $model->otup_user_id]);
         }
 

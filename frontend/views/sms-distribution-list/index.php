@@ -9,6 +9,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\sms\entity\smsDistributionList\search\SmsDistributionListSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -46,7 +47,7 @@ $gridId = 'sms-grid-id';
     <?php //=Html::beginForm(['/sms-distribution-list/update-multiple'],'post', ['data-pjax' => true])?>
     <h5>Multiple Update - selected items</h5>
         <div class="col-md-1">
-            <?=Html::dropDownList('SmsMultipleForm[status_id]','', SmsDistributionList::getStatusList(), ['id' => 'status_id', 'class'=>'form-control', 'prompt' => '-'])?>
+            <?=Html::dropDownList('SmsMultipleForm[status_id]', '', SmsDistributionList::getStatusList(), ['id' => 'status_id', 'class' => 'form-control', 'prompt' => '-'])?>
         </div>
         <div class="col-md-2">
             <?=Html::button('<i class="fa fa-save"></i> Update selected items', ['class' => 'btn btn-warning btn-submit-multiple-update']);?>

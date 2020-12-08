@@ -14,6 +14,7 @@ use frontend\widgets\notification\NotificationMessage;
 use modules\offer\src\entities\offer\Offer;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\product\Product;
+use phpDocumentor\Reflection\DocBlock\Tags\Source;
 use sales\auth\Auth;
 use sales\entities\EventTrait;
 use sales\events\lead\LeadBookedEvent;
@@ -24,6 +25,7 @@ use sales\events\lead\LeadCreatedByApiEvent;
 use sales\events\lead\LeadCreatedByIncomingCallEvent;
 use sales\events\lead\LeadCreatedByIncomingEmailEvent;
 use sales\events\lead\LeadCreatedByIncomingSmsEvent;
+use sales\events\lead\LeadCreatedClientChatEvent;
 use sales\events\lead\LeadCreatedCloneEvent;
 use sales\events\lead\LeadCreatedEvent;
 use sales\events\lead\LeadCreatedManuallyEvent;
@@ -330,6 +332,7 @@ class Lead extends ActiveRecord implements Objectable
     public const TYPE_CREATE_INCOMING_EMAIL = 5;
     public const TYPE_CREATE_CLONE = 6;
     public const TYPE_CREATE_IMPORT = 7;
+    public const TYPE_CREATE_CLIENT_CHAT = 8;
 
     public const TYPE_CREATE_LIST = [
         self::TYPE_CREATE_MANUALLY => 'Manually',
@@ -339,6 +342,7 @@ class Lead extends ActiveRecord implements Objectable
         self::TYPE_CREATE_INCOMING_EMAIL => 'Incoming email',
         self::TYPE_CREATE_CLONE => 'Clone',
         self::TYPE_CREATE_IMPORT => 'Import',
+        self::TYPE_CREATE_CLIENT_CHAT => 'Client Chat',
     ];
 
     public const SCENARIO_API = 'scenario_api';
@@ -368,7 +372,7 @@ class Lead extends ActiveRecord implements Objectable
     /**
      * {@inheritdoc}
      */
-    public static function tableName() : string
+    public static function tableName(): string
     {
         return 'leads';
     }
@@ -421,6 +425,11 @@ class Lead extends ActiveRecord implements Objectable
         return $this->l_type_create === self::TYPE_CREATE_CLONE;
     }
 
+    public function isClientChatCreated(): bool
+    {
+        return $this->l_type_create === self::TYPE_CREATE_CLIENT_CHAT;
+    }
+
 //    public function init()
 //    {
 //        parent::init();
@@ -461,7 +470,7 @@ class Lead extends ActiveRecord implements Objectable
     public function getAdditionalInformationMultiplePnr(): array
     {
         $data = [];
-        foreach ($this->getAdditionalInformationForm() as $key => $obj){
+        foreach ($this->getAdditionalInformationForm() as $key => $obj) {
             array_push($data, $obj->pnr);
         }
         return $data;
@@ -572,8 +581,7 @@ class Lead extends ActiveRecord implements Objectable
         $clientEmail,
         $depId,
         $delayedCharge
-    ): self
-    {
+    ): self {
         $lead = self::create();
         $lead->client_id = $clientId;
         $lead->l_client_first_name = $clientFirstName;
@@ -629,76 +637,71 @@ class Lead extends ActiveRecord implements Objectable
      * @param int $clientId
      * @param int|null $projectId
      * @param int|null $sourceId
+     * @param int $departmentId
      * @return Lead
      */
     public static function createByIncomingEmail(
         string $clientEmail,
         int $clientId,
         ?int $projectId,
-        ?int $sourceId
-    ): self
-    {
+        ?int $sourceId,
+        int $departmentId
+    ): self {
         $lead = self::create();
         $lead->l_client_email = $clientEmail;
         $lead->client_id = $clientId;
         $lead->project_id = $projectId;
         $lead->source_id = $sourceId;
-        $lead->l_dep_id = Department::DEPARTMENT_SALES;
+        $lead->l_dep_id = $departmentId;
         $lead->status = self::STATUS_PENDING;
         $lead->l_type_create = self::TYPE_CREATE_INCOMING_EMAIL;
         $lead->recordEvent(new LeadCreatedByIncomingEmailEvent($lead));
         return $lead;
     }
 
-    /**
-     * @param string $clientPhone
-     * @param int $clientId
-     * @param int|null $projectId
-     * @param int|null $sourceId
-     * @return Lead
-     */
     public static function createByIncomingSms(
         string $clientPhone,
         int $clientId,
         ?int $projectId,
-        ?int $sourceId
-    ): self
-    {
+        ?int $sourceId,
+        int $departmentId
+    ): self {
         $lead = self::create();
         $lead->l_client_phone = $clientPhone;
         $lead->client_id = $clientId;
         $lead->project_id = $projectId;
         $lead->source_id = $sourceId;
-        $lead->l_dep_id = Department::DEPARTMENT_SALES;
+        $lead->l_dep_id = $departmentId;
         $lead->status = self::STATUS_PENDING;
         $lead->l_type_create = self::TYPE_CREATE_INCOMING_SMS;
         $lead->recordEvent(new LeadCreatedByIncomingSmsEvent($lead));
         return $lead;
     }
 
-	/**
-	 * @param $phoneNumber
-	 * @param $clientId
-	 * @param $projectId
-	 * @param $sourceId
-	 * @param $gmt
-	 * @return Lead
-	 */
+    /**
+     * @param $phoneNumber
+     * @param $clientId
+     * @param $projectId
+     * @param $sourceId
+     * @param $departmentId
+     * @param $gmt
+     * @return Lead
+     */
     public static function createByIncomingCall(
         $phoneNumber,
         $clientId,
         $projectId,
         $sourceId,
+        $departmentId,
         $gmt
-    ): self
-    {
+    ): self {
         $lead = self::create();
         $lead->l_client_phone = $phoneNumber;
         $lead->client_id = $clientId;
         $lead->project_id = $projectId;
         $lead->source_id = $sourceId;
         $lead->offset_gmt = $gmt;
-        $lead->l_dep_id = Department::DEPARTMENT_SALES;
+        $lead->l_dep_id = $departmentId;
         $lead->status = self::STATUS_PENDING;
         $lead->l_type_create = self::TYPE_CREATE_INCOMING_CALL;
         $lead->l_call_status_id = self::CALL_STATUS_QUEUE;
@@ -770,6 +773,36 @@ class Lead extends ActiveRecord implements Objectable
         $lead->rating = $form->rating;
         $lead->notes_for_experts = $form->notes;
         $lead->recordEvent(new LeadCreatedNewEvent($lead, $creatorId));
+        return $lead;
+    }
+
+    public static function createByClientChat(
+        $clientId,
+        $clientFirstName,
+        $clientLastName,
+        $requestIp,
+        $sourceId,
+        $projectId,
+        $depId,
+        ?int $creatorId,
+        int $visitorLogId,
+        ?string $ip,
+        ?string $gmtOffset
+    ): self {
+        $lead = self::create();
+        $lead->client_id = $clientId;
+        $lead->l_client_first_name = $clientFirstName;
+        $lead->l_client_last_name = $clientLastName;
+        $lead->request_ip = $requestIp;
+        $lead->source_id = $sourceId;
+        $lead->project_id = $projectId;
+        $lead->l_dep_id = $depId;
+        $lead->status = null;
+        $lead->l_type_create = self::TYPE_CREATE_CLIENT_CHAT;
+        $lead->l_visitor_log_id = $visitorLogId;
+        $lead->request_ip = $ip;
+        $lead->offset_gmt = $gmtOffset;
+        $lead->recordEvent(new LeadCreatedClientChatEvent($lead, $creatorId));
         return $lead;
     }
 
@@ -1070,13 +1103,15 @@ class Lead extends ActiveRecord implements Objectable
             throw new \DomainException('Lead is already Sold with this owner.');
         }
 
-        $this->recordEvent(new LeadSoldEvent(
+        $this->recordEvent(
+            new LeadSoldEvent(
                 $this,
                 $this->status,
                 $this->employee_id,
                 $newOwnerId,
                 $creatorId,
-                $reason)
+                $reason
+            )
         );
 
         $this->changeOwner($newOwnerId);
@@ -1111,13 +1146,15 @@ class Lead extends ActiveRecord implements Objectable
             throw new \DomainException('Lead is already Booked with this owner.');
         }
 
-        $this->recordEvent(new LeadBookedEvent(
+        $this->recordEvent(
+            new LeadBookedEvent(
                 $this,
                 $this->status,
                 $this->employee_id,
                 $newOwnerId,
                 $creatorId,
-                $reason)
+                $reason
+            )
         );
 
         $this->changeOwner($newOwnerId);
@@ -1160,7 +1197,8 @@ class Lead extends ActiveRecord implements Objectable
         }
         $this->snooze_for = $snoozeFor;
 
-        $this->recordEvent(new LeadSnoozeEvent(
+        $this->recordEvent(
+            new LeadSnoozeEvent(
                 $this,
                 $this->status,
                 $this->employee_id,
@@ -1203,13 +1241,15 @@ class Lead extends ActiveRecord implements Objectable
             throw new \DomainException('Lead is already Follow Up with this owner.');
         }
 
-        $this->recordEvent(new LeadFollowUpEvent(
+        $this->recordEvent(
+            new LeadFollowUpEvent(
                 $this,
                 $this->status,
                 $this->employee_id,
                 $newOwnerId,
                 $creatorId,
-                $reason)
+                $reason
+            )
         );
 
         $this->changeOwner($newOwnerId);
@@ -1252,13 +1292,15 @@ class Lead extends ActiveRecord implements Objectable
             throw new \DomainException('Lead is already Processing with this owner.');
         }
 
-        $this->recordEvent(new LeadProcessingEvent(
+        $this->recordEvent(
+            new LeadProcessingEvent(
                 $this,
                 $this->status,
                 $this->employee_id,
                 $newOwnerId,
                 $creatorId,
-                $reason)
+                $reason
+            )
         );
 
         $this->recordEvent(new LeadTaskEvent($this), LeadTaskEvent::class);
@@ -1287,13 +1329,15 @@ class Lead extends ActiveRecord implements Objectable
             throw new \DomainException('Lead is already Pending with this owner.');
         }
 
-        $this->recordEvent(new LeadPendingEvent(
+        $this->recordEvent(
+            new LeadPendingEvent(
                 $this,
                 $this->status,
                 $this->employee_id,
                 $newOwnerId,
                 $creatorId,
-                $reason)
+                $reason
+            )
         );
 
         $this->changeOwner($newOwnerId);
@@ -1356,13 +1400,15 @@ class Lead extends ActiveRecord implements Objectable
             throw new \DomainException('Lead is already Trash with this owner.');
         }
 
-        $this->recordEvent(new LeadTrashEvent(
+        $this->recordEvent(
+            new LeadTrashEvent(
                 $this,
                 $this->status,
                 $this->employee_id,
                 $newOwnerId,
                 $creatorId,
-                $reason)
+                $reason
+            )
         );
 
         $this->changeOwner($newOwnerId);
@@ -1422,13 +1468,15 @@ class Lead extends ActiveRecord implements Objectable
             throw new \DomainException('Lead is already Reject with this owner.');
         }
 
-        $this->recordEvent(new LeadRejectEvent(
+        $this->recordEvent(
+            new LeadRejectEvent(
                 $this,
                 $this->status,
                 $this->employee_id,
                 $newOwnerId,
                 $creatorId,
-                $reason)
+                $reason
+            )
         );
 
         $this->changeOwner($newOwnerId);
@@ -1450,13 +1498,15 @@ class Lead extends ActiveRecord implements Objectable
             throw new \DomainException('Lead is already New with this owner.');
         }
 
-        $this->recordEvent(new LeadNewEvent(
+        $this->recordEvent(
+            new LeadNewEvent(
                 $this,
                 $this->status,
                 $this->employee_id,
                 $newOwnerId,
                 $creatorId,
-                $reason)
+                $reason
+            )
         );
 
         $this->changeOwner($newOwnerId);
@@ -1997,7 +2047,7 @@ class Lead extends ActiveRecord implements Objectable
     /**
      * @return int
      */
-    public function updateLastAction() : int
+    public function updateLastAction(): int
     {
         return self::updateAll(['l_last_action_dt' => date('Y-m-d H:i:s')], ['id' => $this->id]);
     }
@@ -2146,7 +2196,7 @@ class Lead extends ActiveRecord implements Objectable
     public function getStatusDate($status)
     {
         $flow = LeadFlow::find()->where(['lead_id' => $this->id ,'status' => $status])->one();
-        if($flow){
+        if ($flow) {
             return $flow['created'];
         }
 
@@ -2459,11 +2509,9 @@ class Lead extends ActiveRecord implements Objectable
      */
     public function updateIpInfo(): array
     {
-
         $out = ['error' => false, 'data' => []];
 
         if (empty($this->offset_gmt) && !empty($this->request_ip)) {
-
             $ip = $this->request_ip; //'217.26.162.22';
             $key = Yii::$app->params['ipinfodb_key'] ?? '';
             $url = 'http://api.ipinfodb.com/v3/ip-city/?format=json&key=' . $key . '&ip=' . $ip;
@@ -2480,12 +2528,11 @@ class Lead extends ActiveRecord implements Objectable
 
 
                     if ($data && isset($data['timeZone'])) {
-
-                        if(isset($data['statusCode'])) {
+                        if (isset($data['statusCode'])) {
                             unset($data['statusCode']);
                         }
 
-                        if(isset($data['statusMessage'])) {
+                        if (isset($data['statusMessage'])) {
                             unset($data['statusMessage']);
                         }
 
@@ -2496,48 +2543,43 @@ class Lead extends ActiveRecord implements Objectable
 
                         $out['data'] = $data;
                     }
-
                 }
-
             } catch (\Throwable $throwable) {
                 $out['error'] = $throwable->getMessage();
 
-                if(!$this->offset_gmt && $this->leadFlightSegments) {
+                if (!$this->offset_gmt && $this->leadFlightSegments) {
                     $firstSegment = $this->leadFlightSegments[0];
                     $airport = Airports::findByIata($firstSegment->origin);
                     if ($airport && $airport->dst) {
                         $offset = $airport->dst;
-                        if(is_numeric($offset)) {
-
+                        if (is_numeric($offset)) {
                             $offsetStr = null;
 
-                            if($offset > 0) {
-                                if($offset < 10) {
-                                    $offsetStr = '+0'.$offset.':00';
+                            if ($offset > 0) {
+                                if ($offset < 10) {
+                                    $offsetStr = '+0' . $offset . ':00';
                                 } else {
-                                    $offsetStr = '+'.$offset.':00';
+                                    $offsetStr = '+' . $offset . ':00';
                                 }
                             }
 
-                            if($offset < 0) {
-                                if($offset > -10) {
-                                    $offsetStr = '-0'.abs($offset).':00';
+                            if ($offset < 0) {
+                                if ($offset > -10) {
+                                    $offsetStr = '-0' . abs($offset) . ':00';
                                 } else {
-                                    $offsetStr = $offset.':00';
+                                    $offsetStr = $offset . ':00';
                                 }
                             }
 
-                            if($offset === 0) {
+                            if ($offset === 0) {
                                 $offsetStr = '-00:00';
                             }
 
-                            if($offsetStr) {
+                            if ($offsetStr) {
                                 $this->offset_gmt = $offsetStr;
                                 self::updateAll(['offset_gmt' => $this->offset_gmt], ['id' => $this->id]);
                             }
-
                         }
-
                     }
                 }
             }
@@ -2564,14 +2606,13 @@ class Lead extends ActiveRecord implements Objectable
         if ($type && $employee_id && isset(Yii::$app->params['email_from']['sales'])) {
             $user = Employee::findOne($employee_id);
 
-            if($employee2_id) {
+            if ($employee2_id) {
                 $user2 = Employee::findOne($employee2_id);
             } else {
                 $user2 = null;
             }
 
             if ($user && $user->email) {
-
                 //$swiftMailer = Yii::$app->mailer2;
 
                 $userName = $user->username;
@@ -2586,20 +2627,20 @@ class Lead extends ActiveRecord implements Objectable
                 $subject = 'Default subject';
 
                 if ($type === 'reassigned-lead') {
-
-                    $body = Yii::t('email', "Attention!
+                    $body = Yii::t(
+                        'email',
+                        "Attention!
 Your Lead ({lead_id}) has been reassigned to another agent ({name2}).",
                         [
                             'name' => $userName,
                             'name2' => $userName2,
                             'lead_id' => Purifier::createLeadShortLink($this),
                             'br' => "\r\n"
-                        ]);
+                        ]
+                    );
 
                     $subject = Yii::t('email', 'Lead-{id} reassigned to ({username})', ['id' => $this->id, 'username' => $userName2]);
-
                 } elseif ($type === 'lead-status-sold') {
-
                     $quote = Quote::find()->where(['lead_id' => $this->id, 'status' => Quote::STATUS_APPLIED])->orderBy(['id' => SORT_DESC])->one();
                     $flightSegment = LeadFlightSegment::find()->where(['lead_id' => $this->id])->orderBy(['id' => SORT_ASC])->one();
                     $airlineName = '-';
@@ -2612,7 +2653,9 @@ Your Lead ({lead_id}) has been reassigned to another agent ({name2}).",
                         $profit = number_format(Quote::countProfit($quote->id), 2);
                     }
 
-                    $body = Yii::t('email', "Booked quote with UID : {quote_uid},
+                    $body = Yii::t(
+                        'email',
+                        "Booked quote with UID : {quote_uid},
 Source: {name},
 Lead: {lead_id}
 {name} made \${profit} on {airline} to {destination}",
@@ -2624,29 +2667,30 @@ Lead: {lead_id}
                             'airline' => $airlineName,
                             'profit' => $profit,
                             'br' => "\r\n"
-                        ]);
+                        ]
+                    );
 
                     $subject = Yii::t('email', 'Lead-{id} to SOLD', ['id' => $this->id]);
                 } elseif ($type === 'lead-status-booked') {
-
-
                     $subject = Yii::t('email', 'Lead-{id} to BOOKED', ['id' => $this->id]);
                     $quote = Quote::find()->where(['lead_id' => $lead->id, 'status' => Quote::STATUS_APPLIED])->orderBy(['id' => SORT_DESC])->one();
 
-                    $body = Yii::t('email', "Your Lead ({lead_id}) has been changed status to BOOKED!
+                    $body = Yii::t(
+                        'email',
+                        "Your Lead ({lead_id}) has been changed status to BOOKED!
 Booked quote UID: {quote_uid}",
                         [
                             'name' => $userName,
                             'lead_id' => Purifier::createLeadShortLink($this),
                             'quote_uid' => $quote ? $quote->uid : '-',
                             'br' => "\r\n"
-                        ]);
-
-
+                        ]
+                    );
                 } elseif ($type === 'lead-status-snooze') {
-
                     $subject = Yii::t('email', "Lead-{id} to SNOOZE", ['id' => $this->id]);
-                    $body = Yii::t('email', "Your Lead ({lead_id}) has been changed status to SNOOZE!
+                    $body = Yii::t(
+                        'email',
+                        "Your Lead ({lead_id}) has been changed status to SNOOZE!
 Snooze for: {datetime}.
 Reason: {reason}",
                         [
@@ -2655,21 +2699,21 @@ Reason: {reason}",
                             'datetime' => Yii::$app->formatter->asDatetime(strtotime($this->snooze_for)),
                             'reason' => $this->status_description ?: '-',
                             'br' => "\r\n"
-                        ]);
-
-
+                        ]
+                    );
                 } elseif ($type === 'lead-status-follow-up') {
-
                     $subject = Yii::t('email', "Lead-{id} to FOLLOW-UP", ['id' => $this->id]);
-                    $body = Yii::t('email', 'Your Lead ({lead_id}) has been changed status to FOLLOW-UP!
+                    $body = Yii::t(
+                        'email',
+                        'Your Lead ({lead_id}) has been changed status to FOLLOW-UP!
 Reason: {reason}',
                         [
                             'name' => $userName,
                             'reason' => $this->status_description ?: '-',
                             'lead_id' => Purifier::createLeadShortLink($this),
                             'br' => "\r\n"
-                        ]);
-
+                        ]
+                    );
                 }
 
 
@@ -2696,11 +2740,9 @@ Reason: {reason}',
                     if (!$isSend) {
                         Yii::warning('Not send Notification to UserID:' . $user->id . ' - Lead Id: ' . $this->id, 'Lead:sendNotification:' . $type);
                     }
-
                 } catch (\Throwable $e) {
                     Yii::error($user->email . ' ' . $e->getMessage(), 'Lead:sendNotification:Notifications:create');
                 }
-
             } else {
                 Yii::warning('Not found employee (' . $employee_id . ')', 'Lead:sendNotification:' . $type);
             }
@@ -2755,7 +2797,6 @@ Reason: {reason}',
      */
     public function createOrUpdateQCall(): bool
     {
-
         if ($this->lastLeadFlow) {
             $callCount = (int) $this->lastLeadFlow->lf_out_calls;
         } else {
@@ -2792,13 +2833,13 @@ Reason: {reason}',
                 return true;
             }
         } else {
-           if ($lq) {
-               try {
-                   $lq->delete();
-               } catch (\Throwable $throwable) {
-                   Yii::error($throwable->getMessage(), 'Lead:createOrUpdateQCall:Throwable');
-               }
-           }
+            if ($lq) {
+                try {
+                    $lq->delete();
+                } catch (\Throwable $throwable) {
+                    Yii::error($throwable->getMessage(), 'Lead:createOrUpdateQCall:Throwable');
+                }
+            }
         }
         return false;
     }
@@ -2839,14 +2880,14 @@ Reason: {reason}',
 
         $clientPhone = ClientPhone::find()->where(['phone' => $phoneNumber])->orderBy(['id' => SORT_DESC])->limit(1)->one();
 
-        if($clientPhone) {
+        if ($clientPhone) {
             $client = $clientPhone->client;
         } else {
             $client = new Client();
             $client->first_name = 'ClientName';
             $client->created = date('Y-m-d H:i:s');
 
-            if($client->save()) {
+            if ($client->save()) {
                 $clientPhone = new ClientPhone();
                 $clientPhone->phone = $phoneNumber;
                 $clientPhone->client_id = $client->id;
@@ -2857,8 +2898,7 @@ Reason: {reason}',
             }
         }
 
-        if($client) {
-
+        if ($client) {
             $lead->status = self::STATUS_PENDING;
             //$lead->employee_id = $this->c_created_user_id;
             $lead->client_id = $client->id;
@@ -2876,7 +2916,7 @@ Reason: {reason}',
                 $source = Sources::find()->select('id')->where(['project_id' => $lead->project_id, 'default' => true])->one();
             }
 
-            if($source) {
+            if ($source) {
                 $lead->source_id = $source->id;
             }
 
@@ -2897,7 +2937,6 @@ Reason: {reason}',
                         }
                     }
                 }*/
-
             } else {
                 Yii::error(VarDumper::dumpAsString($lead->errors), 'Model:Lead:createNewLeadByPhone:Lead:save');
             }
@@ -2908,11 +2947,9 @@ Reason: {reason}',
 
     public function afterSave($insert, $changedAttributes)
     {
-
         parent::afterSave($insert, $changedAttributes);
 
         if ($this->enableActiveRecordEvents) {
-
             if ($insert) {
                 LeadFlow::addStateFlow($this);
 
@@ -2939,15 +2976,11 @@ Reason: {reason}',
                 $jobId = Yii::$app->queue_job->push($job);*/
 
                 //Yii::info('Lead: ' . $this->id . ', QuickSearchInitPriceJob: '.$jobId, 'info\Lead:afterSave:QuickSearchInitPriceJob');
-
             } else {
-
                 if (isset($changedAttributes['status']) && $changedAttributes['status'] != $this->status) {
-
-
                     LeadFlow::addStateFlow($this);
 
-                    if($this->called_expert && ($this->status == self::STATUS_TRASH || $this->status == self::STATUS_FOLLOW_UP || $this->status == self::STATUS_SNOOZE || $this->status == self::STATUS_PROCESSING)) {
+                    if ($this->called_expert && ($this->status == self::STATUS_TRASH || $this->status == self::STATUS_FOLLOW_UP || $this->status == self::STATUS_SNOOZE || $this->status == self::STATUS_PROCESSING)) {
                         $job = new UpdateLeadBOJob();
                         $job->lead_id = $this->id;
                         $jobId = Yii::$app->queue_job->priority(200)->push($job);
@@ -2957,13 +2990,10 @@ Reason: {reason}',
 
 
                 if ($this->status != self::STATUS_TRASH && isset($changedAttributes['employee_id']) && $this->employee_id && $changedAttributes['employee_id'] != $this->employee_id) {
-
                     //echo $changedAttributes['employee_id'].' - '. $this->employee_id;
 
                     if (isset($changedAttributes['status']) && ($changedAttributes['status'] == self::STATUS_TRASH || $changedAttributes['status'] == self::STATUS_FOLLOW_UP)) {
-
                     } else {
-
                         if (!$this->sendNotification('reassigned-lead', $changedAttributes['employee_id'], $this->employee_id)) {
                             Yii::warning('Not send Email notification to employee_id: ' . $changedAttributes['employee_id'] . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
                         }
@@ -2971,19 +3001,16 @@ Reason: {reason}',
                 }
 
                 if (isset($changedAttributes['status']) && $changedAttributes['status'] != $this->status) {
-
                     if ($this->status == self::STATUS_SOLD) {
                         //echo $changedAttributes['status'].' - '. $this->status; exit;
                         if ($this->employee_id && !$this->sendNotification('lead-status-sold', $this->employee_id)) {
                             Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
                         }
                     } elseif ($this->status == self::STATUS_BOOKED) {
-
                         if ($this->employee_id && !$this->sendNotification('lead-status-booked', $this->employee_id, null, $this)) {
                             Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
                         }
                     } elseif ($this->status == self::STATUS_FOLLOW_UP) {
-
                         if ($this->status_description) {
                             //todo delete
 //                            $reason = new Reason();
@@ -2998,7 +3025,6 @@ Reason: {reason}',
                             Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
                         }*/
                     } elseif ($this->status == self::STATUS_SNOOZE) {
-
                         if ($this->status_description) {
                             //todo delete
 //                            $reason = new Reason();
@@ -3013,22 +3039,19 @@ Reason: {reason}',
                         if ($this->employee_id && !$this->sendNotification('lead-status-snooze', $this->employee_id, null, $this)) {
                             Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
                         }
-
                     }
                 }
             }
 
             //create or update LeadTask
-            if(
+            if (
                 ($this->status == self::STATUS_PROCESSING && isset($changedAttributes['status'])) ||
                 (isset($changedAttributes['employee_id']) && $this->status == self::STATUS_PROCESSING) ||
                 (isset($changedAttributes['l_answered']) && $changedAttributes['l_answered'] != $this->l_answered)
-            )
-            {
-
+            ) {
                 LeadTask::deleteUnnecessaryTasks($this->id);
 
-                if($this->l_answered) {
+                if ($this->l_answered) {
                     $taskType = Task::CAT_ANSWERED_PROCESS;
                 } else {
                     $taskType = Task::CAT_NOT_ANSWERED_PROCESS;
@@ -3040,7 +3063,6 @@ Reason: {reason}',
             }
 
             if (!$insert) {
-
                 foreach (['updated', 'created'] as $item) {
                     if (in_array($item, array_keys($changedAttributes))) {
                         unset($changedAttributes[$item]);
@@ -3082,7 +3104,6 @@ Reason: {reason}',
                     }
                 }
             }
-
         }
 
         //Add logs after changed model attributes
@@ -3095,7 +3116,6 @@ Reason: {reason}',
 //        $leadLog->addLog([
 //            'lead_id' => $this->id,
 //        ]);
-
     }
 
     /**
@@ -3147,7 +3167,7 @@ Reason: {reason}',
      * @return DateTime|null
      * @throws \Exception
      */
-    public function getClientTime2():? DateTime
+    public function getClientTime2(): ?DateTime
     {
         $clientDt = null;
         $offset = false;
@@ -3182,7 +3202,6 @@ Reason: {reason}',
      */
     public function getClientTime2Old()
     {
-
         $clientTime = '-';
         $offset = false;
 
@@ -3196,9 +3215,7 @@ Reason: {reason}',
                     $offset = str_replace('-', '+', $offset);
                 }*/
             }
-
         } elseif ($this->leadFlightSegments) {
-
             $firstSegment = $this->leadFlightSegments[0];
             $airport = Airports::findByIata($firstSegment->origin);
             if ($airport && $airport->dst) {
@@ -3217,7 +3234,7 @@ Reason: {reason}',
 
             $clientTime = date('H:i', strtotime("now $offset GMT"));*/
 
-            if(is_numeric($offset) && $offset > 0) {
+            if (is_numeric($offset) && $offset > 0) {
                 $offset = '+' . $offset;
             }
 
@@ -3249,7 +3266,7 @@ Reason: {reason}',
             //$offset = '-2';
 
 
-            $timezoneName = timezone_name_from_abbr('',(int)$offset * 3600, date('I', time()));
+            $timezoneName = timezone_name_from_abbr('', (int)$offset * 3600, date('I', time()));
 
             /*$date = new \DateTime(time(), new \DateTimeZone($timezoneName));
            // $clientTime = Yii::$app->formatter->asTime() $date->format('H:i');
@@ -3275,7 +3292,7 @@ Reason: {reason}',
 
 
             $dt = new DateTime();
-            if($timezoneName) {
+            if ($timezoneName) {
                 $timezone = new \DateTimeZone($timezoneName);
                 $dt->setTimezone($timezone);
             }
@@ -3284,10 +3301,9 @@ Reason: {reason}',
 
             //$clientTime = $clientTime; . ' '.$timezone->getName();  //$offset
 
-            $clientTime = '<b title="TZ ('.$offset.') '.($this->offset_gmt ? 'by IP': 'by IATA').'"><i class="fa fa-clock-o '.($this->offset_gmt ? 'success': '').'"></i> ' . Html::encode($clientTime) . '</b>'; //<br/>(GMT: ' .$offset_gmt . ')';
+            $clientTime = '<b title="TZ (' . $offset . ') ' . ($this->offset_gmt ? 'by IP' : 'by IATA') . '"><i class="fa fa-clock-o ' . ($this->offset_gmt ? 'success' : '') . '"></i> ' . Html::encode($clientTime) . '</b>'; //<br/>(GMT: ' .$offset_gmt . ')';
 
             //$clientTime = $offset;
-
         }
 
         return $clientTime;
@@ -3318,7 +3334,8 @@ Reason: {reason}',
 
     public function getAppliedQuote(): ActiveQuery
     {
-        return $this->hasOne(Quote::class, ['lead_id' => 'id'])->andWhere([
+        return $this->hasOne(Quote::class, ['lead_id' => 'id'])->andWhere(
+            [
             'or',
             [Quote::tableName() . '.status' => Quote::STATUS_APPLIED],
             [Quote::tableName() . '.status' => null]]
@@ -3341,39 +3358,36 @@ Reason: {reason}',
     public function beforeSave($insert): bool
     {
         if (parent::beforeSave($insert)) {
-
-                if ($insert) {
-                    //$this->created = date('Y-m-d H:i:s');
-                    if (!empty($this->project_id) && empty($this->source_id)) {
-                        $project = Project::findOne(['id' => $this->project_id]);
-                        if ($project !== null) {
-                            $this->source_id = $project->sources[0]->id;
-                        }
+            if ($insert) {
+                //$this->created = date('Y-m-d H:i:s');
+                if (!empty($this->project_id) && empty($this->source_id) && $this->l_type_create !== self::TYPE_CREATE_CLIENT_CHAT) {
+                    $project = Project::findOne(['id' => $this->project_id]);
+                    if ($project !== null) {
+                        $this->source_id = $project->sources[0]->id;
                     }
-
-                    $leadExistByUID = Lead::findOne([
-                        'uid' => $this->uid,
-                        'source_id' => $this->source_id
-                    ]);
-                    if ($leadExistByUID !== null) {
-                        $this->uid = self::generateUid();
-                    }
-
-                    /*if(!$this->gid) {
-                        $this->gid = md5(uniqid('', true));
-                    }*/
-
-                } else {
-                    //$this->updated = date('Y-m-d H:i:s');
                 }
 
-                if (!$this->uid) {
+                $leadExistByUID = Lead::findOne([
+                    'uid' => $this->uid,
+                    'source_id' => $this->source_id
+                ]);
+                if ($leadExistByUID !== null) {
                     $this->uid = self::generateUid();
                 }
 
-                if (!$this->gid) {
-                    $this->gid = self::generateGid();
-                }
+                /*if(!$this->gid) {
+                    $this->gid = md5(uniqid('', true));
+                }*/
+            } else {
+                //$this->updated = date('Y-m-d H:i:s');
+            }
+
+            if (!$this->uid) {
+                $this->uid = self::generateUid();
+            }
+            if (!$this->gid) {
+                $this->gid = self::generateGid();
+            }
 
             $this->adults = (int) $this->adults;
             $this->children = (int) $this->children;
@@ -3472,7 +3486,7 @@ Reason: {reason}',
             return $this->totalTips;
         }
 
-        $this->totalTips = $this->tips ? $this->tips/2 : 0;
+        $this->totalTips = $this->tips ? $this->tips / 2 : 0;
 
         return $this->totalTips;
     }
@@ -3700,7 +3714,8 @@ Reason: {reason}',
         ]);
 
         if ($template === null) {
-            $result['errors'][] = sprintf('Email Template [%s] for project [%s] not fond.',
+            $result['errors'][] = sprintf(
+                'Email Template [%s] for project [%s] not fond.',
                 ProjectEmailTemplate::getTypes(ProjectEmailTemplate::TYPE_EMAIL_OFFER),
                 $this->project->name
             );
@@ -3773,7 +3788,7 @@ Reason: {reason}',
      * @param $projectContactInfo
      * @return array
      */
-    public function getEmailData2($quoteIds = [], $projectContactInfo) : array
+    public function getEmailData2($quoteIds = [], $projectContactInfo): array
     {
         $project = $this->project;
 
@@ -3786,11 +3801,10 @@ Reason: {reason}',
         }
 
 
-        if($quoteIds && is_array($quoteIds)) {
+        if ($quoteIds && is_array($quoteIds)) {
             foreach ($quoteIds as $qid) {
                 $quoteModel = Quote::findOne($qid);
-                if($quoteModel) {
-
+                if ($quoteModel) {
                     $cabinClasses = [];
                     //$quoteItem = $quoteModel->getInfoForEmail2();
                     $quoteItem = [
@@ -3798,7 +3812,7 @@ Reason: {reason}',
                         'uid' => $quoteModel->uid,
                         'cabinClass' => $quoteModel->cabin,
                         'tripType' => $quoteModel->trip_type,
-						'hasSeparates' =>  $quoteModel->getTicketSegments() ? true : false
+                        'hasSeparates' =>  $quoteModel->getTicketSegments() ? true : false
 
                         //'airlineCode' => $quoteModel->main_airline_code,
                         //'offerData' =>  $quoteModel->getInfoForEmail2()
@@ -3851,7 +3865,7 @@ Reason: {reason}',
 
         $requestSegments = [];
 
-        if($leadSegments = $this->leadFlightSegments) {
+        if ($leadSegments = $this->leadFlightSegments) {
             $firstSegment = $leadSegments[0];
             $lastSegment = end($leadSegments);
 
@@ -3859,7 +3873,7 @@ Reason: {reason}',
             $arriveIATA = $lastSegment->destination;
 
             $departAirport = Airports::find()->where(['iata' => $firstSegment->origin])->one();
-            if($departAirport) {
+            if ($departAirport) {
                 $departCity = $departAirport->city;
             } else {
                 $departCity = $firstSegment->origin;
@@ -3867,7 +3881,7 @@ Reason: {reason}',
 
 
             $arriveAirport = Airports::find()->where(['iata' => $firstSegment->destination])->one();
-            if($arriveAirport) {
+            if ($arriveAirport) {
                 $arriveCity = $arriveAirport->city;
             } else {
                 $arriveCity = $firstSegment->destination;
@@ -3885,8 +3899,7 @@ Reason: {reason}',
              * @property string $destination_label*/
 
 
-            foreach($leadSegments as $segmentModel) {
-
+            foreach ($leadSegments as $segmentModel) {
                 $destAirport = Airports::find()->where(['iata' => $segmentModel->destination])->one();
                 $origAirport = Airports::find()->where(['iata' => $segmentModel->origin])->one();
 
@@ -3898,7 +3911,6 @@ Reason: {reason}',
                     'destinationCity' => $destAirport ? $destAirport->city : $segmentModel->destination,
                 ];
             }
-
         }
 
 
@@ -3933,10 +3945,10 @@ Reason: {reason}',
             $upp = UserProjectParams::find()->where(['upp_project_id' => $project->id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->withPhoneList()->one();
         }
 
-        if($offerIds && is_array($offerIds)) {
+        if ($offerIds && is_array($offerIds)) {
             foreach ($offerIds as $ofId) {
                 $offerModel = Offer::findOne($ofId);
-                if($offerModel) {
+                if ($offerModel) {
                     $offerItem = $offerModel->serialize(); //attributes;
                     //$quoteItem = array_merge($quoteItem, $offerModel->getInfoForEmail2());
                     $content_data['offers'][] = $offerItem;
@@ -4034,7 +4046,8 @@ Reason: {reason}',
                 'route' => sprintf('%s - %s', $leadFlightSegment->origin, $leadFlightSegment->destination),
                 'date' => $leadFlightSegment->departure,
                 'flex' => empty($leadFlightSegment->flexibility)
-                    ? '' : sprintf('%s %d',
+                    ? '' : sprintf(
+                        '%s %d',
                         $leadFlightSegment->flexibility_type,
                         $leadFlightSegment->flexibility
                     )
@@ -4044,7 +4057,7 @@ Reason: {reason}',
 
         $quoteArr = [];
 
-        if($this->quotes) {
+        if ($this->quotes) {
             foreach ($this->quotes as $quote) {
                 $quoteArr[] = $quote->getQuoteInformationForExpert();
             }
@@ -4053,7 +4066,7 @@ Reason: {reason}',
 
         $similarLeads = [];
 
-        if($cloneLead = $this->clone) {
+        if ($cloneLead = $this->clone) {
             $similarLeads[$cloneLead->id] = [
                 'uid' => $cloneLead->uid,
                 'gid' => $cloneLead->gid,
@@ -4069,7 +4082,7 @@ Reason: {reason}',
         /** @var self[] $childLeads */
         $childLeads = self::find()->where(['clone_id' => $this->id])->all();
 
-        if($childLeads) {
+        if ($childLeads) {
             foreach ($childLeads as $childLead) {
                 $similarLeads[$childLead->id] = [
                     'uid' => $childLead->uid,
@@ -4141,7 +4154,6 @@ Reason: {reason}',
      */
     public function getTaskInfo(): string
     {
-
         $taskListAll = \common\models\LeadTask::find()->with('ltTask')->select(['COUNT(*) AS field_cnt', 'lt_task_id'])->where(['lt_lead_id' => $this->id])->groupBy(['lt_task_id'])->all();
         $taskListChecked = \common\models\LeadTask::find()->with('ltTask')->select(['COUNT(*) AS field_cnt', 'lt_task_id'])->where(['lt_lead_id' => $this->id])->andWhere(['IS NOT', 'lt_completed_dt', null])->groupBy(['lt_task_id'])->all();
 
@@ -4208,7 +4220,6 @@ Reason: {reason}',
      */
     public static function getEndTaskLeads(int $category_id = null): array
     {
-
         $query = new Query();
         $query->select(['lt.lt_lead_id', 'lt.lt_user_id', 'l.status', 'l.l_answered', 't.t_category_id']);
 
@@ -4256,7 +4267,8 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
 
         $command = $query->createCommand();
 
-        echo $command->getRawSql(); exit;
+        echo $command->getRawSql();
+        exit;
 
         //VarDumper::dump($command->queryAll()); exit;
 
@@ -4404,10 +4416,10 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         $leadFlights = $this->leadFlightSegments;
         $key = $this->cabin;
-        foreach ($leadFlights as $flEntry){
-            $key .= $flEntry->origin.$flEntry->destination.strtotime($flEntry->departure).$flEntry->flexibility_type.$flEntry->flexibility;
+        foreach ($leadFlights as $flEntry) {
+            $key .= $flEntry->origin . $flEntry->destination . strtotime($flEntry->departure) . $flEntry->flexibility_type . $flEntry->flexibility;
         }
-        $key .= '_'.$this->adults.'_'.$this->children.'_'.$this->infants;
+        $key .= '_' . $this->adults . '_' . $this->children . '_' . $this->infants;
         return $key;
     }
 
@@ -4433,7 +4445,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $query = Call::find();
         $query->where(['c_lead_id' => $this->id]);
 
-        if($type_id !== 0) {
+        if ($type_id !== 0) {
             $query->andWhere(['c_call_type_id' => $type_id]);
         }
 
@@ -4455,7 +4467,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $query = Sms::find();
         $query->where(['s_lead_id' => $this->id, 's_is_deleted' => false]);
 
-        if($type_id !== 0) {
+        if ($type_id !== 0) {
             $query->andWhere(['s_type_id' => $type_id]);
         }
 
@@ -4473,7 +4485,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $query = Email::find();
         $query->where(['e_lead_id' => $this->id, 'e_is_deleted' => false]);
 
-        if($type_id !== 0) {
+        if ($type_id !== 0) {
             $query->andWhere(['e_type_id' => $type_id]);
         }
         $count = $query->count();
@@ -4503,11 +4515,10 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
 
         $query->andWhere(['status' => self::STATUS_PENDING, 'l_call_status_id' => [self::CALL_STATUS_READY, self::CALL_STATUS_NONE]]);
         $query->andWhere(['OR', ['IS', 'l_pending_delay_dt', null], ['<=', 'l_pending_delay_dt', date('Y-m-d H:i:s')]]);
-        $query->andWhere(['OR', ['BETWEEN', new Expression('TIME(CONVERT_TZ(NOW(), \'+00:00\', offset_gmt))'), '09:00', '21:00'], ['>=', 'created', date('Y-m-d H:i:s', strtotime('-'.self::PENDING_ALLOW_CALL_TIME_MINUTES.' min'))]]);
+        $query->andWhere(['OR', ['BETWEEN', new Expression('TIME(CONVERT_TZ(NOW(), \'+00:00\', offset_gmt))'), '09:00', '21:00'], ['>=', 'created', date('Y-m-d H:i:s', strtotime('-' . self::PENDING_ALLOW_CALL_TIME_MINUTES . ' min'))]]);
         $query->andWhere(['OR', ['employee_id' => null], ['employee_id' => $user_id]]);
 
-        if($user_id) {
-
+        if ($user_id) {
             $subQuery = UserProjectParams::find()
                 ->select(['upp_project_id'])
                 ->innerJoinWith('phoneList', false)
@@ -4534,7 +4545,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         $min = 0;
 
-        if($this->created) {
+        if ($this->created) {
             $diffSeconds = time() - strtotime($this->created);
         } else {
             $diffSeconds = 0;
@@ -4544,13 +4555,13 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
 
         $diffMin = ceil($diffSeconds / $hour);
 
-        if($diffMin < $hour) {
+        if ($diffMin < $hour) {
             $min = 10;
-        } elseif($diffMin < ($hour * 4)) {
+        } elseif ($diffMin < ($hour * 4)) {
             $min = 30;
-        } elseif($diffMin < ($hour * 72)) {
+        } elseif ($diffMin < ($hour * 72)) {
             $min = 180;
-        } elseif($diffMin < ($hour * 192)) {
+        } elseif ($diffMin < ($hour * 192)) {
             $min = 180;
         } /*else {
             $min = 120;
@@ -4561,15 +4572,15 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return $min;
     }
 
-	/**
-	 * @param int $delayedCharged
-	 * @param string $notesForExperts
-	 */
+    /**
+     * @param int $delayedCharged
+     * @param string $notesForExperts
+     */
     public function editDelayedChargeAndNote(int $delayedCharged, string $notesForExperts): void
-	{
-		$this->l_delayed_charge = $delayedCharged;
-		$this->notes_for_experts = strip_tags($notesForExperts);
-	}
+    {
+        $this->l_delayed_charge = $delayedCharged;
+        $this->notes_for_experts = strip_tags($notesForExperts);
+    }
 
     /**
      * @return LeadQuery
@@ -4586,7 +4597,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     public function getCommunicationInfo(bool $linkMode = true): string
     {
         $str = '';
-        $linkAttributes = ['target' => '_blank', 'data-pjax'=> '0'];
+        $linkAttributes = ['target' => '_blank', 'data-pjax' => '0'];
 
         if ($linkMode) {
             $callsText = '<span title="Calls Out / In"><i class="fa fa-phone success"></i> ' . $this->getCountCalls(Call::CALL_TYPE_OUT) . '/' .
@@ -4607,39 +4618,45 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
             }
 
             $emilText = '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> ' .
-                $this->getCountEmails(Email::TYPE_OUTBOX) .'/'.  $this->getCountEmails(Email::TYPE_INBOX) . '</span> | ';
+                $this->getCountEmails(Email::TYPE_OUTBOX) . '/' .  $this->getCountEmails(Email::TYPE_INBOX) . '</span> | ';
             if (Auth::can('/email/index')) {
-                $str .= Html::a($emilText,
-                    Url::to(['/email/index', 'EmailSearch[e_lead_id]'  => $this->id]), $linkAttributes);
+                $str .= Html::a(
+                    $emilText,
+                    Url::to(['/email/index', 'EmailSearch[e_lead_id]'  => $this->id]),
+                    $linkAttributes
+                );
             } else {
-                 $str .= $emilText;
+                $str .= $emilText;
             }
 
             $chatText = '<span title="Client Chat"><i class="fa fa-weixin warning"></i> ' .
                 $this->getCountClientChat() . '</span>';
             if (Auth::can('/client-chat-crud/index')) {
-                $str .= Html::a($chatText,
-                    Url::to(['/client-chat-crud/index', 'ClientChatQaSearch[leadId]'  => $this->id]), $linkAttributes);
+                $str .= Html::a(
+                    $chatText,
+                    Url::to(['/client-chat-crud/index', 'ClientChatQaSearch[leadId]'  => $this->id]),
+                    $linkAttributes
+                );
             } else {
                 $str .= $chatText;
             }
         } else {
-            $str .= '<span title="Calls Out / In / Join"><i class="fa fa-phone success"></i> '. $this->getCountCalls(\common\models\Call::CALL_TYPE_OUT) .'/'.  $this->getCountCalls(\common\models\Call::CALL_TYPE_IN) .'/'.  $this->getCountCalls(\common\models\Call::CALL_TYPE_JOIN) .'</span> | ';
-            $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> '. $this->getCountSms(\common\models\Sms::TYPE_OUTBOX) .'/'.  $this->getCountSms(\common\models\Sms::TYPE_INBOX) .'</span> | ';
-            $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> '. $this->getCountEmails(\common\models\Email::TYPE_OUTBOX) .'/'.  $this->getCountEmails(\common\models\Email::TYPE_INBOX) .'</span> | ';
+            $str .= '<span title="Calls Out / In / Join"><i class="fa fa-phone success"></i> ' . $this->getCountCalls(\common\models\Call::CALL_TYPE_OUT) . '/' .  $this->getCountCalls(\common\models\Call::CALL_TYPE_IN) . '/' .  $this->getCountCalls(\common\models\Call::CALL_TYPE_JOIN) . '</span> | ';
+            $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> ' . $this->getCountSms(\common\models\Sms::TYPE_OUTBOX) . '/' .  $this->getCountSms(\common\models\Sms::TYPE_INBOX) . '</span> | ';
+            $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> ' . $this->getCountEmails(\common\models\Email::TYPE_OUTBOX) . '/' .  $this->getCountEmails(\common\models\Email::TYPE_INBOX) . '</span> | ';
             $str .= '<span title="Client Chat"><i class="fa fa-weixin warning"></i> ' . $this->getCountClientChat() . '</span>';
         }
 
         return $str;
     }
 
-	/**
-	 * @return bool
-	 */
+    /**
+     * @return bool
+     */
     public function isInTrash(): bool
-	{
-		return $this->status === self::STATUS_TRASH;
-	}
+    {
+        return $this->status === self::STATUS_TRASH;
+    }
 
     public function getProjectId(): ?int
     {
@@ -4652,19 +4669,19 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     }
 
     public function isMultiDestination(): bool
-	{
-		return $this->trip_type === self::TRIP_TYPE_MULTI_DESTINATION;
-	}
+    {
+        return $this->trip_type === self::TRIP_TYPE_MULTI_DESTINATION;
+    }
 
-	public function isRoundTrip(): bool
-	{
-		return $this->trip_type === self::TRIP_TYPE_ROUND_TRIP;
-	}
+    public function isRoundTrip(): bool
+    {
+        return $this->trip_type === self::TRIP_TYPE_ROUND_TRIP;
+    }
 
-	public function isReadyForGa(): bool
-	{
-		return (GaHelper::getTrackingIdByLead($this) && GaHelper::getClientIdByLead($this));
-	}
+    public function isReadyForGa(): bool
+    {
+        return (GaHelper::getTrackingIdByLead($this) && GaHelper::getClientIdByLead($this));
+    }
 
     public function isExistQuotesForSend(): bool
     {
@@ -4672,5 +4689,5 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
             ->andWhere(['lead_id' => $this->id])
             ->andWhere(['status' => [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED]])
             ->exists();
-	}
+    }
 }

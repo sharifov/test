@@ -18,7 +18,8 @@ class FlightSegmentSearch extends FlightSegment
     {
         return [
             [['fs_id', 'fs_flight_id', 'fs_origin_iata', 'fs_flex_type_id', 'fs_flex_days'], 'integer'],
-            [['fs_destination_iata', 'fs_departure_date'], 'safe'],
+            [['fs_destination_iata'], 'safe'],
+            [['fs_departure_date'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -46,7 +47,7 @@ class FlightSegmentSearch extends FlightSegment
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['fs_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['fs_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ]

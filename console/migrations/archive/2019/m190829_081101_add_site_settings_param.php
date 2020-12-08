@@ -38,8 +38,6 @@ class m190829_081101_add_site_settings_param extends Migration
             's_updated_dt' => date('Y-m-d H:i:s'),
             //'s_updated_user_id' => 1,
         ]);
-
-
     }
 
     /**

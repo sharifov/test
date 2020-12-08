@@ -1,6 +1,5 @@
 <?php
 
-
 namespace sales\viewModel\chat;
 
 use common\components\ChartTools;
@@ -49,7 +48,7 @@ class ViewModelChatExtendedGraph
                 (int)$arr['newIncomingClientChats'],
                 //\Yii::$app->formatter->asDuration(floor($arr['sumFrtOfChatsInGroup'] / $arr['initiatedByClient'])),
                 (int)$arr['newOutgoingAgentChats'],
-                (int)$arr['acceptedByAgent'],
+                (int)$arr['acceptedByAgentSourceAgent'] + (int)$arr['acceptedByAgentSourceClient'],
                 (int)$arr['missedChats'],
 
             ]);
@@ -279,7 +278,7 @@ class ViewModelChatExtendedGraph
      * @param array $data
      * @return array
      */
-    private function setMonthName(array $data):array
+    private function setMonthName(array $data): array
     {
         foreach ($data as $key => $arr) {
             $firstKey = array_key_first($arr);
@@ -293,9 +292,10 @@ class ViewModelChatExtendedGraph
     {
         $totalInitiatedByClient = array_sum(array_column($this->clientChatData, 'newIncomingClientChats'));
         $totalInitiatedByAgent = array_sum(array_column($this->clientChatData, 'newOutgoingAgentChats'));
-        $totalInitiatedByClientClosed = array_sum(array_column($this->clientChatData, 'initiatedByClientClosed'));
-        $totalInitiatedByAgentClosed = array_sum(array_column($this->clientChatData, 'initiatedByAgentClosed'));
-        $totalAcceptedByAgent = array_sum(array_column($this->clientChatData, 'acceptedByAgent'));
+        $totalInitiatedByClientClosed = array_sum(array_column($this->clientChatData, 'initByClientClosedArchive'));
+        $totalInitiatedByAgentClosed = array_sum(array_column($this->clientChatData, 'initByAgentClosedArchive'));
+        $acceptedByAgentSourceAgent = array_sum(array_column($this->clientChatData, 'acceptedByAgentSourceAgent'));
+        $acceptedByAgentSourceClient = array_sum(array_column($this->clientChatData, 'acceptedByAgentSourceClient'));
         $totalMissedChats = array_sum(array_column($this->clientChatData, 'missedChats'));
         $totalFrtAvg = floor(array_sum(array_column($this->clientChatData, 'sumFrtOfChatsInGroup')) / ($totalInitiatedByClient ?: 1));
 
@@ -308,7 +308,8 @@ class ViewModelChatExtendedGraph
             'clients' => $totalInitiatedByClient,
             'agents' => $totalInitiatedByAgent,
             'total' => $totalInitiatedByClient + $totalInitiatedByAgent,
-            'acceptedByAgent' => $totalAcceptedByAgent,
+            'acceptedByAgentSourceAgent' => $acceptedByAgentSourceAgent,
+            'acceptedByAgentSourceClient' => $acceptedByAgentSourceClient,
             'missedChats' => $totalMissedChats,
             'totalFrtAvg' => \Yii::$app->formatter->asDuration($totalFrtAvg),
             'totalClientChatDurationAvg' => \Yii::$app->formatter->asDuration($totalClientChatDurationAvg),
@@ -316,5 +317,4 @@ class ViewModelChatExtendedGraph
             'totalChatDurationAvg' =>  \Yii::$app->formatter->asDuration($totalChatDurationAvg),
         ];
     }
-
 }

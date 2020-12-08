@@ -47,4 +47,6 @@ phpunit.phar
 
 /lsp
 
-/.php_cs.cache
+# CodeSniffer cache files
+.php_cs.cache
+.phpcs-cache

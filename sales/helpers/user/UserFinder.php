@@ -60,5 +60,4 @@ class UserFinder
         }
         throw new \InvalidArgumentException('$user must be integer, Employee or null');
     }
-
 }

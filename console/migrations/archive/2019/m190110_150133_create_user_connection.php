@@ -17,7 +17,7 @@ class m190110_150133_create_user_connection extends Migration
             $tableOptions = 'CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE=InnoDB';
         }
 
-        $this->createTable('{{%user_connection}}',	[
+        $this->createTable('{{%user_connection}}', [
             'uc_id'                     => $this->primaryKey(),
             'uc_connection_id'          => $this->integer()->notNull(),
             'uc_user_id'                => $this->integer(),
@@ -45,6 +45,4 @@ class m190110_150133_create_user_connection extends Migration
     {
         $this->dropTable('{{%user_connection}}');
     }
-
-
 }

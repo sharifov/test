@@ -23,10 +23,10 @@ use yii\widgets\ActiveForm;
                 ]) ?>
         </div>
         <div class="col-md-2">
-			<?= $form->field($leadForm->preferences, 'marketPrice')->input('number', ['min' => 0, 'max' => 99000]) ?>
+            <?= $form->field($leadForm->preferences, 'marketPrice')->input('number', ['min' => 0, 'max' => 99000]) ?>
         </div>
         <div class="col-md-2">
-			<?= $form->field($leadForm->preferences, 'clientsBudget')->input('number', ['min' => 0, 'max' => 99000]) ?>
+            <?= $form->field($leadForm->preferences, 'clientsBudget')->input('number', ['min' => 0, 'max' => 99000]) ?>
         </div>
         <div class="col-md-2">
             <?= $form->field($leadForm->preferences, 'numberStops')->dropDownList(LeadPreferencesHelper::listNumberStops(), ['prompt' => '-']) ?>

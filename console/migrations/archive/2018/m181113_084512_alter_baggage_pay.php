@@ -12,7 +12,7 @@ class m181113_084512_alter_baggage_pay extends Migration
      */
     public function safeUp()
     {
-        $this->createTable('{{%quote_segment_baggage_charge}}',[
+        $this->createTable('{{%quote_segment_baggage_charge}}', [
             'qsbc_id' => $this->primaryKey(),
             'qsbc_pax_code' => $this->string(3),
             'qsbc_segment_id' => $this->integer(),

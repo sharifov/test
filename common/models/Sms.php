@@ -10,8 +10,8 @@ use DateTime;
 use modules\twilio\components\TwilioCommunicationService;
 use sales\entities\cases\Cases;
 use sales\entities\EventTrait;
-use sales\events\sms\SmsCreatedByIncomingSalesEvent;
-use sales\events\sms\SmsCreatedByIncomingSupportsEvent;
+use sales\events\sms\IncomingSmsCreatedByLeadTypeEvent;
+use sales\events\sms\IncomingSmsCreatedByCaseTypeEvent;
 use sales\events\sms\SmsCreatedEvent;
 use sales\services\sms\incoming\SmsIncomingForm;
 use Yii;
@@ -74,7 +74,6 @@ use yii\helpers\VarDumper;
  */
 class Sms extends \yii\db\ActiveRecord
 {
-
     use EventTrait;
 
     public const TYPE_DRAFT     = 0;
@@ -96,8 +95,8 @@ class Sms extends \yii\db\ActiveRecord
     public const STATUS_CANCEL  = 4;
     public const STATUS_DONE    = 5;
     public const STATUS_ERROR   = 6;
-    public const STATUS_SENT 	= 7;
-    public const STATUS_QUEUED 	= 8;
+    public const STATUS_SENT    = 7;
+    public const STATUS_QUEUED  = 8;
 
     public const STATUS_LIST = [
         self::STATUS_NEW        => 'New',
@@ -152,8 +151,7 @@ class Sms extends \yii\db\ActiveRecord
         ?int $ownerId,
         ?int $leadId,
         ?int $caseId
-    ): self
-    {
+    ): self {
         $sms = self::create();
         $sms->s_lead_id = $leadId;
         $sms->s_case_id = $caseId;
@@ -161,66 +159,29 @@ class Sms extends \yii\db\ActiveRecord
         return $sms;
     }
 
-    /**
-     * @param SmsIncomingForm $form
-     * @param int $clientId
-     * @param int|null $ownerId
-     * @param int|null $caseId
-     * @return static
-     */
-    public static function createByIncomingExchange(
+    public static function createIncomingByCaseType(
         SmsIncomingForm $form,
         ?int $clientId,
         ?int $ownerId,
         ?int $caseId
-    ): self
-    {
+    ): self {
         $sms = self::create();
         $sms->loadByIncoming($form, $clientId, $ownerId);
         $sms->s_case_id = $caseId;
-        $sms->recordEvent(new SmsCreatedByIncomingSupportsEvent($sms, $caseId, $form->si_phone_from, $form->si_phone_to, $form->si_sms_text));
+        $sms->recordEvent(new IncomingSmsCreatedByCaseTypeEvent($sms, $caseId, $form->si_phone_from, $form->si_phone_to, $form->si_sms_text));
         return $sms;
     }
 
-    /**
-     * @param SmsIncomingForm $form
-     * @param int $clientId
-     * @param int|null $ownerId
-     * @param int|null $caseId
-     * @return static
-     */
-    public static function createByIncomingSupport(
-        SmsIncomingForm $form,
-        ?int $clientId,
-        ?int $ownerId,
-        ?int $caseId
-    ): self
-    {
-        $sms = self::create();
-        $sms->loadByIncoming($form, $clientId, $ownerId);
-        $sms->s_case_id = $caseId;
-        $sms->recordEvent(new SmsCreatedByIncomingSupportsEvent($sms, $caseId, $form->si_phone_from, $form->si_phone_to, $form->si_sms_text));
-        return $sms;
-    }
-
-    /**
-     * @param SmsIncomingForm $form
-     * @param int $clientId
-     * @param int|null $ownerId
-     * @param int|null $leadId
-     * @return static
-     */
-    public static function createByIncomingSales(
+    public static function createIncomingByLeadType(
         SmsIncomingForm $form,
         ?int $clientId,
         ?int $ownerId,
         ?int $leadId
-    ): self
-    {
+    ): self {
         $sms = self::create();
         $sms->loadByIncoming($form, $clientId, $ownerId);
         $sms->s_lead_id = $leadId;
-        $sms->recordEvent(new SmsCreatedByIncomingSalesEvent($sms, $leadId, $form->si_phone_from, $form->si_phone_to, $form->si_sms_text));
+        $sms->recordEvent(new IncomingSmsCreatedByLeadTypeEvent($sms, $leadId, $form->si_phone_from, $form->si_phone_to, $form->si_sms_text));
         return $sms;
     }
 
@@ -361,7 +322,6 @@ class Sms extends \yii\db\ActiveRecord
                 'updatedByAttribute' => 's_updated_user_id',
             ],*/
         ];
-
     }
 
     /**
@@ -388,13 +348,13 @@ class Sms extends \yii\db\ActiveRecord
         return self::TYPE_LIST[$this->s_type_id] ?? '-';
     }
 
-	/**
-	 * @return array|string[]
-	 */
+    /**
+     * @return array|string[]
+     */
     public static function getSmsTypeList(): array
-	{
-		return self::TYPE_LIST;
-	}
+    {
+        return self::TYPE_LIST;
+    }
 
     /**
      * @return \yii\db\ActiveQuery
@@ -483,14 +443,12 @@ class Sms extends \yii\db\ActiveRecord
 
 
         try {
-
-            $str = 'ProjectId: ' . $this->s_project_id. ' TemplateKey:'. $tplType . ' From:' . $this->s_phone_from . ' To:'. $this->s_phone_to;
+            $str = 'ProjectId: ' . $this->s_project_id . ' TemplateKey:' . $tplType . ' From:' . $this->s_phone_from . ' To:' . $this->s_phone_to;
             //VarDumper::dump($str); exit;
 
             $request = $communication->smsSend($this->s_project_id, $tplType, $this->s_phone_from, $this->s_phone_to, $content_data, $data, ($this->s_language_id ?: 'en-US'), 0);
 
-            if($request && isset($request['data']['sq_status_id'])) {
-
+            if ($request && isset($request['data']['sq_status_id'])) {
                 $this->s_status_id          = $request['data']['sq_status_id'];
                 $this->s_communication_id   = $request['data']['sq_id'];
 
@@ -534,19 +492,18 @@ class Sms extends \yii\db\ActiveRecord
 
             //VarDumper::dump($request, 10, true); exit;
 
-            if($request && isset($request['error']) && $request['error']) {
+            if ($request && isset($request['error']) && $request['error']) {
                 $this->s_status_id = self::STATUS_ERROR;
                 $errorData = @json_decode($request['error'], true);
                 $this->s_error_message = 'Communication error: ' . ($errorData['message'] ?: $request['error']);
                 $this->save();
                 $out['error'] = $this->s_error_message;
-                Yii::error($str. "\r\n". $out['error'], 'Sms:sendSms:smsSend:CommunicationError');
+                Yii::error($str . "\r\n" . $out['error'], 'Sms:sendSms:smsSend:CommunicationError');
             }
-
         } catch (\Throwable $exception) {
             $error = VarDumper::dumpAsString($exception->getMessage());
             $out['error'] = $error;
-            Yii::error($str. "\r\n". $error, 'Sms:sendSms:smsSend:exception');
+            Yii::error($str . "\r\n" . $error, 'Sms:sendSms:smsSend:exception');
             $this->s_error_message = 'Communication error: ' . $error;
             $this->save();
         }
@@ -564,12 +521,12 @@ class Sms extends \yii\db\ActiveRecord
     {
 
         $clientPhone = ClientPhone::find()->where(['phone' => $this->s_phone_from])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-        if($clientPhone && $clientPhone->client_id) {
+        if ($clientPhone && $clientPhone->client_id) {
             $lead = Lead::find()->where(['client_id' => $clientPhone->client_id, 'status' => [Lead::STATUS_PROCESSING, Lead::STATUS_SNOOZE, Lead::STATUS_ON_HOLD, Lead::STATUS_FOLLOW_UP]])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-            if(!$lead) {
+            if (!$lead) {
                 $lead = Lead::find()->where(['client_id' => $clientPhone->client_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
             }
-            if($lead) {
+            if ($lead) {
                 $this->s_lead_id = $lead->id;
             }
         }
@@ -605,23 +562,23 @@ class Sms extends \yii\db\ActiveRecord
      * @return array
      * @throws \Exception
      */
-    public static function getSmsStats(string $startDate, string $endDate, ?string $groupingBy, int $smsType) : array
+    public static function getSmsStats(string $startDate, string $endDate, ?string $groupingBy, int $smsType): array
     {
-        $sDate = $startDate." 00:00:00";
-        $eDate = $endDate." 23:59:59";
-        switch ($groupingBy){
+        $sDate = $startDate . " 00:00:00";
+        $eDate = $endDate . " 23:59:59";
+        switch ($groupingBy) {
             case null:
-                if (strtotime($startDate) == strtotime($endDate)){
-                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate." 23:59:59", $step = '+1 hour', $format = 'H:i:s');
+                if (strtotime($startDate) == strtotime($endDate)) {
+                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate . " 23:59:59", $step = '+1 hour', $format = 'H:i:s');
                 } else {
                     $daysRange = ChartTools::getDaysRange($startDate, $endDate);
                 }
                 break;
             case 'hours':
-                if (strtotime($startDate) == strtotime($endDate)){
-                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate." 23:59:59", $step = '+1 hour', $format = 'H:i:s');
+                if (strtotime($startDate) == strtotime($endDate)) {
+                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate . " 23:59:59", $step = '+1 hour', $format = 'H:i:s');
                 } else {
-                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate." 23:59:59", $step = '+1 hour', $format = 'Y-m-d H:i:s');
+                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate . " 23:59:59", $step = '+1 hour', $format = 'Y-m-d H:i:s');
                 }
                 break;
             case 'days':
@@ -636,7 +593,7 @@ class Sms extends \yii\db\ActiveRecord
                 $eDate = date('Y-m-31', strtotime($endDate));
                 break;
         }
-        if ($smsType == 0){
+        if ($smsType == 0) {
             $sms = self::find()->select(['s_status_id', 's_updated_dt', 's_tw_price'])
                 ->where(['s_status_id' => [ self::STATUS_DONE, self::STATUS_ERROR]])
                 ->andWhere(['between', 's_updated_dt', $sDate, $eDate])
@@ -651,23 +608,23 @@ class Sms extends \yii\db\ActiveRecord
 
         $smsStats = [];
         $item = [];
-        if (strtotime($startDate) < strtotime($endDate)){
+        if (strtotime($startDate) < strtotime($endDate)) {
             if (isset($daysRange)) {
                 $timeLine = $daysRange;
                 $item['timeLine'] = 'd M';
                 $timeInSeconds = 0;
                 $dateFormat = 'Y-m-d';
-            } elseif (isset($monthsRange)){
+            } elseif (isset($monthsRange)) {
                 $timeLine = $monthsRange;
                 $timeInSeconds = 0;
                 $dateFormat = 'Y-m';
                 $item['timeLine'] = 'Y, M';
-            } elseif (isset($weeksPeriods)){
+            } elseif (isset($weeksPeriods)) {
                 $timeLine = $weeksPeriods;
                 $item['timeLine'] = 'd M';
                 $timeInSeconds = 0;
                 $dateFormat = 'Y-m-d';
-            }elseif (isset($hoursRange)){
+            } elseif (isset($hoursRange)) {
                 $timeLine = $hoursRange;
                 $item['timeLine'] = 'H:i';
                 $dateFormat = 'Y-m-d H:i:s';
@@ -679,7 +636,7 @@ class Sms extends \yii\db\ActiveRecord
                 $item['timeLine'] = 'd M';
                 $timeInSeconds = 0;
                 $dateFormat = 'Y-m-d';
-            } elseif (isset($hoursRange)){
+            } elseif (isset($hoursRange)) {
                 $timeLine = $hoursRange;
                 $item['timeLine'] = 'H:i';
                 $dateFormat = 'H:i:s';
@@ -689,7 +646,7 @@ class Sms extends \yii\db\ActiveRecord
                 $timeInSeconds = 0;
                 $dateFormat = 'Y-m';
                 $item['timeLine'] = 'Y, M';
-            } elseif (isset($weeksPeriods)){
+            } elseif (isset($weeksPeriods)) {
                 $timeLine = $weeksPeriods;
                 $item['timeLine'] = 'd M';
                 $timeInSeconds = 0;
@@ -698,27 +655,26 @@ class Sms extends \yii\db\ActiveRecord
         }
 
         $done = $error = $sd_TotalPrice = 0;
-        foreach ($timeLine as $key => $timeSignature){
+        foreach ($timeLine as $key => $timeSignature) {
             $weekInterval = explode('/', $timeSignature);
-            if (count($weekInterval) != 2){
+            if (count($weekInterval) != 2) {
                 $EndPoint = date($dateFormat, strtotime($timeSignature) + $timeInSeconds);
-                if ($EndPoint == '00:00:00'){
+                if ($EndPoint == '00:00:00') {
                     $EndPoint = '23:59:59';
                 }
             } else {
                 $EndPoint = date($dateFormat, strtotime($weekInterval[1]));
                 $timeSignature = date($dateFormat, strtotime($weekInterval[0]));
             }
-            foreach ($sms as $smsItem){
+            foreach ($sms as $smsItem) {
                 $smsUpdatedTime = date($dateFormat, strtotime($smsItem->s_updated_dt));
-                if ($smsUpdatedTime >= $timeSignature && $smsUpdatedTime <= $EndPoint)
-                {
-                    switch ($smsItem->s_status_id){
-                        case self::STATUS_DONE :
+                if ($smsUpdatedTime >= $timeSignature && $smsUpdatedTime <= $EndPoint) {
+                    switch ($smsItem->s_status_id) {
+                        case self::STATUS_DONE:
                             $sd_TotalPrice = $sd_TotalPrice + $smsItem->s_tw_price;
                             $done++;
                             break;
-                        case self::STATUS_ERROR :
+                        case self::STATUS_ERROR:
                             $error++;
                             break;
                     }

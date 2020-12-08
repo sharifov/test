@@ -6,8 +6,7 @@ use sales\dto\product\ProductQuoteDTO;
 
 class ProductQuoteCalcPriceDTO extends ProductQuoteDTO
 {
-	public function __construct()
-	{
-
-	}
+    public function __construct()
+    {
+    }
 }

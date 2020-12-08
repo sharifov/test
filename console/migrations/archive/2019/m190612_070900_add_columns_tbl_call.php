@@ -35,5 +35,4 @@ class m190612_070900_add_columns_tbl_call extends Migration
 
         Yii::$app->db->getSchema()->refreshTableSchema('{{%call}}');
     }
-
 }

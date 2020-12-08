@@ -1,7 +1,8 @@
 <?php
 
-
 namespace sales\helpers\setting;
+
+use Yii;
 
 class SettingHelper
 {
@@ -73,5 +74,20 @@ class SettingHelper
     public static function processingFee(): float
     {
         return (float) (\Yii::$app->params['settings']['processing_fee'] ?? 25.00);
+    }
+
+    public static function userSiteActivityLogHistoryDays(): int
+    {
+        return (int) (Yii::$app->params['settings']['user_site_activity_log_history_days'] ?? 0);
+    }
+
+    public static function consoleLogCleanerEnable(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['console_log_cleaner_enable'] ?? false);
+    }
+
+    public static function consoleLogCleanerParamsDays(): int
+    {
+        return (int) (Yii::$app->params['settings']['console_log_cleaner_params']['days'] ?? 90);
     }
 }

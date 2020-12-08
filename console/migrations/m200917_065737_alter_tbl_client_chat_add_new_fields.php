@@ -31,8 +31,8 @@ class m200917_065737_alter_tbl_client_chat_add_new_fields extends Migration
 
         $this->addForeignKey('FK-cch_language_id', '{{%client_chat}}', ['cch_language_id'], '{{%language}}', ['language_id'], 'SET NULL', 'CASCADE');
 
-		$this->addColumn('{{%client_chat}}', 'cch_source_type_id', $this->tinyInteger(1));
-		$this->addColumn('{{%client_chat}}', 'cch_missed', $this->boolean());
+        $this->addColumn('{{%client_chat}}', 'cch_source_type_id', $this->tinyInteger(1));
+        $this->addColumn('{{%client_chat}}', 'cch_missed', $this->boolean());
     }
 
     /**
@@ -40,7 +40,7 @@ class m200917_065737_alter_tbl_client_chat_add_new_fields extends Migration
      */
     public function safeDown()
     {
-    	$this->dropColumn('{{%client_chat}}', 'cch_source_type_id');
-    	$this->dropColumn('{{%client_chat}}', 'cch_missed');
+        $this->dropColumn('{{%client_chat}}', 'cch_source_type_id');
+        $this->dropColumn('{{%client_chat}}', 'cch_missed');
     }
 }

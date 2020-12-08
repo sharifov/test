@@ -41,5 +41,4 @@ class IncomingForm extends CompositeForm
     {
         return ['call'];
     }
-
 }

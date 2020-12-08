@@ -1,4 +1,5 @@
 <?php
+
 /* @var $this yii\web\View */
 /* @var $dataRoom array */
 /* @var $dataHotel array */
@@ -26,7 +27,7 @@ $quoteExist = $hotelSearch->quoteExist($dataRoom['groupKey']);
     </td>
     <td>
         <table class="table table-striped table-bordered">
-            <?php foreach ($quoteRooms as $room):?>
+            <?php foreach ($quoteRooms as $room) :?>
                  <tr>
                     <td title="<?=($room['key'])?>">
                         <b><?=\yii\helpers\Html::encode($room['name'])?></b>
@@ -56,16 +57,16 @@ $quoteExist = $hotelSearch->quoteExist($dataRoom['groupKey']);
             <!--            ages: --><?php //=(\yii\helpers\Html::encode($room['childrenAges'] ?? ''))?>
             <!--        </td>-->
                     <td>
-                        <?=number_format(\yii\helpers\Html::encode($room['amount']-($room['markup'] ?? 0)), 2)?> $
+                        <?=number_format(\yii\helpers\Html::encode($room['amount'] - ($room['markup'] ?? 0)), 2)?> $
                     </td>
                 </tr>
             <?php endforeach;?>
         </table>
     </td>
     <td>
-        <?php if ($quoteExist):?>
+        <?php if ($quoteExist) :?>
             <span class="badge badge-white">Added</span>
-        <?php else: ?>
+        <?php else : ?>
             <?= \yii\bootstrap4\Html::a('<i class="fa fa-plus"></i> add Quote', null, ['data-url' => \yii\helpers\Url::to(['/hotel/hotel-quote/add-ajax', 'ph_id' => $hotelSearch->ph_id]),
             'data-hotel-code' => $dataHotel['code'],
             'data-quote-key' => $dataRoom['groupKey'],

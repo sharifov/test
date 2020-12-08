@@ -1,7 +1,7 @@
 <?php
 
 use yii\helpers\Html;
-use \common\models\Call;
+use common\models\Call;
 
 /* @var $this yii\web\View */
 /* @var $model \common\models\UserConnection */
@@ -10,9 +10,9 @@ use \common\models\Call;
 $isCallFree = $model->ucUser->isCallFree();
 $isCallStatusReady = $model->ucUser->isCallStatusReady();
 
-if($isCallFree && $isCallStatusReady) {
+if ($isCallFree && $isCallStatusReady) {
     $class = 'text-success';
-} elseif($isCallStatusReady) {
+} elseif ($isCallStatusReady) {
     $class = 'text-warning';
 } else {
     $class = 'text-danger';

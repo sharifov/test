@@ -1,4 +1,5 @@
 <?php
+
 return [
     /*[
         'pattern' => 'queue/<type:(inbox1|follow-up1|processing1|processing-all|booked1|trash1)>',
@@ -35,15 +36,15 @@ return [
         'pattern' => 'cases/take-over/<gid>',
         'route' => 'cases/take-over',
     ],
-	[
+    [
         'pattern' => 'cases/ajax-sale-list-edit-info/<caseId>/<caseSaleId>',
         'route' => 'cases/ajax-sale-list-edit-info',
     ],
-	[
+    [
         'pattern' => 'cases/ajax-sync-with-back-office/<caseId>/<caseSaleId>',
         'route' => 'cases/ajax-sync-with-back-office'
     ],
-	[
+    [
         'pattern' => 'cases/ajax-refresh-sale-info/<caseId>/<caseSaleId>',
         'route' => 'cases/ajax-refresh-sale-info'
     ],

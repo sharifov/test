@@ -20,8 +20,9 @@ class ClientEmailSearch extends ClientEmail
     {
         return [
             [['id', 'client_id', 'type'], 'integer'],
-            [['email', 'created', 'updated', 'comments'], 'safe'],
+            [['email', 'comments'], 'safe'],
             ['ce_title', 'string', 'max' => 150],
+            [['created', 'updated'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

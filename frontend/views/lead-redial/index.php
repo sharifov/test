@@ -75,14 +75,12 @@ $list = new ListsAccess($user->id);
 
         <?php $showQueue = (bool)Yii::$app->params['settings']['agent_show_redial_queue']; ?>
 
-        <?php if ($showQueue || (!$showQueue && !$user->isAgent())): ?>
-
+        <?php if ($showQueue || (!$showQueue && !$user->isAgent())) : ?>
             <p></p>
 
             <div style="font-size: 30px">Redial Queue</div>
 
             <?php if ($user->isAdmin()) : ?>
-
                 <?= MultipleUpdateWidget::widget([
                     'gridId' => 'redialGrid',
                     'script' => "let pjax = $('#lead-redial-pjax'); if (pjax.length) { $.pjax.reload({container: '#lead-redial-pjax', async: false}); }",

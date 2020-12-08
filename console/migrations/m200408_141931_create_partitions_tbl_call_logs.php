@@ -142,7 +142,6 @@ PARTITION y23 VALUES LESS THAN (2023)ENGINE = InnoDB,
         ], $tableOptions);
 
         $this->addPrimaryKey('PK-call_log_record-clr_cl_id', '{{%call_log_record}}', ['clr_cl_id']);
-
     }
 
     /**

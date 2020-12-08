@@ -18,123 +18,123 @@ use yii\web\View;
 
 
 $select2Properties = [
-	'options' => [
-		'placeholder' => 'Select location ...',
-		'multiple' => false,
-	],
-	'pluginOptions' => [
-		'width' => '100%',
-		'allowClear' => true,
-		'minimumInputLength' => 1,
-		'language' => [
-			'errorLoading' => new JsExpression("function () { return 'Waiting for results...'; }"),
-		],
-		'ajax' => [
-			'url' => ['/airport/get-list'],
-			'dataType' => 'json',
-			'data' => new JsExpression('function(params) { return {term:params.term}; }'),
-		],
-		'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
-		'templateResult' => new JsExpression('formatRepo'),
-		'templateSelection' => new JsExpression('function (data) { return data.selection || data.text;}'),
-	]
+    'options' => [
+        'placeholder' => 'Select location ...',
+        'multiple' => false,
+    ],
+    'pluginOptions' => [
+        'width' => '100%',
+        'allowClear' => true,
+        'minimumInputLength' => 1,
+        'language' => [
+            'errorLoading' => new JsExpression("function () { return 'Waiting for results...'; }"),
+        ],
+        'ajax' => [
+            'url' => ['/airport/get-list'],
+            'dataType' => 'json',
+            'data' => new JsExpression('function(params) { return {term:params.term}; }'),
+        ],
+        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+        'templateResult' => new JsExpression('formatRepo'),
+        'templateSelection' => new JsExpression('function (data) { return data.selection || data.text;}'),
+    ]
 ];
 ?>
 
 <?= $form->field($model, 'segments')->widget(MultipleInput::class, [
-	'max' => 10,
+    'max' => 10,
 //    'allowEmptyList' => true,
-	'enableError' => true,
-	'showGeneralError' => true,
-	'columns' => [
-		[
-			'name' => 'fs_origin_iata',
-			'type' => Select2::class,
-			'title' => 'Origin',
-			'value' => static function ($segment) {
-				return $segment['fs_origin_iata'] ?? '';
-			},
-			'options' => static function ($segment) use ($select2Properties) {
-				if (isset($segment['fs_origin_iata'])) {
-					$select2Properties['data'] = [$segment['fs_origin_iata'] => $segment['fs_origin_iata_label']];
-				} else {
-					$select2Properties['data'] = [];
-				}
-				return $select2Properties;
-			},
-			'headerOptions' => [
-				//'style' => 'width: 35%;',
-			]
-		],
-		[
-			'name' => 'fs_destination_iata',
-			'type' => Select2::class,
-			'title' => 'Destination',
-			'value' => static function ($segment) {
-				return $segment['fs_destination_iata'] ?? '';
-			},
-			'options' => static function ($segment) use ($select2Properties) {
-				if (isset($segment['fs_destination_iata'])) {
-					$select2Properties['data'] = [$segment['fs_destination_iata'] => $segment['fs_destination_iata_label']];
-				} else {
-					$select2Properties['data'] = [];
-				}
-				return $select2Properties;
-			},
+    'enableError' => true,
+    'showGeneralError' => true,
+    'columns' => [
+        [
+            'name' => 'fs_origin_iata',
+            'type' => Select2::class,
+            'title' => 'Origin',
+            'value' => static function ($segment) {
+                return $segment['fs_origin_iata'] ?? '';
+            },
+            'options' => static function ($segment) use ($select2Properties) {
+                if (isset($segment['fs_origin_iata'])) {
+                    $select2Properties['data'] = [$segment['fs_origin_iata'] => $segment['fs_origin_iata_label']];
+                } else {
+                    $select2Properties['data'] = [];
+                }
+                return $select2Properties;
+            },
+            'headerOptions' => [
+                //'style' => 'width: 35%;',
+            ]
+        ],
+        [
+            'name' => 'fs_destination_iata',
+            'type' => Select2::class,
+            'title' => 'Destination',
+            'value' => static function ($segment) {
+                return $segment['fs_destination_iata'] ?? '';
+            },
+            'options' => static function ($segment) use ($select2Properties) {
+                if (isset($segment['fs_destination_iata'])) {
+                    $select2Properties['data'] = [$segment['fs_destination_iata'] => $segment['fs_destination_iata_label']];
+                } else {
+                    $select2Properties['data'] = [];
+                }
+                return $select2Properties;
+            },
 
-		],
-		[
-			'name' => 'fs_departure_date',
-			'type' => DatePicker::class,
-			'title' => 'Departure',
-			'value' => static function ($segment) {
-				return (isset($segment['fs_departure_date']) && $segment['fs_departure_date']) ? date('d-M-Y', strtotime($segment['fs_departure_date'])) : date('d-M-Y');
-			},
-			'options' => [
-				'addon' => '',
-				'clientOptions' => [
-					'autoclose' => true,
-					'format' => 'dd-M-yyyy',
-					'todayHighlight' => true,
-					'sty'
-				],
-				'options' => [
-					'class' => 'depart-date form-control',
-					'placeholder' => 'Departure',
-					'readonly' => true,
-				],
-			],
-			'headerOptions' => [
-				'style' => 'width: 130px;',
-			]
-		],
-		[
-			'name' => 'fs_flex_type_id',
-			'type' => 'dropDownList',
-			'title' => 'Flex (+/-)',
-			'value' => static function ($segment) {
-				return $segment['fs_flex_type_id'] ?? '';
-			},
-			'items' => FlightSegmentHelper::flexibilityTypeList(),
-			'headerOptions' => [
-				'style' => 'width: 80px;',
-			]
-		],
+        ],
+        [
+            'name' => 'fs_departure_date',
+            'type' => DatePicker::class,
+            'title' => 'Departure',
+            'value' => static function ($segment) {
+                return (isset($segment['fs_departure_date']) && $segment['fs_departure_date']) ? date('d-M-Y', strtotime($segment['fs_departure_date'])) : date('d-M-Y');
+            },
+            'options' => [
+                'addon' => '',
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'dd-M-yyyy',
+                    'todayHighlight' => true,
+                    'sty'
+                ],
+                'options' => [
+                    'class' => 'depart-date form-control',
+                    'placeholder' => 'Departure',
+                    'readonly' => true,
+                ],
+            ],
+            'headerOptions' => [
+                'style' => 'width: 130px;',
+            ]
+        ],
+        [
+            'name' => 'fs_flex_type_id',
+            'type' => 'dropDownList',
+            'title' => 'Flex (+/-)',
+            'value' => static function ($segment) {
+                return $segment['fs_flex_type_id'] ?? '';
+            },
+            'items' => FlightSegmentHelper::flexibilityTypeList(),
+            'headerOptions' => [
+                'style' => 'width: 80px;',
+            ]
+        ],
 
-		[
-			'name' => 'fs_flex_days',
-			'type' => 'dropDownList',
-			'title' => 'Flex (days)',
-			'value' => static function ($segment) {
-				return $segment['fs_flex_days'] ?? '';
-			},
-			'items' => FlightSegmentHelper::flexibilityList(),
-			'headerOptions' => [
-				'style' => 'width: 80px;',
-			]
-		],
+        [
+            'name' => 'fs_flex_days',
+            'type' => 'dropDownList',
+            'title' => 'Flex (days)',
+            'value' => static function ($segment) {
+                return $segment['fs_flex_days'] ?? '';
+            },
+            'items' => FlightSegmentHelper::flexibilityList(),
+            'headerOptions' => [
+                'style' => 'width: 80px;',
+            ]
+        ],
 
-	]
+    ]
 ])->label(false) ?>
 
 <?php

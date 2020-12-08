@@ -15,12 +15,13 @@ class CallReport
         $this->credential = $credential;
     }
 
-    public function generate(array $phones, string $fileName, string $date): void
+    public function generate(array $phones, string $fileName, string $date): array
     {
         $result = $this->getResult($phones, $date);
         $file = $this->writeTmpFile($result);
         $this->send($file, $fileName);
         FileHelper::unlink($file);
+        return $result;
     }
 
     private function send(string $file, string $newFileName): void

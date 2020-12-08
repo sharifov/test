@@ -67,5 +67,4 @@ class CasesSearchByClient extends Model
     {
         return (new \ReflectionClass(static::class))->getShortName();
     }
-
 }

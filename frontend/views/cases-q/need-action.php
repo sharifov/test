@@ -85,39 +85,41 @@ $lists = new ListsAccess($user->id);
                 },
             ],
             'cs_order_uid',
-			[
-				'attribute' => 'cs_dep_id',
-				'value' => static function (CasesQSearch $model) {
-					return $model->department ? $model->department->dep_name : '';
-				},
-				'filter' => Department::getList()
-			],
-			[
-				'attribute' => 'cs_created_dt',
-				'value' => static function (CasesQSearch $model) {
-					return $model->cs_created_dt ? Yii::$app->formatter->asDatetime(strtotime($model->cs_created_dt)) : '-';
-				},
-				'filter' => DatePicker::widget([
-					'model' => $searchModel,
-					'attribute' => 'cs_created_dt',
-					'clientOptions' => [
-						'autoclose' => true,
-						'format' => 'yyyy-mm-dd'
-					],
-					'options' => [
-						'autocomplete' => 'off'
-					]
-				]),
-			],
-			[
+            [
+                'attribute' => 'cs_dep_id',
+                'value' => static function (CasesQSearch $model) {
+                    return $model->department ? $model->department->dep_name : '';
+                },
+                'filter' => Department::getList()
+            ],
+            [
+                'attribute' => 'cs_created_dt',
+                'value' => static function (CasesQSearch $model) {
+                    return $model->cs_created_dt ? Yii::$app->formatter->asDatetime(strtotime($model->cs_created_dt)) : '-';
+                },
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'cs_created_dt',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd'
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off'
+                    ]
+                ]),
+            ],
+            [
                 'label' => 'Communication',
                 'value' => static function (CasesQSearch $model) {
                     $statistics = new StatisticsHelper($model->cs_id, StatisticsHelper::TYPE_CASE);
-                    return Yii::$app->getView()->render('/partial/_communication_statistic_list',
+                    return Yii::$app->getView()->render(
+                        '/partial/_communication_statistic_list',
                         [
                             'statistics' => $statistics->setCountAll(),
                             'lastCommunication' => $statistics::getLastCommunicationByCaseId($model->cs_id),
-                        ]);
+                        ]
+                    );
                 },
                 'format' => 'raw',
                 'contentOptions' => [
@@ -128,11 +130,11 @@ $lists = new ListsAccess($user->id);
                 'label' => 'Pending Time',
                 'value' => static function (CasesQSearch $model) {
                     $createdTS = strtotime($model->cs_created_dt);
-    
+
                     $diffTime = time() - $createdTS;
                     $diffHours = (int) ($diffTime / (60 * 60));
-    
-                    return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+
+                    return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
                 },
                 'options' => [
                     'style' => 'width:180px'
@@ -143,19 +145,19 @@ $lists = new ListsAccess($user->id);
             [
                 'header' => 'Client time',
                 'format' => 'raw',
-                'value' => function(CasesQSearch $model) {
+                'value' => function (CasesQSearch $model) {
                     return $model->getClientTime();
                 },
             ],
-			/*[
-				'attribute' => 'cs_user_id',
+            /*[
+                'attribute' => 'cs_user_id',
                 'label' => 'Agent',
-				'value' => static function (CasesQSearch $model) {
-					return $model->owner ? $model->owner->username : '';
-				},
-				'filter' => $lists->getEmployees(),
-				'visible' => $user->isSupSuper() || $user->isExSuper() || $user->isAdmin()
-			],*/
+                'value' => static function (CasesQSearch $model) {
+                    return $model->owner ? $model->owner->username : '';
+                },
+                'filter' => $lists->getEmployees(),
+                'visible' => $user->isSupSuper() || $user->isExSuper() || $user->isAdmin()
+            ],*/
 
             [
                 'class' => \common\components\grid\UserSelect2Column::class,
@@ -163,21 +165,21 @@ $lists = new ListsAccess($user->id);
                 'attribute' => 'cs_user_id',
                 'relation' => 'owner',
                 'placeholder' => 'Select User',
-                'visible' => $user->isSupSuper() || $user->isExSuper() || $user->isAdmin()
+//                'visible' => $user->isSupSuper() || $user->isExSuper() || $user->isAdmin()
             ],
 
-			[
-				'attribute' => 'cs_last_action_dt',
-				'label' => 'Last Action',
-				'value' => static function (CasesQSearch $model) {
-					$createdTS = strtotime($model->cs_last_action_dt);
+            [
+                'attribute' => 'cs_last_action_dt',
+                'label' => 'Last Action',
+                'value' => static function (CasesQSearch $model) {
+                    $createdTS = strtotime($model->cs_last_action_dt);
 
-					$diffTime = time() - $createdTS;
-					$diffHours = (int) ($diffTime / (60 * 60));
+                    $diffTime = time() - $createdTS;
+                    $diffHours = (int) ($diffTime / (60 * 60));
 
-					return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
-				},
-			],
+                    return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+                },
+            ],
             [
                 'class' => 'yii\grid\ActionColumn',
                 'template' => '{view}',

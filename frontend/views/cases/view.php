@@ -42,16 +42,16 @@ $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 \frontend\assets\CreditCardAsset::register($this);
 
-$bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($this);
+$bundle = \frontend\themes\gentelella_v2\assets\AssetLeadCommunication::register($this);
 
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
 
 $clientProjectInfo = $model->client->clientProjects;
 $unsubscribe = false;
-if (isset($clientProjectInfo) && $clientProjectInfo){
-    foreach ($clientProjectInfo as $item){
-        if ($model->cs_project_id == $item['cp_project_id']){
+if (isset($clientProjectInfo) && $clientProjectInfo) {
+    foreach ($clientProjectInfo as $item) {
+        if ($model->cs_project_id == $item['cp_project_id']) {
             $unsubscribe = $item['cp_unsubscribe'];
         }
     }
@@ -64,7 +64,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
 
 
     <h1>
-        <?=$model->department ? '<i class="fa fa-sitemap"></i>  <span class="badge badge-warning">' . Html::encode($model->department->dep_name) . '</span>': ''?>
+        <?=$model->department ? '<i class="fa fa-sitemap"></i>  <span class="badge badge-warning">' . Html::encode($model->department->dep_name) . '</span>' : ''?>
         <?php /*=$model->project ? ' <span class="label label-warning">' . Html::encode($model->project->name) . '</span>': ''*/?>
 
     <?=$model->category ? Html::encode($model->category->cc_name) : '' ?>: <?= Html::encode($this->title) ?></h1>
@@ -83,7 +83,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
 
                 <?= Html::button('<i class="fa fa-list"></i> Status History ' . ($model->caseStatusLogs ? '(' . count($model->caseStatusLogs) . ')' : ''), ['class' => 'btn btn-info', 'id' => 'btn-status-history', 'title' => 'Status history']) ?>
                 <?= CasesViewRenderHelper::renderTakeButton($model, $user) ?>
-                <?php if (Auth::can('cases/view_Checked', ['case' => $model])): ?>
+                <?php if (Auth::can('cases/view_Checked', ['case' => $model])) : ?>
                     <?= CasesViewRenderHelper::renderCheckedButton($model) ?>
                 <?php endif; ?>
 
@@ -105,7 +105,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
                 'model'      => $model,
                 'isAdmin'       => $isAdmin
             ])
-            ?>
+?>
         </div>
         <div class="col-md-4">
             <?php yii\widgets\Pjax::begin(['id' => 'pjax-client-info', 'enablePushState' => false, 'enableReplaceState' => false]) ?>
@@ -114,7 +114,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
                 'isAdmin'       => $isAdmin,
                 'unsubscribe' => $unsubscribe
             ])
-            ?>
+?>
             <?php \yii\widgets\Pjax::end(); ?>
         </div>
         <div class="col-md-4">
@@ -127,7 +127,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
 
                 'isAdmin'       => $isAdmin
             ])
-            ?>
+?>
         </div>
     </div>
 
@@ -150,7 +150,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
                         'smsEnabled' => $smsEnabled
                     ]);
                     ?>
-            <?php else: ?>
+            <?php else : ?>
                 <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
             <?php endif;?>
         </div>
@@ -159,11 +159,11 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
     <div class="row">
         <div class="col-md-6">
 
-			<?= $this->render('notes/agent_notes', [
-				'caseModel' => $model,
-				'dataProviderNotes'  => $dataProviderNotes,
-				'modelNote'  => $modelNote,
-			]); ?>
+            <?= $this->render('notes/agent_notes', [
+                'caseModel' => $model,
+                'dataProviderNotes'  => $dataProviderNotes,
+                'modelNote'  => $modelNote,
+            ]); ?>
 
 
         </div>
@@ -178,7 +178,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
                 'caseModel' => $model,
                 'isAdmin'       => $isAdmin
             ])
-            ?>
+?>
 
             <?= $this->render('sales/_sale_list', [
                 'searchModel' => $csSearchModel,
@@ -188,7 +188,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
                 'saleSearchModel' => $saleSearchModel,
                 'saleDataProvider' => $saleDataProvider,
             ])
-            ?>
+?>
         </div>
     </div>
 

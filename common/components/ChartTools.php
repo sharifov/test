@@ -1,6 +1,5 @@
 <?php
 
-
 namespace common\components;
 
 use DateInterval;
@@ -61,7 +60,7 @@ class ChartTools
         $lastMonth  = date($format, $endDate);
         $months = array($firstMonth);
         while ($startDate < $endDate) {
-            $startDate = strtotime(date('Y-m-d', $startDate).' +1 month');
+            $startDate = strtotime(date('Y-m-d', $startDate) . ' +1 month');
             if (date($format, $startDate) != $lastMonth && ($startDate < $endDate)) {
                 $months[] = date($format, $startDate);
             }
@@ -98,7 +97,7 @@ class ChartTools
                 $lastEle = end($week);
             }
 
-            array_push($weeksRanges, $firstEle .'/'.$lastEle);
+            array_push($weeksRanges, $firstEle . '/' . $lastEle);
         }
         return $weeksRanges;
     }

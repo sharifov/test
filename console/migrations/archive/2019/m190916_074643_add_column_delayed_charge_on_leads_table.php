@@ -30,5 +30,4 @@ class m190916_074643_add_column_delayed_charge_on_leads_table extends Migration
             Yii::$app->cache->flush();
         }
     }
-
 }

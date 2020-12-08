@@ -37,76 +37,76 @@ use yii\db\ActiveRecord;
  */
 class UserPayroll extends \yii\db\ActiveRecord
 {
-	public const AGENT_STATUS_PENDING = 1;
-	public const AGENT_STATUS_APPROVED = 2;
-	public const AGENT_STATUS_NOT_APPROVED = 3;
+    public const AGENT_STATUS_PENDING = 1;
+    public const AGENT_STATUS_APPROVED = 2;
+    public const AGENT_STATUS_NOT_APPROVED = 3;
 
-	public const AGENT_STATUS_LIST = [
-		self::AGENT_STATUS_PENDING => 'Pending',
-		self::AGENT_STATUS_APPROVED => 'Approved',
-		self::AGENT_STATUS_NOT_APPROVED => 'Not Approved'
-	];
+    public const AGENT_STATUS_LIST = [
+        self::AGENT_STATUS_PENDING => 'Pending',
+        self::AGENT_STATUS_APPROVED => 'Approved',
+        self::AGENT_STATUS_NOT_APPROVED => 'Not Approved'
+    ];
 
-	public const STATUS_PENDING = 1;
-	public const STATUS_APPROVED = 2;
-	public const STATUS_NOT_APPROVED = 3;
-	public const STATUS_PAID = 4;
-	public const STATUS_RECALCULATED = 5;
+    public const STATUS_PENDING = 1;
+    public const STATUS_APPROVED = 2;
+    public const STATUS_NOT_APPROVED = 3;
+    public const STATUS_PAID = 4;
+    public const STATUS_RECALCULATED = 5;
 
-	public const STATUS_LIST = [
-		self::STATUS_PENDING => 'Pending',
-		self::STATUS_APPROVED => 'Approved',
-		self::STATUS_NOT_APPROVED => 'Not Approved',
-		self::STATUS_PAID => 'Paid',
-		self::STATUS_RECALCULATED => 'Recalculated'
-	];
+    public const STATUS_LIST = [
+        self::STATUS_PENDING => 'Pending',
+        self::STATUS_APPROVED => 'Approved',
+        self::STATUS_NOT_APPROVED => 'Not Approved',
+        self::STATUS_PAID => 'Paid',
+        self::STATUS_RECALCULATED => 'Recalculated'
+    ];
 
-	public const STATUS_CLASS_LIST = [
-		self::STATUS_PENDING => 'info',
-		self::STATUS_APPROVED => 'success',
-		self::STATUS_NOT_APPROVED => 'danger',
-		self::STATUS_PAID => 'success',
-		self::STATUS_RECALCULATED => 'warning',
-	];
+    public const STATUS_CLASS_LIST = [
+        self::STATUS_PENDING => 'info',
+        self::STATUS_APPROVED => 'success',
+        self::STATUS_NOT_APPROVED => 'danger',
+        self::STATUS_PAID => 'success',
+        self::STATUS_RECALCULATED => 'warning',
+    ];
 
-	public const AGENT_STATUS_CLASS_LIST = [
-		self::AGENT_STATUS_PENDING => 'info',
-		self::AGENT_STATUS_APPROVED => 'success',
-		self::AGENT_STATUS_NOT_APPROVED => 'danger'
-	];
+    public const AGENT_STATUS_CLASS_LIST = [
+        self::AGENT_STATUS_PENDING => 'info',
+        self::AGENT_STATUS_APPROVED => 'success',
+        self::AGENT_STATUS_NOT_APPROVED => 'danger'
+    ];
 
-	/**
-	 * @return array
-	 */
-	public function behaviors(): array
-	{
-		return [
-			'timestamp' => [
-				'class' => TimestampBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['ups_created_dt', 'ups_updated_dt'],
-					ActiveRecord::EVENT_BEFORE_UPDATE => ['ups_updated_dt'],
-				],
-				'value' => date('Y-m-d H:i:s')
-			],
-		];
-	}
+    /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['ups_created_dt', 'ups_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['ups_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s')
+            ],
+        ];
+    }
 
-	/**
-	 * @param bool $insert
-	 * @return bool
-	 */
-	public function beforeSave($insert): bool
-	{
-		$totalAmount = (float)$this->ups_base_amount + (float)$this->ups_profit_amount + (float)$this->ups_tax_amount + (float)$this->ups_payment_amount;
-		if ($this->ups_total_amount !== null && (float)$this->ups_total_amount !== $totalAmount) {
-			$this->ups_status_id = self::STATUS_RECALCULATED;
-		}
-		$this->ups_total_amount = $totalAmount;
-		return parent::beforeSave($insert);
-	}
+    /**
+     * @param bool $insert
+     * @return bool
+     */
+    public function beforeSave($insert): bool
+    {
+        $totalAmount = (float)$this->ups_base_amount + (float)$this->ups_profit_amount + (float)$this->ups_tax_amount + (float)$this->ups_payment_amount;
+        if ($this->ups_total_amount !== null && (float)$this->ups_total_amount !== $totalAmount) {
+            $this->ups_status_id = self::STATUS_RECALCULATED;
+        }
+        $this->ups_total_amount = $totalAmount;
+        return parent::beforeSave($insert);
+    }
 
-	/**
+    /**
      * {@inheritdoc}
      */
     public static function tableName(): string
@@ -181,35 +181,35 @@ class UserPayroll extends \yii\db\ActiveRecord
         return $this->hasMany(UserProfit::class, ['up_payroll_id' => 'ups_id']);
     }
 
-	/**
-	 * @return array
-	 */
+    /**
+     * @return array
+     */
     public static function getAgentStatusList(): array
-	{
-		return self::AGENT_STATUS_LIST;
-	}
+    {
+        return self::AGENT_STATUS_LIST;
+    }
 
-	/**
-	 * @param int $statusId
-	 * @return string|null
-	 */
-	public static function getAgentStatusName(?int $statusId): ?string
-	{
-		return self::getAgentStatusList()[$statusId] ?? null;
-	}
+    /**
+     * @param int $statusId
+     * @return string|null
+     */
+    public static function getAgentStatusName(?int $statusId): ?string
+    {
+        return self::getAgentStatusList()[$statusId] ?? null;
+    }
 
-	/**
-	 * @return array
-	 */
-	public static function getStatusList(): array
-	{
-		return self::STATUS_LIST;
-	}
+    /**
+     * @return array
+     */
+    public static function getStatusList(): array
+    {
+        return self::STATUS_LIST;
+    }
 
-	public static function getStatusName(?int $statusId): ?string
-	{
-		return self::getStatusList()[$statusId] ?? null;
-	}
+    public static function getStatusName(?int $statusId): ?string
+    {
+        return self::getStatusList()[$statusId] ?? null;
+    }
 
     /**
      * {@inheritdoc}
@@ -220,71 +220,71 @@ class UserPayroll extends \yii\db\ActiveRecord
         return new UserPayrollQuery(static::class);
     }
 
-	/**
-	 * @param UserPayrollCreateDTO $dto
-	 * @return UserPayroll
-	 */
+    /**
+     * @param UserPayrollCreateDTO $dto
+     * @return UserPayroll
+     */
     public static function create(UserPayrollCreateDTO $dto): self
-	{
-		$payroll = new self();
+    {
+        $payroll = new self();
 
-		$payroll->ups_user_id = $dto->userId;
-		$payroll->ups_month = $dto->month;
-		$payroll->ups_year = $dto->year;
-		$payroll->ups_base_amount = $dto->baseAmount;
-		$payroll->ups_profit_amount = $dto->profitAmount;
-		$payroll->ups_tax_amount = $dto->taxAmount;
-		$payroll->ups_payment_amount = $dto->paymentAmount;
-		$payroll->ups_agent_status_id = $dto->agentStatus;
-		$payroll->ups_status_id = $dto->status;
+        $payroll->ups_user_id = $dto->userId;
+        $payroll->ups_month = $dto->month;
+        $payroll->ups_year = $dto->year;
+        $payroll->ups_base_amount = $dto->baseAmount;
+        $payroll->ups_profit_amount = $dto->profitAmount;
+        $payroll->ups_tax_amount = $dto->taxAmount;
+        $payroll->ups_payment_amount = $dto->paymentAmount;
+        $payroll->ups_agent_status_id = $dto->agentStatus;
+        $payroll->ups_status_id = $dto->status;
 
-		return $payroll;
-	}
+        return $payroll;
+    }
 
-	/**
-	 * @param UserPayrollCreateDTO $dto
-	 */
-	public function recalculate(UserPayrollCreateDTO $dto): void
-	{
-		$this->ups_base_amount = $dto->baseAmount;
-		$this->ups_profit_amount = $dto->profitAmount;
-		$this->ups_tax_amount = $dto->taxAmount;
-		$this->ups_payment_amount = $dto->paymentAmount;
-	}
+    /**
+     * @param UserPayrollCreateDTO $dto
+     */
+    public function recalculate(UserPayrollCreateDTO $dto): void
+    {
+        $this->ups_base_amount = $dto->baseAmount;
+        $this->ups_profit_amount = $dto->profitAmount;
+        $this->ups_tax_amount = $dto->taxAmount;
+        $this->ups_payment_amount = $dto->paymentAmount;
+    }
 
-	/**
-	 * @return mixed|null
-	 */
-	public function getRowClass()
-	{
-		return self::STATUS_CLASS_LIST[$this->ups_status_id] ?? null;
-	}
+    /**
+     * @return mixed|null
+     */
+    public function getRowClass()
+    {
+        return self::STATUS_CLASS_LIST[$this->ups_status_id] ?? null;
+    }
 
-	public static function asFormat(?int $value): ?string
-	{
-		return $value ? Html::tag(
-			'span',
-			self::getStatusName($value),
-			['class' => 'badge badge-' . self::getClassName($value)]
-		) : null;
-	}
+    public static function asFormat(?int $value): ?string
+    {
+        return $value ? Html::tag(
+            'span',
+            self::getStatusName($value),
+            ['class' => 'badge badge-' . self::getClassName($value)]
+        ) : null;
+    }
 
-	public static function asFormatAgent(?int $value): ?string
-	{
-		return $value ? Html::tag(
-			'span',
-			self::getAgentStatusName($value),
-			['class' => 'badge badge-' . self::getAgentClassName($value)]
-		) : null;
-	}
+    public static function asFormatAgent(?int $value): ?string
+    {
+        return $value ? Html::tag(
+            'span',
+            self::getAgentStatusName($value),
+            ['class' => 'badge badge-' . self::getAgentClassName($value)]
+        ) : null;
+    }
 
-	private static function getAgentClassName(?int $value)
-	{
-		return self::AGENT_STATUS_CLASS_LIST[$value] ?? 'secondary';
-	}
+    private static function getAgentClassName(?int $value)
+    {
+        return self::AGENT_STATUS_CLASS_LIST[$value] ?? 'secondary';
+    }
 
-	private static function getClassName(?int $value): string
-	{
-		return self::STATUS_CLASS_LIST[$value] ?? 'secondary';
-	}
+    private static function getClassName(?int $value): string
+    {
+        return self::STATUS_CLASS_LIST[$value] ?? 'secondary';
+    }
 }

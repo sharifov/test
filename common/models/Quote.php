@@ -64,6 +64,8 @@ class Quote extends \yii\db\ActiveRecord
 {
     use EventTrait;
 
+    public const SCENARIO_API_UPDATE = 'api_update';
+
     public const CHECKOUT_URL_PAGE = 'checkout/quote';
 
     public const
@@ -71,7 +73,7 @@ class Quote extends \yii\db\ActiveRecord
         FARE_TYPE_SR = 'SR',
         FARE_TYPE_SRU = 'SRU',
         FARE_TYPE_COMM = 'COMM',
-        FARE_TYPE_TOUR= 'TOUR',
+        FARE_TYPE_TOUR = 'TOUR',
         FARE_TYPE_PUBC = 'PUBC';
 
     public const
@@ -82,7 +84,7 @@ class Quote extends \yii\db\ActiveRecord
         STATUS_OPENED = 5;
 
 
-    public CONST STATUS_LIST = [
+    public const STATUS_LIST = [
         self::STATUS_CREATED => 'New',
         self::STATUS_APPLIED => 'Applied',
         self::STATUS_DECLINED => 'Declined',
@@ -90,7 +92,7 @@ class Quote extends \yii\db\ActiveRecord
         self::STATUS_OPENED => 'Opened'
     ];
 
-    public CONST STATUS_CLASS_LIST = [
+    public const STATUS_CLASS_LIST = [
         self::STATUS_CREATED => 'lq-created',
         self::STATUS_APPLIED => 'lq-applied',
         self::STATUS_DECLINED => 'lq-declined',
@@ -98,7 +100,7 @@ class Quote extends \yii\db\ActiveRecord
         self::STATUS_OPENED => 'lq-opened'
     ];
 
-    public CONST STATUS_CLASS_SPAN = [
+    public const STATUS_CLASS_SPAN = [
         self::STATUS_CREATED => 'status-new',
         self::STATUS_APPLIED => 'status-applied',
         self::STATUS_DECLINED => 'status-declined',
@@ -106,7 +108,7 @@ class Quote extends \yii\db\ActiveRecord
         self::STATUS_OPENED => 'status-opened'
     ];
 
-    public CONST
+    public const
         PASSENGER_ADULT = 'ADT',
         PASSENGER_CHILD = 'CHD',
         PASSENGER_INFANT = 'INF';
@@ -194,7 +196,8 @@ class Quote extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['uid', 'reservation_dump', 'main_airline_code'], 'required'],
+            ['main_airline_code', 'required', 'on' => self::SCENARIO_DEFAULT],
+            [['uid', 'reservation_dump'], 'required'],
             [['lead_id', 'status' ], 'integer'],
             [[ 'check_payment'], 'boolean'],
             [['created', 'updated', 'created_by_seller', 'employee_name', 'employee_id', 'pcc', 'gds', 'last_ticket_date', 'service_fee_percent'], 'safe'],
@@ -211,6 +214,13 @@ class Quote extends \yii\db\ActiveRecord
         ];
     }
 
+    public function scenarios()
+    {
+        $scenarios = parent::scenarios();
+        $defaultAttributes = $scenarios[self::SCENARIO_DEFAULT];
+        $scenarios[self::SCENARIO_API_UPDATE] = $defaultAttributes;
+        return $scenarios;
+    }
 
     /**
      * {@inheritdoc}
@@ -240,7 +250,7 @@ class Quote extends \yii\db\ActiveRecord
             'type_id' => 'Type',
             'tickets'   => 'Tickets JSON',
             'origin_search_data' => 'Original Search JSON',
-			'gds_offer_id' => 'GDS Offer ID'
+            'gds_offer_id' => 'GDS Offer ID'
         ];
     }
 
@@ -403,15 +413,15 @@ class Quote extends \yii\db\ActiveRecord
         $profit += $markUp;
         $profit -= $processingFee;
 
-        return round($profit,2);
+        return round($profit, 2);
     }
 
     public function getFinalProfit()
     {
         $final = $this->lead->final_profit;
-        if($this->lead->getAgentsProcessingFee()){
+        if ($this->lead->getAgentsProcessingFee()) {
             $final -= $this->lead->getAgentsProcessingFee();
-        }else{
+        } else {
             $final -= ($this->lead->adults + $this->lead->children) * SettingHelper::processingFee();
         }
         return $final;
@@ -435,8 +445,8 @@ class Quote extends \yii\db\ActiveRecord
             'fare_type' => 'q.fare_type',
             'check_payment' => 'q.check_payment'
         ])
-        ->from(Quote::tableName().' q')
-        ->leftJoin(QuotePrice::tableName().' qp','q.id = qp.quote_id')
+        ->from(Quote::tableName() . ' q')
+        ->leftJoin(QuotePrice::tableName() . ' qp', 'q.id = qp.quote_id')
         ->where(['q.id' => $quoteId]);
 
         return $query->one();
@@ -445,7 +455,7 @@ class Quote extends \yii\db\ActiveRecord
     public static function countProfit($id)
     {
         $data = self::getDataForProfit($id);
-        return self::getProfit($data['mark_up'], $data['selling'],$data['fare_type'],$data['check_payment']);
+        return self::getProfit($data['mark_up'], $data['selling'], $data['fare_type'], $data['check_payment']);
     }
 
     public function getTotalProfit()
@@ -455,7 +465,7 @@ class Quote extends \yii\db\ActiveRecord
         }
 
         $priceData = $this->getPricesData();
-        return self::getProfit($priceData['total']['mark_up'] + $priceData['total']['extra_mark_up'], $priceData['total']['selling'],$this->fare_type,$this->check_payment);
+        return self::getProfit($priceData['total']['mark_up'] + $priceData['total']['extra_mark_up'], $priceData['total']['selling'], $this->fare_type, $this->check_payment);
         //return self::countProfit($this->id);
     }
 
@@ -464,25 +474,29 @@ class Quote extends \yii\db\ActiveRecord
      */
     public function getProcessingFee()
     {
-        if($this->lead->getAgentsProcessingFee())
+        if ($this->lead->getAgentsProcessingFee()) {
             return $this->lead->getAgentsProcessingFee();
+        }
 
-        if(!$this->employee){
+        if (!$this->employee) {
             $employee = $this->lead->employee;
-            if(!$employee) return 0;
+            if (!$employee) {
+                return 0;
+            }
 
             $groups = $employee->ugsGroups;
-            return ($groups)?$groups[0]->ug_processing_fee:0;
+            return ($groups) ? $groups[0]->ug_processing_fee : 0;
         }
 
         $groups = $this->employee->ugsGroups;
-        return ($groups)?$groups[0]->ug_processing_fee:0;
+        return ($groups) ? $groups[0]->ug_processing_fee : 0;
     }
 
     public function isEditable()
     {
-        if($this->status == self::STATUS_CREATED)
+        if ($this->status == self::STATUS_CREATED) {
             return true;
+        }
 
         return false;
     }
@@ -661,8 +675,6 @@ class Quote extends \yii\db\ActiveRecord
         }
 
         if (parent::beforeSave($insert)) {
-
-
             if ($insert) {
                 if (!$this->status) {
                     $this->status = self::STATUS_CREATED;
@@ -675,7 +687,6 @@ class Quote extends \yii\db\ActiveRecord
                 /*                if(!$this->employee_id && Yii::$app->user->id) {
                                     $this->employee_id = Yii::$app->user->id;
                                 }*/
-
             }
 
             return true;
@@ -711,7 +722,7 @@ class Quote extends \yii\db\ActiveRecord
 
                 if (stripos($rowArr[0], "OPERATED") !== false) {
                     $idx = count($itinerary);
-                    if($idx > 0){
+                    if ($idx > 0) {
                         $idx--;
                     }
                     if (isset($data[$idx]) && isset($itinerary[$idx])) {
@@ -724,7 +735,9 @@ class Quote extends \yii\db\ActiveRecord
                     }
                 }
 
-                if (!is_numeric(intval($rowArr[0]))) continue;
+                if (!is_numeric(intval($rowArr[0]))) {
+                    continue;
+                }
 
                 $segmentCount++;
                 $carrier = substr($rowArr[1], 0, 2);
@@ -746,7 +759,7 @@ class Quote extends \yii\db\ActiveRecord
                 }
 
                 $posCarr = stripos($row, $carrier);
-                $rowFl = substr($row, $posCarr+strlen($carrier));
+                $rowFl = substr($row, $posCarr + strlen($carrier));
                 preg_match('/([0-9]+)\D/', $rowFl, $matches);
                 if (!empty($matches)) {
                     $flightNumber = $matches[1];
@@ -760,7 +773,9 @@ class Quote extends \yii\db\ActiveRecord
 
                 preg_match_all("/[0-9]{2}(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)/", $row, $matches);
                 if (!empty($matches)) {
-                    if (empty($matches[0])) continue;
+                    if (empty($matches[0])) {
+                        continue;
+                    }
                     $depDate = $matches[0][0];
                     if (isset($matches[0][1])) {
                         $arrDateInRow = true;
@@ -771,64 +786,64 @@ class Quote extends \yii\db\ActiveRecord
                 $rowExpl = explode($depAirport . $arrAirport, $row);
                 $rowTime = $rowExpl[1];
                 preg_match_all('/([0-9]{3,4})(N|A|P)?(\+([0-9])?)?/', $rowTime, $matches);
-				if (!empty($matches)) {
-					$now = new \DateTime();
-					$matches[1][0] = substr_replace($matches[1][0], ':', -2, 0);
-					$matches[1][1] = substr_replace($matches[1][1], ':', -2, 0);
-					$date = $depDate . ' ' . $matches[1][0];
-					if ($matches[2][0] != '') {
-						$date = $date . strtolower(str_replace('N', 'P', $matches[2][0])) . 'm';
-						$dateFormat = 'jM g:ia';
-					}
-					else {
-						$dateFormat = 'jM H:i';
-					}
-					$depDateTime = \DateTime::createFromFormat($dateFormat, $date);
-					if ($depDateTime == false) {
-						continue;
-					}
-					if (/*$now->format('m') > $depDateTime->format('m')*/
-						$now->getTimestamp() > $depDateTime->getTimestamp()
-					) {
-						$date = date('Y') + 1 . $date;
-						$dateFormat = 'Y' . $dateFormat;
-						$depDateTime = \DateTime::createFromFormat($dateFormat, $date);
-					}
-					$date = $arrDate . ' ' . $matches[1][1];
-					if ($matches[2][1] != '') {
-						$date = $date . strtolower(str_replace('N', 'P', $matches[2][1])) . 'm';
-						$dateFormat = 'jM g:ia';
-					}
-					else {
-						$dateFormat = 'jM H:i';
-					}
-					$arrDateTime = \DateTime::createFromFormat($dateFormat, $date);
-					if (/*$now->format('m') > $arrDateTime->format('m')*/
-						$now->getTimestamp() > $arrDateTime->getTimestamp()
-					) {
-						$date = date('Y') + 1 . $date;
-						$dateFormat = 'Y' . $dateFormat;
-						$arrDateTime = \DateTime::createFromFormat($dateFormat, $date);
-					}
-					$arrDepDiff = $depDateTime->diff($arrDateTime);
-					if ($arrDepDiff->d == 0 && !$arrDateInRow && !empty($matches[3][1])) {
-						if ($matches[3][1] == "+") {
-							$matches[3][1] .= 1;
-						}
-						$arrDateTime->add(\DateInterval::createFromDateString($matches[3][1] . ' day'));
-					}
-					/*if ($depDateTime > $arrDateTime) {
-						$arrDateTime->add(\DateInterval::createFromDateString('+1 year'));
-					}*/
-					$depCity = Airports::findByIata($depAirport);
-					/*$timezone = ($depCity !== null && !empty($depCity->timezone))
-					? new \DateTimeZone($depCity->timezone)
-					: new \DateTimeZone("UTC");*/
-					$arrCity = Airports::findByIata($arrAirport);
-					/*$timezone = ($arrCity !== null && !empty($arrCity->timezone))
-						? new \DateTimeZone($arrCity->timezone)
-						: new \DateTimeZone("UTC");*/
-				}
+                if (!empty($matches)) {
+                    $now = new \DateTime();
+                    $matches[1][0] = substr_replace($matches[1][0], ':', -2, 0);
+                    $matches[1][1] = substr_replace($matches[1][1], ':', -2, 0);
+                    $date = $depDate . ' ' . $matches[1][0];
+                    if ($matches[2][0] != '') {
+                        $date = $date . strtolower(str_replace('N', 'P', $matches[2][0])) . 'm';
+                        $dateFormat = 'jM g:ia';
+                    } else {
+                        $dateFormat = 'jM H:i';
+                    }
+                    $depDateTime = \DateTime::createFromFormat($dateFormat, $date);
+                    if ($depDateTime == false) {
+                        continue;
+                    }
+                    if (
+/*$now->format('m') > $depDateTime->format('m')*/
+                        $now->getTimestamp() > $depDateTime->getTimestamp()
+                    ) {
+                        $date = date('Y') + 1 . $date;
+                        $dateFormat = 'Y' . $dateFormat;
+                        $depDateTime = \DateTime::createFromFormat($dateFormat, $date);
+                    }
+                    $date = $arrDate . ' ' . $matches[1][1];
+                    if ($matches[2][1] != '') {
+                        $date = $date . strtolower(str_replace('N', 'P', $matches[2][1])) . 'm';
+                        $dateFormat = 'jM g:ia';
+                    } else {
+                        $dateFormat = 'jM H:i';
+                    }
+                    $arrDateTime = \DateTime::createFromFormat($dateFormat, $date);
+                    if (
+/*$now->format('m') > $arrDateTime->format('m')*/
+                        $now->getTimestamp() > $arrDateTime->getTimestamp()
+                    ) {
+                        $date = date('Y') + 1 . $date;
+                        $dateFormat = 'Y' . $dateFormat;
+                        $arrDateTime = \DateTime::createFromFormat($dateFormat, $date);
+                    }
+                    $arrDepDiff = $depDateTime->diff($arrDateTime);
+                    if ($arrDepDiff->d == 0 && !$arrDateInRow && !empty($matches[3][1])) {
+                        if ($matches[3][1] == "+") {
+                            $matches[3][1] .= 1;
+                        }
+                        $arrDateTime->add(\DateInterval::createFromDateString($matches[3][1] . ' day'));
+                    }
+                    /*if ($depDateTime > $arrDateTime) {
+                        $arrDateTime->add(\DateInterval::createFromDateString('+1 year'));
+                    }*/
+                    $depCity = Airports::findByIata($depAirport);
+                    /*$timezone = ($depCity !== null && !empty($depCity->timezone))
+                    ? new \DateTimeZone($depCity->timezone)
+                    : new \DateTimeZone("UTC");*/
+                    $arrCity = Airports::findByIata($arrAirport);
+                    /*$timezone = ($arrCity !== null && !empty($arrCity->timezone))
+                        ? new \DateTimeZone($arrCity->timezone)
+                        : new \DateTimeZone("UTC");*/
+                }
 
                 $rowExpl = explode($depDate, $rowFl);
                 $cabin = trim(str_replace($flightNumber, '', trim($rowExpl[0])));
@@ -860,7 +875,7 @@ class Quote extends \yii\db\ActiveRecord
                     'flightDuration' => $flightDuration,
                     'layoverDuration' => 0
                 ];
-                if(!empty($airline)){
+                if (!empty($airline)) {
                     $segment['cabin'] = $airline->getCabinByClass($cabin);
                 }
                 if (!empty($operationAirlineCode)) {
@@ -874,7 +889,7 @@ class Quote extends \yii\db\ActiveRecord
                 $fSegment = new FlightSegment();
                 $fSegment->airlineCode = $segment['carrier'];
                 $fSegment->bookingClass = $segment['bookingClass'];
-                if(isset($segment['cabin']) && !empty($segment['cabin'])){
+                if (isset($segment['cabin']) && !empty($segment['cabin'])) {
                     $fSegment->cabin = $segment['cabin'];
                 }
                 $fSegment->flightNumber = $segment['flightNumber'];
@@ -923,7 +938,7 @@ class Quote extends \yii\db\ActiveRecord
 
             if (stripos($rowArr[0], "OPERATED") !== false) {
                 $idx = count($segments);
-                if($idx > 0){
+                if ($idx > 0) {
                     $idx--;
                 }
                 if (isset($segments[$idx])) {
@@ -935,9 +950,9 @@ class Quote extends \yii\db\ActiveRecord
                     if (!empty($matches)) {
                         $operatedBy = trim($matches[1]);
                     }
-                    if(mb_strlen($operatedBy) > 2){
+                    if (mb_strlen($operatedBy) > 2) {
                         $airline = Airline::find()->andWhere(['like' ,'name', $operatedBy ])->one();
-                        if(!empty($airline)){
+                        if (!empty($airline)) {
                             $operatedBy = $airline->iata;
                         }
                     }
@@ -945,7 +960,9 @@ class Quote extends \yii\db\ActiveRecord
                 }
             }
 
-            if (!is_numeric(intval($rowArr[0]))) continue;
+            if (!is_numeric(intval($rowArr[0]))) {
+                continue;
+            }
 
             $segmentCount++;
             $carrier = isset($rowArr[1]) ? substr($rowArr[1], 0, 2) : '';
@@ -967,9 +984,9 @@ class Quote extends \yii\db\ActiveRecord
                 if (!empty($matches)) {
                     $operatedBy = trim($matches[1]);
                 }
-                if(mb_strlen($operatedBy) > 2){
+                if (mb_strlen($operatedBy) > 2) {
                     $airline = Airline::find()->andWhere(['like' ,'name', $operatedBy ])->one();
-                    if(!empty($airline)){
+                    if (!empty($airline)) {
                         $operatedBy = $airline->iata;
                     }
                 }
@@ -977,7 +994,7 @@ class Quote extends \yii\db\ActiveRecord
             }
 
             $posCarr = stripos($row, $carrier);
-            $rowFl = substr($row, $posCarr+strlen($carrier));
+            $rowFl = substr($row, $posCarr + strlen($carrier));
 
             preg_match('/([0-9]+)\D/', $rowFl, $matches);
             if (!empty($matches)) {
@@ -992,7 +1009,9 @@ class Quote extends \yii\db\ActiveRecord
 
             preg_match_all("/[0-9]{2}(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)/", $row, $matches);
             if (!empty($matches)) {
-                if (empty($matches[0])) continue;
+                if (empty($matches[0])) {
+                    continue;
+                }
                 $depDate = $matches[0][0];
                 if (isset($matches[0][1])) {
                     $arrDateInRow = true;
@@ -1003,70 +1022,69 @@ class Quote extends \yii\db\ActiveRecord
             $rowExpl = explode($depAirport . $arrAirport, $row);
             $rowTime = $rowExpl[1];
             preg_match_all('/([0-9]{3,4})(N|A|P)?(\+([0-9])?)?/', $rowTime, $matches);
-			if (!empty($matches)) {
-
-			    if (!isset($matches[1][0], $matches[1][1])) {
+            if (!empty($matches)) {
+                if (!isset($matches[1][0], $matches[1][1])) {
                     throw new \Exception('TripsSegmentsData is wrong, please check dump', -5);
-			    }
+                }
 
-				$now = new \DateTime();
-				$matches[1][0] = substr_replace($matches[1][0], ':', -2, 0);
-				$matches[1][1] = substr_replace($matches[1][1], ':', -2, 0);
-				$date = $depDate . ' ' . $matches[1][0];
-				if (isset($matches[2][0]) && $matches[2][0] != '') {
-					$date = $date . strtolower(str_replace('N', 'P', $matches[2][0])) . 'm';
-					$dateFormat = 'jM g:ia';
-				}
-				else {
-					$dateFormat = 'jM H:i';
-				}
-				$depDateTime = \DateTime::createFromFormat($dateFormat, $date);
-				if ($depDateTime == false) {
-					continue;
-				}
-				if (/*$now->format('m') > $depDateTime->format('m')*/
-					$now->getTimestamp() > $depDateTime->getTimestamp()
-				) {
-					$date = date('Y') + 1 . $date;
-					$dateFormat = 'Y' . $dateFormat;
-					$depDateTime = \DateTime::createFromFormat($dateFormat, $date);
-				}
+                $now = new \DateTime();
+                $matches[1][0] = substr_replace($matches[1][0], ':', -2, 0);
+                $matches[1][1] = substr_replace($matches[1][1], ':', -2, 0);
+                $date = $depDate . ' ' . $matches[1][0];
+                if (isset($matches[2][0]) && $matches[2][0] != '') {
+                    $date = $date . strtolower(str_replace('N', 'P', $matches[2][0])) . 'm';
+                    $dateFormat = 'jM g:ia';
+                } else {
+                    $dateFormat = 'jM H:i';
+                }
+                $depDateTime = \DateTime::createFromFormat($dateFormat, $date);
+                if ($depDateTime == false) {
+                    continue;
+                }
+                if (
+/*$now->format('m') > $depDateTime->format('m')*/
+                    $now->getTimestamp() > $depDateTime->getTimestamp()
+                ) {
+                    $date = date('Y') + 1 . $date;
+                    $dateFormat = 'Y' . $dateFormat;
+                    $depDateTime = \DateTime::createFromFormat($dateFormat, $date);
+                }
 
-				$date = $arrDate . ' ' . $matches[1][1];
-				if (isset($matches[2][1]) && $matches[2][1] != '') {
-					$date = $date . strtolower(str_replace('N', 'P', $matches[2][1])) . 'm';
-					$dateFormat = 'jM g:ia';
-				}
-				else {
-					$dateFormat = 'jM H:i';
-				}
-				$arrDateTime = \DateTime::createFromFormat($dateFormat, $date);
-				if (/*$now->format('m') > $arrDateTime->format('m')*/
-					$now->getTimestamp() > $arrDateTime->getTimestamp()
-				) {
-					$date = date('Y') + 1 . $date;
-					$dateFormat = 'Y' . $dateFormat;
-					$arrDateTime = \DateTime::createFromFormat($dateFormat, $date);
-				}
-				$arrDepDiff = $depDateTime->diff($arrDateTime);
-				if ($arrDepDiff->d == 0 && !$arrDateInRow && isset($matches[3][1]) && !empty($matches[3][1])) {
-					if ($matches[3][1] == "+") {
-						$matches[3][1] .= 1;
-					}
-					$arrDateTime->add(\DateInterval::createFromDateString($matches[3][1] . ' day'));
-				}
-				/*if ($depDateTime > $arrDateTime) {
-					$arrDateTime->add(\DateInterval::createFromDateString('+1 year'));
-				}*/
-				$depCity = Airports::findByIata($depAirport);
-				/*$timezone = ($depCity !== null && !empty($depCity->timezone))
-				? new \DateTimeZone($depCity->timezone)
-				: new \DateTimeZone("UTC");*/
-				$arrCity = Airports::findByIata($arrAirport);
-				/*$timezone = ($arrCity !== null && !empty($arrCity->timezone))
-					? new \DateTimeZone($arrCity->timezone)
-					: new \DateTimeZone("UTC");*/
-			}
+                $date = $arrDate . ' ' . $matches[1][1];
+                if (isset($matches[2][1]) && $matches[2][1] != '') {
+                    $date = $date . strtolower(str_replace('N', 'P', $matches[2][1])) . 'm';
+                    $dateFormat = 'jM g:ia';
+                } else {
+                    $dateFormat = 'jM H:i';
+                }
+                $arrDateTime = \DateTime::createFromFormat($dateFormat, $date);
+                if (
+/*$now->format('m') > $arrDateTime->format('m')*/
+                    $now->getTimestamp() > $arrDateTime->getTimestamp()
+                ) {
+                    $date = date('Y') + 1 . $date;
+                    $dateFormat = 'Y' . $dateFormat;
+                    $arrDateTime = \DateTime::createFromFormat($dateFormat, $date);
+                }
+                $arrDepDiff = $depDateTime->diff($arrDateTime);
+                if ($arrDepDiff->d == 0 && !$arrDateInRow && isset($matches[3][1]) && !empty($matches[3][1])) {
+                    if ($matches[3][1] == "+") {
+                        $matches[3][1] .= 1;
+                    }
+                    $arrDateTime->add(\DateInterval::createFromDateString($matches[3][1] . ' day'));
+                }
+                /*if ($depDateTime > $arrDateTime) {
+                    $arrDateTime->add(\DateInterval::createFromDateString('+1 year'));
+                }*/
+                $depCity = Airports::findByIata($depAirport);
+                /*$timezone = ($depCity !== null && !empty($depCity->timezone))
+                ? new \DateTimeZone($depCity->timezone)
+                : new \DateTimeZone("UTC");*/
+                $arrCity = Airports::findByIata($arrAirport);
+                /*$timezone = ($arrCity !== null && !empty($arrCity->timezone))
+                    ? new \DateTimeZone($arrCity->timezone)
+                    : new \DateTimeZone("UTC");*/
+            }
 
             $rowExpl = explode($depDate, $rowFl);
             $cabin = trim(str_replace($flightNumber, '', trim($rowExpl[0])));
@@ -1088,14 +1106,14 @@ class Quote extends \yii\db\ActiveRecord
                 'qs_booking_class' => trim($cabin),
                 'qs_duration' => $flightDuration,
                 'qs_marketing_airline' => $carrier,
-                'qs_operating_airline' => (!empty($operationAirlineCode))?$operationAirlineCode:$carrier,
+                'qs_operating_airline' => (!empty($operationAirlineCode)) ? $operationAirlineCode : $carrier,
             ];
-            $segment['qs_key'] = '#'.$segment['qs_flight_number'].$segment['qs_departure_airport_code'].'-'.$segment['qs_arrival_airport_code'].' '.$segment['qs_departure_time']->format('Y-m-d H:i');
+            $segment['qs_key'] = '#' . $segment['qs_flight_number'] . $segment['qs_departure_airport_code'] . '-' . $segment['qs_arrival_airport_code'] . ' ' . $segment['qs_departure_time']->format('Y-m-d H:i');
 
-            if(!empty($airline)){
+            if (!empty($airline)) {
                 $segment['qs_cabin'] = QuoteSegment::getCabinReal($airline->getCabinByClass($cabin));
             }
-            if(!isset($segment['qs_cabin'])){
+            if (!isset($segment['qs_cabin'])) {
                 $segment['qs_cabin'] = QuoteSegment::getCabinReal($this->cabin);
             }
             $segments[] = $segment;
@@ -1135,7 +1153,7 @@ class Quote extends \yii\db\ActiveRecord
             }
 
             $keySegment = [];
-            foreach ($trip['segments'] as $segment){
+            foreach ($trip['segments'] as $segment) {
                 $keySegment[] = $segment['qs_key'];
             }
             $trips[$key]['qt_key'] = implode('|', $keySegment);
@@ -1146,29 +1164,29 @@ class Quote extends \yii\db\ActiveRecord
 
     public function createQuoteTrips()
     {
-        if($this->getQuoteTrips()->count() == 0){
+        if ($this->getQuoteTrips()->count() == 0) {
             $data = $this->getTripsSegmentsData();
-            if(!empty($data)){
+            if (!empty($data)) {
                 $transaction = self::getDb()->beginTransaction();
 
-                foreach ($data as $tripEntry){
+                foreach ($data as $tripEntry) {
                     $trip = new QuoteTrip();
                     $trip->qt_duration = $tripEntry['qt_duration'];
                     $trip->qt_key = $tripEntry['qt_key'];
 
-                    if(!$trip->validate()){
-                        Yii::error('QuoteUid: '.$this->uid.'<br/>'.VarDumper::dumpAsString($trip->getErrors()).'<br/>dump: '.$this->reservation_dump, 'QuoteModel:createQuoteTrips:QuoteTrip:save');
+                    if (!$trip->validate()) {
+                        Yii::error('QuoteUid: ' . $this->uid . '<br/>' . VarDumper::dumpAsString($trip->getErrors()) . '<br/>dump: ' . $this->reservation_dump, 'QuoteModel:createQuoteTrips:QuoteTrip:save');
                         $transaction->rollBack();
                         return false;
                     }
                     $this->link('quoteTrips', $trip);
 
-                    if(isset($tripEntry['segments']) && is_array($tripEntry['segments'])) {
-                        foreach ($tripEntry['segments'] as $segmentEntry){
+                    if (isset($tripEntry['segments']) && is_array($tripEntry['segments'])) {
+                        foreach ($tripEntry['segments'] as $segmentEntry) {
                             $segment = new QuoteSegment();
                             $segment->attributes = $segmentEntry;
-                            if(!$segment->validate()){
-                                Yii::error('QuoteUid: '.$this->uid.'<br/>'.VarDumper::dumpAsString($segmentEntry).VarDumper::dumpAsString($segment->getErrors()).'<br/>dump: '.$this->reservation_dump, 'QuoteModel:createQuoteTrips:QuoteSegment:save');
+                            if (!$segment->validate()) {
+                                Yii::error('QuoteUid: ' . $this->uid . '<br/>' . VarDumper::dumpAsString($segmentEntry) . VarDumper::dumpAsString($segment->getErrors()) . '<br/>dump: ' . $this->reservation_dump, 'QuoteModel:createQuoteTrips:QuoteSegment:save');
                                 $transaction->rollBack();
                                 return false;
                             }
@@ -1195,11 +1213,11 @@ class Quote extends \yii\db\ActiveRecord
 
     public function getHasOvernight()
     {
-        if(!empty($this->quoteTrips)){
-            foreach ($this->quoteTrips as $trip){
-                if(!empty($trip->quoteSegments) && count($trip->quoteSegments) > 1){
-                    foreach ($trip->quoteSegments as $segment){
-                        if($segment->getIsOVernight()){
+        if (!empty($this->quoteTrips)) {
+            foreach ($this->quoteTrips as $trip) {
+                if (!empty($trip->quoteSegments) && count($trip->quoteSegments) > 1) {
+                    foreach ($trip->quoteSegments as $segment) {
+                        if ($segment->getIsOVernight()) {
                             $this->hasOvernight = true;
                         }
                     }
@@ -1211,12 +1229,12 @@ class Quote extends \yii\db\ActiveRecord
 
     public function getHasAirportChange()
     {
-        if(!empty($this->quoteTrips)){
-            foreach ($this->quoteTrips as $trip){
-                if(!empty($trip->quoteSegments) && count($trip->quoteSegments) > 1){
+        if (!empty($this->quoteTrips)) {
+            foreach ($this->quoteTrips as $trip) {
+                if (!empty($trip->quoteSegments) && count($trip->quoteSegments) > 1) {
                     $previousSegment = null;
-                    foreach ($trip->quoteSegments as $segment){
-                        if($previousSegment !== null && $segment->qs_departure_airport_code != $previousSegment->qs_arrival_airport_code){
+                    foreach ($trip->quoteSegments as $segment) {
+                        if ($previousSegment !== null && $segment->qs_departure_airport_code != $previousSegment->qs_arrival_airport_code) {
                             $this->hasAirportChange = true;
                             break;
                         }
@@ -1231,19 +1249,19 @@ class Quote extends \yii\db\ActiveRecord
     public function getBaggageInfo()
     {
         //if one segment has baggage -> quote has baggage
-        if(!empty($this->quoteTrips)){
-            foreach ($this->quoteTrips as $trip){
-                if(!empty($trip->quoteSegments)){
-                    foreach ($trip->quoteSegments as $segment){
-                        if(!empty($segment->quoteSegmentBaggages)){
-                            foreach ($segment->quoteSegmentBaggages as $baggage){
-                                if(($baggage->qsb_allow_pieces && $baggage->qsb_allow_pieces > 0)){
-                                    $this->freeBaggageInfo = $baggage->qsb_allow_pieces.' pcs';
-                                }elseif ($baggage->qsb_allow_weight){
-                                    $this->freeBaggageInfo = $baggage->qsb_allow_weight.$baggage->qsb_allow_unit;
+        if (!empty($this->quoteTrips)) {
+            foreach ($this->quoteTrips as $trip) {
+                if (!empty($trip->quoteSegments)) {
+                    foreach ($trip->quoteSegments as $segment) {
+                        if (!empty($segment->quoteSegmentBaggages)) {
+                            foreach ($segment->quoteSegmentBaggages as $baggage) {
+                                if (($baggage->qsb_allow_pieces && $baggage->qsb_allow_pieces > 0)) {
+                                    $this->freeBaggageInfo = $baggage->qsb_allow_pieces . ' pcs';
+                                } elseif ($baggage->qsb_allow_weight) {
+                                    $this->freeBaggageInfo = $baggage->qsb_allow_weight . $baggage->qsb_allow_unit;
                                 }
 
-                                if($this->freeBaggageInfo) {
+                                if ($this->freeBaggageInfo) {
                                     $this->hasFreeBaggage = true;
                                     return ['hasFreeBaggage' => $this->hasFreeBaggage, 'freeBaggageInfo' => $this->freeBaggageInfo];
                                 }
@@ -1270,26 +1288,26 @@ class Quote extends \yii\db\ActiveRecord
      * @return array
      * @throws \Exception
      */
-    public function getBaggageInfo2() : array
+    public function getBaggageInfo2(): array
     {
 
         //$caryOn = 1;
         //$checked = random_int(0, 1);
 
         //if one segment has baggage -> quote has baggage
-        if($this->quoteTrips){
-            foreach ($this->quoteTrips as $trip){
-                if(!empty($trip->quoteSegments)){
-                    foreach ($trip->quoteSegments as $segment){
-                        if(!empty($segment->quoteSegmentBaggages)){
-                            foreach ($segment->quoteSegmentBaggages as $baggage){
-                                if($baggage->qsb_allow_pieces && $baggage->qsb_allow_pieces > 0){
+        if ($this->quoteTrips) {
+            foreach ($this->quoteTrips as $trip) {
+                if (!empty($trip->quoteSegments)) {
+                    foreach ($trip->quoteSegments as $segment) {
+                        if (!empty($segment->quoteSegmentBaggages)) {
+                            foreach ($segment->quoteSegmentBaggages as $baggage) {
+                                if ($baggage->qsb_allow_pieces && $baggage->qsb_allow_pieces > 0) {
                                     $this->freeBaggageInfo2 = $baggage->qsb_allow_pieces;
                                 } elseif ($baggage->qsb_allow_weight) {
-                                    $this->freeBaggageInfo2 = $baggage->qsb_allow_weight.$baggage->qsb_allow_unit;
+                                    $this->freeBaggageInfo2 = $baggage->qsb_allow_weight . $baggage->qsb_allow_unit;
                                 }
 
-                                if($this->freeBaggageInfo2){
+                                if ($this->freeBaggageInfo2) {
                                     $this->hasFreeBaggage = true;
                                     //return ['hasFreeBaggage' => $this->hasFreeBaggage, 'freeBaggageInfo' => $this->freeBaggageInfo2];
                                 }
@@ -1305,17 +1323,17 @@ class Quote extends \yii\db\ActiveRecord
 
 
 
-    public function getBaggageInfoByTrip(QuoteTrip $trip) : array
+    public function getBaggageInfoByTrip(QuoteTrip $trip): array
     {
 
         $caryOn = 1;
         $checked = 0;
 
-        if($trip->quoteSegments){
-            foreach ($trip->quoteSegments as $segment){
-                if(!empty($segment->quoteSegmentBaggages)){
-                    foreach ($segment->quoteSegmentBaggages as $baggage){
-                        if($baggage->qsb_allow_pieces > 0) {
+        if ($trip->quoteSegments) {
+            foreach ($trip->quoteSegments as $segment) {
+                if (!empty($segment->quoteSegmentBaggages)) {
+                    foreach ($segment->quoteSegmentBaggages as $baggage) {
+                        if ($baggage->qsb_allow_pieces > 0) {
                             $checked = $baggage->qsb_allow_pieces;
                         }
                         /*elseif ($baggage->qsb_allow_weight) {
@@ -1337,7 +1355,8 @@ class Quote extends \yii\db\ActiveRecord
 
         if (!$insert) {
             if (isset($changedAttributes['status'])) {
-                if ($this->lead->called_expert &&
+                if (
+                    $this->lead->called_expert &&
                     $changedAttributes['status'] != $this->status &&
                     !in_array($this->status, [self::STATUS_APPLIED])
                 ) {
@@ -1349,10 +1368,9 @@ class Quote extends \yii\db\ActiveRecord
             QuoteStatusLog::createNewFromQuote($this);
         }
 
-        if($this->lead_id && $this->lead) {
+        if ($this->lead_id && $this->lead) {
             $this->lead->updateLastAction();
         }
-
     }
 
 
@@ -1395,7 +1413,7 @@ class Quote extends \yii\db\ActiveRecord
         $class = self::STATUS_CLASS_SPAN[$this->status] ??  '';
         $label = self::STATUS_LIST[$this->status] ?? '-';
 
-        return '<span id="q-status-' . $this->uid . '" class="quote__status '.$class.'" title="' . Yii::$app->formatter->asDatetime($this->updated) . '" data-toggle="tooltip"><i class="fa fa-circle"></i> <span>'.$label.'</span></span>';
+        return '<span id="q-status-' . $this->uid . '" class="quote__status ' . $class . '" title="' . Yii::$app->formatter->asDatetime($this->updated) . '" data-toggle="tooltip"><i class="fa fa-circle"></i> <span>' . $label . '</span></span>';
     }
 
 
@@ -1461,14 +1479,13 @@ class Quote extends \yii\db\ActiveRecord
     {
         $trips = [];
 
-        if(!$this->quoteTrips) {
+        if (!$this->quoteTrips) {
             return $this->getTripsFromDumpLikeSearch();
         }
 
-        foreach ($this->quoteTrips as $tripKey => $trip){
+        foreach ($this->quoteTrips as $tripKey => $trip) {
             $segments = [];
             foreach ($trip->quoteSegments as $keySegm => $segment) {
-
                 //$airline = $segment->marketingAirline; // ? Airline::findIdentity($segment->qs_marketing_airline);
                 $departureDateTime = new \DateTime($segment->qs_departure_time);
                 $arrivalDateTime = new \DateTime($segment->qs_arrival_time);
@@ -1476,19 +1493,19 @@ class Quote extends \yii\db\ActiveRecord
                 $baggageCharge = $segment->quoteSegmentBaggageCharges;
 
                 $baggageInfo = [];
-                if(count($baggages)){
-                    foreach ($baggages as $baggageEntry){
+                if (count($baggages)) {
+                    foreach ($baggages as $baggageEntry) {
                         $baggageInfo[$baggageEntry->qsb_pax_code] = $baggageEntry->getInfo();
                     }
                 }
-                if(count($baggageCharge)){
-                    foreach ($baggageCharge as $baggageChEntry){
+                if (count($baggageCharge)) {
+                    foreach ($baggageCharge as $baggageChEntry) {
                         $baggageInfo[$baggageChEntry->qsbc_pax_code]['charge'] = $baggageChEntry->getInfo();
                     }
                 }
                 $stops = [];
-                if(count($segment->quoteSegmentStops)){
-                    foreach ($segment->quoteSegmentStops as $stopEntry){
+                if (count($segment->quoteSegmentStops)) {
+                    foreach ($segment->quoteSegmentStops as $stopEntry) {
                         $stops[] = $stopEntry->getInfo();
                     }
                 }
@@ -1514,7 +1531,7 @@ class Quote extends \yii\db\ActiveRecord
                 ];
             }
             $trips[] = [
-                'tripId' => $tripKey+1,
+                'tripId' => $tripKey + 1,
                 'segments' => $segments,
                 'duration' => $trip->qt_duration,
             ];
@@ -1527,15 +1544,15 @@ class Quote extends \yii\db\ActiveRecord
     {
         $trips = [];
 
-        if(empty($this->quoteTrips)){
+        if (empty($this->quoteTrips)) {
             return $this->getTripsFromDump($title);
         }
 
-        foreach ($this->quoteTrips as $trip){
+        foreach ($this->quoteTrips as $trip) {
             $segments = [];
             $routing = [];
             foreach ($trip->quoteSegments as $keySegm => $segment) {
-                if($keySegm == 0){
+                if ($keySegm == 0) {
                     $routing[] = $segment->qs_departure_airport_code;
                 }
                 $routing[] = $segment->qs_arrival_airport_code;
@@ -1547,13 +1564,13 @@ class Quote extends \yii\db\ActiveRecord
                 $baggageCharge = $segment->quoteSegmentBaggageCharges;
 
                 $baggageInfo = [];
-                if(count($baggages)){
-                    foreach ($baggages as $baggageEntry){
+                if (count($baggages)) {
+                    foreach ($baggages as $baggageEntry) {
                         $baggageInfo[$baggageEntry->qsb_pax_code] = $baggageEntry->getInfo();
                     }
                 }
-                if(count($baggageCharge)){
-                    foreach ($baggageCharge as $baggageChEntry){
+                if (count($baggageCharge)) {
+                    foreach ($baggageCharge as $baggageChEntry) {
                         $baggageInfo[$baggageChEntry->qsbc_pax_code]['charge'] = $baggageChEntry->getInfo();
                     }
                 }
@@ -1583,7 +1600,7 @@ class Quote extends \yii\db\ActiveRecord
                 'stops' => $trip->stops,
                 'totalDuration' => $trip->qt_duration,
                 'routing' => implode('-', $routing),
-                'title' => $segments[0]['departureCity'].' - '.$segments[count($segments)-1]['arrivalCity'],
+                'title' => $segments[0]['departureCity'] . ' - ' . $segments[count($segments) - 1]['arrivalCity'],
                 ];
         }
 
@@ -1594,22 +1611,22 @@ class Quote extends \yii\db\ActiveRecord
     {
         $trips = [];
 
-        foreach ($this->quoteTrips as $trip){
+        foreach ($this->quoteTrips as $trip) {
             $firstSegment = null;
             $lastSegment = null;
 
             $segments = $trip->quoteSegments;
-            if( $segments ) {
+            if ($segments) {
                 $segmentsCnt = count($segments);
                 $stopCnt = $segmentsCnt - 1;
                 $firstSegment = $segments[0];
                 $lastSegment = end($segments);
                 $marketingAirlines = [];
-                foreach ($segments as $segment){
-                    if(isset($segment->qs_stop) && $segment->qs_stop > 0){
+                foreach ($segments as $segment) {
+                    if (isset($segment->qs_stop) && $segment->qs_stop > 0) {
                         $stopCnt += $segment->qs_stop;
                     }
-                    if(!in_array($segment->qs_marketing_airline, $marketingAirlines)){
+                    if (!in_array($segment->qs_marketing_airline, $marketingAirlines)) {
                         $marketingAirlines[] = $segment->qs_marketing_airline;
                     }
                 }
@@ -1619,15 +1636,15 @@ class Quote extends \yii\db\ActiveRecord
             $datediff = strtotime($lastSegment->qs_arrival_time) - strtotime($firstSegment->qs_departure_time);
 
             $trips[] = [
-                'airline' => (count($marketingAirlines) == 1)?$marketingAirlines[0]:'',
-                'departureDate' => Yii::$app->formatter_search->asDatetime(strtotime($firstSegment->qs_departure_time),'MMM d'),
-                'departureTime' => Yii::$app->formatter_search->asDatetime(strtotime($firstSegment->qs_departure_time),'h:mm a'),
+                'airline' => (count($marketingAirlines) == 1) ? $marketingAirlines[0] : '',
+                'departureDate' => Yii::$app->formatter_search->asDatetime(strtotime($firstSegment->qs_departure_time), 'MMM d'),
+                'departureTime' => Yii::$app->formatter_search->asDatetime(strtotime($firstSegment->qs_departure_time), 'h:mm a'),
                 'departureAirport' => $firstSegment->qs_departure_airport_code,
-                'departureCity' => ($firstSegment->departureAirport)?$firstSegment->departureAirport->city:$firstSegment->qs_departure_airport_code,
-                'arrivalTime' => Yii::$app->formatter_search->asDatetime(strtotime($lastSegment->qs_arrival_time),'h:mm a'),
+                'departureCity' => ($firstSegment->departureAirport) ? $firstSegment->departureAirport->city : $firstSegment->qs_departure_airport_code,
+                'arrivalTime' => Yii::$app->formatter_search->asDatetime(strtotime($lastSegment->qs_arrival_time), 'h:mm a'),
                 'arrivalDatePlus' => round($datediff / (60 * 60 * 24)),
                 'arrivalAirport' => $lastSegment->qs_arrival_airport_code,
-                'arrivalCity' => ($lastSegment->arrivalAirport)?$lastSegment->arrivalAirport->city:$lastSegment->qs_arrival_airport_code,
+                'arrivalCity' => ($lastSegment->arrivalAirport) ? $lastSegment->arrivalAirport->city : $lastSegment->qs_arrival_airport_code,
                 'duration' => SearchService::durationInMinutes($trip->qt_duration),
                 'stops' => Yii::t('search', '{n, plural, =0{Nonstop} one{# stop} other{# stops}}', ['n' => $stopCnt]),
             ];
@@ -1644,7 +1661,7 @@ class Quote extends \yii\db\ActiveRecord
 
 
 
-    public function getInfoForEmail2() : array
+    public function getInfoForEmail2(): array
     {
         $trips = [];
         $quoteCabinClasses = [];
@@ -1653,8 +1670,7 @@ class Quote extends \yii\db\ActiveRecord
 
         $maxStopsQuantity = 0;
 
-        foreach ($this->quoteTrips as $trip){
-
+        foreach ($this->quoteTrips as $trip) {
             $tripCabinClasses = [];
             $tripMarketingAirlines = [];
             $tripOperatingAirlines = [];
@@ -1663,15 +1679,13 @@ class Quote extends \yii\db\ActiveRecord
             $lastSegment = null;
             $segments = $trip->quoteSegments;
 
-            if( $segments ) {
-
+            if ($segments) {
                 $segmentsCnt = count($segments);
                 $stopCnt = $segmentsCnt - 1;
                 $firstSegment = $segments[0];
                 $lastSegment = end($segments);
 
                 foreach ($segments as $segment) {
-
                     $cabinClass = SearchService::getCabin($segment->qs_cabin);
 
                     $quoteCabinClasses[$segment->qs_cabin] = $cabinClass;
@@ -1679,9 +1693,9 @@ class Quote extends \yii\db\ActiveRecord
 
                     $airlineCodeM = $airlineNameM = $segment->qs_marketing_airline;
 
-                    if($segment->qs_marketing_airline) {
+                    if ($segment->qs_marketing_airline) {
                         $airline = Airline::findIdentity($segment->qs_marketing_airline);
-                        if($airline) {
+                        if ($airline) {
                             $airlineNameM = $airline->name;
                         }
                     }
@@ -1696,9 +1710,9 @@ class Quote extends \yii\db\ActiveRecord
 
                     $airlineCodeO = $airlineNameO = $segment->qs_operating_airline;
 
-                    if($segment->qs_operating_airline) {
+                    if ($segment->qs_operating_airline) {
                         $airline = Airline::findIdentity($segment->qs_operating_airline);
-                        if($airline) {
+                        if ($airline) {
                             $airlineNameO = $airline->name;
                         }
                     }
@@ -1706,12 +1720,12 @@ class Quote extends \yii\db\ActiveRecord
                     $tripOperatingAirlines[$airlineCodeO] = $airlineNameO;
                     $quoteOperatingAirlines[$airlineCodeO] = $airlineNameO;
 
-                    if($segment->qs_stop > 0){
+                    if ($segment->qs_stop > 0) {
                         $stopCnt += $segment->qs_stop;
                     }
                 }
 
-                if($stopCnt > $maxStopsQuantity) {
+                if ($stopCnt > $maxStopsQuantity) {
                     $maxStopsQuantity = $stopCnt;
                 }
 
@@ -1741,10 +1755,7 @@ class Quote extends \yii\db\ActiveRecord
                     'stopsQuantity' => $stopCnt,
                     'baggage' => $this->getBaggageInfoByTrip($trip),
                 ];
-
             }
-
-
         }
 
 
@@ -1769,7 +1780,7 @@ class Quote extends \yii\db\ActiveRecord
         $tripIndex = 0;
         $segments = self::parseDump($this->reservation_dump, false);
         foreach ($segments as $key => $segment) {
-            if(!isset($segment['cabin']) || empty($segment['cabin'])){
+            if (!isset($segment['cabin']) || empty($segment['cabin'])) {
                 $segment['cabin'] = $this->cabin;
             }
             if ($this->trip_type != Lead::TRIP_TYPE_ONE_WAY) {
@@ -1782,9 +1793,9 @@ class Quote extends \yii\db\ActiveRecord
                     }
                 }
             }
-            $trips[$tripIndex]['tripId'] = $tripIndex+1;
+            $trips[$tripIndex]['tripId'] = $tripIndex + 1;
             $trips[$tripIndex]['segments'][] = [
-                'segmentId' => $key+1,
+                'segmentId' => $key + 1,
                 'departureTime' => $segment['departureDateTime']->format('Y-m-d H:i'),
                 'arrivalTime' => $segment['arrivalDateTime']->format('Y-m-d H:i'),
                 'stop' => 0,
@@ -1813,7 +1824,6 @@ class Quote extends \yii\db\ActiveRecord
             } else {
                 $trips[$key]['duration'] = ($arrDt->getTimestamp() - $depDt->getTimestamp()) / 60;
             }
-
         }
         return $trips;
     }
@@ -1824,7 +1834,7 @@ class Quote extends \yii\db\ActiveRecord
         $tripIndex = 0;
         $segments = self::parseDump($this->reservation_dump, false);
         foreach ($segments as $key => $segment) {
-            if(!isset($segment['cabin']) || empty($segment['cabin'])){
+            if (!isset($segment['cabin']) || empty($segment['cabin'])) {
                 $segment['cabin'] = $this->cabin;
             }
             if ($this->trip_type != Lead::TRIP_TYPE_ONE_WAY) {
@@ -1872,7 +1882,8 @@ class Quote extends \yii\db\ActiveRecord
             $src = Airports::findByIata($routing[min(array_keys($routing))]);
             $dst = Airports::findByIata($routing[max(array_keys($routing))]);
             $trips[$key]['routing'] = implode('-', $routing);
-            $trips[$key]['title'] = sprintf('%s - %s',
+            $trips[$key]['title'] = sprintf(
+                '%s - %s',
                 ($src !== null) ? $src->city : $src,
                 ($dst !== null) ? $dst->city : $dst
             );
@@ -1991,9 +2002,9 @@ class Quote extends \yii\db\ActiveRecord
     {
         $priceData = $this->getPricesData();
         $details = [];
-        foreach ($priceData['prices'] as $paxCode => $price){
-            $details[$paxCode]['selling'] = round($price['selling']/$price['tickets'], 2);
-            $details[$paxCode]['fare'] = round($price['fare']/$price['tickets'], 2);
+        foreach ($priceData['prices'] as $paxCode => $price) {
+            $details[$paxCode]['selling'] = round($price['selling'] / $price['tickets'], 2);
+            $details[$paxCode]['fare'] = round($price['fare'] / $price['tickets'], 2);
             $details[$paxCode]['taxes'] = round(($price['taxes'] + $price['mark_up'] + $price['extra_mark_up'] + $price['service_fee']) / $price['tickets'], 2);
             $details[$paxCode]['tickets'] = $price['tickets'];
         }
@@ -2017,7 +2028,7 @@ class Quote extends \yii\db\ActiveRecord
         $priceData = $this->getPricesData();
         $result = [
             'prices' => [
-                'totalPrice' => round($priceData['total']['selling'],2),
+                'totalPrice' => round($priceData['total']['selling'], 2),
                 'totalTax' => 0,
                 'isCk' => boolval($this->check_payment),
             ],
@@ -2028,11 +2039,11 @@ class Quote extends \yii\db\ActiveRecord
         ];
 
         $priceData = $this->getPricesData();
-        foreach ($priceData['prices'] as $paxCode => $price){
+        foreach ($priceData['prices'] as $paxCode => $price) {
             $result['passengers'][$paxCode]['cnt'] = $price['tickets'];
-            $result['passengers'][$paxCode]['price'] = round($price['selling']/$price['tickets'], 2);
+            $result['passengers'][$paxCode]['price'] = round($price['selling'] / $price['tickets'], 2);
             $result['passengers'][$paxCode]['tax'] = round(($price['taxes'] + $price['mark_up'] + $price['extra_mark_up'] + $price['service_fee']) / $price['tickets'], 2);
-            $result['passengers'][$paxCode]['baseFare'] = round($price['fare']/$price['tickets'], 2);
+            $result['passengers'][$paxCode]['baseFare'] = round($price['fare'] / $price['tickets'], 2);
             $result['prices']['totalTax'] += $result['passengers'][$paxCode]['tax'] * $price['tickets'];
         }
         $result['prices']['totalTax'] = round($result['prices']['totalTax'], 2);
@@ -2043,7 +2054,7 @@ class Quote extends \yii\db\ActiveRecord
 
     public function getServiceFeePercent()
     {
-        return ($this->check_payment)?($this->service_fee_percent?$this->service_fee_percent:$this->serviceFee*100):0;
+        return ($this->check_payment) ? ($this->service_fee_percent ? $this->service_fee_percent : $this->serviceFee * 100) : 0;
     }
 
     public function getEstimationProfitText()
@@ -2053,20 +2064,20 @@ class Quote extends \yii\db\ActiveRecord
         /* if(isset($priceData['service_fee']) && $priceData['service_fee'] > 0){
             $data[] = '<span class="text-danger">Merchant fee: -'.round($priceData['service_fee'],2).'$</span>';
         } */
-        if(isset($priceData['processing_fee']) && $priceData['processing_fee'] > 0){
-            $data[] = '<span class="text-danger">Processing fee: -'.round($priceData['processing_fee'],2).'$</span>';
+        if (isset($priceData['processing_fee']) && $priceData['processing_fee'] > 0) {
+            $data[] = '<span class="text-danger">Processing fee: -' . round($priceData['processing_fee'], 2) . '$</span>';
         }
 
-        return (empty($data))?'-':implode('<br/>', $data);
+        return (empty($data)) ? '-' : implode('<br/>', $data);
     }
 
     public function getPricePerPax()
     {
         $priceData = $this->getPricesData();
-        if(isset($priceData['prices'])){
+        if (isset($priceData['prices'])) {
             foreach ($priceData['prices'] as $paxCode => $priceEntry) {
-                if($paxCode == QuotePrice::PASSENGER_ADULT){
-                    return round($priceEntry['selling'] / $priceEntry['tickets'],2);
+                if ($paxCode == QuotePrice::PASSENGER_ADULT) {
+                    return round($priceEntry['selling'] / $priceEntry['tickets'], 2);
                 }
             }
         }
@@ -2091,8 +2102,8 @@ class Quote extends \yii\db\ActiveRecord
         $total = $defData;
 
         $paxCode = null;
-        foreach ($this->quotePrices as $price){
-            if($paxCode !== $price->passenger_type){
+        foreach ($this->quotePrices as $price) {
+            if ($paxCode !== $price->passenger_type) {
                 $prices[$price->passenger_type] = $defData;
                 $paxCode = $price->passenger_type;
             }
@@ -2103,14 +2114,14 @@ class Quote extends \yii\db\ActiveRecord
             $prices[$price->passenger_type]['mark_up'] += $price->mark_up;
             $prices[$price->passenger_type]['extra_mark_up'] += $price->extra_mark_up;
             $prices[$price->passenger_type]['selling'] = ($prices[$price->passenger_type]['net'] + $prices[$price->passenger_type]['mark_up'] + $prices[$price->passenger_type]['extra_mark_up']);
-            if($service_fee_percent > 0){
+            if ($service_fee_percent > 0) {
                 $prices[$price->passenger_type]['service_fee'] = $prices[$price->passenger_type]['selling'] * $service_fee_percent / 100;
                 $prices[$price->passenger_type]['selling'] += $prices[$price->passenger_type]['service_fee'];
             }
             $prices[$price->passenger_type]['selling'] = round($prices[$price->passenger_type]['selling'], 2);
         }
 
-        foreach ($prices as $key => $price){
+        foreach ($prices as $key => $price) {
             $total['tickets'] += $price['tickets'];
             $total['net'] += $price['net'];
             $total['mark_up'] += $price['mark_up'];
@@ -2125,7 +2136,7 @@ class Quote extends \yii\db\ActiveRecord
                 'prices' => $prices,
                 'total' => $total,
                 'service_fee_percent' => $service_fee_percent,
-                'service_fee' => ($service_fee_percent > 0)?$total['selling'] * $service_fee_percent / 100:0,
+                'service_fee' => ($service_fee_percent > 0) ? $total['selling'] * $service_fee_percent / 100 : 0,
                 'processing_fee' => $this->getProcessingFee()
                 ];
     }
@@ -2204,12 +2215,12 @@ class Quote extends \yii\db\ActiveRecord
     public static function isExcludedIP($ip): bool
     {
         $ipInGlobal = GlobalAcl::findOne(['mask' => $ip]);
-        if($ipInGlobal !== null){
+        if ($ipInGlobal !== null) {
             return true;
         }
 
         $ipInEmployee = EmployeeAcl::findOne(['mask' => $ip]);
-        if($ipInEmployee !== null){
+        if ($ipInEmployee !== null) {
             return true;
         }
         return false;
@@ -2227,7 +2238,8 @@ class Quote extends \yii\db\ActiveRecord
                 continue;
             }
 
-            if ((stripos($row, "JCB") !== false ||
+            if (
+                (stripos($row, "JCB") !== false ||
                 stripos($row, "ADT") !== false ||
                 stripos($row, "PFA") !== false ||
                 stripos($row, "JNN") !== false ||
@@ -2237,45 +2249,48 @@ class Quote extends \yii\db\ActiveRecord
                 stripos($row, "INF") !== false ||
                 stripos($row, "CBI") !== false) &&
                 stripos($row, "XT") !== false
-                ) {
+            ) {
                     $priceRows[] = $row;
-                }
+            }
 
-                if (stripos($row, "VALIDATING CARRIER") !== false && empty($validatingCarrierRow)) {
-                    $row = str_replace("VALIDATING CARRIER - ", "", $row);
-                    $validating = explode(' ', $row);
-                    $validatingCarrierRow = $validating[0];
-                }
+            if (stripos($row, "VALIDATING CARRIER") !== false && empty($validatingCarrierRow)) {
+                $row = str_replace("VALIDATING CARRIER - ", "", $row);
+                $validating = explode(' ', $row);
+                $validatingCarrierRow = $validating[0];
+            }
 
-                if (stripos($row, "BAG ALLOWANCE") !== false) {
-                    $bagRows[] = $this->getBagString($explodeDump, $key);
-                }
+            if (stripos($row, "BAG ALLOWANCE") !== false) {
+                $bagRows[] = $this->getBagString($explodeDump, $key);
+            }
         }
 
         $prices = [];
         foreach ($priceRows as $row) {
-            if (stripos($row, "JCB") !== false ||
+            if (
+                stripos($row, "JCB") !== false ||
                 stripos($row, "ADT") !== false ||
                 stripos($row, "PFA") !== false
-                ) {
-                    if (empty($prices[self::PASSENGER_ADULT])) {
-                        $prices[self::PASSENGER_ADULT] = $this->getPrice($row);
-                    }
-                } elseif (stripos($row, "JNN") !== false ||
+            ) {
+                if (empty($prices[self::PASSENGER_ADULT])) {
+                    $prices[self::PASSENGER_ADULT] = $this->getPrice($row);
+                }
+            } elseif (
+                stripos($row, "JNN") !== false ||
                     stripos($row, "CNN") !== false ||
                     stripos($row, "CBC") !== false
-                    ) {
-                        if (empty($prices[self::PASSENGER_CHILD])) {
-                            $prices[self::PASSENGER_CHILD] = $this->getPrice($row);
-                        }
-                } elseif (stripos($row, "JNF") !== false ||
+            ) {
+                if (empty($prices[self::PASSENGER_CHILD])) {
+                    $prices[self::PASSENGER_CHILD] = $this->getPrice($row);
+                }
+            } elseif (
+                stripos($row, "JNF") !== false ||
                     stripos($row, "INF") !== false ||
                     stripos($row, "CBI") !== false
-                    ) {
-                        if (empty($prices[self::PASSENGER_INFANT])) {
-                            $prices[self::PASSENGER_INFANT] = $this->getPrice($row);
-                        }
+            ) {
+                if (empty($prices[self::PASSENGER_INFANT])) {
+                    $prices[self::PASSENGER_INFANT] = $this->getPrice($row);
                 }
+            }
         }
 
 
@@ -2294,7 +2309,7 @@ class Quote extends \yii\db\ActiveRecord
             if ($key < $index) {
                 continue;
             }
-            if (stripos($val, "BAG ALLOWANCE") !== false && $key > $index){
+            if (stripos($val, "BAG ALLOWANCE") !== false && $key > $index) {
                 break;
             }
             $bags[] = $val;
@@ -2318,47 +2333,47 @@ class Quote extends \yii\db\ActiveRecord
 
             if (stripos($val, "BAG ALLOWANCE") !== false) {
                 $bags['segment'] = $detail[1];
-                if (stripos($val, "NIL/") !== false ||
+                if (
+                    stripos($val, "NIL/") !== false ||
                     stripos($val, "*/") !== false
-                    ) {
-                        if (stripos($val, "1STCHECKED") !== false) {
-                            $bagsString = explode('1STCHECKED', $val);
-                            $detailBag = explode('/', $bagsString[1]);
-                            if (stripos($detailBag[0], "USD") !== false) {
-                                $bagItem = [
-                                    'ordinal' => '1st',
-                                    'piece' => 1,
-                                    'weight' => 'N/A',
-                                    'height' => 'N/A',
-                                    'price' => explode('-', $detailBag[0])[2],
-                                ];
-                                $detailVolume = explode('UP TO', $bagsString[1]);
-                                if (isset($detailVolume[1])) {
-                                    $bagItem['weight'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[1])));
-                                }
-                                if (isset($detailVolume[2])) {
-                                    $bagItem['height'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[2])));
-                                }
-                                $bags['paid_baggage'][] = $bagItem;
+                ) {
+                    if (stripos($val, "1STCHECKED") !== false) {
+                        $bagsString = explode('1STCHECKED', $val);
+                        $detailBag = explode('/', $bagsString[1]);
+                        if (stripos($detailBag[0], "USD") !== false) {
+                            $bagItem = [
+                                'ordinal' => '1st',
+                                'piece' => 1,
+                                'weight' => 'N/A',
+                                'height' => 'N/A',
+                                'price' => explode('-', $detailBag[0])[2],
+                            ];
+                            $detailVolume = explode('UP TO', $bagsString[1]);
+                            if (isset($detailVolume[1])) {
+                                $bagItem['weight'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[1])));
                             }
-                        }
-                    } else {
-
-                        $detailBag = explode('/', $detail[2]);
-                        $bags['free_baggage'] = [
-                            'piece' => (int)str_replace('P', '', $detailBag[0]),
-                            'weight' => 'N/A',
-                            'height' => 'N/A',
-                            'price' => 'USD0'
-                        ];
-                        $detailVolume = explode('UP TO', $detail[2]);
-                        if (isset($detailVolume[1])) {
-                            $bags['free_baggage']['weight'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[1])));
-                        }
-                        if (isset($detailVolume[2])) {
-                            $bags['free_baggage']['height'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[2])));
+                            if (isset($detailVolume[2])) {
+                                $bagItem['height'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[2])));
+                            }
+                            $bags['paid_baggage'][] = $bagItem;
                         }
                     }
+                } else {
+                    $detailBag = explode('/', $detail[2]);
+                    $bags['free_baggage'] = [
+                        'piece' => (int)str_replace('P', '', $detailBag[0]),
+                        'weight' => 'N/A',
+                        'height' => 'N/A',
+                        'price' => 'USD0'
+                    ];
+                    $detailVolume = explode('UP TO', $detail[2]);
+                    if (isset($detailVolume[1])) {
+                        $bags['free_baggage']['weight'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[1])));
+                    }
+                    if (isset($detailVolume[2])) {
+                        $bags['free_baggage']['height'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[2])));
+                    }
+                }
             } else {
                 $detailBag = explode('/', $detail[2]);
                 if (stripos($detailBag[0], "USD") !== false) {
@@ -2379,7 +2394,6 @@ class Quote extends \yii\db\ActiveRecord
                     }
                     $bags['paid_baggage'][] = $bagItem;
                 }
-
             }
         }
         return $bags;
@@ -2411,7 +2425,7 @@ class Quote extends \yii\db\ActiveRecord
     public function getCheckoutUrlPage(): string
     {
         $url = '#';
-        if($this->lead && $this->lead->project && $this->lead->project->link) {
+        if ($this->lead && $this->lead->project && $this->lead->project->link) {
             $url = $this->lead->project->link . '/' . self::CHECKOUT_URL_PAGE . '/' . $this->uid;
         }
 
@@ -2425,20 +2439,18 @@ class Quote extends \yii\db\ActiveRecord
     {
         $segments = [];
 
-        if($this->origin_search_data) {
+        if ($this->origin_search_data) {
             $dataArr = @json_decode($this->origin_search_data, true);
 
-            if($dataArr && isset($dataArr['tickets'])) {
+            if ($dataArr && isset($dataArr['tickets'])) {
                 $ticketsArr = $dataArr['tickets'];
                 $ticketNr = 1;
                 foreach ($ticketsArr as $ticket) {
-
-                    if(isset($ticket['trips']) && $ticket['trips']) {
-
+                    if (isset($ticket['trips']) && $ticket['trips']) {
                         //VarDumper::dump()
 
                         foreach ($ticket['trips'] as $trip) {
-                            if(isset($trip['segmentIds']) && $trip['segmentIds']) {
+                            if (isset($trip['segmentIds']) && $trip['segmentIds']) {
                                 foreach ($trip['segmentIds'] as $segmentId) {
                                     $segments[$trip['tripId']][$segmentId] = $ticketNr;
                                 }
@@ -2446,7 +2458,7 @@ class Quote extends \yii\db\ActiveRecord
                         }
                     }
 
-                    $ticketNr ++;
+                    $ticketNr++;
                 }
             }
         }
@@ -2490,8 +2502,10 @@ class Quote extends \yii\db\ActiveRecord
             try {
                 return JsonHelper::decode($this->origin_search_data);
             } catch (\Throwable $throwable) {
-                Yii::error(AppHelper::throwableFormatter($throwable),
-                'Quote:getJsonOriginSearchData:failed');
+                Yii::error(
+                    AppHelper::throwableFormatter($throwable),
+                    'Quote:getJsonOriginSearchData:failed'
+                );
             }
         }
         return null;

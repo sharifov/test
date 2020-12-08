@@ -5,6 +5,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use yii\helpers\Url;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\ProfitBonusSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -44,7 +45,7 @@ if ($user->isAdmin()) {
                     return $model->pbUser ? '<i class="fa fa-user"></i> ' . $model->pbUser->username : '-';
                 },
                 'format' => 'raw',
-                'filter' => (empty($user_id))?$userList:false,
+                'filter' => (empty($user_id)) ? $userList : false,
             ],
             'pb_min_profit',
             'pb_bonus',
@@ -54,7 +55,7 @@ if ($user->isAdmin()) {
             [
                 'class' => 'yii\grid\ActionColumn',
                 'template' => '{update} {delete}',
-                'contentOptions'=>['style'=>'width: 60px;'],
+                'contentOptions' => ['style' => 'width: 60px;'],
                 'buttons' => [
                     'update' => function ($url, $model, $key) use ($user_id) {
                         return Html::a('<span class="glyphicon glyphicon-pencil"></span>', Url::to([
@@ -67,13 +68,13 @@ if ($user->isAdmin()) {
                         ]);
                     },
                     'delete' => function ($url, $model, $key) use ($user_id) {
-                    return Html::a('<span class="glyphicon glyphicon-trash"></span>', ['delete', 'id' => $model->pb_id, 'user_id' => $user_id], [
+                        return Html::a('<span class="glyphicon glyphicon-trash"></span>', ['delete', 'id' => $model->pb_id, 'user_id' => $user_id], [
                         'class' => '',
                         'data' => [
                             'confirm' => 'Are you sure you want to delete this item?',
                             'method' => 'post',
                         ],
-                    ]);
+                        ]);
                     }
                 ]
             ]

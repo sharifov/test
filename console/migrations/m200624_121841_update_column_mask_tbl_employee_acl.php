@@ -19,7 +19,6 @@ class m200624_121841_update_column_mask_tbl_employee_acl extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     /**
@@ -35,6 +34,4 @@ class m200624_121841_update_column_mask_tbl_employee_acl extends Migration
             Yii::$app->cache->flush();
         }
     }
-
-
 }

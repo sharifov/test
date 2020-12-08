@@ -32,8 +32,7 @@ class Handler
         ClientManageService $clientManageService,
         CasesRepository $casesRepository,
         TransactionManager $transactionManager
-    )
-    {
+    ) {
         $this->categoryRepository = $categoryRepository;
         $this->clientManageService = $clientManageService;
         $this->casesRepository = $casesRepository;
@@ -70,7 +69,6 @@ class Handler
             $this->casesRepository->save($case);
 
             return new Result($case->cs_gid, $client->uuid, $case->cs_id);
-
         });
 
         return $result;

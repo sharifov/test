@@ -64,5 +64,4 @@ class CallForm extends Model
             ['c_recording_duration', 'string'],
         ];
     }
-
 }

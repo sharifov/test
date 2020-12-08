@@ -4,7 +4,7 @@ use common\models\ClientEmail;
 use common\models\ClientPhone;
 use sales\entities\cases\Cases;
 use yii\helpers\Html;
-use \yii\helpers\Url;
+use yii\helpers\Url;
 use sales\auth\Auth;
 
 /* @var $this yii\web\View */
@@ -17,13 +17,13 @@ use sales\auth\Auth;
             <h2><i class="fa fa-user"></i> Client Info</h2>
             <ul class="nav navbar-right panel_toolbox">
                 <li>
-                    <?=Html::a('<i class="fas fa-info-circle"></i> Details', '#',  [
-                        'id' => 'btn-client-details',
+                    <?=Html::a('<i class="fas fa-info-circle"></i> Details', '#', [
+                        'id' => 'btn-client-info-details',
                         'data-client-id' => $caseModel->cs_client_id,
                         'title' => 'Client Info',
                     ])?>
                 </li>
-                <?php if($caseModel->isProcessing()):?>
+                <?php if ($caseModel->isProcessing()) :?>
                     <li>
                         <?= \yii\bootstrap\Html::a('<i class="fa fa-plus-circle success"></i> Add Phone', '#', ['id' => 'btn-add-phone', 'title' => 'Add Phone'])?>
                     </li>
@@ -34,10 +34,10 @@ use sales\auth\Auth;
                         <?= \yii\bootstrap\Html::a('<i class="fa fa-edit warning"></i> Update', '#', ['id' => 'btn-client-update', 'title' => 'Update Client Info'])?>
                     </li>
 
-                    <?php if($unsubscribe): ?>
-                        <?php if (Auth::can('client-project/subscribe-client-ajax')): ?>
+                    <?php if ($unsubscribe) : ?>
+                        <?php if (Auth::can('client-project/subscribe-client-ajax')) : ?>
                             <li>
-                                <?=Html::a('<i class="far fa-bell-slash info"></i> Subscribe', '#',  [
+                                <?=Html::a('<i class="far fa-bell-slash info"></i> Subscribe', '#', [
                                     'id' => 'client-unsubscribe-button',
                                     'title' => 'Allow communication with client',
                                     'data-unsubscribe-url' => Url::to(['client-project/unsubscribe-client-ajax',
@@ -48,10 +48,10 @@ use sales\auth\Auth;
                                 ])?>
                             </li>
                         <?php endif; ?>
-                    <?php else: ?>
-                        <?php if (Auth::can('client-project/unsubscribe-client-ajax')): ?>
+                    <?php else : ?>
+                        <?php if (Auth::can('client-project/unsubscribe-client-ajax')) : ?>
                             <li>
-                                <?=Html::a('<i class="far fa-bell-slash info"></i> Unsubscribe', '#',  [
+                                <?=Html::a('<i class="far fa-bell-slash info"></i> Unsubscribe', '#', [
                                     'id' => 'client-unsubscribe-button',
                                     'title' => 'Restrict communication with client',
                                     'data-unsubscribe-url' => Url::to(['client-project/unsubscribe-client-ajax',
@@ -82,7 +82,7 @@ use sales\auth\Auth;
             <div class="clearfix"></div>
         </div>
         <div class="x_content" style="display: block;">
-            <?php if($caseModel->client):?>
+            <?php if ($caseModel->client) :?>
                 <div class="row">
                     <div class="col-md-6">
                         <?= \yii\widgets\DetailView::widget([
@@ -109,20 +109,20 @@ use sales\auth\Auth;
                                 'project:projectName',
                                 [
                                     'label' => 'Phones',
-                                    'value' => function(\common\models\Client $model) {
+                                    'value' => function (\common\models\Client $model) {
 
                                         $phones = $model->clientPhones;
                                         $data = [];
-										if ($phones) {
-											foreach ($phones as $k => $phone) {
-												$data[] = '<i class="fa fa-phone"></i> 
+                                        if ($phones) {
+                                            foreach ($phones as $k => $phone) {
+                                                $data[] = '<i class="fa fa-phone"></i> 
                                                            <code class="' . $phone::getPhoneTypeTextDecoration($phone->type) . '" 
                                                                  title="' . $phone::getPhoneType($phone->type) . '">' . Html::encode($phone->phone) . '</code> ' . $phone::getPhoneTypeLabel($phone->type); //<code>'.Html::a($phone->phone, ['client-phone/view', 'id' => $phone->id], ['target' => '_blank', 'data-pjax' => 0]).'</code>';
-											}
-										}
+                                            }
+                                        }
 
                                         $str = implode('<br>', $data);
-                                        return ''.$str.'';
+                                        return '' . $str . '';
                                     },
                                     'format' => 'raw',
                                     'contentOptions' => ['class' => 'text-left'],
@@ -130,20 +130,20 @@ use sales\auth\Auth;
 
                                 [
                                     'label' => 'Emails',
-                                    'value' => function(\common\models\Client $model) {
+                                    'value' => function (\common\models\Client $model) {
 
                                         $emails = $model->clientEmails;
                                         $data = [];
-                                        if($emails) {
+                                        if ($emails) {
                                             foreach ($emails as $k => $email) {
                                                 $data[] = '<i class="fa fa-envelope"></i> 
                                                            <code class="' . $email::getEmailTypeTextDecoration($email->type) . '"
-                                                                 title="' . $email::getEmailType($email->type) . '">'.Html::encode($email->email) . '</code> ' . $email::getEmailTypeLabel($email->type);
+                                                                 title="' . $email::getEmailType($email->type) . '">' . Html::encode($email->email) . '</code> ' . $email::getEmailTypeLabel($email->type);
                                             }
                                         }
 
                                         $str = implode('<br>', $data);
-                                        return ''.$str.'';
+                                        return '' . $str . '';
                                     },
                                     'format' => 'raw',
                                     'contentOptions' => ['class' => 'text-left'],
@@ -154,15 +154,15 @@ use sales\auth\Auth;
 
                                 [
                                     'attribute' => 'created',
-                                    'value' => function(\common\models\Client $model) {
-                                        return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
+                                    'value' => function (\common\models\Client $model) {
+                                        return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
                                     },
                                     'format' => 'html',
                                 ],
                                 [
                                     'attribute' => 'updated',
-                                    'value' => function(\common\models\Client $model) {
-                                        return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
+                                    'value' => function (\common\models\Client $model) {
+                                        return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->updated));
                                     },
                                     'format' => 'html',
                                 ]
@@ -178,6 +178,7 @@ use sales\auth\Auth;
 $addPhoneAjaxUrl = \yii\helpers\Url::to(['cases/add-phone', 'gid' => $caseModel->cs_gid]);
 $addEmailAjaxUrl = \yii\helpers\Url::to(['cases/add-email', 'gid' => $caseModel->cs_gid]);
 $clientUpdateAjaxUrl = \yii\helpers\Url::to(['cases/client-update', 'gid' => $caseModel->cs_gid]);
+$clientInfoUrl = \yii\helpers\Url::to(['/client/ajax-get-info']);
 
 $js = <<<JS
      $(document).on('click', '#btn-add-phone', function(){
@@ -216,6 +217,19 @@ $js = <<<JS
             
            return false;
      });
+    
+    $(document).on('click', '#btn-client-info-details', function(e) {
+        e.preventDefault();
+        var client_id = $(this).data('client-id');
+        $('#modalCase .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+        $('#modalCase-label').html('Client Details (' + client_id + ')');
+        $('#modalCase').modal();
+        $.post('$clientInfoUrl', {client_id: client_id},
+            function (data) {
+                $('#modalCase .modal-body').html(data);
+            }
+        );
+    });
 
 JS;
 

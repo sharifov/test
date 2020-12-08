@@ -10,10 +10,10 @@ namespace sales\model\clientChatUserAccess\event;
  */
 class ResetChatUserAccessWidgetEvent
 {
-	public $userId;
+    public $userId;
 
-	public function __construct(int $userId)
-	{
-		$this->userId = $userId;
-	}
+    public function __construct(int $userId)
+    {
+        $this->userId = $userId;
+    }
 }

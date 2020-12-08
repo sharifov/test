@@ -28,8 +28,11 @@ class ClientChatFeedbackJob implements JobInterface
             (Yii::createObject(ClientChatRequestService::class))
                 ->createOrUpdateFeedback($this->rid, $this->comment, $this->rating);
         } catch (\Throwable $throwable) {
-            AppHelper::throwableLogger($throwable,
-            'ClientChatFeedbackJob:Execute:Throwable', false);
+            AppHelper::throwableLogger(
+                $throwable,
+                'ClientChatFeedbackJob:Execute:Throwable',
+                false
+            );
         }
     }
 }

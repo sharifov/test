@@ -38,8 +38,7 @@ class LeadQcall extends \yii\db\ActiveRecord
         int $weight,
         Interval $interval,
         ?string $callFrom
-    ): self
-    {
+    ): self {
         $lq = new static();
         $lq->lqc_lead_id = $leadId;
         $lq->lqc_weight = $weight;
@@ -210,7 +209,7 @@ class LeadQcall extends \yii\db\ActiveRecord
      */
     public function getReservationUser(): ActiveQuery
     {
-        return $this->hasOne(Employee::class,['id' => 'lqc_reservation_user_id']);
+        return $this->hasOne(Employee::class, ['id' => 'lqc_reservation_user_id']);
     }
 
     /**

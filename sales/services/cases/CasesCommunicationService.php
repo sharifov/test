@@ -37,8 +37,7 @@ class CasesCommunicationService
         CasesRepository $casesRepository,
         ClientManageService $clientManageService,
         TransactionManager $transaction
-    )
-    {
+    ) {
         $this->casesRepository = $casesRepository;
         $this->clientManageService = $clientManageService;
         $this->transaction = $transaction;
@@ -67,7 +66,7 @@ class CasesCommunicationService
             'gid' => $case->cs_gid
         ];
 
-        if ($case->caseSale){
+        if ($case->caseSale) {
             $content_data['sales'] = array_column($case->caseSale, 'css_sale_book_id', 'css_sale_id');
         }
 
@@ -81,7 +80,7 @@ class CasesCommunicationService
 
         $content_data['agent'] = [
             'name'      => $user->full_name,
-			'username'  => $user->username,
+            'username'  => $user->username,
             'nickname'  => $user->nickname,
 //            'phone'     => $upp && $upp->upp_tw_phone_number ? $upp->upp_tw_phone_number : '',
             'phone'     => $upp && $upp->getPhone() ? $upp->getPhone() : '',

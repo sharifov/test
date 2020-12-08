@@ -47,7 +47,7 @@ class Purifier
     }
 
     public static function createChatShortLink(ClientChat $chat): string
-	{
-		return '{chat-' . $chat->cch_id . '}';
-	}
+    {
+        return '{chat-' . $chat->cch_id . '}';
+    }
 }

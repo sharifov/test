@@ -1,4 +1,5 @@
 <?php
+
 namespace sales\model\user\entity\userCallStatus\events;
 
 use common\models\UserCallStatus;
@@ -81,5 +82,4 @@ class UserCallStatusEvents extends Component
             \Yii::error(VarDumper::dumpAsString($userStatus->errors), 'UserCallStatusEvent:resetCallPhoneStatus:UserStatus:save');
         }
     }
-
 }

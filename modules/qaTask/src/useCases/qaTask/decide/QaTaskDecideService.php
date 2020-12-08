@@ -33,7 +33,7 @@ class QaTaskDecideService extends QaTaskActionsService
                 $task,
                 $startStatusId,
                 $task->t_status_id,
-               null,
+                null,
                 $description,
                 QaTaskActions::DECIDE,
                 $task->t_assigned_user_id,

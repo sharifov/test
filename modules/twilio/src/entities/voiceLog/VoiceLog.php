@@ -87,7 +87,7 @@ class VoiceLog extends \yii\db\ActiveRecord
     }
 
     public static function find()
-	{
-		return new Scopes(static::class);
-	}
+    {
+        return new Scopes(static::class);
+    }
 }

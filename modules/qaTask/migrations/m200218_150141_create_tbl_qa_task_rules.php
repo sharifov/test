@@ -64,8 +64,8 @@ class m200218_150141_create_tbl_qa_task_rules extends Migration
      */
     public function safeDown()
     {
-        $this->dropForeignKey('FK-qa_task_rules-tr_updated_user_id','{{%qa_task_rules}}');
-        $this->dropForeignKey('FK-qa_task_rules-tr_created_user_id','{{%qa_task_rules}}');
+        $this->dropForeignKey('FK-qa_task_rules-tr_updated_user_id', '{{%qa_task_rules}}');
+        $this->dropForeignKey('FK-qa_task_rules-tr_created_user_id', '{{%qa_task_rules}}');
         $this->dropTable('{{%qa_task_rules}}');
 
         if (Yii::$app->cache) {

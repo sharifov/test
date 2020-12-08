@@ -1,4 +1,5 @@
 <?php
+
 namespace console\controllers;
 
 use common\models\Airline;
@@ -55,7 +56,6 @@ class UserMonitorController extends Controller
             ->andWhere(['NOT IN', 'id', (new Query())->select('lqc_lead_id')->from(LeadQcall::tableName())])
             ->all();
         foreach ($leads as $lead) {
-
             $lq = new LeadQcall();
             $lq->lqc_lead_id = $lead->id;
             $lq->lqc_weight = 0;
@@ -69,9 +69,9 @@ class UserMonitorController extends Controller
             }
         }
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
-	}
+    }
 
-	/**
+    /**
      * @throws \yii\db\Exception
      */
     public function actionConvertCollate()
@@ -90,16 +90,16 @@ class UserMonitorController extends Controller
 
         // Alter the encoding of each table
         foreach ($tables as $id => $table) {
-            if(isset($table['table_name'])) {
+            if (isset($table['table_name'])) {
                 $tableName = $table['table_name'];
                 $db->createCommand("ALTER TABLE `$tableName` CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci")->execute();
-                echo $id." - tbl: " . $tableName . "\r\n";
+                echo $id . " - tbl: " . $tableName . "\r\n";
             }
 
-            if(isset($table['TABLE_NAME'])) {
+            if (isset($table['TABLE_NAME'])) {
                 $tableName = $table['TABLE_NAME'];
                 $db->createCommand("ALTER TABLE `$tableName` CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci")->execute();
-                echo $id." - tbl: " . $tableName . "\r\n";
+                echo $id . " - tbl: " . $tableName . "\r\n";
             }
         }
         $db->createCommand('SET FOREIGN_KEY_CHECKS=1;')->execute();
@@ -126,7 +126,6 @@ class UserMonitorController extends Controller
         $resultInfo = '';
 
         if (UserMonitor::isAutologoutEnabled()) {
-
             if ($idleTimeMinutes === null) {
                 $idleTimeMinutes = UserMonitor::autologoutIdlePeriodMin();
             }

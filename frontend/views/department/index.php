@@ -6,7 +6,8 @@ use yii\grid\GridView;
 use yii\helpers\Json;
 use yii\widgets\Pjax;
 use common\components\grid\UserSelect2Column;
-use dosamigos\datepicker\DatePicker;
+use common\components\grid\DateTimeColumn;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\DepartmentSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -41,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     try {
                         $val = Json::decode($model->dep_params);
-                        return '<pre>'.print_r($val, true).'</pre>';
+                        return '<pre>' . print_r($val, true) . '</pre>';
                     } catch (Throwable $e) {
                         return 'Json decode error';
                     }
@@ -58,6 +59,11 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'dep_updated_dt'
+            ],
+
+            /*[
                 'attribute' => 'dep_updated_dt',
                 'value' => static function (\common\models\Department $model) {
                     return $model->dep_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->dep_updated_dt)) : '-';
@@ -75,7 +81,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
 
             [
                     'class' => 'yii\grid\ActionColumn',

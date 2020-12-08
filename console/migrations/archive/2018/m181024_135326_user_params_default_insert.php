@@ -13,9 +13,9 @@ class m181024_135326_user_params_default_insert extends Migration
     public function safeUp()
     {
         $users = \common\models\Employee::find()->all();
-        if($users){
-            foreach ($users as $user){
-                if(!$user->userParams){
+        if ($users) {
+            foreach ($users as $user) {
+                if (!$user->userParams) {
                     $this->insert('{{%user_params}}', [
                         'up_user_id' => $user->id,
                         'up_commission_percent' => 10,

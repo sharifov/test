@@ -38,14 +38,35 @@ class m200928_090123_create_tbl_client_chat_feedback extends Migration
         ], $tableOptions);
 
 
-        $this->addForeignKey('FK-client_chat_feedback-ccf_client_chat_id', '{{%client_chat_feedback}}', ['ccf_client_chat_id'],
-        '{{%client_chat}}', ['cch_id'], 'SET NULL', 'CASCADE');
+        $this->addForeignKey(
+            'FK-client_chat_feedback-ccf_client_chat_id',
+            '{{%client_chat_feedback}}',
+            ['ccf_client_chat_id'],
+            '{{%client_chat}}',
+            ['cch_id'],
+            'SET NULL',
+            'CASCADE'
+        );
 
-        $this->addForeignKey('FK-client_chat_feedback-ccf_user_id', '{{%client_chat_feedback}}', ['ccf_user_id'],
-        '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
+        $this->addForeignKey(
+            'FK-client_chat_feedback-ccf_user_id',
+            '{{%client_chat_feedback}}',
+            ['ccf_user_id'],
+            '{{%employees}}',
+            ['id'],
+            'SET NULL',
+            'CASCADE'
+        );
 
-        $this->addForeignKey('FK-client_chat_feedback-ccf_client_id','{{%client_chat_feedback}}', ['ccf_client_id'],
-        '{{%clients}}','id','SET NULL','CASCADE');
+        $this->addForeignKey(
+            'FK-client_chat_feedback-ccf_client_id',
+            '{{%client_chat_feedback}}',
+            ['ccf_client_id'],
+            '{{%clients}}',
+            'id',
+            'SET NULL',
+            'CASCADE'
+        );
 
         (new \console\migrations\RbacMigrationService())->up($this->route, $this->roles);
     }

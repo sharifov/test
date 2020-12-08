@@ -23,10 +23,10 @@ class MonitorFlowController extends Controller
     private $leadRepository;
 
     public function __construct($id, $module, LeadRepository $leadRepository, $config = [])
-   {
-       parent::__construct($id, $module, $config);
-       $this->leadRepository = $leadRepository;
-   }
+    {
+        parent::__construct($id, $module, $config);
+        $this->leadRepository = $leadRepository;
+    }
 
     /**
      * @param bool $test
@@ -56,9 +56,8 @@ class MonitorFlowController extends Controller
 
         //echo $quotes->createCommand()->getRawSql(); exit;
 
-        if($quotes) {
+        if ($quotes) {
             foreach ($quotes as $quote) {
-
                 /* $existQuote = Quote::find()->where(['lead_id' => $quote->lead_id, 'status' => Quote::STATUS_APPLIED])->exists();
                 if ($existQuote) {
                     if ($test) {
@@ -98,7 +97,7 @@ class MonitorFlowController extends Controller
     /**
      * @param bool $test
      */
-    public function actionOnWake($test = false) : void
+    public function actionOnWake($test = false): void
     {
         printf("\n --- Start [" . date('Y-m-d H:i:s') . "] %s ---\n", $this->ansiFormat(self::class . '/' . $this->action->id, Console::FG_YELLOW));
         $time_start = microtime(true);
@@ -107,9 +106,8 @@ class MonitorFlowController extends Controller
 
         $leads = Lead::find()->where(['status' => Lead::STATUS_SNOOZE])->andWhere(['<=', 'snooze_for', date('Y-m-d H:i:s')])->limit(100)->all();
 
-        if($leads) {
+        if ($leads) {
             foreach ($leads as $lead) {
-
 //                $lead->status = Lead::STATUS_PROCESSING;
 
                 try {
@@ -121,7 +119,6 @@ class MonitorFlowController extends Controller
                     if ($test) {
                         echo 'Lead: ' . $lead->id . ' ' . VarDumper::dumpAsString($lead->errors) . "\r\n";
                     }
-
                 }
 //                if ($lead->save()) {
 //
@@ -169,14 +166,11 @@ class MonitorFlowController extends Controller
         }
 
         foreach ($leads as $lead) {
-
             $lead->status = $lead::STATUS_FOLLOW_UP;
             if ($lead->update(false)) {
-
                 if ($test) {
                     echo $lead->id . ' - status: ' . $lead->status . PHP_EOL;
                 }
-
             } else {
                 Yii::error('Lead: ' . $lead->id . ', ' . VarDumper::dumpAsString($lead->errors), 'console:MonitorFlowController:actionFollowUp:Lead:save');
                 if ($test) {

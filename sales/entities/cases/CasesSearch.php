@@ -210,17 +210,17 @@ class CasesSearch extends Cases
             'departureCountries' => 'Depart. Countries',
             'arrivalCountries' => 'Arrival Countries',
             'clientId' => 'Client ID',
-			'saleTicketSendEmailDate' => 'Send Email Date',
-			'sentEmailBy' => 'Sent Email By User',
-			'userGroup' => 'User Group',
-			'csStatuses' => 'Status',
-			'airlinePenalty' => 'Airline Penalty',
-			'cs_order_uid' => 'Order uid',
-			'validatingCarrier' => 'Validating Carrier',
-			'emailsQtyFrom' => 'Emails From', 'emailsQtyTo' => 'Emails To',
-			'smsQtyFrom' => 'Sms From', 'smsQtyTo' => 'Sms To',
-			'callsQtyFrom' => 'Calls From', 'callsQtyTo' => 'Calls To',
-			'chatsQtyFrom' => 'Chats From', 'chatsQtyTo' => 'Chats To',
+            'saleTicketSendEmailDate' => 'Send Email Date',
+            'sentEmailBy' => 'Sent Email By User',
+            'userGroup' => 'User Group',
+            'csStatuses' => 'Status',
+            'airlinePenalty' => 'Airline Penalty',
+            'cs_order_uid' => 'Order uid',
+            'validatingCarrier' => 'Validating Carrier',
+            'emailsQtyFrom' => 'Emails From', 'emailsQtyTo' => 'Emails To',
+            'smsQtyFrom' => 'Sms From', 'smsQtyTo' => 'Sms To',
+            'callsQtyFrom' => 'Calls From', 'callsQtyTo' => 'Calls To',
+            'chatsQtyFrom' => 'Chats From', 'chatsQtyTo' => 'Chats To',
             'caseUserGroup' => 'Case User Group',
         ];
     }
@@ -296,7 +296,7 @@ class CasesSearch extends Cases
         if ($this->cssSaleId) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $this->cssSaleId])]);
         }
-        if ($this->clientId){
+        if ($this->clientId) {
             $query->andWhere(['cs_client_id' => $this->clientId]);
         }
 
@@ -376,17 +376,17 @@ class CasesSearch extends Cases
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['<=', 'css_profit', $this->cssProfitTo])]);
         }
         if ($this->cssInOutDate) {
-			$departRange = explode(' - ', $this->cssInOutDate);
-			if ($departRange[0] && $departRange[1]) {
-				$fromDate = date('Y-m-d', strtotime($departRange[0]));
-				$toDate = date('Y-m-d', strtotime($departRange[1]));
-				$query->andWhere(['cs_id' => CaseSale::find()
-													->select('css_cs_id')
-													->where(['between', 'DATE(css_out_date)', $fromDate, $toDate])
-													->orWhere(['between', 'DATE(css_in_date)', $fromDate, $toDate])
-				]);
-			}
-		}
+            $departRange = explode(' - ', $this->cssInOutDate);
+            if ($departRange[0] && $departRange[1]) {
+                $fromDate = date('Y-m-d', strtotime($departRange[0]));
+                $toDate = date('Y-m-d', strtotime($departRange[1]));
+                $query->andWhere(['cs_id' => CaseSale::find()
+                                                    ->select('css_cs_id')
+                                                    ->where(['between', 'DATE(css_out_date)', $fromDate, $toDate])
+                                                    ->orWhere(['between', 'DATE(css_in_date)', $fromDate, $toDate])
+                ]);
+            }
+        }
         if ($this->cssChargeType) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_charge_type' => $this->cssChargeType])]);
         }
@@ -407,42 +407,45 @@ class CasesSearch extends Cases
         if ($this->departureCountries) {
             $query->andWhere(['cs_id' =>
                 CaseSale::find()->select('case_sale.css_cs_id')
-                ->innerJoin(Airports::tableName() . 'AS airports',
-                    'case_sale.css_out_departure_airport = airports.iata OR case_sale.css_in_departure_airport = airports.iata')
+                ->innerJoin(
+                    Airports::tableName() . 'AS airports',
+                    'case_sale.css_out_departure_airport = airports.iata OR case_sale.css_in_departure_airport = airports.iata'
+                )
                 ->where(['IN', 'airports.country', $this->departureCountries])
             ]);
         }
         if ($this->arrivalCountries) {
             $query->andWhere(['cs_id' =>
                 CaseSale::find()->select('case_sale.css_cs_id')
-                ->innerJoin(Airports::tableName() . 'AS airports',
-                    'case_sale.css_out_departure_airport = airports.iata OR case_sale.css_in_departure_airport = airports.iata')
+                ->innerJoin(
+                    Airports::tableName() . 'AS airports',
+                    'case_sale.css_out_departure_airport = airports.iata OR case_sale.css_in_departure_airport = airports.iata'
+                )
                 ->where(['IN', 'airports.country', $this->arrivalCountries])
             ]);
         }
 
-		if ($this->saleTicketSendEmailDate) {
-			$emails = SettingHelper::getCaseSaleTicketMainEmailList();
-			$this->saleTicketSendEmailDate = date('Y-m-d', strtotime($this->saleTicketSendEmailDate));
-			$query->innerJoin(Email::tableName(), new Expression('cs_id = e_case_id'))
-				->andWhere(['e_email_to' => $emails, 'date_format(e_created_dt, "%Y-%m-%d")' => $this->saleTicketSendEmailDate])
-				->groupBy('cs_id');
+        if ($this->saleTicketSendEmailDate) {
+            $emails = SettingHelper::getCaseSaleTicketMainEmailList();
+            $this->saleTicketSendEmailDate = date('Y-m-d', strtotime($this->saleTicketSendEmailDate));
+            $query->innerJoin(Email::tableName(), new Expression('cs_id = e_case_id'))
+                ->andWhere(['e_email_to' => $emails, 'date_format(e_created_dt, "%Y-%m-%d")' => $this->saleTicketSendEmailDate])
+                ->groupBy('cs_id');
 
-			if ($params['export_type']) {
-				$query->addSelect(['cases.*', 'css_sale_id as cssSaleId', 'css_sale_book_id as cssBookId', 'css_sale_pnr as salePNR', 'css_send_email_dt as saleTicketSendEmailDate', 'username as sentEmailBy', 'ug_name as userGroup'])
-					->innerJoin(CaseSale::tableName(), new Expression('css_cs_id = cs_id and css_send_email_dt is not null'))
-					->leftJoin(Employee::tableName(), new Expression('id = e_created_user_id'))
-					->leftJoin(UserGroupAssign::tableName(), new Expression('ugs_user_id = e_created_user_id'))
-					->leftJoin(UserGroup::tableName(), new Expression('ug_id = ugs_group_id'))
-					->andWhere(['date_format(css_send_email_dt, "%Y-%m-%d")' => $this->saleTicketSendEmailDate]);
-			}
-		}
-		if ($this->airlinePenalty) {
+            if ($params['export_type']) {
+                $query->addSelect(['cases.*', 'css_sale_id as cssSaleId', 'css_sale_book_id as cssBookId', 'css_sale_pnr as salePNR', 'css_send_email_dt as saleTicketSendEmailDate', 'username as sentEmailBy', 'ug_name as userGroup'])
+                    ->innerJoin(CaseSale::tableName(), new Expression('css_cs_id = cs_id and css_send_email_dt is not null'))
+                    ->leftJoin(Employee::tableName(), new Expression('id = e_created_user_id'))
+                    ->leftJoin(UserGroupAssign::tableName(), new Expression('ugs_user_id = e_created_user_id'))
+                    ->leftJoin(UserGroup::tableName(), new Expression('ug_id = ugs_group_id'))
+                    ->andWhere(['date_format(css_send_email_dt, "%Y-%m-%d")' => $this->saleTicketSendEmailDate]);
+            }
+        }
+        if ($this->airlinePenalty) {
             $query->andWhere([
                     'cs_id' => SaleTicket::find()->select('st_case_id')
                         ->andWhere(['st_penalty_type' => $this->airlinePenalty])
-                ]
-            );
+                ]);
         }
 
         $query = $this->prepareCommunicationQuery($query);
@@ -509,7 +512,7 @@ class CasesSearch extends Cases
         if ($this->cssSaleId) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $this->cssSaleId])]);
         }
-        if ($this->clientId){
+        if ($this->clientId) {
             $query->andWhere(['cs_client_id' => $this->clientId]);
         }
 
@@ -591,35 +594,35 @@ class CasesSearch extends Cases
         if ($this->cssProfitTo) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['<=', 'css_profit', $this->cssProfitTo])]);
         }
-		if ($this->cssInOutDate) {
-			$departRange = explode(' - ', $this->cssInOutDate);
-			if ($departRange[0] && $departRange[1]) {
-				$fromDate = date('Y-m-d', strtotime($departRange[0]));
-				$toDate = date('Y-m-d', strtotime($departRange[1]));
-				$query->andWhere(['cs_id' => CaseSale::find()
-													->select('css_cs_id')
-													->where(['between', 'DATE(css_out_date)', $fromDate, $toDate])
-													->orWhere(['between', 'DATE(css_in_date)', $fromDate, $toDate])
-				]);
-			}
-		}
+        if ($this->cssInOutDate) {
+            $departRange = explode(' - ', $this->cssInOutDate);
+            if ($departRange[0] && $departRange[1]) {
+                $fromDate = date('Y-m-d', strtotime($departRange[0]));
+                $toDate = date('Y-m-d', strtotime($departRange[1]));
+                $query->andWhere(['cs_id' => CaseSale::find()
+                                                    ->select('css_cs_id')
+                                                    ->where(['between', 'DATE(css_out_date)', $fromDate, $toDate])
+                                                    ->orWhere(['between', 'DATE(css_in_date)', $fromDate, $toDate])
+                ]);
+            }
+        }
 
-		if ($this->saleTicketSendEmailDate) {
-			$emails = SettingHelper::getCaseSaleTicketMainEmailList();
-			$this->saleTicketSendEmailDate = date('Y-m-d', strtotime($this->saleTicketSendEmailDate));
-			$query->innerJoin(Email::tableName(), new Expression('cs_id = e_case_id'))
-				->andWhere(['e_email_to' => $emails, 'date_format(e_created_dt, "%Y-%m-%d")' => $this->saleTicketSendEmailDate])
-				->groupBy('cs_id');
+        if ($this->saleTicketSendEmailDate) {
+            $emails = SettingHelper::getCaseSaleTicketMainEmailList();
+            $this->saleTicketSendEmailDate = date('Y-m-d', strtotime($this->saleTicketSendEmailDate));
+            $query->innerJoin(Email::tableName(), new Expression('cs_id = e_case_id'))
+                ->andWhere(['e_email_to' => $emails, 'date_format(e_created_dt, "%Y-%m-%d")' => $this->saleTicketSendEmailDate])
+                ->groupBy('cs_id');
 
-			if ($params['export_type']) {
-				$query->addSelect(['cases.*', 'css_sale_id as cssSaleId', 'css_sale_book_id as cssBookId', 'css_sale_pnr as salePNR', 'css_send_email_dt as saleTicketSendEmailDate', 'username as sentEmailBy', 'ug_name as userGroup'])
-					->innerJoin(CaseSale::tableName(), new Expression('css_cs_id = cs_id and css_send_email_dt is not null'))
-					->leftJoin(Employee::tableName(), new Expression('id = e_created_user_id'))
-					->leftJoin(UserGroupAssign::tableName(), new Expression('ugs_user_id = e_created_user_id'))
-					->leftJoin(UserGroup::tableName(), new Expression('ug_id = ugs_group_id'))
-					->andWhere(['date_format(css_send_email_dt, "%Y-%m-%d")' => $this->saleTicketSendEmailDate]);
-			}
-		}
+            if ($params['export_type']) {
+                $query->addSelect(['cases.*', 'css_sale_id as cssSaleId', 'css_sale_book_id as cssBookId', 'css_sale_pnr as salePNR', 'css_send_email_dt as saleTicketSendEmailDate', 'username as sentEmailBy', 'ug_name as userGroup'])
+                    ->innerJoin(CaseSale::tableName(), new Expression('css_cs_id = cs_id and css_send_email_dt is not null'))
+                    ->leftJoin(Employee::tableName(), new Expression('id = e_created_user_id'))
+                    ->leftJoin(UserGroupAssign::tableName(), new Expression('ugs_user_id = e_created_user_id'))
+                    ->leftJoin(UserGroup::tableName(), new Expression('ug_id = ugs_group_id'))
+                    ->andWhere(['date_format(css_send_email_dt, "%Y-%m-%d")' => $this->saleTicketSendEmailDate]);
+            }
+        }
 
         if ($this->cssChargeType) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_charge_type' => $this->cssChargeType])]);
@@ -641,16 +644,20 @@ class CasesSearch extends Cases
         if ($this->departureCountries) {
             $query->andWhere(['cs_id' =>
                 CaseSale::find()->select('case_sale.css_cs_id')
-                ->innerJoin(Airports::tableName() . ' AS airports',
-                    'case_sale.css_out_departure_airport = airports.iata OR case_sale.css_in_departure_airport = airports.iata')
+                ->innerJoin(
+                    Airports::tableName() . ' AS airports',
+                    'case_sale.css_out_departure_airport = airports.iata OR case_sale.css_in_departure_airport = airports.iata'
+                )
                 ->where(['IN', 'airports.country', $this->departureCountries])
             ]);
         }
         if ($this->arrivalCountries) {
             $query->andWhere(['cs_id' =>
                 CaseSale::find()->select('case_sale.css_cs_id')
-                ->innerJoin(Airports::tableName() . ' AS airports',
-                    'case_sale.css_out_departure_airport = airports.iata OR case_sale.css_in_departure_airport = airports.iata')
+                ->innerJoin(
+                    Airports::tableName() . ' AS airports',
+                    'case_sale.css_out_departure_airport = airports.iata OR case_sale.css_in_departure_airport = airports.iata'
+                )
                 ->where(['IN', 'airports.country', $this->arrivalCountries])
             ]);
         }
@@ -658,18 +665,18 @@ class CasesSearch extends Cases
             $query->andWhere([
                     'cs_id' => SaleTicket::find()->select('st_case_id')
                         ->andWhere(['st_penalty_type' => $this->airlinePenalty])
-                ]
-            );
+                ]);
         }
         if ($this->caseUserGroup) {
             $query->andWhere([
                     'cs_user_id' => Employee::find()->select('id')
-                        ->innerJoin(UserGroupAssign::tableName() . ' AS user_group_assign',
-                            new Expression('user_group_assign.ugs_user_id = employees.id'))
+                        ->innerJoin(
+                            UserGroupAssign::tableName() . ' AS user_group_assign',
+                            new Expression('user_group_assign.ugs_user_id = employees.id')
+                        )
                         ->andWhere(['user_group_assign.ugs_group_id' => $this->caseUserGroup])
                         ->groupBy('employees.id')
-                ]
-            );
+                ]);
         }
 
         $query = $this->prepareCommunicationQuery($query);
@@ -760,7 +767,6 @@ class CasesSearch extends Cases
         }
 
         if (!empty($this->callsQtyFrom) || !empty($this->callsQtyTo)) {
-
             if ((bool) Yii::$app->params['settings']['new_communication_block_lead']) {
                 $query->leftJoin([
                     'calls' => CallLogCase::find()
@@ -772,7 +778,6 @@ class CasesSearch extends Cases
                         ->where(['IN', 'cl_type_id', [CallLogType::IN, CallLogType::OUT]])
                         ->groupBy(['clc_case_id'])
                 ], 'cases.cs_id = calls.c_case_id');
-
             } else {
                 $query->leftJoin([
                     'calls' => Call::find()
@@ -969,11 +974,11 @@ class CasesSearch extends Cases
         $query = new Query();
         $query->addSelect(['DATE(cs_created_dt) as createdDate,
             COUNT(cs_id) AS allUserCases,
-            SUM(IF(cs_status = '. CasesStatus::STATUS_SOLVED .', 1, 0)) AS solvedCases
+            SUM(IF(cs_status = ' . CasesStatus::STATUS_SOLVED . ', 1, 0)) AS solvedCases
         ']);
         $query->from(static::tableName());
         $query->where(['cs_user_id' => $userID]);
-        if($this->datetime_start && $this->datetime_end){
+        if ($this->datetime_start && $this->datetime_end) {
             $query->andFilterWhere(['>=', 'cs_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
                 ->andFilterWhere(['<=', 'cs_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         }

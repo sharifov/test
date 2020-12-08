@@ -204,9 +204,9 @@ use yii\widgets\ActiveForm;
                             ]
                         ]
                     ])->label('Depart From / To');
-                    ?>
+?>
                 </div>
-			</div>
+            </div>
 
 
         <?php  //echo $form->field($model, 'notes_for_experts') ?>

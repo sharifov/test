@@ -7,7 +7,7 @@ use yii\helpers\Html;
 /* @var $mailList [] */
 
 
-if(!$mailList || !is_array($mailList)) {
+if (!$mailList || !is_array($mailList)) {
     $mailList = [];
 }
 
@@ -98,7 +98,7 @@ if(!$mailList || !is_array($mailList)) {
         </tr>
         <?php
         $nr = 1;
-        foreach ($mailList as $mail):?>
+        foreach ($mailList as $mail) :?>
         <tr>
             <td width="100px"><?=($nr++)?></td>
             <td><?=Html::encode($mail)?></td>

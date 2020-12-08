@@ -75,7 +75,7 @@ if ($firstSourceStarted = $chat->getFirstHumanSourceTypeStarted()) {
             </tr>
             </tbody>
         </table>
-        <?php if (Auth::can('client-chat/view', ['chat' => $chat])): ?>
+        <?php if (Auth::can('client-chat/view', ['chat' => $chat])) : ?>
             <div class="chat__message-footer">
                 <a class="comm-chat-room-view comm-chat-room-view-details" href="#" data-id="<?= $chat->cch_id ?>"><i class="fa fa-search-plus"> </i> Details</a>
             </div>

@@ -21,7 +21,7 @@ class UserParamsSearch extends UserParams
         return [
             [['up_user_id', 'up_commission_percent', 'up_updated_user_id', 'up_bonus_active', 'up_inbox_show_limit_leads', 'up_default_take_limit_leads', 'up_min_percent_for_take_leads', 'up_call_expert_limit'], 'integer'],
             [['up_base_amount'], 'number'],
-            [['up_updated_dt'], 'safe'],
+            [['up_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -59,7 +59,7 @@ class UserParamsSearch extends UserParams
             return $dataProvider;
         }
 
-        if ($this->up_updated_dt){
+        if ($this->up_updated_dt) {
             $query->andFilterWhere(['>=', 'up_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->up_updated_dt))])
                 ->andFilterWhere(['<=', 'up_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->up_updated_dt) + 3600 * 24)]);
         }

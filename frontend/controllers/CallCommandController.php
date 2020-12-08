@@ -88,7 +88,6 @@ class CallCommandController extends FController
         $model = new CallCommand();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-
             if ((int) $model->ccom_type_id === CallCommand::TYPE_COMMAND_LIST) {
                 CommandListService::childrenSaver($model);
             }
@@ -113,7 +112,6 @@ class CallCommandController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-
             if ((int) $model->ccom_type_id === CallCommand::TYPE_COMMAND_LIST) {
                 CallCommand::deleteAll(['ccom_parent_id' => $id]);
                 CommandListService::childrenSaver($model);
@@ -158,7 +156,6 @@ class CallCommandController extends FController
                 $typeObj = $callCommandService->initTypeCommandClass();
 
                 if ($modelId && $model = $this->findModel($modelId)) {
-
                     if ((int) $typeId === CallCommand::TYPE_COMMAND_LIST) {
                         $typeObj = $callCommandService::fillCommandList($typeObj, $model->ccom_params_json);
                     } else {
@@ -173,11 +170,13 @@ class CallCommandController extends FController
                     ['model' => $typeObj, 'typeId' => $typeId, 'index' => $index]
                 );
                 $result['status'] = 1;
-
             } catch (\Throwable $throwable) {
                 $result['message'] = $throwable->getMessage();
-                AppHelper::throwableLogger($throwable,
-                'CallCommandController:actionGetTypeForm:throwable', false);
+                AppHelper::throwableLogger(
+                    $throwable,
+                    'CallCommandController:actionGetTypeForm:throwable',
+                    false
+                );
                 ob_clean();
             }
             return $result;
@@ -196,7 +195,6 @@ class CallCommandController extends FController
 
             try {
                 if ($parentModel = $this->findModel($modelId)) {
-
                     if (count($parentModel->callCommands)) {
                         foreach ($parentModel->callCommands as $key => $childModel) {
                             $callCommandService = new CallCommandTypeService($childModel->ccom_type_id);
@@ -223,11 +221,13 @@ class CallCommandController extends FController
 
                 $result['template'] = $template;
                 $result['status'] = 1;
-
             } catch (\Throwable $throwable) {
                 $result['message'] = $throwable->getMessage();
-                AppHelper::throwableLogger($throwable,
-                'CallCommandController:actionGetListSubForms:throwable', false);
+                AppHelper::throwableLogger(
+                    $throwable,
+                    'CallCommandController:actionGetListSubForms:throwable',
+                    false
+                );
                 ob_clean();
             }
             return $result;
@@ -250,10 +250,12 @@ class CallCommandController extends FController
                     return ActiveForm::validate($model);
                 }
                 throw new \DomainException('Model "' . $typeId . '" not loaded post data');
-
             } catch (\Throwable $throwable) {
-                AppHelper::throwableLogger($throwable,
-                'CallCommandController:actionCheckTypeForm:throwable', true);
+                AppHelper::throwableLogger(
+                    $throwable,
+                    'CallCommandController:actionCheckTypeForm:throwable',
+                    true
+                );
             }
         }
         throw new BadRequestHttpException();
@@ -263,7 +265,6 @@ class CallCommandController extends FController
     {
         try {
             if ($typeId = Yii::$app->request->get('type_id')) {
-
                 $callCommandService = new CallCommandTypeService($typeId);
                 /** @var CommandList $mainModel */
                 $mainModel = $callCommandService->initTypeCommandClass();
@@ -287,10 +288,12 @@ class CallCommandController extends FController
                 throw new \DomainException('MultipleFormData Undefined.', -1);
             }
             throw new \InvalidArgumentException('TypeId is required.', -2);
-
         } catch (\Throwable $throwable) {
-            AppHelper::throwableLogger($throwable,
-            'CallCommandController:actionValidateCommandListForm', true);
+            AppHelper::throwableLogger(
+                $throwable,
+                'CallCommandController:actionValidateCommandListForm',
+                true
+            );
         }
         return [];
     }
@@ -298,7 +301,6 @@ class CallCommandController extends FController
     public function actionValidateCommandForm()
     {
         if (Yii::$app->request->isAjax) {
-
             Yii::$app->response->format = Response::FORMAT_JSON;
             $post = Yii::$app->request->post();
             $callCommandFormName = (new CallCommand())->formName();

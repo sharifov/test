@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created
  * User: alex.connor@techork.com
@@ -70,6 +71,4 @@ class ApiFlightService extends ApiService
 //
 //        return $out;
     }
-
-
 }

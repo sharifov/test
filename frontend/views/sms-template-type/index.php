@@ -5,6 +5,8 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 use dosamigos\datepicker\DatePicker;
 use common\components\grid\UserSelect2Column;
+use common\components\grid\DateTimeColumn;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\SmsTemplateTypeSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -59,6 +61,11 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'stp_updated_dt'
+            ],
+
+            /*[
                 'attribute' => 'stp_updated_dt',
                 'value' => static function (\common\models\SmsTemplateType $model) {
                     return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->stp_updated_dt));
@@ -76,7 +83,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
 
             [
                 'class' => UserSelect2Column::class,
@@ -86,6 +93,11 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'stp_created_dt'
+            ],
+
+            /*[
                 'attribute' => 'stp_created_dt',
                 'value' => static function (\common\models\SmsTemplateType $model) {
                     return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->stp_created_dt));
@@ -103,8 +115,8 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
-            
+            ],*/
+
             //'stp_created_user_id',
             //'stp_updated_user_id',
             //'stp_created_dt',

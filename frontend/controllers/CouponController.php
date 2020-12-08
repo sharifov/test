@@ -171,7 +171,7 @@ class CouponController extends FController
                 } catch (\DomainException $e) {
                     return $this->asJson(['success' => false, 'message' => $e->getMessage()]);
                 } catch (\Throwable $e) {
-                    Yii::error($e, 'CouponController:' . __FUNCTION__ );
+                    Yii::error($e, 'CouponController:' . __FUNCTION__);
                     return $this->asJson(['success' => false, 'message' => 'Server error']);
                 }
             }
@@ -184,144 +184,139 @@ class CouponController extends FController
     }
 
     public function actionPreview(): string
-	{
-		$form = new SendCouponsForm();
+    {
+        $form = new SendCouponsForm();
 
-		if ($form->load(Yii::$app->request->post())) {
+        if ($form->load(Yii::$app->request->post())) {
+            if ($form->validate()) {
+                try {
+                    $case = $this->casesRepository->find($form->caseId);
+                    $coupons = CouponCase::find()->getByCaseId($case ? $case->cs_id : 0)->all();
+                    $result = $this->sendCouponsService->preview($form, $case, Auth::user());
 
-			if ($form->validate()) {
-				try {
-					$case = $this->casesRepository->find($form->caseId);
-					$coupons = CouponCase::find()->getByCaseId($case ? $case->cs_id : 0)->all();
-					$result = $this->sendCouponsService->preview($form, $case, Auth::user());
+                    if ($result['error']) {
+                    } else {
+                        $previewEmailForm = new CasePreviewEmailForm($result['data']);
+                        $previewEmailForm->e_email_from_name = Auth::user()->nickname;
+                        $previewEmailForm->coupon_list = json_encode($form->couponIds);
 
-					if ($result['error']) {
-						
-					} else {
-						$previewEmailForm = new CasePreviewEmailForm($result['data']);
-						$previewEmailForm->e_email_from_name = Auth::user()->nickname;
-						$previewEmailForm->coupon_list = json_encode($form->couponIds);
+                        $emailTemplateType = EmailTemplateType::findOne(['etp_key' => $form->emailTemplateType]);
+                        if ($emailTemplateType) {
+                            $previewEmailForm->e_email_tpl_id = $emailTemplateType->etp_id;
+                        }
 
-						$emailTemplateType = EmailTemplateType::findOne(['etp_key' => $form->emailTemplateType]);
-						if ($emailTemplateType) {
-							$previewEmailForm->e_email_tpl_id = $emailTemplateType->etp_id;
-						}
+                        return $this->render('/cases/coupons/view', [
+                            'previewEmailForm' => $previewEmailForm,
+                            'model' => $case,
+                            'coupons' => $coupons
+                        ]);
+                    }
+                } catch (\DomainException | \RuntimeException $e) {
+                    Yii::error($e->getMessage(), 'CouponController::actionSend::DomainException|RuntimeException');
+                    $form->addError('error', $e->getMessage());
+                } catch (\Throwable $e) {
+                    $form->addError('error', 'Internal Server Error');
+                    Yii::error($e->getMessage(), 'CouponController::actionSend::Throwable');
+                }
+            }
+        }
 
-						return $this->render('/cases/coupons/view', [
-							'previewEmailForm' => $previewEmailForm,
-							'model' => $case,
-							'coupons' => $coupons
-						]);
-					}
+        $form->caseId = $form->caseId ?: 0;
+        $case = Cases::findOne($form->caseId);
+        $coupons = CouponCase::find()->getByCaseId($case ? $case->cs_id : 0)->all();
 
-				} catch (\DomainException | \RuntimeException $e) {
-					Yii::error($e->getMessage(), 'CouponController::actionSend::DomainException|RuntimeException');
-					$form->addError('error', $e->getMessage());
-				} catch (\Throwable $e) {
-					$form->addError('error', 'Internal Server Error');
-					Yii::error($e->getMessage(), 'CouponController::actionSend::Throwable');
-				}
-			}
-		}
+        return $this->render('/cases/coupons/view', [
+            'model' => $case,
+            'coupons' => $coupons,
+            'sendCouponsForm' => $form
+        ]);
+    }
 
-		$form->caseId = $form->caseId ?: 0;
-		$case = Cases::findOne($form->caseId);
-		$coupons = CouponCase::find()->getByCaseId($case ? $case->cs_id : 0)->all();
+    public function actionSend(): string
+    {
+        $previewEmailForm = new CasePreviewEmailForm();
 
-		return $this->render('/cases/coupons/view', [
-			'model' => $case,
-			'coupons' => $coupons,
-			'sendCouponsForm' => $form
-		]);
-	}
+        if ($previewEmailForm->load(Yii::$app->request->post())) {
+            if ($previewEmailForm->validate()) {
+                try {
+                    $case = $this->casesRepository->find($previewEmailForm->e_case_id);
+                    $coupons = CouponCase::find()->getByCaseId($case ? $case->cs_id : 0)->all();
 
-	public function actionSend(): string
-	{
-		$previewEmailForm = new CasePreviewEmailForm();
+                    $mail = new Email();
+                    $mail->e_project_id = $case->cs_project_id;
+                    $mail->e_case_id = $case->cs_id;
+                    if ($previewEmailForm->e_email_tpl_id) {
+                        $mail->e_template_type_id = $previewEmailForm->e_email_tpl_id;
+                    }
+                    $mail->e_type_id = Email::TYPE_OUTBOX;
+                    $mail->e_status_id = Email::STATUS_PENDING;
+                    $mail->e_email_subject = $previewEmailForm->e_email_subject;
+                    $mail->body_html = $previewEmailForm->e_email_message;
+                    $mail->e_email_from = $previewEmailForm->e_email_from;
 
-		if ($previewEmailForm->load(Yii::$app->request->post())) {
+                    $mail->e_email_from_name = $previewEmailForm->e_email_from_name;
+                    $mail->e_email_to_name = $previewEmailForm->e_email_to_name;
 
-			if ($previewEmailForm->validate()) {
-				try {
-					$case = $this->casesRepository->find($previewEmailForm->e_case_id);
-					$coupons = CouponCase::find()->getByCaseId($case ? $case->cs_id : 0)->all();
+                    if ($previewEmailForm->e_language_id) {
+                        $mail->e_language_id = $previewEmailForm->e_language_id;
+                    }
 
-					$mail = new Email();
-					$mail->e_project_id = $case->cs_project_id;
-					$mail->e_case_id = $case->cs_id;
-					if ($previewEmailForm->e_email_tpl_id) {
-						$mail->e_template_type_id = $previewEmailForm->e_email_tpl_id;
-					}
-					$mail->e_type_id = Email::TYPE_OUTBOX;
-					$mail->e_status_id = Email::STATUS_PENDING;
-					$mail->e_email_subject = $previewEmailForm->e_email_subject;
-					$mail->body_html = $previewEmailForm->e_email_message;
-					$mail->e_email_from = $previewEmailForm->e_email_from;
+                    $mail->e_email_to = $previewEmailForm->e_email_to;
+                    //$mail->e_email_data = [];
+                    $mail->e_created_dt = date('Y-m-d H:i:s');
+                    $mail->e_created_user_id = Yii::$app->user->id;
 
-					$mail->e_email_from_name = $previewEmailForm->e_email_from_name;
-					$mail->e_email_to_name = $previewEmailForm->e_email_to_name;
+                    if ($mail->save()) {
+                        $mail->e_message_id = $mail->generateMessageId();
+                        $mail->update();
 
-					if ($previewEmailForm->e_language_id) {
-						$mail->e_language_id = $previewEmailForm->e_language_id;
-					}
+                        $previewEmailForm->is_send = true;
 
-					$mail->e_email_to = $previewEmailForm->e_email_to;
-					//$mail->e_email_data = [];
-					$mail->e_created_dt = date('Y-m-d H:i:s');
-					$mail->e_created_user_id = Yii::$app->user->id;
+                        $mailResponse = $mail->sendMail();
 
-					if ($mail->save()) {
-						$mail->e_message_id = $mail->generateMessageId();
-						$mail->update();
+                        $selectedCoupons = json_decode($previewEmailForm->coupon_list, true);
 
-						$previewEmailForm->is_send = true;
+                        foreach ($selectedCoupons as $couponId) {
+                            $coupon = Coupon::findOne((int)$couponId);
+                            if ($coupon) {
+                                $coupon->c_status_id = CouponStatus::SEND;
+                                $coupon->save();
+                            }
+                        }
 
-						$mailResponse = $mail->sendMail();
+                        if (isset($mailResponse['error']) && $mailResponse['error']) {
+                            $previewEmailForm->addError('error', 'Error: Email Message has not been sent to ' .  $mail->e_email_to);
+                        } else {
+                            Yii::$app->session->setFlash('success', 'Success: <strong>Email Message</strong> is sent to <strong>' . $mail->e_email_to . '</strong>');
 
-						$selectedCoupons = json_decode($previewEmailForm->coupon_list, true);
+                            $form = new SendCouponsForm();
+                            $form->caseId = $case->cs_id;
+                            return $this->render('/cases/coupons/view', [
+                                'model' => $case,
+                                'coupons' => $coupons,
+                                'sendCouponsForm' => $form
+                            ]);
+                        }
+                    } else {
+                        throw new \RuntimeException($mail->getErrorSummary(false)[0]);
+                    }
+                } catch (\DomainException | \RuntimeException $e) {
+                    Yii::error($e->getMessage(), 'CouponController::actionSend::DomainException|RuntimeException');
+                    $previewEmailForm->addError('error', $e->getMessage());
+                } catch (\Throwable $e) {
+                    $previewEmailForm->addError('error', 'Internal Server Error');
+                    Yii::error($e->getMessage(), 'CouponController::actionSend::Throwable');
+                }
+            }
+        }
+        $previewEmailForm->e_case_id = $previewEmailForm->e_case_id ?: 0;
+        $case = Cases::findOne($previewEmailForm->e_case_id);
+        $coupons = CouponCase::find()->getByCaseId($case ? $case->cs_id : 0)->all();
 
-						foreach ($selectedCoupons as $couponId) {
-							$coupon = Coupon::findOne((int)$couponId);
-							if ($coupon) {
-								$coupon->c_status_id = CouponStatus::SEND;
-								$coupon->save();
-							}
-						}
-
-						if (isset($mailResponse['error']) && $mailResponse['error']) {
-							$previewEmailForm->addError('error', 'Error: Email Message has not been sent to ' .  $mail->e_email_to);
-						} else {
-							Yii::$app->session->setFlash('success', 'Success: <strong>Email Message</strong> is sent to <strong>' . $mail->e_email_to . '</strong>');
-
-							$form = new SendCouponsForm();
-							$form->caseId = $case->cs_id;
-							return $this->render('/cases/coupons/view', [
-								'model' => $case,
-								'coupons' => $coupons,
-								'sendCouponsForm' => $form
-							]);
-						}
-
-					} else {
-						throw new \RuntimeException($mail->getErrorSummary(false)[0]);
-					}
-				} catch (\DomainException | \RuntimeException $e) {
-					Yii::error($e->getMessage(), 'CouponController::actionSend::DomainException|RuntimeException');
-					$previewEmailForm->addError('error', $e->getMessage());
-				} catch (\Throwable $e) {
-					$previewEmailForm->addError('error', 'Internal Server Error');
-					Yii::error($e->getMessage(), 'CouponController::actionSend::Throwable');
-				}
-			}
-		}
-		$previewEmailForm->e_case_id = $previewEmailForm->e_case_id ?: 0;
-		$case = Cases::findOne($previewEmailForm->e_case_id);
-		$coupons = CouponCase::find()->getByCaseId($case ? $case->cs_id : 0)->all();
-
-		return $this->render('/cases/coupons/view', [
-			'model' => $case,
-			'coupons' => $coupons,
-			'previewEmailForm' => $previewEmailForm
-		]);
-	}
+        return $this->render('/cases/coupons/view', [
+            'model' => $case,
+            'coupons' => $coupons,
+            'previewEmailForm' => $previewEmailForm
+        ]);
+    }
 }

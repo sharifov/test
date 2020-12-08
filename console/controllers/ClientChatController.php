@@ -17,6 +17,7 @@ use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\services\clientChatChannel\ClientChatChannelCodeException;
 use sales\services\clientChatChannel\ClientChatChannelService;
+use sales\services\clientChatService\ClientChatService;
 use Yii;
 use yii\console\Controller;
 use yii\helpers\ArrayHelper;
@@ -28,15 +29,24 @@ use yii\helpers\VarDumper;
  * @package console\controllers
  *
  * @property ClientChatRepository $clientChatRepository
+ * @property ClientChatService $clientChatService
  */
 class ClientChatController extends Controller
 {
     private ClientChatRepository $clientChatRepository;
 
-    public function __construct($id, $module, ClientChatRepository $clientChatRepository, $config = [])
-    {
+    private ClientChatService $clientChatService;
+
+    public function __construct(
+        $id,
+        $module,
+        ClientChatRepository $clientChatRepository,
+        ClientChatService $clientChatService,
+        $config = []
+    ) {
         parent::__construct($id, $module, $config);
         $this->clientChatRepository = $clientChatRepository;
+        $this->clientChatService = $clientChatService;
     }
 
     /**
@@ -86,15 +96,15 @@ class ClientChatController extends Controller
                 $user['email']
             );
 
-            echo "\n-- " . $user['username'] . ' ('.$user['id'].') --' . PHP_EOL;
+            echo "\n-- " . $user['username'] . ' (' . $user['id'] . ') --' . PHP_EOL;
 
             if (isset($result['error']) && !$result['error']) {
                 printf(" - Registered: %s\n", $this->ansiFormat('Username: ' . $result['data']['username'] . ', ID: ' . $result['data']['_id'], Console::FG_BLUE));
 
                 $userProfile = UserProfile::findOne(['up_user_id' => $user['id']]);
-                //				if ($userProfile && $userProfile->up_rc_user_id) {
-                //					continue;
-                //				}
+                //              if ($userProfile && $userProfile->up_rc_user_id) {
+                //                  continue;
+                //              }
 
                 if (!$userProfile) {
                     $userProfile = new UserProfile();
@@ -183,7 +193,7 @@ class ClientChatController extends Controller
 
             $result = $rocketChat->deleteUser($userProfile->up_rc_user_id ?? null, $user['username'], $deleteByUsername);
 
-            echo "\n-- " . $user['username'] . ' ('.$user['id'].') --' . PHP_EOL;
+            echo "\n-- " . $user['username'] . ' (' . $user['id'] . ') --' . PHP_EOL;
 
             if (isset($result['error']) && !$result['error']) {
                 printf(" - Deleted: %s\n", $this->ansiFormat('Success', Console::FG_BLUE));
@@ -237,7 +247,7 @@ class ClientChatController extends Controller
         $rocketChat->updateSystemAuth(false);
 
         foreach ($users as $user) {
-            echo "\n-- UserId " . ' ('.$user->up_user_id.') --' . PHP_EOL;
+            echo "\n-- UserId " . ' (' . $user->up_user_id . ') --' . PHP_EOL;
 
 
             $user->up_rc_user_password = null;
@@ -293,7 +303,7 @@ class ClientChatController extends Controller
     public function actionIdle(): void
     {
         echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
-            self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
         $channels = [];
         $processed = $failed = 0;
@@ -320,6 +330,7 @@ class ClientChatController extends Controller
                 /** @var ClientChat $clientChat */
                 $clientChat->idle(null, ClientChatStatusLog::ACTION_AUTO_IDLE);
                 $this->clientChatRepository->save($clientChat);
+                $this->clientChatService->sendRequestToUsers($clientChat);
                 $channels[$clientChat->cch_channel_id] = $clientChat->cch_channel_id;
                 $processed++;
             } catch (\Throwable $throwable) {
@@ -360,7 +371,7 @@ class ClientChatController extends Controller
     public function actionHoldToProgress(): void
     {
         echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
-            self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
         $processed = $failed = 0;
         $timeStart = microtime(true);
@@ -424,7 +435,7 @@ class ClientChatController extends Controller
     public function actionCloseToArchiveOnTimeout(int $hourTimeout = 0): void
     {
         echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
-            self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
         $processed = $failed = 0;
         $timeStart = microtime(true);
@@ -433,6 +444,10 @@ class ClientChatController extends Controller
 
         foreach ($closedChats as $clientChat) {
             try {
+                if (ClientChatQuery::isExistsNotClosedArchivedChatByRid($clientChat->cch_rid)) {
+                    continue;
+                }
+
                 $clientChat->archive(null, ClientChatStatusLog::ACTION_TIMEOUT_FINISH);
                 $this->clientChatRepository->save($clientChat);
 
@@ -441,7 +456,7 @@ class ClientChatController extends Controller
                 Notifications::pub(
                     ['chat-' . $clientChat->cch_id],
                     'refreshChatPage',
-                    ['data' => ClientChatAccessMessage::chatInProgress($clientChat->cch_id)]
+                    ['data' => ClientChatAccessMessage::chatArchive($clientChat->cch_id)]
                 );
             } catch (\Throwable $e) {
                 Yii::error(
@@ -461,5 +476,12 @@ class ClientChatController extends Controller
 
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
+        Yii::info(VarDumper::dumpAsString([
+            'Processed' => $processed,
+            'Failed' => $failed,
+            'Execute Time' => $time . ' sec',
+            'End Time' => date('Y-m-d H:i:s'),
+        ]), 'info\ClientChatController:actionCloseToArchiveOnTimeout:result');
     }
 }

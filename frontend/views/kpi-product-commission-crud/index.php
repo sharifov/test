@@ -6,6 +6,7 @@ use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\kpi\entity\kpiProductCommission\search\KpiProductCommissionSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -28,10 +29,10 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-			[
-				'class' => ProductTypeColumn::class,
-				'attribute' => 'pc_product_type_id',
-			],
+            [
+                'class' => ProductTypeColumn::class,
+                'attribute' => 'pc_product_type_id',
+            ],
             'pc_performance:percentInteger',
             'pc_commission_percent:percentInteger',
 
@@ -49,14 +50,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'placeholder' => 'Select User',
             ],
 
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'pc_created_dt',
-			],
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'pc_updated_dt',
-			],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'pc_created_dt',
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'pc_updated_dt',
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

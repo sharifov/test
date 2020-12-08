@@ -24,5 +24,4 @@ class m181001_130325_add_column_grade_answered_tbl_lead extends Migration
         $this->dropColumn('{{%leads}}', 'l_answered');
         $this->dropColumn('{{%leads}}', 'l_grade');
     }
-
 }

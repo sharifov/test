@@ -46,7 +46,7 @@ class FlightQuoteTripSearch extends FlightQuoteTrip
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['fqt_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['fqt_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ]

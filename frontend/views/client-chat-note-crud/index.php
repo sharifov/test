@@ -40,15 +40,15 @@ $this->params['breadcrumbs'][] = $this->title;
             'ccn_note:ntext',
             'ccn_deleted:boolean',
             [
-				'class' => DateTimeColumn::class,
-				'attribute' => 'ccn_created_dt',
-				'format' => 'byUserDateTime'
-			],
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'ccn_updated_dt',
-				'format' => 'byUserDateTime'
-			],
+                'class' => DateTimeColumn::class,
+                'attribute' => 'ccn_created_dt',
+                'format' => 'byUserDateTime'
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'ccn_updated_dt',
+                'format' => 'byUserDateTime'
+            ],
 
             ['class' => ActionColumn::class],
         ],

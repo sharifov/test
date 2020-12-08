@@ -30,5 +30,4 @@ class LeadQcallRepository
             throw new \RuntimeException('Removing error');
         }
     }
-
 }

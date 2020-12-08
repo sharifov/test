@@ -31,8 +31,7 @@ class CreateDto
         ?int $actionId,
         ?int $ownerId,
         ?int $creatorId
-    )
-    {
+    ) {
         $this->orderId = $orderId;
         $this->startStatusId = $startStatusId;
         $this->endStatusId = $endStatusId;

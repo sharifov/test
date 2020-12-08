@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: dmitrii
@@ -7,6 +8,7 @@
  */
 
 namespace common\components\logger;
+
 use Yii;
 
 class AirLogger

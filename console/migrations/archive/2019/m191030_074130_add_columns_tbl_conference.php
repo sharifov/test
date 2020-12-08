@@ -42,6 +42,4 @@ class m191030_074130_add_columns_tbl_conference extends Migration
             Yii::$app->cache->flush();
         }
     }
-
-
 }

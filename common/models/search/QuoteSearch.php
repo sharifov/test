@@ -25,10 +25,12 @@ class QuoteSearch extends Quote
             [['datetime_start', 'datetime_end'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['id', 'lead_id', 'employee_id', 'status', 'check_payment'], 'integer'],
-            [['uid', 'record_locator', 'pcc', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'reservation_dump', 'fare_type', 'created', 'updated'], 'safe'],
+            [['uid', 'record_locator', 'pcc', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'reservation_dump', 'fare_type'], 'safe'],
 
             ['type_id', 'integer'],
             ['type_id', 'in', 'range' => array_keys(Quote::TYPE_LIST)],
+
+            [['created', 'updated'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -69,7 +71,7 @@ class QuoteSearch extends Quote
             return $dataProvider;
         }
 
-        if(empty($this->created) && isset($params['QuoteSearch']['date_range'])){
+        if (empty($this->created) && isset($params['QuoteSearch']['date_range'])) {
             $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
                 ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         }

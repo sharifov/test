@@ -44,5 +44,4 @@ class LeadTrashEventLogListener
             Yii::error($e, 'Listeners:LeadTrashEventLogListener');
         }
     }
-
 }

@@ -38,7 +38,7 @@ class m200611_073420_add_setting_internal_notification_email extends Migration
     {
          $this->delete('{{%setting}}', ['IN', 's_key', [
             'internal_notification_for_user_email'
-        ]]);
+         ]]);
 
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();

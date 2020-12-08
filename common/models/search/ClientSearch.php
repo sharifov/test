@@ -15,7 +15,6 @@ use common\models\Client;
  */
 class ClientSearch extends Client
 {
-
     public $client_email;
     public $client_phone;
     public $not_in_client_id;
@@ -28,7 +27,7 @@ class ClientSearch extends Client
         return [
             [['id', 'not_in_client_id'], 'integer'],
             [['client_email', 'client_phone'], 'string'],
-            [['first_name', 'middle_name', 'last_name', 'created', 'updated'], 'safe'],
+            [['first_name', 'middle_name', 'last_name'], 'safe'],
             ['uuid', 'string', 'max' => 36],
             [['company_name'], 'string', 'max' => 150],
             [['is_company', 'is_public', 'disabled'], 'boolean'],
@@ -37,6 +36,8 @@ class ClientSearch extends Client
             ['cl_project_id', 'integer'],
 
             ['parent_id', 'integer'],
+
+            [['created', 'updated'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -52,7 +53,7 @@ class ClientSearch extends Client
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -71,14 +72,14 @@ class ClientSearch extends Client
             return $dataProvider;
         }
 
-        if ($this->created){
+        if ($this->created) {
             $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
-                ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 *24)]);
+                ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
         }
 
-        if ($this->updated){
+        if ($this->updated) {
             $query->andFilterWhere(['>=', 'updated', Employee::convertTimeFromUserDtToUTC(strtotime($this->updated))])
-                ->andFilterWhere(['<=', 'updated', Employee::convertTimeFromUserDtToUTC(strtotime($this->updated) + 3600 *24)]);
+                ->andFilterWhere(['<=', 'updated', Employee::convertTimeFromUserDtToUTC(strtotime($this->updated) + 3600 * 24)]);
         }
 
         // grid filtering conditions
@@ -86,7 +87,7 @@ class ClientSearch extends Client
             Client::tableName() . '.id' => $this->id,
         ]);
 
-        if($this->not_in_client_id) {
+        if ($this->not_in_client_id) {
             $query->andWhere(['NOT IN', Client::tableName() . '.id', $this->not_in_client_id]);
         }
 
@@ -136,7 +137,7 @@ class ClientSearch extends Client
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -157,7 +158,7 @@ class ClientSearch extends Client
             'DATE(updated)' => $this->updated,
         ]);
 
-        if($this->not_in_client_id) {
+        if ($this->not_in_client_id) {
             $query->andWhere(['NOT IN', 'id', $this->not_in_client_id]);
         }
 

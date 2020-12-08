@@ -12,7 +12,7 @@ class m200916_104252_alter_tbl_client_chat_visitor_data extends Migration
      */
     public function safeUp()
     {
-		$this->alterColumn('{{%client_chat_visitor_data}}', 'cvd_referrer', $this->string(1000));
+        $this->alterColumn('{{%client_chat_visitor_data}}', 'cvd_referrer', $this->string(1000));
     }
 
     /**
@@ -20,6 +20,6 @@ class m200916_104252_alter_tbl_client_chat_visitor_data extends Migration
      */
     public function safeDown()
     {
-		$this->alterColumn('{{%client_chat_visitor_data}}', 'cvd_referrer', $this->string());
-	}
+        $this->alterColumn('{{%client_chat_visitor_data}}', 'cvd_referrer', $this->string());
+    }
 }

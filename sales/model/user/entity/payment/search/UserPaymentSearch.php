@@ -19,7 +19,8 @@ class UserPaymentSearch extends UserPayment
         return [
             [['upt_id', 'upt_assigned_user_id', 'upt_category_id', 'upt_status_id', 'upt_created_user_id', 'upt_updated_user_id', 'upt_payroll_id'], 'integer'],
             [['upt_amount'], 'number'],
-            [['upt_description', 'upt_date', 'upt_created_dt', 'upt_updated_dt'], 'safe'],
+            [['upt_description'], 'safe'],
+            [['upt_date', 'upt_created_dt', 'upt_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -47,10 +48,10 @@ class UserPaymentSearch extends UserPayment
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-			'sort'=> ['defaultOrder' => ['upt_id' => SORT_DESC]],
-			'pagination' => [
-				'pageSize' => 30,
-			],
+            'sort' => ['defaultOrder' => ['upt_id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
         ]);
 
         $this->load($params);
@@ -68,7 +69,7 @@ class UserPaymentSearch extends UserPayment
             'upt_category_id' => $this->upt_category_id,
             'upt_status_id' => $this->upt_status_id,
             'upt_amount' => $this->upt_amount,
-            'upt_date' => $this->upt_date,
+            'DATE(upt_date)' => $this->upt_date,
             'upt_created_user_id' => $this->upt_created_user_id,
             'upt_updated_user_id' => $this->upt_updated_user_id,
             'date_format(upt_created_dt, "%Y-%m-%d")' => $this->upt_created_dt,

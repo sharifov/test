@@ -162,9 +162,9 @@ class CallUserAccess extends \yii\db\ActiveRecord
     }
 
     public function isPending(): bool
-	{
-		return $this->cua_status_id === self::STATUS_TYPE_PENDING;
-	}
+    {
+        return $this->cua_status_id === self::STATUS_TYPE_PENDING;
+    }
 
     /**
      * @param bool $insert
@@ -196,14 +196,14 @@ class CallUserAccess extends \yii\db\ActiveRecord
             NativeEventDispatcher::trigger(CallUserAccessEvents::class, CallUserAccessEvents::INSERT);
         }
 
-        if(($insert || isset($changedAttributes['cua_status_id'])) && $call && ($call->isIn() || $call->isHold())) {
+        if (($insert || isset($changedAttributes['cua_status_id'])) && $call && ($call->isIn() || $call->isHold())) {
 //        if(($insert || isset($changedAttributes['cua_status_id']))) {
             //Notifications::socket($this->cua_user_id, null, 'updateIncomingCall', $this->attributes);
-			if ($this->isPending()) {
-				$client = $this->cuaCall->cClient;
+            if ($this->isPending()) {
+                $client = $this->cuaCall->cClient;
 
-				$name = '';
-				$phone = '';
+                $name = '';
+                $phone = '';
                 if ($call->isJoin()) {
                     if (($parent = $call->cParent) && $parent->cCreatedUser) {
                         $name = $parent->cCreatedUser->nickname;
@@ -220,7 +220,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
 
                 $auth = Yii::$app->authManager;
 
-				$callInfo = [
+                $callInfo = [
                     'id' => $call->c_id,
                     'callSid' => $call->c_call_sid,
                     'conferenceSid' => $call->c_conference_sid,
@@ -252,8 +252,8 @@ class CallUserAccess extends \yii\db\ActiveRecord
                     ],
                     'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
                     'queue' => Call::getQueueName($call),
-				];
-			}
+                ];
+            }
             Notifications::publish('updateIncomingCall', ['user_id' => $this->cua_user_id], array_merge($this->attributes, $callInfo ?? ['callSid' => $call->c_call_sid]));
         }
 
@@ -265,7 +265,6 @@ class CallUserAccess extends \yii\db\ActiveRecord
             NativeEventDispatcher::recordEvent(CallUserAccessEvents::class, CallUserAccessEvents::UPDATE, [CallUserAccessEvents::class, 'updateUserStatus'], $this);
             NativeEventDispatcher::trigger(CallUserAccessEvents::class, CallUserAccessEvents::UPDATE);
         }
-        
     }
 
     /**
@@ -290,6 +289,4 @@ class CallUserAccess extends \yii\db\ActiveRecord
         parent::afterDelete();
         NativeEventDispatcher::trigger(CallUserAccessEvents::class, CallUserAccessEvents::DELETE);
     }
-    
-    
 }

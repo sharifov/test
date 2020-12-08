@@ -28,8 +28,8 @@ use yii\helpers\Url;
 //            return ['class' => 'danger'];
 //        }
         if ($model->l_is_test) {
-        	return ['class' => 'info'];
-		}
+            return ['class' => 'info'];
+        }
     },
     'columns' => [
         [
@@ -197,7 +197,7 @@ use yii\helpers\Url;
         [
             'attribute' => 'attempts',
 //            'filter' => false,
-//			'enableSorting' => false,
+//          'enableSorting' => false,
             'visible' => !$user->isAgent(),
         ],
         [
@@ -220,7 +220,7 @@ use yii\helpers\Url;
                 ],
                 'options' => [
                     'autocomplete' => 'off',
-                    'placeholder' =>'Choose Date'
+                    'placeholder' => 'Choose Date'
                 ],
             ]),
         ],
@@ -240,7 +240,7 @@ use yii\helpers\Url;
                 ],
                 'options' => [
                     'autocomplete' => 'off',
-                    'placeholder' =>'Choose Date'
+                    'placeholder' => 'Choose Date'
                 ],
             ]),
         ],
@@ -260,7 +260,7 @@ use yii\helpers\Url;
                 ],
                 'options' => [
                     'autocomplete' => 'off',
-                    'placeholder' =>'Choose Date'
+                    'placeholder' => 'Choose Date'
                 ],
             ]),
         ],
@@ -287,7 +287,7 @@ use yii\helpers\Url;
         ],
         [
             'label' => 'Reserved for',
-            'value' => static function(LeadQcall $model) {
+            'value' => static function (LeadQcall $model) {
                 if ($model->lqc_reservation_time && (strtotime($model->lqc_reservation_time) > time())) {
                     return date('H:i:s', (strtotime($model->lqc_reservation_time) - time()));
                 }
@@ -296,7 +296,7 @@ use yii\helpers\Url;
         ],
         [
             'label' => 'Reserved by',
-            'value' => static function(LeadQcall $model) {
+            'value' => static function (LeadQcall $model) {
                 if (
                     $model->lqc_reservation_time && (strtotime($model->lqc_reservation_time) > time())
                     && ($user = $model->reservationUser)
@@ -306,27 +306,27 @@ use yii\helpers\Url;
                 return '';
             },
         ],
-		[
-			'label' => 'Is Test',
-			'attribute' => 'l_is_test',
-			'value' => static function (LeadQcall $model) {
-				if ($model->l_is_test) {
-					$label = '<label class="label label-success">True</label>';
-				} else {
-					$label = '<label class="label label-danger">False</label>';
-				}
-				return $label;
-			},
-			'options' => [
-				'style' => 'width:120px'
-			],
-			'format' => 'raw',
-			'filter' => [
-				1 => 'True',
-				0 => 'False'
-			],
-			'visible' => ($user->checkIfUsersIpIsAllowed() || Yii::$app->request->get('is_test'))
-		],
+        [
+            'label' => 'Is Test',
+            'attribute' => 'l_is_test',
+            'value' => static function (LeadQcall $model) {
+                if ($model->l_is_test) {
+                    $label = '<label class="label label-success">True</label>';
+                } else {
+                    $label = '<label class="label label-danger">False</label>';
+                }
+                return $label;
+            },
+            'options' => [
+                'style' => 'width:120px'
+            ],
+            'format' => 'raw',
+            'filter' => [
+                1 => 'True',
+                0 => 'False'
+            ],
+            'visible' => ($user->checkIfUsersIpIsAllowed() || Yii::$app->request->get('is_test'))
+        ],
         [
             'class' => 'yii\grid\ActionColumn',
             'template' => '{call}',
@@ -351,4 +351,4 @@ use yii\helpers\Url;
             ]
         ],
     ],
-]); ?>
+]);

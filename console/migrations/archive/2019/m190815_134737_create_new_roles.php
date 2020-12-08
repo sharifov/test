@@ -88,7 +88,6 @@ class m190815_134737_create_new_roles extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     /**
@@ -106,7 +105,7 @@ class m190815_134737_create_new_roles extends Migration
         $supervision->description = 'Supervision';
         $auth->update('supervision', $supervision);
 
-        foreach(['sup_agent', 'sup_super', 'ex_agent', 'ex_super'] as $item) {
+        foreach (['sup_agent', 'sup_super', 'ex_agent', 'ex_super'] as $item) {
             $role = $auth->getRole($item);
             $auth->remove($role);
         }
@@ -115,5 +114,4 @@ class m190815_134737_create_new_roles extends Migration
             Yii::$app->cache->flush();
         }
     }
-
 }

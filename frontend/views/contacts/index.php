@@ -49,7 +49,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'header' => 'Actions',
                 'template' => '{view} &nbsp;&nbsp; {update} &nbsp;&nbsp;&nbsp; {delete}',
                 'buttons' => [
-                    'delete' => static function($url, Client $model){
+                    'delete' => static function ($url, Client $model) {
                         return Html::a('<span class="glyphicon glyphicon-trash text-danger"></span>', ['delete', 'id' => $model->id], [
                             'class' => '',
                             'data' => [
@@ -59,7 +59,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         ]);
                     }
                 ],
-                'visibleButtons'=>
+                'visibleButtons' =>
                 [
                      'update' => static function (Client $model) {
                         return (new ContactUpdateAccess())->isUserCanUpdateContact($model, Auth::user());
@@ -76,7 +76,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'is_company',
                 'label' => 'Type',
-                'value' => static function(Client $model) {
+                'value' => static function (Client $model) {
                     return $model->is_company ? '<i class="fa fa-building-o" title="Company"></i>' : '<i class="fa fa-user" title="Personal"></i>';
                 },
                 'format' => 'raw',
@@ -88,7 +88,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'ucl_favorite',
-                'value' => static function(Client $model) {
+                'value' => static function (Client $model) {
                     $out = '<span class="not-set">(not set)</span>';
                     if ($model->contact) {
                         $class = $model->contact->ucl_favorite ? 'fa fa-star text-warning' : 'fa fa-star-o';
@@ -112,22 +112,22 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'header' => 'Name',
                 'attribute' => 'by_name',
-                'value' => static function(Client $model) {
+                'value' => static function (Client $model) {
 //                    $out = '';
 //                    $out .= $model->first_name ? '<em>First name:</em> ' . Html::encode($model->first_name) . '<br />' : '';
 //                    $out .= $model->middle_name ? '<em>Middle name:</em> ' . Html::encode($model->middle_name) . '<br />' : '';
 //                    $out .= $model->last_name ? '<em>Last name:</em> ' . Html::encode($model->last_name) . '<br />' : '';
 
-                    return  $model->is_company ? '-' : '<i class="fa fa-user"></i> ' . '<b>' . Html::encode($model->full_name) .'</b>';
+                    return  $model->is_company ? '-' : '<i class="fa fa-user"></i> ' . '<b>' . Html::encode($model->full_name) . '</b>';
                 },
                 'format' => 'raw',
             ],
 
             [
                 'attribute' => 'company_name',
-                'value' => static function(Client $model) {
+                'value' => static function (Client $model) {
 
-                    return $model->is_company ? '<i class="fa fa-building-o" title="Company"></i> ' . '<b>' . Html::encode($model->company_name) .'</b>' : '-';
+                    return $model->is_company ? '<i class="fa fa-building-o" title="Company"></i> ' . '<b>' . Html::encode($model->company_name) . '</b>' : '-';
                 },
                 'format' => 'raw',
             ],
@@ -135,16 +135,15 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'header' => 'Phones',
                 'attribute' => 'client_phone',
-                'value' => static function(Client $model) {
+                'value' => static function (Client $model) {
                     $phones = $model->clientPhones;
                     $data = [];
-                    if($phones) {
+                    if ($phones) {
                         foreach ($phones as $k => $phone) {
-
-                            $access = CallAccess::isUserCanDial(Auth::id(),UserProfile::CALL_TYPE_WEB);
+                            $access = CallAccess::isUserCanDial(Auth::id(), UserProfile::CALL_TYPE_WEB);
 
                             $out = '<span data-toggle="tooltip" 
-                                            title="'. Html::encode($phone->cp_title) . '"
+                                            title="' . Html::encode($phone->cp_title) . '"
                                             data-original-title="' . Html::encode($phone->cp_title) . '">';
 
                             $out .= CallHelper::callNumber($phone->phone, $access, '', ['data-title' => $model->full_name, 'disable-icon' => $access ? false : true], 'span');
@@ -161,14 +160,14 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'header' => 'Emails',
                 'attribute' => 'client_email',
-                'value' => static function(Client $model) {
+                'value' => static function (Client $model) {
                     $emails = $model->clientEmails;
                     $data = [];
-                    if($emails) {
+                    if ($emails) {
                         foreach ($emails as $k => $email) {
                             $data[] = ' <code data-toggle="tooltip" 
-                                            title="'. Html::encode($email->ce_title) . '"
-                                            data-original-title="'. Html::encode($email->ce_title) . '">' .
+                                            title="' . Html::encode($email->ce_title) . '"
+                                            data-original-title="' . Html::encode($email->ce_title) . '">' .
                                 Html::encode($email->email) . '</code>';
                         }
                     }
@@ -180,7 +179,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Public',
                 'attribute' => 'is_public',
-                'value' => static function(Client $model) {
+                'value' => static function (Client $model) {
                     return $model->is_public ? '<i class="fa fa-globe" title="public"></i>' : '<i class="fa fa-book" title="private"></i>';
                 },
                 'format' => 'raw',
@@ -192,7 +191,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'disabled',
-                'value' => static function(Client $model) {
+                'value' => static function (Client $model) {
 
 
 //                    $innerBtn = $model->disabled ? '<span class="label label-success">Disabled</span>' : '-';

@@ -46,12 +46,12 @@ $dataProviderQuotes = $searchModel->searchProduct($params);
 
                 <div class="col-md-6">
                     <table class="table table-bordered">
-                        <?php if ($model->ph_min_star_rate || $model->ph_max_star_rate): ?>
+                        <?php if ($model->ph_min_star_rate || $model->ph_max_star_rate) : ?>
                         <tr>
                             <td>Star rate (<?=$model->ph_min_star_rate?> - <?=$model->ph_max_star_rate?>)</td>
                         </tr>
                         <?php endif; ?>
-                        <?php if ($model->ph_max_price_rate || $model->ph_min_price_rate): ?>
+                        <?php if ($model->ph_max_price_rate || $model->ph_min_price_rate) : ?>
                             <tr>
                                 <td>Price rate (<?=$model->ph_max_price_rate?> - <?=$model->ph_min_price_rate?>)</td>
                             </tr>
@@ -68,8 +68,8 @@ $dataProviderQuotes = $searchModel->searchProduct($params);
     <!--        </p>-->
                 <?php Pjax::begin(['id' => 'pjax-hotel-rooms-' . $model->ph_id]); ?>
 
-                <?php if ($model->hotelRooms):?>
-                    <?php foreach ($model->hotelRooms as $rk => $room): ?>
+                <?php if ($model->hotelRooms) :?>
+                    <?php foreach ($model->hotelRooms as $rk => $room) : ?>
                     <div class="col-md-6">
                         <div class="x_panel">
                         <div class="x_title">
@@ -115,7 +115,7 @@ $dataProviderQuotes = $searchModel->searchProduct($params);
                         </div>
                         <div class="x_content" style="display: block">
                             <div class="col-md-12">
-                                <?php if ($room->hotelRoomPaxes):?>
+                                <?php if ($room->hotelRoomPaxes) :?>
                                     <table class="table table-bordered">
                                         <thead>
                                         <tr class=" bg-info">
@@ -127,7 +127,7 @@ $dataProviderQuotes = $searchModel->searchProduct($params);
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        <?php foreach ($room->hotelRoomPaxes as $nr => $pax): ?>
+                                        <?php foreach ($room->hotelRoomPaxes as $nr => $pax) : ?>
                                         <tr>
                                             <td title="Pax Id: <?=Html::encode($pax->hrp_id)?>"><?=($nr + 1)?>. Pax</td>
                                             <td><b><?=Html::encode($pax->getPaxTypeName())?></b></td>

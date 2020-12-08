@@ -12,12 +12,14 @@ use sales\entities\cases\Cases;
 use sales\entities\EventTrait;
 use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\clientChat\ClientChatCodeException;
+use sales\model\clientChat\event\ClientChatArchiveEvent;
 use sales\model\clientChat\event\ClientChatCloseEvent;
-use sales\model\clientChat\event\ClientChatManageStatusLogEvent;
+use sales\model\clientChat\event\ClientChatHoldEvent;
+use sales\model\clientChat\event\ClientChatIdleEvent;
+use sales\model\clientChat\event\ClientChatInProgressEvent;
 use sales\model\clientChat\event\ClientChatOwnerAssignedEvent;
-use sales\model\clientChat\event\ClientChatSetStatusArchivedEvent;
-use sales\model\clientChat\event\ClientChatSetStatusCloseEvent;
-use sales\model\clientChat\event\ClientChatSetStatusIdleEvent;
+use sales\model\clientChat\event\ClientChatPendingEvent;
+use sales\model\clientChat\event\ClientChatTransferEvent;
 use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
 use sales\model\clientChatCase\entity\ClientChatCase;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
@@ -341,33 +343,88 @@ class ClientChat extends \yii\db\ActiveRecord
 
     public function pending(?int $userId, int $action, ?string $description = null): void
     {
-        $this->recordEvent(new ClientChatManageStatusLogEvent($this, $this->cch_status_id, self::STATUS_PENDING, $this->cch_owner_user_id, $userId, $description, $this->cch_channel_id, $action, null));
+        $this->recordEvent(new ClientChatPendingEvent(
+            $this,
+            $this->cch_status_id,
+            $this->cch_owner_user_id,
+            $userId,
+            $description,
+            $this->cch_channel_id,
+            $action,
+            null,
+            $this->cch_rid
+        ));
         $this->cch_status_id = self::STATUS_PENDING;
     }
 
     public function close(int $userId, int $action, ?int $reasonId = null, ?string $description = null): void
     {
-        $this->recordEvent(new ClientChatManageStatusLogEvent($this, $this->cch_status_id, self::STATUS_CLOSED, $this->cch_owner_user_id, $userId, $description, $this->cch_channel_id, $action, $reasonId));
-        $this->recordEvent(new ClientChatCloseEvent($this->cch_id, true, (int)$this->cch_owner_user_id));
+        $this->recordEvent(new ClientChatCloseEvent(
+            $this->cch_id,
+            (int)$this->cch_status_id,
+            $this->cch_owner_user_id,
+            $userId,
+            $description,
+            (int)$this->cch_channel_id,
+            $action,
+            $reasonId,
+            true,
+            $this->cch_rid
+        ));
         $this->cch_status_id = self::STATUS_CLOSED;
     }
 
-    public function archive(?int $userId, int $action, ?int $reasonId = null, ?string $description = null): void
-    {
-        $this->recordEvent(new ClientChatManageStatusLogEvent($this, $this->cch_status_id, self::STATUS_ARCHIVE, $this->cch_owner_user_id, $userId, $description, $this->cch_channel_id, $action, $reasonId));
-        $this->recordEvent(new ClientChatCloseEvent($this->cch_id, false, (int)$this->cch_owner_user_id));
+    public function archive(
+        ?int $userId,
+        int $action,
+        ?int $reasonId = null,
+        ?string $description = null,
+        bool $shallowClose = false
+    ): void {
+        $this->recordEvent(new ClientChatArchiveEvent(
+            $this->cch_id,
+            (int)$this->cch_status_id,
+            $this->cch_owner_user_id,
+            $userId,
+            $description,
+            (int)$this->cch_channel_id,
+            $action,
+            $reasonId,
+            $shallowClose,
+            $this->cch_rid
+        ));
         $this->cch_status_id = self::STATUS_ARCHIVE;
     }
 
     public function transfer(int $userId, int $action, ?int $reasonId, ?string $description = null): void
     {
-        $this->recordEvent(new ClientChatManageStatusLogEvent($this, $this->cch_status_id, self::STATUS_TRANSFER, $this->cch_owner_user_id, $userId, $description, $this->cch_channel_id, $action, $reasonId));
+        $this->recordEvent(new ClientChatTransferEvent(
+            $this->cch_id,
+            (int)$this->cch_status_id,
+            (int)$this->cch_owner_user_id,
+            $userId,
+            $description,
+            (int)$this->cch_channel_id,
+            $action,
+            $reasonId,
+            $this->cch_rid
+        ));
         $this->cch_status_id = self::STATUS_TRANSFER;
     }
 
     public function inProgress(?int $userId, $action): void
     {
-        $this->recordEvent(new ClientChatManageStatusLogEvent($this, $this->cch_status_id, self::STATUS_IN_PROGRESS, $this->cch_owner_user_id, $userId, null, $this->cch_channel_id, $action, null));
+        $this->recordEvent(new ClientChatInProgressEvent(
+            $this,
+            $this->cch_status_id,
+            $this->cch_owner_user_id,
+            $userId,
+            null,
+            $this->cch_channel_id,
+            $action,
+            null,
+            $this->cch_rid
+        ));
         $this->cch_status_id = self::STATUS_IN_PROGRESS;
     }
 
@@ -377,19 +434,17 @@ class ClientChat extends \yii\db\ActiveRecord
         ?string $description = null,
         ?int $reasonId = null
     ): void {
-        $this->recordEvent(
-            new ClientChatManageStatusLogEvent(
-                $this,
-                $this->cch_status_id,
-                self::STATUS_HOLD,
-                $this->cch_owner_user_id,
-                $userId,
-                $description,
-                $this->cch_channel_id,
-                $action,
-                $reasonId
-            )
-        );
+        $this->recordEvent(new ClientChatHoldEvent(
+            $this->cch_id,
+            $this->cch_status_id,
+            $this->cch_owner_user_id,
+            $userId,
+            $description,
+            $this->cch_channel_id,
+            $action,
+            $reasonId,
+            $this->cch_rid
+        ));
         $this->cch_status_id = self::STATUS_HOLD;
     }
 
@@ -399,20 +454,17 @@ class ClientChat extends \yii\db\ActiveRecord
         ?string $description = null,
         ?int $reasonId = null
     ): void {
-        $this->recordEvent(
-            new ClientChatManageStatusLogEvent(
-                $this,
-                $this->cch_status_id,
-                self::STATUS_IDLE,
-                $this->cch_owner_user_id,
-                $userId,
-                $description,
-                $this->cch_channel_id,
-                $action,
-                $reasonId
-            )
-        );
-        $this->recordEvent(new ClientChatSetStatusIdleEvent($this->cch_id));
+        $this->recordEvent(new ClientChatIdleEvent(
+            $this->cch_id,
+            $this->cch_status_id,
+            $this->cch_owner_user_id,
+            $userId,
+            $description,
+            $this->cch_channel_id,
+            $action,
+            $reasonId,
+            $this->cch_rid
+        ));
         $this->cch_status_id = self::STATUS_IDLE;
     }
 
@@ -624,5 +676,10 @@ class ClientChat extends \yii\db\ActiveRecord
     public function isHumanStarted(): bool
     {
         return $this->cch_source_type_id === self::SOURCE_TYPE_AGENT || $this->cch_source_type_id === self::SOURCE_TYPE_CLIENT ;
+    }
+
+    public function changeChannel(int $channelId): void
+    {
+        $this->cch_channel_id = $channelId;
     }
 }

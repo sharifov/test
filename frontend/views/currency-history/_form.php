@@ -16,11 +16,11 @@ use yii\widgets\ActiveForm;
         <div class="col-md-3">
             <?= $form->field($model, 'ch_code')->dropDownList(\common\models\Currency::getList(), ['prompt' => '-']) ?>
 
-			<?= $form->field($model, 'ch_base_rate')->input('number', ['step' => 0.00001]) ?>
+            <?= $form->field($model, 'ch_base_rate')->input('number', ['step' => 0.00001]) ?>
 
-			<?= $form->field($model, 'ch_app_rate')->input('number', ['step' => 0.00001]) ?>
+            <?= $form->field($model, 'ch_app_rate')->input('number', ['step' => 0.00001]) ?>
 
-			<?= $form->field($model, 'ch_app_percent')->input('number', ['step' => 0.001]) ?>
+            <?= $form->field($model, 'ch_app_percent')->input('number', ['step' => 0.001]) ?>
         </div>
         <div class="col-md-3">
             <?= $form->field($model, 'ch_created_date')->textInput() ?>

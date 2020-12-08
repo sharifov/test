@@ -27,7 +27,6 @@ class m191118_142120_table_setting_add_redial_reservation_time extends Migration
         }
 
         Yii::$app->db->getSchema()->refreshTableSchema('{{%setting}}');
-
     }
 
     /**
@@ -45,5 +44,4 @@ class m191118_142120_table_setting_add_redial_reservation_time extends Migration
 
         Yii::$app->db->getSchema()->refreshTableSchema('{{%setting}}');
     }
-
 }

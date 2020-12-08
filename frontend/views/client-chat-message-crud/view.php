@@ -38,15 +38,15 @@ $this->params['breadcrumbs'][] = $this->title;
             'ccm_sent_dt',
             [
                 'attribute' => 'files',
-                'value' => function(\sales\model\clientChatMessage\entity\ClientChatMessage $model) {
+                'value' => function (\sales\model\clientChatMessage\entity\ClientChatMessage $model) {
                     $view = "";
                     if (array_key_exists('attachments', $model->ccm_body)) {
                         foreach ($model->ccm_body['attachments'] as $attachment) {
                             if (array_key_exists('title_link', $attachment) && array_key_exists('title', $attachment)) {
-                                $view = $view.HTML::a($attachment['title'], "/client-chat-message-crud/download?url=".base64_encode ( $attachment['title_link'] ), ['target'=>'_blank']).", ";
+                                $view = $view . HTML::a($attachment['title'], "/client-chat-message-crud/download?url=" . base64_encode($attachment['title_link']), ['target' => '_blank']) . ", ";
                             }
                             if (array_key_exists('image_url', $attachment)) {
-                                $view .= Html::a($attachment['image_url'], $attachment['image_url'], ['target'=>'_blank']) . ', ';
+                                $view .= Html::a($attachment['image_url'], $attachment['image_url'], ['target' => '_blank']) . ', ';
                             }
                         }
                     }
@@ -58,14 +58,14 @@ $this->params['breadcrumbs'][] = $this->title;
 //            'ccm_body',
             [
                 'attribute' => 'ccm_body',
-                'value' => function(\sales\model\clientChatMessage\entity\ClientChatMessage $model) {
+                'value' => function (\sales\model\clientChatMessage\entity\ClientChatMessage $model) {
                     return json_encode($model->ccm_body);
                 },
                 'format' => 'raw',
             ],
             [
                 'attribute' => 'ccm_has_attachment',
-                'value' => function(\sales\model\clientChatMessage\entity\ClientChatMessage $model) {
+                'value' => function (\sales\model\clientChatMessage\entity\ClientChatMessage $model) {
                     if ($model->ccm_has_attachment > 0) {
                         return "Yes";
                     }

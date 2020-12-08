@@ -46,7 +46,7 @@ class ClientChatQaSearch extends ClientChat
 
     public const MESSAGE_BY_LIST = [
         self::MESSAGE_BY_CLIENT => 'Client',
-        self::MESSAGE_BY_USER=> 'User',
+        self::MESSAGE_BY_USER => 'User',
     ];
 
     public function rules(): array
@@ -65,13 +65,15 @@ class ClientChatQaSearch extends ClientChat
             [
                 [
                     'cch_rid', 'cch_title', 'cch_description',
-                    'cch_note', 'cch_ip', 'cch_language_id',
-                    'cch_created_dt', 'cch_updated_dt', 'createdRangeDate',
+                    'cch_note', 'cch_ip', 'cch_language_id', 'createdRangeDate',
                 ],
                 'safe',
             ],
+            [['cch_created_dt', 'cch_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
             [['dataCountry', 'dataCity', 'messageText'], 'string', 'max' => 100],
-            ['ownerUserID', 'string']
+            ['ownerUserID', 'string'],
+            [['createdRangeDate'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+            [['createdRangeDate'], 'validateRange', 'params' => ['minStartDate' => '2020-01-01 00:00:00', 'maxEndDate' => date("Y-m-d 23:59:59")]],
         ];
     }
 
@@ -97,12 +99,13 @@ class ClientChatQaSearch extends ClientChat
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cch_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['cch_id' => SORT_DESC]],
         ]);
 
         $this->load($params);
 
         if (!$this->validate()) {
+            $this->createdRangeDate = null;
             $query->where('0=1');
             return $dataProvider;
         }
@@ -268,5 +271,26 @@ class ClientChatQaSearch extends ClientChat
             ->andFilterWhere(['like', 'cch_language_id', $this->cch_language_id]);
 
         return $query;
+    }
+
+    public function validateRange($attribute, $params)
+    {
+        $range = explode(' - ', $this->$attribute);
+        if ((count($range) == count($params)) == 2) {
+            if (
+                (strtotime(reset($range)) < strtotime(reset($params)) ||
+                    strtotime(reset($range)) > strtotime(end($params))) ||
+
+                (strtotime(end($range)) > strtotime(end($params)) ||
+                    strtotime(end($range)) < strtotime(reset($params))) ||
+
+                (strtotime(reset($range)) > strtotime(end($range)) ||
+                    strtotime(end($range)) < strtotime(reset($range)))
+            ) {
+                $this->addError($attribute, 'Range start date or end date is incorrect');
+            }
+        } else {
+            $this->addError($attribute, 'Range format or validation params set wrong');
+        }
     }
 }

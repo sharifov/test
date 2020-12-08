@@ -12,7 +12,7 @@ class m181128_084223_add_column_tips_on_leads_table extends Migration
      */
     public function safeUp()
     {
-        $this->addColumn('{{%leads}}', 'tips', $this->decimal(10,2)->defaultValue(0));
+        $this->addColumn('{{%leads}}', 'tips', $this->decimal(10, 2)->defaultValue(0));
     }
 
     /**

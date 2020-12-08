@@ -59,13 +59,13 @@ $tabs[] = [
 ?>
 
 <div class="row">
-	<div class="col-md-12">
+    <div class="col-md-12">
         <nav>
             <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                <?php foreach ($tabs as $key => $tab): ?>
-                    <?php if ($key === 0): ?>
+                <?php foreach ($tabs as $key => $tab) : ?>
+                    <?php if ($key === 0) : ?>
                         <a class="nav-item nav-link active" id="nav-<?= $tab['id']?>-tab" data-toggle="tab" href="#nav-<?= $tab['id']?>" role="tab" aria-controls="nav-<?= $tab['id']?>" aria-selected="true"><?= $tab['name']?></a>
-                    <?php else: ?>
+                    <?php else : ?>
                         <a class="nav-item nav-link" id="nav-<?= $tab['id']?>-tab" data-toggle="tab" href="#nav-<?= $tab['id']?>" role="tab" aria-controls="nav-<?= $tab['id']?>" aria-selected="false"><?= $tab['name']?></a>
                     <?php endif;?>
                 <?php endforeach; ?>
@@ -73,10 +73,10 @@ $tabs[] = [
         </nav>
         <div class="tab-content" id="nav-tabContent">
             <br>
-            <?php foreach ($tabs as $key => $tab): ?>
-                <?php if ($key === 0): ?>
+            <?php foreach ($tabs as $key => $tab) : ?>
+                <?php if ($key === 0) : ?>
                     <div class="tab-pane fade show active" id="nav-<?= $tab['id']?>" role="tabpanel" aria-labelledby="nav-<?= $tab['id']?>-tab"><?= $tab['content']?></div>
-                <?php else: ?>
+                <?php else : ?>
                     <div class="tab-pane fade" id="nav-<?= $tab['id']?>" role="tabpanel" aria-labelledby="nav-<?= $tab['id']?>-tab"><?= $tab['content']?></div>
                 <?php endif;?>
             <?php endforeach; ?>

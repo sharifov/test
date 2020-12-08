@@ -34,13 +34,14 @@ class LeadRejectEvent
      * @param int|null $creatorId
      * @param string|null $reason
      */
-    public function __construct(Lead $lead,
-                                ?int $oldStatus,
-                                ?int $oldOwnerId,
-                                ?int $newOwnerId,
-                                ?int $creatorId,
-                                ?string $reason)
-    {
+    public function __construct(
+        Lead $lead,
+        ?int $oldStatus,
+        ?int $oldOwnerId,
+        ?int $newOwnerId,
+        ?int $creatorId,
+        ?string $reason
+    ) {
         $this->lead = $lead;
         $this->oldStatus = $oldStatus;
         $this->oldOwnerId = $oldOwnerId;
@@ -49,5 +50,4 @@ class LeadRejectEvent
         $this->reason = $reason;
         $this->created = date('Y-m-d H:i:s');
     }
-
 }

@@ -1,6 +1,8 @@
 <?php
+
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+
 ?>
 
 <div class="calls-search">
@@ -31,7 +33,7 @@ use yii\widgets\ActiveForm;
                             ]
                         ]
                     ])->label('Chat Created Date / Message Send Date');
-                    ?>
+?>
                 </div>
             </div>
         </div>

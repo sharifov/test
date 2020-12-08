@@ -2,10 +2,10 @@
 
 use yii\widgets\ActiveForm;
 use yii\helpers\Html;
-use \sales\helpers\lead\LeadHelper;
-use \yii\web\JqueryAsset;
-use \yii\web\View;
-use \common\widgets\Alert;
+use sales\helpers\lead\LeadHelper;
+use yii\web\JqueryAsset;
+use yii\web\View;
+use common\widgets\Alert;
 
 /**
  * @var $this yii\web\View
@@ -47,30 +47,34 @@ $itineraryFormId = $itineraryForm->formName() . '-form';
                     <span style="font-weight: 600; font-size: 16px;">Flight Request</span>
                     <span style="font-size: 13px; padding: 0 7px">
                         <?php
-                            switch ($itineraryForm->tripType) {
-                                case \common\models\Lead::TRIP_TYPE_ONE_WAY : $iconClass = 'fa fa-long-arrow-right';
-                                    break;
-                                case \common\models\Lead::TRIP_TYPE_ROUND_TRIP : $iconClass = 'fa fa-exchange';
-                                    break;
-                                case \common\models\Lead::TRIP_TYPE_MULTI_DESTINATION : $iconClass = 'fa fa-random';
-                                    break;
-                                default: $iconClass = '';
-                            }
+                        switch ($itineraryForm->tripType) {
+                            case \common\models\Lead::TRIP_TYPE_ONE_WAY:
+                                    $iconClass = 'fa fa-long-arrow-right';
+                                break;
+                            case \common\models\Lead::TRIP_TYPE_ROUND_TRIP:
+                                    $iconClass = 'fa fa-exchange';
+                                break;
+                            case \common\models\Lead::TRIP_TYPE_MULTI_DESTINATION:
+                                    $iconClass = 'fa fa-random';
+                                break;
+                            default:
+                                    $iconClass = '';
+                        }
                         ?>
                         <i class="<?=$iconClass?> text-success" aria-hidden="true"></i>
                         <?= LeadHelper::tripTypeName($itineraryForm->tripType) ?> •
                         <b><?= LeadHelper::cabinName($itineraryForm->cabin) ?></b> •
                         <?= (int)$itineraryForm->adults + (int)$itineraryForm->children + (int)$itineraryForm->infants ?> pax</span>
                     <span>
-                        <?php if ($itineraryForm->adults): ?>
+                        <?php if ($itineraryForm->adults) : ?>
                             <span><strong class="label label-success"
                                           style="margin-left: 7px;"><?= $itineraryForm->adults ?></strong> ADT</span>
                         <?php endif; ?>
-                        <?php if ($itineraryForm->children): ?>
+                        <?php if ($itineraryForm->children) : ?>
                             <span><strong class="label label-success"
                                           style="margin-left: 7px;"><?= $itineraryForm->children ?></strong> CHD</span>
                         <?php endif; ?>
-                        <?php if ($itineraryForm->infants): ?>
+                        <?php if ($itineraryForm->infants) : ?>
                             <span><strong class="label label-success"
                                           style="margin-left: 7px;"><?= $itineraryForm->infants ?></strong> INF</span>
                         <?php endif; ?>
@@ -87,7 +91,7 @@ $itineraryFormId = $itineraryForm->formName() . '-form';
                                 <th>Departure</th>
                                 <th>Flex</th>
                             </tr>
-                            <?php foreach ($itineraryForm->segments as $keySegment => $segment): ?>
+                            <?php foreach ($itineraryForm->segments as $keySegment => $segment) : ?>
                                 <tr>
                                     <td>
                                         <?= $keySegment + 1 ?>.
@@ -123,13 +127,13 @@ $itineraryFormId = $itineraryForm->formName() . '-form';
                         ['class' => 'btn btn-default', 'data' => ['method' => 'post', 'params'=> ['id'=> $itineraryForm->leadId]]])*/ ?>
 
                     <?php if ($itineraryForm->isViewMode()) : ?>
-
-
                         <?php if (Yii::$app->user->can('updateLead', ['leadId' => $itineraryForm->leadId])) : ?>
                         <div class="btn-wrapper text-right">
-                            <?= Html::a('<i class="fa fa-edit"></i> Edit',
+                            <?= Html::a(
+                                '<i class="fa fa-edit"></i> Edit',
                                 ['/lead-itinerary/view-edit-form', 'id' => $itineraryForm->leadId],
-                                ['class' => 'btn btn-default']) ?>
+                                ['class' => 'btn btn-default']
+                            ) ?>
                         </div>
                         <?php endif; ?>
 
@@ -143,19 +147,18 @@ $itineraryFormId = $itineraryForm->formName() . '-form';
 
 
                 <?php if ($itineraryForm->isEditMode()) : ?>
-
                     <div class="clearfix"></div>
                     <div class="request-form collapse in show" id="request" aria-expanded="true">
                         <div class="separator"></div>
 
                         <div id="modeFlightSegments" data-value="edit" style="display: none"></div>
-						<?php
-						$js = <<<JS
+                        <?php
+                        $js = <<<JS
     pjaxOffFormSubmit('#product-accordion');
     pjaxOffFormSubmit('#pjax-lead-products-wrap');
 JS;
-						$this->registerJs($js, View::POS_HEAD);
-						?>
+                        $this->registerJs($js, View::POS_HEAD);
+                        ?>
                         <div class="sl-itinerary-form2">
                             <?php $form = ActiveForm::begin([
                                 'action' => ['/lead-itinerary/edit'],
@@ -203,7 +206,7 @@ JS;
                             <div class="btn-wrapper text-right">
 
 
-                                <?= Html::a('<i class="fa fa-remove"></i> Close',  ['/lead-itinerary/view-edit-form', 'id'=> $itineraryForm->leadId, 'mode' => 'view'], [
+                                <?= Html::a('<i class="fa fa-remove"></i> Close', ['/lead-itinerary/view-edit-form', 'id' => $itineraryForm->leadId, 'mode' => 'view'], [
                                     'class' => 'btn btn-default',
                                 ]) ?>
 

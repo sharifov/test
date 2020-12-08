@@ -22,5 +22,4 @@ class m190227_092519_lead_agents_processing_fee_add extends Migration
     {
         $this->dropColumn('{{%leads}}', 'agents_processing_fee');
     }
-
 }

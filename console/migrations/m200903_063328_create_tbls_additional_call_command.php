@@ -37,14 +37,32 @@ class m200903_063328_create_tbls_additional_call_command extends Migration
             'plc_created_dt' => $this->dateTime(),
         ], $tableOptions);
 
-        $this->addForeignKey('FK-phone_line_command-plc_line_id', '{{%phone_line_command}}', ['plc_line_id'],
-        '{{%phone_line}}', ['line_id'], 'SET NULL', 'CASCADE'
+        $this->addForeignKey(
+            'FK-phone_line_command-plc_line_id',
+            '{{%phone_line_command}}',
+            ['plc_line_id'],
+            '{{%phone_line}}',
+            ['line_id'],
+            'SET NULL',
+            'CASCADE'
         );
-        $this->addForeignKey('FK-phone_line_command-plc_ccom_id', '{{%phone_line_command}}', ['plc_ccom_id'],
-        '{{%call_command}}', ['ccom_id'], 'SET NULL', 'CASCADE'
+        $this->addForeignKey(
+            'FK-phone_line_command-plc_ccom_id',
+            '{{%phone_line_command}}',
+            ['plc_ccom_id'],
+            '{{%call_command}}',
+            ['ccom_id'],
+            'SET NULL',
+            'CASCADE'
         );
-        $this->addForeignKey('FK-phone_line_command-plc_created_user_id', '{{%phone_line_command}}', ['plc_created_user_id'],
-        '{{%employees}}', ['id'], 'SET NULL', 'CASCADE'
+        $this->addForeignKey(
+            'FK-phone_line_command-plc_created_user_id',
+            '{{%phone_line_command}}',
+            ['plc_created_user_id'],
+            '{{%employees}}',
+            ['id'],
+            'SET NULL',
+            'CASCADE'
         );
 
         $this->createTable('{{%call_gather_switch}}', [
@@ -54,14 +72,28 @@ class m200903_063328_create_tbls_additional_call_command extends Migration
             'cgs_exec_ccom_id' => $this->integer()->notNull(),
         ], $tableOptions);
 
-        $this->addPrimaryKey('PK-call_gather_switch', '{{%call_gather_switch}}',
+        $this->addPrimaryKey(
+            'PK-call_gather_switch',
+            '{{%call_gather_switch}}',
             ['cgs_ccom_id', 'cgs_step', 'cgs_case']
         );
-        $this->addForeignKey('FK-call_gather_switch-cgs_ccom_id', '{{%call_gather_switch}}', ['cgs_ccom_id'],
-        '{{%call_command}}', ['ccom_id'], 'CASCADE', 'CASCADE'
+        $this->addForeignKey(
+            'FK-call_gather_switch-cgs_ccom_id',
+            '{{%call_gather_switch}}',
+            ['cgs_ccom_id'],
+            '{{%call_command}}',
+            ['ccom_id'],
+            'CASCADE',
+            'CASCADE'
         );
-        $this->addForeignKey('FK-call_gather_switch-cgs_exec_ccom_id', '{{%call_gather_switch}}', ['cgs_exec_ccom_id'],
-        '{{%call_command}}', ['ccom_id'], 'CASCADE', 'CASCADE'
+        $this->addForeignKey(
+            'FK-call_gather_switch-cgs_exec_ccom_id',
+            '{{%call_gather_switch}}',
+            ['cgs_exec_ccom_id'],
+            '{{%call_command}}',
+            ['ccom_id'],
+            'CASCADE',
+            'CASCADE'
         );
 
         (new \console\migrations\RbacMigrationService())->up($this->route, $this->roles);

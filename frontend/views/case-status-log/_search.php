@@ -56,7 +56,8 @@ $userList = Employee::getList();
             <div class="row">
                 <div class="col-md-6">
                     <?= $form->field($model, 'created_date_from')->widget(
-                        DatePicker::class, [
+                        DatePicker::class,
+                        [
                         'inline' => false,
                         'clientOptions' => [
                             'autoclose' => true,
@@ -64,12 +65,14 @@ $userList = Employee::getList();
                             'format' => 'yyyy-mm-dd',
                             'todayBtn' => true
                         ]
-                    ]);?>
+                        ]
+                    );?>
                 </div>
 
                 <div class="col-md-6">
                     <?= $form->field($model, 'created_date_to')->widget(
-                        DatePicker::class, [
+                        DatePicker::class,
+                        [
                         'inline' => false,
                         'clientOptions' => [
                             'autoclose' => true,
@@ -77,7 +80,8 @@ $userList = Employee::getList();
                             'format' => 'yyyy-mm-dd',
                             'todayBtn' => true
                         ]
-                    ]);?>
+                        ]
+                    );?>
                 </div>
             </div>
         </div>

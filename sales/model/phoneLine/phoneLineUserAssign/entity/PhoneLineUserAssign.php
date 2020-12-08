@@ -32,20 +32,19 @@ use yii\db\ActiveRecord;
  */
 class PhoneLineUserAssign extends \yii\db\ActiveRecord
 {
-
-	public function behaviors(): array
-	{
-		return [
-			'timestamp' => [
-				'class' => TimestampBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['plus_created_dt', 'plus_updated_dt'],
-					ActiveRecord::EVENT_BEFORE_UPDATE => ['plus_updated_dt'],
-				],
-				'value' => date('Y-m-d H:i:s'),
-			],
-		];
-	}
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['plus_created_dt', 'plus_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['plus_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s'),
+            ],
+        ];
+    }
 
     public function rules(): array
     {
@@ -125,10 +124,10 @@ class PhoneLineUserAssign extends \yii\db\ActiveRecord
         ];
     }
 
-	public static function find(): Scopes
-	{
-		return new Scopes(static::class);
-	}
+    public static function find(): Scopes
+    {
+        return new Scopes(static::class);
+    }
 
     public static function tableName(): string
     {

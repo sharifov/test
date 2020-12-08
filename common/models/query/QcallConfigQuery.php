@@ -16,7 +16,7 @@ class QcallConfigQuery extends \yii\db\ActiveQuery
      * @param int|null $callCount
      * @return QcallConfig|null
      */
-    public function config(?int $status, ?int $callCount):? QcallConfig
+    public function config(?int $status, ?int $callCount): ?QcallConfig
     {
         return $this->andWhere(['qc_status_id' => $status])
             ->andWhere(['<=', 'qc_call_att', $callCount])

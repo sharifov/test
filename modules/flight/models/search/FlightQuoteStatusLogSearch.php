@@ -18,7 +18,7 @@ class FlightQuoteStatusLogSearch extends FlightQuoteStatusLog
     {
         return [
             [['qsl_id', 'qsl_created_user_id', 'qsl_flight_quote_id', 'qsl_status_id'], 'integer'],
-            [['qsl_created_dt'], 'safe'],
+            [['qsl_created_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -46,7 +46,7 @@ class FlightQuoteStatusLogSearch extends FlightQuoteStatusLog
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['qsl_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['qsl_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ]
@@ -66,7 +66,7 @@ class FlightQuoteStatusLogSearch extends FlightQuoteStatusLog
             'qsl_created_user_id' => $this->qsl_created_user_id,
             'qsl_flight_quote_id' => $this->qsl_flight_quote_id,
             'qsl_status_id' => $this->qsl_status_id,
-            'qsl_created_dt' => $this->qsl_created_dt,
+            'DATE(qsl_created_dt)' => $this->qsl_created_dt,
         ]);
 
         return $dataProvider;

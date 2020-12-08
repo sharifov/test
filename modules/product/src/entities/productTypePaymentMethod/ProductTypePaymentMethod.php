@@ -37,27 +37,27 @@ class ProductTypePaymentMethod extends \yii\db\ActiveRecord
         return 'product_type_payment_method';
     }
 
-	/**
-	 * @return array
-	 */
-	public function behaviors(): array
-	{
-		return [
-			'timestamp' => [
-				'class' => TimestampBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['ptpm_created_dt', 'ptpm_updated_dt'],
-					ActiveRecord::EVENT_BEFORE_UPDATE => ['ptpm_updated_dt'],
-				],
-				'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
-			],
-			'user' => [
-				'class' => BlameableBehavior::class,
-				'createdByAttribute' => 'ptpm_created_user_id', //'pq_owner_user_id',
-				'updatedByAttribute' => 'ptpm_updated_user_id',
-			],
-		];
-	}
+    /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['ptpm_created_dt', 'ptpm_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['ptpm_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'ptpm_created_user_id', //'pq_owner_user_id',
+                'updatedByAttribute' => 'ptpm_updated_user_id',
+            ],
+        ];
+    }
 
     public function rules()
     {
@@ -73,10 +73,10 @@ class ProductTypePaymentMethod extends \yii\db\ActiveRecord
             [['ptpm_produt_type_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductType::class, 'targetAttribute' => ['ptpm_produt_type_id' => 'pt_id']],
             [['ptpm_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ptpm_updated_user_id' => 'id']],
             ['ptpm_default', function ($attribute, $params, InlineValidator $validator) {
-        		if ($this->ptpm_default && $default = self::find()->andWhere(['ptpm_produt_type_id' => $this->ptpm_produt_type_id, 'ptpm_default' => true])->andWhere(['<>', 'ptpm_payment_method_id', $this->ptpm_payment_method_id])->one()) {
-					$this->addError($attribute, 'Already exist default Product type payment method: Product - ' . $default->ptpmProdutType->pt_name . '; Payment Method: ' . $default->ptpmPaymentMethod->pm_name);
-				}
-			}],
+                if ($this->ptpm_default && $default = self::find()->andWhere(['ptpm_produt_type_id' => $this->ptpm_produt_type_id, 'ptpm_default' => true])->andWhere(['<>', 'ptpm_payment_method_id', $this->ptpm_payment_method_id])->one()) {
+                    $this->addError($attribute, 'Already exist default Product type payment method: Product - ' . $default->ptpmProdutType->pt_name . '; Payment Method: ' . $default->ptpmPaymentMethod->pm_name);
+                }
+            }],
         ];
     }
 
@@ -105,7 +105,7 @@ class ProductTypePaymentMethod extends \yii\db\ActiveRecord
      * @return \yii\db\ActiveQuery
      */
     public function getPtpmCreatedUser(): \yii\db\ActiveQuery
-	{
+    {
         return $this->hasOne(Employee::class, ['id' => 'ptpm_created_user_id']);
     }
 
@@ -115,7 +115,7 @@ class ProductTypePaymentMethod extends \yii\db\ActiveRecord
      * @return \yii\db\ActiveQuery
      */
     public function getPtpmPaymentMethod(): \yii\db\ActiveQuery
-	{
+    {
         return $this->hasOne(PaymentMethod::class, ['pm_id' => 'ptpm_payment_method_id']);
     }
 
@@ -125,7 +125,7 @@ class ProductTypePaymentMethod extends \yii\db\ActiveRecord
      * @return \yii\db\ActiveQuery
      */
     public function getPtpmProdutType(): \yii\db\ActiveQuery
-	{
+    {
         return $this->hasOne(ProductType::class, ['pt_id' => 'ptpm_produt_type_id']);
     }
 
@@ -135,7 +135,7 @@ class ProductTypePaymentMethod extends \yii\db\ActiveRecord
      * @return \yii\db\ActiveQuery
      */
     public function getPtpmUpdatedUser(): \yii\db\ActiveQuery
-	{
+    {
         return $this->hasOne(Employee::class, ['id' => 'ptpm_updated_user_id']);
     }
 }

@@ -22,5 +22,4 @@ class m181129_132742_alter_user_group_add_processing_fee extends Migration
     {
         $this->dropColumn('{{%user_group}}', 'ug_processing_fee');
     }
-
 }

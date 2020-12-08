@@ -1,8 +1,9 @@
 <?php
+
 namespace frontend\components;
 
 use frontend\models\UserSiteActivity;
-use \Yii;
+use Yii;
 use yii\base\Behavior;
 use yii\helpers\VarDumper;
 use yii\web\Application;
@@ -34,8 +35,7 @@ class UserSiteActivityLog extends Behavior
 
             $settings = Yii::$app->params['settings'];
 
-            if(isset($settings['user_site_activity_time'], $settings['user_site_activity_count']) && $settings['user_site_activity_time'] && $settings['user_site_activity_count']) {
-
+            if (isset($settings['user_site_activity_time'], $settings['user_site_activity_count']) && $settings['user_site_activity_time'] && $settings['user_site_activity_count']) {
                 $sec = (int) $settings['user_site_activity_time'];
 
                 $requestCount = UserSiteActivity::find()
@@ -44,7 +44,7 @@ class UserSiteActivityLog extends Behavior
                     ->andWhere(['>=', 'usa_created_dt', date('Y-m-d H:i:s', time() - $sec)])
                     ->count();
 
-                if($requestCount > $settings['user_site_activity_count']) {
+                if ($requestCount > $settings['user_site_activity_count']) {
                     // Yii::warning(VarDumper::dumpAsString(['usa_user_id' => Yii::$app->user->id, 'usa_request_url' => $request_url]), 'UserSiteActivityLog:block');
 //                    throw new NotAcceptableHttpException('Many requests for this url. With frequent requests, the system may block you. Please wait any time ...', 111);
                     throw new ForbiddenHttpException('You\'ve made too many requests recently. Please wait and try your request again later.', 111);
@@ -59,10 +59,9 @@ class UserSiteActivityLog extends Behavior
             $activity->usa_request_type = Yii::$app->request->isPost ? UserSiteActivity::REQUEST_TYPE_POST : UserSiteActivity::REQUEST_TYPE_GET;
             $activity->usa_request_get  = Yii::$app->request->get() ? json_encode(Yii::$app->request->get()) : null;
             // $activity->usa_request_post = Yii::$app->request->post() ? json_encode(Yii::$app->request->post()) : null;
-            if(!$activity->save()) {
+            if (!$activity->save()) {
                 Yii::error(VarDumper::dumpAsString($activity->errors), 'UserSiteActivityLog:UserSiteActivity:save');
             }
-
         }
     }
 }

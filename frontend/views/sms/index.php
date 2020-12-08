@@ -1,6 +1,7 @@
 <?php
 
 use common\components\grid\UserSelect2Column;
+use common\components\grid\DateTimeColumn;
 use common\models\Employee;
 use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
@@ -55,20 +56,20 @@ $user = Yii::$app->user->identity;
         <div class="col-md-3">
             <?php
             echo  \kartik\daterange\DateRangePicker::widget([
-                'model'=> $searchModel,
+                'model' => $searchModel,
                 'attribute' => 'date_range',
-                'useWithAddon'=>true,
-                'presetDropdown'=>true,
-                'hideInput'=>true,
-                'convertFormat'=>true,
+                'useWithAddon' => true,
+                'presetDropdown' => true,
+                'hideInput' => true,
+                'convertFormat' => true,
                 'startAttribute' => 'datetime_start',
                 'endAttribute' => 'datetime_end',
-                'pluginOptions'=>[
-                    'timePicker'=> true,
+                'pluginOptions' => [
+                    'timePicker' => true,
                     'timePickerIncrement' => 1,
                     'timePicker24Hour' => true,
-                    'locale'=>[
-                        'format'=>'Y-m-d H:i',
+                    'locale' => [
+                        'format' => 'Y-m-d H:i',
                         'separator' => ' - '
                     ]
                 ]
@@ -87,7 +88,7 @@ $user = Yii::$app->user->identity;
         'filterModel' => $searchModel,
         'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
         'rowOptions' => function (\common\models\Sms $model, $index, $widget, $grid) {
-            if($model->s_type_id == \common\models\Sms::TYPE_OUTBOX) {
+            if ($model->s_type_id == \common\models\Sms::TYPE_OUTBOX) {
                 if ($model->s_status_id == \common\models\Sms::STATUS_ERROR) {
                     return ['class' => 'danger'];
                 } elseif ($model->s_status_id == \common\models\Sms::STATUS_PROCESS) {
@@ -271,22 +272,8 @@ $user = Yii::$app->user->identity;
 //                'filter' => $userList
 //            ],
             [
-                'attribute' => 's_created_dt',
-                'value' => static function (\common\models\Sms $model) {
-                    return $model->s_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->s_created_dt), 'php: Y-m-d [H:i:s]')  : '-';
-                },
-                'format' => 'raw',
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel,
-                    'attribute' => 's_created_dt',
-                    'clientOptions' => [
-                        'autoclose' => true,
-                        'format' => 'yyyy-mm-dd',
-                    ],
-                    'options' => [
-                        'autocomplete' => 'off'
-                    ],
-                ]),
+                'class' => DateTimeColumn::class,
+                'attribute' => 's_created_dt'
             ],
         ],
     ]); ?>

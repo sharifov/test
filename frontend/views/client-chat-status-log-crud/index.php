@@ -25,7 +25,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -34,19 +34,21 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'csl_id',
             [
-                'label' =>'Client Chat ID',
+                'label' => 'Client Chat ID',
                 'attribute' => 'csl_cch_id',
                 'value' => static function (ClientChatStatusLog $model) {
                     return $model->cslCch->cch_id ?? null;
                 }
             ],
-            //'csl_from_status',
+            'csl_rid',
             [
                 'attribute' => 'csl_from_status',
                 'value' => static function (ClientChatStatusLog $model) {
-                    return $model->csl_from_status ? Html::tag('span',
+                    return $model->csl_from_status ? Html::tag(
+                        'span',
                         ClientChat::getStatusNameById($model->csl_from_status),
-                            ['class' => 'badge badge-' . ClientChat::getStatusClassById($model->csl_from_status)]) : null;
+                        ['class' => 'badge badge-' . ClientChat::getStatusClassById($model->csl_from_status)]
+                    ) : null;
                 },
                 'format' => 'raw',
                 'filter' => \sales\model\clientChat\entity\ClientChat::getStatusList()
@@ -54,55 +56,57 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'csl_to_status',
                 'value' => static function (ClientChatStatusLog $model) {
-                    return $model->csl_to_status ? Html::tag('span',
+                    return $model->csl_to_status ? Html::tag(
+                        'span',
                         ClientChat::getStatusNameById($model->csl_to_status),
-                            ['class' => 'badge badge-' . ClientChat::getStatusClassById($model->csl_to_status)]) : null;
+                        ['class' => 'badge badge-' . ClientChat::getStatusClassById($model->csl_to_status)]
+                    ) : null;
                 },
                 'format' => 'raw',
                 'filter' => \sales\model\clientChat\entity\ClientChat::getStatusList()
             ],
-			[
-				'attribute' => 'csl_prev_channel_id',
-				'value' => static function (ClientChatStatusLog $model) {
-					return $model->cslPrevChannel ? Html::a('<i class="fa fa-link"></i> ' . $model->cslPrevChannel->ccc_name, ['/client-chat-channel-crud/view', 'id' => $model->csl_prev_channel_id], ['target' => '_blank', 'data-pjax' => 0]) : null;
-				},
-				'format' => 'raw',
-				'filter' => ClientChatChannel::getList()
-			],
-			[
-				'class' => UserSelect2Column::class,
-				'attribute' => 'csl_user_id',
-				'relation' => 'cslUser',
-				'format' => 'username',
-				'placeholder' => 'Select User'
-			],
+            [
+                'attribute' => 'csl_prev_channel_id',
+                'value' => static function (ClientChatStatusLog $model) {
+                    return $model->cslPrevChannel ? Html::a('<i class="fa fa-link"></i> ' . $model->cslPrevChannel->ccc_name, ['/client-chat-channel-crud/view', 'id' => $model->csl_prev_channel_id], ['target' => '_blank', 'data-pjax' => 0]) : null;
+                },
+                'format' => 'raw',
+                'filter' => ClientChatChannel::getList()
+            ],
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'csl_user_id',
+                'relation' => 'cslUser',
+                'format' => 'username',
+                'placeholder' => 'Select User'
+            ],
             //'csl_to_status',
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'csl_start_dt',
-				'format' => 'byUserDateTime'
-			],
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'csl_end_dt',
-				'format' => 'byUserDateTime'
-			],
-			[
-				'class' => UserSelect2Column::class,
-				'attribute' => 'csl_owner_id',
-				'relation' => 'cslOwner',
-				'format' => 'username',
-				'placeholder' => 'Select User'
-			],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'csl_start_dt',
+                'format' => 'byUserDateTime'
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'csl_end_dt',
+                'format' => 'byUserDateTime'
+            ],
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'csl_owner_id',
+                'relation' => 'cslOwner',
+                'format' => 'username',
+                'placeholder' => 'Select User'
+            ],
 
-			[
-				'attribute' => 'csl_action_type',
-				'value' => static function (ClientChatStatusLog $model) {
-					return ClientChatStatusLog::getActionLabel($model->csl_action_type);
-				},
-				'format' => 'raw',
-				'filter' => ClientChatStatusLog::getActionList()
-			],
+            [
+                'attribute' => 'csl_action_type',
+                'value' => static function (ClientChatStatusLog $model) {
+                    return ClientChatStatusLog::getActionLabel($model->csl_action_type);
+                },
+                'format' => 'raw',
+                'filter' => ClientChatStatusLog::getActionList()
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

@@ -93,8 +93,10 @@ class ContactsSearch extends Client
     {
         $query = Client::find();
 
-        $query->innerJoin(UserContactList::tableName() . ' AS user_contact_list',
-            'user_contact_list.ucl_client_id = ' . Client::tableName() . '.id');
+        $query->innerJoin(
+            UserContactList::tableName() . ' AS user_contact_list',
+            'user_contact_list.ucl_client_id = ' . Client::tableName() . '.id'
+        );
 
         if (!$this->isRoleAdmin()) {
             $query->andWhere(['user_contact_list.ucl_user_id' => $this->userId]);
@@ -458,7 +460,6 @@ class ContactsSearch extends Client
         }
 
         if ($this->search_text) {
-
             $queryClient->andWhere([
                 'OR',
                 ['IN', 'c.id', ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['like', 'phone', $this->search_text])],
@@ -479,7 +480,6 @@ class ContactsSearch extends Client
                 ])],
                 ['like', 'u.full_name', $this->search_text],
             ]);
-
         }
 
         $union = $queryClient->union($queryUser);

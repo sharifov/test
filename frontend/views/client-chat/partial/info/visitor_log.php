@@ -7,7 +7,7 @@ use yii\widgets\DetailView;
 
 ?>
 
-<?php if ($visitorLog): ?>
+<?php if ($visitorLog) : ?>
     <?= DetailView::widget([
         'model' => $visitorLog,
         'attributes' => [
@@ -28,11 +28,11 @@ use yii\widgets\DetailView;
             'vl_ip_address'
         ]
     ]) ?>
-<?php else: ?>
+<?php else : ?>
     <?= Alert::widget([
         'body' => 'Visitor log data not found.',
         'options' => [
             'class' => 'alert alert-warning'
         ]
     ]) ?>
-<?php endif; ?>
+<?php endif;

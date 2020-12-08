@@ -11,7 +11,7 @@ use yii\widgets\Pjax;
 
 ?>
 
-<?php if ($model->userParams): ?>
+<?php if ($model->userParams) : ?>
 <div class="row">
     <div class="col-md-6">
         <h5>General Info</h5>
@@ -72,9 +72,9 @@ use yii\widgets\Pjax;
             ]) ?>
         </div>
     </div>
-    <?php endif; ?>
+<?php endif; ?>
 
-    <?php if ($model->userProfile): ?>
+    <?php if ($model->userProfile) : ?>
         <div class="col-md-6">
             <h5>Chats Credentials Sets</h5>
             <div class="well">
@@ -102,7 +102,7 @@ use yii\widgets\Pjax;
 
 </div>
 <div class="row">
-    <?php if ($model->userProjectParams): ?>
+    <?php if ($model->userProjectParams) : ?>
         <div class="col-md-6">
             <h5>Project Params</h5>
             <div class="well">
@@ -140,7 +140,7 @@ use yii\widgets\Pjax;
                         [
                             'label' => 'Allow General Line',
                             'value' => function (\common\models\UserProjectParams $model) {
-                                return $model->upp_allow_general_line == 1 ? '<i class="fa fa-check-square-o"></i>': '<i class="fa fa-close"></i>';
+                                return $model->upp_allow_general_line == 1 ? '<i class="fa fa-check-square-o"></i>' : '<i class="fa fa-close"></i>';
                             },
                             'format' => 'raw'
                         ],
@@ -150,7 +150,7 @@ use yii\widgets\Pjax;
         </div>
     <?php endif; ?>
 
-    <?php if ($model->userProductType): ?>
+    <?php if ($model->userProductType) : ?>
         <div class="col-md-6">
             <h5>Product Type</h5>
             <div class="well">

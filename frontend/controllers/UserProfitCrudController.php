@@ -103,13 +103,13 @@ class UserProfitCrudController extends FController
         ]);
     }
 
-	/**
-	 * @param $id
-	 * @return \yii\web\Response
-	 * @throws NotFoundHttpException
-	 * @throws \Throwable
-	 * @throws \yii\db\StaleObjectException
-	 */
+    /**
+     * @param $id
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
     public function actionDelete($id)
     {
         $this->findModel($id)->delete();
@@ -117,18 +117,18 @@ class UserProfitCrudController extends FController
         return $this->redirect(['index']);
     }
 
-	/**
-	 * @throws NotFoundHttpException
-	 */
+    /**
+     * @throws NotFoundHttpException
+     */
     public function actionGetAgentPercentCommission(): \yii\web\Response
-	{
-		if (Yii::$app->request->isPost) {
-			$userId = Yii::$app->request->post('userId');
-			$agentCommission = Employee::findOne(['id' => $userId]);
-			return $this->asJson(['agentCommission' => $agentCommission->userParams->up_commission_percent ?? 0]);
-		}
-		throw new NotFoundHttpException('Page not found');
-	}
+    {
+        if (Yii::$app->request->isPost) {
+            $userId = Yii::$app->request->post('userId');
+            $agentCommission = Employee::findOne(['id' => $userId]);
+            return $this->asJson(['agentCommission' => $agentCommission->userParams->up_commission_percent ?? 0]);
+        }
+        throw new NotFoundHttpException('Page not found');
+    }
 
     /**
      * Finds the UserProfit model based on its primary key value.

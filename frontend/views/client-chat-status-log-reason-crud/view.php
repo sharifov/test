@@ -33,20 +33,20 @@ $this->params['breadcrumbs'][] = $this->title;
             'model' => $model,
             'attributes' => [
                 'cslr_id',
-				[
-					'attribute' => 'cslr_status_log_id',
-					'value' => static function (ClientChatStatusLogReason $model) {
-						return Html::a('<i class="fa fa-link"> ' . $model->cslr_status_log_id, ['/client-chat-status-log-crud/view', 'id' => $model->cslr_status_log_id], ['data-pjax' => 0, 'target' => '_blank']);
-					},
-					'format' => 'raw'
-				],
-				[
-					'attribute' => 'cslr_action_reason_id',
-					'value' => static function (ClientChatStatusLogReason $model) {
-						return Html::a('<i class="fa fa-link"> ' . $model->cslr_action_reason_id, ['/client-chat-action-reason-crud/view', 'id' => $model->cslr_action_reason_id], ['data-pjax' => 0, 'target' => '_blank']);
-					},
-					'format' => 'raw'
-				],
+                [
+                    'attribute' => 'cslr_status_log_id',
+                    'value' => static function (ClientChatStatusLogReason $model) {
+                        return Html::a('<i class="fa fa-link"> ' . $model->cslr_status_log_id, ['/client-chat-status-log-crud/view', 'id' => $model->cslr_status_log_id], ['data-pjax' => 0, 'target' => '_blank']);
+                    },
+                    'format' => 'raw'
+                ],
+                [
+                    'attribute' => 'cslr_action_reason_id',
+                    'value' => static function (ClientChatStatusLogReason $model) {
+                        return Html::a('<i class="fa fa-link"> ' . $model->cslr_action_reason_id, ['/client-chat-action-reason-crud/view', 'id' => $model->cslr_action_reason_id], ['data-pjax' => 0, 'target' => '_blank']);
+                    },
+                    'format' => 'raw'
+                ],
                 'cslr_comment',
             ],
         ]) ?>

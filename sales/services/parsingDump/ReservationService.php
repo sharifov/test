@@ -25,9 +25,9 @@ class ReservationService
      * @param string $gds
      */
     public function __construct(string $gds)
-	{
-		$this->gds = ParsingDump::setGdsForParsing($gds);
-	}
+    {
+        $this->gds = ParsingDump::setGdsForParsing($gds);
+    }
 
     /**
      * @param $string
@@ -80,13 +80,15 @@ class ReservationService
                 $itinerary[] = $this->itinerary[] = (new ItineraryDumpDTO([]))
                     ->feelByParsedReservationDump($this->parseResult[$i]);
 
-                $i ++;
+                $i++;
             } catch (\Throwable $throwable) {
-                \Yii::error(VarDumper::dumpAsString([
+                \Yii::error(
+                    VarDumper::dumpAsString([
                      'parseData' => $parseData,
                      'throwable' => $throwable,
-                ], 20),
-                'ReservationService:parseReservation:Throwable');
+                    ], 20),
+                    'ReservationService:parseReservation:Throwable'
+                );
                 $this->parseResult['failed']['segment'][] = $row;
             }
         }

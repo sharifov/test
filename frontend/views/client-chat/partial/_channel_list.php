@@ -11,9 +11,18 @@ use sales\model\clientChat\dashboard\FilterForm;
 /** @var int $page */
 /** @var int $countFreeToTake */
 /** @var int|null $resetUnreadMessagesChatId */
+/** @var array $listParams */
 
 $formatter = new \common\components\i18n\Formatter();
 $formatter->timeZone = \sales\auth\Auth::user()->timezone;
+
+$loadButtonText = '<i class="fa fa-angle-double-down"> </i> Load more (<span>' . $listParams['moreCount'] . '</span>)';
+$loadButtonClass = '';
+if ($listParams['isFullList']) {
+    $loadButtonText = 'All conversations are loaded';
+    $loadButtonClass = ' disabled';
+}
+
 ?>
 
 <div class="_cc-wrapper">
@@ -28,7 +37,7 @@ $formatter->timeZone = \sales\auth\Auth::user()->timezone;
     </div>
 
     <div id="cc-dialogs-wrapper" class="_cc-list-wrapper">
-        <?php if ($dataProvider): ?>
+        <?php if ($dataProvider) : ?>
             <?= $this->render('_client-chat-item', [
                 'clientChats' => $dataProvider->getModels(),
                 'clientChatId' => $clientChatId,
@@ -39,8 +48,8 @@ $formatter->timeZone = \sales\auth\Auth::user()->timezone;
     </div>
 
     <div class="_cc-channel-pagination" style="display: flex;justify-content: center; padding: 15px 0 10px;">
-        <button class="btn btn-default btn-sm" id="btn-load-channels" data-page="<?= $page; ?>">
-            <i class="fa fa-angle-double-down"> </i> Load more ...
+        <button class="btn btn-default btn-sm<?= $loadButtonClass ?>" id="btn-load-channels" data-page="<?= $listParams['page'] ?>"<?= $loadButtonClass ?>>
+            <?= $loadButtonText ?>
         </button>
     </div>
 </div>

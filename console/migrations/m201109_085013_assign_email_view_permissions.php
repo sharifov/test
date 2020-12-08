@@ -146,5 +146,4 @@ class m201109_085013_assign_email_view_permissions extends Migration
             }
         }
     }
-
 }

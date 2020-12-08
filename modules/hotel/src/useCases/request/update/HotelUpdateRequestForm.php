@@ -80,23 +80,23 @@ class HotelUpdateRequestForm extends Model
 
             ['ph_hotel_code', 'integer'],
             ['ph_hotel_code', 'string', 'max' => 11],
-		];
+        ];
     }
 
     public function attributeLabels(): array
     {
-		return [
-			'ph_check_in_date' => 'Check In',
-			'ph_check_out_date' => 'Check Out',
-			'ph_zone_code' => 'Zone Code',
-			'ph_hotel_code' => 'Hotel Code',
-			'ph_destination_code' => 'Destination',
-			'ph_destination_label' => 'Destination',
-			'ph_min_star_rate' => 'Min. Rate',
-			'ph_max_star_rate' => 'Max. Rate',
-			'ph_max_price_rate' => 'Max Price Rate',
-			'ph_min_price_rate' => 'Min Price Rate',
-		];
+        return [
+            'ph_check_in_date' => 'Check In',
+            'ph_check_out_date' => 'Check Out',
+            'ph_zone_code' => 'Zone Code',
+            'ph_hotel_code' => 'Hotel Code',
+            'ph_destination_code' => 'Destination',
+            'ph_destination_label' => 'Destination',
+            'ph_min_star_rate' => 'Min. Rate',
+            'ph_max_star_rate' => 'Max. Rate',
+            'ph_max_price_rate' => 'Max Price Rate',
+            'ph_min_price_rate' => 'Min Price Rate',
+        ];
     }
 
     public function getHotelId(): int

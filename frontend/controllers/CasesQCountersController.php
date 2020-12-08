@@ -193,5 +193,4 @@ class CasesQCountersController extends FController
         $user = Yii::$app->user->identity;
         return $this->casesQRepository->getNeedActionCount($user);
     }
-
 }

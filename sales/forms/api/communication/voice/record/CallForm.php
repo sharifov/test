@@ -69,5 +69,4 @@ class CallForm extends Model
             ['c_endpoint', 'in', 'range' => ['client', 'number']],
         ];
     }
-
 }

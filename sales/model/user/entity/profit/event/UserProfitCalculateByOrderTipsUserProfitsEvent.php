@@ -1,4 +1,5 @@
 <?php
+
 namespace sales\model\user\entity\profit\event;
 
 use modules\order\src\entities\order\Order;
@@ -11,17 +12,17 @@ use modules\order\src\entities\order\Order;
  */
 class UserProfitCalculateByOrderTipsUserProfitsEvent
 {
-	/**
-	 * @var Order
-	 */
-	public $order;
+    /**
+     * @var Order
+     */
+    public $order;
 
-	/**
-	 * UserProfitCalculateByOrderTipsUserProfits constructor.
-	 * @param Order $order
-	 */
-	public function __construct(Order $order)
-	{
-		$this->order = $order;
-	}
+    /**
+     * UserProfitCalculateByOrderTipsUserProfits constructor.
+     * @param Order $order
+     */
+    public function __construct(Order $order)
+    {
+        $this->order = $order;
+    }
 }

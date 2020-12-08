@@ -1,5 +1,7 @@
 <?php
+
 use yii\widgets\Pjax;
+
 /**
  * @var $emailsGraphData []
  */
@@ -75,24 +77,24 @@ $this->title = 'Emails Report';
                     <div class="x_panel">
                         <div class="col-md-3">
                             <?=\kartik\daterange\DateRangePicker::widget([
-                                'options'=>['id'=>'call-stats-picker'],
-                                'name'=>'callStatsRange',
-                                'convertFormat'=>true,
-                                'presetDropdown'=>true,
-                                'hideInput'=>true,
-                                'useWithAddon'=>true,
-                                'pluginOptions'=>[
+                                'options' => ['id' => 'call-stats-picker'],
+                                'name' => 'callStatsRange',
+                                'convertFormat' => true,
+                                'presetDropdown' => true,
+                                'hideInput' => true,
+                                'useWithAddon' => true,
+                                'pluginOptions' => [
                                     'minDate' => '2019-01-01',
                                     'maxDate' => date("Y-m-d"),
-                                    'timePicker'=> false,
-                                    'timePickerIncrement'=>15,
-                                    'locale'=>[
-                                        'format'=>'Y-m-d',
+                                    'timePicker' => false,
+                                    'timePickerIncrement' => 15,
+                                    'locale' => [
+                                        'format' => 'Y-m-d',
                                         'separator' => ' / '
                                     ],
                                 ],
-                                'pluginEvents'=>[
-                                    "apply.daterangepicker"=>"function(){
+                                'pluginEvents' => [
+                                    "apply.daterangepicker" => "function(){
                                      $('#chart_div').html(generateChartPreloader());                                    
                                      $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), emailsType: $('#emails_type').val()}, type: 'POST', url: 'emails-graph', async:true, push: false});
                                      let dates = $('#call-stats-picker').val().split(' / ');
@@ -139,7 +141,7 @@ $this->title = 'Emails Report';
 
                         <?php Pjax::begin(['id' => 'calls-graph-pjax']); ?>
                         <div class="x_content">
-                            <?php if ($emailsGraphData): ?>
+                            <?php if ($emailsGraphData) : ?>
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div id="chart_div" style="height:550px">
@@ -154,12 +156,12 @@ $this->title = 'Emails Report';
                                             function drawChart() {
                                                 let data = google.visualization.arrayToDataTable([
                                                     ['Time Line', 'Emails Done', 'Emails Error', {role: 'annotation'}],
-                                                    <?php foreach($emailsGraphData as $k => $item):?>
+                                                    <?php foreach ($emailsGraphData as $k => $item) :?>
                                                     ['<?=  ($item['weeksInterval'] == null)
                                                         ? date($item['timeLine'], strtotime($item['time']))
-                                                        : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
+                                                        : date($item['timeLine'], strtotime($item['time'])) . ' / ' . date($item['timeLine'], strtotime($item['weeksInterval']));
 
-                                                        ?>', <?=$item['done']?>, <?=$item['error']?>, '<?=''?>'],
+                                                    ?>', <?=$item['done']?>, <?=$item['error']?>, '<?=''?>'],
                                                     <?php endforeach;?>
                                                 ]);
 

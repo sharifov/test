@@ -1,6 +1,5 @@
 <?php
 
-
 namespace sales\forms\clientChat;
 
 use sales\model\clientChat\entity\ClientChat;

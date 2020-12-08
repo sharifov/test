@@ -42,6 +42,4 @@ class m190611_061527_add_columns_tbl_api_log extends Migration
 
         Yii::$app->db->getSchema()->refreshTableSchema('{{%api_log}}');
     }
-
-
 }

@@ -55,7 +55,7 @@ class AirportRepository extends Repository
     public function getListByIata($iata = []): array
     {
         $data = [];
-        foreach (Airports::find()->where(['iata' => $iata])->all() as $airport){
+        foreach (Airports::find()->where(['iata' => $iata])->all() as $airport) {
             $data[$airport['iata']] = ['name' => $airport['name'], 'city' => $airport['city'], 'country' => $airport['country']];
         }
         return $data;
@@ -71,11 +71,11 @@ class AirportRepository extends Repository
 
         $query = Airports::find();
 
-        if($countTerm < 4) {
+        if ($countTerm < 4) {
             $query->orfilterWhere(['like', 'LOWER(iata)', $term]);
         }
 
-        if($countTerm > 3) {
+        if ($countTerm > 3) {
             $query->orFilterWhere(['like', 'LOWER(name)', $term]);
             $query->orFilterWhere(['like', 'LOWER(city)', $term]);
             $query->orFilterWhere(['like', 'LOWER(country)', $term]);

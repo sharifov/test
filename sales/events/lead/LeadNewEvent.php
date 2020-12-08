@@ -25,13 +25,14 @@ class LeadNewEvent
     public $reason;
     public $created;
 
-    public function __construct(Lead $lead,
-                                ?int $oldStatus,
-                                ?int $oldOwnerId,
-                                ?int $newOwnerId,
-                                ?int $creatorId,
-                                ?string $reason)
-    {
+    public function __construct(
+        Lead $lead,
+        ?int $oldStatus,
+        ?int $oldOwnerId,
+        ?int $newOwnerId,
+        ?int $creatorId,
+        ?string $reason
+    ) {
         $this->lead = $lead;
         $this->oldStatus = $oldStatus;
         $this->oldOwnerId = $oldOwnerId;

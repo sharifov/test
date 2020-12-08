@@ -22,24 +22,24 @@ use yii\base\Model;
 class PhoneCreateForm extends Model
 {
 
-	/**
-	 * @var string
-	 */
+    /**
+     * @var string
+     */
     public $phone;
 
-	/**
-	 * @var integer
-	 */
-	public $id;
+    /**
+     * @var integer
+     */
+    public $id;
 
-	/**
-	 * @var integer
-	 */
-	public $client_id;
+    /**
+     * @var integer
+     */
+    public $client_id;
 
-	/**
-	 * @var integer
-	 */
+    /**
+     * @var integer
+     */
     public $type;
 
     public $help;
@@ -52,26 +52,26 @@ class PhoneCreateForm extends Model
     public $cp_title;
 
 
-	/**
+    /**
      * @return array
      */
     public function rules(): array
     {
         return [
             ['phone', 'validateRequired', 'skipOnEmpty' => false],
-			['phone', 'default', 'value' => null],
-			[['phone', 'cp_title'], 'string', 'max' => 100],
+            ['phone', 'default', 'value' => null],
+            [['phone', 'cp_title'], 'string', 'max' => 100],
             ['phone', PhoneInputValidator::class],
-            ['phone', 'filter', 'filter' => static function($value) {
-				return $value === null ? null : str_replace(['-', ' '], '', trim($value));
+            ['phone', 'filter', 'filter' => static function ($value) {
+                return $value === null ? null : str_replace(['-', ' '], '', trim($value));
             }],
             ['phone', InternalPhoneValidator::class, 'allowInternalPhone' => \Yii::$app->params['settings']['allow_contact_internal_phone']],
-			[['type', 'client_id', 'id'], 'integer'],
-			['type', 'checkTypeForExistence'],
-			[['phone', 'client_id'], 'unique', 'targetClass' => ClientPhone::class,  'targetAttribute' => ['phone', 'client_id'], 'message' => 'Client already has this phone number', 'except' => 'update'],
-			['phone', 'checkUniqueClientPhone', 'on' => 'update'],
+            [['type', 'client_id', 'id'], 'integer'],
+            ['type', 'checkTypeForExistence'],
+            [['phone', 'client_id'], 'unique', 'targetClass' => ClientPhone::class,  'targetAttribute' => ['phone', 'client_id'], 'message' => 'Client already has this phone number', 'except' => 'update'],
+            ['phone', 'checkUniqueClientPhone', 'on' => 'update'],
             ['comments', 'string'],
-		];
+        ];
     }
 
     public function validateRequired($attribute, $params): void
@@ -81,26 +81,26 @@ class PhoneCreateForm extends Model
         }
     }
 
-	/**
-	 * @param $attribute
-	 * @param $params
-	 */
-	public function checkTypeForExistence($attribute, $params): void
-	{
-		if (!ClientPhone::getPhoneType($this->type)) {
-			$this->addError($attribute, 'Type of the phone is not found');
-		}
-	}
+    /**
+     * @param $attribute
+     * @param $params
+     */
+    public function checkTypeForExistence($attribute, $params): void
+    {
+        if (!ClientPhone::getPhoneType($this->type)) {
+            $this->addError($attribute, 'Type of the phone is not found');
+        }
+    }
 
-	/**
-	 * @param $attribute
-	 * @param $params
-	 */
-	public function checkUniqueClientPhone($attribute, $params): void
-	{
-		$phone = ClientPhone::find()->where('id<>:id', [':id' => $this->id])->andWhere(['phone' => $this->phone, 'client_id' => $this->client_id])->exists();
-		if ($phone) {
-			$this->addError($attribute, 'Client already has this phone number');
-		}
-	}
+    /**
+     * @param $attribute
+     * @param $params
+     */
+    public function checkUniqueClientPhone($attribute, $params): void
+    {
+        $phone = ClientPhone::find()->where('id<>:id', [':id' => $this->id])->andWhere(['phone' => $this->phone, 'client_id' => $this->client_id])->exists();
+        if ($phone) {
+            $this->addError($attribute, 'Client already has this phone number');
+        }
+    }
 }

@@ -178,7 +178,7 @@ class UserController extends FController
                 Yii::error(VarDumper::dumpAsString($ucs->errors), 'UserCallStatusController:actionUpdateStatus:save');
             } else {
                 // Notifications::socket($ucs->us_user_id, null, 'updateUserCallStatus', ['id' => 'ucs'.$ucs->us_id, 'type_id' => $type_id]);
-                Notifications::publish('updateUserCallStatus', ['user_id' =>$ucs->us_user_id], ['id' => 'ucs'.$ucs->us_id, 'type_id' => $type_id]);
+                Notifications::publish('updateUserCallStatus', ['user_id' => $ucs->us_user_id], ['id' => 'ucs' . $ucs->us_id, 'type_id' => $type_id]);
             }
         }
 
@@ -263,7 +263,7 @@ class UserController extends FController
 
         $casesSearchModel = new CasesSearch();
         $casesSearchModel->datetime_start =  $datePickerModel->dateStart;
-        $casesSearchModel->datetime_end= $datePickerModel->dateEnd;
+        $casesSearchModel->datetime_end = $datePickerModel->dateEnd;
 
         $casesInfoDataProvider = $casesSearchModel->searchUserCasesInfo($params, $id);
 

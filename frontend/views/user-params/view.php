@@ -32,16 +32,16 @@ $this->params['breadcrumbs'][] = $this->title;
             'upUser.username',
             [
                 'attribute' => 'up_base_amount',
-                'value' => function(\common\models\UserParams $model) {
-                    return $model->up_base_amount ? '$'.number_format($model->up_base_amount , 2) : '-';
+                'value' => function (\common\models\UserParams $model) {
+                    return $model->up_base_amount ? '$' . number_format($model->up_base_amount, 2) : '-';
                 },
 
             ],
 
             [
                 'attribute' => 'up_commission_percent',
-                'value' => function(\common\models\UserParams $model) {
-                    return $model->up_commission_percent ? $model->up_commission_percent. '%' : '-';
+                'value' => function (\common\models\UserParams $model) {
+                    return $model->up_commission_percent ? $model->up_commission_percent . '%' : '-';
                 },
 
             ],
@@ -56,8 +56,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'up_leaderboard_enabled:boolean',
             [
                 'attribute' => 'up_updated_dt',
-                'value' => function(\common\models\UserParams $model) {
-                 return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->up_updated_dt));
+                'value' => function (\common\models\UserParams $model) {
+                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->up_updated_dt));
                 },
                 'format' => 'raw',
              ],

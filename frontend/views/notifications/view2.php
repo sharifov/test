@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model common\models\Notifications */
 
-$this->title = 'Notification - '. $model->n_title;
+$this->title = 'Notification - ' . $model->n_title;
 $this->params['breadcrumbs'][] = ['label' => Yii::t('notifications', 'My Notifications'), 'url' => ['list']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -39,7 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'n_id',
                     [
                       'attribute' => 'n_type_id',
-                        'value' => function(\common\models\Notifications $model) {
+                        'value' => function (\common\models\Notifications $model) {
                             return $model->getType();
                         }
                     ],

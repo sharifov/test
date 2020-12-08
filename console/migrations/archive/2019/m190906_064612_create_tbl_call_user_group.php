@@ -18,7 +18,7 @@ class m190906_064612_create_tbl_call_user_group extends Migration
         }
 
 
-        $this->createTable('{{%call_user_group}}',	[
+        $this->createTable('{{%call_user_group}}', [
             'cug_c_id'          => $this->integer()->notNull(),
             'cug_ug_id'         => $this->integer()->notNull(),
             'cug_created_dt'      => $this->dateTime(),
@@ -29,7 +29,7 @@ class m190906_064612_create_tbl_call_user_group extends Migration
         $this->addForeignKey('FK-call_user_group_cug_ug_id', '{{%call_user_group}}', ['cug_ug_id'], '{{%user_group}}', ['ug_id'], 'CASCADE', 'CASCADE');
 
 
-        $this->createTable('{{%department_phone_project_user_group}}',	[
+        $this->createTable('{{%department_phone_project_user_group}}', [
             'dug_dpp_id'        => $this->integer()->notNull(),
             'dug_ug_id'         => $this->integer()->notNull(),
             'dug_created_dt'    => $this->dateTime(),
@@ -42,7 +42,6 @@ class m190906_064612_create_tbl_call_user_group extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     /**

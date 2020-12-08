@@ -12,7 +12,7 @@ class m191014_081932_add_index_tbl_lead_flow extends Migration
      */
     public function safeUp()
     {
-		$this->createIndex('fk-lead_flow-owner', 'lead_flow', 'lf_owner_id');
+        $this->createIndex('fk-lead_flow-owner', 'lead_flow', 'lf_owner_id');
     }
 
     /**
@@ -20,7 +20,7 @@ class m191014_081932_add_index_tbl_lead_flow extends Migration
      */
     public function safeDown()
     {
-    	$this->dropIndex('fk-lead_flow-owner', 'lead_flow');
+        $this->dropIndex('fk-lead_flow-owner', 'lead_flow');
 
         return true;
     }

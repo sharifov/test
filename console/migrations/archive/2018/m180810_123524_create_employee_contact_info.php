@@ -41,5 +41,4 @@ class m180810_123524_create_employee_contact_info extends Migration
         $this->dropForeignKey('fk-employee_contact_info-projects', 'employee_contact_info');
         $this->dropTable('employee_contact_info');
     }
-
 }

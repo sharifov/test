@@ -306,7 +306,7 @@ class CallLogSearch extends CallLog
 
         $clientTableName = Client::tableName();
         $query->addSelect([
-            "if (" . $clientTableName . ".first_name is not null, if (" . $clientTableName . ".last_name is not null, concat(" . $clientTableName . ".first_name, ' ', " . $clientTableName . ".last_name), " . $clientTableName . ".first_name), null) as client_name",
+            "if (" . $clientTableName . ".is_company = 1, " . $clientTableName . ".company_name, if (" . $clientTableName . ".first_name is not null, if (" . $clientTableName . ".last_name is not null, concat(" . $clientTableName . ".first_name, ' ', " . $clientTableName . ".last_name), " . $clientTableName . ".first_name), null)) as client_name",
             'cn_note as callNote'
         ]);
 
@@ -316,11 +316,11 @@ class CallLogSearch extends CallLog
         $oldClientPrefix = 'client:seller';
         $lengthOld = strlen($oldClientPrefix) + 1;
 
-//		$query->addSelect([
-//		    "IF(
-//				call_log.cl_type_id = 1,
-//				if (cl_phone_to regexp '" . $clientPrefix . "' = 1, REGEXP_SUBSTR(cl_phone_to, '[[:digit:]]+'), null),
-//				if (cl_phone_from regexp '" . $clientPrefix . "' = 1, REGEXP_SUBSTR(cl_phone_from, '[[:digit:]]+'), null)
+//      $query->addSelect([
+//          "IF(
+//              call_log.cl_type_id = 1,
+//              if (cl_phone_to regexp '" . $clientPrefix . "' = 1, REGEXP_SUBSTR(cl_phone_to, '[[:digit:]]+'), null),
+//              if (cl_phone_from regexp '" . $clientPrefix . "' = 1, REGEXP_SUBSTR(cl_phone_from, '[[:digit:]]+'), null)
 //            ) AS user_id"
 //        ]);
         $query->addSelect([
@@ -384,7 +384,7 @@ class CallLogSearch extends CallLog
             ->from($query)
             ->leftJoin(Employee::tableName(), Employee::tableName() . '.id = user_id');
 
-//		VarDumper::dump($q->createCommand()->getRawSql());die;
+//      VarDumper::dump($q->createCommand()->getRawSql());die;
 
         return $dataProvider;
     }
@@ -533,7 +533,7 @@ class CallLogSearch extends CallLog
             SUM(IF(cl_category_id = ' . CallLogCategory::REDIAL_CALL . ', cl_duration, 0)) as redialCallsDuration,
             SUM(IF(cl_category_id = ' . CallLogCategory::REDIAL_CALL . ', clr_duration, 0)) as redialCallsTalkTime,
             SUM(IF(cl_category_id = ' . CallLogCategory::REDIAL_CALL . ', 1, 0)) as redialCallsTotalAttempts,
-            SUM(IF(cl_category_id = ' . CallLogCategory::REDIAL_CALL . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . $queryByLogRecordDuration. ', 1, 0)) as redialCallsCompleted,
+            SUM(IF(cl_category_id = ' . CallLogCategory::REDIAL_CALL . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . $queryByLogRecordDuration . ', 1, 0)) as redialCallsCompleted,
             SUM(IF(cl_category_id = ' . CallLogCategory::REDIAL_CALL . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . $queryByLogRecordDuration . ', clr_duration, 0)) as redialCallsCompleteTalkTime           
         ']);
 
@@ -584,7 +584,6 @@ class CallLogSearch extends CallLog
                 $model['redialCallsTotalAttempts'] == 0 &&
                 $model['redialCallsCompleted'] == 0 &&
                 $model['redialCallsCompleteTalkTime'] == 0
-
             ) {
                 unset($data[$key]);
             }
@@ -638,7 +637,7 @@ class CallLogSearch extends CallLog
         $query->from(static::tableName());
         $query->where('cl_status_id IS NOT NULL');
         $query->andWhere(['cl_user_id' => $user_id]);
-        if($this->createTimeStart && $this->createTimeEnd){
+        if ($this->createTimeStart && $this->createTimeEnd) {
             $query->andWhere(['>=', 'cl_call_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->createTimeStart))]);
             $query->andWhere(['<=', 'cl_call_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->createTimeEnd))]);
         }

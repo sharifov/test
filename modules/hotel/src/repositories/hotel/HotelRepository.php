@@ -22,13 +22,13 @@ class HotelRepository extends Repository
         $this->eventDispatcher = $eventDispatcher;
     }
 
-	public function find(int $id): Hotel
-	{
-		if ($hotel = Hotel::findOne($id)) {
-			return $hotel;
-		}
-		throw new NotFoundException('Hotel is not found', HotelCodeException::HOTEL_NOT_FOUND);
-	}
+    public function find(int $id): Hotel
+    {
+        if ($hotel = Hotel::findOne($id)) {
+            return $hotel;
+        }
+        throw new NotFoundException('Hotel is not found', HotelCodeException::HOTEL_NOT_FOUND);
+    }
 
     public function save(Hotel $hotel): int
     {

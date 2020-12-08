@@ -252,10 +252,10 @@ class ConferenceRoom extends \yii\db\ActiveRecord
      * @param bool $enabled
      * @return array
      */
-    public static function getList(bool $enabled = true) : array
+    public static function getList(bool $enabled = true): array
     {
         $query = self::find()->orderBy(['cr_id' => SORT_ASC]);
-        if($enabled) {
+        if ($enabled) {
             $query->andWhere(['cr_enabled' => true]);
         }
         $data = $query->asArray()->all();

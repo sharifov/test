@@ -105,11 +105,15 @@ class LeadCreateForm extends Model
 
             ['flights', 'required'],
             ['flights', IsArrayValidator::class],
-            ['flights', function () { $this->loadAndValidateFlights(); }, 'skipOnError' => true, 'skipOnEmpty' => true],
+            ['flights', function () {
+                $this->loadAndValidateFlights();
+            }, 'skipOnError' => true, 'skipOnEmpty' => true],
 
             ['client', 'required'],
             ['client', IsArrayValidator::class],
-            ['client', function () { $this->loadAndValidateClient($this->client); }, 'skipOnError' => true, 'skipOnEmpty' => true],
+            ['client', function () {
+                $this->loadAndValidateClient($this->client);
+            }, 'skipOnError' => true, 'skipOnEmpty' => true],
 
             ['flight_id', 'required'],
             ['flight_id', 'integer'],

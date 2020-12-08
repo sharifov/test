@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @link http://www.yiiframework.com/
  * @copyright Copyright (c) 2008 Yii Software LLC
@@ -28,7 +29,7 @@ class UserInfoWidget extends \yii\bootstrap\Widget
         $user = Yii::$app->user->identity;
         $userGroups = [];
 
-        if($user->ugsGroups) {
+        if ($user->ugsGroups) {
             $userGroups = ArrayHelper::map($user->ugsGroups, 'ug_id', 'ug_name');
         }
 

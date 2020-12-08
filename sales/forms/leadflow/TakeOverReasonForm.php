@@ -76,7 +76,7 @@ class TakeOverReasonForm extends Model
                 return $this->reason === self::REASON_OTHER;
             }],
             ['other', 'filter', 'filter' => 'trim', 'skipOnArray' => true],
-            ['other', 'string']
+            ['other', 'string', 'max' => 250],
         ];
     }
 
@@ -142,5 +142,4 @@ class TakeOverReasonForm extends Model
         }
         return false;
     }
-
 }

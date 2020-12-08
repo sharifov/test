@@ -138,7 +138,7 @@ class UserFailedLoginController extends FController
                     if ($user->save(false)) {
                         $result['status'] = 1;
                         $result['message'] = 'Status changed to active.';
-                    }  else {
+                    } else {
                         throw new \DomainException($user->getErrorSummary(false)[0]);
                     }
                 } else {

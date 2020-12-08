@@ -29,5 +29,4 @@ class TransactionManager
         }
         return $result;
     }
-
 }

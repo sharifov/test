@@ -16,7 +16,7 @@ class ClientChatHoldSearch extends ClientChatHold
     {
         return [
             [['cchd_id', 'cchd_cch_id', 'cchd_cch_status_log_id'], 'integer'],
-            [['cchd_start_dt', 'cchd_deadline_dt'], 'safe'],
+            [['cchd_start_dt', 'cchd_deadline_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -31,7 +31,7 @@ class ClientChatHoldSearch extends ClientChatHold
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cchd_deadline_dt' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['cchd_deadline_dt' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],

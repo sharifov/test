@@ -17,7 +17,7 @@ class m190219_115019_create_tbl_user_profile extends Migration
             $tableOptions = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE=InnoDB';
         }
 
-       $this->createTable('{{%user_profile}}',	[
+        $this->createTable('{{%user_profile}}', [
             'up_user_id'            => $this->integer()->notNull(),
             'up_call_type_id'       => $this->tinyInteger()->defaultValue(0),
             'up_sip'                => $this->string(255),

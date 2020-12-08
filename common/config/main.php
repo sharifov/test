@@ -87,8 +87,8 @@ return [
             'url' => 'https://rocketchat.travel-dev.com/api/v1/',
             'username' => '',
             'password' => '',
-			'host' => 'https://rocketchat.travel-dev.com',
-		],
+            'host' => 'https://rocketchat.travel-dev.com',
+        ],
 
         'chatBot' => [
             'class' => \common\components\ChatBot::class,
@@ -155,6 +155,27 @@ return [
         'gaRequestService' => [
             'class' => \common\components\ga\GaRequestService::class,
             'url' => 'https://www.google-analytics.com/collect',  // For test : debug/collect
+        ],
+        'prometheus' => [
+            'class' => \kivork\PrometheusClient\components\PrometheusClient::class,
+            'redisOptions' => [
+                'host' => 'localhost',
+                'port' => 6379,
+                'password' => null,
+                'timeout' => 0.1, // in seconds
+                'read_timeout' => 10, // in seconds
+                'persistent_connections' => false,
+                'database' => 3,
+            ],
+            'useHttpBasicAuth' => false,
+            'authUsername' => '',
+            'authPassword' => '',
+        ],
+        'centrifugo' => [
+            'class'  => \sorokinmedia\centrifugo\Client::class,
+            'host'   => 'http://localhost:8000/api',
+            'secret' => '',
+            'apikey' => ''
         ],
     ],
     'bootstrap' => [

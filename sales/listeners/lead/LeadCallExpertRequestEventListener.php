@@ -24,5 +24,4 @@ class LeadCallExpertRequestEventListener
         $jobId = Yii::$app->queue_job->priority(200)->push($job);
 //        Yii::info('Lead: ' . $lead->id . ', UpdateLeadBOJob: ' . $jobId, 'info\\LeadCallExpertRequestEventListener' );
     }
-
 }

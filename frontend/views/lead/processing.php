@@ -24,7 +24,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <style>
 .dropdown-menu {
-	z-index: 1010 !important;
+    z-index: 1010 !important;
 }
 </style>
 <h1><i class="fa fa-spinner"></i> <?=\yii\helpers\Html::encode($this->title)?></h1>
@@ -64,7 +64,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 $diffHours = (int) ($diffTime / (60 * 60));
 
 
-                $str = ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+                $str = ($diffHours > 3 && $diffHours < 73 ) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
                 $str .= '<br><i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
 
                 return $str;
@@ -85,7 +85,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 'options' => [
                     'autocomplete' => 'off',
-                    'placeholder' =>'Choose Date'
+                    'placeholder' => 'Choose Date'
                 ],
             ]),
         ],
@@ -128,8 +128,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     $str .= $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
 
 
-                    $clientName.= '<br>'. $str;
-
+                    $clientName .= '<br>' . $str;
                 } else {
                     $clientName = '-';
                 }
@@ -156,7 +155,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'attribute' => 'clientTime',
             'header' => 'Client time',
             'format' => 'raw',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) {
                 return ClientTimeFormatter::format($model->getClientTime2(), $model->offset_gmt);
             },
             //'options' => ['style' => 'width:80px'],
@@ -205,11 +204,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 $statusValue = $model->getStatusName(true);
                 $reasonValue =  $model->getLastReasonFromLeadFlow();
 
-                if($reasonValue) {
-                    $reasonValue = '<br><pre>'.$reasonValue.'</pre>';
+                if ($reasonValue) {
+                    $reasonValue = '<br><pre>' . $reasonValue . '</pre>';
                 }
 
-                return $statusValue.'<br>'.$reasonValue;
+                return $statusValue . '<br>' . $reasonValue;
             },
             'format' => 'raw',
             'filter' => \common\models\Lead::getProcessingStatuses(),
@@ -244,7 +243,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'attribute' => 'l_last_action_dt',
             //'label' => 'Last Update',
             'value' => static function (\common\models\Lead $model) {
-                return $model->l_last_action_dt ? '<b>'.Yii::$app->formatter->asRelativeTime(strtotime($model->l_last_action_dt)).'</b><br>' .
+                return $model->l_last_action_dt ? '<b>' . Yii::$app->formatter->asRelativeTime(strtotime($model->l_last_action_dt)) . '</b><br>' .
                     Yii::$app->formatter->asDatetime(strtotime($model->l_last_action_dt)) : $model->l_last_action_dt;
             },
             'format' => 'raw',
@@ -260,7 +259,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 'options' => [
                     'autocomplete' => 'off',
-                    'placeholder' =>'Choose Date'
+                    'placeholder' => 'Choose Date'
                 ],
             ]),
         ],
@@ -336,8 +335,8 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'l_init_price',
             //'format' => 'raw',
-            'value' => function(\common\models\Lead $model) {
-                return $model->l_init_price ? number_format($model->l_init_price, 2) . ' $': '-';
+            'value' => function (\common\models\Lead $model) {
+                return $model->l_init_price ? number_format($model->l_init_price, 2) . ' $' : '-';
             },
             'contentOptions' => [
                 'class' => 'text-right'
@@ -477,7 +476,7 @@ $this->params['breadcrumbs'][] = $this->title;
         }
     ]);
 
-?>
+    ?>
 
 
 
@@ -525,7 +524,7 @@ $this->registerJsFile('/js/moment-timezone-with-data.min.js', [
 ]);*/
 
 $this->registerJsFile('/js/jquery.countdown-2.2.0/jquery.countdown.min.js', [
-    'position' => \yii\web\View::POS_HEAD,
+    'position' => \yii\web\View::POS_END,
     'depends' => [
         \yii\web\JqueryAsset::class
     ]

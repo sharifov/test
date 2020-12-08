@@ -19,10 +19,10 @@ class m190903_145755_update_tbl_user_project_param extends Migration
                 if ($uppItem->uppUser && $uppItem->uppUser->udDeps) {
                     foreach ($uppItem->uppUser->udDeps as $dep) {
                         $uppItem->upp_dep_id = $dep->dep_id;
-                        if( !$uppItem->save()) {
+                        if (!$uppItem->save()) {
                             print_r($uppItem->errors);
                         } else {
-                            echo ' - Set department ID: '. $uppItem->upp_dep_id . ', UserId: ' . $uppItem->upp_user_id."\r\n";
+                            echo ' - Set department ID: ' . $uppItem->upp_dep_id . ', UserId: ' . $uppItem->upp_user_id . "\r\n";
                         }
                         break;
                     }
@@ -42,5 +42,4 @@ class m190903_145755_update_tbl_user_project_param extends Migration
 
         // return false;
     }
-
 }

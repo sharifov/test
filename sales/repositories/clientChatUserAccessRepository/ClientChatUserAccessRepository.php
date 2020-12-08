@@ -1,4 +1,5 @@
 <?php
+
 namespace sales\repositories\clientChatUserAccessRepository;
 
 use common\models\Notifications;
@@ -11,6 +12,7 @@ use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserAccess\event\UpdateChatUserAccessWidgetEvent;
 use sales\repositories\NotFoundException;
 use sales\repositories\Repository;
+use yii\helpers\VarDumper;
 
 /**
  * Class ClientChatUserAccessRepository
@@ -68,13 +70,15 @@ class ClientChatUserAccessRepository extends Repository
     public function updateChatUserAccessWidget(int $chatId, int $userId, int $statusId, ?int $chatUserAccessId = null): void
     {
         $data = [];
-        if ($statusId === ClientChatUserAccess::STATUS_ACCEPT) {
+        if (ClientChatUserAccess::isInStatusAcceptGroupList($statusId)) {
             $data = ClientChatAccessMessage::accept($chatId, $userId, (int)$chatUserAccessId);
         } elseif ($statusId === ClientChatUserAccess::STATUS_PENDING) {
             $data = ClientChatAccessMessage::pending($userId, (int)$chatUserAccessId);
-        } elseif ($statusId === ClientChatUserAccess::STATUS_SKIP || $statusId === ClientChatUserAccess::STATUS_CANCELED) {
+        } elseif (ClientChatUserAccess::isInStatusSkipGroupList($statusId)) {
             $data = ClientChatAccessMessage::skip($chatId, $userId, (int)$chatUserAccessId);
         }
+
+        \Yii::info('UserId: ' . $userId . '; ' . VarDumper::dumpAsString($data), 'info\updateChatUserAccessWidget');
 
         Notifications::publish('clientChatRequest', ['user_id' => $userId], ['data' => $data]);
     }

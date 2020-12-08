@@ -123,7 +123,6 @@ class CurrentQueueCallsService
         }
 
         foreach ($queue as $call) {
-
             if ($call->isIn() || $call->isOut() || $call->isReturn()) {
                 $name = $call->cClient ? $call->cClient->getShortName() : '------';
             } elseif ($call->isJoin() && ($parentJoin = $call->cParent) && $parentJoin->cCreatedUser) {
@@ -203,7 +202,6 @@ class CurrentQueueCallsService
                 $source = $call->c_parent_call_sid ? $call->cParent->getSourceName() : '';
             } else {
                 $source = $call->getSourceName();
-
             }
             if ($source === '-') {
                 $source = '';

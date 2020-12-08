@@ -93,5 +93,4 @@ class CasesQController extends FController
             'isAgent' => Auth::user()->isAgent(),
         ]);
     }
-
 }

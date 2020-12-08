@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $lead Lead
  * @var $quote Quote
@@ -36,7 +37,9 @@ JS;
 $this->registerJs($js);
 
 ?>
-<?php if(!empty($errors)):?><div class="alert alert-danger">Some errors happened!</div><?php endif;?>
+<?php if (!empty($errors)) :
+    ?><div class="alert alert-danger">Some errors happened!</div><?php
+endif;?>
 
 <?php $form = ActiveForm::begin([
     'errorCssClass' => '',

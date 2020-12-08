@@ -12,7 +12,6 @@ use frontend\models\Log;
  */
 class LogSearch extends Log
 {
-
     public $days;
     /**
      * @inheritdoc

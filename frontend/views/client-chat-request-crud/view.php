@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'ccr_id',
                 [
                     'attribute' => 'ccr_event',
-                    'value' => static function(ClientChatRequest $model) {
+                    'value' => static function (ClientChatRequest $model) {
                         return $model->getEventName();
                     },
                     //'filter' => ClientChatRequest::getEventList()

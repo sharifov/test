@@ -21,6 +21,7 @@ use yii\helpers\Html;
  * @property int|null $csl_user_id
  * @property int|null $csl_prev_channel_id
  * @property int $csl_action_type
+ * @property string|null $csl_rid
  *
  * @property ClientChat $cslCch
  * @property Employee $cslOwner
@@ -45,6 +46,9 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
     public const ACTION_AUTO_REVERT_TO_PROGRESS = 14;
     public const ACTION_REOPEN = 15;
     public const ACTION_TIMEOUT_FINISH = 16;
+    public const ACTION_CHAT_ACCEPT = 17;
+    public const ACTION_AUTO_RETURN = 18;
+    public const ACTION_AUTO_REOPEN = 19;
 
     private const ACTION_LIST = [
         self::ACTION_OPEN => 'Open By Client',
@@ -63,6 +67,9 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
         self::ACTION_AUTO_REVERT_TO_PROGRESS => 'Auto Revert to progress',
         self::ACTION_REOPEN => 'Reopen',
         self::ACTION_TIMEOUT_FINISH => 'Timeout Finish',
+        self::ACTION_CHAT_ACCEPT => 'Chat Accept',
+        self::ACTION_AUTO_RETURN => 'Auto Return',
+        self::ACTION_AUTO_REOPEN => 'Auto Reopen',
     ];
 
     private const ACTION_LABEL_LIST = [
@@ -82,6 +89,9 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
         self::ACTION_AUTO_REVERT_TO_PROGRESS => 'badge badge-info',
         self::ACTION_REOPEN => 'badge badge-info',
         self::ACTION_TIMEOUT_FINISH => 'badge badge-info',
+        self::ACTION_CHAT_ACCEPT => 'badge badge-success',
+        self::ACTION_AUTO_RETURN => 'badge badge-info',
+        self::ACTION_AUTO_REOPEN => 'badge badge-info',
     ];
 
     public function rules(): array
@@ -112,6 +122,8 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
 
             ['csl_user_id', 'integer'],
             ['csl_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['csl_user_id' => 'id']],
+
+            ['csl_rid', 'string', 'max' => 150],
         ];
     }
 
@@ -129,7 +141,7 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
     {
         return $this->hasOne(ClientChatChannel::class, ['ccc_id' => 'csl_prev_channel_id']);
     }
-    
+
     public function getCslUser(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'csl_user_id']);
@@ -149,6 +161,7 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
             'csl_user_id' => 'User ID',
             'csl_prev_channel_id' => 'Prev Channel ID',
             'csl_action_type' => 'Action Type',
+            'csl_rid' => 'Room Id',
         ];
     }
 
@@ -169,7 +182,8 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
         ?int $ownerId,
         ?int $creatorId,
         ?int $channelId,
-        int $actionType
+        int $actionType,
+        ?string $rid
     ): self {
         $status = new self();
         $status->csl_cch_id = $chatId;
@@ -179,6 +193,7 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
         $status->csl_user_id = $creatorId;
         $status->csl_prev_channel_id = $channelId;
         $status->csl_action_type = $actionType;
+        $status->csl_rid = $rid;
         $status->csl_start_dt = date('Y-m-d H:i:s');
         return $status;
     }

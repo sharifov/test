@@ -39,7 +39,7 @@ class AgentReportController extends FController
         $searchModel = new AgentActivitySearch();
         $params = Yii::$app->request->queryParams;
 
-        if(isset($params['reset'])){
+        if (isset($params['reset'])) {
             $params = [];
         }
 
@@ -91,7 +91,7 @@ class AgentReportController extends FController
         $params = $this->validateDateParams($params);
         $dataProvider = $searchModel->searchSms($params);
 
-        $title = (isset($params['AgentActivitySearch']['s_type_id']) && $params['AgentActivitySearch']['s_type_id'] == Sms::TYPE_OUTBOX)?'SMS Sent':'SMS Received';
+        $title = (isset($params['AgentActivitySearch']['s_type_id']) && $params['AgentActivitySearch']['s_type_id'] == Sms::TYPE_OUTBOX) ? 'SMS Sent' : 'SMS Received';
 
         return $this->render('_sms', [
             'title' => $title,
@@ -108,7 +108,7 @@ class AgentReportController extends FController
         $params = $this->validateDateParams($params);
         $dataProvider = $searchModel->searchEmail($params);
 
-        $title = (isset($params['AgentActivitySearch']['e_type_id']) && $params['AgentActivitySearch']['e_type_id'] == Email::TYPE_OUTBOX)?'Emails Sent':'Emails Received';
+        $title = (isset($params['AgentActivitySearch']['e_type_id']) && $params['AgentActivitySearch']['e_type_id'] == Email::TYPE_OUTBOX) ? 'Emails Sent' : 'Emails Received';
 
         return $this->render('_email', [
             'title' => $title,

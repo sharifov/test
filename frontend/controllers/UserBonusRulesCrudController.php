@@ -18,18 +18,18 @@ class UserBonusRulesCrudController extends FController
     /**
      * {@inheritdoc}
      */
-	public function behaviors()
-	{
-		$behaviors = [
-			'verbs' => [
-				'class' => VerbFilter::class,
-				'actions' => [
-					'delete' => ['POST'],
-				],
-			],
-		];
-		return ArrayHelper::merge(parent::behaviors(), $behaviors);
-	}
+    public function behaviors()
+    {
+        $behaviors = [
+            'verbs' => [
+                'class' => VerbFilter::class,
+                'actions' => [
+                    'delete' => ['POST'],
+                ],
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
 
     public function init(): void
     {

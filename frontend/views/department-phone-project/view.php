@@ -7,7 +7,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model common\models\DepartmentPhoneProject */
 
-$this->title = $model->dppProject->name . ' - ' .$model->dpp_id;
+$this->title = $model->dppProject->name . ' - ' . $model->dpp_id;
 $this->params['breadcrumbs'][] = ['label' => 'Department Phone Projects', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);

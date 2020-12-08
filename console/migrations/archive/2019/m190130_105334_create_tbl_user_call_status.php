@@ -19,7 +19,7 @@ class m190130_105334_create_tbl_user_call_status extends Migration
 
 
 
-        $this->createTable('{{%user_call_status}}',	[
+        $this->createTable('{{%user_call_status}}', [
             'us_id'                 => $this->primaryKey(),
             'us_type_id'            => $this->tinyInteger(1),
             'us_user_id'            => $this->integer(),
@@ -29,7 +29,6 @@ class m190130_105334_create_tbl_user_call_status extends Migration
 
         $this->createIndex('IND-user_call_status_us_type_id', '{{%user_call_status}}', ['us_type_id']);
         $this->addForeignKey('FK-user_call_status_us_user_id', '{{%user_call_status}}', ['us_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
-
     }
 
     /**
@@ -39,6 +38,4 @@ class m190130_105334_create_tbl_user_call_status extends Migration
     {
         $this->dropTable('{{%user_call_status}}');
     }
-
-
 }

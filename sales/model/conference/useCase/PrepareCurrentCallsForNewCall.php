@@ -35,7 +35,7 @@ class PrepareCurrentCallsForNewCall
         foreach ($this->getCallsForActions() as $call) {
             if ($call['action'] === 'hangup') {
                 $this->hangUp($call['call_sid']);
-            } elseif ($call['action'] === 'hold'){
+            } elseif ($call['action'] === 'hold') {
                 $this->toHold($call['conference_id'], $call['conference_sid'], $call['call_sid']);
             }
         }
@@ -67,7 +67,7 @@ class PrepareCurrentCallsForNewCall
             'c_created_user_id' => $this->userId,
             'c_status_id' => [Call::STATUS_RINGING, Call::STATUS_IN_PROGRESS]
         ])
-        ->leftJoin(ConferenceParticipant::tableName(),'cp_call_id = c_id AND (cp_type_id = ' . ConferenceParticipant::TYPE_AGENT . ' OR cp_type_id = ' . ConferenceParticipant::TYPE_USER . ') AND cp_status_id IS NOT NULL AND cp_status_id <> ' . ConferenceParticipant::STATUS_LEAVE)
+        ->leftJoin(ConferenceParticipant::tableName(), 'cp_call_id = c_id AND (cp_type_id = ' . ConferenceParticipant::TYPE_AGENT . ' OR cp_type_id = ' . ConferenceParticipant::TYPE_USER . ') AND cp_status_id IS NOT NULL AND cp_status_id <> ' . ConferenceParticipant::STATUS_LEAVE)
         ->leftJoin(Conference::tableName(), 'cf_created_user_id = c_created_user_id AND cf_id = c_conference_id AND cf_status_id = ' . Conference::STATUS_START)
         ->asArray()->all();
     }
@@ -136,7 +136,6 @@ class PrepareCurrentCallsForNewCall
         }
 
         if ($clientCall->isOut()) {
-
             if ($parent = $clientCall->cParent) {
                 $parent->c_queue_start_dt = date('Y-m-d H:i:s');
 
@@ -159,7 +158,6 @@ class PrepareCurrentCallsForNewCall
                     'clientCall' => $clientCall->getAttributes(),
                 ]), 'PrepareCurrentCallsForNewCall:transferClientCallToHold');
             }
-
         } elseif ($clientCall->isIn()) {
             if (!$clientCall->c_group_id) {
                 if ($currentCall = Call::findOne(['c_call_sid' => $callSid])) {
@@ -195,7 +193,6 @@ class PrepareCurrentCallsForNewCall
         }
 
         if (Call::applyCallToAgentAccess($clientCall, $this->userId)) {
-
         }
     }
 
@@ -232,14 +229,12 @@ class PrepareCurrentCallsForNewCall
     private function log(): void
     {
         foreach ($this->messages as $message) {
-
             if ($ntf = Notifications::create($this->userId, $message['title'], $message['error'], Notifications::TYPE_DANGER, true)) {
                 $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
                 Notifications::publish('getNewNotification', ['user_id' => $this->userId], $dataNotification);
             }
 
             \Yii::error(VarDumper::dumpAsString($message), static::class);
-
         }
     }
 
@@ -254,5 +249,4 @@ class PrepareCurrentCallsForNewCall
             ],
         ]);
     }
-
 }

@@ -20,14 +20,14 @@ class CaseCategoryController extends BaseController
     public function behaviors(): array
     {
         $behaviors = [
-			'HttpCache' => [
-				'class' => HttpCache::class,
+            'HttpCache' => [
+                'class' => HttpCache::class,
                 'only' => ['list'],
                 'lastModified' => static function () {
                     return strtotime(CaseCategory::find()->max('cc_updated_dt'));
                 },
-			],
-		];
+            ],
+        ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 

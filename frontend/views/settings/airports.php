@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $this \yii\web\View
  * @var $dataProvider ActiveDataProvider
@@ -13,7 +14,6 @@ use yii\helpers\Url;
 use frontend\models\search\AirportForm;
 use common\models\Airports;
 use yii\widgets\Pjax;
-
 
 $this->title = 'Airports';
 $this->params['breadcrumbs'][] = $this->title;
@@ -50,6 +50,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'dst'
         ]
     ])
-    ?>
+?>
     <?php Pjax::end(); ?>
 </div>

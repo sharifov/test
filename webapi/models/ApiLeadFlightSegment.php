@@ -55,25 +55,27 @@ class ApiLeadFlightSegment extends \yii\db\ActiveRecord
     }
 
 
-    public function checkOriginIata() : void
+    public function checkOriginIata(): void
     {
         $origin = Airports::findByIata($this->origin);
         if ($origin) {
             $this->origin_label = sprintf('%s (%s)', $origin->name, $origin->iata);
         } else {
-            $this->addError('origin', sprintf('Not found %s IATA ("'.$this->origin.'") ',
+            $this->addError('origin', sprintf(
+                'Not found %s IATA ("' . $this->origin . '") ',
                 $this->getAttributeLabel('origin')
             ));
         }
     }
 
-    public function checkDestinationIata() : void
+    public function checkDestinationIata(): void
     {
         $destination = Airports::findByIata($this->destination);
         if ($destination) {
             $this->destination_label = sprintf('%s (%s)', $destination->name, $destination->iata);
         } else {
-            $this->addError('origin', sprintf('Not found %s IATA ("'.$this->destination.'") ',
+            $this->addError('origin', sprintf(
+                'Not found %s IATA ("' . $this->destination . '") ',
                 $this->getAttributeLabel('destination')
             ));
         }
@@ -95,5 +97,4 @@ class ApiLeadFlightSegment extends \yii\db\ActiveRecord
             'departure' => 'Departure',
         ];
     }
-
 }

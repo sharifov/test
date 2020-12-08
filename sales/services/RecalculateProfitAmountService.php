@@ -26,17 +26,17 @@ class RecalculateProfitAmountService
 
     public $changedOffers = [];
     public $changedOrders = [];
-	/**
-	 * @var OrderRepository
-	 */
-	private $orderRepository;
+    /**
+     * @var OrderRepository
+     */
+    private $orderRepository;
 
-	public function __construct(OrderRepository $orderRepository)
-	{
-		$this->orderRepository = $orderRepository;
-	}
+    public function __construct(OrderRepository $orderRepository)
+    {
+        $this->orderRepository = $orderRepository;
+    }
 
-	/**
+    /**
      * @param ProductQuote $productQuote
      * @return RecalculateProfitAmountService
      */

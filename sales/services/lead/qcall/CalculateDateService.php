@@ -13,8 +13,7 @@ class CalculateDateService
         bool $clientTimeEnable,
         ?string $clientGmt,
         string $time = 'now'
-    ): Interval
-    {
+    ): Interval {
         $fromInterval = new \DateInterval('PT' . $from . 'M');
         $toInterval = new \DateInterval('PT' . $to . 'M');
 
@@ -61,5 +60,4 @@ class CalculateDateService
             $setupTo->setTimezone(new \DateTimeZone('UTC'))
         );
     }
-
 }

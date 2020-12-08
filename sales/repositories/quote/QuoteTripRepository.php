@@ -21,5 +21,4 @@ class QuoteTripRepository
         }
         return $quoteTrip->qt_id;
     }
-
 }

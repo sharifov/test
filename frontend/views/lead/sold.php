@@ -244,7 +244,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 return 'Total profit: ' . $totalProfitTxt . (($splitProfitTxt) ? '<hr/>Split profit:<br/>' . $splitProfitTxt : '') .
                     '<hr/> ' . (($model->employee) ? $model->employee->username : 'Main agent') . ' profit: ' . $mainAgentProfitTxt;
-
             },
             'format' => 'raw',
         ],
@@ -284,7 +283,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'attribute' => 'last_ticket_date',
             'value' => static function (Lead $model) {
 //                return ($model->appliedQuote && $model->appliedQuote->last_ticket_date) ? Yii::$app->formatter->asDate($model->appliedQuote->last_ticket_date) : '-';
-                return ( $model->leadFlowSold && $model->leadFlowSold->created ) ? Yii::$app->formatter->asDatetime(strtotime($model->leadFlowSold->created)): '';
+                return ( $model->leadFlowSold && $model->leadFlowSold->created ) ? Yii::$app->formatter->asDatetime(strtotime($model->leadFlowSold->created)) : '';
             },
             //'format' => 'datetime',
             'filter' => DatePicker::widget([
@@ -309,7 +308,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     return  date('Y-m-d', strtotime($date));
                 }
                 return '';
-
             },
             'format' => 'raw',
             'contentOptions' => [

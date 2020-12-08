@@ -26,11 +26,11 @@ class WebSocketAsset extends AssetBundle
         '/js/reconnecting-websocket.min.js'
     ];
 
-    public $depends = [
-        'yii\web\YiiAsset',
-        'yii\web\JqueryAsset',
-        'yii\bootstrap4\BootstrapAsset',
-    ];
+//    public $depends = [
+//        'yii\web\YiiAsset',
+//        'yii\web\JqueryAsset',
+//        'yii\bootstrap4\BootstrapAsset',
+//    ];
 
     public $jsOptions = [
         'position' => \yii\web\View::POS_END

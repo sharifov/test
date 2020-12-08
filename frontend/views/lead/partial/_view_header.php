@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $this \yii\web\View
  * @var $title string
@@ -15,9 +16,9 @@ use yii\helpers\Html;
             <h2 class="page-header__title">
                 <?= Html::encode($title) ?>
                 <?php
-                    if($lead->clone_id && $cloneLead = $lead->clone) {
-                        echo Html::a('(Cloned from ' . $lead->clone_id . ' )', ['lead/view', 'gid' => $cloneLead->gid], ['title' => 'Clone reason: ' . $lead->description]);
-                    }
+                if ($lead->clone_id && $cloneLead = $lead->clone) {
+                    echo Html::a('(Cloned from ' . $lead->clone_id . ' )', ['lead/view', 'gid' => $cloneLead->gid], ['title' => 'Clone reason: ' . $lead->description]);
+                }
                 ?>
                 <?= $lead->getStatusLabel() ?>
             </h2>
@@ -40,7 +41,8 @@ use yii\helpers\Html;
                     </div>
 
                     <div class="page-header__general-item">
-                        <strong>Market:</strong>
+                        <?php $typeCreate = Lead::TYPE_CREATE_LIST[$lead->l_type_create] ?? '-' ?>
+                        <strong title="<?php echo $typeCreate?>">Market:</strong>
                         <span><?= Html::encode(($lead->project ? $lead->project->name : '') . ($lead->source ? ' - ' . $lead->source->name : ''))?></span>
                     </div>
 

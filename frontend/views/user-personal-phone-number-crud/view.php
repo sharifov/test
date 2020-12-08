@@ -33,7 +33,11 @@ $this->params['breadcrumbs'][] = $this->title;
             'attributes' => [
                 'upn_id',
                 'upn_user_id:username',
-                'upn_phone_number',
+                [
+                    'label' => 'Phone Number ID',
+                    'attribute' => 'upn_phone_number',
+                ],
+                'upnPhoneNumber.pl_phone_number',
                 'upn_title',
                 'upn_approved:BooleanByLabel',
                 'upn_enabled:BooleanByLabel',

@@ -4,6 +4,7 @@ use common\widgets\Alert;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $hotelSearch \modules\hotel\models\Hotel */
 /* @var $dataProvider yii\data\ArrayDataProvider */
@@ -61,7 +62,7 @@ The SPA service at Christmas is closed on December 25 and January 1.'
 
     <div class="row">
         <div class="col-md-12">
-			<?= Alert::widget() ?>
+            <?= Alert::widget() ?>
         </div>
     </div>
 

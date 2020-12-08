@@ -57,7 +57,7 @@ class CallLogRecord extends \yii\db\ActiveRecord
     }
 
     public function getRecordingUrl(): string
-	{
-		return \Yii::$app->communication->recording_url . $this->clr_record_sid;
-	}
+    {
+        return \Yii::$app->communication->recording_url . $this->clr_record_sid;
+    }
 }

@@ -3,8 +3,7 @@
 ?>
 <h5>Sms Chart</h5>
 <div class="well">
-    <?php if (isset($smsInfoGraph) && $smsInfoGraph): ?>
-
+    <?php if (isset($smsInfoGraph) && $smsInfoGraph) : ?>
         <div id="info-sms-chart"></div>
 
         <script type="text/javascript">
@@ -43,7 +42,7 @@
                         'Error',
                         {role: 'annotation'}
                     ],
-                    <?php foreach($smsInfoGraph as $k => $item): ?>
+                    <?php foreach ($smsInfoGraph as $k => $item) : ?>
                     [
                         '<?=($item['createdDate']) ?>',
                         <?= $item['smsDone'] ?>,
@@ -60,7 +59,7 @@
                 })
             })
         </script>
-    <?php else: ?>
+    <?php else : ?>
         <div class="row">
             <div class="col-md-12 text-center">
                 <p style="margin: 0;">No results found.</p>

@@ -1,4 +1,5 @@
 <?php
+
 use yii\helpers\Html;
 
 /**
@@ -29,8 +30,8 @@ $class = 'text-success';
                 <?= '$ ' . number_format($model['teamsProfitPerAgent'])?>
             <?php elseif (isset($model['teamsConversion']) && $model['teamsConversion'] > 0) : ?>
                 <?= Yii::$app->formatter->asPercent($model['teamsConversion']) ?>
-                <?= '&nbsp;'.'[' . number_format($model['teamLeadsToProcessing']) .'/' . number_format($model['teamLeadsWithoutRTS']) .']' ?>
-            <?php else:?>
+                <?= '&nbsp;' . '[' . number_format($model['teamLeadsToProcessing']) . '/' . number_format($model['teamLeadsWithoutRTS']) . ']' ?>
+            <?php else :?>
                 <?= '-' ?>
             <?php endif;?>
         </div>

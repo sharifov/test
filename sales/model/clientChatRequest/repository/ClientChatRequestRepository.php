@@ -16,7 +16,7 @@ class ClientChatRequestRepository extends Repository
                 $dates = ClientChatRequest::partitionDatesFrom(date_create_from_format('Y-m-d H:i:s', $model->ccr_created_dt));
                 ClientChatRequest::createMonthlyPartition($dates[0], $dates[1]);
                 if ($attempts > 0) {
-                    throw new \RuntimeException("unable to create client_chat_message partition");
+                    throw new \RuntimeException("unable to create client_chat_request partition");
                 }
                 $this->save($model, ++$attempts);
             }

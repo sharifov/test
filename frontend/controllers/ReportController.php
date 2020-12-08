@@ -20,7 +20,6 @@ use yii\web\Response;
 
 class ReportController extends FController
 {
-
     public function beforeAction($action)
     {
         $this->view->title = ucwords(str_replace('-', ' ', $action->id));

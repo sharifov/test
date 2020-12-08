@@ -83,7 +83,8 @@ class CallForm extends Model
                     return false;
                 }
             }
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+        }
         return true;
     }
 
@@ -149,5 +150,4 @@ class CallForm extends Model
             ['calledPhone', 'string'],
         ];
     }
-
 }

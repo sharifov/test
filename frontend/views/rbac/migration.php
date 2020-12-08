@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var string the new migration class name
  */

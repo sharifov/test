@@ -51,7 +51,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'rating',
             [
                 'attribute' => 'parent_id',
-                'value' => function(\common\models\Client $model) {
+                'value' => function (\common\models\Client $model) {
                     $out = '<span class="not-set">(not set)</span>';
                     if ($model->parent_id && $parent = Client::findOne(['id' => $model->parent_id])) {
                         return $parent->id . '  <i class="fa fa-user"></i> ' . $parent->getNameByType();
@@ -62,11 +62,12 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'cl_type_id',
-                'value' => function(\common\models\Client $model) {
+                'value' => function (\common\models\Client $model) {
                     return $model::TYPE_LIST[$model->cl_type_id];
                 },
                 'format' => 'raw',
             ],
+            'cl_ca_id',
         ],
     ]) ?>
     </div>
@@ -76,18 +77,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attributes' => [
                     [
                         'label' => 'Phones',
-                        'value' => function(\common\models\Client $model) {
+                        'value' => function (\common\models\Client $model) {
 
                             $phones = $model->clientPhones;
                             $data = [];
-                            if($phones) {
+                            if ($phones) {
                                 foreach ($phones as $k => $phone) {
-                                    $data[] = '<i class="fa fa-phone"></i> <code>'.Html::encode($phone->phone).'</code>'; //<code>'.Html::a($phone->phone, ['client-phone/view', 'id' => $phone->id], ['target' => '_blank', 'data-pjax' => 0]).'</code>';
+                                    $data[] = '<i class="fa fa-phone"></i> <code>' . Html::encode($phone->phone) . '</code>'; //<code>'.Html::a($phone->phone, ['client-phone/view', 'id' => $phone->id], ['target' => '_blank', 'data-pjax' => 0]).'</code>';
                                 }
                             }
 
                             $str = implode('<br>', $data);
-                            return ''.$str.'';
+                            return '' . $str . '';
                         },
                         'format' => 'raw',
                         'contentOptions' => ['class' => 'text-left'],
@@ -95,18 +96,18 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     [
                         'label' => 'Emails',
-                        'value' => function(\common\models\Client $model) {
+                        'value' => function (\common\models\Client $model) {
 
                             $emails = $model->clientEmails;
                             $data = [];
-                            if($emails) {
+                            if ($emails) {
                                 foreach ($emails as $k => $email) {
-                                    $data[] = '<i class="fa fa-envelope"></i> <code>'.Html::encode($email->email).'</code>';
+                                    $data[] = '<i class="fa fa-envelope"></i> <code>' . Html::encode($email->email) . '</code>';
                                 }
                             }
 
                             $str = implode('<br>', $data);
-                            return ''.$str.'';
+                            return '' . $str . '';
                         },
                         'format' => 'raw',
                         'contentOptions' => ['class' => 'text-left'],
@@ -117,15 +118,15 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     [
                         'attribute' => 'created',
-                        'value' => function(\common\models\Client $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
+                        'value' => function (\common\models\Client $model) {
+                            return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
                         },
                         'format' => 'html',
                     ],
                     [
                         'attribute' => 'updated',
-                        'value' => function(\common\models\Client $model) {
-                            return $model->updated ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated)) : null;
+                        'value' => function (\common\models\Client $model) {
+                            return $model->updated ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->updated)) : null;
                         },
                         'format' => 'html',
                     ],

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $this \yii\web\View
  * @var $lead Lead
@@ -47,12 +48,12 @@ use yii\helpers\Html;
             <div class="clearfix"></div>
         </div>
         <div class="x_content" style="display: <?=$products ? 'none' : 'block'?>">
-			<?php
-			$js = <<<JS
+            <?php
+            $js = <<<JS
 pjaxOffFormSubmit('#pj-itinerary');
 JS;
-			$this->registerJs($js);
-			?>
+            $this->registerJs($js);
+            ?>
             <?php \yii\widgets\Pjax::begin(['id' => 'pj-itinerary', 'enablePushState' => false, 'enableReplaceState' => false])?>
             <?= $this->render('../partial/_flightDetails', [
                 'itineraryForm' => $itineraryForm,
@@ -68,15 +69,14 @@ JS;
         </div>
     </div>
 
-<?php foreach ($products as $product):?>
-
-    <?php if ((int) $product->isHotel() && $product->hotel): ?>
+<?php foreach ($products as $product) :?>
+    <?php if ((int) $product->isHotel() && $product->hotel) : ?>
         <?= $this->render('@modules/hotel/views/hotel/partial/_product_hotel', [
             'product' => $product,
         ]) ?>
     <?php endif; ?>
 
-    <?php if ((int) $product->isFlight() && $product->flight): ?>
+    <?php if ((int) $product->isFlight() && $product->flight) : ?>
         <?= $this->render('@modules/flight/views/flight/partial/_product_flight', [
             'product' => $product,
         ]) ?>

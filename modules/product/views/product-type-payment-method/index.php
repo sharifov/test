@@ -9,6 +9,7 @@ use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel modules\product\src\entities\productTypePaymentMethod\search\ProductTypePaymentMethodSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -54,14 +55,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             'ptpm_payment_fee_amount',
-			[
-				'class' => BooleanColumn::class,
-				'attribute' => 'ptpm_enabled',
-			],
-			[
-				'class' => BooleanColumn::class,
-				'attribute' => 'ptpm_default',
-			],
+            [
+                'class' => BooleanColumn::class,
+                'attribute' => 'ptpm_enabled',
+            ],
+            [
+                'class' => BooleanColumn::class,
+                'attribute' => 'ptpm_default',
+            ],
 
             [
                 'class' => UserSelect2Column::class,
@@ -77,14 +78,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'placeholder' => 'Select User',
             ],
 
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'ptpm_created_dt',
-			],
             [
-				'class' => DateTimeColumn::class,
-				'attribute' => 'ptpm_updated_dt',
-			],
+                'class' => DateTimeColumn::class,
+                'attribute' => 'ptpm_created_dt',
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'ptpm_updated_dt',
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

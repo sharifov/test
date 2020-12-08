@@ -9,6 +9,7 @@ use common\models\search\QuotePriceSearch;
 use common\models\UserProjectParams;
 use frontend\models\CommunicationForm;
 use sales\auth\Auth;
+use sales\helpers\app\AppHelper;
 use Yii;
 use common\models\Quote;
 use common\models\search\QuoteSearch;
@@ -47,7 +48,7 @@ class QuotesController extends FController
     {
         $searchModel = new QuoteSearch();
         $params = Yii::$app->request->queryParams;
-        if(isset($params['reset'])){
+        if (isset($params['reset'])) {
             unset($params['QuoteSearch']['date_range']);
         }
 
@@ -88,8 +89,6 @@ class QuotesController extends FController
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
-
-
     }
 
     public function actionAjaxDetails()
@@ -99,7 +98,7 @@ class QuotesController extends FController
         $model = $this->findModel($id);
         $lead = $model->lead;
 
-        if($lead->status === Lead::STATUS_TRASH && Auth::user()->isAgent()) {
+        if ($lead->status === Lead::STATUS_TRASH && Auth::user()->isAgent()) {
             throw new ForbiddenHttpException('Access Denied for Agent');
         }
 
@@ -134,26 +133,35 @@ class QuotesController extends FController
 
         $content_data = $lead->getEmailData2([$quoteID], $projectContactInfo);
 
-        $mailCapture = $communication->mailCapture(
-            $lead->project_id,
-            $tpl ,
-            $mailFrom,
-            $mailTo,
-            $content_data,
-            $language, [
-                'img_width' => 265,
-                'img_height' => 60,
-                'img_update' => 1
-            ]
-        );
+        try {
+            $mailCapture = $communication->mailCapture(
+                $lead->project_id,
+                $tpl,
+                $mailFrom,
+                $mailTo,
+                $content_data,
+                $language,
+                [
+                    'img_width' => 265,
+                    'img_height' => 60,
+                    'img_format' => 'png',
+                    'img_update' => 1,
+                ]
+            );
 
-        $url = $mailCapture['data'];
+            if (!isset($mailCapture['data']['img'])) {
+                throw new \RuntimeException('Create capture error.');
+            }
 
-        $host = isset($url['host']) ? $url['host'] : '';
-        $dir = isset($url['dir']) ? $url['dir'] : '';
-        $img = isset($url['img']) ? $url['img'] : '';
+            return  $mailCapture['data']['img'];
 
-        return  $host . $dir . $img;
+        } catch (\Throwable $e) {
+            Yii::error(VarDumper::dumpAsString([
+                'error' => AppHelper::throwableFormatter($e),
+                'quoteId' => $quoteID,
+            ]), 'QuotesController:actionAjaxCapture');
+            return $e->getMessage();
+        }
     }
 
 

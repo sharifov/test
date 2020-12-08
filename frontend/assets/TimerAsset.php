@@ -9,8 +9,8 @@ use yii\web\AssetBundle;
  */
 class TimerAsset extends AssetBundle
 {
-    public $basePath = '@webroot';
-    public $baseUrl = '@web';
+//    public $basePath = '@webroot';
+//    public $baseUrl = '@web';
     public $css = [
         //'/js/timer.css',
     ];

@@ -24,7 +24,8 @@ class LeadChecklistSearch extends LeadChecklist
             [['datetime_start', 'datetime_end'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['lc_type_id', 'lc_lead_id', 'lc_user_id'], 'integer'],
-            [['lc_notes', 'lc_created_dt'], 'safe'],
+            [['lc_notes'], 'safe'],
+            [['lc_created_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -52,7 +53,7 @@ class LeadChecklistSearch extends LeadChecklist
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['lc_created_dt' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['lc_created_dt' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -66,14 +67,14 @@ class LeadChecklistSearch extends LeadChecklist
             return $dataProvider;
         }
 
-        if(isset($params['LeadChecklistSearch']['date_range'])){
+        if (isset($params['LeadChecklistSearch']['date_range'])) {
             $query->andFilterWhere(['>=', 'lc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
                 ->andFilterWhere(['<=', 'lc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         }
 
         if ($this->lc_created_dt) {
             $query->andFilterWhere(['>=', 'lc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lc_created_dt))])
-                ->andFilterWhere(['<=', 'lc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lc_created_dt) + 3600 *24)]);
+                ->andFilterWhere(['<=', 'lc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lc_created_dt) + 3600 * 24)]);
         }
 
         // grid filtering conditions
@@ -104,7 +105,7 @@ class LeadChecklistSearch extends LeadChecklist
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['lc_created_dt' => SORT_ASC]],
+            'sort' => ['defaultOrder' => ['lc_created_dt' => SORT_ASC]],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -132,7 +133,4 @@ class LeadChecklistSearch extends LeadChecklist
 
         return $dataProvider;
     }
-
-
-
 }

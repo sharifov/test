@@ -66,7 +66,7 @@ class QaTaskSearchSearch extends QaTaskSearch
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> [
+            'sort' => [
                 'defaultOrder' => ['t_id' => SORT_DESC]
             ],
         ]);

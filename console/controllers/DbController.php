@@ -1,4 +1,5 @@
 <?php
+
 namespace console\controllers;
 
 use common\models\Airline;
@@ -43,14 +44,14 @@ use yii\helpers\VarDumper;
 class DbController extends Controller
 {
 
-	private const MODELS_PATH = [
-		'\\common\\models\\',
-		'\\frontend\\models\\'
-	];
-	/**
-	 * @var GlobalLogFormatAttrService
-	 */
-	private $globalLogFormatAttrService;
+    private const MODELS_PATH = [
+        '\\common\\models\\',
+        '\\frontend\\models\\'
+    ];
+    /**
+     * @var GlobalLogFormatAttrService
+     */
+    private $globalLogFormatAttrService;
 
     /**
      * DbController constructor.
@@ -80,7 +81,7 @@ class DbController extends Controller
             Cases::updateAll(['cs_last_action_dt' => $case['cs_updated_dt']], 'cs_last_action_dt IS NULL AND cs_id = ' . $case['cs_id']);
         }
         printf("\n --- Done ---\n");
-	}
+    }
 
     public function actionInitProjectWeight()
     {
@@ -89,14 +90,14 @@ class DbController extends Controller
         }
         $projects = Project::find()->select(['id'])->indexBy('id')->asArray()->all();
 
-        Yii::$app->db->createCommand()->batchInsert('{{%project_weight}}', ['pw_project_id'],$projects)->execute();
-	}
+        Yii::$app->db->createCommand()->batchInsert('{{%project_weight}}', ['pw_project_id'], $projects)->execute();
+    }
 
     public function actionSendEmptyDepartmentLeadToSales()
     {
         $leads = Lead::updateAll(['l_dep_id' => Department::DEPARTMENT_SALES], ['IS', 'l_dep_id', null]);
         printf("\n --- Sent %s Leads ---\n", $this->ansiFormat($leads, Console::FG_YELLOW));
-	}
+    }
 
     public function actionRemoveClientSystemPhones()
     {
@@ -136,7 +137,7 @@ class DbController extends Controller
         printf("\n --- Deleted %s ClientPhones ---\n", $this->ansiFormat($countDeleted, Console::FG_YELLOW));
 
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
-	}
+    }
 
     public function actionLeadQcall()
     {
@@ -146,7 +147,6 @@ class DbController extends Controller
             ->andWhere(['NOT IN', 'id', (new Query())->select('lqc_lead_id')->from(LeadQcall::tableName())])
             ->all();
         foreach ($leads as $lead) {
-
             $lq = new LeadQcall();
             $lq->lqc_lead_id = $lead->id;
             $lq->lqc_weight = 0;
@@ -160,7 +160,7 @@ class DbController extends Controller
             }
         }
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
-	}
+    }
 
 
 
@@ -189,9 +189,9 @@ class DbController extends Controller
         // Alter the encoding of each table
         foreach ($tables as $id => $table) {
             $tableName = $table['TABLE_NAME'];
-            if($tableName) {
+            if ($tableName) {
                 $db->createCommand("ALTER TABLE `$tableName` CONVERT TO CHARACTER SET " . $collate . " COLLATE " . $collation)->execute();
-                echo $id." - tbl: " . $tableName . " - " . $table['TABLE_COLLATION'] . " \r\n";
+                echo $id . " - tbl: " . $tableName . " - " . $table['TABLE_COLLATION'] . " \r\n";
             }
         }
         $db->createCommand('SET FOREIGN_KEY_CHECKS=1;')->execute();
@@ -298,10 +298,10 @@ ORDER BY lf.lead_id, id';
 
         $logs = $db->createCommand($sql)->queryAll();
 
-        if($logs) {
+        if ($logs) {
             foreach ($logs as $nr => $log) {
                 LeadFlow::updateAll(['lf_from_status_id' => $log['from_status_id'], 'lf_end_dt' => $log['end_dt'], 'lf_time_duration' => $log['time_duration']], ['id' => $log['id']]);
-                echo $nr.' - id: '.$log['id']."\n";
+                echo $nr . ' - id: ' . $log['id'] . "\n";
             }
         }
 
@@ -315,12 +315,12 @@ ORDER BY lf.lead_id, id';
     {
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
-        $quotes = Quote::find()->leftJoin('quote_trip','quote_trip.qt_quote_id = quotes.id')->where(['quote_trip.qt_id' => null])->all();
+        $quotes = Quote::find()->leftJoin('quote_trip', 'quote_trip.qt_quote_id = quotes.id')->where(['quote_trip.qt_id' => null])->all();
         printf("\n Quotes to update: %d \n", count($quotes));
-        if(count($quotes)){
+        if (count($quotes)) {
             $cntUpdated = 0;
-            foreach ($quotes as $quote){
-                if($quote->createQuoteTrips()){
+            foreach ($quotes as $quote) {
+                if ($quote->createQuoteTrips()) {
                     $cntUpdated++;
                 }
             }
@@ -329,7 +329,6 @@ ORDER BY lf.lead_id, id';
         }
 
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
-
     }
 
     public function actionUpdateSoldSales()
@@ -370,10 +369,9 @@ ORDER BY lf.lead_id, id';
 
         $response = Yii::$app->telegram->setWebhook(['url' => $url]);
 
-        if(!$response->ok) {
+        if (!$response->ok) {
             echo $response->description;
         } else {
-
             //VarDumper::dump($response);
 
             print_r(@json_decode(Yii::$app->telegram->getMe(), true));
@@ -393,126 +391,127 @@ ORDER BY lf.lead_id, id';
      */
     public function actionClearUserSiteActivityLogs(): void
     {
+        /* TODO:: remove this action */
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
         $count = UserSiteActivity::clearHistoryLogs();
         echo 'Removed: ' . $count;
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
 
-	/**
-	 *
-	 * @param int $limit
-	 * @throws InvalidConfigException
+    /**
+     *
+     * @param int $limit
+     * @throws InvalidConfigException
      *
      *
      * todo delete
-	 */
+     */
 //    public function actionMigrateOldLeadLogsInGlobalLog($limit = 1000): void
-//	{
-//		printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
-//		$time_start = microtime(true);
-//		\Yii::$app->db->pdo->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+//  {
+//      printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+//      $time_start = microtime(true);
+//      \Yii::$app->db->pdo->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
 //
-//		$leadLog = LeadLog::find()->where(['>=', 'created', '2019-06-01 00:00:00'])->asArray();
-//		$leadLogCount = $leadLog->count();
+//      $leadLog = LeadLog::find()->where(['>=', 'created', '2019-06-01 00:00:00'])->asArray();
+//      $leadLogCount = $leadLog->count();
 //
-//		printf("\n --- Message: %s ---\n", $this->ansiFormat('Total rows: ' . $leadLogCount, Console::FG_GREEN));
+//      printf("\n --- Message: %s ---\n", $this->ansiFormat('Total rows: ' . $leadLogCount, Console::FG_GREEN));
 //
-//		$globalLog = Yii::createObject(GlobalLogInterface::class);
+//      $globalLog = Yii::createObject(GlobalLogInterface::class);
 //
-//		$c = 0;
+//      $c = 0;
 //
-//		$iter = (int)($leadLogCount / $limit);
+//      $iter = (int)($leadLogCount / $limit);
 //
-//		$offset = 0;
+//      $offset = 0;
 //
-//		for($i = 0; $i <= $iter; $i++) {
-//			foreach (($leadLog->limit($limit)->offset($offset)->all()) as $log) {
-//				if (($c % $limit) === 0) {
-//					if ($leadLogCount > 0) {
-//						$percent = round($c * 100 / $leadLogCount, 1);
-//					} else {
-//						$percent = 0;
-//					}
+//      for($i = 0; $i <= $iter; $i++) {
+//          foreach (($leadLog->limit($limit)->offset($offset)->all()) as $log) {
+//              if (($c % $limit) === 0) {
+//                  if ($leadLogCount > 0) {
+//                      $percent = round($c * 100 / $leadLogCount, 1);
+//                  } else {
+//                      $percent = 0;
+//                  }
 //
-//					$memory = Yii::$app->formatter->asShortSize(memory_get_usage(), 1);
+//                  $memory = Yii::$app->formatter->asShortSize(memory_get_usage(), 1);
 //
-//					printf(" --- [%s] (%s) %s ---\n", $percent . '%', $memory, $this->ansiFormat( 'Current processed rows: ' . $c . ' of ' . $leadLogCount, Console::FG_PURPLE));
-//				}
+//                  printf(" --- [%s] (%s) %s ---\n", $percent . '%', $memory, $this->ansiFormat( 'Current processed rows: ' . $c . ' of ' . $leadLogCount, Console::FG_PURPLE));
+//              }
 //
-//				$message = json_decode($log['message'], true);
+//              $message = json_decode($log['message'], true);
 //
-//				$modelPath = $this->getModelPath($message['model']);
+//              $modelPath = $this->getModelPath($message['model']);
 //
-//				if (!$modelPath) {
-//					echo 'Log will not be inserted, because the model ' . $message['model'] . ' was not found.' . PHP_EOL;
-//					continue;
-//				}
+//              if (!$modelPath) {
+//                  echo 'Log will not be inserted, because the model ' . $message['model'] . ' was not found.' . PHP_EOL;
+//                  continue;
+//              }
 //
-//				$action = array_search($message['title'], GlobalLog::getActionTypeList(), false);
+//              $action = array_search($message['title'], GlobalLog::getActionTypeList(), false);
 //
-//				$this->removeDuplicatesFromOldNewAttributes($message['oldParams'], $message['newParams']);
+//              $this->removeDuplicatesFromOldNewAttributes($message['oldParams'], $message['newParams']);
 //
-//				$c++;
-//				if (empty($message['oldParams']) && empty($message['newParams'])) {
-//					continue;
-//				}
+//              $c++;
+//              if (empty($message['oldParams']) && empty($message['newParams'])) {
+//                  continue;
+//              }
 //
-//				if ($message['model'] !== 'Lead') {
-//					if(!isset($message['newParams']['id'])) {
-//						if (preg_match('/\((.*?)\)/si', $message['model'], $output)) {
-//							$modelRowHashId = $output[1];
+//              if ($message['model'] !== 'Lead') {
+//                  if(!isset($message['newParams']['id'])) {
+//                      if (preg_match('/\((.*?)\)/si', $message['model'], $output)) {
+//                          $modelRowHashId = $output[1];
 //
-//							$modelRowId = $this->findModelRowId($modelPath, $modelRowHashId, $log['lead_id']);
+//                          $modelRowId = $this->findModelRowId($modelPath, $modelRowHashId, $log['lead_id']);
 //
-//							if (!$modelRowId) {
-//								continue;
-//							}
-//						} else {
-//							continue;
-//						}
-//					} else {
-//						$modelRowId = $message['newParams']['id'];
-//					}
-//				} else {
-//					$modelRowId = $log['lead_id'];
-//				}
+//                          if (!$modelRowId) {
+//                              continue;
+//                          }
+//                      } else {
+//                          continue;
+//                      }
+//                  } else {
+//                      $modelRowId = $message['newParams']['id'];
+//                  }
+//              } else {
+//                  $modelRowId = $log['lead_id'];
+//              }
 //
-//				$formattedAttr = $this->globalLogFormatAttrService->formatAttr($modelPath, json_encode($message['oldParams']), json_encode($message['newParams']));
+//              $formattedAttr = $this->globalLogFormatAttrService->formatAttr($modelPath, json_encode($message['oldParams']), json_encode($message['newParams']));
 //
-//				if (empty($formattedAttr)) {
-//					continue;
-//				}
+//              if (empty($formattedAttr)) {
+//                  continue;
+//              }
 //
-//				$globalLog->log(new LogDTO(
-//					$modelPath,
-//					$modelRowId,
-//					$log['employee_id'] ? 'app-frontend' : 'app-webapi',
-//					$log['employee_id'] ?? null,
-//					json_encode($message['oldParams']),
-//					json_encode($message['newParams']),
-//					$formattedAttr,
-//					$action ?: null,
-//					$log['created'] ?? null
-//				));
-//			}
-//			$offset += $limit;
-//		}
+//              $globalLog->log(new LogDTO(
+//                  $modelPath,
+//                  $modelRowId,
+//                  $log['employee_id'] ? 'app-frontend' : 'app-webapi',
+//                  $log['employee_id'] ?? null,
+//                  json_encode($message['oldParams']),
+//                  json_encode($message['newParams']),
+//                  $formattedAttr,
+//                  $action ?: null,
+//                  $log['created'] ?? null
+//              ));
+//          }
+//          $offset += $limit;
+//      }
 //
-//		$time_end = microtime(true);
-//		$time = number_format(round($time_end - $time_start, 2), 2);
-//		printf("\nExecute Time: %s, count Old Logs: " . $leadLogCount, $this->ansiFormat($time . ' s', Console::FG_RED));
-//		printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
-//	}
+//      $time_end = microtime(true);
+//      $time = number_format(round($time_end - $time_start, 2), 2);
+//      printf("\nExecute Time: %s, count Old Logs: " . $leadLogCount, $this->ansiFormat($time . ' s', Console::FG_RED));
+//      printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+//  }
 
-	public function actionTruncateGlobalLog(): void
-	{
-		try {
-			Yii::$app->db->createCommand()->truncateTable('global_log')->execute();
-		} catch (Exception $e) {
-			echo $e->getMessage() . PHP_EOL;
-		}
-	}
+    public function actionTruncateGlobalLog(): void
+    {
+        try {
+            Yii::$app->db->createCommand()->truncateTable('global_log')->execute();
+        } catch (Exception $e) {
+            echo $e->getMessage() . PHP_EOL;
+        }
+    }
 
     /**
      * @param int $limit
@@ -537,7 +536,7 @@ ORDER BY lf.lead_id, id';
         $resultInfo = 'Processed: ' . $processed .
             ', Execute Time: ' . number_format(round(microtime(true) - $timeStart, 2), 2);
 
-        Yii::info($resultInfo , 'info\:' . self::class . ':' . $this->action->id);
+        Yii::info($resultInfo, 'info\DbController:actionCompressEmail');
         $this->printInfo($resultInfo, $this->action->id);
     }
 
@@ -559,89 +558,89 @@ ORDER BY lf.lead_id, id';
                 $processed++;
             } catch (\Throwable $e) {
                 $failed++;
-                Yii::error(VarDumper::dumpAsString($e), self::class . ':' . $this->action->id . ':Clean failed' );
+                Yii::error(VarDumper::dumpAsString($e), self::class . ':' . $this->action->id . ':Clean failed');
             }
         }
 
         $resultInfo = 'Processed: ' . $processed . ' Failed: ' . $failed .
             ', Execute Time: ' . number_format(round(microtime(true) - $timeStart, 2), 2);
 
-        Yii::info($resultInfo , 'info\:' . self::class . ':' . $this->action->id);
+        Yii::info($resultInfo, 'info\:' . self::class . ':' . $this->action->id);
         $this->printInfo($resultInfo, $this->action->id, Console::FG_GREEN);
     }
 
-	/**
-	 * @param string $modelPath
-	 * @param int $leadId
-	 * @return int|null
-	 * @throws InvalidConfigException
-	 */
-	public function findModelRowByLeadId(string $modelPath, int $leadId): ?int
-	{
-		echo 'findModelByLeadId' . PHP_EOL;
-		/* @var ActiveRecord $model */
-		$model = Yii::createObject($modelPath);
+    /**
+     * @param string $modelPath
+     * @param int $leadId
+     * @return int|null
+     * @throws InvalidConfigException
+     */
+    public function findModelRowByLeadId(string $modelPath, int $leadId): ?int
+    {
+        echo 'findModelByLeadId' . PHP_EOL;
+        /* @var ActiveRecord $model */
+        $model = Yii::createObject($modelPath);
 
-		$row = $model::find()
-			->select('id')
-			->andWhere([
-				'lead_id' => $leadId
-			])->all();
+        $row = $model::find()
+            ->select('id')
+            ->andWhere([
+                'lead_id' => $leadId
+            ])->all();
 
-		return count($row) !== 1 ? $row[0]->id : null;
-	}
+        return count($row) !== 1 ? $row[0]->id : null;
+    }
 
-	/**
-	 * @param string $modelPath
-	 * @param string $modelRowHashId
-	 * @param int $leadId
-	 * @return int|null
-	 * @throws InvalidConfigException
-	 */
-	private function findModelRowId(string $modelPath, string $modelRowHashId, int $leadId): ?int
-	{
-		/* @var ActiveRecord $model */
-		$model = Yii::createObject($modelPath);
+    /**
+     * @param string $modelPath
+     * @param string $modelRowHashId
+     * @param int $leadId
+     * @return int|null
+     * @throws InvalidConfigException
+     */
+    private function findModelRowId(string $modelPath, string $modelRowHashId, int $leadId): ?int
+    {
+        /* @var ActiveRecord $model */
+        $model = Yii::createObject($modelPath);
 
-		$row = $model::find()
-			->select('id')
-			->andWhere([
-			'uid' => $modelRowHashId,
-			'lead_id' => $leadId
-		])->limit(1)->one();
+        $row = $model::find()
+            ->select('id')
+            ->andWhere([
+            'uid' => $modelRowHashId,
+            'lead_id' => $leadId
+        ])->limit(1)->one();
 
-		return $row->id ?? null;
-	}
+        return $row->id ?? null;
+    }
 
-	/**
-	 * @param string $modelName
-	 * @return string|null
-	 */
-	private function getModelPath(string $modelName): ?string
-	{
-		foreach (self::MODELS_PATH as $path) {
-			try {
-				return (new \ReflectionClass(explode(' ', $path . $modelName, 2)[0]))->getName();
-			} catch (\ReflectionException $e) {
-				echo 'ReflectionException: ' . $e->getMessage() . PHP_EOL;
-			}
-		}
+    /**
+     * @param string $modelName
+     * @return string|null
+     */
+    private function getModelPath(string $modelName): ?string
+    {
+        foreach (self::MODELS_PATH as $path) {
+            try {
+                return (new \ReflectionClass(explode(' ', $path . $modelName, 2)[0]))->getName();
+            } catch (\ReflectionException $e) {
+                echo 'ReflectionException: ' . $e->getMessage() . PHP_EOL;
+            }
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	/**
-	 * @param array $oldAttributes
-	 * @param array $newAttributes
-	 */
-	private function removeDuplicatesFromOldNewAttributes(array &$oldAttributes, array &$newAttributes): void
-	{
-		foreach ($newAttributes as $key => $value) {
-			if ((array_key_exists($key, $newAttributes) && ($newAttributes[$key] == $oldAttributes[$key] || (empty($newAttributes[$key]) && empty($oldAttributes[$key]))))) {
-				unset($newAttributes[$key], $oldAttributes[$key]);
-			}
-		}
-	}
+    /**
+     * @param array $oldAttributes
+     * @param array $newAttributes
+     */
+    private function removeDuplicatesFromOldNewAttributes(array &$oldAttributes, array &$newAttributes): void
+    {
+        foreach ($newAttributes as $key => $value) {
+            if ((array_key_exists($key, $newAttributes) && ($newAttributes[$key] == $oldAttributes[$key] || (empty($newAttributes[$key]) && empty($oldAttributes[$key]))))) {
+                unset($newAttributes[$key], $oldAttributes[$key]);
+            }
+        }
+    }
 
     /**
      * @param string $info
@@ -708,14 +707,14 @@ ORDER BY lf.lead_id, id';
                 } else {
                     echo '+ ' . ($processed + 1) . '. ' . $user->username . ', ps: ' . ($userStatus->us_call_phone_status ? 1 : 0) . "\n";
                 }
-                $processed ++;
+                $processed++;
             }
         }
 
         $resultInfo = 'Processed: ' . $processed .
             ', Execute Time: ' . number_format(round(microtime(true) - $timeStart, 2), 2);
 
-        Yii::info($resultInfo , 'info\:' . self::class . ':' . $this->action->id);
+        Yii::info($resultInfo, 'info\:' . self::class . ':' . $this->action->id);
         $this->printInfo($resultInfo, $this->action->id);
     }
 }

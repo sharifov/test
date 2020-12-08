@@ -14,26 +14,26 @@ use sales\repositories\Repository;
  */
 class FlightQuoteStatusLogRepository extends Repository
 {
-	/**
-	 * @var EventDispatcher
-	 */
-	private $eventDispatcher;
+    /**
+     * @var EventDispatcher
+     */
+    private $eventDispatcher;
 
-	public function __construct(EventDispatcher $eventDispatcher)
-	{
-		$this->eventDispatcher = $eventDispatcher;
-	}
-	
-	/**
-	 * @param FlightQuoteStatusLog $quoteStatusLog
-	 * @return int
-	 */
-	public function save(FlightQuoteStatusLog $quoteStatusLog): int
-	{
-		if (!$quoteStatusLog->save(false)) {
-			throw new \RuntimeException('Saving error');
-		}
-		$this->eventDispatcher->dispatchAll($quoteStatusLog->releaseEvents());
-		return $quoteStatusLog->qsl_id;
-	}
+    public function __construct(EventDispatcher $eventDispatcher)
+    {
+        $this->eventDispatcher = $eventDispatcher;
+    }
+
+    /**
+     * @param FlightQuoteStatusLog $quoteStatusLog
+     * @return int
+     */
+    public function save(FlightQuoteStatusLog $quoteStatusLog): int
+    {
+        if (!$quoteStatusLog->save(false)) {
+            throw new \RuntimeException('Saving error');
+        }
+        $this->eventDispatcher->dispatchAll($quoteStatusLog->releaseEvents());
+        return $quoteStatusLog->qsl_id;
+    }
 }

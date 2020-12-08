@@ -35,171 +35,169 @@ use sales\services\TransactionManager;
  */
 class FlightManageService
 {
-	private $flightRepository;
-	private $transaction;
-	private $segmentRepository;
-	/**
-	 * @var ProductCreateService
-	 */
-	private $productCreateService;
-	/**
-	 * @var ProductRepository
-	 */
-	private $productRepository;
-	/**
-	 * @var FlightSegmentRepository
-	 */
-	private $flightSegmentRepository;
-	/**
-	 * @var FlightQuoteManageService
-	 */
-	private $flightQuoteManageService;
+    private $flightRepository;
+    private $transaction;
+    private $segmentRepository;
+    /**
+     * @var ProductCreateService
+     */
+    private $productCreateService;
+    /**
+     * @var ProductRepository
+     */
+    private $productRepository;
+    /**
+     * @var FlightSegmentRepository
+     */
+    private $flightSegmentRepository;
+    /**
+     * @var FlightQuoteManageService
+     */
+    private $flightQuoteManageService;
 
-	public function __construct(
-	    FlightRepository $flightRepository,
+    public function __construct(
+        FlightRepository $flightRepository,
         FlightSegmentRepository $segmentRepository,
         ProductCreateService $productCreateService,
         ProductRepository $productRepository,
         FlightSegmentRepository $flightSegmentRepository,
         FlightQuoteManageService $flightQuoteManageService,
         TransactionManager $transaction
-    )
-	{
-		$this->flightRepository = $flightRepository;
-		$this->transaction = $transaction;
-		$this->segmentRepository = $segmentRepository;
-		$this->productCreateService = $productCreateService;
-		$this->productRepository = $productRepository;
-		$this->flightSegmentRepository = $flightSegmentRepository;
-		$this->flightQuoteManageService = $flightQuoteManageService;
-	}
+    ) {
+        $this->flightRepository = $flightRepository;
+        $this->transaction = $transaction;
+        $this->segmentRepository = $segmentRepository;
+        $this->productCreateService = $productCreateService;
+        $this->productRepository = $productRepository;
+        $this->flightSegmentRepository = $flightSegmentRepository;
+        $this->flightQuoteManageService = $flightQuoteManageService;
+    }
 
-	/**
-	 * @param int $id
-	 * @param ItineraryEditForm $form
-	 * @throws \Throwable
-	 */
-	public function editItinerary(int $id, ItineraryEditForm $form): void
-	{
-		$flight = $this->flightRepository->find($id);
+    /**
+     * @param int $id
+     * @param ItineraryEditForm $form
+     * @throws \Throwable
+     */
+    public function editItinerary(int $id, ItineraryEditForm $form): void
+    {
+        $flight = $this->flightRepository->find($id);
 
-		$flight->editItinerary(
-			$form->cabin,
-			$form->adults,
-			$form->children,
-			$form->infants,
+        $flight->editItinerary(
+            $form->cabin,
+            $form->adults,
+            $form->children,
+            $form->infants,
             $form->fl_stops,
             $form->fl_delayed_charge
-		);
+        );
 
-		$this->transaction->wrap(function () use ($flight, $form) {
+        $this->transaction->wrap(function () use ($flight, $form) {
 
-			$flight->setTripType(self::calculateTripType($form->segments));
-			$newSegmentsIds = [];
-			foreach ($form->segments as $segmentForm) {
-				$segment = $this->getSegment($flight->fl_id, $segmentForm);
-				$newSegmentsIds[] = $this->segmentRepository->save($segment);
-			}
-			$this->segmentRepository->removeOld($flight->flightSegments, $newSegmentsIds);
+            $flight->setTripType(self::calculateTripType($form->segments));
+            $newSegmentsIds = [];
+            foreach ($form->segments as $segmentForm) {
+                $segment = $this->getSegment($flight->fl_id, $segmentForm);
+                $newSegmentsIds[] = $this->segmentRepository->save($segment);
+            }
+            $this->segmentRepository->removeOld($flight->flightSegments, $newSegmentsIds);
 
-			$this->flightRepository->save($flight);
+            $this->flightRepository->save($flight);
 
-			$flight->updateLastAction();
+            $flight->updateLastAction();
+        });
+    }
 
-		});
-	}
+    public function createNewProductAndAssignNewQuote(FlightQuoteCreateForm $form, Lead $lead, array $quote): void
+    {
+        $this->transaction->wrap(function () use ($form, $lead, $quote) {
+            $productCreateForm = new ProductCreateForm();
+            $productCreateForm->pr_lead_id = $lead->id;
+            $productCreateForm->pr_type_id = ProductType::PRODUCT_FLIGHT;
+            $newProductId = $this->productCreateService->create($productCreateForm);
+            $product = $this->productRepository->find($newProductId);
 
-	public function createNewProductAndAssignNewQuote(FlightQuoteCreateForm $form, Lead $lead, array $quote): void
-	{
-		$this->transaction->wrap(function () use ($form, $lead, $quote) {
-			$productCreateForm = new ProductCreateForm();
-			$productCreateForm->pr_lead_id = $lead->id;
-			$productCreateForm->pr_type_id = ProductType::PRODUCT_FLIGHT;
-			$newProductId = $this->productCreateService->create($productCreateForm);
-			$product = $this->productRepository->find($newProductId);
+            $newFlight = $product->flight;
+            $newFlight->editItinerary(
+                Flight::getCabinByRealCode($quote['cabin']),
+                $quote['passengers'][FlightPax::PAX_ADULT]['cnt'] ?? 0,
+                $quote['passengers'][FlightPax::PAX_CHILD]['cnt'] ?? 0,
+                $quote['passengers'][FlightPax::PAX_INFANT]['cnt'] ?? 0,
+                count($form->itinerary) - 1,
+                false
+            );
+            $newFlight->setTripType($quote['tripType']);
+            $this->flightRepository->save($newFlight);
 
-			$newFlight = $product->flight;
-			$newFlight->editItinerary(
-				Flight::getCabinByRealCode($quote['cabin']),
-				$quote['passengers'][FlightPax::PAX_ADULT]['cnt'] ?? 0,
-				$quote['passengers'][FlightPax::PAX_CHILD]['cnt'] ?? 0,
-				$quote['passengers'][FlightPax::PAX_INFANT]['cnt'] ?? 0,
-				count($form->itinerary) - 1,
-				false
-			);
-			$newFlight->setTripType($quote['tripType']);
-			$this->flightRepository->save($newFlight);
+            /** @var ItineraryDumpDTO $itinerary */
+            foreach ($form->itinerary as $itinerary) {
+                $segmentDto = (new SegmentDTO())->fillByItineraryDumpDto($itinerary, $newFlight->fl_id);
+                $flightSegment = FlightSegment::create($segmentDto);
+                $this->flightSegmentRepository->save($flightSegment);
+            }
+            $this->flightQuoteManageService->create($newFlight, $quote, $form->quoteCreator);
+        });
+    }
 
-			/** @var ItineraryDumpDTO $itinerary */
-			foreach ($form->itinerary as $itinerary) {
-				$segmentDto = (new SegmentDTO())->fillByItineraryDumpDto($itinerary, $newFlight->fl_id);
-				$flightSegment = FlightSegment::create($segmentDto);
-				$this->flightSegmentRepository->save($flightSegment);
-			}
-			$this->flightQuoteManageService->create($newFlight, $quote, $form->quoteCreator);
-		});
-	}
+    public function updateFlightRequestAndAssignNewQuote(FlightQuoteCreateForm $form, Flight $flight, array $quote): void
+    {
+        $this->transaction->wrap(function () use ($form, $flight, $quote) {
+            $flight->editItinerary(
+                Flight::getCabinByRealCode($quote['cabin']),
+                $quote['passengers'][FlightPax::PAX_ADULT]['cnt'] ?? 0,
+                $quote['passengers'][FlightPax::PAX_CHILD]['cnt'] ?? 0,
+                $quote['passengers'][FlightPax::PAX_INFANT]['cnt'] ?? 0,
+                count($form->itinerary) - 1,
+                false
+            );
+            $flight->setTripType($quote['tripType']);
+            $this->flightRepository->save($flight);
+            foreach ($flight->flightSegments as $segment) {
+                $this->flightSegmentRepository->remove($segment);
+            }
+            /** @var ItineraryDumpDTO $itinerary */
+            foreach ($form->itinerary as $itinerary) {
+                $segmentDto = (new SegmentDTO())->fillByItineraryDumpDto($itinerary, $flight->fl_id);
+                $flightSegment = FlightSegment::create($segmentDto);
+                $this->flightSegmentRepository->save($flightSegment);
+            }
+            $this->flightQuoteManageService->create($flight, $quote, $form->quoteCreator);
+        });
+    }
 
-	public function updateFlightRequestAndAssignNewQuote(FlightQuoteCreateForm $form, Flight $flight, array $quote): void
-	{
-		$this->transaction->wrap(function () use ($form, $flight, $quote) {
-			$flight->editItinerary(
-				Flight::getCabinByRealCode($quote['cabin']),
-				$quote['passengers'][FlightPax::PAX_ADULT]['cnt'] ?? 0,
-				$quote['passengers'][FlightPax::PAX_CHILD]['cnt'] ?? 0,
-				$quote['passengers'][FlightPax::PAX_INFANT]['cnt'] ?? 0,
-				count($form->itinerary) - 1,
-				false
-			);
-			$flight->setTripType($quote['tripType']);
-			$this->flightRepository->save($flight);
-			foreach ($flight->flightSegments as $segment) {
-				$this->flightSegmentRepository->remove($segment);
-			}
-			/** @var ItineraryDumpDTO $itinerary */
-			foreach ($form->itinerary as $itinerary) {
-				$segmentDto = (new SegmentDTO())->fillByItineraryDumpDto($itinerary, $flight->fl_id);
-				$flightSegment = FlightSegment::create($segmentDto);
-				$this->flightSegmentRepository->save($flightSegment);
-			}
-			$this->flightQuoteManageService->create($flight, $quote, $form->quoteCreator);
-		});
-	}
+    /**
+     * @param array $segments
+     * @return int|null
+     * @throws \yii\base\InvalidConfigException
+     */
+    private function calculateTripType(array $segments): ?int
+    {
+        $segmentsDTO = [];
 
-	/**
-	 * @param array $segments
-	 * @return int|null
-	 * @throws \yii\base\InvalidConfigException
-	 */
-	private function calculateTripType(array $segments): ?int
-	{
-		$segmentsDTO = [];
+        /** @var FlightSegmentForm $segment */
+        foreach ($segments as $segment) {
+            $segmentsDTO[] = new SegmentDTO(null, $segment->fs_origin_iata, $segment->fs_destination_iata);
+        }
 
-		/** @var FlightSegmentForm $segment */
-		foreach ($segments as $segment) {
-			$segmentsDTO[] = new SegmentDTO(null, $segment->fs_origin_iata, $segment->fs_destination_iata);
-		}
+        return FlightTripTypeCalculator::calculate(...$segmentsDTO);
+    }
 
-		return FlightTripTypeCalculator::calculate(...$segmentsDTO);
-	}
+    /**
+     * @param int $flightId
+     * @param FlightSegmentEditForm $segmentForm
+     * @return FlightSegment
+     */
+    private function getSegment(int $flightId, FlightSegmentEditForm $segmentForm): FlightSegment
+    {
+        $dto = (new SegmentDTO())->fillBySegmentForm($segmentForm);
 
-	/**
-	 * @param int $flightId
-	 * @param FlightSegmentEditForm $segmentForm
-	 * @return FlightSegment
-	 */
-	private function getSegment(int $flightId, FlightSegmentEditForm $segmentForm): FlightSegment
-	{
-		$dto = (new SegmentDTO())->fillBySegmentForm($segmentForm);
+        if ($segmentForm->fs_id) {
+            $segment = $this->segmentRepository->find($segmentForm->fs_id);
+            $segment->edit($dto);
+            return $segment;
+        }
 
-		if ($segmentForm->fs_id) {
-			$segment = $this->segmentRepository->find($segmentForm->fs_id);
-			$segment->edit($dto);
-			return $segment;
-		}
-
-		$dto->flightId = $flightId;
-		$segment = FlightSegment::create($dto);
-		return $segment;
-	}
+        $dto->flightId = $flightId;
+        $segment = FlightSegment::create($dto);
+        return $segment;
+    }
 }

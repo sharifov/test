@@ -206,7 +206,7 @@ $duration = 10;
 
         <div class="row top_tiles">
 
-            <?php if($user->isAdmin()): ?>
+            <?php if ($user->isAdmin()) : ?>
             <div class="animated flipInY col-md-2 col-sm-6 col-xs-12">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-list"></i></div>
@@ -263,7 +263,7 @@ $duration = 10;
 
             <div class="animated flipInY col-md-2 col-sm-6 col-xs-12" title="My Project / Phone List">
                 <?php
-                if($user->userProjectParams):
+                if ($user->userProjectParams) :
                     ?>
 
                     <table class="table table-bordered table-striped">
@@ -273,7 +273,7 @@ $duration = 10;
                         </tr>
                         <?php
                         $nr = 1;
-                        foreach ($user->userProjectParams as $upp):?>
+                        foreach ($user->userProjectParams as $upp) :?>
                             <tr>
                                 <td><?=Html::encode($upp->uppProject->name)?></td>
 <!--                                <td>--><?php //=Html::encode($upp->upp_tw_phone_number)?><!--</td>-->
@@ -297,23 +297,22 @@ $duration = 10;
 
             <?php //= Html::a('<i class="fa fa-refresh"></i> Auto Redial INIT', ['auto-redial', 'act' => 'init'], ['class' => 'btn btn-info click_after_call_update', 'id' => 'btn-auto-redial-init']) ?>
 
-            <?php if($isActionFind && $leadModel):?>
+            <?php if ($isActionFind && $leadModel) :?>
                 <div class="text-center badge badge-warning" style="font-size: 35px">
                     <i class="fa fa-spinner fa-spin"></i> Processing ...
                 </div>
-            <?php elseif($callModel):?>
+            <?php elseif ($callModel) :?>
                 <div class="text-center badge badge-warning" style="font-size: 35px">
                     <i class="fa fa-spinner fa-spin"></i> <?=$callModel->getStatusName()?> <?=$callModel->c_to?> ...
                 </div>
-            <?php else: ?>
-
-                <?php if($checkShiftTime && $isAccessNewLead):?>
+            <?php else : ?>
+                <?php if ($checkShiftTime && $isAccessNewLead) :?>
                     <div class="text-center">
                         <?= Html::a('<i class="fa fa-search"></i> Find new Lead and make Call', ['auto-redial', 'act' => 'find'], ['class' => 'btn btn-lg btn-success']) ?>
                     </div>
                 <?php endif; ?>
 
-                <?php if($isActionFind):?>
+                <?php if ($isActionFind) :?>
                     <div class="alert alert-warning alert-dismissible" role="alert">
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                         <strong>Sorry! No lead was found.</strong> Last request time: <?=Yii::$app->formatter->asTime(time())?>
@@ -334,21 +333,18 @@ $duration = 10;
 
 
 
-        <?php if($user->userProfile):?>
+        <?php if ($user->userProfile) :?>
             <hr>
             <div class="row">
                 <div class="col-md-6">
 
-                    <?php if($leadModel && !$callModel): ?>
-
-                        <?php if(isset($callData['error']) && $callData['error']):?>
+                    <?php if ($leadModel && !$callModel) : ?>
+                        <?php if (isset($callData['error']) && $callData['error']) :?>
                             <div class="alert alert-danger" role="alert"><strong>Error:</strong> <?=Html::encode($callData['error'])?></div>
-                            <?=$this->registerJs("createNotify('Call Error', '". Html::encode($callData['error'])."', 'error');");?>
-                        <?php else: ?>
-
-                            <?php if($callData): ?>
-
-                                <?=$this->registerJs("webCall('". $callData['phone_from']."', '". $callData['phone_to']."', ". $callData['project_id'].", ". $callData['lead_id'].", '', 'auto-redial', '');");?>
+                            <?=$this->registerJs("createNotify('Call Error', '" . Html::encode($callData['error']) . "', 'error');");?>
+                        <?php else : ?>
+                            <?php if ($callData) : ?>
+                                <?=$this->registerJs("webCall('" . $callData['phone_from'] . "', '" . $callData['phone_to'] . "', " . $callData['project_id'] . ", " . $callData['lead_id'] . ", '', 'auto-redial', '');");?>
                                 <?php //=$this->registerJs('autoredialInit(); startAutoTake();');?>
                                 <?php //=$this->registerJs('startTimer(20);');?>
                             <?php endif; ?>
@@ -378,13 +374,13 @@ $duration = 10;
                                                     'attribute' => 'client.name',
                                                     'header' => 'Client name',
                                                     'format' => 'raw',
-                                                    'value' => function(\common\models\Lead $model) {
-                                                        if($model->client) {
+                                                    'value' => function (\common\models\Lead $model) {
+                                                        if ($model->client) {
                                                             $clientName = $model->client->first_name . ' ' . $model->client->last_name;
                                                             if ($clientName === 'Client Name') {
                                                                 $clientName = '- - - ';
                                                             } else {
-                                                                $clientName = '<i class="fa fa-user"></i> '. Html::encode($clientName);
+                                                                $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName);
                                                             }
                                                         } else {
                                                             $clientName = '-';
@@ -400,8 +396,8 @@ $duration = 10;
                                                     'attribute' => 'client.phone',
                                                     'header' => 'Client Phones',
                                                     'format' => 'raw',
-                                                    'value' => function(\common\models\Lead $model) use ($isAgent) {
-                                                        if($model->client && $model->client->clientPhones) {
+                                                    'value' => function (\common\models\Lead $model) use ($isAgent) {
+                                                        if ($model->client && $model->client->clientPhones) {
                                                             if ($isAgent && Yii::$app->user->id !== $model->employee_id) {
                                                                 $str = '- // - // - // -';
                                                             } else {
@@ -452,7 +448,7 @@ $duration = 10;
 
                                                 [
                                                     'attribute' => 'status',
-                                                    'value' => function(\common\models\Lead $model) {
+                                                    'value' => function (\common\models\Lead $model) {
                                                         return $model->getStatusName(true);
                                                     },
                                                     'format' => 'html',
@@ -460,7 +456,7 @@ $duration = 10;
                                                 ],
                                                 [
                                                     'attribute' => 'project_id',
-                                                    'value' => function(\common\models\Lead $model) {
+                                                    'value' => function (\common\models\Lead $model) {
                                                         return $model->project ? $model->project->name : '-';
                                                     },
 
@@ -468,7 +464,7 @@ $duration = 10;
 
                                                 [
                                                     'attribute' => 'source_id',
-                                                    'value' => function(\common\models\Lead $model) {
+                                                    'value' => function (\common\models\Lead $model) {
                                                         return $model->source ? $model->source->name : '-';
                                                     },
                                                 ],
@@ -518,14 +514,14 @@ $duration = 10;
                                             'attributes' => [
                                                 [
                                                     'attribute' => 'trip_type',
-                                                    'value' => function(\common\models\Lead $model) {
+                                                    'value' => function (\common\models\Lead $model) {
                                                         return $model->getFlightTypeName();
                                                     },
                                                 ],
 
                                                 [
                                                     'attribute' => 'cabin',
-                                                    'value' => function(\common\models\Lead $model) {
+                                                    'value' => function (\common\models\Lead $model) {
                                                         return $model->getCabinClassName();
                                                     },
                                                 ],
@@ -541,7 +537,7 @@ $duration = 10;
                                                 [
                                                     'label' => 'Client time',
                                                     'format' => 'raw',
-                                                    'value' => function(\common\models\Lead $model) {
+                                                    'value' => function (\common\models\Lead $model) {
                                                         return ClientTimeFormatter::format($model->getClientTime2(), $model->offset_gmt);
                                                     },
                                                     //'options' => ['style' => 'width:80px'],
@@ -561,8 +557,8 @@ $duration = 10;
 
                                                 [
                                                     'attribute' => 'created',
-                                                    'value' => function(\common\models\Lead $model) {
-                                                        return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
+                                                    'value' => function (\common\models\Lead $model) {
+                                                        return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
                                                     },
                                                     'format' => 'raw',
                                                 ],
@@ -575,7 +571,7 @@ $duration = 10;
                                                         $diffTime = time() - $createdTS;
                                                         $diffHours = (int) ($diffTime / (60 * 60));
 
-                                                        return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+                                                        return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
                                                     },
                                                     'options' => [
                                                         'style' => 'width:180px'
@@ -591,7 +587,7 @@ $duration = 10;
 
                         </div>
 
-                    <?php else: ?>
+                    <?php else : ?>
                         <?php /*php
                             if(!Yii::$app->request->isPjax || Yii::$app->request->get('act') === 'start') {
                                 $this->registerJs('startTimer(10);');
@@ -604,7 +600,7 @@ $duration = 10;
                 </div>
                 <div class="col-md-6">
                     <?php /*<h3>Call status: <span class="badge badge-info" id="call_autoredial_status"><?=$callModel ? $callModel->getStatusName() : '-'?></span></h3>*/?>
-                    <?php if($callModel): ?>
+                    <?php if ($callModel) : ?>
                         <div class="x_panel">
                             <div class="x_title">
                                 <h2><i class="fa fa-phone-square"></i> Current Call: <?=$callModel->c_id?></h2>
@@ -663,7 +659,7 @@ $duration = 10;
                                             [
                                                 'attribute' => 'c_project_id',
                                                 'value' => static function (\common\models\Call $model) {
-                                                    return $model->cProject ? '<span class="badge badge-info">'.$model->cProject->name .'</span>' : '-';
+                                                    return $model->cProject ? '<span class="badge badge-info">' . $model->cProject->name . '</span>' : '-';
                                                 },
                                                 'format' => 'raw'
                                             ],
@@ -702,8 +698,8 @@ $duration = 10;
                                 </div>
 
                                 <div class="col-md-12 text-center">
-                                    <?php if($callModel->cLead && $callModel->cLead->status === Lead::STATUS_PENDING && $callModel->isStatusInProgress()): ?>
-                                        <?=Html::a('<i class="fa fa-download"></i> Take Lead <b id="auto_take_timer" data-name="'.$callModel->cLead->id.'"></b>', ['lead/auto-take', 'gid' => $callModel->cLead->gid], [
+                                    <?php if ($callModel->cLead && $callModel->cLead->status === Lead::STATUS_PENDING && $callModel->isStatusInProgress()) : ?>
+                                        <?=Html::a('<i class="fa fa-download"></i> Take Lead <b id="auto_take_timer" data-name="' . $callModel->cLead->id . '"></b>', ['lead/auto-take', 'gid' => $callModel->cLead->gid], [
                                             'class' => 'btn btn-success',
                                             'target' => '_blank',
                                             'data-pjax' => 0
@@ -717,7 +713,7 @@ $duration = 10;
                     <?php endif; ?>
                 </div>
             </div>
-        <?php else: ?>
+        <?php else : ?>
             <div class="alert alert-warning alert-dismissible" role="alert">
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <strong>Warning!</strong> Not found user profile for User (<?=$user->id?>)
@@ -726,7 +722,7 @@ $duration = 10;
         <hr>
 
         <div class="row">
-            <?php if(!$checkShiftTime): ?>
+            <?php if (!$checkShiftTime) : ?>
                 <div class="col-md-4">
                     <div class="alert alert-warning alert-dismissible" role="alert">
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -738,7 +734,7 @@ $duration = 10;
                 </div>
             <?php endif; ?>
 
-            <?php if(!$isAccessNewLead): ?>
+            <?php if (!$isAccessNewLead) : ?>
                 <div class="col-md-4">
                     <div class="alert alert-warning alert-dismissible" role="alert">
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -748,7 +744,7 @@ $duration = 10;
             <?php endif; ?>
 
 
-            <?php if(isset($accessLeadByFrequency['access']) && $accessLeadByFrequency['access'] == false): ?>
+            <?php if (isset($accessLeadByFrequency['access']) && $accessLeadByFrequency['access'] == false) : ?>
                 <div class="col-md-4">
                     <div class="alert alert-warning alert-dismissible" role="alert">
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -793,7 +789,7 @@ $duration = 10;
                 [
                     'attribute' => 'c_project_id',
                     'value' => static function (\common\models\Call $model) {
-                        return $model->cProject ? '<span class="badge badge-info">'.Html::encode($model->cProject->name).'</span>' : '-';
+                        return $model->cProject ? '<span class="badge badge-info">' . Html::encode($model->cProject->name) . '</span>' : '-';
                     },
                     'format' => 'raw',
                     'filter' => $projectList
@@ -821,7 +817,7 @@ $duration = 10;
                 [
                     'attribute' => 'c_recording_url',
                     'value' => static function (\common\models\Call $model) {
-                        return  $model->recordingUrl ? '<audio controls="controls" controlsList="nodownload" style="width: 350px; height: 25px"><source src="'.$model->recordingUrl.'" type="audio/mpeg"> </audio>' : '-';
+                        return  $model->recordingUrl ? '<audio controls="controls" controlsList="nodownload" style="width: 350px; height: 25px"><source src="' . $model->recordingUrl . '" type="audio/mpeg"> </audio>' : '-';
                     },
                     'format' => 'raw'
                 ],
@@ -866,10 +862,10 @@ $duration = 10;
             ],
         ]); ?>
 
-        <?php if($dataProvider) :?>
+        <?php if ($dataProvider) :?>
         <h3>Pending leads:</h3>
-        <?php
-        $gridColumns = [
+            <?php
+            $gridColumns = [
             //['class' => 'yii\grid\SerialColumn'],
             [
                 'attribute' => 'id',
@@ -890,7 +886,7 @@ $duration = 10;
                     $diffTime = time() - $createdTS;
                     $diffHours = (int) ($diffTime / (60 * 60));
 
-                    return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+                    return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
                 },
                 'options' => [
                     'style' => 'width:180px'
@@ -978,7 +974,6 @@ $duration = 10;
                         }
                     }
                     return '-';
-
                 },
                 'format' => 'raw',
                 'contentOptions' => [
@@ -1018,7 +1013,7 @@ $duration = 10;
             [
                 'label' => 'Pax',
                 'value' => static function (\common\models\Lead $model) {
-                    return '<span title="adult"><i class="fa fa-male"></i> '. $model->adults .'</span> / <span title="child"><i class="fa fa-child"></i> ' . $model->children . '</span> / <span title="infant"><i class="fa fa-info"></i> ' . $model->infants.'</span>';
+                    return '<span title="adult"><i class="fa fa-male"></i> ' . $model->adults . '</span> / <span title="child"><i class="fa fa-child"></i> ' . $model->children . '</span> / <span title="infant"><i class="fa fa-info"></i> ' . $model->infants . '</span>';
                 },
                 'format' => 'raw',
                 //'visible' => ! $isAgent,
@@ -1056,7 +1051,7 @@ $duration = 10;
             [
                 'header' => 'Client time',
                 'format' => 'raw',
-                'value' => function(\common\models\Lead $model) {
+                'value' => function (\common\models\Lead $model) {
                     return ClientTimeFormatter::format($model->getClientTime2(), $model->offset_gmt);
                 },
                 //'options' => ['style' => 'width:80px'],
@@ -1066,7 +1061,7 @@ $duration = 10;
             [
                 'label' => 'Client time2',
                 'format' => 'raw',
-                'value' => function(\common\models\Lead $model) {
+                'value' => function (\common\models\Lead $model) {
                     return $model->l_client_time;
                 },
                 //'options' => ['style' => 'width:80px'],
@@ -1114,7 +1109,7 @@ $duration = 10;
                     return $model->l_pending_delay_dt ? Yii::$app->formatter->asDatetime(strtotime($model->l_pending_delay_dt)) : '-';
                 },
             ],
-        ];
+            ];
 
             echo GridView::widget([
 
@@ -1134,7 +1129,7 @@ $duration = 10;
 
             ]);
 
-        ?>
+            ?>
 
         <?php endif; ?>
 

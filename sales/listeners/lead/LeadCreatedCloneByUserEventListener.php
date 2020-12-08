@@ -55,13 +55,16 @@ class LeadCreatedCloneByUserEventListener
             $agent = 'System';
         }
 
-        $body = Yii::t('email', "Agent {agent} cloned lead (Id: {clone_id}) with reason [{reason}]. New lead (Id: {lead_id})",
+        $body = Yii::t(
+            'email',
+            "Agent {agent} cloned lead (Id: {clone_id}) with reason [{reason}]. New lead (Id: {lead_id})",
             [
                 'agent' => $agent,
                 'clone_id' => $lead->clone ? Purifier::createLeadShortLink($lead->clone) : 'not found',
                 'reason' => $lead->description,
                 'lead_id' => Purifier::createLeadShortLink($lead),
-            ]);
+            ]
+        );
 
         if ($ntf = Notifications::create($event->ownerOfOriginalLead, $subject, $body, Notifications::TYPE_INFO, true)) {
             //Notifications::socket($owner->id, null, 'getNewNotification', [], true);

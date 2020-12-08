@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by Alex Connor.
  * User: alexandr
@@ -46,29 +47,26 @@ class CallUserAccessJob extends BaseObject implements JobInterface
      * @param Queue $queue
      * @return bool
      */
-    public function execute($queue) : bool
+    public function execute($queue): bool
     {
 
         try {
-
             $this->casesCreateService = Yii::createObject(CasesCreateService::class);
             $this->clientManageService = Yii::createObject(ClientManageService::class);
             $this->casesRepository = Yii::createObject(CasesRepository::class);
 
             // Yii::info('CallUserAccessJob - CallId: ' . $this->call_id ,'info\CallUserAccessJob');
 
-            if($this->delay) {
+            if ($this->delay) {
                 sleep($this->delay);
             }
 
-            if($this->call_id) {
-
+            if ($this->call_id) {
                 $originalAgentId = null;
 
                 $call = Call::find()->where(['c_id' => $this->call_id])->limit(1)->one();
 
-                if($call && $call->isStatusQueue()) {
-
+                if ($call && $call->isStatusQueue()) {
                     //$originalAgentId = $call->c_created_user_id;
 
                     // Yii::info('CallUserAccessJob - CallId: ' . $this->call_id . ', c_status_id: ' . $call->c_status_id . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallUserAccessJob-call');
@@ -100,16 +98,14 @@ class CallUserAccessJob extends BaseObject implements JobInterface
 
                     $timeStartCallUserAccess = (int) Yii::$app->params['settings']['time_repeat_call_user_access'] ?? 0;
 
-                    if($timeStartCallUserAccess) {
+                    if ($timeStartCallUserAccess) {
                         $job = new CallUserAccessJob();
                         $job->call_id = $call->c_id;
                         $job->delay = 0;
                         $jobId = Yii::$app->queue_job->delay($timeStartCallUserAccess)->priority(100)->push($job);
                     }
-
                 }
             }
-
         } catch (\Throwable $e) {
             Yii::error(VarDumper::dumpAsString($e->getMessage()), 'CallUserAccessJob:execute:catch');
         }

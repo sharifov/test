@@ -133,56 +133,54 @@ class SaleSearch extends Model
         $currentPage = Yii::$app->request->get('page', 1);
 
         if (isset($params['SaleSearch']) && $params['SaleSearch']) {
-
-
             //VarDumper::dump($params['SaleSearch']); exit;
             $data = [];
 
-            if($this->sale_id) {
+            if ($this->sale_id) {
                 $data['sale_id'] = $this->sale_id;
             }
 
-            if($this->pnr) {
+            if ($this->pnr) {
                 $data['pnr'] = $this->pnr;
             }
 
-            if($this->email) {
+            if ($this->email) {
                 $data['email'] = $this->email;
             }
 
-            if($this->phone) {
+            if ($this->phone) {
                 $data['phone'] = $this->phone;
             }
 
-            if($this->first_name) {
+            if ($this->first_name) {
                 $data['pax_first_name'] = $this->first_name;
             }
 
-            if($this->last_name) {
+            if ($this->last_name) {
                 $data['pax_last_name'] = $this->last_name;
             }
 
-            if($this->ticket_number) {
+            if ($this->ticket_number) {
                 $data['ticket_number'] = $this->ticket_number;
             }
 
-            if($this->booking_id) {
+            if ($this->booking_id) {
                 $data['confirmation_number'] = $this->booking_id;
             }
 
-            if($this->acn) {
+            if ($this->acn) {
                 $data['airline_confirmation_number'] = $this->acn;
             }
 
-            if($this->card) {
+            if ($this->card) {
                 $data['card'] = $this->card;
             }
 
-            if($currentPage) {
+            if ($currentPage) {
                 $data['page'] = $currentPage;
             }
 
-            if($pageSize) {
+            if ($pageSize) {
                 $data['limit'] = $pageSize;
             }
 
@@ -194,21 +192,20 @@ class SaleSearch extends Model
 
             if ($response->isOk) {
                 $result = $response->data;
-                if(isset($result['items']) && is_array($result['items'])) {
+                if (isset($result['items']) && is_array($result['items'])) {
                     $searchData = $result['items'];
                     $totalCount = $result['totalItems'];
                 }
 
                 //VarDumper::dump($result, 10, true);
-
             } else {
                 //Yii::error(print_r($response->content, true), 'SaleSearch:search:BackOffice:sendRequest2');
-                throw new Exception('BO request Error: '. VarDumper::dumpAsString($response->content), 10);
+                throw new Exception('BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
             }
         }
 
 
-        if($searchData) {
+        if ($searchData) {
             $arr = array_fill(0, ($currentPage - 1) * $pageSize, ['items' => ['saleId' => 0]]);
             $searchData = array_merge($arr, $searchData);
         }
@@ -237,6 +234,4 @@ class SaleSearch extends Model
 
         return $dataProvider;
     }
-
-
 }

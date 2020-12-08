@@ -59,7 +59,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'attribute' => 'source_id',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) {
                 return $model->source ? $model->source->name : '-';
             },
             'filter' => \common\models\Sources::getList(true)
@@ -76,7 +76,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 $diffHours = (int) ($diffTime / (60 * 60));
 
 
-                $str = ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+                $str = ($diffHours > 3 && $diffHours < 73 ) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
                 $str .= '<br><i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
 
                 return $str;
@@ -96,7 +96,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 $clientName = trim($model->l_client_first_name . ' ' . $model->l_client_last_name);
 
                 if ($clientName) {
-                    $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName).'';
+                    $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName) . '';
                 }
 
                 $str = $model->l_client_email ? '<br><i class="fa fa-envelope"></i> ' . $model->l_client_email : '';
@@ -118,15 +118,14 @@ $this->params['breadcrumbs'][] = $this->title;
             'value' => static function (\common\models\Lead $model) {
 
                 if ($model->client) {
-
                     $clientName = trim($model->client->first_name . ' ' . $model->client->last_name);
 
-                    if($clientName === 'ClientName') {
+                    if ($clientName === 'ClientName') {
                         $clientName = '-';
                     }
 
                     if ($clientName) {
-                        $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName).'';
+                        $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName) . '';
                     }
 
                     $str = $model->client->clientEmails ? '<br><i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
@@ -196,7 +195,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'header' => 'Client time',
             'format' => 'raw',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) {
                 return ClientTimeFormatter::format($model->getClientTime2(), $model->offset_gmt);
             },
             'options' => ['style' => 'width:90px'],
@@ -205,13 +204,13 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'header' => 'Location',
             'format' => 'raw',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) {
                 // {"ipAddress":"71.150.186.68","countryCode":"US","countryName":"United States","regionName":"Kentucky","cityName":"Lowmansville","zipCode":"41232","latitude":"38.0001","longitude":"-82.7151","timeZone":"-04:00"}
                 $str = '';
-                if($model->request_ip_detail) {
+                if ($model->request_ip_detail) {
                     $ipData = @json_decode($model->request_ip_detail, true);
                     $location = [];
-                    if($ipData) {
+                    if ($ipData) {
                         $location[] = $ipData['countryCode'] ?? '';
                         //$location[] = $ipData['countryName'] ?? '';
                         $location[] = $ipData['regionName'] ?? '';
@@ -256,7 +255,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
                 }
                 return '-';
-
             },
             'format' => 'raw',
             'contentOptions' => [
@@ -296,7 +294,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'Pax',
             'value' => static function (\common\models\Lead $model) {
-                return '<span title="adult"><i class="fa fa-male"></i> '. $model->adults .'</span> / <span title="child"><i class="fa fa-child"></i> ' . $model->children . '</span> / <span title="infant"><i class="fa fa-info"></i> ' . $model->infants.'</span>';
+                return '<span title="adult"><i class="fa fa-male"></i> ' . $model->adults . '</span> / <span title="child"><i class="fa fa-child"></i> ' . $model->children . '</span> / <span title="infant"><i class="fa fa-info"></i> ' . $model->infants . '</span>';
             },
             'format' => 'raw',
             //'visible' => ! $isAgent,
@@ -368,34 +366,34 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'l_init_price',
             //'format' => 'raw',
-            'value' => function(\common\models\Lead $model) {
-                return $model->l_init_price ? number_format($model->l_init_price, 2) . ' $': '-';
+            'value' => function (\common\models\Lead $model) {
+                return $model->l_init_price ? number_format($model->l_init_price, 2) . ' $' : '-';
             },
             'contentOptions' => [
                 'class' => 'text-right'
             ],
         ],
 
-		[
-			'label' => 'Is Test',
-			'attribute' => 'l_is_test',
-			'value' => static function (\common\models\Lead $model) {
-				if ($model->l_is_test) {
-					$label = '<label class="label label-success">True</label>';
-				} else {
-					$label = '<label class="label label-danger">False</label>';
-				}
-				return $label;
-			},
-			'options' => [
-				'style' => 'width:180px'
-			],
-			'format' => 'raw',
-			'filter' => [
-				1 => 'True',
-				0 => 'False'
-			]
-		],
+        [
+            'label' => 'Is Test',
+            'attribute' => 'l_is_test',
+            'value' => static function (\common\models\Lead $model) {
+                if ($model->l_is_test) {
+                    $label = '<label class="label label-success">True</label>';
+                } else {
+                    $label = '<label class="label label-danger">False</label>';
+                }
+                return $label;
+            },
+            'options' => [
+                'style' => 'width:180px'
+            ],
+            'format' => 'raw',
+            'filter' => [
+                1 => 'True',
+                0 => 'False'
+            ]
+        ],
 
         [
             'class' => 'yii\grid\ActionColumn',
@@ -410,7 +408,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             'target' => '_blank',
                         ]);
 
-                    $buttons .= ' '. Html::a('<i class="fa fa-list-ul"></i> View', ['leads/view', 'id' => $model->id], [
+                    $buttons .= ' ' . Html::a('<i class="fa fa-list-ul"></i> View', ['leads/view', 'id' => $model->id], [
                             'class' => 'btn btn-warning btn-xs',
                             'data-pjax' => 0,
                             'target' => '_blank',

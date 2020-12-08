@@ -3,6 +3,8 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\DateTimeColumn;
+
 /* @var $this yii\web\View */
 /* @var $searchModel modules\flight\models\search\FlightQuotePaxPriceSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -41,8 +43,16 @@ $this->params['breadcrumbs'][] = $this->title;
             'qpp_client_fare',
             'qpp_client_tax',
             'qpp_cnt',
-            'qpp_created_dt',
-            'qpp_updated_dt',
+            //'qpp_created_dt',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'qpp_created_dt'
+            ],
+            //'qpp_updated_dt',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'qpp_updated_dt'
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

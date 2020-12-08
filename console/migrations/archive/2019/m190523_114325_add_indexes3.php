@@ -22,5 +22,4 @@ class m190523_114325_add_indexes3 extends Migration
     {
         $this->dropIndex('IND-client_phone', '{{%client_phone}}');
     }
-
 }

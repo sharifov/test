@@ -106,10 +106,12 @@ class CallLogTransferService
 
         if (
             $call->isOut() &&
-            !$call->isGeneralParent()
-            && $call->c_group_id != null
-            && (
-                !$call->isTransfer() || ($call->isTransfer() && !$call->isSourceTransfer())
+            !$call->isGeneralParent() &&
+            $call->c_group_id != null &&
+            (
+                !$call->isTransfer() ||
+                ($call->isTransfer() &&
+                !$call->isSourceTransfer())
             )
         ) {
             $this->outChildTransferCall();
@@ -423,7 +425,6 @@ class CallLogTransferService
             if ($log->cl_user_id && ($log->isIn() || $log->isOut())) {
                 $this->sendHistorySocketMessage($log->getAttributes(), $this->call['c_case_id'], $this->call['c_lead_id']);
             }
-
         } catch (\Throwable $e) {
             $transaction->rollBack();
             \Yii::error(VarDumper::dumpAsString(['category' => 'createCallLogs', 'Call' => $this->call, 'error' => $e->getMessage()]), 'CallLogTransferService');
@@ -476,7 +477,7 @@ class CallLogTransferService
         $call['client_name'] = null;
         if ($call['cl_client_id']) {
             $client = Client::find()
-                ->addSelect(new Expression("if (first_name is not null, if (last_name is not null, concat(first_name, ' ', last_name), first_name), null) as client_name"))
+                ->addSelect(new Expression("if (is_company = 1, company_name, if (first_name is not null, if (last_name is not null, concat(first_name, ' ', last_name), first_name), null)) as client_name"))
                 ->andWhere(['id' => $call['cl_client_id']])
                 ->asArray()
                 ->one();

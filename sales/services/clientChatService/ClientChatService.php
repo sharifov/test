@@ -1,4 +1,5 @@
 <?php
+
 namespace sales\services\clientChatService;
 
 use common\components\purifier\Purifier;
@@ -190,11 +191,10 @@ class ClientChatService
 
     /**
      * @param ClientChat $clientChat
-     * @param ClientChatChannel $channel
      */
-    public function sendRequestToUsers(ClientChat $clientChat, ClientChatChannel $channel): void
+    public function sendRequestToUsers(ClientChat $clientChat): void
     {
-        $userChannel = ClientChatUserChannel::find()->byChannelId($channel->ccc_id)->onlineUsers()->all();
+        $userChannel = ClientChatUserChannel::find()->byChannelId($clientChat->cch_channel_id)->onlineUsers()->all();
 
         if ($userChannel) {
             /** @var ClientChatUserChannel $item */
@@ -326,9 +326,9 @@ class ClientChatService
                 throw new \DomainException('It’s not possible to transfer the chat to another department because it is in the "Closed" status');
             }
 
-            //			if ($clientChat->cch_dep_id === $form->depId && !$form->agentId) {
-            //				throw new \DomainException('Chat already assigned to this department; Choose another;');
-            //			}
+            //          if ($clientChat->cch_dep_id === $form->depId && !$form->agentId) {
+            //              throw new \DomainException('Chat already assigned to this department; Choose another;');
+            //          }
 
             foreach ($form->agentId as $agentId) {
                 if ($clientChat->cch_owner_user_id === $agentId) {
@@ -372,7 +372,7 @@ class ClientChatService
                 $agentNames = Employee::find()->select(['nickname'])->where(['id' => $form->agentId])->asArray()->column();
                 $transferTo = implode(', ', $agentNames) . ' agent';
             } else {
-                $this->sendRequestToUsers($clientChat, $clientChatChannel);
+                $this->sendRequestToUsers($clientChat);
                 $transferTo = $clientChatChannel->ccc_name . ' channel';
             }
 
@@ -384,9 +384,6 @@ class ClientChatService
                     Notifications::publish('getNewNotification', ['user_id' => $user->id], $dataNotification);
                 }
             }
-
-            $data = ClientChatAccessMessage::agentStartTransfer($clientChat, $user);
-            Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]);
 
             return $clientChatChannel;
         });
@@ -401,7 +398,7 @@ class ClientChatService
     {
         $_self = $this;
         $this->transactionManager->wrap(static function () use ($_self, $clientChat, $ownerId) {
-            $clientChat->assignOwner($ownerId)->inProgress($ownerId, ClientChatStatusLog::ACTION_OPEN);
+            $clientChat->assignOwner($ownerId)->inProgress($ownerId, ClientChatStatusLog::ACTION_CHAT_ACCEPT);
             $_self->clientChatRepository->save($clientChat);
             $_self->clientChatMessageService->touchUnreadMessage($clientChat->cch_id);
             $_self->assignAgentToRcChannel($clientChat->cch_rid, $clientChat->cchOwnerUser->userProfile->up_rc_user_id ?? '');
@@ -418,19 +415,26 @@ class ClientChatService
             }
             $lastMessage = $this->clientChatLastMessageRepository->getByChatId($clientChat->cch_id);
 
-            $clientChat->archive($chatUserAccess->ccua_user_id, ClientChatStatusLog::ACTION_ACCEPT_TRANSFER);
+            $clientChat->archive(
+                $chatUserAccess->ccua_user_id,
+                ClientChatStatusLog::ACTION_ACCEPT_TRANSFER,
+                null,
+                null,
+                true
+            );
+            $dto = ClientChatCloneDto::feelInOnTransfer($clientChat);
+            $clientChat->changeChannel($oldChannelId);
             $this->clientChatRepository->save($clientChat);
 
-            $dto = ClientChatCloneDto::feelInOnTransfer($clientChat);
             $newClientChat = ClientChat::clone($dto);
             $newClientChat->assignOwner($chatUserAccess->ccua_user_id);
             $newClientChat->cch_source_type_id = ClientChat::SOURCE_TYPE_TRANSFER;
-            if (!$channel = $clientChat->cchChannel) {
+            if (!$clientChat->cchChannel) {
                 $channel = $this->clientChatChannelRepository->findDefaultByProject((int)$clientChat->cch_project_id);
+                $newClientChat->cch_channel_id = $channel->ccc_id;
             }
             $this->clientChatRepository->save($newClientChat);
             $this->cloneLead($clientChat, $newClientChat)->cloneCase($clientChat, $newClientChat)->cloneNotes($clientChat, $newClientChat);
-            $newClientChat->cch_channel_id = $channel->ccc_id;
             $newClientChat->cch_parent_id = $clientChat->cch_id;
             $newClientChat->inProgress($chatUserAccess->ccua_user_id, ClientChatStatusLog::ACTION_ACCEPT_TRANSFER);
             $this->clientChatRepository->save($newClientChat);
@@ -448,7 +452,7 @@ class ClientChatService
             if ($oldVisitor) {
                 $this->clientChatVisitorRepository->create($newClientChat->cch_id, $oldVisitor->cvd_id, $newClientChat->cch_client_id);
             }
-            $chatUserAccess->transferAccepted();
+//            $chatUserAccess->transferAccept();
 
             if ((int)$oldChannelId !== (int)$newClientChat->cch_channel_id) {
                 $botTransferChatResult = \Yii::$app->chatBot->transferDepartment($clientChat->cch_rid, $clientChat->ccv->ccvCvd->cvd_visitor_rc_id, (string)$oldChannelId, (string)$newClientChat->cch_channel_id);
@@ -488,8 +492,11 @@ class ClientChatService
             $clientChat->inProgress($user->id ?? null, $action);
             $this->clientChatRepository->save($clientChat);
 
-            $data = ClientChatAccessMessage::chatCanceled($clientChat, $user);
-            Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]);
+            Notifications::pub(
+                [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],
+                'refreshChatPage',
+                ['data' => ClientChatAccessMessage::chatCanceled($clientChat, $user)]
+            );
         }
     }
 
@@ -518,8 +525,11 @@ class ClientChatService
             }
         }
 
-        $data = ClientChatAccessMessage::chatClosed($clientChat, $user);
-        Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]);
+        Notifications::pub(
+            [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],
+            'refreshChatPage',
+            ['data' => ClientChatAccessMessage::chatClosed($clientChat, $user)]
+        );
     }
 
     /**
@@ -592,7 +602,7 @@ class ClientChatService
 
         return $this->transactionManager->wrap(function () use ($clientChat, $owner, $lastMessage) {
 
-            $clientChat->archive($owner->id, ClientChatStatusLog::ACTION_TAKE);
+            $clientChat->archive($owner->id, ClientChatStatusLog::ACTION_TAKE, null, null, true);
             $this->clientChatRepository->save($clientChat);
 
             $dto = ClientChatCloneDto::feelInOnTake($clientChat, $owner->id);
@@ -625,5 +635,29 @@ class ClientChatService
 
             return $newClientChat;
         });
+    }
+
+    public function autoReturn(ClientChat $clientChat): void
+    {
+        $clientChat->inProgress(null, ClientChatStatusLog::ACTION_AUTO_RETURN);
+        $this->clientChatRepository->save($clientChat);
+
+        Notifications::pub(
+            [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],
+            'refreshChatPage',
+            ['data' => ClientChatAccessMessage::chatAutoReturn($clientChat->cch_id)]
+        );
+    }
+
+    public function autoReopen(ClientChat $clientChat): void
+    {
+        $clientChat->inProgress(null, ClientChatStatusLog::ACTION_AUTO_REOPEN);
+        $this->clientChatRepository->save($clientChat);
+
+        Notifications::pub(
+            [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],
+            'refreshChatPage',
+            ['data' => ClientChatAccessMessage::chatAutoReopen($clientChat->cch_id)]
+        );
     }
 }

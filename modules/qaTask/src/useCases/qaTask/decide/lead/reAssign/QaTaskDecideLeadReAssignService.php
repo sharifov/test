@@ -36,8 +36,7 @@ class QaTaskDecideLeadReAssignService extends QaTaskActionsService
         TransactionManager $transactionManager,
         QaTaskDecideService $decideService,
         LeadRepository $leadRepository
-    )
-    {
+    ) {
         parent::__construct($taskRepository, $userRepository, $eventDispatcher, $projectAccessService, $accessChecker, $transactionManager);
         $this->decideService = $decideService;
         $this->leadRepository = $leadRepository;
@@ -60,7 +59,6 @@ class QaTaskDecideLeadReAssignService extends QaTaskActionsService
 
             $lead->processing($assignUser->id, $form->getUserId(), 'Re-assign (QA)');
             $this->leadRepository->save($lead);
-
         });
     }
 

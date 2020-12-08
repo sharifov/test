@@ -78,6 +78,4 @@ class m200806_093917_add_site_settings_autologin extends Migration
             Yii::$app->cache->flush();
         }
     }
-
-
 }

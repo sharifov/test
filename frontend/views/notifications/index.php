@@ -2,10 +2,12 @@
 
 use common\components\grid\UserSelect2Column;
 use dosamigos\datepicker\DatePicker;
+use common\components\grid\DateTimeColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\NotificationsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -32,20 +34,20 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="col-md-3">
             <?php
             echo  \kartik\daterange\DateRangePicker::widget([
-                'model'=> $searchModel,
+                'model' => $searchModel,
                 'attribute' => 'date_range',
-                'useWithAddon'=>true,
-                'presetDropdown'=>true,
-                'hideInput'=>true,
-                'convertFormat'=>true,
+                'useWithAddon' => true,
+                'presetDropdown' => true,
+                'hideInput' => true,
+                'convertFormat' => true,
                 'startAttribute' => 'datetime_start',
                 'endAttribute' => 'datetime_end',
-                'pluginOptions'=>[
-                    'timePicker'=> true,
-                    'timePickerIncrement'=>1,
+                'pluginOptions' => [
+                    'timePicker' => true,
+                    'timePickerIncrement' => 1,
                     'timePicker24Hour' => true,
-                    'locale'=>[
-                        'format'=>'Y-m-d H:i',
+                    'locale' => [
+                        'format' => 'Y-m-d H:i',
                         'separator' => ' - '
                     ]
                 ]
@@ -84,8 +86,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'n_type_id',
-                'value' => function(\common\models\Notifications $model){
-                    return '<span class="label label-default">'.$model->getType().'</span>';
+                'value' => function (\common\models\Notifications $model) {
+                    return '<span class="label label-default">' . $model->getType() . '</span>';
                 },
                 'format' => 'raw',
                 'filter' => \common\models\Notifications::getTypeList()
@@ -97,6 +99,10 @@ $this->params['breadcrumbs'][] = $this->title;
             'n_popup:boolean',
             'n_popup_show:boolean',
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'n_read_dt'
+            ],
+            /*[
                 'attribute' => 'n_read_dt',
                 'value' => static function (\common\models\Notifications $model) {
                     return $model->n_read_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->n_read_dt)) : '-';
@@ -114,8 +120,14 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
+
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'n_created_dt'
+            ],
+
+            /*[
                 'attribute' => 'n_created_dt',
                 'value' => static function (\common\models\Notifications $model) {
                     return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->n_created_dt));
@@ -133,7 +145,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

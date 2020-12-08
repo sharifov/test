@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\TaskSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -31,7 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
             't_name',
             [
                 'attribute' => 't_category_id',
-                'value' => function(\common\models\Task $model) {
+                'value' => function (\common\models\Task $model) {
                     return $model->getCategoryName();
                 },
                 'filter' => \common\models\Task::CAT_LIST

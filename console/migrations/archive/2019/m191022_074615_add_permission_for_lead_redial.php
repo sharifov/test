@@ -22,7 +22,6 @@ class m191022_074615_add_permission_for_lead_redial extends Migration
         $auth = Yii::$app->authManager;
 
         foreach ($this->routes as $route) {
-
             if (!$permission = $auth->getPermission($route)) {
                 $permission = $auth->createPermission($route);
                 $auth->add($permission);
@@ -38,7 +37,6 @@ class m191022_074615_add_permission_for_lead_redial extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     public function safeDown()

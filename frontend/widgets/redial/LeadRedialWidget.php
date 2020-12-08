@@ -109,7 +109,7 @@ class LeadRedialWidget extends Widget
         $lastCall = Call::find()
             ->andWhere(['c_lead_id' => $this->lead->id])
             ->andWhere(['c_call_type_id' => Call::CALL_TYPE_IN])
-            ->andWhere(['IS NOT', 'c_from', NULL])
+            ->andWhere(['IS NOT', 'c_from', null])
             ->orderBy(['c_updated_dt' => SORT_DESC])
             ->asArray()
             ->one();
@@ -127,7 +127,7 @@ class LeadRedialWidget extends Widget
             $clientPhones = $this->lead->client->getClientPhones()->
             andWhere(['or',
                 ['type' => [ClientPhone::PHONE_FAVORITE, ClientPhone::PHONE_VALID, ClientPhone::PHONE_NOT_SET]],
-                ['IS', 'type', NULL]
+                ['IS', 'type', null]
             ])
                 ->orderBy(['type' => SORT_DESC])->asArray()->all();
             foreach ($clientPhones as $clientPhone) {
@@ -152,5 +152,4 @@ class LeadRedialWidget extends Widget
         }
         throw new \DomainException('Not found projectId for LeadId: ' . $this->lead->id);
     }
-
 }

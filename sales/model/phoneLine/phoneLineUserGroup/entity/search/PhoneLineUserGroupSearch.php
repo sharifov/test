@@ -10,13 +10,11 @@ class PhoneLineUserGroupSearch extends PhoneLineUserGroup
     public function rules(): array
     {
         return [
-            ['plug_created_dt', 'safe'],
+            [['plug_created_dt', 'plug_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
 
             ['plug_line_id', 'integer'],
 
             ['plug_ug_id', 'integer'],
-
-            ['plug_updated_dt', 'safe'],
         ];
     }
 

@@ -5,6 +5,7 @@ use common\components\grid\DateTimeColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel modules\order\src\entities\orderTips\search\OrderTipsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -28,23 +29,23 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
 
-			[
-				'class' => OrderColumn::class,
-				'attribute' => 'ot_order_id',
-				'relation' => 'otOrder',
-			],
+            [
+                'class' => OrderColumn::class,
+                'attribute' => 'ot_order_id',
+                'relation' => 'otOrder',
+            ],
             'ot_client_amount',
             'ot_amount',
             'ot_user_profit',
-			'ot_user_profit_percent:percentInteger',
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'ot_created_dt',
-			],
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'ot_updated_dt',
-			],
+            'ot_user_profit_percent:percentInteger',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'ot_created_dt',
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'ot_updated_dt',
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

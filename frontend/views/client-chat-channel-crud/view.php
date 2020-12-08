@@ -67,6 +67,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'ccc_disabled:booleanByLabel',
                 'ccc_frontend_enabled:booleanByLabel',
                 'ccc_default:booleanByLabel',
+                'ccc_default_device:booleanByLabel',
                 'ccc_priority',
                 'ccc_created_dt:byUserDateTime',
                 'ccc_updated_dt:byUserDateTime',
@@ -79,7 +80,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <div class="col-md-8">
         <h2>Settings:</h2>
-        <?php if ($model->ccc_settings): ?>
+        <?php if ($model->ccc_settings) : ?>
             <pre>
             <?php \yii\helpers\VarDumper::dump(@json_decode($model->ccc_settings, true), 10, true) ?>
             </pre>

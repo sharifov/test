@@ -11,7 +11,7 @@ use common\models\Lead;
  * @property string $created
  * @property int|null $creatorId
  */
-class LeadCreatedNewEvent  implements LeadableEventInterface
+class LeadCreatedNewEvent implements LeadableEventInterface
 {
     public $lead;
     public $created;

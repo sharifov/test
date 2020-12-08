@@ -44,7 +44,7 @@ class LeadFlowQuery extends ActiveQuery
      * @param int $leadId
      * @return LeadFlow|null
      */
-    public function last(int $leadId):? LeadFlow
+    public function last(int $leadId): ?LeadFlow
     {
         return $this->andWhere(['lead_id' => $leadId])->orderBy(['created' => SORT_DESC])->limit(1)->one();
     }

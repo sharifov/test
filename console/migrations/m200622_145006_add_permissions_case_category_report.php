@@ -3,7 +3,6 @@
 use yii\db\Migration;
 use common\models\Employee;
 
-
 /**
  * Class m200622_145006_add_permissions_case_category_report
  */

@@ -36,7 +36,6 @@ use common\models\QuoteTrip;
 use common\models\QuoteSegmentBaggage;
 use common\models\QuoteSegmentBaggageCharge;
 
-
 class QuoteController extends ApiBaseController
 {
 
@@ -266,7 +265,6 @@ class QuoteController extends ApiBaseController
         ];
 
         try {
-
             $response['status'] = ($model->status != $model::STATUS_DECLINED) ? 'Success' : 'Failed';
 
             /*$sellerContactInfo = EmployeeContactInfo::findOne([
@@ -299,8 +297,8 @@ class QuoteController extends ApiBaseController
             $response['source_code'] = ($model->lead && isset($model->lead->source)) ? $model->lead->source->cid : null;
             $response['gdsOfferId'] = $model->gds_offer_id;
 
-            if(in_array($model->lead->status,[10,12])){
-                $response['lead_status'] = ($model->lead->status == 10)?'sold':'booked';
+            if (in_array($model->lead->status, [10,12])) {
+                $response['lead_status'] = ($model->lead->status == 10) ? 'sold' : 'booked';
                 $response['booked_quote_uid'] = $model->lead->getBookedQuoteUid();
             }
 
@@ -328,7 +326,6 @@ class QuoteController extends ApiBaseController
                             $message = 'Your Quote (UID: ' . $model->uid . ") has been OPENED by client! \r\nProject: " . Html::encode($project_name) . "! \r\nLead (Id: " . Purifier::createLeadShortLink($lead) . ")";
 
                             if ($lead->employee_id) {
-
                                 if ($ntf = Notifications::create($lead->employee_id, $subject, $message, Notifications::TYPE_INFO, true)) {
                                     // Notifications::socket($lead->employee_id, null, 'getNewNotification', [], true);
                                     $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
@@ -354,13 +351,13 @@ class QuoteController extends ApiBaseController
                     }
                 }
             }
-
-
         } catch (\Throwable $e) {
-
             Yii::error($e->getTraceAsString(), 'API:Quote:get:try');
-            if (Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
-            else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
+            if (Yii::$app->request->get('debug')) {
+                $message = ($e->getTraceAsString());
+            } else {
+                $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
+            }
 
             $response['error'] = $message;
             $response['error_code'] = 30;
@@ -376,8 +373,11 @@ class QuoteController extends ApiBaseController
 
         if (isset($response['error']) && $response['error']) {
             $json = @json_encode($response['error']);
-            if (isset($response['error_code']) && $response['error_code']) $error_code = $response['error_code'];
-            else $error_code = 0;
+            if (isset($response['error_code']) && $response['error_code']) {
+                $error_code = $response['error_code'];
+            } else {
+                $error_code = 0;
+            }
             throw new UnprocessableEntityHttpException($json, $error_code);
         }
 
@@ -401,11 +401,17 @@ class QuoteController extends ApiBaseController
             throw new BadRequestHttpException((new Quote())->formName() . ' is required', 1);
         }
 
+        if (empty($quoteAttributes['uid'])) {
+            throw new BadRequestHttpException((new Quote())->formName() . '.uid is required', 1);
+        }
+
         $model = Quote::findOne(['uid' => $quoteAttributes['uid']]);
 
         if (!$model) {
             throw new NotFoundHttpException('Not found Quote UID: ' . $quoteAttributes['uid'], 2);
         }
+
+        $model->setScenario(Quote::SCENARIO_API_UPDATE);
 
         $oldQuoteType = $model->type_id;
 
@@ -414,62 +420,62 @@ class QuoteController extends ApiBaseController
             'errors' => []
         ];
 
-        if(isset($quoteAttributes['baggage']) && !empty($quoteAttributes['baggage'])){
-            foreach ($quoteAttributes['baggage'] as $baggageAttr){
+        if (isset($quoteAttributes['baggage']) && !empty($quoteAttributes['baggage'])) {
+            foreach ($quoteAttributes['baggage'] as $baggageAttr) {
                 $segmentKey = $baggageAttr['segment'];
                 $origin = substr($segmentKey, 0, 3);
                 $destination = substr($segmentKey, 2, 3);
-                $segments = QuoteSegment::find()->innerJoin(QuoteTrip::tableName(),'qs_trip_id = qt_id')
+                $segments = QuoteSegment::find()->innerJoin(QuoteTrip::tableName(), 'qs_trip_id = qt_id')
                 ->andWhere(['qt_quote_id' =>  $model->id])
                 ->andWhere(['or',
-                    ['qs_departure_airport_code'=>$origin],
-                    ['qs_arrival_airport_code'=>$destination]
+                    ['qs_departure_airport_code' => $origin],
+                    ['qs_arrival_airport_code' => $destination]
                 ])
                 ->all();
-                if(!empty($segments)){
+                if (!empty($segments)) {
                     $segmentsIds = [];
-                    foreach ($segments as $segment){
+                    foreach ($segments as $segment) {
                         $segmentsIds[] = $segment->qs_id;
                     }
-                    if(isset($baggageAttr['free_baggage']) && isset($baggageAttr['free_baggage']['piece'])){
+                    if (isset($baggageAttr['free_baggage']) && isset($baggageAttr['free_baggage']['piece'])) {
                         //QuoteSegmentBaggage::deleteAll('qsb_segment_id IN (:segments)',[':segments' => implode(',', $segmentsIds)]);
 
                         if ($segmentsIds) {
                             QuoteSegmentBaggage::deleteAll(['qsb_segment_id' => $segmentsIds]);
                         }
 
-                        foreach ($segments as $segment){
+                        foreach ($segments as $segment) {
                             $baggage = new QuoteSegmentBaggage();
                             $baggage->qsb_allow_pieces = $baggageAttr['free_baggage']['piece'];
                             $baggage->qsb_segment_id = $segment->qs_id;
-                            if(isset($baggageAttr['free_baggage']['weight'])){
-                                $baggage->qsb_allow_max_weight = substr($baggageAttr['free_baggage']['weight'],0,100);
+                            if (isset($baggageAttr['free_baggage']['weight'])) {
+                                $baggage->qsb_allow_max_weight = substr($baggageAttr['free_baggage']['weight'], 0, 100);
                             }
-                            if(isset($baggageAttr['free_baggage']['height'])){
-                                $baggage->qsb_allow_max_size = substr($baggageAttr['free_baggage']['height'],0,100);
+                            if (isset($baggageAttr['free_baggage']['height'])) {
+                                $baggage->qsb_allow_max_size = substr($baggageAttr['free_baggage']['height'], 0, 100);
                             }
                             $baggage->save(false);
                         }
                     }
-                    if(isset($baggageAttr['paid_baggage']) && !empty($baggageAttr['paid_baggage'])){
+                    if (isset($baggageAttr['paid_baggage']) && !empty($baggageAttr['paid_baggage'])) {
                         //QuoteSegmentBaggageCharge::deleteAll('qsbc_segment_id IN (:segments)',[':segments' => implode(',', $segmentsIds)]);
                         if ($segmentsIds) {
                             QuoteSegmentBaggageCharge::deleteAll(['qsbc_segment_id' => $segmentsIds]);
                         }
-                        foreach ($segments as $segment){
-                            foreach ($baggageAttr['paid_baggage'] as $paidBaggageAttr){
+                        foreach ($segments as $segment) {
+                            foreach ($baggageAttr['paid_baggage'] as $paidBaggageAttr) {
                                 $baggage = new QuoteSegmentBaggageCharge();
                                 $baggage->qsbc_segment_id = $segment->qs_id;
                                 $baggage->qsbc_price = str_replace('USD', '', $paidBaggageAttr['price']);
-                                if(isset($paidBaggageAttr['piece'])){
+                                if (isset($paidBaggageAttr['piece'])) {
                                     $baggage->qsbc_first_piece = $paidBaggageAttr['piece'];
                                     $baggage->qsbc_last_piece = $paidBaggageAttr['piece'];
                                 }
-                                if(isset($paidBaggageAttr['weight'])){
-                                    $baggage->qsbc_max_weight = substr($paidBaggageAttr['weight'], 0 , 100);
+                                if (isset($paidBaggageAttr['weight'])) {
+                                    $baggage->qsbc_max_weight = substr($paidBaggageAttr['weight'], 0, 100);
                                 }
-                                if(isset($paidBaggageAttr['height'])){
-                                    $baggage->qsbc_max_size = substr($paidBaggageAttr['height'],0, 100);
+                                if (isset($paidBaggageAttr['height'])) {
+                                    $baggage->qsbc_max_size = substr($paidBaggageAttr['height'], 0, 100);
                                 }
                                 $baggage->save(false);
                             }
@@ -488,7 +494,6 @@ class QuoteController extends ApiBaseController
                 $response['errors'] = $result['errors'];
             }
         } else {
-
             $changedAttributes = $model->attributes;
             $changedAttributes['selling'] = $model->getPricesData()['total']['selling'];
             //$selling = 0;
@@ -578,16 +583,17 @@ class QuoteController extends ApiBaseController
                             GlobalLog::ACTION_TYPE_UPDATE
                         )
                     );
-
                 } else {
                     $response['errors'][] = $model->getErrors();
                     $transaction->rollBack();
                 }
             } catch (\Throwable $e) {
-
                 Yii::error($e->getTraceAsString(), 'API:Quote:update:try');
-                if (Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
-                else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
+                if (Yii::$app->request->get('debug')) {
+                    $message = ($e->getTraceAsString());
+                } else {
+                    $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
+                }
 
                 $response['error'] = $message;
                 $response['error_code'] = 30;
@@ -601,8 +607,11 @@ class QuoteController extends ApiBaseController
 
         if (isset($response['error']) && $response['error']) {
             $json = @json_encode($response['error']);
-            if (isset($response['error_code']) && $response['error_code']) $error_code = $response['error_code'];
-            else $error_code = 0;
+            if (isset($response['error_code']) && $response['error_code']) {
+                $error_code = $response['error_code'];
+            } else {
+                $error_code = 0;
+            }
             throw new UnprocessableEntityHttpException($json, $error_code);
         }
 
@@ -628,7 +637,7 @@ class QuoteController extends ApiBaseController
             throw new BadRequestHttpException((new Quote())->formName() . ' is required', 1);
         }
 
-        if(!isset($quoteAttributes['uid'])) {
+        if (!isset($quoteAttributes['uid'])) {
             throw new BadRequestHttpException('Not found uid in POST request', 2);
         }
 
@@ -650,7 +659,7 @@ class QuoteController extends ApiBaseController
 
         $data = $model->lead->getLeadInformationForExpert();
 
-        if($data) {
+        if ($data) {
             $result = BackOffice::sendRequest('lead/update-lead', 'POST', json_encode($data));
             if ($result['status'] === 'Success' && empty($result['errors'])) {
                 $response['status'] = 'Success';
@@ -856,54 +865,54 @@ class QuoteController extends ApiBaseController
             $trip->createTrips($tripsSegmentsData);
             $quote = $trip->getQuote();
 
-            if(isset($quoteAttributes['baggage']) && !empty($quoteAttributes['baggage'])){
-                foreach ($quoteAttributes['baggage'] as $baggageAttr){
+            if (isset($quoteAttributes['baggage']) && !empty($quoteAttributes['baggage'])) {
+                foreach ($quoteAttributes['baggage'] as $baggageAttr) {
                     $segmentKey = $baggageAttr['segment'];
                     $origin = substr($segmentKey, 0, 3);
                     $destination = substr($segmentKey, 2, 3);
-                    $segment = QuoteSegment::find()->innerJoin(QuoteTrip::tableName(),'qs_trip_id = qt_id')
+                    $segment = QuoteSegment::find()->innerJoin(QuoteTrip::tableName(), 'qs_trip_id = qt_id')
                                 ->andWhere(['qt_quote_id' =>  $quote->id])
                                 ->andWhere(['or',
-                                    ['qs_departure_airport_code'=>$origin],
-                                    ['qs_arrival_airport_code'=>$destination]
+                                    ['qs_departure_airport_code' => $origin],
+                                    ['qs_arrival_airport_code' => $destination]
                                 ])
                                 ->one();
                     $segments = [];
-                    if(!empty($segment)){
+                    if (!empty($segment)) {
                         $segments = QuoteSegment::find()
                         ->andWhere(['qs_trip_id' =>  $segment->qs_trip_id])
                         ->all();
                     }
-                    if(!empty($segments)){
-                        if(isset($baggageAttr['free_baggage']) && isset($baggageAttr['free_baggage']['piece'])){
-                            foreach ($segments as $segment){
+                    if (!empty($segments)) {
+                        if (isset($baggageAttr['free_baggage']) && isset($baggageAttr['free_baggage']['piece'])) {
+                            foreach ($segments as $segment) {
                                 $baggage = new QuoteSegmentBaggage();
                                 $baggage->qsb_allow_pieces = $baggageAttr['free_baggage']['piece'];
                                 $baggage->qsb_segment_id = $segment->qs_id;
-                                if(isset($baggageAttr['free_baggage']['weight'])){
+                                if (isset($baggageAttr['free_baggage']['weight'])) {
                                     $baggage->qsb_allow_max_weight = substr($baggageAttr['free_baggage']['weight'], 0, 100);
                                 }
-                                if(isset($baggageAttr['free_baggage']['height'])){
+                                if (isset($baggageAttr['free_baggage']['height'])) {
                                     $baggage->qsb_allow_max_size = substr($baggageAttr['free_baggage']['height'], 0, 100);
                                 }
                                 $baggage->save(false);
                             }
                         }
-                        if(isset($baggageAttr['paid_baggage']) && !empty($baggageAttr['paid_baggage'])){
-                            foreach ($segments as $segment){
-                                foreach ($baggageAttr['paid_baggage'] as $paidBaggageAttr){
+                        if (isset($baggageAttr['paid_baggage']) && !empty($baggageAttr['paid_baggage'])) {
+                            foreach ($segments as $segment) {
+                                foreach ($baggageAttr['paid_baggage'] as $paidBaggageAttr) {
                                     $baggage = new QuoteSegmentBaggageCharge();
                                     $baggage->qsbc_segment_id = $segment->qs_id;
                                     $baggage->qsbc_price = str_replace('USD', '', $paidBaggageAttr['price']);
-                                    if(isset($paidBaggageAttr['piece'])){
+                                    if (isset($paidBaggageAttr['piece'])) {
                                         $baggage->qsbc_first_piece = $paidBaggageAttr['piece'];
                                         $baggage->qsbc_last_piece = $paidBaggageAttr['piece'];
                                     }
-                                    if(isset($paidBaggageAttr['weight'])){
-                                        $baggage->qsbc_max_weight = substr($paidBaggageAttr['weight'], 0 , 100);
+                                    if (isset($paidBaggageAttr['weight'])) {
+                                        $baggage->qsbc_max_weight = substr($paidBaggageAttr['weight'], 0, 100);
                                     }
-                                    if(isset($paidBaggageAttr['height'])){
-                                        $baggage->qsbc_max_size = substr($paidBaggageAttr['height'],0, 100);
+                                    if (isset($paidBaggageAttr['height'])) {
+                                        $baggage->qsbc_max_size = substr($paidBaggageAttr['height'], 0, 100);
                                     }
                                     $baggage->save(false);
                                 }
@@ -943,16 +952,14 @@ class QuoteController extends ApiBaseController
                         GlobalLog::ACTION_TYPE_UPDATE
                     )
                 );
-
             }
         } catch (\Throwable $throwable) {
-
             $transaction->rollBack();
 
             if ($throwable->getCode() < 0) {
-                Yii::warning(AppHelper::throwableFormatter($throwable),'API:Quote:create:warning:try');
+                Yii::warning(AppHelper::throwableFormatter($throwable), 'API:Quote:create:warning:try');
             } else {
-                Yii::error(VarDumper::dumpAsString($throwable),'API:Quote:create:try');
+                Yii::error(VarDumper::dumpAsString($throwable), 'API:Quote:create:try');
             }
 
             if (Yii::$app->request->get('debug')) {
@@ -969,7 +976,7 @@ class QuoteController extends ApiBaseController
 
         if (!empty($warnings)) {
             $responseData['warnings'] = $warnings;
-            Yii::warning(VarDumper::dumpAsString($warnings),'API:Quote:create:warnings');
+            Yii::warning(VarDumper::dumpAsString($warnings), 'API:Quote:create:warnings');
         }
 
         $responseData = $apiLog->endApiLog($responseData);

@@ -147,20 +147,20 @@ use frontend\extensions\DatePicker;
                     <?= $form->field($model, 'departRangeTime', [
                         'options' => ['class' => 'form-group']
                     ])->widget(\kartik\daterange\DateRangePicker::class, [
-                        'presetDropdown' => false,
-                        'hideInput' => true,
-                        'convertFormat' => true,
-                        'pluginOptions' => [
-                            'timePicker' => true,
-                            'timePickerIncrement' => 1,
-                            'timePicker24Hour' => true,
-                            'locale' => [
-                                'format' => 'd-M-Y',
-                                'separator' => ' - '
-                            ]
-                        ]
+                                      'presetDropdown' => false,
+                                      'hideInput' => true,
+                                      'convertFormat' => true,
+                                      'pluginOptions' => [
+                                      'timePicker' => true,
+                                      'timePickerIncrement' => 1,
+                                      'timePicker24Hour' => true,
+                                      'locale' => [
+                                      'format' => 'd-M-Y',
+                                      'separator' => ' - '
+                                      ]
+                                      ]
                     ])->label('Depart From / To');
-                    ?>
+                                        ?>
                 </div>
             </div>
 
@@ -182,7 +182,7 @@ use frontend\extensions\DatePicker;
                             ]
                         ]
                     ])->label('Created From / To');
-                    ?>
+?>
                 </div>
             </div>
 
@@ -204,7 +204,7 @@ use frontend\extensions\DatePicker;
                             ]
                         ]
                     ])->label('Updated From / To');
-                    ?>
+?>
                 </div>
             </div>
 
@@ -226,7 +226,7 @@ use frontend\extensions\DatePicker;
                             ]
                         ]
                     ])->label('Status date From / To');
-                    ?>
+?>
                 </div>
             </div>
 
@@ -287,7 +287,7 @@ use frontend\extensions\DatePicker;
                             ]
                         ]
                     ])->label('Last Action From / To');
-                    ?>
+?>
                 </div>
             </div>
             <div class="row">

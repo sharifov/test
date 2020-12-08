@@ -96,9 +96,9 @@ $is_admin = $user->isAdmin();
 
                                         </button>
                                         <ul class="dropdown-menu">
-                                            <?php foreach ($mailList as $mailName): ?>
+                                            <?php foreach ($mailList as $mailName) : ?>
                                                 <li>
-                                                    <?=Html::a('<i class="fa fa-envelope"></i> '. $mailName, \yii\helpers\Url::current(['email_email' => $mailName, 'id' => null, 'reply_id' => null, 'edit_id' => null, 'action' => 'new']))?>
+                                                    <?=Html::a('<i class="fa fa-envelope"></i> ' . $mailName, \yii\helpers\Url::current(['email_email' => $mailName, 'id' => null, 'reply_id' => null, 'edit_id' => null, 'action' => 'new']))?>
                                                 </li>
                                             <?php endforeach; ?>
                                         </ul>
@@ -111,15 +111,15 @@ $is_admin = $user->isAdmin();
                                     <?=Html::dropDownList('email_type_id', Yii::$app->request->get('email_type_id'), \common\models\Email::FILTER_TYPE_LIST, ['class' => 'form-control', 'onchange' => '$("#btn-submit-email").click();'])?>
                                 </div>
                                 <div class="col-md-6">
-                                    <?php if($is_admin):?>
+                                    <?php if ($is_admin) :?>
                                         <?=Html::dropDownList('email_project_id', Yii::$app->request->get('email_project_id'), $projectList, ['prompt' => 'All projects', 'class' => 'form-control', 'onchange' => '$("#btn-submit-email").click();'])?>
                                     <?php endif; ?>
                                 </div>
                                 <div class="col-md-6" style="margin-top: 10px;">
-									<?=Html::dropDownList('email_email', Yii::$app->request->get('email_email'), $mailList, ['prompt' => 'All emails', 'class' => 'form-control', 'onchange' => '$("#btn-submit-email").click();'])?>
+                                    <?=Html::dropDownList('email_email', Yii::$app->request->get('email_email'), $mailList, ['prompt' => 'All emails', 'class' => 'form-control', 'onchange' => '$("#btn-submit-email").click();'])?>
                                 </div>
                                 <div class="col-md-6" style="margin-top: 10px;">
-									<?= Html::submitButton('Ok', ['id' => 'btn-submit-email', 'class' => 'btn btn-primary hidden']) ?>
+                                    <?= Html::submitButton('Ok', ['id' => 'btn-submit-email', 'class' => 'btn btn-primary hidden']) ?>
                                 </div>
                             <?= Html::endForm() ?>
 
@@ -133,7 +133,7 @@ $is_admin = $user->isAdmin();
                                 ],
                                 'layout' => "{summary}\n{pager}\n{items}\n{summary}",
                                 'itemView' => function ($model, $key, $index, $widget) use ($modelEmailView, $dataProvider) {
-                                    return $this->render('_list_item',['model' => $model, 'modelEmailView' => $modelEmailView, 'dataProvider' => $dataProvider]);
+                                    return $this->render('_list_item', ['model' => $model, 'modelEmailView' => $modelEmailView, 'dataProvider' => $dataProvider]);
                                 },
 
                                 'itemOptions' => [
@@ -158,24 +158,23 @@ $is_admin = $user->isAdmin();
 
                         <!-- CONTENT MAIL -->
                         <div class="col-sm-9 mail_view">
-                            <?php if($modelEmailView): ?>
+                            <?php if ($modelEmailView) : ?>
                                 <?=$this->render('_view_mail', ['model' => $modelEmailView])?>
-                            <?php elseif(Yii::$app->request->get('action') === 'new' || Yii::$app->request->get('edit_id') || Yii::$app->request->get('reply_id')): ?>
-
+                            <?php elseif (Yii::$app->request->get('action') === 'new' || Yii::$app->request->get('edit_id') || Yii::$app->request->get('reply_id')) : ?>
                                 <?php
-                                    if(Yii::$app->request->get('action') === 'new') {
-                                        $action = 'create';
-                                    } elseif(Yii::$app->request->get('edit_id')) {
-                                        $action = 'update';
-                                    } elseif(Yii::$app->request->get('reply_id')) {
-                                        $action = 'reply';
-                                    } else {
-                                        $action = '';
-                                    }
+                                if (Yii::$app->request->get('action') === 'new') {
+                                    $action = 'create';
+                                } elseif (Yii::$app->request->get('edit_id')) {
+                                    $action = 'update';
+                                } elseif (Yii::$app->request->get('reply_id')) {
+                                    $action = 'reply';
+                                } else {
+                                    $action = '';
+                                }
                                 ?>
 
                                 <?=$this->render('_new_mail', ['model' => $modelNewEmail, 'mailList' => $mailList, 'action' => $action])?>
-                            <?php else: ?>
+                            <?php else : ?>
                                 <?=$this->render('_stats', ['model' => $modelNewEmail, 'mailList' => $mailList])?>
                             <?php endif; ?>
 

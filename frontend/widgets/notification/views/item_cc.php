@@ -18,12 +18,12 @@ if ($clientChat->cchProject) {
 ?>
 
 <li>
-	<a href="<?= Url::to(['/client-chat/index', 'chid' => $clientChat->cch_id]) ?>" data-pjax="0">
-		<span class="glyphicon glyphicon-info-sign"> </span>
-		<span>
+    <a href="<?= Url::to(['/client-chat/index', 'chid' => $clientChat->cch_id]) ?>" data-pjax="0">
+        <span class="glyphicon glyphicon-info-sign"> </span>
+        <span>
             <span>You have unread messages: <?= Html::tag('span', $clientChat->countUnreadMessage, ['class' => 'label label-default']) ?> from <?= $clientChat->cchClient->full_name ?></span>
         </span>
-        <?php if ($message): ?>
+        <?php if ($message) : ?>
         <span class="message"><?= $message ?></span>
         <?php endif; ?>
     </a>

@@ -18,7 +18,8 @@ class SettingSearch extends Setting
     {
         return [
             [['s_id', 's_updated_user_id', 's_category_id'], 'integer'],
-            [['s_key', 's_name', 's_type', 's_value', 's_updated_dt'], 'safe'],
+            [['s_key', 's_name', 's_type', 's_value'], 'safe'],
+            [['s_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -46,7 +47,7 @@ class SettingSearch extends Setting
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['s_updated_dt' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['s_updated_dt' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 50,
             ],
@@ -63,7 +64,7 @@ class SettingSearch extends Setting
         // grid filtering conditions
         $query->andFilterWhere([
             's_id' => $this->s_id,
-            's_updated_dt' => $this->s_updated_dt,
+            'DATE(s_updated_dt)' => $this->s_updated_dt,
             's_updated_user_id' => $this->s_updated_user_id,
             's_category_id' => $this->s_category_id,
         ]);

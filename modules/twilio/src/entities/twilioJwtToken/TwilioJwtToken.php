@@ -60,7 +60,7 @@ class TwilioJwtToken extends \yii\db\ActiveRecord
      * @return Scopes the active query used by this AR class.
      */
     public static function find(): Scopes
-	{
+    {
         return new Scopes(static::class);
     }
 }

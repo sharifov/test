@@ -65,7 +65,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 ],
                                 'pluginOptions' => ['allowClear' => true],
                             ]);
-                            ?>
+?>
                         </div>
 
                         <div class="col-md-2">
@@ -80,7 +80,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     $model->cch_owner_user_id => $model->cchOwnerUser->username
                                 ] : [],
                             ])
-                            ?>
+?>
                         </div>
 
                         <div class="col-md-2">
@@ -95,8 +95,10 @@ $this->params['breadcrumbs'][] = $this->title;
                         </div>
 
                         <div class="col-md-2">
-                            <?= $form->field($model, 'cch_project_id')->dropDownList(\common\models\Project::getList(),
-                                ['prompt' => '-']) ?>
+                            <?= $form->field($model, 'cch_project_id')->dropDownList(
+                                \common\models\Project::getList(),
+                                ['prompt' => '-']
+                            ) ?>
                         </div>
 
                         <div class="col-md-2">

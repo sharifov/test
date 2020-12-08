@@ -55,6 +55,6 @@ class InternalContact
      */
     public function releaseLog(?string $prefix, ?string $category): void
     {
-      $this->log->release($prefix, $category);
+        $this->log->release($prefix, $category);
     }
 }

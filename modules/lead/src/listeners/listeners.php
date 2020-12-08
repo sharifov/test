@@ -8,6 +8,7 @@ use sales\events\lead\LeadCreatedByApiEvent;
 use sales\events\lead\LeadCreatedByIncomingCallEvent;
 use sales\events\lead\LeadCreatedByIncomingEmailEvent;
 use sales\events\lead\LeadCreatedByIncomingSmsEvent;
+use sales\events\lead\LeadCreatedClientChatEvent;
 use sales\events\lead\LeadCreatedCloneByUserEvent;
 use sales\events\lead\LeadCreatedEvent;
 use sales\events\lead\LeadCreatedManuallyEvent;
@@ -35,6 +36,7 @@ use sales\listeners\lead\LeadCreatedByApiLogEventListener;
 use sales\listeners\lead\LeadCreatedByIncomingCallLogListener;
 use sales\listeners\lead\LeadCreatedByIncomingEmailLogListener;
 use sales\listeners\lead\LeadCreatedByIncomingSmsLogListener;
+use sales\listeners\lead\LeadCreatedClientChatLogListener;
 use sales\listeners\lead\LeadCreatedCloneByUserEventListener;
 use sales\listeners\lead\LeadCreatedEventListener;
 use sales\listeners\lead\LeadCreatedNewEventLogListener;
@@ -86,6 +88,7 @@ return [
         LeadCreatedNewEventLogListener::class,
         LeadSendToGaListener::class,
     ],
+     LeadCreatedClientChatEvent::class => [],
 
     LeadDuplicateDetectedEvent::class => [LeadDuplicateDetectedEventListener::class],
     LeadOwnerChangedEvent::class => [LeadOwnerChangedNotificationsListener::class],
@@ -125,5 +128,5 @@ return [
     LeadNewEvent::class => [LeadNewEventLogListener::class],
 
     LeadQuoteCloneEvent::class => [LeadQuoteCloneEventListener::class],
-	LeadPreferencesUpdateCurrencyEvent::class => [LeadPreferencesUpdateCurrencyEventListener::class]
+    LeadPreferencesUpdateCurrencyEvent::class => [LeadPreferencesUpdateCurrencyEventListener::class]
 ];

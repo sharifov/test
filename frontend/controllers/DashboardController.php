@@ -65,7 +65,6 @@ class DashboardController extends FController
         }
 
         return $this->dashboardAgent();
-
     }
 
     public function dashboardSupervision(): string
@@ -181,9 +180,7 @@ class DashboardController extends FController
             $item['proc_count'] = 0;
             $item['trash_count'] = 0;
             if (isset($dataStats[$item['created_date']])) {
-
                 $dataStats[$item['created_date']]['pending_count'] = $item['pending_count'];
-
             } else {
                 $dataStats[$item['created_date']] = $item;
             }
@@ -197,9 +194,7 @@ class DashboardController extends FController
             $item['trash_count'] = 0;
 
             if (isset($dataStats[$item['created_date']])) {
-
                 $dataStats[$item['created_date']]['book_count'] = $item['book_count'];
-
             } else {
                 $dataStats[$item['created_date']] = $item;
             }
@@ -227,9 +222,7 @@ class DashboardController extends FController
             $item['book_count'] = 0;
 
             if (isset($dataStats[$item['created_date']])) {
-
                 $dataStats[$item['created_date']]['proc_count'] = $item['proc_count'];
-
             } else {
                 $dataStats[$item['created_date']] = $item;
             }
@@ -243,9 +236,7 @@ class DashboardController extends FController
             $item['trash_count'] = 0;
 
             if (isset($dataStats[$item['created_date']])) {
-
                 $dataStats[$item['created_date']]['sold_count'] = $item['sold_count'];
-
             } else {
                 $dataStats[$item['created_date']] = $item;
             }
@@ -296,9 +287,9 @@ class DashboardController extends FController
         $processList = [];
 
         @exec('cat /var/spool/cron/crontabs/root', $outCron);
-        if(isset($outCron) && count($outCron)) {
-            foreach ($outCron AS $lineCron) {
-                if(!preg_match('/(#|SHELL|PATH)/', $lineCron) && strlen($lineCron) > 2) {
+        if (isset($outCron) && count($outCron)) {
+            foreach ($outCron as $lineCron) {
+                if (!preg_match('/(#|SHELL|PATH)/', $lineCron) && strlen($lineCron) > 2) {
                     $crontabJobList[] = $lineCron;
                 }
             }
@@ -306,14 +297,14 @@ class DashboardController extends FController
 
         @exec('ps aux | grep -E "(queue|WorkerMan)" | grep -v grep', $out);
 
-        if(isset($out) && count($out)) {
-            foreach ($out AS $line) {
+        if (isset($out) && count($out)) {
+            foreach ($out as $line) {
                 //if(!preg_match("/(grep|workqueue)/", $line)) {
                     $tpmArr =  preg_split("#\s+#", $line);
                     $com = '';
-                    for ($i=10; $i < count($tpmArr); $i++) {
-                        $com .= $tpmArr[$i] . ' ';
-                    }
+                for ($i = 10; $i < count($tpmArr); $i++) {
+                    $com .= $tpmArr[$i] . ' ';
+                }
                     $processList[] = [
                         'pid' => $tpmArr[1],
                         'stime' => $tpmArr[8],
@@ -413,5 +404,4 @@ class DashboardController extends FController
     {
         return $this->render('index_um');
     }
-
 }

@@ -4,6 +4,7 @@ use common\components\grid\DateTimeColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\conference\entity\conferenceParticipantStats\search\ConferenceParticipantStatsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */

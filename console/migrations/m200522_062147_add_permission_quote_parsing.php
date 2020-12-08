@@ -32,14 +32,14 @@ class m200522_062147_add_permission_quote_parsing extends Migration
         Employee::ROLE_SUPPORT_SENIOR,
     ];
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function safeUp()
-	{
-		$category = SettingCategory::findOne(['sc_name' => 'Enable']);
+    /**
+     * {@inheritdoc}
+     */
+    public function safeUp()
+    {
+        $category = SettingCategory::findOne(['sc_name' => 'Enable']);
 
-		$this->insert('{{%setting}}', [
+        $this->insert('{{%setting}}', [
             's_key' => 'enable_gds_parsers_for_create_quote',
             's_name' => 'Enable GDS parsers for create Quote',
             's_type' => Setting::TYPE_BOOL,
@@ -53,17 +53,17 @@ class m200522_062147_add_permission_quote_parsing extends Migration
         }
         Yii::$app->db->getSchema()->refreshTableSchema('{{%setting}}');
 
-		(new \console\migrations\RbacMigrationService())->up($this->route, $this->roles);
-	}
+        (new \console\migrations\RbacMigrationService())->up($this->route, $this->roles);
+    }
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function safeDown()
-	{
-		(new \console\migrations\RbacMigrationService())->down($this->route, $this->roles);
+    /**
+     * {@inheritdoc}
+     */
+    public function safeDown()
+    {
+        (new \console\migrations\RbacMigrationService())->down($this->route, $this->roles);
 
-		$this->delete('{{%setting}}', ['IN', 's_key', [
+        $this->delete('{{%setting}}', ['IN', 's_key', [
             'enable_gds_parsers_for_create_quote'
         ]]);
 
@@ -71,5 +71,5 @@ class m200522_062147_add_permission_quote_parsing extends Migration
             Yii::$app->cache->flush();
         }
         Yii::$app->db->getSchema()->refreshTableSchema('{{%setting}}');
-	}
+    }
 }

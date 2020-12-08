@@ -20,8 +20,9 @@ class QuotePriceSearch extends QuotePrice
     {
         return [
             [['id', 'quote_id'], 'integer'],
-            [['passenger_type', 'created', 'updated'], 'safe'],
+            [['passenger_type'], 'safe'],
             [['selling', 'net', 'fare', 'taxes', 'mark_up', 'extra_mark_up'], 'number'],
+            [['created', 'updated'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -49,7 +50,7 @@ class QuotePriceSearch extends QuotePrice
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],

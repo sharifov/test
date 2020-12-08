@@ -1,8 +1,6 @@
 <?php
 
-
 namespace sales\forms\cases;
-
 
 use sales\services\client\InternalPhoneException;
 use sales\services\client\InternalPhoneGuard;
@@ -40,7 +38,7 @@ class CasesAddPhoneForm extends Model
         return [
             ['phone', 'required'],
             [['phone'], PhoneInputValidator::class],
-			['phone', InternalPhoneValidator::class, 'allowInternalPhone' => \Yii::$app->params['settings']['allow_contact_internal_phone']]
+            ['phone', InternalPhoneValidator::class, 'allowInternalPhone' => \Yii::$app->params['settings']['allow_contact_internal_phone']]
         ];
     }
 

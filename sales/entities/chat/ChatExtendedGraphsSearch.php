@@ -55,6 +55,7 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
     public function rules(): array
     {
         return [
+            ['timeZone', 'required'],
             [['createTimeRange', 'createTimeStart', 'createTimeEnd', 'timeZone', 'defaultUserTz'], 'string'],
             [['graphGroupBy', 'cch_owner_user_id', 'cch_channel_id', 'cch_project_id'], 'integer'],
             [['userGroupIds'], 'each', 'rule' => ['integer']],
@@ -84,12 +85,12 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
         $query = static::find();
         $query->select([
             '' . $this->setGroupingParam() . ' AS date',
-            'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_CLIENT . ' AND cch_status_id = '. ClientChat::STATUS_NEW . ', 1, 0)) AS newIncomingClientChats',
-            'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_AGENT . ' AND cch_status_id = '. ClientChat::STATUS_NEW . ', 1, 0)) AS newOutgoingAgentChats',
-            'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_CLIENT . ' AND cch_status_id = '. ClientChat::STATUS_IN_PROGRESS . ', 1, 0)) AS progressIncomingClientChats',
-            'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_AGENT . ' AND cch_status_id = '. ClientChat::STATUS_IN_PROGRESS . ', 1, 0)) AS progressOutgoingAgentChats',
-            'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_CLIENT . ' AND cch_status_id = '. ClientChat::STATUS_CLOSED. ', 1, 0)) AS initiatedByClientClosed',
-            'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_AGENT . ' AND cch_status_id = '. ClientChat::STATUS_CLOSED . ', 1, 0)) AS initiatedByAgentClosed',
+            'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_CLIENT . ', 1, 0)) AS newIncomingClientChats',
+            'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_AGENT . ', 1, 0)) AS newOutgoingAgentChats',
+            //'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_CLIENT . ' AND cch_status_id = '. ClientChat::STATUS_IN_PROGRESS . ', 1, 0)) AS progressIncomingClientChats',
+            //'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_AGENT . ' AND cch_status_id = '. ClientChat::STATUS_IN_PROGRESS . ', 1, 0)) AS progressOutgoingAgentChats',
+            'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_CLIENT . ' AND (cch_status_id = ' . ClientChat::STATUS_CLOSED . ' OR cch_status_id = ' . ClientChat::STATUS_ARCHIVE . '), 1, 0)) AS initByClientClosedArchive',
+            'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_AGENT . ' AND (cch_status_id = ' . ClientChat::STATUS_CLOSED . ' OR cch_status_id = ' . ClientChat::STATUS_ARCHIVE . '), 1, 0)) AS initByAgentClosedArchive',
             'SUM(IF(cch_missed = ' . ClientChat::MISSED . ', 1, 0)) AS missedChats',
             'GROUP_CONCAT(DISTINCT cch_owner_user_id) AS agentsInGroup'
         ]);
@@ -102,6 +103,7 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
 
         $ccTblSubQuery = new Query();
         $ccTblSubQuery->select('*')->from(ClientChat::tableName())->where('' . $this->setGroupingParam() . ' = date');
+        $ccTblSubQuery->andWhere(['cch_source_type_id' => [ClientChat::SOURCE_TYPE_CLIENT, ClientChat::SOURCE_TYPE_AGENT]]);
 
         $ccuaTblSubQuery = new Query();
         $ccuaTblSubQuery->select('*')->from(ClientChatUserAccess::tableName())->where(['ccua_status_id' => ClientChatUserAccess::STATUS_ACCEPT]);
@@ -125,7 +127,7 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
         }
 
         $query->addSelect([
-            'acceptedByAgent' => (new Query())
+            'acceptedByAgentSourceAgent' => (new Query())
                 ->select('COUNT(*)')
                 ->from([
                     //'ccTbl' => ((new Query())->select('*')->from(ClientChat::tableName())->where('date_format(cch_created_dt, "%Y-%m-%d") = date')),
@@ -135,6 +137,17 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
                 ])
                 ->where('ccTbl.cch_id = ccuaTbl.ccua_cch_id')
                 ->andWhere('ccTbl.cch_owner_user_id = ccuaTbl.ccua_user_id')
+                ->andWhere('ccTbl.cch_source_type_id = ' . ClientChat::SOURCE_TYPE_AGENT),
+
+            'acceptedByAgentSourceClient' => (new Query())
+                ->select('COUNT(*)')
+                ->from([
+                    'ccTbl' => $ccTblSubQuery,
+                    'ccuaTbl' => $ccuaTblSubQuery
+                ])
+                ->where('ccTbl.cch_id = ccuaTbl.ccua_cch_id')
+                ->andWhere('ccTbl.cch_owner_user_id = ccuaTbl.ccua_user_id')
+                ->andWhere('ccTbl.cch_source_type_id = ' . ClientChat::SOURCE_TYPE_CLIENT)
         ]);
 
         //$query->andWhere('cch_owner_user_id IS NOT NULL');
@@ -220,7 +233,7 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
             }
 
             foreach ($firstMessagesOfChats as $messageOfChat) {
-                if ($chat['cch_id'] == $messageOfChat['ccm_cch_id'] && $chat['cch_status_id'] == ClientChat::STATUS_CLOSED) {
+                if ($chat['cch_id'] == $messageOfChat['ccm_cch_id'] && ($chat['cch_status_id'] == ClientChat::STATUS_CLOSED || $chat['cch_status_id'] == ClientChat::STATUS_ARCHIVE)) {
                     $chatsData[$key]['chat_duration'] = strtotime($chat['cch_updated_dt']) - strtotime($messageOfChat['first_msg_date']);
                 }
             }
@@ -295,7 +308,7 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
     private function getTimeZoneOffset()
     {
         $timezone = new \DateTimeZone($this->timeZone);
-        $seconds = $timezone->getOffset(new \DateTime);
+        $seconds = $timezone->getOffset(new \DateTime());
         $sign = ($seconds > 0) ? '+' : '-';
         $hours = floor(abs($seconds) / 3600);
         $minutes = floor((abs($seconds) / 60) % 60);

@@ -59,8 +59,8 @@ class CompositeFormHelper
         foreach ($models as $model) {
             $model->validate($attributes);
             foreach ($model->getErrors() as $attribute => $errors) {
-                if ($internalForm = strstr($attribute,'.', true)) {
-                    $tmpInternalFormAttribute = strstr($attribute,'.');
+                if ($internalForm = strstr($attribute, '.', true)) {
+                    $tmpInternalFormAttribute = strstr($attribute, '.');
                     $internalFormAttribute = substr($tmpInternalFormAttribute, 1, strlen($tmpInternalFormAttribute));
                     try {
                         $result[Html::getInputId($model->{$internalForm}, $internalFormAttribute)] = $errors;
@@ -104,5 +104,4 @@ class CompositeFormHelper
         }
         return $errors;
     }
-
 }

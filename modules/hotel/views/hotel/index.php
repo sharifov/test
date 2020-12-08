@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel modules\hotel\models\search\HotelSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */

@@ -38,5 +38,4 @@ class m191031_111403_table_settings_add_qcall_count_last_dialed_leads extends Mi
             Yii::$app->cache->flush();
         }
     }
-
 }

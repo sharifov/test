@@ -44,5 +44,4 @@ class LeadSoldEventLogListener
             Yii::error($e, 'Listeners:LeadSoldEventLogListener');
         }
     }
-
 }

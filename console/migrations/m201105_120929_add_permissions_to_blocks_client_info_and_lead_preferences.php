@@ -71,5 +71,4 @@ class m201105_120929_add_permissions_to_blocks_client_info_and_lead_preferences 
             $auth->remove($permission);
         }
     }
-
 }

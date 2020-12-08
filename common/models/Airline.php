@@ -1,6 +1,6 @@
 <?php
-namespace common\models;
 
+namespace common\models;
 
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
@@ -81,17 +81,17 @@ class Airline extends ActiveRecord
 
     public function getCabinByClass($class)
     {
-        if(in_array($class, explode(',', $this->cl_economy))){
+        if (in_array($class, explode(',', $this->cl_economy))) {
             return 'E';
-        }elseif(in_array($class, explode(',', $this->cl_business))){
+        } elseif (in_array($class, explode(',', $this->cl_business))) {
             return 'B';
-        }elseif(in_array($class, explode(',', $this->cl_first))){
+        } elseif (in_array($class, explode(',', $this->cl_first))) {
             return 'F';
-        }elseif(in_array($class, explode(',', $this->cl_premium_economy))){
+        } elseif (in_array($class, explode(',', $this->cl_premium_economy))) {
             return 'P';
-        }elseif(in_array($class, explode(',', $this->cl_premium_business))){
+        } elseif (in_array($class, explode(',', $this->cl_premium_business))) {
             return 'PB';
-        }elseif(in_array($class, explode(',', $this->cl_premium_first))){
+        } elseif (in_array($class, explode(',', $this->cl_premium_first))) {
             return 'PF';
         }
 
@@ -117,23 +117,22 @@ class Airline extends ActiveRecord
                     ->asArray()
                     ->all();
 
-                if(!empty($lastUpdated) && $lastUpdatedDT = new \DateTime($lastUpdated[0]['updated_dt'])){
+                if (!empty($lastUpdated) && $lastUpdatedDT = new \DateTime($lastUpdated[0]['updated_dt'])) {
                     if ($lastUpdatedDT >= $lastModified) {
                         $flgSync = false;
                     }
                 }
             }
 
-            if($flgSync){
+            if ($flgSync) {
                 $content = $response->getContent();
-                if(!empty($content)){
+                if (!empty($content)) {
                     try {
                         $data = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
-                        if(isset($data['results'])){
-
-                            foreach ($data['results'] as $entry){
-                                $airline = Airline::findOne(['iata'=> $entry['airlineCode']]);
-                                if($airline === null){
+                        if (isset($data['results'])) {
+                            foreach ($data['results'] as $entry) {
+                                $airline = Airline::findOne(['iata' => $entry['airlineCode']]);
+                                if ($airline === null) {
                                     $airline = new Airline();
                                     $airline->iata = $entry['airlineCode'];
                                 }
@@ -145,14 +144,18 @@ class Airline extends ActiveRecord
                                 $airline->cl_premium_first = $entry['premium-first'];
                                 $airline->name = $entry['airlineName'];
                                 if (!$airline->save()) {
-                                    \Yii::error(\yii\helpers\VarDumper::dumpAsString([$entry, $airline->getErrors()], 20),
-                                        'Airline:syncCabinClasses:notSaved');
+                                    \Yii::error(
+                                        \yii\helpers\VarDumper::dumpAsString([$entry, $airline->getErrors()], 20),
+                                        'Airline:syncCabinClasses:notSaved'
+                                    );
                                 }
                             }
                         }
                     } catch (\JsonException $e) {
-                        \Yii::error(\yii\helpers\VarDumper::dumpAsString($e->getMessage(), 20),
-                            'Airline:syncCabinClasses:noJsonDecode');
+                        \Yii::error(
+                            \yii\helpers\VarDumper::dumpAsString($e->getMessage(), 20),
+                            'Airline:syncCabinClasses:noJsonDecode'
+                        );
                     }
                 }
             }
@@ -167,7 +170,7 @@ class Airline extends ActiveRecord
     {
         $data = [];
         $airlines = self::find()->where(['iata' => $iata])->asArray()->all();
-        if($airlines) {
+        if ($airlines) {
             foreach ($airlines as $airline) {
                 $data[$airline['iata']] = $airline['name'];
             }

@@ -34,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'client_id',
                 'label' => 'Client',
                 'value' => static function ($model) {
-                    return '<i class="fa fa-user"></i> ' . ($model->client ? Html::encode($model->client->full_name . ' (id: '.$model->client->id.')') : '');
+                    return '<i class="fa fa-user"></i> ' . ($model->client ? Html::encode($model->client->full_name . ' (id: ' . $model->client->id . ')') : '');
                 },
                 'format' => 'raw'
             ],

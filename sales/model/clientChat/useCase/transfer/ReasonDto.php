@@ -12,14 +12,14 @@ namespace sales\model\clientChat\useCase\transfer;
  */
 class ReasonDto
 {
-	public $id;
-	public $name;
-	public $requiredComment;
+    public $id;
+    public $name;
+    public $requiredComment;
 
-	public function __construct(int $id, string $name, bool $requiredComment)
-	{
-		$this->id = $id;
-		$this->name = $name;
-		$this->requiredComment = $requiredComment;
-	}
+    public function __construct(int $id, string $name, bool $requiredComment)
+    {
+        $this->id = $id;
+        $this->name = $name;
+        $this->requiredComment = $requiredComment;
+    }
 }

@@ -4,6 +4,7 @@ use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\NotificationsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -55,7 +56,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 return ['style' =>  'background-color:#d9edf7'];
             }*/
 
-            if($model->n_new) {
+            if ($model->n_new) {
                 return ['class' =>  'warning'];
             }
         },
@@ -84,8 +85,8 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'n_type_id',
                 //'format' => 'html',
-                'value' => function(\common\models\Notifications $model){
-                    return '<span class="label label-default">'.$model->getType().'</span>';
+                'value' => function (\common\models\Notifications $model) {
+                    return '<span class="label label-default">' . $model->getType() . '</span>';
                 },
                 'format' => 'raw',
                 'filter' => \common\models\Notifications::getTypeList()
@@ -111,7 +112,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'options' => [
                         'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
+                        'placeholder' => 'Choose Date'
                     ],
                 ]),
             ],
@@ -131,7 +132,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'options' => [
                         'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
+                        'placeholder' => 'Choose Date'
                     ],
                 ]),
             ],

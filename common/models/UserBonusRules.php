@@ -24,11 +24,11 @@ use yii\db\ActiveRecord;
  */
 class UserBonusRules extends \yii\db\ActiveRecord
 {
-	public const VALUE_MAX = 100;
-	public const VALUE_MIN = 0;
+    public const VALUE_MAX = 100;
+    public const VALUE_MIN = 0;
 
-	public const EXP_MAX_VALUE = 32767;
-	public const EXP_MIN_VALUE = 0;
+    public const EXP_MAX_VALUE = 32767;
+    public const EXP_MIN_VALUE = 0;
 
     /**
      * {@inheritdoc}
@@ -38,24 +38,24 @@ class UserBonusRules extends \yii\db\ActiveRecord
         return 'user_bonus_rules';
     }
 
-	public function behaviors(): array
-	{
-		return [
-			'timestamp' => [
-				'class' => TimestampBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['ubr_created_dt', 'ubr_updated_dt'],
-					ActiveRecord::EVENT_BEFORE_UPDATE => ['ubr_updated_dt'],
-				],
-				'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
-			],
-			'user' => [
-				'class' => BlameableBehavior::class,
-				'createdByAttribute' => 'ubr_created_user_id',
-				'updatedByAttribute' => 'ubr_updated_user_id',
-			],
-		];
-	}
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['ubr_created_dt', 'ubr_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['ubr_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'ubr_created_user_id',
+                'updatedByAttribute' => 'ubr_updated_user_id',
+            ],
+        ];
+    }
 
     /**
      * {@inheritdoc}
@@ -65,10 +65,10 @@ class UserBonusRules extends \yii\db\ActiveRecord
         return [
             [['ubr_exp_month', 'ubr_kpi_percent', 'ubr_order_profit'], 'required'],
             [['ubr_exp_month', 'ubr_kpi_percent', 'ubr_order_profit', 'ubr_created_user_id', 'ubr_updated_user_id'], 'integer'],
-			[['ubr_exp_month'], 'number', 'min' => self::EXP_MIN_VALUE, 'max' => self::EXP_MAX_VALUE],
-			[['ubr_order_profit', 'ubr_value'], 'number', 'min' => self::VALUE_MIN],
-			[['ubr_kpi_percent'], 'number', 'max' => self::VALUE_MAX, 'min' => self::VALUE_MIN],
-			[['ubr_value'], 'filter', 'filter' => 'floatval'],
+            [['ubr_exp_month'], 'number', 'min' => self::EXP_MIN_VALUE, 'max' => self::EXP_MAX_VALUE],
+            [['ubr_order_profit', 'ubr_value'], 'number', 'min' => self::VALUE_MIN],
+            [['ubr_kpi_percent'], 'number', 'max' => self::VALUE_MAX, 'min' => self::VALUE_MIN],
+            [['ubr_value'], 'filter', 'filter' => 'floatval'],
             [['ubr_created_dt', 'ubr_updated_dt'], 'safe'],
             [['ubr_exp_month', 'ubr_kpi_percent', 'ubr_order_profit'], 'unique', 'targetAttribute' => ['ubr_exp_month', 'ubr_kpi_percent', 'ubr_order_profit']],
             [['ubr_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ubr_created_user_id' => 'id']],
@@ -113,11 +113,11 @@ class UserBonusRules extends \yii\db\ActiveRecord
         return $this->hasOne(Employee::class, ['id' => 'ubr_updated_user_id']);
     }
 
-	/**
-	 * @return UserBonusRulesQuery|\yii\db\ActiveQuery
-	 */
-	public static function find()
-	{
-		return new UserBonusRulesQuery(static::class);
-	}
+    /**
+     * @return UserBonusRulesQuery|\yii\db\ActiveQuery
+     */
+    public static function find()
+    {
+        return new UserBonusRulesQuery(static::class);
+    }
 }

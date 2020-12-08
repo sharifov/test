@@ -26,7 +26,7 @@ use yii\helpers\Html;
         $this->registerMetaTag(['name' => 'robots', 'content' => 'noindex, nofollow']);
         $this->registerMetaTag(['name' => 'msapplication-TileColor', 'content' => '#a9e04b']);
         //$this->registerLinkTag(['rel' => 'icon', 'type' => 'image/png', 'href' => Helper::publishStatic('images/favicons/16x16.png'), 'sizes' => '16x16']);
-        $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'href' => Yii::$app->request->baseUrl.'/favicon.phone.ico']);
+        $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'href' => Yii::$app->request->baseUrl . '/favicon.phone.ico']);
         $this->head();
         // $host = 'Sales';
         echo Html::tag('title', Html::encode($this->title));
@@ -83,12 +83,18 @@ use yii\helpers\Html;
                         </li>*/ ?>
 
                         <li>
-                            <?=Html::a('<i class="fa fa-home pull-right"></i> Home', ['/site/index'],
-                                ['title' => 'Home']) ?>
+                            <?=Html::a(
+                                '<i class="fa fa-home pull-right"></i> Home',
+                                ['/site/index'],
+                                ['title' => 'Home']
+                            ) ?>
                             <?php /*=Html::a('<i class="fa fa-user pull-right"></i> My Profile', ['/site/profile'],
                                 ['title' => "My Profile"])*/ ?>
-                            <?=Html::a('<i class="fa fa-sign-out pull-right"></i> Log Out', ['/site/logout'],
-                                ['title' => "Logout"]) ?>
+                            <?=Html::a(
+                                '<i class="fa fa-sign-out pull-right"></i> Log Out',
+                                ['/site/logout'],
+                                ['title' => "Logout"]
+                            ) ?>
                             <?php /*=Html::a('<i class="fa fa-sign-out pull-right"></i> Log Out', ['/user-management/auth/logout'],
                                 ['title' => "Logout"])*/ ?>
 

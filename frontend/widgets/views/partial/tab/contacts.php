@@ -6,7 +6,6 @@ use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\ActiveForm;
 
-
 /** @var View $this */
 /** @var array $userPhones */
 /** @var array $userEmails */

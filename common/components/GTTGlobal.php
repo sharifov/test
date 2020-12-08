@@ -44,7 +44,8 @@ class GTTGlobal
         curl_setopt($ch, CURLOPT_URL, sprintf('http://50.97.0.109:7003/airticket/v1/mlist.aspx?%s', $fields));
         $result = curl_exec($ch);
 
-        Yii::warning(sprintf("Request:\n%s\n\nDump:\n%s",
+        Yii::warning(sprintf(
+            "Request:\n%s\n\nDump:\n%s",
             print_r($fields, true),
             print_r(curl_getinfo($ch), true)
         ), 'GTTGlobal::getOnlineQuotes()');
@@ -76,7 +77,7 @@ class GTTGlobal
                 $fSegment->departureAirportCode = $segment['departureAirportCode'];
                 $fSegment->destinationAirportCode = $segment['arrivalAirportCode'];
                 $fSegment->destinationAirportCode = $segment['arrivalAirportCode'];
-                if(!empty($segment['codeShare'])){
+                if (!empty($segment['codeShare'])) {
                     $fSegment->operationAirlineCode = $segment['codeShare'];
                 }
                 $segments[] = $fSegment;

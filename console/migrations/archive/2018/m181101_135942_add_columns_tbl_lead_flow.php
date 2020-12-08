@@ -61,7 +61,6 @@ class m181101_135942_add_columns_tbl_lead_flow extends Migration
 
             }
         }*/
-
     }
 
     /**
@@ -77,5 +76,4 @@ class m181101_135942_add_columns_tbl_lead_flow extends Migration
         $this->dropColumn('{{%lead_flow}}', 'lf_time_duration');
         $this->dropColumn('{{%lead_flow}}', 'lf_description');
     }
-
 }

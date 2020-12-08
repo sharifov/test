@@ -62,5 +62,4 @@ class CallSessionRepository extends Repository
         }
         $this->eventDispatcher->dispatchAll($callSession->releaseEvents());
     }
-
 }

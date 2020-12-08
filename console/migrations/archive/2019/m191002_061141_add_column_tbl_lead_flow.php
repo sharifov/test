@@ -22,6 +22,4 @@ class m191002_061141_add_column_tbl_lead_flow extends Migration
     {
         $this->dropColumn('{{%lead_flow}}', 'lf_out_calls');
     }
-
-
 }

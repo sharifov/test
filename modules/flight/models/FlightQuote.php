@@ -56,94 +56,94 @@ use yii\helpers\ArrayHelper;
  */
 class FlightQuote extends ActiveRecord implements Quotable
 {
-	use EventTrait;
+    use EventTrait;
 
-	public const FARE_TYPE_PUBLIC = 'PUB';
-	public const FARE_TYPE_PRIVATE = 'SR';
-	public const FARE_TYPE_COMMISSION = 'COMM';
-	public const FARE_TYPE_TOUR = 'TOUR';
+    public const FARE_TYPE_PUBLIC = 'PUB';
+    public const FARE_TYPE_PRIVATE = 'SR';
+    public const FARE_TYPE_COMMISSION = 'COMM';
+    public const FARE_TYPE_TOUR = 'TOUR';
 
-	public const FARE_TYPE_LIST = [
-		self::FARE_TYPE_PUBLIC => 'Public',
-		self::FARE_TYPE_PRIVATE => 'Private',
-		self::FARE_TYPE_COMMISSION => 'Commission',
-		self::FARE_TYPE_TOUR => 'Tour',
-	];
+    public const FARE_TYPE_LIST = [
+        self::FARE_TYPE_PUBLIC => 'Public',
+        self::FARE_TYPE_PRIVATE => 'Private',
+        self::FARE_TYPE_COMMISSION => 'Commission',
+        self::FARE_TYPE_TOUR => 'Tour',
+    ];
 
-	public const FARE_TYPE_ID_LIST = [
-		self::FARE_TYPE_PUBLIC => 1,
-		self::FARE_TYPE_PRIVATE => 2,
-		self::FARE_TYPE_COMMISSION => 3,
-		self::FARE_TYPE_TOUR => 4
-	];
+    public const FARE_TYPE_ID_LIST = [
+        self::FARE_TYPE_PUBLIC => 1,
+        self::FARE_TYPE_PRIVATE => 2,
+        self::FARE_TYPE_COMMISSION => 3,
+        self::FARE_TYPE_TOUR => 4
+    ];
 
-	public const STOPS_DIRECT = 0;
-	public const STOPS_UP_TO_1 = 1;
-	public const STOPS_UP_TO_2 = 2;
+    public const STOPS_DIRECT = 0;
+    public const STOPS_UP_TO_1 = 1;
+    public const STOPS_UP_TO_2 = 2;
 
-	public const STOPS_LIST = [
-		self::STOPS_DIRECT => 'Direct only',
-		self::STOPS_UP_TO_1 => 'Up to 1 stop',
-		self::STOPS_UP_TO_2 => 'Up to 2 stop'
-	];
+    public const STOPS_LIST = [
+        self::STOPS_DIRECT => 'Direct only',
+        self::STOPS_UP_TO_1 => 'Up to 1 stop',
+        self::STOPS_UP_TO_2 => 'Up to 2 stop'
+    ];
 
-	public const CHANGE_AIRPORT_ANY = 0;
-	public const CHANGE_AIRPORT_NO = 1;
+    public const CHANGE_AIRPORT_ANY = 0;
+    public const CHANGE_AIRPORT_NO = 1;
 
-	public const CHANGE_AIRPORT_LIST = [
-		self::CHANGE_AIRPORT_ANY => '--',
-		self::CHANGE_AIRPORT_NO => 'No Airport Change'
-	];
+    public const CHANGE_AIRPORT_LIST = [
+        self::CHANGE_AIRPORT_ANY => '--',
+        self::CHANGE_AIRPORT_NO => 'No Airport Change'
+    ];
 
-	public const BAGGAGE_ANY = 0;
-	public const BAGGAGE_ONE_PLUS = 1;
-	public const BAGGAGE_TWO_PLUS = 2;
+    public const BAGGAGE_ANY = 0;
+    public const BAGGAGE_ONE_PLUS = 1;
+    public const BAGGAGE_TWO_PLUS = 2;
 
-	public const BAGGAGE_LIST = [
-		self::BAGGAGE_ANY => '--',
-		self::BAGGAGE_ONE_PLUS => '1+',
-		self::BAGGAGE_TWO_PLUS => '2+'
-	];
+    public const BAGGAGE_LIST = [
+        self::BAGGAGE_ANY => '--',
+        self::BAGGAGE_ONE_PLUS => '1+',
+        self::BAGGAGE_TWO_PLUS => '2+'
+    ];
 
-	public const SORT_BY_PRICE_ASC = 'price_asc';
-	public const SORT_BY_PRICE_DESC = 'price_desc';
-	public const SORT_BY_DURATION_ASC = 'duration_asc';
-	public const SORT_BY_DURATION_DESC = 'duration_desc';
+    public const SORT_BY_PRICE_ASC = 'price_asc';
+    public const SORT_BY_PRICE_DESC = 'price_desc';
+    public const SORT_BY_DURATION_ASC = 'duration_asc';
+    public const SORT_BY_DURATION_DESC = 'duration_desc';
 
-	public const SORT_BY_LIST = [
-		self::SORT_BY_PRICE_ASC => 'Price (ASC)',
-		self::SORT_BY_PRICE_DESC => 'Price (DESC)',
-		self::SORT_BY_DURATION_ASC => 'Destination (ASC)',
-		self::SORT_BY_DURATION_DESC => 'Destination (DESC)',
-	];
+    public const SORT_BY_LIST = [
+        self::SORT_BY_PRICE_ASC => 'Price (ASC)',
+        self::SORT_BY_PRICE_DESC => 'Price (DESC)',
+        self::SORT_BY_DURATION_ASC => 'Destination (ASC)',
+        self::SORT_BY_DURATION_DESC => 'Destination (DESC)',
+    ];
 
-	public const SORT_TYPE_LIST = [
-		self::SORT_BY_PRICE_ASC => SORT_ASC,
-		self::SORT_BY_PRICE_DESC => SORT_DESC,
-		self::SORT_BY_DURATION_ASC => SORT_ASC,
-		self::SORT_BY_DURATION_DESC => SORT_DESC
-	];
+    public const SORT_TYPE_LIST = [
+        self::SORT_BY_PRICE_ASC => SORT_ASC,
+        self::SORT_BY_PRICE_DESC => SORT_DESC,
+        self::SORT_BY_DURATION_ASC => SORT_ASC,
+        self::SORT_BY_DURATION_DESC => SORT_DESC
+    ];
 
-	public const SORT_ATTRIBUTES_NAME_LIST = [
-		self::SORT_BY_PRICE_ASC	=> 'price',
-		self::SORT_BY_PRICE_DESC	=> 'price',
-		self::SORT_BY_DURATION_ASC	=> 'duration',
-		self::SORT_BY_DURATION_DESC	=> 'duration',
-	];
+    public const SORT_ATTRIBUTES_NAME_LIST = [
+        self::SORT_BY_PRICE_ASC => 'price',
+        self::SORT_BY_PRICE_DESC    => 'price',
+        self::SORT_BY_DURATION_ASC  => 'duration',
+        self::SORT_BY_DURATION_DESC => 'duration',
+    ];
 
-	public const TYPE_BASE = 0;
-	public const TYPE_ORIGINAL = 1;
-	public const TYPE_ALTERNATIVE = 2;
+    public const TYPE_BASE = 0;
+    public const TYPE_ORIGINAL = 1;
+    public const TYPE_ALTERNATIVE = 2;
 
-	public const TYPE_LIST = [
-		self::TYPE_BASE => 'Base',
-		self::TYPE_ORIGINAL => 'Original',
-		self::TYPE_ALTERNATIVE => 'Alternative',
-	];
+    public const TYPE_LIST = [
+        self::TYPE_BASE => 'Base',
+        self::TYPE_ORIGINAL => 'Original',
+        self::TYPE_ALTERNATIVE => 'Alternative',
+    ];
 
-	public const SERVICE_FEE = 0.035;
+    public const SERVICE_FEE = 0.035;
 
-	/**
+    /**
      * {@inheritdoc}
      */
     public static function tableName()
@@ -246,13 +246,13 @@ class FlightQuote extends ActiveRecord implements Quotable
         return $this->hasOne(ProductQuote::class, ['pq_id' => 'fq_product_quote_id']);
     }
 
-	/**
-	 * @return ActiveQuery
-	 */
-	public function getMainAirline(): ActiveQuery
-	{
-		return $this->hasOne(Airline::class, ['iata' => 'fq_main_airline']);
-	}
+    /**
+     * @return ActiveQuery
+     */
+    public function getMainAirline(): ActiveQuery
+    {
+        return $this->hasOne(Airline::class, ['iata' => 'fq_main_airline']);
+    }
 
     /**
      * @return ActiveQuery
@@ -274,7 +274,7 @@ class FlightQuote extends ActiveRecord implements Quotable
      * @return ActiveQuery
      */
     public function getFlightQuoteStatusLogs(): \yii\db\ActiveQuery
-	{
+    {
         return $this->hasMany(FlightQuoteStatusLog::class, ['qsl_flight_quote_id' => 'fq_id']);
     }
 
@@ -282,7 +282,7 @@ class FlightQuote extends ActiveRecord implements Quotable
      * @return ActiveQuery
      */
     public function getFlightQuoteTrips(): \yii\db\ActiveQuery
-	{
+    {
         return $this->hasMany(FlightQuoteTrip::class, ['fqt_flight_quote_id' => 'fq_id']);
     }
 
@@ -291,134 +291,134 @@ class FlightQuote extends ActiveRecord implements Quotable
         return new Scopes(static::class);
     }
 
-	/**
-	 * @return array
-	 */
+    /**
+     * @return array
+     */
     public static function getFareTypeList(): array
-	{
-		return self::FARE_TYPE_LIST;
-	}
+    {
+        return self::FARE_TYPE_LIST;
+    }
 
-	/**
-	 * @return array
-	 */
-	public static function getStopsLIst(): array
-	{
-		return self::STOPS_LIST;
-	}
+    /**
+     * @return array
+     */
+    public static function getStopsLIst(): array
+    {
+        return self::STOPS_LIST;
+    }
 
-	/**
-	 * @return array
-	 */
-	public static function getChangeAirportList(): array
-	{
-		return self::CHANGE_AIRPORT_LIST;
-	}
+    /**
+     * @return array
+     */
+    public static function getChangeAirportList(): array
+    {
+        return self::CHANGE_AIRPORT_LIST;
+    }
 
-	/**
-	 * @return array
-	 */
-	public static function getBaggageList(): array
-	{
-		return self::BAGGAGE_LIST;
-	}
+    /**
+     * @return array
+     */
+    public static function getBaggageList(): array
+    {
+        return self::BAGGAGE_LIST;
+    }
 
-	/**
-	 * @return array
-	 */
-	public static function getSortList(): array
-	{
-		return self::SORT_BY_LIST;
-	}
+    /**
+     * @return array
+     */
+    public static function getSortList(): array
+    {
+        return self::SORT_BY_LIST;
+    }
 
-	/**
-	 * @return array
-	 */
-	public static function getSortTypeList(): array
-	{
-		return self::SORT_TYPE_LIST;
-	}
+    /**
+     * @return array
+     */
+    public static function getSortTypeList(): array
+    {
+        return self::SORT_TYPE_LIST;
+    }
 
-	/**
-	 * @param $sortId
-	 * @return int|null
-	 */
-	public static function getSortTypeBySortId($sortId): ?int
-	{
-		return self::getSortTypeList()[$sortId] ?? null;
-	}
+    /**
+     * @param $sortId
+     * @return int|null
+     */
+    public static function getSortTypeBySortId($sortId): ?int
+    {
+        return self::getSortTypeList()[$sortId] ?? null;
+    }
 
-	/**
-	 * @return mixed
-	 */
-	public static function getDefaultSortType()
-	{
-		return self::getSortTypeList()[self::SORT_BY_PRICE_ASC];
-	}
+    /**
+     * @return mixed
+     */
+    public static function getDefaultSortType()
+    {
+        return self::getSortTypeList()[self::SORT_BY_PRICE_ASC];
+    }
 
-	public static function getDefaultSortAttributeName()
-	{
-		return self::getSortAttributesNameList()[self::SORT_BY_PRICE_ASC];
-	}
+    public static function getDefaultSortAttributeName()
+    {
+        return self::getSortAttributesNameList()[self::SORT_BY_PRICE_ASC];
+    }
 
-	/**
-	 * @return array
-	 */
-	public static function getSortAttributesNameList(): array
-	{
-		return self::SORT_ATTRIBUTES_NAME_LIST;
-	}
+    /**
+     * @return array
+     */
+    public static function getSortAttributesNameList(): array
+    {
+        return self::SORT_ATTRIBUTES_NAME_LIST;
+    }
 
-	/**
-	 * @param $sortId
-	 * @return string|null
-	 */
-	public static function getSortAttributeNameById($sortId): ?string
-	{
-		return self::getSortAttributesNameList()[$sortId] ?? null;
-	}
+    /**
+     * @param $sortId
+     * @return string|null
+     */
+    public static function getSortAttributeNameById($sortId): ?string
+    {
+        return self::getSortAttributesNameList()[$sortId] ?? null;
+    }
 
-	/**
-	 * @param string $fareType
-	 * @return int|null
-	 */
-	public static function getFareTypeId(string $fareType): ?int
-	{
-		return self::FARE_TYPE_ID_LIST[$fareType] ?? null;
-	}
+    /**
+     * @param string $fareType
+     * @return int|null
+     */
+    public static function getFareTypeId(string $fareType): ?int
+    {
+        return self::FARE_TYPE_ID_LIST[$fareType] ?? null;
+    }
 
-	/**
-	 * @param FlightQuoteCreateDTO $dto
-	 * @return FlightQuote
-	 */
-	public static function create(FlightQuoteCreateDTO $dto): FlightQuote
-	{
-		$flightQuote = new self();
+    /**
+     * @param FlightQuoteCreateDTO $dto
+     * @return FlightQuote
+     */
+    public static function create(FlightQuoteCreateDTO $dto): FlightQuote
+    {
+        $flightQuote = new self();
 
-		$flightQuote->fq_flight_id = $dto->flightId;
-		$flightQuote->fq_source_id = $dto->sourceId;
-		$flightQuote->fq_product_quote_id = $dto->productQuoteId;
-		$flightQuote->fq_hash_key = $dto->hashKey;
-		$flightQuote->fq_service_fee_percent = $dto->serviceFeePercent;
-		$flightQuote->fq_record_locator = $dto->recordLocator;
-		$flightQuote->fq_gds = $dto->gds;
-		$flightQuote->fq_gds_offer_id = $dto->gdsOfferId;
-		$flightQuote->fq_gds_pcc = $dto->gdsPcc;
-		$flightQuote->fq_type_id = $dto->typeId;
-		$flightQuote->fq_cabin_class = $dto->cabinClass;
-		$flightQuote->fq_trip_type_id = $dto->tripTypeId;
-		$flightQuote->fq_main_airline = $dto->mainAirline;
-		$flightQuote->fq_fare_type_id = $dto->fareType;
-		$flightQuote->fq_created_user_id = $dto->createdUserId;
-		$flightQuote->fq_created_expert_id = $dto->createdExpertId;
-		$flightQuote->fq_created_expert_name = $dto->createdExpertName;
-		$flightQuote->fq_reservation_dump = $dto->reservationDump;
-		$flightQuote->fq_pricing_info = $dto->pricingInfo;
-		$flightQuote->fq_origin_search_data = $dto->originSearchData;
-		$flightQuote->fq_last_ticket_date = $dto->lastTicketDate;
-		$flightQuote->fq_request_hash = $dto->requestHash;
-		return $flightQuote;
-	}
+        $flightQuote->fq_flight_id = $dto->flightId;
+        $flightQuote->fq_source_id = $dto->sourceId;
+        $flightQuote->fq_product_quote_id = $dto->productQuoteId;
+        $flightQuote->fq_hash_key = $dto->hashKey;
+        $flightQuote->fq_service_fee_percent = $dto->serviceFeePercent;
+        $flightQuote->fq_record_locator = $dto->recordLocator;
+        $flightQuote->fq_gds = $dto->gds;
+        $flightQuote->fq_gds_offer_id = $dto->gdsOfferId;
+        $flightQuote->fq_gds_pcc = $dto->gdsPcc;
+        $flightQuote->fq_type_id = $dto->typeId;
+        $flightQuote->fq_cabin_class = $dto->cabinClass;
+        $flightQuote->fq_trip_type_id = $dto->tripTypeId;
+        $flightQuote->fq_main_airline = $dto->mainAirline;
+        $flightQuote->fq_fare_type_id = $dto->fareType;
+        $flightQuote->fq_created_user_id = $dto->createdUserId;
+        $flightQuote->fq_created_expert_id = $dto->createdExpertId;
+        $flightQuote->fq_created_expert_name = $dto->createdExpertName;
+        $flightQuote->fq_reservation_dump = $dto->reservationDump;
+        $flightQuote->fq_pricing_info = $dto->pricingInfo;
+        $flightQuote->fq_origin_search_data = $dto->originSearchData;
+        $flightQuote->fq_last_ticket_date = $dto->lastTicketDate;
+        $flightQuote->fq_request_hash = $dto->requestHash;
+        return $flightQuote;
+    }
 
     public static function clone(FlightQuote $quote, int $flightId, int $productQuoteId): self
     {
@@ -433,79 +433,79 @@ class FlightQuote extends ActiveRecord implements Quotable
         $clone->recordEvent(new FlightQuoteCloneCreatedEvent($clone));
 
         return $clone;
-	}
+    }
 
-	/**
-	 * @param $type
-	 * @return mixed|string
-	 */
-	public static function getTypeName(int $type)
-	{
-		return self::TYPE_LIST[$type] ?? '-';
-	}
+    /**
+     * @param $type
+     * @return mixed|string
+     */
+    public static function getTypeName(int $type)
+    {
+        return self::TYPE_LIST[$type] ?? '-';
+    }
 
-	public function isBase(): bool
-	{
-		return $this->fq_type_id === self::TYPE_BASE;
-	}
+    public function isBase(): bool
+    {
+        return $this->fq_type_id === self::TYPE_BASE;
+    }
 
-	public function base(): void
-	{
-		$this->fq_type_id = self::TYPE_BASE;
-	}
+    public function base(): void
+    {
+        $this->fq_type_id = self::TYPE_BASE;
+    }
 
-	public function isOriginal(): bool
-	{
-		return $this->fq_type_id === self::TYPE_ORIGINAL;
-	}
+    public function isOriginal(): bool
+    {
+        return $this->fq_type_id === self::TYPE_ORIGINAL;
+    }
 
-	public function original(): void
-	{
-		$this->fq_type_id = self::TYPE_ORIGINAL;
-	}
+    public function original(): void
+    {
+        $this->fq_type_id = self::TYPE_ORIGINAL;
+    }
 
-	public function isAlternative(): bool
-	{
-		return $this->fq_type_id === self::TYPE_ALTERNATIVE;
-	}
+    public function isAlternative(): bool
+    {
+        return $this->fq_type_id === self::TYPE_ALTERNATIVE;
+    }
 
-	public function alternative(): void
-	{
-		$this->fq_type_id = self::TYPE_ALTERNATIVE;
-	}
+    public function alternative(): void
+    {
+        $this->fq_type_id = self::TYPE_ALTERNATIVE;
+    }
 
-	/**
-	 * @return bool
-	 */
-	public function createdByExpert(): bool
-	{
-		return $this->fq_created_expert_id ? true : false;
-	}
+    /**
+     * @return bool
+     */
+    public function createdByExpert(): bool
+    {
+        return $this->fq_created_expert_id ? true : false;
+    }
 
-	/**
-	 * @return string
-	 */
-	public function getEmployeeName(): string
-	{
-		$createdByExpert = $this->createdByExpert();
+    /**
+     * @return string
+     */
+    public function getEmployeeName(): string
+    {
+        $createdByExpert = $this->createdByExpert();
 
-		if ($createdByExpert) {
-			return $this->fq_created_expert_name;
-		}
+        if ($createdByExpert) {
+            return $this->fq_created_expert_name;
+        }
 
-		return $this->fqCreatedUser->username;
-	}
+        return $this->fqCreatedUser->username;
+    }
 
-	/**
-	 * @param ProductQuote $productQuote
-	 * @return FlightQuote|null
-	 */
-	public static function findByProductQuoteId(ProductQuote $productQuote): ?FlightQuote
-	{
-		return self::findOne(['fq_product_quote_id' => $productQuote->pq_id]);
-	}
+    /**
+     * @param ProductQuote $productQuote
+     * @return FlightQuote|null
+     */
+    public static function findByProductQuoteId(ProductQuote $productQuote): ?FlightQuote
+    {
+        return self::findOne(['fq_product_quote_id' => $productQuote->pq_id]);
+    }
 
-	public function serialize(): array
+    public function serialize(): array
     {
         return (new FlightQuoteSerializer($this))->getData();
     }
@@ -521,24 +521,24 @@ class FlightQuote extends ActiveRecord implements Quotable
     }
 
     /**
-	 * @return float
-	 */
-	public function getServiceFeePercent(): float
-	{
-		return $this->fq_service_fee_percent ?? 0.00;
-	}
+     * @return float
+     */
+    public function getServiceFeePercent(): float
+    {
+        return $this->fq_service_fee_percent ?? 0.00;
+    }
 
-	/**
-	 * @return float
-	 */
-	public function getProcessingFee(): float
-	{
-		$processingFeeAmount = $this->fqProductQuote->pqProduct->prType->getProcessingFeeAmount();
+    /**
+     * @return float
+     */
+    public function getProcessingFee(): float
+    {
+        $processingFeeAmount = $this->fqProductQuote->pqProduct->prType->getProcessingFeeAmount();
 
-		$flight = $this->fqFlight;
+        $flight = $this->fqFlight;
 
-		return ($flight->fl_adults + $flight->fl_children) * $processingFeeAmount;
-	}
+        return ($flight->fl_adults + $flight->fl_children) * $processingFeeAmount;
+    }
 
     /**
      * @return float
@@ -566,7 +566,7 @@ class FlightQuote extends ActiveRecord implements Quotable
     }
 
     public static function getGdsList(): array
-	{
-		return SearchService::GDS_LIST;
-	}
+    {
+        return SearchService::GDS_LIST;
+    }
 }

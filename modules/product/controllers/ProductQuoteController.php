@@ -25,13 +25,13 @@ class ProductQuoteController extends FController
 {
     private $productQuoteCloneService;
     /**
-	 * @var EventDispatcher
-	 */
+     * @var EventDispatcher
+     */
     private $eventDispatcher;
     /**
-	 * @var ProductQuoteRepository
-	 */
-	private $productQuoteRepository;
+     * @var ProductQuoteRepository
+     */
+    private $productQuoteRepository;
 
     /**
      * ProductQuoteController constructor.
@@ -49,8 +49,7 @@ class ProductQuoteController extends FController
         EventDispatcher $eventDispatcher,
         ProductQuoteRepository $productQuoteRepository,
         $config = []
-    )
-    {
+    ) {
         parent::__construct($id, $module, $config);
         $this->productQuoteCloneService = $productQuoteCloneService;
         $this->eventDispatcher = $eventDispatcher;
@@ -109,7 +108,6 @@ class ProductQuoteController extends FController
             $model->prepareRemove();
             $this->productQuoteRepository->remove($model);
             $transaction->commit();
-
         } catch (\Throwable $throwable) {
             $transaction->rollBack();
             return ['error' => 'Error: ' . $throwable->getMessage()];

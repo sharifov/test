@@ -36,7 +36,7 @@ $this->registerJs($js);?>
             'attribute' => 'e_lead_id',
             'label' => 'Lead ID',
             'value' => static function (\common\models\Email $model) {
-                return $model->e_lead_id ? Html::a($model->e_lead_id,[
+                return $model->e_lead_id ? Html::a($model->e_lead_id, [
                     'lead/view',
                     'gid' => $model->eLead->gid
                 ]) : '-';
@@ -49,7 +49,7 @@ $this->registerJs($js);?>
         [
             'label' => 'Message',
             'value' => static function (\common\models\Email $model) {
-                return '<a class="chat__details" href="#" data-id="'.$model->e_id.'"><i class="fa fa-search-plus"></i> '.$model->e_email_subject.'</a>';
+                return '<a class="chat__details" href="#" data-id="' . $model->e_id . '"><i class="fa fa-search-plus"></i> ' . $model->e_email_subject . '</a>';
             },
             'format' => 'raw',
         ],

@@ -34,11 +34,11 @@ class MultipleUpdateForm extends Model
         return [
             ['ids', 'required', 'message' => 'Not selected rows'],
             ['ids', 'string'],
-            ['ids', 'filter', 'filter' => static function($value) {
+            ['ids', 'filter', 'filter' => static function ($value) {
                 return explode(',', $value);
             }],
             ['ids', 'each', 'rule' => ['integer']],
-            ['ids', 'filter', 'filter' => static function($value) {
+            ['ids', 'filter', 'filter' => static function ($value) {
                 $new = [];
                 foreach ($value as $item) {
                     $new[] = (int)$item;

@@ -29,8 +29,7 @@ class LeadImportService
         LeadRepository $leadRepository,
         TransactionManager $transactionManager,
         ClientManageService $clientManageService
-    )
-    {
+    ) {
         $this->leadRepository = $leadRepository;
         $this->transactionManager = $transactionManager;
         $this->clientManageService = $clientManageService;
@@ -46,9 +45,7 @@ class LeadImportService
         $log = new Log();
 
         foreach ($forms as $key => $form) {
-
             if ($form->validate()) {
-
                 try {
                     /** @var Lead $lead */
                     $lead = $this->transactionManager->wrap(function () use ($form, $creatorId) {
@@ -75,7 +72,6 @@ class LeadImportService
                 } catch (\Throwable $e) {
                     $log->add(Message::createInvalid($key, VarDumper::dumpAsString($e->getMessage())));
                 }
-
             } else {
                 $log->add(Message::createInvalid($key, VarDumper::dumpAsString($form->getErrors())));
             }
@@ -86,13 +82,15 @@ class LeadImportService
 
     private function guardDuplicate(LeadImportForm $form, int $clientId): void
     {
-        if ($lead = Lead::find()->andWhere([
+        if (
+            $lead = Lead::find()->andWhere([
             'status' => Lead::STATUS_NEW,
             'client_id' => $clientId,
             'notes_for_experts' => $form->notes,
             'project_id' => $form->project_id,
             'source_id' => $form->source_id,
-        ])->limit(1)->one()) {
+            ])->limit(1)->one()
+        ) {
             throw new \DomainException('Duplicate found. Lead Id: ' . $lead->id);
         }
     }

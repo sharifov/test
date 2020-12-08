@@ -16,7 +16,7 @@ class LeadGuard
     public static function guard(?int $leadId): Lead
     {
         if (!$lead = Lead::findOne(['id' => $leadId])) {
-            throw new \DomainException( 'Lead id(' . $leadId . ') not found');
+            throw new \DomainException('Lead id(' . $leadId . ') not found');
         }
         return $lead;
     }

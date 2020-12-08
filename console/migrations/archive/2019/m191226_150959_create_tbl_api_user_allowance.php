@@ -17,7 +17,7 @@ class m191226_150959_create_tbl_api_user_allowance extends Migration
             $tableOptions = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE=InnoDB';
         }
 
-        $this->createTable('{{%api_user_allowance}}',	[
+        $this->createTable('{{%api_user_allowance}}', [
             'aua_user_id' => $this->primaryKey(),
             'aua_allowed_number_requests' => $this->integer(10)->notNull(),
             'aua_last_check_time' => $this->integer(10)->notNull()

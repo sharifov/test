@@ -322,7 +322,7 @@ class OneTimeController extends Controller
     public function actionSaleToCase(string $fromDate, string $toDate, int $status): void
     {
         echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
-            self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
         $time_start = microtime(true);
 
         $fromDate = date('Y-m-d', strtotime($fromDate));
@@ -339,13 +339,15 @@ class OneTimeController extends Controller
                 $job->case_id = $value['cs_id'];
                 $job->phone = $this->getPhoneByClient($value['cs_client_id'])['phone'];
                 Yii::$app->queue_job->priority(100)->push($job);
-                $processed ++;
+                $processed++;
                 Console::updateProgress($processed, $countCases);
             }
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableFormatter($throwable),
-                'OneTimeController:actionSaleToCase:Throwable' );
-            echo Console::renderColoredString('%r --- Error : '. $throwable->getMessage() .' %n'), PHP_EOL;
+            Yii::error(
+                AppHelper::throwableFormatter($throwable),
+                'OneTimeController:actionSaleToCase:Throwable'
+            );
+            echo Console::renderColoredString('%r --- Error : ' . $throwable->getMessage() . ' %n'), PHP_EOL;
         }
 
         Console::endProgress(false);
@@ -353,7 +355,7 @@ class OneTimeController extends Controller
         $time = number_format(round($time_end - $time_start, 2), 2);
         echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
             ' s] %gFind cases: %w[' . $countCases . '] %g Added to queue: %w[' . $processed . '] %n'), PHP_EOL;
-        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g'. self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' . self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
     }
 
     /**
@@ -372,7 +374,7 @@ class OneTimeController extends Controller
         $processed = $countItems = 0;
 
         $cases = Yii::$app->db->createCommand(
-        '
+            '
             SELECT 
                 cases.cs_id,
                 cases.cs_client_id,
@@ -431,13 +433,15 @@ class OneTimeController extends Controller
                     Yii::$app->queue_job->priority(10)->push($job);
                 }
 
-                $processed ++;
+                $processed++;
                 Console::updateProgress($processed, $countItems);
             }
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableFormatter($throwable),
-                'OneTimeController:actionSaleToCase:Throwable' );
-            echo Console::renderColoredString('%r --- Error : '. $throwable->getMessage() .' %n'), PHP_EOL;
+            Yii::error(
+                AppHelper::throwableFormatter($throwable),
+                'OneTimeController:actionSaleToCase:Throwable'
+            );
+            echo Console::renderColoredString('%r --- Error : ' . $throwable->getMessage() . ' %n'), PHP_EOL;
         }
         Console::endProgress(false);
 
@@ -447,13 +451,13 @@ class OneTimeController extends Controller
         echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
             ' s] %gFind cases: %w[' . $countItems . '] %g Added to queue: %w[' . $processed . '] %n'), PHP_EOL;
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
-            self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
     }
 
     public function actionSaleDataToJson(?string $fromDate = null, ?string $toDate = null): void
     {
         echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
-            self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
         $processed = 0;
         $time_start = microtime(true);
@@ -487,8 +491,10 @@ class OneTimeController extends Controller
             $transaction->commit();
         } catch (\Throwable $throwable) {
             $transaction->rollBack();
-            Yii::error(AppHelper::throwableFormatter($throwable),
-                'OneTimeController:actionSaleDataToJson:Throwable' );
+            Yii::error(
+                AppHelper::throwableFormatter($throwable),
+                'OneTimeController:actionSaleDataToJson:Throwable'
+            );
             echo Console::renderColoredString('%r --- Error : ' . $throwable->getMessage() . ' %n'), PHP_EOL;
         }
 
@@ -531,7 +537,7 @@ class OneTimeController extends Controller
                         'model' => $conference->getAttributes(),
                     ]);
                 }
-                $processed ++;
+                $processed++;
                 Console::updateProgress($processed, $count);
             }
         }
@@ -650,8 +656,7 @@ class OneTimeController extends Controller
         $processed = 0;
 
         foreach ($clients as $client) {
-
-            $processed ++;
+            $processed++;
             Console::updateProgress($processed, $count);
 
             if ($client['cl_project_id']) {
@@ -813,7 +818,6 @@ class OneTimeController extends Controller
 //            echo PHP_EOL;
 //            VarDumper::dump($projects);
 //            echo PHP_EOL;
-
         }
 
         Console::endProgress(false);
@@ -823,7 +827,6 @@ class OneTimeController extends Controller
 
         printf(PHP_EOL . 'Execute Time: %s' . PHP_EOL, $this->ansiFormat($time . ' s', Console::FG_RED));
         printf(PHP_EOL . ' --- End [' . date('Y-m-d H:i:s') . '] %s ---' . PHP_EOL . PHP_EOL, $this->ansiFormat(self::class . '\\' . $this->action->id, Console::FG_YELLOW));
-
     }
 
     private function cloneClientWithProject($parentClient, $projectId, $typeCreate, $createdDt): void

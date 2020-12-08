@@ -123,7 +123,7 @@ class UserSiteActivity extends \yii\db\ActiveRecord
     public static function clearHistoryLogs(): int
     {
         $days = (int) Yii::$app->params['settings']['user_site_activity_log_history_days'] ?? 0;
-        if($days > 0) {
+        if ($days > 0) {
             return self::deleteAll(['<=', 'usa_created_dt', date('Y-m-d', strtotime('-' . $days . ' days'))]);
         }
         return 0;

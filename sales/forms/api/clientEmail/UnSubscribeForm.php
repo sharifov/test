@@ -2,7 +2,6 @@
 
 namespace sales\forms\api\clientEmail;
 
-
 use sales\repositories\emailUnsubscribe\EmailUnsubscribeRepository;
 use yii\base\Model;
 

@@ -48,7 +48,6 @@ class UpdateAllService
         }
 
         return $report;
-
     }
 
     /**
@@ -97,7 +96,7 @@ class UpdateAllService
      */
     private function getAll(UpdateAllForm $form): array
     {
-        return LeadQcall::find()->innerJoinWith(['lqcLead' => static function(ActiveQuery $query) use ($form){
+        return LeadQcall::find()->innerJoinWith(['lqcLead' => static function (ActiveQuery $query) use ($form) {
             if ($form->statusId) {
                 $query->andOnCondition([Lead::tableName() . '.status' => $form->statusId]);
             }

@@ -5,7 +5,7 @@ use yii\web\View;
 /** @var string $message */
 /** @var  View $this */
 
-$js =<<<JS
+$js = <<<JS
 $("#redial-alert").fadeTo(2000, 500).slideUp(500, function(){
     $("#redial-alert").slideUp(500);
 });

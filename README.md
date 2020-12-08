@@ -33,8 +33,7 @@ OR:
 
 1). PHP 7.3, 7.4 Install:
 ```
-sudo apt-get install php7.3 php7.3-fpm php-pear php-imagick php7.3-intl php7.3-zip php7.3-curl php7.3-gd php7.3-mysql php7.3-xml php7.3-mbstring php7.3-pgsql php7.3-xmlrpc php7.3-sqlite3 php7.3-soap php7.3-tidy php7.3-recode php7.3-pspell php7.3-imap
-sudo apt-get install php7.4 php7.4-fpm php-pear php-imagick php7.4-intl php7.4-zip php7.4-curl php7.4-gd php7.4-mysql php7.4-xml php7.4-mbstring php7.4-pgsql php7.4-xmlrpc php7.4-sqlite3 php7.4-soap php7.4-tidy php7.4-pspell php7.4-imap php7.4-bcmath
+sudo apt-get install php7.4 php7.4-fpm php-pear php-imagick php7.4-intl php7.4-zip php7.4-curl php7.4-gd php7.4-mysql php7.4-xml php7.4-mbstring php7.4-pgsql php7.4-xmlrpc php7.4-sqlite3 php7.4-soap php7.4-tidy php7.4-pspell php7.4-imap php7.4-bcmath php-redis
 
 sudo update-alternatives --config php
 ```
@@ -79,6 +78,10 @@ redis-cli
 127.0.0.1:6379> PUBSUB NUMSUB user*
 127.0.0.1:6379> SUBSCRIBE "user-167"
 ```
+
+1.3)
+
+sudo apt install php-ssh2
 
 2). Composer INSTALL:
 
@@ -361,7 +364,7 @@ CRONs
 10   0  *  *  *     run-this-one php /var/www/sale/yii lead/update-by-tasks
 30   0  *  *  *     run-this-one php /var/www/sale/yii db/update-airline-cabin-classes
 40   0  1  *  *     php /var/www/sale/yii kpi/calculate-salary
-20   0  *  *  *     php /var/www/sale/yii db/clear-user-site-activity-logs
+20   0  *  *  *     php /var/www/sale/yii db/clear-user-site-activity-logs TODO:: remove
 */5 * * * *         php /var/www/sale/yii logger/format-log-managed-attr
 */5 * * * *         php /var/www/sale/yii lead/return-lead-to-ready
 10   1-3  *  *  *     php /var/www/sale/yii service/update-currency
@@ -369,12 +372,13 @@ CRONs
 45 * * * *         php /var/www/sale/yii qa-task/lead-processing-quality
 */4 * * * *     php /var/www/sale/yii service/send-sms
 */10   *  *  *  *   run-this-one php /var/www/sale/yii call/terminator
-30 11 * * * php /var/www/sale/yii log/cleaner
+30 11 * * * php /var/www/sale/yii log/cleaner TODO:: remove
 0 9 27 * * php /var/www/sale/yii postgres-db/create-chat-message-partition
-40 5 * * * php /var/www/sale/yii call/cleaner
+40 5 * * * php /var/www/sale/yii call/cleaner TODO:: remove
 */3 * * * *         php /var/www/sale/yii user-monitor/logout
 */1 * * * *   run-this-one php /var/www/sale/yii client-chat/idle
 */1 * * * *   run-this-one php /var/www/sale/yii client-chat/hold-to-progress
+30 4 * * * php /var/www/sale/yii call-report/priceline
 ```
   
 ```

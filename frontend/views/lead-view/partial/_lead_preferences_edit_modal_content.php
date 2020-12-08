@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $form ActiveForm
  * @var $this View
@@ -12,7 +13,6 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
 
-
 ?>
     <div class="edit-name-modal-content-ghj">
         <?php $form = ActiveForm::begin([
@@ -24,7 +24,7 @@ use yii\web\View;
             'validateOnBlur' => false,
             'validationUrl' => Url::to(['lead-view/ajax-edit-lead-preferences-validation'])
         ]);
-        ?>
+?>
 
         <?= $form->errorSummary($leadPreferencesForm) ?>
 
@@ -69,7 +69,7 @@ use yii\web\View;
             <?= Html::submitButton('<i class="fa fa-check-square-o"></i> Update Lead Preferences', [
                 'class' => 'btn btn-warning'
             ])
-            ?>
+?>
         </div>
         <?php ActiveForm::end(); ?>
     </div>

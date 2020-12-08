@@ -12,7 +12,7 @@ use sales\services\parsingDump\BaggageService;
 use unclead\multipleinput\MultipleInput;
 use unclead\multipleinput\MultipleInputColumn;
 use yii\jui\AutoComplete;
-use \yii\widgets\ActiveForm;
+use yii\widgets\ActiveForm;
 use yii\helpers\Url;
 
 ?>
@@ -20,7 +20,7 @@ use yii\helpers\Url;
 <?php foreach ($segments as $key => $segment) : ?>
     <div class="row">
         <div class="col-1 border p-1">
-            <strong>Segment <?php echo $key+1 ?></strong>
+            <strong>Segment <?php echo $key + 1 ?></strong>
         </div>
         <div class="col-1 border p-1">
             <?php echo $segment['airlineName'] ?>
@@ -60,17 +60,18 @@ use yii\helpers\Url;
             ]) ?>
 
                 <?php
-                    if (isset($segment['baggage'])) {
-                        $segmentBaggageForm->baggageData = $segment['baggage'];
-                    }
+                if (isset($segment['baggage'])) {
+                    $segmentBaggageForm->baggageData = $segment['baggage'];
+                }
 
                     $multipleInputId = 'multiple_w_' . $key;
 
                     echo $formBaggage
                         ->field($segmentBaggageForm, 'baggageData')
                         ->label(false)
-                        ->widget(MultipleInput::class,
-                        [
+                        ->widget(
+                            MultipleInput::class,
+                            [
                             'id' => $multipleInputId,
                             'max' => 10,
                             'theme' => MultipleInput::THEME_BS,
@@ -141,15 +142,16 @@ use yii\helpers\Url;
                                     'defaultValue' => $segment['segmentIata'],
                                 ],
                             ],
-                        ])
+                            ]
+                        )
                 ?>
             <?php ActiveForm::end(); ?>
         </div>
     </div>
     <br />
 
-<?php
-$js =<<<JS
+    <?php
+    $js = <<<JS
     var formBaggage = $('#$formName');
     
     formBaggage.on('ajaxBeforeSend', function(event, jqXHR, settings) {        
@@ -178,13 +180,13 @@ $js =<<<JS
             }); 
     });      
 JS;
-$this->registerJs($js);
-?>
+    $this->registerJs($js);
+    ?>
 
 <?php endforeach; ?>
 
 <?php
-$js =<<<JS
+$js = <<<JS
     $('.ui-autocomplete-input')
         .addClass('form-control')
         .focus(function () {

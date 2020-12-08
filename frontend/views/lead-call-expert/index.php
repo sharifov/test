@@ -6,6 +6,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
+use common\components\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\LeadCallExpertSearch */
@@ -85,7 +86,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->product ? 'ID: ' . $model->product->pr_id . ' Name: ' . $model->product->pr_name : '-';
                 },
             ],
-            [
+            /*[
                 'attribute' => 'lce_request_dt',
                 'value' => static function (\common\models\LeadCallExpert $model) {
                     return $model->lce_request_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lce_request_dt)) : '-';
@@ -103,6 +104,11 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' => 'Choose Date'
                     ],
                 ]),
+            ],*/
+
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'lce_request_dt'
             ],
 
             /*[
@@ -144,7 +150,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'lce_response_text:ntext',
             'lce_response_lead_quotes:ntext',
             //'lce_response_dt',
-            [
+            /*[
                 'attribute' => 'lce_response_dt',
                 'value' => static function (\common\models\LeadCallExpert $model) {
                     return $model->lce_response_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lce_response_dt)) : '-';
@@ -162,6 +168,11 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' => 'Choose Date'
                     ],
                 ]),
+            ],*/
+
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'lce_response_dt'
             ],
 
             //'lce_status_id',
@@ -169,8 +180,13 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'lce_expert_user_id',
             'lce_expert_username',
-            //'lce_updated_dt',
+
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'lce_updated_dt'
+            ],
+
+            /*[
                 'attribute' => 'lce_updated_dt',
                 'value' => static function (\common\models\LeadCallExpert $model) {
                     return $model->lce_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lce_updated_dt)) : '-';
@@ -188,7 +204,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' => 'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

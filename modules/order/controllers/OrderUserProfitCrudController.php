@@ -16,21 +16,21 @@ use yii\filters\VerbFilter;
  */
 class OrderUserProfitCrudController extends FController
 {
-	/**
-	 * @return array
-	 */
-	public function behaviors(): array
-	{
-		$behaviors = [
-			'verbs' => [
-				'class' => VerbFilter::class,
-				'actions' => [
-					'delete-ajax' => ['POST'],
-				],
-			],
-		];
-		return ArrayHelper::merge(parent::behaviors(), $behaviors);
-	}
+    /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'verbs' => [
+                'class' => VerbFilter::class,
+                'actions' => [
+                    'delete-ajax' => ['POST'],
+                ],
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
 
     /**
      * Lists all OrderUserProfit models.
@@ -91,7 +91,7 @@ class OrderUserProfitCrudController extends FController
     public function actionUpdate($oup_order_id, $oup_user_id)
     {
         $model = $this->findModel($oup_order_id, $oup_user_id);
-		$model->setScenario(OrderUserProfit::SCENARIO_CRUD);
+        $model->setScenario(OrderUserProfit::SCENARIO_CRUD);
 
         if ($model->load(Yii::$app->request->post()) && $model->save(true)) {
             return $this->redirect(['view', 'oup_order_id' => $model->oup_order_id, 'oup_user_id' => $model->oup_user_id]);

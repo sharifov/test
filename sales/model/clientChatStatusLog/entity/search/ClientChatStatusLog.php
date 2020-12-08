@@ -14,23 +14,22 @@ class ClientChatStatusLog extends ClientChatStatusLogModel
 
             ['csl_description', 'safe'],
 
-            ['csl_end_dt', 'safe'],
-
             ['csl_from_status', 'integer'],
 
             ['csl_id', 'integer'],
 
             ['csl_owner_id', 'integer'],
 
-            ['csl_start_dt', 'safe'],
+            [['csl_start_dt', 'csl_end_dt'], 'date', 'format' => 'php:Y-m-d'],
 
             ['csl_to_status', 'integer'],
 
             ['csl_user_id', 'integer'],
             ['csl_prev_channel_id', 'integer'],
-			['csl_action_type', 'integer'],
+            ['csl_action_type', 'integer'],
 
-		];
+            ['csl_rid', 'string', 'max' => 150],
+        ];
     }
 
     public function search($params): ActiveDataProvider
@@ -39,7 +38,7 @@ class ClientChatStatusLog extends ClientChatStatusLogModel
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['csl_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['csl_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -63,6 +62,7 @@ class ClientChatStatusLog extends ClientChatStatusLogModel
             'csl_user_id' => $this->csl_user_id,
             'csl_prev_channel_id' => $this->csl_prev_channel_id,
             'csl_action_type' => $this->csl_action_type,
+            'csl_rid' => $this->csl_rid,
         ]);
 
         $query->andFilterWhere(['like', 'csl_description', $this->csl_description]);

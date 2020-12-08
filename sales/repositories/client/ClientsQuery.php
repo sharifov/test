@@ -28,8 +28,11 @@ class ClientsQuery
     public static function oneByEmailAndProject(string $email, int $projectId)
     {
         return Client::find()->alias('clients')->select(['clients.*'])
-            ->innerJoin(ClientEmail::tableName() . ' AS emails',
-                'emails.client_id = clients.id AND emails.email = :email', [':email' => $email])
+            ->innerJoin(
+                ClientEmail::tableName() . ' AS emails',
+                'emails.client_id = clients.id AND emails.email = :email',
+                [':email' => $email]
+            )
             ->where(['clients.cl_project_id' => $projectId])
             ->orderBy(['clients.id' => SORT_DESC])
             ->limit(1)
@@ -39,8 +42,11 @@ class ClientsQuery
     public static function findParentByEmail(?string $email, int $projectId)
     {
         return Client::find()->alias('clients')->select(['clients.*'])
-            ->innerJoin(ClientEmail::tableName() . ' AS emails',
-                'emails.client_id = clients.id AND emails.email = :email', [':email' => $email])
+            ->innerJoin(
+                ClientEmail::tableName() . ' AS emails',
+                'emails.client_id = clients.id AND emails.email = :email',
+                [':email' => $email]
+            )
             ->where(['!=', 'clients.cl_project_id', $projectId])
             ->andWhere(['IS', 'parent_id', null])
             ->orderBy(['clients.id' => SORT_ASC])

@@ -1,4 +1,5 @@
 <?php
+
 namespace common\models;
 
 use frontend\models\UserFailedLogin;
@@ -86,7 +87,7 @@ class LoginForm extends Model
 
         $user = $this->getUser();
 
-        if($user) {
+        if ($user) {
             if (!$this->checkByIp($user)) {
                 return false;
             }
@@ -108,7 +109,7 @@ class LoginForm extends Model
         if ($this->validate()) {
             $user = $this->getUser();
 
-            if($user) {
+            if ($user) {
                 if (!$this->checkByIp($user)) {
                     return null;
                 }
@@ -125,7 +126,7 @@ class LoginForm extends Model
      */
     private function checkByIp($user): bool
     {
-        if($user->acl_rules_activated) {
+        if ($user->acl_rules_activated) {
             $clientIP = AntiBruteForceHelper::getClientIPAddress();
             if ($clientIP === 'UNKNOWN' ||  (!GlobalAcl::isActiveIPRule($clientIP) && !EmployeeAcl::isActiveIPRule($clientIP, $user->id))) {
                 $this->addError('username', sprintf('Remote Address %s Denied! Please, contact your Supervision or Administrator.', $clientIP));
@@ -193,14 +194,15 @@ class LoginForm extends Model
                 Yii::$app->session->id
             );
             if (!$userFailedLogin->save()) {
-                \Yii::error(VarDumper::dumpAsString($userFailedLogin->getErrors(), 10),
-                'LoginForm:afterValidate:saveFailed');
+                \Yii::error(
+                    VarDumper::dumpAsString($userFailedLogin->getErrors(), 10),
+                    'LoginForm:afterValidate:saveFailed'
+                );
             }
 
             if ($this->_user) {
                 (new AntiBruteForceService())->checkAttempts($this->_user);
             }
-
         }
         parent::afterValidate();
     }

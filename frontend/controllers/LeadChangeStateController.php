@@ -53,8 +53,7 @@ class LeadChangeStateController extends FController
         LeadStateService $stateService,
         FollowUpGuard $followUpGuard,
         $config = []
-    )
-    {
+    ) {
         parent::__construct($id, $module, $config);
         $this->assignService = $assignService;
         $this->stateService = $stateService;
@@ -263,15 +262,15 @@ class LeadChangeStateController extends FController
         $form = new ReturnReasonForm($lead);
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
-               if ($form->isReturnToFollowUp()) {
-                   $this->stateService->followUp($lead, $lead->employee_id, Yii::$app->user->id, $form->description);
-                   Yii::$app->getSession()->setFlash('success', 'Success');
-               } elseif ($form->isReturnToProcessing()) {
-                   $this->stateService->processing($lead, $form->userId, Yii::$app->user->id, $form->description);
-                   Yii::$app->getSession()->setFlash('success', 'Success');
-               } else {
-                   Yii::$app->getSession()->setFlash('error', 'Error');
-               }
+                if ($form->isReturnToFollowUp()) {
+                    $this->stateService->followUp($lead, $lead->employee_id, Yii::$app->user->id, $form->description);
+                    Yii::$app->getSession()->setFlash('success', 'Success');
+                } elseif ($form->isReturnToProcessing()) {
+                    $this->stateService->processing($lead, $form->userId, Yii::$app->user->id, $form->description);
+                    Yii::$app->getSession()->setFlash('success', 'Success');
+                } else {
+                    Yii::$app->getSession()->setFlash('error', 'Error');
+                }
             } catch (\DomainException $e) {
                 Yii::$app->getSession()->setFlash('warning', $e->getMessage());
             }
@@ -359,5 +358,4 @@ class LeadChangeStateController extends FController
         }
         throw new NotFoundHttpException('The requested page does not exist.');
     }
-
 }

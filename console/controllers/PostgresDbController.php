@@ -1,11 +1,11 @@
 <?php
+
 namespace console\controllers;
 
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\services\log\GlobalLogFormatAttrService;
 use yii\console\Controller;
 use yii\helpers\Console;
-
 
 /**
  * Class PostgresDbController
@@ -15,9 +15,9 @@ use yii\helpers\Console;
  */
 class PostgresDbController extends Controller
 {
-	/**
-	 * @var GlobalLogFormatAttrService
-	 */
+    /**
+     * @var GlobalLogFormatAttrService
+     */
     private GlobalLogFormatAttrService $globalLogFormatAttrService;
 
     /**
@@ -40,10 +40,10 @@ class PostgresDbController extends Controller
      * @param string|null $date format Y-m-d (ex. 2020-06-01)
      * @throws \Exception
      */
-    public function actionCreateChatMessagePartition(string $date = null) : void
+    public function actionCreateChatMessagePartition(string $date = null): void
     {
         printf("\n %s\n", $this->ansiFormat('--- Start ' . $this->action->id . " ---", Console::FG_GREEN));
-        printf("\n %s\n", $this->ansiFormat('date arg =  ' . $date , Console::FG_GREY));
+        printf("\n %s\n", $this->ansiFormat('date arg =  ' . $date, Console::FG_GREY));
 
         $start = date_create("now +1 month");
         if (!is_null($date)) {
@@ -51,18 +51,18 @@ class PostgresDbController extends Controller
         }
 
         if (!$start) {
-            printf("\n %s\n", $this->ansiFormat('invalid date arg =  ' . $date , Console::FG_RED));
+            printf("\n %s\n", $this->ansiFormat('invalid date arg =  ' . $date, Console::FG_RED));
             return;
         }
 
         $dates = ClientChatMessage::partitionDatesFrom($start);
         $start = $dates[0];
-        $partitionEndDate =$dates[1];
+        $partitionEndDate = $dates[1];
 
-        printf("\n %s\n", $this->ansiFormat('Partition from  ' . date_format($start, "Y-m-d").' TO '. date_format($partitionEndDate, "Y-m-d") , Console::FG_GREY));
+        printf("\n %s\n", $this->ansiFormat('Partition from  ' . date_format($start, "Y-m-d") . ' TO ' . date_format($partitionEndDate, "Y-m-d"), Console::FG_GREY));
 
         $tableName = ClientChatMessage::createMonthlyPartition($start, $partitionEndDate);
-        printf("\n %s\n", $this->ansiFormat( 'Partition created ' . $tableName, Console::FG_GREY));
-        printf("\n %s\n", $this->ansiFormat( '--- Done ' . $this->action->id . " ---", Console::FG_GREEN));
-	}
+        printf("\n %s\n", $this->ansiFormat('Partition created ' . $tableName, Console::FG_GREY));
+        printf("\n %s\n", $this->ansiFormat('--- Done ' . $this->action->id . " ---", Console::FG_GREEN));
+    }
 }

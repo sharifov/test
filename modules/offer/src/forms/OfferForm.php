@@ -81,5 +81,4 @@ class OfferForm extends Model
             'of_client_total' => 'Client Total',
         ];
     }
-
 }

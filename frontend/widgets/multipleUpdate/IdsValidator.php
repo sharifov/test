@@ -43,7 +43,7 @@ class IdsValidator extends Validator
 
         $filter = \Yii::createObject([
             'class' => FilterValidator::class,
-            'filter' => static function($value) {
+            'filter' => static function ($value) {
                 $new = [];
                 foreach ($value as $item) {
                     $new[] = (int)$item;

@@ -5,7 +5,7 @@ use common\models\Lead;
 use sales\access\LeadPreferencesAccess;
 use yii\helpers\Url;
 use yii\web\View;
-use \yii\helpers\Html;
+use yii\helpers\Html;
 
 /**
  * @var $this View
@@ -26,11 +26,10 @@ $manageLeadPreferencesAccess = LeadPreferencesAccess::isUserCanManageLeadPrefere
         <h2><i class="fa fa-cog"></i> Lead Preferences</h2>
         <ul class="nav navbar-right panel_toolbox" style="min-width: initial;">
             <li>
-                <?php if(!$lead->l_answered): ?>
-
-                    <?php if($lead->isProcessing()):?>
+                <?php if (!$lead->l_answered) : ?>
+                    <?php if ($lead->isProcessing()) :?>
                         <?= Html::a(($lead->l_answered ? '<i class="fa fa-commenting-o"></i>Make UnAnswered' : '<i class="fa fa-commenting"></i> Make Answered'), ['lead/update2', 'id' => $lead->id, 'act' => 'answer'], [
-                            'class' => ''.($lead->l_answered ? 'text-success' : 'text-info'),
+                            'class' => '' . ($lead->l_answered ? 'text-success' : 'text-info'),
                             'data-pjax' => false,
                             'data' => [
                                 'confirm' => 'Are you sure?',
@@ -38,16 +37,16 @@ $manageLeadPreferencesAccess = LeadPreferencesAccess::isUserCanManageLeadPrefere
                                 'pjax' => 0
                             ],
                         ]) ?>
-                    <?php else: ?>
+                    <?php else : ?>
                         <a href="#" class="text-warning disabled"><i class="fa fa-commenting-o"></i> ANSWERED: false</a>
                     <?php endif;?>
 
-                <?php else: ?>
+                <?php else : ?>
                     <a href="#" class="text-success disabled"><i class="fa fa-commenting-o"></i> ANSWERED: true</a>
                 <?php endif; ?>
             </li>
 
-            <?php if($manageLeadPreferencesAccess): ?>
+            <?php if ($manageLeadPreferencesAccess) : ?>
                 <li>
                     <?=
                     Html::a('<i class="fa fa-edit yellow"></i> Edit Preferences', '#', [
@@ -89,12 +88,12 @@ $manageLeadPreferencesAccess = LeadPreferencesAccess::isUserCanManageLeadPrefere
                         <td class="text-center"><?= $leadPreferences && is_numeric($leadPreferences->number_stops) ? Html::encode($leadPreferences->number_stops) : '-' ?></td>
                         <td><?= $leadPreferences && $leadPreferences->pref_currency ? Html::encode($leadPreferences->pref_currency) : '-' ?></td>
                         <td>
-                            <?php if($lead->l_delayed_charge === null): ?>
+                            <?php if ($lead->l_delayed_charge === null) : ?>
                                 -
-                            <?php else: ?>
-                                <?php if($lead->l_delayed_charge): ?>
+                            <?php else : ?>
+                                <?php if ($lead->l_delayed_charge) : ?>
                                     <i class="fa fa-check-square-o green"></i> yes
-                                <?php else: ?>
+                                <?php else : ?>
                                     <i class="fa fa-square-o warning"></i> no
                                 <?php endif; ?>
                             <?php endif; ?>

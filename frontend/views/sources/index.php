@@ -4,7 +4,7 @@ use common\models\Sources;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
-use dosamigos\datepicker\DatePicker;
+use common\components\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\SourcesSearch */
@@ -61,8 +61,13 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'name',
             'cid',
-            //'last_update',
+
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'last_update'
+            ],
+
+            /*[
                 'attribute' => 'last_update',
                 'value' => static function (\common\models\Sources $model) {
                     return $model->last_update ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->last_update)) : '-';
@@ -80,7 +85,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
             'default:boolean',
             'hidden:boolean',
 
@@ -104,7 +109,7 @@ $this->params['breadcrumbs'][] = $this->title;
                              'data' => [
                                 'confirm' => 'Are you sure you want to set default this item?',
                                 'method' => 'post',
-                            ],
+                             ],
                         ]);
                     },
                 ],

@@ -57,13 +57,16 @@ class QaTaskCancelNotifierListener
             $reason = $reasonModel->tar_name;
         }
 
-        $body = Yii::t('email', "You task (Id: {id}) has been canceled by {username} ({role}). Reason: {reason}.",
+        $body = Yii::t(
+            'email',
+            "You task (Id: {id}) has been canceled by {username} ({role}). Reason: {reason}.",
             [
                 'id' => Purifier::createQaTaskShortLink($task),
                 'username' => $creator->username,
                 'role' => implode(',', $creator->getRoles(true)),
                 'reason' => $reason,
-            ]);
+            ]
+        );
 
         if ($ntf = Notifications::create($assigned->id, $subject, $body, Notifications::TYPE_INFO, true)) {
             //Notifications::socket($assigned->id, null, 'getNewNotification', [], true);

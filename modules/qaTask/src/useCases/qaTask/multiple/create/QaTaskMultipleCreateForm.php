@@ -30,8 +30,7 @@ class QaTaskMultipleCreateForm extends Model
         array $categoryList,
         ?int $userId,
         $config = []
-    )
-    {
+    ) {
         Assert::oneOf($objectType, array_keys(QaTaskObjectType::getList()));
         $this->objectType = $objectType;
         $this->userId = $userId;

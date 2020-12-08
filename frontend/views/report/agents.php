@@ -8,7 +8,7 @@ use kartik\grid\GridView;
 /* @var $searchModel common\models\search\LeadSearch */
 /* @var $dataProvider yii\data\SqlDataProvider */
 
-$this->title = 'Agents & Leads (Today: '.date("d-M-Y").' )';
+$this->title = 'Agents & Leads (Today: ' . date("d-M-Y") . ' )';
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
@@ -40,8 +40,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'label' => 'Agent',
                         'attribute' => 'username',
-                        'value' => function($data) {
-                            return '<b>'.Html::encode($data['username']).'</b>';
+                        'value' => function ($data) {
+                            return '<b>' . Html::encode($data['username']) . '</b>';
                         },
                         'format' => 'html',
                         'filter' => false,
@@ -50,7 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'label' => 'Sold',
                         'attribute' => 'st_sold',
-                        'value' => function($data) {
+                        'value' => function ($data) {
                             return $data['st_sold'] ?: '-';
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -60,7 +60,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'label' => 'On Hold',
                         'attribute' => 'st_on_hold',
-                        'value' => function($data) {
+                        'value' => function ($data) {
                             return $data['st_on_hold'] ?: '-';
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -69,7 +69,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'label' => 'Processing',
                         'attribute' => 'st_processing',
-                        'value' => function($data) {
+                        'value' => function ($data) {
                             return $data['st_processing'] ?: '-';
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -78,7 +78,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'label' => 'Follow Up',
                         'attribute' => 'st_follow_up',
-                        'value' => function($data) {
+                        'value' => function ($data) {
                             return $data['st_follow_up'] ?: '-';
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -87,7 +87,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'label' => 'Reject',
                         'attribute' => 'st_reject',
-                        'value' => function($data) {
+                        'value' => function ($data) {
                             return $data['st_reject'] ?: '-';
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -96,7 +96,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'label' => 'Booked',
                         'attribute' => 'st_booked',
-                        'value' => function($data) {
+                        'value' => function ($data) {
                             return $data['st_booked'] ?: '-';
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -105,7 +105,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'label' => 'Snooze',
                         'attribute' => 'st_snooze',
-                        'value' => function($data) {
+                        'value' => function ($data) {
                             return $data['st_snooze'] ?: '-';
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -114,7 +114,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'label' => 'Pending',
                         'attribute' => 'st_pending',
-                        'value' => function($data) {
+                        'value' => function ($data) {
                             return $data['st_pending'] ?: '-';
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -123,7 +123,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'label' => 'Trash',
                         'attribute' => 'st_trash',
-                        'value' => function($data) {
+                        'value' => function ($data) {
                             return $data['st_trash'] ?: '-';
                         },
                         'contentOptions' => ['class' => 'text-center'],

@@ -111,12 +111,12 @@ class ClientChatFeedback extends ActiveRecord
     }
 
     public function validateCommentRating(): void
-	{
-	    if (empty($this->ccf_message) && empty($this->ccf_rating)) {
-	        $this->addError('ccf_message', 'Comment or rating must be filled.');
-	        $this->addError('ccf_rating', 'Rating or comment must be filled.');
-	    }
-	}
+    {
+        if (empty($this->ccf_message) && empty($this->ccf_rating)) {
+            $this->addError('ccf_message', 'Comment or rating must be filled.');
+            $this->addError('ccf_rating', 'Rating or comment must be filled.');
+        }
+    }
 
     public static function create(int $chatId, ?int $userId, int $clientId, ?int $rating, ?string $message): self
     {

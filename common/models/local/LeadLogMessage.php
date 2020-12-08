@@ -60,5 +60,4 @@ class LeadLogMessage extends Model
             'updated', 'created',
         ];
     }
-
 }

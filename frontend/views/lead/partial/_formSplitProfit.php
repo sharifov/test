@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $form ActiveForm
  * @var $split ProfitSplit
@@ -64,20 +65,21 @@ JS;
 $this->registerJs($js);
 ?>
 <div class="row split-row">
-	<div class="col-md-4">
-    	<?= $form->field($split, '[' . $key . ']ps_user_id', [
+    <div class="col-md-4">
+        <?= $form->field($split, '[' . $key . ']ps_user_id', [
             'template' => '{input}{error}{hint}'
         ])->dropDownList(
             $userList,
             [
             'class' => 'form-control',
             'placeholder' => 'Percent',
-        ]);?>
-	</div>
-	<div class="col-md-4">
-	<?= $form->field($split, '[' . $key . ']ps_percent', [
+            ]
+        );?>
+    </div>
+    <div class="col-md-4">
+    <?= $form->field($split, '[' . $key . ']ps_percent', [
         'template' => '{input}{error}{hint}'
-    ])->input('number',[
+    ])->input('number', [
         'min' => 0,
         'max' => 100,
         'class' => 'form-control',
@@ -85,14 +87,14 @@ $this->registerJs($js);
         'onchange' => "calcProfitByPercent(this, $totalProfit);",
         'onkeydown' => "delay(checkPercentageOfSplit, 500)();"
     ]);?>
-	</div>
-	<div class="col-md-1">
+    </div>
+    <div class="col-md-1">
         <div class="profit-amount" style="display: flex; width: 70px; border: 1px solid #e4e9ee; justify-content: center; align-items: center; height: 30px;">
-			<?= (!empty($split->ps_percent))?$totalProfit*$split->ps_percent/100:'0'?>
+            <?= (!empty($split->ps_percent)) ? $totalProfit * $split->ps_percent / 100 : '0'?>
         </div>
-	</div>
-	<div class="col-md-3">
-		<?= Html::button('<i class="fa fa-trash"></i>', [
+    </div>
+    <div class="col-md-3">
+        <?= Html::button('<i class="fa fa-trash"></i>', [
             'class' => 'btn btn-danger pull-right remove-split-button' ,
         ]); ?>
         <?= $form->field($split, '[' . $key . ']ps_id', [
@@ -100,6 +102,6 @@ $this->registerJs($js);
                 'tag' => false
             ],
         ])->hiddenInput()->label(false);
-        ?>
-	</div>
+?>
+    </div>
 </div>

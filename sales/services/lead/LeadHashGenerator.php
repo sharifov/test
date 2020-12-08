@@ -43,5 +43,4 @@ class LeadHashGenerator
 
         return md5(implode('|', $hashArray));
     }
-
 }

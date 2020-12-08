@@ -36,5 +36,4 @@ class m190807_125432_remove_permision_export_leads_for_supervision extends Migra
             echo "Can't add child /leads/export for supervision";
         }
     }
-
 }

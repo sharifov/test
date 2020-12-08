@@ -30,5 +30,4 @@ class m190805_122620_add_column_tbl_user_project_params extends Migration
             Yii::$app->cache->flush();
         }
     }
-
 }

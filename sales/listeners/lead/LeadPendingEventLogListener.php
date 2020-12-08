@@ -44,5 +44,4 @@ class LeadPendingEventLogListener
             Yii::error($e, 'Listeners:LeadPendingEventLogListener');
         }
     }
-
 }

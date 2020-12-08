@@ -47,7 +47,7 @@ class SmsDistributionListSearch extends SmsDistributionList
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['sdl_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['sdl_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 50,
             ],

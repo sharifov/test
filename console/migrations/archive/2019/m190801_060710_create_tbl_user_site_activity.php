@@ -78,7 +78,6 @@ class m190801_060710_create_tbl_user_site_activity extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     /**
@@ -104,5 +103,4 @@ class m190801_060710_create_tbl_user_site_activity extends Migration
             Yii::$app->cache->flush();
         }
     }
-
 }

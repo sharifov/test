@@ -1,4 +1,5 @@
 <?php
+
 namespace frontend\models;
 
 use common\models\EmailTemplateType;
@@ -53,25 +54,24 @@ class CasePreviewEmailForm extends Model
 
 
     public function __construct(array $data = [], $config = [])
-	{
-		parent::__construct($config);
+    {
+        parent::__construct($config);
 
-		if ($data) {
-			$this->e_case_id = $data['email_data']['case']['id'] ?? null;
-			$this->e_email_from = $data['email_from'] ?? null;
-			$this->e_email_to = $data['email_to'] ?? null;
-			$this->e_email_from_name = $data['email_from_name'] ?? null;
-			$this->e_email_to_name = $data['email_to_name'] ?? null;
-			$this->e_email_subject = $data['email_subject'] ?? null;
-			$this->e_email_message = $data['email_body_html'] ?? null;
-		}
-
-	}
+        if ($data) {
+            $this->e_case_id = $data['email_data']['case']['id'] ?? null;
+            $this->e_email_from = $data['email_from'] ?? null;
+            $this->e_email_to = $data['email_to'] ?? null;
+            $this->e_email_from_name = $data['email_from_name'] ?? null;
+            $this->e_email_to_name = $data['email_to_name'] ?? null;
+            $this->e_email_subject = $data['email_subject'] ?? null;
+            $this->e_email_message = $data['email_body_html'] ?? null;
+        }
+    }
 
     /**
      * @return array
      */
-    public function rules() : array
+    public function rules(): array
     {
         return [
             [['e_case_id', 'e_email_from', 'e_email_to', 'e_email_message', 'e_email_subject'], 'required'],
@@ -102,7 +102,7 @@ class CasePreviewEmailForm extends Model
     /**
      * @return array
      */
-    public function attributeLabels() : array
+    public function attributeLabels(): array
     {
         return [
             'e_case_id'         => 'Case Id',
@@ -117,5 +117,4 @@ class CasePreviewEmailForm extends Model
             'e_user_id'         => 'Agent ID',
         ];
     }
-
 }

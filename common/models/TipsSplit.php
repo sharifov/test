@@ -105,7 +105,7 @@ class TipsSplit extends \yii\db\ActiveRecord
 
     public function countTips($total)
     {
-        if(!empty($this->ts_percent)){
+        if (!empty($this->ts_percent)) {
             return $total * $this->ts_percent / 100;
         }
 

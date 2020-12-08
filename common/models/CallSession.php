@@ -20,7 +20,6 @@ use Yii;
  */
 class CallSession extends \yii\db\ActiveRecord
 {
-
     use EventTrait;
 
     /**
@@ -65,9 +64,8 @@ class CallSession extends \yii\db\ActiveRecord
     public function beforeSave($insert): bool
     {
         if (parent::beforeSave($insert)) {
-
-            if($insert) {
-                if(!$this->cs_create_dt) {
+            if ($insert) {
+                if (!$this->cs_create_dt) {
                     $this->cs_create_dt = date('Y-m-d H:i:s');
                 }
             }

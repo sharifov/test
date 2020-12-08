@@ -1,4 +1,5 @@
 <?php
+
 namespace frontend\models;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
@@ -108,10 +109,10 @@ class CommunicationForm extends Model
      * @param array $config
      */
     public function __construct(?string $languageId = null, $config = [])
-	{
-		$this->c_language_id = self::getDefaultLanguage($languageId);
-		parent::__construct($config);
-	}
+    {
+        $this->c_language_id = self::getDefaultLanguage($languageId);
+        parent::__construct($config);
+    }
 
     /**
      * @param string|null $languageId
@@ -123,20 +124,20 @@ class CommunicationForm extends Model
         if (array_key_exists($languageId, $activeLanguages)) {
             return $languageId;
         }
-	    return array_key_first($activeLanguages);
+        return array_key_first($activeLanguages);
     }
 
     /**
      * @return array
      */
-    public function rules() : array
+    public function rules(): array
     {
         return [
             [['c_type_id', 'c_lead_id'], 'required'],
 
             [['c_email_to', 'c_language_id', 'c_email_tpl_key'], 'required', 'when' => static function (CommunicationForm $model) {
                         return (int) $model->c_type_id === self::TYPE_EMAIL;
-                    },
+            },
                 'whenClient' => "function (attribute, value) { return $('#c_type_id').val() == " . self::TYPE_EMAIL . '; }'
             ],
 
@@ -173,13 +174,13 @@ class CommunicationForm extends Model
 
             [['c_quotes'], 'required', 'when' => static function (CommunicationForm $model) {
                     return ($model->c_email_tpl_key === self::TPL_TYPE_EMAIL_OFFER_KEY || $model->c_email_tpl_key === self::TPL_TYPE_EMAIL_OFFER_VIEW_KEY) && (int) $model->c_type_id === self::TYPE_EMAIL;
-                },
+            },
                 'whenClient' => "function (attribute, value) { return ($('#c_type_id').val() == " . self::TYPE_EMAIL . " && ($('#c_email_tpl_key').val() == '" . self::TPL_TYPE_EMAIL_OFFER_VIEW_KEY . "' || $('#c_email_tpl_key').val() == '" . self::TPL_TYPE_EMAIL_OFFER_KEY . "')); }"
             ],
 
             [['c_quotes'], 'required', 'when' => static function (CommunicationForm $model) {
                     return ($model->c_sms_tpl_key === self::TPL_TYPE_SMS_OFFER_KEY || $model->c_sms_tpl_key === self::TPL_TYPE_SMS_OFFER_VIEW_KEY) && (int) $model->c_type_id === self::TYPE_SMS;
-                },
+            },
                 'whenClient' => "function (attribute, value) { return $('#c_type_id').val() == " . self::TYPE_SMS . " && ($('#c_sms_tpl_key').val() == '" . self::TPL_TYPE_SMS_OFFER_KEY . "' || $('#c_sms_tpl_key').val() == '" . self::TPL_TYPE_SMS_OFFER_VIEW_KEY . "'); }"
             ],
 
@@ -244,12 +245,12 @@ class CommunicationForm extends Model
      */
     public function validateQuotes($attribute, $params, $validator): void
     {
-       if (!empty($this->c_quotes)) {
-           $this->quoteList = @json_decode($this->c_quotes, true);
-           if(!is_array($this->quoteList)) {
-               $this->quoteList = [];
-           }
-       }
+        if (!empty($this->c_quotes)) {
+            $this->quoteList = @json_decode($this->c_quotes, true);
+            if (!is_array($this->quoteList)) {
+                $this->quoteList = [];
+            }
+        }
     }
 
     /**
@@ -261,7 +262,7 @@ class CommunicationForm extends Model
     {
         if (!empty($this->c_offers)) {
             $this->offerList = @json_decode($this->c_offers, true);
-            if(!is_array($this->offerList)) {
+            if (!is_array($this->offerList)) {
                 $this->offerList = [];
             }
         }
@@ -301,7 +302,7 @@ class CommunicationForm extends Model
     /**
      * @return array
      */
-    public function attributeLabels() : array
+    public function attributeLabels(): array
     {
         return [
             'c_type_id'         => 'Message Type',
@@ -321,5 +322,4 @@ class CommunicationForm extends Model
             'c_offers'          => 'Checked Offers',
         ];
     }
-
 }

@@ -8,6 +8,7 @@ use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeGroupAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\helpers\user\UserFinder;
+use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use yii\db\ActiveQuery;
 
 /**
@@ -36,6 +37,11 @@ class Scopes extends \yii\db\ActiveQuery
     public function byChannelIds(array $ids): self
     {
         return $this->andWhere(['IN', 'cch_channel_id', $ids]);
+    }
+
+    public function excludeChatIds(array $ids): self
+    {
+        return $this->andWhere(['NOT IN', 'cch_id', $ids]);
     }
 
     public function byIds(array $ids): self
@@ -169,9 +175,17 @@ class Scopes extends \yii\db\ActiveQuery
         return $this->byOwner(null)->orWhere(['cch_status_id' => ClientChat::STATUS_TRANSFER]);
     }
 
+    public function conditionSetUserAccess(): Scopes
+    {
+        return $this->byOwner(null)
+            ->andWhere(['cch_status_id' => ClientChat::STATUS_PENDING])
+            ->orWhere(['cch_status_id' => ClientChat::STATUS_TRANSFER])
+            ->andWhere(['NOT IN', 'cch_status_id', ClientChat::CLOSED_STATUS_GROUP]);
+    }
+
     public function withUnreadMessage(bool $edgerLoading = false): self
     {
-        return $this->innerJoinWith(['unreadMessage' => static function(ActiveQuery $query) {
+        return $this->innerJoinWith(['unreadMessage' => static function (ActiveQuery $query) {
             $query->andOnCondition(['>', 'ccu_count', 0]);
         }], $edgerLoading);
     }
@@ -210,5 +224,4 @@ class Scopes extends \yii\db\ActiveQuery
     {
         return $this->byStatuses(ClientChat::FREE_TO_TAKE_STATUS_GROUP);
     }
-
 }

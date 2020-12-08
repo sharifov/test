@@ -1,6 +1,7 @@
 <?php
 
 namespace modules\flight\models;
+
 use common\models\Airports;
 use modules\flight\src\entities\flightQuoteSegmentStop\serializer\FlightQuoteSegmentStopSerializer;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentStopDTO;
@@ -81,23 +82,23 @@ class FlightQuoteSegmentStop extends \yii\db\ActiveRecord
         return new \modules\flight\models\query\FlightQuoteSegmentStopQuery(static::class);
     }
 
-	/**
-	 * @param FlightQuoteSegmentStopDTO $dto
-	 * @return FlightQuoteSegmentStop
-	 */
+    /**
+     * @param FlightQuoteSegmentStopDTO $dto
+     * @return FlightQuoteSegmentStop
+     */
     public static function create(FlightQuoteSegmentStopDTO $dto): self
-	{
-		$stop = new self();
+    {
+        $stop = new self();
 
-		$stop->qss_quote_segment_id = $dto->quoteSegmentId;
-		$stop->qss_location_iata = $dto->locationIata;
-		$stop->qss_elapsed_time = $dto->elapsedTime;
-		$stop->qss_duration = $dto->duration;
-		$stop->qss_departure_dt = $dto->departureDt;
-		$stop->qss_arrival_dt = $dto->arrivalDt;
+        $stop->qss_quote_segment_id = $dto->quoteSegmentId;
+        $stop->qss_location_iata = $dto->locationIata;
+        $stop->qss_elapsed_time = $dto->elapsedTime;
+        $stop->qss_duration = $dto->duration;
+        $stop->qss_departure_dt = $dto->departureDt;
+        $stop->qss_arrival_dt = $dto->arrivalDt;
 
-		return $stop;
-	}
+        return $stop;
+    }
 
     public static function clone(FlightQuoteSegmentStop $stop, int $segmentId): self
     {
@@ -109,18 +110,18 @@ class FlightQuoteSegmentStop extends \yii\db\ActiveRecord
         $clone->qss_quote_segment_id = $segmentId;
 
         return $clone;
-	}
+    }
 
-	/**
-	 * @return \yii\db\ActiveQuery
-	 */
-	public function getLocationAirport(): ActiveQuery
-	{
-		return $this->hasOne(Airports::class, ['iata' => 'qss_location_iata']);
-	}
-	
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLocationAirport(): ActiveQuery
+    {
+        return $this->hasOne(Airports::class, ['iata' => 'qss_location_iata']);
+    }
+
     public function serialize(): array
     {
         return (new FlightQuoteSegmentStopSerializer($this))->getData();
-	}
+    }
 }

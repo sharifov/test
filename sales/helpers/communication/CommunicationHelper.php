@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author alex.connor@techork.com
  */
@@ -18,5 +19,4 @@ class CommunicationHelper
     {
         echo Yii::$app->controller->renderPartial('/lead/communication/_list_call_recursive', ['callList' => $callList]);
     }
-
 }

@@ -3,8 +3,7 @@
 ?>
 <h5>Email Chart</h5>
 <div class="well">
-    <?php if (isset($emailsInfoGraph) && $emailsInfoGraph): ?>
-
+    <?php if (isset($emailsInfoGraph) && $emailsInfoGraph) : ?>
         <div id="info-emails-chart"></div>
 
         <script type="text/javascript">
@@ -43,7 +42,7 @@
                         'Error',
                         {role: 'annotation'}
                     ],
-                    <?php foreach($emailsInfoGraph as $k => $item): ?>
+                    <?php foreach ($emailsInfoGraph as $k => $item) : ?>
                     [
                         '<?=($item['createdDate']) ?>',
                         <?= $item['emailsDone'] ?>,
@@ -60,7 +59,7 @@
                 })
             })
         </script>
-    <?php else: ?>
+    <?php else : ?>
         <div class="row">
             <div class="col-md-12 text-center">
                 <p style="margin: 0;">No results found.</p>

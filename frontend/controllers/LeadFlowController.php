@@ -40,7 +40,7 @@ class LeadFlowController extends FController
 
         $params = Yii::$app->request->queryParams;
 
-        if(Yii::$app->user->identity->canRole('supervision')) {
+        if (Yii::$app->user->identity->canRole('supervision')) {
             $params['LeadFlowSearch']['supervision_id'] = Yii::$app->user->id;
         }
 

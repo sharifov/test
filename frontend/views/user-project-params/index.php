@@ -8,7 +8,7 @@ use common\models\UserProjectParams;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
-use dosamigos\datepicker\DatePicker;
+use common\components\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\UserProjectParamsSearch */
@@ -47,8 +47,8 @@ if ($user->isAdmin()) {
 
             [
                 'attribute' => 'upp_user_id',
-                'value' => function(\common\models\UserProjectParams $model) {
-                    return $model->uppUser ? '<i class="fa fa-user"></i> '.Html::encode($model->uppUser->username).'' : '-';
+                'value' => function (\common\models\UserProjectParams $model) {
+                    return $model->uppUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->uppUser->username) . '' : '-';
                 },
                 'format' => 'raw',
                 'filter' => $userList
@@ -79,21 +79,26 @@ if ($user->isAdmin()) {
             ['class' => BooleanColumn::class, 'attribute' => 'upp_vm_enabled'],
             [
                 'attribute' => 'upp_vm_user_status_id',
-                'value' => static function(UserProjectParams $model) {
+                'value' => static function (UserProjectParams $model) {
                     return UserProjectParams::VM_USER_STATUS_LIST[$model->upp_vm_user_status_id] ?? null;
                 },
                 'filter' => UserProjectParams::VM_USER_STATUS_LIST,
             ],
             [
                 'attribute' => 'upp_vm_id',
-                'value' => static function(UserProjectParams $model) {
+                'value' => static function (UserProjectParams $model) {
                     return $model->upp_vm_id ? $model->voiceMail->uvm_name : null;
                 },
             ],
             //'upp_tw_sip_id',
             //'upp_created_dt',
-            //'upp_updated_dt',
+
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'upp_updated_dt'
+            ],
+
+            /*[
                 'attribute' => 'upp_updated_dt',
                 'value' => function(\common\models\UserProjectParams $model) {
                     return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->upp_updated_dt));
@@ -111,7 +116,7 @@ if ($user->isAdmin()) {
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
             ['class' => UserSelect2Column::class, 'attribute' => 'upp_updated_user_id', 'relation' => 'uppUpdatedUser'],
             //'upp_updated_user_id',
 

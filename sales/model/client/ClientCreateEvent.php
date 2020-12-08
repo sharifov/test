@@ -7,12 +7,13 @@ use yii\base\Event;
 
 class ClientCreateEvent extends Component
 {
-	public const CREATE = 'create';
+    public const CREATE = 'create';
 
-	public static function createByClientChatRequest(Event $event): void
-	{
-		$clientChatRequest = $event->data;
+    public static function createByClientChatRequest(Event $event): void
+    {
+        $clientChatRequest = $event->data;
 
-		var_dump($clientChatRequest);die;
-	}
+        var_dump($clientChatRequest);
+        die;
+    }
 }

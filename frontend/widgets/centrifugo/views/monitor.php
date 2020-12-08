@@ -1,5 +1,7 @@
 <?php
+
 use sales\helpers\setting\SettingHelper;
+
 /**
  * @var $centrifugoUrl
  * @var $token
@@ -9,7 +11,7 @@ use sales\helpers\setting\SettingHelper;
 
 $realtimeMonitorEnable = SettingHelper::isClientChatRealTimeMonitoringEnabled();
 
-$passChannelsToJs ='["' . implode('", "', $channels) . '"]';
+$passChannelsToJs = '["' . implode('", "', $channels) . '"]';
 
 $js = <<<JS
 let enableLiveUpdate = '$realtimeMonitorEnable'

@@ -5,6 +5,8 @@ namespace console\controllers;
 use common\models\Notifications;
 use Faker\Factory;
 use modules\twilio\src\entities\conferenceLog\ConferenceLog;
+use sales\model\clientChat\cannedResponse\entity\ClientChatCannedResponse;
+use sales\model\clientChat\cannedResponseCategory\entity\ClientChatCannedResponseCategory;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatMessage\ClientChatMessageRepository;
@@ -24,6 +26,7 @@ use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackF
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
 use yii\console\Controller;
+use yii\helpers\Console;
 use yii\console\ExitCode;
 use yii\helpers\VarDumper;
 
@@ -31,7 +34,6 @@ class TestController extends Controller
 {
     public function actionTest()
     {
-
         $data = [
             'id' => '5c23460e-6fc1-4ea6-a368-df52ca5b293e',
             'rid' => 'b1ee59aa-5315-4714-88ee-4487f7ccca31',
@@ -79,7 +81,7 @@ class TestController extends Controller
         $chat->assignOwner(167);
         $repo = \Yii::createObject(ClientChatRepository::class);
         $repo->save($chat);
-die;
+        die;
 
         $service = \Yii::createObject(ClientChatMessageService::class);
         VarDumper::dump($service->increaseUnreadMessages(9, 295));
@@ -98,45 +100,95 @@ die;
             ->all();
         $events = [];
         foreach ($eventsLog as $item) {
-           $events[] = EventFactory::create($item['cel_event_type'], $item['cel_data']);
+            $events[] = EventFactory::create($item['cel_event_type'], $item['cel_data']);
         }
         $aggregate = new ConferenceLogAggregate($events);
         $aggregate->run();
 //        VarDumper::dump($aggregate->getParticipantsResult());
         $printer = new HtmlFormatter($aggregate->logs);
         VarDumper::dump($printer->format());
-
-
     }
 
     public function actionTestIsChatTransfer(int $cchId)
-	{
-		$chatRepository = \Yii::createObject(ClientChatRepository::class);
-		var_dump($chatRepository->isChatInTransfer($cchId));
-	}
+    {
+        $chatRepository = \Yii::createObject(ClientChatRepository::class);
+        var_dump($chatRepository->isChatInTransfer($cchId));
+    }
 
-	public function actionTestChatVisitorDataRules()
-	{
-		$faker = Factory::create();
-		$data = new ClientChatVisitorData();
-		$data->cvd_referrer = $faker->realText(1005, 1);
+    public function actionTestChatVisitorDataRules()
+    {
+        $faker = Factory::create();
+        $data = new ClientChatVisitorData();
+        $data->cvd_referrer = $faker->realText(1005, 1);
 
-		var_dump(strlen($data->cvd_referrer));
-		var_dump($data->validate());
-		var_dump($data->errors);
-	}
+        var_dump(strlen($data->cvd_referrer));
+        var_dump($data->validate());
+        var_dump($data->errors);
+    }
 
-	public function actionTestUserAccessToAllChats(int $userId)
-	{
-		$channelIds = [1,2,3,4,5,6,7,8];
-		$service = \Yii::createObject(ClientChatUserAccessService::class);
-		$service->setUserAccessToAllChatsByChannelIds($channelIds, $userId);
-	}
+    public function actionTestUserAccessToAllChats(int $userId)
+    {
+        $channelIds = [1,2,3,4,5,6,7,8];
+        $service = \Yii::createObject(ClientChatUserAccessService::class);
+        $service->setUserAccessToAllChatsByChannelIds($channelIds, $userId);
+    }
 
     public function actionVirtualCronTest()
     {
         echo date('Y-m-d H:i:s');
         \Yii::info($_SERVER, 'info\TestController:actionTest');
         return ExitCode::OK;
-	}
+    }
+
+    public function actionFillChatCannedTablesWithTestData()
+    {
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
+        $processedCategory = 0;
+        $timeStart = microtime(true);
+
+
+//        $categoryCounts = 10000 * 2;
+//        Console::startProgress(0, $categoryCounts, 'Counting categories: ', false);
+//        $faker = Factory::create('ru_RU');
+//        for ($i = 1; $i <= $categoryCounts; $i++) {
+//            $cannedResponseCategory = new ClientChatCannedResponseCategory();
+//            $cannedResponseCategory->crc_name = $faker->sentence(3, true);
+//            $cannedResponseCategory->crc_enabled = 1;
+//            $cannedResponseCategory->crc_created_dt = date('Y-m-d H:i:s');
+//            $cannedResponseCategory->crc_updated_dt = date('Y-m-d H:i:s');
+//            $cannedResponseCategory->save();
+//
+//            Console::updateProgress($i, $categoryCounts);
+//        }
+//        Console::endProgress("Categories created." . PHP_EOL);
+
+
+        $cannedResponseCnt = 10000 * 2;
+        Console::startProgress(0, $cannedResponseCnt, 'Counting canned responses: ', false);
+        $faker = Factory::create('ru_RU');
+        for ($i = 1; $i <= $cannedResponseCnt; $i++) {
+            $cannedResponse = new ClientChatCannedResponse();
+            $cannedResponse->cr_language_id = 'ru-RU';
+            $cannedResponse->cr_user_id = 464;
+            $cannedResponse->cr_sort_order = $i;
+            $cannedResponse->cr_message = $faker->realText(1000);
+            $cannedResponse->cr_created_dt = date('Y-m-d H:i:s');
+            $cannedResponse->cr_updated_dt = date('Y-m-d H:i:s');
+            $cannedResponse->save();
+
+            Console::updateProgress($i, $cannedResponseCnt);
+        }
+        Console::endProgress("Canned responses created." . PHP_EOL);
+
+        $timeEnd = microtime(true);
+        $time = number_format(round($timeEnd - $timeStart, 2), 2);
+
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
+            ' s] %g ProcessedCategory: %w[' . $processedCategory . '] %g %n'), PHP_EOL;
+
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+    }
 }

@@ -20,7 +20,7 @@ class ProductTypePaymentMethodSearch extends ProductTypePaymentMethod
             [['ptpm_produt_type_id', 'ptpm_payment_method_id', 'ptpm_enabled', 'ptpm_default', 'ptpm_created_user_id', 'ptpm_updated_user_id'], 'integer'],
             [['ptpm_payment_fee_amount', 'ptpm_payment_fee_percent'], 'number'],
             [['ptpm_payment_fee_percent'], 'filter', 'filter' => 'floatval', 'skipOnEmpty' => true],
-            [['ptpm_created_dt', 'ptpm_updated_dt'], 'safe'],
+            [['ptpm_created_dt', 'ptpm_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -68,8 +68,8 @@ class ProductTypePaymentMethodSearch extends ProductTypePaymentMethod
             'ptpm_default' => $this->ptpm_default,
             'ptpm_created_user_id' => $this->ptpm_created_user_id,
             'ptpm_updated_user_id' => $this->ptpm_updated_user_id,
-            'ptpm_created_dt' => $this->ptpm_created_dt,
-            'ptpm_updated_dt' => $this->ptpm_updated_dt,
+            'DATE(ptpm_created_dt)' => $this->ptpm_created_dt,
+            'DATE(ptpm_updated_dt)' => $this->ptpm_updated_dt,
         ]);
 
         return $dataProvider;

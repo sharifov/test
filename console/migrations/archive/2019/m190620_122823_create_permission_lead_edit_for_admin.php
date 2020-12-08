@@ -54,7 +54,5 @@ class m190620_122823_create_permission_lead_edit_for_admin extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
-
 }

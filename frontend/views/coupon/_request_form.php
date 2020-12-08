@@ -29,7 +29,7 @@ use common\components\bootstrap4\activeForm\ActiveForm;
 
     <?= $form->field($model, 'caseId')->hiddenInput()->label(false) ?>
 
-    <?= $form->field($model, 'count')->dropDownList(array_combine(range(1,9),range(1,9))) ?>
+    <?= $form->field($model, 'count')->dropDownList(array_combine(range(1, 9), range(1, 9))) ?>
 
     <?= $form->field($model, 'code')->dropDownList($model->getCodeList()) ?>
 

@@ -58,11 +58,11 @@ class UserConnectionController extends FController
         $searchModel = new EmployeeSearch();
         $params = Yii::$app->request->queryParams;
 
-        if(!isset($params['EmployeeSearch']['status']) || !$params['EmployeeSearch']['status']) {
+        if (!isset($params['EmployeeSearch']['status']) || !$params['EmployeeSearch']['status']) {
             $params['EmployeeSearch']['status'] = 10;
         }
 
-        if(Yii::$app->user->identity->canRole('supervision')) {
+        if (Yii::$app->user->identity->canRole('supervision')) {
             $params['EmployeeSearch']['supervision_id'] = Yii::$app->user->id;
         }
 

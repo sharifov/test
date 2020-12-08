@@ -49,17 +49,17 @@ class UserContactList extends \yii\db\ActiveRecord
     }
 
     public function behaviors(): array
-	{
-		return [
-			'timestamp' => [
-				'class' => TimestampBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['ucl_created_dt'],
-				],
-				'value' => date('Y-m-d H:i:s')
-			],
-		];
-	}
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['ucl_created_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s')
+            ],
+        ];
+    }
 
     /**
      * {@inheritdoc}

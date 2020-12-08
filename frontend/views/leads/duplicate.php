@@ -41,15 +41,15 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     [
                         'attribute' => 'client_phone',
-                        'value' => function($model) {
+                        'value' => function ($model) {
                             return Html::a($model['client_phone'], ['leads/index', 'LeadSearch[client_phone]' => $model['client_phone']], ['data-pjax' => 0, 'target' => '_blank']);
                         },
                         'format' => 'raw',
                     ],
                 ],
             'toolbar' =>  [
-                ['content'=>
-                    Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['leads/duplicate'], ['data-pjax'=>1, 'class' => 'btn btn-default', 'title'=>'Reset Grid'])
+                ['content' =>
+                    Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['leads/duplicate'], ['data-pjax' => 1, 'class' => 'btn btn-default', 'title' => 'Reset Grid'])
                 ],
                 //'{export}',
                 //$fullExportMenu,
@@ -100,7 +100,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         [
                             //'header' => 'Email',
                             'attribute' => 'client_email',
-                            'value' => function($model) {
+                            'value' => function ($model) {
                                 return Html::a($model['client_email'], ['leads/index', 'LeadSearch[client_email]' => $model['client_email']], ['data-pjax' => 0, 'target' => '_blank']);
                             },
                             'format' => 'raw',
@@ -108,8 +108,8 @@ $this->params['breadcrumbs'][] = $this->title;
                         ],
                     ],
                 'toolbar' =>  [
-                    ['content'=>
-                        Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['leads/duplicate'], ['data-pjax'=>1, 'class' => 'btn btn-default', 'title'=>'Reset Grid'])
+                    ['content' =>
+                        Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['leads/duplicate'], ['data-pjax' => 1, 'class' => 'btn btn-default', 'title' => 'Reset Grid'])
                     ],
                     //'{export}',
                     //$fullExportMenu,
@@ -157,7 +157,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                         [
                             'attribute' => 'request_ip',
-                            'value' => function($model) {
+                            'value' => function ($model) {
                                 return Html::a($model['request_ip'], ['leads/index', 'LeadSearch[request_ip]' => $model['request_ip']], ['data-pjax' => 0, 'target' => '_blank']);
                             },
                             'format' => 'raw',
@@ -165,8 +165,8 @@ $this->params['breadcrumbs'][] = $this->title;
                         ],
                     ],
                 'toolbar' =>  [
-                    ['content'=>
-                        Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['leads/duplicate'], ['data-pjax' => 1, 'class' => 'btn btn-default', 'title'=>'Reset Grid'])
+                    ['content' =>
+                        Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['leads/duplicate'], ['data-pjax' => 1, 'class' => 'btn btn-default', 'title' => 'Reset Grid'])
                     ],
                     //'{export}',
                     //$fullExportMenu,

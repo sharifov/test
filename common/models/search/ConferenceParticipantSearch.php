@@ -35,7 +35,7 @@ class ConferenceParticipantSearch extends ConferenceParticipant
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cp_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['cp_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],

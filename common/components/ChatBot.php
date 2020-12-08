@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created
  * User: alex.connor@techork.com
@@ -40,7 +41,7 @@ class ChatBot extends Component
 
     private Request $request;
 
-    public function init() : void
+    public function init(): void
     {
         parent::init();
         $this->initRequest();
@@ -49,7 +50,7 @@ class ChatBot extends Component
     /**
      * @return bool
      */
-    private function initRequest() : bool
+    private function initRequest(): bool
     {
         $authStr = base64_encode($this->username . ':' . $this->password);
 
@@ -75,11 +76,22 @@ class ChatBot extends Component
      * @return \yii\httpclient\Response
      * @throws \yii\httpclient\Exception
      */
-    protected function sendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []) : Response
+    protected function sendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []): Response
     {
         $url = $this->url . $action;
         //$options = ['RETURNTRANSFER' => 1];
-        return $this->send($url, $data, $method, $headers, $options);
+
+        $response = $this->send($url, $data, $method, $headers, $options);
+
+        $metrics = \Yii::$container->get(Metrics::class);
+        if ($response->isOk) {
+            $metrics->serviceCounter('chat_bot', ['type' => 'success', 'action' => $action]);
+        } else {
+            $metrics->serviceCounter('chat_bot', ['type' => 'error', 'action' => $action]);
+        }
+        unset($metrics);
+
+        return $response;
     }
 
     /**
@@ -119,7 +131,7 @@ class ChatBot extends Component
      * @return array
      * @throws \yii\httpclient\Exception
      */
-    public function endConversation(string $rid, string $visitorId, bool $shallowClose = true) : array
+    public function endConversation(string $rid, string $visitorId, bool $shallowClose = true): array
     {
         $out = ['error' => false, 'data' => []];
         $data = [
@@ -152,7 +164,7 @@ class ChatBot extends Component
      * @return array
      * @throws \yii\httpclient\Exception
      */
-    public function transferDepartment(string $rid, string $visitorId, string $oldDepartment, string $newDepartment) : array
+    public function transferDepartment(string $rid, string $visitorId, string $oldDepartment, string $newDepartment): array
     {
         $out = ['error' => false, 'data' => []];
         $data = [
@@ -184,7 +196,7 @@ class ChatBot extends Component
      * @return array
      * @throws \yii\httpclient\Exception
      */
-    public function assignAgent(string $rid, string $userId) : array
+    public function assignAgent(string $rid, string $userId): array
     {
         $out = ['error' => false, 'data' => []];
         $data = [
@@ -208,7 +220,7 @@ class ChatBot extends Component
         return $out;
     }
 
-    public function createRoom(string $visitorId, string $channelId, ?string $message, string $userRcId, string $userRcToken) : array
+    public function createRoom(string $visitorId, string $channelId, ?string $message, string $userRcId, string $userRcToken): array
     {
         $out = ['error' => false, 'data' => []];
         $data = [
@@ -234,7 +246,7 @@ class ChatBot extends Component
         return $out;
     }
 
-    public function sendMessage(array $data, array $headers = []) : array
+    public function sendMessage(array $data, array $headers = []): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -248,7 +260,7 @@ class ChatBot extends Component
             }
         } else {
             $out['error'] = $this->parseErrorContent($response);
-            //			\Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ChatBot:sendMessage');
+            //          \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ChatBot:sendMessage');
         }
 
         return $out;
@@ -273,9 +285,32 @@ class ChatBot extends Component
             }
         } else {
             $out['error'] = $this->parseErrorContent($response);
-            //			\Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ChatBot:sendMessage');
+            //          \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ChatBot:sendMessage');
         }
 
+        return $out;
+    }
+
+    public function sendNote(string $rid, string $message, string $alias): array
+    {
+        $out = ['error' => false, 'data' => []];
+        $data = [
+            'rid' => $rid,
+            'message' => $message,
+            'alias' => $alias,
+        ];
+
+        $response = $this->sendRequest('livechat/send-note', $data, 'post');
+
+        if ($response->isOk) {
+            if (!empty($response->data)) {
+                $out['data'] = $response->data;
+            } else {
+                $out['error']['message'] = 'Not found in response array data key [data]';
+            }
+        } else {
+            $out['error'] = $this->parseErrorContent($response);
+        }
         return $out;
     }
 

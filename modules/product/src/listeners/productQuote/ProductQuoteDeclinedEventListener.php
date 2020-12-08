@@ -45,5 +45,4 @@ class ProductQuoteDeclinedEventListener
             Yii::error(AppHelper::throwableFormatter($e), 'Listeners:' . self::class);
         }
     }
-
 }

@@ -42,62 +42,62 @@ use yii\db\ActiveRecord;
  */
 class UserProfit extends \yii\db\ActiveRecord
 {
-	public const STATUS_PENDING = 1;
-	public const STATUS_DONE = 2;
-	public const STATUS_CANCELED = 3;
-	public const STATUS_DELETED = 4;
+    public const STATUS_PENDING = 1;
+    public const STATUS_DONE = 2;
+    public const STATUS_CANCELED = 3;
+    public const STATUS_DELETED = 4;
 
-	public const STATUS_LIST = [
-		self::STATUS_PENDING => 'Pending',
-		self::STATUS_DONE => 'Done',
-		self::STATUS_CANCELED => 'Canceled',
-		self::STATUS_DELETED => 'Deleted'
-	];
+    public const STATUS_LIST = [
+        self::STATUS_PENDING => 'Pending',
+        self::STATUS_DONE => 'Done',
+        self::STATUS_CANCELED => 'Canceled',
+        self::STATUS_DELETED => 'Deleted'
+    ];
 
-	public const STATUS_CLASS_LIST = [
-		self::STATUS_PENDING => 'info',
-		self::STATUS_DONE => 'success',
-		self::STATUS_CANCELED => 'warning',
-		self::STATUS_DELETED => 'danger'
-	];
+    public const STATUS_CLASS_LIST = [
+        self::STATUS_PENDING => 'info',
+        self::STATUS_DONE => 'success',
+        self::STATUS_CANCELED => 'warning',
+        self::STATUS_DELETED => 'danger'
+    ];
 
-	public const TYPE_SALE_COMM = 1;
-	public const TYPE_EXCHANGE_COMM = 2;
-	public const TYPE_TIPS = 3;
-	public const TYPE_USER_PROFIT = 4;
+    public const TYPE_SALE_COMM = 1;
+    public const TYPE_EXCHANGE_COMM = 2;
+    public const TYPE_TIPS = 3;
+    public const TYPE_USER_PROFIT = 4;
 
-	public const TYPE_LIST = [
-		self::TYPE_SALE_COMM => 'Sale commission',
-		self::TYPE_EXCHANGE_COMM => 'Exchange commission',
-		self::TYPE_TIPS => 'Tips',
-		self::TYPE_USER_PROFIT => 'Order User Profit'
-	];
+    public const TYPE_LIST = [
+        self::TYPE_SALE_COMM => 'Sale commission',
+        self::TYPE_EXCHANGE_COMM => 'Exchange commission',
+        self::TYPE_TIPS => 'Tips',
+        self::TYPE_USER_PROFIT => 'Order User Profit'
+    ];
 
-	/**
-	 * @return array
-	 */
-	public function behaviors(): array
-	{
-		return [
-			'timestamp' => [
-				'class' => TimestampBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['up_created_dt', 'up_updated_dt'],
-					ActiveRecord::EVENT_BEFORE_UPDATE => ['up_updated_dt'],
-				],
-				'value' => date('Y-m-d H:i:s'),
-				'preserveNonEmptyValues' => true
-			],
-		];
-	}
+    /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['up_created_dt', 'up_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['up_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s'),
+                'preserveNonEmptyValues' => true
+            ],
+        ];
+    }
 
-	public function beforeSave($insert)
-	{
-		$this->calcAmount();
-		return parent::beforeSave($insert);
-	}
+    public function beforeSave($insert)
+    {
+        $this->calcAmount();
+        return parent::beforeSave($insert);
+    }
 
-	/**
+    /**
      * {@inheritdoc}
      */
     public static function tableName(): string
@@ -117,7 +117,7 @@ class UserProfit extends \yii\db\ActiveRecord
             [['up_split_percent', 'up_percent'], 'filter', 'filter' => 'intval'],
             [['up_created_dt', 'up_updated_dt'], 'safe'],
             [['up_id'], 'unique'],
-			[['up_percent', 'up_split_percent'], 'number', 'max' => 100, 'min' => 0],
+            [['up_percent', 'up_split_percent'], 'number', 'max' => 100, 'min' => 0],
             [['up_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['up_lead_id' => 'id']],
             [['up_order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['up_order_id' => 'or_id']],
             [['up_payroll_id'], 'exist', 'skipOnError' => true, 'targetClass' => UserPayroll::class, 'targetAttribute' => ['up_payroll_id' => 'ups_id']],
@@ -165,7 +165,7 @@ class UserProfit extends \yii\db\ActiveRecord
      * @return ActiveQuery
      */
     public function getUpOrder(): ActiveQuery
-	{
+    {
         return $this->hasOne(Order::class, ['or_id' => 'up_order_id']);
     }
 
@@ -200,78 +200,78 @@ class UserProfit extends \yii\db\ActiveRecord
     }
 
     public static function getStatusList(): array
-	{
-		return self::STATUS_LIST;
-	}
+    {
+        return self::STATUS_LIST;
+    }
 
-	public static function getStatusName($statusId): ?string
-	{
-		return self::getStatusList()[$statusId] ?? null;
-	}
+    public static function getStatusName($statusId): ?string
+    {
+        return self::getStatusList()[$statusId] ?? null;
+    }
 
-	public static function getTypeList(): array
-	{
-		return self::TYPE_LIST;
-	}
+    public static function getTypeList(): array
+    {
+        return self::TYPE_LIST;
+    }
 
-	public static function getTypeName($typeId): ?string
-	{
-		return self::getTypeList()[$typeId] ?? null;
-	}
+    public static function getTypeName($typeId): ?string
+    {
+        return self::getTypeList()[$typeId] ?? null;
+    }
 
-	public function calcAmount(): void
-	{
-		$this->up_amount = round((((float)$this->up_profit * (int)$this->up_percent / 100) * (int)$this->up_split_percent / 100), 2);
-	}
+    public function calcAmount(): void
+    {
+        $this->up_amount = round((((float)$this->up_profit * (int)$this->up_percent / 100) * (int)$this->up_split_percent / 100), 2);
+    }
 
-	public static function asFormat(?int $value): ?string
-	{
-		return $value ? Html::tag(
-			'span',
-			self::getStatusName($value),
-			['class' => 'badge badge-' . self::getClassName($value)]
-		) : null;
-	}
+    public static function asFormat(?int $value): ?string
+    {
+        return $value ? Html::tag(
+            'span',
+            self::getStatusName($value),
+            ['class' => 'badge badge-' . self::getClassName($value)]
+        ) : null;
+    }
 
-	private static function getClassName(?int $value): string
-	{
-		return self::STATUS_CLASS_LIST[$value] ?? 'secondary';
-	}
+    private static function getClassName(?int $value): string
+    {
+        return self::STATUS_CLASS_LIST[$value] ?? 'secondary';
+    }
 
-	public function isDone(): bool
-	{
-		return $this->up_status_id === self::STATUS_DONE;
-	}
+    public function isDone(): bool
+    {
+        return $this->up_status_id === self::STATUS_DONE;
+    }
 
-	/**
-	 * @return mixed|null
-	 */
-	public function getRowClass()
-	{
-		return self::STATUS_CLASS_LIST[$this->up_status_id] ?? null;
-	}
+    /**
+     * @return mixed|null
+     */
+    public function getRowClass()
+    {
+        return self::STATUS_CLASS_LIST[$this->up_status_id] ?? null;
+    }
 
-	public function updateProfit(UserProfitCreateUpdateDTO $dto): void
-	{
-		$this->up_percent = $dto->percent;
-		$this->up_profit = $dto->profit;
-		$this->up_split_percent = $dto->splitPercent;
-	}
+    public function updateProfit(UserProfitCreateUpdateDTO $dto): void
+    {
+        $this->up_percent = $dto->percent;
+        $this->up_profit = $dto->profit;
+        $this->up_split_percent = $dto->splitPercent;
+    }
 
-	public function create(UserProfitCreateUpdateDTO $dto): void
-	{
-		$this->up_user_id = $dto->userId;
-		$this->up_lead_id = $dto->leadId;
-		$this->up_order_id = $dto->orderId;
-		$this->up_product_quote_id = $dto->productQuoteId;
-		$this->up_percent = $dto->percent;
-		$this->up_profit = $dto->profit;
-		$this->up_status_id = $dto->statusId;
-		$this->up_payroll_id = $dto->payrollId;
-		$this->up_type_id = $dto->typeId;
-		$this->up_split_percent = $dto->splitPercent;
-//		$this->up_amount = $this->up_profit
-	}
+    public function create(UserProfitCreateUpdateDTO $dto): void
+    {
+        $this->up_user_id = $dto->userId;
+        $this->up_lead_id = $dto->leadId;
+        $this->up_order_id = $dto->orderId;
+        $this->up_product_quote_id = $dto->productQuoteId;
+        $this->up_percent = $dto->percent;
+        $this->up_profit = $dto->profit;
+        $this->up_status_id = $dto->statusId;
+        $this->up_payroll_id = $dto->payrollId;
+        $this->up_type_id = $dto->typeId;
+        $this->up_split_percent = $dto->splitPercent;
+//      $this->up_amount = $this->up_profit
+    }
 
     /**
      * {@inheritdoc}

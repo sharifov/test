@@ -3,6 +3,8 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\DateTimeColumn;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\QcallConfigSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -67,12 +69,17 @@ $this->params['breadcrumbs'][] = $this->title;
 //                },
 //                'format' => 'raw'
 //            ],
-            [
+            /*[
                 'attribute' => 'qc_updated_dt',
                 'value' => static function (\common\models\QcallConfig $model) {
                     return $model->qc_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->qc_updated_dt)) : '-';
                 },
                 'format' => 'raw'
+            ],*/
+
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'qc_updated_dt'
             ],
 
 

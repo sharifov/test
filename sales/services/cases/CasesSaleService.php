@@ -20,294 +20,296 @@ use yii\web\NotFoundHttpException;
 
 class CasesSaleService
 {
-	private const FORMAT_PASSENGERS_DATA = [
-		'meal' => 'formatByCountSegments',
-		'wheelchair' => 'formatByCountSegments',
-		'ff_numbers' => 'formatByFFAirline',
-		'kt_numbers' => 'formatByAirline',
-	];
+    private const FORMAT_PASSENGERS_DATA = [
+        'meal' => 'formatByCountSegments',
+        'wheelchair' => 'formatByCountSegments',
+        'ff_numbers' => 'formatByFFAirline',
+        'kt_numbers' => 'formatByAirline',
+    ];
 
-	/**
-	 * @var CasesSaleRepository
-	 */
-	private $casesSaleRepository;
+    /**
+     * @var CasesSaleRepository
+     */
+    private $casesSaleRepository;
 
-	/**
-	 * @var array
-	 */
-	private $segments = [];
+    /**
+     * @var array
+     */
+    private $segments = [];
 
-	/**
-	 * @var string
-	 */
-	private $validatingCarrier;
+    /**
+     * @var string
+     */
+    private $validatingCarrier;
 
-	/**
-	 * @var array
-	 */
-	private $namref = [];
-	/**
-	 * @var SaleTicketService
-	 */
-	private $saleTicketService;
+    /**
+     * @var array
+     */
+    private $namref = [];
+    /**
+     * @var SaleTicketService
+     */
+    private $saleTicketService;
 
-	/**
-	 * CasesSaleService constructor.
-	 * @param CasesSaleRepository $casesSaleRepository
-	 * @param SaleTicketService $saleTicketService
-	 */
-	public function __construct(CasesSaleRepository $casesSaleRepository, SaleTicketService $saleTicketService)
-	{
-		$this->casesSaleRepository = $casesSaleRepository;
-		$this->saleTicketService = $saleTicketService;
-	}
+    /**
+     * CasesSaleService constructor.
+     * @param CasesSaleRepository $casesSaleRepository
+     * @param SaleTicketService $saleTicketService
+     */
+    public function __construct(CasesSaleRepository $casesSaleRepository, SaleTicketService $saleTicketService)
+    {
+        $this->casesSaleRepository = $casesSaleRepository;
+        $this->saleTicketService = $saleTicketService;
+    }
 
-	/**
-	 * @param CaseSale $caseSale
-	 * @return array
-	 * @throws Exception
-	 */
-	public function prepareSaleData(CaseSale $caseSale): array
-	{
-		$originalData = JsonHelper::decode($caseSale->css_sale_data);
-		$updatedData = JsonHelper::decode($caseSale->css_sale_data_updated);
+    /**
+     * @param CaseSale $caseSale
+     * @return array
+     * @throws Exception
+     */
+    public function prepareSaleData(CaseSale $caseSale): array
+    {
+        $originalData = JsonHelper::decode($caseSale->css_sale_data);
+        $updatedData = JsonHelper::decode($caseSale->css_sale_data_updated);
 
-		$difference = $this->compareSaleData($originalData, $updatedData);
+        $difference = $this->compareSaleData($originalData, $updatedData);
 
-		if (empty($originalData['passengers'])) {
-			throw new \RuntimeException('Sale Info: not found passengers data while preparing data for sync with B/0', 10);
-		}
+        if (empty($originalData['passengers'])) {
+            throw new \RuntimeException('Sale Info: not found passengers data while preparing data for sync with B/0', 10);
+        }
 
-		$this->bufferPassengerNameref($originalData['passengers'])->preparePassengersData($difference);
+        $this->bufferPassengerNameref($originalData['passengers'])->preparePassengersData($difference);
 
-		return $difference;
-	}
+        return $difference;
+    }
 
-	/**
-	 * @param CaseSale $caseSale
-	 * @return array
-	 */
-	public function getSegments(CaseSale $caseSale): array
-	{
-		$updatedData = JsonHelper::decode($caseSale->css_sale_data_updated);
+    /**
+     * @param CaseSale $caseSale
+     * @return array
+     */
+    public function getSegments(CaseSale $caseSale): array
+    {
+        $updatedData = JsonHelper::decode($caseSale->css_sale_data_updated);
 
-		$segments = [];
+        $segments = [];
 
-		foreach ($updatedData['itinerary'] as $itinerary) {
-			foreach ($itinerary['segments'] as $segment) {
-				$segments[] = $segment;
-			}
-		}
+        foreach ($updatedData['itinerary'] as $itinerary) {
+            foreach ($itinerary['segments'] as $segment) {
+                $segments[] = $segment;
+            }
+        }
 
-		return $segments;
-	}
+        return $segments;
+    }
 
-	/**
-	 * @param CaseSale $caseSale
-	 * @return CasesSaleService
-	 */
-	public function setSegments(CaseSale $caseSale): CasesSaleService
-	{
-		$this->segments = $this->getSegments($caseSale);
+    /**
+     * @param CaseSale $caseSale
+     * @return CasesSaleService
+     */
+    public function setSegments(CaseSale $caseSale): CasesSaleService
+    {
+        $this->segments = $this->getSegments($caseSale);
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * @param CaseSale $caseSale
-	 * @return CasesSaleService
-	 */
-	public function setValidatingCarrier(CaseSale $caseSale): CasesSaleService
-	{
-		$updatedData = JsonHelper::decode($caseSale->css_sale_data_updated);
+    /**
+     * @param CaseSale $caseSale
+     * @return CasesSaleService
+     */
+    public function setValidatingCarrier(CaseSale $caseSale): CasesSaleService
+    {
+        $updatedData = JsonHelper::decode($caseSale->css_sale_data_updated);
 
-		$this->validatingCarrier = $updatedData['validatingCarrier'];
+        $this->validatingCarrier = $updatedData['validatingCarrier'];
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * @param CaseSale $caseSale
-	 * @return bool
-	 */
-	public function isDataBackedUpToOriginal(CaseSale $caseSale): bool
-	{
-		$oldData = JsonHelper::decode($caseSale->css_sale_data);
-		$newData = JsonHelper::decode($caseSale->css_sale_data_updated);
+    /**
+     * @param CaseSale $caseSale
+     * @return bool
+     */
+    public function isDataBackedUpToOriginal(CaseSale $caseSale): bool
+    {
+        $oldData = JsonHelper::decode($caseSale->css_sale_data);
+        $newData = JsonHelper::decode($caseSale->css_sale_data_updated);
 
-		$difference = $this->compareSaleData($oldData, $newData);
+        $difference = $this->compareSaleData($oldData, $newData);
 
-		return !$difference ? true : false;
-	}
+        return !$difference ? true : false;
+    }
 
-	/**
-	 * @param array $passengers
-	 * @return bool
-	 */
-	public function checkIfPassengersHasNamerefAttribute(array  $passengers): bool
-	{
-		foreach ($passengers as $passenger) {
-			if (!empty($passenger['nameref'])) {
-				return true;
-			}
-		}
-		return false;
-	}
+    /**
+     * @param array $passengers
+     * @return bool
+     */
+    public function checkIfPassengersHasNamerefAttribute(array $passengers): bool
+    {
+        foreach ($passengers as $passenger) {
+            if (!empty($passenger['nameref'])) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	/**
-	 * @param array $saleDataDiff
-	 * @throws Exception
-	 */
-	private function preparePassengersData(array &$saleDataDiff): void
-	{
-		if (isset($saleDataDiff['passengers']) && !empty($this->namref)) {
-			foreach ($saleDataDiff['passengers'] as $key => $passenger) {
-				$this->formatFFNumbersByAirline($passenger, $saleDataDiff, $key);
+    /**
+     * @param array $saleDataDiff
+     * @throws Exception
+     */
+    private function preparePassengersData(array &$saleDataDiff): void
+    {
+        if (isset($saleDataDiff['passengers']) && !empty($this->namref)) {
+            foreach ($saleDataDiff['passengers'] as $key => $passenger) {
+                $this->formatFFNumbersByAirline($passenger, $saleDataDiff, $key);
 
-				unset($saleDataDiff['passengers'][$key]);
-				$saleDataDiff['passengers'][$this->namref[$key]] = $passenger;
-			}
-		} else {
-			throw new \RuntimeException('Sale info doesnt have passengers or passengers nameref');
-		}
-	}
+                unset($saleDataDiff['passengers'][$key]);
+                $saleDataDiff['passengers'][$this->namref[$key]] = $passenger;
+            }
+        } else {
+            throw new \RuntimeException('Sale info doesnt have passengers or passengers nameref');
+        }
+    }
 
-	/**
-	 * @param array $passenger
-	 * @param array $saleDataDiff
-	 * @param string $key
-	 */
-	private function formatFFNumbersByAirline(array &$passenger, array $saleDataDiff, string $key): void
-	{
-		if (empty($passenger['ff_numbers']) && !empty($passenger['ff_airline'])) {
-			throw new \RuntimeException('Cant send data to B/O, Frequent Flyer is not provided;', -1);
-		}
+    /**
+     * @param array $passenger
+     * @param array $saleDataDiff
+     * @param string $key
+     */
+    private function formatFFNumbersByAirline(array &$passenger, array $saleDataDiff, string $key): void
+    {
+        if (empty($passenger['ff_numbers']) && !empty($passenger['ff_airline'])) {
+            throw new \RuntimeException('Cant send data to B/O, Frequent Flyer is not provided;', -1);
+        }
 
-		if (array_key_first($passenger) === 'ff_numbers' && !empty($saleDataDiff['passengers'][$key]['ff_airline'])) {
-			$passenger['ff_numbers'] = [
-				$passenger['ff_airline'] => array_shift($passenger['ff_numbers'])
-			];
-			unset($passenger['ff_airline']);
-		}
-	}
+        if (array_key_first($passenger) === 'ff_numbers' && !empty($saleDataDiff['passengers'][$key]['ff_airline'])) {
+            $passenger['ff_numbers'] = [
+                $passenger['ff_airline'] => array_shift($passenger['ff_numbers'])
+            ];
+            unset($passenger['ff_airline']);
+        }
+    }
 
-	/**
-	 * @param array $passenger
-	 */
-	public function formatPassengersData(array &$passenger): void
-	{
-		foreach ($passenger as $key => $value) {
-			if (array_key_exists($key, self::FORMAT_PASSENGERS_DATA) && method_exists($this, self::FORMAT_PASSENGERS_DATA[$key])) {
-				$this->{self::FORMAT_PASSENGERS_DATA[$key]}($passenger, $key);
-			}
-		}
-	}
+    /**
+     * @param array $passenger
+     */
+    public function formatPassengersData(array &$passenger): void
+    {
+        foreach ($passenger as $key => $value) {
+            if (array_key_exists($key, self::FORMAT_PASSENGERS_DATA) && method_exists($this, self::FORMAT_PASSENGERS_DATA[$key])) {
+                $this->{self::FORMAT_PASSENGERS_DATA[$key]}($passenger, $key);
+            }
+        }
+    }
 
-	/**
-	 * @param array $passenger
-	 * @param string $key
-	 */
-	private function formatByCountSegments(array &$passenger, string $key): void
-	{
-		$value = $passenger[$key];
-		$passenger[$key] = [];
-		foreach ($this->segments as $segmentKey => $segment) {
-			$passenger[$key][$segmentKey+1] = $value;
-		}
-	}
+    /**
+     * @param array $passenger
+     * @param string $key
+     */
+    private function formatByCountSegments(array &$passenger, string $key): void
+    {
+        $value = $passenger[$key];
+        $passenger[$key] = [];
+        foreach ($this->segments as $segmentKey => $segment) {
+            $passenger[$key][$segmentKey + 1] = $value;
+        }
+    }
 
-	/**
-	 * @param array $passenger
-	 * @param string $key
-	 */
-	private function formatByFFAirline(array &$passenger, string $key): void
-	{
-		$value = $passenger[$key];
-		$passenger = [];
-		$passenger[$key][$this->validatingCarrier] = $value;
-	}
+    /**
+     * @param array $passenger
+     * @param string $key
+     */
+    private function formatByFFAirline(array &$passenger, string $key): void
+    {
+        $value = $passenger[$key];
+        $passenger = [];
+        $passenger[$key][$this->validatingCarrier] = $value;
+    }
 
-	/**
-	 * @param array $passenger
-	 * @param string $key
-	 */
-	private function formatByAirline(array &$passenger, string $key): void
-	{
-		$value = $passenger[$key];
-		$passenger[$key] = [];
-		foreach ($this->segments as $segmentKey => $segment) {
-			$passenger[$key][$segment['airline']] = $value;
-		}
-	}
+    /**
+     * @param array $passenger
+     * @param string $key
+     */
+    private function formatByAirline(array &$passenger, string $key): void
+    {
+        $value = $passenger[$key];
+        $passenger[$key] = [];
+        foreach ($this->segments as $segmentKey => $segment) {
+            $passenger[$key][$segment['airline']] = $value;
+        }
+    }
 
-	/**
-	 * @param array $passengers
-	 * @return CasesSaleService
-	 */
-	private function bufferPassengerNameref(array $passengers): CasesSaleService
-	{
-		foreach ($passengers as $key => $passenger) {
-			if (empty($passenger['nameref'])) {
-				throw new \RuntimeException('Sale info: nameref is not found in passengers data');
-			}
-			$this->namref[$key] = $passenger['nameref'];
-		}
+    /**
+     * @param array $passengers
+     * @return CasesSaleService
+     */
+    private function bufferPassengerNameref(array $passengers): CasesSaleService
+    {
+        foreach ($passengers as $key => $passenger) {
+            if (empty($passenger['nameref'])) {
+                throw new \RuntimeException('Sale info: nameref is not found in passengers data');
+            }
+            $this->namref[$key] = $passenger['nameref'];
+        }
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * @param array $oldData
-	 * @param array $newData
-	 * @return array
-	 */
-	public function compareSaleData(array $oldData, array $newData): array
-	{
-		$difference = [];
-		foreach ($newData as $firstKey => $firstValue) {
-			if (is_array($firstValue)) {
-				if (!array_key_exists($firstKey, $oldData) || !is_array($oldData[$firstKey])) {
-					$difference[$firstKey] = '';
-				} else {
-					$newDiff = $this->compareSaleData($oldData[$firstKey], $firstValue);
-					if (!empty($newDiff)) {
-						$difference[$firstKey] = $newDiff;
-					}
-				}
-			} elseif ((!array_key_exists($firstKey, $oldData) || $oldData[$firstKey] != $firstValue)) {
-				if (!empty($firstValue) || !empty($oldData[$firstKey])) {
-					$difference[$firstKey] = $firstValue;
-				}
-			}
-		}
-		return $difference;
-	}
+    /**
+     * @param array $oldData
+     * @param array $newData
+     * @return array
+     */
+    public function compareSaleData(array $oldData, array $newData): array
+    {
+        $difference = [];
+        foreach ($newData as $firstKey => $firstValue) {
+            if (is_array($firstValue)) {
+                if (!array_key_exists($firstKey, $oldData) || !is_array($oldData[$firstKey])) {
+                    $difference[$firstKey] = '';
+                } else {
+                    $newDiff = $this->compareSaleData($oldData[$firstKey], $firstValue);
+                    if (!empty($newDiff)) {
+                        $difference[$firstKey] = $newDiff;
+                    }
+                }
+            } elseif ((!array_key_exists($firstKey, $oldData) || $oldData[$firstKey] != $firstValue)) {
+                if (!empty($firstValue) || !empty($oldData[$firstKey])) {
+                    $difference[$firstKey] = $firstValue;
+                }
+            }
+        }
+        return $difference;
+    }
 
-	/**
-	 * @param CaseSale $caseSale
-	 * @param Cases $case
-	 * @param array $saleData
-	 * @return CaseSale
-	 */
-	public function refreshOriginalSaleData(CaseSale $caseSale, Cases $case, array $saleData): CaseSale
-	{
-		if (isset($saleData['saleId']) && (int)$saleData['saleId'] === $caseSale->css_sale_id) {
-			$caseSale = $this->casesSaleRepository->refreshOriginalSaleData($caseSale, $case, $saleData);
-			$caseSale = $this->prepareAdditionalData($caseSale, $saleData);
+    /**
+     * @param CaseSale $caseSale
+     * @param Cases $case
+     * @param array $saleData
+     * @return CaseSale
+     */
+    public function refreshOriginalSaleData(CaseSale $caseSale, Cases $case, array $saleData): CaseSale
+    {
+        if (isset($saleData['saleId']) && (int)$saleData['saleId'] === $caseSale->css_sale_id) {
+            $caseSale = $this->casesSaleRepository->refreshOriginalSaleData($caseSale, $case, $saleData);
+            $caseSale = $this->prepareAdditionalData($caseSale, $saleData);
 
-			if(!$caseSale->save()) {
-				\Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]),
-				'CasesController:actionAddSale:CaseSale:save');
-				throw new \RuntimeException('An error occurred while trying to refresh original sale info;');
-			}
+            if (!$caseSale->save()) {
+                \Yii::error(
+                    VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]),
+                    'CasesController:actionAddSale:CaseSale:save'
+                );
+                throw new \RuntimeException('An error occurred while trying to refresh original sale info;');
+            }
 
-			$case->updateLastAction();
-		} else {
-			throw new \DomainException('Sale info form B/O is not equal with current info');
-		}
+            $case->updateLastAction();
+        } else {
+            throw new \DomainException('Sale info form B/O is not equal with current info');
+        }
 
-		return $caseSale;
-	}
+        return $caseSale;
+    }
 
     /**
      * @param CaseSale $caseSale
@@ -325,21 +327,23 @@ class CasesSaleService
 
             $caseSale = $this->prepareAdditionalData($caseSale, $saleData);
 
-            if(!$caseSale->save()) {
-                \Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]),
-                'CasesSaleService:saveAdditionalData');
+            if (!$caseSale->save()) {
+                \Yii::error(
+                    VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]),
+                    'CasesSaleService:saveAdditionalData'
+                );
                 throw new \RuntimeException('Error. Additional data not saved');
             }
             $case->updateLastAction();
             if ($createTicket) {
-			    $this->saleTicketService->createSaleTicketBySaleData($caseSale, $saleData);
-			}
+                $this->saleTicketService->createSaleTicketBySaleData($caseSale, $saleData);
+            }
             return $caseSale;
         }
         throw new \RuntimeException('Error. Additional data not saved. Broken saleData params');
     }
 
-	/**
+    /**
      * @param CaseSale $caseSale
      * @param array $saleData
      * @return CaseSale
@@ -349,7 +353,7 @@ class CasesSaleService
         $caseSale->css_sale_pnr = $saleData['pnr'] ?? null;
         $caseSale->css_sale_created_dt = $saleData['created'] ?? null;
         //$caseSale->css_sale_book_id = $saleData['confirmationNumber'] ?? null;
-        if (!empty( $saleData['confirmationNumber'])) {
+        if (!empty($saleData['confirmationNumber'])) {
             $caseSale->css_sale_book_id = $saleData['confirmationNumber'];
         }
         $caseSale->css_sale_pax = $saleData['requestDetail']['passengersCnt'] ?? null;
@@ -419,8 +423,10 @@ class CasesSaleService
                 throw new \RuntimeException('BO request Error: ' . $responseStr, 20);
             }
         } catch (\Throwable $exception) {
-            \Yii::error(VarDumper::dumpAsString([$exception, $params], 20),
-            'CasesSaleService:searchRequestToBackOffice:Fail');
+            \Yii::error(
+                VarDumper::dumpAsString([$exception->getMessage(), $params], 20),
+                'CasesSaleService:searchRequestToBackOffice:Fail'
+            );
         }
         return [];
     }
@@ -457,57 +463,54 @@ class CasesSaleService
     }
 
     public function sendAddedCreditCardToBO(string $projectApiKey, string $bookingId, int $saleId, CreditCardForm $form, int $requestTime = 120): array
-	{
-		$response = [
-			'error' => false,
-			'message' => ''
-		];
+    {
+        $response = [
+            'error' => false,
+            'message' => ''
+        ];
 
-		try {
+        try {
+            $data = [
+                'apiKey' => $projectApiKey,
+                'flightRequest' => [
+                    'uid' => $bookingId,
+                    'saleId' => $saleId
+                ],
+                'card' => [
+                    'nickname' => $form->cc_holder_name,
+                    'number' => (string)$form->cc_number,
+                    'expiration_date' => $form->cc_expiration,
+                    'cvv' => (string)$form->cc_cvv
+                ]
+            ];
 
-			$data = [
-				'apiKey' => $projectApiKey,
-				'flightRequest' => [
-					'uid' => $bookingId,
-					'saleId' => $saleId
-				],
-				'card' => [
-					'nickname' => $form->cc_holder_name,
-					'number' => (string)$form->cc_number,
-					'expiration_date' => $form->cc_expiration,
-					'cvv' => (string)$form->cc_cvv
-				]
-			];
+            $host = Yii::$app->params['backOffice']['serverUrlV3'];
+            $responseBO = BackOffice::sendRequest2('payment/add-credit-card', $data, 'POST', $requestTime, $host);
 
-			$host = Yii::$app->params['backOffice']['serverUrlV3'];
-			$responseBO = BackOffice::sendRequest2('payment/add-credit-card', $data, 'POST', $requestTime, $host);
+            if ($responseBO->isOk) {
+                $result = $responseBO->data;
 
-			if ($responseBO->isOk) {
-				$result = $responseBO->data;
+                if (!(bool)$result['success']) {
+                    $errors = '';
+                    foreach ($result['errors'] as $error) {
+                        if (is_array($error)) {
+                            $errors .= implode('; ', $error);
+                        } else {
+                            $errors .= $error . '; ';
+                        }
+                    }
+                    throw new \RuntimeException('BO add credit card request errors: ' . $errors);
+                }
+            } else {
+                throw new \RuntimeException('BO add credit card request error. ' . VarDumper::dumpAsString($responseBO->content));
+            }
+        } catch (\Throwable $e) {
+            $response['error'] = true;
+            $response['message'] = $e->getMessage();
+        }
 
-				if (!(bool)$result['success']) {
-					$errors = '';
-					foreach ($result['errors'] as $error) {
-						if (is_array($error)) {
-							$errors .= implode('; ', $error);
-						} else {
-							$errors .= $error . '; ';
-						}
-					}
-					throw new \RuntimeException('BO add credit card request errors: ' . $errors);
-				}
-			} else {
-				throw new \RuntimeException('BO add credit card request error. ' . VarDumper::dumpAsString($responseBO->content));
-			}
-
-
-		} catch (\Throwable $e) {
-			$response['error'] = true;
-			$response['message'] = $e->getMessage();
-		}
-
-		return $response;
-	}
+        return $response;
+    }
 
     /**
      * @param string|null $order_uid
@@ -541,7 +544,7 @@ class CasesSaleService
         }
 
         try {
-			if (!empty($saleData['saleId']) && $case = Cases::findOne($csId)) {
+            if (!empty($saleData['saleId']) && $case = Cases::findOne($csId)) {
                 $saleId = (int)$saleData['saleId'];
 
                 if ($refreshSaleData = $this->detailRequestToBackOffice($saleId, 0, 120, 1)) {
@@ -552,8 +555,10 @@ class CasesSaleService
                     $caseSale = $this->saveAdditionalData($caseSale, $case, $refreshSaleData);
 
                     if (!$caseSale->save(false)) {
-                        \Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $refreshSaleData]),
-                        'CasesSaleService:createSale:Update');
+                        \Yii::error(
+                            VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $refreshSaleData]),
+                            'CasesSaleService:createSale:Update'
+                        );
                         throw new \RuntimeException('Error. CaseSale not saved from detailRequestToBackOffice.');
                     }
                 } else {
@@ -563,8 +568,10 @@ class CasesSaleService
             }
             throw new \RuntimeException('Error. Param saleId is empty or Case not found');
         } catch (\Throwable $throwable) {
-            Yii::error(VarDumper::dumpAsString(['throwable' => AppHelper::throwableFormatter($throwable), 'saleData' => $saleData]),
-            'CasesSaleService:createSale:Throwable');
+            Yii::error(
+                VarDumper::dumpAsString(['throwable' => AppHelper::throwableFormatter($throwable), 'saleData' => $saleData]),
+                'CasesSaleService:createSale:Throwable'
+            );
         }
         return null;
     }
@@ -580,34 +587,34 @@ class CasesSaleService
     }
 
     public function sendCcInfo(string $apiKey, int $saleId, string $bookId, string $email): array
-	{
-		$result = [
-			'error' => false,
-			'message' => ''
-		];
+    {
+        $result = [
+            'error' => false,
+            'message' => ''
+        ];
 
-		$data = [
-			'apiKey' => $apiKey,
-			'flightRequest' => [
-				'uid' => $bookId,
-				'saleId' => $saleId
-			],
-			'email' => $email
-		];
-		$response = BackOffice::sendRequest2('payment/invoke-new-cc-info', $data, 'POST', 30, Yii::$app->params['backOffice']['serverUrlV3'], true);
-		if ($response->isOk) {
-			$responseData = $response->data;
-			Yii::info(VarDumper::dumpAsString($responseData), 'info\CasesSaleService::sendCcInfo::BOResponse');
-			if (!$responseData['success']) {
-				$result['error'] = true;
-				$result['message'] = reset($responseData['errors'])[0] ?? 'Unknown error message from B/O';
-			}
-			return $result;
-		}
+        $data = [
+            'apiKey' => $apiKey,
+            'flightRequest' => [
+                'uid' => $bookId,
+                'saleId' => $saleId
+            ],
+            'email' => $email
+        ];
+        $response = BackOffice::sendRequest2('payment/invoke-new-cc-info', $data, 'POST', 30, Yii::$app->params['backOffice']['serverUrlV3'], true);
+        if ($response->isOk) {
+            $responseData = $response->data;
+            Yii::info(VarDumper::dumpAsString($responseData), 'info\CasesSaleService::sendCcInfo::BOResponse');
+            if (!$responseData['success']) {
+                $result['error'] = true;
+                $result['message'] = reset($responseData['errors'])[0] ?? 'Unknown error message from B/O';
+            }
+            return $result;
+        }
 
-		$result['error'] = true;
-		$result['message'] = Json::decode($response->content)['message'] ?? 'Unknown error message from B/O';
+        $result['error'] = true;
+        $result['message'] = Json::decode($response->content)['message'] ?? 'Unknown error message from B/O';
 
-		return $result;
-	}
+        return $result;
+    }
 }

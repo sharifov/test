@@ -51,5 +51,4 @@ class PreferencesCreateForm extends Model
             'currency' => 'Currency'
         ];
     }
-
 }

@@ -140,22 +140,22 @@ class Order extends ActiveRecord
     }
 
     public function create(CreateOrderDTO $dto): self
-	{
-		$this->or_gid = self::generateGid();
-		$this->or_uid = self::generateUid();
-		$this->or_status_id = $dto->status;
-		$this->or_lead_id = $dto->leadId;
-		$this->or_name = $this->generateName();
-		if ($this->orLead && $this->orLead->employee_id) {
-			$this->or_owner_user_id = $this->orLead->employee_id;
-		}
-		if (!$this->or_name && $this->or_lead_id) {
-			$this->or_name = $this->generateName();
-		}
-		$this->updateOrderTotalByCurrency();
+    {
+        $this->or_gid = self::generateGid();
+        $this->or_uid = self::generateUid();
+        $this->or_status_id = $dto->status;
+        $this->or_lead_id = $dto->leadId;
+        $this->or_name = $this->generateName();
+        if ($this->orLead && $this->orLead->employee_id) {
+            $this->or_owner_user_id = $this->orLead->employee_id;
+        }
+        if (!$this->or_name && $this->or_lead_id) {
+            $this->or_name = $this->generateName();
+        }
+        $this->updateOrderTotalByCurrency();
 
-		return $this;
-	}
+        return $this;
+    }
 
     /**
      * @return ActiveQuery
@@ -206,9 +206,9 @@ class Order extends ActiveRecord
     }
 
     public function getOrderUserProfit(): ActiveQuery
-	{
-		return $this->hasMany(OrderUserProfit::class, ['oup_order_id' => 'or_id']);
-	}
+    {
+        return $this->hasMany(OrderUserProfit::class, ['oup_order_id' => 'or_id']);
+    }
 
     /**
      * @return ActiveQuery
@@ -229,14 +229,14 @@ class Order extends ActiveRecord
     }
 
     public function getOrderTips(): ActiveQuery
-	{
-		return $this->hasOne(OrderTips::class, ['ot_order_id' => 'or_id']);
-	}
+    {
+        return $this->hasOne(OrderTips::class, ['ot_order_id' => 'or_id']);
+    }
 
-	public function getOrderTipsUserProfit(): ActiveQuery
-	{
-		return $this->hasMany(OrderTipsUserProfit::class, ['otup_order_id' => 'or_id']);
-	}
+    public function getOrderTipsUserProfit(): ActiveQuery
+    {
+        return $this->hasMany(OrderTipsUserProfit::class, ['otup_order_id' => 'or_id']);
+    }
 
     public static function find(): Scopes
     {
@@ -274,13 +274,13 @@ class Order extends ActiveRecord
     public function getOrderTotalCalcSum(): float
     {
         $sum = 0;
-		$quotes = $this->productQuotes;
-		if($quotes) {
-			foreach ($quotes as $quote) {
-				$sum += $quote->totalCalcSum;
-			}
-			$sum = round($sum, 2);
-		}
+        $quotes = $this->productQuotes;
+        if ($quotes) {
+            foreach ($quotes as $quote) {
+                $sum += $quote->totalCalcSum;
+            }
+            $sum = round($sum, 2);
+        }
         return $sum;
     }
 
@@ -329,31 +329,31 @@ class Order extends ActiveRecord
     }
 
     public function isProcessing()
-	{
-		return $this->or_status_id === OrderStatus::PROCESSING;
-	}
+    {
+        return $this->or_status_id === OrderStatus::PROCESSING;
+    }
 
     public function processing(): void
-	{
-		// ToDo: need to log status
-		if (!$this->isProcessing()) {
-			OrderStatus::guard($this->or_status_id, OrderStatus::PROCESSING);
-			foreach ($this->productQuotes as $productQuote) {
-				if (OrderStatus::guardOrder(OrderStatus::PROCESSING, $productQuote->pq_status_id)) {
-					$this->setStatus(OrderStatus::PROCESSING);
-					break;
-				}
-			}
-		}
-	}
+    {
+        // ToDo: need to log status
+        if (!$this->isProcessing()) {
+            OrderStatus::guard($this->or_status_id, OrderStatus::PROCESSING);
+            foreach ($this->productQuotes as $productQuote) {
+                if (OrderStatus::guardOrder(OrderStatus::PROCESSING, $productQuote->pq_status_id)) {
+                    $this->setStatus(OrderStatus::PROCESSING);
+                    break;
+                }
+            }
+        }
+    }
 
-	private function setStatus(int $status): void
-	{
-		if (!array_key_exists($status, OrderStatus::getList())) {
-			throw new \InvalidArgumentException('Invalid Status');
-		}
-		OrderStatus::guard($this->or_status_id, $status);
+    private function setStatus(int $status): void
+    {
+        if (!array_key_exists($status, OrderStatus::getList())) {
+            throw new \InvalidArgumentException('Invalid Status');
+        }
+        OrderStatus::guard($this->or_status_id, $status);
 
-		$this->or_status_id = $status;
-	}
+        $this->or_status_id = $status;
+    }
 }

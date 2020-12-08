@@ -21,8 +21,7 @@ class m190521_134122_add_fks_tbl_leads extends Migration
      */
     public function safeDown()
     {
-       $this->dropForeignKey('FK-leads_project_id', '{{%leads}}');
-       $this->dropForeignKey('FK-leads_source_id', '{{%leads}}');
+        $this->dropForeignKey('FK-leads_project_id', '{{%leads}}');
+        $this->dropForeignKey('FK-leads_source_id', '{{%leads}}');
     }
-
 }

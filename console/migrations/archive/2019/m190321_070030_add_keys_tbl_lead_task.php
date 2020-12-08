@@ -20,7 +20,6 @@ class m190321_070030_add_keys_tbl_lead_task extends Migration
      */
     public function safeDown()
     {
-      $this->dropIndex('IND_lead_task', '{{%lead_task}}');
+        $this->dropIndex('IND_lead_task', '{{%lead_task}}');
     }
-
 }

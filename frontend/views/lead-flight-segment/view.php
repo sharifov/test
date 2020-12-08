@@ -36,8 +36,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'lead_id',
                         'format' => 'raw',
-                        'value' => function(\common\models\LeadFlightSegment $model) {
-                            return '<i class="fa fa-arrow-right"></i> '.Html::a('lead: '.$model->lead_id, ['leads/view', 'id' => $model->lead_id], ['target' => '_blank', 'data-pjax' => 0]);
+                        'value' => function (\common\models\LeadFlightSegment $model) {
+                            return '<i class="fa fa-arrow-right"></i> ' . Html::a('lead: ' . $model->lead_id, ['leads/view', 'id' => $model->lead_id], ['target' => '_blank', 'data-pjax' => 0]);
                         },
                     ],
                     'origin',
@@ -45,8 +45,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     //'departure',
                     [
                         'attribute' => 'departure',
-                        'value' => function(\common\models\LeadFlightSegment $model) {
-                            return '<i class="fa fa-calendar"></i> '.date("Y-m-d", strtotime($model->departure));
+                        'value' => function (\common\models\LeadFlightSegment $model) {
+                            return '<i class="fa fa-calendar"></i> ' . date("Y-m-d", strtotime($model->departure));
                         },
                         'format' => 'html',
                     ],
@@ -66,16 +66,16 @@ $this->params['breadcrumbs'][] = $this->title;
                     'destination_label',
                     [
                         'attribute' => 'created',
-                        'value' => function(\common\models\LeadFlightSegment $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
+                        'value' => function (\common\models\LeadFlightSegment $model) {
+                            return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
                         },
                         'format' => 'html',
                     ],
 
                     [
                         'attribute' => 'updated',
-                        'value' => function(\common\models\LeadFlightSegment $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
+                        'value' => function (\common\models\LeadFlightSegment $model) {
+                            return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->updated));
                         },
                         'format' => 'html',
                     ],

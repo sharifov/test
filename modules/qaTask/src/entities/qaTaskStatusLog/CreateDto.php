@@ -36,8 +36,7 @@ class CreateDto
         ?int $actionId,
         ?int $assignedId,
         ?int $creatorId
-    )
-    {
+    ) {
         $this->task = $task;
         $this->startStatusId = $startStatusId;
         $this->endStatusId = $endStatusId;

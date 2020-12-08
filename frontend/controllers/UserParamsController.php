@@ -75,7 +75,7 @@ class UserParamsController extends FController
         if ($model->load(Yii::$app->request->post())) {
             $model->up_updated_user_id = Yii::$app->user->id;
 
-            if($model->save()) {
+            if ($model->save()) {
                 return $this->redirect(['view', 'id' => $model->up_user_id]);
             }
         }
@@ -98,7 +98,7 @@ class UserParamsController extends FController
 
         if ($model->load(Yii::$app->request->post())) {
             $model->up_updated_user_id = Yii::$app->user->id;
-            if($model->save()) {
+            if ($model->save()) {
                 return $this->redirect(['view', 'id' => $model->up_user_id]);
             }
         }

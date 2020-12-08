@@ -56,11 +56,13 @@ class EmployeeSearch extends Employee
     {
         return [
             [['id', 'status', 'acl_rules_activated', 'supervision_id', 'user_group_id', 'user_project_id', 'user_params_project_id', 'online', 'user_call_type_id', 'user_department_id', 'experienceMonth'], 'integer'],
-            [['username', 'nickname', 'full_name', 'auth_key', 'password_hash', 'password_reset_token', 'email', 'last_activity', 'created_at', 'updated_at', 'user_sip', 'pageSize'], 'safe'],
+            [['username', 'nickname', 'full_name', 'auth_key', 'password_hash', 'password_reset_token', 'email', 'last_activity', 'user_sip', 'pageSize'], 'safe'],
             [['timeStart', 'timeEnd', 'roles', 'twoFaEnable', 'joinDate'], 'safe'],
-			[['joinDate'], 'date', 'format' => 'php:Y-m-d', 'skipOnEmpty' => true],
+            [['joinDate'], 'date', 'format' => 'php:Y-m-d', 'skipOnEmpty' => true],
             [['timeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            [['projectParamsIds', 'projectAccessIds'], 'each', 'rule' => ['integer']]
+            [['projectParamsIds', 'projectAccessIds'], 'each', 'rule' => ['integer']],
+            [['created_at', 'updated_at'], 'date', 'format' => 'php:Y-m-d'],
+
         ];
     }
 
@@ -176,14 +178,14 @@ class EmployeeSearch extends Employee
 //        }
 //
 //        if ($this->experienceMonth > 0) {
-//			$subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'ABS(TIMESTAMPDIFF(MONTH, curdate(), up_join_date))', $this->experienceMonth]);
-//			$query->andWhere(['IN', 'employees.id', $subQuery]);
-//		}
+//          $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'ABS(TIMESTAMPDIFF(MONTH, curdate(), up_join_date))', $this->experienceMonth]);
+//          $query->andWhere(['IN', 'employees.id', $subQuery]);
+//      }
 //
 //        if (!empty($this->joinDate)) {
-//			$subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'up_join_date', $this->joinDate]);
-//			$query->andWhere(['IN', 'employees.id', $subQuery]);
-//		}
+//          $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'up_join_date', $this->joinDate]);
+//          $query->andWhere(['IN', 'employees.id', $subQuery]);
+//      }
 //
 //
 //        $query->andFilterWhere(['like', 'username', $this->username])
@@ -235,12 +237,12 @@ class EmployeeSearch extends Employee
             //'updated_at' => $this->updated_at,
         ]);
 
-        if ($this->updated_at){
+        if ($this->updated_at) {
             $query->andFilterWhere(['>=', 'updated_at', Employee::convertTimeFromUserDtToUTC(strtotime($this->updated_at))])
                 ->andFilterWhere(['<=', 'updated_at', Employee::convertTimeFromUserDtToUTC(strtotime($this->updated_at) + 3600 * 24)]);
         }
 
-        if ($this->roles){
+        if ($this->roles) {
             $query->andWhere(['IN', 'employees.id', array_keys(Employee::getListByRole($this->roles))]);
         }
 
@@ -323,7 +325,6 @@ class EmployeeSearch extends Employee
             ->andFilterWhere(['like', 'password_hash', $this->password_hash])
             ->andFilterWhere(['like', 'password_reset_token', $this->password_reset_token])
             ->andFilterWhere(['like', 'email', $this->email]);
-
     }
 
 
@@ -404,7 +405,7 @@ class EmployeeSearch extends Employee
      * @return ArrayDataProvider
      * @throws \yii\db\Exception
      */
-    public function searchByUserGroupsForSupervision(array $params):ArrayDataProvider
+    public function searchByUserGroupsForSupervision(array $params): ArrayDataProvider
     {
         $query = Employee::find()->select(['id', 'username', 'status', 'auth_assignment.item_name'])->leftJoin('auth_assignment', 'id = user_id');
 
@@ -439,7 +440,7 @@ class EmployeeSearch extends Employee
 
         $newModels = [];
         $filteredUserIds = [];
-        foreach ($data as $key => $model){
+        foreach ($data as $key => $model) {
             if (Auth::user()->isSupervision() && $model['item_name'] == Employee::ROLE_AGENT && !in_array($model['id'], $filteredUserIds)) {
                 $newModels[] = $model;
                 array_push($filteredUserIds, $model['id']);
@@ -470,7 +471,8 @@ class EmployeeSearch extends Employee
         ];
 
         //var_dump($query->createCommand()->getSql()); die();
-        return $dataProvider = new ArrayDataProvider($paramsData);;
+        return $dataProvider = new ArrayDataProvider($paramsData);
+        ;
     }
 
     public function searchAgentLeads($params)

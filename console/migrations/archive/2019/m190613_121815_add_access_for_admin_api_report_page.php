@@ -32,7 +32,7 @@ class m190613_121815_add_access_for_admin_api_report_page extends Migration
         $auth = \Yii::$app->authManager;
 
         $permission = $auth->getPermission('/stats/api-graph');
-        if($permission) {
+        if ($permission) {
             $auth->remove($permission);
         }
 
@@ -40,5 +40,4 @@ class m190613_121815_add_access_for_admin_api_report_page extends Migration
             Yii::$app->cache->flush();
         }
     }
-
 }

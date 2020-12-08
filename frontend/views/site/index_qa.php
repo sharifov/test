@@ -1,6 +1,5 @@
 <?php
 
-
 use sales\access\EmployeeProjectAccess;
 use yii\helpers\Html;
 
@@ -73,7 +72,6 @@ $userId = Yii::$app->user->id;
                         $projectsValue = '';
 
                         if ($projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id)) {
-
                             $groupsValueArr = [];
                             foreach ($projectList as $project) {
                                 $groupsValueArr[] = Html::tag('span', Html::encode($project), ['class' => 'label label-default']);
@@ -197,6 +195,6 @@ $userId = Yii::$app->user->id;
     </div>
 
         */
-?>
+    ?>
 
 </div>

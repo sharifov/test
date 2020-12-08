@@ -12,70 +12,70 @@ use common\models\ClientPhone;
  */
 class ClientPhoneFormatter implements Formatter
 {
-	/**
-	 * @var ClientPhone
-	 */
-	private $clientPhone;
+    /**
+     * @var ClientPhone
+     */
+    private $clientPhone;
 
-	/**
-	 * ClientPhoneFormatter constructor.
-	 * @param ClientPhone $clientPhone
-	 */
-	public function __construct(ClientPhone $clientPhone)
-	{
+    /**
+     * ClientPhoneFormatter constructor.
+     * @param ClientPhone $clientPhone
+     */
+    public function __construct(ClientPhone $clientPhone)
+    {
 
-		$this->clientPhone = $clientPhone;
-	}
+        $this->clientPhone = $clientPhone;
+    }
 
-	/**
-	 * @param string $attribute
-	 * @return string
-	 */
-	public function getFormattedAttributeLabel(string $attribute): string
-	{
-		return $this->clientPhone->getAttributeLabel($attribute);
-	}
+    /**
+     * @param string $attribute
+     * @return string
+     */
+    public function getFormattedAttributeLabel(string $attribute): string
+    {
+        return $this->clientPhone->getAttributeLabel($attribute);
+    }
 
-	/**
-	 * @param $attribute
-	 * @param $value
-	 * @return mixed
-	 */
-	public function getFormattedAttributeValue($attribute, $value)
-	{
-		$functions = $this->getAttributeFormatters();
+    /**
+     * @param $attribute
+     * @param $value
+     * @return mixed
+     */
+    public function getFormattedAttributeValue($attribute, $value)
+    {
+        $functions = $this->getAttributeFormatters();
 
-		if (array_key_exists($attribute, $functions)) {
-			return $functions[$attribute]($value);
-		}
+        if (array_key_exists($attribute, $functions)) {
+            return $functions[$attribute]($value);
+        }
 
-		return $value;
-	}
+        return $value;
+    }
 
-	/**
-	 * @return array
-	 */
-	public function getExceptedAttributes(): array
-	{
-		return [
-			'updated',
-			'created'
-		];
-	}
+    /**
+     * @return array
+     */
+    public function getExceptedAttributes(): array
+    {
+        return [
+            'updated',
+            'created'
+        ];
+    }
 
-	/**
-	 * @return array
-	 */
-	private function getAttributeFormatters(): array
-	{
-		$clientPhone = $this->clientPhone;
-		return [
-			'phone' => static function ($value) {
-				return $value;
-			},
-			'type' => static function ($value) use ($clientPhone) {
-				return $clientPhone::PHONE_TYPE[$value] ?? $value;
-			}
-		];
-	}
+    /**
+     * @return array
+     */
+    private function getAttributeFormatters(): array
+    {
+        $clientPhone = $this->clientPhone;
+        return [
+            'phone' => static function ($value) {
+                return $value;
+            },
+            'type' => static function ($value) use ($clientPhone) {
+                return $clientPhone::PHONE_TYPE[$value] ?? $value;
+            }
+        ];
+    }
 }

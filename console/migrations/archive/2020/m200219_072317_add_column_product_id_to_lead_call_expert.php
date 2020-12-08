@@ -26,7 +26,7 @@ class m200219_072317_add_column_product_id_to_lead_call_expert extends Migration
     public function init()
     {
         parent::init();
-        $this->table = '{{%'. $this->tableName .'}}';
+        $this->table = '{{%' . $this->tableName . '}}';
     }
 
     /**
@@ -38,8 +38,14 @@ class m200219_072317_add_column_product_id_to_lead_call_expert extends Migration
         $this->addColumn($this->table, $this->columnName, $this->integer());
 
         $this->addForeignKey(
-            'FK-' . $this->tableName . '-' . $this->columnName, $this->table, [$this->columnName],
-            '{{%product}}', ['pr_id'], 'SET NULL', 'CASCADE');
+            'FK-' . $this->tableName . '-' . $this->columnName,
+            $this->table,
+            [$this->columnName],
+            '{{%product}}',
+            ['pr_id'],
+            'SET NULL',
+            'CASCADE'
+        );
 
         (new RbacMigrationService())->up($this->routes, $this->roles);
     }

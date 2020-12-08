@@ -2,6 +2,8 @@
 
 namespace frontend\controllers;
 
+use sales\services\cleaner\form\DbCleanerParamsForm;
+use sales\services\cleaner\cleaners\GlobalLogCleaner;
 use Yii;
 use common\models\GlobalLog;
 use common\models\search\GlobalLogSearch;
@@ -16,21 +18,21 @@ use yii\filters\VerbFilter;
 class GlobalLogController extends FController
 {
 
-	/**
-	 * @return array
-	 */
-	public function behaviors(): array
-	{
-		$behaviors = [
-			'verbs' => [
-				'class' => VerbFilter::class,
-				'actions' => [
-					'delete' => ['POST'],
-				],
-			],
-		];
-		return ArrayHelper::merge(parent::behaviors(), $behaviors);
-	}
+    /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'verbs' => [
+                'class' => VerbFilter::class,
+                'actions' => [
+                    'delete' => ['POST'],
+                ],
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
 
     public function init(): void
     {
@@ -47,9 +49,15 @@ class GlobalLogController extends FController
         $searchModel = new GlobalLogSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
+        $cleaner = new GlobalLogCleaner();
+        $dbCleanerParamsForm = (new DbCleanerParamsForm())
+            ->setTable($cleaner->getTable())
+            ->setColumn($cleaner->getColumn());
+
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'modelCleaner' => $dbCleanerParamsForm,
         ]);
     }
 
@@ -84,28 +92,28 @@ class GlobalLogController extends FController
         ]);
     }
 
-	/**
-	 * @return string
-	 * @throws BadRequestHttpException
-	 */
-	public function actionAjaxViewGeneralLeadLog(): string
-	{
-		if (Yii::$app->request->isAjax) {
-			$leadId = Yii::$app->request->get('lid');
+    /**
+     * @return string
+     * @throws BadRequestHttpException
+     */
+    public function actionAjaxViewGeneralLeadLog(): string
+    {
+        if (Yii::$app->request->isAjax) {
+            $leadId = Yii::$app->request->get('lid');
 
-			$searchModel = new GlobalLogSearch();
-			$params = Yii::$app->request->queryParams;
-			$params['GlobalLogSearch']['leadId'] = $leadId;
-			$dataProvider = $searchModel->searchByLead($params);
+            $searchModel = new GlobalLogSearch();
+            $params = Yii::$app->request->queryParams;
+            $params['GlobalLogSearch']['leadId'] = $leadId;
+            $dataProvider = $searchModel->searchByLead($params);
 
-			return $this->renderAjax('partial/_general_lead_log', [
-				'dataProvider' => $dataProvider,
-				'searchModel' => $searchModel,
-				'lid' => $leadId,
-			]);
-		}
-		throw new BadRequestHttpException();
-	}
+            return $this->renderAjax('partial/_general_lead_log', [
+                'dataProvider' => $dataProvider,
+                'searchModel' => $searchModel,
+                'lid' => $leadId,
+            ]);
+        }
+        throw new BadRequestHttpException();
+    }
 
     /**
      * Finds the GlobalLog model based on its primary key value.

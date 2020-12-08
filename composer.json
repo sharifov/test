@@ -16,7 +16,8 @@
 		"irc" : "irc://irc.freenode.net/yii",
 		"source" : "https://github.com/yiisoft/yii2"
 	},
-	"minimum-stability" : "stable",
+	"minimum-stability" : "dev",
+	"prefer-stable": true,
 	"require" : {
 		"php" : ">=7.4",
 		"yiisoft/yii2" : "~2.0.24",
@@ -73,11 +74,13 @@
 		"kivork/yii2-rbac-export-import": "@dev",
 		"2amigos/2fa-library": "^2.0",
 		"yiisoft/yii2-redis": "~2.0.0",
-		"centrifugal/phpcent": "~3.0",
 		"kivork/yii2-bootstrap4-glyphicons": "*",
 		"2amigos/yii2-multi-select-widget": "*",
 		"kivork/yii2-mattermost-log-target": "@dev",
-        "kivork/yii2-virtual-cron": "@dev"
+        "kivork/yii2-virtual-cron": "@dev",
+        "kivork/yii2-prometheus-client": "@dev",
+		"sorokinmedia/yii2-centrifugo": "*"
+
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",
@@ -95,7 +98,8 @@
 		"vimeo/psalm": "^3.13",
 		"phpstan/phpstan": "^0.12.37",
 		"friendsofphp/php-cs-fixer": "^2.16",
-		"proget-hq/phpstan-yii2": "^0.7.3"
+		"proget-hq/phpstan-yii2": "^0.7.3",
+		"squizlabs/php_codesniffer": "^3.5"
 	},
 	"autoload-dev": {
 		"psr-2": {
@@ -141,11 +145,21 @@
 		{
 			"type": "vcs",
 			"url": "https://stash.travelinsides.com/scm/lib/yii2-virtual-cron.git"
+		},
+		{
+			"type": "vcs",
+			"url": "https://stash.travelinsides.com/scm/lib/yii2-prometheus-client.git"
 		}
 	],
 	"scripts": {
 		"cs-fix": [
 			"vendor/bin/php-cs-fixer fix --config=.php_cs --verbose --show-progress=dots"
-		]
+		],
+		"cs-check": "phpcs",
+		"cs-fix2": "phpcbf",
+        "assets-compressor": [
+          "./compressed-assets-flush.sh",
+          "php yii asset frontend/config/assets-config.php frontend/config/assets-prod.php"
+        ]
 	}
 }

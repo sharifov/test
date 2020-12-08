@@ -101,9 +101,9 @@ class HotelRoom extends \yii\db\ActiveRecord
         if ($this->hotelRoomPaxes) {
             foreach ($this->hotelRoomPaxes as $pax) {
                 if ($pax->isAdult()) {
-                    $adults ++;
+                    $adults++;
                 } elseif ($pax->isChild()) {
-                    $children ++;
+                    $children++;
                     $paxes[] = ['paxType' => 1, 'age' => $pax->hrp_age];
                 }
             }

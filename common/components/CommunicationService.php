@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created
  * User: alexandr
@@ -43,7 +44,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
     public $voipApiUsername = '';
 
 
-    public function init() : void
+    public function init(): void
     {
         parent::init();
         $this->initRequest();
@@ -53,7 +54,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
     /**
      * @return bool
      */
-    private function initRequest() : bool
+    private function initRequest(): bool
     {
         $authStr = base64_encode($this->username . ':' . $this->password);
 
@@ -79,7 +80,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return \yii\httpclient\Response
      * @throws Exception
      */
-    protected function sendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []) : Response
+    protected function sendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []): Response
     {
         $url = $this->url . $action;
 
@@ -89,20 +90,30 @@ class CommunicationService extends Component implements CommunicationServiceInte
             ->setUrl($url)
             ->setData($data);
 
-        if($headers) {
+        if ($headers) {
             $this->request->addHeaders($headers);
         }
 
         $this->request->setOptions([CURLOPT_ENCODING => 'gzip']);
 
-        if($options) {
+        if ($options) {
             $this->request->addOptions($options);
         }
         if (isset(Yii::$app->params['additionalCurlOptions'])) {
             $this->request->addOptions(Yii::$app->params['additionalCurlOptions']);
         }
 
-        return $this->request->send();
+        $response = $this->request->send();
+
+        $metrics = \Yii::$container->get(Metrics::class);
+        if ($response->isOk) {
+            $metrics->serviceCounter('communication', ['type' => 'success', 'action' => $action]);
+        } else {
+            $metrics->serviceCounter('communication', ['type' => 'error', 'action' => $action]);
+        }
+        unset($metrics);
+
+        return $response;
     }
 
 
@@ -116,7 +127,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function mailPreview(int $project_id, string $template_type, string $email_from, string $email_to, array $email_data = [], string $language = 'en-US') : array
+    public function mailPreview(int $project_id, string $template_type, string $email_from, string $email_to, array $email_data = [], string $language = 'en-US'): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -127,18 +138,18 @@ class CommunicationService extends Component implements CommunicationServiceInte
         $data['mail']['language_id'] = $language;
         $data['mail']['email_data'] = $email_data;
 
-        if(isset($email_data['email_from_name']) && $email_data['email_from_name']) {
+        if (isset($email_data['email_from_name']) && $email_data['email_from_name']) {
             $data['mail']['email_from_name'] = $email_data['email_from_name'];
         }
 
-        if(isset($email_data['email_to_name']) && $email_data['email_to_name']) {
+        if (isset($email_data['email_to_name']) && $email_data['email_to_name']) {
             $data['mail']['email_to_name'] = $email_data['email_to_name'];
         }
 
         $response = $this->sendRequest('email/preview', $data);
 
         if ($response->isOk) {
-            if(isset($response->data['data']['response'])) {
+            if (isset($response->data['data']['response'])) {
                 $out['data'] = $response->data['data']['response'];
             } else {
                 $out['error'] = 'Not found in response array data key [data][response]';
@@ -162,7 +173,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function mailCapture(int $project_id, string $template_type, string $email_from, string $email_to, array $email_data = [], string $language = 'en-US', array $capture_options = []) : array
+    public function mailCapture(int $project_id, string $template_type, string $email_from, string $email_to, array $email_data = [], string $language = 'en-US', array $capture_options = []): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -174,24 +185,27 @@ class CommunicationService extends Component implements CommunicationServiceInte
         $data['mail']['email_data'] = $email_data;
         $data['mail']['capture_options'] = $capture_options;
 
-        if(isset($email_data['email_from_name']) && $email_data['email_from_name']) {
+        if (isset($email_data['email_from_name']) && $email_data['email_from_name']) {
             $data['mail']['email_from_name'] = $email_data['email_from_name'];
         }
 
-        if(isset($email_data['email_to_name']) && $email_data['email_to_name']) {
+        if (isset($email_data['email_to_name']) && $email_data['email_to_name']) {
             $data['mail']['email_to_name'] = $email_data['email_to_name'];
         }
 
         $response = $this->sendRequest('email/capture', $data);
 
         if ($response->isOk) {
-            if(isset($response->data['data']['response'])) {
+            if (isset($response->data['data']['response'])) {
                 $out['data'] = $response->data['data']['response'];
             } else {
                 $out['error'] = 'Not found in response array data key [data][response]';
             }
         } else {
             $out['error'] = $response->content;
+        }
+
+        if ($out['error']) {
             \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::mailCapture');
         }
 
@@ -210,7 +224,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function mailSend(int $project_id, ?string $template_type, string $email_from, string $email_to, array $content_data = [], array $email_data = [], ?string $language = 'en-US', int $delay = 0) : array
+    public function mailSend(int $project_id, ?string $template_type, string $email_from, string $email_to, array $content_data = [], array $email_data = [], ?string $language = 'en-US', int $delay = 0): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -222,43 +236,43 @@ class CommunicationService extends Component implements CommunicationServiceInte
         $data['mail']['eq_email_data'] = $email_data;
 
 
-        if(isset($content_data['email_from_name']) && $content_data['email_from_name']) {
+        if (isset($content_data['email_from_name']) && $content_data['email_from_name']) {
             $data['mail']['eq_email_from_name'] = $content_data['email_from_name'];
         }
 
-        if(isset($content_data['email_to_name']) && $content_data['email_to_name']) {
+        if (isset($content_data['email_to_name']) && $content_data['email_to_name']) {
             $data['mail']['eq_email_to_name'] = $content_data['email_to_name'];
         }
 
-        if(isset($content_data['email_message_id']) && $content_data['email_message_id']) {
+        if (isset($content_data['email_message_id']) && $content_data['email_message_id']) {
             $data['mail']['eq_email_message_id'] = $content_data['email_message_id'];
         }
 
-        if(isset($content_data['email_body_html'])) {
+        if (isset($content_data['email_body_html'])) {
             $data['mail']['eq_email_body_html'] = $content_data['email_body_html'];
         }
 
-        if(isset($content_data['email_body_text'])) {
+        if (isset($content_data['email_body_text'])) {
             $data['mail']['eq_email_body_text'] = $content_data['email_body_text'];
         }
 
-        if(isset($content_data['email_subject'])) {
+        if (isset($content_data['email_subject'])) {
             $data['mail']['eq_email_subject'] = $content_data['email_subject'];
         }
 
-        if(isset($content_data['email_reply_to'])) {
+        if (isset($content_data['email_reply_to'])) {
             $data['mail']['eq_email_reply_to'] = $content_data['email_reply_to'];
         }
 
-        if(isset($content_data['email_cc'])) {
+        if (isset($content_data['email_cc'])) {
             $data['mail']['eq_email_cc'] = $content_data['email_cc'];
         }
 
-        if(isset($content_data['email_bcc'])) {
+        if (isset($content_data['email_bcc'])) {
             $data['mail']['eq_email_bcc'] = $content_data['email_bcc'];
         }
 
-        if($delay > 0) {
+        if ($delay > 0) {
             $data['mail']['eq_delay'] = $delay;
         }
 
@@ -266,7 +280,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
         $response = $this->sendRequest('email/send', $data);
 
         if ($response->isOk) {
-            if(isset($response->data['data']['response'])) {
+            if (isset($response->data['data']['response'])) {
                 $out['data'] = $response->data['data']['response'];
             } else {
                 $out['error'] = 'Not found in response array data key [data][response]';
@@ -284,7 +298,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function mailTypes() : array
+    public function mailTypes(): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -292,7 +306,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
         $response = $this->sendRequest('email/template-types', $data);
 
         if ($response->isOk) {
-            if(isset($response->data['data']['response'])) {
+            if (isset($response->data['data']['response'])) {
                 $out['data'] = $response->data['data']['response'];
             } else {
                 $out['error'] = 'Not found in response array data key [data][response]';
@@ -311,30 +325,30 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function mailGetMessages(array $filter = []) : array
+    public function mailGetMessages(array $filter = []): array
     {
         $out = ['error' => false, 'data' => []];
 
         $data = [];
         //$data['project'] = 123;
 
-        if(isset($filter['last_dt'])) {
+        if (isset($filter['last_dt'])) {
             $data['last_dt'] = date('Y-m-d H:i:s', strtotime($filter['last_dt']));
         }
 
-        if(isset($filter['last_id'])) {
+        if (isset($filter['last_id'])) {
             $data['last_id'] = (int) $filter['last_id'];
         }
 
-        if(isset($filter['limit'])) {
+        if (isset($filter['limit'])) {
             $data['limit'] = (int) $filter['limit'];
         }
 
-        if(isset($filter['email_list'])) {
+        if (isset($filter['email_list'])) {
             $data['email_list'] = $filter['email_list'];
         }
 
-        if(isset($filter['project_list'])) {
+        if (isset($filter['project_list'])) {
             $data['project_list'] = $filter['project_list'];
         }
 
@@ -342,14 +356,14 @@ class CommunicationService extends Component implements CommunicationServiceInte
         $response = $this->sendRequest('email/inbox', $data);
 
         if ($response->isOk) {
-            if(isset($response->data['data']['response'])) {
+            if (isset($response->data['data']['response'])) {
                 $out['data'] = $response->data['data']['response'];
             } else {
                 $out['error'] = 'Not found in response array data key [data][response]';
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error('filter: '. VarDumper::dumpAsString($filter)."\r\n". VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::mailGetMessages');
+            \Yii::error('filter: ' . VarDumper::dumpAsString($filter) . "\r\n" . VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::mailGetMessages');
         }
 
         return $out;
@@ -366,7 +380,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function smsPreview(int $project_id, ?string $template_type, string $phone_from, string $phone_to, array $sms_data = [], ?string $language = 'en-US') : array
+    public function smsPreview(int $project_id, ?string $template_type, string $phone_from, string $phone_to, array $sms_data = [], ?string $language = 'en-US'): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -380,7 +394,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
         $response = $this->sendRequest('sms/preview', $data);
 
         if ($response->isOk) {
-            if(isset($response->data['data']['response'])) {
+            if (isset($response->data['data']['response'])) {
                 $out['data'] = $response->data['data']['response'];
             } else {
                 $out['error'] = 'Not found in response array data key [data][response]';
@@ -406,7 +420,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function smsSend(int $project_id, ?string $template_type, string $phone_from, string $phone_to, array $content_data = [], array $sms_data = [], ?string $language = 'en-US', ?int $delay = 0) : array
+    public function smsSend(int $project_id, ?string $template_type, string $phone_from, string $phone_to, array $content_data = [], array $sms_data = [], ?string $language = 'en-US', ?int $delay = 0): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -417,11 +431,11 @@ class CommunicationService extends Component implements CommunicationServiceInte
         $data['sms']['sq_language_id'] = $language;
         $data['sms']['sq_sms_data'] = $sms_data;
 
-        if(isset($content_data['sms_text'])) {
+        if (isset($content_data['sms_text'])) {
             $data['sms']['sq_sms_text'] = $content_data['sms_text'];
         }
 
-        if($delay > 0) {
+        if ($delay > 0) {
             $data['sms']['sq_delay'] = $delay;
         }
 
@@ -429,7 +443,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
         $response = $this->sendRequest('sms/send', $data);
 
         if ($response->isOk) {
-            if(isset($response->data['data']['response'])) {
+            if (isset($response->data['data']['response'])) {
                 $out['data'] = $response->data['data']['response'];
             } else {
                 $out['error'] = 'Not found in response array data key [data][response]';
@@ -447,7 +461,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function smsTypes() : array
+    public function smsTypes(): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -455,7 +469,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
         $response = $this->sendRequest('sms/template-types', $data);
 
         if ($response->isOk) {
-            if(isset($response->data['data']['response'])) {
+            if (isset($response->data['data']['response'])) {
                 $out['data'] = $response->data['data']['response'];
             } else {
                 $out['error'] = 'Not found in response array data key [data][response]';
@@ -474,48 +488,48 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function smsGetMessages(array $filter = []) : array
+    public function smsGetMessages(array $filter = []): array
     {
         $out = ['error' => false, 'data' => []];
 
         $data = [];
         $data['project'] = 123;
 
-        if(isset($filter['last_dt'])) {
+        if (isset($filter['last_dt'])) {
             $data['last_dt'] = date('Y-m-d H:i:s', strtotime($filter['last_dt']));
         }
 
-        if(isset($filter['last_id'])) {
+        if (isset($filter['last_id'])) {
             $data['last_id'] = (int) $filter['last_id'];
         }
 
-        if(isset($filter['last_n'])) {
+        if (isset($filter['last_n'])) {
             $data['last_n'] = (int) $filter['last_n'];
         }
 
-        if(isset($filter['limit'])) {
+        if (isset($filter['limit'])) {
             $data['limit'] = (int) $filter['limit'];
         }
 
-        if(isset($filter['phone_list'])) {
+        if (isset($filter['phone_list'])) {
             $data['phone_list'] = $filter['phone_list'];
         }
 
-        if(isset($filter['project_list'])) {
+        if (isset($filter['project_list'])) {
             $data['project_list'] = $filter['project_list'];
         }
 
         $response = $this->sendRequest('sms/inbox', $data);
 
         if ($response->isOk) {
-            if(isset($response->data['data']['response'])) {
+            if (isset($response->data['data']['response'])) {
                 $out['data'] = $response->data['data']['response'];
             } else {
                 $out['error'] = 'Not found in response array data key [data][response]';
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error('filter: '. VarDumper::dumpAsString($filter)."\r\n". VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::smsGetMessages');
+            \Yii::error('filter: ' . VarDumper::dumpAsString($filter) . "\r\n" . VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::smsGetMessages');
         }
 
         return $out;
@@ -532,7 +546,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function callToPhone(int $project_id, string $phone_from, string $from_number, string $phone_to, string $from_name = '', array $options = []) : array
+    public function callToPhone(int $project_id, string $phone_from, string $from_number, string $phone_to, string $from_name = '', array $options = []): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -548,7 +562,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
         $response = $this->sendRequest('voice/call-to-phone', $data);
 
         if ($response->isOk) {
-            if(isset($response->data['data']['response'])) {
+            if (isset($response->data['data']['response'])) {
                 $out['data'] = $response->data['data']['response'];
             } else {
                 $out['error'] = 'Not found in response array data key [data][response]';
@@ -568,7 +582,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function updateCall(string $sid, array $updateData = []) : array
+    public function updateCall(string $sid, array $updateData = []): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -578,7 +592,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
         $response = $this->sendRequest('voice/update-call', $data);
 
         if ($response->isOk) {
-            if(isset($response->data['data']['response'])) {
+            if (isset($response->data['data']['response'])) {
                 $out['data'] = $response->data['data']['response'];
             } else {
                 $out['error'] = 'Not found in response array data key [data][response]';
@@ -599,7 +613,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function redirectCall(string $sid, array $data = [], string $callBackUrl = '') : array
+    public function redirectCall(string $sid, array $data = [], string $callBackUrl = ''): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -610,7 +624,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
         $response = $this->sendRequest('voice/redirect-call', $data);
 
         if ($response->isOk) {
-            if(isset($response->data['data']['response'])) {
+            if (isset($response->data['data']['response'])) {
                 $out['data'] = $response->data['data']['response'];
             } else {
                 $out['error'] = 'Not found in response array data key [data][response]';
@@ -630,7 +644,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function updateRecordingStatus(string $sid, string $status, ?string $recordingSid = null) : array
+    public function updateRecordingStatus(string $sid, string $status, ?string $recordingSid = null): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -671,7 +685,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return array
      * @throws Exception
      */
-    public function getJwtToken($username = '') : array
+    public function getJwtToken($username = ''): array
     {
 
         /*'identity' => $token->jt_agent,
@@ -686,7 +700,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
         $response = $this->sendRequest('twilio-jwt/get-token', $data);
 
         if ($response->isOk) {
-            if(isset($response->data['data'])) {
+            if (isset($response->data['data'])) {
                 $out['data'] = $response->data['data'];
             } else {
                 $out['error'] = 'Not found in response array data key [data]';
@@ -708,9 +722,9 @@ class CommunicationService extends Component implements CommunicationServiceInte
      */
     public function getJwtTokenCache($username = '', $deleteCache = false)
     {
-        $cacheKey = 'jwt_token_'.$username;
+        $cacheKey = 'jwt_token_' . $username;
 
-        if($deleteCache) {
+        if ($deleteCache) {
             \Yii::$app->cache->delete($cacheKey);
         }
         $out = \Yii::$app->cache->get($cacheKey);
@@ -718,7 +732,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
         if ($out === false) {
             $out = $this->getJwtToken($username);
 
-            if($out && isset($out['data']['token']) && $out['data']['token']) {
+            if ($out && isset($out['data']['token']) && $out['data']['token']) {
                 $expired = isset($out['data']['expire']) ? strtotime($out['data']['expire']) - time() : 60 * 30;
                 \Yii::$app->cache->set($cacheKey, $out, $expired);
             }
@@ -738,7 +752,6 @@ class CommunicationService extends Component implements CommunicationServiceInte
      */
     public function callRedirect($cid, $type, $from, $to, $firstTransferToNumber = false)
     {
-
         $out = ['error' => false, 'data' => []];
 
         $data = [
@@ -755,7 +768,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
         if ($response->isOk) {
             // \Yii::warning(VarDumper::dumpAsString(['cid' => $cid, 'type' => $type, 'from' => $from, 'to' => $to, 'content' => $response->data]), 'Component:CommunicationService::callRedirect');
-            if(isset($response->data['data'])) {
+            if (isset($response->data['data'])) {
                 $out['data'] = $response->data['data'];
             } else {
                 $out['error'] = 'Not found in response array data key [data]';
@@ -861,8 +874,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
         string $conferenceSid,
         string $to,
         int $userId
-    ): array
-    {
+    ): array {
         $data = [
             'callSid' => $callSid,
             'parentCallSid' => $parentCallSid,
@@ -961,10 +973,10 @@ class CommunicationService extends Component implements CommunicationServiceInte
             $out['error'] = true;
             $out['message'] = 'Server error. Try again later.';
             \Yii::error(VarDumper::dumpAsString($response->content), 'Component:CommunicationService::processResponse');
-		}
+        }
 
-	    return $out;
-	}
+        return $out;
+    }
 
     private function processResponseGetPrice(\yii\httpclient\Response $response): array
     {
@@ -994,11 +1006,11 @@ class CommunicationService extends Component implements CommunicationServiceInte
             $out['error'] = true;
             $out['message'] = 'Server error. Try again later.';
             \Yii::error(VarDumper::dumpAsString($response->content), 'Component:CommunicationService::processResponse');
-		}
+        }
 
-	    return $out;
-	}
-	
+        return $out;
+    }
+
     /**
      * @param int $limit
      * @param int $offset
@@ -1022,7 +1034,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
         $response = $this->sendRequest('phone-number/list', $data, 'get');
 
         if ($response->isOk) {
-            if(empty($response->data['data']['response'])) {
+            if (empty($response->data['data']['response'])) {
                 $out['error'] = 'Not found in response array data key [data]';
             } else {
                 $out['data'] = $response->data['data']['response'];
@@ -1053,9 +1065,9 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'callSid' => $callSid,
         ];
 
-       $response = $this->sendRequest('twilio/get-call-price', $data);
+        $response = $this->sendRequest('twilio/get-call-price', $data);
 
-       return $this->processResponseGetPrice($response);
+        return $this->processResponseGetPrice($response);
     }
 
     public function getSmsPrice(string $smsSid): array
@@ -1064,9 +1076,9 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'smsSid' => $smsSid,
         ];
 
-       $response = $this->sendRequest('twilio/get-sms-price', $data);
+        $response = $this->sendRequest('twilio/get-sms-price', $data);
 
-       return $this->processResponseGetPrice($response);
+        return $this->processResponseGetPrice($response);
     }
 
     public function callToUser(string $from, string $to, int $to_user_id, int $created_userId, array $requestCall, string $friendly_name): array
@@ -1081,9 +1093,9 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'friendly_name' => $friendly_name,
         ];
 
-       $response = $this->sendRequest('twilio-conference/call-to-user', $data);
+        $response = $this->sendRequest('twilio-conference/call-to-user', $data);
 
-       return $this->processResponse($response);
+        return $this->processResponse($response);
     }
 
     public function getCallInfo(string $callSid): array
@@ -1092,9 +1104,9 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'callSid' => $callSid,
         ];
 
-       $response = $this->sendRequest('twilio-conference/get-call-info', $data);
+        $response = $this->sendRequest('twilio-conference/get-call-info', $data);
 
-       return $this->processResponse($response);
+        return $this->processResponse($response);
     }
 
     public function repeatMessage(array $data): array

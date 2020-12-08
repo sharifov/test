@@ -1,4 +1,5 @@
 <?php
+
 namespace common\components;
 
 use yii\base\Component;
@@ -26,7 +27,7 @@ class AirSearchService extends Component
     public array $options = [CURLOPT_ENCODING => 'gzip'];
     public Request $request;
 
-    public function init() : void
+    public function init(): void
     {
         parent::init();
         $this->initRequest();
@@ -35,7 +36,7 @@ class AirSearchService extends Component
     /**
      * @return bool
      */
-    private function initRequest() : bool
+    private function initRequest(): bool
     {
         $authStr = base64_encode($this->username . ':' . $this->password);
 
@@ -70,7 +71,6 @@ class AirSearchService extends Component
         array $options = [],
         ?string $format = null
     ): Response {
-
         $this->request->setMethod($method)
             ->setUrl($this->url . $action)
             ->setData($data);
@@ -85,7 +85,18 @@ class AirSearchService extends Component
         if ($format) {
             $this->request->setFormat($format);
         }
-        return $this->request->send();
+
+        $response = $this->request->send();
+
+        $metrics = \Yii::$container->get(Metrics::class);
+        if ($response->isOk) {
+            $metrics->serviceCounter('air_search', ['type' => 'success', 'action' => $action]);
+        } else {
+            $metrics->serviceCounter('air_search', ['type' => 'error', 'action' => $action]);
+        }
+        unset($metrics);
+
+        return $response;
     }
 
 
@@ -109,9 +120,11 @@ class AirSearchService extends Component
             return $response->data;
         }
 
-        \Yii::error('Params: ' . VarDumper::dumpAsString($params, 10) .
+        \Yii::error(
+            'Params: ' . VarDumper::dumpAsString($params, 10) .
             ' Error: ' . VarDumper::dumpAsString($response->content, 10),
-            'AirSearchService::generateCoupons');
+            'AirSearchService::generateCoupons'
+        );
         return null;
     }
 
@@ -133,9 +146,11 @@ class AirSearchService extends Component
             return $response->data;
         }
 
-        \Yii::error('Code: ' . $code .
+        \Yii::error(
+            'Code: ' . $code .
             ', Error: ' . VarDumper::dumpAsString($response->content, 10),
-            'AirSearchService::validateCoupon');
+            'AirSearchService::validateCoupon'
+        );
         return null;
     }
 
@@ -152,10 +167,11 @@ class AirSearchService extends Component
         if ($response->isOk) {
             return $response->data;
         }
-        \Yii::error('Params: ' . VarDumper::dumpAsString($params, 10) .
+        \Yii::error(
+            'Params: ' . VarDumper::dumpAsString($params, 10) .
             ' Error: ' . VarDumper::dumpAsString($response->content, 10),
-            'SearchService::getCoupons');
+            'SearchService::getCoupons'
+        );
         return null;
     }
-
 }

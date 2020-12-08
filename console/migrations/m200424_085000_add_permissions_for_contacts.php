@@ -46,8 +46,8 @@ class m200424_085000_add_permissions_for_contacts extends Migration
         (new RbacMigrationService())->up($this->routes, $this->roles);
 
         if (\Yii::$app->cache) {
-			\Yii::$app->cache->flush();
-		}
+            \Yii::$app->cache->flush();
+        }
     }
 
     /**
@@ -59,7 +59,7 @@ class m200424_085000_add_permissions_for_contacts extends Migration
         (new RbacMigrationService())->up($this->routes, $this->roles);
 
         if (\Yii::$app->cache) {
-			\Yii::$app->cache->flush();
-		}
+            \Yii::$app->cache->flush();
+        }
     }
 }

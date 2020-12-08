@@ -19,7 +19,8 @@ class ApiLogSearch extends ApiLog
     {
         return [
             [['al_id', 'al_user_id', 'al_memory_usage', 'al_db_query_count'], 'integer'],
-            [['al_request_data', 'al_request_dt', 'al_response_data', 'al_response_dt', 'al_ip_address', 'al_action', 'al_execution_time', 'al_db_execution_time'], 'safe'],
+            [['al_request_data', 'al_response_data', 'al_response_dt', 'al_ip_address', 'al_action', 'al_execution_time', 'al_db_execution_time'], 'safe'],
+            [['al_request_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -47,7 +48,7 @@ class ApiLogSearch extends ApiLog
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['al_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['al_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -64,7 +65,7 @@ class ApiLogSearch extends ApiLog
         // grid filtering conditions
         $query->andFilterWhere([
             'al_id' => $this->al_id,
-            'al_request_dt' => $this->al_request_dt,
+            'DATE(al_request_dt)' => $this->al_request_dt,
             'al_response_dt' => $this->al_response_dt,
             'al_user_id' => $this->al_user_id,
             'al_memory_usage' => $this->al_memory_usage,

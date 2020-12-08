@@ -22,7 +22,6 @@ class m180814_090942_create_tbl_api_log extends Migration
             'al_user_id'                => $this->integer(),
             'al_action'                 => $this->string(255),
         ]);
-
     }
 
     /**
@@ -32,5 +31,4 @@ class m180814_090942_create_tbl_api_log extends Migration
     {
         $this->dropTable('{{%api_log}}');
     }
-
 }

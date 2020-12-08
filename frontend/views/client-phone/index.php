@@ -4,6 +4,8 @@ use yii\grid\ActionColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use dosamigos\datepicker\DatePicker;
+use common\components\grid\DateTimeColumn;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\ClentPhoneSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -33,8 +35,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'client_id',
                 'value' => static function (\common\models\ClientPhone $model) {
                     $client = $model->client;
-                    if($client->id) {
-                        return '<span class="label label-info"> <i class="fa fa-link"></i> ' .  Html::encode($client->full_name). '</span>';
+                    if ($client->id) {
+                        return '<span class="label label-info"> <i class="fa fa-link"></i> ' .  Html::encode($client->full_name) . '</span>';
                     } else {
                         return 'not set';
                     }
@@ -52,7 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'filter' =>  \common\models\ClientPhone::getPhoneTypeList()
             ],
-            [
+            /*[
                 'attribute' => 'created',
                 'value' => static function (\common\models\ClientPhone $model) {
                     return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
@@ -70,12 +72,22 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
+            ],*/
+
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'created'
             ],
-            //'updated',
+
             //'comments:ntext',
             'is_sms:boolean',
-            //'validate_dt',
+
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'validate_dt'
+            ],
+
+            /*[
                 'attribute' => 'validate_dt',
                 'value' => static function (\common\models\ClientPhone $model) {
                     return $model->validate_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->validate_dt)) : null;
@@ -93,7 +105,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
 
             ['class' => ActionColumn::class],
         ],

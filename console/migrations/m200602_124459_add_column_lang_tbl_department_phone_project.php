@@ -16,15 +16,27 @@ class m200602_124459_add_column_lang_tbl_department_phone_project extends Migrat
         //$this->dropColumn('{{%department_phone_project}}', 'dpp_language_id');
 
         $this->addColumn('{{%department_phone_project}}', 'dpp_language_id', $this->string(5)->append('CHARACTER SET utf8 COLLATE utf8_unicode_ci'));
-        $this->addForeignKey('FK-department_phone_project-dpp_language_id',
-            '{{%department_phone_project}}', 'dpp_language_id',
-            '{{%language}}', 'language_id', 'SET NULL', 'CASCADE');
+        $this->addForeignKey(
+            'FK-department_phone_project-dpp_language_id',
+            '{{%department_phone_project}}',
+            'dpp_language_id',
+            '{{%language}}',
+            'language_id',
+            'SET NULL',
+            'CASCADE'
+        );
 
 
         $this->addColumn('{{%call}}', 'c_language_id', $this->string(5)->append('CHARACTER SET utf8 COLLATE utf8_unicode_ci'));
-        $this->addForeignKey('FK-call-c_language_id',
-            '{{%call}}', 'c_language_id',
-            '{{%language}}', 'language_id', 'SET NULL', 'CASCADE');
+        $this->addForeignKey(
+            'FK-call-c_language_id',
+            '{{%call}}',
+            'c_language_id',
+            '{{%language}}',
+            'language_id',
+            'SET NULL',
+            'CASCADE'
+        );
 
 
         if (Yii::$app->cache) {
@@ -32,7 +44,6 @@ class m200602_124459_add_column_lang_tbl_department_phone_project extends Migrat
         }
         Yii::$app->db->getSchema()->refreshTableSchema('{{%department_phone_project}}');
         Yii::$app->db->getSchema()->refreshTableSchema('{{%call}}');
-
     }
 
     /**
@@ -49,5 +60,4 @@ class m200602_124459_add_column_lang_tbl_department_phone_project extends Migrat
         Yii::$app->db->getSchema()->refreshTableSchema('{{%department_phone_project}}');
         Yii::$app->db->getSchema()->refreshTableSchema('{{%call}}');
     }
-
 }

@@ -44,5 +44,4 @@ class LeadSnoozeEventLogListener
             Yii::error($e, 'Listeners:LeadSnoozeEventLogListener');
         }
     }
-
 }

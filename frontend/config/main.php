@@ -15,8 +15,6 @@ use common\components\i18n\Formatter;
 use yii\web\JqueryAsset;
 use yii\bootstrap\BootstrapAsset;
 use yii\bootstrap\BootstrapPluginAsset;
-use frontend\themes\gentelella\assets\AssetLeadCommunication;
-use frontend\themes\gentelella_v2\assets\ThemeAsset;
 
 $params = array_merge(
     require __DIR__ . '/../../common/config/params.php',
@@ -27,6 +25,9 @@ $params = array_merge(
 
 $appVersion = $params['release']['version'] ?? '';
 $gitHash = $params['release']['git_hash'] ?? '';
+
+//$bundles = (YII_ENV === 'prod' || YII_ENV === 'stage' || (YII_ENV === 'dev' && ($params['minifiedAssetsEnabled'] ?? true))) ? require __DIR__ . '/assets-bundle.php' : [];
+$bundles = [];
 
 return [
     'id' => 'app-frontend',
@@ -91,6 +92,7 @@ return [
                         $ip = $_SERVER['REMOTE_ADDR'];
                         return "[frontend][$ip][$userID]";
                     },
+                    'db' => 'db_postgres'
                 ],
                 [
                     'class' => 'yii\log\DbTarget',
@@ -102,6 +104,7 @@ return [
                         $ip = $_SERVER['REMOTE_ADDR'];
                         return "[frontend][$ip][$userID]";
                     },
+                    'db' => 'db_postgres'
                 ],
                 [
                     'class' => \common\components\logger\AirFileTarget::class,
@@ -147,7 +150,7 @@ return [
                 '*' => [
                     'class' => 'yii\i18n\DbMessageSource',
                     'db' => 'db',
-                    'sourceLanguage' => 'en-US', // Developer language
+                    'sourceLanguage' => 'xx', // 'en-US' Developer language
                     'sourceMessageTable' => '{{%language_source}}',
                     'messageTable' => '{{%language_translate}}',
                     'cachingDuration' => 3600,
@@ -166,35 +169,37 @@ return [
             'hashCallback' => static function ($path) use ($appVersion) {
                 return hash('md4', $path . $appVersion);
             },
-            'bundles' => [
+            'bundles' => array_merge($bundles, [
+
                 BootstrapAsset::class => [
                     'sourcePath' => '@npm/bootstrap/dist',
                     'css' => [
                         'css/bootstrap.css'
                     ],
                 ],
+
                 BootstrapPluginAsset::class => [
+                    'class' => \yii\bootstrap4\BootstrapAsset::class,
                     'sourcePath' => '@npm/bootstrap/dist',
                     'js' => [
                         'js/bootstrap.bundle.js'
                     ],
                     'depends' => [
                         JqueryAsset::class,
-                        \yii\bootstrap4\BootstrapAsset::class,
                     ],
                 ],
-                AssetLeadCommunication::class => [
-                    'basePath' => '@webroot',
-                    'baseUrl' => '@web',
-                    'js' => [
-                        'https://cdnjs.cloudflare.com/ajax/libs/scrollup/2.4.1/jquery.scrollUp.min.js',
-                        '/js/sms_counter.min.js',
-                    ],
-                    'depends' => [
-                        ThemeAsset::class,
-                    ]
-                ]
-            ],
+//                AssetLeadCommunication::class => [
+//                    'basePath' => '@webroot',
+//                    'baseUrl' => '@web',
+//                    'js' => [
+//                        'https://cdnjs.cloudflare.com/ajax/libs/scrollup/2.4.1/jquery.scrollUp.min.js',
+//                        '/js/sms_counter.min.js',
+//                    ],
+//                    'depends' => [
+//                        GentelellaAsset::class
+//                    ]
+//                ]
+            ]),
         ],
     ],
     'modules' => [

@@ -1,4 +1,5 @@
 <?php
+
 //
 //Yii::t('client_chat-base', 'Client Chat test message');
 //Yii::t('client_chat-base', 'Client Chat 2 test message', []);

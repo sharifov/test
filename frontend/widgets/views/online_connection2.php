@@ -1,4 +1,5 @@
 <?php
+
 /* @var $leadId integer */
 
 use common\models\UserConnection;
@@ -48,19 +49,19 @@ $dtNow = date('Y-m-d H:i:s');
             }
         </script>
     </li>
-    <?php if (UserConnection::isIdleMonitorEnabled()): ?>
+    <?php if (UserConnection::isIdleMonitorEnabled()) : ?>
     <li>
         <a href="javascript:;" class="info-number" title="User Monitor" id="user-monitor-indicator">
             <div class="text-success"><i class="fa fa-clock-o"></i> <span id="user-monitor-timer"></span></div>
         </a>
     </li>
-    <?php
+        <?php
         //$this->registerJs("$('#user-monitor-timer').timer({format: '%M:%S', seconds: 0}).timer('start');", \yii\web\View::POS_READY, 'user-monitor-timer');
-    ?>
+        ?>
     <?php endif; ?>
 
 
-<?php if (UserMonitor::isAutologoutEnabled()): ?>
+<?php if (UserMonitor::isAutologoutEnabled()) : ?>
     <?php Modal::begin([
         'id' => 'modal-autologout',
         'closeButton' => false,
@@ -70,7 +71,7 @@ $dtNow = date('Y-m-d H:i:s');
     ])?>
         <div class="text-center">
             <p>You are not active for a long time (<?=UserMonitor::autologoutIdlePeriodMin()?> min.). After a few seconds, the system will automatically log out.</p>
-            <?php if(UserMonitor::isAutologoutTimerSec()): ?>
+            <?php if (UserMonitor::isAutologoutTimerSec()) : ?>
                 <h1 id="autologout-timer" class="text-danger">00:00</h1>
             <?php endif; ?>
             <p><b>Do you want to continue working?</b></p>
@@ -155,7 +156,7 @@ $js = <<<JS
     const onlineObj = $('#online-connection-indicator');
     
     window.sendCommandUpdatePhoneWidgetCurrentCalls = function () {
-        socketSend('Call', 'GetCurrentQueueCalls', {'userId': userId});
+         socketSend('Call', 'GetCurrentQueueCalls', {'userId': userId});
     };
     
     function wsInitConnect(){
@@ -163,7 +164,7 @@ $js = <<<JS
         try {
     
             //const socket = new WebSocket(wsUrl);
-            var socket = new ReconnectingWebSocket(wsUrl, null, {debug: false, reconnectInterval: 15000});
+            var socket = new ReconnectingWebSocket(wsUrl, null, {debug: false, reconnectInterval: 10000});
             window.socket = socket;
             
             socket.onopen = function (e) {
@@ -213,7 +214,11 @@ $js = <<<JS
                             //alert(obj.cmd);
                              if (typeof obj.notification !== 'undefined') {
                                  if (userId == obj.notification.userId) {
-                                    notificationInit(obj.notification);
+                                    if (typeof notificationInit === 'undefined') {
+                                        console.warn('not found notificationInit method');
+                                    } else {
+                                        notificationInit(obj.notification); 
+                                    }
                                  } else {
                                      console.error('connecting user Id not equal notification user Id');
                                  }
@@ -462,9 +467,9 @@ $js = <<<JS
                             let activeChatId = localStorage.getItem('activeChatId');
                             if (typeof window.refreshChatPage === 'function' && window.name === 'chat' && activeChatId == obj.data.cchId) {
                                 $("#modal-sm").modal("hide");
-                                window.refreshChatPage(obj.data.cchId, obj.data.tab);
+                                window.refreshChatPage(obj.data.cchId);                                
+                                createNotify('Warning', obj.data.message, 'warning');
                             }
-                            createNotify('Warning', obj.data.message, 'warning');
                         }
                         
                         if (obj.cmd === 'logout') {
@@ -480,8 +485,12 @@ $js = <<<JS
                         }
                         
                         if (obj.cmd === 'addCallToHistory') {
-                            if (typeof PhoneWidgetCall === "object") {
-                                PhoneWidgetCall.socket(obj.data);
+                            if (window.tabHistoryLoaded) {
+                                if (typeof PhoneWidgetCall === "object") {
+                                    PhoneWidgetCall.socket(obj.data);
+                                }
+                            } else {
+                                console.log('History not loaded.');
                             }
                         }
                         
@@ -515,6 +524,19 @@ $js = <<<JS
                                     createNotify('Warning', obj.data.message, 'warning');
                                 }
                             }    
+                        }
+                        
+                        if(obj.cmd === 'clientChatAddOfferButton') {                            
+                            let chatId = parseInt(obj.data.chatId, 10);
+                            let leadId = parseInt(obj.data.leadId, 10);
+                            let content = '<span class="chat-offer" data-chat-id="' + chatId + '" data-lead-id="' + leadId + '"><i class="fa fa-plane"> </i> Offer</span>';
+                            $(document).find('span[data-cc-lead-info-offer="' + leadId + '"]').html(content);
+                        }
+                        
+                        if(obj.cmd === 'clientChatRemoveOfferButton') {                            
+                            let chatId = parseInt(obj.data.chatId, 10);
+                            let leadId = parseInt(obj.data.leadId, 10);
+                            $(document).find('span[data-cc-lead-info-offer="' + leadId + '"]').html("");
                         }
                     }
                     // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
@@ -566,7 +588,6 @@ $this->registerJs($js, \yii\web\View::POS_READY, 'connection-js');
 
 
 if (UserMonitor::isAutologoutEnabled()) {
-
     $isAutologoutShowMessage = UserMonitor::isAutologoutShowMessage() ? 'true' : 'false';
     $isAutologoutTimerSec = UserMonitor::isAutologoutTimerSec();
 
@@ -635,9 +656,8 @@ JS;
 
 
 if (UserConnection::isIdleMonitorEnabled()) {
-
     $idleMs = UserConnection::idleSeconds() * 1000;
-$js = <<<JS
+    $js = <<<JS
 
 function setIdle() {
     let objDiv = $('#user-monitor-indicator div');

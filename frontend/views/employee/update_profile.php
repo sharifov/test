@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $this View
  * @var $model Employee
@@ -15,7 +16,6 @@ use yii\bootstrap\Html;
 use yii\bootstrap\ActiveForm;
 use common\models\Employee;
 use yii\web\View;
-
 
 $this->title = 'My profile - ' . $model->username;
 
@@ -49,15 +49,15 @@ $this->params['breadcrumbs'][] = $this->title;
                             <label class="control-label">User Groups</label>:
                             <?php
                                 $groupsValue = '';
-                                if( $groupsModel =  $model->ugsGroups) {
-                                    $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
+                            if ($groupsModel =  $model->ugsGroups) {
+                                $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
 
-                                    $groupsValueArr = [];
-                                    foreach ($groups as $group) {
-                                        $groupsValueArr[] = Html::tag('span', Html::encode($group), ['class' => 'label label-default']);
-                                    }
-                                    $groupsValue = implode(' ', $groupsValueArr);
+                                $groupsValueArr = [];
+                                foreach ($groups as $group) {
+                                    $groupsValueArr[] = Html::tag('span', Html::encode($group), ['class' => 'label label-default']);
                                 }
+                                $groupsValue = implode(' ', $groupsValueArr);
+                            }
                                 echo $groupsValue;
                             ?>
                         </div>
@@ -67,11 +67,11 @@ $this->params['breadcrumbs'][] = $this->title;
                             <?php
                                 $projectsValueArr = [];
 
-                                if($projects = $model->projects) {
-                                    foreach ($projects as $project) {
-                                        $projectsValueArr[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-list']) . ' ' . Html::encode($project->name), ['class' => 'label label-info']);
-                                    }
+                            if ($projects = $model->projects) {
+                                foreach ($projects as $project) {
+                                    $projectsValueArr[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-list']) . ' ' . Html::encode($project->name), ['class' => 'label label-info']);
                                 }
+                            }
 
                                 $projectsValue = implode(' ', $projectsValueArr);
                                 echo $projectsValue;
@@ -82,10 +82,10 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <label class="control-label">My Product Types</label>:
                                 <?php
                                     $productTypeValue = '';
-                                    foreach ($productTypeList as $productType) {
-                                        $productTypeValue .= Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-list']) . ' ' .
-                                            Html::encode($productType->pt_name), ['class' => 'label label-default']) . ' ';
-                                    }
+                                foreach ($productTypeList as $productType) {
+                                    $productTypeValue .= Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-list']) . ' ' .
+                                        Html::encode($productType->pt_name), ['class' => 'label label-default']) . ' ';
+                                }
                                     echo $productTypeValue;
                                 ?>
                             </div>
@@ -143,32 +143,32 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->upUser->userProfile->up_join_date;
                 }
             ],
-			[
-				'label' => 'Experience',
-				'value' => static function (UserParams $model) {
-					return $model->upUser->userProfile->getExperienceMonth() . ' Months';
-				}
-			],
+            [
+                'label' => 'Experience',
+                'value' => static function (UserParams $model) {
+                    return $model->upUser->userProfile->getExperienceMonth() . ' Months';
+                }
+            ],
             [
                 'attribute' => 'up_base_amount',
-                'value' => function(UserParams $model) {
-                    return $model->up_base_amount ? '$'.number_format($model->up_base_amount , 2) : '-';
+                'value' => function (UserParams $model) {
+                    return $model->up_base_amount ? '$' . number_format($model->up_base_amount, 2) : '-';
                 },
             ],
             [
                 'attribute' => 'up_commission_percent',
-                'value' => function(UserParams $model) {
-                    return $model->up_commission_percent ? $model->up_commission_percent. '%' : '-';
+                'value' => function (UserParams $model) {
+                    return $model->up_commission_percent ? $model->up_commission_percent . '%' : '-';
                 },
 
             ],
-			[
-				'label' => 'New Commission Percent',
-				'value' => $userCommissionRuleValue . ' %'
-			],
+            [
+                'label' => 'New Commission Percent',
+                'value' => $userCommissionRuleValue . ' %'
+            ],
             [
                 'label' => 'New Bonus Value',
-                'value' => '$'.$userBonusRuleValue
+                'value' => '$' . $userBonusRuleValue
             ],
             'up_bonus_active:boolean',
             'up_timezone',
@@ -199,10 +199,10 @@ $this->params['breadcrumbs'][] = $this->title;
             ],*/
             'up_telegram',
             'up_telegram_enable:boolean',
-			'up_rc_auth_token',
-			'up_rc_user_id',
-			'up_rc_user_password',
-			'up_rc_token_expired'
+            'up_rc_auth_token',
+            'up_rc_user_id',
+            'up_rc_user_password',
+            'up_rc_token_expired'
 
            /* @property int $up_user_id
  * @property int $up_call_type_id
@@ -219,7 +219,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 </div>
 
-<?php if ($qrcodeData): ?>
+<?php if ($qrcodeData) : ?>
     <div class="col-sm-2">
         <h3>Telegram Auth</h3>
         <?php echo '<img src="' . $qrcodeData . '" title="Scan">'; ?>

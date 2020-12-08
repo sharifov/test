@@ -36,8 +36,7 @@ class QCallService
     public function __construct(
         LeadQcallRepository $leadQcallRepository,
         LeadFlowRepository $leadFlowRepository
-    )
-    {
+    ) {
         $this->leadQcallRepository = $leadQcallRepository;
         $this->leadFlowRepository = $leadFlowRepository;
     }
@@ -93,8 +92,7 @@ class QCallService
         ?string $clientGmt,
         FindPhoneParams $findPhoneParams,
         ?string $phoneFrom = null
-    ): ?int
-    {
+    ): ?int {
         if (!$qConfig = $this->findConfig($config)) {
             //Yii::warning('QCallService:create. Config not found for status: ' . $config->status . ', callCount: ' . $config->callCount);
             return null;
@@ -137,8 +135,7 @@ class QCallService
         ?string $clientGmt,
         FindPhoneParams $findPhoneParams,
         FindWeightParams $findWeightParams
-    ): void
-    {
+    ): void {
         if (!$qConfig = $this->findConfig($config)) {
 //            Yii::warning('QCallService:updateInterval. Config not found for status: ' . $config->status . ', callCount: ' . $config->callCount);
             return;

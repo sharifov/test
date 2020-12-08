@@ -30,14 +30,14 @@ $this->registerCssFile('/css/style-duplicate.css');
 
 <style>
 .dropdown-menu {
-	z-index: 1010 !important;
+    z-index: 1010 !important;
 }
 </style>
 
 
 
 <h1>
-	<?=\yii\helpers\Html::encode($this->title)?>
+    <?=\yii\helpers\Html::encode($this->title)?>
 </h1>
 <div class="lead-duplicate">
 
@@ -139,7 +139,7 @@ $this->registerCssFile('/css/style-duplicate.css');
                 $clientName = trim($model->l_client_first_name . ' ' . $model->l_client_last_name);
 
                 if ($clientName) {
-                    $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName).'';
+                    $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName) . '';
                 }
 
                 $str = $model->l_client_email ? '<br><i class="fa fa-envelope"></i> ' . $model->l_client_email : '';
@@ -257,17 +257,17 @@ $this->registerCssFile('/css/style-duplicate.css');
             'label' => 'Diff Request Details',
             'content' => function (\common\models\Lead $model) {
                 $content = '';
-                $content .= $model->getFlightDetails("\n")."\n";
-                $content .= 'pax: ' . ($model->adults . '/' . $model->children . '/' . $model->infants) . ''."\n";
+                $content .= $model->getFlightDetails("\n") . "\n";
+                $content .= 'pax: ' . ($model->adults . '/' . $model->children . '/' . $model->infants) . '' . "\n";
 
                 $content .= sprintf('Cabin: %s', Lead::getCabin($model['cabin']));
 
                 $parentModel = $model->lDuplicateLead;
 
                 $contentParent = '';
-                if($parentModel) {
-                    $contentParent .= $parentModel->getFlightDetails("\n")."\n";
-                    $contentParent .= 'pax: ' . ($parentModel->adults . '/' . $parentModel->children . '/' . $parentModel->infants) . ''."\n";
+                if ($parentModel) {
+                    $contentParent .= $parentModel->getFlightDetails("\n") . "\n";
+                    $contentParent .= 'pax: ' . ($parentModel->adults . '/' . $parentModel->children . '/' . $parentModel->infants) . '' . "\n";
 
                     $contentParent .= sprintf('Cabin: %s', Lead::getCabin($parentModel['cabin']));
                 }
@@ -418,13 +418,13 @@ $this->registerCssFile('/css/style-duplicate.css');
             },
             'format' => 'raw'
         ],*/
-       [
+        [
             'label' => 'Reason',
             'contentOptions' => [
                 'style' => 'max-width: 250px;'
             ],
             'value' => static function (\common\models\Lead $model) {
-                return '<pre>'. $model->getLastReasonFromLeadFlow()  . '</pre>';
+                return '<pre>' . $model->getLastReasonFromLeadFlow()  . '</pre>';
             },
             'format' => 'raw'
         ],

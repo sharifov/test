@@ -23,8 +23,7 @@ class QaTaskCreateManuallyService
     public function __construct(
         QaTaskRepository $taskRepository,
         EventDispatcher $eventDispatcher
-    )
-    {
+    ) {
         $this->taskRepository = $taskRepository;
         $this->eventDispatcher = $eventDispatcher;
     }

@@ -38,15 +38,15 @@ use yii\widgets\ActiveForm;
             <p class="date"><i class="fa fa-calendar"></i> <?=Yii::$app->formatter->asDatetime(time())?></p>
         </div>
         <div class="col-md-12">
-            <?php if($action === 'create'):?>
+            <?php if ($action === 'create') :?>
                 <h4>Create new mail</h4>
             <?php endif; ?>
 
-            <?php if($action === 'update'):?>
+            <?php if ($action === 'update') :?>
                 <h4>Edit mail message</h4>
             <?php endif; ?>
 
-            <?php if($action === 'reply'):?>
+            <?php if ($action === 'reply') :?>
                 <h4>Reply message</h4>
             <?php endif; ?>
 
@@ -74,9 +74,9 @@ use yii\widgets\ActiveForm;
 
         <div class="row">
             <div class="col-md-4">
-                <?php if($action === 'create' || $action === 'update' || $action === 'reply'):?>
+                <?php if ($action === 'create' || $action === 'update' || $action === 'reply') :?>
                     <?= $form->field($model, 'e_email_from')->textInput(['maxlength' => true, 'readonly' => true]) ?>
-                <?php else: ?>
+                <?php else : ?>
                     <?= $form->field($model, 'e_email_from')->dropDownList($mailList, ['prompt' => '--- select email ---']) ?>
                 <?php endif; ?>
 

@@ -1,7 +1,10 @@
 <?php
+
 namespace modules\hotel;
+
 use Yii;
 use yii\i18n\PhpMessageSource;
+
 /**
  * Class Bootstrap
  * @package modules\hotel

@@ -14,8 +14,7 @@ class QaTaskQueueActionColumn extends ActionColumn
         array $visibleButtons = [],
         array $buttons = [],
         $config = []
-    )
-    {
+    ) {
         $customConfig['template'] = '{viewTask} {viewObject}' . $template;
 
         $customConfig['visibleButtons'] = array_merge($visibleButtons, [
@@ -40,14 +39,16 @@ class QaTaskQueueActionColumn extends ActionColumn
                 ]);
             },
             'viewObject' => static function ($url, QaTask $model) {
-                return Html::a('<i class="glyphicon glyphicon-search"></i> Object',
+                return Html::a(
+                    '<i class="glyphicon glyphicon-search"></i> Object',
                     ['/qa-task/qa-task/view-object', 'typeId' => $model->t_object_type_id, 'id' => $model->t_object_id],
                     [
                         'class' => 'btn btn-warning btn-xs',
                         'target' => '_blank',
                         'data-pjax' => 0,
                         'title' => 'View Object',
-                    ]);
+                    ]
+                );
             },
         ]);
         $config = array_merge($customConfig, $config);

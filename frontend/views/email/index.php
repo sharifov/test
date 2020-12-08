@@ -2,11 +2,12 @@
 
 use common\components\grid\UserSelect2Column;
 use common\models\Employee;
-use dosamigos\datepicker\DatePicker;
+use common\components\grid\DateTimeColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\EmailSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -21,10 +22,10 @@ $user = Yii::$app->user->identity;
 <div class="email-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-	<?php Pjax::begin([
-		'id' => 'emails',
-		'timeout' => 5000
-	]); ?>
+    <?php Pjax::begin([
+        'id' => 'emails',
+        'timeout' => 5000
+    ]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <div class="row">
@@ -40,20 +41,20 @@ $user = Yii::$app->user->identity;
         <div class="col-md-3">
             <?php
             echo  \kartik\daterange\DateRangePicker::widget([
-                'model'=> $searchModel,
+                'model' => $searchModel,
                 'attribute' => 'date_range',
-                'useWithAddon'=>true,
-                'presetDropdown'=>true,
-                'hideInput'=>true,
-                'convertFormat'=>true,
+                'useWithAddon' => true,
+                'presetDropdown' => true,
+                'hideInput' => true,
+                'convertFormat' => true,
                 'startAttribute' => 'datetime_start',
                 'endAttribute' => 'datetime_end',
-                'pluginOptions'=>[
-                    'timePicker'=> true,
-                    'timePickerIncrement'=>1,
+                'pluginOptions' => [
+                    'timePicker' => true,
+                    'timePickerIncrement' => 1,
                     'timePicker24Hour' => true,
-                    'locale'=>[
-                        'format'=>'Y-m-d H:i',
+                    'locale' => [
+                        'format' => 'Y-m-d H:i',
                         'separator' => ' - '
                     ]
                 ]
@@ -157,8 +158,8 @@ $user = Yii::$app->user->identity;
                 },
                 'filter' => \common\models\Email::STATUS_LIST
             ],
-			'attribute' => 'e_client_id:client',
-			//'e_status_done_dt',
+            'attribute' => 'e_client_id:client',
+            //'e_status_done_dt',
             //'e_read_dt',
             //'e_error_message',
             /*[
@@ -201,6 +202,10 @@ $user = Yii::$app->user->identity;
                 },
             ],*/
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'e_created_dt'
+            ],
+            /*[
                 'attribute' => 'e_created_dt',
                 'value' => static function (\common\models\Email $model) {
                     return $model->e_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->e_created_dt), 'php: Y-m-d [H:i:s]')  : '-';
@@ -217,7 +222,7 @@ $user = Yii::$app->user->identity;
                         'autocomplete' => 'off'
                     ],
                 ]),
-            ],
+            ],*/
 
 
         ],

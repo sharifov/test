@@ -77,7 +77,7 @@ return [
                 '*' => [
                     'class' => 'yii\i18n\DbMessageSource',
                     'db' => 'db',
-                    'sourceLanguage' => 'en-US', // Developer language
+                    'sourceLanguage' => 'xx', // 'en-US' Developer language
                     'sourceMessageTable' => '{{%language_source}}',
                     'messageTable' => '{{%language_translate}}',
                     'cachingDuration' => 3600,
@@ -108,6 +108,7 @@ return [
                         $ip = $_SERVER['REMOTE_ADDR'];
                         return "[webapi][$ip][$userID]";
                     },
+                    'db' => 'db_postgres'
                 ],
                 [
                     'class' => \yii\log\DbTarget::class,
@@ -122,6 +123,7 @@ return [
                         $ip = $_SERVER['REMOTE_ADDR'];
                         return "[webapi][$ip][$userID]";
                     },
+                    'db' => 'db_postgres'
                 ],
                 [
                     'class' => \common\components\logger\AirFileTarget::class,

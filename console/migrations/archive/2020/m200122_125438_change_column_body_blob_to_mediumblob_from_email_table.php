@@ -22,5 +22,4 @@ class m200122_125438_change_column_body_blob_to_mediumblob_from_email_table exte
     {
         $this->alterColumn('{{%email}}', 'e_email_body_blob', $this->binary());
     }
-
 }

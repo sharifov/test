@@ -15,7 +15,7 @@ class Repository
                 } catch (NotFoundException $e) {
                     return null;
                 } catch (\Throwable $e) {
-                    throw new $e;
+                    throw new $e();
                 }
             } else {
                 throw new \BadMethodCallException('Instance methods ' . static::class . '->' . $name . ' and ' . static::class . '->' . $method . '  doesn\'t exists');

@@ -1,8 +1,6 @@
 <?php
 
-
 namespace sales\services\lead;
-
 
 use common\models\Lead;
 use common\models\LeadPreferences;
@@ -23,57 +21,57 @@ use sales\services\TransactionManager;
  */
 class LeadPreferencesManageService
 {
-	private $finder;
-	private $leadRepository;
-	private $transactionManager;
-	private $leadPreferencesRepository;
+    private $finder;
+    private $leadRepository;
+    private $transactionManager;
+    private $leadPreferencesRepository;
 
-	/**
-	 * LeadPreferencesManageService constructor.
-	 * @param ServiceFinder $finder
-	 * @param TransactionManager $transactionManager
-	 * @param LeadRepository $leadRepository
-	 * @param LeadPreferencesRepository $leadPreferencesRepository
-	 */
-	public function __construct(
-		ServiceFinder $finder,
-		TransactionManager $transactionManager,
-		LeadRepository $leadRepository,
-		LeadPreferencesRepository $leadPreferencesRepository)
-	{
-		$this->finder = $finder;
-		$this->leadRepository = $leadRepository;
-		$this->transactionManager = $transactionManager;
-		$this->leadPreferencesRepository = $leadPreferencesRepository;
-	}
+    /**
+     * LeadPreferencesManageService constructor.
+     * @param ServiceFinder $finder
+     * @param TransactionManager $transactionManager
+     * @param LeadRepository $leadRepository
+     * @param LeadPreferencesRepository $leadPreferencesRepository
+     */
+    public function __construct(
+        ServiceFinder $finder,
+        TransactionManager $transactionManager,
+        LeadRepository $leadRepository,
+        LeadPreferencesRepository $leadPreferencesRepository
+    ) {
+        $this->finder = $finder;
+        $this->leadRepository = $leadRepository;
+        $this->transactionManager = $transactionManager;
+        $this->leadPreferencesRepository = $leadPreferencesRepository;
+    }
 
-	/**
-	 * @param LeadPreferencesForm $form
-	 * @param int|Lead $lead
-	 * @throws \Throwable
-	 */
-	public function edit(LeadPreferencesForm $form, Lead $lead): void
-	{
-		$lead = $this->finder->leadFind($lead);
-		$leadPreferences = $lead->leadPreferences;
+    /**
+     * @param LeadPreferencesForm $form
+     * @param int|Lead $lead
+     * @throws \Throwable
+     */
+    public function edit(LeadPreferencesForm $form, Lead $lead): void
+    {
+        $lead = $this->finder->leadFind($lead);
+        $leadPreferences = $lead->leadPreferences;
 
-		$this->transactionManager->wrap( function () use($form, $lead, $leadPreferences) {
-			$lead->editDelayedChargeAndNote($form->delayedCharge, $form->notesForExperts);
-			$lead->l_client_lang = $form->clientLang;
+        $this->transactionManager->wrap(function () use ($form, $lead, $leadPreferences) {
+            $lead->editDelayedChargeAndNote($form->delayedCharge, $form->notesForExperts);
+            $lead->l_client_lang = $form->clientLang;
 
-			$this->leadRepository->save($lead);
+            $this->leadRepository->save($lead);
 
-			if ($leadPreferences) {
-				$leadPreferences->edit(
-					$form->marketPrice,
-					$form->clientsBudget,
-					$form->numberStops,
+            if ($leadPreferences) {
+                $leadPreferences->edit(
+                    $form->marketPrice,
+                    $form->clientsBudget,
+                    $form->numberStops,
                     $form->currency
-				);
-			} else {
-				$leadPreferences = LeadPreferences::create($lead->id, $form->marketPrice, $form->clientsBudget, $form->numberStops, $form->currency);
-			}
-			$this->leadPreferencesRepository->save($leadPreferences);
-		});
-	}
+                );
+            } else {
+                $leadPreferences = LeadPreferences::create($lead->id, $form->marketPrice, $form->clientsBudget, $form->numberStops, $form->currency);
+            }
+            $this->leadPreferencesRepository->save($leadPreferences);
+        });
+    }
 }

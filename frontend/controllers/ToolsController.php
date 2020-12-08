@@ -3,7 +3,6 @@
 namespace frontend\controllers;
 
 use common\models\Quote;
-
 use sales\services\parsingDump\lib\ParsingDump;
 use sales\services\parsingDump\lib\worldSpan\Baggage;
 use sales\services\parsingDump\lib\worldSpan\Pricing;
@@ -59,7 +58,7 @@ class ToolsController extends FController
         $successItems = [];
         $warningItems = [];
 
-        if( Yii::$app->cache->flush()) {
+        if (Yii::$app->cache->flush()) {
             $successItems[] = 'Cache is flushed';
         } else {
             $warningItems[] = 'Cache is not flushed!';
@@ -77,29 +76,29 @@ class ToolsController extends FController
         FileHelper::removeDirectory($ccDir);
         FileHelper::removeDirectory($wcDir);
 
-        if(!file_exists($fcDir)) {
-            $successItems[] = 'Removed dir '.$fcDir;
+        if (!file_exists($fcDir)) {
+            $successItems[] = 'Removed dir ' . $fcDir;
         } else {
-            $warningItems[] = 'Not Removed dir '.$fcDir;
+            $warningItems[] = 'Not Removed dir ' . $fcDir;
         }
 
-        if(!file_exists($ccDir)) {
+        if (!file_exists($ccDir)) {
             $successItems[] = 'Removed dir ' . $ccDir;
         } else {
             $warningItems[] = 'Not Removed dir ' . $ccDir;
         }
 
-        if(!file_exists($wcDir)) {
+        if (!file_exists($wcDir)) {
             $successItems[] = 'Removed dir ' . $wcDir;
         } else {
             $warningItems[] = 'Not Removed dir ' . $wcDir;
         }
 
-        if($successItems) {
+        if ($successItems) {
             Yii::$app->session->setFlash('success', implode('<br>', $successItems));
         }
 
-        if($warningItems) {
+        if ($warningItems) {
             Yii::$app->session->setFlash('warning', implode('<br>', $warningItems));
         }
 
@@ -136,11 +135,8 @@ class ToolsController extends FController
         $prepareSegment = (int) Yii::$app->request->post('prepare_segment', 0);
 
         if ($dump) {
-
             if ($prepareSegment === 1 && $type === ParsingDump::PARSING_TYPE_RESERVATION) {
-
                 $data = (new ReservationService($gds))->parseReservation($dump, false);
-
             } elseif ($obj = ParsingDump::initClass($gds, $type)) {
                 $data = $obj->parseDump($dump);
             } else {
@@ -240,19 +236,26 @@ class ToolsController extends FController
 
         // Open file
         $f = @fopen($filepath, "rb");
-        if ($f === false) return false;
+        if ($f === false) {
+            return false;
+        }
 
         // Sets buffer size, according to the number of lines to retrieve.
         // This gives a performance boost when reading a few lines from the file.
-        if (!$adaptive) $buffer = 4096;
-        else $buffer = ($lines < 2 ? 64 : ($lines < 10 ? 512 : 4096));
+        if (!$adaptive) {
+            $buffer = 4096;
+        } else {
+            $buffer = ($lines < 2 ? 64 : ($lines < 10 ? 512 : 4096));
+        }
 
         // Jump to last character
         fseek($f, -1, SEEK_END);
 
         // Read it and adjust line number if necessary
         // (Otherwise the result would be wrong if file doesn't end with a blank line)
-        if (fread($f, 1) != "\n") $lines -= 1;
+        if (fread($f, 1) != "\n") {
+            $lines -= 1;
+        }
 
         // Start reading
         $output = '';
@@ -260,7 +263,6 @@ class ToolsController extends FController
 
         // While we would like more
         while (ftell($f) > 0 && $lines >= 0) {
-
             // Figure out how far back we should jump
             $seek = min(ftell($f), $buffer);
 
@@ -275,22 +277,17 @@ class ToolsController extends FController
 
             // Decrease our line counter
             $lines -= substr_count($chunk, "\n");
-
         }
 
         // While we have too many lines
         // (Because of buffer size we might have read too many)
         while ($lines++ < 0) {
-
             // Find first newline and remove all text before that
             $output = substr($output, strpos($output, "\n") + 1);
-
         }
 
         // Close file and return
         fclose($f);
         return trim($output);
-
     }
-
 }

@@ -13,7 +13,7 @@ use sales\helpers\communication\StatisticsHelper;
 use yii\helpers\Html;
 use kartik\grid\GridView;
 use sales\entities\cases\Cases;
-use \sales\entities\cases\CasesStatus;
+use sales\entities\cases\CasesStatus;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
 use yii\helpers\ArrayHelper;
@@ -73,7 +73,7 @@ $gridId = 'cases-grid-id';
     </div>
 
 
-    <?php if ($user->isAdmin() || $user->isExSuper() || $user->isSupSuper()): ?>
+    <?php if ($user->isAdmin() || $user->isExSuper() || $user->isSupSuper()) : ?>
         <?= MultipleUpdateButtonWidget::widget([
             'modalId' => 'modal-df',
             'showUrl' => Url::to(['/cases-multiple-update/show']),
@@ -94,8 +94,8 @@ $gridId = 'cases-grid-id';
             ],
             [
                 'attribute' => 'cs_id',
-                'value' => static function(Cases $case){
-                    if(Auth::can('cases/view', ['case' => $case])){
+                'value' => static function (Cases $case) {
+                    if (Auth::can('cases/view', ['case' => $case])) {
                         return Html::a($case->cs_id, [
                             'cases/view',
                             'gid' => $case->cs_gid
@@ -148,8 +148,10 @@ $gridId = 'cases-grid-id';
 
                     $statistics = new StatisticsHelper($case->cs_id, StatisticsHelper::TYPE_CASE);
                     $str .= '<br /><br />';
-                    $str .= Yii::$app->getView()->render('/partial/_communication_statistic_list',
-                        ['statistics' => $statistics->setCountAll()]);
+                    $str .= Yii::$app->getView()->render(
+                        '/partial/_communication_statistic_list',
+                        ['statistics' => $statistics->setCountAll()]
+                    );
 
                     return $str ?? '-';
                 },
@@ -244,14 +246,16 @@ $gridId = 'cases-grid-id';
                     if ($model->caseSale) {
                         foreach ($model->caseSale as $caseSale) {
                             /** @var CaseSale $caseSale */
-                            $out .= Html::a('[' . $caseSale->css_sale_id . ']',
-                                ['sale/view', 'h' => base64_encode($caseSale->css_sale_book_id . '|' . $caseSale->css_sale_id)]) . '<br />';
+                            $out .= Html::a(
+                                '[' . $caseSale->css_sale_id . ']',
+                                ['sale/view', 'h' => base64_encode($caseSale->css_sale_book_id . '|' . $caseSale->css_sale_id)]
+                            ) . '<br />';
                             $out .= $caseSale->css_charged ? 'Selling price: ' . $caseSale->css_charged . '<br />' : '';
                             $out .= $caseSale->css_profit ? 'Profit: ' . $caseSale->css_profit . '<br />' : '';
                             $out .= $caseSale->css_out_date ? 'Out : <i class="fa fa-calendar"></i> ' .
-                                Yii::$app->formatter->asDatetime(strtotime( $caseSale->css_out_date)) . '<br />' : '';
+                                Yii::$app->formatter->asDatetime(strtotime($caseSale->css_out_date)) . '<br />' : '';
                             $out .= $caseSale->css_in_date ? 'In : <i class="fa fa-calendar"></i> ' .
-                                Yii::$app->formatter->asDatetime(strtotime( $caseSale->css_in_date)) . '<br />' : '';
+                                Yii::$app->formatter->asDatetime(strtotime($caseSale->css_in_date)) . '<br />' : '';
                             $out .= '<hr />';
                         }
                     }

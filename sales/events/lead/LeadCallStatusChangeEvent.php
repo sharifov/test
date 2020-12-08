@@ -33,5 +33,4 @@ class LeadCallStatusChangeEvent
         $this->newCallStatus = $newCallStatus;
         $this->ownerId = $ownerId;
     }
-
 }

@@ -41,22 +41,22 @@ class DepartmentEmailProjectUserGroup extends \yii\db\ActiveRecord
         ];
     }
 
-	/**
-	 * @return array
-	 */
-	public function behaviors()
-	{
-		return [
-			'timestamp' => [
-				'class' => TimestampBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['dug_created_dt'],
-					ActiveRecord::EVENT_BEFORE_UPDATE => ['dug_created_dt'],
-				],
-				'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
-			],
-		];
-	}
+    /**
+     * @return array
+     */
+    public function behaviors()
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['dug_created_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['dug_created_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+            ],
+        ];
+    }
 
     /**
      * {@inheritdoc}

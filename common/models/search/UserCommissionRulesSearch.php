@@ -19,7 +19,7 @@ class UserCommissionRulesSearch extends UserCommissionRules
         return [
             [['ucr_exp_month', 'ucr_kpi_percent', 'ucr_order_profit', 'ucr_created_user_id', 'ucr_updated_user_id'], 'integer'],
             [['ucr_value'], 'number'],
-            [['ucr_created_dt', 'ucr_updated_dt'], 'safe'],
+            [['ucr_created_dt', 'ucr_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

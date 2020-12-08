@@ -18,8 +18,9 @@ class PaymentSearch extends Payment
     {
         return [
             [['pay_id', 'pay_type_id', 'pay_method_id', 'pay_status_id', 'pay_invoice_id', 'pay_order_id', 'pay_created_user_id', 'pay_updated_user_id'], 'integer'],
-            [['pay_date', 'pay_currency', 'pay_created_dt', 'pay_updated_dt'], 'safe'],
+            [['pay_currency'], 'safe'],
             [['pay_amount'], 'number'],
+            [['pay_created_dt', 'pay_updated_dt', 'pay_date'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -63,14 +64,14 @@ class PaymentSearch extends Payment
             'pay_type_id' => $this->pay_type_id,
             'pay_method_id' => $this->pay_method_id,
             'pay_status_id' => $this->pay_status_id,
-            'pay_date' => $this->pay_date,
+            'DATE(pay_date)' => $this->pay_date,
             'pay_amount' => $this->pay_amount,
             'pay_invoice_id' => $this->pay_invoice_id,
             'pay_order_id' => $this->pay_order_id,
             'pay_created_user_id' => $this->pay_created_user_id,
             'pay_updated_user_id' => $this->pay_updated_user_id,
-            'pay_created_dt' => $this->pay_created_dt,
-            'pay_updated_dt' => $this->pay_updated_dt,
+            'DATE(pay_created_dt)' => $this->pay_created_dt,
+            'DATE(pay_updated_dt)' => $this->pay_updated_dt,
         ]);
 
         $query->andFilterWhere(['like', 'pay_currency', $this->pay_currency]);

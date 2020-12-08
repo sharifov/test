@@ -31,7 +31,7 @@ class OutputHelper
      */
     public static function getColorByStatusCode(int $statusCode): int
     {
-         switch ($statusCode) {
+        switch ($statusCode) {
             case 1: // success
                 $colorInfo = Console::FG_GREEN;
                 break;

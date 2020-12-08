@@ -93,9 +93,9 @@ class PhoneList extends \yii\db\ActiveRecord
     }
 
     public function getDepartmentPhoneProject(): ActiveQuery
-	{
-		return $this->hasOne(DepartmentPhoneProject::class, ['dpp_phone_list_id' => 'pl_id']);
-	}
+    {
+        return $this->hasOne(DepartmentPhoneProject::class, ['dpp_phone_list_id' => 'pl_id']);
+    }
 
     public static function find(): Scopes
     {

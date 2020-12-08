@@ -8,7 +8,7 @@ use yii\widgets\DetailView;
 /* @var $searchModel common\models\search\QuotePriceSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Quote: '.$model->id.', UID: ' . $model->uid;
+$this->title = 'Quote: ' . $model->id . ', UID: ' . $model->uid;
 $this->params['breadcrumbs'][] = ['label' => 'Quotes', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
@@ -41,15 +41,15 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                     [
                         'attribute' => 'lead_id',
                         'format' => 'html',
-                        'value' => function(\common\models\Quote $model) {
-                            return '<i class="fa fa-arrow-right"></i> '.Html::a($model->lead_id, ['leads/view', 'id' => $model->lead_id], ['target' => '_blank']);
+                        'value' => function (\common\models\Quote $model) {
+                            return '<i class="fa fa-arrow-right"></i> ' . Html::a($model->lead_id, ['leads/view', 'id' => $model->lead_id], ['target' => '_blank']);
                         },
                     ],
                     [
                         'attribute' => 'employee_id',
                         'format' => 'raw',
-                        'value' => function(\common\models\Quote $model) {
-                            return $model->employee ? '<i class="fa fa-user"></i> '.$model->employee->username : '-';
+                        'value' => function (\common\models\Quote $model) {
+                            return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
                         },
 
                     ],
@@ -65,7 +65,7 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                 'attributes' => [
                     [
                         'attribute' => 'status',
-                        'value' => function(\common\models\Quote $model) {
+                        'value' => function (\common\models\Quote $model) {
                             return $model->getStatusName(true);
                         },
                         'format' => 'raw',
@@ -74,8 +74,8 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 
                     [
                         'attribute' => 'gds',
-                        'value' => function(\common\models\Quote $model) {
-                            return '<i class="fa fa-plane"></i> '.$model->getGdsName2();
+                        'value' => function (\common\models\Quote $model) {
+                            return '<i class="fa fa-plane"></i> ' . $model->getGdsName2();
                         },
                         'format' => 'raw',
 
@@ -83,14 +83,14 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                     'pcc',
                     [
                         'attribute' => 'trip_type',
-                        'value' => function(\common\models\Quote $model) {
+                        'value' => function (\common\models\Quote $model) {
                             return \common\models\Lead::getFlightType($model->trip_type) ?? '-';
                         },
 
                     ],
                     [
                         'attribute' => 'cabin',
-                        'value' => function(\common\models\Quote $model) {
+                        'value' => function (\common\models\Quote $model) {
                             return \common\models\Lead::getCabin($model->cabin) ?? '-';
                         },
                         'filter' => \common\models\Lead::CABIN_LIST
@@ -107,8 +107,8 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                     //'reservation_dump:ntext',
                     [
                         'attribute' => 'reservation_dump',
-                        'value' => function(\common\models\Quote $model) {
-                            return '<pre>'.$model->reservation_dump.'</pre>';
+                        'value' => function (\common\models\Quote $model) {
+                            return '<pre>' . $model->reservation_dump . '</pre>';
                         },
                         'format' => 'html',
                     ],
@@ -118,16 +118,16 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                     //'updated',
                     [
                         'attribute' => 'created',
-                        'value' => function(\common\models\Quote $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
+                        'value' => function (\common\models\Quote $model) {
+                            return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
                         },
                         'format' => 'raw',
                     ],
 
                     [
                         'attribute' => 'updated',
-                        'value' => function(\common\models\Quote $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
+                        'value' => function (\common\models\Quote $model) {
+                            return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->updated));
                         },
                         'format' => 'raw',
                     ],
@@ -155,8 +155,8 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                     ],
                     [
                         'attribute' => 'passenger_type',
-                        'value' => function(\common\models\QuotePrice $model) {
-                            return '<i class="fa fa-user"></i> '.$model->getPassengerTypeName();
+                        'value' => function (\common\models\QuotePrice $model) {
+                            return '<i class="fa fa-user"></i> ' . $model->getPassengerTypeName();
                         },
                         'format' => 'raw',
                         'filter' => \common\models\QuotePrice::PASSENGER_TYPE_LIST
@@ -204,16 +204,16 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 
                     [
                         'attribute' => 'created',
-                        'value' => function(\common\models\QuotePrice $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
+                        'value' => function (\common\models\QuotePrice $model) {
+                            return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
                         },
                         'format' => 'raw',
                     ],
 
                     [
                         'attribute' => 'updated',
-                        'value' => function(\common\models\QuotePrice $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
+                        'value' => function (\common\models\QuotePrice $model) {
+                            return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->updated));
                         },
                         'format' => 'raw',
                     ],
@@ -227,7 +227,7 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
         </div>
     </div>
 
-    <?php if ($showGdsOfferId): ?>
+    <?php if ($showGdsOfferId) : ?>
     <div class="row">
         <div class="col-md-12">
             <h3>Origin Search Data:</h3>

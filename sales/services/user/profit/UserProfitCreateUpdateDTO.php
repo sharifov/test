@@ -1,4 +1,5 @@
 <?php
+
 namespace sales\services\user\profit;
 
 /**
@@ -18,69 +19,68 @@ namespace sales\services\user\profit;
  */
 class UserProfitCreateUpdateDTO
 {
-	/**
-	 * @var int|null
-	 */
-	public $userId;
-	/**
-	 * @var int|null
-	 */
-	public $leadId;
-	/**
-	 * @var int|null
-	 */
-	public $orderId;
-	/**
-	 * @var int|null
-	 */
-	public $productQuoteId;
-	/**
-	 * @var int|null
-	 */
-	public $percent;
-	/**
-	 * @var float|null
-	 */
-	public $profit;
-	/**
-	 * @var int|null
-	 */
-	public $splitPercent;
-	/**
-	 * @var int|null
-	 */
-	public $statusId;
-	/**
-	 * @var int|null
-	 */
-	public $payrollId;
-	/**
-	 * @var int|null
-	 */
-	public $typeId;
+    /**
+     * @var int|null
+     */
+    public $userId;
+    /**
+     * @var int|null
+     */
+    public $leadId;
+    /**
+     * @var int|null
+     */
+    public $orderId;
+    /**
+     * @var int|null
+     */
+    public $productQuoteId;
+    /**
+     * @var int|null
+     */
+    public $percent;
+    /**
+     * @var float|null
+     */
+    public $profit;
+    /**
+     * @var int|null
+     */
+    public $splitPercent;
+    /**
+     * @var int|null
+     */
+    public $statusId;
+    /**
+     * @var int|null
+     */
+    public $payrollId;
+    /**
+     * @var int|null
+     */
+    public $typeId;
 
-	public function __construct(
-		?int $userId,
-		?int $leadId,
-		?int $orderId,
-		?int $productQuoteId,
-		?int $percent,
-		?float $profit,
-		?int $splitPercent,
-		?int $statusId = null,
-		?int $payrollId = null,
-		?int $typeId = null
-	)
-	{
-		$this->userId = $userId;
-		$this->leadId = $leadId;
-		$this->orderId = $orderId;
-		$this->productQuoteId = $productQuoteId;
-		$this->percent = $percent;
-		$this->profit = $profit;
-		$this->splitPercent = $splitPercent;
-		$this->statusId = $statusId;
-		$this->payrollId = $payrollId;
-		$this->typeId = $typeId;
-	}
+    public function __construct(
+        ?int $userId,
+        ?int $leadId,
+        ?int $orderId,
+        ?int $productQuoteId,
+        ?int $percent,
+        ?float $profit,
+        ?int $splitPercent,
+        ?int $statusId = null,
+        ?int $payrollId = null,
+        ?int $typeId = null
+    ) {
+        $this->userId = $userId;
+        $this->leadId = $leadId;
+        $this->orderId = $orderId;
+        $this->productQuoteId = $productQuoteId;
+        $this->percent = $percent;
+        $this->profit = $profit;
+        $this->splitPercent = $splitPercent;
+        $this->statusId = $statusId;
+        $this->payrollId = $payrollId;
+        $this->typeId = $typeId;
+    }
 }

@@ -175,11 +175,13 @@ class StatsController extends FController
                 'viewModel' => new ViewModelTotalCallGraph($model->getCallLogStats(), $model),
             ]);
         } else {
+            if (!$model->validate()) {
+                $model->createTimeRange = null;
+            }
             return $this->render('calls-stats', [
                 'model' => $model
             ]);
         }
-
     }
 
     /**
@@ -190,7 +192,6 @@ class StatsController extends FController
         $callSearch = new CallGraphsSearch();
         $callSearch->load(Yii::$app->request->post());
         if ($callSearch->validate()) {
-
             $html = $this->renderAjax('partial/_total_calls_chart', [
                 'viewModel' => new ViewModelTotalCallGraph($callSearch->getCallLogStats(), $callSearch),
             ]);
@@ -211,11 +212,11 @@ class StatsController extends FController
             $chartOptions = Yii::$app->request->post();
             $rangeBy = Yii::$app->request->post('groupBy');
             $date = explode("/", $chartOptions['dateRange']);
-            if ($chartOptions['dateRange'] == ''){
+            if ($chartOptions['dateRange'] == '') {
                 $date[0] = $date[1] = date('Y-m-d', strtotime('-0 day'));
             }
             $smsGraphData = Sms::getSmsStats($date[0], $date[1], $rangeBy, (int)$chartOptions['smsType']);
-            if ($chartOptions['dateRange'] == ''){
+            if ($chartOptions['dateRange'] == '') {
                 $date[0] = $date[1] = date('Y-m-d', strtotime('-0 day'));
             }
             return $this->renderAjax('sms-report', [
@@ -237,7 +238,7 @@ class StatsController extends FController
             $chartOptions = Yii::$app->request->post();
             $rangeBy = Yii::$app->request->post('groupBy');
             $date = explode("/", $chartOptions['dateRange']);
-            if ($chartOptions['dateRange'] == ''){
+            if ($chartOptions['dateRange'] == '') {
                 $date[0] = $date[1] = date('Y-m-d', strtotime('-0 day'));
             }
             $emailsGraphData = Email::getEmailsStats($date[0], $date[1], $rangeBy, (int)$chartOptions['emailsType']);
@@ -264,42 +265,43 @@ class StatsController extends FController
             $rangeBy = Yii::$app->request->post('groupBy');
             $action = Yii::$app->request->post('action');
             $date = explode("/", $chartOptions['dateRange']);
-            if ($chartOptions['dateRange'] == ''){
+            if ($chartOptions['dateRange'] == '') {
                 $date[0] = $date[1] = date('Y-m-d', strtotime('-0 day'));
             }
             $userApiId = $chartOptions['project'];
 
-            if (date('Y-m-d', strtotime($date[0])) == date('Y-m-d', strtotime($date[1])) && $rangeBy != 'D' && $rangeBy != 'M'){
+            if (date('Y-m-d', strtotime($date[0])) == date('Y-m-d', strtotime($date[1])) && $rangeBy != 'D' && $rangeBy != 'M') {
                 $range = 'H';
                 $chartTimeFormat = 'H:i';
-                $currentDate =  date('Y-m-d H:i:s', strtotime($date[0].' 00:00:00'));
-                $lastDate =  date('Y-m-d H:i:s', strtotime($date[1].' 23:59:59'));
-            } else if(date('Y-m-d', strtotime($date[0])) != date('Y-m-d', strtotime($date[1])) && $rangeBy == 'D') {
+                $currentDate =  date('Y-m-d H:i:s', strtotime($date[0] . ' 00:00:00'));
+                $lastDate =  date('Y-m-d H:i:s', strtotime($date[1] . ' 23:59:59'));
+            } elseif (date('Y-m-d', strtotime($date[0])) != date('Y-m-d', strtotime($date[1])) && $rangeBy == 'D') {
                 $range = 'D';
                 $chartTimeFormat = 'd M';
                 $currentDate =  date('Y-m-d', strtotime($date[0]));
                 $lastDate =  date('Y-m-d', strtotime($date[1]));
-            } else if(date('Y-m-d', strtotime($date[0])) == date('Y-m-d', strtotime($date[1])) && $rangeBy == 'D') {
+            } elseif (date('Y-m-d', strtotime($date[0])) == date('Y-m-d', strtotime($date[1])) && $rangeBy == 'D') {
                 $range = 'D';
                 $chartTimeFormat = 'd M';
                 $currentDate =  date('Y-m-d', strtotime($date[0]));
                 $lastDate =  date('Y-m-d', strtotime($date[1]));
-            } else if(date('Y-m-d', strtotime($date[0])) == date('Y-m-d', strtotime($date[1])) && $rangeBy == 'M') {
+            } elseif (date('Y-m-d', strtotime($date[0])) == date('Y-m-d', strtotime($date[1])) && $rangeBy == 'M') {
                 $range = 'M';
                 $chartTimeFormat = 'Y-m';
                 $currentDate =  date('Y-m-01', strtotime($date[0]));
                 $lastDate =  date('Y-m-31', strtotime($date[1]));
-            } if (date('Y-m-d', strtotime($date[0])) != date('Y-m-d', strtotime($date[1])) && $rangeBy != 'H' && $rangeBy != 'M'){
+            }
+            if (date('Y-m-d', strtotime($date[0])) != date('Y-m-d', strtotime($date[1])) && $rangeBy != 'H' && $rangeBy != 'M') {
                 $range = 'D';
                 $chartTimeFormat = 'd M';
                 $currentDate =  date('Y-m-d', strtotime($date[0]));
                 $lastDate =  date('Y-m-d', strtotime($date[1]));
-            } else if(date('Y-m-d', strtotime($date[0])) != date('Y-m-d', strtotime($date[1])) && $rangeBy == 'M') {
+            } elseif (date('Y-m-d', strtotime($date[0])) != date('Y-m-d', strtotime($date[1])) && $rangeBy == 'M') {
                 $range = 'M';
                 $chartTimeFormat = 'Y-m';
                 $currentDate = date('Y-m-01', strtotime($date[0]));
                 $lastDate = date('Y-m-31', strtotime($date[1]));
-            } else if (date('Y-m-d', strtotime($date[0])) != date('Y-m-d', strtotime($date[1])) && $rangeBy == 'H') {
+            } elseif (date('Y-m-d', strtotime($date[0])) != date('Y-m-d', strtotime($date[1])) && $rangeBy == 'H') {
                 $range = 'HD';
                 $chartTimeFormat = 'Y-m-d H:i';
                 $currentDate = date('Y-m-d H:i:s', strtotime($date[0] . ' 00:00:00'));
@@ -339,7 +341,7 @@ class StatsController extends FController
         $teamsBoardsSettings = json_decode($teamsSettings['s_value'], true);
         $teamsSkill = json_decode($teamsSettingsSkill['s_value'], true);
 
-        if(Yii::$app->request->isPost){
+        if (Yii::$app->request->isPost) {
             $period = Yii::$app->request->post('period');
         } else {
             $period = 'currentWeek';

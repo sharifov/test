@@ -105,5 +105,4 @@ class CloneReasonForm extends Model
         }
         return false;
     }
-
 }

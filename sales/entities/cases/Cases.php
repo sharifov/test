@@ -65,7 +65,6 @@ use Yii;
  */
 class Cases extends ActiveRecord implements Objectable
 {
-
     use EventTrait;
 
     /**
@@ -96,67 +95,41 @@ class Cases extends ActiveRecord implements Objectable
         return $case;
     }
 
-    /**
-     * @param int $clientId
-     * @param int|null $projectId
-     * @return static
-     */
-    public static function createSupportByIncomingSms(int $clientId, ?int $projectId): self
+    public static function createByIncomingSms(int $departmentId, int $clientId, ?int $projectId): self
     {
         $case = self::create();
         $case->cs_client_id = $clientId;
         $case->cs_project_id = $projectId;
-        $case->cs_dep_id = Department::DEPARTMENT_SUPPORT;
+        $case->cs_dep_id = $departmentId;
         $case->cs_source_type_id = CasesSourceType::SMS;
         $case->pending(null, 'Created by incoming sms');
         return $case;
     }
 
-    /**
-     * @param int $clientId
-     * @param int|null $projectId
-     * @return static
-     */
-    public static function createSupportByIncomingEmail(int $clientId, ?int $projectId): self
+    public static function createByDepartmentIncomingEmail(int $departmentId, int $clientId, ?int $projectId): self
     {
         $case = self::create();
         $case->cs_client_id = $clientId;
         $case->cs_project_id = $projectId;
-        $case->cs_dep_id = Department::DEPARTMENT_SUPPORT;
-        $case->cs_source_type_id = CasesSourceType::MAIL;
-        $case->pending(null, 'Created by incoming email');
-        return $case;
-    }
-
-    /**
-     * @param int $clientId
-     * @param int|null $projectId
-     * @return static
-     */
-    public static function createExchangeByIncomingEmail(int $clientId, ?int $projectId): self
-    {
-        $case = self::create();
-        $case->cs_client_id = $clientId;
-        $case->cs_project_id = $projectId;
-        $case->cs_dep_id = Department::DEPARTMENT_EXCHANGE;
+        $case->cs_dep_id = $departmentId;
         $case->cs_source_type_id = CasesSourceType::MAIL;
         $case->pending(null, 'Created by incoming email');
         return $case;
     }
 
     public static function createExchangeByImport(int $clientId, int $projectId, string $bookingId, int $categoryId, string $subject, int $sourceType)
-	{
-		$case = self::create();
-		$case->cs_client_id = $clientId;
-		$case->cs_project_id = $projectId;
-		$case->cs_dep_id = Department::DEPARTMENT_EXCHANGE;
-		$case->cs_category_id = $categoryId;
-		$case->cs_subject = $subject;
-		$case->cs_source_type_id = $sourceType;
-		$case->cs_order_uid = $bookingId;
-		$case->pending(null, 'Created by import');
-		return $case;
-	}
+    {
+        $case = self::create();
+        $case->cs_client_id = $clientId;
+        $case->cs_project_id = $projectId;
+        $case->cs_dep_id = Department::DEPARTMENT_EXCHANGE;
+        $case->cs_category_id = $categoryId;
+        $case->cs_subject = $subject;
+        $case->cs_source_type_id = $sourceType;
+        $case->cs_order_uid = $bookingId;
+        $case->pending(null, 'Created by import');
+        return $case;
+    }
 
     /**
      * @param int $clientId
@@ -201,8 +174,7 @@ class Cases extends ActiveRecord implements Objectable
         ?int $sourceTypeId,
         ?string $orderUid,
         ?string $targetMessage
-    ): self
-    {
+    ): self {
         $case = self::create();
         $case->cs_project_id = $projectId;
         $case->cs_category_id = $categoryId;
@@ -224,8 +196,7 @@ class Cases extends ActiveRecord implements Objectable
         ?string $subject,
         ?string $description,
         int $categoryId
-    ): self
-    {
+    ): self {
         $case = self::create();
         $case->cs_client_id = $clientId;
         $case->cs_project_id = $projectId;
@@ -278,13 +249,13 @@ class Cases extends ActiveRecord implements Objectable
         return $this->cs_status === CasesStatus::STATUS_PENDING;
     }
 
-	/**
-	 * @return bool
-	 */
+    /**
+     * @return bool
+     */
     public function isDepartmentSupport(): bool
-	{
-		return $this->cs_dep_id === Department::DEPARTMENT_SUPPORT;
-	}
+    {
+        return $this->cs_dep_id === Department::DEPARTMENT_SUPPORT;
+    }
 
     /**
      * @param int $userId
@@ -441,8 +412,7 @@ class Cases extends ActiveRecord implements Objectable
         ?string $subject,
         ?string $description,
         ?string $orderUid
-    ): void
-    {
+    ): void {
         $this->updateCategory($categoryId);
         $this->cs_subject = $subject;
         $this->cs_description = $description;
@@ -525,21 +495,21 @@ class Cases extends ActiveRecord implements Objectable
         return $this->hasMany(CaseStatusLog::class, ['csl_case_id' => 'cs_id']);
     }
 
-	/**
-	 * @return ActiveQuery
-	 */
+    /**
+     * @return ActiveQuery
+     */
     public function getDepartmentPhonesByProjectAndDepartment(): ActiveQuery
-	{
-		return $this->hasMany(DepartmentPhoneProject::class, ['dpp_project_id' => 'cs_project_id', 'dpp_dep_id' => 'cs_dep_id']);
-	}
+    {
+        return $this->hasMany(DepartmentPhoneProject::class, ['dpp_project_id' => 'cs_project_id', 'dpp_dep_id' => 'cs_dep_id']);
+    }
 
-	/**
-	 * @return ActiveQuery
-	 */
+    /**
+     * @return ActiveQuery
+     */
     public function getDepartmentEmailsByProjectAndDepartment(): ActiveQuery
-	{
-		return $this->hasMany(DepartmentEmailProject::class, ['dep_project_id' => 'cs_project_id', 'dep_dep_id' => 'cs_dep_id']);
-	}
+    {
+        return $this->hasMany(DepartmentEmailProject::class, ['dep_project_id' => 'cs_project_id', 'dep_dep_id' => 'cs_dep_id']);
+    }
 
     /**
      * @return ActiveQuery
@@ -630,20 +600,20 @@ class Cases extends ActiveRecord implements Objectable
         $offset = $this->call->c_offset_gmt ?? false;
 
         if ($offset) {
-            if(is_numeric($offset) && $offset > 0) {
+            if (is_numeric($offset) && $offset > 0) {
                 $offset = '+' . $offset;
             }
 
-            $timezoneName = timezone_name_from_abbr('',intval($offset) * 3600, true);
+            $timezoneName = timezone_name_from_abbr('', intval($offset) * 3600, true);
 
             $dt = new \DateTime();
-            if($timezoneName) {
+            if ($timezoneName) {
                 $timezone = new \DateTimeZone($timezoneName);
                 $dt->setTimezone($timezone);
             }
             $clientTime =  $dt->format('H:i');
 
-            $clientTime = '<b title="TZ ('.$offset.')"><i class="fa fa-clock-o '.($this->call->c_offset_gmt ? 'success': '').'"></i> ' . Html::encode($clientTime) . '</b>';
+            $clientTime = '<b title="TZ (' . $offset . ')"><i class="fa fa-clock-o ' . ($this->call->c_offset_gmt ? 'success' : '') . '"></i> ' . Html::encode($clientTime) . '</b>';
         }
 
         return $clientTime;

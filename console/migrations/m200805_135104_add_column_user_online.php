@@ -38,5 +38,4 @@ class m200805_135104_add_column_user_online extends Migration
             Yii::$app->cache->flush();
         }
     }
-
 }

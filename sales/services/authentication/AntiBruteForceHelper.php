@@ -45,8 +45,10 @@ class AntiBruteForceHelper
             $browserName = 'Internet Explorer';
         } elseif (strpos($exactBrowserName, 'firefox/')) {
             $browserName = 'Firefox';
-        } elseif (strpos($exactBrowserName, 'safari/') && strpos($exactBrowserName, 'opr/') === false &&
-            strpos($exactBrowserName, 'chrome/') === false) {
+        } elseif (
+            strpos($exactBrowserName, 'safari/') && strpos($exactBrowserName, 'opr/') === false &&
+            strpos($exactBrowserName, 'chrome/') === false
+        ) {
                 $browserName = 'Safari';
         } else {
             $browserName = 'Browser not defined';

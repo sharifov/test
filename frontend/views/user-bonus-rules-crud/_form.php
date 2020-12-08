@@ -33,8 +33,8 @@ use yii\widgets\Pjax;
                 ]) ?>
 
                 <?= $form->field($model, 'ubr_order_profit')->input('number', [
-					'min' => UserBonusRules::EXP_MIN_VALUE,
-					'step' => 1
+                    'min' => UserBonusRules::EXP_MIN_VALUE,
+                    'step' => 1
                 ]) ?>
 
                 <?= $form->field($model, 'ubr_value')->input('number', [

@@ -34,13 +34,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'model' => $model,
             'attributes' => [
                 'ccar_id',
-				[
-					'attribute' => 'ccar_action_id',
-					'value' => static function (ClientChatActionReason $model) {
-						return ClientChatStatusLog::getActionLabel($model->ccar_action_id);
-					},
-					'format' => 'raw',
-				],
+                [
+                    'attribute' => 'ccar_action_id',
+                    'value' => static function (ClientChatActionReason $model) {
+                        return ClientChatStatusLog::getActionLabel($model->ccar_action_id);
+                    },
+                    'format' => 'raw',
+                ],
                 'ccar_key',
                 'ccar_name',
                 'ccar_enabled:booleanByLabel',

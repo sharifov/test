@@ -42,5 +42,4 @@ class LeadFlightSegmentHelper
     {
         return ArrayHelper::getValue(self::flexibilityTypeList(), $type);
     }
-
 }

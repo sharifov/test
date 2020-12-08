@@ -37,7 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'css_sale_created_dt',
             [
                 'attribute' => 'css_sale_data',
-                'value' => static function($model) {
+                'value' => static function ($model) {
                     return $model->getSaleDataEncoded();
                 },
             ],

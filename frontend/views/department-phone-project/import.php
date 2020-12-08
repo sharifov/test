@@ -27,8 +27,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
 </div>
 
-<?php foreach ($logs as $log): ?>
+<?php foreach ($logs as $log) : ?>
 <pre>
-<?php print_r($log) ?>
+    <?php print_r($log) ?>
 </pre>
 <?php endforeach;?>

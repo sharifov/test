@@ -29,5 +29,4 @@ class LeadTaskEventListener
     {
         $this->service->createLeadTasks($event->lead);
     }
-
 }

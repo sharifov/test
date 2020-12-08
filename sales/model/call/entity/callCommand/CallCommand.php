@@ -105,14 +105,7 @@ class CallCommand extends \yii\db\ActiveRecord
                 return $('#callCommandParent').val().length;
             }"],
 
-            ['ccom_sort_order', 'checkParentSort']
-
-            /*[['ccom_sort_order'], 'unique', 'targetAttribute' => ['ccom_parent_id', 'ccom_sort_order'],
-                'message' => 'This parent already has a child with this sorting',
-                    'when' => function($model) {
-                        return (!empty($model->ccom_parent_id) && !empty($model->ccom_sort_order));
-                    }, 'enableClientValidation' => false],*/
-
+            ['ccom_sort_order', 'checkParentSort'],
         ];
     }
 

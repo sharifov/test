@@ -73,7 +73,7 @@ class Scopes extends \yii\db\ActiveQuery implements ProjectQueryInterface, Depar
         return $this->andWhere(['t_assigned_user_id' => $userId]);
     }
 
-    public function anyAssigned():self
+    public function anyAssigned(): self
     {
         return $this->andWhere(['IS NOT', 't_assigned_user_id',  null]);
     }

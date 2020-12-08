@@ -38,7 +38,7 @@ class m200320_175714_add_setting_enable_request_to_bo_sale extends Migration
     {
          $this->delete('{{%setting}}', ['IN', 's_key', [
             'enable_request_to_bo_sale'
-        ]]);
+         ]]);
 
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
@@ -46,6 +46,4 @@ class m200320_175714_add_setting_enable_request_to_bo_sale extends Migration
 
         Yii::$app->db->getSchema()->refreshTableSchema('{{%setting}}');
     }
-
-
 }

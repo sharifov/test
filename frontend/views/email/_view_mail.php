@@ -13,7 +13,7 @@ use yii\widgets\ActiveForm;
         <div class="col-md-8">
             <div class="btn-group">
 
-                <?php if($model->e_type_id == \common\models\Email::TYPE_DRAFT || $model->e_type_id == \common\models\Email::TYPE_OUTBOX): ?>
+                <?php if ($model->e_type_id == \common\models\Email::TYPE_DRAFT || $model->e_type_id == \common\models\Email::TYPE_OUTBOX) : ?>
                     <?= Html::a('<i class="fa fa-edit"></i> Edit', \yii\helpers\Url::current(['reply_id' => null, 'id' => null, 'edit_id' => $model->e_id]), [
                         'class' => 'btn btn-sm btn-warning',
                         'data-placement' => 'top',
@@ -25,7 +25,7 @@ use yii\widgets\ActiveForm;
                         ],*/
                     ]) ?>
                 <?php endif; ?>
-                <?php if($model->e_type_id == \common\models\Email::TYPE_INBOX): ?>
+                <?php if ($model->e_type_id == \common\models\Email::TYPE_INBOX) : ?>
                     <?= Html::a('<i class="fa fa-reply"></i> Reply', \yii\helpers\Url::current(['id' => null, 'reply_id' => $model->e_id, 'edit_id' => null]), [
                         'class' => 'btn btn-sm btn-primary',
                         'data-placement' => 'top',
@@ -67,14 +67,14 @@ use yii\widgets\ActiveForm;
                 <span><?=Html::encode($model->e_email_from)?></span> To:
                 <i class="fa fa-user"></i> <strong><?=Html::encode($model->e_email_to)?></strong>
                 <a class="sender-dropdown"><i class="fa fa-chevron-down"></i></a>
-                <?php if($model->eProject):?>
+                <?php if ($model->eProject) :?>
                     <span class="label label-info"><?=Html::encode($model->eProject->name)?></span>
                 <?php endif;?>
-                <?php if($model->e_status_id):?>
+                <?php if ($model->e_status_id) :?>
                     <span class="badge badge-warning"><?=Html::encode($model->getStatusName())?></span>
                 <?php endif;?>
 
-                <?php if($model->e_is_deleted):?>
+                <?php if ($model->e_is_deleted) :?>
                     <span class="badge badge-danger">Deleted</span>
                 <?php endif;?>
 

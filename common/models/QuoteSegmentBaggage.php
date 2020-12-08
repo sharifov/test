@@ -130,22 +130,22 @@ class QuoteSegmentBaggage extends \yii\db\ActiveRecord
     {
         $data = [];
 
-        if(!empty($this->qsb_airline_code)){
+        if (!empty($this->qsb_airline_code)) {
             $data['airlineCode'] = $this->qsb_airline_code;
         }
-        if(!is_null($this->qsb_allow_pieces)){
+        if (!is_null($this->qsb_allow_pieces)) {
             $data['allowPieces'] = $this->qsb_allow_pieces;
         }
-        if(!empty($this->qsb_allow_unit)){
+        if (!empty($this->qsb_allow_unit)) {
             $data['allowUnit'] = $this->qsb_allow_unit;
         }
-        if(!empty($this->qsb_allow_weight)){
+        if (!empty($this->qsb_allow_weight)) {
             $data['allowWeight'] = $this->qsb_allow_weight;
         }
-        if(!empty($this->qsb_allow_max_size)){
+        if (!empty($this->qsb_allow_max_size)) {
             $data['allowMaxSize'] = $this->qsb_allow_max_size;
         }
-        if(!empty($this->qsb_allow_max_weight)){
+        if (!empty($this->qsb_allow_max_weight)) {
             $data['allowMaxWeight'] = $this->qsb_allow_max_weight;
         }
 

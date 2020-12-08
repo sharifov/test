@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $lead Lead
  * @var $quote Quote
@@ -46,9 +47,12 @@ $paxCntTypes = [
 
     <div id="box_segments" ></div>
 
-    <?php echo Html::textarea('reservation_result', null,
-        ['id' => 'reservation_result', 'style' => 'display:none;'])
-    ?>
+    <?php echo Html::textarea(
+        'reservation_result',
+        null,
+        ['id' => 'reservation_result', 'style' => 'display:none;']
+    )
+?>
     <div class="table-wrapper table-responsive ticket-details-block__table mb-20"
          id="alt-quote-fares-info-<?= $quote->id ?>">
         <?= $form->field($quote, 'id', [
@@ -302,7 +306,7 @@ $paxCntTypes = [
                 <?php if (!isset($project_id)) {
                     $project_id = $lead->project_id;
                 } ?>
-                <?php if (isset($project_id)): ?>
+                <?php if (isset($project_id)) : ?>
                     <tr>
                         <th>Quote Creator</th>
                         <td class="td-input" colspan="3">
@@ -323,12 +327,15 @@ $paxCntTypes = [
         <div class="col-sm-6">
             <ul class="nav nav-tabs" id="dumpTab">
 
-                <?php if ($enableGdsParsers): ?>
+                <?php if ($enableGdsParsers) : ?>
                     <li id="box-gds-tab" >
-                        <?= Html::a('GDS Dump', sprintf('#r-prepare_dump-%d', $quote->id),
-                            ['data-toggle' => 'tab', 'class' => 'active']) ?>
+                        <?= Html::a(
+                            'GDS Dump',
+                            sprintf('#r-prepare_dump-%d', $quote->id),
+                            ['data-toggle' => 'tab', 'class' => 'active']
+                        ) ?>
                     </li>
-                <?php else: ?>
+                <?php else : ?>
                     <li class="base-tab" id="reservation-dump-tab">
                         <?= Html::a('Reservation Dump', sprintf('#r-dump-%d', $quote->id), ['data-toggle' => 'tab', 'class' => 'active']) ?>
                     </li>
@@ -338,13 +345,16 @@ $paxCntTypes = [
                 <?php endif; ?>
             </ul>
             <div class="tab-content">
-                <?php if ($enableGdsParsers): ?>
+                <?php if ($enableGdsParsers) : ?>
                     <div id="<?= sprintf('r-prepare_dump-%d', $quote->id) ?>" class="prepare_dump_box tab-pane fade in active show">
-                        <?php echo Html::textarea('prepare_dump', null,
-                            ['id' => 'prepare_dump', 'rows' => 13, 'class' => 'form-control'])
+                        <?php echo Html::textarea(
+                            'prepare_dump',
+                            null,
+                            ['id' => 'prepare_dump', 'rows' => 13, 'class' => 'form-control']
+                        )
                         ?>
                     </div>
-                <?php else: ?>
+                <?php else : ?>
                     <div id="<?= sprintf('r-dump-%d', $quote->id) ?>" class="tab-pane fade in active show">
                         <?= $form->field($quote, 'reservation_dump', [
                             'options' => [
@@ -372,7 +382,7 @@ $paxCntTypes = [
     <div class="btn-wrapper">
 
         <?php if ($enableGdsParsers) :?>
-            <?php if ($quote->isNewRecord): ?>
+            <?php if ($quote->isNewRecord) : ?>
                 <?= Html::button('<i class="fa fa-recycle"></i> Import from GDS dump', [
                     'id' => 'prepare_dump_btn',
                     'class' => 'btn btn-warning',
@@ -389,7 +399,7 @@ $paxCntTypes = [
                     'style' => 'display: none',
                 ]) ?>
             <?php endif; ?>
-        <?php else: ?>
+        <?php else : ?>
             <?= Html::button('<i class="glyphicon glyphicon-remove-circle"></i> Cancel', [
                 'id' => 'cancel-alt-quote',
                 'class' => 'btn btn-danger base-btn'

@@ -42,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     'attribute' => 'st_penalty_type',
                     'format' => 'raw',
-                    'value' => static function(SaleTicket $model) {
+                    'value' => static function (SaleTicket $model) {
                         return $model->getPenaltyTypeName($model->st_penalty_type);
                     },
                 ],

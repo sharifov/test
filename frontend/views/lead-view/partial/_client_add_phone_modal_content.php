@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $form ActiveForm
  * @var $this View
@@ -34,7 +35,7 @@ $addPhone->client_id = $lead->client_id;
 
     <?= $form->errorSummary($addPhone); ?>
 
-    <?php if ($lead->isOwner($user->id) || $user->isAnySupervision() || $user->isAdmin() || $user->isSuperAdmin()): ?>
+    <?php if ($lead->isOwner($user->id) || $user->isAnySupervision() || $user->isAdmin() || $user->isSuperAdmin()) : ?>
             <?= $form->field($addPhone, 'phone', [
                 'options' => [
                     'class' => 'form-group',
@@ -50,7 +51,7 @@ $addPhone->client_id = $lead->client_id;
                     'customContainer' => 'intl-tel-input'
                 ]
             ]) ?>
-        <?php endif; ?>
+    <?php endif; ?>
 
         <?=
         $form->field($addPhone, 'type')->dropDownList(ClientPhone::getPhoneTypeList())
@@ -59,7 +60,7 @@ $addPhone->client_id = $lead->client_id;
             <?= Html::submitButton('<i class="fa fa-plus"></i> Add Phone', [
                 'class' => 'btn btn-success'
             ])
-            ?>
+?>
         </div>
     <?php ActiveForm::end(); ?>
 </div>

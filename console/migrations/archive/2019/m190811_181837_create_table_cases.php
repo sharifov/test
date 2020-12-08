@@ -48,7 +48,7 @@ class m190811_181837_create_table_cases extends Migration
             'PK-cases_category_cs_key',
             '{{%cases_category}}',
             ['cc_key']
-            );
+        );
 
         $this->addForeignKey(
             'FK-cases_cs_category',
@@ -58,7 +58,7 @@ class m190811_181837_create_table_cases extends Migration
             'cc_key',
             'SET NULL',
             'CASCADE'
-            );
+        );
 
         $this->addForeignKey(
             'FK-cases_category_cc_user_id',
@@ -88,7 +88,7 @@ class m190811_181837_create_table_cases extends Migration
             'id',
             'SET NULL',
             'CASCADE'
-            );
+        );
 
         $this->addForeignKey(
             'FK-cases_cs_lead_id',
@@ -98,7 +98,7 @@ class m190811_181837_create_table_cases extends Migration
             'id',
             'SET NULL',
             'CASCADE'
-            );
+        );
 
         $this->addForeignKey(
             'FK-cases_cs_call_id',
@@ -108,7 +108,7 @@ class m190811_181837_create_table_cases extends Migration
             'c_id',
             'SET NULL',
             'CASCADE'
-            );
+        );
 
         $this->addForeignKey(
             'FK-cases_cs_dep_id',
@@ -133,7 +133,6 @@ class m190811_181837_create_table_cases extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     /**
@@ -149,5 +148,4 @@ class m190811_181837_create_table_cases extends Migration
             Yii::$app->cache->flush();
         }
     }
-
 }

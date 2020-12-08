@@ -4,12 +4,13 @@ use common\models\search\LeadSearch;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\log\Logger;
+
 /* @var $model common\models\search\LeadSearch */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<?php foreach(Yii::$app->session->getAllFlashes() as $type => $messages): ?>
-    <?php foreach($messages as $message): ?>
+<?php foreach (Yii::$app->session->getAllFlashes() as $type => $messages) : ?>
+    <?php foreach ($messages as $message) : ?>
         <div class="alert alert-success">
             <?= $message ?>
         </div>
@@ -50,8 +51,8 @@ use yii\log\Logger;
         <div class="form-group text-center">
             <?= Html::submitButton('<i class="fa fa-close"></i> Delete logs', [
                 'class' => 'btn btn-danger',
-                'data' =>[
-                    'confirm' =>'You want to remove logs by selected criteria?'
+                'data' => [
+                    'confirm' => 'You want to remove logs by selected criteria?'
                 ]
             ]) ?>
         </div>

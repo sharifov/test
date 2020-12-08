@@ -30,5 +30,4 @@ class m191107_083549_add_column_type_create_tbl_lead extends Migration
             Yii::$app->cache->flush();
         }
     }
-
 }

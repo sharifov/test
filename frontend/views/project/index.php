@@ -3,7 +3,8 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
-use dosamigos\datepicker\DatePicker;
+use common\components\grid\DateTimeColumn;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\ProjectSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -39,7 +40,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     'class' => 'danger'
                 ];
             }
-
         },
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
@@ -109,6 +109,11 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'last_update'
+            ],
+
+            /*[
                 'attribute' => 'last_update',
                 'value' => static function (\common\models\Project $model) {
                     return $model->last_update ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->last_update)) : '-';
@@ -126,9 +131,8 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
 
-            //'last_update',
             //'custom_data:ntext',
 
 

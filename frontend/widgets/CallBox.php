@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @link http://www.yiiframework.com/
  * @copyright Copyright (c) 2008 Yii Software LLC
@@ -57,14 +58,14 @@ class CallBox extends \yii\bootstrap\Widget
         $userModel = \Yii::$app->user->identity;
 
 //        if (!SettingHelper::isOriginalPhoneWidgetEnabled()) {
-//        	return '';
-//		}
+//          return '';
+//      }
 
-        if(!$userModel) {
+        if (!$userModel) {
             return '';
         }
 
-        if(!$userModel->userProfile || (int) $userModel->userProfile->up_call_type_id === \common\models\UserProfile::CALL_TYPE_OFF) {
+        if (!$userModel->userProfile || (int) $userModel->userProfile->up_call_type_id === \common\models\UserProfile::CALL_TYPE_OFF) {
             return '';
         }
 

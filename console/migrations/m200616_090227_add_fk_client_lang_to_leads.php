@@ -13,10 +13,15 @@ class m200616_090227_add_fk_client_lang_to_leads extends Migration
      */
     public function safeUp()
     {
-        $this->addForeignKey('FK-leads-l_client_lang',
-            '{{%leads}}', 'l_client_lang',
-            '{{%language}}', 'language_id',
-            'SET NULL', 'CASCADE');
+        $this->addForeignKey(
+            'FK-leads-l_client_lang',
+            '{{%leads}}',
+            'l_client_lang',
+            '{{%language}}',
+            'language_id',
+            'SET NULL',
+            'CASCADE'
+        );
 
         Yii::$app->db->getSchema()->refreshTableSchema('{{%leads}}');
 

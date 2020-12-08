@@ -26,7 +26,8 @@ class UserMonitorSearch extends UserMonitor
     {
         return [
             [['um_id', 'um_user_id', 'um_type_id', 'um_period_sec', 'userId', 'typeId'], 'integer'],
-            [['um_start_dt', 'um_end_dt', 'um_description', 'timeRange', 'startTime', 'endTime'], 'safe'],
+            [['um_description', 'timeRange', 'startTime', 'endTime'], 'safe'],
+            [['um_start_dt', 'um_end_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -63,25 +64,27 @@ class UserMonitorSearch extends UserMonitor
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'pagination' => [
+                'pageSize' => 30,
+            ],
         ]);
 
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
-        if ($this->userId){
+        if ($this->userId) {
             $query->andWhere(['um_user_id' => $this->userId]);
         }
 
-        if ($this->typeId){
+        if ($this->typeId) {
             $query->andWhere(['um_type_id' => $this->typeId]);
         }
 
-        if (!empty($this->startTime) && !empty($this->endTime)){
+        if (!empty($this->startTime) && !empty($this->endTime)) {
             $query->andWhere(['>=', 'um_start_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->startTime))]);
             $query->andWhere(['<=', 'um_end_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->endTime))]);
         }

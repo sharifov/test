@@ -1,4 +1,5 @@
 <?php
+
 namespace frontend\models;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
@@ -44,7 +45,7 @@ class CasePreviewSmsForm extends Model
     /**
      * @return array
      */
-    public function rules() : array
+    public function rules(): array
     {
         return [
             [['s_case_id', 's_phone_from', 's_phone_to', 's_sms_message'], 'required'],
@@ -78,7 +79,7 @@ class CasePreviewSmsForm extends Model
     /**
      * @return array
      */
-    public function attributeLabels() : array
+    public function attributeLabels(): array
     {
         return [
             's_case_id'       => 'Case Id',
@@ -90,5 +91,4 @@ class CasePreviewSmsForm extends Model
             's_user_id'         => 'Agent ID',
         ];
     }
-
 }

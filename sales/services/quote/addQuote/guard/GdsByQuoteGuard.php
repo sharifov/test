@@ -16,7 +16,7 @@ class GdsByQuoteGuard
     public static function guard(?string $gds): ?string
     {
         if (!$gds = ParsingDump::getGdsByQuote($gds)) {
-            throw new \DomainException(  'This gds(' . $gds . ') cannot be processed');
+            throw new \DomainException('This gds(' . $gds . ') cannot be processed');
         }
         return $gds;
     }

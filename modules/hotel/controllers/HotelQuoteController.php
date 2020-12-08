@@ -16,7 +16,6 @@ use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookService;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCancelBookService;
 use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchGuard;
 use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchService;
-
 use modules\hotel\src\useCases\quote\HotelQuoteManageService;
 use sales\helpers\app\AppHelper;
 use Yii;
@@ -41,41 +40,41 @@ use yii\web\Response;
  */
 class HotelQuoteController extends FController
 {
-	/**
-	 * @var HotelRepository
-	 */
-	private $hotelRepository;
-	/**
-	 * @var HotelQuoteSearchService
-	 */
-	private $hotelQuoteSearchService;
-	/**
-	 * @var HotelQuoteRoomRepository
-	 */
-	private $hotelQuoteRoomRepository;
-	/**
-	 * @var HotelQuoteManageService
-	 */
-	private $hotelQuoteManageService;
+    /**
+     * @var HotelRepository
+     */
+    private $hotelRepository;
+    /**
+     * @var HotelQuoteSearchService
+     */
+    private $hotelQuoteSearchService;
+    /**
+     * @var HotelQuoteRoomRepository
+     */
+    private $hotelQuoteRoomRepository;
+    /**
+     * @var HotelQuoteManageService
+     */
+    private $hotelQuoteManageService;
 
-	public function __construct(
-		$id,
-		$module,
-		HotelQuoteSearchService $hotelQuoteSearchService,
-		HotelRepository $hotelRepository,
-		HotelQuoteManageService $hotelQuoteManageService,
-		HotelQuoteRoomRepository $hotelQuoteRoomRepository,
-		$config = []
-	) {
-		parent::__construct($id, $module, $config);
+    public function __construct(
+        $id,
+        $module,
+        HotelQuoteSearchService $hotelQuoteSearchService,
+        HotelRepository $hotelRepository,
+        HotelQuoteManageService $hotelQuoteManageService,
+        HotelQuoteRoomRepository $hotelQuoteRoomRepository,
+        $config = []
+    ) {
+        parent::__construct($id, $module, $config);
 
-		$this->hotelQuoteSearchService = $hotelQuoteSearchService;
-		$this->hotelRepository = $hotelRepository;
-		$this->hotelQuoteRoomRepository = $hotelQuoteRoomRepository;
-		$this->hotelQuoteManageService = $hotelQuoteManageService;
-	}
+        $this->hotelQuoteSearchService = $hotelQuoteSearchService;
+        $this->hotelRepository = $hotelRepository;
+        $this->hotelQuoteRoomRepository = $hotelQuoteRoomRepository;
+        $this->hotelQuoteManageService = $hotelQuoteManageService;
+    }
 
-	/**
+    /**
      * @return array
      */
     public function behaviors(): array
@@ -120,11 +119,11 @@ class HotelQuoteController extends FController
         $result = [];
 
         if ($hotel) {
-			try {
-            	$result = $this->hotelQuoteSearchService->search(HotelQuoteSearchGuard::guard($hotel));
-			} catch (\DomainException $e) {
-				Yii::$app->session->setFlash('error', $e->getMessage());
-			}
+            try {
+                $result = $this->hotelQuoteSearchService->search(HotelQuoteSearchGuard::guard($hotel));
+            } catch (\DomainException $e) {
+                Yii::$app->session->setFlash('error', $e->getMessage());
+            }
         }
         $hotelList = $result['hotels'] ?? [];
 
@@ -155,7 +154,6 @@ class HotelQuoteController extends FController
         Yii::$app->response->format = Response::FORMAT_JSON;
 
         try {
-
             if (!$hotelId) {
                 throw new Exception('Hotel Request param not found', 2);
             }
@@ -168,7 +166,7 @@ class HotelQuoteController extends FController
                 throw new Exception('Quote key param not found', 4);
             }
 
-			$hotel = $this->hotelRepository->find($hotelId);
+            $hotel = $this->hotelRepository->find($hotelId);
 
             $productId = $hotel->ph_product_id;
 
@@ -178,11 +176,11 @@ class HotelQuoteController extends FController
             $quoteData = Hotel::getHotelQuoteDataByKey($result, $hotelCode, $quoteKey);
 
             if (!$hotelData) {
-                throw new Exception('Not found quote - hotel code ('.$hotelCode.')', 6);
+                throw new Exception('Not found quote - hotel code (' . $hotelCode . ')', 6);
             }
 
             if (!$quoteData) {
-                throw new Exception('Not found quote - quote key ('.$quoteKey.')', 7);
+                throw new Exception('Not found quote - quote key (' . $quoteKey . ')', 7);
             }
 
             $hotelModel = HotelList::findOrCreateByData($hotelData);
@@ -196,16 +194,14 @@ class HotelQuoteController extends FController
             }
 
             //$hotelList = $result['hotels'] ?? [];
-
-
         } catch (\Throwable $throwable) {
-        	Yii::warning(VarDumper::dumpAsString($throwable->getTraceAsString()), 'app');
+            Yii::warning(VarDumper::dumpAsString($throwable->getTraceAsString()), 'app');
             return ['error' => 'Error: ' . $throwable->getMessage()];
         }
 
         return [
             'product_id' => $productId,
-            'message' => 'Successfully added quote. Hotel "'.Html::encode($hotelData['name']).'", Hotel Quote Id: (' . $hotelQuote->hq_id . ')'
+            'message' => 'Successfully added quote. Hotel "' . Html::encode($hotelData['name']) . '", Hotel Quote Id: (' . $hotelQuote->hq_id . ')'
         ];
     }
 
@@ -346,34 +342,33 @@ class HotelQuoteController extends FController
         return $result;
     }
 
-	/**
-	 * @return Response
-	 * @throws BadRequestHttpException
-	 */
+    /**
+     * @return Response
+     * @throws BadRequestHttpException
+     */
     public function actionAjaxUpdateAgentMarkup(): Response
-	{
-		$extraMarkup = Yii::$app->request->post('extra_markup');
+    {
+        $extraMarkup = Yii::$app->request->post('extra_markup');
 
-		$hotelQuoteRoomId = array_key_first($extraMarkup);
-		$value = $extraMarkup[$hotelQuoteRoomId];
+        $hotelQuoteRoomId = array_key_first($extraMarkup);
+        $value = $extraMarkup[$hotelQuoteRoomId];
 
-		if ($hotelQuoteRoomId && $value !== null) {
-			try {
-				$hotelQuoteRoom = $this->hotelQuoteRoomRepository->find($hotelQuoteRoomId);
+        if ($hotelQuoteRoomId && $value !== null) {
+            try {
+                $hotelQuoteRoom = $this->hotelQuoteRoomRepository->find($hotelQuoteRoomId);
 
-				$this->hotelQuoteManageService->updateAgentMarkup($hotelQuoteRoom, $value);
-			} catch (\RuntimeException $e) {
-				return $this->asJson(['message' => $e->getMessage()]);
-			} catch (\Throwable $e) {
-				Yii::error($e->getTraceAsString(), 'HotelQuoteController::actionAjaxUpdateAgentMarkup::Throwable');
+                $this->hotelQuoteManageService->updateAgentMarkup($hotelQuoteRoom, $value);
+            } catch (\RuntimeException $e) {
+                return $this->asJson(['message' => $e->getMessage()]);
+            } catch (\Throwable $e) {
+                Yii::error($e->getTraceAsString(), 'HotelQuoteController::actionAjaxUpdateAgentMarkup::Throwable');
+            }
 
-			}
+            return $this->asJson(['output' => $value]);
+        }
 
-			return $this->asJson(['output' => $value]);
-		}
-
-		throw new BadRequestHttpException();
-	}
+        throw new BadRequestHttpException();
+    }
 
     /**
      * Finds the HotelQuote model based on its primary key value.

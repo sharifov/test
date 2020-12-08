@@ -70,9 +70,9 @@ class CallCommandTypeService
     public function checkTemplateFileExist(): bool
     {
         if (file_exists(\Yii::getAlias($this->getPathToTemplateFile()))) {
-			return true;
-		}
-		throw new \DomainException('File: "' . $this->getPathToTemplateFile() . '" is not exist');
+            return true;
+        }
+        throw new \DomainException('File: "' . $this->getPathToTemplateFile() . '" is not exist');
     }
 
     public function getNamespaceTypes(): string
@@ -170,5 +170,4 @@ class CallCommandTypeService
             'validationUrl' => Url::to(['call-command/validate-type-form', 'type_id' => $typeId]),
         ];
     }
-
 }

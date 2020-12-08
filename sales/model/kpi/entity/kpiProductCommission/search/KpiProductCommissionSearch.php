@@ -18,7 +18,7 @@ class KpiProductCommissionSearch extends KpiProductCommission
     {
         return [
             [['pc_product_type_id', 'pc_performance', 'pc_commission_percent', 'pc_created_user_id', 'pc_updated_user_id'], 'integer'],
-            [['pc_created_dt', 'pc_updated_dt'], 'safe'],
+            [['pc_created_dt', 'pc_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -45,11 +45,11 @@ class KpiProductCommissionSearch extends KpiProductCommission
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
-			'query' => $query,
-			'sort'=> ['defaultOrder' => ['pc_created_dt' => SORT_DESC, 'pc_updated_dt' => SORT_DESC]],
-			'pagination' => [
-				'pageSize' => 30,
-			],
+            'query' => $query,
+            'sort' => ['defaultOrder' => ['pc_created_dt' => SORT_DESC, 'pc_updated_dt' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
         ]);
 
         $this->load($params);

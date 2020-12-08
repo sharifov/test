@@ -29,28 +29,32 @@ $pjaxId = 'pjax-hotel-update'
         ]);
         ?>
 
-		    <?= $form->errorSummary($model) ?>
+            <?= $form->errorSummary($model) ?>
 
             <?= $form->field($model, 'ph_check_in_date')->widget(
-				DatePicker::class, [
-					'inline' => false,
-					'clientOptions' => [
-						'autoclose' => true,
-						'format' => 'yyyy-mm-dd',
-						'todayBtn' => true
-					]
-            ])?>
+                DatePicker::class,
+                [
+                    'inline' => false,
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                        'todayBtn' => true
+                    ]
+                ]
+            )?>
 
 
             <?= $form->field($model, 'ph_check_out_date')->widget(
-				DatePicker::class, [
+                DatePicker::class,
+                [
                 'inline' => false,
                 'clientOptions' => [
                     'autoclose' => true,
-					'format' => 'yyyy-mm-dd',
-					'todayBtn' => true
+                    'format' => 'yyyy-mm-dd',
+                    'todayBtn' => true
                 ]
-            ])?>
+                ]
+            )?>
 
             <div class="form-group" id="update_hotel_request_dest_type_wrap">
                 <label>Destination Type</label>
@@ -62,8 +66,8 @@ $pjaxId = 'pjax-hotel-update'
                         'multiple' => true,
                         'id' => 'ph_destination_type'
                     ],
-					'size' => Select2::SIZE_SMALL,
-				]) ?>
+                    'size' => Select2::SIZE_SMALL,
+                ]) ?>
             </div>
 
 
@@ -71,24 +75,24 @@ $pjaxId = 'pjax-hotel-update'
                 'options' => [
                     'placeholder' => $model->getAttributeLabel('ph_destination_label')
                 ],
-				'pluginOptions' => [
-					'allowClear' => true,
-					'minimumInputLength' => 2,
-					'language' => [
-						'errorLoading' => new JsExpression("function () { return 'Waiting for results...'; }"),
-					],
-					'ajax' => [
-						'url' => ['/hotel/hotel/ajax-get-destination-list'],
-						'dataType' => 'json',
-						'data' => new JsExpression('function(params) { 
+                'pluginOptions' => [
+                    'allowClear' => true,
+                    'minimumInputLength' => 2,
+                    'language' => [
+                        'errorLoading' => new JsExpression("function () { return 'Waiting for results...'; }"),
+                    ],
+                    'ajax' => [
+                        'url' => ['/hotel/hotel/ajax-get-destination-list'],
+                        'dataType' => 'json',
+                        'data' => new JsExpression('function(params) { 
 						    return {term:params.term, destType: $("#ph_destination_type").val()}; 
 						}'),
                         'delay' => 1200,
-					],
-					'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
-					'templateResult' => new JsExpression('formatRepo'),
-					'templateSelection' => new JsExpression('function (data) { return data.selection || data.text;}'),
-				],
+                    ],
+                    'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                    'templateResult' => new JsExpression('formatRepo'),
+                    'templateSelection' => new JsExpression('function (data) { return data.selection || data.text;}'),
+                ],
                 'pluginEvents' => [
                     'select2:select' => new JsExpression('function (data) { 
                         $("#ph_destination_code").val(data.params.data.code); 

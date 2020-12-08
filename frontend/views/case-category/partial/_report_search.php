@@ -1,6 +1,7 @@
 <?php
+
 use yii\helpers\Html;
-use \kartik\form\ActiveForm;
+use kartik\form\ActiveForm;
 use sales\access\EmployeeDepartmentAccess;
 
 /* @var $this yii\web\View */
@@ -49,7 +50,7 @@ use sales\access\EmployeeDepartmentAccess;
                             ]
                         ]
                     ])->label('Created DateTime Range');
-                    ?>
+?>
                 </div>
                 <div class="col-md-2">
                     <?= $form->field($model, 'depID')->dropDownList(EmployeeDepartmentAccess::getDepartments(), ['prompt' => '-']) ?>

@@ -19,7 +19,7 @@ class DepartmentEmailProjectSearch extends DepartmentEmailProject
         return [
             [['dep_id', 'dep_project_id', 'dep_dep_id', 'dep_source_id', 'dep_enable', 'dep_updated_user_id', 'dep_default'], 'integer'],
 //            ['dep_email', 'safe'],
-            ['dep_updated_dt', 'safe'],
+            ['dep_updated_dt', 'date', 'format' => 'php:Y-m-d'],
 
             ['dep_email_list_id', 'integer'],
         ];
@@ -68,7 +68,7 @@ class DepartmentEmailProjectSearch extends DepartmentEmailProject
             'dep_enable' => $this->dep_enable,
             'dep_default' => $this->dep_default,
             'dep_updated_user_id' => $this->dep_updated_user_id,
-            'dep_updated_dt' => $this->dep_updated_dt,
+            'DATE(dep_updated_dt)' => $this->dep_updated_dt,
             'dep_email_list_id' => $this->dep_email_list_id,
         ]);
 

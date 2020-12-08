@@ -1,4 +1,5 @@
 <?php
+
 namespace console\controllers;
 
 use yii\console\Controller;
@@ -17,19 +18,19 @@ class KpiController extends Controller
 
         $result = KpiService::calculateSalary($dateParam);
 
-        printf($this->ansiFormat("\nCalculates salary for period ".$result['start']->format('Y-m-d').' '.$result['end']->format('Y-m-d')."\n", Console::FG_BLUE));
+        printf($this->ansiFormat("\nCalculates salary for period " . $result['start']->format('Y-m-d') . ' ' . $result['end']->format('Y-m-d') . "\n", Console::FG_BLUE));
 
-        if(count($result['errors'])){
-            printf($this->ansiFormat("\n --- Errors ---\n" , Console::FG_RED));
-            foreach ($result['errors'] as $error){
+        if (count($result['errors'])) {
+            printf($this->ansiFormat("\n --- Errors ---\n", Console::FG_RED));
+            foreach ($result['errors'] as $error) {
                 print_r($error);
             }
         }
 
-        if(count($result['messages'])){
-            printf($this->ansiFormat("\n --- Info ---\n" , Console::FG_BLUE));
-            foreach ($result['messages'] as $message){
-                print("\n".$message);
+        if (count($result['messages'])) {
+            printf($this->ansiFormat("\n --- Info ---\n", Console::FG_BLUE));
+            foreach ($result['messages'] as $message) {
+                print("\n" . $message);
             }
         }
 

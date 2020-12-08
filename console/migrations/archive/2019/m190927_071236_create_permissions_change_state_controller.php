@@ -32,7 +32,6 @@ class m190927_071236_create_permissions_change_state_controller extends Migratio
         $auth = Yii::$app->authManager;
 
         foreach ($this->routes as $route) {
-
             if (!$permission = $auth->getPermission($route)) {
                 $permission = $auth->createPermission($route);
                 $auth->add($permission);
@@ -48,7 +47,6 @@ class m190927_071236_create_permissions_change_state_controller extends Migratio
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     public function safeDown()

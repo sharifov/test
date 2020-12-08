@@ -45,5 +45,4 @@ class AirportController extends FController
         $airports = AirportFormatHelper::formatRows($airports, $term);
         return $airports;
     }
-
 }

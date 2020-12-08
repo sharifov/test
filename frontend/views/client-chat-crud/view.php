@@ -37,7 +37,8 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="client-chat-view">
     <div class="row">
         <div class="col-md-4">
-            <?php $room = Html::a('<span class="glyphicon glyphicon-list-alt"></span>',
+            <?php $room = Html::a(
+                '<span class="glyphicon glyphicon-list-alt"></span>',
                 ['/client-chat-qa/room', 'id' => $model->cch_id],
                 [
                     'target' => '_blank',
@@ -50,17 +51,19 @@ $this->params['breadcrumbs'][] = $this->title;
                 'model' => $model,
                 'attributes' => [
                     'cch_id',
-					[
-						'attribute' => 'cch_parent_id',
-						'value' => static function (ClientChat $model) {
-							return $model->cch_parent_id ?
-								Html::a('<i class="fa fa-link"></i> ' . $model->cch_parent_id,
-									['client-chat-crud/view', 'id' => $model->cch_parent_id],
-									['target' => '_blank', 'data-pjax' => 0]) : '-';
-						},
-						'format' => 'raw',
-						'options' => ['style' => 'width:100px'],
-					],
+                    [
+                        'attribute' => 'cch_parent_id',
+                        'value' => static function (ClientChat $model) {
+                            return $model->cch_parent_id ?
+                                Html::a(
+                                    '<i class="fa fa-link"></i> ' . $model->cch_parent_id,
+                                    ['client-chat-crud/view', 'id' => $model->cch_parent_id],
+                                    ['target' => '_blank', 'data-pjax' => 0]
+                                ) : '-';
+                        },
+                        'format' => 'raw',
+                        'options' => ['style' => 'width:100px'],
+                    ],
                     'cch_rid',
                     'cch_ccr_id',
                     'cch_title',
@@ -71,9 +74,11 @@ $this->params['breadcrumbs'][] = $this->title;
                         'attribute' => 'cch_channel_id',
                         'value' => static function (ClientChat $model) {
                             return $model->cch_channel_id ?
-                                Html::a(Html::encode($model->cchChannel->ccc_name),
+                                Html::a(
+                                    Html::encode($model->cchChannel->ccc_name),
                                     ['client-chat-channel-crud/view', 'id' => $model->cch_channel_id],
-                                    ['target' => '_blank', 'data-pjax' => 0]) : '-';
+                                    ['target' => '_blank', 'data-pjax' => 0]
+                                ) : '-';
                         },
                         'format' => 'raw',
                     ],
@@ -87,8 +92,11 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'cch_status_id',
                         'value' => static function (ClientChat $model) {
-                            return Html::tag('span', $model->getStatusName(),
-                                ['class' => 'badge badge-'.$model->getStatusClass()]);
+                            return Html::tag(
+                                'span',
+                                $model->getStatusName(),
+                                ['class' => 'badge badge-' . $model->getStatusClass()]
+                            );
                         },
                         'format' => 'raw',
                     ],
@@ -100,14 +108,14 @@ $this->params['breadcrumbs'][] = $this->title;
                         },
                         'format' => 'raw',
                     ],
-					[
-						'attribute' => 'cch_source_type_id',
-						'value' => static function (ClientChat $model) {
-							return $model->getSourceTypeName();
-						},
-						'format' => 'raw',
-					],
-					'cch_missed:booleanByLabel',
+                    [
+                        'attribute' => 'cch_source_type_id',
+                        'value' => static function (ClientChat $model) {
+                            return $model->getSourceTypeName();
+                        },
+                        'format' => 'raw',
+                    ],
+                    'cch_missed:booleanByLabel',
                     'cch_created_dt:byUserDateTime',
                     'cch_updated_dt:byUserDateTime',
                     'cch_created_user_id:username',
@@ -132,7 +140,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'cvd_local_time'
                     ]
                 ])  ?>
-            <?php else: ?>
+            <?php else : ?>
                 <p>Additional Data not found</p>
             <?php endif ?>
 
@@ -142,7 +150,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attributes' => [
                     [
                         'label' => 'Case',
-                        'value' => static function(ClientChat $model) {
+                        'value' => static function (ClientChat $model) {
                             $out = '<span id="chat-info-case-info">';
                             foreach ($model->cases as $case) {
                                 $out .= Yii::$app->formatter->format($case, 'case') . ' ';
@@ -154,7 +162,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     [
                         'label' => 'Lead',
-                        'value' => static function(ClientChat $model) {
+                        'value' => static function (ClientChat $model) {
                             $out = '<span id="chat-info-lead-info">';
                             foreach ($model->leads as $lead) {
                                 $out .= Yii::$app->formatter->format($lead, 'lead') . ' ';
@@ -174,7 +182,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'columns' => [
                     [
                         'attribute' => 'ccr_created_dt',
-                        'value' => static function(ClientChatRequest $model) {
+                        'value' => static function (ClientChatRequest $model) {
                             return $model->ccr_created_dt ?
                                 Yii::$app->formatter->asDatetime(strtotime($model->ccr_created_dt)) : '-';
                         },
@@ -183,7 +191,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     [
                         'label' => 'Url',
-                        'value' => static function(ClientChatRequest $model) {
+                        'value' => static function (ClientChatRequest $model) {
                             if ($pageUrl = $model->getPageUrl()) {
                                 return Yii::$app->formatter->asUrl($pageUrl);
                             }
@@ -220,7 +228,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'vl_ip_address'
                     ]
                 ]) ?>
-            <?php else: ?>
+            <?php else : ?>
                 <p>Visitor log not found</p>
             <?php endif ?>
         </div>
@@ -236,7 +244,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'columns' => [
                     [
                         'attribute' => 'By',
-                        'value' => static function(ClientChatMessage $model) {
+                        'value' => static function (ClientChatMessage $model) {
                             return ChatHelper::formattedByChatMessage($model);
                         },
                         'format' => 'raw',
@@ -244,7 +252,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     [
                         'attribute' => 'message',
-                        'value' => static function(ClientChatMessage $model) {
+                        'value' => static function (ClientChatMessage $model) {
                             if (empty($model->ccm_body) || empty($model->ccm_body['msg'])) {
                                 return '';
                             }
@@ -258,7 +266,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'ccm_sent_dt:byUserDateTime',
                     [
                         'attribute' => 'ccm_body',
-                        'value' => static function(ClientChatMessage $model) {
+                        'value' => static function (ClientChatMessage $model) {
                             return '<pre><small>' .
                                 (StringHelper::truncate(JsonHelper::encode($model->ccm_body), 240, '...', null, true)) . '</small></pre> 
                             <a href="' .
@@ -271,7 +279,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'ccm_has_attachment:booleanByLabel',
                     [
                         'attribute' => 'files',
-                        'value' => static function(ClientChatMessage $model) {
+                        'value' => static function (ClientChatMessage $model) {
                             $view = '';
                             if (array_key_exists('attachments', $model->ccm_body)) {
                                 foreach ($model->ccm_body['attachments'] as $attachment) {
@@ -281,14 +289,16 @@ $this->params['breadcrumbs'][] = $this->title;
                                     if (array_key_exists('title_link', $attachment) && array_key_exists('title', $attachment)) {
                                         $titleLink = explode('.', $attachment['title_link']);
                                         $title = '[' . StringHelper::truncate($attachment['title'], 20) . '].' . end($titleLink);
-                                        $view .= Html::a($title,
+                                        $view .= Html::a(
+                                            $title,
                                             '/client-chat-message-crud/download?url=' . base64_encode($attachment['title_link']),
-                                            ['target'=>'_blank']) . '<br /> ';
+                                            ['target' => '_blank']
+                                        ) . '<br /> ';
                                     }
                                     if (array_key_exists('image_url', $attachment)) {
                                         $titleLink = explode('.', $attachment['image_url']);
                                         $title = '[' . StringHelper::truncate($attachment['image_url'], 20) . '].' . end($titleLink);
-                                        $view .= Html::a($title, $attachment['image_url'], ['target'=>'_blank']) . '<br /> ';
+                                        $view .= Html::a($title, $attachment['image_url'], ['target' => '_blank']) . '<br /> ';
                                     }
                                 }
                             }

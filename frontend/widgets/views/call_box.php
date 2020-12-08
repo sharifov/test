@@ -21,7 +21,7 @@ if($client) {
 }*/
 $client_phone = '';
 
-if($lastCall) {
+if ($lastCall) {
     if ($lastCall->isIn()) {
         $client_phone = $lastCall->c_from;
     } elseif ($lastCall->isOut()) {
@@ -32,15 +32,15 @@ if($lastCall) {
 }
 
 
-if($client_phone) {
+if ($client_phone) {
     $clientPhone = \common\models\ClientPhone::find()->where(['phone' => $client_phone])->limit(1)->orderBy(['client_id' => SORT_DESC])->one();
 } else {
     $clientPhone = null;
 }
 $client = null;
-if($clientPhone && $client = $clientPhone->client) {
+if ($clientPhone && $client = $clientPhone->client) {
     $client_name = $client->full_name;
-    if($client_name === 'ClientName') {
+    if ($client_name === 'ClientName') {
         $client_name = '- - - - -';
     }
 } else {
@@ -59,9 +59,8 @@ if ($lastCall && ($lastCall->isStatusRinging() || $lastCall->isStatusInProgress(
 
 use yii\widgets\Pjax; ?>
 
-<?php if (\sales\helpers\setting\SettingHelper::isOriginalPhoneWidgetEnabled()): ?>
-
-<?php yii\widgets\Pjax::begin(['id' => 'call-box-pjax', 'timeout' => 10000, 'enablePushState' => false, 'options' => []])?>
+<?php if (\sales\helpers\setting\SettingHelper::isOriginalPhoneWidgetEnabled()) : ?>
+    <?php yii\widgets\Pjax::begin(['id' => 'call-box-pjax', 'timeout' => 10000, 'enablePushState' => false, 'options' => []])?>
 <div class="fabs">
     <div class="call_box <?=$isVisible ? 'is-visible' : ''?>">
         <div class="call_box_header" style="<?=($userCallStatus && $userCallStatus->us_type_id === \common\models\UserCallStatus::STATUS_TYPE_OCCUPIED) ? 'background: #f55f42' : ''?>">
@@ -85,7 +84,7 @@ use yii\widgets\Pjax; ?>
 
         </div>
         <div class="call_box_body call_box_login">
-            <?php if($lastCall):?>
+            <?php if ($lastCall) :?>
                 <h4 title="<?=$lastCall->c_updated_dt ? Yii::$app->formatter->asDatetime(strtotime($lastCall->c_updated_dt)) : '-'?>">
                     <?=$lastCall->getStatusLabel()?>
                     <?php /*Id: <?=$lastCall->c_id?> [<?=date('H:i:s')?>]*/ ?>
@@ -95,24 +94,23 @@ use yii\widgets\Pjax; ?>
                     <span class="label label-default"><?=$lastCall->cDep ? \yii\helpers\Html::encode($lastCall->cDep->dep_name) : '-'?></span><br>
                     <?=$lastCall->getCallTypeName()?>
                 </h4>
-                <?php if ($lastCall->isStatusRinging() || $lastCall->isStatusInProgress()): ?>
+                <?php if ($lastCall->isStatusRinging() || $lastCall->isStatusInProgress()) : ?>
                     <?php
-                        if($lastCall->c_updated_dt) {
-                            $timerSeconds = time() - strtotime($lastCall->c_updated_dt);
-                            if(!$timerSeconds) {
-                                $timerSeconds = 0;
-                            }
-                            if( $timerSeconds >= 0 ) {
-                                echo '<div  style="font-size: 16px" class="badge badge-warning">
-<i class="fa fa-clock-o fa-spin" title="updated: '.date('H:i:s', strtotime($lastCall->c_updated_dt)).'"></i> <span id="call-box-timer" class="timer">' .gmdate('i:s', $timerSeconds). '</span></div>';
-                                $js = "$('#call-box-timer').timer({format: '%M:%S', seconds: " . $timerSeconds . "}).timer('start');";
-                                $this->registerJs($js, \yii\web\View::POS_READY);
-                            }
+                    if ($lastCall->c_updated_dt) {
+                        $timerSeconds = time() - strtotime($lastCall->c_updated_dt);
+                        if (!$timerSeconds) {
+                            $timerSeconds = 0;
                         }
+                        if ($timerSeconds >= 0) {
+                            echo '<div  style="font-size: 16px" class="badge badge-warning">
+<i class="fa fa-clock-o fa-spin" title="updated: ' . date('H:i:s', strtotime($lastCall->c_updated_dt)) . '"></i> <span id="call-box-timer" class="timer">' . gmdate('i:s', $timerSeconds) . '</span></div>';
+                            $js = "$('#call-box-timer').timer({format: '%M:%S', seconds: " . $timerSeconds . "}).timer('start');";
+                            $this->registerJs($js, \yii\web\View::POS_READY);
+                        }
+                    }
                     ?>
-                <?php else:?>
-
-                    <?php if($lastCall->c_updated_dt):?>
+                <?php else :?>
+                    <?php if ($lastCall->c_updated_dt) :?>
                         <i class="fa fa-calendar"></i> <?=Yii::$app->formatter->asDatetime(strtotime($lastCall->c_updated_dt))?>
                         (<?=Yii::$app->formatter->asRelativeTime(strtotime($lastCall->c_updated_dt))?>)
                     <?php endif; ?>
@@ -134,8 +132,12 @@ use yii\widgets\Pjax; ?>
                         if (!Auth::can('/user-call-status/update-status')) {
                             $disabled = ['disabled' => 'disabled'];
                         }
-                        echo \yii\helpers\Html::dropDownList('user-call-status', $userCallStatus ? $userCallStatus->us_type_id : \common\models\UserCallStatus::STATUS_TYPE_READY, \common\models\UserCallStatus::STATUS_TYPE_LIST,
-                            array_merge(['class' => 'form-control', 'id' => 'user-call-status-select'], $disabled));
+                        echo \yii\helpers\Html::dropDownList(
+                            'user-call-status',
+                            $userCallStatus ? $userCallStatus->us_type_id : \common\models\UserCallStatus::STATUS_TYPE_READY,
+                            \common\models\UserCallStatus::STATUS_TYPE_LIST,
+                            array_merge(['class' => 'form-control', 'id' => 'user-call-status-select'], $disabled)
+                        );
                         ?>
 
                         <?php /*=\yii\helpers\Html::button('<i class="fa fa-search"></i> Show Details', ['class' => 'btn btn-sm btn-info', 'id' => 'call_box_first_screen'])*/?>
@@ -164,7 +166,7 @@ use yii\widgets\Pjax; ?>
                 </table>
                 <?php endif;*/ ?>
 
-                <?php if($client): ?>
+                <?php if ($client) : ?>
                     <?=\yii\helpers\Html::button('<i class="fa fa-user"></i> Client Info', [
                         'class' => 'btn btn-xs btn-info',
                         'id' => 'btn-client-details',
@@ -172,19 +174,19 @@ use yii\widgets\Pjax; ?>
                     ])?>
                 <?php endif; ?>
 
-                <?php if($lastCall): ?>
+                <?php if ($lastCall) : ?>
                     <?=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Call Info', [
                         'class' => 'btn btn-xs btn-default',
-                        'title' => 'Call Info Id: '.$lastCall->c_id,
+                        'title' => 'Call Info Id: ' . $lastCall->c_id,
                         'data-call-id' => $lastCall->c_id,
                         'id' => 'btn-call-info'
                     ])?>
 
 
                     <?php //php if($countMissedCalls): ?>
-                        <?=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Missed' . ($countMissedCalls ? ' (' . $countMissedCalls .')' : '') , [
+                        <?=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Missed' . ($countMissedCalls ? ' (' . $countMissedCalls . ')' : ''), [
                             'class' => 'btn btn-xs btn-danger',
-                            'title' => 'Missed Calls' . ($countMissedCalls ? ' (' . $countMissedCalls .')' : ''),
+                            'title' => 'Missed Calls' . ($countMissedCalls ? ' (' . $countMissedCalls . ')' : ''),
                             'id' => 'btn-missed-calls'
                         ])?>
                     <?php //php endif; ?>
@@ -246,19 +248,19 @@ use yii\widgets\Pjax; ?>
         <?php
             $iconClass = 'fa fa-list';
 
-            if($lastCall) {
-                if ($lastCall->isStatusRinging()) {
-                    $iconClass = 'fa fa-spinner fa-spin';
-                } elseif ($lastCall->isStatusInProgress()) {
-                    $iconClass = 'fa fa-refresh fa-spin';
-                }
+        if ($lastCall) {
+            if ($lastCall->isStatusRinging()) {
+                $iconClass = 'fa fa-spinner fa-spin';
+            } elseif ($lastCall->isStatusInProgress()) {
+                $iconClass = 'fa fa-refresh fa-spin';
             }
+        }
         //$iconClass = 'fa fa-refresh fa-spin';
         ?>
             <i class="prime <?=$iconClass?>"></i>
     </a>
 </div>
-<?php yii\widgets\Pjax::end() ?>
+    <?php yii\widgets\Pjax::end() ?>
 
 <?php endif; ?>
 

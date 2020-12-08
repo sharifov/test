@@ -5,6 +5,7 @@ use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\ConferenceSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -36,7 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'cf_call_sid',
             [
                 'label' => 'Participants',
-                'value' => static function(\common\models\Conference $model) {
+                'value' => static function (\common\models\Conference $model) {
                     return Html::a(count($model->conferenceParticipants), ['conference-participant/index', 'ConferenceParticipantSearch[cp_cf_id]' => $model->cf_id], ['target' => '_blank', 'data-pjax' => 0]);
                 },
                 'format' => 'raw'
@@ -44,7 +45,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'cf_status_id',
             [
                 'attribute' => 'cf_status_id',
-                'value' => static function(\common\models\Conference $model) {
+                'value' => static function (\common\models\Conference $model) {
                     return $model->getStatusName();
                 },
                 'filter' => \common\models\Conference::getList()
@@ -65,15 +66,19 @@ $this->params['breadcrumbs'][] = $this->title;
 
             ],
             [
-                'class' => \common\components\grid\DateTimeColumn::class,
+                'class' => DateTimeColumn::class,
                 'attribute' => 'cf_start_dt',
             ],
             [
-                'class' => \common\components\grid\DateTimeColumn::class,
+                'class' => DateTimeColumn::class,
                 'attribute' => 'cf_end_dt',
             ],
             'cf_duration:duration',
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'cf_created_dt',
+            ],
+            /*[
                 'attribute' => 'cf_created_dt',
                 'value' => function(\common\models\Conference $model) {
                     return $model->cf_created_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->cf_created_dt)) : '-';
@@ -92,8 +97,12 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ]),
                 'options' => ['style' => 'width: 250px'],
-            ],
+            ],*/
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'cf_updated_dt',
+            ],
+            /*[
                 'attribute' => 'cf_updated_dt',
                 'value' => function(\common\models\Conference $model) {
                     return $model->cf_updated_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->cf_updated_dt)) : '';
@@ -112,11 +121,11 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ]),
                 'options' => ['style' => 'width: 250px'],
-            ],
+            ],*/
             [
                 'attribute' => 'cf_cr_id',
-                'value' => function(\common\models\Conference $model) {
-                    return $model->cfCr ? Html::a(Html::encode($model->cfCr->cr_name),['conference-room/view', 'id' => $model->cf_cr_id], ['target' => '_blank', 'data-pjax' => 0])  : '-';
+                'value' => function (\common\models\Conference $model) {
+                    return $model->cfCr ? Html::a(Html::encode($model->cfCr->cr_name), ['conference-room/view', 'id' => $model->cf_cr_id], ['target' => '_blank', 'data-pjax' => 0])  : '-';
                 },
                 'filter' => \common\models\ConferenceRoom::getList(),
                 'format' => 'raw',

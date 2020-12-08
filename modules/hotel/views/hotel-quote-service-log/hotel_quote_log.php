@@ -5,7 +5,7 @@ use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
-use dosamigos\datepicker\DatePicker;
+use common\components\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel modules\hotel\src\entities\hotelQuoteServiceLog\search\HotelQuoteServiceLogCrudSearch */
@@ -45,10 +45,10 @@ use dosamigos\datepicker\DatePicker;
                     if (strlen($message) < 600) {
                         return '<pre><small>' . $message . '</small></pre>';
                     } else {
-                        $out = '<button class="btn btn-secondary" type="button" data-toggle="collapse" data-target="#item_'. $model->hqsl_id .'" aria-expanded="false" aria-controls="item_'. $model->hqsl_id .'">
+                        $out = '<button class="btn btn-secondary" type="button" data-toggle="collapse" data-target="#item_' . $model->hqsl_id . '" aria-expanded="false" aria-controls="item_' . $model->hqsl_id . '">
                                     <i class="fas fa-eye"></i>  Api Response
                                 </button>';
-                        $out .= '<div class="collapse" id="item_'. $model->hqsl_id .'">';
+                        $out .= '<div class="collapse" id="item_' . $model->hqsl_id . '">';
                         $out .= '<pre><small>' . $message . '</small></pre>';
                         $out .= '</div>';
                         return $out;
@@ -80,6 +80,11 @@ use dosamigos\datepicker\DatePicker;
             ],
 
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'hqsl_created_dt'
+            ],
+
+            /*[
                 'attribute' => 'hqsl_created_dt',
                 'value' => static function (HotelQuoteServiceLog $model) {
                     return $model->hqsl_created_dt ?
@@ -97,9 +102,9 @@ use dosamigos\datepicker\DatePicker;
                         'autocomplete' => 'off'
                     ],
                 ]) : null,
-            ],
+            ],*/
         ];
-    ?>
+        ?>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $filterModel,

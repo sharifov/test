@@ -13,5 +13,4 @@ class LeadSupervisionRule extends LeadRule
     {
         return $lead->canAgentEdit($userId) || $lead->canSupervisionEdit(Yii::$app->user->identity->userGroupList);
     }
-
 }

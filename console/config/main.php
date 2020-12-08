@@ -62,6 +62,7 @@ return [
                         //$ip = $_SERVER['REMOTE_ADDR'];
                         return '[console]';
                     },
+                    'db' => 'db_postgres'
                 ],
                 [
                     'class' => \yii\log\DbTarget::class,
@@ -74,6 +75,7 @@ return [
                     'prefix' => function () {
                         return '[console]';
                     },
+                    'db' => 'db_postgres'
                 ],
                 [
                     'class' => \common\components\logger\AirFileTarget::class,
@@ -111,7 +113,7 @@ return [
         ],*/
 
     ],
-    'modules'=>[
+    'modules' => [
         'translatemanager' => [
             'class'                     => 'lajax\translatemanager\Module',
             'root'                      => '@frontend',               // The root directory of the project scan.

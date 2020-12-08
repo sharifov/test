@@ -1,5 +1,7 @@
 <?php
+
 use yii\helpers\Html;
+
 \frontend\assets\VueAsset::register($this); // register VueAsset
 
 $this->registerJsFile('/js/vue/call-widget.js', [

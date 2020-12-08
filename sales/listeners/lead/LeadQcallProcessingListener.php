@@ -52,7 +52,6 @@ class LeadQcallProcessingListener
                 $lead->offset_gmt,
                 new FindPhoneParams($lead->project_id, $lead->l_dep_id)
             );
-
         } catch (\Throwable $e) {
             \Yii::error($e, 'LeadQcallProcessingListener');
         }

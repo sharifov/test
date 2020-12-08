@@ -7,6 +7,7 @@ use yii\grid\GridView;
 use yii\helpers\StringHelper;
 use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\clientChatRequest\entity\search\ClientChatRequestSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -33,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'ccr_id',
             [
                 'attribute' => 'ccr_event',
-                'value' => static function(ClientChatRequest $model) {
+                'value' => static function (ClientChatRequest $model) {
                     return $model->getEventName();
                 },
                 'filter' => ClientChatRequest::getEventList()
@@ -42,28 +43,30 @@ $this->params['breadcrumbs'][] = $this->title;
             'ccr_visitor_id',
             [
                 'attribute' => 'ccr_json_data',
-                'value' => static function(ClientChatRequest $model) {
+                'value' => static function (ClientChatRequest $model) {
                     $content = '<p>' . StringHelper::truncate($model->ccr_json_data, 200, '...', null, true) . '</p>';
-                    $content .= Html::a('<i class="fas fa-eye"></i> details</a>',null,
+                    $content .= Html::a(
+                        '<i class="fas fa-eye"></i> details</a>',
+                        null,
                         [
                             'class' => 'btn btn-sm btn-success',
                             'data-pjax' => 0,
-                            'onclick' => '(function ( $event ) { $("#data_'. $model->ccr_id . '").toggle(); })();',
+                            'onclick' => '(function ( $event ) { $("#data_' . $model->ccr_id . '").toggle(); })();',
                         ]
                     );
                     $content .= $model->ccr_json_data ?
-                        '<pre id="data_'. $model->ccr_id . '" style="display: none;">' .
+                        '<pre id="data_' . $model->ccr_id . '" style="display: none;">' .
                             VarDumper::dumpAsString(JsonHelper::decode($model->ccr_json_data), 10, true) . '</pre>' : '-';
 
                     return $content;
                 },
                 'format' => 'raw',
             ],
-			[
-				'class' => \common\components\grid\DateTimeColumn::class,
-				'attribute' => 'ccr_created_dt',
-				'format' => 'byUserDateTime'
-			],
+            [
+                'class' => \common\components\grid\DateTimeColumn::class,
+                'attribute' => 'ccr_created_dt',
+                'format' => 'byUserDateTime'
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

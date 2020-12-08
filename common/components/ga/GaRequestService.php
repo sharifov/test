@@ -29,13 +29,13 @@ class GaRequestService extends Component
 
     private Request $curlRequest;
 
-    public function init() : void
+    public function init(): void
     {
         parent::init();
         $this->initRequest();
     }
 
-    private function initRequest() : bool
+    private function initRequest(): bool
     {
         try {
             $client = new Client();
@@ -45,8 +45,10 @@ class GaRequestService extends Component
 
             return true;
         } catch (Throwable $throwable) {
-            Yii::error(AppHelper::throwableFormatter($throwable),
-            'GaRequestService::initRequest:Throwable');
+            Yii::error(
+                AppHelper::throwableFormatter($throwable),
+                'GaRequestService::initRequest:Throwable'
+            );
         }
         return false;
     }
@@ -66,8 +68,7 @@ class GaRequestService extends Component
         array $headers = [],
         array $options = [],
         ?string $format = null
-    ): Response
-    {
+    ): Response {
         $this->curlRequest->setMethod($method);
 
         if ($data) {

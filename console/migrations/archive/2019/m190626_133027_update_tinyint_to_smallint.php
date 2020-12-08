@@ -35,4 +35,3 @@ class m190626_133027_update_tinyint_to_smallint extends Migration
         $this->alterColumn('{{%lead_call_expert}}', 'lce_status_id', $this->tinyInteger(1));
     }
 }
-

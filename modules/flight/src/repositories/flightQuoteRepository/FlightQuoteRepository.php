@@ -16,19 +16,19 @@ use sales\repositories\Repository;
  */
 class FlightQuoteRepository extends Repository
 {
-	/**
-	 * @var EventDispatcher
-	 */
-	private $eventDispatcher;
+    /**
+     * @var EventDispatcher
+     */
+    private $eventDispatcher;
 
-	/**
-	 * FlightQuoteRepository constructor.
-	 * @param EventDispatcher $eventDispatcher
-	 */
-	public function __construct(EventDispatcher $eventDispatcher)
-	{
-		$this->eventDispatcher = $eventDispatcher;
-	}
+    /**
+     * FlightQuoteRepository constructor.
+     * @param EventDispatcher $eventDispatcher
+     */
+    public function __construct(EventDispatcher $eventDispatcher)
+    {
+        $this->eventDispatcher = $eventDispatcher;
+    }
 
     public function find(?int $id): FlightQuote
     {
@@ -38,18 +38,18 @@ class FlightQuoteRepository extends Repository
         throw new NotFoundException('Flight quote is not found', FlightCodeException::FLIGHT_QUOTE_NOT_FOUND);
     }
 
-	/**
-	 * @param FlightQuote $flightQuote
-	 * @return int
-	 */
-	public function save(FlightQuote $flightQuote): int
-	{
-		if (!$flightQuote->save()) {
-			throw new \RuntimeException($flightQuote->getErrorSummary(false)[0]);
-		}
-		$this->eventDispatcher->dispatchAll($flightQuote->releaseEvents());
-		return $flightQuote->fq_id;
-	}
+    /**
+     * @param FlightQuote $flightQuote
+     * @return int
+     */
+    public function save(FlightQuote $flightQuote): int
+    {
+        if (!$flightQuote->save()) {
+            throw new \RuntimeException($flightQuote->getErrorSummary(false)[0]);
+        }
+        $this->eventDispatcher->dispatchAll($flightQuote->releaseEvents());
+        return $flightQuote->fq_id;
+    }
 
     public function remove(FlightQuote $quote): void
     {

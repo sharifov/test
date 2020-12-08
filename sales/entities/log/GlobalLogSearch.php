@@ -19,11 +19,11 @@ use yii\db\Query;
  */
 class GlobalLogSearch extends GlobalLog
 {
-	public $leadId;
+    public $leadId;
 
-	/**
-	 * @return array
-	 */
+    /**
+     * @return array
+     */
     public function rules(): array
     {
         return [
@@ -40,7 +40,7 @@ class GlobalLogSearch extends GlobalLog
      * @return ActiveDataProvider
      */
     public function search($params): ActiveDataProvider
-	{
+    {
         $query = GlobalLog::find();
 
         // add conditions that should always apply here
@@ -63,7 +63,7 @@ class GlobalLogSearch extends GlobalLog
             'gl_app_user_id' => $this->gl_app_user_id,
             'gl_obj_id' => $this->gl_obj_id,
             'gl_created_at' => $this->gl_created_at,
-			'gl_action_type' => $this->gl_action_type
+            'gl_action_type' => $this->gl_action_type
         ]);
 
         $query->andFilterWhere(['like', 'gl_app_id', $this->gl_app_id])

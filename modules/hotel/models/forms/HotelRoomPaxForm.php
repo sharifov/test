@@ -37,31 +37,31 @@ class HotelRoomPaxForm extends HotelRoomPax
     {
         return [
             [['hrp_type_id'], 'required'],
-			['hrp_age', 'string', 'max' => 3],
-			[['hrp_hotel_room_id', 'hrp_type_id', 'hrp_age', 'hrp_id'], 'integer'],
+            ['hrp_age', 'string', 'max' => 3],
+            [['hrp_hotel_room_id', 'hrp_type_id', 'hrp_age', 'hrp_id'], 'integer'],
             [['hrp_dob'], 'safe'],
-			[['hrp_age'], 'required', 'when' => static function ($model) {
-        		return $model->isChild();
-			}],
+            [['hrp_age'], 'required', 'when' => static function ($model) {
+                return $model->isChild();
+            }],
             //[['hrp_dob'], 'filter', ],
             [['hrp_dob'], 'filter', 'filter' => static function ($value) {
-				return date('Y-m-d', strtotime($value));
+                return date('Y-m-d', strtotime($value));
             }, 'skipOnEmpty' => true],
-			[['hrp_age'], 'filter', 'filter' => function () {
-        		if ($this->hrp_dob && $this->hrp_age == null) {
-					$dobTime = strtotime($this->hrp_dob);
-					$now = time();
+            [['hrp_age'], 'filter', 'filter' => function () {
+                if ($this->hrp_dob && $this->hrp_age == null) {
+                    $dobTime = strtotime($this->hrp_dob);
+                    $now = time();
 
-					$age = date('Y', $now) - date('Y', $dobTime);
-					return $age == 0 ? 1 : $age;
-				}
-        		return $this->hrp_age;
-			}],
+                    $age = date('Y', $now) - date('Y', $dobTime);
+                    return $age == 0 ? 1 : $age;
+                }
+                return $this->hrp_age;
+            }],
             [['hrp_first_name', 'hrp_last_name'], 'string', 'max' => 40],
             [['hrp_id'], 'exist', 'skipOnError' => true, 'targetClass' => HotelRoomPax::class, 'targetAttribute' => ['hrp_id' => 'hrp_id']],
             [['hrp_hotel_room_id'], 'exist', 'skipOnError' => true, 'targetClass' => HotelRoom::class, 'targetAttribute' => ['hrp_hotel_room_id' => 'hr_id']],
-			[['hrp_dob'], 'compareDateOfBirth'],
-			[['hrp_age'], 'checkDateOfBirth']
+            [['hrp_dob'], 'compareDateOfBirth'],
+            [['hrp_age'], 'checkDateOfBirth']
         ];
     }
 
@@ -81,42 +81,41 @@ class HotelRoomPaxForm extends HotelRoomPax
         ];
     }
 
-	/**
-	 * @return void
-	 * @throws \Exception
-	 */
-	public function checkDateOfBirth(): void
-	{
-		$ageRange = $this->getPaxAgeRangeByPaxId($this->hrp_type_id);
-		if ($this->hrp_age !== null && $ageRange && ($this->hrp_age < $ageRange['min'] || (isset($ageRange['max']) && $this->hrp_age > $ageRange['max']))) {
+    /**
+     * @return void
+     * @throws \Exception
+     */
+    public function checkDateOfBirth(): void
+    {
+        $ageRange = $this->getPaxAgeRangeByPaxId($this->hrp_type_id);
+        if ($this->hrp_age !== null && $ageRange && ($this->hrp_age < $ageRange['min'] || (isset($ageRange['max']) && $this->hrp_age > $ageRange['max']))) {
+            $message = 'The age of the ' . $this->getPaxTypeName() . ', should be from ' . $ageRange['min'] . ' ' . (isset($ageRange['max']) ? ' to ' . $ageRange['max'] : '') . ' years old';
+            $this->addError('hrp_age', $message);
+        }
 
-			$message = 'The age of the '.$this->getPaxTypeName().', should be from '.$ageRange['min'].' '. (isset($ageRange['max']) ? ' to ' . $ageRange['max'] : '').' years old';
-			$this->addError('hrp_age', $message);
-		}
+        if ($this->hrp_age && $this->hrp_dob) {
+            $dobTime = new DateTime($this->hrp_dob);
+            $now = new DateTime();
 
-		if ($this->hrp_age && $this->hrp_dob) {
-			$dobTime = new DateTime($this->hrp_dob);
-			$now = new DateTime();
+            $interval = $now->diff($dobTime);
 
-			$interval = $now->diff($dobTime);
+            $age = $interval->y == 0 ? 1 : $interval->y;
 
-			$age = $interval->y == 0 ? 1 : $interval->y;
+            if ($age != $this->hrp_age) {
+                $this->addError('hrp_age', 'Date of birth does not match the entered age.');
+            }
+        }
+    }
 
-			if ($age != $this->hrp_age) {
-				$this->addError('hrp_age', 'Date of birth does not match the entered age.');
-			}
-		}
-	}
-
-	/**
-	 * @return void
-	 */
-	public function compareDateOfBirth(): void
-	{
-		$today = strtotime('today');
-		$dob = strtotime($this->hrp_dob);
-		if ($today < $dob) {
-			$this->addError('hrp_dob', 'Date of Birth cant be gather then current date');
-		}
-	}
+    /**
+     * @return void
+     */
+    public function compareDateOfBirth(): void
+    {
+        $today = strtotime('today');
+        $dob = strtotime($this->hrp_dob);
+        if ($today < $dob) {
+            $this->addError('hrp_dob', 'Date of Birth cant be gather then current date');
+        }
+    }
 }

@@ -9,7 +9,7 @@
 ]])?>
     <a href="javascript:;" class="dropdown-toggle info-number" title="Notifications" data-toggle="dropdown" aria-expanded="false">
         <i class="fa fa-comment-o"></i>
-        <?php if($newCount): ?>
+        <?php if ($newCount) : ?>
             <span class="badge bg-green"><?=$newCount?></span>
         <?php endif;?>
     </a>
@@ -19,8 +19,8 @@
 
         $soundPlay = false;
 
-        if($model):
-            foreach ($model as $n => $item): ?>
+        if ($model) :
+            foreach ($model as $n => $item) : ?>
             <li>
                 <a href="<?=\yii\helpers\Url::to(['/notifications/view2', 'id' => $item->n_id])?>" data-pjax="0">
                     <span class="glyphicon glyphicon-info-sign"> <?php //remove-sign, ok-sign, question-sign ?>
@@ -34,7 +34,7 @@
                     </span>
                 </a>
                 <?php
-                    if($item->n_popup && !$item->n_popup_show):
+                if ($item->n_popup && !$item->n_popup_show) :
                     $soundPlay = true;
 
                     $desktopMessage = strip_tags($item->n_message);
@@ -47,12 +47,11 @@
                     $type = $item->getNotifyType();
 
                     if ($n === 0) {
-
                         $js2 = '
                             new PNotify({
-                                title: "'.\yii\helpers\Html::encode($item->n_title).'",
-                                type: "'.$type.'",
-                                text: "'.$message.'",
+                                title: "' . \yii\helpers\Html::encode($item->n_title) . '",
+                                type: "' . $type . '",
+                                text: "' . $message . '",
                                 icon: true,
                                 desktop: {
                                     desktop: true,
@@ -71,7 +70,7 @@
                         /*nonblock: {
                                    nonblock: true
                                },*/
-                            
+
 //                            new PNotify({
 //                                title: "'.\yii\helpers\Html::encode($item->n_title).'",
 //                                type: "'.$type.'",
@@ -83,7 +82,7 @@
                         $this->registerJs($js2, \yii\web\View::POS_READY);
 //                        break;
                     }
-                ?>
+                    ?>
                 <?php endif;?>
 
                 <?php
@@ -101,24 +100,24 @@
             </div>
 
             <?php
-                if($newCount) {
-                    $jsDiv = '<span class="label-success label pull-right">'.$newCount.'</span>';
-                    $this->registerJs('favicon.badge('.$newCount.');', \yii\web\View::POS_READY);
-                } else {
-                    $jsDiv = '';
-                    //$this->registerJs('favicon.badge(10);', \yii\web\View::POS_READY);
-                    $this->registerJs('favicon.reset();', \yii\web\View::POS_READY);
-                }
+            if ($newCount) {
+                $jsDiv = '<span class="label-success label pull-right">' . $newCount . '</span>';
+                $this->registerJs('favicon.badge(' . $newCount . ');', \yii\web\View::POS_READY);
+            } else {
+                $jsDiv = '';
+                //$this->registerJs('favicon.badge(10);', \yii\web\View::POS_READY);
+                $this->registerJs('favicon.reset();', \yii\web\View::POS_READY);
+            }
 
-                $this->registerJs("$('#div-cnt-notification').html('".$jsDiv."'); ", \yii\web\View::POS_READY);
+                $this->registerJs("$('#div-cnt-notification').html('" . $jsDiv . "'); ", \yii\web\View::POS_READY);
             ?>
         </li>
 
     </ul>
     <?php
-        if($soundPlay) {
-            $this->registerJs('$(function() {soundNotification();});', \yii\web\View::POS_READY);
-        }
+    if ($soundPlay) {
+        $this->registerJs('$(function() {soundNotification();});', \yii\web\View::POS_READY);
+    }
     ?>
 
 <?php yii\widgets\Pjax::end() ?>

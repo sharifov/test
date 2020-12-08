@@ -55,11 +55,14 @@ class LeadOwnerChangedNotificationsListener
 
         $subject = Yii::t('email', 'Lead-{id} reassigned to ({username})', ['id' => $lead->id, 'username' => $newOwner->username]);
 
-        $body = Yii::t('email', "Attention! Your Lead (Id: {lead_id}) has been reassigned to another agent ({name}).",
+        $body = Yii::t(
+            'email',
+            "Attention! Your Lead (Id: {lead_id}) has been reassigned to another agent ({name}).",
             [
                 'lead_id' => Purifier::createLeadShortLink($lead),
                 'name' => $newOwner->username,
-            ]);
+            ]
+        );
 
         if ($ntf = Notifications::create($oldOwner->id, $subject, $body, Notifications::TYPE_INFO, true)) {
             //Notifications::socket($oldOwner->id, null, 'getNewNotification', [], true);
@@ -72,5 +75,4 @@ class LeadOwnerChangedNotificationsListener
             );
         }
     }
-
 }

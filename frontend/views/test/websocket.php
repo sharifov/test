@@ -1,4 +1,5 @@
 <?php
+
 use common\models\Employee;
 use yii\helpers\Html;
 
@@ -15,7 +16,7 @@ $controllerId = Yii::$app->controller->id;
 $actionId = Yii::$app->controller->action->id;
 $pageUrl = urlencode(\yii\helpers\Url::current());
 $ipAddress = Yii::$app->request->remoteIP;
-$webSocketHost = (Yii::$app->request->isSecureConnection ? 'wss': 'ws') . '://'.Yii::$app->request->serverName . '/ws';// . ':8888';
+$webSocketHost = (Yii::$app->request->isSecureConnection ? 'wss' : 'ws') . '://' . Yii::$app->request->serverName . '/ws';// . ':8888';
 
 ?>
 <div class="ws-index">

@@ -30,7 +30,6 @@ class m190617_072818_add_settings_support_phone_numbers extends Migration
         }
 
         Yii::$app->db->getSchema()->refreshTableSchema('{{%setting}}');
-
     }
 
     /**

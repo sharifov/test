@@ -19,9 +19,9 @@ class ConferenceSearch extends Conference
     {
         return [
             [['cf_id', 'cf_cr_id', 'cf_status_id', 'cf_created_user_id'], 'integer'],
-            [['cf_sid', 'cf_options', 'cf_created_dt', 'cf_updated_dt'], 'safe'],
+            [['cf_sid', 'cf_options'], 'safe'],
             [['cf_friendly_name', 'cf_call_sid'], 'string'],
-            [['cf_start_dt', 'cf_end_dt'], 'date', 'format' => 'php:Y-m-d'],
+            [['cf_start_dt', 'cf_end_dt', 'cf_created_dt', 'cf_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
             ['cf_duration', 'integer'],
         ];
     }
@@ -34,7 +34,7 @@ class ConferenceSearch extends Conference
         // bypass scenarios() implementation in the parent class
         return Model::scenarios();
     }
-    
+
     public function search($params, Employee $user): ActiveDataProvider
     {
         $query = Conference::find()->with(['createdUser']);
@@ -43,7 +43,7 @@ class ConferenceSearch extends Conference
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cf_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['cf_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],

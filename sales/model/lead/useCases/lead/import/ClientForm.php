@@ -41,7 +41,7 @@ class ClientForm extends Model
             ['phone', 'default', 'value' => null],
             ['phone', 'string', 'max' => 100],
             ['phone', PhoneInputValidator::class],
-            ['phone', 'filter', 'filter' => static function($value) {
+            ['phone', 'filter', 'filter' => static function ($value) {
                 return $value === null ? null : str_replace(['-', ' '], '', trim($value));
             }],
         ];

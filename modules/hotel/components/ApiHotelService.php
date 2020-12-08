@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created
  * User: alex.connor@techork.com
@@ -44,12 +45,12 @@ class ApiHotelService extends Component
     private const DESTINATION_HOTEL = 2;
 
     private const DESTINATION_AVAILABLE_TYPE = [
-    	self::DESTINATION_LOCATIONS,
-		self::DESTINATION_CITY_ZONE,
-		self::DESTINATION_HOTEL
-	];
+        self::DESTINATION_LOCATIONS,
+        self::DESTINATION_CITY_ZONE,
+        self::DESTINATION_HOTEL
+    ];
 
-    public function init() : void
+    public function init(): void
     {
         parent::init();
         $this->initRequest();
@@ -58,7 +59,7 @@ class ApiHotelService extends Component
     /**
      * @return bool
      */
-    private function initRequest() : bool
+    private function initRequest(): bool
     {
         $authStr = base64_encode($this->username . ':' . $this->password);
 
@@ -84,7 +85,7 @@ class ApiHotelService extends Component
      * @return Response
      * @throws \yii\httpclient\Exception
      */
-    protected function sendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []) : Response
+    protected function sendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []): Response
     {
         $url = $this->url . $action;
         /* @var $this->request Client */
@@ -107,8 +108,8 @@ class ApiHotelService extends Component
     {
         $method = strtolower($method);
         if ($method === 'post' || $method === 'delete') {
-			$this->request->setFormat(Client::FORMAT_JSON);
-		}
+            $this->request->setFormat(Client::FORMAT_JSON);
+        }
     }
 
     /**
@@ -147,7 +148,7 @@ class ApiHotelService extends Component
                 $out['error'] = 'Not found in response array data key [hotels]';
                 \Yii::error(VarDumper::dumpAsString($response->data['error'], 10), 'Component:ApiHotelService::search');
             } else {
-                $out['error'] = 'Error ('.$response->statusCode.'): ' . $response->content;
+                $out['error'] = 'Error (' . $response->statusCode . '): ' . $response->content;
                 \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:ApiHotelService::search');
             }
         } catch (\Throwable $throwable) {
@@ -158,54 +159,53 @@ class ApiHotelService extends Component
         return $out;
     }
 
-	/**
-	 * @param string $term
-	 * @param string $lang
-	 * @param string $hc
-	 * @param string $zc
-	 * @param array $type
-	 * @return array
-	 */
+    /**
+     * @param string $term
+     * @param string $lang
+     * @param string $hc
+     * @param string $zc
+     * @param array $type
+     * @return array
+     */
     public function searchDestination(string $term, string $lang = '', string $hc = '', string $zc = '', array $type = null): array
-	{
-		$out = ['error' => false, 'data' => []];
+    {
+        $out = ['error' => false, 'data' => []];
 
-		$data['term'] = $term;
-		$data['lang'] = $lang;
-		$data['hc'] = $hc;
-		$data['zc'] = $zc;
+        $data['term'] = $term;
+        $data['lang'] = $lang;
+        $data['hc'] = $hc;
+        $data['zc'] = $zc;
 
-		$data['t'] = implode(',', $type ?: self::getDestinationAvailableTypeList());
+        $data['t'] = implode(',', $type ?: self::getDestinationAvailableTypeList());
 
-		try {
-			$response = $this->sendRequest('content/destinations', $data, 'get');
+        try {
+            $response = $this->sendRequest('content/destinations', $data, 'get');
 
-			if ($response->isOk) {
-				if (isset($response->data['destinations'])) {
-					$out['data'] = $response->data;
-				} else {
-					$out['error'] = 'Not found destination';
-				}
-			} else {
-				$out['error'] = 'Error ('.$response->statusCode.'): ' . $response->content;
-				\Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:ApiHotelService:searchDestination:');
-			}
+            if ($response->isOk) {
+                if (isset($response->data['destinations'])) {
+                    $out['data'] = $response->data;
+                } else {
+                    $out['error'] = 'Not found destination';
+                }
+            } else {
+                $out['error'] = 'Error (' . $response->statusCode . '): ' . $response->content;
+                \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:ApiHotelService:searchDestination:');
+            }
+        } catch (\Throwable $throwable) {
+            \Yii::error(VarDumper::dumpAsString($throwable, 10), 'Component:ApiHotelService:searchDestination:throwable');
+            $out['error'] = 'ApiHotelService error: ' . $throwable->getMessage();
+        }
 
-		} catch (\Throwable $throwable) {
-			\Yii::error(VarDumper::dumpAsString($throwable, 10), 'Component:ApiHotelService:searchDestination:throwable');
-			$out['error'] = 'ApiHotelService error: ' . $throwable->getMessage();
-		}
+        return $out;
+    }
 
-		return $out;
-	}
-
-	/**
-	 * @return array
-	 */
-	public static function getDestinationAvailableTypeList(): array
-	{
-		return self::DESTINATION_AVAILABLE_TYPE;
-	}
+    /**
+     * @return array
+     */
+    public static function getDestinationAvailableTypeList(): array
+    {
+        return self::DESTINATION_AVAILABLE_TYPE;
+    }
 
     /**
      * @param string $urlAction
@@ -225,18 +225,14 @@ class ApiHotelService extends Component
 
             if ($response->isOk) {
                 if ((new HotelApiDataHelper())->checkDataResponse($urlMethod, $response->data)) {
-
                     $result['data'] = (new HotelApiDataHelper())->prepareDataResponse($urlMethod, $response->data);
                     $result['data']['logData'] = $response->data;
                     $result['statusApi'] = HotelQuoteServiceLogStatus::STATUS_SUCCESS;
-                    $resultMessage->message = 'Process('. $resultMessage->urlMethodMap[$urlMethod] .') completed successfully';
-
+                    $resultMessage->message = 'Process(' . $resultMessage->urlMethodMap[$urlMethod] . ') completed successfully';
                 } elseif (isset($response->data['error']) && !empty($response->data['error'])) {
-
                     $result['statusApi'] = HotelQuoteServiceLogStatus::STATUS_FAIL_WITH_ERROR;
                     $result['data']['logData'] = $response->data;
                     $resultMessage->message = $response->data['error']['message'];
-
                 } else {
                     $result['statusApi'] = HotelQuoteServiceLogStatus::STATUS_FAIL;
                     $result['data']['logData'] = $response;
@@ -253,13 +249,15 @@ class ApiHotelService extends Component
             $resultMessage->code = $throwable->getCode();
 
             $result['data']['logData'] = $resultMessage->prepareMessage()->forLog;
-            \Yii::error(VarDumper::dumpAsString($result['data']['logData']),
-                'ApiHotelService error:' . $resultMessage->urlMethodMap[$urlMethod]);
+            \Yii::error(
+                VarDumper::dumpAsString($result['data']['logData']),
+                'ApiHotelService error:' . $resultMessage->urlMethodMap[$urlMethod]
+            );
         }
 
         $resultMessage->title = HotelQuoteServiceLogStatus::getTitle($result['statusApi']);
         $result['message'] = $resultMessage->prepareMessage()->forHuman;
 
-		return $result;
-	}
+        return $result;
+    }
 }

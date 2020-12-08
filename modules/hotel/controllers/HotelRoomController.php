@@ -96,7 +96,6 @@ class HotelRoomController extends FController
 
 
         if ($model->load(Yii::$app->request->post())) {
-
             //Yii::$app->response->format = Response::FORMAT_JSON;
 
             if ($model->validate()) {
@@ -104,40 +103,39 @@ class HotelRoomController extends FController
                 $modelRoom->attributes = $model->attributes;
 
                 if ($modelRoom->save()) {
-					if ($model->hr_pax_list) {
-						$paxIDs = [];
-						foreach ($model->hr_pax_list as $paxData) {
-							$paxForm = new HotelRoomPaxForm();
-							$paxForm->attributes = $paxData;
-							$paxForm->hrp_hotel_room_id = $modelRoom->hr_id;
+                    if ($model->hr_pax_list) {
+                        $paxIDs = [];
+                        foreach ($model->hr_pax_list as $paxData) {
+                            $paxForm = new HotelRoomPaxForm();
+                            $paxForm->attributes = $paxData;
+                            $paxForm->hrp_hotel_room_id = $modelRoom->hr_id;
 
 
-							$paxModel = null;
-							if ($paxForm->hrp_id) {
-								$paxModel = HotelRoomPax::findOne($paxForm->hrp_id);
+                            $paxModel = null;
+                            if ($paxForm->hrp_id) {
+                                $paxModel = HotelRoomPax::findOne($paxForm->hrp_id);
+                            }
 
-							}
+                            if (!$paxModel) {
+                                $paxModel = new HotelRoomPax();
+                                //$paxModel->hrp_hotel_room_id = $modelRoom->hr_id;
+                            }
 
-							if (!$paxModel) {
-								$paxModel = new HotelRoomPax();
-								//$paxModel->hrp_hotel_room_id = $modelRoom->hr_id;
-							}
+                            $paxModel->attributes = $paxForm->attributes;
+                            if (!$paxModel->save()) {
+                                Yii::error('attr: '  . VarDumper::dumpAsString($paxModel->attributes) . ', errors:' . VarDumper::dumpAsString($paxModel->errors), 'HotelRoomController:actionCreateAjax:HotelRoomPax:save');
+                            } else {
+                                $paxIDs[] = $paxModel->hrp_id;
+                            }
+                        }
 
-							$paxModel->attributes = $paxForm->attributes;
-							if (!$paxModel->save()) {
-								Yii::error('attr: '  . VarDumper::dumpAsString($paxModel->attributes) . ', errors:' . VarDumper::dumpAsString($paxModel->errors), 'HotelRoomController:actionCreateAjax:HotelRoomPax:save');
-							} else {
-								$paxIDs[] = $paxModel->hrp_id;
-							}
-						}
-
-						$paxForDelete = HotelRoomPax::find()->where(['NOT IN', 'hrp_id', $paxIDs])->andWhere(['hrp_hotel_room_id' => $modelRoom->hr_id])->all();
-						if ($paxForDelete) {
-							foreach ($paxForDelete as $paxDeleteItem) {
-								$paxDeleteItem->delete();
-							}
-						}
-					}
+                        $paxForDelete = HotelRoomPax::find()->where(['NOT IN', 'hrp_id', $paxIDs])->andWhere(['hrp_hotel_room_id' => $modelRoom->hr_id])->all();
+                        if ($paxForDelete) {
+                            foreach ($paxForDelete as $paxDeleteItem) {
+                                $paxDeleteItem->delete();
+                            }
+                        }
+                    }
 
                     return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-product-search-' . $modelRoom->hrHotel->ph_product_id . '"});</script>';
                     //return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-hotel-rooms-' . $modelRoom->hr_hotel_id . '"});</script>';
@@ -145,7 +143,6 @@ class HotelRoomController extends FController
             }
             //return ['errors' => \yii\widgets\ActiveForm::validate($model)];
         } else {
-
             $hotelId = (int) Yii::$app->request->get('id');
 
             if (!$hotelId) {
@@ -205,13 +202,11 @@ class HotelRoomController extends FController
         $model->hr_id = $modelRoom->hr_id;
 
         if ($model->load(Yii::$app->request->post())) {
-
             if ($model->validate()) {
                 //echo 123; exit;
                 $modelRoom->hr_room_name = $model->hr_room_name;
 
                 if ($modelRoom->save()) {
-
                     if ($model->hr_pax_list) {
                         $paxIDs = [];
                         foreach ($model->hr_pax_list as $paxData) {
@@ -223,7 +218,6 @@ class HotelRoomController extends FController
                             $paxModel = null;
                             if ($paxForm->hrp_id) {
                                 $paxModel = HotelRoomPax::findOne($paxForm->hrp_id);
-
                             }
 
                             if (!$paxModel) {
@@ -246,8 +240,6 @@ class HotelRoomController extends FController
                                 $paxDeleteItem->delete();
                             }
                         }
-
-
                     }
 
                     return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-product-search-' . $modelRoom->hrHotel->ph_product_id . '"});</script>';
@@ -304,7 +296,7 @@ class HotelRoomController extends FController
         try {
             $model = $this->findModel($id);
             if (!$model->delete()) {
-                throw new Exception('Hotel Room ('.$id.') not deleted', 2);
+                throw new Exception('Hotel Room (' . $id . ') not deleted', 2);
             }
         } catch (\Throwable $throwable) {
             return ['error' => 'Error: ' . $throwable->getMessage()];

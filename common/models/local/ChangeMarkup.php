@@ -1,4 +1,5 @@
 <?php
+
 namespace common\models\local;
 
 use common\components\BackOffice;

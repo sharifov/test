@@ -25,8 +25,10 @@ class Pricing implements ParseDumpInterface
                 $result['prices'] = $prices;
             }
         } catch (\Throwable $throwable) {
-            \Yii::error(AppHelper::throwableFormatter($throwable),
-                'Amadeus:Pricing:parseDump:Throwable');
+            \Yii::error(
+                AppHelper::throwableFormatter($throwable),
+                'Amadeus:Pricing:parseDump:Throwable'
+            );
         }
         return $result;
     }
@@ -77,7 +79,7 @@ class Pricing implements ParseDumpInterface
                         $result[$j]['type'] = $passengerType;
                         $result[$j]['fare'] = $fare;
                         $result[$j]['taxes'] = $taxes;
-                        $j ++;
+                        $j++;
                     }
                 }
             }
@@ -195,7 +197,7 @@ class Pricing implements ParseDumpInterface
                     $result[$j]['type'] = PricingService::passengerTypeMapping($priceMatches[2]);
                     $result[$j]['fare'] = $priceMatches[4] ?? null;
                     $result[$j]['taxes'] = !empty($priceMatches[5]) ? $priceMatches[5] : '0.00';
-                    $j ++;
+                    $j++;
                 }
             }
         }

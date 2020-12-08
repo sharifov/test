@@ -1,22 +1,27 @@
 <?php
 
+use sales\auth\Auth;
+use sales\services\cleaner\form\DbCleanerParamsForm;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\StringHelper;
 use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
+use common\components\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\ApiLogSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var DbCleanerParamsForm $modelCleaner */
 
 $this->title = 'Api Logs';
 $this->params['breadcrumbs'][] = $this->title;
+$pjaxListId = 'pjax-api-log';
 ?>
 <div class="api-log-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <?php Pjax::begin(); ?>
+
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <p>
@@ -29,6 +34,15 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ]) ?>
     </p>
+
+    <?php if (Auth::can('global/clean/table')) : ?>
+        <?php echo $this->render('../clean/_clean_table_form', [
+            'modelCleaner' => $modelCleaner,
+            'pjaxIdForReload' => $pjaxListId,
+        ]); ?>
+    <?php endif ?>
+
+    <?php Pjax::begin(['id' => $pjaxListId]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -49,7 +63,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'al_action',
                 'value' => function (\common\models\ApiLog $model) {
-                    return '<b>'.Html::encode($model->al_action).'</b>';
+                    return '<b>' . Html::encode($model->al_action) . '</b>';
                 },
                 'format' => 'raw',
                 'filter' => \common\models\ApiLog::getActionFilter()
@@ -85,13 +99,19 @@ $this->params['breadcrumbs'][] = $this->title;
                     return '<small>' . $resultStr . '</small>';
                 },
             ],
+
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'al_request_dt'
+            ],
+
+            /*[
                 'attribute' => 'al_request_dt',
                 'value' => static function (\common\models\ApiLog $model) {
                     return $model->al_request_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->al_request_dt), 'php:Y-m-d [H:i:s]') : '-';
                 },
                 'format' => 'raw'
-            ],
+            ],*/
 
             //'al_response_data:ntext',
 //            [
@@ -160,7 +180,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 //'format' => 'html',
                 'value' => function (\common\models\ApiLog $model) {
                     $apiUser = \common\models\ApiUser::findOne($model->al_user_id);
-                    return $apiUser ? $apiUser->au_name . ' ('.$model->al_user_id.')' : $model->al_user_id;
+                    return $apiUser ? $apiUser->au_name . ' (' . $model->al_user_id . ')' : $model->al_user_id;
                 },
                 'filter' => \common\models\ApiUser::getList()
             ],

@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
+use common\components\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\UserContactListSearch */
@@ -32,7 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'ucl_description:ntext',
             [
                 'attribute' => 'ucl_favorite',
-                'value' => function(\common\models\UserContactList $model) {
+                'value' => function (\common\models\UserContactList $model) {
                     $out = '<span class="not-set">(not set)</span>';
                     if (isset($model->ucl_favorite)) {
                         $out = $model->ucl_favorite ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
@@ -42,7 +43,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'filter' => [1 => 'Yes', 0 => 'No']
             ],
-            'ucl_created_dt:byUserDateTime',
+            //'ucl_created_dt:byUserDateTime',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'ucl_created_dt'
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

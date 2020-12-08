@@ -59,13 +59,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     'style' => 'word-break: break-all; white-space:normal'
                 ]
             ],
-			[
-				'attribute' => 'cs_category_id',
-				'value' => static function (CasesQSearch $model) {
-					return $model->category ? $model->category->cc_name : '';
-				},
-				'filter' => CaseCategory::getList()
-			],
+            [
+                'attribute' => 'cs_category_id',
+                'value' => static function (CasesQSearch $model) {
+                    return $model->category ? $model->category->cc_name : '';
+                },
+                'filter' => CaseCategory::getList()
+            ],
             [
                 'attribute' => 'cs_lead_id',
                 'value' => static function (CasesQSearch $model) {
@@ -87,50 +87,52 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'options' => ['style' => 'width: 180px']
             ],
-			[
-				'attribute' => 'css_penalty_type',
-				'value' => static function (CasesQSearch $model) {
-					return $model->css_penalty_type ? SaleTicket::getPenaltyTypeName($model->css_penalty_type) : '-';
-				},
-				'filter' => SaleTicket::getAirlinePenaltyList()
-			],
-			[
-				'attribute' => 'cs_dep_id',
-				'value' => static function (CasesQSearch $model) {
-					return $model->department ? $model->department->dep_name : '';
-				},
-				'filter' => Department::getList()
-			],
+            [
+                'attribute' => 'css_penalty_type',
+                'value' => static function (CasesQSearch $model) {
+                    return $model->css_penalty_type ? SaleTicket::getPenaltyTypeName($model->css_penalty_type) : '-';
+                },
+                'filter' => SaleTicket::getAirlinePenaltyList()
+            ],
+            [
+                'attribute' => 'cs_dep_id',
+                'value' => static function (CasesQSearch $model) {
+                    return $model->department ? $model->department->dep_name : '';
+                },
+                'filter' => Department::getList()
+            ],
             [
                 'class' => NeedActionColumn::class,
                 'attribute' => 'cs_need_action',
             ],
-			[
-				'attribute' => 'cs_created_dt',
-				'value' => static function (CasesQSearch $model) {
-					return $model->cs_created_dt ? Yii::$app->formatter->asDatetime(strtotime($model->cs_created_dt)) : '-';
-				},
-				'filter' => DatePicker::widget([
-					'model' => $searchModel,
-					'attribute' => 'cs_created_dt',
-					'clientOptions' => [
-						'autoclose' => true,
-						'format' => 'yyyy-mm-dd'
-					],
-					'options' => [
-						'autocomplete' => 'off'
-					]
-				]),
-			],
-			[
+            [
+                'attribute' => 'cs_created_dt',
+                'value' => static function (CasesQSearch $model) {
+                    return $model->cs_created_dt ? Yii::$app->formatter->asDatetime(strtotime($model->cs_created_dt)) : '-';
+                },
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'cs_created_dt',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd'
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off'
+                    ]
+                ]),
+            ],
+            [
                 'label' => 'Communication',
                 'value' => static function (CasesQSearch $model) {
                     $statistics = new StatisticsHelper($model->cs_id, StatisticsHelper::TYPE_CASE);
-                    return Yii::$app->getView()->render('/partial/_communication_statistic_list',
+                    return Yii::$app->getView()->render(
+                        '/partial/_communication_statistic_list',
                         [
                             'statistics' => $statistics->setCountAll(),
                             'lastCommunication' => $statistics::getLastCommunicationByCaseId($model->cs_id),
-                        ]);
+                        ]
+                    );
                 },
                 'format' => 'raw',
                 'contentOptions' => [
@@ -141,11 +143,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => 'Pending Time',
                 'value' => static function (CasesQSearch $model) {
                     $createdTS = strtotime($model->cs_created_dt);
-    
+
                     $diffTime = time() - $createdTS;
                     $diffHours = (int) ($diffTime / (60 * 60));
-    
-                    return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+
+                    return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
                 },
                 'options' => [
                     'style' => 'width:180px'
@@ -156,7 +158,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'header' => 'Client time',
                 'format' => 'raw',
-                'value' => static function(CasesQSearch $model) {
+                'value' => static function (CasesQSearch $model) {
                     return $model->getClientTime();
                 },
             ],
@@ -167,18 +169,18 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->owner ? '<i class="fa fa-user"></i> ' . $model->owner->username : '-';
                 },
             ],
-			[
-				'attribute' => 'cs_last_action_dt',
-				'label' => 'Last Action',
-				'value' => static function (CasesQSearch $model) {
-					$createdTS = strtotime($model->cs_last_action_dt);
+            [
+                'attribute' => 'cs_last_action_dt',
+                'label' => 'Last Action',
+                'value' => static function (CasesQSearch $model) {
+                    $createdTS = strtotime($model->cs_last_action_dt);
 
-					$diffTime = time() - $createdTS;
-					$diffHours = (int) ($diffTime / (60 * 60));
+                    $diffTime = time() - $createdTS;
+                    $diffHours = (int) ($diffTime / (60 * 60));
 
-					return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
-				},
-			],
+                    return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+                },
+            ],
             [
                 'class' => 'yii\grid\ActionColumn',
                 'template' => '{view} {take}',

@@ -81,7 +81,7 @@ $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2
                                     'data-toggle' => 'tooltip',
                                     'id' => 'redial-lead-actions-block-call',
                                 ])
-                    ?>
+?>
                 </div>
             </div>
 

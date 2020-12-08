@@ -27,7 +27,6 @@ class m190628_053616_add_permissions_to_lead_flow_checklist_controller extends M
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     /**
@@ -45,5 +44,4 @@ class m190628_053616_add_permissions_to_lead_flow_checklist_controller extends M
             Yii::$app->cache->flush();
         }
     }
-
 }

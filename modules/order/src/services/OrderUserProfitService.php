@@ -1,4 +1,5 @@
 <?php
+
 namespace modules\order\src\services;
 
 use common\models\UserProductType;
@@ -27,65 +28,64 @@ use yii\helpers\ArrayHelper;
  */
 class OrderUserProfitService
 {
-	/**
-	 * @var UserProfitRepository
-	 */
-	private $userProfitRepository;
-	/**
-	 * @var OrderUserProfitRepository
-	 */
-	private $orderUserProfitRepository;
-	/**
-	 * @var TransactionManager
-	 */
-	private $transactionManager;
-	/**
-	 * @var EventDispatcher
-	 */
-	private $eventDispatcher;
-	/**
-	 * @var UserProductTypeRepository
-	 */
-	private $userProductTypeRepository;
+    /**
+     * @var UserProfitRepository
+     */
+    private $userProfitRepository;
+    /**
+     * @var OrderUserProfitRepository
+     */
+    private $orderUserProfitRepository;
+    /**
+     * @var TransactionManager
+     */
+    private $transactionManager;
+    /**
+     * @var EventDispatcher
+     */
+    private $eventDispatcher;
+    /**
+     * @var UserProductTypeRepository
+     */
+    private $userProductTypeRepository;
 
-	public function __construct(
-		UserProfitRepository $userProfitRepository,
-		OrderUserProfitRepository $orderUserProfitRepository,
-		UserProductTypeRepository $userProductTypeRepository,
-		TransactionManager $transactionManager,
-		EventDispatcher $eventDispatcher
-	){
-		$this->userProfitRepository = $userProfitRepository;
-		$this->orderUserProfitRepository = $orderUserProfitRepository;
-		$this->transactionManager = $transactionManager;
-		$this->eventDispatcher = $eventDispatcher;
-		$this->userProductTypeRepository = $userProductTypeRepository;
-	}
+    public function __construct(
+        UserProfitRepository $userProfitRepository,
+        OrderUserProfitRepository $orderUserProfitRepository,
+        UserProductTypeRepository $userProductTypeRepository,
+        TransactionManager $transactionManager,
+        EventDispatcher $eventDispatcher
+    ) {
+        $this->userProfitRepository = $userProfitRepository;
+        $this->orderUserProfitRepository = $orderUserProfitRepository;
+        $this->transactionManager = $transactionManager;
+        $this->eventDispatcher = $eventDispatcher;
+        $this->userProductTypeRepository = $userProductTypeRepository;
+    }
 
-	/**
-	 * @param OrderUserProfitFormComposite $form
-	 * @param Order $order
-	 * @throws \Throwable
-	 */
-	public function updateMultiple(OrderUserProfitFormComposite $form, Order $order): void
-	{
-		$this->transactionManager->wrap(function () use ($form, $order) {
-			/** @var OrderUserProfit[] $orderUserProfits */
-			$orderUserProfits = $form->getAttributeValueByName('orderUserProfits');
+    /**
+     * @param OrderUserProfitFormComposite $form
+     * @param Order $order
+     * @throws \Throwable
+     */
+    public function updateMultiple(OrderUserProfitFormComposite $form, Order $order): void
+    {
+        $this->transactionManager->wrap(function () use ($form, $order) {
+            /** @var OrderUserProfit[] $orderUserProfits */
+            $orderUserProfits = $form->getAttributeValueByName('orderUserProfits');
 
-			if ($orderUserProfits) {
+            if ($orderUserProfits) {
+                $this->orderUserProfitRepository->deleteByOrderId($order->or_id);
 
-				$this->orderUserProfitRepository->deleteByOrderId($order->or_id);
+                foreach ($orderUserProfits as $row) {
+                    $row->scenario = OrderUserProfit::SCENARIO_INSERT;
+                    $row->insert();
+                    $row->oup_amount = $order->or_profit_amount;
+                    $this->orderUserProfitRepository->save($row);
+                }
 
-				foreach ($orderUserProfits as $row) {
-					$row->scenario = OrderUserProfit::SCENARIO_INSERT;
-					$row->insert();
-					$row->oup_amount = $order->or_profit_amount;
-					$this->orderUserProfitRepository->save($row);
-				}
-
-				$this->eventDispatcher->dispatch((new UserProfitCalculateByOrderUserProfitEvent($order)));
-			}
-		});
-	}
+                $this->eventDispatcher->dispatch((new UserProfitCalculateByOrderUserProfitEvent($order)));
+            }
+        });
+    }
 }

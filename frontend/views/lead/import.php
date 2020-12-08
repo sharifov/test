@@ -23,8 +23,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
     <div class="x_content">
 
-    <?php if ($log): ?>
-
+    <?php if ($log) : ?>
         <div class="card import-summary" style="margin-bottom: 10px;">
             <div class="card-header">
                 <span class="pull-right clickable close-icon"><i class="fa fa-times"></i></span>
@@ -32,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
             <div class="card-body">
                 <ul>
-                    <?php foreach ($log as $message): ?>
+                    <?php foreach ($log as $message) : ?>
                         <li><?= $message ?></li>
                     <?php endforeach; ?>
                 </ul>
