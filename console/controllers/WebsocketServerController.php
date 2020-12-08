@@ -448,40 +448,43 @@ class WebsocketServerController extends Controller
 
         //$out['data'] = print_r($params, true);
 
-        if ($controller === 'idle' && $action === 'set') {
-            if (isset($params['val'])) {
-                $val = (bool) $params['val'];
+// TODO: FIX idle
+//        if ($controller === 'idle' && $action === 'set') {
+//            if (isset($params['val'])) {
+//                $val = (bool) $params['val'];
+//
+//                UserConnection::updateAll(['uc_idle_state' => $val, 'uc_idle_state_dt' => date('Y-m-d H:i:s')], ['uc_connection_id' => $frame->fd, 'uc_app_instance' => \Yii::$app->params['appInstance']]);
+//
+//                //echo "\r\n";
+//                $uc = UserConnection::find()->where(['uc_connection_id' => $frame->fd, 'uc_app_instance' => \Yii::$app->params['appInstance']])->one();
+//                if ($uc && $uc->uc_user_id) {
+//                    if ($val) {
+//                        UserMonitor::setUserIdle($uc->uc_user_id);
+//                    } else {
+//                        UserMonitor::setUserActive($uc->uc_user_id);
+//                    }
+//
+//                    UserMonitor::updateGlobalIdle($uc->uc_user_id);
+//
+////                    print_r($uc->attributes);
+////                    $uc->uc_idle_state = $val;
+////                    $uc->uc_idle_state_dt = date('Y-m-d H:i:s');
+////                    $uc->save();
+//                }
+//
+//                unset($uc, $val);
+//            }
+//        }
 
-                UserConnection::updateAll(['uc_idle_state' => $val, 'uc_idle_state_dt' => date('Y-m-d H:i:s')], ['uc_connection_id' => $frame->fd, 'uc_app_instance' => \Yii::$app->params['appInstance']]);
 
-                //echo "\r\n";
-                $uc = UserConnection::find()->where(['uc_connection_id' => $frame->fd, 'uc_app_instance' => \Yii::$app->params['appInstance']])->one();
-                if ($uc && $uc->uc_user_id) {
-                    if ($val) {
-                        UserMonitor::setUserIdle($uc->uc_user_id);
-                    } else {
-                        UserMonitor::setUserActive($uc->uc_user_id);
-                    }
-
-                    UserMonitor::updateGlobalIdle($uc->uc_user_id);
-
-//                    print_r($uc->attributes);
-//                    $uc->uc_idle_state = $val;
-//                    $uc->uc_idle_state_dt = date('Y-m-d H:i:s');
-//                    $uc->save();
-                }
-
-                unset($uc, $val);
-            }
-        }
-
-        if ($controller === 'window' && $action === 'set') {
-            if (isset($params['val'])) {
-                $val = (bool) $params['val'];
-                UserConnection::updateAll(['uc_window_state' => $val, 'uc_window_state_dt' => date('Y-m-d H:i:s')], ['uc_connection_id' => $frame->fd, 'uc_app_instance' => \Yii::$app->params['appInstance']]);
-                unset($val);
-            }
-        }
+// TODO: FIX uc_window_state
+//        if ($controller === 'window' && $action === 'set') {
+//            if (isset($params['val'])) {
+//                $val = (bool) $params['val'];
+//                UserConnection::updateAll(['uc_window_state' => $val, 'uc_window_state_dt' => date('Y-m-d H:i:s')], ['uc_connection_id' => $frame->fd, 'uc_app_instance' => \Yii::$app->params['appInstance']]);
+//                unset($val);
+//            }
+//        }
 
         if ($controller === 'info' && $action === 'get') {
             $out['data'] = $data;
