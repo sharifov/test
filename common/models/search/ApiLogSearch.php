@@ -48,7 +48,7 @@ class ApiLogSearch extends ApiLog
                 if (DateHelper::checkDateTime($date[1], 'Y-m-d H:i')) {
                     $this->createTimeEnd = Employee::convertTimeFromUserDtToUTC(strtotime($date[1]));
                 } else {
-                    $this->addError($attribute, 'createTimeEnd incorrect format');
+                    $this->addError($attribute, 'CreateTimeEnd incorrect format');
                     $this->createTimeRange = null;
                 }
             } else {
@@ -69,8 +69,6 @@ class ApiLogSearch extends ApiLog
     {
         $query = ApiLog::find();
 
-        // add conditions that should always apply here
-
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => ['defaultOrder' => ['al_id' => SORT_DESC]],
@@ -86,7 +84,6 @@ class ApiLogSearch extends ApiLog
             return $dataProvider;
         }
 
-        // grid filtering conditions
         $query->andFilterWhere([
             'al_id' => $this->al_id,
             'al_response_dt' => $this->al_response_dt,
@@ -102,7 +99,6 @@ class ApiLogSearch extends ApiLog
 
         $query->andFilterWhere(['like', 'al_request_data', $this->al_request_data])
             ->andFilterWhere(['like', 'al_response_data', $this->al_response_data])
-           // ->andFilterWhere(['like', 'al_action', $this->al_action])
             ->andFilterWhere(['like', 'al_ip_address', $this->al_ip_address]);
 
         return $dataProvider;

@@ -1,5 +1,6 @@
 <?php
 
+use yii\grid\ActionColumn;
 use sales\auth\Auth;
 use sales\services\cleaner\form\DbCleanerParamsForm;
 use yii\helpers\Html;
@@ -7,7 +8,6 @@ use yii\grid\GridView;
 use yii\helpers\StringHelper;
 use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
-use common\components\grid\DateTimeColumn;
 use kartik\daterange\DateRangePicker;
 
 /* @var $this yii\web\View */
@@ -26,7 +26,6 @@ $pjaxListId = 'pjax-api-log';
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <p>
-        <?php //= Html::a('Create Api Log', ['create'], ['class' => 'btn btn-success'])?>
         <?= Html::a('Delete All', ['delete-all'], [
             'class' => 'btn btn-danger',
             'data' => [
@@ -48,12 +47,8 @@ $pjaxListId = 'pjax-api-log';
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
-        'layout' => "{errors}\n{summary}\n{items}\n{pager}",
+        'layout' => "{errors}\n{pager}\n{summary}\n{items}\n{pager}",
         'columns' => [
-            //['class' => 'yii\grid\SerialColumn'],
-
-            //'al_id',
-
             [
                 'attribute' => 'al_id',
                 'value' => function (\common\models\ApiLog $model) {
@@ -61,7 +56,6 @@ $pjaxListId = 'pjax-api-log';
                 },
                 'options' => ['style' => 'width:100px']
             ],
-
             [
                 'attribute' => 'al_action',
                 'value' => function (\common\models\ApiLog $model) {
@@ -70,13 +64,11 @@ $pjaxListId = 'pjax-api-log';
                 'format' => 'raw',
                 'filter' => \common\models\ApiLog::getActionFilter()
             ],
-
             [
                 'label' => 'Relative Time',
                 'value' => static function (\common\models\ApiLog $model) {
                     return $model->al_request_dt ? '' . Yii::$app->formatter->asRelativeTime(strtotime($model->al_request_dt)) : '-';
                 },
-                //'format' => 'raw'
             ],
             [
                 'attribute' => 'al_request_data',
@@ -141,10 +133,8 @@ $pjaxListId = 'pjax-api-log';
                     return Yii::$app->formatter->asShortSize(mb_strlen($model->al_response_data), 1);
                 },
             ],
-
             [
                 'attribute' => 'al_execution_time',
-                //'format' => 'html',
                 'value' => function (\common\models\ApiLog $model) {
                     return $model->al_execution_time;
                 },
@@ -156,36 +146,28 @@ $pjaxListId = 'pjax-api-log';
                     return Yii::$app->formatter->asShortSize($model->al_memory_usage, 2);
                 },
             ],
-
             [
                 'attribute' => 'al_db_execution_time',
                 'value' => function (\common\models\ApiLog $model) {
                     return $model->al_db_execution_time;
                 },
             ],
-
             [
                 'attribute' => 'al_db_query_count',
                 'value' => function (\common\models\ApiLog $model) {
                     return $model->al_db_query_count;
                 },
             ],
-
-            //'al_user_id',
-
             [
                 'attribute' => 'al_user_id',
-                //'format' => 'html',
                 'value' => function (\common\models\ApiLog $model) {
                     $apiUser = \common\models\ApiUser::findOne($model->al_user_id);
                     return $apiUser ? $apiUser->au_name . ' (' . $model->al_user_id . ')' : $model->al_user_id;
                 },
                 'filter' => \common\models\ApiUser::getList()
             ],
-
             'al_ip_address',
-
-            ['class' => 'yii\grid\ActionColumn'],
+            ['class' => ActionColumn::class],
         ],
     ]); ?>
     <?php Pjax::end(); ?>
