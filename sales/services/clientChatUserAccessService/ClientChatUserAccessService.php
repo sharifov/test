@@ -137,7 +137,7 @@ class ClientChatUserAccessService
         return false;
     }
 
-    public function deleteAccessForOtherUsersBatch(int $chatId, int $ownerId): bool
+    public static function deleteAccessForOtherUsersBatch(int $chatId, int $ownerId): bool
     {
         $users = ClientChatUserAccess::find()->select(['ccua_user_id', 'ccua_id'])->where(
             new Expression(

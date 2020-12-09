@@ -46,6 +46,7 @@ use sales\repositories\NotFoundException;
 use sales\repositories\visitorLog\VisitorLogRepository;
 use sales\services\client\ClientManageService;
 use sales\services\clientChatMessage\ClientChatMessageService;
+use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
 use sales\services\TransactionManager;
 use yii\helpers\VarDumper;
 
@@ -641,6 +642,8 @@ class ClientChatService
     {
         $clientChat->inProgress(null, ClientChatStatusLog::ACTION_AUTO_RETURN);
         $this->clientChatRepository->save($clientChat);
+
+        $deleteAccessForOtherUsersBatch = ClientChatUserAccessService::deleteAccessForOtherUsersBatch($clientChat->cch_id, $clientChat->cch_owner_user_id);
 
         Notifications::pub(
             [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],
