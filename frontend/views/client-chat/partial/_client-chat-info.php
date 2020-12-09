@@ -145,7 +145,7 @@ $chatCounter = new ClientChatCounter($client->id);
     </div>
     <div class="_rc-block-wrapper">
         <div class="row">
-            <div class="client-chat-client-info-wrapper">
+            <div class="client-chat-client-info-wrapper col-md-12">
                 <?= ClientChatClientInfoWidget::widget(['chat' => $clientChat]) ?>
             </div>
             <?php if (Auth::can('client-chat/manage', ['chat' => $clientChat])) : ?>
