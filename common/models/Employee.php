@@ -937,10 +937,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             if (isset($roles[self::ROLE_SUPPORT_SENIOR])) {
                 unset($roles[self::ROLE_SUPPORT_SENIOR]);
             }
-
-            if (isset($roles[self::ROLE_SUPERVISION])) {
-                unset($roles[self::ROLE_SUPERVISION]);
-            }
         }
 
         if (!$user->isAdmin() && !$user->isSuperAdmin() && !$user->isUserManager()) {
