@@ -155,8 +155,8 @@ $js = <<<JS
     const wsUrl = '$wsUrl';
     const onlineObj = $('#online-connection-indicator');
     
-    window.sendCommandUpdatePhoneWidgetCurrentCalls = function () {
-         socketSend('Call', 'GetCurrentQueueCalls', {'userId': userId});
+    window.sendCommandUpdatePhoneWidgetCurrentCalls = function (finishedCallSid) {
+         socketSend('Call', 'GetCurrentQueueCalls', {'userId': userId, 'finishedCallSid': finishedCallSid});
     };
     
     function wsInitConnect(){
@@ -173,7 +173,7 @@ $js = <<<JS
                 onlineObj.attr('title', 'Online Connection: opened').find('i').removeClass('danger').addClass('warning');
                 // console.log(e);
                 
-                window.sendCommandUpdatePhoneWidgetCurrentCalls();
+                window.sendCommandUpdatePhoneWidgetCurrentCalls('');
                
             };
             

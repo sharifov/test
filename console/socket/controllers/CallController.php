@@ -28,10 +28,14 @@ class CallController
                 ]
             ];
         }
-
         $userId = (int)$params['userId'];
+        $finishedCallSid = null;
+        if (isset($params['finishedCallSid'])) {
+            $finishedCallSid = (string)$params['finishedCallSid'];
+        }
+
         $userStatusType = UserCallStatus::find()->select(['us_type_id'])->where(['us_user_id' => $userId])->orderBy(['us_id' => SORT_DESC])->limit(1)->asArray()->one();
-        $calls = $this->currentQueueCallsService->getQueuesCalls($userId);
+        $calls = $this->currentQueueCallsService->getQueuesCalls($userId, $finishedCallSid);
 
         return [
             'cmd' => 'updateCurrentCalls',

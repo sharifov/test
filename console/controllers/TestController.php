@@ -23,6 +23,7 @@ use sales\model\conference\entity\aggregate\log\HtmlFormatter;
 use sales\model\conference\entity\conferenceEventLog\ConferenceEventLog;
 use sales\model\conference\entity\conferenceEventLog\EventFactory;
 use sales\model\conference\entity\conferenceEventLog\events\ParticipantJoin;
+use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
 use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackForm;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
@@ -33,6 +34,13 @@ use yii\helpers\VarDumper;
 
 class TestController extends Controller
 {
+    public function actionDisconnectCalls()
+    {
+        $userId = 295;
+        $prepare = new PrepareCurrentCallsForNewCall($userId);
+        $prepare->prepare();
+    }
+
     public function actionTest()
     {
         $data = [

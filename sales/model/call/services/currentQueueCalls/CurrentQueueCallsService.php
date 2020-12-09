@@ -19,7 +19,7 @@ class CurrentQueueCallsService
     private bool $canContactDetails;
     private bool $canCallInfo;
 
-    public function getQueuesCalls(int $userId): QueueCalls
+    public function getQueuesCalls(int $userId, ?string $excludeCallSid): QueueCalls
     {
         $this->userId = $userId;
 
@@ -27,10 +27,10 @@ class CurrentQueueCallsService
         $this->canContactDetails = $auth->checkAccess($this->userId, '/client/ajax-get-info');
         $this->canCallInfo = $auth->checkAccess($this->userId, '/call/ajax-call-info');
 
-        $holdQueue = $this->getHoldCalls();
-        $incomingQueue = $this->getIncomingCalls();
-        $outgoingQueue = $this->getOutgoingCalls();
-        $activeQueue = $this->getActiveCalls();
+        $holdQueue = $this->getHoldCalls($excludeCallSid);
+        $incomingQueue = $this->getIncomingCalls($excludeCallSid);
+        $outgoingQueue = $this->getOutgoingCalls($excludeCallSid);
+        $activeQueue = $this->getActiveCalls($excludeCallSid);
         $conferences = $this->getActiveConferences($activeQueue['calls']);
 
         $queueCalls = new QueueCalls(
@@ -78,10 +78,7 @@ class CurrentQueueCallsService
         return $conferences;
     }
 
-    /**
-     * @return ActiveQueueCall[]
-     */
-    private function getActiveCalls(): array
+    private function getActiveCalls(?string $excludeCallSid): array
     {
         $calls = [];
         $last_time = 0;
@@ -89,21 +86,33 @@ class CurrentQueueCallsService
         $conferenceBase = (bool)(\Yii::$app->params['settings']['voip_conference_base'] ?? false);
 
         if ($conferenceBase) {
-            $queue = Call::find()
+            $query = Call::find()
                 ->with(['cProject', 'cClient'])
                 ->joinWith(['currentParticipant'])
                 ->byCreatedUser($this->userId)
                 ->inProgress()
-                ->andWhere(['cp_type_id' => [ConferenceParticipant::TYPE_AGENT, ConferenceParticipant::TYPE_USER]])
-                ->orderBy(['c_updated_dt' => SORT_ASC])
-                ->all();
+                ->andWhere(['cp_type_id' => [ConferenceParticipant::TYPE_AGENT, ConferenceParticipant::TYPE_USER]]);
+
+            if ($excludeCallSid) {
+                $query = $query->andWhere(['<>', 'c_call_sid', $excludeCallSid]);
+            }
+
+            $queue = $query->orderBy(['c_updated_dt' => SORT_ASC])->all();
         } else {
-            $queue = Call::find()
+            $query = Call::find()
                 ->with(['cProject', 'cClient'])
                 ->byCreatedUser($this->userId)
-                ->andWhere(['OR', ['c_status_id' => Call::STATUS_IN_PROGRESS], ['c_status_id' => Call::STATUS_RINGING]])
-                ->orderBy(['c_updated_dt' => SORT_ASC])
-                ->all();
+                ->andWhere([
+                    'OR',
+                    ['c_status_id' => Call::STATUS_IN_PROGRESS],
+                    ['c_status_id' => Call::STATUS_RINGING]
+                ]);
+
+            if ($excludeCallSid) {
+                $query = $query->andWhere(['<>', 'c_call_sid', $excludeCallSid]);
+            }
+
+            $queue = $query->orderBy(['c_updated_dt' => SORT_ASC])->all();
             foreach ($queue as $key => $call) {
                 if ($call->isStatusRinging()) {
                     if ($call->isIn()) {
@@ -249,9 +258,10 @@ class CurrentQueueCallsService
     }
 
     /**
+     * @param string|null $excludeCallSid
      * @return OutgoingQueueCall[]
      */
-    private function getOutgoingCalls(): array
+    private function getOutgoingCalls(?string $excludeCallSid): array
     {
         $calls = [];
         $last_time = 0;
@@ -259,23 +269,31 @@ class CurrentQueueCallsService
         $conferenceBase = (bool)(\Yii::$app->params['settings']['voip_conference_base'] ?? false);
 
         if ($conferenceBase) {
-            $queue = Call::find()
+            $query = Call::find()
                 ->with(['cProject', 'cClient'])
                 ->joinWith(['currentParticipant'])
                 ->byCreatedUser($this->userId)
                 ->out()
                 ->ringing()
-                ->andWhere(['cp_type_id' => ConferenceParticipant::TYPE_AGENT])
-                ->orderBy(['c_updated_dt' => SORT_ASC])
-                ->all();
+                ->andWhere(['cp_type_id' => ConferenceParticipant::TYPE_AGENT]);
+
+            if ($excludeCallSid) {
+                $query = $query->andWhere(['<>', 'c_call_sid', $excludeCallSid]);
+            }
+
+            $queue = $query->orderBy(['c_updated_dt' => SORT_ASC])->all();
         } else {
-            $queue = Call::find()
+            $query = Call::find()
                 ->with(['cProject', 'cClient'])
                 ->byCreatedUser($this->userId)
                 ->out()
-                ->ringing()
-                ->orderBy(['c_updated_dt' => SORT_ASC])
-                ->all();
+                ->ringing();
+
+            if ($excludeCallSid) {
+                $query = $query->andWhere(['<>', 'c_call_sid', $excludeCallSid]);
+            }
+
+            $queue = $query->orderBy(['c_updated_dt' => SORT_ASC])->all();
 
             foreach ($queue as $key => $call) {
                 if (!$call->isGeneralParent()) {
@@ -329,20 +347,25 @@ class CurrentQueueCallsService
     }
 
     /**
+     * @param string|null $excludeCallSid
      * @return IncomingQueueCall[]
      */
-    private function getIncomingCalls(): array
+    private function getIncomingCalls(?string $excludeCallSid): array
     {
         $calls = [];
         $last_time = 0;
 
-        $queue = CallUserAccess::find()
+        $query = CallUserAccess::find()
             ->with(['cuaCall', 'cuaCall.cProject', 'cuaCall', 'cuaCall.cClient'])
             ->joinWith(['cuaCall'])
             ->where(['cua_user_id' => $this->userId, 'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING])
-            ->andWhere(['<>', 'c_status_id', Call::STATUS_HOLD])
-            ->orderBy(['cua_updated_dt' => SORT_ASC])
-            ->all();
+            ->andWhere(['<>', 'c_status_id', Call::STATUS_HOLD]);
+
+        if ($excludeCallSid) {
+            $query = $query->andWhere(['<>', 'c_call_sid', $excludeCallSid]);
+        }
+
+        $queue = $query->orderBy(['cua_updated_dt' => SORT_ASC])->all();
 
         foreach ($queue as $item) {
             $call = $item->cuaCall;
@@ -385,19 +408,24 @@ class CurrentQueueCallsService
     }
 
     /**
+     * @param string|null $excludeCallSid
      * @return IncomingQueueCall[]
      */
-    private function getHoldCalls(): array
+    private function getHoldCalls(?string $excludeCallSid): array
     {
         $calls = [];
 
-        $queue = CallUserAccess::find()
+        $query = CallUserAccess::find()
             ->with(['cuaCall', 'cuaCall.cProject', 'cuaCall', 'cuaCall.cClient'])
             ->joinWith(['cuaCall'])
             ->where(['cua_user_id' => $this->userId, 'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING])
-            ->andWhere(['c_status_id' => Call::STATUS_HOLD])
-            ->orderBy(['cua_updated_dt' => SORT_ASC])
-            ->all();
+            ->andWhere(['c_status_id' => Call::STATUS_HOLD]);
+
+        if ($excludeCallSid) {
+            $query = $query->andWhere(['<>', 'c_call_sid', $excludeCallSid]);
+        }
+
+        $queue = $query->orderBy(['cua_updated_dt' => SORT_ASC])->all();
 
         foreach ($queue as $item) {
             $call = $item->cuaCall;
