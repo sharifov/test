@@ -24,6 +24,10 @@ class m201209_081159_add_cc_project_config_auto_message extends Migration
             'botAvatar' => ''
         ];
 
+        $autoMessage['autoMessageTranslates'] = [
+            'ru-RU' => '',
+            'en-US' => ''
+        ];
         foreach (ClientChatProjectConfig::find()->all() as $projectConfig) {
             /** @var ClientChatProjectConfig $projectConfig */
             $paramsJson = JsonHelper::decode($projectConfig->ccpc_params_json);
@@ -43,7 +47,7 @@ class m201209_081159_add_cc_project_config_auto_message extends Migration
         foreach (ClientChatProjectConfig::find()->all() as $projectConfig) {
             /** @var ClientChatProjectConfig $projectConfig */
             $paramsJson = JsonHelper::decode($projectConfig->ccpc_params_json);
-            unset($paramsJson['autoMessage']);
+            unset($paramsJson['autoMessage'], $paramsJson['autoMessageTranslates']);
             $projectConfig->ccpc_params_json = JsonHelper::encode($paramsJson);
 
             if (!$projectConfig->save()) {

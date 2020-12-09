@@ -4,6 +4,7 @@ namespace sales\model\clientChat\entity\projectConfig;
 
 use sales\model\clientChat\entity\channelTranslate\ClientChatChannelTranslate;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
+use Yii;
 use yii\helpers\Json;
 
 /**
@@ -19,6 +20,7 @@ use yii\helpers\Json;
  * @property array $theme
  * @property array $settings
  * @property array $channels
+ * @property array $autoMessage
  */
 class ProjectConfigApiResponseDto
 {
@@ -69,6 +71,11 @@ class ProjectConfigApiResponseDto
     public array $channels;
 
     /**
+     * @var array $autoMessage
+     */
+    public array $autoMessage;
+
+    /**
      * ProjectConfigApiResponseDto constructor.
      * @param ClientChatProjectConfig $projectConfig
      * @param string|null $languageId
@@ -87,5 +94,10 @@ class ProjectConfigApiResponseDto
         $this->theme = Json::decode($projectConfig->ccpc_theme_json) ?? [];
         $this->settings = Json::decode($projectConfig->ccpc_settings_json) ?? [];
         $this->channels = ClientChatChannel::getSettingsList($projectConfig->ccpc_project_id, $languageId);
+
+        $this->autoMessage = $params['autoMessage'] ?? [];
+        if (!empty($params['autoMessageTranslates'][$languageId])) {
+            $this->autoMessage['message'] = $params['autoMessageTranslates'][$languageId];
+        }
     }
 }

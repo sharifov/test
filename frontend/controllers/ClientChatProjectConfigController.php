@@ -97,6 +97,10 @@ class ClientChatProjectConfigController extends FController
     "repeatDelay": 1,
     "botName": "",
     "botAvatar": ""
+  },
+  "autoMessageTranslates": {
+    "ru-RU": "",
+    "en-US": ""
   }
 }';
 
