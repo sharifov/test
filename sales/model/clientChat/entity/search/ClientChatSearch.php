@@ -460,7 +460,7 @@ class ClientChatSearch extends ClientChat
             $query->orderBy([
                 '(cch_status_id = ' . ClientChat::STATUS_ARCHIVE .
                 ' OR cch_status_id = ' . ClientChat::STATUS_CLOSED . ')' => SORT_ASC,
-                'cch_created_dt' => SORT_DESC,
+                'last_message_date' => SORT_DESC,
             ]);
         } else {
             $query->byOwner($user->id);

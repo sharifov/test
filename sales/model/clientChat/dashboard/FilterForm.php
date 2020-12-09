@@ -27,6 +27,7 @@ use yii\helpers\Html;
  * @property $fromDate
  * @property $toDate
  * @property $rangeDate
+ * @property $showFilter
  * @property $clientName
  * @property $resetAdditionalFilter
  * @property array       $channels
@@ -44,7 +45,7 @@ class FilterForm extends Model
     public const DEFAULT_VALUE_CREATED_DATE = null;
     public const DEFAULT_VALUE_FROM_DATE = null;
     public const DEFAULT_VALUE_TO_DATE = null;
-    public const DEFAULT_VALUE_SHOW_FILTER = 0;
+    public const DEFAULT_VALUE_SHOW_FILTER = 1;
     public const DEFAULT_VALUE_CLIENT_NAME = null;
 
     public $channelId;
