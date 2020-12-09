@@ -46,6 +46,7 @@ use sales\repositories\NotFoundException;
 use sales\repositories\visitorLog\VisitorLogRepository;
 use sales\services\client\ClientManageService;
 use sales\services\clientChatMessage\ClientChatMessageService;
+use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
 use sales\services\TransactionManager;
 use yii\helpers\VarDumper;
 
@@ -70,6 +71,7 @@ use yii\helpers\VarDumper;
  * @property ClientChatMessageService $clientChatMessageService
  * @property ClientChatUnreadRepository $clientChatUnreadRepository
  * @property ClientChatLastMessageRepository $clientChatLastMessageRepository
+ * @property ClientChatUserAccessService $clientChatUserAccessService
  */
 class ClientChatService
 {
@@ -134,6 +136,7 @@ class ClientChatService
 
     private ClientChatUnreadRepository $clientChatUnreadRepository;
     private ClientChatLastMessageRepository $clientChatLastMessageRepository;
+    private ClientChatUserAccessService $clientChatUserAccessService;
 
     public function __construct(
         ClientChatChannelRepository $clientChatChannelRepository,
@@ -152,7 +155,8 @@ class ClientChatService
         ClientChatStatusLogRepository $clientChatStatusLogRepository,
         ClientChatMessageService $clientChatMessageService,
         ClientChatUnreadRepository $clientChatUnreadRepository,
-        ClientChatLastMessageRepository $clientChatLastMessageRepository
+        ClientChatLastMessageRepository $clientChatLastMessageRepository,
+        ClientChatUserAccessService $clientChatUserAccessService
     ) {
         $this->clientChatChannelRepository = $clientChatChannelRepository;
         $this->clientChatRepository = $clientChatRepository;
@@ -171,6 +175,7 @@ class ClientChatService
         $this->clientChatMessageService = $clientChatMessageService;
         $this->clientChatUnreadRepository = $clientChatUnreadRepository;
         $this->clientChatLastMessageRepository = $clientChatLastMessageRepository;
+        $this->clientChatUserAccessService = $clientChatUserAccessService;
     }
 
     /**
@@ -641,6 +646,8 @@ class ClientChatService
     {
         $clientChat->inProgress(null, ClientChatStatusLog::ACTION_AUTO_RETURN);
         $this->clientChatRepository->save($clientChat);
+
+        $this->clientChatUserAccessService->deleteAccessForOtherUsersBatch($clientChat->cch_id, $clientChat->cch_owner_user_id);
 
         Notifications::pub(
             [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],
