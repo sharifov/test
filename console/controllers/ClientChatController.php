@@ -359,13 +359,13 @@ class ClientChatController extends Controller
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
-        Yii::info(VarDumper::dumpAsString([
-            'Processed' => $processed,
-            'Failed' => $failed,
-            'Minutes' => $minutes,
-            'Execute Time' => $time . ' sec',
-            'End Time' => date('Y-m-d H:i:s'),
-        ]), 'info\ClientChatController:actionIdle:result');
+//        Yii::info(VarDumper::dumpAsString([
+//            'Processed' => $processed,
+//            'Failed' => $failed,
+//            'Minutes' => $minutes,
+//            'Execute Time' => $time . ' sec',
+//            'End Time' => date('Y-m-d H:i:s'),
+//        ]), 'info\ClientChatController:actionIdle:result');
     }
 
     public function actionHoldToProgress(): void
@@ -424,12 +424,12 @@ class ClientChatController extends Controller
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
-        Yii::info(VarDumper::dumpAsString([
-            'Processed' => $processed,
-            'Failed' => $failed,
-            'Execute Time' => $time . ' sec',
-            'End Time' => date('Y-m-d H:i:s'),
-        ]), 'info\ClientChatController:actionHoldToProgress:result');
+//        Yii::info(VarDumper::dumpAsString([
+//            'Processed' => $processed,
+//            'Failed' => $failed,
+//            'Execute Time' => $time . ' sec',
+//            'End Time' => date('Y-m-d H:i:s'),
+//        ]), 'info\ClientChatController:actionHoldToProgress:result');
     }
 
     public function actionCloseToArchiveOnTimeout(int $hourTimeout = 0): void
@@ -477,11 +477,11 @@ class ClientChatController extends Controller
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
-        Yii::info(VarDumper::dumpAsString([
-            'Processed' => $processed,
-            'Failed' => $failed,
-            'Execute Time' => $time . ' sec',
-            'End Time' => date('Y-m-d H:i:s'),
-        ]), 'info\ClientChatController:actionCloseToArchiveOnTimeout:result');
+//        Yii::info(VarDumper::dumpAsString([
+//            'Processed' => $processed,
+//            'Failed' => $failed,
+//            'Execute Time' => $time . ' sec',
+//            'End Time' => date('Y-m-d H:i:s'),
+//        ]), 'info\ClientChatController:actionCloseToArchiveOnTimeout:result');
     }
 }
