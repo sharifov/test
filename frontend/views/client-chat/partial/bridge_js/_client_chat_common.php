@@ -1070,8 +1070,6 @@ $(document).on('click', '.cc_take', function (e) {
     .done(function(dataResponse) {        
         if (dataResponse.status > 0) { 
             createNotify('Success', dataResponse.message, 'success');
-            $(location).attr('href', '/client-chat/index?chid=' + dataResponse.goToClientChatId);
-            return false;                     
         } else if (dataResponse.message.length) {
             createNotify('Error', dataResponse.message, 'error');
         } else {
