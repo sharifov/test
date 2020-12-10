@@ -1060,8 +1060,6 @@ $(document).on('click', '.cc_take', function (e) {
     btnSubmit.html('<i class="fa fa-cog fa-spin"></i> Loading...')
         .addClass('btn-default')
         .prop('disabled', true);
-        
-    $('#page-loader').show();    
     
     $.ajax({
         url: '{$clientChatTakeUrl}',
@@ -1069,11 +1067,11 @@ $(document).on('click', '.cc_take', function (e) {
         data: {cchId: cchId},
         dataType: 'json'    
     })
-    .done(function(dataResponse) {
-        $('#page-loader').hide();
+    .done(function(dataResponse) {        
         if (dataResponse.status > 0) { 
             createNotify('Success', dataResponse.message, 'success');
-            $(location).attr('href', '/client-chat/index?chid=' + dataResponse.goToClientChatId);                     
+            $(location).attr('href', '/client-chat/index?chid=' + dataResponse.goToClientChatId);
+            return false;                     
         } else if (dataResponse.message.length) {
             createNotify('Error', dataResponse.message, 'error');
         } else {
@@ -1081,8 +1079,7 @@ $(document).on('click', '.cc_take', function (e) {
         }
         btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
     })
-    .fail(function(jqXHR, textStatus, errorThrown) {
-        $('#page-loader').hide();
+    .fail(function(jqXHR, textStatus, errorThrown) {        
         createNotify('Error', jqXHR.responseText, 'error');
         btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
     })
