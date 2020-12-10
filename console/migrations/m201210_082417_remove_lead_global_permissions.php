@@ -38,6 +38,5 @@ class m201210_082417_remove_lead_global_permissions extends Migration
      */
     public function safeDown()
     {
-
     }
 }
