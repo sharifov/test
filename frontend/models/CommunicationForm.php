@@ -99,7 +99,7 @@ class CommunicationForm extends Model
     public $c_quotes;
     public $c_offers;
 
-    public $quoteList;
+    public $quoteList = [];
     public $offerList;
 
 
