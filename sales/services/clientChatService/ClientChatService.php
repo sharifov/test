@@ -638,12 +638,11 @@ class ClientChatService
         });
     }
 
-    public function autoReturn(ClientChat $clientChat): void
+    public function autoReturn(ClientChat $clientChat, ClientChatUserAccessService $clientChatUserAccessService): void
     {
         $clientChat->inProgress(null, ClientChatStatusLog::ACTION_AUTO_RETURN);
         $this->clientChatRepository->save($clientChat);
-
-        $deleteAccessForOtherUsersBatch = ClientChatUserAccessService::deleteAccessForOtherUsersBatch($clientChat->cch_id, $clientChat->cch_owner_user_id);
+        $clientChatUserAccessService->deleteAccessForOtherUsersBatch($clientChat->cch_id, $clientChat->cch_owner_user_id);
 
         Notifications::pub(
             [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],

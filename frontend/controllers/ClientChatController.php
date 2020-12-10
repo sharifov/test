@@ -1160,7 +1160,7 @@ class ClientChatController extends FController
 
                 $clientChat->inProgress(Auth::id(), ClientChatStatusLog::ACTION_REVERT_TO_PROGRESS);
                 $this->clientChatRepository->save($clientChat);
-                $this->clientChatUserAccessService::deleteAccessForOtherUsersBatch($clientChat->cch_id, $clientChat->cch_owner_user_id);
+                $this->clientChatUserAccessService->deleteAccessForOtherUsersBatch($clientChat->cch_id, $clientChat->cch_owner_user_id);
 
                 $result['message'] = 'ClientChat returned to InProgress';
                 $result['status'] = 1;
