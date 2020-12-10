@@ -638,10 +638,11 @@ class ClientChatService
         });
     }
 
-    public function autoReturn(ClientChat $clientChat, ClientChatUserAccessService $clientChatUserAccessService): void
+    public function autoReturn(ClientChat $clientChat): void
     {
         $clientChat->inProgress(null, ClientChatStatusLog::ACTION_AUTO_RETURN);
         $this->clientChatRepository->save($clientChat);
+        $clientChatUserAccessService = \Yii::$container->get(ClientChatUserAccessService::class);
         $clientChatUserAccessService->deleteAccessForOtherUsersBatch($clientChat->cch_id, $clientChat->cch_owner_user_id);
 
         Notifications::pub(
