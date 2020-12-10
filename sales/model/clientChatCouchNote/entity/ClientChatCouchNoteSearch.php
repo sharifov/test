@@ -29,6 +29,14 @@ class ClientChatCouchNoteSearch extends ClientChatCouchNote
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => [
+                'defaultOrder' => [
+                    'cccn_id' => SORT_DESC,
+                ]
+            ],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
         ]);
 
         $this->load($params);

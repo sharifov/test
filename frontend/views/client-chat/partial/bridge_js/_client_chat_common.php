@@ -528,6 +528,7 @@ $(document).on('click', '.cc_reopen', function (e) {
 
 $(document).on('click', '.cc_close', function (e) {
     e.preventDefault();
+    
     let btn = $(this);
     let cchId = btn.attr('data-cch-id');
     // let btnHtml = btn.html();
@@ -688,7 +689,7 @@ reloadChat = function(chatData) {
 }
 
 preReloadChat = function(cchId) {
-    $('#page-loader').show();  
+    $('#cc-dialogs-wrapper').append(loaderIframe);   
     $('#_rc-'+cchId).remove();
     
     let iframeWrapperEl = $("#_rc-iframe-wrapper");
@@ -699,6 +700,7 @@ preReloadChat = function(cchId) {
 
 postReloadChat = function() {
     $('#page-loader').hide();
+    $('#cc-dialogs-wrapper #_cc-load').remove();
 }
 
 window.refreshCouchNote = function (cch_id) {    
@@ -1107,7 +1109,7 @@ $(document).on('click', '.cc_return', function (e) {
         .addClass('btn-default')
         .prop('disabled', true);
         
-    $('#page-loader').show();    
+    $('#cc-dialogs-wrapper').append(loaderIframe);  
     
     $.ajax({
         url: '{$clientChatReturnUrl}',
@@ -1116,25 +1118,26 @@ $(document).on('click', '.cc_return', function (e) {
         dataType: 'json'    
     })
     .done(function(dataResponse) {
-        $('#page-loader').hide();
+        $('#cc-dialogs-wrapper #_cc-load').remove();
         if (dataResponse.status > 0) { 
             createNotify('Success', dataResponse.message, 'success');
-            $(location).attr('href', '/client-chat/index?chid=' + dataResponse.goToClientChatId);                     
+            refreshChannelList();
+            refreshChatInfo(cchId);                     
         } else if (dataResponse.message.length) {
             createNotify('Error', dataResponse.message, 'error');
         } else {
             createNotify('Error', 'Error, please check logs', 'error');
         }
-        btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
+        btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);        
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
-        $('#page-loader').hide();
+        $('#cc-dialogs-wrapper #_cc-load').remove();
         createNotify('Error', jqXHR.responseText, 'error');
         btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
     })
     .always(function(jqXHR, textStatus, errorThrown) {  
         setTimeout(function () {
-            $('#page-loader').hide();
+            $('#cc-dialogs-wrapper #_cc-load').remove();
             btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
         }, 3000);
     });           

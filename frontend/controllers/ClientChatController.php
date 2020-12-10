@@ -874,7 +874,7 @@ class ClientChatController extends FController
             if (Yii::$app->request->isPjax && $form->validate()) {
                 $this->clientChatService->closeConversation($form, Auth::user());
 
-                return '<script>$("#modal-sm").modal("hide"); refreshChatPage(' . $form->cchId . '); createNotify("Success", "Room successfully closed", "success")</script>';
+                return '<script>$("#modal-sm").modal("hide"); refreshChatPage(' . $form->cchId . '); createNotify("Success", "Chat successfully closed", "success")</script>';
             }
         } catch (NotFoundException | ForbiddenHttpException $e) {
             return '<script>setTimeout(function () {$("#modal-sm").modal("hide");}, 500); createNotify("Error", "' . $e->getMessage() . '", "error")</script>';
