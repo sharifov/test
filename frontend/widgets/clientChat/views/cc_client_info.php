@@ -1,6 +1,7 @@
 <?php
 
 use sales\helpers\clientChat\ClientChatHelper;
+use sales\model\client\helpers\ClientFormatter;
 use sales\model\clientChat\entity\ClientChat;
 use yii\helpers\Html;
 
@@ -16,7 +17,7 @@ $client = $clientChat->cchClient;
             <span class="_cc-status-wrapper"><span class="_cc-status" data-is-online="<?= (int)$clientChat->cch_client_online ?>"> </span></span>
         </span>
         <div class="_rc-client-info">
-            <span class="_rc-client-name"><span><?= Html::encode($client->full_name ?: 'Client-' . $client->id) ?></span></span>
+            <span class="_rc-client-name"><span><?= ClientFormatter::formatFullName($client) ?></span></span>
 
             <?php if ($emails = $client->clientEmails) : ?>
                 <div class="box_client_info_data">

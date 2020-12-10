@@ -37,6 +37,8 @@ use yii\db\ActiveQuery;
  * @property int|null $cl_type_create // 1 - Manually, 2 - Lead etc.
  * @property int|null $cl_project_id
  * @property int|null $cl_ca_id
+ * @property bool $cl_excluded
+ * @property string|null $cl_ppn
  *
  * @property ClientEmail[] $clientEmails
  * @property ClientPhone[] $clientPhones
@@ -160,6 +162,12 @@ class Client extends ActiveRecord
             ['cl_ca_id', 'integer'],
             ['cl_ca_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             ['cl_ca_id', 'exist', 'skipOnError' => true, 'targetClass' => ClientAccount::class, 'targetAttribute' => ['cl_ca_id' => 'ca_id']],
+
+            ['cl_excluded', 'default', 'value' => false],
+            ['cl_excluded', 'boolean'],
+
+            ['cl_ppn', 'default', 'value' => null],
+            ['cl_ppn', 'string', 'max' => 10],
         ];
     }
 
@@ -187,6 +195,8 @@ class Client extends ActiveRecord
             'cl_type_create' => 'Type create',
             'cl_project_id' => 'Project',
             'cl_ca_id' => 'Client account',
+            'cl_excluded' => 'Is exclude',
+            'cl_ppn' => 'PPN',
         ];
     }
 
@@ -454,5 +464,10 @@ class Client extends ActiveRecord
         $client->cl_ca_id = $clientAccount->ca_id;
         $client->cl_type_create = self::TYPE_CREATE_CLIENT_ACCOUNT;
         return $client;
+    }
+
+    public function isExcluded(): bool
+    {
+        return $this->cl_excluded ? true : false;
     }
 }

@@ -36,6 +36,8 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
     <?= $form->field($model, 'parent_id')->textInput() ?>
     <?= $form->field($model, 'cl_project_id')->dropDownList($projectList, ['prompt' => '-']) ?>
     <?= $form->field($model, 'cl_type_id')->dropDownList($model::TYPE_LIST) ?>
+    <?= $form->field($model, 'cl_excluded')->checkbox() ?>
+    <?= $form->field($model, 'cl_ppn')->textInput(['maxlength' => true]) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

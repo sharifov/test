@@ -33,7 +33,13 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             'id',
             'uuid',
-            'first_name',
+            [
+                'attribute' => 'first_name',
+                'value' => static function (Client $client) {
+                    return \sales\model\client\helpers\ClientFormatter::formatName($client);
+                },
+                'format' => 'raw',
+            ],
             'middle_name',
             'last_name',
             'company_name',
@@ -68,6 +74,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
             ],
             'cl_ca_id',
+            'cl_excluded:boolean',
+            'cl_ppn',
         ],
     ]) ?>
     </div>

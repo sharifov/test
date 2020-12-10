@@ -1,6 +1,7 @@
 <?php
 
 use sales\access\ListsAccess;
+use sales\model\client\helpers\ClientFormatter;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use common\models\Lead;
@@ -159,6 +160,10 @@ $this->params['breadcrumbs'][] = $this->title;
                         $clientName = '- - - ';
                     } else {
                         $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName);
+                    }
+
+                    if ($model->client->isExcluded()) {
+                        $clientName = ClientFormatter::formatExclude($model->client)  . $clientName;
                     }
                 } else {
                     $clientName = '-';

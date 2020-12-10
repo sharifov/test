@@ -2,6 +2,7 @@
 
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\callLog\entity\callLog\CallLogStatus;
+use sales\model\client\helpers\ClientFormatter;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -74,7 +75,11 @@ $this->title = 'Call Id: ' . $model->cl_id;
                         if (!$model->cl_client_id) {
                             return '';
                         }
-                        return $model->client->getShortName() . ' (' . $model->cl_client_id . ')';
+                        $clientName = $model->client->getShortName() . ' (' . $model->cl_client_id . ')';
+                        if ($model->client->isExcluded()) {
+                            $clientName = ClientFormatter::formatExclude($model->client) . $clientName;
+                        }
+                        return  $clientName;
                     },
                     'format' => 'raw'
                 ],
