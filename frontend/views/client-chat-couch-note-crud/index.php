@@ -29,6 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'layout' => "{errors}\n{pager}\n{summary}\n{items}\n{pager}",
         'columns' => [
             'cccn_id',
             'cccn_cch_id',
@@ -41,6 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => [
                     'style' => ['max-width' => '600px;', 'word-wrap' => 'break-word;']
                 ],
+                'format' => 'raw',
             ],
             'cccn_alias',
             [

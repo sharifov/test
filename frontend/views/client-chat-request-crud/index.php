@@ -44,7 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'ccr_json_data',
                 'value' => static function (ClientChatRequest $model) {
-                    $content = '<p>' . StringHelper::truncate($model->ccr_json_data, 200, '...', null, true) . '</p>';
+                    $content = '<p>' . StringHelper::truncate($model->ccr_json_data, 216, '...', null, true) . '</p>';
                     $content .= Html::a(
                         '<i class="fas fa-eye"></i> details</a>',
                         null,
@@ -61,6 +61,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $content;
                 },
                 'format' => 'raw',
+                'contentOptions' => [
+                    'style' => ['max-width' => '800px', 'word-wrap' => 'break-word !important'],
+                ],
             ],
             [
                 'class' => \common\components\grid\DateTimeColumn::class,
