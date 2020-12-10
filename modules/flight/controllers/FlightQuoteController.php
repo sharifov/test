@@ -228,11 +228,13 @@ class FlightQuoteController extends FController
         $gds = Yii::$app->request->post('gds', '');
         $pjaxId = Yii::$app->request->post('pjaxId', '');
 
+        $flight = $this->flightRepository->find($flightId);
         $form = new FlightQuoteSearchForm();
-        $form->load(Yii::$app->request->post() ?: Yii::$app->request->get());
 
         try {
-            $flight = $this->flightRepository->find($flightId);
+            if (empty($flight->flightSegments)) {
+                throw new \DomainException('Flight Segment data is not found; Create a new flight request;');
+            }
 
             $quotes = \Yii::$app->cacheFile->get($flight->fl_request_hash_key);
 
@@ -242,41 +244,44 @@ class FlightQuoteController extends FController
                     \Yii::$app->cacheFile->set($flight->fl_request_hash_key, $quotes = FlightQuoteSearchHelper::formatQuoteData($quotes), 600);
                 }
             }
+
+            $form->load(Yii::$app->request->post() ?: Yii::$app->request->get());
+
+            $viewData = FlightQuoteSearchHelper::getAirlineLocationInfo($quotes);
+
+            if (Yii::$app->request->isPost) {
+                $params = ['page' => 1];
+            }
+
+            $quotes = $form->applyFilters($quotes);
+
+            $dataProvider = new ArrayDataProvider([
+                'allModels' => $quotes['results'] ?? [],
+                'pagination' => [
+                    'pageSize' => 10,
+                    'params' => array_merge(Yii::$app->request->get(), $form->getFilters(), $params ?? []),
+                ],
+                'sort' => [
+                    'attributes' => ['price', 'duration'],
+                    'defaultOrder' => [$form->getSortBy() => $form->getSortType()],
+                ],
+            ]);
+
+            if (empty($pjaxId)) {
+                $pjaxId = 'pjax-product-' . $flight->fl_product_id;
+            }
         } catch (NotFoundHttpException | \DomainException $e) {
             $errorMessage = $e->getMessage();
             $quotes = [];
         } catch (\Throwable $e) {
             Yii::error($e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(), 'Flight::FlightQuoteController::actionAjaxSearchQuote::Throwable');
             $quotes = [];
-        }
-
-        $viewData = FlightQuoteSearchHelper::getAirlineLocationInfo($quotes);
-
-        if (Yii::$app->request->isPost) {
-            $params = ['page' => 1];
-        }
-
-        $quotes = $form->applyFilters($quotes);
-
-        $dataProvider = new ArrayDataProvider([
-            'allModels' => $quotes['results'] ?? [],
-            'pagination' => [
-                'pageSize' => 10,
-                'params' => array_merge(Yii::$app->request->get(), $form->getFilters(), $params ?? []),
-            ],
-            'sort' => [
-                'attributes' => ['price', 'duration'],
-                'defaultOrder' => [$form->getSortBy() => $form->getSortType()],
-            ],
-        ]);
-
-        if (empty($pjaxId)) {
-            $pjaxId = 'pjax-product-' . $flight->fl_product_id;
+            $errorMessage = $e->getMessage();
         }
 
         $viewData['quotes'] = $quotes;
-        $viewData['dataProvider'] = $dataProvider;
-        $viewData['flightId'] = $flight->fl_id;
+        $viewData['dataProvider'] = $dataProvider ?? new ArrayDataProvider();
+        $viewData['flightId'] = $flight->fl_id ?? null;
         $viewData['gds'] = $gds;
         $viewData['flight'] = $flight;
         $viewData['searchForm'] = $form;
@@ -451,14 +456,14 @@ class FlightQuoteController extends FController
                         $this->flightManageService->createNewProductAndAssignNewQuote($form, $lead, $preparedData);
                         return '<script>createNotify("Created new Product: Flight", "Quote successfully assigned to a new product Flight", "success"); $("#modal-md").modal("hide");pjaxReload({container: "#pjax-lead-products-wrap"})</script>';
                     }
-                } else if ($action === FlightQuoteCreateForm::ACTION_UPDATE_FLIGHT_REQUEST) {
+                } elseif ($action === FlightQuoteCreateForm::ACTION_UPDATE_FLIGHT_REQUEST) {
                     $form->scenario = FlightQuoteCreateForm::ACTION_CREATE_NEW_PRODUCT;
                     if ($form->validate()) {
                         $preparedData = $this->flightQuoteManageService->prepareFlightQuoteData($form);
                         $this->flightManageService->updateFlightRequestAndAssignNewQuote($form, $flight, $preparedData);
                         return '<script>createNotify("Flight Request successfully updated", "Quote successfully assigned to a product Flight", "success"); $("#modal-md").modal("hide");pjaxReload({container: "#pjax-lead-products-wrap"})</script>';
                     }
-                } else if ($action === FlightQuoteCreateForm::ACTION_APPLY_PRICING_INFO) {
+                } elseif ($action === FlightQuoteCreateForm::ACTION_APPLY_PRICING_INFO) {
                     $dump = FlightQuoteHelper::parsePriceDump($form->pricingInfo);
                     $form->updateDataByPricingDump($dump);
                     FlightQuoteHelper::quoteCalculatePaxPrices($form);
