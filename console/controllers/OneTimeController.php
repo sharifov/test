@@ -903,4 +903,94 @@ class OneTimeController extends Controller
             }
         }
     }
+
+    public function actionAddLeadViewBlockPermissions()
+    {
+        $auth = Yii::$app->authManager;
+
+        foreach ($auth->getRoles() as $role) {
+            foreach ($auth->getPermissionsByRole($role->name) as $permission) {
+                if ($permission->name === '/leads/index') {
+                    $this->addNewPermissions($role);
+                }
+            }
+        }
+    }
+
+    private function addNewPermissions($role): void
+    {
+        $permissions = [
+            [
+                'lead-view/client-info/view',
+                'lead-view/client-info/view/all',
+                'lead-view/client-info/view/owner',
+                'lead-view/client-info/view/empty',
+                'lead-view/client-info/view/group',
+            ],
+            [
+                'lead-view/lead-preferences/view',
+                'lead-view/lead-preferences/view/all',
+                'lead-view/lead-preferences/view/owner',
+                'lead-view/lead-preferences/view/empty',
+                'lead-view/lead-preferences/view/group',
+            ],
+            [
+                'lead-view/check-list/view',
+                'lead-view/check-list/view/all',
+                'lead-view/check-list/view/owner',
+                'lead-view/check-list/view/empty',
+                'lead-view/check-list/view/group',
+            ],
+            [
+                'lead-view/task-list/view',
+                'lead-view/task-list/view/all',
+                'lead-view/task-list/view/owner',
+                'lead-view/task-list/view/empty',
+                'lead-view/task-list/view/group',
+            ],
+            [
+                'lead-view/communication-block/view',
+                'lead-view/communication-block/view/all',
+                'lead-view/communication-block/view/owner',
+                'lead-view/communication-block/view/empty',
+                'lead-view/communication-block/view/group',
+            ],
+            [
+                'lead-view/call-expert/view',
+                'lead-view/call-expert/view/all',
+                'lead-view/call-expert/view/owner',
+                'lead-view/call-expert/view/empty',
+                'lead-view/call-expert/view/group',
+            ],
+            [
+                'lead-view/notes/view',
+                'lead-view/notes/view/all',
+                'lead-view/notes/view/owner',
+                'lead-view/notes/view/empty',
+                'lead-view/notes/view/group',
+            ],
+            [
+                'lead-view/flight-default/view',
+                'lead-view/flight-default/view/all',
+                'lead-view/flight-default/view/owner',
+                'lead-view/flight-default/view/empty',
+                'lead-view/flight-default/view/group',
+            ]
+        ];
+        foreach ($permissions as $group) {
+            $this->assignPermissions($role, $group);
+        }
+    }
+
+    private function assignPermissions($role, $permissions): void
+    {
+        $auth = Yii::$app->authManager;
+        foreach ($permissions as $permission) {
+            if ($p = $auth->getPermission($permission)) {
+                if (!$auth->hasChild($role, $p)) {
+                    $auth->addChild($role, $p);
+                }
+            }
+        }
+    }
 }
