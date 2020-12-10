@@ -507,15 +507,23 @@ $js = <<<JS
                         }
                         
                         if(obj.cmd === 'reloadClientChatList') {
-                            let boxElement = $('#pjax-client-chat-channel-list');
-                            if (boxElement.length) {
-                                pjaxReload({container: '#pjax-client-chat-channel-list'});
-                            }
+                            if (typeof window.refreshChannelList === 'function') {
+                                window.refreshChannelList();
+                            }                            
                         }
                         
                         if(obj.cmd === 'reloadChatInfo') {
                             let boxElement = $('#_cc_additional_info_wrapper');
-                            if (boxElement.length) {
+                            if (boxElement.length) {                                
+                                if (!('data' in obj)) {
+                                    console.error('Error: reloadChatInfo - "data" required in "obj"');
+                                    return;
+                                }
+                                if (!('cchId' in obj.data) || !('message' in obj.data)) {
+                                    console.error('Error: reloadChatInfo - "cchId" and "message" required in "obj.data"');
+                                    return;
+                                }
+                            
                                 let activeChatId = parseInt(localStorage.getItem('activeChatId'), 10);
                                 let cchId = parseInt(obj.data.cchId, 10);
                                 

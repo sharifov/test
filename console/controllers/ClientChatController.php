@@ -373,6 +373,7 @@ class ClientChatController extends Controller
         echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
+        $channels = [];
         $processed = $failed = 0;
         $timeStart = microtime(true);
         $enable = \Yii::$app->params['settings']['client_chat_job_hold_to_in_progress_enable'] ?? false;
@@ -399,13 +400,12 @@ class ClientChatController extends Controller
                 if ($holdRow = ClientChatHold::findOne(['cchd_cch_id' => $clientChat->cch_id])) {
                     $holdRow->delete();
                 }
-
                 Notifications::pub(
-                    ['chat-' . $clientChat->cch_id],
-                    'refreshChatPage',
+                    [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],
+                    'reloadChatInfo',
                     ['data' => ClientChatAccessMessage::chatInProgress($clientChat->cch_id)]
                 );
-
+                $channels[$clientChat->cch_channel_id] = $clientChat->cch_channel_id;
                 $processed++;
             } catch (\Throwable $throwable) {
                 Yii::error(
@@ -414,6 +414,15 @@ class ClientChatController extends Controller
                 );
                 echo Console::renderColoredString('%r --- Error : ' . $throwable->getMessage() . ' %n'), PHP_EOL;
                 $failed++;
+            }
+        }
+
+        if ($channels) {
+            foreach ($channels as $channelId) {
+                Notifications::pub(
+                    [ClientChatChannel::getPubSubKey($channelId)],
+                    'reloadClientChatList'
+                );
             }
         }
 
