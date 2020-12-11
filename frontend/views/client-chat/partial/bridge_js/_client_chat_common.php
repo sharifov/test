@@ -1093,7 +1093,7 @@ $(document).on('click', '.cc_take', function (e) {
         btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
     })
     .fail(function(jqXHR, textStatus, errorThrown) {  
-        hideAllLoaders();      
+        $('#page-loader').hide();   
         createNotify('Error', jqXHR.responseText, 'error');
         btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
     })
