@@ -3,6 +3,7 @@
 use frontend\widgets\multipleUpdate\button\MultipleUpdateButtonWidget;
 use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use sales\auth\Auth;
+use sales\model\client\helpers\ClientFormatter;
 use yii\helpers\Url;
 use common\models\Email;
 use common\models\Sms;
@@ -160,6 +161,9 @@ $this->registerJs($js);
                         $clientName = '- - - ';
                     } else {
                         $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName);
+                    }
+                    if ($lead->client->isExcluded()) {
+                        $clientName = ClientFormatter::formatExclude($lead->client)  . $clientName;
                     }
                 } else {
                     $clientName = '-';

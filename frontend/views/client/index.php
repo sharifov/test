@@ -50,6 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => $filterProjects,
             ],
             'disabled:boolean',
+            'cl_excluded:boolean',
             [
                 'header' => 'Phones',
                 'attribute' => 'client_phone',

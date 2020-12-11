@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use sales\entities\cases\Cases;
@@ -89,7 +90,13 @@ use sales\auth\Auth;
                             'model' => $caseModel->client,
                             'attributes' => [
                                 'id',
-                                'first_name',
+                                [
+                                    'attribute' => 'first_name',
+                                    'value' => static function (Client $client) {
+                                        return \sales\model\client\helpers\ClientFormatter::formatName($client);
+                                    },
+                                    'format' => 'raw',
+                                ],
                                 'middle_name',
                                 'last_name',
                                 [

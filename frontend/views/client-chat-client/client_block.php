@@ -12,7 +12,13 @@ use yii\widgets\DetailView;
             'model' => $client,
             'attributes' => [
                 'id',
-                'first_name',
+                [
+                    'attribute' => 'first_name',
+                    'value' => static function (Client $client) {
+                        return \sales\model\client\helpers\ClientFormatter::formatName($client);
+                    },
+                    'format' => 'raw',
+                ],
                 'middle_name',
                 'last_name',
             ],

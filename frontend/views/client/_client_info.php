@@ -2,6 +2,7 @@
 
 use common\models\Client;
 use common\models\Employee;
+use sales\logger\formatter\ClientFormatter;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -17,7 +18,13 @@ $user = Yii::$app->user->identity;
             'model' => $model,
             'attributes' => [
                 'id',
-                'first_name',
+                [
+                    'attribute' => 'first_name',
+                    'value' => static function (Client $client) {
+                        return \sales\model\client\helpers\ClientFormatter::formatName($client);
+                    },
+                    'format' => 'raw',
+                ],
                 'middle_name',
                 'last_name',
             ],

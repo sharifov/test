@@ -15,6 +15,7 @@ use yii\base\Model;
  * @property string $rcId
  * @property int|null $projectId
  * @property int|null $typeCreate
+ * @property int|string $ip
  */
 class ClientCreateForm extends Model
 {
@@ -27,6 +28,7 @@ class ClientCreateForm extends Model
     public $rcId;
     public $projectId;
     public $typeCreate;
+    public $ip;
 
     /**
      * @return array
@@ -51,6 +53,9 @@ class ClientCreateForm extends Model
             ['typeCreate', 'integer'],
             ['typeCreate', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             ['typeCreate', 'in', 'range' => array_keys(Client::TYPE_CREATE_LIST)],
+
+            ['ip', 'default', 'value' => null],
+            ['ip', 'string', 'max' => 39],
         ];
     }
 

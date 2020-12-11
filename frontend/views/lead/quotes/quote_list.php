@@ -35,9 +35,11 @@ use yii\widgets\Pjax;
                     <span class="badge badge-warning"><i class="fa fa-warning"></i> Warning: Flight Segments is empty!</span>
                 <?php endif; ?>
             </li>
+                <?php if (!$lead->client->isExcluded()) : ?>
                 <li>
-                    <?=Html::a('<i class="fa fa-plus-circle success"></i> Add Quote', null, ['class' => 'add-clone-alt-quote', 'data-uid' => 0, 'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0])])?>
+                    <?= Html::a('<i class="fa fa-plus-circle success"></i> Add Quote', null, ['class' => 'add-clone-alt-quote', 'data-uid' => 0, 'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0])])?>
                 </li>
+                <?php endif; ?>
                 <li>
                     <?= $this->render('_quote_clone_by_id', ['lead' => $leadForm->getLead()])?>
                 </li>

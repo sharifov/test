@@ -837,7 +837,8 @@ class OneTimeController extends Controller
             $parentClient['last_name'],
             $projectId,
             $typeCreate,
-            $parentClient['id']
+            $parentClient['id'],
+            null
         );
         $client->disabled = $parentClient['disabled'];
         $client->cl_type_id = $parentClient['cl_type_id'];

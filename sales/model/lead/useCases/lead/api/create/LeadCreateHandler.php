@@ -54,6 +54,7 @@ class LeadCreateHandler
             $clientForm = ClientCreateForm::createWidthDefaultName();
             $clientForm->projectId = $form->project_id;
             $clientForm->typeCreate = Client::TYPE_CREATE_LEAD;
+            $clientForm->ip = $form->request_ip;
 
             $client = $this->clientManageService->getOrCreate(
                 [new PhoneCreateForm(['phone' => $form->clientForm->phone])],

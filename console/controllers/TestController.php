@@ -5,6 +5,7 @@ namespace console\controllers;
 use common\models\Notifications;
 use Faker\Factory;
 use modules\twilio\src\entities\conferenceLog\ConferenceLog;
+use sales\model\client\useCase\excludeInfo\ClientExcludeIpChecker;
 use sales\model\clientChat\cannedResponse\entity\ClientChatCannedResponse;
 use sales\model\clientChat\cannedResponseCategory\entity\ClientChatCannedResponseCategory;
 use sales\model\clientChat\entity\ClientChat;

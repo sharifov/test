@@ -1,6 +1,7 @@
 <?php
 
 use sales\formatters\client\ClientTimeFormatter;
+use sales\model\client\helpers\ClientFormatter;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 //use kartik\grid\GridView;
@@ -131,6 +132,10 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     if ($clientName) {
                         $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName) . '';
+                    }
+
+                    if ($model->client->isExcluded()) {
+                        $clientName = ClientFormatter::formatExclude($model->client)  . $clientName;
                     }
 
                     $str = $model->client->clientEmails ? '<br><i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';

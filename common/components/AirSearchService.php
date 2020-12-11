@@ -174,4 +174,19 @@ class AirSearchService extends Component
         );
         return null;
     }
+
+    public function checkExcludeIp(string $ip)
+    {
+        $response = $this->sendRequest('airline/ip-check/' . $ip, [], 'get');
+
+        if ($response->isOk) {
+            return $response->data;
+        }
+
+        \Yii::error(
+            'Ip: ' . $ip . ' Error: ' . VarDumper::dumpAsString($response->content, 10),
+            'AirSearchService::checkIp'
+        );
+        return null;
+    }
 }
