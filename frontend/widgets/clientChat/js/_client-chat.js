@@ -86,7 +86,12 @@ function refreshClientChatWidget(obj) {
         case 'accept':
         case 'accept_transfer':
             if (document.visibilityState == "visible") {
-                window.location.href = data.url;
+                if (window.name === 'chat') {
+                    window.location.href = data.url;
+                } else {
+                    window.open(data.url, '_blank');
+                    return false;
+                }
             }
             window.chat.removeRequest(data.chatId, data.userId, data.chatUserAccessId);
             break;
