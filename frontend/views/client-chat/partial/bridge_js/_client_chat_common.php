@@ -1065,8 +1065,6 @@ $(document).on('click', '.cc_take', function (e) {
         return false;
     } 
     
-    showAllLoaders();
-    
     let cchId = $(this).attr('data-cch-id');
     let btnSubmit = $(this);
     let btnContent = btnSubmit.html();
@@ -1074,6 +1072,8 @@ $(document).on('click', '.cc_take', function (e) {
     btnSubmit.html('<i class="fa fa-cog fa-spin"></i> Loading...')
         .addClass('btn-default')
         .prop('disabled', true);
+        
+    $('#page-loader').show();    
     
     $.ajax({
         url: '{$clientChatTakeUrl}',
@@ -1082,11 +1082,9 @@ $(document).on('click', '.cc_take', function (e) {
         dataType: 'json'    
     })
     .done(function(dataResponse) { 
-        hideAllLoaders();       
+        $('#page-loader').hide();       
         if (dataResponse.status > 0) { 
-            createNotify('Success', dataResponse.message, 'success');
-            //$(location).attr('href', '/client-chat/index?chid=' + dataResponse.goToClientChatId);
-            //return false;
+            createNotify('Success', dataResponse.message, 'success');            
         } else if (dataResponse.message.length) {
             createNotify('Error', dataResponse.message, 'error');
         } else {
@@ -1101,7 +1099,7 @@ $(document).on('click', '.cc_take', function (e) {
     })
     .always(function(jqXHR, textStatus, errorThrown) {  
         setTimeout(function () {
-            hideAllLoaders();
+            $('#page-loader').hide();
             btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
         }, 4000);
     });           
