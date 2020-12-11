@@ -2,6 +2,10 @@
 
 use sales\events\quote\QuoteSendEvent;
 use sales\listeners\quote\QuoteSendEventListener;
+use sales\model\client\entity\events\ClientCreatedEvent;
+use sales\model\client\entity\events\ClientExcludedEvent;
+use sales\model\client\listeners\ClientCreatedCheckExcludeListener;
+use sales\model\client\listeners\ClientExcludeNotifierListener;
 use sales\model\clientChat\event\ClientChatArchiveEvent;
 use sales\model\clientChat\event\ClientChatCloseEvent;
 use sales\model\clientChat\event\ClientChatHoldEvent;
@@ -59,7 +63,13 @@ return [
     ],
     ClientChatIdleEvent::class => [
         ClientChatIdleStatusLogListener::class
-    ]
+    ],
+    ClientExcludedEvent::class => [
+        ClientExcludeNotifierListener::class,
+    ],
+    ClientCreatedEvent::class => [
+        ClientCreatedCheckExcludeListener::class,
+    ],
 
 //    ClientChatOwnerAssignedEvent::class => [ClientChatRemoveOldOwnerUnreadMessagesListener::class],
 ];

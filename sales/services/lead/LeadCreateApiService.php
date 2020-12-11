@@ -351,6 +351,7 @@ class LeadCreateApiService
             'lastName' => $lastName,
             'projectId' => $modelLead->project_id,
             'typeCreate' => Client::TYPE_CREATE_LEAD,
+            'ip' => $modelLead->request_ip,
         ]);
 
         if (!$newClient->validate()) {

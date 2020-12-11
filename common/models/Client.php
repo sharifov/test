@@ -7,6 +7,8 @@ use sales\entities\cases\Cases;
 use sales\entities\EventTrait;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
+use sales\model\client\entity\events\ClientCreatedEvent;
+use sales\model\client\entity\events\ClientExcludedEvent;
 use sales\model\clientAccount\entity\ClientAccount;
 use thamtech\uuid\helpers\UuidHelper;
 use thamtech\uuid\validators\UuidValidator;
@@ -39,6 +41,7 @@ use yii\db\ActiveQuery;
  * @property int|null $cl_ca_id
  * @property bool $cl_excluded
  * @property string|null $cl_ppn
+ * @property string|null $cl_ip
  *
  * @property ClientEmail[] $clientEmails
  * @property ClientPhone[] $clientPhones
@@ -108,9 +111,10 @@ class Client extends ActiveRecord
      * @param $projectId
      * @param $typeCreate
      * @param $parentId
+     * @param $ip
      * @return Client
      */
-    public static function create($firstName, $middleName, $lastName, $projectId, $typeCreate, $parentId): self
+    public static function create($firstName, $middleName, $lastName, $projectId, $typeCreate, $parentId, $ip): self
     {
         $client = new static();
         $client->first_name = $firstName;
@@ -120,6 +124,8 @@ class Client extends ActiveRecord
         $client->cl_type_create = $typeCreate;
         $client->parent_id = $parentId;
         $client->uuid = UuidHelper::uuid();
+        $client->cl_ip = $ip;
+        $client->recordEvent(new ClientCreatedEvent($client));
         return $client;
     }
 
@@ -168,6 +174,8 @@ class Client extends ActiveRecord
 
             ['cl_ppn', 'default', 'value' => null],
             ['cl_ppn', 'string', 'max' => 10],
+
+            ['cl_ip', 'string', 'max' => 39],
         ];
     }
 
@@ -197,6 +205,7 @@ class Client extends ActiveRecord
             'cl_ca_id' => 'Client account',
             'cl_excluded' => 'Is exclude',
             'cl_ppn' => 'PPN',
+            'cl_ip' => 'IP',
         ];
     }
 
@@ -469,5 +478,12 @@ class Client extends ActiveRecord
     public function isExcluded(): bool
     {
         return $this->cl_excluded ? true : false;
+    }
+
+    public function exclude(string $ppn): void
+    {
+        $this->cl_excluded = true;
+        $this->cl_ppn = $ppn;
+        $this->recordEvent(new ClientExcludedEvent($this->id));
     }
 }
