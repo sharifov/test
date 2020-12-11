@@ -15,6 +15,7 @@ class ClientChatAccessMessage
     private const COMMAND_DELETED = 'deleted';
     private const COMMAND_RESET = 'reset';
     private const COMMAND_ACCEPT_TRANSFER = 'accept_transfer';
+    private const COMMAND_TAKE = 'take';
 
     public static function accept(int $chatId, int $userId, int $chatUserAccessId): array
     {
@@ -213,16 +214,8 @@ class ClientChatAccessMessage
 
     public static function take(int $chatId, int $userId, int $chatUserAccessId): array
     {
-        $urlChatId = $chatId;
-        if ($clientChatOld = ClientChat::findOne($chatId)) {
-            if ($clientChatTransfer = ClientChatQuery::lastSameChat($clientChatOld->cch_rid)) {
-                /** @var ClientChat $clientChatTransfer */
-                $urlChatId = $clientChatTransfer->cch_id;
-            }
-        }
         return [
-            'command' => self::COMMAND_ACCEPT,
-            'url' => Url::toRoute(['/client-chat/index', 'chid' => $urlChatId]),
+            'command' => self::COMMAND_TAKE,
             'userId' => $userId,
             'chatId' => $chatId,
             'chatUserAccessId' => $chatUserAccessId

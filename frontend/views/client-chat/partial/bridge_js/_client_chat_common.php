@@ -1085,6 +1085,8 @@ $(document).on('click', '.cc_take', function (e) {
         hideAllLoaders();       
         if (dataResponse.status > 0) { 
             createNotify('Success', dataResponse.message, 'success');
+            $(location).attr('href', '/client-chat/index?chid=' + dataResponse.goToClientChatId);
+            return false;
         } else if (dataResponse.message.length) {
             createNotify('Error', dataResponse.message, 'error');
         } else {
@@ -1092,7 +1094,8 @@ $(document).on('click', '.cc_take', function (e) {
         }
         btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
     })
-    .fail(function(jqXHR, textStatus, errorThrown) {        
+    .fail(function(jqXHR, textStatus, errorThrown) {  
+        hideAllLoaders();      
         createNotify('Error', jqXHR.responseText, 'error');
         btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
     })
@@ -1100,7 +1103,7 @@ $(document).on('click', '.cc_take', function (e) {
         setTimeout(function () {
             hideAllLoaders();
             btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
-        }, 3000);
+        }, 4000);
     });           
 });
 

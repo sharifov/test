@@ -73,7 +73,7 @@ class ClientChatUserAccess extends \yii\db\ActiveRecord
     public const STATUS_SKIP_GROUP = [
         self::STATUS_SKIP,
         self::STATUS_TRANSFER_SKIP,
-        self::STATUS_CANCELED
+        self::STATUS_CANCELED,
     ];
 
     public function behaviors(): array
@@ -159,6 +159,11 @@ class ClientChatUserAccess extends \yii\db\ActiveRecord
     public function accept(): void
     {
         $this->ccua_status_id = self::STATUS_ACCEPT;
+    }
+
+    public function take(): void
+    {
+        $this->ccua_status_id = self::STATUS_TAKE;
     }
 
     public function transferAccept(): void

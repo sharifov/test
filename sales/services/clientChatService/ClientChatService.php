@@ -616,7 +616,7 @@ class ClientChatService
                 ->cloneNotes($clientChat, $newClientChat);
 
             $userAccess = ClientChatUserAccess::create($newClientChat->cch_id, $newClientChat->cch_owner_user_id);
-            $userAccess->accept();
+            $userAccess->take();
             $this->clientChatUserAccessRepository->save($userAccess, $newClientChat);
 
             if ($oldVisitor = $clientChat->ccv->ccvCvd ?? null) {

@@ -95,8 +95,7 @@ function refreshClientChatWidget(obj) {
             window.chat.removeRequest(data.chatId, data.userId, data.chatUserAccessId);
             break;
         case 'skip':
-            window.chat.removeRequest(data.chatId, data.userId, data.chatUserAccessId);
-            break;
+        case 'take':
         case 'deleted':
             window.chat.removeRequest(data.chatId, data.userId, data.chatUserAccessId);
             break;
