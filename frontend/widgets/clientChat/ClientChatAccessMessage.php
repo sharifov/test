@@ -4,6 +4,7 @@ namespace frontend\widgets\clientChat;
 
 use common\models\Employee;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChat\entity\ClientChatQuery;
 use yii\helpers\Url;
 
 class ClientChatAccessMessage
@@ -196,13 +197,31 @@ class ClientChatAccessMessage
     {
         $urlChatId = $chatId;
         if ($clientChatOld = ClientChat::findOne($chatId)) {
-            if ($clientChatTransfer = ClientChat::find()->byRid($clientChatOld->cch_rid)->orderBy(['cch_id' => SORT_DESC])->one()) {
+            if ($clientChatTransfer = ClientChatQuery::lastSameChat($clientChatOld->cch_rid)) {
                 /** @var ClientChat $clientChatTransfer */
                 $urlChatId = $clientChatTransfer->cch_id;
             }
         }
         return [
             'command' => self::COMMAND_ACCEPT_TRANSFER,
+            'url' => Url::toRoute(['/client-chat/index', 'chid' => $urlChatId]),
+            'userId' => $userId,
+            'chatId' => $chatId,
+            'chatUserAccessId' => $chatUserAccessId
+        ];
+    }
+
+    public static function take(int $chatId, int $userId, int $chatUserAccessId): array
+    {
+        $urlChatId = $chatId;
+        if ($clientChatOld = ClientChat::findOne($chatId)) {
+            if ($clientChatTransfer = ClientChatQuery::lastSameChat($clientChatOld->cch_rid)) {
+                /** @var ClientChat $clientChatTransfer */
+                $urlChatId = $clientChatTransfer->cch_id;
+            }
+        }
+        return [
+            'command' => self::COMMAND_ACCEPT,
             'url' => Url::toRoute(['/client-chat/index', 'chid' => $urlChatId]),
             'userId' => $userId,
             'chatId' => $chatId,

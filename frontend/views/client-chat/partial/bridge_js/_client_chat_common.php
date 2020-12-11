@@ -703,6 +703,18 @@ postReloadChat = function() {
     $('#cc-dialogs-wrapper #_cc-load').remove();
 }
 
+function showAllLoaders(){
+    $('#cc-dialogs-wrapper').append(loaderIframe);
+    $('#_cc_additional_info_wrapper').append(loaderIframe);
+    $("#_rc-iframe-wrapper").append(loaderIframe);    
+}
+
+function hideAllLoaders() {
+    $('#_cc_additional_info_wrapper #_cc-load').remove();
+    $('#cc-dialogs-wrapper #_cc-load').remove();
+    $("#_rc-iframe-wrapper").find('#_cc-load').remove();
+}
+
 window.refreshCouchNote = function (cch_id) {    
     $('#couch_note_box').html('');    
     $.ajax({
@@ -1053,10 +1065,12 @@ $(document).on('click', '.cc_take', function (e) {
         return false;
     } 
     
+    showAllLoaders();
+    
     let cchId = $(this).attr('data-cch-id');
     let btnSubmit = $(this);
     let btnContent = btnSubmit.html();
-        
+            
     btnSubmit.html('<i class="fa fa-cog fa-spin"></i> Loading...')
         .addClass('btn-default')
         .prop('disabled', true);
@@ -1067,7 +1081,8 @@ $(document).on('click', '.cc_take', function (e) {
         data: {cchId: cchId},
         dataType: 'json'    
     })
-    .done(function(dataResponse) {        
+    .done(function(dataResponse) { 
+        hideAllLoaders();       
         if (dataResponse.status > 0) { 
             createNotify('Success', dataResponse.message, 'success');
         } else if (dataResponse.message.length) {
@@ -1083,7 +1098,7 @@ $(document).on('click', '.cc_take', function (e) {
     })
     .always(function(jqXHR, textStatus, errorThrown) {  
         setTimeout(function () {
-            $('#page-loader').hide();
+            hideAllLoaders();
             btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
         }, 3000);
     });           
