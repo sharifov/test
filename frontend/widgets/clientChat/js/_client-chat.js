@@ -84,12 +84,11 @@ function refreshClientChatWidget(obj) {
 
     switch (data.command) {
         case 'accept':
-        case 'accept_transfer':
             if (document.visibilityState == "visible") {
                 if (window.name === 'chat') {
                     window.location.href = data.url;
                 } else {
-                    window.open(data.url, '_blank');
+                    window.open(data.url);
                     return false;
                 }
             }
@@ -98,6 +97,7 @@ function refreshClientChatWidget(obj) {
         case 'skip':
         case 'take':
         case 'deleted':
+        case 'accept_transfer':
             window.chat.removeRequest(data.chatId, data.userId, data.chatUserAccessId);
             break;
         case 'pending':

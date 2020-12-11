@@ -196,16 +196,8 @@ class ClientChatAccessMessage
 
     public static function acceptTransfer(int $chatId, int $userId, int $chatUserAccessId): array
     {
-        $urlChatId = $chatId;
-        if ($clientChatOld = ClientChat::findOne($chatId)) {
-            if ($clientChatTransfer = ClientChatQuery::lastSameChat($clientChatOld->cch_rid)) {
-                /** @var ClientChat $clientChatTransfer */
-                $urlChatId = $clientChatTransfer->cch_id;
-            }
-        }
         return [
             'command' => self::COMMAND_ACCEPT_TRANSFER,
-            'url' => Url::toRoute(['/client-chat/index', 'chid' => $urlChatId]),
             'userId' => $userId,
             'chatId' => $chatId,
             'chatUserAccessId' => $chatUserAccessId
