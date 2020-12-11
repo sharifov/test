@@ -627,6 +627,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'label' => Yii::t('language', 'Tools'), 'url' => 'javascript:', 'icon' => 'cog',
                     'items' => [
                         ['label' => Yii::t('menu', 'Check Flight Dump'), 'url' => ['/tools/check-flight-dump']],
+                        ['label' => Yii::t('menu', 'Check Exclude IP'), 'url' => ['/tools/check-exclude-ip']],
                         ['label' => Yii::t('menu', 'Stash Log Files'), 'url' => ['/tools/stash-log-file']],
                         ['label' => Yii::t('menu', 'DB Info'), 'url' => ['/tools/db-info']],
                     ]

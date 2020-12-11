@@ -157,6 +157,25 @@ class ToolsController extends FController
      * @return string
      * @throws \Exception
      */
+    public function actionCheckExcludeIp(): string
+    {
+        $data = [];
+        $ip = substr(trim(Yii::$app->request->get('ip', '')), 0, 50);
+
+        if ($ip) {
+            $data[] = $ip;
+        }
+
+        return $this->render('check-exclude-ip', [
+            'ip' => $ip,
+            'data' => $data,
+        ]);
+    }
+
+    /**
+     * @return string
+     * @throws \Exception
+     */
     public function actionStashLogFile(): string
     {
         $lines = 10;

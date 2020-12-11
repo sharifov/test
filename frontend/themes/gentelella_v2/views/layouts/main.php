@@ -290,7 +290,14 @@ $bundle = \frontend\assets\AppAsset::register($this);
         <!-- /page content -->
         <!-- footer content -->
         <footer>
-            <p class="pull-left">&copy; <?=Yii::$app->name ?> <?= date('Y') ?>, <span title="<?=Yii::$app->params['release']['git_branch'] ?? ''?> : <?=Yii::$app->params['release']['git_hash'] ?? ''?>">v. <?=Yii::$app->params['release']['version'] ?? ''?></p>
+            <p class="pull-left">&copy; <?=Yii::$app->name ?> <?= date('Y') ?>,
+                <span title="<?=Yii::$app->params['release']['git_branch'] ?? ''?> : <?=Yii::$app->params['release']['git_hash'] ?? ''?>">
+                    v. <?=Yii::$app->params['release']['version'] ?? ''?>
+                </span>
+                <span title="Hostname">
+                    , host: <?=Yii::$app->params['appHostname'] ?? ''?>
+                </span>
+            </p>
             <p class="pull-right"><small><i><?=date('Y-m-d H:i:s')?></i></small></p>
 
             <div class="clearfix"></div>
