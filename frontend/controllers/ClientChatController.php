@@ -1106,19 +1106,12 @@ class ClientChatController extends FController
 
                 $takeClientChat = $this->clientChatService->takeClientChat($clientChat, Auth::user());
 
-                Notifications::pub(
-                    [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],
-                    'refreshChatPage',
-                    ['data' => ClientChatAccessMessage::chatTaken($clientChat, $takeClientChat->cchOwnerUser->nickname)]
-                );
-
                 $clientChatLink = Purifier::createChatShortLink($clientChat);
                 Notifications::createAndPublish(
                     $clientChat->cch_owner_user_id,
                     'Chat was taken',
                     'Client Chat was taken by ' . $takeClientChat->cchOwnerUser->nickname . ' (' . $clientChatLink . ')',
-                    Notifications::TYPE_INFO,
-                    true
+                    Notifications::TYPE_INFO
                 );
 
                 $result['message'] = 'Client Chat was successfully taken';
