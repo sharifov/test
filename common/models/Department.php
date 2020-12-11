@@ -33,12 +33,14 @@ class Department extends \yii\db\ActiveRecord
     public const DEPARTMENT_EXCHANGE    = 2;
     public const DEPARTMENT_SUPPORT     = 3;
     public const DEPARTMENT_SCHEDULE_CHANGE = 4;
+    public const DEPARTMENT_FRAUD_PREVENTION = 5;
 
     public const DEPARTMENT_LIST = [
         self::DEPARTMENT_SALES      => 'Sales',
         self::DEPARTMENT_EXCHANGE   => 'Exchange',
         self::DEPARTMENT_SUPPORT    => 'Support',
         self::DEPARTMENT_SCHEDULE_CHANGE    => 'Schedule Change',
+        self::DEPARTMENT_FRAUD_PREVENTION => 'Fraud prevention',
     ];
 
     private const CSS_CLASS_LIST = [
@@ -46,6 +48,7 @@ class Department extends \yii\db\ActiveRecord
         self::DEPARTMENT_EXCHANGE   => 'warning',
         self::DEPARTMENT_SUPPORT    => 'info',
         self::DEPARTMENT_SCHEDULE_CHANGE    => 'primary',
+        self::DEPARTMENT_FRAUD_PREVENTION    => 'secondary',
     ];
 
     private static function getCssClass(?int $value): string
@@ -92,6 +95,11 @@ class Department extends \yii\db\ActiveRecord
     public function isScheduleChange(): bool
     {
         return $this->dep_id === self::DEPARTMENT_SCHEDULE_CHANGE;
+    }
+
+    public function isFraudPrevention(): bool
+    {
+        return $this->dep_id === self::DEPARTMENT_FRAUD_PREVENTION;
     }
 
     /**
