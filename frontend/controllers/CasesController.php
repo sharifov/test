@@ -1143,6 +1143,9 @@ class CasesController extends FController
                         break;
                     case CasesStatus::STATUS_SOLVED:
                         $this->casesManageService->solved($case->cs_id, $user->id, $statusForm->message);
+                        if ($statusForm->isSendFeedback()) {
+                            Yii::$app->session->addFlash('success', 'email send OK');
+                        }
                         break;
                     case CasesStatus::STATUS_PENDING:
                         $this->casesManageService->pending($case->cs_id, $user->id, $statusForm->message);
@@ -1155,7 +1158,7 @@ class CasesController extends FController
                         return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
                 }
 
-                Yii::$app->session->setFlash('success', 'Case Status changed successfully ("' . CasesStatus::getName($statusForm->statusId) . '")');
+                Yii::$app->session->addFlash('success', 'Case Status changed successfully ("' . CasesStatus::getName($statusForm->statusId) . '")');
             } catch (\DomainException $e) {
                 Yii::$app->session->setFlash('error', $e->getMessage());
             } catch (\Throwable $e) {
@@ -1164,6 +1167,10 @@ class CasesController extends FController
             }
 
             return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
+        }
+
+        if (!$statusForm->isResendFeedbackEnable()) {
+            $statusForm->resendFeedbackForm = true;
         }
 
         return $this->renderAjax('partial/_change_status', [

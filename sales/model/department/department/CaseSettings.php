@@ -9,6 +9,9 @@ namespace sales\model\department\department;
  * @property bool $createOnSms
  * @property bool $createOnEmail
  * @property int $trashActiveDaysLimit
+ * @property bool $sendFeedback
+ * @property string $feedbackTemplateTypeKey
+ * @property string $feedbackEmailFrom
  */
 class CaseSettings
 {
@@ -16,6 +19,9 @@ class CaseSettings
     public bool $createOnSms;
     public bool $createOnEmail;
     public int $trashActiveDaysLimit;
+    public bool $sendFeedback;
+    public string $feedbackTemplateTypeKey;
+    public string $feedbackEmailFrom;
 
     public function __construct(array $params)
     {
@@ -23,5 +29,13 @@ class CaseSettings
         $this->createOnSms = (bool)($params['createOnSms'] ?? false);
         $this->createOnEmail = (bool)($params['createOnEmail'] ?? false);
         $this->trashActiveDaysLimit = (int)($params['trashActiveDaysLimit'] ?? 0);
+        $this->sendFeedback = (bool)($params['sendFeedback'] ?? false);
+        $this->feedbackTemplateTypeKey = (string)($params['feedbackTemplateTypeKey'] ?? '');
+        $this->feedbackEmailFrom = (string)($params['feedbackEmailFrom'] ?? '');
+    }
+
+    public function isActiveFeedback(): bool
+    {
+        return $this->sendFeedback && $this->feedbackTemplateTypeKey && $this->feedbackEmailFrom;
     }
 }

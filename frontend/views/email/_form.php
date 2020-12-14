@@ -56,7 +56,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'e_template_type_id')->textInput() ?>
 
-    <?= $form->field($model, 'e_language_id')->dropDownList(\lajax\translatemanager\models\Language::getLanguageNames()) ?>
+    <?= $form->field($model, 'e_language_id')->dropDownList(\common\models\Language::getLanguages(true)) ?>
 
     <?= $form->field($model, 'e_communication_id')->textInput() ?>
 

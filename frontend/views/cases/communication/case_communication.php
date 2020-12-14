@@ -400,7 +400,7 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
                             </div>
 
                             <div class="col-sm-3 form-group message-field-sms message-field-email" id="language-group" style="display: block;">
-                                <?= $form->field($comForm, 'c_language_id')->dropDownList(\lajax\translatemanager\models\Language::getLanguageNames(true), ['prompt' => '---', 'class' => 'form-control', 'id' => 'language']) ?>
+                                <?= $form->field($comForm, 'c_language_id')->dropDownList(\common\models\Language::getLanguages(true), ['prompt' => '---', 'class' => 'form-control', 'id' => 'language']) ?>
                             </div>
 
                             <div class="col-sm-3 form-group message-field-email" id="email-address" style="display: none;">
