@@ -84,6 +84,15 @@ use sales\auth\Auth;
         </div>
         <div class="x_content" style="display: block;">
             <?php if ($caseModel->client) :?>
+                <?php if ($caseModel->client->isExcluded()) : ?>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="alert alert-danger" role="alert">
+                                <b><i class="fa fa-warning"></i> Warning!</b> Excluded client.
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
                 <div class="row">
                     <div class="col-md-6">
                         <?= \yii\widgets\DetailView::widget([

@@ -11,6 +11,11 @@ $client = $clientChat->cchClient;
 
 ?>
 <div class="col-md-12">
+    <?php if ($client && $client->isExcluded()) : ?>
+        <div class="alert alert-danger" role="alert">
+            <b><i class="fa fa-warning"></i> Warning!</b> Excluded client.
+        </div>
+    <?php endif; ?>
     <div style="display: flex; margin-bottom: 15px;">
         <span class="_rc-client-icon _cc-item-icon-round">
             <span class="_cc_client_name"><?= ClientChatHelper::getFirstLetterFromName(ClientChatHelper::getClientName($clientChat)) ?></span>
