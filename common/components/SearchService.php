@@ -9,6 +9,7 @@ use common\models\Quote;
 use Yii;
 use common\models\Airline;
 use common\models\Airports;
+use yii\helpers\ArrayHelper;
 use yii\httpclient\Client;
 use yii\httpclient\CurlTransport;
 use yii\helpers\VarDumper;
@@ -199,39 +200,33 @@ class SearchService
     /**
      * @param $result
      * @return array
+     * @throws \Exception
      */
-    public static function getAirlineLocationInfo($result)
+    public static function getAirlineLocationInfo($result): array
     {
         $airlinesIata = [];
         $locationsIata = [];
-        if (isset($result['results'])) {
-            foreach ($result['results'] as $resItem) {
-                if (!in_array($resItem['validatingCarrier'], $airlinesIata)) {
-                    $airlinesIata[] = $resItem['validatingCarrier'];
-                }
-                foreach ($resItem['trips'] as $trip) {
-                    foreach ($trip['segments'] as $segment) {
-                        if (!in_array($segment['operatingAirline'], $airlinesIata)) {
-                            $airlinesIata[] = $segment['operatingAirline'];
-                        }
-                        if (!in_array($segment['marketingAirline'], $airlinesIata)) {
-                            $airlinesIata[] = $segment['marketingAirline'];
-                        }
-                        if (!in_array($segment['departureAirportCode'], $locationsIata)) {
-                            $locationsIata[] = $segment['departureAirportCode'];
-                        }
-                        if (!in_array($segment['arrivalAirportCode'], $locationsIata)) {
-                            $locationsIata[] = $segment['arrivalAirportCode'];
+        if (is_array($results = ArrayHelper::getValue($result, 'results'))) {
+            foreach ($results as $resItem) {
+                $airlinesIata[] = ArrayHelper::getValue($resItem, 'validatingCarrier', '');
+                if (is_array($trips = ArrayHelper::getValue($resItem, 'trips'))) {
+                    foreach ($trips as $trip) {
+                        if (is_array($segments = ArrayHelper::getValue($trip, 'segments'))) {
+                            foreach ($segments as $segment) {
+                                $airlinesIata[] = ArrayHelper::getValue($segment, 'operatingAirline', '');
+                                $airlinesIata[] = ArrayHelper::getValue($segment, 'marketingAirline', '');
+                                $locationsIata[] = ArrayHelper::getValue($segment, 'departureAirportCode', '');
+                                $locationsIata[] = ArrayHelper::getValue($segment, 'arrivalAirportCode', '');
+                            }
                         }
                     }
                 }
             }
         }
-
-        $airlines = Airline::getAirlinesListByIata($airlinesIata);
-        $locations = Airports::getAirportListByIata($locationsIata);
-
-        return ['airlines' => $airlines, 'locations' => $locations];
+        return [
+            'airlines' => Airline::getAirlinesListByIata(array_unique($airlinesIata)),
+            'locations' => Airports::getAirportListByIata(array_unique($locationsIata))
+        ];
     }
 
     public static function getAirlineLocationItem($resItem)

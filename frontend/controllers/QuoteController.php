@@ -9,6 +9,7 @@ use common\models\Notifications;
 use common\models\Quote;
 use common\models\QuotePrice;
 use sales\auth\Auth;
+use sales\helpers\app\AppHelper;
 use sales\model\clientChat\socket\ClientChatSocketCommands;
 use sales\forms\quotePrice\AddQuotePriceForm;
 use sales\forms\segment\SegmentBaggageForm;
@@ -47,47 +48,45 @@ class QuoteController extends FController
     /**
      * @param $leadId
      * @return string
-     * @throws \yii\httpclient\Exception
+     * @throws \Exception
      */
     public function actionGetOnlineQuotes($leadId): string
     {
-        $lead = Lead::findOne(['id' => $leadId]);
-        if (Yii::$app->request->isPost) {
-            /*$response = [
-                'success' => false,
-                'body' => ''
-            ];*/
+        try {
+            $lead = Lead::findOne(['id' => $leadId]);
+            if (Yii::$app->request->isPost) {
+                $gds = Yii::$app->request->post('gds', '');
 
-            $gds = Yii::$app->request->post('gds', '');
-            //$gds = 'G';
+                if ($lead !== null) {
+                    $keyCache = sprintf('quick-search-new-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey());
+                    //Yii::$app->cache->delete($keyCache); // only for debug
+                    $result = Yii::$app->cacheFile->get($keyCache);
 
-            if ($lead !== null) {
-                $keyCache = sprintf('quick-search-new-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey());
-
-                //Yii::$app->cache->delete($keyCache);
-
-                $result = Yii::$app->cacheFile->get($keyCache);
-
-                if ($result === false) {
-                    $result = SearchService::getOnlineQuotes($lead);
-                    if ($result && !empty($result['data']) && empty($result['error'])) {
-                        Yii::$app->cacheFile->set($keyCache, $result, 600);
+                    if ($result === false) {
+                        $result = SearchService::getOnlineQuotes($lead);
+                        if ($result && !empty($result['data']) && empty($result['error'])) {
+                            Yii::$app->cacheFile->set($keyCache, $result, 600);
+                        }
                     }
+
+                    $viewData = SearchService::getAirlineLocationInfo($result['data'] ?? []);
+                    $viewData['result'] = $result;
+                    $viewData['leadId'] = $leadId;
+                    $viewData['gds'] = $gds;
+                    $viewData['lead'] = $lead;
+
+                    $result = $this->renderAjax('_search_results', $viewData);
+                } else {
+                    throw new \Exception('Not found lead', -1);
                 }
-
-                $viewData = SearchService::getAirlineLocationInfo($result['data'] ?? []);
-                $viewData['result'] = $result;
-                $viewData['leadId'] = $leadId;
-                $viewData['gds'] = $gds;
-                $viewData['lead'] = $lead;
-
-                return $this->renderAjax('_search_results', $viewData);
             } else {
-                return 'Not found lead';
+                throw new \Exception('Post is required', -2);
             }
+        } catch (\Throwable $throwable) {
+            AppHelper::throwableLogger($throwable, 'QuoteController:actionGetOnlineQuotes');
+            $result = $throwable->getMessage();
         }
-
-        return '';
+        return $result;
     }
 
     /**
