@@ -54,7 +54,6 @@ class ToolsController extends FController
      */
     public function actionClearCache()
     {
-
         $successItems = [];
         $warningItems = [];
 
@@ -117,7 +116,7 @@ class ToolsController extends FController
 
         // Call Supervisor API
         //VarDumper::dump($supervisor->getAllProcessInfo(), 10, true);
-         //exit;
+        //exit;
 
         return $this->render('supervisor');
     }
@@ -163,7 +162,12 @@ class ToolsController extends FController
         $ip = substr(trim(Yii::$app->request->get('ip', '')), 0, 50);
 
         if ($ip) {
-            $data[] = $ip;
+            $response = Yii::$app->airsearch->checkExcludeIp($ip);
+            if ($response) {
+                $data = $response;
+            } else {
+                $data = 'Error: ' . $ip;
+            }
         }
 
         return $this->render('check-exclude-ip', [
@@ -218,7 +222,6 @@ class ToolsController extends FController
      */
     public function actionDbInfo(): string
     {
-
         $db = Yii::$app->getDb();
         // get the db name
         $schema = $db->createCommand('select database()')->queryScalar();
