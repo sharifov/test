@@ -44,7 +44,6 @@ use yii\base\Model;
 
 class CommunicationForm extends Model
 {
-
     public const TYPE_EMAIL = 1;
     public const TYPE_SMS   = 2;
     public const TYPE_VOICE = 3;
@@ -116,9 +115,9 @@ class CommunicationForm extends Model
 
     /**
      * @param string|null $languageId
-     * @return string
+     * @return string|null
      */
-    private static function getDefaultLanguage(?string $languageId = null): string
+    private static function getDefaultLanguage(?string $languageId = null): ?string
     {
         $activeLanguages = Language::getLanguages(true);
         if (array_key_exists($languageId, $activeLanguages)) {
@@ -136,7 +135,7 @@ class CommunicationForm extends Model
             [['c_type_id', 'c_lead_id'], 'required'],
 
             [['c_email_to', 'c_language_id', 'c_email_tpl_key'], 'required', 'when' => static function (CommunicationForm $model) {
-                        return (int) $model->c_type_id === self::TYPE_EMAIL;
+                return (int) $model->c_type_id === self::TYPE_EMAIL;
             },
                 'whenClient' => "function (attribute, value) { return $('#c_type_id').val() == " . self::TYPE_EMAIL . '; }'
             ],
@@ -173,13 +172,13 @@ class CommunicationForm extends Model
 
 
             [['c_quotes'], 'required', 'when' => static function (CommunicationForm $model) {
-                    return ($model->c_email_tpl_key === self::TPL_TYPE_EMAIL_OFFER_KEY || $model->c_email_tpl_key === self::TPL_TYPE_EMAIL_OFFER_VIEW_KEY) && (int) $model->c_type_id === self::TYPE_EMAIL;
+                return ($model->c_email_tpl_key === self::TPL_TYPE_EMAIL_OFFER_KEY || $model->c_email_tpl_key === self::TPL_TYPE_EMAIL_OFFER_VIEW_KEY) && (int) $model->c_type_id === self::TYPE_EMAIL;
             },
                 'whenClient' => "function (attribute, value) { return ($('#c_type_id').val() == " . self::TYPE_EMAIL . " && ($('#c_email_tpl_key').val() == '" . self::TPL_TYPE_EMAIL_OFFER_VIEW_KEY . "' || $('#c_email_tpl_key').val() == '" . self::TPL_TYPE_EMAIL_OFFER_KEY . "')); }"
             ],
 
             [['c_quotes'], 'required', 'when' => static function (CommunicationForm $model) {
-                    return ($model->c_sms_tpl_key === self::TPL_TYPE_SMS_OFFER_KEY || $model->c_sms_tpl_key === self::TPL_TYPE_SMS_OFFER_VIEW_KEY) && (int) $model->c_type_id === self::TYPE_SMS;
+                return ($model->c_sms_tpl_key === self::TPL_TYPE_SMS_OFFER_KEY || $model->c_sms_tpl_key === self::TPL_TYPE_SMS_OFFER_VIEW_KEY) && (int) $model->c_type_id === self::TYPE_SMS;
             },
                 'whenClient' => "function (attribute, value) { return $('#c_type_id').val() == " . self::TYPE_SMS . " && ($('#c_sms_tpl_key').val() == '" . self::TPL_TYPE_SMS_OFFER_KEY . "' || $('#c_sms_tpl_key').val() == '" . self::TPL_TYPE_SMS_OFFER_VIEW_KEY . "'); }"
             ],
