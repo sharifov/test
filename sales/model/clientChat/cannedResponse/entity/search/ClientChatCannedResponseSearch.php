@@ -69,8 +69,8 @@ class ClientChatCannedResponseSearch extends ClientChatCannedResponse
     {
         $query = self::find()->select(
             (new Expression(
-                "ts_headline('english', cr_message, plainto_tsquery('english', :substring)) as headline_message,
-             cr_message as message",
+                "ts_headline('english', cr_message, to_tsquery('english', :substring)) as headline_message,
+                cr_message as message",
                 ['substring' => $searchSubString]
             ))
         );
@@ -79,7 +79,7 @@ class ClientChatCannedResponseSearch extends ClientChatCannedResponse
             $query->byProjectId($projectId);
         }
         $query->byTsVectorMessage($searchSubString);
-        $query->andWhere(['or', ['cr_user_id' => $userId], ['cr_user_id' => null]]);
+        $query->andWhere(['OR', ['cr_user_id' => $userId], ['cr_user_id' => null]]);
         $query->joinCategory()->categoryEnabled();
         if ($languageId) {
             $query->byLanguageId($languageId);

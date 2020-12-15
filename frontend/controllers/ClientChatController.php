@@ -1976,7 +1976,7 @@ class ClientChatController extends FController
 
         try {
             $form = new ClientChatSearchCannedResponse();
-            $form->query = (string)$query;
+            $form->query = (string) $query;
             $form->chatId = $chatId;
             if ($form->validate()) {
                 $chat = $this->clientChatRepository->findById($form->chatId);
