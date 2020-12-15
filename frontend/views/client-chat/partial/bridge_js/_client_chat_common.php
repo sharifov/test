@@ -127,20 +127,6 @@ $(document).ready( function () {
         }
     });
     
-    /*$('#canned-response').mousedown(function(event) { // TODO:: for debug
-        switch (event.which) {
-            case 1:
-                return false;
-                break;
-            case 2:
-                return false;
-                break;
-            case 3:
-                return false;
-                break;
-        }
-    });*/
-    
     $('textarea.canned-response').on('keypress', function (e) {
         if (e.keyCode === 13 && e.originalEvent.shiftKey === false) {
             document.getElementById("send-canned-response").click();
