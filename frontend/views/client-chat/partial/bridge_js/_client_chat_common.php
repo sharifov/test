@@ -116,7 +116,9 @@ $(document).ready( function () {
         onSelect: function (suggestion) {
             let searchValue = '/'+suggestion.value;
             let curVal = $(this).val();
-            $(this).val(curVal.replace(searchValue, suggestion.value));
+            let inputValue = curVal.replace(searchValue, suggestion.value);
+            inputValue = inputValue.replace('/', '');
+            $(this).val(inputValue);
         },
         onSearchError: function (query, jqXHR, textStatus, errorThrown) {
             createNotify('Error', jqXHR.statusText, 'error');
@@ -124,6 +126,20 @@ $(document).ready( function () {
             $('#loading-canned-response').hide();
         }
     });
+    
+    /*$('#canned-response').mousedown(function(event) { // TODO:: for debug
+        switch (event.which) {
+            case 1:
+                return false;
+                break;
+            case 2:
+                return false;
+                break;
+            case 3:
+                return false;
+                break;
+        }
+    });*/
     
     $('textarea.canned-response').on('keypress', function (e) {
         if (e.keyCode === 13 && e.originalEvent.shiftKey === false) {

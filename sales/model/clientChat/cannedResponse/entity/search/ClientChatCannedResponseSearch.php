@@ -67,10 +67,9 @@ class ClientChatCannedResponseSearch extends ClientChatCannedResponse
 
     public function searchCannedResponse(?int $projectId, string $searchSubString, int $userId, ?string $languageId): array
     {
-        $searchSubString = str_replace(' ', ' & ', trim($searchSubString));
         $query = self::find()->select(
             (new Expression(
-                "ts_headline('english', cr_message, to_tsquery('english', :substring)) as headline_message,
+                "ts_headline('english', cr_message, plainto_tsquery('english', :substring)) as headline_message,
              cr_message as message",
                 ['substring' => $searchSubString]
             ))
@@ -85,8 +84,6 @@ class ClientChatCannedResponseSearch extends ClientChatCannedResponse
         if ($languageId) {
             $query->byLanguageId($languageId);
         }
-
-//        print_r($query->createCommand()->rawSql);die;
 
         return $query->asArray()->all();
     }

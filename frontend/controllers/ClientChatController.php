@@ -2009,7 +2009,8 @@ class ClientChatController extends FController
                 $errorMessage = $form->getErrorSummary(false)[0];
             }
         } catch (\Throwable $e) {
-            $errorMessage = $e->getMessage();
+            $errorMessage = 'The search failed. Please try again.';
+            AppHelper::throwableLogger($e, 'ClientChatController:actionAjaxCannedResponse:throwable');
         }
 
         return $this->asJson([
