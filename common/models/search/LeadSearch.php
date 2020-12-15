@@ -272,7 +272,7 @@ class LeadSearch extends Lead
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id' => $this->id,
+            Lead::tableName() . '.id' => $this->id,
             'gid'   => $this->gid,
             'client_id' => $this->client_id,
             'employee_id' => $this->employee_id,
@@ -1404,7 +1404,7 @@ class LeadSearch extends Lead
         }
 
         $query->andFilterWhere([
-            'id' => $this->id,
+            Lead::tableName() . '.id' => $this->id,
             'gid' => $this->gid,
             'client_id' => $this->client_id,
             'employee_id' => $this->employee_id,
