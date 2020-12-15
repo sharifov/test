@@ -7,7 +7,7 @@ use yii\web\JqueryAsset;
 
 class ClientChatAsset extends AssetBundle
 {
-    public $sourcePath = '@frontend/themes/gentelella_v2/';
+    public $sourcePath = '@frontend/themes/gentelella_v2/src/';
     public $css = [
         'css/client-chat/client-chat.css',
     ];

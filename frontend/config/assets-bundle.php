@@ -1,6 +1,7 @@
 <?php
 
 use dosamigos\ckeditor\CKEditorAsset;
+use frontend\assets\groups\BootstrapGroupAsset;
 use frontend\assets\overridden\ImperaviAsset;
 use frontend\assets\overridden\KartikActiveFormAsset;
 use frontend\assets\overridden\KartikCheckboxColumnAsset;
@@ -29,6 +30,9 @@ use kartik\grid\GridViewAsset;
 use kdn\yii2\assets\JsonEditorFullAsset;
 use kdn\yii2\assets\JsonEditorMinimalistAsset;
 use vova07\imperavi\Asset;
+use yii\bootstrap4\BootstrapAsset;
+use yii\bootstrap4\BootstrapPluginAsset;
+use yii\web\JqueryAsset;
 
 $assetsProd = require __DIR__ . '/assets-prod.php';
 
@@ -154,5 +158,15 @@ return array_merge($assetsProd, [
         'depends' => [
             KartikGridFloatHeadAsset::class,
         ]
-    ]
+    ],
+    JqueryAsset::class => [
+        'js' => ['https://code.jquery.com/jquery-3.5.1.min.js']
+    ],
+//    BootstrapAsset::class => [
+//        'class' => BootstrapGroupAsset::class
+//    ],
+//    BootstrapPluginAsset::class => [
+//        'class' => BootstrapGroupAsset::class
+//    ]
+
 ]);

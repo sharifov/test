@@ -160,7 +160,10 @@
 		"cs-check": "phpcs",
 		"cs-fix2": "phpcbf",
 		"assets-compressor": [
-			"./compressed-assets-flush.sh",
+			"rm -rf frontend/web/all_shared/build/*",
+			"rm -rf frontend/web/fontawesome/build/*",
+			"rm -rf frontend/web/client_chat/build/*",
+			"rm -rf frontend/web/web_phone/build/*",
 			"php yii asset frontend/config/assets-config.php frontend/config/assets-prod.php"
 		],
 		"lint": "vendor/bin/phplint",

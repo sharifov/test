@@ -5,7 +5,9 @@
 
 namespace frontend\assets;
 
+use frontend\assets\groups\BootstrapGroupAsset;
 use yii\web\AssetBundle;
+use yii\web\JqueryAsset;
 
 /**
  * @author alex.connor
@@ -25,9 +27,8 @@ class PageLoaderAsset extends AssetBundle
     ];
 
     public $depends = [
-        'yii\web\YiiAsset',
-        'yii\web\JqueryAsset',
-        'yii\bootstrap4\BootstrapAsset',
+        JqueryAsset::class,
+        BootstrapGroupAsset::class
     ];
 
     public $jsOptions = [

@@ -7,7 +7,7 @@ use yii\web\AssetBundle;
 
 class ClientChatWidgetAsset extends AssetBundle
 {
-    public $sourcePath = '@frontend/widgets/clientChat/';
+    public $sourcePath = '@frontend/widgets/clientChat/assets/';
 
     public $css = [
         'css/_client-chat.css'
