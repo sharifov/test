@@ -84,15 +84,14 @@ function refreshClientChatWidget(obj) {
 
     switch (data.command) {
         case 'accept':
+            window.chat.removeRequest(data.chatId, data.userId, data.chatUserAccessId);
             if (document.visibilityState == "visible") {
                 if (window.name === 'chat') {
                     window.location.href = data.url;
                 } else {
                     window.open(data.url);
-                    return false;
                 }
             }
-            window.chat.removeRequest(data.chatId, data.userId, data.chatUserAccessId);
             break;
         case 'skip':
         case 'take':
