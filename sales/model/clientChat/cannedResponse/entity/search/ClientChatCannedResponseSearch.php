@@ -45,7 +45,7 @@ class ClientChatCannedResponseSearch extends ClientChatCannedResponse
         $this->load($params);
 
         if (!$this->validate()) {
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
@@ -75,15 +75,27 @@ class ClientChatCannedResponseSearch extends ClientChatCannedResponse
             ))
         );
 
-        if ($projectId) {
-            $query->byProjectId($projectId);
-        }
-        $query->byTsVectorMessage($searchSubString);
-        $query->andWhere(['OR', ['cr_user_id' => $userId], ['cr_user_id' => null]]);
-        $query->joinCategory()->categoryEnabled();
+        $query->byTsVectorMessage($searchSubString)
+            ->joinCategory()
+            ->categoryEnabled();
+
+        $query->andWhere([
+            'OR',
+                ['cr_user_id' => $userId],
+                ['cr_user_id' => null]
+        ]);
+
         if ($languageId) {
             $query->byLanguageId($languageId);
         }
+        if ($projectId) {
+            $query->andWhere([
+                'OR',
+                    ['cr_project_id' => $projectId],
+                    ['cr_project_id' => null]
+            ]);
+        }
+        $query->orderBy(['cr_sort_order' => SORT_ASC]);
 
         return $query->asArray()->all();
     }

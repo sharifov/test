@@ -47,6 +47,7 @@ class ClientChatCannedResponse extends \yii\db\ActiveRecord
             ['cr_project_id', 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['cr_project_id' => 'id']],
 
             ['cr_sort_order', 'integer'],
+            ['cr_sort_order', 'default', 'value' => 1],
 
             ['cr_updated_dt', 'safe'],
 
