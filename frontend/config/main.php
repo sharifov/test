@@ -87,10 +87,11 @@ return [
                     ],
 //                    'logVars' => YII_DEBUG ? ['_GET', '_POST', '_FILES', '_COOKIE', '_SESSION', '_SERVER'] : [],
                     'logVars' => [],
-                    'prefix' => function () {
+                    'prefix' => static function () {
                         $userID = Yii::$app->user->isGuest ? '-' : Yii::$app->user->id;
                         $ip = $_SERVER['REMOTE_ADDR'];
-                        return "[frontend][$ip][$userID]";
+                        $hostname = php_uname('n');
+                        return "[$hostname][frontend][$ip][$userID]";
                     },
                     'db' => 'db_postgres'
                 ],
@@ -99,10 +100,11 @@ return [
                     'levels' => ['info'],
                     'logVars' => [],
                     'categories' => ['info\*'],
-                    'prefix' => function () {
+                    'prefix' => static function () {
                         $userID = Yii::$app->user->isGuest ? '-' : Yii::$app->user->id;
                         $ip = $_SERVER['REMOTE_ADDR'];
-                        return "[frontend][$ip][$userID]";
+                        $hostname = php_uname('n');
+                        return "[$hostname][frontend][$ip][$userID]";
                     },
                     'db' => 'db_postgres'
                 ],

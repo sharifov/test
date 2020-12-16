@@ -57,10 +57,19 @@ class ClientChatVisitorDataRepository extends Repository
     {
         $visitorData->updateByClientChatRequest($data);
         if (!$visitorData->validate()) {
+            $errorAttributes = [];
             foreach ($visitorData->errors as $attribute => $error) {
+                $errorAttributes[$attribute] = $visitorData->{$attribute};
                 $visitorData->{$attribute} = null;
             }
-            \Yii::error('Client Chat Visitor Data validation failed: ' . VarDumper::dumpAsString($visitorData->errors), 'ClientChatVisitorDataRepository::updateByClientChatRequest::validation');
+            $errorData = [
+                'attributes' => $errorAttributes,
+                'errors' => $visitorData->errors,
+            ];
+            \Yii::error(
+                'Client Chat Visitor Data validation failed: ' . VarDumper::dumpAsString($errorData),
+                'ClientChatVisitorDataRepository::updateByClientChatRequest::validation'
+            );
         }
 
         try {

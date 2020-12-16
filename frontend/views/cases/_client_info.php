@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use sales\entities\cases\Cases;
@@ -83,13 +84,28 @@ use sales\auth\Auth;
         </div>
         <div class="x_content" style="display: block;">
             <?php if ($caseModel->client) :?>
+                <?php if ($caseModel->client->isExcluded()) : ?>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="alert alert-danger" role="alert">
+                                <b><i class="fa fa-warning"></i> Warning!</b> Excluded client.
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
                 <div class="row">
                     <div class="col-md-6">
                         <?= \yii\widgets\DetailView::widget([
                             'model' => $caseModel->client,
                             'attributes' => [
                                 'id',
-                                'first_name',
+                                [
+                                    'attribute' => 'first_name',
+                                    'value' => static function (Client $client) {
+                                        return \sales\model\client\helpers\ClientFormatter::formatName($client);
+                                    },
+                                    'format' => 'raw',
+                                ],
                                 'middle_name',
                                 'last_name',
                                 [

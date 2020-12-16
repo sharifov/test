@@ -1,17 +1,17 @@
-    <?php
+<?php
 
 /* @var $this yii\web\View */
 /* @var $order \modules\order\src\entities\order\Order */
 /* @var $index integer */
 
-    use common\models\Currency;
-    use modules\invoice\src\entities\invoice\InvoiceStatus;
-    use modules\order\src\entities\order\OrderPayStatus;
-    use modules\order\src\entities\order\OrderStatus;
-    use modules\product\src\entities\productQuote\ProductQuoteStatus;
-    use yii\bootstrap4\Html;
+use common\models\Currency;
+use modules\invoice\src\entities\invoice\InvoiceStatus;
+use modules\order\src\entities\order\OrderPayStatus;
+use modules\order\src\entities\order\OrderStatus;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use yii\bootstrap4\Html;
 
-    ?>
+?>
 
 <div class="x_panel">
     <div class="x_title">

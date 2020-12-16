@@ -104,8 +104,17 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
         </div>
         <div class="x_content">
 
+            <?php if ($lead->client->isExcluded()) : ?>
             <div class="row">
+                <div class="col-md-12">
+                    <div class="alert alert-danger" role="alert">
+                        <b><i class="fa fa-warning"></i> Warning!</b> Excluded client.
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
 
+            <div class="row">
                 <div class="col-md-4">
                     <?= $this->render('_client_manage_name', [
                         'client' => $lead->client

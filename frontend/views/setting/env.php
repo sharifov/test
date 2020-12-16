@@ -119,6 +119,11 @@ $this->params['breadcrumbs'][] = $this->title;
             </thead>
             <tbody>
             <tr>
+                <td>0</td>
+                <td>appHostname</td>
+                <td><?=Yii::$app->params['appHostname'] ?? ''?></td>
+            </tr>
+            <tr>
                 <td>1</td>
                 <td>appName</td>
                 <td><?=Yii::$app->params['appName'] ?? ''?></td>

@@ -154,7 +154,6 @@ class QuotesController extends FController
             }
 
             return  $mailCapture['data']['img'];
-
         } catch (\Throwable $e) {
             Yii::error(VarDumper::dumpAsString([
                 'error' => AppHelper::throwableFormatter($e),

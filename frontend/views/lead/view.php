@@ -85,6 +85,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
         </div>
 
         <div class="col-md-6">
+<?php if (Auth::can('lead-view/flight-default/view', ['lead' => $lead])) : ?>
         <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-products-wrap', 'enablePushState' => false, 'enableReplaceState' => false]) ?>
 
             <?= $this->render('products/_products', [
@@ -111,7 +112,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
                 ]) ?>
             <?php endif; ?>
         <?php \yii\widgets\Pjax::end(); ?>
-
+<?php endif; ?>
         </div>
         <div class="col-md-6">
             <?php /*if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && !$lead->isOwner($user->id)):*/?><!--
@@ -166,7 +167,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
                 </div>
             --><?php /*endif; */?>
 
-            <?php if (Auth::can('lead/view_Lead_Preferences')) : ?>
+            <?php if (Auth::can('lead-view/lead-preferences/view', ['lead' => $lead])) : ?>
                 <div id="lead-preferences">
                     <?= $this->render('partial/_lead_preferences', [
                         'lead' => $lead
@@ -174,8 +175,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
                 </div>
             <?php endif; ?>
 
-
-            <?php if (Auth::can('lead/view_Check_List')) : ?>
+            <?php if (Auth::can('lead-view/check-list/view', ['lead' => $lead])) : ?>
                 <?= $this->render('checklist/lead_checklist', [
                     'lead' => $lead,
                     'comForm'       => $comForm,
@@ -186,13 +186,13 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
                 ]) ?>
             <?php endif; ?>
 
-            <?php if (Auth::can('lead/view_Task_List')) : ?>
+            <?php if (Auth::can('lead-view/task-list/view', ['lead' => $lead])) : ?>
                 <?= $this->render('partial/_task_list', [
                     'lead' => $lead
                 ]) ?>
             <?php endif; ?>
 
-            <?php if (Yii::$app->user->can('lead/view_CommunicationBlock', ['lead' => $lead])) : ?>
+            <?php if (Yii::$app->user->can('lead-view/communication-block/view', ['lead' => $lead])) : ?>
                 <?= $this->render('communication/lead_communication', [
                     'leadForm'      => $leadForm,
                     'previewEmailForm' => $previewEmailForm,
@@ -207,24 +207,25 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
                     'unsubscribe' => $unsubscribe,
                     'smsEnabled' => $smsEnabled,
                 ]); ?>
-            <?php else : ?>
-                <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
+                <?php /*else: */ ?><!--
+                <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>-->
             <?php endif;?>
 
             <?php //php \yii\helpers\VarDumper::dump(Yii::$app->user->identity->callExpertCountByShiftTime)?>
 
 
-
-            <?php if (Auth::can('lead/view_BO_Expert')) : ?>
-                <?php  if (Yii::$app->user->identity->isAllowCallExpert) : ?>
-                    <?= $this->render('call-expert/lead_call_expert', [
-                        'lead' => $lead,
-                        'comForm'       => $comForm,
-                        'leadId'        => $lead->id,
-                        'dataProvider'  => $dataProviderCallExpert,
-                        'isAdmin'       => $is_admin,
-                        'modelLeadCallExpert'       => $modelLeadCallExpert,
-                    ]) ?>
+            <?php if (!$lead->client->isExcluded()) : ?>
+                <?php if (Auth::can('lead-view/call-expert/view', ['lead' => $lead])) : ?>
+                    <?php  if (Yii::$app->user->identity->isAllowCallExpert) : ?>
+                        <?= $this->render('call-expert/lead_call_expert', [
+                            'lead' => $lead,
+                            'comForm'       => $comForm,
+                            'leadId'        => $lead->id,
+                            'dataProvider'  => $dataProviderCallExpert,
+                            'isAdmin'       => $is_admin,
+                            'modelLeadCallExpert'       => $modelLeadCallExpert,
+                        ]) ?>
+                    <?php endif; ?>
                 <?php endif; ?>
             <?php endif; ?>
 
@@ -273,13 +274,13 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
 //                    'is_manager' => $is_manager,
 //                ]);?>
 
-
+            <?php if (Auth::can('lead-view/notes/view', ['lead' => $lead])) : ?>
                 <?= $this->render('notes/agent_notes', [
                     'lead' => $lead,
                     'dataProviderNotes'  => $dataProviderNotes,
                     'modelNote'  => $modelNote,
                 ]) ?>
-
+            <?php endif;?>
         </div>
 
         <div class="clearfix"></div>

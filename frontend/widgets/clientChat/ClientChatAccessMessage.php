@@ -4,6 +4,7 @@ namespace frontend\widgets\clientChat;
 
 use common\models\Employee;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChat\entity\ClientChatQuery;
 use yii\helpers\Url;
 
 class ClientChatAccessMessage
@@ -13,6 +14,8 @@ class ClientChatAccessMessage
     private const COMMAND_SKIP = 'skip';
     private const COMMAND_DELETED = 'deleted';
     private const COMMAND_RESET = 'reset';
+    private const COMMAND_ACCEPT_TRANSFER = 'accept_transfer';
+    private const COMMAND_TAKE = 'take';
 
     public static function accept(int $chatId, int $userId, int $chatUserAccessId): array
     {
@@ -53,13 +56,14 @@ class ClientChatAccessMessage
         ];
     }
 
-    public static function deleted(int $userId): array
+    public static function deleted(int $cchId, int $userId, int $chatUserAccessId): array
     {
         return [
             'command' => self::COMMAND_DELETED,
             'status_id' => null,
-            'user_id' => $userId,
-            'cch_id' => null,
+            'userId' => $userId,
+            'chatId' => $cchId,
+            'chatUserAccessId' => $chatUserAccessId,
             'pjaxUrl' => Url::to('/client-chat/pjax-update-chat-widget'),
             'html' => self::refresh($userId)
         ];
@@ -188,5 +192,25 @@ class ClientChatAccessMessage
         $widget->open = true;
         $widget->userAccessId = $chatUserAccessId;
         return $widget->fetchOneItem();
+    }
+
+    public static function acceptTransfer(int $chatId, int $userId, int $chatUserAccessId): array
+    {
+        return [
+            'command' => self::COMMAND_ACCEPT_TRANSFER,
+            'userId' => $userId,
+            'chatId' => $chatId,
+            'chatUserAccessId' => $chatUserAccessId
+        ];
+    }
+
+    public static function take(int $chatId, int $userId, int $chatUserAccessId): array
+    {
+        return [
+            'command' => self::COMMAND_TAKE,
+            'userId' => $userId,
+            'chatId' => $chatId,
+            'chatUserAccessId' => $chatUserAccessId
+        ];
     }
 }

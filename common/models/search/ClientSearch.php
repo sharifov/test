@@ -38,6 +38,8 @@ class ClientSearch extends Client
             ['parent_id', 'integer'],
 
             [['created', 'updated'], 'date', 'format' => 'php:Y-m-d'],
+
+            ['cl_excluded', 'boolean'],
         ];
     }
 
@@ -112,6 +114,7 @@ class ClientSearch extends Client
             'is_public' => $this->is_public,
             'disabled' => $this->disabled,
             'parent_id' => $this->parent_id,
+            'cl_excluded' => $this->cl_excluded,
         ]);
 
         if ($this->cl_project_id === -1) {

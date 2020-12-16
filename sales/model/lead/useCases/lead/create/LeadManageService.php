@@ -248,6 +248,9 @@ class LeadManageService
                 }
             }
             $visitorLog->vl_client_id = $client->id;
+            if (!$visitorLog->vl_project_id) {
+                $visitorLog->vl_project_id = $chat->cch_project_id;
+            }
             $this->visitorLogRepository->save($visitorLog);
 
             $source = Sources::find()->select(['id'])->where(['cid' => $visitorLog->vl_source_cid])->one();

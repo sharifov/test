@@ -7,6 +7,8 @@ use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\UserContactList;
 use http\Exception\RuntimeException;
+use sales\model\clientAccount\entity\ClientAccount;
+use sales\model\clientAccount\form\ClientAccountCreateApiForm;
 use sales\repositories\client\ClientsCollection;
 use sales\repositories\client\ClientsQuery;
 use sales\services\client\ClientCreateForm;
@@ -82,7 +84,8 @@ class ClientManageService
             $clientForm->lastName,
             $clientForm->projectId,
             $clientForm->typeCreate,
-            $parentId
+            $parentId,
+            $clientForm->ip
         );
         $this->clientRepository->save($client);
         return $client;
@@ -277,7 +280,15 @@ class ClientManageService
             break;
         }
 
-        $client = Client::create('', '', '', $form->projectId, $form->typeCreate, $parentId);
+        $client = Client::create(
+            '',
+            '',
+            '',
+            $form->projectId,
+            $form->typeCreate,
+            $parentId,
+            $form->ip
+        );
         $client->id = 0;
 
         return $client;
@@ -341,7 +352,8 @@ class ClientManageService
             $form->lastName,
             $form->projectId,
             $form->typeCreate,
-            $parentId
+            $parentId,
+            $form->ip
         );
         $client->uuid = $form->uuid;
 
@@ -365,12 +377,17 @@ class ClientManageService
             throw new \RuntimeException('Client Rocket Chat id is not provided');
         }
 
+        $ip = null;
+        if ($data = $clientChatRequest->getDecodedData()) {
+            $ip = $data['geo']['ip'] ?? null;
+        }
         $clientForm = new ClientCreateForm([
             'firstName' => $clientChatRequest->getNameFromData(),
             'rcId' => $rcId,
             'uuid' => $uuId,
             'typeCreate' => Client::TYPE_CREATE_CLIENT_CHAT,
-            'projectId' => $projectId
+            'projectId' => $projectId,
+            'ip' => $ip,
         ]);
 
         if ($client = $this->detectClientFromChatRequest($projectId, $uuId, $clientEmailForm->email, $rcId)) {
@@ -507,5 +524,29 @@ class ClientManageService
         if ($userContactList = UserContactList::findOne(['ucl_client_id' => $clientId])) {
             $userContactList->delete();
         }
+    }
+
+    public function createOrLinkByClientAccount(ClientAccount $clientAccount): Client
+    {
+        if ($client = Client::findOne(['uuid' => $clientAccount->ca_uuid])) {
+            $client->cl_ca_id = $clientAccount->ca_id;
+        } else {
+            $client = Client::createByClientAccount($clientAccount);
+        }
+        $this->clientRepository->save($client);
+
+        if ($clientAccount->ca_email) {
+            $clientEmailForm = new EmailCreateForm();
+            $clientEmailForm->email = $clientAccount->ca_email;
+            $this->addEmail($client, $clientEmailForm);
+        }
+
+        if ($clientAccount->ca_phone) {
+            $clientPhoneForm = new PhoneCreateForm();
+            $clientPhoneForm->phone = $clientAccount->ca_phone;
+            $this->addPhone($client, $clientPhoneForm);
+        }
+
+        return $client;
     }
 }

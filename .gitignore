@@ -50,3 +50,9 @@ phpunit.phar
 # CodeSniffer cache files
 .php_cs.cache
 .phpcs-cache
+
+# PhpLinter cache file
+.phplint.cache
+
+cghooks.lock
+

@@ -937,10 +937,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             if (isset($roles[self::ROLE_SUPPORT_SENIOR])) {
                 unset($roles[self::ROLE_SUPPORT_SENIOR]);
             }
-
-            if (isset($roles[self::ROLE_SUPERVISION])) {
-                unset($roles[self::ROLE_SUPERVISION]);
-            }
         }
 
         if (!$user->isAdmin() && !$user->isSuperAdmin() && !$user->isUserManager()) {
@@ -2541,7 +2537,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $dateTime;
     }
 
-    public static function getUtcOffsetDst($time_zone = 'Europe/Chisinau', $dateToCheck)
+    /**
+     * $time_zone ex. = 'Europe/Chisinau'
+     */
+    public static function getUtcOffsetDst($time_zone, $dateToCheck)
     {
         // Set UTC as default time zone.
         //date_default_timezone_set( 'UTC' );

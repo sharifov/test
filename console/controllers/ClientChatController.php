@@ -359,13 +359,13 @@ class ClientChatController extends Controller
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
-        Yii::info(VarDumper::dumpAsString([
-            'Processed' => $processed,
-            'Failed' => $failed,
-            'Minutes' => $minutes,
-            'Execute Time' => $time . ' sec',
-            'End Time' => date('Y-m-d H:i:s'),
-        ]), 'info\ClientChatController:actionIdle:result');
+//        Yii::info(VarDumper::dumpAsString([
+//            'Processed' => $processed,
+//            'Failed' => $failed,
+//            'Minutes' => $minutes,
+//            'Execute Time' => $time . ' sec',
+//            'End Time' => date('Y-m-d H:i:s'),
+//        ]), 'info\ClientChatController:actionIdle:result');
     }
 
     public function actionHoldToProgress(): void
@@ -373,6 +373,7 @@ class ClientChatController extends Controller
         echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
+        $channels = [];
         $processed = $failed = 0;
         $timeStart = microtime(true);
         $enable = \Yii::$app->params['settings']['client_chat_job_hold_to_in_progress_enable'] ?? false;
@@ -399,13 +400,12 @@ class ClientChatController extends Controller
                 if ($holdRow = ClientChatHold::findOne(['cchd_cch_id' => $clientChat->cch_id])) {
                     $holdRow->delete();
                 }
-
                 Notifications::pub(
-                    ['chat-' . $clientChat->cch_id],
-                    'refreshChatPage',
+                    [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],
+                    'reloadChatInfo',
                     ['data' => ClientChatAccessMessage::chatInProgress($clientChat->cch_id)]
                 );
-
+                $channels[$clientChat->cch_channel_id] = $clientChat->cch_channel_id;
                 $processed++;
             } catch (\Throwable $throwable) {
                 Yii::error(
@@ -417,6 +417,15 @@ class ClientChatController extends Controller
             }
         }
 
+        if ($channels) {
+            foreach ($channels as $channelId) {
+                Notifications::pub(
+                    [ClientChatChannel::getPubSubKey($channelId)],
+                    'reloadClientChatList'
+                );
+            }
+        }
+
         $timeEnd = microtime(true);
         $time = number_format(round($timeEnd - $timeStart, 2), 2);
         echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
@@ -424,12 +433,12 @@ class ClientChatController extends Controller
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
-        Yii::info(VarDumper::dumpAsString([
-            'Processed' => $processed,
-            'Failed' => $failed,
-            'Execute Time' => $time . ' sec',
-            'End Time' => date('Y-m-d H:i:s'),
-        ]), 'info\ClientChatController:actionHoldToProgress:result');
+//        Yii::info(VarDumper::dumpAsString([
+//            'Processed' => $processed,
+//            'Failed' => $failed,
+//            'Execute Time' => $time . ' sec',
+//            'End Time' => date('Y-m-d H:i:s'),
+//        ]), 'info\ClientChatController:actionHoldToProgress:result');
     }
 
     public function actionCloseToArchiveOnTimeout(int $hourTimeout = 0): void
@@ -477,11 +486,11 @@ class ClientChatController extends Controller
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
-        Yii::info(VarDumper::dumpAsString([
-            'Processed' => $processed,
-            'Failed' => $failed,
-            'Execute Time' => $time . ' sec',
-            'End Time' => date('Y-m-d H:i:s'),
-        ]), 'info\ClientChatController:actionCloseToArchiveOnTimeout:result');
+//        Yii::info(VarDumper::dumpAsString([
+//            'Processed' => $processed,
+//            'Failed' => $failed,
+//            'Execute Time' => $time . ' sec',
+//            'End Time' => date('Y-m-d H:i:s'),
+//        ]), 'info\ClientChatController:actionCloseToArchiveOnTimeout:result');
     }
 }

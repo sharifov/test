@@ -70,10 +70,14 @@ class ClientChatUserAccessRepository extends Repository
     public function updateChatUserAccessWidget(int $chatId, int $userId, int $statusId, ?int $chatUserAccessId = null): void
     {
         $data = [];
-        if (ClientChatUserAccess::isInStatusAcceptGroupList($statusId)) {
-            $data = ClientChatAccessMessage::accept($chatId, $userId, (int)$chatUserAccessId);
+        if ($statusId === ClientChatUserAccess::STATUS_TRANSFER_ACCEPT) {
+            $data = ClientChatAccessMessage::acceptTransfer($chatId, $userId, (int) $chatUserAccessId);
         } elseif ($statusId === ClientChatUserAccess::STATUS_PENDING) {
             $data = ClientChatAccessMessage::pending($userId, (int)$chatUserAccessId);
+        } elseif ($statusId === ClientChatUserAccess::STATUS_TAKE) {
+            $data = ClientChatAccessMessage::take($chatId, $userId, (int) $chatUserAccessId);
+        } elseif (ClientChatUserAccess::isInStatusAcceptGroupList($statusId)) {
+            $data = ClientChatAccessMessage::accept($chatId, $userId, (int)$chatUserAccessId);
         } elseif (ClientChatUserAccess::isInStatusSkipGroupList($statusId)) {
             $data = ClientChatAccessMessage::skip($chatId, $userId, (int)$chatUserAccessId);
         }

@@ -10,6 +10,7 @@ use sales\entities\cases\CaseCategory;
 use common\components\grid\cases\CasesSourceTypeColumn;
 use common\components\grid\cases\CasesStatusColumn;
 use sales\helpers\communication\StatisticsHelper;
+use sales\model\client\helpers\ClientFormatter;
 use yii\helpers\Html;
 use kartik\grid\GridView;
 use sales\entities\cases\Cases;
@@ -132,6 +133,9 @@ $gridId = 'cases-grid-id';
                             $clientName = '- - - ';
                         } else {
                             $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName);
+                        }
+                        if ($case->client->isExcluded()) {
+                            $clientName = ClientFormatter::formatExclude($case->client)  . $clientName;
                         }
                     } else {
                         $clientName = '-';

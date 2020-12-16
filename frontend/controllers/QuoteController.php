@@ -413,7 +413,6 @@ class QuoteController extends FController
                     }
                 }
             }
-
         }
         return $result;
     }
@@ -949,6 +948,9 @@ class QuoteController extends FController
         $lead = Lead::findOne(['id' => $leadId]);
 
         if ($lead !== null) {
+            if ($lead->client->isExcluded()) {
+                return null;
+            }
             $prices = [];
             $quote = new Quote();
             if (empty($qId)) {

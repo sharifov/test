@@ -4,6 +4,7 @@ namespace common\components\jobs;
 
 use common\models\CaseSale;
 use sales\entities\cases\Cases;
+use sales\helpers\app\AppHelper;
 use sales\model\saleTicket\useCase\create\SaleTicketService;
 use sales\services\cases\CasesSaleService;
 use yii\base\BaseObject;
@@ -52,7 +53,7 @@ class UpdateSaleFromBOJob extends BaseObject implements JobInterface
                     ) {
                         Yii::$app->cache->set($cacheKeySale, $refreshSaleData, $this->cacheDuration);
                     } else {
-                        throw new \RuntimeException('Response from detailRequestToBackOffice is empty. SaleId (' . $this->saleId . ')', 101);
+                        throw new \RuntimeException('Response from detailRequestToBackOffice is empty. SaleId (' . $this->saleId . ')', -1);
                     }
                 }
                 $case = Cases::findOne($this->caseId);
@@ -60,23 +61,13 @@ class UpdateSaleFromBOJob extends BaseObject implements JobInterface
                     $casesSaleService->saveAdditionalData($caseSale, $case, $refreshSaleData, false);
                     $saleTicketService->refreshSaleTicketBySaleData((int) $this->caseId, $caseSale, $refreshSaleData);
                 } else {
-                    throw new \RuntimeException('CaseSale (' . $this->caseId . '/' . $this->saleId . ') not found.', 102);
+                    throw new \RuntimeException('CaseSale (' . $this->caseId . '/' . $this->saleId . ') not found.', -2);
                 }
             } else {
-                throw new \RuntimeException('Params "caseId" and "saleId" is required', 103);
+                throw new \RuntimeException('Params "caseId" and "saleId" is required', -3);
             }
         } catch (\Throwable $throwable) {
-            if ($throwable->getCode() > 100) {
-                Yii::info(
-                    VarDumper::dumpAsString($throwable->getMessage()),
-                    'info\UpdateSaleFromBOJob:execute:Throwable'
-                );
-            } else {
-                Yii::error(
-                    VarDumper::dumpAsString($throwable->getMessage()),
-                    'UpdateSaleFromBOJob:execute:Throwable'
-                );
-            }
+            AppHelper::throwableLogger($throwable, 'UpdateSaleFromBOJob:execute:Throwable');
         }
         return false;
     }

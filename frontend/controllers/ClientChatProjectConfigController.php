@@ -89,7 +89,19 @@ class ClientChatProjectConfigController extends FController
         } else {
             $model->ccpc_params_json = '{
   "endpoint": "chatbot.travel-dev.com",
-  "notificationSound": "https://cdn.travelinsides.com/npmstatic/assets/chime.mp3"
+  "notificationSound": "https://cdn.travelinsides.com/npmstatic/assets/chime.mp3",
+  "autoMessage": {
+    "enabled": false,
+    "message": "",
+    "delay": 1,
+    "repeatDelay": 1,
+    "botName": "",
+    "botAvatar": ""
+  },
+  "autoMessageTranslates": {
+    "ru-RU": "",
+    "en-US": ""
+  }
 }';
 
             $model->ccpc_theme_json = '{

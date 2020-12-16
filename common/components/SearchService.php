@@ -172,6 +172,11 @@ class SearchService
         }
 
         $params['fl'] = $fl;
+
+        if ($lead->client->isExcluded()) {
+            $params['ppn'] = $lead->client->cl_ppn;
+        }
+
         $response = \Yii::$app->airsearch->sendRequest('v1/search', $params, 'GET');
 
         if ($response->isOk) {

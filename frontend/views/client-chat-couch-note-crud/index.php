@@ -29,11 +29,21 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'layout' => "{errors}\n{pager}\n{summary}\n{items}\n{pager}",
         'columns' => [
             'cccn_id',
             'cccn_cch_id',
             'cccn_rid',
-            'cccn_message:ntext',
+            [
+                'attribute' => 'cccn_message',
+                'value' => static function (ClientChatCouchNote $model) {
+                    return Yii::$app->formatter->asNtext($model->cccn_message);
+                },
+                'contentOptions' => [
+                    'style' => ['max-width' => '600px;', 'word-wrap' => 'break-word;']
+                ],
+                'format' => 'raw',
+            ],
             'cccn_alias',
             [
                 'attribute' => 'cccn_created_user_id',
@@ -46,7 +56,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     'width' => '200px'
                 ],
             ],
-
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'cccn_created_dt',

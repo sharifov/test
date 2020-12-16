@@ -1,4 +1,5 @@
 <?php
+
 use borales\extensions\phoneInput\PhoneInputAsset;
 use dosamigos\ckeditor\CKEditorAsset;
 use dosamigos\ckeditor\CKEditorWidgetAsset;

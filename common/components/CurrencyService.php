@@ -110,7 +110,7 @@ class CurrencyService extends Component
      * @return array
      * @throws \yii\httpclient\Exception
      */
-    public function getRate(bool $extra = true, ?string $sourceCurrencyCode, array $rateCurrencyList = []): array
+    public function getRate(bool $extra, ?string $sourceCurrencyCode, array $rateCurrencyList = []): array
     {
         $out = ['error' => false, 'data' => []];
         $data = [];

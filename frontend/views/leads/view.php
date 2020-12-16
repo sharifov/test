@@ -5,6 +5,7 @@ use common\models\Department;
 use common\models\Lead;
 use frontend\widgets\lead\editTool\ButtonWidget;
 use sales\auth\Auth;
+use sales\model\client\helpers\ClientFormatter;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\DetailView;
@@ -86,6 +87,9 @@ $isAgent = Auth::user()->isAgent();
                                     $clientName = '- - - ';
                                 } else {
                                     $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName);
+                                }
+                                if ($model->client->isExcluded()) {
+                                    $clientName = ClientFormatter::formatExclude($model->client)  . $clientName;
                                 }
                             } else {
                                 $clientName = '-';

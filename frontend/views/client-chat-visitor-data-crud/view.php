@@ -17,7 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <div class="col-md-4">
+    <div class="col-md-6">
 
         <p>
             <?= Html::a('Update', ['update', 'id' => $model->cvd_id], ['class' => 'btn btn-primary']) ?>
@@ -47,7 +47,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     'attribute' => 'cvd_data',
                     'value' => static function (\sales\model\clientChatVisitorData\entity\ClientChatVisitorData $model) {
-                        return Html::tag('pre', VarDumper::dumpAsString(Json::decode($model->cvd_data)));
+                        return Html::tag('pre', VarDumper::dumpAsString(Json::decode($model->cvd_data), 10, true));
                     },
                     'format' => 'raw'
                 ],

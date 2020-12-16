@@ -259,7 +259,6 @@ class ClientChatClientActionsController extends FController
                 $response['error'] = true;
                 $response['message'] = $this->getParsedErrors($form->getErrors());
             }
-
         } catch (\Throwable $e) {
             $response['error'] = true;
             $response['message'] = $e->getMessage();

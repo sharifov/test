@@ -528,6 +528,7 @@ $(document).on('click', '.cc_reopen', function (e) {
 
 $(document).on('click', '.cc_close', function (e) {
     e.preventDefault();
+    
     let btn = $(this);
     let cchId = btn.attr('data-cch-id');
     // let btnHtml = btn.html();
@@ -688,7 +689,7 @@ reloadChat = function(chatData) {
 }
 
 preReloadChat = function(cchId) {
-    $('#page-loader').show();  
+    $('#cc-dialogs-wrapper').append(loaderIframe);   
     $('#_rc-'+cchId).remove();
     
     let iframeWrapperEl = $("#_rc-iframe-wrapper");
@@ -699,6 +700,19 @@ preReloadChat = function(cchId) {
 
 postReloadChat = function() {
     $('#page-loader').hide();
+    $('#cc-dialogs-wrapper #_cc-load').remove();
+}
+
+function showAllLoaders(){
+    $('#cc-dialogs-wrapper').append(loaderIframe);
+    $('#_cc_additional_info_wrapper').append(loaderIframe);
+    $("#_rc-iframe-wrapper").append(loaderIframe);    
+}
+
+function hideAllLoaders() {
+    $('#_cc_additional_info_wrapper #_cc-load').remove();
+    $('#cc-dialogs-wrapper #_cc-load').remove();
+    $("#_rc-iframe-wrapper").find('#_cc-load').remove();
 }
 
 window.refreshCouchNote = function (cch_id) {    
@@ -1054,7 +1068,7 @@ $(document).on('click', '.cc_take', function (e) {
     let cchId = $(this).attr('data-cch-id');
     let btnSubmit = $(this);
     let btnContent = btnSubmit.html();
-        
+            
     btnSubmit.html('<i class="fa fa-cog fa-spin"></i> Loading...')
         .addClass('btn-default')
         .prop('disabled', true);
@@ -1067,11 +1081,10 @@ $(document).on('click', '.cc_take', function (e) {
         data: {cchId: cchId},
         dataType: 'json'    
     })
-    .done(function(dataResponse) {
-        $('#page-loader').hide();
+    .done(function(dataResponse) { 
+        $('#page-loader').hide();       
         if (dataResponse.status > 0) { 
-            createNotify('Success', dataResponse.message, 'success');
-            $(location).attr('href', '/client-chat/index?chid=' + dataResponse.goToClientChatId);                     
+            createNotify('Success', dataResponse.message, 'success');            
         } else if (dataResponse.message.length) {
             createNotify('Error', dataResponse.message, 'error');
         } else {
@@ -1079,8 +1092,8 @@ $(document).on('click', '.cc_take', function (e) {
         }
         btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
     })
-    .fail(function(jqXHR, textStatus, errorThrown) {
-        $('#page-loader').hide();
+    .fail(function(jqXHR, textStatus, errorThrown) {  
+        $('#page-loader').hide();   
         createNotify('Error', jqXHR.responseText, 'error');
         btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
     })
@@ -1088,7 +1101,7 @@ $(document).on('click', '.cc_take', function (e) {
         setTimeout(function () {
             $('#page-loader').hide();
             btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
-        }, 3000);
+        }, 4000);
     });           
 });
 
@@ -1107,7 +1120,7 @@ $(document).on('click', '.cc_return', function (e) {
         .addClass('btn-default')
         .prop('disabled', true);
         
-    $('#page-loader').show();    
+    $('#cc-dialogs-wrapper').append(loaderIframe);  
     
     $.ajax({
         url: '{$clientChatReturnUrl}',
@@ -1116,25 +1129,26 @@ $(document).on('click', '.cc_return', function (e) {
         dataType: 'json'    
     })
     .done(function(dataResponse) {
-        $('#page-loader').hide();
+        $('#cc-dialogs-wrapper #_cc-load').remove();
         if (dataResponse.status > 0) { 
             createNotify('Success', dataResponse.message, 'success');
-            $(location).attr('href', '/client-chat/index?chid=' + dataResponse.goToClientChatId);                     
+            refreshChannelList();
+            refreshChatInfo(cchId);                     
         } else if (dataResponse.message.length) {
             createNotify('Error', dataResponse.message, 'error');
         } else {
             createNotify('Error', 'Error, please check logs', 'error');
         }
-        btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
+        btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);        
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
-        $('#page-loader').hide();
+        $('#cc-dialogs-wrapper #_cc-load').remove();
         createNotify('Error', jqXHR.responseText, 'error');
         btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
     })
     .always(function(jqXHR, textStatus, errorThrown) {  
         setTimeout(function () {
-            $('#page-loader').hide();
+            $('#cc-dialogs-wrapper #_cc-load').remove();
             btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
         }, 3000);
     });           

@@ -141,7 +141,8 @@ function renderChildCallsRecursive2($calls): void
     </tr>
 
     <?php
-}?>
+}
+?>
 
 <div id="call-map-page" class="col-md-12">
 

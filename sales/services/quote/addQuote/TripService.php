@@ -54,7 +54,7 @@ class TripService
                     '. Dump: ' . $this->quote->reservation_dump .
                     '. QuoteUid: ' . $this->quote->uid;
 
-                throw new \DomainException($message, -1);
+                throw new \DomainException($message);
             }
             $this->quote->link('quoteTrips', $trip);
 

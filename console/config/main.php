@@ -58,9 +58,10 @@ return [
                         'yii\web\HttpException:404',
                     ],
                     'logVars' => [],
-                    'prefix' => function () {
+                    'prefix' => static function () {
                         //$ip = $_SERVER['REMOTE_ADDR'];
-                        return '[console]';
+                        $hostname = php_uname('n');
+                        return "[$hostname][console]";
                     },
                     'db' => 'db_postgres'
                 ],
@@ -72,8 +73,9 @@ return [
                     ],
                     'logVars' => [],
                     'categories' => ['info\*'],
-                    'prefix' => function () {
-                        return '[console]';
+                    'prefix' => static function () {
+                        $hostname = php_uname('n');
+                        return "[$hostname][console]";
                     },
                     'db' => 'db_postgres'
                 ],

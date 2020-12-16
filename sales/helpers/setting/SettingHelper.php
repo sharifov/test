@@ -90,4 +90,9 @@ class SettingHelper
     {
         return (int) (Yii::$app->params['settings']['console_log_cleaner_params']['days'] ?? 90);
     }
+
+    public static function metricsEnabled(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['metrics_enabled'] ?? false);
+    }
 }

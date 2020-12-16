@@ -17,7 +17,8 @@
     <exclude-pattern>*/assets/*</exclude-pattern>
     <exclude-pattern>*/runtime/*</exclude-pattern>
     <exclude-pattern>webapi/web/doc/*</exclude-pattern>
-    <exclude-pattern>console/migrations/*</exclude-pattern>
+    <exclude-pattern>common/Yii.php</exclude-pattern>
+    <exclude-pattern>common/components/ScannerTwigFunction.php</exclude-pattern>
 
     <arg name="basepath" value="."/>
     <arg name="colors"/>
@@ -25,8 +26,19 @@
     <arg name="extensions" value="php"/>
     <arg name="cache" value=".phpcs-cache"/>
     <!-- ignore warnings and display ERRORS only -->
-    <arg  value="np"/>
+    <arg value="np"/>
 
     <!-- Our base rule: set to PSR12-->
-    <rule  ref="PSR12"/>
+    <rule ref="PSR12"/>
+    <rule ref="Squiz.Classes.ValidClassName">
+        <exclude-pattern>m\d{6}_\d{6}_\S+</exclude-pattern>
+    </rule>
+    <rule ref="PSR2.Methods.MethodDeclaration.Underscore">
+        <exclude-pattern>frontend/tests/unit/models</exclude-pattern>
+        <exclude-pattern>webapi/tests/unit/models</exclude-pattern>
+        <exclude-pattern>webapi/tests/acceptance</exclude-pattern>
+    </rule>
+    <rule ref="PSR1.Classes.ClassDeclaration">
+        <exclude-pattern>console/migrations/*</exclude-pattern>
+    </rule>
 </ruleset>

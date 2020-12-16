@@ -8,6 +8,8 @@ use yii\rbac\Rule;
 
 class LeadViewCommunicationBlockCommonGroupRule extends Rule
 {
+    public $name = 'LeadViewCommunicationBlockCommonGroupRule';
+
     public function execute($userId, $item, $params): bool
     {
         if (!isset($params['lead']) || !$params['lead'] instanceof Lead) {

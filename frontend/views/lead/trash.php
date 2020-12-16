@@ -4,6 +4,7 @@ use dosamigos\datepicker\DatePicker;
 use sales\access\EmployeeProjectAccess;
 use sales\access\ListsAccess;
 use sales\formatters\client\ClientTimeFormatter;
+use sales\model\client\helpers\ClientFormatter;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
@@ -164,6 +165,10 @@ $this->params['breadcrumbs'][] = $this->title;
                         $clientName = '- - - ';
                     } else {
                         $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName);
+                    }
+
+                    if ($model->client->isExcluded()) {
+                        $clientName = ClientFormatter::formatExclude($model->client)  . $clientName;
                     }
 
                     $str = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';

@@ -4,7 +4,7 @@ namespace frontend\controllers;
 
 use Yii;
 use sales\model\clientChat\entity\actionReason\ClientChatActionReason;
-use sales\model\clientChat\entity\actionReason\search\actionReasonSearch;
+use sales\model\clientChat\entity\actionReason\search\ActionReasonSearch;
 use frontend\controllers\FController;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -33,7 +33,7 @@ class ClientChatActionReasonCrudController extends FController
      */
     public function actionIndex(): string
     {
-        $searchModel = new actionReasonSearch();
+        $searchModel = new ActionReasonSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [

@@ -1,0 +1,48 @@
+#!/usr/bin/env php
+<?php
+
+require_once('env_tools_lib.php');
+
+$root = str_replace('\\', '/', __DIR__);
+$errors = [];
+$envFile = '.env';
+$envExampleFile = '.env.example';
+$envPatchToFile = $root . '/' . $envFile;
+$envExamplePatchToFile = $root . '/' . $envExampleFile;
+
+echo "Environment Diff Tool v1.0\n";
+echo '... Start : ' . date('H:i:s'). " ...\n";
+
+checkRequiredFiles([$envFile, $envExampleFile], $root);
+
+$contentEnv = file_get_contents($envPatchToFile);
+$contentEnvExample = file_get_contents($envExamplePatchToFile);
+$rowsEnv = explode("\n", $contentEnv);
+$rowsEnvExample = explode("\n", $contentEnvExample);
+
+$resultSearchNotExistInEnv = searchDiff($rowsEnvExample, $contentEnv);
+$notExistInEnv = $resultSearchNotExistInEnv['tagsNotExist'];
+if ($notExistInEnv) {
+    echo formatMessage('Need to Add (' . count($notExistInEnv) . '):', ['fg-blue']) . " \n";
+    foreach ($notExistInEnv as $row) {
+        echo formatMessage(' * ' . $row, ['fg-blue']) . " \n";
+    }
+}
+
+$resultSearchNotExistInEnvExample = searchDiff($rowsEnv, $contentEnvExample);
+$notExistInEnvExample = $resultSearchNotExistInEnvExample['tagsNotExist'];
+if ($notExistInEnvExample) {
+    echo formatMessage('Need to Remove (' . count($notExistInEnvExample) . '):', ['fg-red']) . " \n";
+    foreach ($notExistInEnvExample as $row) {
+        echo formatMessage(' * ' . $row, ['fg-red']) . " \n";
+    }
+}
+
+echo formatMessage('Count rows in "' . $envExampleFile . '" (' . count($resultSearchNotExistInEnv['allTags']) . ')', ['fg-magenta']) . " \n";
+echo formatMessage('Count rows in "' . $envFile . '" (' . count($resultSearchNotExistInEnvExample['allTags']) . ')', ['fg-magenta']) . " \n";
+
+if (!$notExistInEnv && !$notExistInEnvExample) {
+    echo formatMessage('Everything is fine and there is no data with tag discrepancies.', ['bg-green']) . " \n";
+}
+
+echo '... End : ' . date('H:i:s'). "... \n";

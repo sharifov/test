@@ -305,3 +305,11 @@ use yii\web\JsExpression;
     </div>
 
 <?= Html::endForm(); ?>
+
+<?php
+$css = <<<CSS
+    #select2-filterform-channelid-container { 
+        width: 90%;    
+    }    
+CSS;
+$this->registerCss($css);

@@ -4,6 +4,7 @@ return [
     'serviceName' => 'crm',
     'serviceVersion' => '1.0.0',
     'appName' => 'Sales',
+    'appHostname' => php_uname('n'),
     'appInstance' => '1',
     'appEnv' => '',
 

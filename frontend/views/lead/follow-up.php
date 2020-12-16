@@ -5,6 +5,7 @@ use dosamigos\datepicker\DatePicker;
 use sales\access\ListsAccess;
 use sales\formatters\client\ClientTimeFormatter;
 use sales\helpers\lead\RemainingDayCalculator;
+use sales\model\client\helpers\ClientFormatter;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
@@ -107,6 +108,9 @@ $this->params['breadcrumbs'][] = $this->title;
                         $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName);
                     }
 
+                    if ($lead->client->isExcluded()) {
+                        $clientName = ClientFormatter::formatExclude($lead->client)  . $clientName;
+                    }
 
                     $str = $lead->client && $lead->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($lead->client->clientEmails, 'email', 'email')) . '' : '';
                     $str .= $lead->client && $lead->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($lead->client->clientPhones, 'phone', 'phone')) . '' : '';

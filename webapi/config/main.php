@@ -40,7 +40,7 @@ return [
         'defaultRoute' => 'site/index',
         'response' => [
             'class' => 'yii\web\Response',
-            'on beforeSend' => function ($event) {
+            'on beforeSend' => static function ($event) {
                 $response = $event->sender;
                 if ($response->data !== null && !empty(Yii::$app->request->get('suppress_response_code'))) {
                     $response->data = [
@@ -106,7 +106,8 @@ return [
                     'prefix' => static function () {
                         $userID = Yii::$app->user->isGuest ? '-' : Yii::$app->user->id;
                         $ip = $_SERVER['REMOTE_ADDR'];
-                        return "[webapi][$ip][$userID]";
+                        $hostname = php_uname('n');
+                        return "[$hostname][webapi][$ip][$userID]";
                     },
                     'db' => 'db_postgres'
                 ],
@@ -121,7 +122,8 @@ return [
                     'prefix' => static function () {
                         $userID = Yii::$app->user->isGuest ? '-' : Yii::$app->user->id;
                         $ip = $_SERVER['REMOTE_ADDR'];
-                        return "[webapi][$ip][$userID]";
+                        $hostname = php_uname('n');
+                        return "[$hostname][webapi][$ip][$userID]";
                     },
                     'db' => 'db_postgres'
                 ],

@@ -1,5 +1,6 @@
 <?php
 
+use sales\auth\Auth;
 use sales\model\clientChat\dashboard\FilterForm;
 
 /** @var $this \yii\web\View */
@@ -42,7 +43,8 @@ if ($listParams['isFullList']) {
                 'clientChats' => $dataProvider->getModels(),
                 'clientChatId' => $clientChatId,
                 'formatter' => $formatter,
-                'resetUnreadMessagesChatId' => $resetUnreadMessagesChatId
+                'resetUnreadMessagesChatId' => $resetUnreadMessagesChatId,
+                'userId' => Auth::id(),
             ]); ?>
         <?php endif; ?>
     </div>

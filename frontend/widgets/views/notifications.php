@@ -30,7 +30,7 @@
                         <span class="time"><?=Yii::$app->formatter->asRelativeTime(strtotime($item->n_created_dt))?></span>
                     </span>
                     <span class="message">
-                        <?=\yii\helpers\StringHelper::truncate(\common\models\Email::strip_html_tags($item->n_message), 80, '...');?><br>
+                        <?=\yii\helpers\StringHelper::truncate(\common\models\Email::stripHtmlTags($item->n_message), 80, '...');?><br>
                     </span>
                 </a>
                 <?php

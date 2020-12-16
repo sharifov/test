@@ -33,6 +33,9 @@ $this->params['breadcrumbs'][] = $this->title;
             'confirm' => 'Are you sure you want synchronization all airports from TravelServices?',
             'method' => 'post',
         ],]) ?>
+        <p>
+        Synchronization from: <i><?php echo Html::encode(Yii::$app->travelServices->url); ?>airport/export?format=json</i>
+        </p>
     </p>
 
     <?php Pjax::begin(); ?>

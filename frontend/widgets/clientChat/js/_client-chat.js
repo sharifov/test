@@ -89,14 +89,15 @@ function refreshClientChatWidget(obj) {
                     window.location.href = data.url;
                 } else {
                     window.open(data.url);
+                    return false;
                 }
             }
             window.chat.removeRequest(data.chatId, data.userId, data.chatUserAccessId);
             break;
         case 'skip':
-            window.chat.removeRequest(data.chatId, data.userId, data.chatUserAccessId);
-            break;
+        case 'take':
         case 'deleted':
+        case 'accept_transfer':
             window.chat.removeRequest(data.chatId, data.userId, data.chatUserAccessId);
             break;
         case 'pending':

@@ -1,6 +1,7 @@
 <?php
 
 use sales\access\ListsAccess;
+use sales\model\client\helpers\ClientFormatter;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
@@ -76,6 +77,9 @@ $this->params['breadcrumbs'][] = $this->title;
                         $clientName = '- - - ';
                     } else {
                         $clientName = Html::encode($clientName);
+                    }
+                    if ($model->client->isExcluded()) {
+                        $clientName = ClientFormatter::formatExclude($model->client)  . $clientName;
                     }
                 } else {
                     $clientName = '-';

@@ -2,6 +2,10 @@
 
 use sales\events\quote\QuoteSendEvent;
 use sales\listeners\quote\QuoteSendEventListener;
+use sales\model\client\entity\events\ClientCreatedEvent;
+use sales\model\client\entity\events\ClientExcludedEvent;
+use sales\model\client\listeners\ClientCreatedCheckExcludeListener;
+use sales\model\client\listeners\ClientExcludeNotifierListener;
 use sales\model\clientChat\event\ClientChatArchiveEvent;
 use sales\model\clientChat\event\ClientChatCloseEvent;
 use sales\model\clientChat\event\ClientChatHoldEvent;
@@ -16,6 +20,7 @@ use sales\model\clientChat\event\listener\ClientChatHoldStatusLogListener;
 use sales\model\clientChat\event\listener\ClientChatIdleStatusLogListener;
 use sales\model\clientChat\event\listener\ClientChatInProgressStatusLogListener;
 use sales\model\clientChat\event\listener\ClientChatPendingStatusLogListener;
+use sales\model\clientChat\event\listener\ClientChatRefreshListListener;
 use sales\model\clientChat\event\listener\ClientChatRemoveLastMessageListener;
 use sales\model\clientChat\event\listener\ClientChatTransferStatusLogListener;
 use sales\model\clientChat\event\listener\ClientChatUserAccessSetStatusCancelListener;
@@ -44,7 +49,8 @@ return [
         ClientChatArchiveStatusLogListener::class,
         ClientChatEndConversationListener::class,
         ClientChatRemoveLastMessageListener::class,
-        ClientChatUserAccessSetStatusCancelListener::class
+        ClientChatUserAccessSetStatusCancelListener::class,
+        ClientChatRefreshListListener::class,
     ],
     ClientChatTransferEvent::class => [
         ClientChatTransferStatusLogListener::class
@@ -57,7 +63,13 @@ return [
     ],
     ClientChatIdleEvent::class => [
         ClientChatIdleStatusLogListener::class
-    ]
+    ],
+    ClientExcludedEvent::class => [
+        ClientExcludeNotifierListener::class,
+    ],
+    ClientCreatedEvent::class => [
+        ClientCreatedCheckExcludeListener::class,
+    ],
 
 //    ClientChatOwnerAssignedEvent::class => [ClientChatRemoveOldOwnerUnreadMessagesListener::class],
 ];

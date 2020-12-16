@@ -50,9 +50,9 @@ class m200109_095057_create_setting_category_table extends Migration
 
         (new RbacMigrationService())->up($this->routes, $this->roles);
 
-        $this->_addCategory();
+        $this->addCategory();
 
-        $this->_flush();
+        $this->flush();
     }
 
     /**
@@ -67,13 +67,13 @@ class m200109_095057_create_setting_category_table extends Migration
 
         $this->dropTable('{{%setting_category}}');
 
-        $this->_flush();
+        $this->flush();
     }
 
     /**
      * @return array
      */
-    private function _getCategory()
+    private function getCategory()
     {
         $category = [];
 
@@ -91,9 +91,9 @@ class m200109_095057_create_setting_category_table extends Migration
         return $category;
     }
 
-    private function _addCategory(): void
+    private function addCategory(): void
     {
-        foreach ($this->_getCategory() as $key => $category) {
+        foreach ($this->getCategory() as $key => $category) {
             $settingCategory = new SettingCategory();
             $settingCategory->sc_name = $category;
             $settingCategory->save();
@@ -102,7 +102,7 @@ class m200109_095057_create_setting_category_table extends Migration
         }
     }
 
-    private function _flush(): void
+    private function flush(): void
     {
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();

@@ -355,6 +355,7 @@ class ClientChatController extends FController
                         'clientChatId' => $clientChat ? $clientChat->cch_id : '',
                         'formatter' => $formatter,
                         'resetUnreadMessagesChatId' => $resetUnreadMessagesChatId,
+                        'userId' => Auth::id(),
                     ]);
                     $response['page'] = $page + 1;
                 }
@@ -873,7 +874,7 @@ class ClientChatController extends FController
             if (Yii::$app->request->isPjax && $form->validate()) {
                 $this->clientChatService->closeConversation($form, Auth::user());
 
-                return '<script>$("#modal-sm").modal("hide"); refreshChatPage(' . $form->cchId . '); createNotify("Success", "Room successfully closed", "success")</script>';
+                return '<script>$("#modal-sm").modal("hide"); refreshChatPage(' . $form->cchId . '); createNotify("Success", "Chat successfully closed", "success")</script>';
             }
         } catch (NotFoundException | ForbiddenHttpException $e) {
             return '<script>setTimeout(function () {$("#modal-sm").modal("hide");}, 500); createNotify("Error", "' . $e->getMessage() . '", "error")</script>';
@@ -1105,19 +1106,12 @@ class ClientChatController extends FController
 
                 $takeClientChat = $this->clientChatService->takeClientChat($clientChat, Auth::user());
 
-                Notifications::pub(
-                    [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],
-                    'refreshChatPage',
-                    ['data' => ClientChatAccessMessage::chatTaken($clientChat, $takeClientChat->cchOwnerUser->nickname)]
-                );
-
                 $clientChatLink = Purifier::createChatShortLink($clientChat);
                 Notifications::createAndPublish(
                     $clientChat->cch_owner_user_id,
                     'Chat was taken',
                     'Client Chat was taken by ' . $takeClientChat->cchOwnerUser->nickname . ' (' . $clientChatLink . ')',
-                    Notifications::TYPE_INFO,
-                    true
+                    Notifications::TYPE_INFO
                 );
 
                 $result['message'] = 'Client Chat was successfully taken';
@@ -1159,7 +1153,7 @@ class ClientChatController extends FController
 
                 $clientChat->inProgress(Auth::id(), ClientChatStatusLog::ACTION_REVERT_TO_PROGRESS);
                 $this->clientChatRepository->save($clientChat);
-                $this->clientChatUserAccessService->disableAccessForOtherUsersBatch($clientChat->cch_id, $clientChat->cch_owner_user_id);
+                $this->clientChatUserAccessService->deleteAccessForOtherUsersBatch($clientChat->cch_id, $clientChat->cch_owner_user_id);
 
                 $result['message'] = 'ClientChat returned to InProgress';
                 $result['status'] = 1;
@@ -1176,16 +1170,16 @@ class ClientChatController extends FController
         throw new BadRequestHttpException();
     }
 
-    private function guardCanProcessChat(int $userId, int $chatId): void
+    private function guardCanProcessChat(int $userId, int $chatId, int $seconds = 20): void
     {
         $redis = Yii::$app->redis;
         $key = self::RESERVE_CHAT_TO_PROCESS_KEY . $chatId;
         $redis->setnx($key, $userId);
         $value = $redis->get($key);
         if ((int)$value === $userId) {
-            $redis->expire($key, 20);
+            $redis->expire($key, $seconds);
         } else {
-            throw new \RuntimeException('Chat is already being processed');
+            throw new \RuntimeException('Chat is already being processed. Please try again in ' . $seconds . ' seconds.');
         }
     }
 

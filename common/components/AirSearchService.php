@@ -170,7 +170,27 @@ class AirSearchService extends Component
         \Yii::error(
             'Params: ' . VarDumper::dumpAsString($params, 10) .
             ' Error: ' . VarDumper::dumpAsString($response->content, 10),
-            'SearchService::getCoupons'
+            'AirSearchService::getCoupons'
+        );
+        return null;
+    }
+
+    /**
+     * @param string $ip
+     * @return mixed|null
+     * @throws \yii\httpclient\Exception
+     */
+    public function checkExcludeIp(string $ip)
+    {
+        $response = $this->sendRequest('airline/ip-check/' . $ip, [], 'get');
+
+        if ($response->isOk) {
+            return $response->data;
+        }
+
+        \Yii::error(
+            'Ip: ' . $ip . ' Error: ' . VarDumper::dumpAsString($response->content, 10),
+            'AirSearchService::checkIp'
         );
         return null;
     }

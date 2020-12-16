@@ -64,7 +64,7 @@ class m200204_113105_create_table_hotel_quote_service_log extends Migration
 
         (new RbacMigrationService())->up($this->routes, $this->roles);
 
-        $this->_flush();
+        $this->flush();
     }
 
     /**
@@ -81,10 +81,10 @@ class m200204_113105_create_table_hotel_quote_service_log extends Migration
 
         $this->addColumn('{{%hotel_quote}}', 'hq_json_response', $this->json());
 
-        $this->_flush();
+        $this->flush();
     }
 
-    private function _flush(): void
+    private function flush(): void
     {
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();

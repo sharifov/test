@@ -6,6 +6,7 @@ use common\models\Client;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Project;
+use sales\access\EmployeeGroupAccess;
 use sales\helpers\query\QueryHelper;
 use sales\model\clientChat\dashboard\FilterForm;
 use sales\model\clientChat\dashboard\GroupFilter;
@@ -20,6 +21,7 @@ use yii\data\ArrayDataProvider;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  * Class ClientChatSearch
@@ -427,7 +429,6 @@ class ClientChatSearch extends ClientChat
 
         if (GroupFilter::isMy($filter->group)) {
             $query->byOwner($user->id);
-            $query->notInStatus(ClientChat::STATUS_IDLE);
             $query->orderBy([
                 '(cch_status_id = ' . ClientChat::STATUS_ARCHIVE .
                     ' OR cch_status_id = ' . ClientChat::STATUS_CLOSED . ')' => SORT_ASC,
@@ -445,10 +446,21 @@ class ClientChatSearch extends ClientChat
                 'cch_created_dt' => SORT_ASC,
             ]);
         } elseif (GroupFilter::isFreeToTake($filter->group)) {
-            $query->freeToTake();
+            $query->freeToTake($user->id);
             $query->orderBy([
-                '(cch_status_id = ' . ClientChat::STATUS_TRANSFER . ')' => SORT_DESC,
+//                '(cch_status_id = ' . ClientChat::STATUS_TRANSFER . ')' => SORT_DESC,
                 'cch_created_dt' => SORT_ASC,
+            ]);
+        } elseif (GroupFilter::isTeamChats($filter->group)) {
+            $commonUsers = EmployeeGroupAccess::getUsersIdsInCommonGroups($user->id);
+            if (isset($commonUsers[$user->id])) {
+                unset($commonUsers[$user->id]);
+            }
+            $query->andWhere(['cch_owner_user_id' => array_keys($commonUsers)]);
+            $query->orderBy([
+                '(cch_status_id = ' . ClientChat::STATUS_ARCHIVE .
+                ' OR cch_status_id = ' . ClientChat::STATUS_CLOSED . ')' => SORT_ASC,
+                'last_message_date' => SORT_DESC,
             ]);
         } else {
             $query->byOwner($user->id);
@@ -534,7 +546,7 @@ class ClientChatSearch extends ClientChat
 
     public function countFreeToTake(Employee $user, array $channelsIds, FilterForm $filter): int
     {
-        $query = ClientChat::find()->freeToTake();
+        $query = ClientChat::find()->freeToTake($user->id);
 
         if ($filter->channelId) {
             $query->byChannel($filter->channelId);
@@ -546,6 +558,16 @@ class ClientChatSearch extends ClientChat
         }
         if ($filter->userId) {
             $query->andWhere(['cch_owner_user_id' => $filter->userId]);
+        }
+        if ($filter->status) {
+            $query->byStatus($filter->status);
+        }
+        if ($filter->clientName) {
+            $query->join('JOIN', ['client' => Client::tableName()], 'cch_client_id = client.id');
+            $query->andWhere(['OR',
+                ['like', 'client.first_name', $filter->clientName],
+                ['like', 'client.last_name', $filter->clientName]
+            ]);
         }
         if ($filter->fromDate && $filter->toDate) {
             $fromDate = date('Y-m-d', strtotime($filter->fromDate));

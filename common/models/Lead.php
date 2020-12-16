@@ -2866,13 +2866,13 @@ Reason: {reason}',
     }
 
     /**
-     * @param string $phoneNumber
-     * @param int $project_id
-     * @param int $source_id
+     * @param string|null $phoneNumber
+     * @param int|null $project_id
+     * @param int|null $source_id
      * @param $gmt
      * @return static
      */
-    public static function createNewLeadByPhone(string $phoneNumber = '', int $project_id = 0, int $source_id = 0, $gmt): self
+    public static function createNewLeadByPhone(?string $phoneNumber, ?int $project_id, ?int $source_id, $gmt): self
     {
         $lead = new self();
         $lead->l_client_phone = $phoneNumber;
@@ -3788,7 +3788,7 @@ Reason: {reason}',
      * @param $projectContactInfo
      * @return array
      */
-    public function getEmailData2($quoteIds = [], $projectContactInfo): array
+    public function getEmailData2(array $quoteIds, $projectContactInfo): array
     {
         $project = $this->project;
 

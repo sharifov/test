@@ -2,11 +2,14 @@
 
 namespace sales\model\clientAccount\entity;
 
+use borales\extensions\phoneInput\PhoneInputValidator;
 use common\models\Client;
 use common\models\Currency;
 use common\models\Language;
 use common\models\Project;
+use sales\model\clientAccount\form\ClientAccountCreateApiForm;
 use sales\model\clientAccountSocial\entity\ClientAccountSocial;
+use thamtech\uuid\helpers\UuidHelper;
 use thamtech\uuid\validators\UuidValidator;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -85,7 +88,8 @@ class ClientAccount extends ActiveRecord
 
             ['ca_nationality_country_code', 'string', 'max' => 2],
 
-            ['ca_phone', 'string', 'max' => 100],
+            ['ca_phone', 'string', 'max' => 20],
+            ['ca_phone', PhoneInputValidator::class],
 
             ['ca_project_id', 'integer'],
             ['ca_project_id', 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['ca_project_id' => 'id']],
@@ -192,5 +196,32 @@ class ClientAccount extends ActiveRecord
     public static function tableName(): string
     {
         return '{{%client_account}}';
+    }
+
+    public static function createFromApi(ClientAccountCreateApiForm $createApiForm): ClientAccount
+    {
+        $model = new self();
+        $model->ca_project_id = $createApiForm->project_id;
+        $model->ca_uuid = $createApiForm->uuid ?? UuidHelper::uuid();
+        $model->ca_email = $createApiForm->email;
+        $model->ca_hid = $createApiForm->hid;
+        $model->ca_username = $createApiForm->username;
+        $model->ca_first_name = $createApiForm->first_name;
+        $model->ca_middle_name = $createApiForm->middle_name;
+        $model->ca_last_name = $createApiForm->last_name;
+        $model->ca_nationality_country_code = $createApiForm->nationality_country_code;
+        $model->ca_dob = $createApiForm->dob;
+        $model->ca_gender = $createApiForm->gender;
+        $model->ca_phone = $createApiForm->phone;
+        $model->ca_subscription = $createApiForm->subscription;
+        $model->ca_language_id = $createApiForm->language_id;
+        $model->ca_currency_code = $createApiForm->currency_code;
+        $model->ca_timezone = $createApiForm->timezone;
+        $model->ca_created_ip = $createApiForm->created_ip;
+        $model->ca_enabled = $createApiForm->enabled;
+        $model->ca_origin_created_dt = $createApiForm->origin_created_dt;
+        $model->ca_origin_updated_dt = $createApiForm->origin_updated_dt;
+
+        return $model;
     }
 }

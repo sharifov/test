@@ -113,7 +113,7 @@ $bundle = \frontend\themes\gentelella_v2\assets\SimpleAsset::register($this);
                             </li>
                         </ul>
                     </li>
-                    <?php //= frontend\widgets\Notifications::widget(); ?>
+                    <?php //= frontend\widgets\Notifications::widget();?>
                     <?= frontend\widgets\OnlineConnection::widget() ?>
 
                     <li>
