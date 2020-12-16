@@ -9,7 +9,7 @@ use lajax\translatemanager\services\Generator;
 
 class LajaxLanguageItemPluginAsset extends \yii\web\AssetBundle
 {
-    public $sourcePath = "@console/runtime/translate/";
+    public $sourcePath = "@frontend/web/js/translate/";
 
     public $js = ['translate/lang.js'];
 
