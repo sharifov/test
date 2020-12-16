@@ -24,6 +24,7 @@ class m201214_082214_add_department_case_params extends Migration
             $params['object']['case']['sendFeedback'] = false;
             $params['object']['case']['feedbackTemplateTypeKey'] = '';
             $params['object']['case']['feedbackEmailFrom'] = '';
+            $params['object']['case']['feedbackNameFrom'] = '';
             $department->dep_params = json_encode($params);
             if (!$department->save()) {
                 VarDumper::dump($department->getErrors());
@@ -50,6 +51,9 @@ class m201214_082214_add_department_case_params extends Migration
             }
             if (array_key_exists('feedbackEmailFrom', $params['object']['case'])) {
                 unset($params['object']['case']['feedbackEmailFrom']);
+            }
+            if (array_key_exists('feedbackNameFrom', $params['object']['case'])) {
+                unset($params['object']['case']['feedbackNameFrom']);
             }
             $department->dep_params = json_encode($params);
             if (!$department->save()) {

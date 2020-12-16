@@ -12,6 +12,7 @@ namespace sales\model\department\department;
  * @property bool $sendFeedback
  * @property string $feedbackTemplateTypeKey
  * @property string $feedbackEmailFrom
+ * @property string $feedbackNameFrom
  */
 class CaseSettings
 {
@@ -22,6 +23,7 @@ class CaseSettings
     public bool $sendFeedback;
     public string $feedbackTemplateTypeKey;
     public string $feedbackEmailFrom;
+    public string $feedbackNameFrom;
 
     public function __construct(array $params)
     {
@@ -32,6 +34,7 @@ class CaseSettings
         $this->sendFeedback = (bool)($params['sendFeedback'] ?? false);
         $this->feedbackTemplateTypeKey = (string)($params['feedbackTemplateTypeKey'] ?? '');
         $this->feedbackEmailFrom = (string)($params['feedbackEmailFrom'] ?? '');
+        $this->feedbackNameFrom = (string)($params['feedbackNameFrom'] ?? '');
     }
 
     public function isActiveFeedback(): bool
