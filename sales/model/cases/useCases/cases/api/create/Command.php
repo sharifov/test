@@ -13,6 +13,7 @@ namespace sales\model\cases\useCases\cases\api\create;
  * @property int $project_id
  * @property string|null $subject
  * @property string|null $description
+ * @property string|null $project_key
  */
 class Command
 {
@@ -22,6 +23,7 @@ class Command
     public $order_uid;
     public $order_info;
     public $project_id;
+    public $project_key;
     public $subject;
     public $description;
 
@@ -33,7 +35,8 @@ class Command
         array $order_info,
         int $project_id,
         ?string $subject,
-        ?string $description
+        ?string $description,
+        ?string $project_key
     ) {
         $this->contact_email = $contact_email;
         $this->contact_phone = $contact_phone;
@@ -41,6 +44,7 @@ class Command
         $this->order_uid = $order_uid;
         $this->order_info = $order_info;
         $this->project_id = $project_id;
+        $this->project_key = $project_key;
         $this->subject = $subject;
         $this->description = $description;
     }

@@ -189,6 +189,14 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
+            "size": "100",
+            "optional": true,
+            "field": "project_key",
+            "description": "<p>Project Key (if not exist project assign API User)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
             "size": "255",
             "optional": true,
             "field": "subject",
@@ -214,7 +222,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n      \"contact_email\": \"test@test.com\",\n      \"contact_phone\": \"+37369636690\",\n      \"category_id\": 12,\n      \"order_uid\": \"12WS09W\",\n      \"subject\": \"Subject text\",\n      \"description\": \"Description text\",\n      \"order_info\": {\n          \"Departure Date\":\"2020-03-07\",\n          \"Departure Airport\":\"LON\"\n      }\n  }",
+          "content": "{\n      \"contact_email\": \"test@test.com\",\n      \"contact_phone\": \"+37369636690\",\n      \"category_id\": 12,\n      \"order_uid\": \"12WS09W\",\n      \"subject\": \"Subject text\",\n      \"description\": \"Description text\",\n      \"project_key\": \"project_key\",\n      \"order_info\": {\n          \"Departure Date\":\"2020-03-07\",\n          \"Departure Airport\":\"LON\"\n      }\n  }",
           "type": "json"
         }
       ]
@@ -223,7 +231,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "\nHTTP/1.1 200 OK\n  {\n      \"status\": 200,\n      \"message\": \"OK\",\n      \"data\": {\n          \"case_gid\": \"708ddf3e44ec477f8807d8b5f748bb6c\",\n          \"client_uuid\": \"5d0cd25a-7f22-4b18-9547-e19a3e7d0c9a\"\n      },\n      \"technical\": {\n          \"action\": \"v2/cases/create\",\n          \"response_id\": 11934216,\n          \"request_dt\": \"2020-03-17 08:31:30\",\n          \"response_dt\": \"2020-03-17 08:31:30\",\n          \"execution_time\": 0.156,\n          \"memory_usage\": 979248\n      },\n      \"request\": {\n          \"contact_email\": \"test@test.com\",\n          \"contact_phone\": \"+37369636690\",\n          \"category_id\": 12,\n          \"order_uid\": \"12WS09W\",\n          \"subject\": \"Subject text\",\n          \"description\": \"Description text\",\n          \"order_info\": {\n              \"Departure Date\": \"2020-03-07\",\n              \"Departure Airport\": \"LON\"\n          }\n      }\n  }",
+          "content": "\nHTTP/1.1 200 OK\n  {\n      \"status\": 200,\n      \"message\": \"OK\",\n      \"data\": {\n          \"case_gid\": \"708ddf3e44ec477f8807d8b5f748bb6c\",\n          \"client_uuid\": \"5d0cd25a-7f22-4b18-9547-e19a3e7d0c9a\"\n      },\n      \"technical\": {\n          \"action\": \"v2/cases/create\",\n          \"response_id\": 11934216,\n          \"request_dt\": \"2020-03-17 08:31:30\",\n          \"response_dt\": \"2020-03-17 08:31:30\",\n          \"execution_time\": 0.156,\n          \"memory_usage\": 979248\n      },\n      \"request\": {\n          \"contact_email\": \"test@test.com\",\n          \"contact_phone\": \"+37369636690\",\n          \"category_id\": 12,\n          \"order_uid\": \"12WS09W\",\n          \"subject\": \"Subject text\",\n          \"description\": \"Description text\",\n          \"project_key\": \"project_key\",\n          \"order_info\": {\n              \"Departure Date\": \"2020-03-07\",\n              \"Departure Airport\": \"LON\"\n          }\n      }\n  }",
           "type": "json"
         }
       ]
@@ -762,7 +770,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example LEAVE_FEEDBACK:",
-          "content": "{\n\t\t\"event\": \"LEAVE_FEEDBACK\",\n\t\t\"data\": {\n\t\t\t\"rid\": \"20a20989-4d26-42f4-9a1c-2948ce4c4d56\",\n         \"comment\": \"Hello, this is my feedback\",\n         \"rating\": 4,\n         \"visitor\": {\n             \"id\": \"1c1d90ff-5489-45f5-b19b-2181a65ce898\",\n             \"project\": \"ovago\"\n         }\n     }\n}",
+          "content": "{\n     \"event\": \"LEAVE_FEEDBACK\",\n     \"data\": {\n         \"rid\": \"20a20989-4d26-42f4-9a1c-2948ce4c4d56\",\n         \"comment\": \"Hello, this is my feedback\",\n         \"rating\": 4,\n         \"visitor\": {\n             \"id\": \"1c1d90ff-5489-45f5-b19b-2181a65ce898\",\n             \"project\": \"ovago\"\n         }\n     }\n}",
           "type": "json"
         }
       ]
@@ -780,7 +788,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Error-Response (400):",
-          "content": "\nHTTP/1.1 400 Bad Request\n{\n\t\"status\":400,\n\t\"message\":\"Some errors occurred while creating client chat request\",\n\t\"code\":\"13104\",\n\t\"errors\":[\"Event is invalid.\"]\n}",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n \"status\":400,\n \"message\":\"Some errors occurred while creating client chat request\",\n \"code\":\"13104\",\n \"errors\":[\"Event is invalid.\"]\n}",
           "type": "json"
         }
       ]
@@ -1078,7 +1086,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Error-Response (400):",
-          "content": "\nHTTP/1.1 400 Bad Request\n{\n\t\"status\":400,\n\t\"message\":\"Some errors occurred while creating client chat request\",\n\t\"code\":\"13104\",\n\t\"errors\":[\"Event is invalid.\"]\n}",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n \"status\":400,\n \"message\":\"Some errors occurred while creating client chat request\",\n \"code\":\"13104\",\n \"errors\":[\"Event is invalid.\"]\n}",
           "type": "json"
         }
       ]
@@ -1145,7 +1153,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Error-Response (400):",
-          "content": "\nHTTP/1.1 400 Bad Request\n{\n\t\"status\":400,\n\t\"message\":\"Some errors occurred while creating client chat request\",\n\t\"code\":\"13104\",\n\t\"errors\":[\"Event is invalid.\"]\n}",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n \"status\":400,\n \"message\":\"Some errors occurred while creating client chat request\",\n \"code\":\"13104\",\n \"errors\":[\"Event is invalid.\"]\n}",
           "type": "json"
         }
       ]
