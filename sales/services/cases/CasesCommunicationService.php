@@ -63,7 +63,8 @@ class CasesCommunicationService
 
         $content_data['case'] = [
             'id'  => $case->cs_id,
-            'gid' => $case->cs_gid
+            'gid' => $case->cs_gid,
+            'order_uid' => $case->cs_order_uid
         ];
 
         if ($case->caseSale) {
