@@ -25,6 +25,7 @@ use frontend\assets\overridden\KartikGridResizeColumnsAsset;
 use frontend\assets\overridden\KartikGridToggleDataAsset;
 use frontend\assets\overridden\KartikGridViewAsset;
 use frontend\assets\overridden\KDNJsonEditorAsset;
+use frontend\assets\overridden\LajaxLanguageItemPluginAsset;
 use frontend\assets\PageLoaderAsset;
 use frontend\assets\Timeline2Asset;
 use frontend\assets\TimelineAsset;
@@ -55,9 +56,15 @@ use kartik\time\TimePickerAsset;
 use kdn\yii2\assets\JsonEditorFullAsset;
 use kdn\yii2\assets\JsonEditorMinimalistAsset;
 use kivork\bootstrap4glyphicons\assets\GlyphiconAsset;
+use lajax\translatemanager\bundles\FrontendTranslationAsset;
+use lajax\translatemanager\bundles\FrontendTranslationPluginAsset;
 use lajax\translatemanager\bundles\LanguageAsset;
+use lajax\translatemanager\bundles\LanguageItemPluginAsset;
 use lajax\translatemanager\bundles\LanguagePluginAsset;
 use lajax\translatemanager\bundles\ScanPluginAsset;
+use lajax\translatemanager\bundles\TranslateAsset;
+use lajax\translatemanager\bundles\TranslateManagerAsset;
+use lajax\translatemanager\bundles\TranslatePluginAsset;
 use lajax\translatemanager\bundles\TranslationPluginAsset;
 use unclead\multipleinput\assets\MultipleInputAsset;
 use yii\bootstrap4\BootstrapPluginAsset;
@@ -159,6 +166,12 @@ return [
         LanguageAsset::class,
         ScanPluginAsset::class,
         TranslationPluginAsset::class,
+        FrontendTranslationAsset::class,
+        FrontendTranslationPluginAsset::class,
+        TranslateAsset::class,
+        TranslateManagerAsset::class,
+        TranslatePluginAsset::class,
+        LajaxLanguageItemPluginAsset::class
     ],
 
     'targets' => [
@@ -671,6 +684,54 @@ return [
             'css' => 'language-{hash}.css',
             'depends' => [ LanguageAsset::class ],
         ],
+        'FrontendTranslationAsset' => [
+            'class' => FrontendTranslationAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'frontend-translation-{hash}.js',
+            'css' => 'frontend-translation-{hash}.css',
+            'depends' => [ FrontendTranslationAsset::class ],
+        ],
+        'FrontendTranslationPluginAsset' => [
+            'class' => FrontendTranslationPluginAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'frontend-translation-plugin-{hash}.js',
+            'css' => 'frontend-translation-plugin-{hash}.css',
+            'depends' => [ FrontendTranslationPluginAsset::class ],
+        ],
+        'TranslateAsset' => [
+            'class' => TranslateAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'translate-{hash}.js',
+            'css' => 'translate-{hash}.css',
+            'depends' => [ TranslateAsset::class ],
+        ],
+        'TranslateManagerAsset' => [
+            'class' => TranslateManagerAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'translate-manager-{hash}.js',
+            'css' => 'translate-manager-{hash}.css',
+            'depends' => [ TranslateManagerAsset::class ],
+        ],
+        'TranslatePluginAsset' => [
+            'class' => TranslatePluginAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'translate-plugin-{hash}.js',
+            'css' => 'translate-plugin-{hash}.css',
+            'depends' => [ TranslatePluginAsset::class ],
+        ],
+        'LajaxLanguageItemPluginAsset' => [
+            'class' => LajaxLanguageItemPluginAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'lang-asset-{hash}.js',
+            'css' => 'lang-asset-{hash}.css',
+            'depends' => [ LajaxLanguageItemPluginAsset::class ],
+        ],
         'DateTimePickerAsset' => [
             'class' => DateTimePickerAsset::class,
             'basePath' => '@webroot/all_shared/build',
@@ -904,7 +965,7 @@ return [
                 ],
                 'basePath' => null,
                 'sourcePath' => null
-            ]
+            ],
         ],
         'hashCallback' => static function ($path) use ($appVersion) {
             return hash('md4', $path . $appVersion);

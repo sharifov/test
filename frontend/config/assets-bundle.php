@@ -15,6 +15,7 @@ use frontend\assets\overridden\KartikGridResizeColumnsAsset;
 use frontend\assets\overridden\KartikGridToggleDataAsset;
 use frontend\assets\overridden\KartikGridViewAsset;
 use frontend\assets\overridden\KDNJsonEditorAsset;
+use frontend\assets\overridden\LajaxLanguageItemPluginAsset;
 use kartik\daterange\MomentAsset;
 use kartik\dialog\DialogBootstrapAsset;
 use kartik\editable\EditableAsset;
@@ -29,6 +30,7 @@ use kartik\grid\GridToggleDataAsset;
 use kartik\grid\GridViewAsset;
 use kdn\yii2\assets\JsonEditorFullAsset;
 use kdn\yii2\assets\JsonEditorMinimalistAsset;
+use lajax\translatemanager\bundles\LanguageItemPluginAsset;
 use vova07\imperavi\Asset;
 use yii\bootstrap4\BootstrapAsset;
 use yii\bootstrap4\BootstrapPluginAsset;
@@ -162,6 +164,14 @@ return array_merge($assetsProd, [
     JqueryAsset::class => [
         'js' => ['https://code.jquery.com/jquery-3.5.1.min.js']
     ],
+    LanguageItemPluginAsset::class => [
+        'class' => LajaxLanguageItemPluginAsset::class,
+        'css' => [],
+        'js' => [],
+        'depends' => [
+            LajaxLanguageItemPluginAsset::class,
+        ]
+    ]
 //    BootstrapAsset::class => [
 //        'class' => BootstrapGroupAsset::class
 //    ],
