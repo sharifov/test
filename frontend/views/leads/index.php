@@ -106,7 +106,8 @@ $this->registerJs($js);
             'modalId' => 'modal-df',
             'showUrl' => Url::to(['/lead-multiple-update/show']),
             'gridId' => $gridId,
-            'buttonClass' => 'multiple-update-btn btn-warning',
+            'buttonClass' => 'multiple-update-btn',
+            'buttonClassAdditional' => 'btn btn-info btn-warning',
             'buttonText' => 'Multiple update',
         ]) ?>
     <?php endif;?>
@@ -116,9 +117,11 @@ $this->registerJs($js);
             'modalId' => 'modal-df',
             'showUrl' => Url::to(['/qa-task/qa-task-multiple/create-lead']),
             'gridId' => $gridId,
-            'buttonClass' => 'qa-task-multiple-create btn-default',
+            'buttonClass' => 'qa-task-multiple-create',
+            'buttonClassAdditional' => 'btn btn-info btn-default',
             'buttonText' => 'Create QA Tasks',
             'headerText' => 'Create QA Tasks',
+            'faIconClass' => 'fa-plus-square',
         ]) ?>
     <?php endif;?>
 

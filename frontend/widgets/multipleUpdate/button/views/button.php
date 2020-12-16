@@ -9,11 +9,12 @@ use yii\web\View;
 /** @var string $gridId */
 /** @var string $buttonText */
 /** @var string $buttonClass */
+/** @var string $buttonClassAdditional */
 /** @var string $headerText */
-
+/** @var string $faIconClass */
 ?>
 
-<?= Html::button('<i class="fa fa-edit"></i> ' . $buttonText, ['class' => 'btn btn-info ' . $buttonClass]) ?>
+<?= Html::button('<i class="fa ' . $faIconClass . '"></i> ' . $buttonText, ['class' => $buttonClassAdditional . ' ' . $buttonClass]) ?>
 
 <?php
 $js = <<<JS
