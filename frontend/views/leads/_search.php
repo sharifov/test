@@ -326,6 +326,30 @@ use frontend\extensions\DatePicker;
     </div>
 
     <div class="row">
+        <div class="col-md-6">
+            <h2><i class="fa fa-list"></i> Show Additional fields</h2>
+            <?php //echo Html::label('Additional fields:', 'showFields', ['class' => 'control-label']);?>
+            <?= //Select2::widget([
+                // 'name' => 'LeadSearch[show_fields]', //Html::getInputName($filter, 'showFilter'),
+                $form->field($model, 'show_fields')->widget(Select2::class, [
+                'data' => $model->getViewFields(),
+                'size' => Select2::SIZE_SMALL,
+                'pluginOptions' => [
+                    'closeOnSelect' => false,
+                    'allowClear' => true,
+                    //'width' => '100%',
+                ],
+                'options' => [
+                    'placeholder' => 'Choose additional fields...',
+                    'multiple' => true,
+                    'id' => 'showFields',
+                ],
+                //'value' => $model->show_fields,
+            ])->label(false) ?>
+        </div>
+    </div>
+
+    <div class="row">
         <div class="col-md-12">
             <br>
             <div class="form-group text-center">

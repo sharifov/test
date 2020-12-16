@@ -67,6 +67,7 @@ use sales\auth\Auth;
  * @property int|null $callsQtyTo
  * @property int|null $chatsQtyFrom
  * @property int|null $chatsQtyTo
+ * @property array $show_fields
  */
 class LeadSearch extends Lead
 {
@@ -143,6 +144,8 @@ class LeadSearch extends Lead
     public $chatsQtyFrom;
     public $chatsQtyTo;
 
+    public $show_fields = [];
+
     private $leadBadgesRepository;
 
     public function __construct($config = [])
@@ -170,19 +173,26 @@ class LeadSearch extends Lead
 
             [['uid', 'hybrid_uid', 'trip_type', 'cabin', 'notes_for_experts', 'created', 'updated', 'request_ip', 'request_ip_detail', 'offset_gmt', 'snooze_for', 'discount_id',
                 'created_date_from', 'created_date_to', 'depart_date_from', 'depart_date_to', 'source_id', 'statuses', 'sold_date_from', 'sold_date_to', 'processing_filter', 'l_init_price', 'l_last_action_dt'], 'safe'],
-            ['l_init_price', 'filter', 'filter' => function ($value) {
+            ['l_init_price', 'filter', 'filter' => static function ($value) {
                 return $value ? filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION) : null;
             }],
 
             [['created', 'updated', 'l_last_action_dt'], 'date', 'format' => 'php:Y-m-d'],
 
-            ['last_ticket_date', 'safe'],
+            [['last_ticket_date', 'show_fields'], 'safe'],
+            // [['show_fields'],'checkIsArray'],
+
+            ['show_fields', 'filter', 'filter' => static function ($value) {
+                return is_array($value) ? $value : [];
+            }, 'skipOnEmpty' => true],
+
             [['departRangeTime', 'createdRangeTime', 'soldRangeTime', 'updatedRangeTime', 'lastActionRangeTime'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
 
             ['remainingDays', 'integer'],
             ['remainingDays', 'filter', 'filter' => static function ($value) {
                 return (int)$value;
             }, 'skipOnEmpty' => true],
+
             ['l_is_test', 'in', 'range' => [0,1]],
             ['l_call_status_id', 'integer'],
             [['defaultUserTz', 'reportTimezone', 'timeFrom', 'timeTo'], 'string'],
@@ -216,6 +226,67 @@ class LeadSearch extends Lead
     }
 
     /**
+     * @return string[]
+     */
+    public function getViewFields(): array
+    {
+        $data = [
+//            'uid' => 'UID',
+//            'gid' => 'GID',
+//            'client_id' => 'Client ID',
+//            'employee_id' => 'Employee ID',
+//            'status' => 'Status',
+//            'project_id' => 'Project',
+//            'source_id' => 'Source ID',
+//            'trip_type' => 'Trip Type',
+//            'cabin' => 'Cabin',
+//            'adults' => 'Adults',
+//            'children' => 'Children',
+//            'infants' => 'Infants',
+//            'notes_for_experts' => 'Notes for Expert',
+//            'created' => 'Created',
+//            'updated' => 'Updated',
+//            'l_answered' => 'Answered',
+//            'bo_flight_id' => '(BO) Flight ID',
+//            'agents_processing_fee' => 'Agents Processing Fee',
+//            'origin_country' => 'Origin Country code',
+//            'destination_country' => 'Destination Country code',
+//            'l_call_status_id' => 'Call status',
+//            'l_pending_delay_dt' => 'Pending delay',
+//
+//            'l_client_first_name' => 'Client First Name',
+//            'l_client_last_name' => 'Client Last Name',
+//            'l_client_phone' => 'Client Phone',
+//            'l_client_email' => 'Client Email',
+//            'l_client_lang' => 'Client Lang',
+//            'l_client_ua' => 'Client UserAgent',
+//            'l_request_hash' => 'Request Hash',
+//            'l_duplicate_lead_id' => 'Duplicate Lead ID',
+//
+//            'l_init_price' => 'Init Price',
+
+//            'l_dep_id' => 'Department ID',
+//            'l_delayed_charge' => 'Delayed charge',
+//
+//            'l_visitor_log_id' => 'Visitor log ID',
+
+
+            'quotes' => 'Quotes',
+            'pnr' => 'PNR',
+            'updated' => 'Updated',
+            'depart' => 'Depart',
+            'segments' => 'Segments',
+            'expert_quotes' => 'Expert Quotes',
+            'hybrid_uid' => 'Booking ID',
+            'communication' => 'Communication',
+            'status_flow' => 'Status flow',
+            'l_last_action_dt' => 'Last Action',
+            'check_list' => 'Check List',
+        ];
+        return $data;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function scenarios()
@@ -234,7 +305,7 @@ class LeadSearch extends Lead
     public function search($params)
     {
         $query = Lead::find()->with('project', 'source', 'employee', 'client');
-        $query->with(['client.clientEmails', 'client.clientPhones', 'leadFlightSegments']);
+        //$query->with(['client.clientEmails', 'client.clientPhones', 'leadFlightSegments']);
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
         // add conditions that should always apply here
