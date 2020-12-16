@@ -14,7 +14,7 @@ class ClientChatSearchCannedResponse extends Model
     public function rules(): array
     {
         return [
-            ['query', 'string', 'min' => 3, 'max' => 40],
+            ['query', 'string', 'min' => 3],
             ['chatId', 'integer'],
             [['query', 'chatId'], 'required'],
             ['query', 'filter', 'filter' => static function ($value) {
