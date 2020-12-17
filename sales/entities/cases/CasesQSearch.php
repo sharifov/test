@@ -29,7 +29,6 @@ use yii\db\Query;
  */
 class CasesQSearch extends Cases
 {
-
     private $casesQRepository;
 
     public $solved_date;
@@ -381,6 +380,38 @@ class CasesQSearch extends Cases
         $query->addSelect([
             'time_left' => new Expression('if ((cs_deadline_dt IS NOT NULL), cs_deadline_dt, \'2100-01-01 00:00:00\')')
         ]);
+        $query->addSelect(new Expression('
+            DATE(if(last_out_date IS NULL, last_in_date, LEAST(last_in_date, last_out_date))) AS nextFlight'));
+
+        $query->leftJoin([
+            'sale_out' => CaseSale::find()
+            ->select([
+                'css_cs_id',
+                new Expression('
+                    MIN(css_out_date) AS last_out_date'),
+            ])
+            ->innerJoin(
+                Cases::tableName() . ' AS cases',
+                'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_FOLLOW_UP
+            )
+            ->where('css_out_date >= SUBDATE(CURDATE(), 1)')
+            ->groupBy('css_cs_id')
+        ], 'cases.cs_id = sale_out.css_cs_id');
+
+        $query->leftJoin([
+            'sale_in' => CaseSale::find()
+            ->select([
+                'css_cs_id',
+                new Expression('
+                    MIN(css_in_date) AS last_in_date'),
+            ])
+            ->innerJoin(
+                Cases::tableName() . ' AS cases',
+                'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_FOLLOW_UP
+            )
+            ->where('css_in_date >= SUBDATE(CURDATE(), 1)')
+            ->groupBy('css_cs_id')
+        ], 'cases.cs_id = sale_in.css_cs_id');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -409,6 +440,17 @@ class CasesQSearch extends Cases
                 'pageSize' => 20,
             ],
         ]);
+
+        $sorting = $dataProvider->getSort();
+        $sorting->attributes = array_merge($sorting->attributes, [
+            'nextFlight' => [
+                'asc' => ['nextFlight' => SORT_ASC],
+                'desc' => ['nextFlight' => SORT_DESC],
+                'default' => SORT_ASC,
+                'label' => 'Next flight date',
+            ],
+        ]);
+        $dataProvider->setSort($sorting);
 
         $this->load($params);
 

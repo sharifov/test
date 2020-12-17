@@ -83,6 +83,19 @@ $lists = new ListsAccess($user->id);
             ],
             'cs_order_uid',
             [
+                'attribute' => 'nextFlight',
+                'value' => static function (CasesQSearch $model) {
+                    if ($model->nextFlight) {
+                        $out =  '<i class="fa fa-calendar"></i> ';
+                        $out .= Yii::$app->formatter->asDate(strtotime($model->nextFlight));
+                        return $out;
+                    }
+                    return '<span class="not-set">(not set)</span>';
+                },
+                'format' => 'raw',
+                'options' => ['style' => 'width: 180px'],
+            ],
+            [
                 'attribute' => 'cs_dep_id',
                 'value' => static function (CasesQSearch $model) {
                     return $model->department ? $model->department->dep_name : '';
