@@ -397,6 +397,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Projects', 'url' => ['/project/index']],
                         ['label' => 'Project Sources', 'url' => ['/sources/index']],
                         ['label' => 'Project Settings', 'url' => ['/settings/projects']],
+                        ['label' => 'Project Locales', 'url' => ['/project-locale/index']],
                     ]
                 ],
 

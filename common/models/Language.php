@@ -167,6 +167,20 @@ class Language extends ActiveRecord
         return $data;
     }
 
+    public static function getLocaleList($active = true, $group = null): array
+    {
+        if ($active) {
+            $query = self::find()->where(['status' => static::STATUS_ACTIVE])->orderBy(['language_id' => SORT_ASC]);
+        } else {
+            $query =  self::find();
+        }
+
+        $data = ArrayHelper::map($query->asArray(true)->all(), 'language_id', 'language_id', $group);
+
+        return $data;
+    }
+
+
 //    /**
 //     * @param bool $active
 //     * @return array
