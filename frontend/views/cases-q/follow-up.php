@@ -41,7 +41,7 @@ $lists = new ListsAccess($user->id);
 
     <?php Pjax::begin(['id' => 'cases-q-follow-up-pjax-list', 'timeout' => 5000, 'enablePushState' => true]); ?>
 
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
 
     <?= GridView::widget([
@@ -82,6 +82,19 @@ $lists = new ListsAccess($user->id);
                 },
             ],
             'cs_order_uid',
+            [
+                'attribute' => 'nextFlight',
+                'value' => static function (CasesQSearch $model) {
+                    if ($model->nextFlight) {
+                        $out =  '<i class="fa fa-calendar"></i> ';
+                        $out .= Yii::$app->formatter->asDate(strtotime($model->nextFlight));
+                        return $out;
+                    }
+                    return '<span class="not-set">(not set)</span>';
+                },
+                'format' => 'raw',
+                'options' => ['style' => 'width: 180px'],
+            ],
             [
                 'attribute' => 'cs_dep_id',
                 'value' => static function (CasesQSearch $model) {
@@ -135,7 +148,7 @@ $lists = new ListsAccess($user->id);
                     $diffTime = time() - $createdTS;
                     $diffHours = (int) ($diffTime / (60 * 60));
 
-                    return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+                    return ($diffHours > 3 && $diffHours < 73) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
                 },
                 'options' => [
                     'style' => 'width:180px'
@@ -178,7 +191,7 @@ $lists = new ListsAccess($user->id);
                     $diffTime = time() - $createdTS;
                     $diffHours = (int) ($diffTime / (60 * 60));
 
-                    return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+                    return ($diffHours > 3 && $diffHours < 73) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
                 },
             ],
             [

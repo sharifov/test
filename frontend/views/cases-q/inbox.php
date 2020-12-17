@@ -85,7 +85,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return '<span class="not-set">(not set)</span>';
                 },
                 'format' => 'raw',
-                'options' => ['style' => 'width: 180px']
+                'options' => ['style' => 'width: 180px'],
             ],
             [
                 'attribute' => 'css_penalty_type',
