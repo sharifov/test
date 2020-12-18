@@ -43,6 +43,7 @@
 ._cc-addition-data-item {
     color: #000;
     font-weight: 600;
+    overflow-y: auto;
 }
 ._cc-case-item a,
 ._cc-lead-item a {
