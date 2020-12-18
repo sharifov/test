@@ -38,6 +38,9 @@ use yii\helpers\Url;
     <?php if (Auth::can('global/client/locale/edit')) : ?>
         <?= $form->field($model, 'locale')->dropDownList(Language::getLocaleList(false), ['prompt' => '-']) ?>
     <?php endif ?>
+    <?php if (Auth::can('global/client/marketing_country/edit')) : ?>
+        <?= $form->field($model, 'marketingCountry')->textInput(['maxlength' => true]) ?>
+    <?php endif ?>
 
     <div class="form-group text-center">
         <?= Html::submitButton('Update', ['class' => 'btn btn-warning']) ?>

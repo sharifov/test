@@ -282,6 +282,10 @@ $jsCode = <<<JS
                     if (data.locale && jsLocaleClientEl.length) {
                         jsLocaleClientEl.text(data.locale);      
                     }
+                    let jsCountryClientEl = $('.js_marketing_country');
+                    if (data.marketing_country && jsCountryClientEl.length) {
+                        jsCountryClientEl.text(data.marketing_country);      
+                    }
                 }
                 
             },

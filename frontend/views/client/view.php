@@ -78,6 +78,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'cl_ppn',
             'cl_ip',
             'cl_locale',
+            'cl_marketing_country',
         ],
     ]) ?>
     </div>

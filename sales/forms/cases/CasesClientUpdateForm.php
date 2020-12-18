@@ -14,6 +14,7 @@ use yii\base\Model;
  * @property string $middle_name
  * @property string $caseGid
  * @property string|null $locale
+ * @property string|null $marketingCountry
  */
 class CasesClientUpdateForm extends Model
 {
@@ -21,6 +22,7 @@ class CasesClientUpdateForm extends Model
     public $last_name;
     public $middle_name;
     public $locale;
+    public $marketingCountry;
 
     public $caseGid;
 
@@ -38,6 +40,7 @@ class CasesClientUpdateForm extends Model
             $this->last_name = $client->last_name;
             $this->middle_name = $client->middle_name;
             $this->locale = $client->cl_locale;
+            $this->marketingCountry = $client->cl_marketing_country;
         }
     }
 
@@ -50,10 +53,13 @@ class CasesClientUpdateForm extends Model
             ['first_name', 'required'],
             [['first_name', 'last_name', 'middle_name'], 'string', 'min' => 3, 'max' => 100],
             [['first_name', 'last_name', 'middle_name'], 'match', 'pattern' => "/^[a-z-\s\']+$/i"],
-            [['first_name', 'last_name', 'middle_name', 'locale'], 'filter', 'filter' => 'trim'],
+            [['first_name', 'last_name', 'middle_name', 'locale', 'marketingCountry'], 'filter', 'filter' => 'trim'],
 
             ['locale', 'string', 'max' => 5],
-            [['locale'], 'exist', 'skipOnError' => true, 'targetClass' => Language::class, 'targetAttribute' => ['locale' => 'language_id']], /* TODO:: lang to locale */
+            [['locale'], 'exist', 'skipOnError' => true, 'targetClass' => Language::class, 'targetAttribute' => ['locale' => 'language_id']],
+
+            ['marketingCountry', 'string', 'max' => 10],
+            ['marketingCountry', 'filter', 'filter' => 'strtoupper', 'skipOnEmpty' => true],
         ];
     }
 
@@ -67,6 +73,7 @@ class CasesClientUpdateForm extends Model
             'last_name' => 'Last name',
             'middle_name' => 'Middle name',
             'locale' => 'Locale',
+            'marketingCountry' => 'Marketing country'
         ];
     }
 }

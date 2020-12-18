@@ -120,6 +120,7 @@ class ClientUpdateFromEntityService
                 'lastName' => $form->last_name,
                 'middleName' => $form->middle_name,
                 'locale' => $form->locale,
+                'marketingCountry' => $form->marketingCountry,
             ]));
             $case->updateLastAction();
         });

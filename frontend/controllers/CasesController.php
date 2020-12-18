@@ -806,7 +806,7 @@ class CasesController extends FController
     public function actionAddSale()
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        $out = ['error' => '', 'data' => [], 'locale' => ''];
+        $out = ['error' => '', 'data' => [], 'locale' => '', 'marketing_country' => ''];
 
         $gid = Yii::$app->request->post('gid');
         $hash = Yii::$app->request->post('h');
@@ -849,6 +849,7 @@ class CasesController extends FController
 
                 if ($client = $model->client) {
                     $out['locale'] = (string) ClientManageService::setLocaleFromSaleDate($client, $saleData);
+                    $out['marketing_country'] = (string) ClientManageService::setMarketingCountryFromSaleDate($client, $saleData);
                 }
             }
 
@@ -1693,6 +1694,7 @@ class CasesController extends FController
             'error' => 0,
             'message' => '',
             'locale' => '',
+            'marketing_country' => '',
         ];
 
         try {
@@ -1706,6 +1708,7 @@ class CasesController extends FController
 
             if ($client = $case->client) {
                 $out['locale'] = (string) ClientManageService::setLocaleFromSaleDate($client, $saleData);
+                $out['marketing_country'] = (string) ClientManageService::setMarketingCountryFromSaleDate($client, $saleData);
             }
 
             $out['message'] = 'Sale info: ' . $caseSale->css_sale_id . ' successfully refreshed';

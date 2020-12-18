@@ -122,6 +122,13 @@ use sales\auth\Auth;
                                     },
                                     'format' => 'raw',
                                 ],
+                                [
+                                    'attribute' => 'cl_marketing_country',
+                                    'value' => static function (Client $client) {
+                                        return '<span class="js_marketing_country_client">' . $client->cl_marketing_country . '</span>';
+                                    },
+                                    'format' => 'raw',
+                                ],
                             ],
                         ]) ?>
                     </div>

@@ -5,17 +5,15 @@ namespace common\models;
 use common\models\query\ClientQuery;
 use sales\entities\cases\Cases;
 use sales\entities\EventTrait;
-use sales\logger\db\GlobalLogInterface;
-use sales\logger\db\LogDTO;
 use sales\model\client\entity\events\ClientCreatedEvent;
 use sales\model\client\entity\events\ClientExcludedEvent;
 use sales\model\clientAccount\entity\ClientAccount;
 use thamtech\uuid\helpers\UuidHelper;
 use thamtech\uuid\validators\UuidValidator;
 use yii\behaviors\TimestampBehavior;
-use yii\helpers\ArrayHelper;
-use yii\db\ActiveRecord;
 use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "clients".
@@ -43,6 +41,7 @@ use yii\db\ActiveQuery;
  * @property string|null $cl_ppn
  * @property string|null $cl_ip
  * @property string|null $cl_locale
+ * @property string|null $cl_marketing_country
  *
  * @property ClientEmail[] $clientEmails
  * @property ClientPhone[] $clientPhones
@@ -135,13 +134,20 @@ class Client extends ActiveRecord
      * @param string $lastName
      * @param string $middleName
      * @param string|null $locale
+     * @param string|null $country
      */
-    public function edit(string $firstName, string $lastName, string $middleName, ?string $locale): void
-    {
+    public function edit(
+        string $firstName,
+        string $lastName,
+        string $middleName,
+        ?string $locale = null,
+        ?string $country = null
+    ): void {
         $this->first_name = $firstName;
         $this->last_name = $lastName;
         $this->middle_name = $middleName;
         $this->cl_locale = $locale;
+        $this->cl_marketing_country = strtoupper($country);
     }
 
     /**
@@ -181,6 +187,9 @@ class Client extends ActiveRecord
             ['cl_ip', 'string', 'max' => 39],
 
             ['cl_locale', 'string', 'max' => 5],
+
+            ['cl_marketing_country', 'string', 'max' => 10],
+            ['cl_marketing_country', 'filter', 'filter' => 'strtoupper', 'skipOnEmpty' => true],
         ];
     }
 
@@ -212,6 +221,7 @@ class Client extends ActiveRecord
             'cl_ppn' => 'PPN',
             'cl_ip' => 'IP',
             'cl_locale' => 'Locale',
+            'cl_marketing_country' => 'Marketing country'
         ];
     }
 

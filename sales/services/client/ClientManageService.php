@@ -22,6 +22,7 @@ use sales\repositories\client\ClientPhoneRepository;
 use sales\repositories\client\ClientRepository;
 use sales\repositories\NotFoundException;
 use sales\services\ServiceFinder;
+use yii\base\InvalidConfigException;
 use yii\db\ActiveRecord;
 
 /**
@@ -206,7 +207,13 @@ class ClientManageService
     public function updateClient(Client $client, ClientCreateForm $form): void
     {
         $client = $this->finder->clientFind($client);
-        $client->edit((string)$form->firstName, (string)$form->lastName, (string)$form->middleName, (string)$form->locale);
+        $client->edit(
+            (string) $form->firstName,
+            (string) $form->lastName,
+            (string) $form->middleName,
+            (string) $form->locale,
+            (string) $form->marketingCountry
+        );
         $this->clientRepository->save($client);
     }
 
@@ -554,7 +561,7 @@ class ClientManageService
      * @param Client $client
      * @param $saleData
      * @return string|null
-     * @throws \yii\base\InvalidConfigException
+     * @throws InvalidConfigException
      */
     public static function setLocaleFromSaleDate(Client $client, $saleData): ?string
     {
@@ -569,6 +576,30 @@ class ClientManageService
             } else {
                 throw new \RuntimeException('Client locale is not valid. ' .
                     $client->getFirstError('cl_locale'), -1);
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * @param Client $client
+     * @param $saleData
+     * @return string|null
+     * @throws InvalidConfigException
+     */
+    public static function setMarketingCountryFromSaleDate(Client $client, $saleData): ?string
+    {
+        $result = null;
+        $country = $saleData['user_country'] ?? null;
+        if ($country && empty($client->cl_marketing_country)) {
+            $client->cl_marketing_country = $country;
+            if ($client->validate('cl_marketing_country')) {
+                $clientRepository = \Yii::createObject(ClientRepository::class);
+                $clientRepository->save($client);
+                $result = $country;
+            } else {
+                throw new \RuntimeException('Client marketing country is not valid. ' .
+                    $client->getFirstError('cl_marketing_country'), -1);
             }
         }
         return $result;
