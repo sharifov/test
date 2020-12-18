@@ -38,12 +38,7 @@ class ClientChatVisitorDataRepository extends Repository
     public function createByClientChatRequest(string $visitorRcId, array $data): ClientChatVisitorData
     {
         $visitorData = ClientChatVisitorData::createByClientChatRequest($visitorRcId, $data);
-        if (!$visitorData->validate()) {
-            foreach ($visitorData->errors as $attribute => $error) {
-                $visitorData->{$attribute} = null;
-            }
-            \Yii::error('Client Chat Visitor validation failed: ' . VarDumper::dumpAsString($visitorData->errors), 'ClientChatVisitorDataRepository::createByClientChatRequest::validation');
-        }
+        $visitorData = $this->prepareVisitorData($visitorData);
 
         try {
             $this->save($visitorData);
@@ -53,9 +48,8 @@ class ClientChatVisitorDataRepository extends Repository
         return $visitorData;
     }
 
-    public function updateByClientChatRequest(ClientChatVisitorData $visitorData, array $data): void
+    public function prepareVisitorData(ClientChatVisitorData $visitorData): ClientChatVisitorData
     {
-        $visitorData->updateByClientChatRequest($data);
         if (!$visitorData->validate()) {
             $errorAttributes = [];
             foreach ($visitorData->errors as $attribute => $error) {
@@ -71,6 +65,13 @@ class ClientChatVisitorDataRepository extends Repository
                 'ClientChatVisitorDataRepository::updateByClientChatRequest::validation'
             );
         }
+        return $visitorData;
+    }
+
+    public function updateByClientChatRequest(ClientChatVisitorData $visitorData, array $data): void
+    {
+        $visitorData->fillForUpdateByClientChatRequest($data);
+        $visitorData = $this->prepareVisitorData($visitorData);
 
         try {
             $this->save($visitorData);

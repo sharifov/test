@@ -4,7 +4,9 @@ namespace sales\model\clientChatRequest\useCase\api\create;
 
 use common\components\purifier\Purifier;
 use common\models\Notifications;
+use Exception;
 use frontend\widgets\notification\NotificationMessage;
+use sales\helpers\ErrorsToStringHelper;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatFeedback\ClientChatFeedbackRepository;
@@ -247,6 +249,10 @@ class ClientChatRequestService
             );
         }
 
+        if (!$clientChatFeedback->validate()) {
+            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($clientChatFeedback), -1);
+        }
+
         if ($this->clientChatFeedbackRepository->save($clientChatFeedback)) {
             self::sendFeedbackNotifications($clientChat);
         }
@@ -477,7 +483,7 @@ class ClientChatRequestService
     {
         try {
             $visitorData = $this->clientChatVisitorDataRepository->findByVisitorRcId($visitorRcId);
-            $visitorData->updateByClientChatRequest($data);
+            $this->clientChatVisitorDataRepository->updateByClientChatRequest($visitorData, $data);
             $this->clientChatVisitorDataRepository->save($visitorData);
             if (!$this->clientChatVisitorRepository->exists($chatId, $visitorData->cvd_id)) {
                 $this->clientChatVisitorRepository->create($chatId, $visitorData->cvd_id, $clientId);
