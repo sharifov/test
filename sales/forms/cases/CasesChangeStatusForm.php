@@ -6,6 +6,7 @@ use common\models\CaseSale;
 use common\models\ClientEmail;
 use common\models\ClientProject;
 use common\models\Email;
+use common\models\EmailTemplateType;
 use common\models\EmailUnsubscribe;
 use common\models\Employee;
 use sales\access\ListsAccess;
@@ -322,11 +323,21 @@ class CasesChangeStatusForm extends Model
 
     public function isResendFeedbackEnable(): bool
     {
+        $templateTypeId = EmailTemplateType::find()
+            ->select(['etp_id'])
+            ->andWhere(['etp_key' => $this->case->department->getParams()->object->case->feedbackTemplateTypeKey])
+            ->asArray()
+            ->one();
+
+        if (!$templateTypeId) {
+            return false;
+        }
+
         return Email::find()
             ->andWhere([
                 'e_case_id' => $this->case->cs_id,
                 'e_status_id' => Email::STATUS_DONE,
-                'e_template_type_id' => $this->case->department->getParams()->object->case->feedbackTemplateTypeKey,
+                'e_template_type_id' => $templateTypeId['etp_id'],
             ])
             ->exists();
     }
