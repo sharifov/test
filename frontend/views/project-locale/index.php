@@ -38,9 +38,12 @@ $this->params['breadcrumbs'][] = $this->title;
             }
         },
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
+            //['class' => 'yii\grid\SerialColumn'],
+            [
+                'attribute' => 'pl_id',
+                'options' => ['style' => 'width:100px']
+            ],
 
-            //'pl_project_id',
 //            [
 //                'class' => \common\components\grid\project\ProjectColumn::class,
 //                'attribute' => 'pl_project_id',
@@ -79,7 +82,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 //'label' => 'Type Name',
                 'attribute' => 'pl_language_id',
                 'value' => static function (ProjectLocale $model) {
-                    return '<span class="badge badge-warning">' . Html::encode($model->pl_language_id) . '</span>';
+                    return $model->pl_language_id ? '<span class="badge badge-warning">' . Html::encode($model->pl_language_id) . '</span>' : $model->pl_language_id;
                 },
                 'format' => 'raw',
                 'filter' => Select2::widget([
@@ -101,6 +104,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     ]
                 ]),
             ],
+
+            'pl_market_country',
 
             [
                 'label' => 'Locale Name',

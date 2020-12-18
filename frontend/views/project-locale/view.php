@@ -8,7 +8,14 @@ use yii\widgets\DetailView;
 /* @var $model sales\model\project\entity\projectLocale\ProjectLocale */
 
 $this->title = $model->plProject ? $model->plProject->name . ' (' . $model->pl_project_id . ')' : '';
-$this->title .= ' - ' . $model->pl_language_id;
+if ($model->pl_language_id) {
+    $this->title .= ' - ' . $model->pl_language_id;
+}
+
+if ($model->pl_market_country) {
+    $this->title .= ' (' . $model->pl_market_country . ')';
+}
+
 $this->params['breadcrumbs'][] = ['label' => 'Project Locales', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
@@ -18,14 +25,18 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('<i class="fa fa-edit"></i> Update', ['update', 'pl_project_id' => $model->pl_project_id, 'pl_language_id' => $model->pl_language_id], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('<i class="fa fa-remove"></i> Delete', ['delete', 'pl_project_id' => $model->pl_project_id, 'pl_language_id' => $model->pl_language_id], [
+        <?= Html::a('<i class="fa fa-edit"></i> Update', ['update', 'id' => $model->pl_id], ['class' => 'btn btn-primary']) ?>
+        <?= Html::a(
+            '<i class="fa fa-remove"></i> Delete',
+            ['delete', 'id' => $model->pl_id],
+            [
             'class' => 'btn btn-danger',
             'data' => [
                 'confirm' => 'Are you sure you want to delete this item?',
                 'method' => 'post',
             ],
-        ]) ?>
+            ]
+) ?>
     </p>
 
     <div class="row">
@@ -33,10 +44,12 @@ $this->params['breadcrumbs'][] = $this->title;
             <?= DetailView::widget([
                 'model' => $model,
                 'attributes' => [
+                    'pl_id',
                     'pl_project_id',
                     'plProject.name',
                     'pl_language_id',
                     'plLanguage.name_ascii',
+                    'pl_market_country',
                     'pl_default:boolean',
                     'pl_enabled:boolean',
                     //'pl_params',

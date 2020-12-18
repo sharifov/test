@@ -30,18 +30,25 @@ use yii\widgets\ActiveForm;
             ]);
 ?>
 
-            <?= $form->field($model, 'pl_language_id')->widget(Select2::class, [
-                'data' => Language::getLocaleList(false),
-                'size' => Select2::SMALL,
-                'options' => [
-                    'placeholder' => 'Select locale',
-                    'multiple' => false,
-                ],
-                'pluginOptions' => ['allowClear' => true],
-            ]);
-?>
+            <div class="row">
+                <div class="col-md-6">
 
+                <?= $form->field($model, 'pl_language_id')->widget(Select2::class, [
+                    'data' => Language::getLocaleList(false),
+                    'size' => Select2::SMALL,
+                    'options' => [
+                        'placeholder' => 'Select locale',
+                        'multiple' => false,
+                    ],
+                    'pluginOptions' => ['allowClear' => true],
+                ]);
 
+    ?>
+                </div>
+                <div class="col-md-3">
+                    <?php echo $form->field($model, 'pl_market_country')->textInput(['maxlength' => true])?>
+                </div>
+            </div>
 
             <?= $form->field($model, 'pl_default')->checkbox() ?>
 

@@ -52,15 +52,14 @@ class ProjectLocaleController extends FController
 
     /**
      * Displays a single ProjectLocale model.
-     * @param integer $pl_project_id
-     * @param string $pl_language_id
+     * @param int $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($pl_project_id, $pl_language_id)
+    public function actionView($id)
     {
         return $this->render('view', [
-            'model' => $this->findModel($pl_project_id, $pl_language_id),
+            'model' => $this->findModel($id),
         ]);
     }
 
@@ -74,7 +73,7 @@ class ProjectLocaleController extends FController
         $model = new ProjectLocale();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'pl_project_id' => $model->pl_project_id, 'pl_language_id' => $model->pl_language_id]);
+            return $this->redirect(['view', 'id' => $model->pl_id]);
         }
 
         return $this->render('create', [
@@ -85,17 +84,16 @@ class ProjectLocaleController extends FController
     /**
      * Updates an existing ProjectLocale model.
      * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $pl_project_id
-     * @param string $pl_language_id
+     * @param int $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($pl_project_id, $pl_language_id)
+    public function actionUpdate($id)
     {
-        $model = $this->findModel($pl_project_id, $pl_language_id);
+        $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'pl_project_id' => $model->pl_project_id, 'pl_language_id' => $model->pl_language_id]);
+            return $this->redirect(['view', 'id' => $model->pl_id]);
         }
 
         return $this->render('update', [
@@ -106,14 +104,13 @@ class ProjectLocaleController extends FController
     /**
      * Updates an existing ProjectLocale model.
      * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $pl_project_id
-     * @param string $pl_language_id
+     * @param int $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDefault($pl_project_id, $pl_language_id)
+    public function actionDefault($id)
     {
-        $model = $this->findModel($pl_project_id, $pl_language_id);
+        $model = $this->findModel($id);
         $model->pl_default = true;
 
         if ($model->save()) {
@@ -126,11 +123,9 @@ class ProjectLocaleController extends FController
                     'pl_default' => true,
                     'pl_project_id' => $model->pl_project_id
                 ])
-                    ->andWhere(['<>', 'pl_language_id', $model->pl_language_id])
+                    ->andWhere(['<>', 'pl_id', $model->pl_id])
                     ->andWhere(['like', 'pl_language_id', $lang . '-'])
                     ->all();
-
-                //VarDumper::dump($locales); exit;
 
                 if ($locales) {
                     foreach ($locales as $locale) {
@@ -143,30 +138,24 @@ class ProjectLocaleController extends FController
             }
 
             Yii::$app->session->setFlash('success', 'Set default Locale ' . $model->pl_language_id);
-           // return $this->redirect(['view', 'pl_project_id' => $model->pl_project_id, 'pl_language_id' => $model->pl_language_id]);
+
         } else {
             Yii::error($model->errors, 'ProjectLocale:save');
             Yii::$app->session->setFlash('error', 'Error: not set default Locale ' . $model->pl_language_id);
         }
-
         return $this->redirect(['index']);
-
-//        return $this->render('update', [
-//            'model' => $model,
-//        ]);
     }
 
     /**
      * Deletes an existing ProjectLocale model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $pl_project_id
-     * @param string $pl_language_id
+     * @param int $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($pl_project_id, $pl_language_id)
+    public function actionDelete($id)
     {
-        $this->findModel($pl_project_id, $pl_language_id)->delete();
+        $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
     }
@@ -174,14 +163,13 @@ class ProjectLocaleController extends FController
     /**
      * Finds the ProjectLocale model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $pl_project_id
-     * @param string $pl_language_id
+     * @param int $id
      * @return ProjectLocale the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($pl_project_id, $pl_language_id)
+    protected function findModel($id)
     {
-        if (($model = ProjectLocale::findOne(['pl_project_id' => $pl_project_id, 'pl_language_id' => $pl_language_id])) !== null) {
+        if (($model = ProjectLocale::findOne($id)) !== null) {
             return $model;
         }
 

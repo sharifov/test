@@ -7,7 +7,7 @@ use yii\helpers\Html;
 
 $this->title = 'Update Project Locale: ' . $model->pl_project_id;
 $this->params['breadcrumbs'][] = ['label' => 'Project Locales', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->pl_project_id, 'url' => ['view', 'pl_project_id' => $model->pl_project_id, 'pl_language_id' => $model->pl_language_id]];
+$this->params['breadcrumbs'][] = ['label' => $model->pl_project_id, 'url' => ['view', 'id' => $model->pl_id]];
 $this->params['breadcrumbs'][] = 'Update';
 ?>
 <div class="project-locale-update">
