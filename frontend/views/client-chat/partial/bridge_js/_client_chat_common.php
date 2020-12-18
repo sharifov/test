@@ -354,7 +354,16 @@ window.loadClientChatData = function (cch_id, data, ref) {
     
     $('#couch_note_box').html('');
     if (!isClosed) {
-        window.refreshCouchNote(cch_id);
+        // window.refreshCouchNote(cch_id);
+        if (data.couchNoteStatus > 0 && data.couchNoteHtml.length) { 
+            $('#couch_note_box').html(data.couchNoteHtml);
+        } else if (data.couchNoteStatus === 0 && data.message.length) {
+            console.log(data.message);
+        }
+        
+        $.post('{$discardUnreadMessageUrl}', {cchId: cch_id});
+    } else {
+        $('#couch_note_box').html('');
     }
     
     if (data.isShowInput) {
@@ -386,10 +395,9 @@ $(document).on('click', '._cc-list-item', function () {
     let ownerId = $(this).attr('data-owner-id');
     currentChatOwnerId = ownerId;
     
-    if (ownerId === userId) {
-        addChatToActiveConnection();    
-    }
-        
+    // if (ownerId === userId) {
+    //     addChatToActiveConnection();    
+    // }
     if ($(this).hasClass('_cc_active')) {
         $('#cc-dialogs-wrapper #_cc-load').remove(); 
         iframeWrapperEl.find('#_cc-load').remove();
@@ -407,7 +415,7 @@ $(document).on('click', '._cc-list-item', function () {
         chatEl.show();
     }
     
-    window.refreshChatInfo(cch_id, loadClientChatData, ref);
+    window.refreshChatInfo(cch_id, loadClientChatData, ref, window.socketConnectionId);
     
     // socketSend('ChatSubscribe', '', {"subscribe":[cch_id], "unSubscribe":[preChatId]});
     
@@ -592,7 +600,7 @@ window.getChatHistory = function (cchId) {
     });
 }
 
-window.refreshChatInfo = function (cch_id, callable, ref) {
+window.refreshChatInfo = function (cch_id, callable, ref, socketConnectionId) {
     if (clientChatInfoAjaxRequestEnabled) {
         clientChatInfoAjaxRequestXhr.abort();
     }
@@ -601,7 +609,7 @@ window.refreshChatInfo = function (cch_id, callable, ref) {
         url: '{$clientChatInfoUrl}',
         dataType: 'json',
         cache: false,
-        data: {cch_id: cch_id},
+        data: {cch_id: cch_id, socketConnectionId: socketConnectionId ? socketConnectionId : 0},
         beforeSend: function () {
             clientChatInfoAjaxRequestEnabled = true;
             $('#_cc_additional_info_wrapper').append(loaderIframe);
