@@ -17,8 +17,8 @@ use yii\helpers\ArrayHelper;
  *
  * @property int $pl_project_id
  * @property string $pl_language_id
- * @property int|null $pl_default
- * @property int|null $pl_enabled
+ * @property bool|null $pl_default
+ * @property bool|null $pl_enabled
  * @property string|null $pl_params
  * @property int|null $pl_created_user_id
  * @property int|null $pl_updated_user_id
@@ -47,7 +47,8 @@ class ProjectLocale extends \yii\db\ActiveRecord
     {
         return [
             [['pl_project_id', 'pl_language_id'], 'required'],
-            [['pl_project_id', 'pl_default', 'pl_enabled', 'pl_created_user_id', 'pl_updated_user_id'], 'integer'],
+            [['pl_project_id',  'pl_created_user_id', 'pl_updated_user_id'], 'integer'],
+            [['pl_default', 'pl_enabled'], 'boolean'],
             [['pl_params', 'pl_created_dt', 'pl_updated_dt'], 'safe'],
             [['pl_language_id'], 'string', 'max' => 5],
             [['pl_project_id', 'pl_language_id'], 'unique', 'targetAttribute' => ['pl_project_id', 'pl_language_id']],

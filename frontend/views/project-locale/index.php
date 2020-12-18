@@ -24,7 +24,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -110,6 +110,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
             ],
 
+            [
+                'label' => 'Language',
+                //'attribute' => 'pl_language_id',
+                'value' => static function (ProjectLocale $model) {
+                    return $model->plLanguage ? Html::encode($model->plLanguage->language) : '-';
+                },
+            ],
+
             'pl_default:boolean',
             'pl_enabled:boolean',
             //'pl_params',
@@ -153,7 +161,45 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'byUserDateTime'
             ],
 
-            ['class' => 'yii\grid\ActionColumn'],
+            [
+                    'class' => 'yii\grid\ActionColumn',
+                'template' => '{view} {update} {delete} &nbsp;&nbsp; {default}',
+                'contentOptions' => ['style' => 'width: 110px'],
+                'visibleButtons' => [
+                    /*'view' => function ($model, $key, $index) {
+                        return User::hasPermission('viewOrder');
+                    },*/
+//                    'update' => static function ($model, $key, $index) use ($user) {
+//                        return $user->isAdmin();
+//                    },
+//
+//                    'delete' => static function ($model, $key, $index) use ($user) {
+//                        return $user->isAdmin();
+//                    },
+
+                        'default' => static function (ProjectLocale $model, $key, $index) {
+                            return !$model->pl_default;
+                        },
+                    ],
+                    'buttons' => [
+                        'default' => static function ($url, ProjectLocale $model) {
+                            return Html::a('<i class="fa fa-check-square-o text-info"></i>', ['project-locale/default', 'pl_project_id' => $model->pl_project_id, 'pl_language_id' => $model->pl_language_id], [
+                                //'class' => 'btn btn-primary btn-xs take-processing-btn',
+                                'title' => 'set Default',
+                                'data-pjax' => 0,
+                                'data' => [
+                                    'confirm' => 'Are you sure you want set Default this Locale?',
+                                    'pl_project_id' => $model->pl_project_id,
+                                    'pl_language_id' => $model->pl_language_id
+                                    //'method' => 'post',
+                                ],
+                            ]);
+                        },
+
+                    ],
+            ],
+
+
         ],
     ]); ?>
 
