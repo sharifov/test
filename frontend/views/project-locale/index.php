@@ -36,11 +36,20 @@ $this->params['breadcrumbs'][] = $this->title;
                     'class' => 'danger'
                 ];
             }
+
+            if ($model->pl_default) {
+                return [
+                    'class' => 'bg-info'
+                ];
+            }
         },
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
+            //['class' => 'yii\grid\SerialColumn'],
+            [
+                'attribute' => 'pl_id',
+                'options' => ['style' => 'width:100px']
+            ],
 
-            //'pl_project_id',
 //            [
 //                'class' => \common\components\grid\project\ProjectColumn::class,
 //                'attribute' => 'pl_project_id',
@@ -79,7 +88,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 //'label' => 'Type Name',
                 'attribute' => 'pl_language_id',
                 'value' => static function (ProjectLocale $model) {
-                    return '<span class="badge badge-warning">' . Html::encode($model->pl_language_id) . '</span>';
+                    return $model->pl_language_id ? '<span class="badge badge-warning">' . Html::encode($model->pl_language_id) . '</span>' : $model->pl_language_id;
                 },
                 'format' => 'raw',
                 'filter' => Select2::widget([
@@ -101,6 +110,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     ]
                 ]),
             ],
+
+            'pl_market_country',
 
             [
                 'label' => 'Locale Name',
@@ -183,14 +194,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'buttons' => [
                         'default' => static function ($url, ProjectLocale $model) {
-                            return Html::a('<i class="fa fa-check-square-o text-info"></i>', ['project-locale/default', 'pl_project_id' => $model->pl_project_id, 'pl_language_id' => $model->pl_language_id], [
+                            return Html::a('<i class="fa fa-check-square-o text-info"></i>', ['project-locale/default', 'id' => $model->pl_id], [
                                 //'class' => 'btn btn-primary btn-xs take-processing-btn',
                                 'title' => 'set Default',
                                 'data-pjax' => 0,
                                 'data' => [
                                     'confirm' => 'Are you sure you want set Default this Locale?',
-                                    'pl_project_id' => $model->pl_project_id,
-                                    'pl_language_id' => $model->pl_language_id
+                                    'id' => $model->pl_id,
                                     //'method' => 'post',
                                 ],
                             ]);

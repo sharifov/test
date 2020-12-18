@@ -15,8 +15,10 @@ use yii\helpers\ArrayHelper;
 /**
  * This is the model class for table "project_locale".
  *
+ * @property int $pl_id
  * @property int $pl_project_id
- * @property string $pl_language_id
+ * @property string|null $pl_language_id
+ * @property string|null $pl_market_country
  * @property bool|null $pl_default
  * @property bool|null $pl_enabled
  * @property string|null $pl_params
@@ -46,12 +48,14 @@ class ProjectLocale extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['pl_project_id', 'pl_language_id'], 'required'],
+            [['pl_project_id'], 'required'], //, 'pl_language_id', 'pl_market_country'
             [['pl_project_id',  'pl_created_user_id', 'pl_updated_user_id'], 'integer'],
             [['pl_default', 'pl_enabled'], 'boolean'],
             [['pl_params', 'pl_created_dt', 'pl_updated_dt'], 'safe'],
             [['pl_language_id'], 'string', 'max' => 5],
-            [['pl_project_id', 'pl_language_id'], 'unique', 'targetAttribute' => ['pl_project_id', 'pl_language_id']],
+            [['pl_market_country'], 'string', 'max' => 2],
+            [['pl_language_id', 'pl_market_country'], 'default', 'value' => null],
+            [['pl_project_id', 'pl_language_id', 'pl_market_country'], 'unique', 'targetAttribute' => ['pl_project_id', 'pl_language_id', 'pl_market_country']],
             [['pl_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pl_created_user_id' => 'id']],
             [['pl_language_id'], 'exist', 'skipOnError' => true, 'targetClass' => Language::class, 'targetAttribute' => ['pl_language_id' => 'language_id']],
             [['pl_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['pl_project_id' => 'id']],
@@ -65,15 +69,17 @@ class ProjectLocale extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'pl_project_id' => 'Project ID',
-            'pl_language_id' => 'Locale ID',
+            'pl_id' => 'Id',
+            'pl_project_id' => 'Project',
+            'pl_language_id' => 'Locale',
+            'pl_market_country' => 'Market Country',
             'pl_default' => 'Default',
             'pl_enabled' => 'Enabled',
             'pl_params' => 'Params',
             'pl_created_user_id' => 'Created User',
             'pl_updated_user_id' => 'Updated User',
-            'pl_created_dt' => 'Created Dt',
-            'pl_updated_dt' => 'Updated Dt',
+            'pl_created_dt' => 'Created Date',
+            'pl_updated_dt' => 'Updated Date',
         ];
     }
 
@@ -93,7 +99,7 @@ class ProjectLocale extends \yii\db\ActiveRecord
             ],
             'user' => [
                 'class' => BlameableBehavior::class,
-                'createdByAttribute' => 'pl_updated_user_id',
+                'createdByAttribute' => 'pl_created_user_id',
                 'updatedByAttribute' => 'pl_updated_user_id',
             ],
         ];

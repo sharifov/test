@@ -17,8 +17,8 @@ class ProjectLocaleSearch extends ProjectLocale
     public function rules()
     {
         return [
-            [['pl_project_id', 'pl_default', 'pl_enabled', 'pl_created_user_id', 'pl_updated_user_id'], 'integer'],
-            [['pl_language_id', 'pl_params', 'pl_created_dt', 'pl_updated_dt'], 'safe'],
+            [['pl_id', 'pl_project_id', 'pl_default', 'pl_enabled', 'pl_created_user_id', 'pl_updated_user_id'], 'integer'],
+            [['pl_language_id', 'pl_params', 'pl_created_dt', 'pl_updated_dt', 'pl_market_country'], 'safe'],
         ];
     }
 
@@ -46,6 +46,10 @@ class ProjectLocaleSearch extends ProjectLocale
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            //'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
         ]);
 
         $this->load($params);
@@ -59,15 +63,17 @@ class ProjectLocaleSearch extends ProjectLocale
         // grid filtering conditions
         $query->andFilterWhere([
             'pl_project_id' => $this->pl_project_id,
+            'pl_id' => $this->pl_id,
             'pl_default' => $this->pl_default,
             'pl_enabled' => $this->pl_enabled,
             'pl_created_user_id' => $this->pl_created_user_id,
             'pl_updated_user_id' => $this->pl_updated_user_id,
-            'pl_created_dt' => $this->pl_created_dt,
-            'pl_updated_dt' => $this->pl_updated_dt,
+            'DATE(pl_created_dt)' => $this->pl_created_dt,
+            'DATE(pl_updated_dt)' => $this->pl_updated_dt,
         ]);
 
         $query->andFilterWhere(['like', 'pl_language_id', $this->pl_language_id])
+            ->andFilterWhere(['like', 'pl_market_country', $this->pl_market_country])
             ->andFilterWhere(['like', 'pl_params', $this->pl_params]);
 
         return $dataProvider;
