@@ -301,11 +301,6 @@ class CasesChangeStatusForm extends Model
             return $this->enabledSendFeedbackEmail;
         }
 
-        if (!$this->case->cs_order_uid) {
-            $this->enabledSendFeedbackEmail = false;
-            return $this->enabledSendFeedbackEmail;
-        }
-
         $clientIsUnsubscribe = ClientProject::find()
             ->andWhere(['cp_client_id' => $this->case->cs_client_id])
             ->andWhere(['cp_project_id' => $this->case->cs_project_id])
@@ -334,7 +329,7 @@ class CasesChangeStatusForm extends Model
             $this->enabledSendFeedbackEmail = false;
             return $this->enabledSendFeedbackEmail;
         }
-        $this->enabledSendFeedbackEmail = $params->object->case->isActiveFeedback();
+        $this->enabledSendFeedbackEmail = $params->object->case->isActiveFeedback($this->case->cs_order_uid);
         return $this->enabledSendFeedbackEmail;
     }
 
