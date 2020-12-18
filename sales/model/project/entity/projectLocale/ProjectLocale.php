@@ -160,6 +160,25 @@ class ProjectLocale extends \yii\db\ActiveRecord
         );
     }
 
+    public static function getEnabledLocaleListByProjectWithLanguageName(int $projectId): array
+    {
+        return ArrayHelper::map(
+            self::find()
+            ->select(['pl_language_id', 'name'])
+            ->andWhere([
+                'pl_project_id' => $projectId,
+                'pl_enabled' => true,
+            ])
+            ->joinWith('plLanguage')
+            ->orderBy(['pl_language_id' => SORT_ASC])
+            ->asArray(true)
+            ->all(),
+            'pl_language_id',
+            'name',
+            null
+        );
+    }
+
     public static function getDefaultLocaleByProject(int $projectId): ?string
     {
         return self::find()

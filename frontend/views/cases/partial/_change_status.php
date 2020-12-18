@@ -68,7 +68,12 @@ $formId = 'change-status-form-id';
             </div>
 
             <div class="language-wrapper d-none">
-                <?= $form->field($statusForm, 'language')->dropDownList($statusForm->getLanguageList(), ['prompt' => '---']) ?>
+                <?= $form->field($statusForm, 'language')->dropDownList($statusForm->getLanguageList(), [
+                        'prompt' => '---',
+                        'options' => [
+                            $statusForm->getLanguageDefault() => ['selected' => true]
+                        ],
+                ]) ?>
             </div>
         <?php endif;?>
 

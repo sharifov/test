@@ -14,6 +14,7 @@ use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
 use sales\entities\cases\CasesStatusTransferList;
 use sales\helpers\user\UserDateTimeHelper;
+use sales\model\project\entity\projectLocale\ProjectLocale;
 use yii\base\Model;
 use yii\db\Expression;
 use yii\helpers\Json;
@@ -113,7 +114,7 @@ class CasesChangeStatusForm extends Model
             ['sendTo', 'in', 'range' => $this->getSendToList(), 'skipOnError' => true, 'skipOnEmpty' => true],
 
             ['language', 'required', 'when' => function () {
-                return $this->isSendFeedback();
+                return  $this->isSendFeedback();
             }, 'skipOnEmpty' => false],
             ['language', 'in', 'range' => array_keys($this->getLanguageList()), 'skipOnEmpty' => true, 'skipOnError' => true],
         ];
@@ -274,8 +275,24 @@ class CasesChangeStatusForm extends Model
         if ($this->languageList !== null) {
             return $this->languageList;
         }
-        $this->languageList = \common\models\Language::getLanguages(true);
+        $this->languageList = ProjectLocale::getEnabledLocaleListByProjectWithLanguageName($this->case->cs_project_id);
         return $this->languageList;
+    }
+
+    public function getLanguageDefault(): ?string
+    {
+        if (
+            $this->case->client->cl_locale
+            && array_key_exists($this->case->client->cl_locale, $this->getLanguageList())
+        ) {
+            return $this->case->client->cl_locale;
+        }
+
+        if ($projectLocaleDefault = ProjectLocale::getDefaultLocaleByProject($this->case->cs_project_id)) {
+            return $projectLocaleDefault;
+        }
+
+        return null;
     }
 
     public function isEnabledSendFeedbackEmail(): bool
