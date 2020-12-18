@@ -17,7 +17,9 @@ class ActivePane extends React.Component {
     callUpdateHandler() {
         let self = this;
         return function (event) {
-            //active
+            //only for minify version
+            window.phoneWidget.emptyFunc('ActivePane.callUpdateHandler');
+
             self.setState({
                 call: event.call
             });

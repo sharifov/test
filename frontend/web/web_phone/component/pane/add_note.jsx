@@ -17,7 +17,9 @@ class AddNote extends  React.Component {
     callUpdateHandler() {
         let self = this;
         return function(event) {
-            //add note
+            //only for minify version
+            window.phoneWidget.emptyFunc('AddNote.callUpdateHandler');
+
             self.setState({
                 call: event.call
             });

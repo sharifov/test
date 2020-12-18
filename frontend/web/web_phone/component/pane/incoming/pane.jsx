@@ -17,7 +17,9 @@ class IncomingPane extends React.Component {
     callUpdateHandler() {
         let self = this;
         return function (event) {
-            //incoming
+            //only for minify version
+            window.phoneWidget.emptyFunc('IncomingPane.callUpdateHandler');
+
             self.setState({
                 call: event.call
             });

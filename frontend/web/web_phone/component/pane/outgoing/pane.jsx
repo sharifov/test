@@ -17,7 +17,9 @@ class OutgoingPane extends React.Component {
     callUpdateHandler() {
         let self = this;
         return function (event) {
-            //outgoing
+            //only for minify version
+            window.phoneWidget.emptyFunc('OutgoingPane.callUpdateHandler');
+
             self.setState({
                 call: event.call
             });
