@@ -37,6 +37,7 @@ use yii\helpers\Json;
  * @property array|null $sendToList
  * @property array|null $languageList
  * @property bool|null $enabledSendFeedbackEmail
+ * @property string|null $sendEmailDefault
  */
 class CasesChangeStatusForm extends Model
 {
@@ -50,6 +51,7 @@ class CasesChangeStatusForm extends Model
     public $language;
 
     public $caseGid;
+    public ?string $sendEmailDefault = null;
 
     private $case;
     private $user;
@@ -251,7 +253,7 @@ class CasesChangeStatusForm extends Model
 
         $this->sendToList = [];
 
-        $emails = ClientEmail::find()->select(['email'])
+        $emails = ClientEmail::find()->select(['email', 'type'])
             ->andWhere(['client_id' => $this->case->cs_client_id])
             ->andWhere([
                 'OR',
@@ -259,11 +261,19 @@ class CasesChangeStatusForm extends Model
                 ['<>', 'type', ClientEmail::EMAIL_INVALID],
             ])
             ->orderBy(new Expression('FIELD (type, ' . ClientEmail::EMAIL_FAVORITE . ', ' . ClientEmail::EMAIL_VALID . ', ' . ClientEmail::EMAIL_NOT_SET . ', null)'))
-            ->column();
+            ->asArray()
+            ->all();
 
         foreach ($emails as $email) {
-            if (!EmailUnsubscribe::find()->andWhere(['eu_email' => $email, 'eu_project_id' => $this->case->cs_project_id])->exists()) {
-                $this->sendToList[$email] = $email;
+            if (!EmailUnsubscribe::find()->andWhere(['eu_email' => $email['email'], 'eu_project_id' => $this->case->cs_project_id])->exists()) {
+                if (count($emails) === 1) {
+                    $this->sendEmailDefault = $email['email'];
+                } else {
+                    if (!$this->sendEmailDefault && (int)$email['type'] === ClientEmail::EMAIL_FAVORITE) {
+                        $this->sendEmailDefault = $email['email'];
+                    }
+                }
+                $this->sendToList[$email['email']] = $email['email'];
             }
         }
 

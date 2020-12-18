@@ -64,7 +64,12 @@ $formId = 'change-status-form-id';
             <?php endif; ?>
 
             <div class="sendto-wrapper d-none">
-                <?= $form->field($statusForm, 'sendTo')->dropDownList($statusForm->getSendToList()) ?>
+                <?= $form->field($statusForm, 'sendTo')->dropDownList($statusForm->getSendToList(), [
+                        'prompt' => '---',
+                        'options' => [
+                            $statusForm->sendEmailDefault => ['selected' => true]
+                        ],
+                ]) ?>
             </div>
 
             <div class="language-wrapper d-none">
