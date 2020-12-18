@@ -206,7 +206,7 @@ class ClientManageService
     public function updateClient(Client $client, ClientCreateForm $form): void
     {
         $client = $this->finder->clientFind($client);
-        $client->edit((string)$form->firstName, (string)$form->lastName, (string)$form->middleName);
+        $client->edit((string)$form->firstName, (string)$form->lastName, (string)$form->middleName, (string)$form->locale);
         $this->clientRepository->save($client);
     }
 
@@ -548,5 +548,29 @@ class ClientManageService
         }
 
         return $client;
+    }
+
+    /**
+     * @param Client $client
+     * @param $saleData
+     * @return string|null
+     * @throws \yii\base\InvalidConfigException
+     */
+    public static function setLocaleFromSaleDate(Client $client, $saleData): ?string
+    {
+        $result = null;
+        $locale = $saleData['user_language'] ?? null;
+        if ($locale && empty($client->cl_locale)) {
+            $client->cl_locale = $locale;
+            if ($client->validate('cl_locale')) {
+                $clientRepository = \Yii::createObject(ClientRepository::class);
+                $clientRepository->save($client);
+                $result = $locale;
+            } else {
+                throw new \RuntimeException('Client locale is not valid. ' .
+                    $client->getFirstError('cl_locale'), -1);
+            }
+        }
+        return $result;
     }
 }

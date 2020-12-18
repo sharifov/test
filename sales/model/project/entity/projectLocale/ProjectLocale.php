@@ -1,4 +1,5 @@
 <?php
+
 namespace sales\model\project\entity\projectLocale;
 
 use common\models\Employee;
@@ -9,6 +10,7 @@ use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "project_locale".
@@ -134,5 +136,31 @@ class ProjectLocale extends \yii\db\ActiveRecord
     public function getPlUpdatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'pl_updated_user_id']);
+    }
+
+    public static function getLocaleListByProject(int $projectId): array
+    {
+        return ArrayHelper::map(
+            self::find()
+            ->select(['pl_language_id'])
+            ->where(['pl_project_id' => $projectId])
+            ->orderBy(['pl_language_id' => SORT_ASC])
+            ->asArray(true)
+            ->all(),
+            'pl_language_id',
+            'pl_language_id',
+            null
+        );
+    }
+
+    public static function getDefaultLocaleByProject(int $projectId): ?string
+    {
+        return self::find()
+            ->select(['pl_language_id'])
+            ->where([
+                'pl_project_id' => $projectId,
+                'pl_default' => true,
+            ])
+            ->scalar();
     }
 }

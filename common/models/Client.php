@@ -42,6 +42,7 @@ use yii\db\ActiveQuery;
  * @property bool $cl_excluded
  * @property string|null $cl_ppn
  * @property string|null $cl_ip
+ * @property string|null $cl_locale
  *
  * @property ClientEmail[] $clientEmails
  * @property ClientPhone[] $clientPhones
@@ -133,12 +134,14 @@ class Client extends ActiveRecord
      * @param string $firstName
      * @param string $lastName
      * @param string $middleName
+     * @param string|null $locale
      */
-    public function edit(string $firstName, string $lastName, string $middleName): void
+    public function edit(string $firstName, string $lastName, string $middleName, ?string $locale): void
     {
         $this->first_name = $firstName;
         $this->last_name = $lastName;
         $this->middle_name = $middleName;
+        $this->cl_locale = $locale;
     }
 
     /**
@@ -176,6 +179,8 @@ class Client extends ActiveRecord
             ['cl_ppn', 'string', 'max' => 10],
 
             ['cl_ip', 'string', 'max' => 39],
+
+            ['cl_locale', 'string', 'max' => 5],
         ];
     }
 
@@ -206,6 +211,7 @@ class Client extends ActiveRecord
             'cl_excluded' => 'Is exclude',
             'cl_ppn' => 'PPN',
             'cl_ip' => 'IP',
+            'cl_locale' => 'Locale',
         ];
     }
 

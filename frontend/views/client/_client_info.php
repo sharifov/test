@@ -27,6 +27,7 @@ $user = Yii::$app->user->identity;
                 ],
                 'middle_name',
                 'last_name',
+                'locale',
             ],
         ]) ?>
     </div>

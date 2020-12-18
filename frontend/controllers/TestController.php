@@ -116,6 +116,7 @@ use sales\model\clientChatHold\entity\ClientChatHold;
 use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
 use sales\model\clientChatVisitor\entity\ClientChatVisitor;
 use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
+use sales\model\project\entity\projectLocale\ProjectLocale;
 use sales\repositories\client\ClientsQuery;
 use sales\services\client\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;

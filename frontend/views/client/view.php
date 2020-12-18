@@ -77,6 +77,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'cl_excluded:boolean',
             'cl_ppn',
             'cl_ip',
+            'cl_locale',
         ],
     ]) ?>
     </div>

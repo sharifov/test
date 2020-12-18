@@ -61,6 +61,7 @@ use sales\services\cases\CasesCommunicationService;
 use sales\repositories\user\UserRepository;
 use sales\services\cases\CasesCreateService;
 use sales\services\cases\CasesManageService;
+use sales\services\client\ClientManageService;
 use sales\services\client\ClientUpdateFromEntityService;
 use sales\services\email\EmailService;
 use sales\services\TransactionManager;
@@ -805,7 +806,7 @@ class CasesController extends FController
     public function actionAddSale()
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        $out = ['error' => '', 'data' => []];
+        $out = ['error' => '', 'data' => [], 'locale' => ''];
 
         $gid = Yii::$app->request->post('gid');
         $hash = Yii::$app->request->post('h');
@@ -845,6 +846,10 @@ class CasesController extends FController
 
                 $model->updateLastAction();
                 $this->saleTicketService->createSaleTicketBySaleData($cs, $saleData);
+
+                if ($client = $model->client) {
+                    $out['locale'] = (string) ClientManageService::setLocaleFromSaleDate($client, $saleData);
+                }
             }
 
             $out['data'] = ['sale_id' => $saleData['saleId'], 'gid' => $gid, 'h' => $hash];
@@ -1420,10 +1425,25 @@ class CasesController extends FController
 //        ]);
 //    }
 
+    public function actionClientUpdateValidation(): array
+    {
+        try {
+            $case = $this->findModelByGid((string) Yii::$app->request->get('gid'));
+            $form = new CasesClientUpdateForm($case);
+
+            if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                return ActiveForm::validate($form);
+            }
+        } catch (\Throwable $throwable) {
+            \Yii::error(AppHelper::throwableLog($throwable), 'CasesController:actionClientUpdateValidation');
+        }
+        throw new BadRequestHttpException();
+    }
+
     /**
-     * @return string|Response
+     * @return array|string
      * @throws NotFoundHttpException
-     * @throws \Throwable
      */
     public function actionClientUpdate()
     {
@@ -1436,47 +1456,22 @@ class CasesController extends FController
 
         $form = new CasesClientUpdateForm($case);
 
-        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
-            try {
-                $this->clientUpdateFromEntityService->updateClientFromCase($case, $form);
-                Yii::$app->session->setFlash('success', 'Client information has been updated successfully.');
-            } catch (\DomainException $e) {
-                Yii::$app->session->setFlash('error', $e->getMessage());
+        if (Yii::$app->request->isPost) {
+            $response = ['error' => true, 'message' => ''];
+            if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+                try {
+                    $this->clientUpdateFromEntityService->updateClientFromCase($case, $form);
+                    $response['error'] = false;
+                    $response['message'] = 'Client information has been updated successfully.';
+                } catch (\Throwable $throwable) {
+                    $response['message'] = $throwable->getMessage();
+                }
+            } else {
+                $response['message'] = $this->getParsedErrors($form->getErrors());
             }
-            return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return $response;
         }
-
-
-//        try {
-//            if ($form->load(Yii::$app->request->post())) {
-//                if($form->validate()) {
-//                    if ($client = $case->client) {
-//                        $client->first_name = $form->first_name;
-//                        $client->last_name = $form->last_name;
-//                        $client->middle_name = $form->middle_name;
-//
-//                        if ($client->save()) {
-//                            Yii::$app->session->setFlash('success', 'Client information has been updated successfully.');
-//                        } else {
-//                            Yii::$app->session->setFlash('error', VarDumper::dumpAsString($client->errors));
-//                        }
-//
-//                    } else {
-//                        Yii::$app->session->setFlash('warning', 'Client not found (Client Id: ' . $case->cs_client_id . ')');
-//                    }
-//                    return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
-//                }
-//            } else {
-//                if($client = $case->client) {
-//                    $form->first_name = $client->first_name;
-//                    $form->last_name = $client->last_name;
-//                    $form->middle_name = $client->middle_name;
-//                }
-//            }
-//
-//        } catch (\Throwable $exception) {
-//            $form->addError('first_name', $exception->getMessage());
-//        }
 
         return $this->renderAjax('partial/_client_update', [
             'model' => $form,
@@ -1694,20 +1689,24 @@ class CasesController extends FController
 
         $withFareRules = Yii::$app->request->post('check_fare_rules', 0);
 
-        try {
-            $out = [
-                'error' => 0,
-                'message' => ''
-            ];
+        $out = [
+            'error' => 0,
+            'message' => '',
+            'locale' => '',
+        ];
 
+        try {
             $case = $this->casesRepository->find((int)$caseId);
             $caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$caseSaleId);
             $this->checkAccessToManageCaseSaleInfo($caseSale, true);
 
             $saleData = $this->casesSaleService->detailRequestToBackOffice((int)$caseSale->css_sale_id, $withFareRules, 120, 1);
             $caseSale = $this->casesSaleService->refreshOriginalSaleData($caseSale, $case, $saleData);
-
             $this->saleTicketService->refreshSaleTicketBySaleData((int)$caseId, $caseSale, $saleData);
+
+            if ($client = $case->client) {
+                $out['locale'] = (string) ClientManageService::setLocaleFromSaleDate($client, $saleData);
+            }
 
             $out['message'] = 'Sale info: ' . $caseSale->css_sale_id . ' successfully refreshed';
         } catch (\Throwable $throwable) {

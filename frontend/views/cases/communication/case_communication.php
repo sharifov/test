@@ -21,7 +21,9 @@ use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
 use sales\entities\cases\Cases;
 use sales\helpers\communication\StatisticsHelper;
+use sales\helpers\projectLocale\ProjectLocaleHelper;
 use sales\helpers\setting\SettingHelper;
+use sales\model\project\entity\projectLocale\ProjectLocale;
 use yii\helpers\Html;
 use yii\bootstrap4\Modal;
 use yii\helpers\VarDumper;
@@ -155,9 +157,13 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
                     </div>
                     <div class="form-group">
 
-                        <?php echo $form2->field($previewEmailForm, 'e_email_message')->textarea(
-                            ['style' => 'display:none', 'id' => 'e_email_message']
-                        ) ?>
+                        <?php echo $form2
+                            ->field($previewEmailForm, 'e_email_message')
+                            ->textarea([
+                                'style' => 'display:none',
+                                'id' => 'e_email_message'
+                            ])
+                        ?>
 
                         <div style="max-height: 800px; overflow-x: auto;">
                             <iframe id="email_view" src="/lead/get-template?key_cache=<?php echo $previewEmailForm->keyCache?>"
@@ -230,7 +236,7 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
 
                             <div class="col-sm-6 form-group">
                                 <?= $form3->field($previewSmsForm, 's_phone_from')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
-                                <?php //= $form3->field($previewSmsForm, 's_case_id')->hiddenInput()->label(false); ?>
+                                <?php //= $form3->field($previewSmsForm, 's_case_id')->hiddenInput()->label(false);?>
                                 <?= $form3->field($previewSmsForm, 's_language_id')->hiddenInput()->label(false); ?>
                                 <?= $form3->field($previewSmsForm, 's_sms_tpl_id')->hiddenInput()->label(false); ?>
                                 <?= $form3->field($previewSmsForm, 's_quote_list')->hiddenInput()->label(false) ?>
@@ -334,7 +340,7 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
 //                                              } else if ($agentParams->upp_email) {
 //                                                    $typeList[$tk] = $itemName . ' (' . $agentParams->upp_email . ')';
 //                                              }
-                                            } else if ($agentParams->getEmail()) {
+                                            } elseif ($agentParams->getEmail()) {
                                                 $typeList[$tk] = $itemName . ' (' . $agentParams->getEmail() . ')';
                                             }
                                         }
@@ -390,17 +396,36 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
                             </div>
 
                             <div class="col-sm-3 form-group message-field-sms" id="sms-template-group">
-                                <?php //= $form->field($comForm, 'c_sms_tpl_id')->dropDownList(\common\models\SmsTemplateType::getList(false), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_id']) ?>
+                                <?php //= $form->field($comForm, 'c_sms_tpl_id')->dropDownList(\common\models\SmsTemplateType::getList(false), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_id'])?>
                                 <?= $form->field($comForm, 'c_sms_tpl_key')->dropDownList(\common\models\SmsTemplateType::getKeyList(false, $model->cs_dep_id), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_key']) ?>
                             </div>
 
                             <div class="col-sm-3 form-group message-field-email" id="email-template-group" style="display: none;">
-                                <?php //= $form->field($comForm, 'c_email_tpl_id')->dropDownList(\common\models\EmailTemplateType::getList(false, \common\models\Department::DEPARTMENT_SALES), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_id']) ?>
+                                <?php //= $form->field($comForm, 'c_email_tpl_id')->dropDownList(\common\models\EmailTemplateType::getList(false, \common\models\Department::DEPARTMENT_SALES), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_id'])?>
                                 <?= $form->field($comForm, 'c_email_tpl_key')->dropDownList(\common\models\EmailTemplateType::getKeyList(false, $model->cs_dep_id), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_key']) ?>
                             </div>
 
                             <div class="col-sm-3 form-group message-field-sms message-field-email" id="language-group" style="display: block;">
-                                <?= $form->field($comForm, 'c_language_id')->dropDownList(\common\models\Language::getLanguages(true), ['prompt' => '---', 'class' => 'form-control', 'id' => 'language']) ?>
+
+                                <?php
+                                    $localeList = ProjectLocale::getLocaleListByProject((int) $model->cs_project_id);
+                                    $clientLocale = $model->client ? (string) $model->client->cl_locale : '';
+                                    $projectDefaultLocale = ProjectLocale::getDefaultLocaleByProject((int) $model->cs_project_id);
+                                    $defaultLocale = ProjectLocaleHelper::getSelectedLocale($localeList, $clientLocale, $projectDefaultLocale);
+                                ?>
+
+                                <?php echo $form->field($comForm, 'c_language_id')
+                                    ->dropDownList(
+                                        $localeList,
+                                        [
+                                            'prompt' => '---',
+                                            'class' => 'form-control',
+                                            'id' => 'language',
+                                            'options' => [
+                                                $defaultLocale => ['selected' => true]
+                                            ],
+                                        ]
+                                    ) ?>
                             </div>
 
                             <div class="col-sm-3 form-group message-field-email" id="email-address" style="display: none;">
@@ -425,7 +450,7 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
                                         $optionsEmail['prompt'] = '---';
                                     }
                                     ?>
-                                    <?php //= $form->field($comForm,'dep_email_id')->dropDownList(\yii\helpers\ArrayHelper::map($departmentEmails, 'dep_id', 'dep_email'), $optionsEmail) ?>
+                                    <?php //= $form->field($comForm,'dep_email_id')->dropDownList(\yii\helpers\ArrayHelper::map($departmentEmails, 'dep_id', 'dep_email'), $optionsEmail)?>
                                     <?= $form->field($comForm, 'dep_email_id')->dropDownList($departmentEmailsList, $optionsEmail) ?>
                                 </div>
                             <?php endif; ?>
@@ -473,7 +498,7 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
                                         $optionsPhone['prompt'] = '---';
                                     }
                                     ?>
-                                    <?php //= $form->field($comForm,'dpp_phone_id')->dropDownList(\yii\helpers\ArrayHelper::map($departmentPhones, 'dpp_id', 'dpp_phone_number'), $optionsPhone) ?>
+                                    <?php //= $form->field($comForm,'dpp_phone_id')->dropDownList(\yii\helpers\ArrayHelper::map($departmentPhones, 'dpp_id', 'dpp_phone_number'), $optionsPhone)?>
                                     <?= $form->field($comForm, 'dpp_phone_id')->dropDownList($departmentPhonesList, $optionsPhone) ?>
                                 </div>
                             <?php endif; ?>
@@ -501,7 +526,7 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
 
                         <div id="email-input-box" class="message-field-email" style="display: none;">
                             <div class="form-group" id="email-textarea-div">
-                                <?php //= $form->field($comForm, 'c_email_message')->textarea(['rows' => 4, 'class' => 'form-control', 'id' => 'email-message']) ?>
+                                <?php //= $form->field($comForm, 'c_email_message')->textarea(['rows' => 4, 'class' => 'form-control', 'id' => 'email-message'])?>
 
                                 <?= $form->field($comForm, 'c_email_message')->widget(\dosamigos\ckeditor\CKEditor::class, [
                                     'options' => [
@@ -571,7 +596,7 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
 
                                     <?php /*<a href="#" class="call-phone" data-project-id="6" data-case-id="92138" data-phone="+37369594567">+37369594567</a> - Alex <br/>*/?>
 
-                                    <?php //= Html::button('<i class="fa fa-microphone-slash"></i>', ['class' => 'btn call-box__btn call-box__btn--mute']) ?>
+                                    <?php //= Html::button('<i class="fa fa-microphone-slash"></i>', ['class' => 'btn call-box__btn call-box__btn--mute'])?>
                                     <?php /*= Html::button('<i class="fa fa-pause"></i>', ['class' => 'btn call-box__btn call-box__btn--pause', 'disabled' => true, 'id' => 'btn-pause'])*/ ?>
                                 </div>
                                 <?php else : ?>
@@ -926,4 +951,3 @@ $js = <<<JS
 JS;
 
 $this->registerJs($js);
-

@@ -114,7 +114,14 @@ use sales\auth\Auth;
                                         return $caseModel->getClientTime();
                                     },
                                     'format' => 'html'
-                                ]
+                                ],
+                                [
+                                    'attribute' => 'cl_locale',
+                                    'value' => static function (Client $client) {
+                                        return '<span class="js_locale_client">' . $client->cl_locale . '</span>';
+                                    },
+                                    'format' => 'raw',
+                                ],
                             ],
                         ]) ?>
                     </div>
@@ -189,6 +196,8 @@ use sales\auth\Auth;
             <?php endif; ?>
         </div>
     </div>
+
+
 
 <?php
 $addPhoneAjaxUrl = \yii\helpers\Url::to(['cases/add-phone', 'gid' => $caseModel->cs_gid]);

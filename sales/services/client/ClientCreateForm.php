@@ -16,6 +16,7 @@ use yii\base\Model;
  * @property int|null $projectId
  * @property int|null $typeCreate
  * @property int|string $ip
+ * @property int|string $locale
  */
 class ClientCreateForm extends Model
 {
@@ -29,6 +30,7 @@ class ClientCreateForm extends Model
     public $projectId;
     public $typeCreate;
     public $ip;
+    public $locale;
 
     /**
      * @return array
@@ -56,6 +58,9 @@ class ClientCreateForm extends Model
 
             ['ip', 'default', 'value' => null],
             ['ip', 'string', 'max' => 39],
+
+            ['locale', 'default', 'value' => null],
+            ['locale', 'string', 'max' => 5],
         ];
     }
 

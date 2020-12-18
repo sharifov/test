@@ -295,6 +295,11 @@ $(document).on('click', '.refresh-from-bo', function (e) {
                     hide: true
                 }); 
                 $.pjax.reload({container: '#pjax-sale-list',push: false, replace: false, 'scrollTo': false, timeout: 1000, async: false,});
+                
+                let jsLocaleClientEl = $('.js_locale_client');
+                if (data.locale && jsLocaleClientEl.length) {
+                    jsLocaleClientEl.text(data.locale);      
+                }
             }
         },
         error: function (text) {

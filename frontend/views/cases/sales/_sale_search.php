@@ -278,6 +278,10 @@ $jsCode = <<<JS
                         text: 'Sale Id: ' + data.data.sale_id +' successfully added',
                         hide: true
                     });
+                    let jsLocaleClientEl = $('.js_locale_client');
+                    if (data.locale && jsLocaleClientEl.length) {
+                        jsLocaleClientEl.text(data.locale);      
+                    }
                 }
                 
             },
