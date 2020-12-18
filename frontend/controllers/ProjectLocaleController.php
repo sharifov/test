@@ -7,6 +7,7 @@ use sales\model\project\entity\projectLocale\ProjectLocale;
 use sales\model\project\entity\projectLocale\search\ProjectLocaleSearch;
 use frontend\controllers\FController;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -100,6 +101,59 @@ class ProjectLocaleController extends FController
         return $this->render('update', [
             'model' => $model,
         ]);
+    }
+
+    /**
+     * Updates an existing ProjectLocale model.
+     * If update is successful, the browser will be redirected to the 'view' page.
+     * @param integer $pl_project_id
+     * @param string $pl_language_id
+     * @return mixed
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    public function actionDefault($pl_project_id, $pl_language_id)
+    {
+        $model = $this->findModel($pl_project_id, $pl_language_id);
+        $model->pl_default = true;
+
+        if ($model->save()) {
+            [$lang, $country] = explode('-', $model->pl_language_id);
+
+            //VarDumper::dump($lang); exit;
+
+            if (!empty($lang)) {
+                $locales = ProjectLocale::find()->where([
+                    'pl_default' => true,
+                    'pl_project_id' => $model->pl_project_id
+                ])
+                    ->andWhere(['<>', 'pl_language_id', $model->pl_language_id])
+                    ->andWhere(['like', 'pl_language_id', $lang . '-'])
+                    ->all();
+
+                //VarDumper::dump($locales); exit;
+
+                if ($locales) {
+                    foreach ($locales as $locale) {
+                        $locale->pl_default = false;
+                        if (!$locale->update()) {
+                            Yii::error($locale->errors, 'ProjectLocale:default:save');
+                        }
+                    }
+                }
+            }
+
+            Yii::$app->session->setFlash('success', 'Set default Locale ' . $model->pl_language_id);
+           // return $this->redirect(['view', 'pl_project_id' => $model->pl_project_id, 'pl_language_id' => $model->pl_language_id]);
+        } else {
+            Yii::error($model->errors, 'ProjectLocale:save');
+            Yii::$app->session->setFlash('error', 'Error: not set default Locale ' . $model->pl_language_id);
+        }
+
+        return $this->redirect(['index']);
+
+//        return $this->render('update', [
+//            'model' => $model,
+//        ]);
     }
 
     /**
