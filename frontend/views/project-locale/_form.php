@@ -43,7 +43,7 @@ use yii\widgets\ActiveForm;
                     'pluginOptions' => ['allowClear' => true],
                 ]);
 
-    ?>
+?>
                 </div>
                 <div class="col-md-3">
                     <?php echo $form->field($model, 'pl_market_country')->textInput(['maxlength' => true])?>

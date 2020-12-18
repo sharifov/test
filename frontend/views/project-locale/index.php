@@ -36,6 +36,12 @@ $this->params['breadcrumbs'][] = $this->title;
                     'class' => 'danger'
                 ];
             }
+
+            if ($model->pl_default) {
+                return [
+                    'class' => 'bg-info'
+                ];
+            }
         },
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
@@ -188,14 +194,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'buttons' => [
                         'default' => static function ($url, ProjectLocale $model) {
-                            return Html::a('<i class="fa fa-check-square-o text-info"></i>', ['project-locale/default', 'pl_project_id' => $model->pl_project_id, 'pl_language_id' => $model->pl_language_id], [
+                            return Html::a('<i class="fa fa-check-square-o text-info"></i>', ['project-locale/default', 'id' => $model->pl_id], [
                                 //'class' => 'btn btn-primary btn-xs take-processing-btn',
                                 'title' => 'set Default',
                                 'data-pjax' => 0,
                                 'data' => [
                                     'confirm' => 'Are you sure you want set Default this Locale?',
-                                    'pl_project_id' => $model->pl_project_id,
-                                    'pl_language_id' => $model->pl_language_id
+                                    'id' => $model->pl_id,
                                     //'method' => 'post',
                                 ],
                             ]);

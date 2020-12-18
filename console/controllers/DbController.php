@@ -22,6 +22,7 @@ use sales\entities\cases\Cases;
 use sales\helpers\email\TextConvertingHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
+use sales\model\project\entity\projectLocale\ProjectLocale;
 use sales\services\lead\qcall\CalculateDateService;
 use sales\services\log\GlobalLogFormatAttrService;
 use yii\base\InvalidConfigException;
@@ -715,6 +716,727 @@ ORDER BY lf.lead_id, id';
             ', Execute Time: ' . number_format(round(microtime(true) - $timeStart, 2), 2);
 
         Yii::info($resultInfo, 'info\:' . self::class . ':' . $this->action->id);
+        $this->printInfo($resultInfo, $this->action->id);
+    }
+
+
+    public function actionInitProjectCountry()
+    {
+        $this->printInfo('Start', $this->action->id);
+        $timeStart = microtime(true);
+        $data = [
+            'AR' => [
+                'facebook' => 'https://www.facebook.com/kayak.com.argentina',
+                'instagram' => 'https://www.instagram.com/kayak_latam/',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.com.ar',
+                'privacy_policy' => 'https://www.kayak.com.ar/privacy',
+                'terms_of_use' => 'https://www.kayak.com.ar/terms-of-use-book',
+                'support_phone_number' => '+54 11 39899690',
+                'verification_phone_number' => '+54 11 39899690'
+            ],
+            'AU' => [
+                'facebook' => 'https://facebook.com/KAYAK.Australia',
+                'instagram' => 'https://www.instagram.com/kayak_au/',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.com.au',
+                'privacy_policy' => 'https://www.kayak.com.au/privacy',
+                'terms_of_use' => 'https://www.kayak.com.au/terms-of-use-book',
+                'support_phone_number' => '+61 29 0378329',
+                'verification_phone_number' => '+61 29 0378329'
+            ],
+            'AT' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.at.kayak.com',
+                'privacy_policy' => 'https://www.at.kayak.com/privacy',
+                'terms_of_use' => 'https://www.at.kayak.com/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'BE' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.be.kayak.com',
+                'privacy_policy' => 'https://www.be.kayak.com/privacy',
+                'terms_of_use' => 'https://www.be.kayak.com/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'BO' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.bo',
+                'privacy_policy' => 'https://www.kayak.bo/privacy',
+                'terms_of_use' => 'https://www.kayak.bo/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'BR' => [
+                'facebook' => 'https://www.facebook.com/kayak.brazil',
+                'instagram' => 'https://www.instagram.com/kayak_br/',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.com.br',
+                'privacy_policy' => 'https://www.kayak.com.br/privacy',
+                'terms_of_use' => 'https://www.kayak.com.br/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'CA' => [
+                'facebook' => 'https://www.facebook.com/kayak',
+                'instagram' => 'https://www.instagram.com/kayak/',
+                'twitter' => '',
+                'homepage' => 'https://www.ca.kayak.com',
+                'privacy_policy' => 'https://www.ca.kayak.com/privacy',
+                'terms_of_use' => 'https://www.ca.kayak.com/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'CT' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.cat',
+                'privacy_policy' => 'https://www.kayak.cat/privacy',
+                'terms_of_use' => 'https://www.kayak.cat/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'CL' => [
+                'facebook' => 'https://www.facebook.com/kayak.com.chile',
+                'instagram' => 'https://www.instagram.com/kayak_latam/',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.cl',
+                'privacy_policy' => 'https://www.kayak.cl/privacy',
+                'terms_of_use' => 'https://www.kayak.cl/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'CN' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.cn.kayak.com',
+                'privacy_policy' => 'https://www.cn.kayak.com/privacy',
+                'terms_of_use' => 'https://www.cn.kayak.com/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'CO' => [
+                'facebook' => 'https://www.facebook.com/kayak.com.colombia',
+                'instagram' => 'https://www.instagram.com/kayak_latam/',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.com.co',
+                'privacy_policy' => 'https://www.kayak.com.co/privacy',
+                'terms_of_use' => 'https://www.kayak.com.co/terms-of-use-book',
+                'support_phone_number' => '+57 1 3819260',
+                'verification_phone_number' => '+ 57 1 3819260'
+            ],
+            'CR' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.co.cr',
+                'privacy_policy' => 'https://www.kayak.co.cr/privacy',
+                'terms_of_use' => 'https://www.kayak.co.cr/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'CZ' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.cz.kayak.com',
+                'privacy_policy' => 'https://www.cz.kayak.com/privacy',
+                'terms_of_use' => 'https://www.cz.kayak.com/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'DK' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.dk',
+                'privacy_policy' => 'https://www.kayak.dk/privacy',
+                'terms_of_use' => 'https://www.kayak.dk/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'DO' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.com.do',
+                'privacy_policy' => 'https://www.kayak.com.do/privacy',
+                'terms_of_use' => 'https://www.kayak.com.do/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'EC' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.com.ec',
+                'privacy_policy' => 'https://www.kayak.com.ec/privacy',
+                'terms_of_use' => 'https://www.kayak.com.ec/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'SV' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.com.sv',
+                'privacy_policy' => 'https://www.kayak.com.sv/privacy',
+                'terms_of_use' => 'https://www.kayak.com.sv/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'FI' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.fi.kayak.com',
+                'privacy_policy' => 'https://www.fi.kayak.com/privacy',
+                'terms_of_use' => 'https://www.fi.kayak.com/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'FR' => [
+                'facebook' => '',
+                'instagram' => 'https://www.instagram.com/kayak_europe/',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.fr',
+                'privacy_policy' => 'https://www.kayak.fr/privacy',
+                'terms_of_use' => 'https://www.kayak.fr/terms-of-use-book',
+                'support_phone_number' => '+33 7 55539082',
+                'verification_phone_number' => '+ 33 7 55539082'
+            ],
+            'DE' => [
+                'facebook' => 'https://www.facebook.com/kayak.deutschland',
+                'instagram' => 'https://www.instagram.com/kayak_europe/',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.de',
+                'privacy_policy' => 'https://www.kayak.de/privacy',
+                'terms_of_use' => 'https://www.kayak.de/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'GR' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.gr.kayak.com',
+                'privacy_policy' => 'https://www.gr.kayak.com/privacy',
+                'terms_of_use' => 'https://www.gr.kayak.com/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'GT' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.com.gt',
+                'privacy_policy' => 'https://www.kayak.com.gt/privacy',
+                'terms_of_use' => 'https://www.kayak.com.gt/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'HN' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.com.hn',
+                'privacy_policy' => 'https://www.kayak.com.hn/privacy',
+                'terms_of_use' => 'https://www.kayak.com.hn/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'HK' => [
+                'facebook' => 'https://www.facebook.com/KAYAK.HongKong',
+                'instagram' => 'https://www.instagram.com/kayak_hk/',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.com.hk',
+                'privacy_policy' => 'https://www.kayak.com.hk/privacy',
+                'terms_of_use' => 'https://www.kayak.com.hk/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'IN' => [
+                'facebook' => 'https://www.facebook.com/kayak.co.in',
+                'instagram' => 'https://www.instagram.com/kayak_in/',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.co.in',
+                'privacy_policy' => 'https://www.kayak.co.in/privacy',
+                'terms_of_use' => 'https://www.kayak.co.in/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'ID' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.co.id',
+                'privacy_policy' => 'https://www.kayak.co.id/privacy',
+                'terms_of_use' => 'https://www.kayak.co.id/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'IE' => [
+                'facebook' => 'https://www.facebook.com/kayak.ireland',
+                'instagram' => 'https://www.instagram.com/kayak_europe/',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.ie',
+                'privacy_policy' => 'https://www.kayak.ie/privacy',
+                'terms_of_use' => 'https://www.kayak.ie/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'IL' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.il.kayak.com',
+                'privacy_policy' => 'https://www.il.kayak.com/privacy',
+                'terms_of_use' => 'https://www.il.kayak.com/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'IT' => [
+                'facebook' => 'https://facebook.com/kayak.italia',
+                'instagram' => 'https://www.instagram.com/kayak_europe/',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.it',
+                'privacy_policy' => 'https://www.kayak.it/privacy',
+                'terms_of_use' => 'https://www.kayak.it/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'JP' => [
+                'facebook' => 'https://www.facebook.com/kayak.co.jp',
+                'instagram' => 'https://www.instagram.com/kayak.co.jp/',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.co.jp',
+                'privacy_policy' => 'https://www.kayak.co.jp/privacy',
+                'terms_of_use' => 'https://www.kayak.co.jp/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'MY' => [
+                'facebook' => 'https://www.facebook.com/KAYAK.com.my',
+                'instagram' => 'https://www.instagram.com/kayak_my/',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.com.my',
+                'privacy_policy' => 'https://www.kayak.com.my/privacy',
+                'terms_of_use' => 'https://www.kayak.com.my/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'MX' => [
+                'facebook' => 'https://www.facebook.com/kayak.mex',
+                'instagram' => 'https://www.instagram.com/kayak_latam/',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.com.mx',
+                'privacy_policy' => 'https://www.kayak.com.mx/privacy',
+                'terms_of_use' => 'https://www.kayak.com.mx/terms-of-use-book',
+                'support_phone_number' => '+52 664 3911436',
+                'verification_phone_number' => '+ 52 664 3911436'
+            ],
+            'NL' => [
+                'facebook' => 'https://www.facebook.com/kayak.netherlands',
+                'instagram' => 'https://www.instagram.com/kayak_europe/',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.nl',
+                'privacy_policy' => 'https://www.kayak.nl/privacy',
+                'terms_of_use' => 'https://www.kayak.nl/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'NZ' => [
+                'facebook' => 'https://www.facebook.com/KAYAK.NewZealand',
+                'instagram' => 'https://www.instagram.com/kayak_nz/',
+                'twitter' => '',
+                'homepage' => 'https://www.nz.kayak.com',
+                'privacy_policy' => 'https://www.nz.kayak.com/privacy',
+                'terms_of_use' => 'https://www.nz.kayak.com/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'NI' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.com.ni',
+                'privacy_policy' => 'https://www.kayak.com.ni/privacy',
+                'terms_of_use' => 'https://www.kayak.com.ni/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'NO' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.no',
+                'privacy_policy' => 'https://www.kayak.no/privacy',
+                'terms_of_use' => 'https://www.kayak.no/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'PA' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.com.pa',
+                'privacy_policy' => 'https://www.kayak.com.pa/privacy',
+                'terms_of_use' => 'https://www.kayak.com.pa/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'PY' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.com.py',
+                'privacy_policy' => 'https://www.kayak.com.py/privacy',
+                'terms_of_use' => 'https://www.kayak.com.py/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'PE' => [
+                'facebook' => 'https://www.facebook.com/KAYAKEnPeru',
+                'instagram' => 'https://www.instagram.com/kayak_latam/',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.com.pe',
+                'privacy_policy' => 'https://www.kayak.com.pe/privacy',
+                'terms_of_use' => 'https://www.kayak.com.pe/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'PH' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.com.ph',
+                'privacy_policy' => 'https://www.kayak.com.ph/privacy',
+                'terms_of_use' => 'https://www.kayak.com.ph/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'PL' => [
+                'facebook' => 'https://www.facebook.com/KAYAK.Poland',
+                'instagram' => 'https://www.instagram.com/kayak_europe/',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.pl',
+                'privacy_policy' => 'https://www.kayak.pl/privacy',
+                'terms_of_use' => 'https://www.kayak.pl/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'PT' => [
+                'facebook' => 'https://www.facebook.com/kayak.pt',
+                'instagram' => 'https://www.instagram.com/kayak_europe/',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.pt',
+                'privacy_policy' => 'https://www.kayak.pt/privacy',
+                'terms_of_use' => 'https://www.kayak.pt/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'PR' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.com.pr',
+                'privacy_policy' => 'https://www.kayak.com.pr/privacy',
+                'terms_of_use' => 'https://www.kayak.com.pr/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'RO' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.ro.kayak.com',
+                'privacy_policy' => 'https://www.ro.kayak.com/privacy',
+                'terms_of_use' => 'https://www.ro.kayak.com/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'RU' => [
+                'facebook' => 'https://www.facebook.com/kayak.russia',
+                'instagram' => 'https://www.instagram.com/kayak_europe/',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.ru',
+                'privacy_policy' => 'https://www.kayak.ru/privacy',
+                'terms_of_use' => 'https://www.kayak.ru/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'SA' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.ar.kayak.sa',
+                'privacy_policy' => 'https://www.ar.kayak.sa/privacy',
+                'terms_of_use' => 'https://www.ar.kayak.sa/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'SG' => [
+                'facebook' => 'https://www.facebook.com/KAYAK.Singapore',
+                'instagram' => 'https://www.instagram.com/kayak_sg/',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.sg',
+                'privacy_policy' => 'https://www.kayak.sg/privacy',
+                'terms_of_use' => 'https://www.kayak.sg/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'ZA' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.za.kayak.com',
+                'privacy_policy' => 'https://www.za.kayak.com/privacy',
+                'terms_of_use' => 'https://www.za.kayak.com/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'KR' => [
+                'facebook' => 'https://facebook.com/KAYAK.co.kr',
+                'instagram' => 'https://www.instagram.com/kayak_kr/',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.co.kr',
+                'privacy_policy' => 'https://www.kayak.co.kr/privacy',
+                'terms_of_use' => 'https://www.kayak.co.kr/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'ES' => [
+                'facebook' => 'https://www.facebook.com/kayak.espana',
+                'instagram' => 'https://www.instagram.com/kayak_espana/',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.es',
+                'privacy_policy' => 'https://www.kayak.es/privacy',
+                'terms_of_use' => 'https://www.kayak.es/terms-of-use-book',
+                'support_phone_number' => '+34 800 880867',
+                'verification_phone_number' => '+34 800 880867'
+            ],
+            'SE' => [
+                'facebook' => 'https://www.facebook.com/kayak.sverige',
+                'instagram' => 'https://www.instagram.com/kayak_europe/',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.se',
+                'privacy_policy' => 'https://www.kayak.se/privacy',
+                'terms_of_use' => 'https://www.kayak.se/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'CH' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.ch',
+                'privacy_policy' => 'https://www.kayak.ch/privacy',
+                'terms_of_use' => 'https://www.kayak.ch/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'TW' => [
+                'facebook' => 'https://www.facebook.com/KAYAK.com.Taiwan',
+                'instagram' => 'https://www.instagram.com/kayak_tw/',
+                'twitter' => '',
+                'homepage' => 'https://www.tw.kayak.com',
+                'privacy_policy' => 'https://www.tw.kayak.com/privacy',
+                'terms_of_use' => 'https://www.tw.kayak.com/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'TH' => [
+                'facebook' => 'https://www.facebook.com/KAYAK.co.th',
+                'instagram' => 'https://www.instagram.com/kayak_th/',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.co.th',
+                'privacy_policy' => 'https://www.kayak.co.th/privacy',
+                'terms_of_use' => 'https://www.kayak.co.th/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'TR' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.com.tr',
+                'privacy_policy' => 'https://www.kayak.com.tr/privacy',
+                'terms_of_use' => 'https://www.kayak.com.tr/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'UA' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.ua.kayak.com',
+                'privacy_policy' => 'https://www.ua.kayak.com/privacy',
+                'terms_of_use' => 'https://www.ua.kayak.com/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'AE' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.ae',
+                'privacy_policy' => 'https://www.kayak.ae/privacy',
+                'terms_of_use' => 'https://www.kayak.ae/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'GB' => [
+                'facebook' => '',
+                'instagram' => 'https://www.instagram.com/kayak_europe/',
+                'twitter' => 'https://twitter.com/KAYAK_UK',
+                'homepage' => 'https://www.kayak.co.uk',
+                'privacy_policy' => 'https://www.kayak.co.uk/privacy',
+                'terms_of_use' => 'https://www.kayak.co.uk/terms-of-use-book',
+                'support_phone_number' => '+44 8081967575',
+                'verification_phone_number' => '+44 8081967575'
+            ],
+            'US' => [
+                'facebook' => 'https://www.facebook.com/kayak',
+                'instagram' => 'https://www.instagram.com/kayak/',
+                'twitter' => 'https://twitter.com/KAYAK',
+                'homepage' => 'https://www.kayak.com',
+                'privacy_policy' => 'https://www.kayak.com/privacy',
+                'terms_of_use' => 'https://www.kayak.com/terms-of-use-book',
+                'support_phone_number' => '+1 (855) 920-9942',
+                'verification_phone_number' => '+1 (844) 962-3974'
+            ],
+            'UY' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.com.uy',
+                'privacy_policy' => 'https://www.kayak.com.uy/privacy',
+                'terms_of_use' => 'https://www.kayak.com.uy/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'VE' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.kayak.co.ve',
+                'privacy_policy' => 'https://www.kayak.co.ve/privacy',
+                'terms_of_use' => 'https://www.kayak.co.ve/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+            'VN' => [
+                'facebook' => '',
+                'instagram' => '',
+                'twitter' => '',
+                'homepage' => 'https://www.vn.kayak.com',
+                'privacy_policy' => 'https://www.vn.kayak.com/privacy',
+                'terms_of_use' => 'https://www.vn.kayak.com/terms-of-use-book',
+                'support_phone_number' => '',
+                'verification_phone_number' => ''
+            ],
+        ];
+
+        $project = Project::find()->where(['project_key' => 'kayak'])->one();
+
+        $processed = 0;
+
+        if ($project && $data) {
+            foreach ($data as $marketCountry => $mp) {
+                echo ' - ' . $marketCountry . PHP_EOL;
+
+                $params = [];
+                $params['homeUrl']              = $mp['homepage'];
+                $params['privacyPolicy']        = $mp['privacy_policy'];
+                $params['termsOfUse']           = $mp['terms_of_use'];
+
+                $params['social']['facebook']   = $mp['facebook'];
+                $params['social']['instagram']  = $mp['instagram'];
+                $params['social']['twitter']    = $mp['twitter'];
+
+                $params['phoneNumbers']['support']          = $mp['support_phone_number'];
+                $params['phoneNumbers']['verification']     = $mp['verification_phone_number'];
+
+                $params['formatter']['time']        = 'HH:mm';
+                $params['formatter']['date']        = '';
+
+                $json = json_encode($params);
+
+                $locale = new ProjectLocale();
+                $locale->pl_project_id = $project->id;
+                $locale->pl_params = $json;
+                $locale->pl_market_country = $marketCountry;
+                $locale->pl_enabled = true;
+                $locale->save();
+
+                $processed++;
+                echo $json . PHP_EOL;
+            }
+        }
+
+        $resultInfo = 'Processed: ' . $processed .
+            ', Execute Time: ' . number_format(round(microtime(true) - $timeStart, 2), 2);
+
+        $this->printInfo($resultInfo, $this->action->id);
+    }
+
+    public function actionInitProjectLocales()
+    {
+        $this->printInfo('Start', $this->action->id);
+        $timeStart = microtime(true);
+
+        $projects = Project::find()->all();
+
+        $processed = 0;
+
+        if ($projects) {
+            foreach ($projects as $project) {
+                echo ' - ' . $project->project_key . PHP_EOL;
+
+                $params = [];
+                $params['homeUrl']              = '';
+                $params['privacyPolicy']        = '';
+                $params['termsOfUse']           = '';
+
+                $params['social']['facebook']   = '';
+                $params['social']['instagram']  = '';
+                $params['social']['twitter']    = '';
+
+                $params['phoneNumbers']['support']          = '';
+                $params['phoneNumbers']['verification']     = '';
+
+                $params['formatter']['time']        = 'HH:mm';
+                $params['formatter']['date']        = '';
+
+                $json = json_encode($params);
+                echo $json . PHP_EOL;
+
+                $locale = new ProjectLocale();
+                $locale->pl_project_id = $project->id;
+                $locale->pl_language_id = 'en-US';
+                $locale->pl_params = $json;
+                //$locale->pl_market_country = $marketCountry;
+                $locale->pl_enabled = true;
+                $locale->pl_default = true;
+                $locale->save();
+
+                $processed++;
+            }
+        }
+
+        $resultInfo = 'Processed: ' . $processed .
+            ', Execute Time: ' . number_format(round(microtime(true) - $timeStart, 2), 2);
+
         $this->printInfo($resultInfo, $this->action->id);
     }
 }

@@ -114,31 +114,37 @@ class ProjectLocaleController extends FController
         $model->pl_default = true;
 
         if ($model->save()) {
-            [$lang, $country] = explode('-', $model->pl_language_id);
+            $lang = null;
 
-            //VarDumper::dump($lang); exit;
+            if ($model->pl_language_id) {
+                [$lang, $country] = explode('-', $model->pl_language_id);
+            }
 
-            if (!empty($lang)) {
-                $locales = ProjectLocale::find()->where([
+
+            $query = ProjectLocale::find()->where([
                     'pl_default' => true,
                     'pl_project_id' => $model->pl_project_id
                 ])
-                    ->andWhere(['<>', 'pl_id', $model->pl_id])
-                    ->andWhere(['like', 'pl_language_id', $lang . '-'])
-                    ->all();
+                    ->andWhere(['<>', 'pl_id', $model->pl_id]);
 
-                if ($locales) {
-                    foreach ($locales as $locale) {
-                        $locale->pl_default = false;
-                        if (!$locale->update()) {
-                            Yii::error($locale->errors, 'ProjectLocale:default:save');
-                        }
+            if (empty($lang)) {
+                $query->andWhere(['pl_language_id' => null]);
+            } else {
+                $query->andWhere(['like', 'pl_language_id', $lang . '-']);
+            }
+            $locales = $query->all();
+
+            if ($locales) {
+                foreach ($locales as $locale) {
+                    $locale->pl_default = false;
+                    if (!$locale->update()) {
+                        Yii::error($locale->errors, 'ProjectLocale:default:save');
                     }
                 }
             }
 
-            Yii::$app->session->setFlash('success', 'Set default Locale ' . $model->pl_language_id);
 
+            Yii::$app->session->setFlash('success', 'Set default Locale ' . $model->pl_language_id);
         } else {
             Yii::error($model->errors, 'ProjectLocale:save');
             Yii::$app->session->setFlash('error', 'Error: not set default Locale ' . $model->pl_language_id);
