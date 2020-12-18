@@ -595,6 +595,8 @@ class LeadViewController extends FController
                 $form->firstName = $lead->client->first_name;
                 $form->lastName = $lead->client->last_name;
                 $form->middleName = $lead->client->middle_name;
+                $form->locale = $lead->client->cl_locale;
+                $form->marketingCountry = $lead->client->cl_marketing_country;
 
                 return $this->renderAjax('partial/_client_edit_name_modal_content', [
                     'editName' => $form,

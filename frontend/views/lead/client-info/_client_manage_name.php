@@ -5,6 +5,7 @@
  */
 
 use common\models\Client;
+use yii\helpers\Html;
 use yii\widgets\Pjax;
 
 ?>
@@ -27,6 +28,20 @@ use yii\widgets\Pjax;
             <td style="background-color: #eef3f9"><i class="fa fa-user"></i></td>
             <td style="background-color: #eef3f9"><?= $client->getAttributeLabel('middle_name') ?></td>
             <td><?= \yii\helpers\Html::encode($client->middle_name) ?></td>
+        </tr>
+    <?php endif; ?>
+    <?php if (!empty($client->cl_locale)) : ?>
+        <tr>
+            <td style="background-color: #eef3f9"><i class="fa fa-language"></i></td>
+            <td style="background-color: #eef3f9">Locale</td>
+            <td><?= $client->cl_locale ?></td>
+        </tr>
+    <?php endif; ?>
+    <?php if (!empty($client->cl_marketing_country)) : ?>
+        <tr>
+            <td style="background-color: #eef3f9"><i class="fa fa-map-marker"></i></td>
+            <td style="background-color: #eef3f9">Country</td>
+            <td><?= $client->cl_marketing_country ?></td>
         </tr>
     <?php endif; ?>
     <tr>

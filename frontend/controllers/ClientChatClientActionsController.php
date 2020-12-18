@@ -88,6 +88,8 @@ class ClientChatClientActionsController extends FController
         $form->firstName = $client->first_name;
         $form->lastName = $client->last_name;
         $form->middleName = $client->middle_name;
+        $form->locale = $client->cl_locale;
+        $form->marketingCountry = $client->cl_marketing_country;
 
         return $this->renderAjax('_client_edit_name_modal_content', [
             'editName' => $form,
