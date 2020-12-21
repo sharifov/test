@@ -55,7 +55,15 @@ class ClientChatChannelDefaultSettings
         ],
         'system' => [
             'allowTransferChannelActiveChat' => false,
-            'allowRealtime' => true
+            'allowRealtime' => true,
+            'repeatDelaySeconds' => 0,
+            'userLimit' => 0,
+            'sortParameters' => [
+                'pastAcceptedChatsNumber' => [
+                    'pastMinutes' => 180,
+                    'sortPriority' => 0
+                ]
+            ]
         ]
     ];
 
