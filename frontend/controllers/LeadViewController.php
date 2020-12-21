@@ -649,7 +649,7 @@ class LeadViewController extends FController
             $this->clientManageService->updateClient($client, $form);
 
             $response['error'] = false;
-            $response['message'] = 'User name was successfully updated';
+            $response['message'] = 'Client information has been updated successfully';
             $response['html'] = $this->renderAjax('/lead/client-info/_client_manage_name', [
                 'client' => $client
             ]);

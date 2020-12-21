@@ -137,7 +137,7 @@ class ClientChatClientActionsController extends FController
                 $this->clientManageService->updateClient($chat->cchClient, $form);
                 $chat->refresh();
                 $response['error'] = false;
-                $response['message'] = 'User name was successfully updated';
+                $response['message'] = 'Client information has been updated successfully';
                 $response['html'] = ClientChatClientInfoWidget::widget(['chat' => $chat]);
                 $clientFullName = trim($chat->cchClient->first_name . ($chat->cchClient->last_name ? ' ' . $chat->cchClient->last_name : ''));
                 $response['client'] = [
