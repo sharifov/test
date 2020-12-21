@@ -596,7 +596,7 @@ class ClientManageService
             if ($client->validate('cl_marketing_country')) {
                 $clientRepository = \Yii::createObject(ClientRepository::class);
                 $clientRepository->save($client);
-                $result = $country;
+                $result = strtoupper($client->cl_marketing_country);
             } else {
                 throw new \RuntimeException('Client market country is not valid. ' .
                     $client->getFirstError('cl_marketing_country'), -1);
