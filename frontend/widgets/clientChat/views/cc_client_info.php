@@ -48,15 +48,15 @@ $client = $clientChat->cchClient;
 
             <?php if (!empty($client->cl_locale)) : ?>
                 <div class="box_client_info_data box_locale">
-                    <span class="_rc-client-locale"><i class="fa fa-language"> </i>
-                        <code title="locale"><?= Html::encode($client->cl_locale) ?></code>
+                    <span title="locale" class="_rc-client-locale"><i class="fa fa-language"> </i>
+                        <code><?= Html::encode($client->cl_locale) ?></code>
                     </span>
                 </div>
             <?php endif; ?>
             <?php if (!empty($client->cl_marketing_country)) : ?>
                 <div class="box_client_info_data box_country">
-                    <span class="_rc-client-country"><i class="fa fa-map-marker"> </i>
-                        <code title="Marketing country" style="margin-left: 4px;">
+                    <span title="Marketing country" class="_rc-client-country"><i class="fa fa-map-marker"> </i>
+                        <code style="margin-left: 4px;">
                             <?= Html::encode($client->cl_marketing_country) ?>
                         </code>
                     </span>

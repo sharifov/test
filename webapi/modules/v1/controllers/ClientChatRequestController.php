@@ -110,6 +110,7 @@ class ClientChatRequestController extends ApiBaseController
      * {
             "event": "ROOM_CONNECTED",
             "data": {
+                "rid": "d83ef2d3-30bf-4636-a2c6-7f5b4b0e81a4",
                 "geo": {
                     "ip": "92.115.180.30",
                     "version": "IPv4",
