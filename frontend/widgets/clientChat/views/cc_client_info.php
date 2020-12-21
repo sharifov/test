@@ -55,7 +55,7 @@ $client = $clientChat->cchClient;
             <?php endif; ?>
             <?php if (!empty($client->cl_marketing_country)) : ?>
                 <div class="box_client_info_data box_country">
-                    <span title="Marketing country" class="_rc-client-country"><i class="fa fa-map-marker"> </i>
+                    <span title="Market country" class="_rc-client-country"><i class="fa fa-map-marker"> </i>
                         <code style="margin-left: 4px;">
                             <?= Html::encode($client->cl_marketing_country) ?>
                         </code>

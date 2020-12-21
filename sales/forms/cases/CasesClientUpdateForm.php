@@ -73,7 +73,7 @@ class CasesClientUpdateForm extends Model
             'last_name' => 'Last name',
             'middle_name' => 'Middle name',
             'locale' => 'Locale',
-            'marketingCountry' => 'Marketing country'
+            'marketingCountry' => 'Market country'
         ];
     }
 }

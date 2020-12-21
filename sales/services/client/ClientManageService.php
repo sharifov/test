@@ -598,7 +598,7 @@ class ClientManageService
                 $clientRepository->save($client);
                 $result = $country;
             } else {
-                throw new \RuntimeException('Client marketing country is not valid. ' .
+                throw new \RuntimeException('Client market country is not valid. ' .
                     $client->getFirstError('cl_marketing_country'), -1);
             }
         }

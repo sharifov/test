@@ -221,7 +221,7 @@ class Client extends ActiveRecord
             'cl_ppn' => 'PPN',
             'cl_ip' => 'IP',
             'cl_locale' => 'Locale',
-            'cl_marketing_country' => 'Marketing country'
+            'cl_marketing_country' => 'Market country'
         ];
     }
 
