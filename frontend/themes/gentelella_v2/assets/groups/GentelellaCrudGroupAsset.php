@@ -5,7 +5,7 @@ namespace frontend\themes\gentelella_v2\assets\groups;
 
 class GentelellaCrudGroupAsset extends \yii\web\AssetBundle
 {
-    public $sourcePath = '@frontend/themes/gentelella_v2/';
+    public $sourcePath = '@frontend/themes/gentelella_v2/src/';
     public $baseUrl = '@web';
 
     public $css = [

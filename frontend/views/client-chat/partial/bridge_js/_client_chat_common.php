@@ -116,7 +116,9 @@ $(document).ready( function () {
         onSelect: function (suggestion) {
             let searchValue = '/'+suggestion.value;
             let curVal = $(this).val();
-            $(this).val(curVal.replace(searchValue, suggestion.value));
+            let inputValue = curVal.replace(searchValue, suggestion.value);
+            inputValue = inputValue.replace('/', '');
+            $(this).val(inputValue);
         },
         onSearchError: function (query, jqXHR, textStatus, errorThrown) {
             createNotify('Error', jqXHR.statusText, 'error');

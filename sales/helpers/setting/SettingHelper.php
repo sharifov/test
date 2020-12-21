@@ -78,7 +78,7 @@ class SettingHelper
 
     public static function userSiteActivityLogHistoryDays(): int
     {
-        return (int) (Yii::$app->params['settings']['user_site_activity_log_history_days'] ?? 0);
+        return (int) (Yii::$app->params['settings']['user_site_activity_log_history_days'] ?? 3);
     }
 
     public static function consoleLogCleanerEnable(): bool
@@ -94,5 +94,15 @@ class SettingHelper
     public static function metricsEnabled(): bool
     {
         return (bool) (Yii::$app->params['settings']['metrics_enabled'] ?? false);
+    }
+
+    public static function cleanUserMonitorAfterDays(): int
+    {
+        return (int) (Yii::$app->params['settings']['clean_user_monitor_after_days'] ?? 7);
+    }
+
+    public static function cleanCallAfterDays(): int
+    {
+        return (int) (Yii::$app->params['settings']['clean_call_after_days'] ?? 10);
     }
 }

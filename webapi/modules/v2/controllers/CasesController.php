@@ -62,13 +62,14 @@ class CasesController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{160}}           contact_email                    Client Email
+     * @apiParam {string{160}}          contact_email                    Client Email
      * @apiParam {string{20}}           contact_phone                    Client Phone
-     * @apiParam {int}              category_id                      Case category id
-     * @apiParam {string{5..7}}     order_uid                        Order uid (symbols and numbers only)
-     * @apiParam {string{255}}           [subject]                        Subject
-     * @apiParam {string{65000}}           [description                     Description
-     * @apiParam {array[]}          [order_info]                      Order Info (key => value, key: string, value: string)
+     * @apiParam {int}                  category_id                      Case category id
+     * @apiParam {string{5..7}}         order_uid                        Order uid (symbols and numbers only)
+     * @apiParam {string{100}}          [project_key]                    Project Key (if not exist project assign API User)
+     * @apiParam {string{255}}          [subject]                        Subject
+     * @apiParam {string{65000}}        [description]                    Description
+     * @apiParam {array[]}              [order_info]                     Order Info (key => value, key: string, value: string)
      *
      * @apiParamExample {json} Request-Example:
      * {
@@ -78,6 +79,7 @@ class CasesController extends BaseController
      *       "order_uid": "12WS09W",
      *       "subject": "Subject text",
      *       "description": "Description text",
+     *       "project_key": "project_key",
      *       "order_info": {
      *           "Departure Date":"2020-03-07",
      *           "Departure Airport":"LON"
@@ -109,6 +111,7 @@ class CasesController extends BaseController
      *           "order_uid": "12WS09W",
      *           "subject": "Subject text",
      *           "description": "Description text",
+     *           "project_key": "project_key",
      *           "order_info": {
      *               "Departure Date": "2020-03-07",
      *               "Departure Airport": "LON"
@@ -180,14 +183,6 @@ class CasesController extends BaseController
      */
     public function actionCreate(): Response
     {
-        if (!$this->auth->au_project_id) {
-            return new ErrorResponse(
-                new StatusCodeMessage(400),
-                new MessageMessage('Not found Project with current user: ' . $this->auth->au_api_username),
-                new ErrorsMessage('Not found Project with current user: ' . $this->auth->au_api_username),
-                new CodeMessage(ApiCodeException::NOT_FOUND_PROJECT_CURRENT_USER)
-            );
-        }
 
         $form = new CreateForm($this->auth->au_project_id);
 
@@ -208,11 +203,24 @@ class CasesController extends BaseController
             );
         }
 
-        if ($case = Cases::find()->andWhere(['cs_category_id' => $form->category_id, 'cs_order_uid' => $form->order_uid])->withNotFinishStatus()->limit(1)->one()) {
+        if (!$this->auth->au_project_id && !$form->project_key) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage('Not found project Key or Project for API user ' . $this->auth->au_api_username),
+                new ErrorsMessage('Not found project Key or Project for API user ' . $this->auth->au_api_username),
+                new CodeMessage(ApiCodeException::NOT_FOUND_PROJECT_CURRENT_USER)
+            );
+        }
+
+        if (
+            $case = Cases::find()
+            ->andWhere(['cs_category_id' => $form->category_id, 'cs_order_uid' => $form->order_uid])
+            ->withNotFinishStatus()->limit(1)->one()
+        ) {
             return new SuccessResponse(
                 new DataMessage(
                     new Message('case_gid', $case->cs_gid),
-                    new Message('client_uuid', $case->client->uuid),
+                    new Message('client_uuid', $case->client ? $case->client->uuid : ''),
                 )
             );
         }
@@ -235,7 +243,10 @@ class CasesController extends BaseController
             $job->phone = $form->contact_phone;
             Yii::$app->queue_job->priority(100)->push($job);
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableFormatter($throwable), 'CasesController:' . __FUNCTION__ . ':addToJobFailed');
+            Yii::error(
+                AppHelper::throwableFormatter($throwable),
+                'API:CasesController:' . __FUNCTION__ . ':addToJobFailed'
+            );
         }
 
         return new SuccessResponse(

@@ -10,6 +10,7 @@ use frontend\assets\CentrifugeAsset;
 use frontend\assets\EditToolAsset;
 use frontend\assets\groups\AllSharedAsset;
 use frontend\assets\groups\AllSharedGroupAsset;
+use frontend\assets\groups\BootstrapGroupAsset;
 use frontend\assets\MomentAsset;
 use frontend\assets\overridden\ImperaviAsset;
 use frontend\assets\overridden\KartikActiveFormAsset;
@@ -24,6 +25,8 @@ use frontend\assets\overridden\KartikGridResizeColumnsAsset;
 use frontend\assets\overridden\KartikGridToggleDataAsset;
 use frontend\assets\overridden\KartikGridViewAsset;
 use frontend\assets\overridden\KDNJsonEditorAsset;
+use frontend\assets\overridden\LajaxLanguageItemPluginAsset;
+use frontend\assets\PageLoaderAsset;
 use frontend\assets\Timeline2Asset;
 use frontend\assets\TimelineAsset;
 use frontend\assets\WebAudioRecorder;
@@ -53,9 +56,15 @@ use kartik\time\TimePickerAsset;
 use kdn\yii2\assets\JsonEditorFullAsset;
 use kdn\yii2\assets\JsonEditorMinimalistAsset;
 use kivork\bootstrap4glyphicons\assets\GlyphiconAsset;
+use lajax\translatemanager\bundles\FrontendTranslationAsset;
+use lajax\translatemanager\bundles\FrontendTranslationPluginAsset;
 use lajax\translatemanager\bundles\LanguageAsset;
+use lajax\translatemanager\bundles\LanguageItemPluginAsset;
 use lajax\translatemanager\bundles\LanguagePluginAsset;
 use lajax\translatemanager\bundles\ScanPluginAsset;
+use lajax\translatemanager\bundles\TranslateAsset;
+use lajax\translatemanager\bundles\TranslateManagerAsset;
+use lajax\translatemanager\bundles\TranslatePluginAsset;
 use lajax\translatemanager\bundles\TranslationPluginAsset;
 use unclead\multipleinput\assets\MultipleInputAsset;
 use yii\bootstrap4\BootstrapPluginAsset;
@@ -81,6 +90,8 @@ return [
 
     'cssCompressor' => 'gulp compress-css --gulpfile gulpfile.js --src {from} --dist {to}',
 
+    'deleteSource' => true,
+
     'bundles' => [
         AllSharedAsset::class,
         AllSharedGroupAsset::class,
@@ -89,6 +100,8 @@ return [
         GentelellaCrudGroupAsset::class,
         FontAwesomeAsset::class,
         GlyphiconAsset::class,
+        BootstrapGroupAsset::class,
+        PageLoaderAsset::class,
 
         NotificationSocketAsset::class,
         CentrifugeAsset::class,
@@ -153,6 +166,12 @@ return [
         LanguageAsset::class,
         ScanPluginAsset::class,
         TranslationPluginAsset::class,
+        FrontendTranslationAsset::class,
+        FrontendTranslationPluginAsset::class,
+        TranslateAsset::class,
+        TranslateManagerAsset::class,
+        TranslatePluginAsset::class,
+        LajaxLanguageItemPluginAsset::class
     ],
 
     'targets' => [
@@ -161,8 +180,8 @@ return [
             'class' => FontAwesomeAsset::class,
             'basePath' => '@webroot/fontawesome/build',
             'baseUrl' => '@web/fontawesome/build',
-            'js' => 'fontawesome-{hash}.js',
-            'css' => 'fontawesome-{hash}.css',
+            'js' => '',
+            'css' => '',
             'depends' => [
                 FontAwesomeAsset::class,
             ]
@@ -176,6 +195,17 @@ return [
             'css' => 'glyphicon-{hash}.css',
             'depends' => [
                 GlyphiconAsset::class,
+            ]
+        ],
+
+        'PageLoaderAsset' => [
+            'class' => PageLoaderAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'page-loader-{hash}.js',
+            'css' => 'page-loader-{hash}.css',
+            'depends' => [
+                PageLoaderAsset::class,
             ]
         ],
 
@@ -654,6 +684,54 @@ return [
             'css' => 'language-{hash}.css',
             'depends' => [ LanguageAsset::class ],
         ],
+        'FrontendTranslationAsset' => [
+            'class' => FrontendTranslationAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'frontend-translation-{hash}.js',
+            'css' => 'frontend-translation-{hash}.css',
+            'depends' => [ FrontendTranslationAsset::class ],
+        ],
+        'FrontendTranslationPluginAsset' => [
+            'class' => FrontendTranslationPluginAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'frontend-translation-plugin-{hash}.js',
+            'css' => 'frontend-translation-plugin-{hash}.css',
+            'depends' => [ FrontendTranslationPluginAsset::class ],
+        ],
+        'TranslateAsset' => [
+            'class' => TranslateAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'translate-{hash}.js',
+            'css' => 'translate-{hash}.css',
+            'depends' => [ TranslateAsset::class ],
+        ],
+        'TranslateManagerAsset' => [
+            'class' => TranslateManagerAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'translate-manager-{hash}.js',
+            'css' => 'translate-manager-{hash}.css',
+            'depends' => [ TranslateManagerAsset::class ],
+        ],
+        'TranslatePluginAsset' => [
+            'class' => TranslatePluginAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'translate-plugin-{hash}.js',
+            'css' => 'translate-plugin-{hash}.css',
+            'depends' => [ TranslatePluginAsset::class ],
+        ],
+        'LajaxLanguageItemPluginAsset' => [
+            'class' => LajaxLanguageItemPluginAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'lang-asset-{hash}.js',
+            'css' => 'lang-asset-{hash}.css',
+            'depends' => [ LajaxLanguageItemPluginAsset::class ],
+        ],
         'DateTimePickerAsset' => [
             'class' => DateTimePickerAsset::class,
             'basePath' => '@webroot/all_shared/build',
@@ -693,37 +771,33 @@ return [
         'baseUrl' => '@web/all_shared/build',
         'bundles' => [
             yii\bootstrap\BootstrapAsset::class => [
-                'sourcePath' => '@npm/bootstrap/dist',
-                'css' => [
-                    'css/bootstrap.css'
-                ],
+                'class' => BootstrapGroupAsset::class,
+                'depends' => [JqueryAsset::class]
             ],
             yii\bootstrap\BootstrapPluginAsset::class => [
-                'class' => BootstrapPluginAsset::class,
-                'sourcePath' => '@npm/bootstrap/dist',
-                'js' => [
-                    'js/bootstrap.bundle.js'
-                ],
-                'depends' => [],
+                'class' => BootstrapGroupAsset::class,
+                'depends' => [JqueryAsset::class]
             ],
             PopoverXAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
-                'depends' => []
+                'depends' => [JqueryAsset::class]
             ],
             MultiSelectAsset::class => [
                 'depends' => [
-                    BootstrapPluginAsset::class
+                    JqueryAsset::class,
+                    BootstrapPluginAsset::class,
                 ]
             ],
             \kartik\form\ActiveFormAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
-                'depends' => []
+                'depends' => [JqueryAsset::class]
             ],
             DateRangePickerAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
+                'depends' => [JqueryAsset::class]
             ],
             \dosamigos\datepicker\DatePickerAsset::class => [
                 'depends' => [JqueryAsset::class]
@@ -731,7 +805,7 @@ return [
             Select2KrajeeAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
-                'depends' => []
+                'depends' => [JqueryAsset::class]
             ],
             Select2Asset::class => [
                 'bsPluginEnabled' => false,
@@ -751,12 +825,12 @@ return [
             TimePickerAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
-                'depends' => []
+                'depends' => [JqueryAsset::class]
             ],
             \kartik\daterange\MomentAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
-                'depends' => []
+                'depends' => [JqueryAsset::class]
             ],
             DateTimePickerAsset::class => [
                 'baseUrl' => '@web/all_shared/build',
@@ -767,29 +841,29 @@ return [
             ThemeKrajeeBs4Asset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
-                'depends' => []
+                'depends' => [JqueryAsset::class]
             ],
             ThemeKrajeeAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
-                'depends' => []
+                'depends' => [JqueryAsset::class]
             ],
             KartikEditablePjaxAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
-                'depends' => []
+                'depends' => [JqueryAsset::class]
             ],
             DatePickerAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
-                'depends' => []
+                'depends' => [JqueryAsset::class]
             ],
             CKEditorAsset::class => [
                 'sourcePath' => null,
                 'js' => [
                     'https://cdn.ckeditor.com/4.15.1/standard/ckeditor.js',
                 ],
-                'depends' => []
+                'depends' => [JqueryAsset::class]
             ],
             ClientChatAsset::class => [
                 'depends' => [JqueryAsset::class]
@@ -797,7 +871,7 @@ return [
             WidgetAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
-                'depends' => [AllSharedAsset::class]
+                'depends' => [AllSharedAsset::class, JqueryAsset::class]
             ],
             JsonEditorFullAsset::class => [
                 'class' => KDNJsonEditorAsset::class
@@ -815,10 +889,11 @@ return [
             \kartik\editable\EditableAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
-                'depends' => []
+                'depends' => [JqueryAsset::class]
             ],
             ClientChatWidgetAsset::class => [
                 'depends' => [
+                    JqueryAsset::class,
                     AllSharedAsset::class,
                     MomentAsset::class
                 ]
@@ -827,6 +902,7 @@ return [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
                 'depends' => [
+                    JqueryAsset::class,
                     AllSharedAsset::class,
                     DialogAsset::class
                 ]
@@ -834,36 +910,62 @@ return [
             KartikDialogBootstrapAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
-                'depends' => [AllSharedAsset::class]
+                'depends' => [AllSharedAsset::class, JqueryAsset::class]
             ],
             DialogAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
                 'depends' => [
-//                    AllSharedAsset::class,
+                    JqueryAsset::class
                 ]
             ],
             ExportMenuAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
-                'depends' => []
+                'depends' => [JqueryAsset::class]
             ],
             ExportColumnAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
-                'depends' => []
+                'depends' => [JqueryAsset::class]
             ],
             DialogYiiAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
-                'depends' => []
+                'depends' => [JqueryAsset::class]
             ],
             FontAwesomeAsset::class => [
                 'depends' => [
+                    JqueryAsset::class,
                     FontAwesomeAllAsset::class,
                     GlyphiconAsset::class,
                 ]
-            ]
+            ],
+            JqueryAsset::class => [
+                'css' => [],
+                'js' => [],
+                'depends' => [],
+                'basePath' => null,
+                'sourcePath' => null
+            ],
+            \yii\bootstrap4\BootstrapAsset::class => [
+                'css' => [],
+                'js' => [],
+                'depends' => [
+                    JqueryAsset::class
+                ],
+                'basePath' => null,
+                'sourcePath' => null
+            ],
+            BootstrapPluginAsset::class => [
+                'css' => [],
+                'js' => [],
+                'depends' => [
+                    JqueryAsset::class
+                ],
+                'basePath' => null,
+                'sourcePath' => null
+            ],
         ],
         'hashCallback' => static function ($path) use ($appVersion) {
             return hash('md4', $path . $appVersion);

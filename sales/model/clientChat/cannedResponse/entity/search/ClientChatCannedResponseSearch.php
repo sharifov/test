@@ -45,7 +45,7 @@ class ClientChatCannedResponseSearch extends ClientChatCannedResponse
         $this->load($params);
 
         if (!$this->validate()) {
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
@@ -67,26 +67,35 @@ class ClientChatCannedResponseSearch extends ClientChatCannedResponse
 
     public function searchCannedResponse(?int $projectId, string $searchSubString, int $userId, ?string $languageId): array
     {
-        $searchSubString = str_replace(' ', ' & ', trim($searchSubString));
         $query = self::find()->select(
             (new Expression(
                 "ts_headline('english', cr_message, to_tsquery('english', :substring)) as headline_message,
-             cr_message as message",
+                cr_message as message",
                 ['substring' => $searchSubString]
             ))
         );
 
-        if ($projectId) {
-            $query->byProjectId($projectId);
-        }
-        $query->byTsVectorMessage($searchSubString);
-        $query->andWhere(['or', ['cr_user_id' => $userId], ['cr_user_id' => null]]);
-        $query->joinCategory()->categoryEnabled();
+        $query->byTsVectorMessage($searchSubString)
+            ->joinCategory()
+            ->categoryEnabled();
+
+        $query->andWhere([
+            'OR',
+                ['cr_user_id' => $userId],
+                ['cr_user_id' => null]
+        ]);
+
         if ($languageId) {
             $query->byLanguageId($languageId);
         }
-
-//        print_r($query->createCommand()->rawSql);die;
+        if ($projectId) {
+            $query->andWhere([
+                'OR',
+                    ['cr_project_id' => $projectId],
+                    ['cr_project_id' => null]
+            ]);
+        }
+        $query->orderBy(['cr_sort_order' => SORT_ASC]);
 
         return $query->asArray()->all();
     }

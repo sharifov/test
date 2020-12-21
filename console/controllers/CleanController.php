@@ -7,12 +7,12 @@ use sales\helpers\ErrorsToStringHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\services\cleaner\cleaners\ApiLogCleaner;
 use sales\services\cleaner\cleaners\CallCleaner;
-use sales\services\cleaner\cleaners\LogCleaner;
-use sales\services\cleaner\DbCleanerService;
-use sales\services\cleaner\form\DbCleanerParamsForm;
 use sales\services\cleaner\cleaners\GlobalLogCleaner;
+use sales\services\cleaner\cleaners\LogCleaner;
 use sales\services\cleaner\cleaners\UserMonitorCleaner;
 use sales\services\cleaner\cleaners\UserSiteActivityCleaner;
+use sales\services\cleaner\DbCleanerService;
+use sales\services\cleaner\form\DbCleanerParamsForm;
 use Yii;
 use yii\base\Exception;
 use yii\console\Controller;
@@ -21,7 +21,7 @@ use yii\helpers\Console;
 use yii\helpers\VarDumper;
 
 /**
- * Class ClientChatController
+ * Class CleanController
  */
 class CleanController extends Controller
 {
@@ -57,31 +57,61 @@ class CleanController extends Controller
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
         $timeStart = microtime(true);
-        $params = $this->mappingParams();
 
         try {
-            \Yii::$app->runAction('clean/log', $params);
-            \Yii::$app->runAction('clean/api-log', $params);
-            \Yii::$app->runAction('clean/global-log', $params);
-            \Yii::$app->runAction('clean/call', $params);
-            \Yii::$app->runAction('clean/user-site-activity', $params);
-            \Yii::$app->runAction('clean/user-monitor', $params);
+            $paramsLog = [
+                'date' => DbCleanerService::daysToBeforeDate(SettingHelper::consoleLogCleanerParamsDays())
+            ];
+            \Yii::$app->runAction('clean/log', $paramsLog);
         } catch (\Throwable $throwable) {
-            Yii::error(
-                AppHelper::throwableFormatter($throwable),
-                'CleanController:actionOnceDay:throwable'
-            );
-            echo Console::renderColoredString(
-                '%r --- %RError: %n%r' . $throwable->getMessage()
-            ), PHP_EOL;
-            return ExitCode::UNSPECIFIED_ERROR;
+            self::throwableHandler($throwable, 'actionOnceDay:Log');
+        }
+        try {
+            $paramsApiLog = [
+                'date' => DbCleanerService::daysToBeforeDate(SettingHelper::consoleLogCleanerParamsDays())
+            ];
+            \Yii::$app->runAction('clean/api-log', $paramsApiLog);
+        } catch (\Throwable $throwable) {
+            self::throwableHandler($throwable, 'actionOnceDay:ApiLog');
+        }
+        try {
+            $paramsGlobalLog = [
+                'date' => DbCleanerService::daysToBeforeDate(SettingHelper::consoleLogCleanerParamsDays())
+             ];
+            \Yii::$app->runAction('clean/global-log', $paramsGlobalLog);
+        } catch (\Throwable $throwable) {
+            self::throwableHandler($throwable, 'actionOnceDay:GlobalLog');
+        }
+        try {
+            $paramsCall = [
+                'date' => DbCleanerService::daysToBeforeDate(SettingHelper::cleanCallAfterDays())
+            ];
+            \Yii::$app->runAction('clean/call', $paramsCall);
+        } catch (\Throwable $throwable) {
+            self::throwableHandler($throwable, 'actionOnceDay:Call');
+        }
+        try {
+            $paramsUserSiteActivity = [
+                'date' => DbCleanerService::daysToBeforeDate(SettingHelper::userSiteActivityLogHistoryDays())
+            ];
+            \Yii::$app->runAction('clean/user-site-activity', $paramsUserSiteActivity);
+        } catch (\Throwable $throwable) {
+            self::throwableHandler($throwable, 'actionOnceDay:UserSiteActivity');
+        }
+        try {
+            $paramsUserMonitor = [
+                'date' => DbCleanerService::daysToBeforeDate(SettingHelper::cleanUserMonitorAfterDays())
+            ];
+            \Yii::$app->runAction('clean/user-monitor', $paramsUserMonitor);
+        } catch (\Throwable $throwable) {
+            self::throwableHandler($throwable, 'actionOnceDay:UserMonitor');
         }
 
         $timeEnd = microtime(true);
         $time = number_format(round($timeEnd - $timeStart, 2), 2);
         echo Console::renderColoredString('%y --- Execute Time: %w[' . $time . ' s] %n'), PHP_EOL;
         echo Console::renderColoredString('%y --- End : %w[' . date('Y-m-d H:i:s') . '] %y' .
-            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+            self::class . ':' . __FUNCTION__ . '%n'), PHP_EOL;
         return ExitCode::OK;
     }
 
@@ -108,36 +138,18 @@ class CleanController extends Controller
             if ($defaultDays && self::isParamsEmpty($params)) {
                 $dbCleanerParamsForm->day = $defaultDays;
             }
-
             if (!$dbCleanerParamsForm->validate()) {
                 throw new Exception(ErrorsToStringHelper::extractFromModel($dbCleanerParamsForm));
             }
-
             $processed = $cleaner->runDeleteByForm($dbCleanerParamsForm);
         } catch (\Throwable $throwable) {
-            Yii::error(
-                AppHelper::throwableFormatter($throwable),
-                'CleanController:actionApiLog:throwable'
-            );
-            echo Console::renderColoredString(
-                '%r --- %RError: %n%r' . $throwable->getMessage()
-            ), PHP_EOL;
+            self::throwableHandler($throwable, 'actionApiLog:throwable');
             return ExitCode::UNSPECIFIED_ERROR;
         }
 
         $timeEnd = microtime(true);
         $time = number_format(round($timeEnd - $timeStart, 2), 2);
-        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
-            ' s] %g Processed: %w[' . $processed . '] %g %n'), PHP_EOL;
-        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
-            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
-
-        Yii::info(VarDumper::dumpAsString([
-            'Processed' => $processed,
-            'Execute Time' => $time . ' sec',
-            'End Time' => date('Y-m-d H:i:s'),
-        ]), 'info\CleanController:actionApiLog:result');
-
+        self::outputResult($processed, $time, 'actionApiLog:result');
         return ExitCode::OK;
     }
 
@@ -164,36 +176,19 @@ class CleanController extends Controller
             if ($defaultDays && self::isParamsEmpty($params)) {
                 $dbCleanerParamsForm->day = $defaultDays;
             }
-
             if (!$dbCleanerParamsForm->validate()) {
                 throw new Exception(ErrorsToStringHelper::extractFromModel($dbCleanerParamsForm));
             }
 
             $processed = $cleaner->runDeleteByForm($dbCleanerParamsForm);
         } catch (\Throwable $throwable) {
-            Yii::error(
-                AppHelper::throwableFormatter($throwable),
-                'CleanController:actionLog:throwable'
-            );
-            echo Console::renderColoredString(
-                '%r --- %RError: %n%r' . $throwable->getMessage()
-            ), PHP_EOL;
+            self::throwableHandler($throwable, 'actionLog:throwable');
             return ExitCode::UNSPECIFIED_ERROR;
         }
 
         $timeEnd = microtime(true);
         $time = number_format(round($timeEnd - $timeStart, 2), 2);
-        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
-            ' s] %g Processed: %w[' . $processed . '] %g %n'), PHP_EOL;
-        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
-            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
-
-        Yii::info(VarDumper::dumpAsString([
-            'Processed' => $processed,
-            'Execute Time' => $time . ' sec',
-            'End Time' => date('Y-m-d H:i:s'),
-        ]), 'info\CleanController:actionLog:result');
-
+        self::outputResult($processed, $time, 'actionLog:result');
         return ExitCode::OK;
     }
 
@@ -227,29 +222,13 @@ class CleanController extends Controller
 
             $processed = $cleaner->runDeleteByForm($dbCleanerParamsForm);
         } catch (\Throwable $throwable) {
-            Yii::error(
-                AppHelper::throwableFormatter($throwable),
-                'CleanController:actionGlobalLog:throwable'
-            );
-            echo Console::renderColoredString(
-                '%r --- %RError: %n%r' . $throwable->getMessage()
-            ), PHP_EOL;
+            self::throwableHandler($throwable, 'actionGlobalLog:throwable');
             return ExitCode::UNSPECIFIED_ERROR;
         }
 
         $timeEnd = microtime(true);
         $time = number_format(round($timeEnd - $timeStart, 2), 2);
-        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
-            ' s] %g Processed: %w[' . $processed . '] %g %n'), PHP_EOL;
-        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
-            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
-
-        Yii::info(VarDumper::dumpAsString([
-            'Processed' => $processed,
-            'Execute Time' => $time . ' sec',
-            'End Time' => date('Y-m-d H:i:s'),
-        ]), 'info\CleanController:actionGlobalLog:result');
-
+        self::outputResult($processed, $time, 'actionGlobalLog:result');
         return ExitCode::OK;
     }
 
@@ -274,29 +253,13 @@ class CleanController extends Controller
 
             $processed = $cleaner->runDeleteByForm($dbCleanerParamsForm);
         } catch (\Throwable $throwable) {
-            Yii::error(
-                AppHelper::throwableFormatter($throwable),
-                'CleanController:actionCall:throwable'
-            );
-            echo Console::renderColoredString(
-                '%r --- %RError: %n%r' . $throwable->getMessage()
-            ), PHP_EOL;
+            self::throwableHandler($throwable, 'actionCall:throwable');
             return ExitCode::UNSPECIFIED_ERROR;
         }
 
         $timeEnd = microtime(true);
         $time = number_format(round($timeEnd - $timeStart, 2), 2);
-        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
-            ' s] %g Processed: %w[' . $processed . '] %g %n'), PHP_EOL;
-        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
-            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
-
-        Yii::info(VarDumper::dumpAsString([
-            'Processed' => $processed,
-            'Execute Time' => $time . ' sec',
-            'End Time' => date('Y-m-d H:i:s'),
-        ]), 'info\CleanController:actionCall:result');
-
+        self::outputResult($processed, $time, 'actionCall:result');
         return ExitCode::OK;
     }
 
@@ -319,35 +282,19 @@ class CleanController extends Controller
             if ($defaultDays && self::isParamsEmpty($params)) {
                 $dbCleanerParamsForm->day = $defaultDays;
             }
-
             if (!$dbCleanerParamsForm->validate()) {
                 throw new Exception(ErrorsToStringHelper::extractFromModel($dbCleanerParamsForm));
             }
 
             $processed = $cleaner->runDeleteByForm($dbCleanerParamsForm);
         } catch (\Throwable $throwable) {
-            Yii::error(
-                AppHelper::throwableFormatter($throwable),
-                'CleanController:actionUserSiteActivity:throwable'
-            );
-            echo Console::renderColoredString(
-                '%r --- %RError: %n%r' . $throwable->getMessage()
-            ), PHP_EOL;
+            self::throwableHandler($throwable, 'actionUserSiteActivity:throwable');
             return ExitCode::UNSPECIFIED_ERROR;
         }
 
         $timeEnd = microtime(true);
         $time = number_format(round($timeEnd - $timeStart, 2), 2);
-        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
-            ' s] %g Processed: %w[' . $processed . '] %g %n'), PHP_EOL;
-        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
-            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
-
-        Yii::info(VarDumper::dumpAsString([
-            'Processed' => $processed,
-            'Execute Time' => $time . ' sec',
-            'End Time' => date('Y-m-d H:i:s'),
-        ]), 'info\CleanController:actionUserSiteActivity:result');
+        self::outputResult($processed, $time, 'actionUserSiteActivity:result');
 
         return ExitCode::OK;
     }
@@ -373,29 +320,13 @@ class CleanController extends Controller
 
             $processed = $userMonitorCleaner->runDeleteByForm($dbCleanerParamsForm);
         } catch (\Throwable $throwable) {
-            Yii::error(
-                AppHelper::throwableFormatter($throwable),
-                'CleanController:actionUserMonitor:throwable'
-            );
-            echo Console::renderColoredString(
-                '%r --- %RError: %n%r' . $throwable->getMessage()
-            ), PHP_EOL;
+            self::throwableHandler($throwable, 'actionUserMonitor:throwable');
             return ExitCode::UNSPECIFIED_ERROR;
         }
 
         $timeEnd = microtime(true);
         $time = number_format(round($timeEnd - $timeStart, 2), 2);
-        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
-            ' s] %g Processed: %w[' . $processed . '] %g %n'), PHP_EOL;
-        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
-            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
-
-        Yii::info(VarDumper::dumpAsString([
-            'Processed' => $processed,
-            'Execute Time' => $time . ' sec',
-            'End Time' => date('Y-m-d H:i:s'),
-        ]), 'info\CleanController:actionUserMonitor:result');
-
+        self::outputResult($processed, $time, 'actionUserMonitor:result');
         return ExitCode::OK;
     }
 
@@ -420,5 +351,47 @@ class CleanController extends Controller
             }
         }
         return true;
+    }
+
+    /**
+     * @param \Throwable $throwable
+     * @param string $category
+     * @param string $categoryPrefix
+     */
+    private static function throwableHandler(
+        \Throwable $throwable,
+        string $category,
+        string $categoryPrefix = 'CleanController:'
+    ): void {
+        Yii::error(
+            AppHelper::throwableFormatter($throwable),
+            $categoryPrefix . $category
+        );
+        echo Console::renderColoredString(
+            '%r --- %RError: %n%r' . $throwable->getMessage()
+        ), PHP_EOL;
+    }
+
+    /**
+     * @param $processed
+     * @param $time
+     * @param string $category
+     * @param string $categoryPrefix
+     */
+    private static function outputResult(
+        $processed,
+        $time,
+        string $category,
+        string $categoryPrefix = 'CleanController:'
+    ): void {
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
+            ' s] %g Processed: %w[' . $processed . '] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . ']%n'), PHP_EOL;
+
+        Yii::info(VarDumper::dumpAsString([
+            'Processed' => $processed,
+            'Execute Time' => $time . ' sec',
+            'End Time' => date('Y-m-d H:i:s'),
+        ]), 'info\\' . $categoryPrefix . $category);
     }
 }

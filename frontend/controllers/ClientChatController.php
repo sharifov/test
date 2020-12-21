@@ -1976,7 +1976,7 @@ class ClientChatController extends FController
 
         try {
             $form = new ClientChatSearchCannedResponse();
-            $form->query = (string)$query;
+            $form->query = (string) $query;
             $form->chatId = $chatId;
             if ($form->validate()) {
                 $chat = $this->clientChatRepository->findById($form->chatId);
@@ -2009,7 +2009,8 @@ class ClientChatController extends FController
                 $errorMessage = $form->getErrorSummary(false)[0];
             }
         } catch (\Throwable $e) {
-            $errorMessage = $e->getMessage();
+            $errorMessage = 'The search failed. Please try again.';
+            AppHelper::throwableLogger($e, 'ClientChatController:actionAjaxCannedResponse:throwable');
         }
 
         return $this->asJson([

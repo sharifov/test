@@ -18,7 +18,9 @@ class ClientChatSearchCannedResponse extends Model
             ['chatId', 'integer'],
             [['query', 'chatId'], 'required'],
             ['query', 'filter', 'filter' => static function ($value) {
-                return HtmlPurifier::process($value);
+                $value = preg_replace('/[^\w\s]/ui', ' ', $value);
+                $value = preg_replace('|[\s]+|s', ' ', trim($value));
+                return str_replace(' ', ' & ', $value);
             }],
             ['chatId', 'filter', 'filter' => 'intval']
         ];

@@ -17,6 +17,6 @@ class AllSharedGroupAsset extends AssetBundle
 
         ['js/init-objects.js'],
 
-        ['/js/page-loader.js',]
+//        ['/js/page-loader.js',]
     ];
 }

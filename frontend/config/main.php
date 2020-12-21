@@ -1,5 +1,6 @@
 <?php
 
+use frontend\assets\groups\BootstrapGroupAsset;
 use kivork\rbacExportImport\src\rbac\DbManager;
 use kivork\rbacExportImport\RbacImportExportModule;
 use common\models\Employee;
@@ -26,8 +27,8 @@ $params = array_merge(
 $appVersion = $params['release']['version'] ?? '';
 $gitHash = $params['release']['git_hash'] ?? '';
 
-//$bundles = (YII_ENV === 'prod' || YII_ENV === 'stage' || (YII_ENV === 'dev' && ($params['minifiedAssetsEnabled'] ?? true))) ? require __DIR__ . '/assets-bundle.php' : [];
-$bundles = [];
+$bundles = ($params['minifiedAssetsEnabled'] ?? false) ? require __DIR__ . '/assets-bundle.php' : [];
+//true(YII_ENV === 'prod' || YII_ENV === 'stage' || (YII_ENV === 'dev' && ($params['minifiedAssetsEnabled'] ?? true))) ? require __DIR__ . '/assets-bundle.php' : [];
 
 return [
     'id' => 'app-frontend',
@@ -173,22 +174,19 @@ return [
             },
             'bundles' => array_merge($bundles, [
 
+                \yii\bootstrap4\BootstrapAsset::class => [
+                    'class' => BootstrapGroupAsset::class,
+                ],
+                \yii\bootstrap4\BootstrapPluginAsset::class => [
+                    'class' => BootstrapGroupAsset::class,
+                ],
+
                 BootstrapAsset::class => [
-                    'sourcePath' => '@npm/bootstrap/dist',
-                    'css' => [
-                        'css/bootstrap.css'
-                    ],
+                    'class' => BootstrapGroupAsset::class,
                 ],
 
                 BootstrapPluginAsset::class => [
-                    'class' => \yii\bootstrap4\BootstrapAsset::class,
-                    'sourcePath' => '@npm/bootstrap/dist',
-                    'js' => [
-                        'js/bootstrap.bundle.js'
-                    ],
-                    'depends' => [
-                        JqueryAsset::class,
-                    ],
+                  'class' => BootstrapGroupAsset::class,
                 ],
 //                AssetLeadCommunication::class => [
 //                    'basePath' => '@webroot',

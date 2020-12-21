@@ -3,35 +3,26 @@
 
 namespace frontend\assets\overridden;
 
-use yii\helpers\VarDumper;
+use vova07\imperavi\Asset;
 
-class ImperaviAsset extends \vova07\imperavi\Asset
+class ImperaviAsset extends Asset
 {
-    private $pluginsCss = [
-        'clips',
-    ];
-
-    private $pluginsJs = [
-        'fullscreen'
-    ];
-
     public $sourcePath = '@vendor/vova07/yii2-imperavi-widget/src/assets';
     public $baseUrl = '@web';
 
+    public $css = [
+        'redactor.css',
+        'plugins/clips/clips.css'
+    ];
+
+    public $js = [
+        'redactor.js',
+        'plugins/clips/clips.js',
+        'plugins/fullscreen/fullscreen.js',
+    ];
+
     public function addPlugins($plugins)
     {
-        parent::addPlugins($plugins);
     }
 
-    public function init()
-    {
-        parent::init();
-        if (is_array($this->css)) {
-            $this->addPlugins($this->pluginsCss);
-        }
-
-        if (is_array($this->js)) {
-            $this->addPlugins($this->pluginsJs);
-        }
-    }
 }

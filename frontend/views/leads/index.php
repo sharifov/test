@@ -1,6 +1,7 @@
 <?php
 
 use frontend\widgets\multipleUpdate\button\MultipleUpdateButtonWidget;
+use kartik\select2\Select2;
 use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use sales\auth\Auth;
 use sales\model\client\helpers\ClientFormatter;
@@ -74,20 +75,31 @@ $this->registerJs($js);
 
     <?php Pjax::begin(['id' => 'lead-pjax-list', 'timeout' => 7000, 'enablePushState' => true]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]);?>
 
-    <?php
-
-    if ($isAgent) {
-        $searchTpl = '_search_agent';
-    } else {
-        $searchTpl = '_search';
-    }
-
-    echo $this->render($searchTpl, [
-        'model' => $searchModel,
-        'action' => 'index',
-        'lists' => $lists
-    ]);
-    ?>
+    <div class="x_panel">
+        <div class="x_title">
+            <h2><i class="fa fa-search"></i> Search</h2>
+            <ul class="nav navbar-right panel_toolbox">
+                <li>
+                    <a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
+                </li>
+            </ul>
+            <div class="clearfix"></div>
+        </div>
+        <div class="x_content" style="display: <?=(Yii::$app->request->isPjax || Yii::$app->request->get('LeadSearch')) ? 'block' : 'none'?>">
+            <?php
+            if ($isAgent) {
+                $searchTpl = '_search_agent';
+            } else {
+                $searchTpl = '_search';
+            }
+            echo $this->render($searchTpl, [
+                'model' => $searchModel,
+                'action' => 'index',
+                'lists' => $lists
+            ]);
+            ?>
+        </div>
+    </div>
 
     <?php if (Auth::can('leads/index_MultipleUpdate')) : ?>
         <?= MultipleUpdateButtonWidget::widget([
@@ -95,6 +107,7 @@ $this->registerJs($js);
             'showUrl' => Url::to(['/lead-multiple-update/show']),
             'gridId' => $gridId,
             'buttonClass' => 'multiple-update-btn',
+            'buttonClassAdditional' => 'btn btn-info btn-warning',
             'buttonText' => 'Multiple update',
         ]) ?>
     <?php endif;?>
@@ -105,8 +118,10 @@ $this->registerJs($js);
             'showUrl' => Url::to(['/qa-task/qa-task-multiple/create-lead']),
             'gridId' => $gridId,
             'buttonClass' => 'qa-task-multiple-create',
+            'buttonClassAdditional' => 'btn btn-info btn-default',
             'buttonText' => 'Create QA Tasks',
             'headerText' => 'Create QA Tasks',
+            'faIconClass' => 'fa-plus-square',
         ]) ?>
     <?php endif;?>
 
@@ -126,7 +141,7 @@ $this->registerJs($js);
         [
             'attribute' => 'id',
             'value' => static function (Lead $model) {
-                return Html::a('<i class="fa fa-file-o"></i> ' . $model->id, [
+                return Html::a($model->id, [
                     'lead/view', 'gid' => $model->gid
                 ], [
                     'data-pjax' => 0,
@@ -150,9 +165,16 @@ $this->registerJs($js);
                 'class' => 'text-center'
             ]
         ],
+        [
+            'class' => \common\components\grid\project\ProjectColumn::class,
+            'attribute' => 'project_id',
+            'relation' => 'project',
+            'onlyUserProjects' => true
+        ],
         'client_id:client',
         [
-            'header' => 'Client / Emails / Phones',
+            //'header' => 'Client / Emails / Phones',
+            'header' => 'Client',
             'format' => 'raw',
             'value' => static function (Lead $lead) use ($user) {
                 if ($lead->client) {
@@ -169,15 +191,15 @@ $this->registerJs($js);
                     $clientName = '-';
                 }
 
-                $str = $clientName . '<br>';
-
-                if ($user->isAgent() && $lead->isOwner($user->id)) {
-                    $str .= '- // - // - // -';
-                } elseif ($lead->client) {
-                    $str .= $lead->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', ArrayHelper::map($lead->client->clientEmails, 'email', 'email')) . '' : '';
-                    $str .= $lead->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', ArrayHelper::map($lead->client->clientPhones, 'phone', 'phone')) . '' : '';
-                }
-                return $str ?? '-';
+//                $str = $clientName . '<br>';
+//
+//                if ($user->isAgent() && $lead->isOwner($user->id)) {
+//                    $str .= '- // - // - // -';
+//                } elseif ($lead->client) {
+//                    $str .= $lead->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', ArrayHelper::map($lead->client->clientEmails, 'email', 'email')) . '' : '';
+//                    $str .= $lead->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', ArrayHelper::map($lead->client->clientPhones, 'phone', 'phone')) . '' : '';
+//                }
+                return $clientName; // ?? '-';
             },
             'options' => [
                 'style' => 'width:180px'
@@ -193,21 +215,6 @@ $this->registerJs($js);
                         $statusValue .= ' <span data-toggle="tooltip" data-placement="top" title="' . Html::encode($lastLeadFlow->lf_description) . '"><i class="fa fa-warning"></i></span>';
                     }
                 }
-
-                $statusLog = LeadFlow::find()->where([
-                    'lead_id' => $lead->id,
-                    'status' => $lead->status
-                ])
-                    ->orderBy([
-                        'id' => SORT_DESC
-                    ])
-                    ->one();
-
-                if ($statusLog) {
-                    $statusValue .= '<br><br><span class="label label-default">' . Yii::$app->formatter->asDatetime(strtotime($statusLog->created)) . '</span>';
-                    $statusValue .= '<br>' . Yii::$app->formatter->asRelativeTime(strtotime($statusLog->created)) . '';
-                }
-
                 return $statusValue;
             },
             'format' => 'raw',
@@ -219,6 +226,37 @@ $this->registerJs($js);
                 'class' => 'text-center'
             ]
         ],
+
+        [
+            'attribute' => 'status_flow',
+            'value' => static function (Lead $lead) {
+                $statusValue = '';
+                $statusLog = LeadFlow::find()->where([
+                    'lead_id' => $lead->id,
+                    'status' => $lead->status
+                ])
+                    ->orderBy([
+                        'id' => SORT_DESC
+                    ])
+                    ->one();
+
+                if ($statusLog) {
+                    $statusValue .= '<span class="label label-default">' . Yii::$app->formatter->asDatetime(strtotime($statusLog->created)) . '</span>';
+                    $statusValue .= '<br>' . Yii::$app->formatter->asRelativeTime(strtotime($statusLog->created)) . '';
+                }
+
+                return $statusValue;
+            },
+            'format' => 'raw',
+            'options' => [
+                'style' => 'width:100px'
+            ],
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
+            'visible' => $searchModel->show_fields && in_array('status_flow', $searchModel->show_fields, true),
+        ],
+
         [
             'attribute' => 'created',
             'label' => 'Pending Time',
@@ -228,12 +266,7 @@ $this->registerJs($js);
             'visible' => !$isAgent,
             'format' => 'raw'
         ],
-        [
-            'class' => \common\components\grid\project\ProjectColumn::class,
-            'attribute' => 'project_id',
-            'relation' => 'project',
-            'onlyUserProjects' => true
-        ],
+
         [
             'attribute' => 'cabin',
             'value' => static function (Lead $model) {
@@ -242,16 +275,28 @@ $this->registerJs($js);
             'filter' => Lead::CABIN_LIST
         ],
         [
-            'label' => 'Pax / Communication',
+            'label' => 'Pax',
             'value' => static function (Lead $model) {
-                $str = '<i class="fa fa-male"></i> <span title="adult">' . $model->adults . '</span> / <span title="child">' . $model->children . '</span> / <span title="infant">' . $model->infants . '</span><br>';
-                $str .= $model->getCommunicationInfo();
+                $str = '<i class="fa fa-male"></i> <span title="adult">' . $model->adults . '</span> / <span title="child">' . $model->children . '</span> / <span title="infant">' . $model->infants . '</span>';
                 return $str;
             },
             'format' => 'raw',
             'contentOptions' => [
                 'class' => 'text-center'
             ]
+        ],
+
+        [
+            'label' => 'Communication',
+            'value' => static function (Lead $model) {
+                $str = $model->getCommunicationInfo();
+                return $str;
+            },
+            'format' => 'raw',
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
+            'visible' => $searchModel->show_fields && in_array('communication', $searchModel->show_fields, true),
         ],
 
         [
@@ -266,7 +311,8 @@ $this->registerJs($js);
             'format' => 'raw',
             'contentOptions' => [
                 'class' => 'text-center'
-            ]
+            ],
+            'visible' => $searchModel->show_fields && in_array('pnr', $searchModel->show_fields, true),
         ],
         [
             'attribute' => 'hybrid_uid',
@@ -274,7 +320,8 @@ $this->registerJs($js);
             'encodeLabel' => false,
             'contentOptions' => [
                 'class' => 'text-center'
-            ]
+            ],
+            'visible' => $searchModel->show_fields && in_array('hybrid_uid', $searchModel->show_fields, true),
         ],
         [
             'header' => 'CheckList',
@@ -285,10 +332,10 @@ $this->registerJs($js);
             'contentOptions' => [
                 'class' => 'text-left'
             ],
-            'visible' => !$isAgent,
             'options' => [
                 'style' => 'width:200px'
-            ]
+            ],
+            'visible' => (!$isAgent && $searchModel->show_fields && in_array('check_list', $searchModel->show_fields, true)),
         ],
         [
             'header' => 'Quotes',
@@ -310,7 +357,8 @@ $this->registerJs($js);
             'format' => 'raw',
             'contentOptions' => [
                 'class' => 'text-center'
-            ]
+            ],
+            'visible' => $searchModel->show_fields && in_array('quotes', $searchModel->show_fields, true),
         ],
         [
             'header' => 'Expert Quotes',
@@ -327,7 +375,7 @@ $this->registerJs($js);
             'contentOptions' => [
                 'class' => 'text-center'
             ],
-            'visible' => !$isAgent,
+            'visible' => (!$isAgent && $searchModel->show_fields && in_array('expert_quotes', $searchModel->show_fields, true)),
         ],
         [
             'header' => 'Segments',
@@ -351,7 +399,8 @@ $this->registerJs($js);
             ],
             'options' => [
                 'style' => 'width:140px'
-            ]
+            ],
+            'visible' => $searchModel->show_fields && in_array('segments', $searchModel->show_fields, true),
         ],
         [
             'header' => 'Depart',
@@ -367,7 +416,8 @@ $this->registerJs($js);
             ],
             'options' => [
                 'style' => 'width:100px'
-            ]
+            ],
+            'visible' => $searchModel->show_fields && in_array('depart', $searchModel->show_fields, true),
         ],
         [
             'attribute' => 'employee_id',
@@ -396,6 +446,7 @@ $this->registerJs($js);
                 return $str;
             },
             'format' => 'raw',
+            'visible' => $searchModel->show_fields &&  in_array('updated', $searchModel->show_fields, true),
             'filter' => false,
             'contentOptions' => [
                 'class' => 'text-center'
@@ -411,6 +462,7 @@ $this->registerJs($js);
                 }
                 return $str;
             },
+            'visible' => $searchModel->show_fields && in_array('l_last_action_dt', $searchModel->show_fields, true),
             'format' => 'raw',
             'filter' => false,
             'contentOptions' => [
@@ -421,8 +473,17 @@ $this->registerJs($js);
 
     ?>
 
-    <?php
 
+    <?php /*= $form->field($model, 'timezone')->widget(\kartik\select2\Select2::class, [
+        'data' => \common\models\Employee::timezoneList(true),
+        'size' => \kartik\select2\Select2::SMALL,
+        'options' => ['placeholder' => 'Select TimeZone', 'multiple' => false],
+        'pluginOptions' => ['allowClear' => true],
+    ]);*/ ?>
+
+
+
+    <?php
     echo GridView::widget([
         'id' => $gridId,
         'dataProvider' => $dataProvider,
@@ -456,10 +517,10 @@ $this->registerJs($js);
         'bsVersion' => '4.x',
         'hover' => true,
         'floatHeader' => false,
-        'panel' => [
-            'type' => GridView::TYPE_PRIMARY,
-            'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Leads</h3>'
-        ]
+    //        'panel' => [
+    //            'type' => GridView::TYPE_PRIMARY,
+    //            'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Leads</h3>'
+    //        ]
 
     ]);
     ?>
@@ -467,7 +528,7 @@ $this->registerJs($js);
     <br>
     <?php $form = ActiveForm::begin(['options' => ['data-pjax' => true, 'class' => '', 'style' => 'overflow: hidden;']]); // ['action' => ['leads/update-multiple']?>
 
-    <?= Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info multiple-update-btn']) ?>
+    <?= Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-warning multiple-update-btn']) ?>
 
     <?php ActiveForm::end(); ?>
 
@@ -476,6 +537,27 @@ $this->registerJs($js);
 <?php
 
 $js = <<<JS
+
+    // $('#mySelect2').on('select2:select', function (e) {
+    //     var data = e.params.data;
+    //     console.log(data);
+    // });
+    //
+    // $(document).on('select2:select', '#showFields', function(e) {
+    //     /*alert(123);
+    //      var data = e.params.data;
+    //     console.log(data);*/
+    // });
+
+   
+    
+    //  $(document).on('change', '#showFields', function(e) {
+    //     alert(123);
+    //     var data = e.params.data;
+    //     console.log(data);
+    // });
+
+
 
     $(document).on('beforeSubmit', '#lead_form', function(event) {
         let btn = $(this).find('.search_leads_btn');

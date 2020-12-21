@@ -24,7 +24,9 @@ class MultipleUpdateButtonWidget extends Widget
     public $formId = 'multiple-update-form';
     public $buttonText = 'Multiple update';
     public $buttonClass = 'multiple-update-btn';
+    public $buttonClassAdditional = 'btn btn-info';
     public $headerText = 'Multiple update';
+    public $faIconClass = 'fa-edit';
 
     public function init(): void
     {
@@ -49,7 +51,9 @@ class MultipleUpdateButtonWidget extends Widget
             'gridId' => $this->gridId,
             'buttonText' => $this->buttonText,
             'buttonClass' => $this->buttonClass,
+            'buttonClassAdditional' => $this->buttonClassAdditional,
             'headerText' => $this->headerText,
+            'faIconClass' => $this->faIconClass
         ]);
     }
 }

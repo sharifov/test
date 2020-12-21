@@ -3,6 +3,7 @@
 namespace sales\model\cases\useCases\cases\api\create;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
+use common\models\Project;
 use sales\entities\cases\CaseCategory;
 use sales\services\client\InternalPhoneValidator;
 use common\components\validators\IsArrayValidator;
@@ -16,9 +17,10 @@ use yii\base\Model;
  * @property int $category_id
  * @property string $order_uid
  * @property array $order_info
- * @property int $project_id
+ * @property int|null $project_id
  * @property string|null $subject
  * @property string|null $description
+ * @property string|null $project_key
  */
 class CreateForm extends Model
 {
@@ -30,18 +32,27 @@ class CreateForm extends Model
     public $project_id;
     public $subject;
     public $description;
+    public $project_key;
 
     public function formName(): string
     {
         return '';
     }
 
-    public function __construct(int $project_id, $config = [])
+    /**
+     * CreateForm constructor.
+     * @param int|null $project_id
+     * @param array $config
+     */
+    public function __construct(?int $project_id, $config = [])
     {
         parent::__construct($config);
         $this->project_id = $project_id;
     }
 
+    /**
+     * @return array
+     */
     public function rules(): array
     {
         return [
@@ -56,11 +67,13 @@ class CreateForm extends Model
                 return str_replace(['-', ' '], '', trim($value));
             }, 'skipOnEmpty' => true, 'skipOnError' => true],
             ['contact_phone', InternalPhoneValidator::class,
-                'skipOnError' => true, 'skipOnEmpty' => true, 'allowInternalPhone' => \Yii::$app->params['settings']['allow_contact_internal_phone']],
+                'skipOnError' => true, 'skipOnEmpty' => true,
+                'allowInternalPhone' => \Yii::$app->params['settings']['allow_contact_internal_phone']],
 
             ['category_id', 'required'],
             ['category_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['category_id', 'exist', 'targetClass' => CaseCategory::class, 'targetAttribute' => ['category_id' => 'cc_id']],
+            ['category_id', 'exist', 'targetClass' => CaseCategory::class,
+                'targetAttribute' => ['category_id' => 'cc_id']],
 
             ['order_uid', 'required'],
             ['order_uid', 'string', 'min' => 5, 'max' => 7],
@@ -82,11 +95,27 @@ class CreateForm extends Model
                     }
                 }
             }, 'skipOnEmpty' => true, 'skipOnError' => true],
+
+            ['project_key', 'default', 'value' => null],
+            ['project_key', 'string', 'max' => 100],
+            [['project_key'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class,
+                'targetAttribute' => ['project_key' => 'project_key']]
         ];
     }
 
+    /**
+     * @return Command
+     */
     public function getDto(): Command
     {
+
+        if (empty($this->project_id) && $this->project_key) {
+            $this->project_id = Project::find()
+                ->select('id')
+                ->where(['project_key' => $this->project_key])
+                ->scalar();
+        }
+
         return new Command(
             $this->contact_email,
             $this->contact_phone,
@@ -95,7 +124,8 @@ class CreateForm extends Model
             $this->order_info,
             $this->project_id,
             $this->subject,
-            $this->description
+            $this->description,
+            $this->project_key
         );
     }
 }

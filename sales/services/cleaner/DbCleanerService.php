@@ -164,4 +164,11 @@ class DbCleanerService
         }
         throw new Exception('Class processing not found by table: ' . $table);
     }
+
+    public static function daysToBeforeDate(int $days): string
+    {
+        return (new \DateTime('now'))
+                ->modify('-' . $days . ' days')
+                ->format('Y-m-d');
+    }
 }

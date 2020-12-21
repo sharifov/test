@@ -7,7 +7,7 @@ use yii\web\JqueryAsset;
 
 class CommonAsset extends AssetBundle
 {
-    public $sourcePath = '@frontend/themes/gentelella_v2/';
+    public $sourcePath = '@frontend/themes/gentelella_v2/src/';
     public $baseUrl = '@web';
 
     public $js = [

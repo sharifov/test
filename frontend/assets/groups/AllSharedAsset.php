@@ -14,9 +14,7 @@ class AllSharedAsset extends \yii\web\AssetBundle
     public $baseUrl = '@web';
 
     public $depends = [
-        JqueryAsset::class,
         YiiAsset::class,
         PjaxAsset::class,
-        BootstrapProgressbar::class,
     ];
 }
