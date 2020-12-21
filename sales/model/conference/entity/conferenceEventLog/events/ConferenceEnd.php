@@ -13,7 +13,7 @@ class ConferenceEnd implements Event
     public string $SequenceNumber;
     public \DateTimeImmutable $Timestamp;
     public string $StatusCallbackEvent;
-    public string $CallSidEndingConference;
+    public ?string $CallSidEndingConference;
     public string $ReasonConferenceEnded;
     public string $Reason;
 
@@ -26,7 +26,7 @@ class ConferenceEnd implements Event
         string $SequenceNumber,
         string $Timestamp,
         string $StatusCallbackEvent,
-        string $CallSidEndingConference,
+        ?string $CallSidEndingConference,
         string $ReasonConferenceEnded,
         string $Reason,
         ?int $conferenceId,
@@ -52,7 +52,7 @@ class ConferenceEnd implements Event
             $raw['SequenceNumber'],
             $raw['Timestamp'],
             $raw['StatusCallbackEvent'],
-            $raw['CallSidEndingConference'],
+            $raw['CallSidEndingConference'] ?? null,
             $raw['ReasonConferenceEnded'],
             $raw['Reason'],
             $raw['conferenceId'] ?? null,
