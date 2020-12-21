@@ -118,6 +118,7 @@ use sales\model\clientChatVisitor\entity\ClientChatVisitor;
 use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use sales\model\project\entity\projectLocale\ProjectLocale;
 use sales\repositories\client\ClientsQuery;
+use sales\services\cases\CasesCommunicationService;
 use sales\services\client\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
@@ -1837,6 +1838,17 @@ class TestController extends FController
         } catch (\Throwable $throwable) {
             VarDumper::dump(AppHelper::throwableFormatter($throwable), 10, true);
         }
+        exit();
+    }
+
+    public function actionLocaleParams(string $gid, string $locale)
+    {
+        $content_data = [];
+        if ($model = Cases::findOne(['cs_gid' => $gid])) {
+            $casesCommunicationService = \Yii::createObject(CasesCommunicationService::class);
+            $content_data = $casesCommunicationService->getEmailData($model, Auth::user(), $locale);
+        }
+        \yii\helpers\VarDumper::dump($content_data, 10, true);
         exit();
     }
 

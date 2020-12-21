@@ -449,7 +449,7 @@ class CasesController extends FController
 
 
                         //VarDumper::dump($content_data, 10 , true); exit;
-                        $content_data = $this->casesCommunicationService->getEmailData($model, $userModel);
+                        $content_data = $this->casesCommunicationService->getEmailData($model, $userModel, $comForm->c_language_id);
                         $content_data['content'] = $comForm->c_email_message;
                         $content_data['subject'] = $comForm->c_email_subject;
 
