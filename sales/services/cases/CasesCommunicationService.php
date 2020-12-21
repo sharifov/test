@@ -61,6 +61,7 @@ class CasesCommunicationService
                 ->where(['pl_project_id' => $project->id])
                 ->andWhere(['pl_language_id' => (string) $locale])
                 ->andWhere(['pl_market_country' => (string) $client->cl_marketing_country])
+                ->andWhere(['pl_enabled' => true])
                 ->one();
 
             if (!$projectLocale) {
@@ -68,6 +69,7 @@ class CasesCommunicationService
                     ->where(['pl_project_id' => $project->id])
                     ->andWhere(['pl_language_id' => null])
                     ->andWhere(['pl_market_country' => (string) $client->cl_marketing_country])
+                    ->andWhere(['pl_enabled' => true])
                     ->one();
             }
         }
@@ -77,6 +79,7 @@ class CasesCommunicationService
                 ->andWhere(['pl_language_id' => null])
                 ->andWhere(['pl_default' => true])
                 ->andWhere(['IS NOT', 'pl_market_country', null])
+                ->andWhere(['pl_enabled' => true])
                 ->one();
         }
 
