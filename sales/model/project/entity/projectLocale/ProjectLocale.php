@@ -151,6 +151,7 @@ class ProjectLocale extends \yii\db\ActiveRecord
             self::find()
             ->select(['pl_language_id'])
             ->where(['pl_project_id' => $projectId])
+            ->andWhere(['pl_enabled' => true])
             ->orderBy(['pl_language_id' => SORT_ASC])
             ->asArray(true)
             ->all(),
@@ -186,6 +187,7 @@ class ProjectLocale extends \yii\db\ActiveRecord
             ->where([
                 'pl_project_id' => $projectId,
                 'pl_default' => true,
+                'pl_enabled' => true,
             ])
             ->scalar();
     }
