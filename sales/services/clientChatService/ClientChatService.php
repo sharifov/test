@@ -588,7 +588,7 @@ class ClientChatService
     {
         $result = \Yii::$app->chatBot->createRoom($visitorId, $channelId, $message, $userRcId, $userRcToken);
         if ($result['error']) {
-            throw new \RuntimeException('[ChatBot Create Room] ' . $result['error']['message'] ?? 'Unknown ChatBot error message');
+            throw new \RuntimeException('[ChatBot Create Room] ' . ($result['error']['message'] ?? 'Unknown ChatBot error message'));
         }
 
         if (!$rid = (string)($result['data']['rid'] ?? null)) {
