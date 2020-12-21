@@ -24,7 +24,8 @@ use yii\widgets\Pjax;
 
     <?= $form->field($model, 'phone')->widget(PhoneInput::class, [
         'options' => [
-            'class' => 'form-control lead-form-input-element'
+            'class' => 'form-control lead-form-input-element',
+            'onkeyup' => 'var value = $(this).val();$(this).val(value.replace(/[^0-9\+]+/g, ""));'
         ],
         'jsOptions' => [
             'nationalMode' => false,

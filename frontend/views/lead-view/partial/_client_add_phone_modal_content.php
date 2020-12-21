@@ -28,7 +28,7 @@ $addPhone->client_id = $lead->client_id;
         'action' => Url::to(['lead-view/ajax-add-client-phone', 'gid' => $lead->gid]),
         'enableClientValidation' => false,
         'enableAjaxValidation' => true,
-        'validateOnChange' => false,
+        'validateOnChange' => true,
         'validateOnBlur' => false,
         'validationUrl' => Url::to(['lead-view/ajax-add-client-phone-validation', 'gid' => $lead->gid])
     ]); ?>
@@ -43,7 +43,8 @@ $addPhone->client_id = $lead->client_id;
             ])->widget(PhoneInput::class, [
                 'options' => [
                     'class' => 'form-control lead-form-input-element',
-                    'required' => true
+                    'required' => true,
+                    'onkeyup' => 'var value = $(this).val();$(this).val(value.replace(/[^0-9\+]+/g, ""));'
                 ],
                 'jsOptions' => [
                     'nationalMode' => false,
