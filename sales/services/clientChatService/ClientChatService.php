@@ -310,12 +310,12 @@ class ClientChatService
     /**
      * @param ClientChatTransferForm $form
      * @param Employee $user
-     * @return Department
+     * @return void
      * @throws \Throwable
      */
-    public function transfer(ClientChatTransferForm $form, Employee $user): ClientChatChannel
+    public function transfer(ClientChatTransferForm $form, Employee $user): void
     {
-        return $this->transactionManager->wrap(function () use ($form, $user) {
+        $this->transactionManager->wrap(function () use ($form, $user) {
             $clientChat = $this->clientChatRepository->findById($form->chatId);
 
             $transferRule = new ClientChatChannelTransferRule();
@@ -385,8 +385,6 @@ class ClientChatService
                     Notifications::publish('getNewNotification', ['user_id' => $user->id], $dataNotification);
                 }
             }
-
-            return $clientChatChannel;
         });
     }
 
@@ -496,7 +494,7 @@ class ClientChatService
             Notifications::pub(
                 [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],
                 'refreshChatPage',
-                ['data' => ClientChatAccessMessage::chatCanceled($clientChat, $user)]
+                ['data' => ClientChatAccessMessage::chatCanceledTransfer($clientChat, $user)]
             );
         }
     }
