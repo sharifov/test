@@ -48,7 +48,10 @@ class RealTimeStartChatForm extends \yii\base\Model
     public function rules(): array
     {
         return [
-            [['rid', 'visitorId', 'message', 'visitorName', 'visitorEmail'], 'string'],
+            [['rid', 'visitorId', 'visitorName', 'visitorEmail'], 'string'],
+
+            ['message', 'string', 'max' => 5000],
+
             [['channelId', 'projectId'], 'integer'],
             [['visitorId', 'message', 'channelId'], 'required'],
             [['channelId'], 'filter', 'filter' => 'intval'],
