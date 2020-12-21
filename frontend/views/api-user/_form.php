@@ -21,22 +21,35 @@ use yii\widgets\ActiveForm;
 
                     <?= $form->field($model, 'au_name')->textInput(['maxlength' => true]) ?>
 
-                    <?= $form->field($model, 'au_api_username')->textInput(['maxlength' => true]) ?>
-
-                    <?= $form->field($model, 'au_api_password')->passwordInput(['maxlength' => true]) ?>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <?= $form->field($model, 'au_api_username')
+                                ->textInput(['maxlength' => true, 'autocomplete' => false]) ?>
+                        </div>
+                        <div class="col-md-6">
+                            <?= $form->field($model, 'au_api_password')
+                                ->passwordInput(['maxlength' => true, 'autocomplete' => false]) ?>
+                        </div>
+                    </div>
 
                     <?= $form->field($model, 'au_email')->textInput(['maxlength' => true]) ?>
 
-                    <?= $form->field($model, 'au_project_id')->dropDownList(\yii\helpers\ArrayHelper::map(\common\models\Project::find()->all(), 'id', 'name'), ['prompt' => '---']) ?>
+                    <?= $form->field($model, 'au_project_id')
+                        ->dropDownList(\common\models\Project::getList(), ['prompt' => '---']) ?>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <?= $form->field($model, 'au_rate_limit_number')->input('number', ['min' => 0]) ?>
+                        </div>
+                        <div class="col-md-6">
+                            <?= $form->field($model, 'au_rate_limit_reset')->input('number', ['min' => 0]) ?>
+                        </div>
+                    </div>
 
                     <?= $form->field($model, 'au_enabled')->checkbox() ?>
 
-                    <?= $form->field($model, 'au_rate_limit_number')->textInput() ?>
-
-                    <?= $form->field($model, 'au_rate_limit_reset')->textInput() ?>
-
                     <div class="form-group">
-                        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+                        <?= Html::submitButton('Save API User', ['class' => 'btn btn-success']) ?>
                     </div>
                 </div>
 
