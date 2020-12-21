@@ -125,8 +125,9 @@ class CasesCommunicationService
             'address'   => $projectContactInfo['address'] ?? '',
             'phone'     => $projectContactInfo['phone'] ?? '',
             'email'     => $projectContactInfo['email'] ?? '',
-            'localeParams' => $localeParams,
         ];
+
+        $content_data['localeParams'] = $localeParams;
 
         $content_data['agent'] = [
             'name'      => $user->full_name,
