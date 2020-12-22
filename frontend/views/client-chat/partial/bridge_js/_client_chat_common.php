@@ -73,6 +73,9 @@ let loaderIframe = '<div id="_cc-load"></div>';
 let clientChatInfoAjaxRequestEnabled = false;
 let clientChatInfoAjaxRequestXhr;
 
+let chatListingAjaxRequestEnabled = false;
+window.allDialogsLoaded = false;
+
 $(document).ready( function () {
     let clientChatId = {$clientChatId};
 
@@ -211,46 +214,56 @@ function updateLastMessageTime() {
     });
 }
 
-$(document).on('click', '#btn-load-channels', function (e) {
-    
-    e.preventDefault();
-    
-    let page = $(this).attr('data-page');
-    let btn = $(this);
-    
-    let btnCurrentText = btn.html();
-    
-    let params = new URLSearchParams(window.location.search);
-
-    let urlParams = window.getClientChatLoadMoreUrl('{$filter->getId()}', '{$filter->formName()}');
-    let url = '{$loadChannelsUrl}?' + urlParams + '&loadingChannels=1' + '&page=' + page;
-    $.ajax({
-        type: 'get',
-        url: url,
-        dataType: 'json',
-        cache: false,
-        // data: {loadingChannels: 1, channelId: params.get('channelId') | selectedChannel},
-        beforeSend: function () {
-            btn.html('<i class="fa fa-spin fa-spinner"></i> Loading...').prop('disabled', true).addClass('disabled');
-        },
-        success: function (data) {
-            if (data.html) {
-                $('._cc-list-wrapper').append(data.html);
-                refreshUserSelectedState();
-            }
-            if (data.isFullList) {
-                btn.html('All conversations are loaded');
-            } else {
-                let txt = '<i class="fa fa-angle-double-down"> </i> Load more (<span>' + data.moreCount + '</span>)';
-                btn.html(txt).removeAttr('disabled').removeClass('disabled').attr('data-page', data.page);
-            }
-            window.history.replaceState({}, '', '{$loadChannelsUrl}?' + urlParams + '&page=' + (data.page - 1));
-        },
-        error: function (xhr) {
-            btn.html(btnCurrentText);
-        },
+window.addScrollEventListenerToChatListWrapper = function () {
+    $('#cc-dialogs-wrapper').scroll(function (e) {
+        var elem = $(e.currentTarget);
+        if (elem[0].scrollHeight - elem.scrollTop() == elem.outerHeight() && !chatListingAjaxRequestEnabled && !window.allDialogsLoaded) {
+            chatListingAjaxRequestEnabled = true;
+            let page = $(this).attr('data-page');
+            let loadChannelsTxt = $('#load-channels-txt');
+            
+            let loadChannelsCurrentText = loadChannelsTxt.html();
+            
+            let params = new URLSearchParams(window.location.search);
+        
+            let urlParams = window.getClientChatLoadMoreUrl('{$filter->getId()}', '{$filter->formName()}');
+            let url = '{$loadChannelsUrl}?' + urlParams + '&loadingChannels=1' + '&page=' + page;
+            $.ajax({
+                type: 'get',
+                url: url,
+                dataType: 'json',
+                cache: false,
+                // data: {loadingChannels: 1, channelId: params.get('channelId') | selectedChannel},
+                beforeSend: function () {
+                    loadChannelsTxt.html('<i class="fa fa-spin fa-spinner"></i> Loading...');
+                },
+                success: function (data) {
+                    if (data.html) {
+                        $('._cc-list-wrapper').append(data.html);
+                        refreshUserSelectedState();
+                    }
+                    if (data.isFullList) {
+                        loadChannelsTxt.html('All conversations are loaded');
+                        window.allDialogsLoaded = true;
+                    } else {
+                        let txt = '<i class="fa fa-angle-double-down"> </i> Scroll to load more (<span>' + data.moreCount + '</span>)';
+                        loadChannelsTxt.html(txt);
+                        $('#cc-dialogs-wrapper').attr('data-page', data.page);
+                        window.allDialogsLoaded = false;
+                    }
+                    window.history.replaceState({}, '', '{$loadChannelsUrl}?' + urlParams + '&page=' + (data.page - 1));
+                },
+                error: function (xhr) {
+                    loadChannelsTxt.html(loadChannelsCurrentText);
+                },
+                complete: function () {
+                    chatListingAjaxRequestEnabled = false;
+                }
+            });
+        }
     });
-});
+};
+window.addScrollEventListenerToChatListWrapper();
 
 $(document).on('click', '.cc_btn_group_filter', function () {
     let newValue = $(this).attr('data-group-id');
@@ -659,6 +672,7 @@ window.refreshChatPage = function (cchId) {
 window.refreshChannelList = function() {  
     if ($('#pjax-client-chat-channel-list').length) {
         pjaxReload({container: '#pjax-client-chat-channel-list'});
+        window.addScrollEventListenerToChatListWrapper();
     }
 }
 
