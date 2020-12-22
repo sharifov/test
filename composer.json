@@ -79,8 +79,8 @@
 		"kivork/yii2-mattermost-log-target": "@dev",
 		"kivork/yii2-virtual-cron": "@dev",
 		"kivork/yii2-prometheus-client": "@dev",
-		"sorokinmedia/yii2-centrifugo": "*"
-
+		"sorokinmedia/yii2-centrifugo": "*",
+		"stefangabos/world_countries": "^2.1"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",

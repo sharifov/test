@@ -4,8 +4,9 @@ use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $model sales\model\project\entity\projectLocale\ProjectLocale */
+/* @var $copyModel sales\model\project\entity\projectLocale\ProjectLocale */
 
-$this->title = 'Create Project Locale';
+$this->title = ($copyModel ? 'Copy' : 'Create' ) . ' Project Locale';
 $this->params['breadcrumbs'][] = ['label' => 'Project Locales', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -15,6 +16,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?= $this->render('_form', [
         'model' => $model,
+        'copyModel' => $copyModel,
     ]) ?>
 
 </div>

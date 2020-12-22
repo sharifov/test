@@ -23,6 +23,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('<i class="fa fa-plus"></i> Add Project Locale', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
+
     <?php Pjax::begin(); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
@@ -87,6 +88,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 //'label' => 'Type Name',
                 'attribute' => 'pl_language_id',
+                'options' => ['style' => 'width:240px'],
                 'value' => static function (ProjectLocale $model) {
                     return $model->pl_language_id ? '<span class="badge badge-warning">' . Html::encode($model->pl_language_id) . '</span>' : $model->pl_language_id;
                 },
@@ -96,7 +98,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     //'attribute' => 'pl_language_id',
 
                     'name' => 'ProjectLocaleSearch[pl_language_id]',
-                    'data' => \common\models\Language::getLocaleList(true),
+                    'data' => \common\models\Language::getLocaleList(false),
 
                     //'theme' => Select2::THEME_DEFAULT,
                     'size' => Select2::SMALL,
@@ -111,7 +113,34 @@ $this->params['breadcrumbs'][] = $this->title;
                 ]),
             ],
 
-            'pl_market_country',
+            [
+                //'label' => 'Type Name',
+                'attribute' => 'pl_market_country',
+                'contentOptions' => ['style' => 'width: 240px'],
+                'value' => static function (ProjectLocale $model) {
+                    return $model->pl_market_country ? '<span class="badge badge-success">' . Html::encode($model->pl_market_country) . '</span>' : '-';
+                },
+                'format' => 'raw',
+                'filter' => Select2::widget([
+                    //'model' => \common\models\search\ProjectLocaleSearch::class,
+                    //'attribute' => 'pl_language_id',
+
+                    'name' => 'ProjectLocaleSearch[pl_market_country]',
+                    'data' => \common\models\Language::getCountryNames(),
+
+                    //'theme' => Select2::THEME_DEFAULT,
+                    'size' => Select2::SMALL,
+                    'value' => empty(Yii::$app->request->get('ProjectLocaleSearch')['pl_market_country']) ? null : Yii::$app->request->get('ProjectLocaleSearch')['pl_market_country'],
+                    //'hideSearch' => false,
+                    'options' => [
+                        'placeholder' => '',
+                    ],
+                    'pluginOptions' => [
+                        'allowClear' => true,
+                    ]
+                ]),
+            ],
+
 
             [
                 'label' => 'Locale Name',
@@ -141,13 +170,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => false,
             ],
 
-            [
-                'class' => UserSelect2Column::class,
-                'attribute' => 'pl_created_user_id',
-                'relation' => 'plCreatedUser',
-                'format' => 'username',
-                'placeholder' => 'Select User'
-            ],
+//            [
+//                'class' => UserSelect2Column::class,
+//                'attribute' => 'pl_created_user_id',
+//                'relation' => 'plCreatedUser',
+//                'format' => 'username',
+//                'placeholder' => 'Select User'
+//            ],
 
             [
                 'class' => UserSelect2Column::class,
@@ -161,11 +190,11 @@ $this->params['breadcrumbs'][] = $this->title;
             //'pl_updated_user_id',
             //'pl_created_dt',
             //'pl_updated_dt',
-            [
-                'class' => DateTimeColumn::class,
-                'attribute' => 'pl_created_dt',
-                'format' => 'byUserDateTime'
-            ],
+//            [
+//                'class' => DateTimeColumn::class,
+//                'attribute' => 'pl_created_dt',
+//                'format' => 'byUserDateTime'
+//            ],
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'pl_updated_dt',
@@ -174,8 +203,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                     'class' => 'yii\grid\ActionColumn',
-                'template' => '{view} {update} {delete} &nbsp;&nbsp; {default}',
-                'contentOptions' => ['style' => 'width: 110px'],
+                'template' => '{view} {update} {delete} &nbsp;&nbsp;{copy} {default}',
+                'contentOptions' => ['style' => 'width: 140px'],
                 'visibleButtons' => [
                     /*'view' => function ($model, $key, $index) {
                         return User::hasPermission('viewOrder');
@@ -197,12 +226,19 @@ $this->params['breadcrumbs'][] = $this->title;
                             return Html::a('<i class="fa fa-check-square-o text-info"></i>', ['project-locale/default', 'id' => $model->pl_id], [
                                 //'class' => 'btn btn-primary btn-xs take-processing-btn',
                                 'title' => 'set Default',
-                                'data-pjax' => 0,
+                                'data-pjax' => 1,
                                 'data' => [
                                     'confirm' => 'Are you sure you want set Default this Locale?',
                                     'id' => $model->pl_id,
                                     //'method' => 'post',
                                 ],
+                            ]);
+                        },
+
+                        'copy' => static function ($url, ProjectLocale $model) {
+                            return Html::a('<i class="fa fa-copy text-info"></i>', ['project-locale/create', 'id' => $model->pl_id], [
+                                //'class' => 'btn btn-primary btn-xs take-processing-btn',
+                                'title' => 'Copy',
                             ]);
                         },
 
@@ -214,5 +250,7 @@ $this->params['breadcrumbs'][] = $this->title;
     ]); ?>
 
     <?php Pjax::end(); ?>
+
+
 
 </div>

@@ -125,7 +125,18 @@ class AirportsController extends FController
      */
     public function actionSynchronization(): \yii\web\Response
     {
-        $result = Airports::synchronization(10000);
+
+        // $lastRecord = Airports::find()->select('a_updated_dt')->orderBy(['a_updated_dt' => SORT_ASC])->limit(1)->one();
+        // $lastUpdated = ($lastRecord && $lastRecord->a_updated_dt) ? strtotime($lastRecord->a_updated_dt) : 0;
+
+        $lastUpdated = Yii::$app->request->get('lastUpdated');
+        if ($lastUpdated) {
+            $lastUpdated = strtotime($lastUpdated);
+        }
+
+        set_time_limit(300);
+
+        $result = Airports::synchronization(10000, $lastUpdated);
 
         if ($result) {
             if ($result['error']) {
