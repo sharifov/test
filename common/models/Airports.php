@@ -264,10 +264,11 @@ class Airports extends \yii\db\ActiveRecord
 
     /**
      * @param int $limit
+     * @param int $lastUpdated
      * @return array
      * @throws \yii\httpclient\Exception
      */
-    public static function synchronization(int $limit = 0): array
+    public static function synchronization(int $limit = 0, ?int $lastUpdated = 0): array
     {
         $data = [
             'info' => [],
@@ -278,8 +279,10 @@ class Airports extends \yii\db\ActiveRecord
             'error' => false
         ];
 
-        $lastRecord = self::find()->select('a_updated_dt')->orderBy(['a_updated_dt' => SORT_ASC])->limit(1)->one();
-        $lastUpdated = ($lastRecord && $lastRecord->a_updated_dt) ? strtotime($lastRecord->a_updated_dt) : 0;
+        if ($lastUpdated === null) {
+            $lastUpdated = 0;
+        }
+
         $airportsData = Yii::$app->travelServices->airportExport($lastUpdated, $limit);
 
         //$data = $airportsData['data']['Data'] ?? [];
@@ -304,6 +307,7 @@ class Airports extends \yii\db\ActiveRecord
                         $airport->iata = $item['Iata'];
                         $airport->name = $item['Name'];
                         $airport->city = $item['CityAscii'];
+//                        $airport->city = $item['City'];
                         $airport->a_close = (bool) $item['IsClosed'];
                         $airport->a_disabled = (bool) $item['IsDisabled'];
 
@@ -345,10 +349,20 @@ class Airports extends \yii\db\ActiveRecord
                             $diff .= ', ' . $airport->name . ' => ' . $item['Name'];
                         }
 
+//                        if (!isset($item['City'])) {
+//                            VarDumper::dump($item, 10, true);
+//                            continue;
+//                        }
+
                         if ($airport->city !== $item['CityAscii']) {
                             $airport->city = $item['CityAscii'];
                             $diff .= ', ' . $airport->city . ' => ' . $item['CityAscii'];
                         }
+
+//                        if ($airport->city !== $item['City']) {
+//                            $airport->city = $item['City'];
+//                            $diff .= ', ' . $airport->city . ' => ' . $item['City'];
+//                        }
 
                         if ((bool) $airport->a_close !== (bool) $item['IsClosed']) {
                             $airport->a_close = (bool) $item['IsClosed'];
@@ -361,15 +375,15 @@ class Airports extends \yii\db\ActiveRecord
                         }
 
                         $latitude = $item['Latitude'] ? round($item['Latitude'], 14) : 0;
-                        $curLatitude = strval(round($airport->latitude, 14));
-                        if ($latitude && $curLatitude !== strval($latitude)) {
+                        $curLatitude = (string)round($airport->latitude, 14);
+                        if ($latitude && $curLatitude !== (string)$latitude) {
                             $diff .= ', lat=' . $curLatitude . ' => ' . $latitude;
                             $airport->latitude = $latitude;
                         }
 
                         $longitude = $item['Longitude'] ? round($item['Longitude'], 14) : 0;
-                        $curLongitude = strval(round($airport->longitude, 14));
-                        if ($longitude && $curLongitude !== strval($longitude)) {
+                        $curLongitude = (string)round($airport->longitude, 14);
+                        if ($longitude && $curLongitude !== (string)$longitude) {
                             $diff .= ', long=' . $curLongitude . ' => ' . $longitude;
                             $airport->longitude = $longitude;
                         }
