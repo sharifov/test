@@ -80,6 +80,4 @@ class m201221_141845_add_languages_tbl_language extends Migration
             $this->delete('{{%language}}', ['language_id' => $lang['language_id']]);
         }
     }
-
-
 }
