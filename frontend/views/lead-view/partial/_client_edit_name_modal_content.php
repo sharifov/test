@@ -43,7 +43,7 @@ $user = Yii::$app->user->identity;
         <?= $form->field($editName, 'locale')->dropDownList(Language::getLocaleList(false), ['prompt' => '-']) ?>
     <?php endif ?>
     <?php if (Auth::can('global/client/marketing_country/edit')) : ?>
-        <?php echo $form->field($editName, 'locale')->dropDownList(Language::getCountryNames(), ['prompt' => '-']) ?>
+        <?php echo $form->field($editName, 'marketingCountry')->dropDownList(Language::getCountryNames(), ['prompt' => '-']) ?>
     <?php endif ?>
 
     <?=
