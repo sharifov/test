@@ -418,7 +418,6 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
                                     ->dropDownList(
                                         $localeList,
                                         [
-                                            'prompt' => '---',
                                             'class' => 'form-control',
                                             'id' => 'language',
                                             'options' => [
