@@ -1,11 +1,5 @@
 <?php
 
-//
-//require Yii::getAlias('@root/vendor') . '/stefangabos/world_countries/data/en/countries.php';
-//$countryList['en'] = $countries ?? [];
-//require Yii::getAlias('@root/vendor') . '/stefangabos/world_countries/data/ru/countries.php';
-//$countryList['ru'] = $countries ?? [];
-
 return [
     'serviceName' => 'crm',
     'serviceVersion' => '1.0.0',
@@ -32,9 +26,6 @@ return [
         'call2DelayTime' => 2 * 60 * 60,     // 2 hours
     ],
     'ipinfodb_key' => '9079611957f72155dea3bb7ab848ee101c268564ab64921ca5345c4bce7af5b7',
-
-    //'countries' =>  $countryList ?? [],
-
     'backOffice' => [
         'ver' => '1.0.0',
         'apiKey' => '5394bbedf41dd2c0403897ca621f188b',
