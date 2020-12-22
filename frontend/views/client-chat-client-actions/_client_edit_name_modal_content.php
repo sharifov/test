@@ -43,7 +43,7 @@ use yii\widgets\ActiveForm;
         <?= $form->field($editName, 'locale')->dropDownList(Language::getLocaleList(false), ['prompt' => '-']) ?>
     <?php endif ?>
     <?php if (Auth::can('global/client/marketing_country/edit')) : ?>
-        <?= $form->field($editName, 'marketingCountry')->textInput(['maxlength' => true]) ?>
+        <?php echo $form->field($editName, 'locale')->dropDownList(Language::getCountryNames(), ['prompt' => '-']) ?>
     <?php endif ?>
 
     <div class="text-center">
