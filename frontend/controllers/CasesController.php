@@ -859,6 +859,9 @@ class CasesController extends FController
         } catch (\Throwable $exception) {
             $out['error'] = $exception->getMessage();
             \Yii::info(VarDumper::dumpAsString($exception, 10), 'info\CasesController::actionAddSale:Exception');
+            if (isset($saleData)) {
+                \Yii::info(VarDumper::dumpAsString($saleData, 20), 'info\CasesController::actionAddSale:saleData');
+            }
             $transaction->rollBack();
         }
 
