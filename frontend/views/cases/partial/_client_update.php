@@ -39,7 +39,7 @@ use yii\helpers\Url;
         <?php echo $form->field($model, 'locale')->dropDownList(Language::getLocaleList(false), ['prompt' => '-']) ?>
     <?php endif ?>
     <?php if (Auth::can('global/client/marketing_country/edit')) : ?>
-        <?php echo $form->field($model, 'locale')->dropDownList(Language::getCountryNames(), ['prompt' => '-']) ?>
+        <?php echo $form->field($model, 'marketingCountry')->dropDownList(Language::getCountryNames(), ['prompt' => '-']) ?>
     <?php endif ?>
 
     <div class="form-group text-center">
