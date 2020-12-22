@@ -1,5 +1,6 @@
 <?php
 
+use common\components\grid\DateTimeColumn;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Project;
@@ -94,6 +95,7 @@ $lists = new ListsAccess($user->id);
                 },
                 'format' => 'raw',
                 'options' => ['style' => 'width: 180px'],
+                'filter' => false,
             ],
             [
                 'attribute' => 'cs_dep_id',
