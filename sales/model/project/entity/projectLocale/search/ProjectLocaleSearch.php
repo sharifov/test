@@ -46,9 +46,9 @@ class ProjectLocaleSearch extends ProjectLocale
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            //'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['pl_updated_dt' => SORT_DESC]],
             'pagination' => [
-                'pageSize' => 30,
+                'pageSize' => 40,
             ],
         ]);
 

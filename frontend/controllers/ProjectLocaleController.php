@@ -68,16 +68,26 @@ class ProjectLocaleController extends FController
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
-    public function actionCreate()
+    public function actionCreate(?int $id = null)
     {
         $model = new ProjectLocale();
 
+        //$copyId = Yii::$app
+        if ($id) {
+            $copyModel = $this->findModel($id);
+        } else {
+            $copyModel = null;
+        }
+
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->pl_id]);
+            return $copyModel ? $this->redirect(['index']) : $this->redirect(['view', 'id' => $model->pl_id]);
+        } elseif ($copyModel) {
+            $model->attributes = $copyModel->attributes;
         }
 
         return $this->render('create', [
             'model' => $model,
+            'copyModel' => $copyModel
         ]);
     }
 

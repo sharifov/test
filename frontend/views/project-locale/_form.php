@@ -8,6 +8,7 @@ use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
 /* @var $model sales\model\project\entity\projectLocale\ProjectLocale */
+/* @var $copyModel sales\model\project\entity\projectLocale\ProjectLocale */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
@@ -41,12 +42,22 @@ use yii\widgets\ActiveForm;
                         'multiple' => false,
                     ],
                     'pluginOptions' => ['allowClear' => true],
-                ]);
+                ])
 
 ?>
                 </div>
-                <div class="col-md-3">
-                    <?php echo $form->field($model, 'pl_market_country')->textInput(['maxlength' => true])?>
+                <div class="col-md-6">
+                    <?= $form->field($model, 'pl_market_country')->widget(Select2::class, [
+                        'data' => Language::getCountryNames(),
+                        'size' => Select2::SMALL,
+                        'options' => [
+                            'placeholder' => 'Select country',
+                            'multiple' => false,
+                        ],
+                        'pluginOptions' => ['allowClear' => true],
+                    ])
+
+?>
                 </div>
             </div>
 
@@ -64,7 +75,7 @@ use yii\widgets\ActiveForm;
                     [
                         'clientOptions' => [
                             'modes' => ['code', 'form', 'tree'], //'text', , 'view'
-                            'mode' => $model->isNewRecord ? 'code' : 'form'
+                            'mode' => ($model->isNewRecord && !$copyModel) ? 'code' : 'form'
                         ],
                         'collapseAll' => ['form'],
                         'expandAll' => ['tree', 'form'],
