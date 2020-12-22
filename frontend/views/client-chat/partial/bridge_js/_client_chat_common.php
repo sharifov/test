@@ -354,16 +354,9 @@ window.loadClientChatData = function (cch_id, data, ref) {
     
     $('#couch_note_box').html('');
     if (!isClosed) {
-        // window.refreshCouchNote(cch_id);
-        if (data.couchNoteStatus > 0 && data.couchNoteHtml.length) { 
-            $('#couch_note_box').html(data.couchNoteHtml);
-        } else if (data.couchNoteStatus === 0 && data.message.length) {
-            console.log(data.message);
-        }
+        $('#couch_note_box').html(data.couchNoteHtml);
         
         $.post('{$discardUnreadMessageUrl}', {cchId: cch_id});
-    } else {
-        $('#couch_note_box').html('');
     }
     
     if (data.isShowInput) {
@@ -381,6 +374,12 @@ window.loadClientChatData = function (cch_id, data, ref) {
     
     chatEl.show();
     window.removeCcLoadFromIframe();
+    
+    if(data.message.length) {
+        data.message.forEach(function (item, index) {
+            createNotify('Error', item, 'error');
+        });
+    }
 }
 
 $(document).on('click', '._cc-list-item', function () {

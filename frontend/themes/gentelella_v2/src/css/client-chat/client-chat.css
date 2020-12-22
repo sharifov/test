@@ -74,6 +74,7 @@
     height: calc(100vh - 150px);
     width: 100%;
     position: relative;
+    padding-bottom: 10px;
 }
 #_rc-iframe-wrapper ._rc-iframe {
     border: none;

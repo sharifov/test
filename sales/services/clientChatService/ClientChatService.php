@@ -38,6 +38,7 @@ use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\clientChatVisitor\repository\ClientChatVisitorRepository;
 use sales\model\clientChatVisitorData\repository\ClientChatVisitorDataRepository;
+use sales\model\user\entity\userConnectionActiveChat\UserConnectionActiveChat;
 use sales\repositories\clientChatChannel\ClientChatChannelRepository;
 use sales\repositories\clientChatStatusLogRepository\ClientChatStatusLogRepository;
 use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
@@ -675,5 +676,29 @@ class ClientChatService
                 true
             );
         }
+    }
+
+    public function addActiveConnection(int $connectionId, int $chatId): bool
+    {
+        if ($activeConnection = UserConnectionActiveChat::find()->andWhere(['ucac_conn_id' => $connectionId])->one()) {
+            if ($activeConnection->ucac_chat_id === $chatId) {
+                return true;
+            }
+            $activeConnection->ucac_chat_id = $chatId;
+        } else {
+            $activeConnection = new UserConnectionActiveChat();
+            $activeConnection->ucac_chat_id = $chatId;
+            $activeConnection->ucac_conn_id = $connectionId;
+        }
+
+        if (!$activeConnection->save()) {
+            \Yii::error([
+                'message' => 'Add user connection active chat',
+                'model' => $activeConnection->getAttributes(),
+                'errors' => $activeConnection->getErrors(),
+            ], 'ClientChatController:actionAddActiveConnection');
+            return false;
+        }
+        return true;
     }
 }
