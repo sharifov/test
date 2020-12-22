@@ -129,7 +129,7 @@
 
 ._cc-list-wrapper {
     height: auto;
-    width: 375px;
+    /*width: 375px;*/
     overflow: scroll;
     display: flex;
     flex-grow: 1;
