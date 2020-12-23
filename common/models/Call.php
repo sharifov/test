@@ -1921,6 +1921,11 @@ class Call extends \yii\db\ActiveRecord
         return $this->c_status_id;
     }
 
+    public function isEqualTwStatus(string $status): bool
+    {
+        return $this->c_call_status === $status;
+    }
+
 
     /**
      * @return bool

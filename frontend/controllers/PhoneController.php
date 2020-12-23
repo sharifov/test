@@ -18,6 +18,7 @@ use common\models\UserProfile;
 use common\models\UserProjectParams;
 use sales\auth\Auth;
 use sales\entities\cases\Cases;
+use sales\helpers\app\AppHelper;
 use sales\helpers\UserCallIdentity;
 use sales\model\call\useCase\conference\create\CreateCallForm;
 use sales\model\callLog\entity\callLog\CallLog;
@@ -937,15 +938,8 @@ class PhoneController extends FController
 
             $result = Yii::$app->communication->hangUp($call->c_call_sid);
 
-            if (isset($result['result']['status']) && ($result['result']['status'] !== $call->c_call_status)) {
-                $call->c_call_status = (string)$result['result']['status'];
-                $call->setStatusByTwilioStatus($call->c_call_status);
-                if (!$call->save()) {
-                    Yii::error(VarDumper::dumpAsString([
-                        'errors' => $call->getErrors(),
-                        'model' => $call->getAttributes(),
-                    ]), 'PhoneController:AjaxHangup:Call:save');
-                }
+            if (isset($result['result']['status']) && !$call->isEqualTwStatus((string)$result['result']['status'])) {
+                $this->processCall($call, (string)$result['result']['status']);
             }
         } catch (\Throwable $e) {
             $result = [
@@ -954,6 +948,180 @@ class PhoneController extends FController
             ];
         }
         return $this->asJson($result);
+    }
+
+    private function processCall(Call $call, $status): void
+    {
+        try {
+            $call->c_call_status = $status;
+            $call->setStatusByTwilioStatus($call->c_call_status);
+            if (!$call->save()) {
+                Yii::error([
+                    'errors' => $call->getErrors(),
+                    'model' => $call->getAttributes(),
+                ], 'PhoneController:AjaxHangup:processCall:Call:save');
+                return;
+            }
+            if (!$call->isTwFinishStatus()) {
+                return;
+            }
+            if (!$call->c_conference_id) {
+                return;
+            }
+            $this->processConference($call->c_conference_id);
+        } catch (\Throwable $e) {
+            Yii::error([
+                'error' => $e->getMessage(),
+                'callId' => $call->c_id,
+            ], 'PhoneController:AjaxHangup:processCall:Throwable');
+        }
+    }
+
+    private function processConference(int $conferenceId): void
+    {
+        $conference = Conference::findOne($conferenceId);
+        if (!$conference) {
+            Yii::error([
+                'message' => 'Not found conference',
+                'Id' => $conferenceId,
+            ], 'PhoneController:AjaxHangup:processConference');
+            return;
+        }
+        if ($conference->isEnd()) {
+            return;
+        }
+
+        $conferenceInfo = $this->getConferenceInfo($conference->cf_sid);
+
+        if (!$conferenceInfo) {
+            return;
+        }
+
+        if (empty($conferenceInfo['status'])) {
+            return;
+        }
+
+        if ($conferenceInfo['status'] !== Conference::COMPLETED) {
+            return;
+        }
+
+        $endDt = empty($conferenceInfo['dateUpdated']['date']) ? date('Y-m-d H:i:s') : date('Y-m-d H:i:s', strtotime($conferenceInfo['dateUpdated']['date']));
+        $this->completeConference($conference, $endDt);
+    }
+
+    private function completeConference(Conference $conference, string $endDt): void
+    {
+        $conference->end($endDt);
+        if (!$conference->save()) {
+            \Yii::error([
+                'errors' => $conference->getErrors(),
+                'model' => $conference->getAttributes(),
+            ], 'PhoneController:processConference:Conference:Save');
+            return;
+        }
+
+        $this->completeConferenceParticipants($conference);
+    }
+
+    private function completeConferenceParticipants(Conference $conference): void
+    {
+        $participants = $conference->conferenceParticipants;
+        if (!$participants) {
+            return;
+        }
+        foreach ($participants as $participant) {
+            if (!$participant->isLeave()) {
+                $participant->leave($conference->cf_end_dt);
+                if (!$participant->save()) {
+                    \Yii::error([
+                        'message' => 'Participant not saved',
+                        'participantId' => $participant->cp_id,
+                        'conferenceId' => $conference->cf_id,
+                        'errors' => $conference->getErrors(),
+                        'model' => $conference->getAttributes(),
+                    ], 'PhoneController:processConference:Participant:Save');
+                }
+            }
+            $call = Call::find()->andWhere(['c_call_sid' => $participant->cp_call_sid])->one();
+            if ($call && !$call->isTwFinishStatus()) {
+                try {
+                    $result = $this->getCallInfo($call->c_call_sid);
+                    if (isset($result['status']) && !$call->isEqualTwStatus($result['status'])) {
+                        $call->c_call_status = $result['status'];
+                        $call->setStatusByTwilioStatus($call->c_call_status);
+                        if (!$call->save()) {
+                            Yii::error([
+                                'errors' => $call->getErrors(),
+                                'model' => $call->getAttributes(),
+                            ], 'PhoneController:AjaxHangup:processCall:completeConferenceParticipants:Call:save');
+                            return;
+                        }
+                    }
+                } catch (\Throwable $e) {
+                    Yii::error([
+                        'message' => 'Call not saved',
+                        'callId' => $call->c_id,
+                        'participantId' => $participant->cp_id,
+                        'conferenceId' => $conference->cf_id,
+                        'error' => $e->getMessage(),
+                    ], 'PhoneController:AjaxHangup:processCall:completeConferenceParticipants:Call:Throwable');
+                }
+            }
+        }
+    }
+
+    private function getConferenceInfo(string $conferenceSid): array
+    {
+        try {
+            $result = \Yii::$app->communication->getConferenceInfo($conferenceSid);
+            if ($result['error']) {
+                \Yii::error(VarDumper::dumpAsString([
+                    'result' => $result,
+                    'conferenceSid' => $conferenceSid,
+                ]), 'PhoneController:getConferenceInfo:Result');
+            } else {
+                if (!empty($result['result'])) {
+                    return $result['result'];
+                }
+                Yii::error([
+                    'message' => 'Not found result',
+                    'conferenceSid' => $conferenceSid,
+                ], 'PhoneController:getConferenceInfo:Result');
+            }
+        } catch (\Throwable $e) {
+            \Yii::error(VarDumper::dumpAsString([
+                'error' => AppHelper::throwableFormatter($e),
+                'conferenceSid' => $conferenceSid,
+            ]), 'PhoneController:getConferenceInfo:Throwable');
+        }
+        return [];
+    }
+
+    private function getCallInfo(string $callSid): array
+    {
+        try {
+            $result = \Yii::$app->communication->getCallInfo($callSid);
+            if ($result['error']) {
+                \Yii::error(VarDumper::dumpAsString([
+                    'result' => $result,
+                    'callSid' => $callSid,
+                ]), 'PhoneController:getCallInfo:Result');
+            } else {
+                if (!empty($result['result'])) {
+                    return $result['result'];
+                }
+                Yii::error([
+                    'message' => 'Not found result',
+                    'callSid' => $callSid,
+                ], 'PhoneController:getCallInfo:Result');
+            }
+        } catch (\Throwable $e) {
+            \Yii::error(VarDumper::dumpAsString([
+                'error' => AppHelper::throwableFormatter($e),
+                'callSid' => $callSid,
+            ]), 'PhoneController:getCallInfo:Throwable');
+        }
+        return [];
     }
 
     public function actionAjaxHoldConferenceCall(): Response
