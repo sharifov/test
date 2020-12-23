@@ -11,6 +11,8 @@ use common\models\UserGroupAssign;
 use common\models\UserOnline;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
+use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -49,6 +51,12 @@ class EmployeeSearch extends Employee
 
     public $projectAccessIds = [];
     public $projectParamsIds = [];
+
+    public $chatId;
+    public $channelId;
+    public $limit;
+    public $exceptUserId;
+
     /**
      * {@inheritdoc}
      */
@@ -598,5 +606,41 @@ class EmployeeSearch extends Employee
 
         $dataProvider = new SqlDataProvider($paramsData);
         return $dataProvider;
+    }
+
+    /**
+     * @param ClientChat $chat
+     * @param int $limit
+     * @return Employee[]
+     */
+    public function searchAvailableAgentsForChatRequests(ClientChat $chat, int $limit): array
+    {
+        $users = self::find()
+            ->joinChatUserChannel($chat->cch_channel_id)
+            ->online()
+            ->registeredInRc();
+
+        if (!$chat->hasOwner() && $chat->isPending()) {
+            $subQuery = ClientChatUserAccess::find()->select(['ccua_user_id'])->where(['ccua_cch_id' => $chat->cch_id]);
+            $users->andWhere(['NOT IN', 'id', $subQuery]);
+        }
+
+        if ($chat->isTransfer() || $chat->isIdle()) {
+            $subQuery = ClientChatUserAccess::find()
+                ->select(['ccua_user_id'])
+                ->where(['ccua_cch_id' => $chat->cch_id])
+                ->andWhere(['ccua_status_id' => [ClientChatUserAccess::STATUS_PENDING]]);
+            $users->andWhere(['NOT IN', 'id', $subQuery]);
+        }
+
+        if ($limit) {
+            $users->limit($limit);
+        }
+
+        if ($chat->hasOwner()) {
+            $users->exceptUser($chat->cch_owner_user_id);
+        }
+
+        return $users->all();
     }
 }
