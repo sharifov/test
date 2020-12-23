@@ -171,6 +171,7 @@ class ProjectLocale extends \yii\db\ActiveRecord
                 'pl_project_id' => $projectId,
                 'pl_enabled' => true,
             ])
+            ->andWhere(['IS NOT', 'pl_language_id', null])
             ->joinWith('plLanguage')
             ->orderBy(['pl_language_id' => SORT_ASC])
             ->asArray(true)
