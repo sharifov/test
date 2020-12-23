@@ -611,9 +611,10 @@ class EmployeeSearch extends Employee
     /**
      * @param ClientChat $chat
      * @param int $limit
+     * @param int $pastMinutes
      * @return Employee[]
      */
-    public function searchAvailableAgentsForChatRequests(ClientChat $chat, int $limit): array
+    public function searchAvailableAgentsForChatRequests(ClientChat $chat, int $limit, int $pastMinutes): array
     {
         $users = self::find()
             ->joinChatUserChannel($chat->cch_channel_id)
@@ -635,6 +636,18 @@ class EmployeeSearch extends Employee
 
         if ($limit) {
             $users->limit($limit);
+
+            if ($pastMinutes) {
+                $acceptedChatStatus = $chat->isTransfer() ? ClientChatUserAccess::STATUS_TRANSFER_ACCEPT : ClientChatUserAccess::STATUS_ACCEPT;
+                $time = time() - ($pastMinutes * 60);
+                $acceptedChats = ClientChatUserAccess::find()->select(['ccua_user_id', 'count(ccua_id) as cnt_accepted_chats'])
+                    ->where(['ccua_status_id' => $acceptedChatStatus])
+                    ->andWhere(['>=', 'ccua_updated_dt', date('Y-m-d H:i:s', $time)])
+                    ->groupBy(['ccua_user_id']);
+
+                $users->leftJoin('(' . $acceptedChats->createCommand()->rawSql . ') acceptedChats ', 'acceptedChats.ccua_user_id = ccua_user_id');
+                $users->orderBy(['acceptedChats.cnt_accepted_chats' => SORT_ASC]);
+            }
         }
 
         if ($chat->hasOwner()) {

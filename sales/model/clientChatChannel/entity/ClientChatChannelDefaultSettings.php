@@ -88,4 +88,9 @@ class ClientChatChannelDefaultSettings
     {
         return self::$settings['system']['userAccessDistribution']['repeatDelaySeconds'] ?? 0;
     }
+
+    public static function getAccessDistributionPastMinutes(): int
+    {
+        return self::$settings['system']['userAccessDistribution']['sortParameters']['pastAcceptedChatsNumber']['pastMinutes'] ?? 0;
+    }
 }

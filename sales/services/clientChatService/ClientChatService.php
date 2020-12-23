@@ -201,7 +201,7 @@ class ClientChatService
         $channel = $clientChat->cchChannel;
 
         $employeeSearch = new EmployeeSearch();
-        $users = $employeeSearch->searchAvailableAgentsForChatRequests($clientChat, $channel->getSystemUserLimit());
+        $users = $employeeSearch->searchAvailableAgentsForChatRequests($clientChat, $channel->getSystemUserLimit(), $channel->getSystemPastMinutes());
 
         if ($users) {
             foreach ($users as $user) {
