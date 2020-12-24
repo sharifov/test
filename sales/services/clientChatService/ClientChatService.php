@@ -51,6 +51,7 @@ use sales\services\client\ClientManageService;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
 use sales\services\TransactionManager;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 
 /**
@@ -201,17 +202,15 @@ class ClientChatService
         $channel = $clientChat->cchChannel;
 
         $employeeSearch = new EmployeeSearch();
-        $users = $employeeSearch->searchAvailableAgentsForChatRequests($clientChat, $channel->getSystemUserLimit(), $channel->getSystemPastMinutes());
-
-        \Yii::info('Available users for chat request: ' . count($users), 'info\ClientChatService::sendRequestToUsers');
-        \Yii::info(VarDumper::dumpAsString($users, 50), 'info\ClientChatService::sendRequestToUsers');
+        $limit = $channel->getSystemUserLimit();
+        $users = $employeeSearch->searchAvailableAgentsForChatRequests($clientChat, $limit, $channel->getSystemPastMinutes());
 
         if ($users) {
             foreach ($users as $user) {
                 $this->sendRequestToUser($clientChat, $user);
             }
 
-            if ($employeeSearch->limit) {
+            if ($limit) {
                 $this->createUserAccessJob($clientChat->cch_id, $channel->getSystemRepeatDelaySeconds());
             }
         }
