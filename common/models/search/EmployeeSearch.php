@@ -621,18 +621,18 @@ class EmployeeSearch extends Employee
             ->online()
             ->registeredInRc();
 
-        if (!$chat->hasOwner() && $chat->isPending()) {
-            $subQuery = ClientChatUserAccess::find()->select(['ccua_user_id'])->where(['ccua_cch_id' => $chat->cch_id]);
-            $users->andWhere(['NOT IN', 'id', $subQuery]);
-        }
-
-        if ($chat->isTransfer() || $chat->isIdle()) {
-            $subQuery = ClientChatUserAccess::find()
-                ->select(['ccua_user_id'])
-                ->where(['ccua_cch_id' => $chat->cch_id])
-                ->andWhere(['ccua_status_id' => [ClientChatUserAccess::STATUS_PENDING]]);
-            $users->andWhere(['NOT IN', 'id', $subQuery]);
-        }
+//        if (!$chat->hasOwner() && $chat->isPending()) {
+//            $subQuery = ClientChatUserAccess::find()->select(['ccua_user_id'])->where(['ccua_cch_id' => $chat->cch_id]);
+//            $users->andWhere(['NOT IN', 'id', $subQuery]);
+//        }
+//
+//        if ($chat->isTransfer() || $chat->isIdle()) {
+//            $subQuery = ClientChatUserAccess::find()
+//                ->select(['ccua_user_id'])
+//                ->where(['ccua_cch_id' => $chat->cch_id])
+//                ->andWhere(['ccua_status_id' => [ClientChatUserAccess::STATUS_PENDING]]);
+//            $users->andWhere(['NOT IN', 'id', $subQuery]);
+//        }
 
         if ($limit) {
             $users->limit($limit);
