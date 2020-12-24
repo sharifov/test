@@ -9,11 +9,13 @@
 namespace common\components\jobs;
 
 use common\models\UserProfile;
+use sales\services\telegram\TelegramService;
 use yii\base\BaseObject;
 use yii\helpers\VarDumper;
 use yii\queue\JobInterface;
 use Yii;
 use yii\queue\Queue;
+use yii\queue\RetryableJobInterface;
 
 /**
  * This is the model class for "TelegramSendMessage".
@@ -22,7 +24,7 @@ use yii\queue\Queue;
  * @property string $text
  */
 
-class TelegramSendMessageJob extends BaseObject implements JobInterface
+class TelegramSendMessageJob implements RetryableJobInterface
 {
     public $user_id;
     public $text;
@@ -33,39 +35,52 @@ class TelegramSendMessageJob extends BaseObject implements JobInterface
      */
     public function execute($queue): bool
     {
-
         try {
-            if ($this->user_id) {
-                $profile = UserProfile::find()->where(['up_user_id' => $this->user_id])->limit(1)->one();
+            if ($this->user_id && $telegramChatId = TelegramService::getTelegramChatIdByUserId($this->user_id)) {
+                $tgm = Yii::$app->telegram;
+                $tgm->sendMessage([
+                    'chat_id' => $telegramChatId,
+                    'text' => strip_tags($this->text),
+                ]);
 
-                //Yii::info($this->user_id, 'info\TelegramJob:execute:info');
-
-                if ($profile && $profile->up_telegram && $profile->up_telegram_enable) {
-                    $tgm = Yii::$app->telegram;
-
-                    $tgm->sendMessage([
-                        'chat_id' => $profile->up_telegram,
-                        'text' => strip_tags($this->text),
-                    ]);
-
-                    unset($tgm, $profile);
-                    return true;
-                }
+                unset($tgm);
+                return true;
             }
-        } catch (\Throwable $e) {
-            Yii::error(VarDumper::dumpAsString($e->getMessage()), 'TelegramJob:execute:catch');
-        }
+        } catch (\Throwable $throwable) {
+            $errorMessage = VarDumper::dumpAsString($throwable->getMessage());
 
+            if (TelegramService::isBotBlockedByUser($errorMessage)) {
+                Yii::info(VarDumper::dumpAsString([
+                    'message' => $errorMessage,
+                    'userId' => $this->user_id,
+                ]), 'info\TelegramJob:execute:catch');
+
+                UserProfile::disableTelegramByUserId((int) $this->user_id);
+            } else {
+                Yii::error(VarDumper::dumpAsString([
+                    'message' => $errorMessage,
+                    'userId' => $this->user_id,
+                ]), 'TelegramJob:execute:catch');
+            }
+        }
         return false;
     }
 
-    public function getTtr()
+    /**
+     * @return int time to reserve in seconds
+     */
+    public function getTtr(): int
     {
-        return 1 * 5;
+        return 30;
     }
 
-    /*public function canRetry($attempt, $error)
+    /**
+     * @param int $attempt number
+     * @param \Exception|\Throwable $error from last execute of the job
+     * @return bool
+     */
+    public function canRetry($attempt, $error): bool
     {
-        return ($attempt < 5) && ($error instanceof TemporaryException);
-    }*/
+        return ($attempt < 3);
+    }
 }
