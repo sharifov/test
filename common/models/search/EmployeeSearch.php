@@ -638,10 +638,9 @@ class EmployeeSearch extends Employee
             $users->limit($limit);
 
             if ($pastMinutes) {
-                $acceptedChatStatus = $chat->isTransfer() ? ClientChatUserAccess::STATUS_TRANSFER_ACCEPT : ClientChatUserAccess::STATUS_ACCEPT;
                 $time = time() - ($pastMinutes * 60);
                 $acceptedChats = ClientChatUserAccess::find()->select(['ccua_user_id as uid', 'count(ccua_id) as cnt_accepted_chats'])
-                    ->where(['ccua_status_id' => $acceptedChatStatus])
+                    ->where(['IN', 'ccua_status_id', [ClientChatUserAccess::STATUS_TRANSFER_ACCEPT, ClientChatUserAccess::STATUS_ACCEPT, ClientChatUserAccess::STATUS_TAKE]])
                     ->andWhere(['>=', 'ccua_updated_dt', date('Y-m-d H:i:s', $time)])
                     ->groupBy(['ccua_user_id']);
 
