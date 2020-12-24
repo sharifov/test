@@ -22,7 +22,11 @@ $client = $clientChat->cchClient;
             <span class="_cc-status-wrapper"><span class="_cc-status" data-is-online="<?= (int)$clientChat->cch_client_online ?>"> </span></span>
         </span>
         <div class="_rc-client-info">
-            <span class="_rc-client-name"><span><?= ClientFormatter::formatFullName($client) ?></span></span>
+            <span class="_rc-client-name">
+                <span class="break-word client-name-info">
+                    <?= ClientFormatter::formatFullName($client) ?>
+                </span>
+            </span>
 
             <?php if ($emails = $client->clientEmails) : ?>
                 <div class="box_client_info_data">

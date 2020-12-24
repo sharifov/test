@@ -655,3 +655,13 @@
 .autocomplete-suggestion:hover {
     background-color: #dedede;
 }
+.break-word{
+    word-wrap: break-word;
+    display: block;
+}
+.client-name-chat-list {
+    width: 225px;
+}
+.client-name-info {
+    width: 300px;
+}
