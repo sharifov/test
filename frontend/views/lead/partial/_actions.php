@@ -215,7 +215,7 @@ $user = Yii::$app->user->identity;
             echo Html::button('<i class="fa fa-plus"></i> ' . $title . '', $options);
         }  ?>
 
-        <?php if ($leadModel->isSold() && ($user->isAdmin() || $user->isSupervision())) :?>
+        <?php if (Auth::can('lead/split-profit', ['lead' => $leadModel]) && Auth::can('/lead/split-profit')) :?>
             <?= Html::button('<i class="fa fa-money"></i> Split profit', [
                     'class' => 'btn btn-default',
                     'id' => 'split-profit',
