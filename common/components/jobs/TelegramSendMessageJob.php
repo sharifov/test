@@ -1,21 +1,14 @@
 <?php
 
-/**
- * Created by Alex Connor.
- * User: alexandr
- * Date: 2019-04-22
- */
-
 namespace common\components\jobs;
 
 use common\models\UserProfile;
 use sales\services\telegram\TelegramService;
-use yii\base\BaseObject;
 use yii\helpers\VarDumper;
-use yii\queue\JobInterface;
 use Yii;
 use yii\queue\Queue;
 use yii\queue\RetryableJobInterface;
+use common\models\Notifications;
 
 /**
  * This is the model class for "TelegramSendMessage".
@@ -56,6 +49,13 @@ class TelegramSendMessageJob implements RetryableJobInterface
                 ]), 'info\TelegramJob:execute:catch');
 
                 UserProfile::disableTelegramByUserId((int) $this->user_id);
+
+                Notifications::createAndPublish(
+                    $this->user_id,
+                    'Telegram was disabled',
+                    'Telegram was disabled due to blocking on the client side',
+                    Notifications::TYPE_INFO
+                );
             } else {
                 Yii::error(VarDumper::dumpAsString([
                     'message' => $errorMessage,
