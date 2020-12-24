@@ -31,11 +31,6 @@ class SettingHelper
         return \Yii::$app->params['settings']['client_chat_real_time_monitoring'] ?? false;
     }
 
-    public static function isOriginalPhoneWidgetEnabled(): bool
-    {
-        return \Yii::$app->params['settings']['enable_original_phone_widget'] ?? true;
-    }
-
     public static function getRcNameForRegisterChannelInRc(): string
     {
         return \Yii::$app->params['settings']['rc_username_for_register_channel'] ?? '';
