@@ -781,7 +781,7 @@ return [
             PopoverXAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
-                'depends' => [JqueryAsset::class]
+                'depends' => [JqueryAsset::class, BootstrapGroupAsset::class]
             ],
             MultiSelectAsset::class => [
                 'depends' => [
@@ -792,40 +792,40 @@ return [
             \kartik\form\ActiveFormAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
-                'depends' => [JqueryAsset::class]
+                'depends' => [JqueryAsset::class, BootstrapGroupAsset::class]
             ],
             DateRangePickerAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
-                'depends' => [JqueryAsset::class]
+                'depends' => [JqueryAsset::class, BootstrapGroupAsset::class]
             ],
             \dosamigos\datepicker\DatePickerAsset::class => [
-                'depends' => [JqueryAsset::class]
+                'depends' => [JqueryAsset::class, BootstrapGroupAsset::class, AllSharedAsset::class]
             ],
             Select2KrajeeAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
-                'depends' => [JqueryAsset::class]
+                'depends' => [JqueryAsset::class, BootstrapGroupAsset::class]
             ],
             Select2Asset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
-                'depends' => [JqueryAsset::class]
+                'depends' => [JqueryAsset::class, BootstrapGroupAsset::class]
             ],
             KartikActiveFormAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
-                'depends' => [JqueryAsset::class]
+                'depends' => [JqueryAsset::class, BootstrapGroupAsset::class]
             ],
             KartikGridFloatHeadAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
-                'depends' => [JqueryAsset::class]
+                'depends' => [JqueryAsset::class, BootstrapGroupAsset::class]
             ],
             TimePickerAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
-                'depends' => [JqueryAsset::class]
+                'depends' => [JqueryAsset::class, BootstrapGroupAsset::class]
             ],
             \kartik\daterange\MomentAsset::class => [
                 'bsPluginEnabled' => false,
@@ -835,38 +835,38 @@ return [
             DateTimePickerAsset::class => [
                 'baseUrl' => '@web/all_shared/build',
                 'depends' => [
-                    BootstrapPluginAsset::class
+                    BootstrapGroupAsset::class
                 ]
             ],
             ThemeKrajeeBs4Asset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
-                'depends' => [JqueryAsset::class]
+                'depends' => [JqueryAsset::class, BootstrapGroupAsset::class]
             ],
             ThemeKrajeeAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
-                'depends' => [JqueryAsset::class]
+                'depends' => [JqueryAsset::class, BootstrapGroupAsset::class]
             ],
             KartikEditablePjaxAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
-                'depends' => [JqueryAsset::class]
+                'depends' => [JqueryAsset::class, BootstrapGroupAsset::class]
             ],
             DatePickerAsset::class => [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
-                'depends' => [JqueryAsset::class]
+                'depends' => [JqueryAsset::class, BootstrapGroupAsset::class]
             ],
             CKEditorAsset::class => [
                 'sourcePath' => null,
                 'js' => [
                     'https://cdn.ckeditor.com/4.15.1/standard/ckeditor.js',
                 ],
-                'depends' => [JqueryAsset::class]
+                'depends' => [JqueryAsset::class, BootstrapGroupAsset::class]
             ],
             ClientChatAsset::class => [
-                'depends' => [JqueryAsset::class]
+                'depends' => [JqueryAsset::class, BootstrapGroupAsset::class]
             ],
             WidgetAsset::class => [
                 'bsPluginEnabled' => false,
@@ -883,7 +883,8 @@ return [
                 'bsPluginEnabled' => false,
                 'bsDependencyEnabled' => false,
                 'depends' => [
-                    AllSharedAsset::class
+                    BootstrapGroupAsset::class,
+                    AllSharedAsset::class,
                 ]
             ],
             \kartik\editable\EditableAsset::class => [
@@ -903,6 +904,7 @@ return [
                 'bsDependencyEnabled' => false,
                 'depends' => [
                     JqueryAsset::class,
+                    BootstrapGroupAsset::class,
                     AllSharedAsset::class,
                     DialogAsset::class
                 ]

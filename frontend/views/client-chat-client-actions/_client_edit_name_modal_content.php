@@ -1,5 +1,7 @@
 <?php
 
+use common\models\Language;
+use sales\auth\Auth;
 use sales\services\client\ClientCreateForm;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -36,6 +38,13 @@ use yii\widgets\ActiveForm;
     <?= $form->field($editName, 'middleName')->textInput() ?>
 
     <?= $form->field($editName, 'id')->hiddenInput()->label(false)->error(false) ?>
+
+    <?php if (Auth::can('global/client/locale/edit')) : ?>
+        <?= $form->field($editName, 'locale')->dropDownList(Language::getLocaleList(false), ['prompt' => '-']) ?>
+    <?php endif ?>
+    <?php if (Auth::can('global/client/marketing_country/edit')) : ?>
+        <?php echo $form->field($editName, 'marketingCountry')->dropDownList(Language::getCountryNames(), ['prompt' => '-']) ?>
+    <?php endif ?>
 
     <div class="text-center">
         <?= Html::submitButton('<i class="fa fa-check-square-o"> </i> Update client', [

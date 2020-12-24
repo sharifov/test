@@ -3555,7 +3555,7 @@ Reason: {reason}',
     {
         $additionalInformationFormArr = [];
         $separateInfoArr = json_decode($additionalInfoStr);
-        if (is_array($separateInfoArr)) {
+        if (is_array($separateInfoArr) && !empty($separateInfoArr)) {
             $separateInfoArr = json_decode($additionalInfoStr, true);
             foreach ($separateInfoArr as $key => $separateInfo) {
                 $additionalInfo = new LeadAdditionalInformation();

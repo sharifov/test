@@ -45,6 +45,24 @@ $client = $clientChat->cchClient;
                     </span>
                 </div>
             <?php endif; ?>
+
+            <?php if (!empty($client->cl_locale)) : ?>
+                <div class="box_client_info_data box_locale">
+                    <span title="locale" class="_rc-client-locale"><i class="fa fa-language"> </i>
+                        <code><?= Html::encode($client->cl_locale) ?></code>
+                    </span>
+                </div>
+            <?php endif; ?>
+            <?php if (!empty($client->cl_marketing_country)) : ?>
+                <div class="box_client_info_data box_country">
+                    <span title="Market country" class="_rc-client-country"><i class="fa fa-map-marker"> </i>
+                        <code style="margin-left: 4px;">
+                            <?= Html::encode($client->cl_marketing_country) ?>
+                        </code>
+                    </span>
+                </div>
+            <?php endif; ?>
+
         </div>
     </div>
 </div>

@@ -2,9 +2,13 @@
 
 namespace sales\services\cases;
 
+use common\models\Client;
 use common\models\Employee;
+use common\models\Project;
 use common\models\UserProjectParams;
+use frontend\helpers\JsonHelper;
 use sales\entities\cases\Cases;
+use sales\model\project\entity\projectLocale\ProjectLocale;
 use sales\repositories\cases\CasesRepository;
 use sales\services\client\ClientManageService;
 use sales\services\TransactionManager;
@@ -44,11 +48,54 @@ class CasesCommunicationService
     }
 
     /**
+     * @param Project $project
+     * @param Client $client
+     * @param string|null $locale
+     * @return array|mixed|null
+     */
+    public static function getLocaleParams(Project $project, Client $client, ?string $locale)
+    {
+        $projectLocale = null;
+        if ($client->cl_marketing_country) {
+            $projectLocale = ProjectLocale::find()
+                ->where(['pl_project_id' => $project->id])
+                ->andWhere(['pl_language_id' => (string) $locale])
+                ->andWhere(['pl_market_country' => (string) $client->cl_marketing_country])
+                ->andWhere(['pl_enabled' => true])
+                ->one();
+
+            if (!$projectLocale) {
+                $projectLocale = ProjectLocale::find()
+                    ->where(['pl_project_id' => $project->id])
+                    ->andWhere(['pl_language_id' => null])
+                    ->andWhere(['pl_market_country' => (string) $client->cl_marketing_country])
+                    ->andWhere(['pl_enabled' => true])
+                    ->one();
+            }
+        }
+        if (!$projectLocale) {
+            $projectLocale = ProjectLocale::find()
+                ->where(['pl_project_id' => $project->id])
+                ->andWhere(['pl_language_id' => null])
+                ->andWhere(['pl_default' => true])
+                ->andWhere(['IS NOT', 'pl_market_country', null])
+                ->andWhere(['pl_enabled' => true])
+                ->one();
+        }
+
+        if ($projectLocale) {
+            return JsonHelper::decode($projectLocale->pl_params);
+        }
+        return [];
+    }
+
+    /**
      * @param Cases $case
      * @param Employee $user
+     * @param string $locale
      * @return array
      */
-    public function getEmailData(Cases $case, Employee $user): array
+    public function getEmailData(Cases $case, Employee $user, ?string $locale = null): array
     {
         $project = $case->project;
         $projectContactInfo = [];
@@ -59,6 +106,10 @@ class CasesCommunicationService
             if ($project && $project->contact_info) {
                 $projectContactInfo = @json_decode($project->contact_info, true);
             }
+        }
+        $localeParams = [];
+        if ($project && $client = $case->client) {
+            $localeParams = self::getLocaleParams($project, $client, $locale);
         }
 
         $content_data['case'] = [
@@ -78,6 +129,8 @@ class CasesCommunicationService
             'phone'     => $projectContactInfo['phone'] ?? '',
             'email'     => $projectContactInfo['email'] ?? '',
         ];
+
+        $content_data['localeParams'] = $localeParams;
 
         $content_data['agent'] = [
             'name'      => $user->full_name,

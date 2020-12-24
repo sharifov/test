@@ -19,6 +19,7 @@
     <exclude-pattern>webapi/web/doc/*</exclude-pattern>
     <exclude-pattern>common/Yii.php</exclude-pattern>
     <exclude-pattern>common/components/ScannerTwigFunction.php</exclude-pattern>
+    <exclude-pattern>frontend/config/assets-prod.php</exclude-pattern>
 
     <arg name="basepath" value="."/>
     <arg name="colors"/>

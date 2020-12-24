@@ -88,6 +88,8 @@ class ClientChatClientActionsController extends FController
         $form->firstName = $client->first_name;
         $form->lastName = $client->last_name;
         $form->middleName = $client->middle_name;
+        $form->locale = $client->cl_locale;
+        $form->marketingCountry = $client->cl_marketing_country;
 
         return $this->renderAjax('_client_edit_name_modal_content', [
             'editName' => $form,
@@ -135,7 +137,7 @@ class ClientChatClientActionsController extends FController
                 $this->clientManageService->updateClient($chat->cchClient, $form);
                 $chat->refresh();
                 $response['error'] = false;
-                $response['message'] = 'User name was successfully updated';
+                $response['message'] = 'Client information has been updated successfully';
                 $response['html'] = ClientChatClientInfoWidget::widget(['chat' => $chat]);
                 $clientFullName = trim($chat->cchClient->first_name . ($chat->cchClient->last_name ? ' ' . $chat->cchClient->last_name : ''));
                 $response['client'] = [

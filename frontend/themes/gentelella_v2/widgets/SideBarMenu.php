@@ -397,6 +397,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Projects', 'url' => ['/project/index']],
                         ['label' => 'Project Sources', 'url' => ['/sources/index']],
                         ['label' => 'Project Settings', 'url' => ['/settings/projects']],
+                        ['label' => 'Project Locales', 'url' => ['/project-locale/index']],
                     ]
                 ],
 
@@ -595,6 +596,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'items' => [
                         ['label' => Yii::t('language', 'List of languages'), 'url' => ['/translatemanager/language/list']],
                         ['label' => Yii::t('language', 'Create'), 'url' => ['/translatemanager/language/create']],
+                        ['label' => Yii::t('languages', 'Languages'), 'url' => ['/language/index']],
                     ]
                 ],
                 ['label' => Yii::t('language', 'Scan'), 'url' => ['/translatemanager/language/scan']],

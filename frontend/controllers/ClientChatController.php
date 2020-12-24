@@ -953,12 +953,12 @@ class ClientChatController extends FController
 
         try {
             if ($form->load(Yii::$app->request->post()) && !$form->pjaxReload && $form->validate()) {
-                $newChannel = $this->clientChatService->transfer($form, Auth::user());
+                $this->clientChatService->transfer($form, Auth::user());
 
                 return '<script>
                         $("#modal-sm").modal("hide"); 
                         refreshChatPage(' . $form->chatId . '); 
-                        createNotify("Success", "Chat successfully transferred to ' . $newChannel->ccc_name . ' channel. ", "success");
+                        createNotify("Success", "Chat successfully transferred", "success");
                     </script>';
             }
 

@@ -17,7 +17,9 @@ class ListItem extends React.Component {
     callUpdateHandler() {
         let self = this;
         return function (event) {
-            //queue
+            //only for minify version
+            window.phoneWidget.emptyFunc('ListItem.callUpdateHandler');
+
             self.setState({
                 call: event.call
             });

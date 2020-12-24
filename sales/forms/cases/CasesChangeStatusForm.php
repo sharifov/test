@@ -2,13 +2,21 @@
 
 namespace sales\forms\cases;
 
+use common\models\CaseSale;
+use common\models\ClientEmail;
+use common\models\ClientProject;
+use common\models\Email;
+use common\models\EmailTemplateType;
+use common\models\EmailUnsubscribe;
 use common\models\Employee;
 use sales\access\ListsAccess;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
 use sales\entities\cases\CasesStatusTransferList;
 use sales\helpers\user\UserDateTimeHelper;
+use sales\model\project\entity\projectLocale\ProjectLocale;
 use yii\base\Model;
+use yii\db\Expression;
 use yii\helpers\Json;
 
 /**
@@ -21,8 +29,15 @@ use yii\helpers\Json;
  * @property array $statusList
  * @property string $caseGid
  * @property string|null $deadline
+ * @property bool $resendFeedbackForm
+ * @property string $sendTo
+ * @property string $language
  * @property Cases $case
  * @property Employee $user
+ * @property array|null $sendToList
+ * @property array|null $languageList
+ * @property bool|null $enabledSendFeedbackEmail
+ * @property string|null $sendEmailDefault
  */
 class CasesChangeStatusForm extends Model
 {
@@ -31,11 +46,18 @@ class CasesChangeStatusForm extends Model
     public $message;
     public $userId;
     public $deadline;
+    public $resendFeedbackForm;
+    public $sendTo;
+    public $language;
 
     public $caseGid;
+    public ?string $sendEmailDefault = null;
 
     private $case;
     private $user;
+    private ?array $sendToList = null;
+    private ?array $languageList = null;
+    private ?bool $enabledSendFeedbackEmail = null;
 
     public function __construct(Cases $case, Employee $user, $config = [])
     {
@@ -78,6 +100,25 @@ class CasesChangeStatusForm extends Model
                     $this->addError('deadline', 'Deadline should be later than now.');
                 }
             }, 'skipOnError' => true, 'skipOnEmpty' => true],
+
+            ['resendFeedbackForm', 'default', 'value' => false],
+            ['resendFeedbackForm', 'boolean'],
+            ['resendFeedbackForm', 'filter', 'filter' =>  function ($value) {
+                if (!$this->isResendFeedbackEnable()) {
+                    return true;
+                }
+                return $value;
+            }, 'skipOnError' => true, 'skipOnEmpty' => true],
+
+            ['sendTo', 'required', 'when' => function () {
+                return $this->isSendFeedback();
+            }, 'skipOnEmpty' => false],
+            ['sendTo', 'in', 'range' => $this->getSendToList(), 'skipOnError' => true, 'skipOnEmpty' => true],
+
+            ['language', 'required', 'when' => function () {
+                return  $this->isSendFeedback();
+            }, 'skipOnEmpty' => false],
+            ['language', 'in', 'range' => array_keys($this->getLanguageList()), 'skipOnEmpty' => true, 'skipOnError' => true],
         ];
     }
 
@@ -173,6 +214,16 @@ class CasesChangeStatusForm extends Model
         return CasesStatus::STATUS_FOLLOW_UP;
     }
 
+    public function statusSolvedId(): int
+    {
+        return CasesStatus::STATUS_SOLVED;
+    }
+
+    public function isSolved(): bool
+    {
+        return $this->statusId === $this->statusSolvedId();
+    }
+
     private function getReasonList(): array
     {
         return CasesStatus::STATUS_REASON_LIST;
@@ -188,6 +239,133 @@ class CasesChangeStatusForm extends Model
             'reason' => 'Reason',
             'message' => 'Message',
             'userId' => 'Employee',
+            'sendTo' => 'Send to',
+            'language' => 'Language',
+            'resendFeedbackForm' => 'Resend feedback form',
         ];
+    }
+
+    public function getSendToList(): array
+    {
+        if ($this->sendToList !== null) {
+            return $this->sendToList;
+        }
+
+        $this->sendToList = [];
+
+        $emails = ClientEmail::find()->select(['email', 'type'])
+            ->andWhere(['client_id' => $this->case->cs_client_id])
+            ->andWhere([
+                'OR',
+                ['IS', 'type', null],
+                ['<>', 'type', ClientEmail::EMAIL_INVALID],
+            ])
+            ->orderBy(new Expression('FIELD (type, ' . ClientEmail::EMAIL_FAVORITE . ', ' . ClientEmail::EMAIL_VALID . ', ' . ClientEmail::EMAIL_NOT_SET . ', null)'))
+            ->asArray()
+            ->all();
+
+        foreach ($emails as $email) {
+            if (!EmailUnsubscribe::find()->andWhere(['eu_email' => $email['email'], 'eu_project_id' => $this->case->cs_project_id])->exists()) {
+                if (count($emails) === 1) {
+                    $this->sendEmailDefault = $email['email'];
+                } else {
+                    if (!$this->sendEmailDefault && (int)$email['type'] === ClientEmail::EMAIL_FAVORITE) {
+                        $this->sendEmailDefault = $email['email'];
+                    }
+                }
+                $this->sendToList[$email['email']] = $email['email'];
+            }
+        }
+
+        return $this->sendToList;
+    }
+
+    public function getLanguageList(): array
+    {
+        if ($this->languageList !== null) {
+            return $this->languageList;
+        }
+        $this->languageList = ProjectLocale::getEnabledLocaleListByProjectWithLanguageName($this->case->cs_project_id);
+        return $this->languageList;
+    }
+
+    public function getLanguageDefault(): ?string
+    {
+        if (
+            $this->case->client->cl_locale
+            && array_key_exists($this->case->client->cl_locale, $this->getLanguageList())
+        ) {
+            return $this->case->client->cl_locale;
+        }
+
+        if ($projectLocaleDefault = ProjectLocale::getDefaultLocaleByProject($this->case->cs_project_id)) {
+            return $projectLocaleDefault;
+        }
+
+        return null;
+    }
+
+    public function isEnabledSendFeedbackEmail(): bool
+    {
+        if ($this->enabledSendFeedbackEmail !== null) {
+            return $this->enabledSendFeedbackEmail;
+        }
+
+        $clientIsUnsubscribe = ClientProject::find()
+            ->andWhere(['cp_client_id' => $this->case->cs_client_id])
+            ->andWhere(['cp_project_id' => $this->case->cs_project_id])
+            ->andWhere(['cp_unsubscribe' => true])
+            ->exists();
+
+        if ($clientIsUnsubscribe) {
+            $this->enabledSendFeedbackEmail = false;
+            return $this->enabledSendFeedbackEmail;
+        }
+
+        if (!$this->getSendToList()) {
+            $this->enabledSendFeedbackEmail = false;
+            return $this->enabledSendFeedbackEmail;
+        }
+
+        if (!$this->case->cs_dep_id) {
+            $this->enabledSendFeedbackEmail = false;
+            return $this->enabledSendFeedbackEmail;
+        }
+        if (!$params = $this->case->department->getParams()) {
+            $this->enabledSendFeedbackEmail = false;
+            return $this->enabledSendFeedbackEmail;
+        }
+        if (!$params->object->type->isCase()) {
+            $this->enabledSendFeedbackEmail = false;
+            return $this->enabledSendFeedbackEmail;
+        }
+        $this->enabledSendFeedbackEmail = $params->object->case->isActiveFeedback($this->case->cs_order_uid);
+        return $this->enabledSendFeedbackEmail;
+    }
+
+    public function isResendFeedbackEnable(): bool
+    {
+        $templateTypeId = EmailTemplateType::find()
+            ->select(['etp_id'])
+            ->andWhere(['etp_key' => $this->case->department->getParams()->object->case->feedbackTemplateTypeKey])
+            ->asArray()
+            ->one();
+
+        if (!$templateTypeId) {
+            return false;
+        }
+
+        return Email::find()
+            ->andWhere([
+                'e_case_id' => $this->case->cs_id,
+                'e_status_id' => Email::STATUS_DONE,
+                'e_template_type_id' => $templateTypeId['etp_id'],
+            ])
+            ->exists();
+    }
+
+    public function isSendFeedback(): bool
+    {
+        return $this->isSolved() && $this->isEnabledSendFeedbackEmail() && $this->resendFeedbackForm;
     }
 }

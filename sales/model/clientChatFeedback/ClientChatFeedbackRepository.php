@@ -4,19 +4,18 @@ namespace sales\model\clientChatFeedback;
 
 use sales\model\clientChatFeedback\entity\ClientChatFeedback;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 
 /**
  * Class ClientChatFeedbackRepository
  */
-class ClientChatFeedbackRepository extends Repository
+class ClientChatFeedbackRepository
 {
-    public function save(ClientChatFeedback $ClientChatFeedback): ClientChatFeedback
+    public function save(ClientChatFeedback $clientChatFeedback): ClientChatFeedback
     {
-        if (!$ClientChatFeedback->save(false)) {
+        if (!$clientChatFeedback->save()) {
             throw new \RuntimeException('Client Chat Feedback saving failed');
         }
-        return $ClientChatFeedback;
+        return $clientChatFeedback;
     }
 
     public function findById(int $id): ClientChatFeedback

@@ -77,7 +77,9 @@ class IncomingCallNotificationItem extends React.Component {
     phoneUpdateHandler() {
         let self = this;
         return function (event) {
-            //phone
+            //only for minify version
+            window.phoneWidget.emptyFunc('IncomingCallNotificationItem.phoneUpdateHandler');
+
             let call = event.call;
             let notification = self.state.notification;
 
@@ -93,7 +95,9 @@ class IncomingCallNotificationItem extends React.Component {
     desktopUpdateHandler() {
         let self = this;
         return function (event) {
-            //desktop
+            //only for minify version
+            window.phoneWidget.emptyFunc('IncomingCallNotificationItem.desktopUpdateHandler');
+
             let call = event.call;
             let notification = self.state.notification;
 

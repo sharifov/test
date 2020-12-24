@@ -99,7 +99,7 @@ use yii\helpers\Html;
                 'value' => static function (\common\models\Sms $model) {
                     return $model->s_language_id;
                 },
-                'filter' => \lajax\translatemanager\models\Language::getLanguageNames()
+                'filter' => \common\models\Language::getLanguages(true)
             ],*/
             //'s_communication_id',
             //'s_is_deleted',

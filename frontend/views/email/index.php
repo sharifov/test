@@ -143,7 +143,7 @@ $user = Yii::$app->user->identity;
                 'value' => static function (\common\models\Email $model) {
                     return $model->e_language_id;
                 },
-                'filter' => \lajax\translatemanager\models\Language::getLanguageNames()
+                'filter' => \common\models\Language::getLanguages(true)
             ],
             'e_communication_id',
             //'e_is_deleted',

@@ -7,7 +7,9 @@
  * @var $lead Lead
  */
 
+use common\models\Language;
 use common\models\Lead;
+use sales\auth\Auth;
 use sales\services\client\ClientCreateForm;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -36,6 +38,13 @@ $user = Yii::$app->user->identity;
     <?= $form->field($editName, 'lastName')->textInput() ?>
 
     <?= $form->field($editName, 'middleName')->textInput() ?>
+
+    <?php if (Auth::can('global/client/locale/edit')) : ?>
+        <?= $form->field($editName, 'locale')->dropDownList(Language::getLocaleList(false), ['prompt' => '-']) ?>
+    <?php endif ?>
+    <?php if (Auth::can('global/client/marketing_country/edit')) : ?>
+        <?php echo $form->field($editName, 'marketingCountry')->dropDownList(Language::getCountryNames(), ['prompt' => '-']) ?>
+    <?php endif ?>
 
     <?=
     $form->field($editName, 'id')->hiddenInput()->label(false)->error(false);

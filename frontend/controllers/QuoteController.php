@@ -602,7 +602,7 @@ class QuoteController extends FController
 
                     $quote->reservation_dump = str_replace('&nbsp;', ' ', implode("\n", $itinerary));
 
-                    if (!$quote->save(false)) {
+                    if (!$quote->save()) {
                         $response['errors'] = $quote->getErrors();
                         throw new \DomainException('Quote not saved. Error: ' . $quote->getErrorSummary(false)[0], -4);
                     }

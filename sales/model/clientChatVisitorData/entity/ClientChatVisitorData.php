@@ -143,7 +143,7 @@ class ClientChatVisitorData extends \yii\db\ActiveRecord
         return $_self;
     }
 
-    public function updateByClientChatRequest(array $data): void
+    public function fillForUpdateByClientChatRequest(array $data): void
     {
         self::fillInData($this, $data);
     }

@@ -55,7 +55,7 @@ class Language extends ActiveRecord
     ];
 
     /**
-     * {@inheritdoc}
+     * @return string
      */
     public static function tableName()
     {
@@ -63,7 +63,7 @@ class Language extends ActiveRecord
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
     public function rules()
     {
@@ -78,7 +78,7 @@ class Language extends ActiveRecord
     }
 
     /**
-     * {@inheritdoc}
+     * @return string[]
      */
     public function attributeLabels()
     {
@@ -93,9 +93,17 @@ class Language extends ActiveRecord
     }
 
     /**
+     * @return string
+     */
+    public function getFullName(): string
+    {
+        return '(' . $this->language_id . ') ' . $this->name_ascii;
+    }
+
+    /**
      * @return ActiveQuery
      */
-    public function getEmails()
+    public function getEmails(): ActiveQuery
     {
         return $this->hasMany(Email::class, ['e_language_id' => 'language_id']);
     }
@@ -103,7 +111,7 @@ class Language extends ActiveRecord
     /**
      * @return ActiveQuery
      */
-    public function getLanguageTranslates()
+    public function getLanguageTranslates(): ActiveQuery
     {
         return $this->hasMany(LanguageTranslate::class, ['language' => 'language_id']);
     }
@@ -111,7 +119,7 @@ class Language extends ActiveRecord
     /**
      * @return ActiveQuery
      */
-    public function getIds()
+    public function getIds(): ActiveQuery
     {
         return $this->hasMany(LanguageSource::class, ['id' => 'id'])->viaTable('language_translate', ['language' => 'language_id']);
     }
@@ -166,6 +174,52 @@ class Language extends ActiveRecord
 
         return $data;
     }
+
+    /**
+     * @param bool $active
+     * @param null $group
+     * @return array
+     */
+    public static function getLocaleList($active = true, $group = null): array
+    {
+        $dataList = [];
+        if ($active) {
+            $query = self::find()->where(['status' => static::STATUS_ACTIVE])->orderBy(['language_id' => SORT_ASC]);
+        } else {
+            $query =  self::find();
+        }
+
+        $list = $query->all();
+        if ($list) {
+            foreach ($list as $item) {
+                $dataList[$item->language_id] = $item->getFullName();
+            }
+        }
+
+        return $dataList; //ArrayHelper::map($query->asArray(true)->all(), 'language_id', 'language_id', $group);
+    }
+
+    /**
+     * @param string $lang
+     * @return array
+     */
+    public static function getCountryNames(string $lang = 'en'): array
+    {
+        $localeNames = [];
+        $fileName = Yii::getAlias('@root/vendor') . '/stefangabos/world_countries/data/' . $lang . '/countries.php';
+        if ($lang && file_exists($fileName)) {
+            require $fileName;
+            $countries = $countries ?? [];
+            if (is_array($countries)) {
+                foreach ($countries as $country) {
+                    $code = strtoupper($country['alpha2']);
+                    $localeNames[$code] = $code . ' - ' . ($country['name']);
+                }
+            }
+        }
+        return $localeNames;
+    }
+
 
 //    /**
 //     * @param bool $active

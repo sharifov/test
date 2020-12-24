@@ -16,6 +16,8 @@ use yii\base\Model;
  * @property int|null $projectId
  * @property int|null $typeCreate
  * @property int|string $ip
+ * @property string|null $locale
+ * @property string|null $marketingCountry
  */
 class ClientCreateForm extends Model
 {
@@ -29,6 +31,8 @@ class ClientCreateForm extends Model
     public $projectId;
     public $typeCreate;
     public $ip;
+    public $locale;
+    public $marketingCountry;
 
     /**
      * @return array
@@ -41,7 +45,7 @@ class ClientCreateForm extends Model
             ['id', 'integer'],
             [['firstName', 'middleName', 'lastName'], 'string', 'max' => 100],
             [['firstName', 'middleName', 'lastName'], 'match', 'pattern' => "/^[a-z-\s\']+$/i"],
-            [['firstName', 'middleName', 'lastName'], 'filter', 'filter' => 'trim'],
+            [['firstName', 'middleName', 'lastName', 'marketingCountry'], 'filter', 'filter' => 'trim'],
             ['uuid', 'string', 'max' => 36],
             ['rcId', 'string', 'max' => 50],
 
@@ -56,6 +60,13 @@ class ClientCreateForm extends Model
 
             ['ip', 'default', 'value' => null],
             ['ip', 'string', 'max' => 39],
+
+            ['locale', 'default', 'value' => null],
+            ['locale', 'string', 'max' => 5],
+
+            ['locale', 'string', 'max' => 5],
+            ['marketingCountry', 'string', 'max' => 10],
+            ['marketingCountry', 'filter', 'filter' => 'strtoupper', 'skipOnEmpty' => true],
         ];
     }
 

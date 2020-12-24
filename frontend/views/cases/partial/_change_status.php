@@ -45,6 +45,43 @@ $formId = 'change-status-form-id';
             <?= $form->field($statusForm, 'deadline')->widget(DateTimePicker::class) ?>
         </div>
 
+        <?php if ($statusForm->isEnabledSendFeedbackEmail()) : ?>
+            <?php if ($statusForm->isResendFeedbackEnable()) : ?>
+                <div class="resend-wrapper d-none">
+                    <?= Html::checkbox(Html::getInputName($statusForm, 'resendFeedbackForm'), $statusForm->resendFeedbackForm, [
+                        'id' => Html::getInputId($statusForm, 'resendFeedbackForm'),
+                        'label' => 'Resend feedback form',
+                    ])?>
+                </div>
+            <?php else : ?>
+                <div class="resend-wrapper d-none">
+                    <?= Html::checkbox(Html::getInputName($statusForm, 'resendFeedbackForm'), $statusForm->resendFeedbackForm, [
+                        'id' => Html::getInputId($statusForm, 'resendFeedbackForm'),
+                        'label' => 'Send feedback form',
+                        'disabled' => 'disabled',
+                    ])?>
+                </div>
+            <?php endif; ?>
+
+            <div class="sendto-wrapper d-none">
+                <?= $form->field($statusForm, 'sendTo')->dropDownList($statusForm->getSendToList(), [
+                        'prompt' => '---',
+                        'options' => [
+                            $statusForm->sendEmailDefault => ['selected' => true]
+                        ],
+                ]) ?>
+            </div>
+
+            <div class="language-wrapper d-none">
+                <?= $form->field($statusForm, 'language')->dropDownList($statusForm->getLanguageList(), [
+                        'prompt' => '---',
+                        'options' => [
+                            $statusForm->getLanguageDefault() => ['selected' => true]
+                        ],
+                ]) ?>
+            </div>
+        <?php endif;?>
+
         <div class="form-group text-center">
             <?= Html::submitButton('Change Status', ['class' => 'btn btn-warning']) ?>
         </div>
@@ -60,7 +97,12 @@ $reasonId = Html::getInputId($statusForm, 'reason');
 $messageId = Html::getInputId($statusForm, 'message');
 $userId = Html::getInputId($statusForm, 'userId');
 $deadlineId = Html::getInputId($statusForm, 'deadline');
+$sendToId = Html::getInputId($statusForm, 'sendTo');
+$languageId = Html::getInputId($statusForm, 'language');
+$resendId = Html::getInputId($statusForm, 'resendFeedbackForm');
 $reasons = $statusForm->reasons();
+
+$resendRequire = $statusForm->resendFeedbackForm ? 1 : 0;
 
 $js = <<<JS
 
@@ -69,15 +111,25 @@ var reasons = {$reasons};
 var message = $('#{$messageId}');
 var user = $('#{$userId}');
 var deadline = $('#{$deadlineId}');
+var language = $('#{$languageId}');
+var sendTo = $('#{$sendToId}');
+var resend = $('#{$resendId}');
 var reasonWrapper = $('.reason-wrapper');
 var messageWrapper = $('.message-wrapper');
 var userWrapper = $('.user-wrapper');
 var deadlineWrapper = $('.deadline-wrapper');
+var sendToWrapper = $('.sendto-wrapper');
+var languageWrapper = $('.language-wrapper');
+var resendWrapper = $('.resend-wrapper');
 
 reason.parent().addClass('required');
 message.parent().addClass('required');
 user.parent().addClass('required');
-    
+
+if ({$resendRequire}) {
+    feedbackSendBlockRequired();
+}
+
 $('body').find('#{$statusId}').on('change', function () {
     var val = $(this).val() || null;
     resetStatusForm();
@@ -96,6 +148,20 @@ $('body').find('#{$statusId}').on('change', function () {
         deadlineWrapper.removeClass('d-none');
     } else {
         deadlineWrapper.addClass('d-none');
+    }
+    if (val == '{$statusForm->statusSolvedId()}') {
+        sendToWrapper.removeClass('d-none');
+        languageWrapper.removeClass('d-none');
+        resendWrapper.removeClass('d-none');
+        if ({$resendRequire}) {
+            feedbackSendBlockRequired();
+        } else {
+            feedbackSendBlockUnRequired();
+        }
+    } else {
+        sendToWrapper.addClass('d-none');
+        languageWrapper.addClass('d-none');
+        resendWrapper.addClass('d-none');
     }
 })
 
@@ -122,6 +188,32 @@ deadline.on('change',function() {
     removeStatusFormErrors();
 });
 
+language.on('change',function() {
+    removeStatusFormErrors();
+});
+
+sendTo.on('change',function() {
+    removeStatusFormErrors();
+});
+
+resend.on('change', function () {
+    if (this.checked) {
+        feedbackSendBlockRequired();
+    } else {
+        feedbackSendBlockUnRequired();
+    }
+    removeStatusFormErrors();
+});
+
+function feedbackSendBlockRequired() {
+    sendTo.parent().addClass('required');
+    language.parent().addClass('required');
+}
+function feedbackSendBlockUnRequired() {
+    sendTo.parent().removeClass('required');
+    language.parent().removeClass('required');
+}
+
 function removeStatusFormErrors() {
     let form = $("#{$formId}");
     form.find('.alert.alert-danger').hide();
@@ -138,6 +230,9 @@ function resetStatusForm() {
     messageWrapper.addClass('d-none');
     userWrapper.addClass('d-none');
     deadlineWrapper.addClass('d-none');
+    sendToWrapper.addClass('d-none');
+    languageWrapper.addClass('d-none');
+    resendWrapper.addClass('d-none');
 }
 
 JS;

@@ -20,7 +20,9 @@ class ConferencePane extends React.Component {
     callUpdateHandler() {
         let self = this;
         return function (event) {
-            //conference call
+            //only for minify version
+            window.phoneWidget.emptyFunc('ConferencePane.callUpdateHandler');
+
             self.setState({
                 call: event.call
             });
@@ -30,7 +32,9 @@ class ConferencePane extends React.Component {
     conferenceUpdateHandler() {
         let self = this;
         return function (event) {
-            //conference conference
+            //only for minify version
+            window.phoneWidget.emptyFunc('ConferencePane.conferenceUpdateHandler');
+
             self.setState({
                 conference: event.conference
             });

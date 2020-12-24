@@ -96,11 +96,12 @@ class ClientChatAccessMessage
         ];
     }
 
-    public static function chatCanceled(ClientChat $chat, ?Employee $user): array
+    public static function chatCanceledTransfer(ClientChat $chat, ?Employee $user): array
     {
-        $message = 'The chat was canceled by the system because all agents skipped the request';
+        $message = 'The chat transfer was canceled by the system';
         if ($user) {
-            $message = 'User: ' . $user->nickname . ' canceled transfer of this chat';
+            $client = $chat->cchClient;
+            $message = 'User: ' . $user->nickname . ' canceled chat transfer with client: ' . $client->full_name;
         }
         return [
             'message' => $message,
