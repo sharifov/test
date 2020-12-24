@@ -3,13 +3,12 @@
 namespace sales\model\user\entity\userProductType;
 
 use common\models\UserProductType;
-use sales\repositories\Repository;
 
 /**
  * Class UserProductTypeRepository
  * @package sales\model\user\userProductType
  */
-class UserProductTypeRepository extends Repository
+class UserProductTypeRepository
 {
     /**
      * @param int $userId

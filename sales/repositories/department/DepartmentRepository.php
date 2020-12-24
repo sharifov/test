@@ -3,9 +3,8 @@
 namespace sales\repositories\department;
 
 use common\models\Department;
-use sales\repositories\Repository;
 
-class DepartmentRepository extends Repository
+class DepartmentRepository
 {
     public function find(int $id)
     {

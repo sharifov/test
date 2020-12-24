@@ -3,9 +3,8 @@
 namespace modules\flight\src\repositories\FlightQuoteSegmentPaxBaggageChargeRepository;
 
 use modules\flight\models\FlightQuoteSegmentPaxBaggageCharge;
-use sales\repositories\Repository;
 
-class FlightQuoteSegmentPaxBaggageChargeRepository extends Repository
+class FlightQuoteSegmentPaxBaggageChargeRepository
 {
     /**
      * @param FlightQuoteSegmentPaxBaggageCharge $baggageCharge

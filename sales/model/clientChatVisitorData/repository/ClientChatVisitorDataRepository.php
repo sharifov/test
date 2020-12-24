@@ -4,10 +4,9 @@ namespace sales\model\clientChatVisitorData\repository;
 
 use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 use yii\helpers\VarDumper;
 
-class ClientChatVisitorDataRepository extends Repository
+class ClientChatVisitorDataRepository
 {
     public function findOrCreateByVisitorId(string $id): ClientChatVisitorData
     {

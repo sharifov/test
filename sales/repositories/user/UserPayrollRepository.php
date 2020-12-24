@@ -3,9 +3,8 @@
 namespace sales\repositories\user;
 
 use sales\model\user\entity\payroll\UserPayroll;
-use sales\repositories\Repository;
 
-class UserPayrollRepository extends Repository
+class UserPayrollRepository
 {
     /**
      * @param UserPayroll $userPayroll

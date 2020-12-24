@@ -6,14 +6,11 @@ use common\models\LeadFlightSegment;
 use sales\dispatchers\EventDispatcher;
 use sales\model\lead\LeadCodeException;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 
 /**
  * Class LeadSegmentRepository
- *
- * @method null|LeadFlightSegment get($id)
  */
-class LeadSegmentRepository extends Repository
+class LeadSegmentRepository
 {
     private $eventDispatcher;
 

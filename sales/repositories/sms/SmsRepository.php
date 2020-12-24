@@ -5,12 +5,11 @@ namespace sales\repositories\sms;
 use common\models\Sms;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 
 /**
  * Class SmsRepository
  */
-class SmsRepository extends Repository
+class SmsRepository
 {
 
     private $eventDispatcher;

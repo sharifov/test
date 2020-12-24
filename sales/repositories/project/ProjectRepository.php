@@ -3,11 +3,9 @@
 namespace sales\repositories\project;
 
 use common\models\Project;
-use sales\helpers\app\AppHelper;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 
-class ProjectRepository extends Repository
+class ProjectRepository
 {
     public function findByName(string $name)
     {

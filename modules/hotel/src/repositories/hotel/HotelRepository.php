@@ -6,14 +6,13 @@ use modules\hotel\models\Hotel;
 use modules\hotel\src\exceptions\HotelCodeException;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 
 /**
  * Class HotelRepository
  *
  * @property EventDispatcher $eventDispatcher
  */
-class HotelRepository extends Repository
+class HotelRepository
 {
     private $eventDispatcher;
 

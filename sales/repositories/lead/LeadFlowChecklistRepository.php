@@ -4,15 +4,12 @@ namespace sales\repositories\lead;
 
 use common\models\LeadFlowChecklist;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 
 /**
  * Class LeadFlowChecklistRepository
- * @method null|LeadFlowChecklist get($id)
  */
-class LeadFlowChecklistRepository extends Repository
+class LeadFlowChecklistRepository
 {
-
     /**
      * @param $id
      * @return LeadFlowChecklist

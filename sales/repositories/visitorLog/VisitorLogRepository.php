@@ -3,12 +3,10 @@
 namespace sales\repositories\visitorLog;
 
 use common\models\VisitorLog;
-use Hoa\Event\Source;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 use yii\helpers\VarDumper;
 
-class VisitorLogRepository extends Repository
+class VisitorLogRepository
 {
     public function createByClientChatRequest(int $cvdId, array $data): VisitorLog
     {

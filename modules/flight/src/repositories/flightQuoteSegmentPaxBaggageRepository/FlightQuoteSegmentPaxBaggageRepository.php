@@ -4,12 +4,11 @@ namespace modules\flight\src\repositories\flightQuoteSegmentPaxBaggageRepository
 
 use modules\flight\models\FlightQuoteSegmentPaxBaggage;
 use modules\flight\src\exceptions\FlightCodeException;
-use sales\repositories\Repository;
 
 /**
  * Class FlightQuoteSegmentPaxBaggageRepository
  */
-class FlightQuoteSegmentPaxBaggageRepository extends Repository
+class FlightQuoteSegmentPaxBaggageRepository
 {
     public function save(FlightQuoteSegmentPaxBaggage $baggage): int
     {

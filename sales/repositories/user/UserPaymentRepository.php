@@ -3,9 +3,8 @@
 namespace sales\repositories\user;
 
 use sales\model\user\entity\payment\UserPayment;
-use sales\repositories\Repository;
 
-class UserPaymentRepository extends Repository
+class UserPaymentRepository
 {
     /**
      * @param int $paymentId

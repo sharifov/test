@@ -6,18 +6,12 @@ use common\models\Lead;
 use sales\dispatchers\EventDispatcher;
 use sales\model\lead\LeadCodeException;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 
 /**
  * Class LeadRepository
  * @property EventDispatcher $eventDispatcher
- * @method null|Lead get(int $id)
- * @method null|Lead getByGid(string $gid)
- * @method null|Lead getByUid(string $gid)
- * @method null|Lead getActiveByClientId(int $clientId)
- * @method null|Lead getByClientId(int $clientId)
  */
-class LeadRepository extends Repository
+class LeadRepository
 {
     private $eventDispatcher;
 
@@ -40,6 +34,15 @@ class LeadRepository extends Repository
             return $lead;
         }
         throw new NotFoundException('Lead is not found', LeadCodeException::LEAD_NOT_FOUND);
+    }
+
+    public function get(int $id): ?Lead
+    {
+        try {
+            return $this->find($id);
+        } catch (NotFoundException $e) {
+            return null;
+        }
     }
 
     /**
@@ -66,6 +69,14 @@ class LeadRepository extends Repository
         throw new NotFoundException('Lead is not found', LeadCodeException::LEAD_NOT_FOUND);
     }
 
+    public function getByUid(string $uid): ?Lead
+    {
+        try {
+            return $this->findByUid($uid);
+        } catch (NotFoundException $e) {
+            return null;
+        }
+    }
 
     /**
      * @param $requestHash
@@ -101,7 +112,7 @@ class LeadRepository extends Repository
      * @param int $clientId
      * @return null|Lead
      */
-    public function findActiveByClientId(int $clientId): ?Lead
+    public function getActiveByClientId(int $clientId): ?Lead
     {
         return Lead::find()
             ->where(['client_id' => $clientId,
@@ -118,7 +129,7 @@ class LeadRepository extends Repository
      * @param int $clientId
      * @return null|Lead
      */
-    public function findByClientId(int $clientId): ?Lead
+    public function getByClientId(int $clientId): ?Lead
     {
         return Lead::find()
             ->where(['client_id' => $clientId])

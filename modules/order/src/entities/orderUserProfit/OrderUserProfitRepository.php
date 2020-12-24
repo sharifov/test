@@ -3,7 +3,6 @@
 namespace modules\order\src\entities\orderUserProfit;
 
 use sales\dispatchers\EventDispatcher;
-use sales\repositories\Repository;
 use yii\db\Exception;
 
 /**
@@ -12,7 +11,7 @@ use yii\db\Exception;
  *
  * @property EventDispatcher $eventDispatcher
  */
-class OrderUserProfitRepository extends Repository
+class OrderUserProfitRepository
 {
     /**
      * @var EventDispatcher

@@ -5,14 +5,11 @@ namespace sales\repositories\lead;
 use common\models\LeadFlow;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 
 /**
  * Class LeadFlowRepository
- * @method null|LeadFlow get($id)
- * @method null|LeadFlow getPrevious($leadId)
  */
-class LeadFlowRepository extends Repository
+class LeadFlowRepository
 {
     private $eventDispatcher;
 
@@ -35,6 +32,15 @@ class LeadFlowRepository extends Repository
             return $leadFlow;
         }
         throw new NotFoundException('LeadFlow is not found');
+    }
+
+    public function getPrevious($leadId): ?LeadFlow
+    {
+        try {
+            return $this->findPrevious($leadId);
+        } catch (NotFoundException $e) {
+            return null;
+        }
     }
 
     /**

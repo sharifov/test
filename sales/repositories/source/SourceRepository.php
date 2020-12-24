@@ -5,15 +5,12 @@ namespace sales\repositories\source;
 use common\models\Sources;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 
 /**
  * Class SourceRepository
  * @property EventDispatcher $eventDispatcher
- * @method null|Sources getByPhone($phone)
- * @method null|Sources get($id)
  */
-class SourceRepository extends Repository
+class SourceRepository
 {
     private $eventDispatcher;
 

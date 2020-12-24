@@ -3,13 +3,12 @@
 namespace modules\flight\src\repositories\flightQuoteSegmentStopRepository;
 
 use modules\flight\models\FlightQuoteSegmentStop;
-use sales\repositories\Repository;
 
 /**
  * Class FlightQuoteSegmentStopRepository
  * @package modules\flight\src\repositories\flightQuoteSegmentStopRepository
  */
-class FlightQuoteSegmentStopRepository extends Repository
+class FlightQuoteSegmentStopRepository
 {
 
     /**

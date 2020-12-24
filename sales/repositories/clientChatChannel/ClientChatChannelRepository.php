@@ -4,9 +4,8 @@ namespace sales\repositories\clientChatChannel;
 
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 
-class ClientChatChannelRepository extends Repository
+class ClientChatChannelRepository
 {
     /**
      * @param int|null $depId

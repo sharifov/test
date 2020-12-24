@@ -11,7 +11,6 @@ use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserAccess\event\UpdateChatUserAccessWidgetEvent;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 use yii\helpers\VarDumper;
 
 /**
@@ -21,7 +20,7 @@ use yii\helpers\VarDumper;
  * @property ClientChatRepository $clientChatRepository
  * @property EventDispatcher $eventDispatcher
  */
-class ClientChatUserAccessRepository extends Repository
+class ClientChatUserAccessRepository
 {
     /**
      * @var ClientChatRepository

@@ -3,9 +3,8 @@
 namespace sales\model\clientChatVisitor\repository;
 
 use sales\model\clientChatVisitor\entity\ClientChatVisitor;
-use sales\repositories\Repository;
 
-class ClientChatVisitorRepository extends Repository
+class ClientChatVisitorRepository
 {
     public function create(int $cchId, int $visitorDataId, ?int $clientId): ClientChatVisitor
     {

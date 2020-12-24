@@ -5,13 +5,11 @@ namespace sales\repositories\quote;
 use common\models\Quote;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 
 /**
  * Class QuoteRepository
- * @method null|Quote get($id)
  */
-class QuoteRepository extends Repository
+class QuoteRepository
 {
     private $eventDispatcher;
 

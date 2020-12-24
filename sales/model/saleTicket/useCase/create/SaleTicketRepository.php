@@ -4,10 +4,9 @@ namespace sales\model\saleTicket\useCase\create;
 
 use sales\model\saleTicket\entity\SaleTicket;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 use yii\db\ActiveRecord;
 
-class SaleTicketRepository extends Repository
+class SaleTicketRepository
 {
     /**
      * @param SaleTicket $saleTicket

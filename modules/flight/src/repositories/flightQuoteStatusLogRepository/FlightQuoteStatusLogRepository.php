@@ -4,7 +4,6 @@ namespace modules\flight\src\repositories\flightQuoteStatusLogRepository;
 
 use modules\flight\models\FlightQuoteStatusLog;
 use sales\dispatchers\EventDispatcher;
-use sales\repositories\Repository;
 
 /**
  * Class FlightQuoteStatusLogRepository
@@ -12,7 +11,7 @@ use sales\repositories\Repository;
  *
  * @property EventDispatcher $eventDispatcher
  */
-class FlightQuoteStatusLogRepository extends Repository
+class FlightQuoteStatusLogRepository
 {
     /**
      * @var EventDispatcher

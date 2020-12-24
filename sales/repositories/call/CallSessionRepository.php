@@ -5,14 +5,12 @@ namespace sales\repositories\call;
 use common\models\CallSession;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 
 /**
  * Class CallSessionRepository
  * @package sales\repositories\call
- * @method null|CallSession getBySid($sid)
  */
-class CallSessionRepository extends Repository
+class CallSessionRepository
 {
     private $eventDispatcher;
 

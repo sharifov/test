@@ -4,13 +4,11 @@ namespace sales\repositories\user;
 
 use common\models\Employee;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 
 /**
  * Class UserRepository
- * @method null|Employee get($id)
  */
-class UserRepository extends Repository
+class UserRepository
 {
     /**
      * @param $id
