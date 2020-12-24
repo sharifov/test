@@ -645,7 +645,7 @@ class EmployeeSearch extends Employee
                     ->andWhere(['>=', 'ccua_updated_dt', date('Y-m-d H:i:s', $time)])
                     ->groupBy(['ccua_user_id']);
 
-                $users->leftJoin('(' . $acceptedChats->createCommand()->rawSql . ') acceptedChats ', 'acceptedChats.uid = ccua_user_id');
+                $users->leftJoin('(' . $acceptedChats->createCommand()->rawSql . ') acceptedChats ', 'acceptedChats.uid = employees.id');
                 $users->orderBy(['acceptedChats.cnt_accepted_chats' => SORT_ASC]);
             }
         }
