@@ -18,7 +18,6 @@ use common\models\UserConnection;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use common\models\UserProjectParams;
-use frontend\widgets\CallBox;
 use frontend\widgets\newWebPhone\call\socket\MissedCallMessage;
 use http\Exception\InvalidArgumentException;
 use sales\auth\Auth;
@@ -929,64 +928,6 @@ class CallController extends FController
             'projectList'       => $projectList,
         ]);
     }
-
-    /**
-     * @return string
-     */
-    public function actionCallBox(): string
-    {
-        $id = Yii::$app->request->get('id');
-        $status = Yii::$app->request->get('status');
-
-        $keyCache = 'cal-box-request-' . $id . '-' . $status;
-
-        //Yii::$app->cache->delete($keyCache);
-
-        $result = Yii::$app->cache->get($keyCache);
-
-        if ($result === false) {
-            $box = CallBox::getInstance();
-            $result = $box->run();
-            if ($result) {
-                Yii::$app->cache->set($keyCache, $result, 30);
-            }
-        }
-
-        //VarDumper::dump($data); exit;
-
-        return $result;
-    }
-
-    /**
-     * @return string
-     */
-    public function actionIncomingCallWidget(): string
-    {
-        //$id = Yii::$app->request->get('id');
-        // $status = Yii::$app->request->get('status');
-
-        // $keyCache = 'cal-box-request-' . $id . '-' . $status;
-
-        //Yii::$app->cache->delete($keyCache);
-
-        //$result = Yii::$app->cache->get($keyCache);
-
-        //if($result === false) {
-
-//            $box = IncomingCallWidget::getInstance();
-//            $result = $box->run();
-
-            /*if($result) {
-                Yii::$app->cache->set($keyCache, $result, 30);
-            }*/
-        //}
-
-        //VarDumper::dump($data); exit;
-
-//        return $result;
-        return '';
-    }
-
 
     /**
      * @return string

@@ -163,13 +163,6 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                 </div>
             </div>
 
-
-                    <?php /*= Html::button('<i class="fa fa-user"></i> Client Info', [
-                        'class' => 'btn btn-default',
-                        'id' => 'btn-client-details',
-                        'data-client-id' => $leadForm->getClient()->id
-                    ])*/ ?>
-
         </div>
     </div>
 

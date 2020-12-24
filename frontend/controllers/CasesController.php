@@ -670,14 +670,12 @@ class CasesController extends FController
         //VarDumper::dump($dataProvider->allModels); exit;
 
         $fromPhoneNumbers = [];
-        if (SettingHelper::isLeadCommunicationNewCallWidgetEnabled()) {
-            if (($department = $model->department) && $params = $department->getParams()) {
-                $phoneList = new AvailablePhoneList(Auth::id(), $model->cs_project_id, $department->dep_id, $params->defaultPhoneType);
-                foreach ($phoneList->getList() as $phoneItem) {
-                    $fromPhoneNumbers[$phoneItem['phone']] = $phoneItem['project']
-                        . ' ' . ((int)$phoneItem['type_id'] === AvailablePhoneList::GENERAL_ID ? Department::DEPARTMENT_LIST[(int)$phoneItem['department_id']] : AvailablePhoneList::PERSONAL)
-                        . ' (' . $phoneItem['phone'] . ')';
-                }
+        if (($department = $model->department) && $params = $department->getParams()) {
+            $phoneList = new AvailablePhoneList(Auth::id(), $model->cs_project_id, $department->dep_id, $params->defaultPhoneType);
+            foreach ($phoneList->getList() as $phoneItem) {
+                $fromPhoneNumbers[$phoneItem['phone']] = $phoneItem['project']
+                    . ' ' . ((int)$phoneItem['type_id'] === AvailablePhoneList::GENERAL_ID ? Department::DEPARTMENT_LIST[(int)$phoneItem['department_id']] : AvailablePhoneList::PERSONAL)
+                    . ' (' . $phoneItem['phone'] . ')';
             }
         }
 

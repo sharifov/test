@@ -130,28 +130,22 @@ $duration = 10;
 
             if (obj.status === 'completed') {
                 endAutoTake();
-                //stopCall(obj.duration); //updateCommunication();
                 autoredialInit();
             } else if (obj.status === 'initiated') {
                 //endAutoTake();
-                //startCall();
             } else if (obj.status === 'ringing') {
                 autoredialInit();
                 //startAutoTake();
                 //endAutoTake();
-                //startCall();
             } else if (obj.status === 'in-progress') {
                 //autoTake();
                 autoredialInit();
-                //startCallTimer();
                 //$('#div-call-timer').timer('resume');
             } else if (obj.status === 'busy') {
                 endAutoTake();
-                //stopCall(0);
                 //updateCommunication();
                 autoredialInit();
             } else if (obj.status === 'no-answer') {
-                //stopCall(0);
                 //updateCommunication();
                 endAutoTake();
                 autoredialInit();

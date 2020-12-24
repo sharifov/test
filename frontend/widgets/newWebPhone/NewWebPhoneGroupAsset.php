@@ -17,7 +17,6 @@ class NewWebPhoneGroupAsset extends AssetBundle
         ['/web_phone/js/call_object.js'],
         ['/web_phone/js/conference_object.js'],
         ['/web_phone/js/requesters.js'],
-        ['/web_phone/js/old_widget.js'],
 
         ['/web_phone/component/timer.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
         ['/web_phone/component/pane/call_action_timer.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],

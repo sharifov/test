@@ -233,13 +233,10 @@ $js = <<<JS
                         }
                         
                         if(obj.cmd === 'callUpdate') {
-                            /*if (typeof callUpdate === "function") {
-                                callUpdate(obj);
-                            }*/
                             
-                            if (typeof refreshCallBox === "function") {
-                                refreshCallBox(obj);
-                            }
+                             if (typeof PhoneWidgetCall === 'object') {
+                                PhoneWidgetCall.refreshCallStatus(obj);
+                             }
                             
                              if (typeof webCallLeadRedialUpdate === "function") {
                                 webCallLeadRedialUpdate(obj);
@@ -265,24 +262,15 @@ $js = <<<JS
                             updateCommunication();
                         }
                         
-                        /*if(obj.cmd === 'incomingCall') {
-                            if (typeof incomingCall === "function") {
-                                incomingCall(obj);
-                            }
-                        }*/
-                        
                         if(obj.cmd === 'updateUserCallStatus') {
-                            /*if (typeof updateUserCallStatus === "function") {
-                                updateUserCallStatus(obj);
-                            }*/
                             
                              if (typeof PhoneWidgetCall === 'object') {
                                  PhoneWidgetCall.changeStatus(obj.type_id);
                             }
-                            
-                            if (typeof refreshCallBox === "function") {
-                                refreshCallBox(obj);
-                            }
+                             
+                            if (typeof PhoneWidgetCall === 'object') {
+                                PhoneWidgetCall.refreshCallStatus(obj);
+                            }                            
                             
                             
                         }
