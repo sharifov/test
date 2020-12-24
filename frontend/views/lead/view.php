@@ -86,7 +86,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
 
         <div class="col-md-6">
 <?php if (Auth::can('lead-view/flight-default/view', ['lead' => $lead])) : ?>
-        <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-products-wrap', 'enablePushState' => false, 'enableReplaceState' => false]) ?>
+        <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-products-wrap', 'enablePushState' => false, 'enableReplaceState' => false, 'timeout' => 5000]) ?>
 
             <?= $this->render('products/_products', [
                 'lead' => $lead,
