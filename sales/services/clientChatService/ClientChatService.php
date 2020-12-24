@@ -203,6 +203,9 @@ class ClientChatService
         $employeeSearch = new EmployeeSearch();
         $users = $employeeSearch->searchAvailableAgentsForChatRequests($clientChat, $channel->getSystemUserLimit(), $channel->getSystemPastMinutes());
 
+        \Yii::info('Available users for chat request: ' . count($users), 'info\ClientChatService::sendRequestToUsers');
+        \Yii::info(VarDumper::dumpAsString($users, 50), 'info\ClientChatService::sendRequestToUsers');
+
         if ($users) {
             foreach ($users as $user) {
                 $this->sendRequestToUser($clientChat, $user);
