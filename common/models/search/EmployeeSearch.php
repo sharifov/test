@@ -628,7 +628,7 @@ class EmployeeSearch extends Employee
 
         if ($chat->isTransfer() || $chat->isIdle()) {
             $subQuery = ClientChatUserAccess::find()
-                ->select(['ccua_user_id'])
+                ->select(['ccua_user_id as ccua_uid'])
                 ->where(['ccua_cch_id' => $chat->cch_id])
                 ->andWhere(['ccua_status_id' => [ClientChatUserAccess::STATUS_PENDING]]);
             $users->andWhere(['NOT IN', 'id', $subQuery]);
@@ -640,12 +640,12 @@ class EmployeeSearch extends Employee
             if ($pastMinutes) {
                 $acceptedChatStatus = $chat->isTransfer() ? ClientChatUserAccess::STATUS_TRANSFER_ACCEPT : ClientChatUserAccess::STATUS_ACCEPT;
                 $time = time() - ($pastMinutes * 60);
-                $acceptedChats = ClientChatUserAccess::find()->select(['ccua_user_id', 'count(ccua_id) as cnt_accepted_chats'])
+                $acceptedChats = ClientChatUserAccess::find()->select(['ccua_user_id as uid', 'count(ccua_id) as cnt_accepted_chats'])
                     ->where(['ccua_status_id' => $acceptedChatStatus])
                     ->andWhere(['>=', 'ccua_updated_dt', date('Y-m-d H:i:s', $time)])
                     ->groupBy(['ccua_user_id']);
 
-                $users->leftJoin('(' . $acceptedChats->createCommand()->rawSql . ') acceptedChats ', 'acceptedChats.ccua_user_id = ccua_user_id');
+                $users->leftJoin('(' . $acceptedChats->createCommand()->rawSql . ') acceptedChats ', 'acceptedChats.uid = ccua_user_id');
                 $users->orderBy(['acceptedChats.cnt_accepted_chats' => SORT_ASC]);
             }
         }
