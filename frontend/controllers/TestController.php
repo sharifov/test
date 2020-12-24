@@ -1874,9 +1874,9 @@ class TestController extends FController
 
     public function actionTestSetByUserId()
     {
-        $repository = Yii::createObject(ClientChatUserAccessService::class);
-
-        $repository->setUserAccessToAllChats(464);
+//        $repository = Yii::createObject(ClientChatUserAccessService::class);
+//
+//        $repository->setUserAccessToAllChats(464);
     }
 
     public function actionSetAccessToAllChatsByChannelIds()

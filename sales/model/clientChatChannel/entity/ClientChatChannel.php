@@ -336,4 +336,31 @@ class ClientChatChannel extends \yii\db\ActiveRecord
             $this->addError($attribute, 'Default Device already set for project ' . ($this->cccProject ? $this->cccProject->name : ''));
         }
     }
+
+    public function getSystemUserLimit(): int
+    {
+        if (isset($this->settings['system']['userAccessDistribution']['userLimit'])) {
+            return (int)$this->settings['system']['userAccessDistribution']['userLimit'];
+        }
+
+        return ClientChatChannelDefaultSettings::getAccessDistributionUserLimit();
+    }
+
+    public function getSystemRepeatDelaySeconds(): int
+    {
+        if (isset($this->settings['system']['userAccessDistribution']['repeatDelaySeconds'])) {
+            return (int)$this->settings['system']['userAccessDistribution']['repeatDelaySeconds'];
+        }
+
+        return ClientChatChannelDefaultSettings::getAccessDistributionRepeatDelaySeconds();
+    }
+
+    public function getSystemPastMinutes(): int
+    {
+        if (isset($this->settings['system']['userAccessDistribution']['sortParameters']['pastAcceptedChatsNumber']['pastMinutes'])) {
+            return (int)$this->settings['system']['userAccessDistribution']['sortParameters']['pastAcceptedChatsNumber']['pastMinutes'];
+        }
+
+        return ClientChatChannelDefaultSettings::getAccessDistributionPastMinutes();
+    }
 }
