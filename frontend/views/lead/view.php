@@ -94,7 +94,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
                 'quotesProvider' => $quotesProvider,
                 'leadForm' => $leadForm,
                 'is_manager' => $is_manager,
-            ]) ?>
+            ]) ?>N
 
             <?php if ($lead->products) : ?>
                 <?= $this->render('offers/lead_offers', [
