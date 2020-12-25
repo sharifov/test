@@ -14,10 +14,12 @@ use sales\helpers\call\CallHelper;
 use sales\helpers\UserCallIdentity;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\callLog\entity\callLog\CallLogStatus;
+use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\callLog\entity\callLogCase\CallLogCase;
 use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\callLog\entity\callLogQueue\CallLogQueue;
 use sales\model\callLog\entity\callLogRecord\CallLogRecord;
+use sales\model\callLog\entity\callLogUserAccess\CallLogUserAccess;
 use sales\model\callNote\entity\CallNote;
 use sales\model\phoneList\entity\PhoneList;
 use Yii;
@@ -417,6 +419,26 @@ class CallLogTransferService
                 ]);
                 if (!$callQueue->save()) {
                     throw new \RuntimeException(VarDumper::dumpAsString(['model' => $callQueue->toArray(), 'message' => $callQueue->getErrors()]));
+                }
+            }
+
+            if ($log->cl_type_id === CallLogType::IN) {
+                if (!$userAccesses = CallUserAccess::find()->byCall($log->cl_id)->asArray()->all()) {
+                    $userAccesses = CallUserAccess::find()->byCall($this->call['c_parent_id'])->asArray()->all();
+                }
+                if ($userAccesses) {
+                    foreach ($userAccesses as $userAccess) {
+                        $callLogUserAccess = CallLogUserAccess::create(
+                            $log->cl_id,
+                            $userAccess['cua_user_id'],
+                            $userAccess['cua_status_id'],
+                            $userAccess['cua_created_dt'],
+                            $userAccess['cua_updated_dt']
+                        );
+                        if (!$callLogUserAccess->save(false)) {
+                            throw new \RuntimeException(VarDumper::dumpAsString(['model' => $callLogUserAccess->toArray()]));
+                        }
+                    }
                 }
             }
 

@@ -218,6 +218,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'icon' => 'phone',
                     'items' => [
                         ['label' => 'Log', 'url' => ['/call-log/index']],
+                        ['label' => 'User access', 'url' => ['/call-log-user-access/index']],
                         ['label' => 'Cases', 'url' => ['/call-log-case/index']],
                         ['label' => 'Leads', 'url' => ['/call-log-lead/index']],
                         ['label' => 'Queue', 'url' => ['/call-log-queue/index']],
