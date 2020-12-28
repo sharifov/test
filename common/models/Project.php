@@ -34,6 +34,7 @@ use yii\httpclient\CurlTransport;
  * @property string|null $email_postfix
  * @property string|null $ga_tracking_id
  * @property string|null $project_key
+ * @property int|null $p_update_user_id
  *
  * @property ContactInfo $contactInfo
  * @property CustomData|null $customData
@@ -51,6 +52,7 @@ use yii\httpclient\CurlTransport;
  * @property Email[] $emails
  * @property EmployeeContactInfo[] $employeeContactInfos
  * @property Lead[] $leads
+ * @property Employee $pUpdateUser
  * @property PhoneLine[] $phoneLines
  * @property ProjectEmailTemplate[] $projectEmailTemplates
  * @property ProjectEmployeeAccess[] $projectEmployeeAccesses
@@ -84,6 +86,7 @@ class Project extends \yii\db\ActiveRecord
     {
         return [
             [['sort_order'], 'integer', 'min' => 0, 'max' => 100],
+            [['p_update_user_id'], 'integer'],
             [['closed'], 'boolean'],
             [['contact_info', 'custom_data'], 'string'],
             [['last_update'], 'safe'],
@@ -91,6 +94,7 @@ class Project extends \yii\db\ActiveRecord
             [['email_postfix'], 'string', 'max' => 100],
             [['project_key'], 'string', 'max' => 50],
             [['project_key'], 'unique'],
+            [['p_update_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['p_update_user_id' => 'id']],
         ];
     }
 
@@ -106,12 +110,13 @@ class Project extends \yii\db\ActiveRecord
             'api_key' => 'Api Key',
             'contact_info' => 'Contact Info',
             'closed' => 'Closed',
-            'last_update' => 'Last Update',
+            'last_update' => 'Updated Dt',
             'custom_data' => 'Custom Data',
             'sort_order' => 'Sort',
             'email_postfix' => 'Email postfix',
             'ga_tracking_id' => 'GA Tracking Id',
             'project_key' => 'Project Key',
+            'p_update_user_id' => 'Updated User',
         ];
     }
 
@@ -220,7 +225,7 @@ class Project extends \yii\db\ActiveRecord
                             $pr = new self();
                             $pr->id = $projectItem['id'];
                             $data['created'][] = $projectItem['id'];
-                            //$pr->custom_data = @json_encode(['name' => $projectItem['name'], 'phone' => '', 'email' => '']);
+                        //$pr->custom_data = @json_encode(['name' => $projectItem['name'], 'phone' => '', 'email' => '']);
                         } else {
                             $data['updated'][] = $projectItem['id'];
                         }
@@ -232,9 +237,9 @@ class Project extends \yii\db\ActiveRecord
                         $pr->link = $projectItem['link'];
                         $pr->closed = (bool)$projectItem['closed'];
                         $pr->last_update = date('Y-m-d H:i:s');
-                        /*if(isset(Yii::$app->user) && Yii::$app->user->id) {
-                            $pr->pr_updated_user_id = Yii::$app->user->id;
-                        }*/
+                        if (isset(Yii::$app->user) && Yii::$app->user->id) {
+                            $pr->p_update_user_id = Yii::$app->user->id;
+                        }
                         if (!$pr->save()) {
                             Yii::error(
                                 VarDumper::dumpAsString($pr->errors),
@@ -496,6 +501,16 @@ class Project extends \yii\db\ActiveRecord
     public function getLeads(): ActiveQuery
     {
         return $this->hasMany(Lead::class, ['project_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[PUpdateUser]].
+     *
+     * @return ActiveQuery
+     */
+    public function getPUpdateUser(): ActiveQuery
+    {
+        return $this->hasOne(Employee::class, ['id' => 'p_update_user_id']);
     }
 
     /**
