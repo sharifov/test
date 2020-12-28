@@ -3442,7 +3442,7 @@ Reason: {reason}',
             $this->infants = (int) $this->infants;
             $this->bo_flight_id = (int) $this->bo_flight_id;
             $this->agents_processing_fee = ($this->adults + $this->children) * SettingHelper::processingFee();
-            $this->oldAdditionalInformation = $this->oldAttributes['additional_information'];
+            $this->oldAdditionalInformation = $this->oldAttributes['additional_information'] ?? '';
             return true;
         }
         return false;
