@@ -32,12 +32,14 @@ use yii\helpers\VarDumper;
  * @property array $call
  * @property array $callLog
  * @property array $queue
+ * @property array $callUserAccess
  */
 class CallLogTransferService
 {
     private $call = [];
     private $callLog = [];
     private $queue = [];
+    private $callUserAccess = [];
 
     public function saveRecord(Call $call): void
     {
@@ -226,12 +228,14 @@ class CallLogTransferService
             $this->queue['clq_queue_time'] = null;
         }
 
-        $this->queue['clq_access_count'] =
-            (int)CallUserAccess::find()
-                ->andWhere(['cua_call_id' => $this->call['c_parent_id']])
-                ->andWhere(['>=', 'cua_updated_dt', $this->call['c_queue_start_dt']])
-                ->andWhere(['<=', 'cua_created_dt', $this->call['c_created_dt']])
-                ->count();
+        $this->callUserAccess = CallUserAccess::find()
+            ->andWhere(['cua_call_id' => $this->call['c_parent_id']])
+            ->andWhere(['>=', 'cua_updated_dt', $this->call['c_queue_start_dt']])
+            ->andWhere(['<=', 'cua_created_dt', $this->call['c_created_dt']])
+            ->asArray()
+            ->all();
+
+        $this->queue['clq_access_count'] = count($this->callUserAccess);
 
 //        $this->queue['clq_is_transfer'] = ($this->call['c_group_id'] != $this->call['c_id']) ? true : false;
 
@@ -260,11 +264,13 @@ class CallLogTransferService
             $this->queue['clq_queue_time'] = null;
         }
 
-        $this->queue['clq_access_count'] =
-            (int)CallUserAccess::find()
-                ->andWhere(['cua_call_id' => $this->call['c_parent_id']])
-                ->andWhere(['<=', 'cua_created_dt', $this->call['c_created_dt']])
-                ->count();
+        $this->callUserAccess = CallUserAccess::find()
+            ->andWhere(['cua_call_id' => $this->call['c_parent_id']])
+            ->andWhere(['<=', 'cua_created_dt', $this->call['c_created_dt']])
+            ->asArray()
+            ->all();
+
+        $this->queue['clq_access_count'] = count($this->callUserAccess);
 
         $this->createCallLogs();
     }
@@ -277,11 +283,13 @@ class CallLogTransferService
         $this->callLog['cl_is_transfer'] = false;
 
         $this->queue['clq_queue_time'] = $this->callLog['cl_duration'];
-        $this->queue['clq_access_count'] =
-            (int)CallUserAccess::find()
-                ->andWhere(['cua_call_id' => $this->call['c_id']])
-                ->andWhere(['>=', 'cua_created_dt', $this->callLog['cl_call_created_dt']])
-                ->count();
+        $this->callUserAccess = CallUserAccess::find()
+            ->andWhere(['cua_call_id' => $this->call['c_id']])
+            ->andWhere(['>=', 'cua_created_dt', $this->callLog['cl_call_created_dt']])
+            ->asArray()
+            ->all();
+        $this->queue['clq_access_count'] = count($this->callUserAccess);
+
         $this->queue['clq_is_transfer'] = true;
 
         $this->createCallLogs();
@@ -292,7 +300,11 @@ class CallLogTransferService
         $this->callLog['cl_group_id'] = $this->call['c_id'];
 
         $this->queue['clq_queue_time'] = $this->call['c_call_duration'];
-        $this->queue['clq_access_count'] = (int)CallUserAccess::find()->andWhere(['cua_call_id' => $this->call['c_id']])->count();
+        $this->callUserAccess = CallUserAccess::find()
+            ->andWhere(['cua_call_id' => $this->call['c_id']])
+            ->asArray()
+            ->all();
+        $this->queue['clq_access_count'] = count($this->callUserAccess);
 
         $this->createCallLogs();
     }
@@ -422,22 +434,17 @@ class CallLogTransferService
                 }
             }
 
-            if ($log->cl_type_id === CallLogType::IN) {
-                if (!$userAccesses = CallUserAccess::find()->byCall($log->cl_id)->asArray()->all()) {
-                    $userAccesses = CallUserAccess::find()->byCall($this->call['c_parent_id'])->asArray()->all();
-                }
-                if ($userAccesses) {
-                    foreach ($userAccesses as $userAccess) {
-                        $callLogUserAccess = CallLogUserAccess::create(
-                            $log->cl_id,
-                            $userAccess['cua_user_id'],
-                            $userAccess['cua_status_id'],
-                            $userAccess['cua_created_dt'],
-                            $userAccess['cua_updated_dt']
-                        );
-                        if (!$callLogUserAccess->save(false)) {
-                            throw new \RuntimeException(VarDumper::dumpAsString(['model' => $callLogUserAccess->toArray()]));
-                        }
+            if ($this->callUserAccess) {
+                foreach ($this->callUserAccess as $userAccess) {
+                    $callLogUserAccess = CallLogUserAccess::create(
+                        $log->cl_id,
+                        $userAccess['cua_user_id'],
+                        $userAccess['cua_status_id'],
+                        $userAccess['cua_created_dt'],
+                        $userAccess['cua_updated_dt']
+                    );
+                    if (!$callLogUserAccess->save(false)) {
+                        throw new \RuntimeException(VarDumper::dumpAsString(['model' => $callLogUserAccess->toArray()]));
                     }
                 }
             }
