@@ -39,7 +39,9 @@ $('.cancel-call-btn').click(function (e) {
             obj = new Object();
             obj.id = {$callId};
             obj.status = {$cancelStatus};
-            refreshCallBox(obj);
+            if (typeof PhoneWidgetCall === 'object') {
+                PhoneWidgetCall.refreshCallStatus(obj);
+            }
             if (data.success) {
                 new PNotify({title: "Call status", type: "success", text: 'Success', hide: true});
             } else {

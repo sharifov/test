@@ -1,6 +1,7 @@
 <?php
 
 use frontend\widgets\newWebPhone\NewWebPhoneAsset;
+use yii\bootstrap4\Modal;
 use yii\helpers\Url;
 use yii\web\View;
 
@@ -12,6 +13,16 @@ use yii\web\View;
 /** @var int $countMissedCalls */
 
 NewWebPhoneAsset::register($this);
+
+Modal::begin([
+    'id' => 'call-box-modal',
+    'title' => '',
+    'footer' => '<a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>',
+    'size' => Modal::SIZE_LARGE
+]);
+
+Modal::end();
+
 ?>
 
 <?= $this->render('partial/_phone_widget', [

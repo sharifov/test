@@ -207,3 +207,11 @@ a.cw-call-contact-info {
 .has-error {
     border-color: #dc3545 !important;
 }
+.phone-widget-icon {
+    bottom: 50px;
+}
+@media (min-width: 768px) {
+    .phone-widget {
+        bottom: calc(50px + 68px);
+    }
+}

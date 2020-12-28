@@ -7,173 +7,12 @@
 /* @var $use_browser_call_access bool */
 
 use common\models\Call;
-use sales\helpers\setting\SettingHelper;
 use yii\helpers\Url;
 use yii\bootstrap4\Modal;
-use yii\helpers\Html;
 
 \frontend\assets\WebPhoneAsset::register($this);
 
 ?>
-<?php if (SettingHelper::isOriginalPhoneWidgetEnabled()) : ?>
-<div class="fabs2" style="<?=((isset($_COOKIE['web-phone-widget-close']) && $_COOKIE['web-phone-widget-close']) ? '' : 'display: none')?>">
-    <a id="prime2" class="fab2"><i class="fa fa-phone"></i></a>
-</div>
-
-<div id="web-phone-widget">
-    <?php if ($token) : ?>
-        <div id="web-phone-token" style="display: none"><?=$token?></div>
-            <table class="table" style="margin: 0; background-color: rgba(255,255,255,.3);">
-                <tr>
-                    <?php /*<td style="display: none"><i title="<?=$token?>">Token</i></td>*/?>
-                    <td style="width: 100px"><i class="fa fa-user"></i> <span><?=$clientId?></span> <span style="display:none;" id="join-source-type"></span></td>
-                    <td>From: <i class="fa fa-phone"></i> <span id="web-call-from-number"></span></td>
-                    <td>To: <i class="fa fa-phone"></i> <span id="web-call-to-number"></span></td>
-                    <td style="width: 120px">
-                        <div class="text-right">
-                            <?=Html::button('<i class="fa fa-building-o text-warning"></i>', ['class' => 'btn btn-xs btn-primary', 'id' => 'btn-send-digit'])?>
-                            <?=Html::button('<i class="fa fa-angle-double-up"></i>', ['class' => 'btn btn-xs btn-primary', 'id' => 'btn-nin-max-webphone'])?>
-                            <?=Html::button('<i class="fa fa-close"></i>', ['class' => 'btn btn-xs btn-primary', 'id' => 'btn-webphone-close'])?>
-                        </div>
-                    </td>
-                </tr>
-            </table>
-            <table class="table" style="margin: 0">
-                <tr>
-                    <td style="width: 250px">
-                        <table id="volume-indicators" style="display: none">
-                            <tr title="Mic Volume">
-                                <td><i class="fa fa-microphone"></i> </td>
-                                <td><div id="input-volume" style="width: 200px; height: 7px;"></div></td>
-                            </tr>
-                            <tr title="Speaker Volume">
-                                <td><i class="fa fa-volume-down"></i> </td>
-                                <td><div id="output-volume" style="width: 200px; height: 7px;"></div></td>
-                            </tr>
-                        </table>
-                    </td>
-                    <td>
-                        <div class="btn-group" id="btn-group-id-hangup" style="display:none;">
-                            <?=Html::button('<i class="fa fa-close"></i> Hangup', ['class' => 'btn btn-sm btn-danger','id' => 'button-hangup'])?>
-                        </div>
-
-<!--                        <div class="btn-group dropup" style="display:none;" id="btn-group-id-forward">-->
-<!--                            <button type="button" class="btn btn-sm btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
-<!--                                <i class="fa fa-forward"></i> To Support <span class="caret"></span>-->
-<!--                            </button>-->
-<!--                            <ul class="dropdown-menu">-->
-<!--                                --><?php //if($supportGeneralPhones): ?>
-<!--                                    --><?php //foreach ($supportGeneralPhones AS $projectName => $projectPhone): ?>
-<!--                                        <li>-->
-<!--                                            <a href="#" class="btn-transfer" data-type="number" data-value="--><?php //=Html::encode($projectPhone)?><!--">--><?php //echo Html::encode($projectName) . ' ('.Html::encode($projectPhone).')';?><!--</a>-->
-<!--                                        </li>-->
-<!--                                    --><?php //endforeach; ?>
-<!--                                --><?php //endif;?>
-<!--                            </ul>-->
-<!--                        </div>-->
-
-                        <div class="btn-group" id="btn-group-id-redirect" style="display: none;">
-                            <?=Html::button('<i class="fa fa-forward"></i> Transfer Call', ['id' => 'btn-show-transfer-call', 'class' => 'btn btn-sm btn-info'])?>
-                        </div>
-
-
-                        <?php /*=Html::button('<i class="fa fa-phone"></i> Call', ['class' => 'btn btn-xs btn-success', 'id' => 'button-call'])*/?>
-                        <div id="call-controls2" style="display: none;">
-                            <div class="btn-group">
-                                <?=Html::button('<i class="fa fa-phone"></i> Answer', ['class' => 'btn btn-xs btn-success', 'id' => 'button-answer'])?>
-                            </div>
-                            <div class="btn-group">
-                                <?=Html::button('<i class="fa fa-forward"></i> Reject', ['class' => 'btn btn-xs btn-danger','id' => 'button-reject'])?>
-                            </div>
-                        </div>
-
-                        <div class="btn-group" id="btn-group-id-mute" style="display: none;">
-                            <?= Html::button('<i class="fa fa-microphone"></i> Mute', ['id' => 'btn-mute-microphone', 'class' => 'btn btn-sm btn-success']) ?>
-                        </div>
-
-                        <div class="btn-group" id="btn-group-id-hold-call" style="display: none;">
-                            <?= Html::button('<i class="fa fa-pause"></i> <span>On Hold</span>', ['class' => 'btn btn-sm btn-success btn-hold-call', 'data-mode' => 'unhold']) ?>
-                        </div>
-                    </td>
-                </tr>
-            </table>
-
-
-            <div class="webphone-controls" id="controls">
-                <table class="table">
-                    <tr>
-                        <td style="width: 250px">
-                            <div id="info">
-                                <?php /*<div id="client-name"></div>*/ ?>
-                                <div id="output-selection">
-                                    <label>Ringtone Devices</label>
-                                    <select id="ringtone-devices" class="ringtone-devices" multiple></select>
-                                    <label>Speaker Devices</label>
-                                    <select id="speaker-devices" class="speaker-devices" multiple></select><br/>
-                                    <?php /*<a id="get-devices">Seeing unknown devices?</a>*/?>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <i>Logs:</i>
-                            <div id="call-log"></div>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-    <?php else : ?>
-        <div class="alert alert-danger alert-dismissible" role="alert">
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <strong>Warning!</strong> WebCall token is empty.
-        </div>
-    <?php endif; ?>
-</div>
-
-
-    <?php Modal::begin([
-    'id' => 'web-phone-dial-modal',
-    'title' => 'Phone Dial',
-    //'footer' => '<a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>',
-    'size' => Modal::SIZE_LARGE
-    ]); ?>
-    <?php Modal::end(); ?>
-
-
-    <?php Modal::begin([
-    'id' => 'web-phone-send-digit-modal',
-    'title' => 'Send digit',
-    'size' => 'modal-sm',
-    ]);
-    ?>
-    <div class="container container-digit" id="container-digit">
-        <div id="output"></div>
-        <div class="row">
-            <div class="digit" id="one">1</div>
-            <div class="digit" id="two">2</div>
-            <div class="digit" id="three">3</div>
-        </div>
-        <div class="row">
-            <div class="digit" id="four">4</div>
-            <div class="digit" id="five">5</div>
-            <div class="digit">6</div>
-        </div>
-        <div class="row">
-            <div class="digit">7</div>
-            <div class="digit">8</div>
-            <div class="digit">9</div>
-        </div>
-        <div class="row">
-            <div class="digit">*</div>
-            <div class="digit">0</div>
-            <div class="digit">#</div>
-        </div>
-        <div class="row">
-            <i class="fa fa-eraser dig reset-digit" aria-hidden="true"></i>
-        </div>
-    </div>
-    <?php Modal::end(); ?>
-
-<?php endif; ?>
 
 <?php Modal::begin([
     'id' => 'web-phone-redirect-agents-modal',
@@ -307,37 +146,18 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
 
     var webPhoneParams = {};
     var call_acc_sid = '';
-    var isJoinCall = false;
 
    // "use strict";
 
     var device;
-    var joinConnection = null;
     window.connection;
 
     const speakerDevices = document.getElementsByClassName('speaker-devices');
     const ringtoneDevices = document.getElementsByClassName('ringtone-devices');
-    const outputVolumeBar = document.getElementById('output-volume');
-    const inputVolumeBar = document.getElementById('input-volume');
-    const volumeIndicators = document.getElementById('volume-indicators');
 
     if (!Array.prototype.inArray) {
         Array.prototype.inArray = function (element) {
             return this.indexOf(element) > -1;
-        };
-    }
-
-    // Bind button to hangup call
-    let btnHangup = document.getElementById('button-hangup');
-    if (btnHangup) {
-        btnHangup.onclick = function () {
-            log('Hanging up...');
-            if (device) {
-                let callSid = getActiveConnectionCallSid();
-                hangup(callSid);
-            } else {
-                log('Device is null');
-            }
         };
     }
 
@@ -363,17 +183,6 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
             }
         }
 
-        let oldActiveCallBtn = $(document).find('#button-hangup');
-        if (oldActiveCallBtn.length > 0) {
-            if (getActiveConnectionCallSid() !== callSid) {
-                oldActiveCallBtn = null;
-            } else {
-                oldActiveCallBtn.prop('disabled', true);
-            }
-        } else {
-            oldActiveCallBtn = null;
-        }
-
         $.ajax({
             type: 'post',
             data: {
@@ -384,9 +193,6 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
             .done(function(data) {
                 if (data.error) {
                     createNotify('Hangup', data.message, 'error');
-                    if (oldActiveCallBtn !== null) {
-                        oldActiveCallBtn.prop('disabled', false);
-                    }
 
                     if (call !== null) {
                         call.unSetHangupRequestState();
@@ -399,10 +205,6 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
             })
             .fail(function(jqXHR, textStatus, errorThrown) {
                 createNotify('Hangup', 'Server error', 'error');
-                if (oldActiveCallBtn !== null) {
-                    oldActiveCallBtn.prop('disabled', false);
-                }
-
                 if (call !== null) {
                     call.unSetHangupRequestState();
                 }
@@ -444,36 +246,8 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
         }
     }
 
-    function volumeIndicatorsChange(inputVolume, outputVolume) {
-        let inputColor = 'red';
-        if (inputVolume < .50) {
-            inputColor = 'green';
-        } else if (inputVolume < .75) {
-            inputColor = 'yellow';
-        }
-
-        if (inputVolumeBar) {
-            inputVolumeBar.style.width = Math.floor(inputVolume * 300) + 'px';
-            inputVolumeBar.style.background = inputColor;
-        }
-
-        let outputColor = 'red';
-        if (outputVolume < .50) {
-            outputColor = 'green';
-        } else if (outputVolume < .75) {
-            outputColor = 'yellow';
-        }
-
-        if (outputVolumeBar) {
-            outputVolumeBar.style.width = Math.floor(outputVolume * 300) + 'px';
-            outputVolumeBar.style.background = outputColor;
-        }
-    }
-
-
     function bindVolumeIndicators(connection) {
         connection.on('volume', function (inputVolume, outputVolume) {
-            volumeIndicatorsChange(inputVolume, outputVolume);
             if (typeof  PhoneWidgetCall === 'object') {
                 PhoneWidgetCall.volumeIndicatorsChange(inputVolume, outputVolume)
             }
@@ -514,16 +288,8 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
         });
     }
 
-    // Activity log
     function log(message) {
         let msg = '<p>&gt;&nbsp;' + message + '</p>';
-        let logDiv = document.getElementById('call-log');
-        if (logDiv) {
-            logDiv.innerHTML += msg;
-            logDiv.scrollTop = logDiv.scrollHeight;
-        }
-
-
         let logDivWidget = $('.logs-block');
         if (logDivWidget) {
             logDivWidget.append(msg);
@@ -531,27 +297,13 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
         }
     }
 
-
     function clearLog() {
-        let logDiv = document.getElementById('call-log');
-        if (logDiv) {
-            logDiv.innerHTML = '';
-            logDiv.scrollTop = logDiv.scrollHeight;
-        }
-
         let logDivWidget = $('.logs-block');
         if (logDivWidget) {
             logDivWidget.html('');
             logDivWidget.animate({ scrollTop: logDivWidget.prop("scrollHeight")}, 1000);
         }
     }
-
-    // Set the client name in the UI
-    /*function setClientNameUI(clientName) {
-        var div = document.getElementById('client-name');
-        div.innerHTML = 'Your client name: <strong>' + clientName +
-            '</strong>';
-    }*/
 
     function renewTwDevice() {
         console.log(device.status());
@@ -564,15 +316,6 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
                 initDevice();
             }
         }
-    }
-
-    function sendNumberToCall(number)
-    {
-        if(connection) {
-            connection.sendDigits(number);
-            // console.log("digit:" + number + ' sent');
-        }
-        return false;
     }
 
     function acceptInternalCall(call)
@@ -589,8 +332,6 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
             return;
         }
 
-        callControls2Hide();
-
         call.setAcceptCallRequestState();
         PhoneWidgetCall.callRequester.acceptInternalCall(call, connection);
     }
@@ -606,7 +347,6 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
         }
 
         call.setRejectInternalRequest();
-        callControls2Hide();
         incomingConnections.remove(connection.parameters.CallSid);
         connection.reject();
         incomingSoundOff();
@@ -614,57 +354,6 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
             console.log(r);
         });
     }
-
-    let btnAnswer = document.getElementById('button-answer');
-    if (btnAnswer) {
-        btnAnswer.onclick = function () {
-            let callSid = $('#button-answer').attr('data-call-sid');
-            if (!callSid) {
-                createNotify('Answer Call', 'CallSid is empty', 'error');
-                return;
-            }
-
-            let connection = incomingConnections.get(callSid);
-
-            if (connection === null) {
-                createNotify('Answer Call', 'Not found CallSid on Collections of IncomingConnections', 'error');
-                return;
-            }
-
-            console.log("button-answer: " + connection);
-
-            connection.accept();
-            callControls2Hide();
-        };
-    }
-
-    let btnReject = document.getElementById('button-reject');
-    if (btnReject) {
-        btnReject.onclick = function () {
-            let callSid = $('#button-reject').attr('data-call-sid');
-            if (!callSid) {
-                createNotify('Reject Call', 'CallSid is empty', 'error');
-                return;
-            }
-
-            let connection = incomingConnections.get(callSid);
-
-            if (connection === null) {
-                createNotify('Reject Call', 'Not found CallSid on Collections of IncomingConnections', 'error');
-                return;
-            }
-
-            incomingConnections.remove(connection.parameters.CallSid);
-            console.log("button-reject: " + JSON.stringify(connection.parameters));
-            connection.reject();
-            incomingSoundOff();
-            $.get(ajaxSaveCallUrl + '?sid=' + connection.parameters.CallSid, function (r) {
-                console.log(r);
-            });
-            callControls2Hide();
-        };
-    }
-
 
     function initRedirectToAgent(callSid) {
         let modal = $('#web-phone-redirect-agents-modal');
@@ -707,12 +396,6 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
                     //$('#preloader').addClass('hidden');
                     //modal.find('.modal-body').html(data);
                     //modal.modal('show');
-
-                    /*if (typeof refreshCallBox === "function") {
-                        var obj = {'id': data.c_id, 'status': data.c_call_status};
-                        console.log(obj);
-                        refreshCallBox(obj);
-                    }*/
                 },
                 error: function (error) {
                     console.error(error);
@@ -772,20 +455,6 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
         };
     }
 
-    function callControls2Show(callSid)
-    {
-        $('#call-controls2 #button-answer').attr('data-call-sid', callSid);
-        $('#call-controls2 #button-reject').attr('data-call-sid', callSid);
-        $('#call-controls2').show();
-    }
-
-    function callControls2Hide()
-    {
-        $('#call-controls2 #button-answer').attr('data-call-sid', '');
-        $('#call-controls2 #button-reject').attr('data-call-sid', '');
-        $('#call-controls2').hide();
-    }
-
     let incomingConnections = new IncomingConnections();
 
     function initDevice() {
@@ -837,79 +506,7 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
                     // console.warn(conn);
                     //console.info(conn.parameters);
                     //alert(clientId + ' - ' + conn.parameters.From);
-                    $('#btn-group-id-hangup').show();
-                    $('#button-hangup').attr('data-call-sid', connection.parameters.CallSid);
-                    $('#button-hangup').prop('disabled', false);
-                    $('#btn-mute-microphone').html('<i class="fa fa-microphone"></i> Mute').removeClass('btn-warning').addClass('btn-success');
 
-                    let isJoin = false;
-                    let sourceTypeId = null;
-                    let isInternal = false;
-                    let isConferenceCreator = false;
-                    conn.customParameters.forEach(function(value, key) {
-                        if (key === 'type_id' && value == '<?= Call::CALL_TYPE_JOIN ?>') {
-                            isJoin = true;
-                        }
-                        if (key === 'source_type_id') {
-                            sourceTypeId = value;
-                        }
-                        if (key === 'isInternal') {
-                            isInternal = (value === 'true');
-                        }
-                        if (key === 'isConferenceCreator') {
-                            isConferenceCreator = (value === 'true');
-                        }
-                    });
-
-                    if (isJoin) {
-
-                        $('#btn-group-id-hold-call').hide();
-                        joinConnection = conn;
-                        isJoinCall = true;
-                        if (sourceTypeId == '<?= Call::SOURCE_LISTEN ?>') {
-                            $('#join-source-type').html('Join: ' + 'Listen').show();
-                        } else if (sourceTypeId == '<?= Call::SOURCE_COACH ?>') {
-                            $('#join-source-type').html('Join: ' + 'Coach').show();
-                            $('#btn-group-id-mute').show();
-                        } else if (sourceTypeId == '<?= Call::SOURCE_BARGE ?>') {
-                            $('#join-source-type').html('Join: ' + 'Barge').show();
-                            $('#btn-group-id-mute').show();
-                        }
-                    } else {
-
-                        if (typeof  PhoneWidgetCall === 'object') {
-                            if (conferenceBase) {
-                                if (!isInternal || (isInternal && isConferenceCreator)) {
-                                    let btnHold = $('.btn-hold-call');
-                                    btnHold.prop('disabled', false);
-                                    btnHold.html('<i class="fa fa-pause"></i> <span>On Hold</span>');
-                                    btnHold.data('mode', 'unhold');
-                                    btnHold.attr('data-call-sid', connection.parameters.CallSid);
-                                    $('#btn-group-id-hold-call').show();
-                                }
-                            }
-                        }
-
-                        joinConnection = null;
-                        $('#web-call-from-number').text(conn.parameters.From);
-                        $('#web-call-to-number').text(conn.parameters.To);
-                        $('#btn-group-id-mute').show();
-                        isJoinCall = false;
-                        $('#btn-show-transfer-call').attr('data-call-sid', connection.parameters.CallSid);
-                        if (conn.parameters.From === undefined) {
-                            $('#btn-group-id-redirect').show();
-                        } else {
-                            $('#btn-group-id-redirect').show();
-                        }
-
-                        if (isInternal) {
-                            $('#btn-group-id-redirect').hide();
-                        }
-                    }
-
-                    if (volumeIndicators) {
-                        volumeIndicators.style.display = 'block';
-                    }
                     bindVolumeIndicators(conn);
                     if (typeof PhoneWidgetCall === 'object') {
                         PhoneWidgetCall.updateConnection(conn);
@@ -933,19 +530,6 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
                     //console.warn(conn);
                     saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'completed');
 
-                    $('#btn-group-id-hangup').hide();
-                    $('#btn-group-id-redirect').hide();
-                    $('#btn-group-id-mute').hide();
-
-                    $('#join-source-type').html();
-                    $('#join-source-type').hide();
-                    $('#btn-group-id-hold-call').hide();
-
-                    if (volumeIndicators) {
-                        volumeIndicators.style.display = 'none';
-                    }
-                    cleanPhones();
-
                     if (connectCallSid === conn.parameters.CallSid) {
                         soundDisconnect();
                     }
@@ -964,7 +548,6 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
                     incomingConnections.add(conn);
                     // console.log({"action":"incoming", "cid":conn.parameters.CallSid});
                     connection = conn;
-                    callControls2Hide();
                     incomingSoundOff();
                     if ("autoAccept" in connection.message && connection.message.autoAccept === 'false') {
                         if ("isInternal" in connection.message && connection.message.isInternal === 'true') {
@@ -978,15 +561,12 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
                             });
                             call.callSid = connection.parameters.CallSid;
                             PhoneWidgetCall.refreshCallStatus(call);
-                        } else {
-                            callControls2Show(connection.parameters.CallSid);
                         }
                         // startTimerSoundIncomingCall();
                     } else {
                         if (document.visibilityState === 'visible') {
                             conn.accept();
                         } else {
-                            callControls2Show(connection.parameters.CallSid);
                             startTimerSoundIncomingCall();
                         }
                     }
@@ -1013,8 +593,6 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
 
                     var archEnemyPhoneNumber = tw_configs.client;
                     //document.getElementById('call-controls').style.display = 'none';
-                    // document.getElementById('call-controls2').style.display = 'block';
-                    $('#call-controls2').show();
 
                     connection.accept();*/
                     /*
@@ -1043,8 +621,6 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
                     log('Cancel call');
                     // createNotify('Cancel call', 'Cancel call', 'warning');
                     saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'canceled');
-                    callControls2Hide();
-                    $('#btn-group-id-redirect').hide();
                     incomingSoundOff();
                 });
 
@@ -1065,14 +641,6 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
                     $(document).find('.phone-widget__additional-bar #tab-device').hide();
                     $(document).find('.phone-widget__additional-bar #tab-logs').show();
                 }
-
-                window.localStorage.setItem('twilioDevice', JSON.stringify(device, function (key, value) {
-                    if (typeof value === 'function') {
-                        return value.toString();
-                    } else {
-                        return value;
-                    }
-                }));
             })
             .catch(function (err) {
                 updateAgentStatus(connection, false, 1);
@@ -1178,14 +746,10 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
         webPhoneParams = params;
 
         if (device) {
-            $('#web-call-from-number').text(params.FromAgentPhone);
-            $('#web-call-to-number').text(params.To);
-
             console.log('Calling ' + params.To + '...');
             // createNotify('Calling', 'Calling ' + params.To + '...', 'success');
             connection = device.connect(params);
             updateAgentStatus(connection, false, 0);
-            $('#btn-group-id-redirect').hide();
         }
     }
 
@@ -1270,41 +834,20 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
         webPhoneParams = params;
 
         if (device) {
-            $('#web-call-from-number').text(params.FromAgentPhone);
-            $('#web-call-to-number').text(params.To);
-
             console.log('Calling ' + params.To + '...');
             // createNotify('Calling', 'Calling ' + params.To + '...', 'success');
             connection = device.connect(params);
             updateAgentStatus(connection, false, 0);
-           // $('#btn-group-id-redirect').hide();
         }
 
     }
 
-    function cleanPhones() {
-        $('#web-call-from-number').text('');
-        $('#web-call-to-number').text('');
-    }
 </script>
 
 <?php
 
 
 $js = <<<JS
-
-    const webPhoneWidget = $('#web-phone-widget');
-    //setInterval('clearAgentStatus(connection)', 1000);
-
-    $(document).on('click', '#btn-show-transfer-call', function(e) {
-        e.preventDefault();
-        let callSid = $(this).attr('data-call-sid');
-        if (callSid) {
-            initRedirectToAgent(callSid);   
-        } else {
-            new PNotify({title: "Transfer call", type: "error", text: "Not found Call SID!", hide: true});
-        }
-    });
     
     $(document).on('click', '.btn-transfer', function(e) {
         e.preventDefault();
@@ -1349,41 +892,6 @@ $js = <<<JS
                 modal.modal('hide').find('.modal-body').html('');
             }
         });
-    
-        // if(connection && connection.parameters.CallSid) {
-        //     updateAgentStatus(connection, false, 1);
-        //    
-        //     if(connection.status() !== 'open') {
-        //         connection.accept();
-        //     }
-        //                
-        //     if (objValue && objType) {
-        //         $.ajax({
-        //             type: 'post',
-        //             data: {
-        //                 'sid': connection.parameters.CallSid,
-        //                 'id': objValue,
-        //                 'type': objType
-        //             },
-        //             url: ajaxCallTransferUrl,
-        //             success: function (data) {
-        //                 if (data.error) {
-        //                     alert(data.message);
-        //                 }
-        //                 modal.modal('hide').find('.modal-body').html('');
-        //             },
-        //             error: function (error) {
-        //                 console.error(error);
-        //                 modal.modal('hide').find('.modal-body').html('');
-        //             }
-        //         });
-        //     } else {
-        //         new PNotify({title: "Transfer call", type: "error", text: "Please try again after some seconds", hide: true});
-        //     }
-        //            
-        // } else {
-        //     alert('Error: Not found active connection or CallSid');
-        // }
     });
         
         
@@ -1440,112 +948,8 @@ $js = <<<JS
             }
         });
         
-//        console.log(connection.parameters);
-//        
-//        if(connection && connection.parameters.CallSid) {
-//            if(objValue.length < 2) {
-//                console.error('Error call forward param TO');
-//                return false;
-//            }
-//            
-//            let modal = $('#web-phone-redirect-agents-modal');
-//            modal.find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
-//            // connection.accept();
-//            
-//            $.ajax({
-//                type: 'post',
-//                data: {
-//                    'sid': connection.parameters.CallSid,
-//                    'type': objType,
-//                    'from': connection.parameters.To,
-//                    'to': objValue,
-//                },
-//                url: ajaxCallRedirectUrl,
-//                success: function (data) {
-//                    // updateAgentStatus(connection, false, 1);
-//                    //console.log(data);
-//                    if (data.error) {
-//                        alert(data.message);
-//                    }
-//                    modal.modal('hide').find('.modal-body').html('');
-//                },
-//                error: function (error) {
-//                    console.error(error);
-//                    modal.modal('hide').find('.modal-body').html('');
-//                }
-//            });
-//        } else {
-//            alert('Error: Not found active connection or CallSid');
-//        }
     });
-
-
-    $(".digit").on('click', function() {
-        let num = ($(this).clone().children().remove().end().text());
-        $("#output").append('<span>' + num.trim() + '</span>');
-        sendNumberToCall(num.trim());
-        //ion.sound.play("button_tiny");        
-        soundNotification();
-    });
-
-    $('.reset-digit').on('click', function() {
-        $('#output').html('');
-    });
-    
-    $('#btn-send-digit').on('click', function() {
-        $('#web-phone-send-digit-modal').modal();
-    });
-    
-    $('#web-phone-send-digit-modal').on('hidden.bs.modal', function (e) {
-        e.preventDefault();
-        $('#output').html('');
-    });
-     
-    $('#btn-nin-max-webphone').on('click', function() {
-        let iTag = $(this).find('i');
-        if(iTag.hasClass('fa-angle-double-down')) {
-            iTag.removeClass('fa-angle-double-down').addClass('fa-angle-double-up');    
-            $('.webphone-controls').slideUp();
-        } else {
-            iTag.removeClass('fa-angle-double-up').addClass('fa-angle-double-down');
-            $('.webphone-controls').slideDown();
-        }
-        //$(this).find('i').addClass('fa-angle-double-up');
-    });
-    
-    $('#btn-webphone-close').on('click', function() {
-        webPhoneWidget.slideUp('fast');
-        $('.fabs2').show();
-        setCookie('web-phone-widget-close', 1, {expires: 3600 * 24, path: "/"});
-        //$(this).find('i').addClass('fa-angle-double-up');
-    });
-    
-    $('#prime2').on('click', function() {
-        webPhoneWidget.slideDown();
-        $('.fabs2').hide();
-        //deleteCookie('web-phone-widget-close');
-        setCookie('web-phone-widget-close', '', {expires: -1, path: "/"});
-    });
-    
-    $('.call-phone').on('click', function(e) {
-        let phone_number = $(this).data('phone');
-        let project_id = $(this).data('project-id');
-        let lead_id = $(this).data('lead-id');
-        let case_id = $(this).data('case-id');
-        let source_type_id = $(this).data('source_type_id');
-        //alert(phoneNumber);
-        e.preventDefault();
         
-        $('#web-phone-dial-modal .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
-        $('#web-phone-dial-modal').modal();
-        
-        $.post(ajaxPhoneDialUrl, {'phone_number': phone_number, 'project_id': project_id, 'lead_id': lead_id, 'case_id': case_id, 'source_type_id': source_type_id},
-            function (data) {
-                $('#web-phone-dial-modal .modal-body').html(data);
-            }
-        );
-    });
-    
     $(document).on('click', '.btn-make-call', function(e) {
         e.preventDefault();
         
@@ -1562,9 +966,7 @@ $js = <<<JS
                 
                 $('#web-phone-dial-modal').modal('hide');
                 //alert(phone_from + ' - ' + phone_to);
-                webPhoneWidget.slideDown();
-                $('.fabs2').hide();
-                
+
                 $.post(ajaxBlackList, {phone: phone_to}, function(data) {
                     if (data.success) {
                         webCall(phone_from, phone_to, project_id, lead_id, case_id, 'web-call', source_type_id);        
@@ -1585,57 +987,8 @@ $js = <<<JS
         
     });
     
-    $(document).on('click', '#btn-mute-microphone', function(e) {
-        let mute = $(this).html();
-        if (mute === '<i class="fa fa-microphone"></i> Mute') {
-            if (connection) {
-                connection.mute(true);
-                if (connection.isMuted()) {
-                    if (typeof PhoneWidgetCall === 'object') { 
-                        PhoneWidgetCall.panes.active.buttons.mute.mute();
-                    }
-                    $(this).html('<i class="fa fa-microphone"></i> Unmute').removeClass('btn-success').addClass('btn-warning');
-                } else {
-                    new PNotify({title: "Mute", type: "error", text: "Error", hide: true});
-                }
-            }
-        } else {
-            if (connection) {
-                connection.mute(false);
-                if (!connection.isMuted()) {
-                    if (typeof PhoneWidgetCall === 'object') { 
-                        PhoneWidgetCall.panes.active.buttons.mute.unMute();
-                    }
-                    $(this).html('<i class="fa fa-microphone"></i> Mute').removeClass('btn-warning').addClass('btn-success');
-                } else {
-                    new PNotify({title: "Unmute", type: "error", text: "Error", hide: true});
-                }
-            }
-        }
-    });
-    
-    webPhoneWidget.css({left:'50%', 'margin-left':'-' + (webPhoneWidget.width() / 2) + 'px'}); //.slideDown();
     initDevice();
-    
-     $(document).on('click', '.btn-hold-call', function(e) {
-        if (!conferenceBase) {
-           return;
-        }
          
-        e.preventDefault();
-        let callSid = $(this).attr('data-call-sid');
-        if (callSid) {
-           let mode = $(this).attr('data-mode');
-            if (mode === 'unhold') {
-                PhoneWidgetCall.sendHoldRequest(callSid);   
-            } else {
-                PhoneWidgetCall.sendUnHoldRequest(callSid);
-            }
-        } else {
-            alert('Error: Not found active Connection CallSid');
-        }
-    });
-     
      function muteEvent(data)
      {
          if (typeof PhoneWidgetCall !== 'object') {
@@ -1652,33 +1005,8 @@ $js = <<<JS
             call.unMute();
         }
      }
-     
-    //setInterval('renewTwDevice();', 50000);
 
 JS;
-
-//if(Yii::$app->controller->uniqueId)
-/*if(in_array(Yii::$app->controller->action->uniqueId, ['orders/create'])) {
-
-} else {*/
-
 if (Yii::$app->controller->module->id != 'user-management') {
     $this->registerJs($js, \yii\web\View::POS_READY);
-
-    $cookies = Yii::$app->request->cookies;
-
-    //\yii\helpers\VarDumper::dump($cookies, 10, true);
-    /*echo '<h1>+++++++++';
-    \yii\helpers\VarDumper::dump($_COOKIE['web-phone-widget-close'], 10, true);
-    echo '--------</h1>';*/
-
-
-    //if (($cookie = $cookies->get('web-phone-widget-close')) !== null) {
-    if (!isset($_COOKIE['web-phone-widget-close'])) {
-        $this->registerJs("$('#web-phone-widget').slideDown();", \yii\web\View::POS_READY);
-    }
-        //}
 }
-//}
-
-
