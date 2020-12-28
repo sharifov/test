@@ -44,6 +44,7 @@ use yii\helpers\ArrayHelper;
  * @property string|null $cl_ip
  * @property string|null $cl_locale
  * @property string|null $cl_marketing_country
+ * @property bool $cl_call_recording_disabled
  *
  * @property ClientEmail[] $clientEmails
  * @property ClientPhone[] $clientPhones
@@ -192,6 +193,9 @@ class Client extends ActiveRecord
 
             ['cl_marketing_country', 'string', 'max' => 10],
             ['cl_marketing_country', 'filter', 'filter' => 'strtoupper', 'skipOnEmpty' => true],
+
+            ['cl_call_recording_disabled', 'default', 'value' => false],
+            ['cl_call_recording_disabled', 'boolean'],
         ];
     }
 
@@ -223,7 +227,8 @@ class Client extends ActiveRecord
             'cl_ppn' => 'PPN',
             'cl_ip' => 'IP',
             'cl_locale' => 'Locale',
-            'cl_marketing_country' => 'Market country'
+            'cl_marketing_country' => 'Market country',
+            'cl_call_recording_disabled' => 'Call recording disabled',
         ];
     }
 

@@ -15,6 +15,7 @@ namespace sales\model\project\entity;
  * @property $say_redirect_message
  * @property $sms_enabled
  * @property ObjectData $object
+ * @property bool $call_recording_disabled
  */
 class CustomData
 {
@@ -28,6 +29,7 @@ class CustomData
     public $say_redirect_message;
     public $sms_enabled;
     public ObjectData $object;
+    private bool $call_recording_disabled;
 
     public function __construct(?string $raw, ?int $projectId)
     {
@@ -46,6 +48,7 @@ class CustomData
             $this->say_redirect_message = $customData['say_redirect_message'] ?? null;
             $this->sms_enabled = $customData['sms_enabled'] ?? null;
             $this->object = new ObjectData($customData['object'] ?? []);
+            $this->call_recording_disabled = (bool)($customData['call_recording_disabled'] ?? false);
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => 'Project custom data error',
@@ -54,5 +57,10 @@ class CustomData
                 'error' => $e->getMessage(),
             ], 'project\entity\CustomData\constructor');
         }
+    }
+
+    public function isCallRecordingDisabled(): bool
+    {
+        return $this->call_recording_disabled === true;
     }
 }

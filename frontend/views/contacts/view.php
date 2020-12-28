@@ -69,6 +69,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw',
             ],
+            'cl_call_recording_disabled:booleanByLabel',
         ],
     ]) ?>
     </div>

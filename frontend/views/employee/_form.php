@@ -444,6 +444,7 @@ JS;
                     <?= $form->field($modelProfile, 'up_auto_redial')->checkbox() ?>
                     <?= $form->field($modelProfile, 'up_kpi_enable')->checkbox() ?>
                     <?= $form->field($modelProfile, 'up_show_in_contact_list')->checkbox() ?>
+                    <?= $form->field($modelProfile, 'up_call_recording_disabled')->checkbox() ?>
                 </div>
             </div>
         </div>

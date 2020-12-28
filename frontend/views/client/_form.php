@@ -43,11 +43,10 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
         <?= $form->field($model, 'cl_excluded')->checkbox() ?>
         <?= $form->field($model, 'cl_ppn')->textInput(['maxlength' => true]) ?>
         <?= $form->field($model, 'cl_ip')->textInput(['maxlength' => true]) ?>
-
+        <?= $form->field($model, 'cl_call_recording_disabled')->checkbox() ?>
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
         </div>
-
         <?php ActiveForm::end(); ?>
     </div>
 </div>
