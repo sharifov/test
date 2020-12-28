@@ -197,11 +197,11 @@ class Quote extends \yii\db\ActiveRecord
     {
         return [
             ['main_airline_code', 'required', 'on' => self::SCENARIO_DEFAULT],
-            [['uid', 'reservation_dump'], 'required'],
+            [['uid', 'reservation_dump', 'gds'], 'required'],
             [['lead_id', 'status' ], 'integer'],
-            [[ 'check_payment'], 'boolean'],
-            [['created', 'updated', 'created_by_seller', 'employee_name', 'employee_id', 'gds', 'last_ticket_date', 'service_fee_percent'], 'safe'],
-            [['uid', 'record_locator', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'fare_type', 'gds_offer_id'], 'string', 'max' => 255],
+            [['check_payment'], 'boolean'],
+            [['created', 'updated', 'created_by_seller', 'employee_name', 'employee_id', 'last_ticket_date', 'service_fee_percent'], 'safe'],
+            [['uid', 'record_locator', 'cabin', 'trip_type', 'main_airline_code', 'fare_type', 'gds_offer_id'], 'string', 'max' => 255],
 
             [['pricing_info', 'tickets', 'origin_search_data', 'reservation_dump'], 'string'],
             [['status'], 'checkStatus'],
@@ -213,6 +213,8 @@ class Quote extends \yii\db\ActiveRecord
             ['type_id', 'in', 'range' => array_keys(self::TYPE_LIST)],
 
             ['pcc', 'string', 'max' => 50],
+
+            ['gds', 'string', 'max' => 1],
         ];
     }
 

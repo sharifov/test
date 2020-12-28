@@ -713,7 +713,7 @@ class QuoteController extends ApiBaseController
      * @apiParam {string}           [Quote.record_locator]      record_locator
      * @apiParam {string}           [Quote.pcc]                 pcc
      * @apiParam {string}           [Quote.cabin]               cabin
-     * @apiParam {string}           [Quote.gds]                 gds
+     * @apiParam {string{1}}        Quote.gds                   gds
      * @apiParam {string}           [Quote.trip_type]           trip_type
      * @apiParam {string}           [Quote.main_airline_code]   main_airline_code
      * @apiParam {string}           [Quote.reservation_dump]    reservation_dump

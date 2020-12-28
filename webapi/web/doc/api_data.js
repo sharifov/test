@@ -3380,7 +3380,8 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
-            "optional": true,
+            "size": "1",
+            "optional": false,
             "field": "Quote.gds",
             "description": "<p>gds</p>"
           },

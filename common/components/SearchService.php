@@ -59,14 +59,11 @@ class SearchService
     }
 
     /**
-     * @param null $gds
-     * @return array|mixed|null
+     * @param string|null $gds
+     * @return string|null
      */
-    public static function getGDSName($gds = null)
+    public static function getGDSName(?string $gds): ?string
     {
-        if ($gds === null) {
-            return self::GDS_LIST;
-        }
         return self::GDS_LIST[$gds] ?? $gds;
     }
 
