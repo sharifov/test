@@ -227,7 +227,7 @@ $js = <<<JS
                              }
                         }
                                             
-                        if(obj.cmd === 'updateCommunication') {
+                        if(obj.cmd === 'updateCommunication' && typeof updateCommunication === 'function') {
                             // updatePjaxNotify();
                             updateCommunication();
                         }
