@@ -37,12 +37,10 @@ $this->params['breadcrumbs'][] = $this->title;
 </h1>
 <div class="lead-bonus">
 
-    <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+    <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]);?>
     <?= $this->render('_search_bonus', ['model' => $searchModel]); ?>
 
-
     <?php
-
     $gridColumns = [
         [
             'attribute' => 'id',
@@ -99,7 +97,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'header' => 'Client',
             'format' => 'raw',
             'value' => static function (Lead $lead) {
-
                 if ($lead->client) {
                     $clientName = $lead->client->first_name . ' ' . $lead->client->last_name;
                     if ($clientName === 'Client Name') {
@@ -290,7 +287,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'template' => '{action}',
             'buttons' => [
                 'action' => static function ($url, Lead $lead, $key) {
-
                     $buttons = '';
 
                     $buttons .= Html::a('Take', [
@@ -324,9 +320,9 @@ echo GridView::widget([
     'pjax' => false,
     'striped' => true,
     'condensed' => false,
-    'responsive' => true,
+    'responsive' => false,
     'hover' => true,
-    'floatHeader' => true,
+    'floatHeader' => false,
     'floatHeaderOptions' => [
         'scrollingTop' => 20
     ],
