@@ -64,7 +64,13 @@ $this->registerJs($js);?>
 ]); ?>
 <div class="row">
     <div class="col-md-4">Total profit: $<?= number_format($totalProfit, 2)?></div>
-    <div class="col-md-4">Profit for main agent (<b><?= $lead->employee->username?></b>): $<span id="main-agent-profit"><?= $mainAgentProfit?></span></div>
+    <div class="col-md-4">
+        <?php if ($lead->employee) : ?>
+            Profit for main agent (<b><?= $lead->employee->username?></b>): $<span id="main-agent-profit"><?= $mainAgentProfit?></span>
+        <?php else : ?>
+            <i class="fa fa-exclamation-triangle"></i> Main agent not found.
+        <?php endif; ?>
+    </div>
     <div class="col-md-4">
     <?= Html::button('<i class="fa fa-plus"></i> Add Agent', [
             'id' => 'new-split-profit-button',
