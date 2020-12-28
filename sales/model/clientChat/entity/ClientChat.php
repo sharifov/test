@@ -8,6 +8,7 @@ use common\models\Employee;
 use common\models\Language;
 use common\models\Lead;
 use common\models\Project;
+use sales\behaviors\metric\MetricClientChatCounterBehavior;
 use sales\entities\cases\Cases;
 use sales\entities\EventTrait;
 use sales\helpers\clientChat\ClientChatHelper;
@@ -166,6 +167,9 @@ class ClientChat extends \yii\db\ActiveRecord
                     ActiveRecord::EVENT_BEFORE_UPDATE => ['cch_updated_dt'],
                 ],
                 'value' => date('Y-m-d H:i:s'),
+            ],
+            'metric' => [
+                'class' => MetricClientChatCounterBehavior::class,
             ],
         ];
     }

@@ -6,6 +6,7 @@ use common\components\jobs\CallPriceJob;
 use common\components\jobs\CheckClientCallJoinToConferenceJob;
 use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
+use sales\behaviors\metric\MetricCallCounterBehavior;
 use sales\helpers\PhoneFormatter;
 use sales\helpers\UserCallIdentity;
 use sales\model\call\entity\call\data\Data;
@@ -377,6 +378,9 @@ class Call extends \yii\db\ActiveRecord
                     ActiveRecord::EVENT_BEFORE_UPDATE => ['c_updated_dt'],
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+            ],
+            'metric' => [
+                'class' => MetricCallCounterBehavior::class,
             ],
         ];
     }

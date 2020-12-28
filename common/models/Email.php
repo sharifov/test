@@ -6,6 +6,7 @@ use common\components\ChartTools;
 use common\components\CommunicationService;
 use common\models\query\EmailQuery;
 use DateTime;
+use sales\behaviors\metric\MetricEmailCounterBehavior;
 use sales\entities\cases\Cases;
 use sales\helpers\email\TextConvertingHelper;
 use sales\services\email\EmailService;
@@ -228,11 +229,9 @@ class Email extends \yii\db\ActiveRecord
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
-            /*'user' => [
-                'class' => BlameableBehavior::class,
-                'createdByAttribute' => 'e_created_user_id',
-                'updatedByAttribute' => 'e_updated_user_id',
-            ],*/
+            'metric' => [
+                'class' => MetricEmailCounterBehavior::class,
+            ],
         ];
     }
 

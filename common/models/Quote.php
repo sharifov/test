@@ -8,12 +8,14 @@ use common\models\local\FlightSegment;
 use common\models\local\LeadLogMessage;
 use common\models\query\QuoteQuery;
 use frontend\helpers\JsonHelper;
+use sales\behaviors\metric\MetricQuoteCounterBehavior;
 use sales\entities\EventTrait;
 use sales\events\quote\QuoteSendEvent;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\services\parsingDump\lib\ParsingDump;
 use sales\services\parsingDump\ReservationService;
+use sales\traits\MetricObjectCounterTrait;
 use Yii;
 use yii\base\ErrorException;
 use yii\base\InvalidArgumentException;
@@ -63,6 +65,7 @@ use yii\helpers\VarDumper;
 class Quote extends \yii\db\ActiveRecord
 {
     use EventTrait;
+    use MetricObjectCounterTrait;
 
     public const SCENARIO_API_UPDATE = 'api_update';
 
@@ -268,6 +271,9 @@ class Quote extends \yii\db\ActiveRecord
                     ActiveRecord::EVENT_BEFORE_UPDATE => ['updated'],
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+            ],
+            'metric' => [
+                'class' => MetricQuoteCounterBehavior::class,
             ],
         ];
     }

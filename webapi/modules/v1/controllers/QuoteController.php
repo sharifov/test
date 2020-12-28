@@ -850,6 +850,7 @@ class QuoteController extends ApiBaseController
             $quote->attributes = $quoteAttributes;
             $quote->lead_id = $lead->id;
             $quote->employee_id = null;
+            $quote->setMetricLabels(['action' => 'created', 'type_creation' => 'web_api']);
 
             $type = $quoteAttributes['type_id'] ?? null;
             $this->setTypeQuoteInsert($type, $quote, $lead);

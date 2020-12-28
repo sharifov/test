@@ -3,10 +3,12 @@
 namespace sales\model\clientAccount\entity;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
+use common\components\Metrics;
 use common\models\Client;
 use common\models\Currency;
 use common\models\Language;
 use common\models\Project;
+use sales\behaviors\metric\MetricClientAccountCounterBehavior;
 use sales\model\clientAccount\form\ClientAccountCreateApiForm;
 use sales\model\clientAccountSocial\entity\ClientAccountSocial;
 use thamtech\uuid\helpers\UuidHelper;
@@ -131,6 +133,9 @@ class ClientAccount extends ActiveRecord
                 ],
                 'value' => date('Y-m-d H:i:s')
             ],
+            'metric' => [
+                'class' => MetricClientAccountCounterBehavior::class,
+            ],
         ];
     }
 
@@ -221,7 +226,6 @@ class ClientAccount extends ActiveRecord
         $model->ca_enabled = $createApiForm->enabled;
         $model->ca_origin_created_dt = $createApiForm->origin_created_dt;
         $model->ca_origin_updated_dt = $createApiForm->origin_updated_dt;
-
         return $model;
     }
 }

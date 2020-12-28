@@ -133,6 +133,7 @@ class QuoteController extends FController
                             $quote->employee_name = Yii::$app->user->identity->username;
                             $quote->origin_search_data = json_encode($entry);
                             $quote->gds_offer_id = $entry['gdsOfferId'] ?? null;
+                            $quote->setMetricLabels(['action' => 'created', 'type_creation' => 'search']);
 
                             if (isset($entry['tickets'])) {
                                 $quote->tickets = json_encode($entry['tickets']);
@@ -588,6 +589,7 @@ class QuoteController extends FController
                     }
 
                     $quote = Quote::createQuote($postQuote, $lead->id, $lead->originalQuoteExist());
+                    $quote->setMetricLabels(['action' => 'created', 'type_creation' => 'manual']);
 
                     if ((new ReservationService($gds))->parseReservation($post['prepare_dump'], true, $quote->itinerary)) {
                         $itinerary = Quote::createDump($quote->itinerary);

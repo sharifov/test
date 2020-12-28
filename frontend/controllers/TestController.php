@@ -1852,6 +1852,18 @@ class TestController extends FController
         exit();
     }
 
+    public function actionFlushMetrics()
+    {
+        try {
+            $adapter = Yii::createObject(\Prometheus\Storage\Redis::class);
+            $adapter::setDefaultOptions(Yii::$app->prometheus->redisOptions);
+            $adapter->flushRedis();
+        } catch (\Throwable $throwable) {
+            \yii\helpers\VarDumper::dump($throwable->getMessage(), 10, true);
+        }
+        exit('Done');
+    }
+
     public function actionZ()
     {
         return $this->render('z');

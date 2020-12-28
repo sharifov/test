@@ -5,6 +5,7 @@ namespace common\models;
 use common\components\EmailService;
 use common\components\ga\GaHelper;
 use common\components\jobs\UpdateLeadBOJob;
+use common\components\Metrics;
 use common\components\purifier\Purifier;
 use common\models\local\LeadAdditionalInformation;
 use common\models\local\LeadLogMessage;
@@ -16,6 +17,7 @@ use modules\order\src\entities\order\Order;
 use modules\product\src\entities\product\Product;
 use phpDocumentor\Reflection\DocBlock\Tags\Source;
 use sales\auth\Auth;
+use sales\behaviors\metric\MetricLeadCounterBehavior;
 use sales\entities\EventTrait;
 use sales\events\lead\LeadBookedEvent;
 use sales\events\lead\LeadCallExpertRequestEvent;
@@ -226,7 +228,6 @@ class Lead extends ActiveRecord implements Objectable
 
     public const PENDING_ALLOW_CALL_TIME_MINUTES = 20; // minutes
 
-
     public const TRIP_TYPE_ONE_WAY           = 'OW';
     public const TRIP_TYPE_ROUND_TRIP        = 'RT';
     public const TRIP_TYPE_MULTI_DESTINATION = 'MC';
@@ -236,7 +237,6 @@ class Lead extends ActiveRecord implements Objectable
         self::TRIP_TYPE_ONE_WAY             => 'One Way',
         self::TRIP_TYPE_MULTI_DESTINATION   => 'Multi destination'
     ];
-
 
     public const STATUS_PENDING     = 1;
     public const STATUS_PROCESSING  = 2;
@@ -1763,6 +1763,9 @@ class Lead extends ActiveRecord implements Objectable
                     ActiveRecord::EVENT_BEFORE_UPDATE => ['updated', 'l_last_action_dt'],
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+            ],
+            'metric' => [
+                'class' => MetricLeadCounterBehavior::class,
             ],
         ];
     }
@@ -4689,5 +4692,10 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
             ->andWhere(['lead_id' => $this->id])
             ->andWhere(['status' => [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED]])
             ->exists();
+    }
+
+    public function getTypeCreateName(): string
+    {
+        return self::TYPE_CREATE_LIST[$this->l_type_create] ?? 'Undefined';
     }
 }

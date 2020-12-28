@@ -2,7 +2,9 @@
 
 namespace common\models;
 
+use common\components\Metrics;
 use common\models\query\ClientQuery;
+use sales\behaviors\metric\MetricClientCounterBehavior;
 use sales\entities\cases\Cases;
 use sales\entities\EventTrait;
 use sales\model\client\entity\events\ClientCreatedEvent;
@@ -339,7 +341,10 @@ class Client extends ActiveRecord
                     ActiveRecord::EVENT_BEFORE_INSERT => ['created', 'updated'],
                     ActiveRecord::EVENT_BEFORE_UPDATE => ['updated'],
                 ],
-                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+                'value' => date('Y-m-d H:i:s')
+            ],
+            'metric' => [
+                'class' => MetricClientCounterBehavior::class,
             ],
         ];
     }
@@ -501,5 +506,10 @@ class Client extends ActiveRecord
         $this->cl_excluded = true;
         $this->cl_ppn = $ppn;
         $this->recordEvent(new ClientExcludedEvent($this->id));
+    }
+
+    public function getTypeCreateName(): string
+    {
+        return self::TYPE_CREATE_LIST[$this->cl_type_create] ?? 'Undefined';
     }
 }
