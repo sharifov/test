@@ -98,32 +98,32 @@ class ClientChatProjectConfigController extends FController
     "denyPath":["*checkout/quote*"],
     "messageTypes":{
         "withoutFlightParams":{
-            "messages":{
-                "1":{
+            "messages":[
+                {
                     "message":"Hi! Would you like to check for a discount?",
                     "delay":4,
                     "showTyping":false
                 }
-            }
+            ]
         },
         "withFlightParams":{
-            "messages":{
-                "1":{
+            "messages":[
+                {
                     "message":"Hi!",
                     "delay":4,
                     "showTyping":false
                 },
-                "2":{
+                {
                     "message":"We have private deals for {{originCityParam}} to {{destinationCityParam}}!",
                     "delay":4,
                     "showTyping":true
                 },
-                "3":{
+                {
                     "message":"Would you like to check for a discount?",
                     "delay":4,
                     "showTyping":true
                 }
-            }
+            ]
         }
     }
   },
