@@ -227,20 +227,20 @@ $user = Yii::$app->user->identity;
                 'size' => Modal::SIZE_LARGE
             ])?>
             <?php Modal::end()?>
+        <?php endif;?>
 
-            <?php if ($leadModel->tips > 0) :?>
-                <?= Html::button('<i class="fa fa-money"></i> Split tips', [
-                        'class' => 'btn btn-default',
-                        'id' => 'split-tips',
-                        'data-url' => Url::to(['lead/split-tips', 'id' => $leadModel->id]),
-                    ])?>
+        <?php if (Auth::can('lead/split-tips', ['lead' => $leadModel]) && Auth::can('/lead/split-tips')) :?>
+            <?= Html::button('<i class="fa fa-money"></i> Split tips', [
+                'class' => 'btn btn-default',
+                'id' => 'split-tips',
+                'data-url' => Url::to(['lead/split-tips', 'id' => $leadModel->id]),
+            ])?>
 
-                <?php Modal::begin(['id' => 'split-tips-modal',
-                    'title' => 'Split tips',
-                    'size' => Modal::SIZE_LARGE
-                ])?>
-                <?php Modal::end()?>
-            <?php endif;?>
+            <?php Modal::begin(['id' => 'split-tips-modal',
+                'title' => 'Split tips',
+                'size' => Modal::SIZE_LARGE
+            ])?>
+            <?php Modal::end()?>
         <?php endif;?>
     </div>
 
