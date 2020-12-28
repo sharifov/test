@@ -164,6 +164,7 @@ use yii\helpers\VarDumper;
  * @property Sources $source
  * @property Project $project
  * @property LeadAdditionalInformation[] $additionalInformationForm
+ * @property LeadAdditionalInformation[] $oldAdditionalInformationForm
  * @property Lead $clone
  * @property ProfitSplit[] $profitSplits
  * @property TipsSplit[] $tipsSplits
@@ -202,6 +203,7 @@ use yii\helpers\VarDumper;
  * @property ActiveQuery $tsUsers
  * @property string $requestHash
  * @property \common\models\local\LeadAdditionalInformation $additionalInformationFormFirstElement
+ * @property \common\models\local\LeadAdditionalInformation $oldAdditionalInformationFormFirstElement
  * @property null|Quote $appliedAlternativeQuotes
  * @property mixed $flowTransition
  * @property mixed $sumPercentTipsSplit
@@ -345,6 +347,21 @@ class Lead extends ActiveRecord implements Objectable
         self::TYPE_CREATE_CLIENT_CHAT => 'Client Chat',
     ];
 
+    private const PROCESSED_VTF = [
+        0 => 'Pending',
+        1 => 'Verified'
+    ];
+
+    private const PROCESSED_TKT = [
+        0 => 'Pending',
+        1 => 'Issued'
+    ];
+
+    private const PROCESSED_EXP = [
+        0 => 'Pending',
+        1 => 'Checked'
+    ];
+
     public const SCENARIO_API = 'scenario_api';
     public const SCENARIO_MULTIPLE_UPDATE = 'scenario_multiple_update';
 
@@ -368,6 +385,7 @@ class Lead extends ActiveRecord implements Objectable
     public $emailOffers;
     public $quoteType;
 
+    private $oldAdditionalInformation;
 
     /**
      * {@inheritdoc}
@@ -437,6 +455,7 @@ class Lead extends ActiveRecord implements Objectable
 //    }
 
     private $additionalInformationForm;
+    private $oldAdditionalInformationForm;
 
     /**
      * @return LeadAdditionalInformation[]
@@ -457,11 +476,37 @@ class Lead extends ActiveRecord implements Objectable
     }
 
     /**
+     * @return LeadAdditionalInformation[]
+     */
+    public function getOldAdditionalInformationForm(): array
+    {
+        if ($this->oldAdditionalInformationForm !== null) {
+            return $this->oldAdditionalInformationForm;
+        }
+
+        if (!empty($this->oldAdditionalInformation)) {
+            $this->oldAdditionalInformationForm = self::getLeadAdditionalInfo($this->oldAdditionalInformation);
+        } else {
+            $this->oldAdditionalInformationForm = [new LeadAdditionalInformation()];
+        }
+
+        return $this->oldAdditionalInformationForm;
+    }
+
+    /**
      * @return LeadAdditionalInformation
      */
     public function getAdditionalInformationFormFirstElement(): LeadAdditionalInformation
     {
         return $this->getAdditionalInformationForm()[0];
+    }
+
+    /**
+     * @return LeadAdditionalInformation
+     */
+    public function getOldAdditionalInformationFormFirstElement(): LeadAdditionalInformation
+    {
+        return $this->getOldAdditionalInformationForm()[0];
     }
 
     /**
@@ -3397,6 +3442,7 @@ Reason: {reason}',
             $this->infants = (int) $this->infants;
             $this->bo_flight_id = (int) $this->bo_flight_id;
             $this->agents_processing_fee = ($this->adults + $this->children) * SettingHelper::processingFee();
+            $this->oldAdditionalInformation = $this->oldAttributes['additional_information'];
             return true;
         }
         return false;
@@ -3444,6 +3490,63 @@ Reason: {reason}',
         }
 
         parent::afterValidate();
+    }
+
+    public function validate($attributeNames = null, $clearErrors = true)
+    {
+        return parent::validate($attributeNames, $clearErrors);
+    }
+
+    public function save($runValidation = true, $attributeNames = null)
+    {
+        return parent::save($runValidation, $attributeNames);
+    }
+
+    public function sendNotifOnProcessingStatusChanged(): void
+    {
+        $additionalInformation = $this->additionalInformationFormFirstElement;
+        $oldAdditionalInformation = $this->oldAdditionalInformationFormFirstElement;
+
+        $vfy = 'VFY: ' . self::PROCESSED_VTF[(int)$oldAdditionalInformation->vtf_processed];
+        $exp = 'EXP: ' . self::PROCESSED_EXP[(int)$oldAdditionalInformation->exp_processed];
+        $tkt = 'TKT: ' . self::PROCESSED_TKT[(int)$oldAdditionalInformation->tkt_processed];
+        $changed = false;
+        if ($additionalInformation->vtf_processed !== $oldAdditionalInformation->vtf_processed) {
+            $vfy .= ' -> ' . self::PROCESSED_VTF[(int)$additionalInformation->vtf_processed];
+            $changed = true;
+        }
+        if ($additionalInformation->tkt_processed !== $oldAdditionalInformation->tkt_processed) {
+            $tkt .= ' -> ' . self::PROCESSED_TKT[(int)$additionalInformation->tkt_processed];
+            $changed = true;
+        }
+        if ($additionalInformation->exp_processed !== $oldAdditionalInformation->exp_processed) {
+            $exp .= ' -> ' . self::PROCESSED_EXP[(int)$additionalInformation->exp_processed];
+            $changed = true;
+        }
+
+        if ($changed) {
+            $body = Yii::t(
+                'notifications',
+                "Booking status of the Lead ({lead_id}) has changed to: {br}{exp}{br}{vfy}{br}{tkt}",
+                [
+                    'lead_id' => Purifier::createLeadShortLink($this),
+                    'br' => "\r\n",
+                    'exp' => $exp,
+                    'vfy' => $vfy,
+                    'tkt' => $tkt
+                ]
+            );
+            $subject = Yii::t('notifications', 'Lead Update ({lead_id})', ['lead_id' => $this->id]);
+            if ($ntf = Notifications::create($this->employee_id, $subject, $body, Notifications::TYPE_INFO, true)) {
+                $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                Notifications::publish('getNewNotification', ['user_id' => $this->employee_id], $dataNotification);
+            }
+        }
+    }
+
+    public function update($runValidation = true, $attributeNames = null)
+    {
+        return parent::update($runValidation, $attributeNames); // TODO: Change the autogenerated stub
     }
 
 //    public function afterFind()

@@ -556,6 +556,7 @@ class QuoteController extends ApiBaseController
                     }
                     $response['status'] = 'Success';
                     $transaction->commit();
+                    $model->lead->sendNotifOnProcessingStatusChanged();
 
                     //Add logs after changed model attributes
 

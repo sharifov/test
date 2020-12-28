@@ -2,6 +2,7 @@
 
 namespace console\controllers;
 
+use common\models\Lead;
 use common\models\Notifications;
 use Faker\Factory;
 use modules\twilio\src\entities\conferenceLog\ConferenceLog;
@@ -28,8 +29,10 @@ use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackF
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
 use yii\console\Controller;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
 use yii\console\ExitCode;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 
 class TestController extends Controller
@@ -199,5 +202,28 @@ class TestController extends Controller
 
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+    }
+
+    public function actionTestLead($leadId)
+    {
+        $lead = Lead::findOne(['id' => $leadId]);
+
+        if (!$lead) {
+            echo Console::renderColoredString('%r --- Error: Lead not found by id ' . $leadId . '   %r' . ' %n', true), PHP_EOL;
+        }
+
+        $additionalInfo = $lead->getAdditionalInformationFormFirstElement();
+
+        $additionalInfo->vtf_processed = true;
+        $additionalInfo->tkt_processed = false;
+        $additionalInfo->exp_processed = true;
+
+        $lead->additional_information = Json::encode(ArrayHelper::toArray($additionalInfo));
+
+        if (!$lead->save()) {
+            echo Console::renderColoredString('%r --- Error: Lead not saved %r' . ' %n', true), PHP_EOL;
+        }
+
+        $lead->sendNotifOnProcessingStatusChanged();
     }
 }
