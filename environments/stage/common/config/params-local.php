@@ -47,4 +47,12 @@ return [
         'webHookEndpoint' => 'webhook/ping',
     ],
 
+    'clientChat' => [
+        'projectConfig' => [
+            'params' => [
+                'endpoint' => 'https://stage-livechat.travel-dev.com'
+            ]
+        ]
+    ]
+
 ];

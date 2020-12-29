@@ -70,4 +70,12 @@ return [
         'wsConnectionUrl' => 'wss://app.sales.com/centrifugo/connection/websocket',
     ],
 
+    'clientChat' => [
+        'projectConfig' => [
+            'params' => [
+                'endpoint' => ''
+            ]
+        ]
+    ]
+
 ];

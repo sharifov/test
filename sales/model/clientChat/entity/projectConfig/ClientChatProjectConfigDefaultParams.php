@@ -5,7 +5,6 @@ namespace sales\model\clientChat\entity\projectConfig;
 class ClientChatProjectConfigDefaultParams
 {
     private static $params = [
-        "endpoint" => "chatbot.travel-dev.com",
         "notificationSound" => "https://cdn.travelinsides.com/npmstatic/assets/chime.mp3",
         "registrationEnabled" => false,
         "autoMessage" => [

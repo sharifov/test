@@ -10,6 +10,8 @@ use sales\model\client\useCase\excludeInfo\ClientExcludeIpChecker;
 use sales\model\clientChat\cannedResponse\entity\ClientChatCannedResponse;
 use sales\model\clientChat\cannedResponseCategory\entity\ClientChatCannedResponseCategory;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChat\entity\projectConfig\ClientChatProjectConfig;
+use sales\model\clientChat\entity\projectConfig\ProjectConfigApiResponseDto;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatMessage\ClientChatMessageRepository;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
@@ -225,5 +227,17 @@ class TestController extends Controller
         }
 
         $lead->sendNotifOnProcessingStatusChanged();
+    }
+
+    public function actionShowChatProjectConfigDto($projectId)
+    {
+        $config = ClientChatProjectConfig::findOne(['ccpc_project_id' => (int)$projectId]);
+        if (!$config) {
+            echo Console::renderColoredString('%r --- Error: project config not found %r' . ' %n', true), PHP_EOL;
+            exit;
+        }
+
+        $dto = new ProjectConfigApiResponseDto($config);
+        echo $dto->endpoint . PHP_EOL;
     }
 }

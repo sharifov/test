@@ -13,4 +13,9 @@ class AppParamsHelper
     {
         return \Yii::$app->params['liveChatRealTimeVisitors'] ?? '';
     }
+
+    public static function getClientChatProjectConfigEndpoint(): string
+    {
+        return \Yii::$app->params['clientChat']['projectConfig']['params']['endpoint'] ?? '';
+    }
 }
