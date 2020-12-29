@@ -2,11 +2,12 @@
 
 namespace frontend\controllers;
 
+use frontend\helpers\JsonHelper;
+use sales\model\clientChat\entity\projectConfig\ClientChatProjectConfigDefaultParams;
 use sales\model\clientChat\entity\projectConfig\service\ClientChatProjectConfigService;
 use Yii;
 use sales\model\clientChat\entity\projectConfig\ClientChatProjectConfig;
 use sales\model\clientChat\entity\projectConfig\search\ClientChatProjectConfigSearch;
-use frontend\controllers\FController;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
@@ -86,94 +87,12 @@ class ClientChatProjectConfigController extends FController
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             $this->chatProjectConfigService->deleteConfigCacheActiveLanguages($model->ccpc_project_id);
             return $this->redirect(['view', 'id' => $model->ccpc_project_id]);
-        } else {
-            $model->ccpc_params_json = '{
-  "endpoint": "chatbot.travel-dev.com",
-  "notificationSound": "https://cdn.travelinsides.com/npmstatic/assets/chime.mp3",
-  "autoMessage":{
-    "enabled":false,
-    "repeatDelay":3600,
-    "botName":"Agent",
-    "botAvatar":"",
-    "denyPath":["*checkout/quote*"],
-    "messageTypes":{
-        "withoutFlightParams":{
-            "messages":[
-                {
-                    "message":"Hi! Would you like to check for a discount?",
-                    "delay":4,
-                    "showTyping":false
-                }
-            ]
-        },
-        "withFlightParams":{
-            "messages":[
-                {
-                    "message":"Hi!",
-                    "delay":4,
-                    "showTyping":false
-                },
-                {
-                    "message":"We have private deals for {{originCityParam}} to {{destinationCityParam}}!",
-                    "delay":4,
-                    "showTyping":true
-                },
-                {
-                    "message":"Would you like to check for a discount?",
-                    "delay":4,
-                    "showTyping":true
-                }
-            ]
         }
-    }
-  },
-  "autoMessageTranslates": {
-    "ru-RU": "",
-    "en-US": ""
-  }
-}';
 
-            $model->ccpc_theme_json = '{
-  "theme": "linear-gradient(270deg, #0AAB99 0%, #1E71D1 100%)",
-  "primary": "#0C89DF",
-  "primaryDark": "#0066BA",
-  "accent": "#0C89DF",
-  "accentDark": "#0066BA"
-}';
-
-            $model->ccpc_registration_json = '{
-  "enabled": true,
-  "departments": [
-    "Sales",
-    "Support"
-  ],
-  "registrationTitle": "Registration title if registration is enabled",
-  "registrationSubtitle": "Registration subtitle if it is enabled",
-  "formFields": {
-    "name": {
-      "enabled": true,
-      "required": true,
-      "maxLength": 40,
-      "minLength": 3
-    },
-    "email": {
-      "enabled": true,
-      "required": true,
-      "maxLength": 40,
-      "minLength": 3
-    },
-    "department": {
-      "enabled": true,
-      "required": true
-    }
-  }
-}';
-
-            $model->ccpc_settings_json = '{
-  "fileUpload": true,
-  "maxMessageLength": 500
-}';
-        }
+        $model->ccpc_params_json = JsonHelper::encode(ClientChatProjectConfigDefaultParams::getParams());
+        $model->ccpc_theme_json = JsonHelper::encode(ClientChatProjectConfigDefaultParams::getTheme());
+        $model->ccpc_registration_json = JsonHelper::encode(ClientChatProjectConfigDefaultParams::getRegistration());
+        $model->ccpc_settings_json = JsonHelper::encode(ClientChatProjectConfigDefaultParams::getSettings());
 
         return $this->render('create', [
             'model' => $model,
