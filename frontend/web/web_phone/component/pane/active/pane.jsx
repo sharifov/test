@@ -172,13 +172,16 @@ function SoundIndication() {
 
 function RecordIndicator(props) {
     let call = props.call;
-    let color = {'color':'#dc3545', 'cursor': 'pointer'};
+    let style = {'color':'#dc3545'};
     let text = 'ON';
     let title = 'OFF'
     if (props.call.data.recordingDisabled) {
-        color = {'color':'#ccc', 'cursor': 'pointer'};
+        style = {'color':'#ccc'};
         text = 'OFF';
         title = 'ON'
+    }
+    if (!call.data.isJoin) {
+        style.cursor = "pointer";
     }
     let faIcon = "fa fa-record-vinyl";
     if (call.isSentRecordingRequestState()) {
@@ -187,7 +190,10 @@ function RecordIndicator(props) {
     return (
         <div className="sound-indication">
             <div className="sound-control-wrap">
-                <i className={faIcon} style={color} id="wg-call-record" data-call-sid={call.data.callSid} title={title}> </i>
+                {call.data.isJoin
+                    ? <i className={faIcon} style={style}> </i>
+                    : <i className={faIcon} style={style} id="wg-call-record" data-call-sid={call.data.callSid} title={title}> </i>
+                }
                 <div style={{"marginLeft":"10px", "color": "#fff"}}> Record {text}</div>
             </div>
         </div>

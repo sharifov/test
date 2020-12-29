@@ -22,6 +22,7 @@ class IncomingQueueCall extends Model
     public $isMute;
     public $isCoach;
     public $isBarge;
+    public $isJoin;
     public $project;
     public $source;
     public $isEnded = false;

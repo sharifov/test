@@ -162,6 +162,7 @@ class CallUpdateMessage
             'isCoach' => $isCoach,
             'isMute' => $isMute,
             'isBarge' => $isBarge,
+            'isJoin' => $call->isJoin(),
             'project' => $call->c_project_id ? $call->cProject->name : '',
             'source' => $source,
             'isEnded' => $call->isEnded(),
