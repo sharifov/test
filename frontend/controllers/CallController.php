@@ -39,6 +39,7 @@ use sales\services\cleaner\form\DbCleanerParamsForm;
 use Yii;
 use common\models\Call;
 use common\models\search\CallSearch;
+use yii\base\InvalidConfigException;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
@@ -596,6 +597,36 @@ class CallController extends FController
             return $this->render('realtime-user-map/index');
         }
     }
+
+    /**
+     * @return string
+     * @throws InvalidConfigException
+     */
+    public function actionRealtimeMap(): string
+    {
+
+        $centrifugoEnabled = Yii::$app->params['centrifugo']['enabled'] ?? false;
+        $centrifugoWsConnectionUrl = Yii::$app->params['centrifugo']['wsConnectionUrl'] ?? '';
+
+        if (!$centrifugoEnabled) {
+            throw new InvalidConfigException('The "centrifugo" is not enabled.');
+        }
+
+        if (empty($centrifugoWsConnectionUrl)) {
+            throw new InvalidConfigException('The "wsConnectionUrl" property must be set in config params.');
+        }
+
+        $this->layout = '@frontend/themes/gentelella_v2/views/layouts/main_tv2';
+        $cfChannelName = 'realtimeMapChannel#' . Auth::id();
+
+        return $this->render('realtime-map', [
+            'cfChannels' => [$cfChannelName],
+            'cfChannelName' => $cfChannelName,
+            'cfConnectionUrl' => $centrifugoWsConnectionUrl,
+            'cfToken' => Yii::$app->centrifugo->generateConnectionToken(Auth::id())
+        ]);
+    }
+
 
     public function actionUserMap2()
     {
