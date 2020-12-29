@@ -361,7 +361,7 @@ $jsCode = <<<JS
         $.post(url, function(data) {
             $('#modal-' + id).find('.modal-body').html(data);
         });
-       return false;
+       //return false;
     });
 
 $(document).on('click','#client-unsubscribe-button', function (e) {
