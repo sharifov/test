@@ -582,6 +582,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'User Stats', 'url' => ['/user-connection/stats'], 'icon' => 'area-chart'],
                 ['label' => 'Call User Map', 'url' => ['/call/user-map'], 'icon' => 'map'],
                 ['label' => 'Real-time User Map', 'url' => ['/call/realtime-user-map'], 'icon' => 'map'],
+                ['label' => 'Realtime Map v2', 'url' => ['/call/realtime-map'], 'icon' => 'map'],
                 ['label' => 'Client Chat Monitor', 'url' => ['/client-chat/monitor'], 'icon' => 'map'],
                 ['label' => 'Agents Ratings', 'url' => ['/stats/agent-ratings'], 'icon' => 'star-half-empty'],
                 ['label' => 'Stats Agents & Leads', 'url' => ['/report/agents'], 'icon' => 'users'],
