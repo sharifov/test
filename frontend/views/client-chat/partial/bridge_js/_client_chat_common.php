@@ -217,7 +217,7 @@ function updateLastMessageTime() {
 window.addScrollEventListenerToChatListWrapper = function () {
     $('#cc-dialogs-wrapper').scroll(function (e) {
         var elem = $(e.currentTarget);
-        if (elem[0].scrollHeight - elem.scrollTop() == elem.outerHeight() && !chatListingAjaxRequestEnabled && !window.allDialogsLoaded) {
+        if (elem.scrollTop() + Math.ceil(elem.innerHeight()) >= elem[0].scrollHeight && !chatListingAjaxRequestEnabled && !window.allDialogsLoaded) {
             chatListingAjaxRequestEnabled = true;
             let page = $(this).attr('data-page');
             let loadChannelsTxt = $('#load-channels-txt');
