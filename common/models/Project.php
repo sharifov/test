@@ -217,54 +217,50 @@ class Project extends \yii\db\ActiveRecord
         if ($projectsData) {
             if ($projectsData['error']) {
                 $data['error'] = 'Error: ' . $projectsData['error'];
-            } else {
-                if (isset($projectsData['data']['data']) && $projectsData['data']['data']) {
-                    foreach ($projectsData['data']['data'] as $projectItem) {
-                        $pr = self::findOne($projectItem['id']);
-                        if (!$pr) {
-                            $pr = new self();
-                            $pr->id = $projectItem['id'];
-                            $data['created'][] = $projectItem['id'];
-                        //$pr->custom_data = @json_encode(['name' => $projectItem['name'], 'phone' => '', 'email' => '']);
-                        } else {
-                            $data['updated'][] = $projectItem['id'];
-                        }
+            } elseif (isset($projectsData['data']['data']) && $projectsData['data']['data']) {
+                foreach ($projectsData['data']['data'] as $projectItem) {
+                    $pr = self::findOne($projectItem['id']);
+                    if (!$pr) {
+                        $pr = new self();
+                        $pr->id = $projectItem['id'];
+                        $data['created'][] = $projectItem['id'];
+                    } else {
+                        $data['updated'][] = $projectItem['id'];
+                    }
 
-                        $pr->attributes = $projectItem;
+                    $pr->attributes = $projectItem;
 
-                        $pr->name = $projectItem['name'];
-                        $pr->project_key = $projectItem['project_key'];
-                        $pr->link = $projectItem['link'];
-                        $pr->closed = (bool)$projectItem['closed'];
-                        $pr->last_update = date('Y-m-d H:i:s');
-                        if (isset(Yii::$app->user) && Yii::$app->user->id) {
-                            $pr->p_update_user_id = Yii::$app->user->id;
-                        }
-                        if (!$pr->save()) {
-                            Yii::error(
-                                VarDumper::dumpAsString($pr->errors),
-                                'Project:synchronizationProjects:Project:save'
-                            );
-                        } else {
-                            if ($projectItem['sources']) {
-                                foreach ($projectItem['sources'] as $sourceId => $sourceAttr) {
-                                    $source = Sources::findOne(['id' => $sourceId]);
+                    $pr->name = $projectItem['name'];
+                    $pr->project_key = $projectItem['project_key'];
+                    $pr->link = $projectItem['link'];
+                    $pr->closed = (bool)$projectItem['closed'];
+                    $pr->last_update = date('Y-m-d H:i:s');
+                    if (isset(Yii::$app->user) && Yii::$app->user->id) {
+                        $pr->p_update_user_id = Yii::$app->user->id;
+                    }
+                    if (!$pr->save()) {
+                        Yii::error(
+                            VarDumper::dumpAsString($pr->errors),
+                            'Project:synchronizationProjects:Project:save'
+                        );
+                    } elseif ($projectItem['sources']) {
+                        foreach ($projectItem['sources'] as $sourceId => $sourceAttr) {
+                            $source = Sources::findOne(['id' => $sourceId]);
 
-                                    if (!$source) {
-                                        $source = new Sources();
-                                        $source->project_id = $pr->id;
-                                    }
+                            if (!$source) {
+                                $source = new Sources();
+                                $source->id = $sourceId;
+                                $source->project_id = $pr->id;
+                            }
 
-                                    $source->scenario = Sources::SCENARIO_SYNCH;
+                            $source->scenario = Sources::SCENARIO_SYNCH;
 
-                                    $source->attributes = $sourceAttr;
-                                    if (!$source->save()) {
-                                        Yii::error(
-                                            VarDumper::dumpAsString($source->errors),
-                                            'Project:synchronizationProjects:Sources:save'
-                                        );
-                                    }
-                                }
+                            $source->attributes = $sourceAttr;
+                            if (!$source->save()) {
+                                Yii::error(
+                                    VarDumper::dumpAsString($source->errors),
+                                    'Project:synchronizationProjects:Sources:save'
+                                );
                             }
                         }
                     }
