@@ -23,6 +23,7 @@ use sales\events\call\CallCreatedEvent;
 use sales\helpers\cases\CasesUrlHelper;
 use sales\helpers\lead\LeadUrlHelper;
 use sales\model\call\entity\call\events\CallEvents;
+use sales\model\call\services\RecordManager;
 use sales\model\call\socket\CallUpdateMessage;
 use sales\model\callLog\services\CallLogTransferService;
 use sales\model\conference\service\ConferenceDataService;
@@ -1434,12 +1435,20 @@ class Call extends \yii\db\ActiveRecord
                         $call->setConferenceType();
                         $call->update();
                     }
+                    $recordManager = new RecordManager(
+                        $user_id,
+                        $call->c_project_id,
+                        $call->c_dep_id,
+                        null,
+                        $call->c_client_id
+                    );
                     $res = \Yii::$app->communication->acceptConferenceCall(
                         $call->c_id,
                         $call->c_call_sid,
                         UserCallIdentity::getClientId($user_id),
                         $call->c_from,
-                        $user_id
+                        $user_id,
+                        $recordManager->isDisabledRecord()
                     );
 
                     if ($res) {

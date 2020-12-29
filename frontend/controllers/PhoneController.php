@@ -309,7 +309,7 @@ class PhoneController extends FController
             Auth::id(),
             $form->projectId,
             $form->departmentId,
-            $form->fromPhone,
+            null, //$form->fromPhone,
             $form->contactId
         );
 

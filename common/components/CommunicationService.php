@@ -794,7 +794,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $this->processConferenceResponse($response);
     }
 
-    public function acceptConferenceCall($id, $sid, $to, $from, $userId, $callRecordingDisabled = false): array
+    public function acceptConferenceCall($id, $sid, $to, $from, $userId, $callRecordingDisabled): array
     {
         $data = [
             'call_id' => $id,
