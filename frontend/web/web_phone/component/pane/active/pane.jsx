@@ -35,6 +35,7 @@ class ActivePane extends React.Component {
                 <div className="actions-container">
                     <CallBtns call={call}/>
                     <SoundIndication/>
+                    <RecordIndicator call={call}/>
                 </div>
                 <ActivePaneControls call={call} controls={this.props.controls}/>
             </React.Fragment>
@@ -164,6 +165,30 @@ function SoundIndication() {
                         <div className="sound-ovf" style={sound_ovf_30}> </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    );
+}
+
+function RecordIndicator(props) {
+    let call = props.call;
+    let color = {'color':'#dc3545', 'cursor': 'pointer'};
+    let text = 'ON';
+    let title = 'OFF'
+    if (props.call.data.recordingDisabled) {
+        color = {'color':'#ccc', 'cursor': 'pointer'};
+        text = 'OFF';
+        title = 'ON'
+    }
+    let faIcon = "fa fa-record-vinyl";
+    if (call.isSentRecordingRequestState()) {
+        faIcon = "fa fa-spinner fa-spin";
+    }
+    return (
+        <div className="sound-indication">
+            <div className="sound-control-wrap">
+                <i className={faIcon} style={color} id="wg-call-record" data-call-sid={call.data.callSid} title={title}> </i>
+                <div style={{"marginLeft":"10px", "color": "#fff"}}> Record {text}</div>
             </div>
         </div>
     );

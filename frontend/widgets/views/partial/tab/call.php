@@ -210,6 +210,8 @@ $prepareCurrentCallsUrl = Url::to(['/phone/prepare-current-calls']);
 $callLogInfoUrl = Url::to(['/call/ajax-call-log-info']);
 $callInfoUrl = Url::to(['/call/ajax-call-info']);
 $clientInfoUrl = Url::to(['/client/ajax-get-info']);
+$ajaxRecordingEnableUrl = Url::to(['/phone/ajax-recording-enable']);
+$ajaxRecordingDisableUrl = Url::to(['/phone/ajax-recording-disable']);
 
 $ucStatus = $userCallStatus->us_type_id ?? UserCallStatus::STATUS_TYPE_OCCUPIED;
 
@@ -240,6 +242,8 @@ PhoneWidgetCall.init({
     'callLogInfoUrl': '$callLogInfoUrl',
     'callInfoUrl': '$callInfoUrl',
     'clientInfoUrl': '$clientInfoUrl',
+    'recordingEnableUrl': '$ajaxRecordingEnableUrl',
+    'recordingDisableUrl': '$ajaxRecordingDisableUrl'
 });
 JS;
 $this->registerJs($js);

@@ -273,6 +273,60 @@
             return new Call(this.data);
         };
 
+        this.setRecordingDisableRequestState = function () {
+            if (this.isBlocked()) {
+                // createNotify('Error', 'Call is blocked. Please wait some seconds.', 'error');
+                return false;
+            }
+            if (this.data.recordingDisabled) {
+                createNotify('Error', 'Recording already OFF.', 'error');
+                return false;
+            }
+            this.data.sentRecordingRequest = true;
+            this.block();
+            this.save();
+            return true;
+        };
+
+        this.setRecordingEnableRequestState = function () {
+            if (this.isBlocked()) {
+                // createNotify('Error', 'Call is blocked. Please wait some seconds.', 'error');
+                return false;
+            }
+            if (!this.data.recordingDisabled) {
+                createNotify('Error', 'Recording already ON.', 'error');
+                return false;
+            }
+            this.data.sentRecordingRequest = true;
+            this.block();
+            this.save();
+            return true;
+        };
+
+        this.unSetRecordingRequestState = function () {
+            this.data.sentRecordingRequest = false;
+            this.unBlock();
+            this.save();
+        };
+
+        this.isSentRecordingRequestState = function () {
+            return this.data.sentRecordingRequest === true;
+        };
+
+        this.recordingDisable = function () {
+            this.unBlock();
+            this.data.sentRecordingRequest = false;
+            this.data.recordingDisabled = true;
+            this.save();
+        };
+
+        this.recordingEnable = function () {
+            this.unBlock();
+            this.data.sentRecordingRequest = false;
+            this.data.recordingDisabled = false;
+            this.save();
+        };
+
         this.save = function () {
             window.phoneWidget.eventDispatcher.dispatch(this.getEventUpdateName(),{call: this});
         };

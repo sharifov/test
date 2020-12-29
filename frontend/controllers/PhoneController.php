@@ -1307,6 +1307,20 @@ class PhoneController extends FController
         return $this->asJson($result);
     }
 
+    public function actionAjaxRecordingEnable(): Response
+    {
+        return $this->asJson([
+            ''
+        ]);
+    }
+
+    public function actionAjaxRecordingDisable(): Response
+    {
+        return $this->asJson([
+            ''
+        ]);
+    }
+
     private function getJoinCall(string $sid): Call
     {
         if (!$sid) {

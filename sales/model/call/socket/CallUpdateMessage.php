@@ -179,6 +179,7 @@ class CallUpdateMessage
             'queue' => Call::getQueueName($call),
             'conference' => $conference !== null ? $conference->getData() : null,
             'isConferenceCreator' => $isConferenceCreator,
+            'recordingDisabled' => $call->c_recording_disabled,
         ];
     }
 }

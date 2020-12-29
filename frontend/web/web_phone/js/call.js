@@ -69,6 +69,7 @@ var PhoneWidgetCall = function () {
         insertPhoneNumberEvent();
         hideNotificationEvent();
         muteIncomingAudioEvent();
+        recordingClickEvent();
     }
 
     function removeIncomingRequest(callSid) {
@@ -913,6 +914,32 @@ var PhoneWidgetCall = function () {
         });
     }
 
+    function recordingClickEvent() {
+        $(document).on('click', '#wg-call-record', function(e) {
+            if (!conferenceBase) {
+                return false;
+            }
+
+            let callSid = $(this).attr('data-call-sid');
+            if (!callSid) {
+                createNotify('Error', 'Not found Call SID', 'error');
+                return false;
+            }
+
+            let call = queues.active.one(callSid);
+            if (call === null) {
+                createNotify('Error', 'Not found Call on Active Queue', 'error');
+                return false;
+            }
+
+            if (call.data.recordingDisabled) {
+                sendRecordingEnableRequest(call.data.callSid);
+            } else {
+                sendRecordingDisableRequest(call.data.callSid);
+            }
+        });
+    }
+
     function insertPhoneNumberEvent() {
         $(document).on('click', '.phone-dial-contacts', function(e) {
             e.preventDefault();
@@ -997,6 +1024,34 @@ var PhoneWidgetCall = function () {
         }
 
         callRequester.unHold(call);
+    }
+
+    function sendRecordingEnableRequest(callSid) {
+        let call = queues.active.one(callSid);
+        if (call === null) {
+            createNotify('Error', 'Not found Call on Active Queue', 'error');
+            return false;
+        }
+
+        if (!call.setRecordingEnableRequestState()) {
+            return false;
+        }
+
+        callRequester.recordingEnable(call);
+    }
+
+    function sendRecordingDisableRequest(callSid) {
+        let call = queues.active.one(callSid);
+        if (call === null) {
+            createNotify('Error', 'Not found Call on Active Queue', 'error');
+            return false;
+        }
+
+        if (!call.setRecordingDisableRequestState()) {
+            return false;
+        }
+
+        callRequester.recordingDisable(call);
     }
 
     function dialpadHide() {

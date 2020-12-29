@@ -14,6 +14,8 @@
             'callLogInfoUrl': '',
             'callInfoUrl': '',
             'clientInfoUrl': '',
+            'recordingEnableUrl': '',
+            'recordingDisableUrl': '',
         };
 
         this.init = function (settings) {
@@ -291,6 +293,46 @@
                 .fail(function (xhr, textStatus, errorThrown) {
                     createNotify(text, xhr.responseText, 'error');
                 });
+        };
+
+        this.recordingEnable = function (call) {
+            $.ajax({
+                type: 'post',
+                data: {
+                    'sid': call.data.callSid
+                },
+                url: this.settings.recordingEnableUrl
+            })
+                .done(function (data) {
+                    if (data.error) {
+                        createNotify('Recording enable', data.message, 'error');
+                        call.unSetRecordingRequestState();
+                    }
+                })
+                .fail(function () {
+                    createNotify('Recording enable', 'Server error', 'error');
+                    call.unSetRecordingRequestState();
+                })
+        };
+
+        this.recordingDisable = function (call) {
+            $.ajax({
+                type: 'post',
+                data: {
+                    'sid': call.data.callSid
+                },
+                url: this.settings.recordingDisableUrl
+            })
+                .done(function (data) {
+                    if (data.error) {
+                        createNotify('Recording disable', data.message, 'error');
+                        call.unSetRecordingRequestState();
+                    }
+                })
+                .fail(function () {
+                    createNotify('Recording disable', 'Server error', 'error');
+                    call.unSetRecordingRequestState();
+                })
         };
     }
 
