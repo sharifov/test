@@ -34,6 +34,7 @@ class OutgoingQueueCall extends Model
     public $canCallInfo;
     public $isClient;
     public $clientId;
+    public $recordingDisabled;
 
     public function getData(): array
     {

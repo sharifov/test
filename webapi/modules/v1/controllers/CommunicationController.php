@@ -810,6 +810,8 @@ class CommunicationController extends ApiBaseController
                     $call->c_created_user_id = $agentId;
                 }
                 // Yii::warning('Not found Call: ' . $callSid, 'API:Communication:voiceClient:Call::find');
+
+                $call->c_recording_disabled = (bool) ($callOriginalData['call_recording_disabled'] ?? false);
             }
 
             if (!empty($callOriginalData['CallStatus'])) {
@@ -1152,6 +1154,8 @@ class CommunicationController extends ApiBaseController
 //
 //            }
 
+            $call->c_recording_disabled = (bool)($calData['call_recording_disabled'] ?? false);
+
             if (!$call->save()) {
                 \Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:findOrCreateCall:Call:save');
                 throw new \Exception('findOrCreateCall: Can not save call in db', 1);
@@ -1261,6 +1265,7 @@ class CommunicationController extends ApiBaseController
         if ($customParameters->to) {
             $call->c_to = $customParameters->to;
         }
+        $call->c_recording_disabled = $customParameters->call_recording_disabled;
     }
 
     private static function copyUpdatedData(Call $from, Call $to): void
@@ -2578,6 +2583,7 @@ class CommunicationController extends ApiBaseController
             $conference->cf_friendly_name = $form->friendly_name;
             $conference->cf_call_sid = $form->CallSid;
             $conference->cf_created_user_id = $form->conference_created_user_id;
+            $conference->cf_recording_disabled = $form->call_recording_disabled;
 
             try {
                 if (!$conference->save()) {

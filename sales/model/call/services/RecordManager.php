@@ -17,7 +17,7 @@ use yii\helpers\Json;
  * @property int|null $userId
  * @property int|null $projectId
  * @property int|null $departmentId
- * @property int|null $departmentPhoneProjectId
+ * @property string|null $phone
  * @property int|null $contactId
  */
 class RecordManager
@@ -25,42 +25,42 @@ class RecordManager
     private ?int $userId;
     private ?int $projectId;
     private ?int $departmentId;
+    private ?string $phone;
     private ?int $contactId;
-    private ?int $departmentPhoneProjectId;
 
     public function __construct(
         ?int $userId,
         ?int $projectId,
         ?int $departmentId,
-        ?int $departmentPhoneProjectId,
+        ?string $phone,
         ?int $contactId
     ) {
         $this->userId = $userId;
         $this->projectId = $projectId;
         $this->departmentId = $departmentId;
+        $this->phone = $phone;
         $this->contactId = $contactId;
-        $this->departmentPhoneProjectId = $departmentPhoneProjectId;
     }
 
-    public function canRecord(): bool
+    public function isDisabledRecord(): bool
     {
-        return $this->canSystem()
-            && $this->canUser()
-            && $this->canProject()
-            && $this->canDepartment()
-            && $this->canDepartmentPhoneProject()
-            && $this->canContact();
+        return $this->isDisabledSystem()
+            || $this->isDisabledUser()
+            || $this->isDisabledProject()
+            || $this->isDisabledDepartment()
+            || $this->isDisabledDepartmentPhoneProject()
+            || $this->isDisabledContact();
     }
 
-    private function canSystem(): bool
+    private function isDisabledSystem(): bool
     {
-        return !(bool)(\Yii::$app->params['settings']['call_recording_disabled'] ?? false);
+        return (bool)(\Yii::$app->params['settings']['call_recording_disabled'] ?? false);
     }
 
-    private function canUser(): bool
+    private function isDisabledUser(): bool
     {
         if (!$this->userId) {
-            return true;
+            return false;
         }
         $profile = UserProfile::find()
             ->select(['up_call_recording_disabled'])
@@ -69,36 +69,36 @@ class RecordManager
         if (!$profile) {
             return false;
         }
-        return !(bool)$profile['up_call_recording_disabled'];
+        return (bool)$profile['up_call_recording_disabled'];
     }
 
-    private function canProject(): bool
+    private function isDisabledProject(): bool
     {
         if (!$this->projectId) {
-            return true;
+            return false;
         }
         $project = Project::find()->select(['id', 'custom_data'])->andWhere(['id' => $this->projectId])->asArray()->one();
         if (!$project) {
             return false;
         }
         if (!$project['custom_data']) {
-            return true;
+            return false;
         }
         $customData = new CustomData($project['custom_data'], $project['id']);
         return $customData->isCallRecordingDisabled();
     }
 
-    private function canDepartment(): bool
+    private function isDisabledDepartment(): bool
     {
         if (!$this->departmentId) {
-            return true;
+            return false;
         }
         $department = Department::find()->select(['dep_params'])->andWhere(['dep_id' => $this->departmentId])->asArray()->one();
         if (!$department) {
             return false;
         }
         if (!$department['dep_params']) {
-            return true;
+            return false;
         }
         try {
             $data = Json::decode($department['dep_params']);
@@ -111,40 +111,41 @@ class RecordManager
                 'departmentId' => $this->departmentId,
             ], 'Department:getParams');
         }
-        return true;
+        return false;
     }
 
-    private function canDepartmentPhoneProject(): bool
+    private function isDisabledDepartmentPhoneProject(): bool
     {
-        if (!$this->departmentPhoneProjectId) {
-            return true;
+        if (!$this->phone) {
+            return false;
         }
+
         $departmentPhoneProject = DepartmentPhoneProject::find()
             ->select(['dpp_params'])
-            ->andWhere(['dpp_id' => $this->departmentPhoneProjectId])
-            ->asArray()
+            ->byPhone($this->phone, false)
             ->one();
 
         if (!$departmentPhoneProject) {
             return false;
         }
 
-        if (!$departmentPhoneProject['dpp_params']) {
-            return true;
+        if (!$departmentPhoneProject->dpp_params) {
+            return false;
         }
-        $dppParams = @json_decode($departmentPhoneProject['dpp_params'], true);
-        return !(bool)($dppParams['call_recording_disabled'] ?? false);
+
+        $dppParams = @json_decode($departmentPhoneProject->dpp_params, true);
+        return (bool)($dppParams['call_recording_disabled'] ?? false);
     }
 
-    private function canContact(): bool
+    private function isDisabledContact(): bool
     {
         if (!$this->contactId) {
-            return true;
+            return false;
         }
         $contact = Client::find()->select(['cl_call_recording_disabled'])->andWhere(['id' => $this->contactId])->asArray()->one();
         if (!$contact) {
             return false;
         }
-        return !(bool)$contact['cl_call_recording_disabled'];
+        return (bool)$contact['cl_call_recording_disabled'];
     }
 }

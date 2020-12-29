@@ -19,6 +19,7 @@ use yii\base\Model;
  * @property string $accepted_call_sid
  * @property string $from
  * @property string $to
+ * @property bool $call_recording_disabled
  */
 class CallCustomParameters extends Model
 {
@@ -33,6 +34,7 @@ class CallCustomParameters extends Model
     public $accepted_call_sid;
     public $from;
     public $to;
+    public $call_recording_disabled;
 
     public function rules(): array
     {
@@ -63,6 +65,9 @@ class CallCustomParameters extends Model
             ['from', 'string'],
 
             ['to', 'string'],
+
+            ['call_recording_disabled', 'default', 'value' => false],
+            ['call_recording_disabled', 'boolean'],
         ];
     }
 

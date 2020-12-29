@@ -9,6 +9,7 @@ class ActiveConference extends Model
     public $sid;
     public $duration;
     public $participants;
+    public $recordingDisabled;
 
     public function getData(): array
     {

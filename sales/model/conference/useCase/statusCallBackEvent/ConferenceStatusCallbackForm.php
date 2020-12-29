@@ -30,6 +30,7 @@ use yii\base\Model;
  * @property $conference_created_user_id
  * @property $participant_user_id
  * @property $participant_identity
+ * @property $call_recording_disabled
  *
  * @property $conferenceId
  */
@@ -76,6 +77,7 @@ class ConferenceStatusCallbackForm extends Model
     public $conference_created_user_id;
     public $participant_user_id;
     public $participant_identity;
+    public $call_recording_disabled;
 
     public $conferenceId;
 
@@ -141,6 +143,9 @@ class ConferenceStatusCallbackForm extends Model
             ['participant_user_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
 
             ['participant_identity', 'string', 'max' => 50],
+
+            ['call_recording_disabled', 'default', 'value' => false],
+            ['call_recording_disabled', 'boolean'],
 
             ['conferenceId', 'integer'],
         ];

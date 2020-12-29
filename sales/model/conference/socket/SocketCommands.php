@@ -23,6 +23,7 @@ class SocketCommands
                     'conference' => [
                         'sid' => $data['conference']['sid'],
                         'duration' => $data['conference']['duration'],
+                        'recordingDisabled' => $data['conference']['recordingDisabled'],
                         'participants' => $participants,
                     ],
                 ]

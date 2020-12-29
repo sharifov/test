@@ -40,6 +40,7 @@ $ajaxCreateCallUrl = Url::to(['/phone/ajax-create-call']);
 $createInternalCallUrl = Url::to(['/phone/create-internal-call']);
 $getUserByPhoneUrl = Url::to(['/phone/get-user-by-phone']);
 $getCallHistoryFromNumberUrl = Url::to(['/phone/get-call-history-from-number']);
+$ajaxCheckRecording = Url::to(['/phone/ajax-check-recording']);
 
 $conferenceBase = 0;
 if (isset(Yii::$app->params['settings']['voip_conference_base'])) {
@@ -261,51 +262,73 @@ $js = <<<JS
 
                 $.post('{$ajaxBlackList}', {phone: dialData.to}, function(data) {
                     if (data.success) {
-						if (device) {
-
-							if (conferenceBase && callOutBackendSide) {
-								let createCallParams = {
-									'{$csrf_param}' : '{$csrf_token}',
-									'called': dialData.to, 
-							        'from': dialData.from, 
-							        'project_id': dialData.project_id,
-								};
-								$.post('{$ajaxCreateCallUrl}', createCallParams, function(data) {
-									if (data.error) {
-									    freeDialButton();
-										var text = 'Error. Try again later';
-										if (data.message) {
-											text = data.message;
-										}
-										new PNotify({title: "Make call", type: "error", text: text, hide: true});
-									} else {
-										console.log('webCall success');
-									}
-								}, 'json');								
-							} else { 
-								let params = {
-								    'To': filterCallParams(dialData.to), 
-								    'FromAgentPhone': filterCallParams(dialData.from), 
-								    'c_project_id': filterCallParams(dialData.project_id),
-								    'c_dep_id': filterCallParams(dialData.department_id),
-								    'lead_id': filterCallParams(dialData.lead_id), 
-								    'case_id': filterCallParams(dialData.case_id), 
-								    'c_type': 'call-web', 
-								    'c_user_id': userId, 
-								    'user_identity': window.userIdentity, 
-								    'is_conference_call': conferenceBase,
-								    'c_client_id': filterCallParams(dialData.client_id),
-								    'c_source_type_id': filterCallParams(dialData.source_type_id)
-								};				
-								console.log('create call with params:');
-								console.log(params);
-								// createNotify('Calling', 'Calling ' + params.To + '...', 'success');
-								updateAgentStatus(connection, false, 0);
-								connection = device.connect(params);
-							}
-						} else {
-						    freeDialButton();
-						}
+                        
+                        $.post('{$ajaxCheckRecording}', 
+                            {
+                                'fromPhone': dialData.from,
+                                'projectId': dialData.project_id,
+                                'departmentId': dialData.department_id,
+                                'contactId': dialData.client_id
+                            }, function(dataRecording) {
+                        
+                            if (dataRecording.success) {
+                                
+                                if (device) {
+        
+                                    if (conferenceBase && callOutBackendSide) {
+                                        let createCallParams = {
+                                            '{$csrf_param}' : '{$csrf_token}',
+                                            'called': dialData.to, 
+                                            'from': dialData.from, 
+                                            'project_id': dialData.project_id,
+                                        };
+                                        $.post('{$ajaxCreateCallUrl}', createCallParams, function(data) {
+                                            if (data.error) {
+                                                freeDialButton();
+                                                var text = 'Error. Try again later';
+                                                if (data.message) {
+                                                    text = data.message;
+                                                }
+                                                new PNotify({title: "Make call", type: "error", text: text, hide: true});
+                                            } else {
+                                                console.log('webCall success');
+                                            }
+                                        }, 'json');								
+                                    } else { 
+                                        let params = {
+                                            'To': filterCallParams(dialData.to), 
+                                            'FromAgentPhone': filterCallParams(dialData.from), 
+                                            'c_project_id': filterCallParams(dialData.project_id),
+                                            'c_dep_id': filterCallParams(dialData.department_id),
+                                            'lead_id': filterCallParams(dialData.lead_id), 
+                                            'case_id': filterCallParams(dialData.case_id), 
+                                            'c_type': 'call-web', 
+                                            'c_user_id': userId, 
+                                            'user_identity': window.userIdentity, 
+                                            'is_conference_call': conferenceBase,
+                                            'c_client_id': filterCallParams(dialData.client_id),
+                                            'c_source_type_id': filterCallParams(dialData.source_type_id),
+                                            'call_recording_disabled': dataRecording.value
+                                        };
+                                        console.log('create call with params:');
+                                        console.log(params);
+                                        // createNotify('Calling', 'Calling ' + params.To + '...', 'success');
+                                        updateAgentStatus(connection, false, 0);
+                                        connection = device.connect(params);
+                                    }
+                                } else {
+                                    freeDialButton();
+                                }
+                            } else {
+                                freeDialButton();
+                                var text = 'Error. Try again later';
+                                if (dataRecording.message) {
+                                    text = dataRecording.message;
+                                }
+                                new PNotify({title: "Make call", type: "error", text: text, hide: true});
+                            } 
+						}, 'json');
+                        
                     } else {
                         freeDialButton();
                         var text = 'Error. Try again later';

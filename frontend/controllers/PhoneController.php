@@ -20,6 +20,8 @@ use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
 use sales\helpers\UserCallIdentity;
+use sales\model\call\services\RecordManager;
+use sales\model\call\useCase\checkRecording\CheckRecordingForm;
 use sales\model\call\useCase\conference\create\CreateCallForm;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
@@ -283,6 +285,38 @@ class PhoneController extends FController
             $response['callToName'] = $callTo->client->first_name . ' ' . $callTo->client->last_name;
         }
         return $this->asJson($response);
+    }
+
+    public function actionAjaxCheckRecording(): Response
+    {
+        $form = new CheckRecordingForm();
+
+        if (!$form->load(Yii::$app->request->post())) {
+            return $this->asJson([
+                'success' => false,
+                'message' => 'Data not found.',
+            ]);
+        }
+
+        if (!$form->validate()) {
+            return $this->asJson([
+                'success' => false,
+                'message' => VarDumper::dumpAsString($form->getErrors()),
+            ]);
+        }
+
+        $recordManager = new RecordManager(
+            Auth::id(),
+            $form->projectId,
+            $form->departmentId,
+            $form->fromPhone,
+            $form->contactId
+        );
+
+        return $this->asJson([
+            'success' => true,
+            'value' => $recordManager->isDisabledRecord() ? 1 : 0,
+        ]);
     }
 
     /**

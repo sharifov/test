@@ -47,7 +47,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'cf_duration:duration',
             'cf_created_dt:byUserDateTime',
             'cf_updated_dt:byUserDateTime',
-            'createdUser:userName'
+            'createdUser:userName',
+            'cf_recording_disabled:booleanByLabel',
         ],
     ]) ?>
 

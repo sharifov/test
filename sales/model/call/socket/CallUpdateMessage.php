@@ -133,6 +133,7 @@ class CallUpdateMessage
                 'sid' => $data['conference']['sid'],
                 'duration' => $data['conference']['duration'],
                 'participants' => $participants,
+                'recordingDisabled' => $data['conference']['recordingDisabled'],
             ]);
 
             if ($call->c_created_user_id === $data['conference']['creator']) {

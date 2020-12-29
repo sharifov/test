@@ -95,6 +95,7 @@ use Locale;
  * @property bool $c_is_new
  * @property string|null $c_data_json
  * @property string $recordingUrl
+ * @property bool $c_recording_disabled
  *
  * @property Data|null $data
  *
@@ -315,6 +316,9 @@ class Call extends \yii\db\ActiveRecord
             ['c_data_json', 'string'],
 
             ['c_call_sid', 'unique'],
+
+            ['c_recording_disabled', 'default', 'value' => false],
+            ['c_recording_disabled', 'boolean'],
         ];
     }
 
@@ -362,6 +366,7 @@ class Call extends \yii\db\ActiveRecord
             'c_conference_sid' => 'Conference SID',
             'c_language_id' => 'Language ID',
             'c_data_json' => 'Data',
+            'c_recording_disabled' => 'Recording disabled',
         ];
     }
 

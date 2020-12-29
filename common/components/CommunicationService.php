@@ -794,14 +794,15 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $this->processConferenceResponse($response);
     }
 
-    public function acceptConferenceCall($id, $sid, $to, $from, $userId): array
+    public function acceptConferenceCall($id, $sid, $to, $from, $userId, $callRecordingDisabled = false): array
     {
         $data = [
             'call_id' => $id,
             'call_sid' => $sid,
             'to' => $to,
             'from' => $from,
-            'user_id' => $userId
+            'user_id' => $userId,
+            'call_recording_disabled' => $callRecordingDisabled,
         ];
 
         $response = $this->sendRequest('twilio-conference/accept-call', $data);

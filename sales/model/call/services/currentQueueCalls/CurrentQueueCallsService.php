@@ -72,6 +72,7 @@ class CurrentQueueCallsService
                     'sid' => $data['conference']['sid'],
                     'duration' => $data['conference']['duration'],
                     'participants' => $participants,
+                    'recordingDisabled' => $data['conference']['recordingDisabled'],
                 ]);
             }
         }
@@ -246,6 +247,7 @@ class CurrentQueueCallsService
                 'canCallInfo' => $this->canCallInfo,
                 'isClient' => $call->c_client_id ? $call->cClient->isClient() : false,
                 'clientId' => $call->c_client_id,
+                'recordingDisabled' => $call->c_recording_disabled ? true : false,
             ]);
 
             $last_time = strtotime($call->c_updated_dt);
@@ -336,6 +338,7 @@ class CurrentQueueCallsService
                 'canCallInfo' => $this->canCallInfo,
                 'isClient' => $call->c_client_id ? $call->cClient->isClient() : false,
                 'clientId' => $call->c_client_id,
+                'recordingDisabled' => $call->c_recording_disabled ? true : false,
             ]);
             $last_time = strtotime($call->c_updated_dt);
         }
@@ -397,6 +400,7 @@ class CurrentQueueCallsService
                 'canCallInfo' => $this->canCallInfo,
                 'isClient' => $call->c_client_id ? $call->cClient->isClient() : false,
                 'clientId' => $call->c_client_id,
+                'recordingDisabled' => $call->c_recording_disabled ? true : false,
             ]);
             $last_time = strtotime($item->cua_updated_dt);
         }
@@ -463,6 +467,7 @@ class CurrentQueueCallsService
                 'canCallInfo' => $this->canCallInfo,
                 'isClient' => $call->c_client_id ? $call->cClient->isClient() : false,
                 'clientId' => $call->c_client_id,
+                'recordingDisabled' => $call->c_recording_disabled ? true : false,
             ]);
         }
 
