@@ -22,7 +22,9 @@ use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
 use sales\helpers\communication\StatisticsHelper;
+use sales\helpers\projectLocale\ProjectLocaleHelper;
 use sales\helpers\setting\SettingHelper;
+use sales\model\project\entity\projectLocale\ProjectLocale;
 use yii\helpers\Html;
 use yii\bootstrap4\Modal;
 use vova07\imperavi\Widget;
@@ -159,9 +161,7 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                             </div>
                             <div class="form-group">
 
-                                <?php echo $form2->field($previewEmailForm, 'e_email_message')->textarea(
-                                    ['style' => 'display:none', 'id' => 'e_email_message']
-                                ) ?>
+                        <?php echo $form2->field($previewEmailForm, 'e_email_message')->textarea(['style' => 'display:none', 'id' => 'e_email_message']) ?>
 
                                 <div style="max-height: 800px; overflow-x: auto;">
                                     <iframe id="email_view" src="/lead/get-template?key_cache=<?php echo $previewEmailForm->keyCache?>"
@@ -394,10 +394,24 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                                 </div>
 
                                 <div class="col-sm-3 form-group message-field-sms message-field-email" id="language-group" style="display: block;">
-                                    <?= $form->field($comForm, 'c_language_id')
+
+                                    <?php
+                                        $localeList = ProjectLocale::getLocaleListByProject((int) $lead->project_id);
+                                        $clientLocale = $lead->client ? (string) $lead->client->cl_locale : '';
+                                        $projectDefaultLocale = ProjectLocale::getDefaultLocaleByProject((int) $lead->project_id);
+                                        $defaultLocale = ProjectLocaleHelper::getSelectedLocale($localeList, $clientLocale, $projectDefaultLocale);
+                                    ?>
+
+                                    <?php echo $form->field($comForm, 'c_language_id')
                                         ->dropDownList(
-                                            \common\models\Language::getLanguages(true),
-                                            ['prompt' => '---', 'class' => 'form-control', 'id' => 'language']
+                                            $localeList,
+                                            [
+                                                'class' => 'form-control',
+                                                'id' => 'language',
+                                                'options' => [
+                                                    $defaultLocale => ['selected' => true]
+                                                ],
+                                            ]
                                         ) ?>
                                 </div>
 
