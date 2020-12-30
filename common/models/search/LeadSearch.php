@@ -107,6 +107,7 @@ class LeadSearch extends Lead
     public $createdRangeTime;
     public $updatedRangeTime;
     public $lastActionRangeTime;
+    public $statusRangeTime;
     public $soldRangeTime;
     public $createTimeRange;
     public $createdType;
@@ -186,7 +187,7 @@ class LeadSearch extends Lead
                 return is_array($value) ? $value : [];
             }, 'skipOnEmpty' => true],
 
-            [['departRangeTime', 'createdRangeTime', 'soldRangeTime', 'updatedRangeTime', 'lastActionRangeTime'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+            [['departRangeTime', 'createdRangeTime', 'soldRangeTime', 'updatedRangeTime', 'lastActionRangeTime', 'statusRangeTime'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
 
             ['remainingDays', 'integer'],
             ['remainingDays', 'filter', 'filter' => static function ($value) {
@@ -398,6 +399,15 @@ class LeadSearch extends Lead
             }
             if ($lastActionRange[1]) {
                 $query->andFilterWhere(['<=', 'leads.l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($lastActionRange[1]))]);
+            }
+        }
+        if ($this->statusRangeTime) {
+            $statusRange = explode(" - ", $this->statusRangeTime);
+            if ($statusRange[0]) {
+                $query->andFilterWhere(['>=', 'leads.l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($statusRange[0]))]);
+            }
+            if ($statusRange[1]) {
+                $query->andFilterWhere(['<=', 'leads.l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($statusRange[1]))]);
             }
         }
 
@@ -2819,7 +2829,6 @@ class LeadSearch extends Lead
 
     public function searchEmail($params)
     {
-
         $this->load($params);
 
         $query = new Query();
@@ -2871,7 +2880,6 @@ class LeadSearch extends Lead
 
     public function searchPhone($params)
     {
-
         $this->load($params);
 
         $query = new Query();
@@ -3324,7 +3332,7 @@ class LeadSearch extends Lead
             foreach (UserProfile::SKILL_TYPE_LIST as $id => $item) {
                 if ($skill == strtolower($item) && $value == false) {
                     $skillsSettings .= "' ', ";
-                } else if ($skill == strtolower($item) && $value == true) {
+                } elseif ($skill == strtolower($item) && $value == true) {
                     $skillsSettings .= "'" . $id . "', ";
                 }
             }
@@ -3599,7 +3607,7 @@ class LeadSearch extends Lead
         if ($this->departmentId != null) {
             $userIdsByDepartment = UserDepartment::find()->select(['ud_user_id'])->where(['=', 'ud_dep_id', $this->departmentId])->asArray()->all();
             $employeesFromDep = "'" . implode("', '", array_map(function ($entry) {
-                    return $entry['ud_user_id'];
+                return $entry['ud_user_id'];
             }, $userIdsByDepartment)) . "'";
             $queryByDepartment = " AND lf.lf_owner_id in " . "(" . $employeesFromDep . ")";
         } else {
@@ -3609,7 +3617,7 @@ class LeadSearch extends Lead
         if ($this->userGroupId != null) {
             $userIdsByGroup = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['=', 'ugs_group_id', $this->userGroupId])->asArray()->all();
             $employees = "'" . implode("', '", array_map(function ($entry) {
-                    return $entry['ugs_user_id'];
+                return $entry['ugs_user_id'];
             }, $userIdsByGroup)) . "'";
             $queryByGroup = " AND lf.lf_owner_id in " . "(" . $employees . ")";
         } else {
@@ -3741,7 +3749,7 @@ class LeadSearch extends Lead
             $date_from = Employee::convertToUTC(strtotime($dates[0]) - ($hourSub * 3600), $this->defaultUserTz);
             $date_to = Employee::convertToUTC(strtotime($dates[1]), $this->defaultUserTz);
             $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
-            //$utcOffsetDST = Employee::getUtcOffsetDst($timezone, $date_from) ?? date('P');
+        //$utcOffsetDST = Employee::getUtcOffsetDst($timezone, $date_from) ?? date('P');
         } else {
             //$timeSub = date('G', strtotime(date('00:00')));
             $date_from = Employee::convertToUTC(strtotime(date('Y-m-d 00:00') . ' -2 days'), $this->defaultUserTz);
@@ -3754,7 +3762,7 @@ class LeadSearch extends Lead
             $queryByOwner = " lf.lf_owner_id = '{$this->lfOwnerId}'";
         } else {
             $owners = "'" . implode("', '", array_map(function ($entry) {
-                    return $entry;
+                return $entry;
             }, EmployeeGroupAccess::getUsersIdsInCommonGroups(Auth::id()))) . "'";
             $queryByOwner = " lf.lf_owner_id in " . "(" . $owners . ")";
         }
@@ -3762,7 +3770,7 @@ class LeadSearch extends Lead
         if ($this->departmentId != null) {
             $userIdsByDepartment = UserDepartment::find()->select(['ud_user_id'])->where(['=', 'ud_dep_id', $this->departmentId])->asArray()->all();
             $employeesFromDep = "'" . implode("', '", array_map(function ($entry) {
-                    return $entry['ud_user_id'];
+                return $entry['ud_user_id'];
             }, $userIdsByDepartment)) . "'";
             $queryByDepartment = "lf.lf_owner_id in " . "(" . $employeesFromDep . ")";
         } else {
@@ -3772,7 +3780,7 @@ class LeadSearch extends Lead
         if ($this->userGroupId != null) {
             $userIdsByGroup = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['=', 'ugs_group_id', $this->userGroupId])->asArray()->all();
             $employees = "'" . implode("', '", array_map(function ($entry) {
-                    return $entry['ugs_user_id'];
+                return $entry['ugs_user_id'];
             }, $userIdsByGroup)) . "'";
             $queryByGroup = " lf.lf_owner_id in " . "(" . $employees . ")";
         } else {

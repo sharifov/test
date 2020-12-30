@@ -129,6 +129,7 @@ use yii\helpers\VarDumper;
  * @property int $l_is_test
  * @property string|null $hybrid_uid
  * @property int|null $l_visitor_log_id
+ * @property string|null $l_status_dt
  *
  * @property float $finalProfit
  * @property int $quotesCount
@@ -546,7 +547,7 @@ class Lead extends ActiveRecord implements Objectable
 
             [['notes_for_experts', 'request_ip_detail', 'l_client_ua'], 'string'],
 
-            [['created', 'updated', 'snooze_for', 'called_expert', 'additional_information', 'l_pending_delay_dt', 'l_last_action_dt'], 'safe'],
+            [['created', 'updated', 'snooze_for', 'called_expert', 'additional_information', 'l_pending_delay_dt', 'l_last_action_dt', 'l_status_dt'], 'safe'],
 
             [['final_profit', 'tips', 'agents_processing_fee', 'l_init_price'], 'number'],
             [['uid', 'request_ip', 'offset_gmt', 'discount_id', 'description'], 'string', 'max' => 255],
@@ -1060,6 +1061,7 @@ class Lead extends ActiveRecord implements Objectable
         }
 
         $this->status = $status;
+        $this->l_status_dt = date('Y-m-d H:i:s');
     }
 
     /**
@@ -1795,6 +1797,7 @@ class Lead extends ActiveRecord implements Objectable
             'hybrid_uid' => 'Booking ID',
 
             'l_visitor_log_id' => 'Visitor log ID',
+            'l_status_dt' => 'Status Dt',
         ];
     }
 
