@@ -404,10 +404,10 @@ class LeadSearch extends Lead
         if ($this->statusRangeTime) {
             $statusRange = explode(" - ", $this->statusRangeTime);
             if ($statusRange[0]) {
-                $query->andFilterWhere(['>=', 'leads.l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($statusRange[0]))]);
+                $query->andFilterWhere(['>=', 'leads.l_status_dt', Employee::convertTimeFromUserDtToUTC(strtotime($statusRange[0]))]);
             }
             if ($statusRange[1]) {
-                $query->andFilterWhere(['<=', 'leads.l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($statusRange[1]))]);
+                $query->andFilterWhere(['<=', 'leads.l_status_dt', Employee::convertTimeFromUserDtToUTC(strtotime($statusRange[1]))]);
             }
         }
 
