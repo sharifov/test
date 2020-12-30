@@ -2213,4 +2213,14 @@ class Call extends \yii\db\ActiveRecord
         $this->c_data_json = $data->toJson();
         $this->data = $data;
     }
+
+    public function recordingDisable(): void
+    {
+        $this->c_recording_disabled = true;
+    }
+
+    public function recordingEnable(): void
+    {
+        $this->c_recording_disabled = false;
+    }
 }

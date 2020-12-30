@@ -534,6 +534,22 @@ $js = <<<JS
                             let leadId = parseInt(obj.data.leadId, 10);
                             $(document).find('span[data-cc-lead-info-offer="' + leadId + '"]').html("");
                         }
+                        
+                        if (obj.cmd === 'recordingEnable') {
+                            if (typeof obj.data !== 'undefined') {
+                                if (typeof PhoneWidgetCall === 'object') {
+                                    PhoneWidgetCall.socket(obj.data);
+                                }
+                             }
+                        }
+                        
+                        if (obj.cmd === 'recordingDisable') {
+                            if (typeof obj.data !== 'undefined') {
+                                if (typeof PhoneWidgetCall === 'object') {
+                                    PhoneWidgetCall.socket(obj.data);
+                                }
+                             }
+                        }
                     }
                     // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
                 } catch (error) {

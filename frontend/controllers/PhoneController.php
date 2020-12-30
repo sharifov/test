@@ -1309,16 +1309,85 @@ class PhoneController extends FController
 
     public function actionAjaxRecordingEnable(): Response
     {
-        return $this->asJson([
-            ''
-        ]);
+        try {
+            $sid = (string)Yii::$app->request->post('sid');
+            $call = $this->getDataForRecordingConferenceCall($sid, Auth::id());
+            if (!$call->c_recording_disabled) {
+                throw new \DomainException('Recording already enable.');
+            }
+//            $result = Yii::$app->communication->recordingEnable($call->c_conference_sid, $call->c_call_sid);
+            $result = [];
+        } catch (\Throwable $e) {
+            $result = [
+                'error' => true,
+                'message' => $e->getMessage(),
+            ];
+        }
+        return $this->asJson($result);
     }
 
     public function actionAjaxRecordingDisable(): Response
     {
-        return $this->asJson([
-            ''
-        ]);
+        try {
+            $sid = (string)Yii::$app->request->post('sid');
+            $call = $this->getDataForRecordingConferenceCall($sid, Auth::id());
+            if ($call->c_recording_disabled) {
+                throw new \DomainException('Recording already disabled.');
+            }
+            $result = Yii::$app->communication->recordingDisable($call->c_conference_sid);
+            $isError = (bool)($result['error'] ?? true);
+            if ($isError) {
+                throw new \DomainException($result['message']);
+            }
+            $anyError = false;
+            if ($result['result']) {
+                $conference = Conference::find()->bySid($call->c_conference_sid)->one();
+                if ($conference) {
+                    $conference->recordingDisable();
+                    $conference->save(false);
+                }
+                $users = [];
+                $notifications = [];
+                foreach ($result['result'] as $callSid => $res) {
+                    $call = Call::find()->bySid($callSid)->one();
+                    $users[$call->c_created_user_id] = $call->c_created_user_id;
+                    if ($res['error']) {
+                        $anyError = true;
+                    } else {
+                        if ($call) {
+                            $call->recordingDisable();
+                            $call->save(false);
+                            $notifications[] = [
+                                'data' => [
+                                    'command' => 'recordingDisable',
+                                    'call' => ['sid' => $call->c_call_sid],
+                                ]
+                            ];
+                        }
+                    }
+                }
+                foreach ($users as $user) {
+                    foreach ($notifications as $notification) {
+                        Notifications::publish('recordingDisable', ['user_id' => $user], $notification);
+                    }
+                }
+            }
+            if ($anyError) {
+                return $this->asJson([
+                    'error' => true,
+                    'message' => 'There were some errors. Try again.',
+                ]);
+            }
+            return $this->asJson([
+                'error' => false,
+                'result' => $result,
+            ]);
+        } catch (\Throwable $e) {
+            return $this->asJson([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
     private function getJoinCall(string $sid): Call
@@ -1440,6 +1509,75 @@ class PhoneController extends FController
             'keeperSid' => $keeperSid,
             'call' => $call,
         ];
+    }
+
+    private function getDataForRecordingConferenceCall(string $sid, int $userId): Call
+    {
+        if (!$sid) {
+            throw new BadRequestHttpException('Not found Call SID in request');
+        }
+
+        if (!$call = Call::findOne(['c_call_sid' => $sid])) {
+            throw new BadRequestHttpException('Not found Call. Sid: ' . $sid);
+        }
+
+        if (!$call->isOwner($userId)) {
+            throw new BadRequestHttpException('Is not your Call');
+        }
+
+        if (!$participant = $call->currentParticipant) {
+            throw new BadRequestHttpException('Not found Participant');
+        }
+
+        if (!($participant->isAgent() || $participant->isUser())) {
+            throw new BadRequestHttpException('Invalid type of Participant');
+        }
+
+        if (!($call->isIn() || $call->isOut() || $call->isReturn())) {
+            throw new BadRequestHttpException('Invalid Call type');
+        }
+
+        if (!$call->isStatusInProgress()) {
+            throw new BadRequestHttpException('Invalid Call Status');
+        }
+
+        if (!$call->isConferenceType()) {
+            throw new BadRequestHttpException('Call is not conference Call. Sid: ' . $sid);
+        }
+
+        if (!$call->c_conference_id) {
+            throw new BadRequestHttpException('Call not updated. Please wait some seconds.');
+        }
+
+        if (!$conference = Conference::findOne(['cf_id' => $call->c_conference_id])) {
+            throw new BadRequestHttpException('Not found conference. SID: ' . $call->c_conference_sid);
+        }
+
+        if (!$conference->isCreator($userId)) {
+            throw new BadRequestHttpException('You are not conference creator. Sid: ' . $sid);
+        }
+
+        if (!$participants = $conference->conferenceParticipants) {
+            throw new BadRequestHttpException('Not found participants on Conference Sid: ' . $call->c_conference_sid);
+        }
+
+        if (count($participants) < 2) {
+            throw new BadRequestHttpException('Please wait. Count participant must be more then 2');
+        }
+
+        $callIsOneOfParticipants = false;
+        foreach ($participants as $participant) {
+            if ($participant->cp_call_id === $call->c_id) {
+                $callIsOneOfParticipants = true;
+                break;
+            }
+        }
+
+        if (!$callIsOneOfParticipants) {
+            throw new BadRequestHttpException('Call is not One of participants on Conference Sid: ' . $call->c_conference_sid);
+        }
+
+        return $call;
     }
 
     private function getCallForMuteUnmuteParticipant(string $sid, int $userId): Call

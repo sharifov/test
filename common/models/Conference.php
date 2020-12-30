@@ -246,4 +246,14 @@ class Conference extends \yii\db\ActiveRecord
     {
         return $this->cf_created_user_id === $userId;
     }
+
+    public function recordingDisable(): void
+    {
+        $this->cf_recording_disabled = true;
+    }
+
+    public function recordingEnable(): void
+    {
+        $this->cf_recording_disabled = false;
+    }
 }

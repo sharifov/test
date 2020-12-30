@@ -1054,6 +1054,22 @@ var PhoneWidgetCall = function () {
         callRequester.recordingDisable(call);
     }
 
+    function recordingDisable(callSid) {
+        let call = queues.active.one(callSid);
+        if (call === null) {
+            return;
+        }
+        call.recordingDisable();
+    }
+
+    function recordingEnable(callSid) {
+        let call = queues.active.one(callSid);
+        if (call === null) {
+            return;
+        }
+        call.recordingEnable();
+    }
+
     function dialpadHide() {
         $('.dial-popup').slideUp(150);
     }
@@ -1081,6 +1097,14 @@ var PhoneWidgetCall = function () {
         }
         if (data.command === 'addCallToHistory') {
             addCallToHistory(data);
+            return;
+        }
+        if (data.command === 'recordingDisable') {
+            recordingDisable(data.call.sid);
+            return;
+        }
+        if (data.command === 'recordingEnable') {
+            recordingEnable(data.call.sid);
             return;
         }
     }
