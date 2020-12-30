@@ -157,6 +157,9 @@ $user = Yii::$app->user->identity;
             if (!empty($projectCustomDataArr)) {
                 $stylesArr = [];
                 foreach ($projectCustomDataArr as $styleKey => $styleEntry) {
+                    if ($styleKey === 'object') {
+                        continue;
+                    }
                     if (!empty($styleEntry)) {
                         $stylesArr[] = $styleKey . ':' . $styleEntry;
                     }
