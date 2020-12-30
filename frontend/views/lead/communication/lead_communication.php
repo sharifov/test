@@ -397,21 +397,13 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
 
                                     <?php
                                         $localeList = ProjectLocale::getLocaleListByProject((int) $lead->project_id);
-                                        $clientLocale = $lead->client ? (string) $lead->client->cl_locale : '';
-                                        $projectDefaultLocale = ProjectLocale::getDefaultLocaleByProject((int) $lead->project_id);
-                                        $defaultLocale = ProjectLocaleHelper::getSelectedLocale($localeList, $clientLocale, $projectDefaultLocale);
+                                        $comForm->c_language_id = null;
                                     ?>
 
                                     <?php echo $form->field($comForm, 'c_language_id')
                                         ->dropDownList(
                                             $localeList,
-                                            [
-                                                'class' => 'form-control',
-                                                'id' => 'language',
-                                                'options' => [
-                                                    $defaultLocale => ['selected' => true]
-                                                ],
-                                            ]
+                                            ['prompt' => '---', 'class' => 'form-control', 'id' => 'language']
                                         ) ?>
                                 </div>
 
