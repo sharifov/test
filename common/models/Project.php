@@ -12,7 +12,10 @@ use sales\model\phoneLine\phoneLine\entity\PhoneLine;
 use sales\model\project\entity\CustomData;
 use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
 use Yii;
+use yii\behaviors\TimestampBehavior;
+use yii\behaviors\BlameableBehavior;
 use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\httpclient\CurlTransport;
@@ -95,6 +98,23 @@ class Project extends \yii\db\ActiveRecord
             [['project_key'], 'string', 'max' => 50],
             [['project_key'], 'unique'],
             [['p_update_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['p_update_user_id' => 'id']],
+        ];
+    }
+
+    public function behaviors()
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['last_update'],
+                ],
+                'value' => date('Y-m-d H:i:s')
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'updatedByAttribute' => 'p_update_user_id',
+            ],
         ];
     }
 
@@ -234,10 +254,10 @@ class Project extends \yii\db\ActiveRecord
                     $pr->project_key = $projectItem['project_key'];
                     $pr->link = $projectItem['link'];
                     $pr->closed = (bool)$projectItem['closed'];
-                    $pr->last_update = date('Y-m-d H:i:s');
-                    if (isset(Yii::$app->user) && Yii::$app->user->id) {
-                        $pr->p_update_user_id = Yii::$app->user->id;
-                    }
+                    /* $pr->last_update = date('Y-m-d H:i:s');
+                     if (isset(Yii::$app->user) && Yii::$app->user->id) {
+                         $pr->p_update_user_id = Yii::$app->user->id;
+                     }*/
                     if (!$pr->save()) {
                         Yii::error(
                             VarDumper::dumpAsString($pr->errors),
