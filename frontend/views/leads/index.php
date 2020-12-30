@@ -228,6 +228,15 @@ $this->registerJs($js);
         ],
 
         [
+            'attribute' => 'l_status_dt',
+            'value' => static function (Lead $model) {
+                return $model->l_status_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->l_status_dt)) : '-';
+            },
+            'format' => 'raw',
+            'filter' => false
+        ],
+
+        [
             'attribute' => 'status_flow',
             'value' => static function (Lead $lead) {
                 $statusValue = '';
