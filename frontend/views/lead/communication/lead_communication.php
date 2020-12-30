@@ -402,7 +402,7 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
 
                                     <?php echo $form->field($comForm, 'c_language_id')
                                         ->dropDownList(
-                                            \common\models\Language::getLanguages(true),
+                                            $localeList,
                                             ['prompt' => '---', 'class' => 'form-control', 'id' => 'language']
                                         ) ?>
                                 </div>
