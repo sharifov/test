@@ -185,10 +185,11 @@ $(document).ready( function () {
     }
             
     document.addEventListener("visibilitychange", function () {
-        if (window.name === 'chat') {            
-            if (activeChatId == chatId) {
-                $.post('{$discardUnreadMessageUrl}', {cchId: activeChatId});
-            }
+        let activeChatId = localStorage.getItem('activeChatId');
+        let params = new URLSearchParams(window.location.search);
+        let chatId = params.get('chid'); 
+        if (window.name === 'chat' && activeChatId == chatId) {            
+            $.post('{$discardUnreadMessageUrl}', {cchId: activeChatId});
         }
     })
 });
