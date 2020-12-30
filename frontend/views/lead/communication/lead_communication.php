@@ -22,7 +22,9 @@ use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
 use sales\helpers\communication\StatisticsHelper;
+use sales\helpers\projectLocale\ProjectLocaleHelper;
 use sales\helpers\setting\SettingHelper;
+use sales\model\project\entity\projectLocale\ProjectLocale;
 use yii\helpers\Html;
 use yii\bootstrap4\Modal;
 use vova07\imperavi\Widget;
@@ -159,9 +161,7 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                             </div>
                             <div class="form-group">
 
-                                <?php echo $form2->field($previewEmailForm, 'e_email_message')->textarea(
-                                    ['style' => 'display:none', 'id' => 'e_email_message']
-                                ) ?>
+                        <?php echo $form2->field($previewEmailForm, 'e_email_message')->textarea(['style' => 'display:none', 'id' => 'e_email_message']) ?>
 
                                 <div style="max-height: 800px; overflow-x: auto;">
                                     <iframe id="email_view" src="/lead/get-template?key_cache=<?php echo $previewEmailForm->keyCache?>"
@@ -233,7 +233,7 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
 
                                 <div class="col-sm-6 form-group">
                                     <?= $form3->field($previewSmsForm, 's_phone_from')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
-                                    <?php //= $form3->field($previewSmsForm, 's_lead_id')->hiddenInput()->label(false); ?>
+                                    <?php //= $form3->field($previewSmsForm, 's_lead_id')->hiddenInput()->label(false);?>
                                     <?= $form3->field($previewSmsForm, 's_language_id')->hiddenInput()->label(false); ?>
                                     <?= $form3->field($previewSmsForm, 's_sms_tpl_id')->hiddenInput()->label(false); ?>
                                     <?= $form3->field($previewSmsForm, 's_quote_list')->hiddenInput()->label(false) ?>
@@ -384,20 +384,34 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                                 </div>
 
                                 <div class="col-sm-3 form-group message-field-sms" id="sms-template-group">
-                                    <?php //= $form->field($comForm, 'c_sms_tpl_id')->dropDownList(\common\models\SmsTemplateType::getList(false), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_id']) ?>
+                                    <?php //= $form->field($comForm, 'c_sms_tpl_id')->dropDownList(\common\models\SmsTemplateType::getList(false), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_id'])?>
                                     <?= $form->field($comForm, 'c_sms_tpl_key')->dropDownList(\common\models\SmsTemplateType::getKeyList(false, \common\models\Department::DEPARTMENT_SALES), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_key']) ?>
                                 </div>
 
                                 <div class="col-sm-3 form-group message-field-email" id="email-template-group" style="display: none;">
-                                    <?php //= $form->field($comForm, 'c_email_tpl_id')->dropDownList(\common\models\EmailTemplateType::getList(false, \common\models\Department::DEPARTMENT_SALES), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_id']) ?>
+                                    <?php //= $form->field($comForm, 'c_email_tpl_id')->dropDownList(\common\models\EmailTemplateType::getList(false, \common\models\Department::DEPARTMENT_SALES), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_id'])?>
                                     <?= $form->field($comForm, 'c_email_tpl_key')->dropDownList(\common\models\EmailTemplateType::getKeyList(false, \common\models\Department::DEPARTMENT_SALES), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_key']) ?>
                                 </div>
 
                                 <div class="col-sm-3 form-group message-field-sms message-field-email" id="language-group" style="display: block;">
-                                    <?= $form->field($comForm, 'c_language_id')
+
+                                    <?php
+                                        $localeList = ProjectLocale::getLocaleListByProject((int) $lead->project_id);
+                                        $clientLocale = $lead->client ? (string) $lead->client->cl_locale : '';
+                                        $projectDefaultLocale = ProjectLocale::getDefaultLocaleByProject((int) $lead->project_id);
+                                        $defaultLocale = ProjectLocaleHelper::getSelectedLocale($localeList, $clientLocale, $projectDefaultLocale);
+                                    ?>
+
+                                    <?php echo $form->field($comForm, 'c_language_id')
                                         ->dropDownList(
-                                            \common\models\Language::getLanguages(true),
-                                            ['prompt' => '---', 'class' => 'form-control', 'id' => 'language']
+                                            $localeList,
+                                            [
+                                                'class' => 'form-control',
+                                                'id' => 'language',
+                                                'options' => [
+                                                    $defaultLocale => ['selected' => true]
+                                                ],
+                                            ]
                                         ) ?>
                                 </div>
 
@@ -451,7 +465,7 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
 
                             <div id="email-input-box" class="message-field-email" style="display: none;">
                                 <div class="form-group" id="email-textarea-div">
-                                    <?php //= $form->field($comForm, 'c_email_message')->textarea(['rows' => 4, 'class' => 'form-control', 'id' => 'email-message']) ?>
+                                    <?php //= $form->field($comForm, 'c_email_message')->textarea(['rows' => 4, 'class' => 'form-control', 'id' => 'email-message'])?>
 
 
                                     <?php
@@ -481,7 +495,7 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                                     //                                        'removeButtons' => 'Subscript,Superscript,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe',
                                     //                                        'removePlugins' => 'elementspath',
                                     //                                    ]
-                                    //                                ]) ?>
+                                    //                                ])?>
 
                                 </div>
                                 <div class="btn-wrapper">

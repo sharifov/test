@@ -74,6 +74,11 @@ $('#client-edit-name-form').on('beforeSubmit', function (e) {
                 $('#pjax-client-manage-name').html(data.html);
                 $('#modal-client-manage-info').modal('hide');
                 
+                let clientLocale = $('#clientcreateform-locale').val();
+                if (clientLocale !== 'undefined' && clientLocale.length && $('#language option[value=' + clientLocale + ']').length) {
+                    $('#language option[value=' + clientLocale + ']').prop('selected', true);
+                }
+                
                 new PNotify({
                     title: 'User name successfully updated',
                     text: data.message,
