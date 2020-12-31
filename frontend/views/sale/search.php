@@ -57,6 +57,44 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => false
             ],
             [
+                'label' => 'Leads',
+                'value' => static function ($model) {
+                    $data = [];
+                    if ($model['relatedLeads']) {
+                        foreach ($model['relatedLeads'] as $lead) {
+                            $data[] = '<i class="fa fa-link"></i> ' . Html::a($lead['id'], ['/lead/view/' . $lead['gid']]);
+                        }
+                    }
+
+                    $str = '';
+                    if ($data) {
+                        $str = '' . implode('<br>', $data) . '';
+                    }
+
+                    return $str;
+                },
+                'format' => 'raw'
+            ],
+            [
+                'label' => 'Cases',
+                'value' => static function ($model) {
+                    $data = [];
+                    if ($model['relatedCases']) {
+                        foreach ($model['relatedCases'] as $case) {
+                            $data[] = '<i class="fa fa-link"></i> ' . Html::a($case['cs_id'], ['/cases/view/' . $case['cs_gid']]);
+                        }
+                    }
+
+                    $str = '';
+                    if ($data) {
+                        $str = '' . implode('<br>', $data) . '';
+                    }
+
+                    return $str;
+                },
+                'format' => 'raw'
+            ],
+            [
                 'label' => 'Project',
                 'value' => static function ($model) {
                     return $model['project'] ? '<span class="badge badge-info">' . Html::encode($model['project']) . '</span>' : '-';

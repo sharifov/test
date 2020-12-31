@@ -4,6 +4,8 @@ namespace common\models\search;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
 use common\components\BackOffice;
+use common\models\Lead;
+use sales\entities\cases\Cases;
 use sales\repositories\lead\LeadBadgesRepository;
 use Yii;
 use yii\base\Exception;
@@ -41,6 +43,7 @@ class SaleSearch extends Model
     public $phone;
     public $email;
     public $card;
+
 
 //    public $datetime_start;
 //    public $datetime_end;
@@ -80,7 +83,6 @@ class SaleSearch extends Model
      */
     public function attributeLabels()
     {
-
         $labels = [
             'sale_id' => 'Sale Id',
             'acn' => 'Airline Confirmation Number',
@@ -115,7 +117,6 @@ class SaleSearch extends Model
      */
     public function search($params)
     {
-
         $searchData = [];
 
         $this->load($params);
@@ -193,10 +194,18 @@ class SaleSearch extends Model
             if ($response->isOk) {
                 $result = $response->data;
                 if (isset($result['items']) && is_array($result['items'])) {
+                    foreach ($result['items'] as $key => $item) {
+                        $leads = Lead::find()->select(['id', 'gid'])->where(['bo_flight_id' => $item['saleId']])->asArray()->all();
+                        $cases = Cases::find()->joinWith(['caseSale'], false)->select(['cs_id', 'cs_gid'])
+                            ->where(['cs_order_uid' => $item['confirmationNumber']])
+                            ->orWhere(['css_sale_book_id' => $item['confirmationNumber']])->asArray()->all();
+                        $result['items'][$key]['relatedLeads'] = $leads;
+                        $result['items'][$key]['relatedCases'] = $cases;
+                    }
+
                     $searchData = $result['items'];
                     $totalCount = $result['totalItems'];
                 }
-
                 //VarDumper::dump($result, 10, true);
             } else {
                 //Yii::error(print_r($response->content, true), 'SaleSearch:search:BackOffice:sendRequest2');
