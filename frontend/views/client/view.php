@@ -73,6 +73,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw',
             ],
+            [
+                'attribute' => 'cl_type_create',
+                'value' => function (\common\models\Client $model) {
+                    return $model::TYPE_CREATE_LIST[$model->cl_type_create];
+                },
+                'format' => 'raw',
+            ],
             'cl_ca_id',
             'cl_excluded:boolean',
             'cl_ppn',

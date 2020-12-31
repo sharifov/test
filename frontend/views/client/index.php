@@ -4,7 +4,7 @@ use common\models\Client;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
-use dosamigos\datepicker\DatePicker;
+use sales\auth\Auth;
 use common\components\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */
@@ -18,7 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
     <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <p>
         <?= Html::a('Create Client', ['create'], ['class' => 'btn btn-success']) ?>
@@ -54,8 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'header' => 'Phones',
                 'attribute' => 'client_phone',
-                'value' => function (\common\models\Client $model) {
-
+                'value' => function (Client $model) {
                     $phones = $model->clientPhones;
                     $data = [];
                     if ($phones) {
@@ -74,8 +73,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'header' => 'Emails',
                 'attribute' => 'client_email',
-                'value' => function (\common\models\Client $model) {
-
+                'value' => function (Client $model) {
                     $emails = $model->clientEmails;
                     $data = [];
                     if ($emails) {
@@ -96,8 +94,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'header' => 'Leads',
-                'value' => function (\common\models\Client $model) {
-
+                'value' => function (Client $model) {
                     $leads = $model->leads;
                     $data = [];
                     if ($leads) {
@@ -117,26 +114,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 //'options' => ['style' => 'width:100px']
             ],
 
-            /*[
-                'attribute' => 'created',
-                'value' => function(\common\models\Client $model) {
-                return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
-                },
-                'format' => 'raw',
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel,
-                    'attribute' => 'created',
-                    'clientOptions' => [
-                        'autoclose' => true,
-                        'format' => 'yyyy-mm-dd',
-                    ],
-                    'options' => [
-                        'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
-                    ],
-                ]),
-            ],*/
-
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'created'
@@ -147,27 +124,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'updated'
             ],
 
-            /*[
-                'attribute' => 'updated',
-                'value' => function(\common\models\Client $model) {
-                return $model->updated ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated)) : null;
-                },
-                'format' => 'raw',
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel,
-                    'attribute' => 'updated',
-                    'clientOptions' => [
-                        'autoclose' => true,
-                        'format' => 'yyyy-mm-dd',
-                    ],
-                    'options' => [
-                        'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
-                    ],
-                ]),
-            ],*/
-
-            ['class' => 'yii\grid\ActionColumn', 'template' => '{view}'],
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'template' => '{view} {update}',
+                'visibleButtons' => [
+                    'view' => static function (Client $model, $key, $index) {
+                        return Auth::can('/client/view');
+                    },
+                    'update' => static function (Client $model, $key, $index) {
+                        return Auth::can('/client/update');
+                    }
+                ]
+            ],
         ],
     ]); ?>
     <?php Pjax::end(); ?>
