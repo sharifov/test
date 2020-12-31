@@ -926,8 +926,16 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $this->processConferenceResponse($response);
     }
 
-    public function joinToConference(string $callSid, string $conferenceSid, int $projectId, string $from, string $to, string $source_type_id, int $user_id): array
-    {
+    public function joinToConference(
+        string $callSid,
+        string $conferenceSid,
+        int $projectId,
+        string $from,
+        string $to,
+        string $source_type_id,
+        int $user_id,
+        bool $callRecordingDisabled
+    ): array {
         $data = [
             'callSid' => $callSid,
             'conferenceSid' => $conferenceSid,
@@ -935,7 +943,8 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'from' => $from,
             'to' => $to,
             'source_type_id' => $source_type_id,
-            'user_id' => $user_id
+            'user_id' => $user_id,
+            'call_recording_disabled' => $callRecordingDisabled
         ];
 
         $response = $this->sendRequest('twilio-conference/join-to-conference', $data);

@@ -933,7 +933,8 @@ var PhoneWidgetCall = function () {
             }
 
             if (call.data.recordingDisabled) {
-                sendRecordingEnableRequest(call.data.callSid);
+                createNotify('Error', 'Enable recording is not allowed.', 'error');
+                // sendRecordingEnableRequest(call.data.callSid);
             } else {
                 sendRecordingDisableRequest(call.data.callSid);
             }

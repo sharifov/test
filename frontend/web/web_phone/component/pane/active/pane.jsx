@@ -175,12 +175,12 @@ function RecordIndicator(props) {
     let style = {'color':'#dc3545'};
     let text = 'ON';
     let title = 'OFF'
-    if (props.call.data.recordingDisabled) {
+    if (call.data.recordingDisabled) {
         style = {'color':'#ccc'};
         text = 'OFF';
         title = 'ON'
     }
-    if (!call.data.isJoin) {
+    if (!call.data.isJoin && !call.data.recordingDisabled) {
         style.cursor = "pointer";
     }
     let faIcon = "fa fa-record-vinyl";
@@ -190,7 +190,7 @@ function RecordIndicator(props) {
     return (
         <div className="sound-indication">
             <div className="sound-control-wrap">
-                {call.data.isJoin
+                {call.data.isJoin || call.data.recordingDisabled
                     ? <i className={faIcon} style={style}> </i>
                     : <i className={faIcon} style={style} id="wg-call-record" data-call-sid={call.data.callSid} title={title}> </i>
                 }

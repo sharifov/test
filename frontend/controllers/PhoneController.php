@@ -1221,6 +1221,11 @@ class PhoneController extends FController
 
             $from = $call->cParent->c_to ?? $call->c_from;
 
+            $conference = Conference::find()->bySid($call->c_conference_sid)->one();
+            if (!$conference) {
+                throw new \DomainException('Conference not found. SID: ' . $call->c_conference_sid);
+            }
+
             $result = Yii::$app->communication->joinToConference(
                 $call->c_call_sid,
                 $call->c_conference_sid,
@@ -1228,7 +1233,8 @@ class PhoneController extends FController
                 $from,
                 UserCallIdentity::getClientId(Auth::id()),
                 $source_type_id,
-                Auth::id()
+                Auth::id(),
+                (bool)$conference->cf_recording_disabled
             );
             Yii::$app->session->set($key, time());
         } catch (\Throwable $e) {
@@ -1307,24 +1313,7 @@ class PhoneController extends FController
         return $this->asJson($result);
     }
 
-    public function actionAjaxRecordingEnable(): Response
-    {
-        try {
-            $sid = (string)Yii::$app->request->post('sid');
-            $call = $this->getDataForRecordingConferenceCall($sid, Auth::id());
-            if (!$call->c_recording_disabled) {
-                throw new \DomainException('Recording already enable.');
-            }
-//            $result = Yii::$app->communication->recordingEnable($call->c_conference_sid, $call->c_call_sid);
-            $result = [];
-        } catch (\Throwable $e) {
-            $result = [
-                'error' => true,
-                'message' => $e->getMessage(),
-            ];
-        }
-        return $this->asJson($result);
-    }
+    //todo actionAjaxRecordingEnable
 
     public function actionAjaxRecordingDisable(): Response
     {
@@ -1373,9 +1362,14 @@ class PhoneController extends FController
                 }
             }
             if ($anyError) {
+                Yii::error([
+                    'message' => 'Stop recording error',
+                    'callSid' => $call->c_call_sid,
+                    'result' => $result
+                ], 'PhoneController:actionAjaxRecordingDisable');
                 return $this->asJson([
                     'error' => true,
-                    'message' => 'There were some errors. Try again.',
+                    'message' => 'There were some errors. Try again. Record one of call may be not stopped.',
                 ]);
             }
             return $this->asJson([
