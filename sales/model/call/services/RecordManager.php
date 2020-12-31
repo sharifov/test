@@ -28,7 +28,7 @@ class RecordManager
     private ?string $phone;
     private ?int $contactId;
 
-    public function __construct(
+    private function __construct(
         ?int $userId,
         ?int $projectId,
         ?int $departmentId,
@@ -40,6 +40,31 @@ class RecordManager
         $this->departmentId = $departmentId;
         $this->phone = $phone;
         $this->contactId = $contactId;
+    }
+
+    public static function acceptCall(
+        ?int $userId,
+        ?int $projectId,
+        ?int $departmentId,
+        ?string $phone,
+        ?int $contactId
+    ): self {
+        return new self($userId, $projectId, $departmentId, $phone, $contactId);
+    }
+
+    public static function createCall(
+        ?int $userId,
+        ?int $projectId,
+        ?int $departmentId,
+        ?string $phone,
+        ?int $contactId
+    ): self {
+        return new self($userId, $projectId, $departmentId, $phone, $contactId);
+    }
+
+    public static function toUser(int $userId): self
+    {
+        return new self($userId, null, null, null, null);
     }
 
     public function isDisabledRecord(): bool

@@ -1435,7 +1435,7 @@ class Call extends \yii\db\ActiveRecord
                         $call->setConferenceType();
                         $call->update();
                     }
-                    $recordManager = new RecordManager(
+                    $recordManager = RecordManager::acceptCall(
                         $user_id,
                         $call->c_project_id,
                         $call->c_dep_id,

@@ -180,19 +180,20 @@ function RecordIndicator(props) {
         text = 'OFF';
         title = 'ON'
     }
-    if (!call.data.isJoin && !call.data.recordingDisabled) {
-        style.cursor = "pointer";
-    }
     let faIcon = "fa fa-record-vinyl";
     if (call.isSentRecordingRequestState()) {
         faIcon = "fa fa-spinner fa-spin";
     }
+    let canManageRecord = !call.data.isJoin && !call.data.recordingDisabled && !(call.data.isInternal && call.data.type === 'Incoming');
+    if (canManageRecord) {
+        style.cursor = "pointer";
+    }
     return (
         <div className="sound-indication">
             <div className="sound-control-wrap">
-                {call.data.isJoin || call.data.recordingDisabled
-                    ? <i className={faIcon} style={style}> </i>
-                    : <i className={faIcon} style={style} id="wg-call-record" data-call-sid={call.data.callSid} title={title}> </i>
+                {canManageRecord
+                    ? <i className={faIcon} style={style} id="wg-call-record" data-call-sid={call.data.callSid} title={title}> </i>
+                    : <i className={faIcon} style={style}> </i>
                 }
                 <div style={{"marginLeft":"10px", "color": "#fff"}}> Record {text}</div>
             </div>

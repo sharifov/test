@@ -305,7 +305,7 @@ class PhoneController extends FController
             ]);
         }
 
-        $recordManager = new RecordManager(
+        $recordManager = RecordManager::createCall(
             Auth::id(),
             $form->projectId,
             $form->departmentId,
@@ -1713,6 +1713,8 @@ class PhoneController extends FController
 
             Yii::$app->cache->set($key, (time() + 10), 10);
 
+            $recordingManager = RecordManager::toUser($createdUser->id);
+
             $result = Yii::$app->communication->callToUser(
                 UserCallIdentity::getClientId($createdUser->id),
                 UserCallIdentity::getClientId($user_id),
@@ -1744,8 +1746,10 @@ class PhoneController extends FController
                     'queue' => Call::QUEUE_DIRECT,
                     'conference' => [],
                     'isConferenceCreator' => 'false',
+                    'recordingDisabled' => $recordingManager->isDisabledRecord(),
                 ],
-                str_replace('-', '', UuidHelper::uuid())
+                str_replace('-', '', UuidHelper::uuid()),
+                $recordingManager->isDisabledRecord()
             );
         } catch (\Throwable $e) {
             $result = [
