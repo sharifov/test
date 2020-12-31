@@ -1188,7 +1188,11 @@ class PhoneController extends FController
             if (!$call->currentParticipant->isHold()) {
                 throw new \Exception('Invalid type of Participant');
             }
-            $result = Yii::$app->communication->unholdConferenceCall($data['conferenceSid'], $data['keeperSid']);
+            $result = Yii::$app->communication->unholdConferenceCall(
+                $data['conferenceSid'],
+                $data['keeperSid'],
+                $data['recordingDisabled']
+            );
         } catch (\Throwable $e) {
             $result = [
                 'error' => true,
@@ -1234,7 +1238,7 @@ class PhoneController extends FController
                 UserCallIdentity::getClientId(Auth::id()),
                 $source_type_id,
                 Auth::id(),
-                (bool)$conference->cf_recording_disabled
+                $conference->isRecordingDisabled()
             );
             Yii::$app->session->set($key, time());
         } catch (\Throwable $e) {
@@ -1369,7 +1373,7 @@ class PhoneController extends FController
                 ], 'PhoneController:actionAjaxRecordingDisable');
                 return $this->asJson([
                     'error' => true,
-                    'message' => 'There were some errors. Try again. Record one of call may be not stopped.',
+                    'message' => 'Operation error. The call is still recording. Please retry.',
                 ]);
             }
             return $this->asJson([
@@ -1499,6 +1503,7 @@ class PhoneController extends FController
         }
 
         return [
+            'recordingDisabled' => $conference->isRecordingDisabled(),
             'conferenceSid' => $conference->cf_sid,
             'keeperSid' => $keeperSid,
             'call' => $call,

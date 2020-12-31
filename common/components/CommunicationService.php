@@ -844,11 +844,12 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $this->processConferenceResponse($response);
     }
 
-    public function unholdConferenceCall(string $conferenceSid, string $keeperSid): array
+    public function unholdConferenceCall(string $conferenceSid, string $keeperSid, bool $recordingDisabled): array
     {
         $data = [
             'conferenceSid' => $conferenceSid,
             'keeperSid' => $keeperSid,
+            'recordingDisabled' => $recordingDisabled
         ];
 
         $response = $this->sendRequest('twilio-conference/unhold-call', $data);

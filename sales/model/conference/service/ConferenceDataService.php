@@ -97,7 +97,7 @@ class ConferenceDataService
                 'sid' => $conference->cf_sid,
                 'duration' => time() - strtotime($conference->cf_created_dt),
                 'creator' => $conference->cf_created_user_id,
-                'recordingDisabled' => $conference->cf_recording_disabled ? true : false,
+                'recordingDisabled' => $conference->isRecordingDisabled(),
             ],
         ];
     }

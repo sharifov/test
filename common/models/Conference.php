@@ -256,4 +256,9 @@ class Conference extends \yii\db\ActiveRecord
     {
         $this->cf_recording_disabled = false;
     }
+
+    public function isRecordingDisabled(): bool
+    {
+        return $this->cf_recording_disabled ? true : false;
+    }
 }
