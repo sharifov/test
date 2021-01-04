@@ -113,6 +113,7 @@ class Project extends \yii\db\ActiveRecord
             ],
             'user' => [
                 'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'p_update_user_id',
                 'updatedByAttribute' => 'p_update_user_id',
             ],
         ];
@@ -247,8 +248,6 @@ class Project extends \yii\db\ActiveRecord
                     } else {
                         $data['updated'][] = $projectItem['id'];
                     }
-
-                    unset($projectItem['created_by']);
 
                     $pr->attributes = $projectItem;
 
