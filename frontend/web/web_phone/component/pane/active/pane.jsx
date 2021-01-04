@@ -35,7 +35,7 @@ class ActivePane extends React.Component {
                 <div className="actions-container">
                     <CallBtns call={call}/>
                     <SoundIndication/>
-                    <RecordIndicator call={call}/>
+                    <RecordIndicator call={call} canRecordingDisabled={this.props.controls.canRecordingDisabled}/>
                 </div>
                 <ActivePaneControls call={call} controls={this.props.controls}/>
             </React.Fragment>
@@ -184,7 +184,11 @@ function RecordIndicator(props) {
     if (call.isSentRecordingRequestState()) {
         faIcon = "fa fa-spinner fa-spin";
     }
-    let canManageRecord = !call.data.isJoin && !call.data.recordingDisabled && !(call.data.isInternal && call.data.type === 'Incoming');
+    let canManageRecord =
+        props.canRecordingDisabled
+        && !call.data.isJoin
+        && !call.data.recordingDisabled
+        && !(call.data.isInternal && call.data.type === 'Incoming');
     if (canManageRecord) {
         style.cursor = "pointer";
     }

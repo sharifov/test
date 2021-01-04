@@ -329,8 +329,8 @@
                         call.unSetRecordingRequestState();
                     }
                 })
-                .fail(function () {
-                    createNotify('Recording disable', 'Server error', 'error');
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    createNotify('Recording disable', jqXHR.responseText, 'error');
                     call.unSetRecordingRequestState();
                 })
         };

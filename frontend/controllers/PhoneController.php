@@ -31,6 +31,7 @@ use thamtech\uuid\helpers\UuidHelper;
 use yii\base\Exception;
 use yii\helpers\Html;
 use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotAcceptableHttpException;
 use yii\web\Response;
 use yii\filters\AccessControl;
@@ -41,6 +42,19 @@ use Yii;
 
 class PhoneController extends FController
 {
+
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'access' => [
+                'allowActions' => [
+                    'ajax-recording-disable',
+                ],
+            ],
+        ];
+
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
 
     public function actionIndex()
     {
@@ -1321,6 +1335,10 @@ class PhoneController extends FController
 
     public function actionAjaxRecordingDisable(): Response
     {
+        if (!Auth::can('PhoneWidget_CallRecordingDisabled')) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
         try {
             $sid = (string)Yii::$app->request->post('sid');
             $call = $this->getDataForRecordingConferenceCall($sid, Auth::id());

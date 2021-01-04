@@ -217,6 +217,8 @@ $ucStatus = $userCallStatus->us_type_id ?? UserCallStatus::STATUS_TYPE_OCCUPIED;
 
 $btnHoldShow = Auth::can('PhoneWidget_OnHold') ? 'true' : 'false';
 $btnTransferShow = Auth::can('PhoneWidget_Transfer') ? 'true' : 'false';
+$canRecordingDisabled = Auth::can('PhoneWidget_CallRecordingDisabled') ? 'true' : 'false';
+
 
 $js = <<<JS
 PhoneWidgetCall.init({
@@ -243,7 +245,8 @@ PhoneWidgetCall.init({
     'callInfoUrl': '$callInfoUrl',
     'clientInfoUrl': '$clientInfoUrl',
     'recordingEnableUrl': '$ajaxRecordingEnableUrl',
-    'recordingDisableUrl': '$ajaxRecordingDisableUrl'
+    'recordingDisableUrl': '$ajaxRecordingDisableUrl',
+    'canRecordingDisabled': $canRecordingDisabled
 });
 JS;
 $this->registerJs($js);
