@@ -896,7 +896,8 @@ class CasesController extends FController
 
         $response = [
             'error' => false,
-            'message' => ''
+            'message' => '',
+            'newCaseBookingId' => ''
         ];
 
         try {
@@ -907,6 +908,7 @@ class CasesController extends FController
             $this->casesRepository->save($case);
 
             $response['message'] = 'Booking Id(' . $case->cs_order_uid . ') of case successfully updated';
+            $response['newCaseBookingId'] = $case->cs_order_uid;
         } catch (NotFoundException $e) {
             $response['message'] = $e->getMessage();
             $response['error'] = true;

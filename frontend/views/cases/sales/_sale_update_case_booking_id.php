@@ -51,6 +51,7 @@ $updateBookingIdUrl = Url::to('/cases/update-booking-id-by-sale');
             success: function (response) {
                 if (response.error) {
                     createNotify('Error', response.message, 'error');
+                    $('#caseBookingId').html(response.newCaseBookingId);
                 } else {
                     createNotify('Success', response.message, 'success');
                     modal.modal('hide');

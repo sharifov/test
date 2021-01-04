@@ -70,6 +70,12 @@ use yii\widgets\DetailView;
                         [
                             'attribute' => 'cs_order_uid',
                             'label' => 'Booking ID',
+                            'value' => static function (Cases $model) {
+                                return Html::tag('span', $model->cs_order_uid, [
+                                    'id' => 'caseBookingId'
+                                ]);
+                            },
+                            'format' => 'raw'
                         ],
                         //'cs_subject',
                         //'cs_description:ntext',
