@@ -248,6 +248,8 @@ class Project extends \yii\db\ActiveRecord
                         $data['updated'][] = $projectItem['id'];
                     }
 
+                    unset($projectItem['created_by']);
+
                     $pr->attributes = $projectItem;
 
                     $pr->name = $projectItem['name'];
