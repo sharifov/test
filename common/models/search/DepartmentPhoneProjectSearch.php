@@ -48,7 +48,7 @@ class DepartmentPhoneProjectSearch extends DepartmentPhoneProject
      */
     public function search($params, $user)
     {
-        $query = DepartmentPhoneProject::find()->with(['phoneList']);
+        $query = DepartmentPhoneProject::find()->with(['phoneList', 'dppProject']);
 
         // add conditions that should always apply here
 
@@ -88,6 +88,36 @@ class DepartmentPhoneProjectSearch extends DepartmentPhoneProject
         $query
 //            ->andFilterWhere(['like', 'dpp_phone_number', $this->dpp_phone_number])
             ->andFilterWhere(['like', 'dpp_params', $this->dpp_params]);
+
+        return $dataProvider;
+    }
+
+    public function searchByCallRecording($params): ActiveDataProvider
+    {
+        $query = static::find()->with(['phoneList', 'dppProject']);
+        $query->andWhere(['like', 'dpp_params', '\"call_recording_disabled\":true']);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'pageParam' => 'department-phone-page',
+                'pageSizeParam' => 'department-phone-per-page',
+            ],
+            'sort' => [
+                'sortParam' => 'department-phone-sort',
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            return $dataProvider;
+        }
+
+        $query->andFilterWhere([
+            'dpp_project_id' => $this->dpp_project_id,
+            'dpp_phone_list_id' => $this->dpp_phone_list_id,
+        ]);
 
         return $dataProvider;
     }

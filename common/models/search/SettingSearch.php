@@ -76,4 +76,23 @@ class SettingSearch extends Setting
 
         return $dataProvider;
     }
+
+    public function searchByCallRecording(): ActiveDataProvider
+    {
+        $query = static::find()->andWhere([
+            's_key' => 'call_recording_disabled',
+            's_value' => true,
+        ]);
+
+        return new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'pageParam' => 'system-page',
+                'pageSizeParam' => 'system-per-page',
+            ],
+            'sort' => [
+                'sortParam' => 'system-sort',
+            ],
+        ]);
+    }
 }

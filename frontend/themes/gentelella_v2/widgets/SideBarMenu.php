@@ -476,6 +476,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     ]
                 ],
 
+                ['label' => 'Call recording disabled', 'url' => ['/call-recording-disabled/list'], 'icon' => 'list'],
+
             ]
         ];
 

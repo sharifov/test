@@ -81,4 +81,31 @@ class ProjectSearch extends Project
 
         return $dataProvider;
     }
+
+    public function searchByCallRecording($params): ActiveDataProvider
+    {
+        $query = static::find();
+        $query->andWhere(['like', 'custom_data', '"call_recording_disabled":true']);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'pageParam' => 'project-page',
+                'pageSizeParam' => 'project-per-page',
+            ],
+            'sort' => [
+                'sortParam' => 'project-sort',
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            return $dataProvider;
+        }
+
+        $query->andFilterWhere(['like', 'name', $this->name]);
+
+        return $dataProvider;
+    }
 }

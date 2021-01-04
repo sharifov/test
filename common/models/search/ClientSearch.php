@@ -40,6 +40,8 @@ class ClientSearch extends Client
             [['created', 'updated'], 'date', 'format' => 'php:Y-m-d'],
 
             ['cl_excluded', 'boolean'],
+
+            ['cl_type_id', 'integer']
         ];
     }
 
@@ -178,6 +180,44 @@ class ClientSearch extends Client
         $query->andFilterWhere(['like', 'first_name', $this->first_name])
             ->andFilterWhere(['like', 'middle_name', $this->middle_name])
             ->andFilterWhere(['like', 'last_name', $this->last_name]);
+
+        return $dataProvider;
+    }
+
+    public function searchByCallRecording($params): ActiveDataProvider
+    {
+        $query = static::find()->andWhere(['cl_call_recording_disabled' => true]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'pageParam' => 'client-page',
+                'pageSizeParam' => 'client-per-page',
+            ],
+            'sort' => [
+                'sortParam' => 'client-sort',
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            return $dataProvider;
+        }
+
+        $query->andFilterWhere(['like', 'first_name', $this->first_name])
+            ->andFilterWhere(['like', 'middle_name', $this->middle_name])
+            ->andFilterWhere(['like', 'last_name', $this->last_name])
+            ->andFilterWhere(['like', 'uuid', $this->uuid])
+            ->andFilterWhere(['like', 'company_name', $this->company_name]);
+
+        $query->andFilterWhere([
+            'is_company' => $this->is_company,
+            'is_public' => $this->is_public,
+            'disabled' => $this->disabled,
+            'cl_excluded' => $this->cl_excluded,
+            'cl_type_id' => $this->cl_type_id,
+        ]);
 
         return $dataProvider;
     }
