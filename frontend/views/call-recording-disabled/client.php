@@ -26,7 +26,7 @@ echo GridView::widget([
         'company_name',
         [
             'attribute' => 'cl_type_id',
-            'value' => static function(Client $client) {
+            'value' => static function (Client $client) {
                 return Client::TYPE_LIST[$client->cl_type_id] ?? null;
             },
             'filter' => Client::TYPE_LIST,
