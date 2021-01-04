@@ -1416,6 +1416,20 @@ class Call extends \yii\db\ActiveRecord
                     }
                 }
 
+                $isDisabledRecord = (RecordManager::acceptCall(
+                    $user_id,
+                    $call->c_project_id,
+                    $call->c_dep_id,
+                    null,
+                    $call->c_client_id
+                ))->isDisabledRecord();
+
+                if ($isDisabledRecord) {
+                    $call->recordingDisable();
+                } else {
+                    $call->recordingEnable();
+                }
+
                 if ($call->update() === false) {
                     Yii::error(VarDumper::dumpAsString(['call' => $call->getAttributes(), 'error' => $call->getErrors()]), 'Call:applyCallToAgent:call:update');
                 } else {
@@ -1435,20 +1449,13 @@ class Call extends \yii\db\ActiveRecord
                         $call->setConferenceType();
                         $call->update();
                     }
-                    $recordManager = RecordManager::acceptCall(
-                        $user_id,
-                        $call->c_project_id,
-                        $call->c_dep_id,
-                        null,
-                        $call->c_client_id
-                    );
                     $res = \Yii::$app->communication->acceptConferenceCall(
                         $call->c_id,
                         $call->c_call_sid,
                         UserCallIdentity::getClientId($user_id),
                         $call->c_from,
                         $user_id,
-                        $recordManager->isDisabledRecord()
+                        $call->isRecordingDisable()
                     );
 
                     if ($res) {
@@ -2222,5 +2229,10 @@ class Call extends \yii\db\ActiveRecord
     public function recordingEnable(): void
     {
         $this->c_recording_disabled = false;
+    }
+
+    public function isRecordingDisable(): bool
+    {
+        return $this->c_recording_disabled ? true : false;
     }
 }
