@@ -75,14 +75,6 @@ use yii\web\JqueryAsset;
 use yii\widgets\ActiveFormAsset;
 use yii\widgets\MaskedInputAsset;
 
-$params = array_merge(
-    require __DIR__ . '/../../common/config/params.php',
-    require __DIR__ . '/../../common/config/params-local.php',
-    require __DIR__ . '/params.php',
-    require __DIR__ . '/params-local.php'
-);
-$appVersion = $params['release']['version'] ?? '';
-
 Yii::setAlias('@webroot', __DIR__ . '/../../frontend/web');
 Yii::setAlias('@web', '/');
 
@@ -178,6 +170,25 @@ return [
 
     'targets' => [
 
+        'AllSharedAsset' => [
+            'class' => AllSharedAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'all-shared.min.js',
+            'css' => 'all-shared.min.css',
+        ],
+
+        'AllSharedGroupAsset' => [
+            'class' => AllSharedGroupAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'all-shared-group.min.js',
+            'css' => 'all-shared-group.min.css',
+            'depends' => [
+                AllSharedGroupAsset::class,
+            ]
+        ],
+
         'FontAwesomeAsset' => [
             'class' => FontAwesomeAsset::class,
             'basePath' => '@webroot/fontawesome/build',
@@ -211,25 +222,6 @@ return [
             ]
         ],
 
-        'AllSharedAsset' => [
-            'class' => AllSharedAsset::class,
-            'basePath' => '@webroot/all_shared/build',
-            'baseUrl' => '@web/all_shared/build',
-            'js' => 'all-shared.min.js',
-            'css' => 'all-shared.min.css',
-        ],
-
-        'AllSharedGroupAsset' => [
-            'class' => AllSharedGroupAsset::class,
-            'basePath' => '@webroot/all_shared/build',
-            'baseUrl' => '@web/all_shared/build',
-            'js' => 'all-shared-group.min.js',
-            'css' => 'all-shared-group.min.css',
-            'depends' => [
-                AllSharedGroupAsset::class,
-            ]
-        ],
-
         'GentelellaGroupAsset' => [
             'class' => GentelellaGroupAsset::class,
             'basePath' => '@webroot/all_shared/build',
@@ -248,17 +240,6 @@ return [
             'depends' => [GentelellaCrudGroupAsset::class]
         ],
 
-//        'FontAwesomeAsset' => [
-//            'class' => FontAwesomeAsset::class,
-//            'basePath' => '@webroot/fontawesome/build',
-//            'baseUrl' => '@web/fontawesome/build',
-//            'js' => 'fontawesome.min.js',
-//            'css' => 'fontawesome.min.css',
-//            'depends' => [
-//                FontAwesomeAsset::class,
-//                GlyphiconAsset::class,
-//            ]
-//        ],
         'NotificationSocketAsset' => [
             'class' => NotificationSocketAsset::class,
             'basePath' => '@webroot/all_shared/build',
@@ -376,7 +357,7 @@ return [
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
             'js' => 'active-form-k.min.js',
-            'css' => 'active-form.min.css',
+            'css' => 'active-form-k.min.css',
             'depends' => [ KartikActiveFormAsset::class ],
             'bsPluginEnabled' => false,
             'bsDependencyEnabled' => false
@@ -428,7 +409,7 @@ return [
             'baseUrl' => '@web/all_shared/build',
             'js' => 'krajee-select2.min.js',
             'css' => 'krajee-select2.min.css',
-            'depends' => [ ThemeKrajeeBs4Asset::class, ThemeKrajeeAsset::class ],
+            'depends' => [ Select2KrajeeAsset::class, ThemeKrajeeBs4Asset::class, ThemeKrajeeAsset::class ],
             'bsPluginEnabled' => false,
             'bsDependencyEnabled' => false
         ],
@@ -979,8 +960,8 @@ return [
                 'sourcePath' => null
             ],
         ],
-        'hashCallback' => static function ($path) use ($appVersion) {
-            return hash('md4', $path . $appVersion);
+        'hashCallback' => static function ($path) {
+            return hash('md4', $path);
         },
     ],
 ];
