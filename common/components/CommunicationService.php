@@ -781,12 +781,13 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $out;
     }
 
-    public function callForward($sid, $from, $to): array
+    public function callForward($sid, $from, $to, $callRecordingDisabled): array
     {
         $data = [
             'sid' => $sid,
             'from' => $from,
             'to' => $to,
+            'call_recording_disabled' => $callRecordingDisabled,
         ];
 
         $response = $this->sendRequest('twilio-conference/forward', $data);

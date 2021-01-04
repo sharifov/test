@@ -511,7 +511,7 @@ class PhoneController extends FController
                         ], 'AjaxCallRedirect:Call:resetRepeat');
                     }
                 }
-                $resultApi = $communication->callForward($sid, $from, $to);
+                $resultApi = $communication->callForward($sid, $from, $to, $originalCall->isRecordingDisable());
                 if ($resultApi && isset($resultApi['result']['sid'])) {
                     $result = [
                         'error' => false,
