@@ -57,6 +57,8 @@ class CheckClientCallJoinToConferenceJob implements JobInterface
         }
 
         $call->setStatusQueue();
+        $call->c_created_user_id = null;
+
         if (!$call->save()) {
             \Yii::error(VarDumper::dumpAsString([
                 'error' => $call->getErrors()
