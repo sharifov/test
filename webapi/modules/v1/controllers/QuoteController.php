@@ -4,6 +4,7 @@ namespace webapi\modules\v1\controllers;
 
 use common\components\BackOffice;
 use common\components\purifier\Purifier;
+use common\components\SearchService;
 use common\models\EmployeeContactInfo;
 use common\models\GlobalLog;
 use common\models\Lead;
@@ -25,6 +26,7 @@ use sales\logger\db\LogDTO;
 use sales\repositories\lead\LeadRepository;
 use sales\services\quote\addQuote\TripService;
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
@@ -859,6 +861,10 @@ class QuoteController extends ApiBaseController
             $quote->save();
             if ($quote->hasErrors()) {
                 throw new \RuntimeException($quote->getErrorSummary(false)[0]);
+            }
+
+            if (!ArrayHelper::keyExists($quote->gds, SearchService::GDS_LIST)) {
+                $warnings[] = 'Quote GDS (' . $quote->gds . ') not found in GDS_LIST.';
             }
 
             $tripsSegmentsData = $quote->getTripsSegmentsData();
