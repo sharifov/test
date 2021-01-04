@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\Employee;
 use sales\auth\Auth;
 use Yii;
 use sales\model\callLog\entity\callLogUserAccess\CallLogUserAccess;
@@ -63,8 +64,15 @@ class CallLogUserAccessController extends FController
     {
         $model = new CallLogUserAccess();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->clua_cl_id]);
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            if ($model->clua_access_start_dt && ($startDt = Employee::convertTimeFromUserDtToUTC(strtotime($model->clua_access_start_dt)))) {
+                $model->clua_access_start_dt = $startDt;
+            }
+            if ($model->clua_access_finish_dt && ($finishDt = Employee::convertTimeFromUserDtToUTC(strtotime($model->clua_access_finish_dt)))) {
+                $model->clua_access_finish_dt = $finishDt;
+            }
+            $model->save(false);
+            return $this->redirect(['view', 'id' => $model->clua_id]);
         }
 
         return $this->render('create', [
@@ -80,9 +88,22 @@ class CallLogUserAccessController extends FController
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        if ($model->clua_access_start_dt && ($startDt = Employee::convertTimeFromUtcToUserTime(Auth::user()->timezone, strtotime($model->clua_access_start_dt)))) {
+            $model->clua_access_start_dt = $startDt;
+        }
+        if ($model->clua_access_finish_dt && ($finishDt = Employee::convertTimeFromUtcToUserTime(Auth::user()->timezone, strtotime($model->clua_access_finish_dt)))) {
+            $model->clua_access_finish_dt = $finishDt;
+        }
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->clua_cl_id]);
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            if ($model->clua_access_start_dt && ($startDt = Employee::convertTimeFromUserDtToUTC(strtotime($model->clua_access_start_dt)))) {
+                $model->clua_access_start_dt = $startDt;
+            }
+            if ($model->clua_access_finish_dt && ($finishDt = Employee::convertTimeFromUserDtToUTC(strtotime($model->clua_access_finish_dt)))) {
+                $model->clua_access_finish_dt = $finishDt;
+            }
+            $model->save(false);
+            return $this->redirect(['view', 'id' => $model->clua_id]);
         }
 
         return $this->render('update', [
