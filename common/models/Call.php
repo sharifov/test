@@ -237,6 +237,10 @@ class Call extends \yii\db\ActiveRecord
         self::SOURCE_TRANSFER_CALL  => 'Transfer',
         self::SOURCE_CONFERENCE_CALL  => 'Conference',
         self::SOURCE_REDIAL_CALL  => 'Redial',
+        self::SOURCE_LISTEN  => 'Listen',
+        self::SOURCE_COACH  => 'Coach',
+        self::SOURCE_BARGE  => 'Barge',
+        self::SOURCE_INTERNAL  => 'Internal',
         self::SOURCE_LEAD  => 'Lead',
         self::SOURCE_CASE  => 'Case',
     ];
@@ -249,6 +253,8 @@ class Call extends \yii\db\ActiveRecord
     public const QUEUE_HOLD = 'hold';
     public const QUEUE_GENERAL = 'general';
     public const QUEUE_DIRECT = 'direct';
+
+    public const CHANNEL_REALTIME_MAP = 'realtimeMapChannel';
 
     private ?Data $data = null;
 
@@ -1312,6 +1318,8 @@ class Call extends \yii\db\ActiveRecord
                 Yii::$app->queue_job->delay(60)->priority(10)->push($job);
             }
         }
+
+        $this->sendFrontendData();
     }
 
     public static function getQueueName(Call $call): string
@@ -1366,7 +1374,7 @@ class Call extends \yii\db\ActiveRecord
 //                    //$parentCall->setStatusDelay();
 //                    //$parentCall->update();
 //                } else {
-                    $call->setStatusDelay();
+                $call->setStatusDelay();
                 //}
 
                 if ($call->c_created_user_id && (int) $call->c_created_user_id !== $user_id) {
@@ -2206,6 +2214,9 @@ class Call extends \yii\db\ActiveRecord
         return $this->c_source_type_id === self::SOURCE_INTERNAL;
     }
 
+    /**
+     * @return Data
+     */
     public function getData(): Data
     {
         if ($this->data !== null) {
@@ -2215,6 +2226,9 @@ class Call extends \yii\db\ActiveRecord
         return $this->data;
     }
 
+    /**
+     * @param Data $data
+     */
     public function setData(Data $data): void
     {
         $this->c_data_json = $data->toJson();
@@ -2234,5 +2248,41 @@ class Call extends \yii\db\ActiveRecord
     public function isRecordingDisable(): bool
     {
         return $this->c_recording_disabled ? true : false;
+    }
+    
+    /**
+     * @return array
+     * @throws \Exception
+     */
+    public function getApiData(): array
+    {
+        $data = $this->attributes;
+        $callUserAccesses = CallUserAccess::find()->select(['cua_user_id', 'cua_status_id', 'cua_created_dt'])
+            ->where(['cua_call_id' => $this->c_id])
+            ->orderBy(['cua_created_dt' => SORT_ASC])
+            //->limit(random_int(4, 7))
+            ->asArray()->all();
+
+        $data['userAccessList'] = $callUserAccesses;
+        return $data;
+    }
+
+    /**
+     * @param string $action
+     * @return mixed
+     */
+    public function sendFrontendData(string $action = 'update')
+    {
+        return Yii::$app->centrifugo->setSafety(false)
+            ->publish(
+                self::CHANNEL_REALTIME_MAP,
+                [
+                    'action'  => $action,
+                    'id'      => $this->c_id,
+                    'data' => [
+                        'call' => $this->getApiData(),
+                    ]
+                ]
+            );
     }
 }

@@ -29,7 +29,6 @@ use yii\db\ActiveRecord;
  */
 class CallUserAccess extends \yii\db\ActiveRecord
 {
-
     public const STATUS_TYPE_PENDING = 1;
     public const STATUS_TYPE_ACCEPT = 2;
     public const STATUS_TYPE_SKIP = 3;
@@ -264,6 +263,9 @@ class CallUserAccess extends \yii\db\ActiveRecord
         if (!$insert && isset($changedAttributes['cua_status_id'])) {
             NativeEventDispatcher::recordEvent(CallUserAccessEvents::class, CallUserAccessEvents::UPDATE, [CallUserAccessEvents::class, 'updateUserStatus'], $this);
             NativeEventDispatcher::trigger(CallUserAccessEvents::class, CallUserAccessEvents::UPDATE);
+        }
+        if ($call) {
+            $call->sendFrontendData();
         }
     }
 
