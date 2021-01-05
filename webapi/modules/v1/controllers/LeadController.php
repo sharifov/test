@@ -1305,6 +1305,8 @@ class LeadController extends ApiBaseController
                         }
                     }
 
+                    $lead->sendNotifOnProcessingStatusChanged();
+
 //                    if (!empty($leadAttributes['info_tickets'])) {
 //                        $result = $lead->sendSoldEmail($leadAttributes['info_tickets']);
 //                        if (!$result['status']) {
