@@ -39,12 +39,15 @@ class m201228_131040_add_call_recording_settings extends Migration
             $customData = [];
             /** @var Project $project */
             if ($project->custom_data) {
-                $customData = json_decode($project->custom_data, true, 512, JSON_THROW_ON_ERROR);
-            }
-            $customData['call_recording_disabled'] = false;
-            $project->custom_data = @json_encode($customData);
-            if (!$project->save()) {
-                VarDumper::dump($project->getErrors());
+                try {
+                    $customData = @json_decode($project->custom_data, true, 512, JSON_THROW_ON_ERROR);
+                    $customData['call_recording_disabled'] = false;
+                    $project->custom_data = @json_encode($customData);
+                    if (!$project->save()) {
+                        VarDumper::dump($project->getErrors());
+                    }
+                } catch (Throwable $throwable) {
+                }
             }
         }
 
