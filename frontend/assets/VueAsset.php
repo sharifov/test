@@ -15,9 +15,9 @@ class VueAsset extends AssetBundle
     public $basePath = '@webroot';
     public $baseUrl = '@web';
 
-    /*public $css = [
-        'css/site.css',
-    ];*/
+//    public $css = [
+//        'https://cdn.jsdelivr.net/npm/animate.css@4.1',
+//    ];
 
     /*public $js = [
         ['https://cdn.jsdelivr.net/npm/vue/dist/vue.js', 'position' => \yii\web\View::POS_HEAD],
@@ -29,15 +29,21 @@ class VueAsset extends AssetBundle
 
         if (YII_ENV === 'prod' || YII_ENV === 'stage') {
             // $jsFile = 'https://cdn.jsdelivr.net/npm/vue';
-            $jsFile = 'https://unpkg.com/vue@3.0.0-rc.9/dist/vue.global.prod.js';
+            $jsFile = 'https://unpkg.com/vue@3.0/dist/vue.global.prod.js';
         } else {
             // $jsFile = 'https://cdn.jsdelivr.net/npm/vue/dist/vue.js';
-            $jsFile = 'https://unpkg.com/vue@3.0.0-rc.9/dist/vue.global.js';
+            $jsFile = 'https://unpkg.com/vue@3.0/dist/vue.global.js';
         }
 
         //vue(.runtime).global(.prod).js
 
         $this->js[] = [$jsFile, 'position' => \yii\web\View::POS_HEAD];
+        $this->js[] = ['https://cdn.jsdelivr.net/npm/axios@0.21/dist/axios.min.js', 'position' => \yii\web\View::POS_HEAD];
+        $this->js[] = ['https://cdn.jsdelivr.net/npm/moment@2.29/moment.min.js', 'position' => \yii\web\View::POS_HEAD];
+
+        //$this->js[] = ['https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.3/velocity.min.js', 'position' => \yii\web\View::POS_HEAD];
+        //$this->js[] = ['https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.15/lodash.min.js', 'position' => \yii\web\View::POS_HEAD];
+        $this->js[] = ['https://cdnjs.cloudflare.com/ajax/libs/libphonenumber-js/1.9.6/libphonenumber-js.min.js', 'position' => \yii\web\View::POS_HEAD];
     }
 
 //    public $depends = [

@@ -266,7 +266,7 @@ class CallController extends Controller
                             foreach ($project_employee_access as $projectEmployer) {
                                 $projectUser = Employee::findOne($projectEmployer->employee_id);
                                 if ($projectUser && $projectUser->userProfile && $projectUser->userProfile->up_call_type_id === UserProfile::CALL_TYPE_WEB) {
-                                        $user = $projectUser;
+                                    $user = $projectUser;
                                     if ($user->isOnline() && $user->isCallStatusReady() && $user->isCallFree()) {
                                         $agent = UserCallIdentity::getId($user->id);
                                         echo 'Find agent:' . $agent . PHP_EOL;

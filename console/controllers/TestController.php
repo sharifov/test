@@ -2,6 +2,7 @@
 
 namespace console\controllers;
 
+use common\models\Call;
 use common\models\Notifications;
 use Faker\Factory;
 use modules\twilio\src\entities\conferenceLog\ConferenceLog;
@@ -199,5 +200,36 @@ class TestController extends Controller
 
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function actionTestCentrifugo()
+    {
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+        $n = 0;
+        while (true) {
+            $n++;
+            $calls = Call::find()
+                ->where(['c_status_id' => [Call::STATUS_IVR, Call::STATUS_QUEUE, Call::STATUS_COMPLETED]])
+                ->andWhere('c_id > FLOOR(RAND()*(3368194-100000)+100000)')
+                //->orderBy('RAND()')
+                ->limit(rand(1, 2))->all(); //['c_id' => SORT_DESC]
+            foreach ($calls as $call) {
+                $call->c_status_id = random_int(1, 12);
+                $call->c_source_type_id = random_int(1, 12);
+                $call->c_updated_dt = date("Y-m-d H:i:s", strtotime('-' . random_int(1, 60) . ' minutes'));
+                $call->c_created_dt = $call->c_updated_dt;
+                $call->c_queue_start_dt = date("Y-m-d H:i:s", strtotime('-' . random_int(1, 15) . ' minutes'));
+                $call->sendFrontendData('update');
+                echo ' - ' . $call->c_id . PHP_EOL;
+            }
+            usleep(0.9 * 1000000);
+            if ($n > 100000) {
+                break;
+            }
+        }
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
 }
