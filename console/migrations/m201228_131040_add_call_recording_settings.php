@@ -39,15 +39,15 @@ class m201228_131040_add_call_recording_settings extends Migration
             $customData = [];
             /** @var Project $project */
             if ($project->custom_data) {
-                try {
-                    $customData = @json_decode($project->custom_data, true, 512, JSON_THROW_ON_ERROR);
-                    $customData['call_recording_disabled'] = false;
-                    $project->custom_data = @json_encode($customData);
-                    if (!$project->save()) {
-                        VarDumper::dump($project->getErrors());
-                    }
-                } catch (Throwable $throwable) {
+                $customData = @json_decode($project->custom_data, true);
+                if (!$customData) {
+                    $customData = [];
                 }
+            }
+            $customData['call_recording_disabled'] = false;
+            $project->custom_data = @json_encode($customData);
+            if (!$project->save()) {
+                VarDumper::dump($project->getErrors());
             }
         }
 
@@ -55,7 +55,10 @@ class m201228_131040_add_call_recording_settings extends Migration
             $customData = [];
             /** @var Department $department */
             if ($department->dep_params) {
-                $customData = @json_decode($department->dep_params, true, 512, JSON_THROW_ON_ERROR);
+                $customData = @json_decode($department->dep_params, true);
+                if (!$customData) {
+                    $customData = [];
+                }
             }
             $customData['call_recording_disabled'] = false;
             $department->dep_params = @json_encode($customData);
@@ -68,7 +71,10 @@ class m201228_131040_add_call_recording_settings extends Migration
             $customData = [];
             /** @var DepartmentPhoneProject $phone */
             if ($phone->dpp_params) {
-                $customData = @json_decode($phone->dpp_params, true, 512, JSON_THROW_ON_ERROR);
+                $customData = @json_decode($phone->dpp_params, true);
+                if (!$customData) {
+                    $customData = [];
+                }
             }
             $customData['call_recording_disabled'] = false;
             $phone->dpp_params = @json_encode($customData);
@@ -92,7 +98,10 @@ class m201228_131040_add_call_recording_settings extends Migration
             if (!$phone->dpp_params) {
                 continue;
             }
-            $customData = @json_decode($phone->dpp_params, true, 512, JSON_THROW_ON_ERROR);
+            $customData = @json_decode($phone->dpp_params, true);
+            if (!$customData) {
+                continue;
+            }
             if (!array_key_exists('call_recording_disabled', $customData)) {
                 continue;
             }
@@ -108,7 +117,10 @@ class m201228_131040_add_call_recording_settings extends Migration
             if (!$department->dep_params) {
                 continue;
             }
-            $customData = @json_decode($department->dep_params, true, 512, JSON_THROW_ON_ERROR);
+            $customData = @json_decode($department->dep_params, true);
+            if (!$customData) {
+                continue;
+            }
             if (!array_key_exists('call_recording_disabled', $customData)) {
                 continue;
             }
@@ -124,7 +136,10 @@ class m201228_131040_add_call_recording_settings extends Migration
             if (!$project->custom_data) {
                 continue;
             }
-            $customData = @json_decode($project->custom_data, true, 512, JSON_THROW_ON_ERROR);
+            $customData = @json_decode($project->custom_data, true);
+            if (!$customData) {
+                continue;
+            }
             if (!array_key_exists('call_recording_disabled', $customData)) {
                 continue;
             }
