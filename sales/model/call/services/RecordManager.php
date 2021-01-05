@@ -7,8 +7,8 @@ use common\models\Department;
 use common\models\DepartmentPhoneProject;
 use common\models\Project;
 use common\models\UserProfile;
-use sales\model\department\department\Params;
-use sales\model\project\entity\CustomData;
+use sales\model\department\department\Params as DepartmentParams;
+use sales\model\project\entity\params\Params as ProjectParams;
 use yii\helpers\Json;
 
 /**
@@ -102,15 +102,15 @@ class RecordManager
         if (!$this->projectId) {
             return false;
         }
-        $project = Project::find()->select(['id', 'custom_data'])->andWhere(['id' => $this->projectId])->asArray()->one();
+        $project = Project::find()->select(['id', 'p_params_json'])->andWhere(['id' => $this->projectId])->asArray()->one();
         if (!$project) {
             return false;
         }
-        if (!$project['custom_data']) {
+        if (!$project['p_params_json']) {
             return false;
         }
-        $customData = new CustomData($project['custom_data'], $project['id']);
-        return $customData->isCallRecordingDisabled();
+        $params = ProjectParams::fromJson($project['p_params_json'], $project['id']);
+        return $params->call->isCallRecordingDisabled();
     }
 
     private function isDisabledDepartment(): bool
@@ -127,7 +127,7 @@ class RecordManager
         }
         try {
             $data = Json::decode($department['dep_params']);
-            $params = new Params($data);
+            $params = new DepartmentParams($data);
             return $params->isCallRecordingDisabled();
         } catch (\Throwable $e) {
             \Yii::error([

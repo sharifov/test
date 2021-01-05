@@ -12,11 +12,13 @@ use common\models\GlobalAcl;
 use common\models\Log;
 use common\models\Project;
 use common\models\ProjectEmailTemplate;
+use sales\model\project\entity\params\Params;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\Response;
@@ -239,26 +241,33 @@ class SettingsController extends FController
 
     public function actionProjectData($id)
     {
-        $errors = [];
         $project = Project::findOne(['id' => $id]);
-        if ($project !== null) {
-            if (Yii::$app->request->isPost || Yii::$app->request->isAjax) {
-                if ($project->load(Yii::$app->request->post())) {
-                    if ($project->save()) {
-                        return $this->redirect(['settings/projects']);
-                    }
-                } else {
-                    if (empty($project->custom_data)) {
-                        $project->custom_data = @json_encode(['background-color' => '#f4f7fa', 'color' => '#000000']);
-                    }
-                }
-
-                return $this->renderAjax('_project_custom_data', [
-                    'model' => $project
-                ]);
+        if ($project === null) {
+            return null;
+        }
+        if (!Yii::$app->request->isPost && !Yii::$app->request->isAjax) {
+            return null;
+        }
+        $originalParams = $project->p_params_json;
+        if ($project->load(Yii::$app->request->post())) {
+            try {
+                $project->p_params_json = Json::decode($project->p_params_json);
+            } catch (\Throwable $e) {
+                $project->p_params_json = $originalParams;
+                Yii::$app->session->addFlash('error', 'Parameters: ' . $e->getMessage());
+            }
+            if ($project->save()) {
+                return $this->redirect(['settings/projects']);
+            }
+        } else {
+            if (empty($project->p_params_json)) {
+                $project->p_params_json = Params::default();
             }
         }
-        return null;
+
+        return $this->renderAjax('_project_custom_data', [
+            'model' => $project
+        ]);
     }
 
 

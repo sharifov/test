@@ -2,12 +2,14 @@
 
 namespace frontend\controllers;
 
+use sales\model\project\entity\params\Params;
 use sales\widgets\ProjectSelect2Widget;
 use Yii;
 use common\models\Project;
 use common\models\search\ProjectSearch;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -74,9 +76,21 @@ class ProjectController extends FController
     public function actionCreate()
     {
         $model = new Project();
+        $model->p_params_json = Params::default();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($model->load(Yii::$app->request->post())) {
+            if (!$model->p_params_json) {
+                $model->p_params_json = [];
+            }
+            try {
+                $model->p_params_json = Json::decode($model->p_params_json);
+            } catch (\Throwable $e) {
+                Yii::$app->session->addFlash('error', 'Parameters: ' .  $e->getMessage());
+                $model->p_params_json = [];
+            }
+            if ($model->save()) {
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
         }
 
         return $this->render('create', [
@@ -94,9 +108,22 @@ class ProjectController extends FController
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        $originalParams = $model->p_params_json;
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($model->load(Yii::$app->request->post())) {
+            try {
+                $model->p_params_json = Json::decode($model->p_params_json);
+            } catch (\Throwable $e) {
+                Yii::$app->session->addFlash('error', 'Parameters: ' .  $e->getMessage());
+                $model->p_params_json = $originalParams;
+            }
+            if ($model->save()) {
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
+        }
+
+        if (!$model->p_params_json) {
+            $model->p_params_json = Params::default();
         }
 
         return $this->render('update', [

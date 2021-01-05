@@ -139,8 +139,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 ]),
             ],*/
 
-            //'custom_data:ntext',
-
 
         ],
     ]); ?>

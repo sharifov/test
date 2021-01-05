@@ -267,7 +267,7 @@ class SmsDistributionList extends ActiveRecord
      */
     public function sendSms()
     {
-        if ($this->sdlProject && $this->sdlProject->getCustomData()->sms_enabled === false) {
+        if ($this->sdlProject && !$this->sdlProject->getParams()->sms->isEnabled()) {
             $this->sdl_status_id = self::STATUS_ERROR;
             $this->sdl_error_message = 'Sms disabled for project ' . $this->sdlProject->name;
             if (!$this->save()) {

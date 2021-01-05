@@ -29,6 +29,7 @@ use sales\model\conference\entity\conferenceEventLog\EventFactory;
 use sales\model\conference\entity\conferenceEventLog\events\ParticipantJoin;
 use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
 use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackForm;
+use sales\model\project\entity\params\Params;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
 use yii\console\Controller;
@@ -49,6 +50,8 @@ class TestController extends Controller
 
     public function actionTest()
     {
+        VarDumper::dump(Params::default());
+        die;
         $data = [
             'id' => '5c23460e-6fc1-4ea6-a368-df52ca5b293e',
             'rid' => 'b1ee59aa-5315-4714-88ee-4487f7ccca31',

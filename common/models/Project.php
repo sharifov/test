@@ -9,7 +9,7 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\projectConfig\ClientChatProjectConfig;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\phoneLine\phoneLine\entity\PhoneLine;
-use sales\model\project\entity\CustomData;
+use sales\model\project\entity\params\Params;
 use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -19,6 +19,7 @@ use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\httpclient\CurlTransport;
+use common\components\validators\IsArrayValidator;
 
 /**
  * Class Project
@@ -32,15 +33,15 @@ use yii\httpclient\CurlTransport;
  * @property string|null $contact_info
  * @property int|null $closed
  * @property string|null $last_update
- * @property string|null $custom_data
  * @property int|null $sort_order
  * @property string|null $email_postfix
  * @property string|null $ga_tracking_id
  * @property string|null $project_key
  * @property int|null $p_update_user_id
+ * @property array|string|null $p_params_json
  *
  * @property ContactInfo $contactInfo
- * @property CustomData|null $customData
+ * @property Params|null $params
  *
  * @property ApiUser[] $apiUsers
  * @property Call[] $calls
@@ -72,7 +73,7 @@ class Project extends \yii\db\ActiveRecord
 {
     private ContactInfo $_contactInfo;
 
-    private ?CustomData $customData = null;
+    private ?Params $params = null;
 
     /**
      * @return string
@@ -91,13 +92,14 @@ class Project extends \yii\db\ActiveRecord
             [['sort_order'], 'integer', 'min' => 0, 'max' => 100],
             [['p_update_user_id'], 'integer'],
             [['closed'], 'boolean'],
-            [['contact_info', 'custom_data'], 'string'],
+            [['contact_info'], 'string'],
             [['last_update'], 'safe'],
             [['name', 'link', 'api_key', 'ga_tracking_id'], 'string', 'max' => 255],
             [['email_postfix'], 'string', 'max' => 100],
             [['project_key'], 'string', 'max' => 50],
             [['project_key'], 'unique'],
             [['p_update_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['p_update_user_id' => 'id']],
+            ['p_params_json', IsArrayValidator::class],
         ];
     }
 
@@ -132,12 +134,12 @@ class Project extends \yii\db\ActiveRecord
             'contact_info' => 'Contact Info',
             'closed' => 'Closed',
             'last_update' => 'Updated Dt',
-            'custom_data' => 'Custom Data',
             'sort_order' => 'Sort',
             'email_postfix' => 'Email postfix',
             'ga_tracking_id' => 'GA Tracking Id',
             'project_key' => 'Project Key',
             'p_update_user_id' => 'Updated User',
+            'p_params_json' => 'Parameters',
         ];
     }
 
@@ -167,13 +169,13 @@ class Project extends \yii\db\ActiveRecord
         return $this->_contactInfo;
     }
 
-    public function getCustomData(): CustomData
+    public function getParams(): Params
     {
-        if ($this->customData !== null) {
-            return $this->customData;
+        if ($this->params !== null) {
+            return $this->params;
         }
-        $this->customData = new CustomData($this->custom_data, $this->id);
-        return $this->customData;
+        $this->params = Params::fromArray($this->p_params_json ?: []);
+        return $this->params;
     }
 
     /**
@@ -197,7 +199,7 @@ class Project extends \yii\db\ActiveRecord
     {
         $projects = [];
         foreach (self::find()->all() as $item) {
-            if ($item->getCustomData()->sms_enabled !== false) {
+            if ($item->getParams()->sms->isEnabled()) {
                 $projects[$item->id] = $item->name;
             }
         }
@@ -244,6 +246,7 @@ class Project extends \yii\db\ActiveRecord
                     if (!$pr) {
                         $pr = new self();
                         $pr->id = $projectItem['id'];
+                        $pr->p_params_json = Params::default();
                         $data['created'][] = $projectItem['id'];
                     } else {
                         $data['updated'][] = $projectItem['id'];

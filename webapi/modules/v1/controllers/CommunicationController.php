@@ -1430,36 +1430,25 @@ class CommunicationController extends ApiBaseController
         }
 
         $project = $callModel->cProject;
-//        $url_say_play_hold = '';
-//        $url_music_play_hold = 'https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3';
 
         $responseTwml = new VoiceResponse();
         $callInfo = [];
         $response = [];
 
-        if ($project && $project->custom_data && !$callFromInternalPhone) {
-            $customData = @json_decode($project->custom_data, true);
-            if ($customData) {
-//                if(isset($customData['url_say_play_hold']) && $customData['url_say_play_hold']) {
-//                    $url_say_play_hold = $customData['url_say_play_hold'];
-//                }
-
-                if (isset($customData['play_direct_message'])) {
-                    if ($customData['play_direct_message']) {
-                        $responseTwml->play($customData['play_direct_message']);
-                    } else {
-                        if (isset($customData['say_direct_message']) && $customData['say_direct_message']) {
-                            $responseTwml->say($customData['say_direct_message'], [
-                                'language' => 'en-US',
-                                'voice' => 'alice'
-                            ]);
-                        }
-                    }
+        if ($project && !$callFromInternalPhone) {
+            $callParams = $project->getParams()->call;
+            if ($callParams->play_direct_message) {
+                $responseTwml->play($callParams->play_direct_message);
+            } else {
+                if ($callParams->say_direct_message) {
+                    $responseTwml->say($callParams->say_direct_message, [
+                        'language' => 'en-US',
+                        'voice' => 'alice'
+                    ]);
                 }
-
-                if (isset($customData['url_music_play_hold']) && $customData['url_music_play_hold']) {
-                    $responseTwml->play($customData['url_music_play_hold'], ['loop' => 0]);
-                }
+            }
+            if ($callParams->url_music_play_hold) {
+                $responseTwml->play($callParams->url_music_play_hold, ['loop' => 0]);
             }
         } else if ($callFromInternalPhone) {
 //          $dial = $responseTwml->dial('', [
@@ -1521,34 +1510,22 @@ class CommunicationController extends ApiBaseController
 
         $project = $callModel->cProject;
 
-        //$url_say_play_hold = '';
-        //$url_music_play_hold = 'https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3';
-
         $responseTwml = new VoiceResponse();
 
-        if ($project && $project->custom_data) {
-            $customData = @json_decode($project->custom_data, true);
-            if ($customData) {
-//                if(isset($customData['url_say_play_hold']) && $customData['url_say_play_hold']) {
-//                    $url_say_play_hold = $customData['url_say_play_hold'];
-//                }
-
-                if (isset($customData['play_redirect_message'])) {
-                    if ($customData['play_redirect_message']) {
-                        $responseTwml->play($customData['play_redirect_message']);
-                    } else {
-                        if (isset($customData['say_redirect_message']) && $customData['say_redirect_message']) {
-                            $responseTwml->say($customData['say_redirect_message'], [
-                                'language' => 'en-US',
-                                'voice' => 'alice'
-                            ]);
-                        }
-                    }
+        if ($project) {
+            $callParams = $project->getParams()->call;
+            if ($callParams->play_redirect_message) {
+                $responseTwml->play($callParams->play_redirect_message);
+            } else {
+                if ($callParams->say_redirect_message) {
+                    $responseTwml->say($callParams->say_redirect_message, [
+                        'language' => 'en-US',
+                        'voice' => 'alice'
+                    ]);
                 }
-
-                if (isset($customData['url_music_play_hold']) && $customData['url_music_play_hold']) {
-                    $responseTwml->play($customData['url_music_play_hold'], ['loop' => 0]);
-                }
+            }
+            if ($callParams->url_music_play_hold) {
+                $responseTwml->play($callParams->url_music_play_hold, ['loop' => 0]);
             }
         }
 

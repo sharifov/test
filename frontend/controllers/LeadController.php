@@ -493,7 +493,7 @@ class LeadController extends FController
         }
 
         $smsEnabled = true;
-        if ($lead->project->getCustomData()->sms_enabled === false) {
+        if (!$lead->project->getParams()->sms->isEnabled()) {
             $smsEnabled = false;
         }
 
