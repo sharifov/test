@@ -296,6 +296,7 @@ class Quote extends \yii\db\ActiveRecord
         $quote->lead_id = $leadId;
         $quote->uid = uniqid();
         $quote->status = self::STATUS_CREATED;
+        $quote->setMetricLabels(['action' => 'created', 'type_creation' => 'clone_by_uid']);
         return $quote;
     }
 
