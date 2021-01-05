@@ -1,5 +1,6 @@
 <?php
 
+use common\components\grid\Select2Column;
 use frontend\widgets\multipleUpdate\button\MultipleUpdateButtonWidget;
 use kartik\select2\Select2;
 use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
@@ -429,12 +430,17 @@ $this->registerJs($js);
             'visible' => $searchModel->show_fields && in_array('depart', $searchModel->show_fields, true),
         ],
         [
+            'class' => Select2Column::class,
             'attribute' => 'employee_id',
             'format' => 'raw',
             'value' => static function (Lead $model) {
                 return $model->employee ? '<i class="fa fa-user"></i> ' . Html::encode($model->employee->username) : '-';
             },
-            'filter' => $lists->getEmployees(true) ?: false
+            'data' => $lists->getEmployees(true) ?: [],
+            'filter' => true,
+            'id' => 'employee-filter',
+            'options' => ['width' => '200px'],
+            'pluginOptions' => ['allowClear' => true]
         ],
         [
             'attribute' => 'created',

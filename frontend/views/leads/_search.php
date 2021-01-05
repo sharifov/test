@@ -249,7 +249,12 @@ use frontend\extensions\DatePicker;
 
                 <?php //php  echo $form->field($model, 'called_expert')?>
                 <div class="col-md-6">
-                    <?php echo $form->field($model, 'employee_id')->dropDownList($lists->getEmployees(true), ['prompt' => '-']) ?>
+                    <?php echo $form->field($model, 'employee_id')->widget(Select2::class, [
+                        'data' => $lists->getEmployees(true),
+                        'size' => Select2::SMALL,
+                        'options' => ['placeholder' => 'Select user', 'multiple' => false],
+                        'pluginOptions' => ['allowClear' => true],
+                    ]); ?>
                 </div>
             </div>
 
