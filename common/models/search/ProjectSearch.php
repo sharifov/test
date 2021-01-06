@@ -85,7 +85,7 @@ class ProjectSearch extends Project
     public function searchByCallRecording($params): ActiveDataProvider
     {
         $query = static::find();
-        $query->andWhere(new Expression('p_params_json->"$.call.call_recording_disabled" = false'));
+        $query->andWhere(new Expression('p_params_json->"$.call.call_recording_disabled" = true'));
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
