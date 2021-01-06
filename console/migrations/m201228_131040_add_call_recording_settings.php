@@ -91,8 +91,6 @@ class m201228_131040_add_call_recording_settings extends Migration
                 VarDumper::dump($phone->getErrors());
             }
         }
-
-
     }
 
     /**
