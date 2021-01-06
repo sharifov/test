@@ -27,7 +27,7 @@ class m201230_161428_add_feedback_params_to_projects extends Migration
             $params['object']['case']['feedbackNameFrom'] = '';
             $params['object']['case']['feedbackBookingIdRequired'] = false;
             $project->custom_data = json_encode($params);
-            if (!$project->save()) {
+            if (!$project->save(false)) {
                 VarDumper::dump($project->getErrors());
             }
         }
@@ -53,7 +53,7 @@ class m201230_161428_add_feedback_params_to_projects extends Migration
             }
             unset($params['object']);
             $project->custom_data = json_encode($params);
-            if (!$project->save()) {
+            if (!$project->save(false)) {
                 VarDumper::dump($project->getErrors());
             }
         }
