@@ -245,8 +245,8 @@ class TestController extends Controller
 
         $dto = new ProjectConfigApiResponseDto($config);
         echo $dto->endpoint . PHP_EOL;
-	}
-	
+    }
+
     /**
      * @throws \Exception
      */
