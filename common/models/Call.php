@@ -1539,6 +1539,7 @@ class Call extends \yii\db\ActiveRecord
                 $callUserAccess->acceptPending();
             } else {
                 $callUserAccess->acceptPending();
+                $callUserAccess->cua_created_dt = date("Y-m-d H:i:s");
             }
 
             if (!$callUserAccess->save()) {
@@ -2249,7 +2250,7 @@ class Call extends \yii\db\ActiveRecord
     {
         return $this->c_recording_disabled ? true : false;
     }
-    
+
     /**
      * @return array
      * @throws \Exception
