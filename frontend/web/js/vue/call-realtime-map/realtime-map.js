@@ -97,25 +97,6 @@ const callItemComponent = {
             console.log(dt);
             return dt;
         },
-
-
-
-        // createdDateTime() {
-        //     return this.createdDateTime()
-        // }
-        // callStatusName: {
-        //     // getter
-        //     get() {
-        //         return this.item.c_status_id + ' status'
-        //     }
-            // },
-            // // setter
-            // set(newValue) {
-            //     const names = newValue.split(' ')
-            //     this.firstName = names[0]
-            //     this.lastName = names[names.length - 1]
-            // }
-        //}
     },
 
     // data() {
@@ -249,12 +230,6 @@ var callMapApp = Vue.createApp({
                 .get('/call/list-api')
                 .then(response => {
                     this.callList = response.data.callList;
-
-
-
-                    console.log(response.data.callList);
-                    //this.$forceUpdate();
-                    //this.$mount();
                 })
                 .catch(error => {
                     console.error("There was an error!", error);
@@ -267,12 +242,10 @@ var callMapApp = Vue.createApp({
                     this.projectList = response.data.projectList;
                     this.depList = response.data.depList;
                     this.userList = response.data.userList;
-                    //console.log(this.projectList[3]);
                     this.callStatusList = response.data.callStatusList;
                     this.callTypeList = response.data.callTypeList;
                     this.callSourceList = response.data.callSourceList;
                     this.callUserAccessStatusTypeList = response.data.callUserAccessStatusTypeList;
-                    //console.log(response.data);
                 })
                 .catch(error => {
                     console.error("There was an error!", error);

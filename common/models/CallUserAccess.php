@@ -264,9 +264,11 @@ class CallUserAccess extends \yii\db\ActiveRecord
             NativeEventDispatcher::recordEvent(CallUserAccessEvents::class, CallUserAccessEvents::UPDATE, [CallUserAccessEvents::class, 'updateUserStatus'], $this);
             NativeEventDispatcher::trigger(CallUserAccessEvents::class, CallUserAccessEvents::UPDATE);
         }
-        if ($call) {
-            $call->sendFrontendData();
-        }
+
+        // $this->sendFrontendData();
+//        if ($call) {
+//            $call->sendFrontendData();
+//        }
     }
 
     /**
@@ -290,5 +292,25 @@ class CallUserAccess extends \yii\db\ActiveRecord
     {
         parent::afterDelete();
         NativeEventDispatcher::trigger(CallUserAccessEvents::class, CallUserAccessEvents::DELETE);
+    }
+
+    /**
+     * @param string $action
+     * @return mixed
+     * @throws \Exception
+     */
+    public function sendFrontendData(string $action = 'update')
+    {
+        return Yii::$app->centrifugo->setSafety(false)
+            ->publish(
+                Call::CHANNEL_REALTIME_MAP,
+                [
+                    'object'  => 'callUserAccess',
+                    'action'  => $action,
+                    'data' => [
+                        'callUserAccess' => $this->attributes
+                    ]
+                ]
+            );
     }
 }

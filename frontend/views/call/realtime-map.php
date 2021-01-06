@@ -5,7 +5,7 @@
 /* @var $cfChannelName string */
 
 $this->title = 'Realtime Call Map';
-\frontend\assets\VueAsset::register($this);
+///\frontend\assets\VueAsset::register($this);
 ?>
 
 <style>
@@ -53,8 +53,9 @@ $this->title = 'Realtime Call Map';
                 <td class="text-center" style="width:90px">
                     <span v-if="item.c_source_type_id">{{ callSourceName }}</span>
                 </td>
-                <td class="text-left" style="width:80px">
-                    <img v-if="getCountryByPhoneNumber(item.c_from)" :src="'https://purecatamphetamine.github.io/country-flag-icons/3x2/' + getCountryByPhoneNumber(item.c_from) + '.svg'" width="20"/> &nbsp;
+                <td class="text-left" style="width:65px">
+                    <?php //<img v-if="getCountryByPhoneNumber(item.c_from)" :src="'https://purecatamphetamine.github.io/country-flag-icons/3x2/' + getCountryByPhoneNumber(item.c_from) + '.svg'" width="20"/> &nbsp; ?>
+                    <img v-if="getCountryByPhoneNumber(item.c_from)" :src="'https://flagcdn.com/20x15/' + getCountryByPhoneNumber(item.c_from).toLowerCase() + '.png'" width="20" height="15" :alt="getCountryByPhoneNumber(item.c_from)"/>
                     {{ getCountryByPhoneNumber(item.c_from) }}
                 </td>
                 <?php /*<td class="text-left" style="width:110px">
@@ -126,6 +127,7 @@ $this->title = 'Realtime Call Map';
 
     </div>
 </div>
+
 
 
 <?php

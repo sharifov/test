@@ -2271,6 +2271,7 @@ class Call extends \yii\db\ActiveRecord
     /**
      * @param string $action
      * @return mixed
+     * @throws \Exception
      */
     public function sendFrontendData(string $action = 'update')
     {
@@ -2278,6 +2279,7 @@ class Call extends \yii\db\ActiveRecord
             ->publish(
                 self::CHANNEL_REALTIME_MAP,
                 [
+                    'object' => 'call',
                     'action'  => $action,
                     'id'      => $this->c_id,
                     'data' => [

@@ -2,6 +2,7 @@
 
 namespace console\controllers;
 
+use common\models\CallUserAccess;
 use common\models\Lead;
 use common\models\Call;
 use common\models\Notifications;
@@ -269,6 +270,24 @@ class TestController extends Controller
                 $call->sendFrontendData('update');
                 echo ' - ' . $call->c_id . PHP_EOL;
             }
+            usleep(0.9 * 1000000);
+            if ($n > 100000) {
+                break;
+            }
+        }
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    }
+
+
+    /**
+     * @throws \Exception
+     */
+    public function actionTestCentrifugo2()
+    {
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+        $n = 0;
+        while (true) {
+            $n++;
             usleep(0.9 * 1000000);
             if ($n > 100000) {
                 break;
