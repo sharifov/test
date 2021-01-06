@@ -34,6 +34,15 @@ class m201228_131040_add_call_recording_settings extends Migration
         );
 
         $this->addColumn('{{%user_profile}}', 'up_call_recording_disabled', $this->boolean()->defaultValue(false));
+        $this->addColumn('{{%clients}}', 'cl_call_recording_disabled', $this->boolean()->defaultValue(false));
+
+        if (Yii::$app->cache) {
+            Yii::$app->cache->flush();
+        }
+
+        Yii::$app->db->getSchema()->refreshTableSchema('{{%call}}');
+        Yii::$app->db->getSchema()->refreshTableSchema('{{%user_profile}}');
+        Yii::$app->db->getSchema()->refreshTableSchema('{{%clients}}');
 
         foreach (Project::find()->all() as $project) {
             $customData = [];
@@ -46,7 +55,7 @@ class m201228_131040_add_call_recording_settings extends Migration
             }
             $customData['call_recording_disabled'] = false;
             $project->custom_data = @json_encode($customData);
-            if (!$project->save()) {
+            if (!$project->save(false)) {
                 VarDumper::dump($project->getErrors());
             }
         }
@@ -83,7 +92,7 @@ class m201228_131040_add_call_recording_settings extends Migration
             }
         }
 
-        $this->addColumn('{{%clients}}', 'cl_call_recording_disabled', $this->boolean()->defaultValue(false));
+
     }
 
     /**
