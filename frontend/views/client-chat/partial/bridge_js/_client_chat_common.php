@@ -868,6 +868,9 @@ $(document).on('click', '.client-chat-send-offer', function(e) {
             modal.find('.modal-body').html(data.message);
             return false;
         }
+        if (data.warning) {
+            createNotify('Attention!', data.warning, 'warning');
+        }
         modal.find('.modal-body').html('');
         modal.find('.modal-title').html('');
         modal.modal('hide');
