@@ -265,6 +265,7 @@ $js = <<<JS
                         
                         $.post('{$ajaxCheckRecording}', 
                             {
+                                'toPhone': filterCallParams(dialData.to),
                                 'fromPhone': dialData.from,
                                 'projectId': dialData.project_id,
                                 'departmentId': dialData.department_id,

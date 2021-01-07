@@ -259,6 +259,24 @@ class ClientManageService
         return $client;
     }
 
+    public function getByPhone(string $phone, ?int $projectId): ?int
+    {
+        $collections = new ClientsCollection(ClientsQuery::allByPhone($phone));
+        if ($collections->isEmpty()) {
+            return null;
+        }
+        if ($projectId) {
+            if ($client = $collections->getWithProject($projectId)) {
+                return $client->id;
+            }
+        } else {
+            if ($client = $collections->getWithoutProject()) {
+                return $client->id;
+            }
+        }
+        return $collections->getFirstId();
+    }
+
     /**
      * @param PhoneCreateForm[] $phones
      * @param ClientCreateForm $form
