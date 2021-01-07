@@ -27,6 +27,7 @@ use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
 use sales\model\phone\AvailablePhoneList;
 use sales\model\user\entity\userStatus\UserStatus;
+use sales\services\client\ClientManageService;
 use thamtech\uuid\helpers\UuidHelper;
 use yii\base\Exception;
 use yii\helpers\Html;
@@ -40,8 +41,20 @@ use yii\helpers\VarDumper;
 use yii\filters\VerbFilter;
 use Yii;
 
+/**
+ * Class PhoneController
+ *
+ * @property ClientManageService $clientManageService
+ */
 class PhoneController extends FController
 {
+    private ClientManageService $clientManageService;
+
+    public function __construct($id, $module, ClientManageService $clientManageService, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->clientManageService = $clientManageService;
+    }
 
     public function behaviors(): array
     {
@@ -317,6 +330,10 @@ class PhoneController extends FController
                 'success' => false,
                 'message' => VarDumper::dumpAsString($form->getErrors()),
             ]);
+        }
+
+        if (!$form->contactId && $form->toPhone) {
+            $form->contactId = $this->clientManageService->getByPhone($form->toPhone, $form->projectId);
         }
 
         $recordManager = RecordManager::createCall(

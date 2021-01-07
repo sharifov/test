@@ -8,6 +8,7 @@ use yii\base\Model;
  * Class CheckRecordingForm
  *
  * @property $fromPhone
+ * @property $toPhone
  * @property $projectId
  * @property $departmentId
  * @property $contactId
@@ -15,6 +16,7 @@ use yii\base\Model;
 class CheckRecordingForm extends Model
 {
     public $fromPhone;
+    public $toPhone;
     public $projectId;
     public $departmentId;
     public $contactId;
@@ -22,17 +24,23 @@ class CheckRecordingForm extends Model
     public function rules(): array
     {
         return [
-           ['fromPhone', 'default', 'value' => null],
-           ['fromPhone', 'string'],
+            ['fromPhone', 'default', 'value' => null],
+            ['fromPhone', 'string'],
 
-           ['projectId', 'default', 'value' => null],
-           ['projectId', 'integer'],
+            ['toPhone', 'default', 'value' => null],
+            ['toPhone', 'string'],
 
-           ['departmentId', 'default', 'value' => null],
-           ['departmentId', 'integer'],
+            ['projectId', 'default', 'value' => null],
+            ['projectId', 'integer'],
+            ['projectId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
 
-           ['contactId', 'default', 'value' => null],
-           ['contactId', 'integer'],
+            ['departmentId', 'default', 'value' => null],
+            ['departmentId', 'integer'],
+            ['departmentId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
+
+            ['contactId', 'default', 'value' => null],
+            ['contactId', 'integer'],
+            ['contactId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
         ];
     }
 
