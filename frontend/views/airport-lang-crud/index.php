@@ -69,17 +69,18 @@ $js = <<<JS
         if(!confirm('Are you sure you want synchronization all airports from TravelServices?')) {
             return false;
         }
+        let spin = '<i class="fa fa-cog fa-spin" style="font-size: 14px;"></i>';
         $(this).prop('disabled', true);
                         
         $('.preloader__text').html('Data synchronization request started.<br> Please, wait.');
         $('#page-loader').show(); 
         
         setTimeout(function () {
-            $('.preloader__text').html('Data preparing started.<br> Please, wait.');
+            $('.preloader__text').html('Data preparing.<br> Please, wait.');
         }, 10000);
         
         setTimeout(function () {
-            $('.preloader__text').html('Data processing started.<br> Please, wait.');
+            $('.preloader__text').html('Data processing.<br> Please, wait.  ' + spin);
         }, 20000);
         
         $(location).attr('href', $(this).attr('href'));

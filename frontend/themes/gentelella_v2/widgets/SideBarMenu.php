@@ -441,8 +441,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Phone Blacklist', 'url' => ['/phone-blacklist/index'], 'icon' => 'phone'],
                 ['label' => 'Email List', 'url' => ['/email-list/index'], 'icon' => 'envelope-o'],
 
-                ['label' => 'Airlines', 'url' => ['/settings/airlines'], 'icon' => 'plane'],
-                //['label' => 'Airports', 'url' => ['/settings/airports'], 'icon' => 'plane'],
+                //['label' => 'Airlines', 'url' => ['/settings/airlines'], 'icon' => 'plane'],
+                ['label' => 'Airlines', 'url' => ['/airline-crud/index'], 'icon' => 'space-shuttle'],
                 ['label' => 'Airports', 'url' => ['/airports/index'], 'icon' => 'plane'],
                 ['label' => 'Airport Lang', 'url' => ['/airport-lang-crud/index'], 'icon' => 'language'],
 

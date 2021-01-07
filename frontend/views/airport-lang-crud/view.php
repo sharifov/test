@@ -36,10 +36,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'ail_name',
                 'ail_city',
                 'ail_country',
-                'ail_created_user_id',
-                'ail_updated_user_id',
-                'ail_created_dt',
-                'ail_updated_dt',
+                'ail_created_user_id:username',
+                'ail_updated_user_id:username',
+                'ail_created_dt:byUserDateTime',
+                'ail_updated_dt:byUserDateTime',
             ],
         ]) ?>
 

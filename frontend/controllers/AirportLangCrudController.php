@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use sales\helpers\app\AppHelper;
 use sales\model\airportLang\service\AirportLangService;
 use Yii;
 use sales\model\airportLang\entity\AirportLang;
@@ -130,65 +131,72 @@ class AirportLangCrudController extends FController
 
     public function actionSynchronization(): \yii\web\Response
     {
-        $timeStart = microtime(true);
-        $lastUpdated = Yii::$app->cache->get(AirportLangService::CACHE_KEY);
-        $info = AirportLangService::getInfo();
+        try {
+            $timeStart = microtime(true);
+            $lastUpdated = Yii::$app->cache->get(AirportLangService::CACHE_KEY);
+            $info = AirportLangService::getInfo();
 
-        if ($info['error']) {
-            Yii::$app->getSession()->setFlash('error', $info['error']);
-            return $this->redirect(['index']);
-        }
-
-        if ((int) $info['lastModified'] === (int) $lastUpdated) {
-            $infoMessage = 'Last Modified Data not changed. (timestamp: ' .
-                $info['lastModified'] . ', dateTime: ' . date('Y-m-d H:i:s', (int) $info['lastModified']) . ')';
-            Yii::$app->getSession()->setFlash('info', $infoMessage);
-            return $this->redirect(['index']);
-        }
-
-        set_time_limit(300);
-        Yii::$app->log->targets['debug']->enabled = false;
-        $error = $created = $updated = $errored = [];
-        $processed = $disabled = 0;
-
-        for ($pageIndex = 0; $pageIndex <= $info['allPages']; $pageIndex++) {
-            $response = AirportLangService::synchronization(0, AirportLangService::PAGE_LIMIT, $pageIndex);
-
-            if ($response['error']) {
-                Yii::$app->getSession()->setFlash('error', $response['error']);
-                $error[] = $response['error'];
-            } else {
-                $created = ArrayHelper::merge($created, $response['created']);
-                $updated = ArrayHelper::merge($updated, $response['updated']);
-                $errored = ArrayHelper::merge($errored, $response['errored']);
-                $processed += $response['processed'];
-                $disabled += $response['disabled'];
+            if ($info['error']) {
+                Yii::$app->getSession()->setFlash('error', $info['error']);
+                return $this->redirect(['index']);
             }
+
+            if ((int) $info['lastModified'] === (int) $lastUpdated) {
+                $infoMessage = 'Last Modified Data not changed. (timestamp: ' .
+                    $info['lastModified'] . ', dateTime: ' . date('Y-m-d H:i:s', (int) $info['lastModified']) . ')';
+                Yii::$app->getSession()->setFlash('info', $infoMessage);
+                return $this->redirect(['index']);
+            }
+
+            set_time_limit(300);
+            Yii::$app->log->targets['debug']->enabled = false;
+            $error = $created = $updated = $errored = [];
+            $processed = $disabled = 0;
+
+            for ($pageIndex = 0; $pageIndex <= $info['allPages']; $pageIndex++) {
+                $response = AirportLangService::synchronization(0, AirportLangService::PAGE_LIMIT, $pageIndex);
+
+                if ($response['error']) {
+                    Yii::$app->getSession()->setFlash('error', $response['error']);
+                    $error[] = $response['error'];
+                } else {
+                    $created = ArrayHelper::merge($created, $response['created']);
+                    $updated = ArrayHelper::merge($updated, $response['updated']);
+                    $errored = ArrayHelper::merge($errored, $response['errored']);
+                    $processed += $response['processed'];
+                    $disabled += $response['disabled'];
+                }
+            }
+
+            Yii::$app->cache->set(AirportLangService::CACHE_KEY, $info['lastModified'], AirportLangService::CACHE_DURATION);
+
+            if ($error || count($errored)) {
+                $errorMessage = 'Errored: (' . count($errored) . ') ' . implode(', ', $errored) . '<br />';
+                $errorMessage .= 'Errors: ' .  implode(', ', $error);
+                Yii::$app->getSession()->setFlash('error', $errorMessage);
+            }
+
+            $successMessage = 'Created: (' . count($created) . ') ' . implode(', ', $created) . '<br />';
+            $successMessage .= 'Updated: (' . count($updated) . ') ' . implode(', ', $updated);
+            Yii::$app->getSession()->setFlash('success', $successMessage);
+
+            $timeEnd = microtime(true);
+            $executeTimeSeconds = number_format(round($timeEnd - $timeStart, 2), 2);
+
+            $infoMessage = 'Total Iata: (' . $info['total'] . ') <br />';
+            $infoMessage .= 'Processed: (' .  $processed . ') <br />';
+            $infoMessage .= 'Disabled: (' .  $disabled . ') <br />';
+            $infoMessage .= 'Execute Time: ' .  $executeTimeSeconds . ' sec <br />';
+            $infoMessage .= 'Last Modified Data: (timestamp: ' .
+                    $info['lastModified'] . ', dateTime: ' . date('Y-m-d H:i:s', (int) $info['lastModified']) . ')';
+            Yii::$app->getSession()->setFlash('info', $infoMessage);
+        } catch (\Throwable $throwable) {
+            Yii::error(
+                AppHelper::throwableFormatter($throwable),
+                'AirportLangCrudController:actionSynchronization'
+            );
+            Yii::$app->getSession()->setFlash('error', $throwable->getMessage());
         }
-
-        Yii::$app->cache->set(AirportLangService::CACHE_KEY, $info['lastModified'], AirportLangService::CACHE_DURATION);
-
-        if ($error || count($errored)) {
-            $errorMessage = 'Errored: (' . count($errored) . ') ' . implode(', ', $errored) . '<br />';
-            $errorMessage .= 'Errors: ' .  implode(', ', $error);
-            Yii::$app->getSession()->setFlash('error', $errorMessage);
-        }
-
-        $successMessage = 'Created: (' . count($created) . ') ' . implode(', ', $created) . '<br />';
-        $successMessage .= 'Updated: (' . count($updated) . ') ' . implode(', ', $updated);
-        Yii::$app->getSession()->setFlash('success', $successMessage);
-
-        $timeEnd = microtime(true);
-        $executeTimeSeconds = number_format(round($timeEnd - $timeStart, 2), 2);
-
-        $infoMessage = 'Total Iata: (' . $info['total'] . ') <br />';
-        $infoMessage .= 'Processed: (' .  $processed . ') <br />';
-        $infoMessage .= 'Disabled: (' .  $disabled . ') <br />';
-        $infoMessage .= 'Execute Time: ' .  $executeTimeSeconds . ' sec <br />';
-        $infoMessage .= 'Last Modified Data: (timestamp: ' .
-                $info['lastModified'] . ', dateTime: ' . date('Y-m-d H:i:s', (int) $info['lastModified']) . ')';
-        Yii::$app->getSession()->setFlash('info', $infoMessage);
-
         return $this->redirect(['index']);
     }
 }
