@@ -444,6 +444,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Airlines', 'url' => ['/settings/airlines'], 'icon' => 'plane'],
                 //['label' => 'Airports', 'url' => ['/settings/airports'], 'icon' => 'plane'],
                 ['label' => 'Airports', 'url' => ['/airports/index'], 'icon' => 'plane'],
+                ['label' => 'Airport Lang', 'url' => ['/airport-lang-crud/index'], 'icon' => 'language'],
+
                 ['label' => 'ACL (IP)', 'url' => ['/settings/acl'], 'icon' => 'user-secret'],
                 ['label' => 'API Users', 'url' => ['/api-user/index'], 'icon' => 'users'],
                 ['label' => 'Tasks', 'url' => ['/task/index'], 'icon' => 'list'],
