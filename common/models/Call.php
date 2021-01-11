@@ -2275,17 +2275,20 @@ class Call extends \yii\db\ActiveRecord
      */
     public function sendFrontendData(string $action = 'update')
     {
-        return Yii::$app->centrifugo->setSafety(false)
-            ->publish(
-                self::CHANNEL_REALTIME_MAP,
-                [
-                    'object' => 'call',
-                    'action'  => $action,
-                    'id'      => $this->c_id,
-                    'data' => [
-                        'call' => $this->getApiData(),
+        $enabled = !empty(Yii::$app->params['centrifugo']['enabled']);
+        if ($enabled) {
+            return Yii::$app->centrifugo->setSafety(false)
+                ->publish(
+                    self::CHANNEL_REALTIME_MAP,
+                    [
+                        'object' => 'call',
+                        'action' => $action,
+                        'id' => $this->c_id,
+                        'data' => [
+                            'call' => $this->getApiData(),
+                        ]
                     ]
-                ]
-            );
+                );
+        }
     }
 }

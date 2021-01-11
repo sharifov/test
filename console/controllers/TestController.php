@@ -288,7 +288,15 @@ class TestController extends Controller
         $n = 0;
         while (true) {
             $n++;
-            usleep(0.9 * 1000000);
+            $acessList = CallUserAccess::find()->limit(5)->orderBy('RAND()')->all();
+            foreach ($acessList as $item) {
+                $item->cua_call_id = 3368193;
+                //$item->cua_user_id = 188;
+                $item->sendFrontendData('insert');
+
+                VarDumper::dump($item->attributes);
+            }
+            usleep(0.1 * 1000000);
             if ($n > 100000) {
                 break;
             }

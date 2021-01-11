@@ -146,7 +146,13 @@ centrifuge.on('connect', function(ctx){
         let jsonData = message.data;
         //console.log(jsonData.data);
         
-        if (jsonData.action == 'update') {
+        if (jsonData.object === 'callUserAccess') {
+            if (jsonData.action === 'delete') {
+                callMapApp.deleteCallUserAccess(jsonData.data.callUserAccess);
+            } else {
+                callMapApp.addCallUserAccess(jsonData.data.callUserAccess);
+            }
+        } else if (jsonData.object === 'call') {
             //callMapApp.addCall(jsonData.data.call);
             //let data = JSON.parse(jsonData.data);
             callMapApp.addCall(jsonData.data.call);

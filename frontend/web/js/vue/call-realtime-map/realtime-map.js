@@ -1,5 +1,5 @@
 let Timer = {
-    template: `<span class="badge badge-warning"> {{ timerIndicator }} </span>`,
+    template: '<span class="badge badge-warning">{{ timerIndicator }}</span>',
     //props:['from'],
     props: {
         fromDt: {
@@ -51,7 +51,8 @@ const callItemComponent = {
     data() {
         return {
             show: true,
-            showStatusList: [1, 2, 3, 4, 10]
+            showStatusList: [1, 2, 3, 4, 10],
+            userAccessList2: []
         }
     },
     created() {
@@ -94,7 +95,7 @@ const callItemComponent = {
             if (this.item.c_status_id == 2 && this.item.c_queue_start_dt) {
                 dt = this.item.c_queue_start_dt;
             }
-            console.log(dt);
+            // console.log(dt);
             return dt;
         },
     },
@@ -137,6 +138,11 @@ const callItemComponent = {
             }
             return ''
         },
+
+        updateCallUserAccess() {
+            alert(123);
+        },
+
 
         // "callStatusList": {
         //     "1": "IVR",
@@ -187,21 +193,30 @@ var callMapApp = Vue.createApp({
         }
     },
     created() {
+        setInterval(() => {
+            this.getStaticData();
+        }, 60 * 60 * 1000); // 1 hour
         this.getStaticData();
         this.getCalls();
     },
     computed: {
         callList1: function () {
             return this.callList.filter(function (item) {
-                if ([1, 2, 3, '1', '2', '3'].includes(item.c_status_id)) {
-                    return item
+                if (item.c_status_id) {
+                    let statusId = parseInt(item.c_status_id)
+                    if ([1, 2, 3].includes(statusId)) {
+                        return item
+                    }
                 }
             })
         },
         callList2: function () {
             return this.callList.filter(function (item) {
-                if ([4, 10, '4', '10'].includes(item.c_status_id)) {
-                    return item
+                if (item.c_status_id) {
+                    let statusId = parseInt(item.c_status_id)
+                    if ([4, 10].includes(statusId)) {
+                        return item
+                    }
                 }
             })
         }
@@ -252,8 +267,61 @@ var callMapApp = Vue.createApp({
                 })
         },
 
-        shuffle: function () {
-            this.callList = _.shuffle(this.callList)
+        callFind(callId) {
+            callId = parseInt(callId)
+            return this.callList.find(x => parseInt(x.c_id) === callId);
+        },
+
+        userAccessFind(objectList, userId) {
+            let item = []
+            if (objectList) {
+                userId = parseInt(userId)
+                item = objectList.find(x => parseInt(x.cua_user_id) === userId)
+            }
+            return item;
+        },
+
+        userAccessFindIndex(objectList, userId) {
+            let index = -1
+            userId = parseInt(userId)
+            if (objectList) {
+                index = objectList.findIndex(x => parseInt(x.cua_user_id) === userId)
+            }
+            return index
+        },
+
+        addCallUserAccess(data) {
+            if (data && data.cua_call_id) {
+                let call = this.callFind(data.cua_call_id);
+                if (call) {
+                    //let userAccess = this.userAccessFind(call.userAccessList, data.cua_user_id);
+                    //console.log(data);
+                    //console.log(userAccess);
+                    //console.log(call.userAccessList);
+
+                    //if (userAccess) {
+                    //console.info(call.userAccessList[0]);
+                    let index = this.userAccessFindIndex(call.userAccessList, data.cua_user_id);
+                    if (index > -1) {
+                        call.userAccessList[index] = data;
+                        //  }
+                    } else {
+                        call.userAccessList = [data, ...call.userAccessList];
+                    }
+                }
+            }
+        },
+
+        deleteCallUserAccess(data) {
+            if (data && data.cua_call_id) {
+                let call = this.callFind(data.cua_call_id);
+                if (call) {
+                    let index = this.userAccessFindIndex(call.userAccessList, data.cua_user_id);
+                    if (index > -1) {
+                        call.userAccessList.splice(index, 1);
+                    }
+                }
+            }
         }
     }
 }).mount('#realtime-map-app');

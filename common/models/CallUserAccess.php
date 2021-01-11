@@ -265,7 +265,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
             NativeEventDispatcher::trigger(CallUserAccessEvents::class, CallUserAccessEvents::UPDATE);
         }
 
-        // $this->sendFrontendData();
+        $this->sendFrontendData($insert ? 'insert' : 'update');
 //        if ($call) {
 //            $call->sendFrontendData();
 //        }
@@ -279,7 +279,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
         if (!parent::beforeDelete()) {
             return false;
         }
-
+        $this->sendFrontendData('delete');
         NativeEventDispatcher::recordEvent(CallUserAccessEvents::class, CallUserAccessEvents::DELETE, [CallUserAccessEvents::class, 'resetHasCallAccess'], $this);
         return true;
     }
@@ -301,16 +301,21 @@ class CallUserAccess extends \yii\db\ActiveRecord
      */
     public function sendFrontendData(string $action = 'update')
     {
-        return Yii::$app->centrifugo->setSafety(false)
-            ->publish(
-                Call::CHANNEL_REALTIME_MAP,
-                [
-                    'object'  => 'callUserAccess',
-                    'action'  => $action,
-                    'data' => [
-                        'callUserAccess' => $this->attributes
+        $enabled = !empty(Yii::$app->params['centrifugo']['enabled']);
+
+        if ($enabled) {
+            return Yii::$app->centrifugo->setSafety(false)
+                ->publish(
+                    Call::CHANNEL_REALTIME_MAP,
+                    [
+                        'object' => 'callUserAccess',
+                        'action' => $action,
+                        'data' => [
+                            'callUserAccess' => $this->attributes
+                        ]
                     ]
-                ]
-            );
+                );
+        }
+        return false;
     }
 }
