@@ -1140,8 +1140,6 @@ class CallController extends FController
                     throw new \DomainException('Prepare current calls error');
                 }
 
-                sleep(10);
-
                 $return = new ReturnToHoldCall();
                 if (!$return->return($call, Auth::id())) {
                     throw new \DomainException('Return Hold call error');
