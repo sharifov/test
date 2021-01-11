@@ -32,7 +32,9 @@ class PrepareCurrentCallsForNewCall
 
     public function prepare(): bool
     {
-        foreach ($this->getCallsForActions() as $call) {
+        $calls = $this->getCallsForActions();
+        \Yii::info($calls, 'info\Debug');
+        foreach ($calls as $call) {
             if ($call['action'] === 'hangup') {
                 $this->hangUp($call['call_sid']);
             } elseif ($call['action'] === 'hold') {
