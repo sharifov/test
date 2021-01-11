@@ -1,6 +1,7 @@
 <?php
 
 use kartik\select2\Select2;
+use sales\auth\Auth;
 use sales\model\clientChat\dashboard\FilterForm;
 use sales\model\clientChat\dashboard\GroupFilter;
 use sales\model\clientChat\entity\ClientChat;
@@ -296,8 +297,52 @@ use yii\web\JsExpression;
                         <span class="sr-only">Toggle Dropdown</span>
                     </button>
                     <div class="dropdown-menu">
-                        <?= \yii\helpers\Html::a('<i class="fa fa-edit text-warning"></i> Multiple update', null, ['class' => 'dropdown-item btn-multiple-update'])?>
-<!--                        <div class="dropdown-divider"></div>-->
+                        <p>
+                            <?php echo
+                                Html::a(
+                                    '<i class="fa fa-edit text-warning"></i> Multiple update status',
+                                    null,
+                                    ['class' => 'dropdown-item btn-multiple-update',
+                                        'data' => [
+                                            'url' => Url::to(['client-chat/ajax-multiple-update']),
+                                            'title' => 'Multiple update status',
+                                        ],
+                                    ]
+                                )
+                            ?>
+                        </p>
+                        <?php if (Auth::can('client-chat/multiple/assign/manage')) : ?>
+                            <p>
+                                <?php echo
+                                    Html::a(
+                                        '<i class="fa fa-user text-success"></i> Multiple Assign Chats',
+                                        null,
+                                        ['class' => 'dropdown-item btn-multiple-update',
+                                            'data' => [
+                                                'url' => Url::to(['client-chat/ajax-multiple-assign']),
+                                                'title' => 'Assign Chats',
+                                            ],
+                                        ]
+                                    )
+                                ?>
+                            </p>
+                        <?php endif ?>
+                        <?php if (Auth::can('client-chat/multiple/archive/manage')) : ?>
+                            <p>
+                                <?php echo
+                                    Html::a(
+                                        '<i class="fa fa-times-circle text-danger"></i> Multiple Close Chats',
+                                        null,
+                                        ['class' => 'dropdown-item btn-multiple-update',
+                                            'data' => [
+                                                'url' => Url::to(['client-chat/ajax-multiple-close']),
+                                                'title' => 'Close Chats',
+                                            ],
+                                        ]
+                                    )
+                                ?>
+                            </p>
+                        <?php endif ?>
                     </div>
                 </div>
             </div>

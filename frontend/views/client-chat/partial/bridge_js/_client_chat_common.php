@@ -1298,37 +1298,37 @@ $(document).on('click', '.multiple-checkbox', function(e) {
 });
 
 $(document).on('click', '.btn-multiple-update', function(e) {
-e.preventDefault();        
-let arrIds = [];
-if (sessionStorage.selectedChats) {
-    let data = jQuery.parseJSON( sessionStorage.selectedChats );
-    arrIds = Object.values(data);
-    
-    console.log(arrIds);
-    // $('#user_list_json').val(JSON.stringify(arrIds));
-    
-    let modal = $('#modal-sm');
-    
-    $.ajax({
-        type: 'post',
-        url: '{$clientChatMultipleUpdate}',
-        dataType: 'html',
-        cache: false,
-        data: {chatIds: arrIds.length ? JSON.stringify(arrIds) : ''},
-        beforeSend: function () {
-            modal.find('.modal-body').html('<div><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
-            modal.find('.modal-title').html('Client Chat Multiple Update');
-            modal.modal('show');
-        },
-        success: function (data) {
-            modal.find('.modal-body').html(data);
-        },
-        error: function (xhr) {                  
-            modal.find('.modal-body').html('Error: ' + xhr.responseText);
-            //createNotify('Error', xhr.responseText, 'error');
-        },
-    });
-}
+    e.preventDefault();        
+    let arrIds = [];
+    if (sessionStorage.selectedChats) {
+        let data = jQuery.parseJSON( sessionStorage.selectedChats );
+        arrIds = Object.values(data);    
+        
+        console.log(arrIds);
+            
+        let modal = $('#modal-sm');
+        let urlAction = $(this).data('url');
+        let title = $(this).data('title');
+        
+        $.ajax({
+            type: 'post',
+            url: urlAction,
+            dataType: 'html',
+            cache: false,
+            data: {chatIds: arrIds.length ? JSON.stringify(arrIds) : ''},
+            beforeSend: function () {
+                modal.find('.modal-body').html('<div><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+                modal.find('.modal-title').html(title);
+                modal.modal('show');
+            },
+            success: function (data) {
+                modal.find('.modal-body').html(data);
+            },
+            error: function (xhr) {                  
+                modal.find('.modal-body').html('Error: ' + xhr.responseText);            
+            },
+        });
+    }
 });
  
 $(document).on('click', '.js-couch-note-btn', function (e) {

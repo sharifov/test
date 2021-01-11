@@ -424,6 +424,26 @@ class ClientChatService
         });
     }
 
+    public function acceptFromMultipleUpdate(ClientChat $clientChat, int $ownerId): void
+    {
+        $_self = $this;
+        $this->transactionManager->wrap(static function () use ($_self, $clientChat, $ownerId) {
+            $clientChat->assignOwner($ownerId)->inProgress($ownerId, ClientChatStatusLog::ACTION_MULTIPLE_ACCEPT);
+            $_self->clientChatRepository->save($clientChat);
+            $_self->clientChatMessageService->touchUnreadMessage($clientChat->cch_id);
+            $_self->assignAgentToRcChannel($clientChat->cch_rid, $clientChat->cchOwnerUser->userProfile->up_rc_user_id ?? '');
+
+            if ($access = ClientChatUserAccess::find()->byChatId($clientChat->cch_id)->byUserId($ownerId)->one()) {
+                /** @var ClientChatUserAccess $access */
+                $access->setStatus(ClientChatUserAccess::STATUS_ACCEPT);
+                $_self->clientChatUserAccessRepository->save($access, $clientChat);
+            }
+
+            $clientChatUserAccessService = \Yii::$container->get(ClientChatUserAccessService::class);
+            $clientChatUserAccessService->disableAccessForOtherUsersBatch($clientChat->cch_id, $ownerId);
+        });
+    }
+
     public function finishTransfer(ClientChat $clientChat, ClientChatUserAccess $chatUserAccess): ClientChat
     {
         return $this->transactionManager->wrap(function () use ($clientChat, $chatUserAccess) {
@@ -551,6 +571,39 @@ class ClientChatService
         );
     }
 
+    public function closeFromMultipleUpdate(int $cchId, Employee $user): void
+    {
+        $clientChat = $this->clientChatRepository->findById($cchId);
+
+        if (!$clientChat->ccv || !$clientChat->ccv->ccvCvd || !$clientChat->ccv->ccvCvd->cvd_visitor_rc_id) {
+            throw new \RuntimeException('Visitor RC id is not found');
+        }
+
+        if (SettingHelper::isClientChatSoftCloseEnabled()) {
+            $clientChat->close($user->id, ClientChatStatusLog::ACTION_MULTIPLE_UPDATE_CLOSE);
+        } else {
+            $clientChat->archive($user->id, ClientChatStatusLog::ACTION_MULTIPLE_UPDATE_CLOSE);
+        }
+
+        $this->clientChatRepository->save($clientChat);
+
+        if ($clientChat->cch_owner_user_id && $clientChat->cch_owner_user_id !== $user->id) {
+            $chatLink = Purifier::createChatShortLink($clientChat);
+            Notifications::createAndPublish(
+                $clientChat->cch_owner_user_id,
+                'Your Chat was closed',
+                'Your Chat was closed by ' . $user->nickname . '; ' . $chatLink,
+                Notifications::TYPE_INFO,
+                true
+            );
+            Notifications::pub(
+                [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],
+                'refreshChatPage',
+                ['data' => ClientChatAccessMessage::chatClosed($clientChat, $user)]
+            );
+        }
+    }
+
     /**
      * @param ClientChat $oldClientChat
      * @param ClientChat $newClientChat
@@ -624,18 +677,18 @@ class ClientChatService
         return $rid;
     }
 
-    public function takeClientChat(ClientChat $clientChat, Employee $owner): ClientChat
+    public function takeClientChat(ClientChat $clientChat, Employee $owner, int $action = ClientChatStatusLog::ACTION_TAKE): ClientChat
     {
         $lastMessage = $this->clientChatLastMessageRepository->getByChatId($clientChat->cch_id);
 
-        return $this->transactionManager->wrap(function () use ($clientChat, $owner, $lastMessage) {
+        return $this->transactionManager->wrap(function () use ($clientChat, $owner, $lastMessage, $action) {
 
-            $clientChat->archive($owner->id, ClientChatStatusLog::ACTION_TAKE, null, null, true);
+            $clientChat->archive($owner->id, $action, null, null, true);
             $this->clientChatRepository->save($clientChat);
 
             $dto = ClientChatCloneDto::feelInOnTake($clientChat, $owner->id);
             $newClientChat = ClientChat::clone($dto);
-            $newClientChat->inProgress($owner->id, ClientChatStatusLog::ACTION_TAKE);
+            $newClientChat->inProgress($owner->id, $action);
             $this->clientChatRepository->save($newClientChat);
 
             $this->cloneLead($clientChat, $newClientChat)
