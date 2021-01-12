@@ -133,8 +133,8 @@ $this->title = 'Realtime Call Map';
             <div class="animated flipInY col-md-2 col-sm-6 ">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-phone"></i></div>
-                    <div class="count">{{ inProgressCounter }}</div>
-                    <h3>In Progress</h3>
+                    <div class="count">{{ inProgressCounter }} / {{ ringingCounter }}</div>
+                    <h3>InProgress / Ringing</h3>
                 </div>
             </div>
             <div class="animated flipInY col-md-2 col-sm-6 ">

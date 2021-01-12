@@ -213,6 +213,9 @@ var callMapApp = Vue.createApp({
         inProgressCounter: function () {
             return this.getCallListByStatusId([4]).length
         },
+        ringingCounter: function () {
+            return this.getCallListByStatusId([3]).length
+        },
         holdCounter: function () {
             return this.getCallListByStatusId([12]).length
         },
