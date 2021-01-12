@@ -133,6 +133,4 @@ class UserOnline extends ActiveRecord
             }
         }
     }
-
-
 }
