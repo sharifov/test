@@ -21,7 +21,6 @@ class m210106_120352_alter_column_country_tbl_airport extends Migration
      */
     public function safeDown()
     {
-        $this->alterColumn('{{%airports}}', 'country', $this->string(40));
-        $this->alterColumn('{{%airport_lang}}', 'ail_country', $this->string(40));
+        echo "m210106_120352_alter_column_country_tbl_airport cannot be reverted.\n";
     }
 }
