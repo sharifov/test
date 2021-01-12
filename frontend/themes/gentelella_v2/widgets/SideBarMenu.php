@@ -534,6 +534,15 @@ class SideBarMenu extends \yii\bootstrap\Widget
             ];
         }
 
+        if (class_exists('\modules\fileStorage\FileStorageModule')) {
+            $menuModuleItems[] = [
+                'label' => 'File storage',
+                'url' => 'javascript:',
+                'icon' => 'list',
+                'items' => \modules\fileStorage\FileStorageModule::getListMenu()
+            ];
+        }
+
         if ($menuModuleItems) {
             $menuItems[] = [
                 'label' => 'Modules',

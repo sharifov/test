@@ -30,9 +30,9 @@ use Yii;
 <?php endforeach; ?>
 <?php if (!empty($relations)) : ?>
  *
-    <?php foreach ($relations as $name => $relation) : ?>
+<?php foreach ($relations as $name => $relation) : ?>
  * @property <?= $relation[1] . ($relation[2] ? '[]' : '') . ' $' . lcfirst($name) . "\n" ?>
-    <?php endforeach; ?>
+<?php endforeach; ?>
 <?php endif; ?>
  */
 class <?= $className ?> extends <?= '\\' . ltrim($generator->baseClass, '\\') . "\n" ?>

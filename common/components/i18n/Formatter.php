@@ -10,6 +10,7 @@ use common\models\Department;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\PaymentMethod;
+use modules\fileStorage\src\entity\fileLog\FileLogType;
 use modules\invoice\src\entities\invoice\Invoice;
 use modules\invoice\src\entities\invoice\InvoiceStatus;
 use modules\invoice\src\entities\invoice\InvoiceStatusAction;
@@ -783,5 +784,14 @@ class Formatter extends \yii\i18n\Formatter
             return VarDumper::dumpAsString($data);
         }
         return $this->nullDisplay;
+    }
+
+    public function asFileLogType($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return FileLogType::asFormat($value);
     }
 }

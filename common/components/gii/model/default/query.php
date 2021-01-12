@@ -1,5 +1,4 @@
 <?php
-
 /**
  * This is the template for generating the ActiveQuery class.
  */
@@ -26,9 +25,23 @@ echo "<?php\n";
 namespace <?= $generator->queryNs ?>;
 
 /**
- * @see <?= $modelFullClassName . "\n" ?>
- */
+* @see <?= $modelFullClassName . "\n" ?>
+*/
 class <?= $className ?> extends <?= '\\' . ltrim($generator->queryBaseClass, '\\') . "\n" ?>
 {
+    /**
+    * @return <?= $modelFullClassName ?>[]|array
+    */
+    public function all($db = null)
+    {
+        return parent::all($db);
+    }
 
+    /**
+    * @return <?= $modelFullClassName ?>|array|null
+    */
+    public function one($db = null)
+    {
+        return parent::one($db);
+    }
 }

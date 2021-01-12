@@ -5,6 +5,7 @@ use kivork\rbacExportImport\src\rbac\DbManager;
 use kivork\rbacExportImport\RbacImportExportModule;
 use common\models\Employee;
 use modules\email\EmailModule;
+use modules\fileStorage\FileStorageModule;
 use modules\flight\FlightModule;
 use modules\hotel\HotelModule;
 use modules\invoice\InvoiceModule;
@@ -328,6 +329,9 @@ return [
             'userFieldDisplay' => 'username', // for gridview, detail vew
             'cronTable' => 'cron_scheduler', //schedulers list table name
             'roles' => ['admin', 'superadmin'], //for roles can manage module
+        ],
+        'file-storage' => [
+            'class' => FileStorageModule::class,
         ],
     ],
     'as beforeRequest' => [
