@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use sales\helpers\app\AppHelper;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -79,4 +80,59 @@ class UserOnline extends ActiveRecord
     {
         return $this->hasOne(Employee::class, ['id' => 'uo_user_id']);
     }
+
+    /**
+     * @param bool $insert
+     * @param array $changedAttributes
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+        $this->sendFrontendData($insert ? 'insert' : 'update');
+    }
+
+    /**
+     * @return bool
+     */
+    public function beforeDelete(): bool
+    {
+        if (!parent::beforeDelete()) {
+            return false;
+        }
+        $this->sendFrontendData('delete');
+        return true;
+    }
+
+
+
+
+    /**
+     * @param string $action
+     * @return false|mixed
+     */
+    public function sendFrontendData(string $action = 'update')
+    {
+        $enabled = !empty(Yii::$app->params['centrifugo']['enabled']);
+        if ($enabled) {
+            try {
+                return Yii::$app->centrifugo->setSafety(false)
+                    ->publish(
+                        Call::CHANNEL_REALTIME_MAP,
+                        [
+                            'object' => 'userOnline',
+                            'action' => $action,
+                            'id' => $this->uo_user_id,
+                            'data' => [
+                                'userOnline' => $this->attributes,
+                            ]
+                        ]
+                    );
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableFormatter($throwable), 'UserOnline:sendFrontendData:Throwable');
+                return false;
+            }
+        }
+    }
+
+
 }

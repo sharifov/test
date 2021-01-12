@@ -26,6 +26,15 @@ $this->title = 'Realtime Call Map';
         opacity: 0;
         /*transform: translateY(30px);*/
     }
+
+
+    .fade-enter-active, .fade-leave-active {
+        transition: opacity .2s;
+    }
+    .fade-enter, .fade-leave-to {
+        opacity: 0;
+    }
+
 </style>
 
 <script type="text/x-template" id="call-item-tpl">
@@ -93,18 +102,66 @@ $this->title = 'Realtime Call Map';
             </tbody>
         </table>
         <div v-if="item.userAccessList && item.userAccessList.length > 0" class="text-right" style="margin-bottom: 5px">
+            <transition-group name=”fade”>
             <span class="label" :class="{ 'label-success': access.cua_status_id == 2, 'label-default': access.cua_status_id != 2 }"
                   v-for="(access, index) in item.userAccessList" :key="access.cua_user_id"
                   style="margin-right: 4px" :title="getUserAccessStatusTypeName(access.cua_status_id)">
                 <i class="fa fa-user"></i> {{ getUserName(access.cua_user_id) }}
             </span>
+            </transition-group>
         </div>
     </div>
 </script>
 
 <div id="realtime-map-app" class="col-md-12">
     <div class="row">
-        <div class="col-md-6" >
+        <div class="top_tiles col-md-12">
+            <div class="animated flipInY col-md-2 col-sm-6 ">
+                <div class="tile-stats">
+                    <div class="icon"><i class="fa fa-spinner"></i></div>
+                    <div class="count">{{ ivrCounter }}</div>
+                    <h3>IVR</h3>
+                </div>
+            </div>
+            <div class="animated flipInY col-md-2 col-sm-6 ">
+                <div class="tile-stats">
+                    <div class="icon"><i class="fa fa-recycle"></i></div>
+                    <div class="count">{{ queueCounter }}</div>
+                    <h3>Queue</h3>
+                </div>
+            </div>
+            <div class="animated flipInY col-md-2 col-sm-6 ">
+                <div class="tile-stats">
+                    <div class="icon"><i class="fa fa-phone"></i></div>
+                    <div class="count">{{ inProgressCounter }}</div>
+                    <h3>In Progress</h3>
+                </div>
+            </div>
+            <div class="animated flipInY col-md-2 col-sm-6 ">
+                <div class="tile-stats">
+                    <div class="icon"><i class="fa fa-stop"></i></div>
+                    <div class="count">{{ delayCounter }}</div>
+                    <h3>Delay</h3>
+                </div>
+            </div>
+            <div class="animated flipInY col-md-2 col-sm-6 ">
+                <div class="tile-stats">
+                    <div class="icon"><i class="fa fa-pause"></i></div>
+                    <div class="count">{{ holdCounter }}</div>
+                    <h3>Hold</h3>
+                </div>
+            </div>
+            <div class="animated flipInY col-md-2 col-sm-6 ">
+                <div class="tile-stats">
+                    <div class="icon"><i class="fa fa-user"></i></div>
+                    <div class="count">{{ onlineUserCounter }}</div>
+                    <h3>OnLine</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-5" >
             <div class="card card-default">
                 <div class="card-header"> Incoming Calls in IVR, QUEUE, RINGING ({{ callList1.length }})</div>
                 <transition-group name="list" tag="div" class="card-body row">
@@ -114,12 +171,23 @@ $this->title = 'Realtime Call Map';
                 </transition-group>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-5">
             <div class="card card-default">
                 <div class="card-header"> Incoming Calls in PROGRESS, DELAY ({{ callList2.length }})</div>
                 <transition-group name="list" tag="div" class="card-body row">
                     <div v-for="(item, index) in callList2" class="list-item col-md-12" :key="item">
                         <call-item-component :item="item" :key="item.с_id" :index="index"></call-item-component>
+                    </div>
+                </transition-group>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="card card-default">
+                <div class="card-header"> Online Users  ({{ onlineUserCounter }})</div>
+                <transition-group name="list" tag="div" class="card-body">
+                    <div v-for="(item, index) in onlineUserList" class="list-item col-md-6" :key="item">
+                        <i class="fa fa-user text-success"></i> {{ getUserName(item.uo_user_id) }}
                     </div>
                 </transition-group>
             </div>
@@ -156,6 +224,12 @@ centrifuge.on('connect', function(ctx){
             //callMapApp.addCall(jsonData.data.call);
             //let data = JSON.parse(jsonData.data);
             callMapApp.addCall(jsonData.data.call);
+        } else if (jsonData.object === 'userOnline') {
+            if (jsonData.action === 'delete') {
+                callMapApp.deleteUserOnline(jsonData.data.userOnline);
+            } else {
+                callMapApp.addUserOnline(jsonData.data.userOnline);
+            }
         }
         //console.log(message);
     });

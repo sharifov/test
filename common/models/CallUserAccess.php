@@ -6,6 +6,7 @@ use common\components\jobs\AgentCallQueueJob;
 use common\components\purifier\Purifier;
 use common\models\query\CallUserAccessQuery;
 use frontend\widgets\newWebPhone\call\socket\RemoveIncomingRequestMessage;
+use sales\helpers\app\AppHelper;
 use sales\model\call\helper\CallHelper;
 use frontend\widgets\notification\NotificationMessage;
 use sales\dispatchers\NativeEventDispatcher;
@@ -296,15 +297,15 @@ class CallUserAccess extends \yii\db\ActiveRecord
 
     /**
      * @param string $action
-     * @return mixed
-     * @throws \Exception
+     * @return false|mixed
      */
     public function sendFrontendData(string $action = 'update')
     {
         $enabled = !empty(Yii::$app->params['centrifugo']['enabled']);
 
         if ($enabled) {
-            return Yii::$app->centrifugo->setSafety(false)
+            try {
+                return Yii::$app->centrifugo->setSafety(false)
                 ->publish(
                     Call::CHANNEL_REALTIME_MAP,
                     [
@@ -315,6 +316,10 @@ class CallUserAccess extends \yii\db\ActiveRecord
                         ]
                     ]
                 );
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableFormatter($throwable), 'CallUserAccess:sendFrontendData:Throwable');
+                return false;
+            }
         }
         return false;
     }

@@ -7,6 +7,7 @@ use common\components\jobs\CheckClientCallJoinToConferenceJob;
 use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
 use sales\behaviors\metric\MetricCallCounterBehavior;
+use sales\helpers\app\AppHelper;
 use sales\helpers\PhoneFormatter;
 use sales\helpers\UserCallIdentity;
 use sales\model\call\entity\call\data\Data;
@@ -2270,14 +2271,14 @@ class Call extends \yii\db\ActiveRecord
 
     /**
      * @param string $action
-     * @return mixed
-     * @throws \Exception
+     * @return false|mixed
      */
     public function sendFrontendData(string $action = 'update')
     {
         $enabled = !empty(Yii::$app->params['centrifugo']['enabled']);
         if ($enabled) {
-            return Yii::$app->centrifugo->setSafety(false)
+            try {
+                return Yii::$app->centrifugo->setSafety(false)
                 ->publish(
                     self::CHANNEL_REALTIME_MAP,
                     [
@@ -2289,6 +2290,10 @@ class Call extends \yii\db\ActiveRecord
                         ]
                     ]
                 );
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableFormatter($throwable), 'Call:sendFrontendData:Throwable');
+                return false;
+            }
         }
     }
 }

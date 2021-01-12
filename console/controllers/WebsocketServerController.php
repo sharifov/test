@@ -183,10 +183,10 @@ class WebsocketServerController extends Controller
                 $userConnection->uc_sub_list = $subList ? @json_encode($subList) : null;
 
                 if ($userConnection->save()) {
-                    $um = UserMonitor::find()->where(['um_user_id' => $userId, 'um_type_id' => UserMonitor::TYPE_ONLINE])->limit(1)->orderBy(['um_id' => SORT_DESC])->one();
-                    if (!$um) {
-                        UserMonitor::addEvent($userId, UserMonitor::TYPE_ONLINE);
-                    }
+//                    $um = UserMonitor::find()->where(['um_user_id' => $userId, 'um_type_id' => UserMonitor::TYPE_ONLINE])->limit(1)->orderBy(['um_id' => SORT_DESC])->one();
+//                    if (!$um) {
+//                        UserMonitor::addEvent($userId, UserMonitor::TYPE_ONLINE);
+//                    }
 
                     $userOnline = UserOnline::find()->where(['uo_user_id' => $userConnection->uc_user_id])->one();
                     if (!$userOnline) {
@@ -204,9 +204,11 @@ class WebsocketServerController extends Controller
                         }
                         unset($uo);
                     } else {
-                        $userOnline->uo_idle_state = false;
-                        $userOnline->uo_idle_state_dt = date('Y-m-d H:i:s');
-                        $userOnline->update();
+                        if ($userOnline->uo_idle_state) {
+                            $userOnline->uo_idle_state = false;
+                            $userOnline->uo_idle_state_dt = date('Y-m-d H:i:s');
+                            $userOnline->update();
+                        }
                     }
                     unset($userOnline);
                 } else {
@@ -382,11 +384,21 @@ class WebsocketServerController extends Controller
                     unset($uc);
 
                     UserMonitor::closeConnectionEvent($row['user_id']);
+                    //$userOnline = UserOnline::find()->where(['uo_user_id' => $row['user_id']])->one();
                 }
 
+                $subQuery = UserConnection::find()->select(['DISTINCT(uc_user_id)']);
+                $userOnlineForDelete = UserOnline::find()->where(['NOT IN', 'uo_user_id', $subQuery])->all();
 
+                unset($subQuery);
 
-                \Yii::$app->db->createCommand('DELETE FROM user_online WHERE uo_user_id NOT IN (SELECT DISTINCT(uc_user_id) FROM user_connection)')->execute();
+                if ($userOnlineForDelete) {
+                    foreach ($userOnlineForDelete as $item) {
+                        $item->delete();
+                    }
+                }
+                unset($userOnlineForDelete);
+                //\Yii::$app->db->createCommand('DELETE FROM user_online WHERE uo_user_id NOT IN (SELECT DISTINCT(uc_user_id) FROM user_connection)')->execute();
             }
 
 

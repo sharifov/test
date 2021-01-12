@@ -113,7 +113,7 @@ const callItemComponent = {
 
         //check() { this.checked = !this.checked; },
         getUserName: function (userId) {
-            return userId > 0 ? this.$root.userList[userId] : userId
+            return this.$root.getUserName(userId)
         },
         getUserAccessStatusTypeName: function (statusTypeId) {
             return statusTypeId > 0 ? this.$root.callUserAccessStatusTypeList[statusTypeId] : statusTypeId
@@ -189,7 +189,8 @@ var callMapApp = Vue.createApp({
             callTypeList: [],
             callSourceList: [],
             callUserAccessStatusTypeList: [],
-            callList: []
+            callList: [],
+            onlineUserList: []
         }
     },
     created() {
@@ -200,28 +201,74 @@ var callMapApp = Vue.createApp({
         this.getCalls();
     },
     computed: {
+        ivrCounter: function () {
+            return this.getCallListByStatusId([1]).length
+        },
+        queueCounter: function () {
+            return this.getCallListByStatusId([2]).length
+        },
+        delayCounter: function () {
+            return this.getCallListByStatusId([10]).length
+        },
+        inProgressCounter: function () {
+            return this.getCallListByStatusId([4]).length
+        },
+        holdCounter: function () {
+            return this.getCallListByStatusId([12]).length
+        },
+
         callList1: function () {
+            return this.getCallListByStatusId([1, 2, 3])
+        },
+        callList2: function () {
+            return this.getCallListByStatusId([4, 10])
+        },
+        onlineUserCounter: function () {
+            return this.onlineUserList.length
+        }
+    },
+    methods: {
+        getCallListByStatusId(statusList) {
             return this.callList.filter(function (item) {
                 if (item.c_status_id) {
                     let statusId = parseInt(item.c_status_id)
-                    if ([1, 2, 3].includes(statusId)) {
+                    if (statusList.includes(statusId)) {
                         return item
                     }
                 }
             })
         },
-        callList2: function () {
-            return this.callList.filter(function (item) {
-                if (item.c_status_id) {
-                    let statusId = parseInt(item.c_status_id)
-                    if ([4, 10].includes(statusId)) {
-                        return item
-                    }
+
+        userOnlineFindIndex(userId) {
+            let index = -1
+            userId = parseInt(userId)
+            if (this.onlineUserList) {
+                index = this.onlineUserList.findIndex(x => parseInt(x.uo_user_id) === userId)
+            }
+            return index
+        },
+        deleteUserOnline(data) {
+            let index = this.userOnlineFindIndex(data.uo_user_id)
+            this.onlineUserList.splice(index, 1);
+        },
+        addUserOnline(data) {
+            let index = this.userOnlineFindIndex(data.uo_user_id)
+            if (index > -1) {
+                return this.updateUserOnline(data);
+            }
+            this.onlineUserList = [data, ...this.onlineUserList];
+            //this.callList.push(callData);
+        },
+
+        updateUserOnline(data) {
+            this.onlineUserList = this.onlineUserList.map((x) => {
+                if (x.uo_user_id === data.uo_user_id) {
+                    return data;
                 }
-            })
-        }
-    },
-    methods: {
+                return x;
+            });
+        },
+
         removeCall(index) {
             this.callList.splice(index, 1);
         },
@@ -261,6 +308,7 @@ var callMapApp = Vue.createApp({
                     this.callTypeList = response.data.callTypeList;
                     this.callSourceList = response.data.callSourceList;
                     this.callUserAccessStatusTypeList = response.data.callUserAccessStatusTypeList;
+                    this.onlineUserList = response.data.onlineUserList;
                 })
                 .catch(error => {
                     console.error("There was an error!", error);
@@ -322,6 +370,9 @@ var callMapApp = Vue.createApp({
                     }
                 }
             }
-        }
+        },
+        getUserName: function (userId) {
+            return userId > 0 ? this.userList[userId] : userId
+        },
     }
 }).mount('#realtime-map-app');

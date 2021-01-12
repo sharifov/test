@@ -17,6 +17,7 @@ use common\models\Sources;
 use common\models\UserConnection;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
+use common\models\UserOnline;
 use common\models\UserProjectParams;
 use frontend\widgets\newWebPhone\call\socket\MissedCallMessage;
 use http\Exception\InvalidArgumentException;
@@ -533,7 +534,12 @@ class CallController extends FController
         Yii::$app->response->format = Response::FORMAT_JSON;
 
         $callList = [];
-        $calls = Call::find()->where(['c_status_id' => [Call::STATUS_IVR, Call::STATUS_QUEUE, Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING, Call::STATUS_IVR, Call::STATUS_DELAY]])
+        $calls = Call::find()->where(['c_status_id' =>
+            [
+                Call::STATUS_IVR, Call::STATUS_QUEUE, Call::STATUS_IN_PROGRESS,
+                Call::STATUS_RINGING, Call::STATUS_HOLD, Call::STATUS_DELAY
+            ]
+        ])
             //->andWhere(['c_id' => 1097179])
             ->orderBy(['c_id' => SORT_DESC])
             ->limit(1000)->all();
@@ -563,6 +569,7 @@ class CallController extends FController
         $response['callSourceList'] = Call::SHORT_SOURCE_LIST;
         $response['callTypeList'] = Call::TYPE_LIST;
         $response['callUserAccessStatusTypeList'] = CallUserAccess::STATUS_TYPE_LIST;
+        $response['onlineUserList'] = UserOnline::find()->asArray()->all();
 
         return $response;
     }
