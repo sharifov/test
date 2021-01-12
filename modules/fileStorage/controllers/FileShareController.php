@@ -30,7 +30,7 @@ class FileShareController extends FController
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
-    
+
     /**
      * @return string
      */

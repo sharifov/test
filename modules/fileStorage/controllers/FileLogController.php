@@ -29,7 +29,7 @@ class FileLogController extends FController
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
-    
+
     /**
      * @return string
      */
