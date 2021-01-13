@@ -5,7 +5,7 @@
 /* @var $cfChannelName string */
 
 $this->title = 'Realtime Call Map';
-///\frontend\assets\VueAsset::register($this);
+//\frontend\assets\VueAsset::register($this);
 ?>
 
 <style>
@@ -184,7 +184,7 @@ $this->title = 'Realtime Call Map';
 
         <div class="col-md-2">
             <div class="card card-default">
-                <div class="card-header"> Online Users  ({{ onlineUserCounter }})</div>
+                <div class="card-header"> Online Users  ({{ onlineUserCounter }}), TimeZone: {{ userTimeZone }}</div>
                 <transition-group name="list" tag="div" class="card-body">
                     <div v-for="(item, index) in onlineUserList" class="list-item col-md-6" :key="item">
                         <i class="fa fa-user text-success"></i> {{ getUserName(item.uo_user_id) }}

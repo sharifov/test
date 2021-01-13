@@ -9,7 +9,7 @@ let Timer = {
     },
     data() {
         return {
-            timeSec: Math.round(new Date().getTime() / 1000) - Math.round(Date.parse(this.fromDt) / 1000)
+            timeSec: 0
         }
     },
     computed: {
@@ -24,16 +24,20 @@ let Timer = {
                 format = 'HH:mm:ss';
             }
             return moment.utc(inMilliseconds).format(format); //format("HH[h]:mm[m]:ss[s]");
-        },
+        }
     },
     methods: {
         startTimer: function () {
             setInterval(() => {
                 this.timeSec++;
             }, 1000);
+        },
+        getTimeInSeconds() {
+            return Math.round((moment.utc().valueOf() - moment.utc(this.fromDt).valueOf()) / 1000)
         }
     },
     created() {
+        this.timeSec = this.getTimeInSeconds()
         this.startTimer();
     }
 }
@@ -119,7 +123,16 @@ const callItemComponent = {
             return statusTypeId > 0 ? this.$root.callUserAccessStatusTypeList[statusTypeId] : statusTypeId
         },
         createdDateTime(format) {
-            return this.item.c_created_dt ? moment(this.item.c_created_dt).format(format) : ''
+            let val = '';
+            if (this.item.c_created_dt) {
+                let obj = moment.utc(this.item.c_created_dt);
+                if (this.$root.userTimeZone) {
+                    val = obj.tz(this.$root.userTimeZone).format(format)
+                } else {
+                    val = obj.format(format)
+                }
+            }
+            return val
         },
 
         formatPhoneNumber(phoneNumber) {
@@ -138,11 +151,6 @@ const callItemComponent = {
             }
             return ''
         },
-
-        updateCallUserAccess() {
-            alert(123);
-        },
-
 
         // "callStatusList": {
         //     "1": "IVR",
@@ -182,6 +190,7 @@ var callMapApp = Vue.createApp({
     },
     data() {
         return {
+            userTimeZone: 'UTC',
             projectList: [],
             depList: [],
             userList: [],
@@ -312,6 +321,7 @@ var callMapApp = Vue.createApp({
                     this.callSourceList = response.data.callSourceList;
                     this.callUserAccessStatusTypeList = response.data.callUserAccessStatusTypeList;
                     this.onlineUserList = response.data.onlineUserList;
+                    this.userTimeZone = response.data.userTimeZone;
                 })
                 .catch(error => {
                     console.error("There was an error!", error);

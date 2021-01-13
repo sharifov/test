@@ -571,6 +571,11 @@ class CallController extends FController
         $response['callUserAccessStatusTypeList'] = CallUserAccess::STATUS_TYPE_LIST;
         $response['onlineUserList'] = UserOnline::find()->asArray()->all();
 
+
+        /** @var Employee $user */
+        $user = \Yii::$app->user->identity;
+        $response['userTimeZone'] = $user->timezone ?: 'UTC';
+
         return $response;
     }
 

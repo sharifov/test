@@ -41,6 +41,10 @@ class VueAsset extends AssetBundle
         $this->js[] = ['https://cdn.jsdelivr.net/npm/axios@0.21/dist/axios.min.js', 'position' => \yii\web\View::POS_HEAD];
         $this->js[] = ['https://cdn.jsdelivr.net/npm/moment@2.29/moment.min.js', 'position' => \yii\web\View::POS_HEAD];
 
+        //$this->js[] = ['https://cdn.jsdelivr.net/npm/moment@2.29/min/moment-with-locales.min.js', 'position' => \yii\web\View::POS_HEAD];
+        //$this->js[] = ['https://cdn.jsdelivr.net/npm/moment@2.29/min/locales.min.js', 'position' => \yii\web\View::POS_HEAD];
+        $this->js[] = ['https://cdn.jsdelivr.net/npm/moment-timezone@0.5/builds/moment-timezone-with-data.min.js', 'position' => \yii\web\View::POS_HEAD];
+
         //$this->js[] = ['https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.3/velocity.min.js', 'position' => \yii\web\View::POS_HEAD];
         //$this->js[] = ['https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.15/lodash.min.js', 'position' => \yii\web\View::POS_HEAD];
         $this->js[] = ['https://cdnjs.cloudflare.com/ajax/libs/libphonenumber-js/1.9.6/libphonenumber-js.min.js', 'position' => \yii\web\View::POS_HEAD];
