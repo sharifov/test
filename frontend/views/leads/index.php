@@ -437,7 +437,7 @@ $this->registerJs($js);
                 return $model->employee ? '<i class="fa fa-user"></i> ' . Html::encode($model->employee->username) : '-';
             },
             'data' => $lists->getEmployees(true) ?: [],
-            'filter' => true,
+            'filter' => $isAgent ? '' : true,
             'id' => 'employee-filter',
             'options' => ['width' => '200px'],
             'pluginOptions' => ['allowClear' => true]
