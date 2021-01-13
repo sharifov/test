@@ -17,6 +17,7 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use sales\model\clientChat\entity\ClientChat;
+use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -225,7 +226,7 @@ class ClientChatQaSearch extends ClientChat
 
     public function searchIds($params): array
     {
-        $query = static::find();
+        $query = static::find()->cache(0);
 
         $this->load($params);
         if (!$this->validate()) {
@@ -233,7 +234,7 @@ class ClientChatQaSearch extends ClientChat
             return [];
         }
         $query->select('cch_id');
-        //$this->filterQuery($query);
+        $this->filterQuery($query);
 
         return ArrayHelper::map($query->asArray()->all(), 'cch_id', 'cch_id');
     }
@@ -242,7 +243,7 @@ class ClientChatQaSearch extends ClientChat
      * @param Scopes $query
      * @return Scopes
      */
-    private function filterQuery(Scopes $query)
+    private function filterQuery(Scopes $query): ActiveQuery
     {
         // grid filtering conditions
         $query->andFilterWhere([
