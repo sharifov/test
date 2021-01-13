@@ -226,7 +226,7 @@ class ClientChatQaSearch extends ClientChat
 
     public function searchIds($params): array
     {
-        $query = static::find()->cache(0);
+        $query = static::find();
 
         $this->load($params);
         if (!$this->validate()) {
