@@ -1,6 +1,11 @@
 <?php
 
 use common\models\Lead;
+use sales\helpers\text\SimpleTextHelper;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
+use yii\helpers\Json;
+use yii\helpers\VarDumper;
 
 /**
  * @var $result []
@@ -450,10 +455,20 @@ CSS;
     </div>
 <?php else :?>
     <?php if (!empty($result['error'])) : ?>
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <pre><?= \yii\helpers\VarDumper::dumpAsString(\yii\helpers\Json::decode($result['error']), 10) ?></pre>
-        </div>
+    <p>
+        <?php if (json_decode($result['error'])) : ?>
+            <?php $errors = Json::decode($result['error']); ?>
 
+            <?php if ($message = ArrayHelper::getValue($errors, 'Message')) : ?>
+                <?php echo '<span class="text-danger">' . $message . '</span>'; ?>
+            <?php else : ?>
+                <?php echo VarDumper::dumpAsString(Json::decode($errors), 10, true); ?>
+            <?php endif ?>
+
+        <?php else : ?>
+            <?php echo '<span class="text-danger">' . SimpleTextHelper::clean($result['error']) . '</span>'; ?>
+        <?php endif ?>
+    </p>
     <?php else : ?>
     <div class="search-results__wrapper">
         <p>No search results</p>
