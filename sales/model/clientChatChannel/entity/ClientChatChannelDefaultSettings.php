@@ -55,7 +55,17 @@ class ClientChatChannelDefaultSettings
         ],
         'system' => [
             'allowTransferChannelActiveChat' => false,
-            'allowRealtime' => true
+            'allowRealtime' => true,
+            'userAccessDistribution' => [
+                'repeatDelaySeconds' => 0,
+                'userLimit' => 0,
+                'sortParameters' => [
+                    'pastAcceptedChatsNumber' => [
+                        'pastMinutes' => 180,
+                        'sortPriority' => 0
+                    ]
+                ]
+            ],
         ]
     ];
 
@@ -67,5 +77,20 @@ class ClientChatChannelDefaultSettings
     public static function isAllowTransferChannelActiveChat(): bool
     {
         return self::$settings['system']['allowTransferChannelActiveChat'] ?? false;
+    }
+
+    public static function getAccessDistributionUserLimit(): int
+    {
+        return self::$settings['system']['userAccessDistribution']['userLimit'] ?? 0;
+    }
+
+    public static function getAccessDistributionRepeatDelaySeconds(): int
+    {
+        return self::$settings['system']['userAccessDistribution']['repeatDelaySeconds'] ?? 0;
+    }
+
+    public static function getAccessDistributionPastMinutes(): int
+    {
+        return self::$settings['system']['userAccessDistribution']['sortParameters']['pastAcceptedChatsNumber']['pastMinutes'] ?? 0;
     }
 }

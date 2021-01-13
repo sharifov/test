@@ -3,9 +3,8 @@
 namespace modules\flight\src\repositories\flightPaxRepository;
 
 use modules\flight\models\FlightPax;
-use sales\repositories\Repository;
 
-class FlightPaxRepository extends Repository
+class FlightPaxRepository
 {
     /**
      * @param FlightPax $flightPax

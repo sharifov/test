@@ -54,7 +54,7 @@ pjaxOffFormSubmit('#pj-itinerary');
 JS;
             $this->registerJs($js);
             ?>
-            <?php \yii\widgets\Pjax::begin(['id' => 'pj-itinerary', 'enablePushState' => false, 'enableReplaceState' => false])?>
+            <?php \yii\widgets\Pjax::begin(['id' => 'pj-itinerary', 'enablePushState' => false, 'enableReplaceState' => false, 'timeout' => 5000])?>
             <?= $this->render('../partial/_flightDetails', [
                 'itineraryForm' => $itineraryForm,
             ]) ?>

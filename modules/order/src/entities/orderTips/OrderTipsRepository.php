@@ -2,11 +2,8 @@
 
 namespace modules\order\src\entities\orderTips;
 
-use sales\repositories\Repository;
-
-class OrderTipsRepository extends Repository
+class OrderTipsRepository
 {
-
     public function save(OrderTips $orderTips): OrderTips
     {
         if (!$orderTips->save()) {

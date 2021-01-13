@@ -3,9 +3,8 @@
 namespace sales\model\clientChatRequest\repository;
 
 use sales\model\clientChatRequest\entity\ClientChatRequest;
-use sales\repositories\Repository;
 
-class ClientChatRequestRepository extends Repository
+class ClientChatRequestRepository
 {
     public function save(ClientChatRequest $model, int $attempts = 0): ClientChatRequest
     {

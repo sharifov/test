@@ -4,12 +4,11 @@ namespace sales\model\clientAccount;
 
 use sales\model\clientAccount\entity\ClientAccount;
 use sales\model\clientAccount\form\ClientAccountUpdateApiForm;
-use sales\repositories\Repository;
 
 /**
  * Class ClientAccountRepository
  */
-class ClientAccountRepository extends Repository
+class ClientAccountRepository
 {
     public function save(ClientAccount $clientAccount, bool $runValidation = false): ClientAccount
     {

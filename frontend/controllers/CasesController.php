@@ -45,11 +45,13 @@ use sales\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
 use sales\guards\cases\CaseManageSaleInfoGuard;
 use sales\model\cases\useCases\cases\updateInfo\Handler;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChat\permissions\ClientChatActionPermission;
 use sales\model\clientChat\services\ClientChatAssignService;
 use sales\model\coupon\entity\couponCase\CouponCase;
 use sales\model\coupon\useCase\send\SendCouponsForm;
 use sales\model\department\department\Params;
 use sales\model\phone\AvailablePhoneList;
+use sales\model\project\entity\CustomData;
 use sales\model\saleTicket\useCase\create\SaleTicketService;
 use sales\repositories\cases\CaseCategoryRepository;
 use sales\repositories\cases\CasesRepository;
@@ -99,6 +101,7 @@ use yii\widgets\ActiveForm;
  * @property SaleTicketService $saleTicketService
  * @property QuoteRepository $quoteRepository
  * @property TransactionManager $transaction
+ * @property ClientChatActionPermission $chatActionPermission
  */
 class CasesController extends FController
 {
@@ -116,6 +119,7 @@ class CasesController extends FController
     private $saleTicketService;
     private $quoteRepository;
     private $transaction;
+    private $chatActionPermission;
 
     public function __construct(
         $id,
@@ -133,6 +137,7 @@ class CasesController extends FController
         SaleTicketService $saleTicketService,
         QuoteRepository $quoteRepository,
         TransactionManager $transaction,
+        ClientChatActionPermission $chatActionPermission,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -149,6 +154,7 @@ class CasesController extends FController
         $this->updateHandler = $updateHandler;
         $this->quoteRepository = $quoteRepository;
         $this->transaction = $transaction;
+        $this->chatActionPermission = $chatActionPermission;
     }
 
     public function behaviors(): array
@@ -162,6 +168,7 @@ class CasesController extends FController
                     'add-sale',
                     'take',
                     'take-over',
+                    'create-by-chat',
                 ],
             ],
         ];
@@ -939,18 +946,18 @@ class CasesController extends FController
     public function actionCreateByChat()
     {
         if (!(Yii::$app->request->isAjax || Yii::$app->request->isPjax)) {
-            throw new NotFoundHttpException('Page not exist');
+            throw new BadRequestHttpException('Bad request.');
         }
 
         $chatId = (int)Yii::$app->request->get('chat_id');
         $chat = ClientChat::findOne(['cch_id' => $chatId]);
 
         if (!$chat) {
-            throw new NotFoundHttpException('Client chat not found');
+            throw new NotFoundHttpException('Client chat not found.');
         }
 
-        if (!Auth::can('client-chat/manage', ['chat' => $chat])) {
-            throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+        if (!$this->chatActionPermission->canCreateCase($chat)) {
+            throw new ForbiddenHttpException('Access denied.');
         }
 
         $user = Auth::user();
@@ -1188,10 +1195,10 @@ class CasesController extends FController
 
     private function sendFeedbackEmailProcess(Cases $case, CasesChangeStatusForm $form, Employee $user): void
     {
-        if (!$dep = $case->department) {
+        if (!$project = $case->project) {
             return;
         }
-        if (!$params = $dep->getParams()) {
+        if (!$customData = $project->getCustomData()) {
             return;
         }
 
@@ -1200,8 +1207,8 @@ class CasesController extends FController
         try {
             $mailPreview = Yii::$app->communication->mailPreview(
                 $case->cs_project_id,
-                $params->object->case->feedbackTemplateTypeKey,
-                $params->object->case->feedbackEmailFrom,
+                $customData->object->case->feedbackTemplateTypeKey,
+                $customData->object->case->feedbackEmailFrom,
                 $form->sendTo,
                 $content,
                 $form->language
@@ -1212,7 +1219,7 @@ class CasesController extends FController
             }
 
             $this->sendFeedbackEmail(
-                $params,
+                $customData,
                 $case,
                 $form,
                 $user,
@@ -1228,7 +1235,7 @@ class CasesController extends FController
     }
 
     private function sendFeedbackEmail(
-        Params $params,
+        CustomData $customData,
         Cases $case,
         CasesChangeStatusForm $form,
         Employee $user,
@@ -1240,7 +1247,7 @@ class CasesController extends FController
         $mail->e_case_id = $case->cs_id;
         $templateTypeId = EmailTemplateType::find()
             ->select(['etp_id'])
-            ->andWhere(['etp_key' => $params->object->case->feedbackTemplateTypeKey])
+            ->andWhere(['etp_key' => $customData->object->case->feedbackTemplateTypeKey])
             ->asArray()
             ->one();
         if ($templateTypeId) {
@@ -1250,8 +1257,8 @@ class CasesController extends FController
         $mail->e_status_id = Email::STATUS_PENDING;
         $mail->e_email_subject = $subject;
         $mail->body_html = $body;
-        $mail->e_email_from = $params->object->case->feedbackEmailFrom;
-        $mail->e_email_from_name = $params->object->case->feedbackNameFrom ?: $user->nickname;
+        $mail->e_email_from = $customData->object->case->feedbackEmailFrom;
+        $mail->e_email_from_name = $customData->object->case->feedbackNameFrom ?: $user->nickname;
         $mail->e_email_to_name = $case->client ? $case->client->full_name : '';
         $mail->e_language_id = $form->language;
         $mail->e_email_to = $form->sendTo;

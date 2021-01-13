@@ -5,11 +5,10 @@ namespace webapi\src\repositories\communication;
 use common\models\Call;
 use common\models\CallUserGroup;
 use common\models\ClientPhone;
-use sales\repositories\Repository;
 use webapi\src\services\communication\RequestDataDTO;
 use yii\helpers\VarDumper;
 
-class CommunicationRepository extends Repository
+class CommunicationRepository
 {
     /**
      * @param string $callSid

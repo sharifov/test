@@ -22,7 +22,9 @@ use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
 use sales\helpers\communication\StatisticsHelper;
+use sales\helpers\projectLocale\ProjectLocaleHelper;
 use sales\helpers\setting\SettingHelper;
+use sales\model\project\entity\projectLocale\ProjectLocale;
 use yii\helpers\Html;
 use yii\bootstrap4\Modal;
 use vova07\imperavi\Widget;
@@ -159,9 +161,7 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                             </div>
                             <div class="form-group">
 
-                                <?php echo $form2->field($previewEmailForm, 'e_email_message')->textarea(
-                                    ['style' => 'display:none', 'id' => 'e_email_message']
-                                ) ?>
+                        <?php echo $form2->field($previewEmailForm, 'e_email_message')->textarea(['style' => 'display:none', 'id' => 'e_email_message']) ?>
 
                                 <div style="max-height: 800px; overflow-x: auto;">
                                     <iframe id="email_view" src="/lead/get-template?key_cache=<?php echo $previewEmailForm->keyCache?>"
@@ -283,21 +283,21 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                                 echo '<div class="alert alert-success alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
                                 echo Yii::$app->session->getFlash('send-success');
                                 echo '</div>';
-                                $this->registerJs('$("body").removeClass("modal-open"); $(".modal-backdrop").remove();');
+                                $this->registerJs('$("body").removeClass("modal-open"); $(".modal-backdrop").remove();updateCommunication();');
                             }
 
                             if (Yii::$app->session->hasFlash('sms-send-success')) {
                                 echo '<div class="alert alert-success alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
                                 echo Yii::$app->session->getFlash('sms-send-success');
                                 echo '</div>';
-                                $this->registerJs('$("body").removeClass("modal-open"); $(".modal-backdrop").remove();');
+                                $this->registerJs('$("body").removeClass("modal-open"); $(".modal-backdrop").remove();updateCommunication();');
                             }
 
                             if (Yii::$app->session->hasFlash('send-error')) {
                                 echo '<div class="alert alert-danger alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
                                 echo Yii::$app->session->getFlash('send-error');
                                 echo '</div>';
-                                $this->registerJs('$("body").removeClass("modal-open"); $(".modal-backdrop").remove();');
+                                $this->registerJs('$("body").removeClass("modal-open"); $(".modal-backdrop").remove();updateCommunication();');
                             }
 
                             echo $form->errorSummary($comForm);
@@ -394,9 +394,15 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                                 </div>
 
                                 <div class="col-sm-3 form-group message-field-sms message-field-email" id="language-group" style="display: block;">
-                                    <?= $form->field($comForm, 'c_language_id')
+
+                                    <?php
+                                        $localeList = ProjectLocale::getLocaleListByProject((int) $lead->project_id);
+                                        $comForm->c_language_id = null;
+                                    ?>
+
+                                    <?php echo $form->field($comForm, 'c_language_id')
                                         ->dropDownList(
-                                            \common\models\Language::getLanguages(true),
+                                            $localeList,
                                             ['prompt' => '---', 'class' => 'form-control', 'id' => 'language']
                                         ) ?>
                                 </div>

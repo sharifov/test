@@ -7,19 +7,13 @@ use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
 use sales\model\cases\CaseCodeException;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 
 /**
  * Class CasesRepository
  *
  * @property EventDispatcher $eventDispatcher
- * @method null|Cases get(int $id)
- * @method null|Cases getByClient(int $clientId)
- * @method null|Cases getByClientProjectDepartment(int $clientId, int $projectId, ?int $departmentId)
- * @method null|Cases getByGid(string $gid)
- * @method null|Cases getByClientWithAnyStatus(string $gid)
  */
-class CasesRepository extends Repository
+class CasesRepository
 {
     private $eventDispatcher;
 
@@ -51,6 +45,15 @@ class CasesRepository extends Repository
         throw new NotFoundException('Case is not found');
     }
 
+    public function getByClient(int $clientId): ?Cases
+    {
+        try {
+            return $this->findByClient($clientId);
+        } catch (NotFoundException $e) {
+            return null;
+        }
+    }
+
     /**
      * @param int $clientId
      * @return Cases
@@ -66,6 +69,15 @@ class CasesRepository extends Repository
             return $case;
         }
         throw new NotFoundException('Case is not found');
+    }
+
+    public function getByClientWithAnyStatus(int $clientId): ?Cases
+    {
+        try {
+            return $this->findByClientWithAnyStatus($clientId);
+        } catch (NotFoundException $e) {
+            return null;
+        }
     }
 
     /**
@@ -171,5 +183,14 @@ class CasesRepository extends Repository
             return $cases;
         }
         throw new NotFoundException('Cases is not found');
+    }
+
+    public function getOpenCasesByPhone(string $phone)
+    {
+        try {
+            return $this->findOpenCasesByPhone($phone);
+        } catch (NotFoundException $e) {
+            return null;
+        }
     }
 }

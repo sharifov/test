@@ -25,6 +25,8 @@ use sales\model\clientChat\entity\ClientChatQuery;
  * @property bool|null $canAcceptPending
  * @property bool|null $canSkipPending
  * @property bool|null $canSendCannedResponse
+ * @property bool|null $canCreateLead
+ * @property bool|null $canCreateCase
  */
 class ClientChatActionPermission
 {
@@ -51,6 +53,9 @@ class ClientChatActionPermission
     private ?bool $canSkipPending = null;
     private ?bool $canCouchNoteChecked = null;
     private ?bool $canSendCannedResponse = null;
+
+    private ?bool $canCreateLead = null;
+    private ?bool $canCreateCase = null;
 
     public function canClose(ClientChat $chat): bool
     {
@@ -302,5 +307,35 @@ class ClientChatActionPermission
         $this->canCouchNoteChecked = Auth::can('client-chat/view', ['chat' => $chat]) &&
             Auth::can('client-chat/couch-note', ['chat' => $chat]);
         return $this->canCouchNoteChecked;
+    }
+
+    public function canCreateLead(ClientChat $chat): bool
+    {
+        if ($this->canCreateLead !== null) {
+            return $this->canCreateLead;
+        }
+
+        if ($chat->isClosed()) {
+            $this->canCreateLead = false;
+            return $this->canCreateLead;
+        }
+
+        $this->canCreateLead = Auth::can('/lead/create-by-chat') && Auth::can('client-chat/manage', ['chat' => $chat]);
+        return $this->canCreateLead;
+    }
+
+    public function canCreateCase(ClientChat $chat): bool
+    {
+        if ($this->canCreateCase !== null) {
+            return $this->canCreateCase;
+        }
+
+        if ($chat->isClosed()) {
+            $this->canCreateCase = false;
+            return $this->canCreateCase;
+        }
+
+        $this->canCreateCase = Auth::can('/cases/create-by-chat') && Auth::can('client-chat/manage', ['chat' => $chat]);
+        return $this->canCreateCase;
     }
 }

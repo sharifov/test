@@ -188,23 +188,23 @@ class ClientChatUserAccessService
         });
     }
 
-    /**
-     * @param ClientChatUserChannel[] $userChannels
-     * @throws \Throwable
-     */
-    public function setUserAccessToAllChats(array $userChannels): void
-    {
-        $_self = $this;
-        $this->transactionManager->wrap(static function () use ($userChannels, $_self) {
-            foreach ($userChannels as $userChannel) {
-                if ($chats = ClientChat::find()->byOwner(null)->byChannel($userChannel->ccuc_channel_id)->all()) {
-                    foreach ($chats as $chat) {
-                        $_self->clientChatService->sendRequestToUser($chat, $userChannel);
-                    }
-                }
-            }
-        });
-    }
+//    /**
+//     * @param ClientChatUserChannel[] $userChannels
+//     * @throws \Throwable
+//     */
+//    public function setUserAccessToAllChats(array $userChannels): void
+//    {
+//        $_self = $this;
+//        $this->transactionManager->wrap(static function () use ($userChannels, $_self) {
+//            foreach ($userChannels as $userChannel) {
+//                if ($chats = ClientChat::find()->byOwner(null)->byChannel($userChannel->ccuc_channel_id)->all()) {
+//                    foreach ($chats as $chat) {
+//                        $_self->clientChatService->sendRequestToUser($chat, $userChannel);
+//                    }
+//                }
+//            }
+//        });
+//    }
 
     public function setUserAccessToAllChatsByChannelIds(array $channelIds, int $userId)
     {

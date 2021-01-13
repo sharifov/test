@@ -31,6 +31,7 @@ use frontend\assets\Timeline2Asset;
 use frontend\assets\TimelineAsset;
 use frontend\assets\WebAudioRecorder;
 use frontend\assets\WebPhoneAsset;
+use frontend\themes\gentelella_v2\assets\BootstrapProgressbar;
 use frontend\themes\gentelella_v2\assets\ClientChatAsset;
 use frontend\themes\gentelella_v2\assets\FontAwesomeAllAsset;
 use frontend\themes\gentelella_v2\assets\FontAwesomeAsset;
@@ -101,6 +102,7 @@ return [
         FontAwesomeAsset::class,
         GlyphiconAsset::class,
         BootstrapGroupAsset::class,
+        BootstrapProgressbar::class,
         PageLoaderAsset::class,
 
         NotificationSocketAsset::class,
@@ -563,6 +565,14 @@ return [
             'depends' => [ KartikDialogBootstrapAsset::class ],
             'bsPluginEnabled' => false,
             'bsDependencyEnabled' => false
+        ],
+        'BootstrapProgressbar,' => [
+            'class' => BootstrapProgressbar::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'bootstrap-progressbar-{hash}.js',
+            'css' => 'bootstrap-progressbar-{hash}.css',
+            'depends' => [ BootstrapProgressbar::class ],
         ],
         'KartikGridViewAsset' => [
             'class' => KartikGridViewAsset::class,

@@ -6,13 +6,12 @@ use modules\flight\models\FlightQuotePaxPrice;
 use modules\flight\src\entities\flightQuotePaxPrice\FlightQuotePaxPriceQuery;
 use modules\flight\src\exceptions\FlightCodeException;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 
 /**
  * Class FlightQuotePaxPriceRepository
  * @package modules\flight\src\repositories\flightQuotePaxPriceRepository
  */
-class FlightQuotePaxPriceRepository extends Repository
+class FlightQuotePaxPriceRepository
 {
     /**
      * @param int $fqId

@@ -369,29 +369,35 @@ class CasesSaleService
         if (isset($saleData['price']['profit'])) {
             $caseSale->css_profit = $saleData['price']['profit'];
         }
-        if (isset($saleData['itinerary'][0]['segments'][0]['departureAirport'])) {
-            $caseSale->css_out_departure_airport = $saleData['itinerary'][0]['segments'][0]['departureAirport'];
+
+        if (!isset($saleData['itinerary'])) {
+            throw new \InvalidArgumentException('SaleData is broken. Index "itinerary" not found in sale data');
         }
-        if (isset($saleData['itinerary'][0]['segments'])) {
-            $idxLastInFirstSegments = count($saleData['itinerary'][0]['segments']) - 1;
-            if (isset($saleData['itinerary'][0]['segments'][$idxLastInFirstSegments]['arrivalAirport'])) {
-                $caseSale->css_out_arrival_airport = $saleData['itinerary'][0]['segments'][$idxLastInFirstSegments]['arrivalAirport'];
+
+        $itineraryFirstKey = array_key_first($saleData['itinerary']);
+
+        if (isset($saleData['itinerary'][$itineraryFirstKey]['segments'][0]['departureAirport'])) {
+            $caseSale->css_out_departure_airport = $saleData['itinerary'][$itineraryFirstKey]['segments'][0]['departureAirport'];
+        }
+        if (isset($saleData['itinerary'][$itineraryFirstKey]['segments'])) {
+            $idxLastInFirstSegments = count($saleData['itinerary'][$itineraryFirstKey]['segments']) - 1;
+            if (isset($saleData['itinerary'][$itineraryFirstKey]['segments'][$idxLastInFirstSegments]['arrivalAirport'])) {
+                $caseSale->css_out_arrival_airport = $saleData['itinerary'][$itineraryFirstKey]['segments'][$idxLastInFirstSegments]['arrivalAirport'];
             }
         }
-        if (isset($saleData['itinerary'][0]['segments'][0]['departureTime'])) {
-            $caseSale->css_out_date = $saleData['itinerary'][0]['segments'][0]['departureTime'];
+        if (isset($saleData['itinerary'][$itineraryFirstKey]['segments'][0]['departureTime'])) {
+            $caseSale->css_out_date = $saleData['itinerary'][$itineraryFirstKey]['segments'][0]['departureTime'];
         }
-        if (isset($saleData['itinerary'])) {
-            $countItinerary = count($saleData['itinerary']);
-            if (isset($saleData['itinerary'][$countItinerary - 1]['segments'][0]['departureAirport'])) {
-                $caseSale->css_in_departure_airport = $saleData['itinerary'][$countItinerary - 1]['segments'][0]['departureAirport'];
+        if (isset($saleData['itinerary'][$itineraryFirstKey])) {
+            if (isset($saleData['itinerary'][$itineraryFirstKey]['segments'][0]['departureAirport'])) {
+                $caseSale->css_in_departure_airport = $saleData['itinerary'][$itineraryFirstKey]['segments'][0]['departureAirport'];
             }
-            $idxLastInLastSegments = count($saleData['itinerary'][$countItinerary - 1]['segments']) - 1;
-            if (isset($saleData['itinerary'][$countItinerary - 1]['segments'][$idxLastInLastSegments]['arrivalAirport'])) {
-                $caseSale->css_out_arrival_airport = $saleData['itinerary'][$countItinerary - 1]['segments'][$idxLastInLastSegments]['arrivalAirport'];
+            $idxLastInLastSegments = count($saleData['itinerary'][$itineraryFirstKey]['segments']) - 1;
+            if (isset($saleData['itinerary'][$itineraryFirstKey]['segments'][$idxLastInLastSegments]['arrivalAirport'])) {
+                $caseSale->css_out_arrival_airport = $saleData['itinerary'][$itineraryFirstKey]['segments'][$idxLastInLastSegments]['arrivalAirport'];
             }
-            if (isset($saleData['itinerary'][$countItinerary - 1]['segments'][0]['departureTime'])) {
-                $caseSale->css_in_date = $saleData['itinerary'][$countItinerary - 1]['segments'][0]['departureTime'];
+            if (isset($saleData['itinerary'][$itineraryFirstKey]['segments'][0]['departureTime'])) {
+                $caseSale->css_in_date = $saleData['itinerary'][$itineraryFirstKey]['segments'][0]['departureTime'];
             }
         }
         if (isset($saleData['chargeType'])) {

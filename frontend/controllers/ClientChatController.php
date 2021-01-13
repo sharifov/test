@@ -447,7 +447,9 @@ class ClientChatController extends FController
 
         $result = [
             'html' => '',
-            'message' => '',
+            'message' => [],
+            'couchNoteStatus' => 0,
+            'couchNoteHtml' => ''
         ];
 
         try {
@@ -457,15 +459,9 @@ class ClientChatController extends FController
                 throw new ForbiddenHttpException('You don\'t have access to this chat');
             }
 
-            if ($clientChat->hasOwner() && $clientChat->isOwner(Auth::id())) {
-                $this->clientChatMessageService->discardUnreadMessages(
-                    $clientChat->cch_id,
-                    (int)$clientChat->cch_owner_user_id
-                );
-            }
-
             $clientChatIframeHelper = new ClientChatIframeHelper($clientChat);
-            $result['isClosed'] = (int) $clientChat->isInClosedStatusGroup();
+            $isClosed = (int) $clientChat->isInClosedStatusGroup();
+            $result['isClosed'] = $isClosed;
             $result['iframe'] = $clientChatIframeHelper->generateIframe();
             $result['iframeSrc'] = $clientChatIframeHelper->generateIframeSrc();
             $result['isShowInput'] = (int) ClientChatHelper::isShowInput($clientChat, Auth::user());
@@ -484,8 +480,25 @@ class ClientChatController extends FController
             } else {
                 $result['noteHtml'] = '';
             }
+
+            $connectionId = (int)Yii::$app->request->post('socketConnectionId');
+
+            if (UserConnection::find()->andWhere(['uc_id' => $connectionId])->exists() && $clientChat->isOwner(Auth::id())) {
+                if (!$this->clientChatService->addActiveConnection($connectionId, $cchId)) {
+                    $result['message'][] = 'Active connection save error.';
+                }
+            }
+
+            if (!$isClosed && (new ClientChatActionPermission())->canCouchNote($clientChat)) {
+                $result['couchNoteStatus'] = 1;
+                $result['couchNoteHtml'] =  $this->renderAjax('partial/_couch_note', [
+                    'couchNoteForm' => new ClientChatCouchNoteForm($clientChat, Auth::user()),
+                ]);
+            }
         } catch (NotFoundException $e) {
-            $result['message'] = $e->getMessage();
+            $result['message'][] = $e->getMessage();
+        } catch (\DomainException | ForbiddenHttpException $e) {
+            $result['message'][] = VarDumper::dumpAsString($e->getMessage());
         }
 
         return $this->asJson($result);
@@ -1815,36 +1828,13 @@ class ClientChatController extends FController
             return $this->asJson(['error' => true, 'message' => 'Owner incorrect']);
         }
 
-        if ($activeConnection = UserConnectionActiveChat::find()->andWhere(['ucac_conn_id' => $connectionId])->one()) {
-            if ($activeConnection->ucac_chat_id === $chatId) {
-                return $this->asJson(['error' => false, 'message' => '']);
-            }
-            $activeConnection->ucac_chat_id = $chatId;
-        } else {
-            $activeConnection = new UserConnectionActiveChat();
-            $activeConnection->ucac_chat_id = $chatId;
-            $activeConnection->ucac_conn_id = $connectionId;
-        }
-
         try {
-            if ($activeConnection->save()) {
+            if ($this->clientChatService->addActiveConnection($connectionId, $chatId)) {
                 return $this->asJson(['error' => false, 'message' => '']);
             }
-
-            Yii::error([
-                'message' => 'Add user connection active chat',
-                'model' => $activeConnection->getAttributes(),
-                'errors' => $activeConnection->getErrors(),
-            ], 'ClientChatController:actionAddActiveConnection');
 
             return $this->asJson(['error' => true, 'message' => 'Active connection save error.']);
         } catch (\Throwable $e) {
-            Yii::error([
-                'message' => 'Add user connection active chat',
-                'model' => $activeConnection->getAttributes(),
-                'errors' => $e->getMessage(),
-            ], 'ClientChatController:actionAddActiveConnection');
-
             return $this->asJson(['error' => true, 'message' => 'Active connection save error.']);
         }
     }
@@ -2153,7 +2143,7 @@ class ClientChatController extends FController
                 }
 
                 $result['status'] = 1;
-                $result['html'] = $this->renderAjax('partial/_couch_note', [
+                $result['html'] =  $this->renderAjax('partial/_couch_note', [
                     'couchNoteForm' => new ClientChatCouchNoteForm($clientChat, Auth::user()),
                 ]);
             } catch (\Throwable $throwable) {

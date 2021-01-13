@@ -117,6 +117,7 @@ use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
 use sales\model\clientChatVisitor\entity\ClientChatVisitor;
 use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use sales\model\project\entity\projectLocale\ProjectLocale;
+use sales\model\project\entity\projectLocale\ProjectLocaleScopes;
 use sales\repositories\client\ClientsQuery;
 use sales\services\cases\CasesCommunicationService;
 use sales\services\client\ClientCreateForm;
@@ -164,7 +165,6 @@ use sales\repositories\cases\CasesSaleRepository;
 use sales\repositories\cases\CaseStatusLogRepository;
 use sales\repositories\lead\LeadBadgesRepository;
 use sales\repositories\lead\LeadRepository;
-use sales\repositories\Repository;
 use sales\services\cases\CasesManageService;
 use sales\services\cases\CasesSaleService;
 use sales\services\client\ClientManageService;
@@ -1873,9 +1873,9 @@ class TestController extends FController
 
     public function actionTestSetByUserId()
     {
-        $repository = Yii::createObject(ClientChatUserAccessService::class);
-
-        $repository->setUserAccessToAllChats(464);
+//        $repository = Yii::createObject(ClientChatUserAccessService::class);
+//
+//        $repository->setUserAccessToAllChats(464);
     }
 
     public function actionSetAccessToAllChatsByChannelIds()

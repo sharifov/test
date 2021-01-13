@@ -2,11 +2,13 @@
 
 namespace sales\services\clientChatService;
 
+use common\components\jobs\clientChat\ClientChatUserAccessJob;
 use common\components\purifier\Purifier;
 use common\models\Client;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Notifications;
+use common\models\search\EmployeeSearch;
 use common\models\UserProfile;
 use frontend\widgets\clientChat\ClientChatAccessMessage;
 use frontend\widgets\notification\NotificationMessage;
@@ -38,6 +40,7 @@ use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\clientChatVisitor\repository\ClientChatVisitorRepository;
 use sales\model\clientChatVisitorData\repository\ClientChatVisitorDataRepository;
+use sales\model\user\entity\userConnectionActiveChat\UserConnectionActiveChat;
 use sales\repositories\clientChatChannel\ClientChatChannelRepository;
 use sales\repositories\clientChatStatusLogRepository\ClientChatStatusLogRepository;
 use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
@@ -48,6 +51,7 @@ use sales\services\client\ClientManageService;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
 use sales\services\TransactionManager;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 
 /**
@@ -195,27 +199,42 @@ class ClientChatService
      */
     public function sendRequestToUsers(ClientChat $clientChat): void
     {
-        $userChannel = ClientChatUserChannel::find()->byChannelId($clientChat->cch_channel_id)->onlineUsers()->all();
+        $channel = $clientChat->cchChannel;
 
-        if ($userChannel) {
-            /** @var ClientChatUserChannel $item */
-            foreach ($userChannel as $item) {
-                $this->sendRequestToUser($clientChat, $item);
+        $employeeSearch = new EmployeeSearch();
+        $limit = $channel->getSystemUserLimit();
+        $users = $employeeSearch->searchAvailableAgentsForChatRequests($clientChat, $limit, $channel->getSystemPastMinutes());
+
+        if ($users) {
+            foreach ($users as $user) {
+                $this->sendRequestToUser($clientChat, $user);
             }
+
+            if ($limit) {
+                $this->createUserAccessJob($clientChat->cch_id, $channel->getSystemRepeatDelaySeconds());
+            }
+        }
+    }
+
+    public function createUserAccessJob(int $chatId, int $delay = 0): void
+    {
+        $job = new ClientChatUserAccessJob();
+        $job->chatId = $chatId;
+        if (!$jobId = \Yii::$app->queue_client_chat_job->priority(10)->delay($delay)->push($job)) {
+            throw new \RuntimeException('ClientChatUserAccessJob not added to queue. ChatId: ' .
+                $chatId);
         }
     }
 
     /**
      * @param ClientChat $clientChat
-     * @param ClientChatUserChannel $clientChatUserChannel
+     * @param Employee $agent
      */
-    public function sendRequestToUser(ClientChat $clientChat, ClientChatUserChannel $clientChatUserChannel): void
+    public function sendRequestToUser(ClientChat $clientChat, Employee $agent): void
     {
-        if ($clientChat->cch_owner_user_id !== $clientChatUserChannel->ccuc_user_id && $clientChatUserChannel->ccucUser->userProfile && $clientChatUserChannel->ccucUser->userProfile->isRegisteredInRc()) {
-            $clientChatUserAccess = ClientChatUserAccess::create($clientChat->cch_id, $clientChatUserChannel->ccuc_user_id);
-            $clientChatUserAccess->pending();
-            $this->clientChatUserAccessRepository->save($clientChatUserAccess, $clientChat);
-        }
+        $clientChatUserAccess = ClientChatUserAccess::create($clientChat->cch_id, $agent->id);
+        $clientChatUserAccess->pending();
+        $this->clientChatUserAccessRepository->save($clientChatUserAccess, $clientChat);
     }
 
     /**
@@ -359,13 +378,14 @@ class ClientChatService
             $this->clientChatRepository->save($clientChat);
 
             if ($form->isAgentTransfer()) {
-                foreach ($form->agentId as $agentId) {
-                    $userChannel = ClientChatUserChannel::find()->byChannelId($clientChatChannel->ccc_id)->byUserId($agentId)->one();
-                    if ($userChannel) {
+                $agents = Employee::find()->joinChatUserChannel($clientChatChannel->ccc_id)->andWhere(['IN', 'id', $form->agentId])->all();
+                if ($agents) {
+                    /** @var Employee $agent */
+                    foreach ($agents as $agent) {
                         try {
-                            $this->sendRequestToUser($clientChat, $userChannel);
+                            $this->sendRequestToUser($clientChat, $agent);
                         } catch (\RuntimeException $e) {
-                            \Yii::error('Send request to user ' . $userChannel->ccuc_user_id . ' failed... ' . $e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(), 'ClientChatService::transfer::RuntimeException');
+                            \Yii::error('Send request to user ' . $agent->id . ' failed... ' . $e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(), 'ClientChatService::transfer::RuntimeException');
                             throw $e;
                         }
                     }
@@ -682,5 +702,29 @@ class ClientChatService
                 true
             );
         }
+    }
+
+    public function addActiveConnection(int $connectionId, int $chatId): bool
+    {
+        if ($activeConnection = UserConnectionActiveChat::find()->andWhere(['ucac_conn_id' => $connectionId])->one()) {
+            if ($activeConnection->ucac_chat_id === $chatId) {
+                return true;
+            }
+            $activeConnection->ucac_chat_id = $chatId;
+        } else {
+            $activeConnection = new UserConnectionActiveChat();
+            $activeConnection->ucac_chat_id = $chatId;
+            $activeConnection->ucac_conn_id = $connectionId;
+        }
+
+        if (!$activeConnection->save()) {
+            \Yii::error([
+                'message' => 'Add user connection active chat',
+                'model' => $activeConnection->getAttributes(),
+                'errors' => $activeConnection->getErrors(),
+            ], 'ClientChatController:actionAddActiveConnection');
+            return false;
+        }
+        return true;
     }
 }

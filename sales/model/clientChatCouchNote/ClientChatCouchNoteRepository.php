@@ -3,12 +3,11 @@
 namespace sales\model\clientChatCouchNote;
 
 use sales\model\clientChatCouchNote\entity\ClientChatCouchNote;
-use sales\repositories\Repository;
 
 /**
  * Class ClientChatCouchNoteRepository
  */
-class ClientChatCouchNoteRepository extends Repository
+class ClientChatCouchNoteRepository
 {
     public function save(ClientChatCouchNote $clientChatCouchNote, int $code = 0): ClientChatCouchNote
     {

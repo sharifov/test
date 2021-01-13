@@ -6,15 +6,11 @@ use common\models\ClientPhone;
 use sales\dispatchers\EventDispatcher;
 use sales\model\client\ClientCodeException;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 
 /**
  * Class ClientPhoneRepository
- *
- * @method null|ClientPhone get($id)
- * @method null|ClientPhone getByPhone($phone)
  */
-class ClientPhoneRepository extends Repository
+class ClientPhoneRepository
 {
     private $eventDispatcher;
 

@@ -272,6 +272,11 @@ $jsCode = <<<JS
                     btn.parent().parent().addClass('success');
                     btn.find('span').removeClass('fa-spinner fa-spin').addClass('fa-check');
                     $.pjax.reload({container: '#pjax-sale-list', push: false, replace: false, timeout: 10000, async: false});
+                    if ($('#pjax-case-communication-log-form').length) {
+                        $.pjax.reload({container: '#pjax-case-communication-log-form', push: false, replace: false, timeout: 10000, async: false});
+                    } else if ($('#pjax-case-communication-form').length) {
+                        $.pjax.reload({container: '#pjax-case-communication-form', push: false, replace: false, timeout: 10000, async: false});
+                    }
                     new PNotify({
                         title: "Sale successfully added",
                         type: "success",

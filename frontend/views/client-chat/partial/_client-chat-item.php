@@ -46,7 +46,13 @@ use yii\helpers\StringHelper;
 
             </span>
             <span>
-                <div title="Client name"><b><span data-cc-client-name-id="<?= $clientChat['client_id']?>"><?= Html::encode($clientFullName) ?></span></b></div>
+                <div title="Client name">
+                    <b>
+                        <span data-cc-client-name-id="<?= $clientChat['client_id']?>" class="break-word client-name-chat-list">
+                            <?= Html::encode($clientFullName) ?>
+                        </span>
+                    </b>
+                </div>
                 <span title="Chat creation date"><small><?= $formatter->asByUserDateTime($clientChat['cch_created_dt'], 'php:F d Y, H:i') ?></small></span>
                 <?php if (!empty($clientChat['cch_owner_user_id'])) : ?>
                     , <span title="Owner"><small><i class="fa fa-user"> </i> <?= Html::encode($clientChat['owner_username']) ?></small></span>

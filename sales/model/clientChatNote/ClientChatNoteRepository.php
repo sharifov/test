@@ -4,12 +4,11 @@ namespace sales\model\clientChatNote;
 
 use sales\model\clientChatNote\entity\ClientChatNote;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 
 /**
  * Class ClientChatNoteRepository
  */
-class ClientChatNoteRepository extends Repository
+class ClientChatNoteRepository
 {
     public function save(ClientChatNote $clientChatNote): ClientChatNote
     {

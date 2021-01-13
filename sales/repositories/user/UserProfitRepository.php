@@ -5,10 +5,8 @@ namespace sales\repositories\user;
 use sales\model\user\entity\payroll\UserPayroll;
 use sales\model\user\entity\profit\search\UserProfitSearch;
 use sales\model\user\entity\profit\UserProfit;
-use sales\model\user\entity\profit\UserProfitQuery;
-use sales\repositories\Repository;
 
-class UserProfitRepository extends Repository
+class UserProfitRepository
 {
     /**
      * @param string $date

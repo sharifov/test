@@ -14,6 +14,7 @@ namespace sales\model\project\entity;
  * @property $say_direct_message
  * @property $say_redirect_message
  * @property $sms_enabled
+ * @property ObjectData $object
  */
 class CustomData
 {
@@ -26,6 +27,7 @@ class CustomData
     public $say_direct_message;
     public $say_redirect_message;
     public $sms_enabled;
+    public ObjectData $object;
 
     public function __construct(?string $raw, ?int $projectId)
     {
@@ -43,6 +45,7 @@ class CustomData
             $this->say_direct_message = $customData['say_direct_message'] ?? null;
             $this->say_redirect_message = $customData['say_redirect_message'] ?? null;
             $this->sms_enabled = $customData['sms_enabled'] ?? null;
+            $this->object = new ObjectData($customData['object'] ?? []);
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => 'Project custom data error',

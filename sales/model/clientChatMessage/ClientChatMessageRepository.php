@@ -3,10 +3,8 @@
 namespace sales\model\clientChatMessage;
 
 use sales\model\clientChatMessage\entity\ClientChatMessage;
-use sales\model\clientChatMessage\event\ClientChatMessageCreateEvent;
-use sales\repositories\Repository;
 
-class ClientChatMessageRepository extends Repository
+class ClientChatMessageRepository
 {
     /**
      * @param ClientChatMessage $model

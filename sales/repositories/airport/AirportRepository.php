@@ -4,17 +4,13 @@ namespace sales\repositories\airport;
 
 use common\models\Airports;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 use yii\db\ActiveRecord;
 
 /**
  * Class AirportRepository
- * @method null|Airports get(int $id)
- * @method null|Airports getByIata($iata)
  */
-class AirportRepository extends Repository
+class AirportRepository
 {
-
     /**
      * @param int $id
      * @return Airports
@@ -27,16 +23,20 @@ class AirportRepository extends Repository
         throw new NotFoundException('Airport is not found.');
     }
 
-    /**
-     * @param $iata
-     * @return Airports
-     */
     public function findByIata($iata): Airports
     {
         if ($airport = Airports::findOne(['iata' => $iata])) {
             return $airport;
         }
         throw new NotFoundException('Airport (' . $iata . ') is not found.');
+    }
+
+    public function getByIata($iata): ?Airports
+    {
+        if ($airport = Airports::findOne(['iata' => $iata])) {
+            return $airport;
+        }
+        return null;
     }
 
     /**

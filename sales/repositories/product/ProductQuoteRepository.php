@@ -4,14 +4,13 @@ namespace sales\repositories\product;
 
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\dispatchers\EventDispatcher;
-use sales\repositories\Repository;
 
 /**
  * Class ProductQuoteRepository
  *
  * @property EventDispatcher $eventDispatcher
  */
-class ProductQuoteRepository extends Repository
+class ProductQuoteRepository
 {
     private $eventDispatcher;
 

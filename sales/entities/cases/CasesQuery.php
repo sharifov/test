@@ -62,4 +62,22 @@ class CasesQuery extends ActiveQuery
     {
         return $this->andWhere(['NOT IN', 'cs_status', [CasesStatus::STATUS_SOLVED, CasesStatus::STATUS_TRASH]]);
     }
+
+    /**
+     * @param null $db
+     * @return Cases[]|array
+     */
+    public function all($db = null)
+    {
+        return parent::all($db);
+    }
+
+    /**
+     * @param null $db
+     * @return Cases|array|null
+     */
+    public function one($db = null)
+    {
+        return parent::one($db);
+    }
 }

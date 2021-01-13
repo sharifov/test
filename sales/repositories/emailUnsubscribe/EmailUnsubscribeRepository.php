@@ -3,13 +3,11 @@
 namespace sales\repositories\emailUnsubscribe;
 
 use common\models\EmailUnsubscribe;
-use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 
 /**
  * Class EmailUnsubscribeRepository
  */
-class EmailUnsubscribeRepository extends Repository
+class EmailUnsubscribeRepository
 {
     /**
      * @param string $email

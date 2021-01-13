@@ -6,7 +6,6 @@ use modules\flight\models\FlightSegment;
 use modules\flight\src\exceptions\FlightCodeException;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 
 /**
  * Class FlightSegmentRepository
@@ -14,7 +13,7 @@ use sales\repositories\Repository;
  *
  * @property EventDispatcher $eventDispatcher
  */
-class FlightSegmentRepository extends Repository
+class FlightSegmentRepository
 {
 
     public function __construct(EventDispatcher $eventDispatcher)

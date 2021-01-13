@@ -1,5 +1,6 @@
 <?php
 
+use common\components\grid\DateTimeColumn;
 use common\models\Department;
 use common\models\Project;
 use sales\auth\Auth;
@@ -31,7 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php Pjax::begin(['id' => 'cases-q-inbox-pjax-list', 'timeout' => 5000, 'enablePushState' => true]); ?>
 
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -76,7 +77,6 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'nextFlight',
                 'value' => static function (CasesQSearch $model) {
-
                     if ($model->nextFlight) {
                         $out =  '<i class="fa fa-calendar"></i> ';
                         $out .= Yii::$app->formatter->asDate(strtotime($model->nextFlight));
@@ -86,6 +86,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw',
                 'options' => ['style' => 'width: 180px'],
+                'filter' => false,
             ],
             [
                 'attribute' => 'css_penalty_type',
@@ -147,7 +148,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     $diffTime = time() - $createdTS;
                     $diffHours = (int) ($diffTime / (60 * 60));
 
-                    return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+                    return ($diffHours > 3 && $diffHours < 73) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
                 },
                 'options' => [
                     'style' => 'width:180px'
@@ -178,7 +179,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     $diffTime = time() - $createdTS;
                     $diffHours = (int) ($diffTime / (60 * 60));
 
-                    return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+                    return ($diffHours > 3 && $diffHours < 73) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
                 },
             ],
             [

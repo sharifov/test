@@ -90,13 +90,42 @@ class ClientChatProjectConfigController extends FController
             $model->ccpc_params_json = '{
   "endpoint": "chatbot.travel-dev.com",
   "notificationSound": "https://cdn.travelinsides.com/npmstatic/assets/chime.mp3",
-  "autoMessage": {
-    "enabled": false,
-    "message": "",
-    "delay": 1,
-    "repeatDelay": 1,
-    "botName": "",
-    "botAvatar": ""
+  "autoMessage":{
+    "enabled":false,
+    "repeatDelay":3600,
+    "botName":"Agent",
+    "botAvatar":"",
+    "denyPath":["*checkout/quote*"],
+    "messageTypes":{
+        "withoutFlightParams":{
+            "messages":{
+                "1":{
+                    "message":"Hi! Would you like to check for a discount?",
+                    "delay":4,
+                    "showTyping":false
+                }
+            }
+        },
+        "withFlightParams":{
+            "messages":{
+                "1":{
+                    "message":"Hi!",
+                    "delay":4,
+                    "showTyping":false
+                },
+                "2":{
+                    "message":"We have private deals for {{originCityParam}} to {{destinationCityParam}}!",
+                    "delay":4,
+                    "showTyping":true
+                },
+                "3":{
+                    "message":"Would you like to check for a discount?",
+                    "delay":4,
+                    "showTyping":true
+                }
+            }
+        }
+    }
   },
   "autoMessageTranslates": {
     "ru-RU": "",

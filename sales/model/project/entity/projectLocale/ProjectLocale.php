@@ -150,8 +150,9 @@ class ProjectLocale extends \yii\db\ActiveRecord
         return ArrayHelper::map(
             self::find()
             ->select(['pl_language_id'])
-            ->where(['pl_project_id' => $projectId])
-            ->andWhere(['pl_enabled' => true])
+            ->byProject($projectId)
+            ->enabled()
+            ->languageNotNull()
             ->orderBy(['pl_language_id' => SORT_ASC])
             ->asArray(true)
             ->all(),
@@ -166,10 +167,9 @@ class ProjectLocale extends \yii\db\ActiveRecord
         return ArrayHelper::map(
             self::find()
             ->select(['pl_language_id', 'name'])
-            ->andWhere([
-                'pl_project_id' => $projectId,
-                'pl_enabled' => true,
-            ])
+            ->byProject($projectId)
+            ->enabled()
+            ->languageNotNull()
             ->joinWith('plLanguage')
             ->orderBy(['pl_language_id' => SORT_ASC])
             ->asArray(true)
@@ -184,11 +184,19 @@ class ProjectLocale extends \yii\db\ActiveRecord
     {
         return self::find()
             ->select(['pl_language_id'])
-            ->where([
-                'pl_project_id' => $projectId,
-                'pl_default' => true,
-                'pl_enabled' => true,
-            ])
+            ->byProject($projectId)
+            ->default()
+            ->enabled()
+            ->languageNotNull()
             ->scalar();
+    }
+
+    /**
+     * {@inheritdoc}
+     * @return ProjectLocaleScopes the active query used by this AR class.
+     */
+    public static function find()
+    {
+        return new ProjectLocaleScopes(static::class);
     }
 }

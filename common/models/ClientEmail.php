@@ -240,4 +240,9 @@ class ClientEmail extends \yii\db\ActiveRecord
     {
         return self::find()->select(['email', 'id'])->where(['client_id' => $clientId])->indexBy('id')->asArray()->column();
     }
+
+    public static function find()
+    {
+        return new ClientEmailQuery(static::class);
+    }
 }

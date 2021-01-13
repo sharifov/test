@@ -6,15 +6,11 @@ use common\models\ClientEmail;
 use sales\dispatchers\EventDispatcher;
 use sales\model\client\ClientCodeException;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 
 /**
  * Class ClientEmailRepository
- *
- * @method null|ClientEmail get($id)
- * @method null|ClientEmail getByEmail($email)
  */
-class ClientEmailRepository extends Repository
+class ClientEmailRepository
 {
     private $eventDispatcher;
 

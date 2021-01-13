@@ -23,7 +23,7 @@ use yii\widgets\ActiveForm;
         'action' => Url::to(['/client-chat-client-actions/ajax-add-client-phone', 'id' => $chatId]),
         'enableClientValidation' => false,
         'enableAjaxValidation' => true,
-        'validateOnChange' => false,
+        'validateOnChange' => true,
         'validateOnBlur' => false,
         'validationUrl' => Url::to(['/client-chat-client-actions/ajax-add-client-phone-validation', 'id' => $chatId])
     ]); ?>
@@ -37,7 +37,8 @@ use yii\widgets\ActiveForm;
         ])->widget(PhoneInput::class, [
             'options' => [
                 'class' => 'form-control lead-form-input-element',
-                'required' => true
+                'required' => true,
+                'onkeyup' => 'var value = $(this).val();$(this).val(value.replace(/[^0-9\+]+/g, ""));'
             ],
             'jsOptions' => [
                 'nationalMode' => false,

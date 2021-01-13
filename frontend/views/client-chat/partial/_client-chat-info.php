@@ -282,7 +282,7 @@ $chatCounter = new ClientChatCounter($client->id);
             <div class="x_title">
                 <h2>Cases (<?= $counter->countActiveCases()?> / <?= $counter->countAllCases()?>) </h2>
                 <ul class="nav navbar-right panel_toolbox">
-                    <?php if (!$clientChat->isClosed() && Auth::can('/cases/create-by-chat')) : ?>
+                    <?php if ($actionPermissions->canCreateCase($clientChat)) : ?>
                     <li>
                         <a class="create_case" data-link="<?= Url::to(['/cases/create-by-chat', 'chat_id' => $clientChat->cch_id]); ?>"><i class="fa fa-plus"></i> Create Case</a>
                     </li>
@@ -315,7 +315,7 @@ $chatCounter = new ClientChatCounter($client->id);
             <div class="x_title">
                 <h2>Leads (<?= $counter->countActiveLeads()?> / <?= $counter->countAllLeads()?>) </h2>
                 <ul class="nav navbar-right panel_toolbox">
-                    <?php if (!$clientChat->isClosed() && Auth::can('/lead/create-by-chat')) : ?>
+                    <?php if ($actionPermissions->canCreateLead($clientChat)) : ?>
                         <li>
                             <a class="create_lead" data-link="<?= Url::to(['/lead/create-by-chat', 'chat_id' => $clientChat->cch_id]); ?>"><i class="fa fa-plus"></i> Create Lead</a>
                         </li>

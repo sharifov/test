@@ -5,16 +5,14 @@ namespace modules\offer\src\entities\offer;
 use modules\offer\src\exceptions\OfferCodeException;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 
 /**
  * Class OfferRepository
  *
  * @property EventDispatcher $eventDispatcher
  *
- * @method Offer|null getByGid(string $gid)
  */
-class OfferRepository extends Repository
+class OfferRepository
 {
     private $eventDispatcher;
 
@@ -37,6 +35,14 @@ class OfferRepository extends Repository
             return $offer;
         }
         throw new NotFoundException('Offer is not found', OfferCodeException::OFFER_NOT_FOUND);
+    }
+
+    public function getByGid(string $gid): ?Offer
+    {
+        if ($offer = Offer::find()->byGid($gid)->one()) {
+            return $offer;
+        }
+        return null;
     }
 
     public function save(Offer $offer): int

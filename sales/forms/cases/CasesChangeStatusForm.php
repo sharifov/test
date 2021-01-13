@@ -339,7 +339,21 @@ class CasesChangeStatusForm extends Model
             $this->enabledSendFeedbackEmail = false;
             return $this->enabledSendFeedbackEmail;
         }
-        $this->enabledSendFeedbackEmail = $params->object->case->isActiveFeedback($this->case->cs_order_uid);
+        if (!$params->object->case->sendFeedback) {
+            $this->enabledSendFeedbackEmail = false;
+            return $this->enabledSendFeedbackEmail;
+        }
+
+        if (!$this->case->cs_project_id) {
+            $this->enabledSendFeedbackEmail = false;
+            return $this->enabledSendFeedbackEmail;
+        }
+        if (!$customData = $this->case->project->getCustomData()) {
+            $this->enabledSendFeedbackEmail = false;
+            return $this->enabledSendFeedbackEmail;
+        }
+
+        $this->enabledSendFeedbackEmail = $customData->object->case->isActiveFeedback($this->case->cs_order_uid);
         return $this->enabledSendFeedbackEmail;
     }
 
@@ -347,7 +361,7 @@ class CasesChangeStatusForm extends Model
     {
         $templateTypeId = EmailTemplateType::find()
             ->select(['etp_id'])
-            ->andWhere(['etp_key' => $this->case->department->getParams()->object->case->feedbackTemplateTypeKey])
+            ->andWhere(['etp_key' => $this->case->project->getCustomData()->object->case->feedbackTemplateTypeKey])
             ->asArray()
             ->one();
 

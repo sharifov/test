@@ -6,14 +6,13 @@ use modules\flight\models\Flight;
 use modules\flight\src\exceptions\FlightCodeException;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 
 /**
  * Class FlightRepository
  *
  * @property EventDispatcher $eventDispatcher
  */
-class FlightRepository extends Repository
+class FlightRepository
 {
     private $eventDispatcher;
 

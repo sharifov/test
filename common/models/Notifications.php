@@ -9,6 +9,7 @@ use common\models\query\NotificationsQuery;
 use frontend\widgets\notification\NotificationCache;
 use frontend\widgets\notification\NotificationMessage;
 use sales\helpers\app\AppHelper;
+use sales\services\telegram\TelegramService;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -246,14 +247,13 @@ class Notifications extends ActiveRecord
 
         parent::afterSave($insert, $changedAttributes);
 
-        if ($insert) {
+        if ($insert && TelegramService::getTelegramChatIdByUserId($this->n_user_id)) {
             $job = new TelegramSendMessageJob();
             $job->user_id = $this->n_user_id;
             $job->text = Purifier::purify($this->n_message, PurifierFilter::shortCodeToIdUrl());
 
             $queue = Yii::$app->queue_job;
             $jobId = $queue->push($job);
-            //Yii::info('UserID: '.$job->user_id.', TelegramSendMessageJob: '.$jobId, 'info\Notifications:afterSave:TelegramSendMessageJob');
         }
     }
 

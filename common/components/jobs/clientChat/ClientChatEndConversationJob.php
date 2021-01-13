@@ -49,8 +49,8 @@ class ClientChatEndConversationJob implements RetryableJobInterface
      * @param \Exception|\Throwable $error from last execute of the job
      * @return bool
      */
-    public function canRetry($attempt, $error)
+    public function canRetry($attempt, $error): bool
     {
-        return 3;
+        return ($attempt < 3);
     }
 }

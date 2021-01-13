@@ -5,14 +5,13 @@ namespace sales\model\clientChatLastMessage;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
-use sales\repositories\Repository;
 use Yii;
 use yii\helpers\VarDumper;
 
 /**
  * Class ClientChatLastMessageRepository
  */
-class ClientChatLastMessageRepository extends Repository
+class ClientChatLastMessageRepository
 {
     public function save(ClientChatLastMessage $clientChatLastMessage, bool $runValidation = false): ClientChatLastMessage
     {

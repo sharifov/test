@@ -5,13 +5,11 @@ namespace sales\repositories\note;
 use common\models\Note;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 
 /**
  * Class NoteRepository
- * @method null|Note get($id)
  */
-class NoteRepository extends Repository
+class NoteRepository
 {
     private $eventDispatcher;
 

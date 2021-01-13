@@ -3,19 +3,14 @@
 namespace sales\repositories\call;
 
 use common\models\Call;
-use http\Exception\RuntimeException;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 
 /**
  * Class CallRepository
  * @property EventDispatcher $eventDispatcher
- * @method null|Call getLastCallByUserCreated(string $callSid)
- * @method null|Call getFirstCall(string $callSid)
- * @method null|Call get($id)
  */
-class CallRepository extends Repository
+class CallRepository
 {
     private $eventDispatcher;
 

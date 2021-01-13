@@ -2,9 +2,7 @@
 
 namespace modules\order\src\entities\orderTipsUserProfit;
 
-use sales\repositories\Repository;
-
-class OrderTipsUserProfitRepository extends Repository
+class OrderTipsUserProfitRepository
 {
     public function findByOrderId(int $id)
     {

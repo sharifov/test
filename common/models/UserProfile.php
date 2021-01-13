@@ -36,7 +36,6 @@ use yii\caching\TagDependency;
  */
 class UserProfile extends \yii\db\ActiveRecord
 {
-
     public const CALL_TYPE_OFF = 0;
     public const CALL_TYPE_SIP = 1;
     public const CALL_TYPE_WEB = 2;
@@ -177,5 +176,16 @@ class UserProfile extends \yii\db\ActiveRecord
     public function isRegisteredInRc(): bool
     {
         return $this->up_rc_auth_token && $this->up_rc_user_id;
+    }
+
+    /**
+     * @param int $userId
+     */
+    public static function disableTelegramByUserId(int $userId): void
+    {
+        if ($profile = self::findOne(['up_user_id' => $userId])) {
+            $profile->up_telegram_enable = false;
+            $profile->save(false);
+        }
     }
 }

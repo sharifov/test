@@ -68,7 +68,13 @@ let currentChatOwnerId = {$clientChatOwnerId};
 window.name = 'chat';
 
 let spinnerContent = '<div><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>';
-let loaderIframe = '<div id="_cc-load">' + spinnerContent + '</div>';  
+let loaderIframe = '<div id="_cc-load"></div>';
+
+let clientChatInfoAjaxRequestEnabled = false;
+let clientChatInfoAjaxRequestXhr;
+
+let chatListingAjaxRequestEnabled = false;
+window.allDialogsLoaded = false;
 
 $(document).ready( function () {
     let clientChatId = {$clientChatId};
@@ -208,46 +214,56 @@ function updateLastMessageTime() {
     });
 }
 
-$(document).on('click', '#btn-load-channels', function (e) {
-    
-    e.preventDefault();
-    
-    let page = $(this).attr('data-page');
-    let btn = $(this);
-    
-    let btnCurrentText = btn.html();
-    
-    let params = new URLSearchParams(window.location.search);
-
-    let urlParams = window.getClientChatLoadMoreUrl('{$filter->getId()}', '{$filter->formName()}');
-    let url = '{$loadChannelsUrl}?' + urlParams + '&loadingChannels=1' + '&page=' + page;
-    $.ajax({
-        type: 'get',
-        url: url,
-        dataType: 'json',
-        cache: false,
-        // data: {loadingChannels: 1, channelId: params.get('channelId') | selectedChannel},
-        beforeSend: function () {
-            btn.html('<i class="fa fa-spin fa-spinner"></i> Loading...').prop('disabled', true).addClass('disabled');
-        },
-        success: function (data) {
-            if (data.html) {
-                $('._cc-list-wrapper').append(data.html);
-                refreshUserSelectedState();
-            }
-            if (data.isFullList) {
-                btn.html('All conversations are loaded');
-            } else {
-                let txt = '<i class="fa fa-angle-double-down"> </i> Load more (<span>' + data.moreCount + '</span>)';
-                btn.html(txt).removeAttr('disabled').removeClass('disabled').attr('data-page', data.page);
-            }
-            window.history.replaceState({}, '', '{$loadChannelsUrl}?' + urlParams + '&page=' + (data.page - 1));
-        },
-        error: function (xhr) {
-            btn.html(btnCurrentText);
-        },
+window.addScrollEventListenerToChatListWrapper = function () {
+    $('#cc-dialogs-wrapper').scroll(function (e) {
+        var elem = $(e.currentTarget);
+        if (elem.scrollTop() + Math.ceil(elem.innerHeight()) >= elem[0].scrollHeight && !chatListingAjaxRequestEnabled && !window.allDialogsLoaded) {
+            chatListingAjaxRequestEnabled = true;
+            let page = $(this).attr('data-page');
+            let loadChannelsTxt = $('#load-channels-txt');
+            
+            let loadChannelsCurrentText = loadChannelsTxt.html();
+            
+            let params = new URLSearchParams(window.location.search);
+        
+            let urlParams = window.getClientChatLoadMoreUrl('{$filter->getId()}', '{$filter->formName()}');
+            let url = '{$loadChannelsUrl}?' + urlParams + '&loadingChannels=1' + '&page=' + page;
+            $.ajax({
+                type: 'get',
+                url: url,
+                dataType: 'json',
+                cache: false,
+                // data: {loadingChannels: 1, channelId: params.get('channelId') | selectedChannel},
+                beforeSend: function () {
+                    loadChannelsTxt.html('<i class="fa fa-spin fa-spinner"></i> Loading...');
+                },
+                success: function (data) {
+                    if (data.html) {
+                        $('._cc-list-wrapper').append(data.html);
+                        refreshUserSelectedState();
+                    }
+                    if (data.isFullList) {
+                        loadChannelsTxt.html('All conversations are loaded');
+                        window.allDialogsLoaded = true;
+                    } else {
+                        let txt = '<i class="fa fa-angle-double-down"> </i> Scroll to load more (<span>' + data.moreCount + '</span>)';
+                        loadChannelsTxt.html(txt);
+                        $('#cc-dialogs-wrapper').attr('data-page', data.page);
+                        window.allDialogsLoaded = false;
+                    }
+                    window.history.replaceState({}, '', '{$loadChannelsUrl}?' + urlParams + '&page=' + (data.page - 1));
+                },
+                error: function (xhr) {
+                    loadChannelsTxt.html(loadChannelsCurrentText);
+                },
+                complete: function () {
+                    chatListingAjaxRequestEnabled = false;
+                }
+            });
+        }
     });
-});
+};
+window.addScrollEventListenerToChatListWrapper();
 
 $(document).on('click', '.cc_btn_group_filter', function () {
     let newValue = $(this).attr('data-group-id');
@@ -337,13 +353,8 @@ window.loadClientChatData = function (cch_id, data, ref) {
     
     let isClosed = data.isClosed;
     let iframeWrapperEl = $("#_rc-iframe-wrapper");
-        
-    iframeWrapperEl.find('._rc-iframe').hide();
-    $('._cc-list-item').removeClass('_cc_active');
-    $(ref).addClass('_cc_active');
     
     iframeWrapperEl.find('#_cc-load').remove();
-    iframeWrapperEl.append(loaderIframe);
     
     let chatEl = $('#_rc-' + cch_id);
     let chatIsShowInput = parseInt(chatEl.data('isShowInput'), 10);
@@ -356,7 +367,9 @@ window.loadClientChatData = function (cch_id, data, ref) {
     
     $('#couch_note_box').html('');
     if (!isClosed) {
-        window.refreshCouchNote(cch_id);
+        $('#couch_note_box').html(data.couchNoteHtml);
+        
+        $.post('{$discardUnreadMessageUrl}', {cchId: cch_id});
     }
     
     if (data.isShowInput) {
@@ -374,13 +387,19 @@ window.loadClientChatData = function (cch_id, data, ref) {
     
     chatEl.show();
     window.removeCcLoadFromIframe();
+    
+    if(data.message.length) {
+        data.message.forEach(function (item, index) {
+            createNotify('Error', item, 'error');
+        });
+    }
 }
 
 $(document).on('click', '._cc-list-item', function () {
-    $('#cc-dialogs-wrapper').append(loaderIframe); 
+    // $('#cc-dialogs-wrapper').append(loaderIframe); 
     let iframeWrapperEl = $("#_rc-iframe-wrapper");
     iframeWrapperEl.find('#_cc-load').remove();
-    iframeWrapperEl.append(loaderIframe);
+    // iframeWrapperEl.append(loaderIframe);
 
     let cch_id = $(this).attr('data-cch-id');
     // let preChatId = currentChatId; 
@@ -388,10 +407,9 @@ $(document).on('click', '._cc-list-item', function () {
     let ownerId = $(this).attr('data-owner-id');
     currentChatOwnerId = ownerId;
     
-    if (ownerId === userId) {
-        addChatToActiveConnection();    
-    }
-        
+    // if (ownerId === userId) {
+    //     addChatToActiveConnection();    
+    // }
     if ($(this).hasClass('_cc_active')) {
         $('#cc-dialogs-wrapper #_cc-load').remove(); 
         iframeWrapperEl.find('#_cc-load').remove();
@@ -399,7 +417,17 @@ $(document).on('click', '._cc-list-item', function () {
     }
     
     let ref = this;
-    window.refreshChatInfo(cch_id, loadClientChatData, ref);
+    
+    iframeWrapperEl.find('._rc-iframe').hide();
+    $('._cc-list-item').removeClass('_cc_active');
+    $(ref).addClass('_cc_active');
+    
+    let chatEl = $('#_rc-' + cch_id);
+    if (chatEl.length) {
+        chatEl.show();
+    }
+    
+    window.refreshChatInfo(cch_id, loadClientChatData, ref, window.socketConnectionId);
     
     // socketSend('ChatSubscribe', '', {"subscribe":[cch_id], "unSubscribe":[preChatId]});
     
@@ -584,14 +612,18 @@ window.getChatHistory = function (cchId) {
     });
 }
 
-window.refreshChatInfo = function (cch_id, callable, ref) {
-    $.ajax({
+window.refreshChatInfo = function (cch_id, callable, ref, socketConnectionId) {
+    if (clientChatInfoAjaxRequestEnabled) {
+        clientChatInfoAjaxRequestXhr.abort();
+    }
+    clientChatInfoAjaxRequestXhr = $.ajax({
         type: 'post',
         url: '{$clientChatInfoUrl}',
         dataType: 'json',
         cache: false,
-        data: {cch_id: cch_id},
+        data: {cch_id: cch_id, socketConnectionId: socketConnectionId ? socketConnectionId : 0},
         beforeSend: function () {
+            clientChatInfoAjaxRequestEnabled = true;
             $('#_cc_additional_info_wrapper').append(loaderIframe);
         },
         success: function (data) {
@@ -602,9 +634,12 @@ window.refreshChatInfo = function (cch_id, callable, ref) {
             }          
         },
         error: function (xhr) {
-            createNotify('Error', xhr.responseText, 'error');
+            if (xhr.status) {
+                createNotify('Error', xhr.responseText, 'error');
+            }
         },
         complete: function () {
+            clientChatInfoAjaxRequestEnabled = false;
             $('#_cc_additional_info_wrapper #_cc-load').remove();
             $('#cc-dialogs-wrapper #_cc-load').remove(); 
         }
@@ -637,6 +672,7 @@ window.refreshChatPage = function (cchId) {
 window.refreshChannelList = function() {  
     if ($('#pjax-client-chat-channel-list').length) {
         pjaxReload({container: '#pjax-client-chat-channel-list'});
+        window.addScrollEventListenerToChatListWrapper();
     }
 }
 
@@ -691,7 +727,7 @@ reloadChat = function(chatData) {
 }
 
 preReloadChat = function(cchId) {
-    $('#cc-dialogs-wrapper').append(loaderIframe);   
+    // $('#cc-dialogs-wrapper').append(loaderIframe);   
     $('#_rc-'+cchId).remove();
     
     let iframeWrapperEl = $("#_rc-iframe-wrapper");
@@ -706,7 +742,7 @@ postReloadChat = function() {
 }
 
 function showAllLoaders(){
-    $('#cc-dialogs-wrapper').append(loaderIframe);
+    // $('#cc-dialogs-wrapper').append(loaderIframe);
     $('#_cc_additional_info_wrapper').append(loaderIframe);
     $("#_rc-iframe-wrapper").append(loaderIframe);    
 }
@@ -1122,7 +1158,7 @@ $(document).on('click', '.cc_return', function (e) {
         .addClass('btn-default')
         .prop('disabled', true);
         
-    $('#cc-dialogs-wrapper').append(loaderIframe);  
+    // $('#cc-dialogs-wrapper').append(loaderIframe);  
     
     $.ajax({
         url: '{$clientChatReturnUrl}',

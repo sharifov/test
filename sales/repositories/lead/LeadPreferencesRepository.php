@@ -5,13 +5,11 @@ namespace sales\repositories\lead;
 use common\models\LeadPreferences;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 
 /**
  * Class LeadPreferencesRepository
- * @method null|LeadPreferences get($id)
  */
-class LeadPreferencesRepository extends Repository
+class LeadPreferencesRepository
 {
 
     private $eventDispatcher;

@@ -1,7 +1,7 @@
 ;( function (window) {
     'use strict';
     window._cc_apply_filter = function (channelId, primaryUrl, status, dep, project, group, read, agentId, createdDate) {
-        let btn = $("#btn-load-channels");
+        let loadChannelsTxt = $("#load-channels-txt");
         let params = new URLSearchParams(window.location.search);
 
         let url = primaryUrl + "?status=" + status + "&group=" + group + "&read=" + read + "&agentId=" + agentId + "&createdDate=" + createdDate;
@@ -27,9 +27,12 @@
             success: function (data) {
                 $("._cc-list-wrapper").html(data.html);
                 if (data.html) {
-                    btn.html("Load more").removeAttr("disabled").removeClass("disabled").attr("data-page", data.page);
+                    loadChannelsTxt.html("Load more");
+                    $('#cc-dialogs-wrapper').attr("data-page", data.page);
+                    window.allDialogsLoaded = false;
                 } else {
-                    btn.html("All conversations are loaded").prop('disabled', true).addClass('disabled');
+                    loadChannelsTxt.html("All conversations are loaded").addClass('disabled');
+                    window.allDialogsLoaded = true;
                 }
                 params.set('page', 1);
                 params.set('channelId', channelId);
@@ -72,6 +75,8 @@
         $('#canned-response-wrap').addClass('disabled');
         $('#couch_note_box').html('');
         pjaxReload({container: '#pjax-client-chat-channel-list'});
+        window.allDialogsLoaded = false;
+        window.refreshChannelList();
         window.removeChatFromActiveConnection();
     };
 

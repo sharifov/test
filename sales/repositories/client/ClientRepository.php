@@ -6,14 +6,11 @@ use common\models\Client;
 use sales\dispatchers\EventDispatcher;
 use sales\model\client\ClientCodeException;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 
 /**
  * Class ClientRepository
- *
- * @method null|Client get($id)
  */
-class ClientRepository extends Repository
+class ClientRepository
 {
     private $eventDispatcher;
 

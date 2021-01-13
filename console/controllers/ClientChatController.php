@@ -4,6 +4,7 @@ namespace console\controllers;
 
 use common\models\Employee;
 use common\models\Notifications;
+use common\models\UserOnline;
 use common\models\UserProfile;
 use frontend\widgets\clientChat\ClientChatAccessMessage;
 use sales\helpers\app\AppHelper;
@@ -305,46 +306,58 @@ class ClientChatController extends Controller
         echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
-        $channels = [];
-        $processed = $failed = 0;
+        $onlineChannels = [];
+        $onlineProcessed = 0;
+        $onlineFailed = 0;
+        $offlineChannels = [];
+        $offlineProcessed = 0;
+        $offlineFailed = 0;
+
         $timeStart = microtime(true);
-        $minutes = \Yii::$app->params['settings']['client_chat_inactive_minutes'] ?? 0;
 
-        if ($minutes === 0) {
-            echo Console::renderColoredString('%w --- Script stopped. Setting "client_chat_inactive_minutes" eq "0" %n'), PHP_EOL;
-            return;
+        $onlineMinutes = (int)(\Yii::$app->params['settings']['client_chat_idle_timeout_online_user'] ?? 0);
+        $offlineMinutes = (int)(\Yii::$app->params['settings']['client_chat_idle_timeout_offline_user'] ?? 0);
+
+        if ($onlineMinutes === 0 && $offlineMinutes === 0) {
+            echo Console::renderColoredString('%w --- Script stopped. Setting "client_chat_idle_timeout_online_user" and "client_chat_idle_timeout_offline_user" eq "0" %n'), PHP_EOL;
         }
 
-        $dtOlder = (new \DateTime('now'))->modify('-' . $minutes . ' minutes')->format('Y-m-d H:i:s');
+        if ($onlineMinutes) {
+            $onlineDtOlder = (new \DateTime('now'))->modify('-' . $onlineMinutes . ' minutes')->format('Y-m-d H:i:s');
+            $inactiveChatsWithOnlineUsers = ClientChat::find()
+                ->innerJoinWith('lastMessage', false)
+                ->leftJoin(UserOnline::tableName(), 'uo_user_id = cch_owner_user_id')
+                ->byStatus(ClientChat::STATUS_IN_PROGRESS)
+                ->andWhere(['<=', 'cclm_dt', $onlineDtOlder])
+                ->andWhere(['cclm_type_id' => ClientChatLastMessage::TYPE_CLIENT])
+                ->andWhere(['IS NOT', 'cch_owner_user_id', null])
+                ->andWhere(['IS NOT', 'uo_user_id', null])
+                ->orderBy(['cch_id' => SORT_ASC])
+                ->all();
 
-        $inactiveChats = ClientChat::find()
-            ->innerJoinWith('lastMessage', false)
-            ->byStatus(ClientChat::STATUS_IN_PROGRESS)
-            ->andWhere(['<=', 'cclm_dt', $dtOlder])
-            ->andWhere(['cclm_type_id' => ClientChatLastMessage::TYPE_CLIENT])
-            ->orderBy(['cch_id' => SORT_ASC])
-            ->all();
-
-        foreach ($inactiveChats as $clientChat) {
-            try {
-                /** @var ClientChat $clientChat */
-                $clientChat->idle(null, ClientChatStatusLog::ACTION_AUTO_IDLE);
-                $this->clientChatRepository->save($clientChat);
-                $this->clientChatService->sendRequestToUsers($clientChat);
-                $channels[$clientChat->cch_channel_id] = $clientChat->cch_channel_id;
-                $processed++;
-            } catch (\Throwable $throwable) {
-                Yii::error(
-                    AppHelper::throwableFormatter($throwable),
-                    'ClientChatController:actionIdle:throwable'
-                );
-                echo Console::renderColoredString('%r --- Error : ' . $throwable->getMessage() . ' %n'), PHP_EOL;
-                $failed++;
-            }
+            [$onlineChannels, $onlineProcessed, $onlineFailed] = $this->transferChatToIdle($inactiveChatsWithOnlineUsers);
         }
+
+        if ($offlineMinutes) {
+            $offlineDtOlder = (new \DateTime('now'))->modify('-' . $offlineMinutes . ' minutes')->format('Y-m-d H:i:s');
+            $inactiveChatsWithOfflineUsers = ClientChat::find()
+                ->innerJoinWith('lastMessage', false)
+                ->leftJoin(UserOnline::tableName(), 'uo_user_id = cch_owner_user_id')
+                ->byStatus(ClientChat::STATUS_IN_PROGRESS)
+                ->andWhere(['<=', 'cclm_dt', $offlineDtOlder])
+                ->andWhere(['cclm_type_id' => ClientChatLastMessage::TYPE_CLIENT])
+                ->andWhere(['IS NOT', 'cch_owner_user_id', null])
+                ->andWhere(['IS', 'uo_user_id', null])
+                ->orderBy(['cch_id' => SORT_ASC])
+                ->all();
+
+            [$offlineChannels, $offlineProcessed, $offlineFailed] = $this->transferChatToIdle($inactiveChatsWithOfflineUsers);
+        }
+
+        $channels = array_unique(array_merge($onlineChannels, $offlineChannels));
 
         if ($channels) {
-            foreach ($channels as $key => $channelId) {
+            foreach ($channels as $channelId) {
                 Notifications::pub(
                     [ClientChatChannel::getPubSubKey($channelId)],
                     'reloadClientChatList'
@@ -354,8 +367,9 @@ class ClientChatController extends Controller
 
         $timeEnd = microtime(true);
         $time = number_format(round($timeEnd - $timeStart, 2), 2);
-        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
-            ' s] %g Processed: %w[' . $processed . '] %g Failed: %w[' . $failed . '] %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %g') . PHP_EOL;
+        echo Console::renderColoredString('%g --- Processed(Online): %w[' . $onlineProcessed . '] %g Failed(Online): %w[' . $onlineFailed . '] %n %g') . PHP_EOL;
+        echo Console::renderColoredString('%g --- Processed(Offline): %w[' . $offlineProcessed . '] %g Failed(Offline): %w[' . $offlineFailed . '] %n %g') . PHP_EOL;
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
@@ -366,6 +380,33 @@ class ClientChatController extends Controller
 //            'Execute Time' => $time . ' sec',
 //            'End Time' => date('Y-m-d H:i:s'),
 //        ]), 'info\ClientChatController:actionIdle:result');
+    }
+
+    /**
+     * @param ClientChat[] $inactiveChats
+     */
+    private function transferChatToIdle(array $inactiveChats): array
+    {
+        $channels = [];
+        $processed = 0;
+        $failed = 0;
+        foreach ($inactiveChats as $clientChat) {
+            try {
+                $clientChat->idle(null, ClientChatStatusLog::ACTION_AUTO_IDLE);
+                $this->clientChatRepository->save($clientChat);
+                $this->clientChatService->sendRequestToUsers($clientChat);
+                $channels[] = $clientChat->cch_channel_id;
+                $processed++;
+            } catch (\Throwable $throwable) {
+                Yii::error(
+                    AppHelper::throwableFormatter($throwable),
+                    'ClientChatController:actionIdle:throwable'
+                );
+                echo Console::renderColoredString('%r --- Error : ' . $throwable->getMessage() . ' %n'), PHP_EOL;
+                $failed++;
+            }
+        }
+        return [$channels, $processed, $failed];
     }
 
     public function actionHoldToProgress(): void

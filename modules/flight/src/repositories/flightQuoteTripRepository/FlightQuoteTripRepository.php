@@ -5,13 +5,12 @@ namespace modules\flight\src\repositories\flightQuoteTripRepository;
 use modules\flight\models\FlightQuoteTrip;
 use modules\flight\src\exceptions\FlightCodeException;
 use sales\repositories\NotFoundException;
-use sales\repositories\Repository;
 
 /**
  * Class FlightQuoteTripRepository
  * @package modules\flight\src\repositories\flightQuoteTripRepository
  */
-class FlightQuoteTripRepository extends Repository
+class FlightQuoteTripRepository
 {
     public function find(int $id): FlightQuoteTrip
     {

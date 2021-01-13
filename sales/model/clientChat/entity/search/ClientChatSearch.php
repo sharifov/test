@@ -395,7 +395,7 @@ class ClientChatSearch extends ClientChat
     public function getListOfChatsIds(Employee $user, array $channelsIds, FilterForm $filter): array
     {
         $query = $this->listOfChatsQuery($filter, $user, $channelsIds);
-        $query->select('client_chat.cch_id');
+        $query->select(['client_chat.cch_id', 'last_message.cclm_dt as last_message_date']);
         return ArrayHelper::map($query->asArray()->all(), 'cch_id', 'cch_id');
     }
 
@@ -411,7 +411,6 @@ class ClientChatSearch extends ClientChat
             'ccu_count',
             'ccu_updated_dt',
             'owner_username' => 'owner.username',
-            'last_message',
             'last_message.cclm_message as last_message',
             'last_message.cclm_type_id as last_message_type_id',
             'last_message.cclm_dt as last_message_date',

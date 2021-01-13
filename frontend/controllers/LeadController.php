@@ -54,6 +54,7 @@ use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChat\permissions\ClientChatActionPermission;
 use sales\model\department\department\DefaultPhoneType;
 use sales\model\lead\useCases\lead\create\LeadCreateByChatForm;
 use sales\model\lead\useCases\lead\create\LeadManageForm;
@@ -107,6 +108,7 @@ use common\models\local\LeadLogMessage;
  * @property LeadImportService $leadImportService
  * @property QuoteRepository $quoteRepository
  * @property TransactionManager $transaction
+ * @property ClientChatActionPermission $chatActionPermission
  */
 class LeadController extends FController
 {
@@ -119,6 +121,7 @@ class LeadController extends FController
     private $leadImportService;
     private $quoteRepository;
     private $transaction;
+    private $chatActionPermission;
 
     public function __construct(
         $id,
@@ -132,6 +135,7 @@ class LeadController extends FController
         LeadImportService $leadImportService,
         QuoteRepository $quoteRepository,
         TransactionManager $transaction,
+        ClientChatActionPermission $chatActionPermission,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -144,6 +148,7 @@ class LeadController extends FController
         $this->leadImportService = $leadImportService;
         $this->quoteRepository = $quoteRepository;
         $this->transaction = $transaction;
+        $this->chatActionPermission = $chatActionPermission;
     }
 
     public function behaviors(): array
@@ -153,6 +158,7 @@ class LeadController extends FController
                 'allowActions' => [
                     'view',
                     'take',
+                    'create-by-chat',
                 ],
             ],
         ];
@@ -2058,7 +2064,7 @@ class LeadController extends FController
     public function actionCreateByChat()
     {
         if (!(Yii::$app->request->isAjax || Yii::$app->request->isPjax)) {
-            throw new NotFoundHttpException('Page not exist');
+            throw new BadRequestHttpException('Bad request.');
         }
 
         $chatId = (int)Yii::$app->request->get('chat_id');
@@ -2068,12 +2074,8 @@ class LeadController extends FController
             throw new NotFoundHttpException('Client chat not found');
         }
 
-        if (!Auth::can('client-chat/manage', ['chat' => $chat])) {
-            throw new ForbiddenHttpException('You do not have access to perform this action', 403);
-        }
-
-        if ($chat->isClosed()) {
-            return 'Client Chat is closed';
+        if (!$this->chatActionPermission->canCreateLead($chat)) {
+            throw new ForbiddenHttpException('Access denied.');
         }
 
         if (!$chat->cchClient) {
