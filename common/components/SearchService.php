@@ -189,9 +189,7 @@ class SearchService
             );
         }
 
-
-
-        return $result; //json_decode((string)$result, true, 512, JSON_THROW_ON_ERROR);
+        return $result;
     }
 
     /**
