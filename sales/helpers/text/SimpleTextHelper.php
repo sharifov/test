@@ -13,7 +13,8 @@ class SimpleTextHelper
      */
     public static function clean(string $text): string
     {
-        $value = preg_replace('/[^\w\s]/ui', '', $text);
+        $value = strip_tags($text);
+        $value = preg_replace('/[^\w\s]/ui', '', $value);
         $value = preg_replace('|[\s]+|s', ' ', $value);
         return (string) $value;
     }
