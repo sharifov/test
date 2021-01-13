@@ -127,6 +127,9 @@ $this->registerJs($js);
     <?php endif;?>
 
     <?php
+
+    $showFilter = $isAgent ? false : true;
+
     $gridColumns = [
         [
             'class' => '\kartik\grid\CheckboxColumn',
@@ -155,7 +158,8 @@ $this->registerJs($js);
             ],
             'contentOptions' => [
                 'class' => 'text-center'
-            ]
+            ],
+            'filter' => $showFilter,
         ],
         [
             'attribute' => 'uid',
@@ -164,15 +168,24 @@ $this->registerJs($js);
             ],
             'contentOptions' => [
                 'class' => 'text-center'
-            ]
+            ],
+            'filter' => $showFilter,
         ],
         [
             'class' => \common\components\grid\project\ProjectColumn::class,
             'attribute' => 'project_id',
             'relation' => 'project',
-            'onlyUserProjects' => true
+            'onlyUserProjects' => true,
+            'filter' => $showFilter,
         ],
-        'client_id:client',
+        [
+            'attribute' => 'client_id',
+            'value' => static function (Lead $model) {
+                return Yii::$app->formatter->asClient($model->client_id);
+            },
+            'format' => 'raw',
+            'filter' => $showFilter,
+        ],
         [
             //'header' => 'Client / Emails / Phones',
             'header' => 'Client',
@@ -204,7 +217,7 @@ $this->registerJs($js);
             },
             'options' => [
                 'style' => 'width:180px'
-            ]
+            ],
         ],
         [
             'attribute' => 'status',
@@ -219,7 +232,7 @@ $this->registerJs($js);
                 return $statusValue;
             },
             'format' => 'raw',
-            'filter' => Lead::STATUS_LIST,
+            'filter' => $showFilter ? Lead::STATUS_LIST : false,
             'options' => [
                 'style' => 'width:100px'
             ],
@@ -282,7 +295,7 @@ $this->registerJs($js);
             'value' => static function (Lead $model) {
                 return $model->getCabinClassName();
             },
-            'filter' => Lead::CABIN_LIST
+            'filter' => $showFilter ? Lead::CABIN_LIST : false,
         ],
         [
             'label' => 'Pax',
@@ -295,7 +308,6 @@ $this->registerJs($js);
                 'class' => 'text-center'
             ]
         ],
-
         [
             'label' => 'Communication',
             'value' => static function (Lead $model) {
@@ -502,7 +514,8 @@ $this->registerJs($js);
     echo GridView::widget([
         'id' => $gridId,
         'dataProvider' => $dataProvider,
-        'filterModel' => $isAgent ? false : $searchModel,
+        //'filterModel' => $isAgent ? false : $searchModel,
+        'filterModel' => $searchModel,
 
         'columns' => $gridColumns,
         'toolbar' => [
