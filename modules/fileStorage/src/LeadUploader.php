@@ -63,16 +63,21 @@ class LeadUploader
             $stream = fopen($file->tempName, 'r+');
             $this->fileSystem->writeStream($fileStorage->fs_path, $stream);
             fclose($stream);
-            $this->eventDispatcher->dispatch(new FileCreatedByLeadEvent($leadId, $fileStorage->fs_name));
+            $this->eventDispatcher->dispatch(new FileCreatedByLeadEvent(
+                $leadId,
+                $fileStorage->fs_name,
+                $fileStorage->fs_title,
+                $fileStorage->fs_path
+            ));
         } catch (FilesystemException | UnableToWriteFile $e) {
-            if (isset($stream) && $stream !== false) {
+            if (isset($stream) && $stream !== false && is_resource($stream)) {
                 fclose($stream);
             }
             $this->error('Upload FileStorage by Lead error.', $e->getMessage(), $leadId, $clientId, $projectKey);
             $this->removeFile($fileStorage, $fileClient, $fileLead, $projectKey);
             throw new \DomainException('Server error. Please try again.');
         } catch (\Throwable $e) {
-            if (isset($stream) && $stream !== false) {
+            if (isset($stream) && $stream !== false && is_resource($stream)) {
                 fclose($stream);
             }
             $this->error('Upload FileStorage by Lead error.', $e->getMessage(), $leadId, $clientId, $projectKey);

@@ -7,6 +7,11 @@ namespace modules\fileStorage\src\entity\fileLead;
 */
 class Scopes extends \yii\db\ActiveQuery
 {
+    public function byLead(int $leadId): self
+    {
+        return $this->andWhere(['fld_lead_id' => $leadId]);
+    }
+
     /**
     * @return FileLead[]|array
     */

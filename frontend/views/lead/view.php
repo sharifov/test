@@ -30,6 +30,7 @@ use frontend\models\CommunicationForm;
 use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
+use modules\fileStorage\src\widgets\FileStorageListWidget;
 use modules\fileStorage\src\widgets\FileStorageUploadWidget;
 use sales\auth\Auth;
 use yii\bootstrap4\Modal;
@@ -216,7 +217,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
 
             <?php //php \yii\helpers\VarDumper::dump(Yii::$app->user->identity->callExpertCountByShiftTime)?>
 
-            <?= FileStorageUploadWidget::byLead($lead->id) ?>
+            <?= FileStorageListWidget::byLead($lead->id) ?>
 
             <?php if (!$lead->client->isExcluded()) : ?>
                 <?php if (Auth::can('lead-view/call-expert/view', ['lead' => $lead])) : ?>

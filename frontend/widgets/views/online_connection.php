@@ -514,6 +514,12 @@ $js = <<<JS
                                 }
                              }
                         }
+                        
+                        if (obj.cmd === 'addFileToFileStorageList') {
+                            if (typeof addFileToFileStorageList === "function") {
+                                addFileToFileStorageList(obj);
+                            }
+                        }
                     }
                     // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
                 } catch (error) {
