@@ -1,19 +1,17 @@
 {
   "name": "sale",
   "version": "1.0.0",
-  "description": "Installation: ------------------- docker setup ------------ 1. sudo apt-get install \\     apt-transport-https \\     ca-certificates \\     curl \\     software-properties-common",
+  "description": "Installation",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "scss-watch": "node-sass --watch frontend/web/scss/*.scss -o frontend/web/css"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://antony.park@stash.travelinsides.com/scm/crm/sale.git"
-  },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@vue/cli": "^4.5.10",
+    "@vue/cli-service-global": "^4.5.10",
     "node-sass": "^4.14.1"
   },
   "devDependencies": {
