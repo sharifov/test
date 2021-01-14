@@ -32,8 +32,6 @@ use yii\widgets\ActiveForm;
 
     <?php // echo $form->field($model, 'last_update') ?>
 
-    <?php // echo $form->field($model, 'custom_data') ?>
-
     <div class="form-group">
         <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
         <?= Html::resetButton('Reset', ['class' => 'btn btn-default']) ?>

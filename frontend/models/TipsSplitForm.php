@@ -70,7 +70,7 @@ class TipsSplitForm extends Model
         //var_dump($attribute);die;
         $employee = $this->getLead()->employee;
         $profitSplit = $this->getTipsSplit();
-        if (!empty($profitSplit)) {
+        if ($employee && !empty($profitSplit)) {
             foreach ($profitSplit as $entry) {
                 if (!empty($entry->ts_user_id) && $employee->id == $entry->ts_user_id) {
                     $this->addError('mainAgent', \Yii::t('user', $employee->username . ' already is main agent'));

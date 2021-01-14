@@ -42,7 +42,6 @@ class MetricsController extends Controller
                     Yii::warning(['message' => $message, 'username' => $username, 'endpoint' => $this->action->uniqueId, 'RemoteIP' => Yii::$app->request->getRemoteIP(),
                         'UserIP' => Yii::$app->request->getUserIP()], 'API:MetricsController:HttpBasicAuth');
                     throw new NotAcceptableHttpException($message, 10);
-                    //return null;
                 }
                 return $user;
             };
@@ -78,5 +77,17 @@ class MetricsController extends Controller
         }
 
         return $response;
+    }
+
+    public function actionFlush(): string
+    {
+        try {
+            $adapter = Yii::createObject(\Prometheus\Storage\Redis::class);
+            $adapter::setDefaultOptions(Yii::$app->prometheus->redisOptions);
+            $adapter->flushRedis();
+        } catch (\Throwable $throwable) {
+            \yii\helpers\VarDumper::dump($throwable->getMessage(), 10, true);
+        }
+        return PHP_EOL . 'Done';
     }
 }

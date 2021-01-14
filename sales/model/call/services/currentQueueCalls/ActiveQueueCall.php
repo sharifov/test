@@ -23,6 +23,7 @@ class ActiveQueueCall extends Model
     public $isMute;
     public $isCoach;
     public $isBarge;
+    public $isJoin;
     public $project;
     public $source;
     public $isEnded = false;
@@ -36,6 +37,7 @@ class ActiveQueueCall extends Model
     public $canCallInfo;
     public $isClient;
     public $clientId;
+    public $recordingDisabled;
 
     public function getData(): array
     {

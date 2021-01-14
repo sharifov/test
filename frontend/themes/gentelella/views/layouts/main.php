@@ -222,7 +222,6 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
 <?= $this->render('_modals') ?>
 <!-- /modals -->
 
-<?= frontend\widgets\CallBox::widget() ?>
 <?= frontend\widgets\WebPhone::widget() ?>
 
 <?php $this->endBody(); ?>

@@ -50,6 +50,7 @@ abstract class BaseApplication extends yii\base\Application
  * @property \common\components\TravelServices $travelServices TravelServices component
  * @property \common\components\ga\GaRequestService $gaRequestService GaRequestService component
  * @property \kivork\PrometheusClient\components\PrometheusClient $prometheus Prometheus client component
+ * @property \sorokinmedia\centrifugo\Client $centrifugo Centrifugo client component
  *
  *
  *

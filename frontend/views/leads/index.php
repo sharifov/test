@@ -1,5 +1,6 @@
 <?php
 
+use common\components\grid\Select2Column;
 use frontend\widgets\multipleUpdate\button\MultipleUpdateButtonWidget;
 use kartik\select2\Select2;
 use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
@@ -126,6 +127,9 @@ $this->registerJs($js);
     <?php endif;?>
 
     <?php
+
+    $showFilter = $isAgent ? false : true;
+
     $gridColumns = [
         [
             'class' => '\kartik\grid\CheckboxColumn',
@@ -154,7 +158,8 @@ $this->registerJs($js);
             ],
             'contentOptions' => [
                 'class' => 'text-center'
-            ]
+            ],
+            'filter' => $showFilter,
         ],
         [
             'attribute' => 'uid',
@@ -163,15 +168,24 @@ $this->registerJs($js);
             ],
             'contentOptions' => [
                 'class' => 'text-center'
-            ]
+            ],
+            'filter' => $showFilter,
         ],
         [
             'class' => \common\components\grid\project\ProjectColumn::class,
             'attribute' => 'project_id',
             'relation' => 'project',
-            'onlyUserProjects' => true
+            'onlyUserProjects' => true,
+            'filter' => $showFilter,
         ],
-        'client_id:client',
+        [
+            'attribute' => 'client_id',
+            'value' => static function (Lead $model) {
+                return Yii::$app->formatter->asClient($model->client_id);
+            },
+            'format' => 'raw',
+            'filter' => $showFilter,
+        ],
         [
             //'header' => 'Client / Emails / Phones',
             'header' => 'Client',
@@ -203,7 +217,7 @@ $this->registerJs($js);
             },
             'options' => [
                 'style' => 'width:180px'
-            ]
+            ],
         ],
         [
             'attribute' => 'status',
@@ -218,13 +232,22 @@ $this->registerJs($js);
                 return $statusValue;
             },
             'format' => 'raw',
-            'filter' => Lead::STATUS_LIST,
+            'filter' => $showFilter ? Lead::STATUS_LIST : false,
             'options' => [
                 'style' => 'width:100px'
             ],
             'contentOptions' => [
                 'class' => 'text-center'
             ]
+        ],
+
+        [
+            'attribute' => 'l_status_dt',
+            'value' => static function (Lead $model) {
+                return $model->l_status_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->l_status_dt)) : '-';
+            },
+            'format' => 'raw',
+            'filter' => false
         ],
 
         [
@@ -272,7 +295,7 @@ $this->registerJs($js);
             'value' => static function (Lead $model) {
                 return $model->getCabinClassName();
             },
-            'filter' => Lead::CABIN_LIST
+            'filter' => $showFilter ? Lead::CABIN_LIST : false,
         ],
         [
             'label' => 'Pax',
@@ -285,7 +308,6 @@ $this->registerJs($js);
                 'class' => 'text-center'
             ]
         ],
-
         [
             'label' => 'Communication',
             'value' => static function (Lead $model) {
@@ -420,12 +442,17 @@ $this->registerJs($js);
             'visible' => $searchModel->show_fields && in_array('depart', $searchModel->show_fields, true),
         ],
         [
+            'class' => Select2Column::class,
             'attribute' => 'employee_id',
             'format' => 'raw',
             'value' => static function (Lead $model) {
                 return $model->employee ? '<i class="fa fa-user"></i> ' . Html::encode($model->employee->username) : '-';
             },
-            'filter' => $lists->getEmployees(true) ?: false
+            'data' => $lists->getEmployees(true) ?: [],
+            'filter' => $isAgent ? '' : true,
+            'id' => 'employee-filter',
+            'options' => ['width' => '200px'],
+            'pluginOptions' => ['allowClear' => true]
         ],
         [
             'attribute' => 'created',
@@ -487,7 +514,8 @@ $this->registerJs($js);
     echo GridView::widget([
         'id' => $gridId,
         'dataProvider' => $dataProvider,
-        'filterModel' => $isAgent ? false : $searchModel,
+        //'filterModel' => $isAgent ? false : $searchModel,
+        'filterModel' => $searchModel,
 
         'columns' => $gridColumns,
         'toolbar' => [

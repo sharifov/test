@@ -28,6 +28,7 @@ use yii\db\ActiveRecord;
  * @property string|null $cf_start_dt
  * @property string|null $cf_end_dt
  * @property int|null $cf_duration
+ * @property bool|null $cf_recording_disabled
  *
  * @property ConferenceRoom $cfCr
  * @property ConferenceParticipant[] $conferenceParticipants
@@ -35,6 +36,8 @@ use yii\db\ActiveRecord;
  */
 class Conference extends \yii\db\ActiveRecord
 {
+
+    public const COMPLETED = 'completed';
 
     public const EVENT_CONFERENCE_END = 'conference-end';
     public const EVENT_CONFERENCE_START = 'conference-start';
@@ -100,6 +103,9 @@ class Conference extends \yii\db\ActiveRecord
 //            [['cf_call_sid'], 'exist', 'skipOnError' => true, 'targetClass' => Call::class, 'targetAttribute' => ['cf_call_sid' => 'c_call_sid']],
 
             ['cf_duration', 'integer', 'max' => 32500],
+
+            ['cf_recording_disabled', 'default', 'value' => false],
+            ['cf_recording_disabled', 'boolean'],
         ];
     }
 
@@ -122,6 +128,7 @@ class Conference extends \yii\db\ActiveRecord
             'cf_end_dt' => 'End',
             'cf_call_sid' => 'Call Sid',
             'cf_duration' => 'Duration',
+            'cf_recording_disabled' => 'Recording disabled',
         ];
     }
 
@@ -238,5 +245,20 @@ class Conference extends \yii\db\ActiveRecord
     public function isCreator(int $userId): bool
     {
         return $this->cf_created_user_id === $userId;
+    }
+
+    public function recordingDisable(): void
+    {
+        $this->cf_recording_disabled = true;
+    }
+
+    public function recordingEnable(): void
+    {
+        $this->cf_recording_disabled = false;
+    }
+
+    public function isRecordingDisabled(): bool
+    {
+        return $this->cf_recording_disabled ? true : false;
     }
 }

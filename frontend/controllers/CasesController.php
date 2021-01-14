@@ -57,6 +57,7 @@ use sales\repositories\cases\CaseCategoryRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\cases\CasesSaleRepository;
 use sales\repositories\client\ClientEmailRepository;
+use sales\repositories\NotFoundException;
 use sales\repositories\quote\QuoteRepository;
 use sales\services\cases\CasesSaleService;
 use sales\services\cases\CasesCommunicationService;
@@ -302,7 +303,7 @@ class CasesController extends FController
         }
 
         $smsEnabled = true;
-        if ($model->project->getCustomData()->sms_enabled === false) {
+        if (!$model->project->getParams()->sms->isEnabled()) {
             $smsEnabled = false;
         }
 
@@ -671,14 +672,12 @@ class CasesController extends FController
         //VarDumper::dump($dataProvider->allModels); exit;
 
         $fromPhoneNumbers = [];
-        if (SettingHelper::isLeadCommunicationNewCallWidgetEnabled()) {
-            if (($department = $model->department) && $params = $department->getParams()) {
-                $phoneList = new AvailablePhoneList(Auth::id(), $model->cs_project_id, $department->dep_id, $params->defaultPhoneType);
-                foreach ($phoneList->getList() as $phoneItem) {
-                    $fromPhoneNumbers[$phoneItem['phone']] = $phoneItem['project']
-                        . ' ' . ((int)$phoneItem['type_id'] === AvailablePhoneList::GENERAL_ID ? Department::DEPARTMENT_LIST[(int)$phoneItem['department_id']] : AvailablePhoneList::PERSONAL)
-                        . ' (' . $phoneItem['phone'] . ')';
-                }
+        if (($department = $model->department) && $params = $department->getParams()) {
+            $phoneList = new AvailablePhoneList(Auth::id(), $model->cs_project_id, $department->dep_id, $params->defaultPhoneType);
+            foreach ($phoneList->getList() as $phoneItem) {
+                $fromPhoneNumbers[$phoneItem['phone']] = $phoneItem['project']
+                    . ' ' . ((int)$phoneItem['type_id'] === AvailablePhoneList::GENERAL_ID ? Department::DEPARTMENT_LIST[(int)$phoneItem['department_id']] : AvailablePhoneList::PERSONAL)
+                    . ' (' . $phoneItem['phone'] . ')';
             }
         }
 
@@ -813,7 +812,14 @@ class CasesController extends FController
     public function actionAddSale()
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        $out = ['error' => '', 'data' => [], 'locale' => '', 'marketing_country' => ''];
+        $out = [
+            'error' => '',
+            'data' => [],
+            'locale' => '',
+            'marketing_country' => '',
+            'updateCaseBookingId' => false,
+            'updateCaseBookingHtml' => ''
+        ];
 
         $gid = Yii::$app->request->post('gid');
         $hash = Yii::$app->request->post('h');
@@ -851,7 +857,18 @@ class CasesController extends FController
                     throw new \RuntimeException($cs->getErrorSummary(false)[0]);
                 }
 
-                $model->updateLastAction();
+                if (empty($model->cs_order_uid)) {
+                    $model->cs_order_uid = $cs->css_sale_book_id;
+                } else if ($model->cs_order_uid !== $cs->css_sale_book_id) {
+                    $out['updateCaseBookingId'] = true;
+                    $out['updateCaseBookingHtml'] = $this->renderPartial('sales/_sale_update_case_booking_id', [
+                        'caseBookingId' => $model->cs_order_uid,
+                        'saleBookingId' => $cs->css_sale_book_id,
+                        'caseId' => $model->cs_id,
+                        'saleId' => $cs->css_sale_id
+                    ]);
+                }
+                $this->casesRepository->save($model);
                 $this->saleTicketService->createSaleTicketBySaleData($cs, $saleData);
 
                 if ($client = $model->client) {
@@ -870,6 +887,38 @@ class CasesController extends FController
         }
 
         return $out;
+    }
+
+    public function actionUpdateBookingIdBySale()
+    {
+        $caseId = Yii::$app->request->post('caseId', 0);
+        $saleId = Yii::$app->request->post('saleId', 0);
+
+        $response = [
+            'error' => false,
+            'message' => '',
+            'newCaseBookingId' => ''
+        ];
+
+        try {
+            $case = $this->casesRepository->find((int)$caseId);
+            $sale = $this->casesSaleRepository->getSaleByPrimaryKeys($case->cs_id, (int) $saleId);
+
+            $case->cs_order_uid = $sale->css_sale_book_id;
+            $this->casesRepository->save($case);
+
+            $response['message'] = 'Booking Id(' . $case->cs_order_uid . ') of case successfully updated';
+            $response['newCaseBookingId'] = $case->cs_order_uid;
+        } catch (NotFoundException $e) {
+            $response['message'] = $e->getMessage();
+            $response['error'] = true;
+        } catch (\Throwable $e) {
+            $response['message'] = 'Internal error has occurred';
+            $response['error'] = true;
+            Yii::error(AppHelper::throwableFormatter($e), 'CasesController:actionUpdateBookingIdBySale:Throwable');
+        }
+
+        return $this->asJson($response);
     }
 
     /**
@@ -1198,7 +1247,7 @@ class CasesController extends FController
         if (!$project = $case->project) {
             return;
         }
-        if (!$customData = $project->getCustomData()) {
+        if (!$params = $project->getParams()) {
             return;
         }
 
@@ -1235,7 +1284,7 @@ class CasesController extends FController
     }
 
     private function sendFeedbackEmail(
-        CustomData $customData,
+        \sales\model\project\entity\params\Params $params,
         Cases $case,
         CasesChangeStatusForm $form,
         Employee $user,

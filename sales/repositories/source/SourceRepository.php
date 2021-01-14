@@ -59,17 +59,4 @@ class SourceRepository
         $this->eventDispatcher->dispatchAll($source->releaseEvents());
         return $source->id;
     }
-
-    /**
-     * @param Sources $source
-     * @throws \Throwable
-     * @throws \yii\db\StaleObjectException
-     */
-    public function remove(Sources $source): void
-    {
-        if (!$source->delete()) {
-            throw new \RuntimeException('Removing error');
-        }
-        $this->eventDispatcher->dispatchAll($source->releaseEvents());
-    }
 }

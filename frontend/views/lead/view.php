@@ -94,7 +94,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
                 'quotesProvider' => $quotesProvider,
                 'leadForm' => $leadForm,
                 'is_manager' => $is_manager,
-            ]) ?>N
+            ]) ?>
 
             <?php if ($lead->products) : ?>
                 <?= $this->render('offers/lead_offers', [
@@ -361,7 +361,7 @@ $jsCode = <<<JS
         $.post(url, function(data) {
             $('#modal-' + id).find('.modal-body').html(data);
         });
-       return false;
+       //return false;
     });
 
 $(document).on('click','#client-unsubscribe-button', function (e) {

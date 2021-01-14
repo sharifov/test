@@ -493,7 +493,7 @@ class LeadController extends FController
         }
 
         $smsEnabled = true;
-        if ($lead->project->getCustomData()->sms_enabled === false) {
+        if (!$lead->project->getParams()->sms->isEnabled()) {
             $smsEnabled = false;
         }
 
@@ -1191,16 +1191,15 @@ class LeadController extends FController
         $tmpl = 'view';
 
         $fromPhoneNumbers = [];
-        if (SettingHelper::isLeadCommunicationNewCallWidgetEnabled()) {
-            if (($department = $leadForm->getLead()->lDep) && $params = $department->getParams()) {
-                $phoneList = new AvailablePhoneList(Auth::id(), $leadForm->getLead()->project_id, $department->dep_id, $params->defaultPhoneType);
-                foreach ($phoneList->getList() as $phoneItem) {
-                    $fromPhoneNumbers[$phoneItem['phone']] = $phoneItem['project']
-                        . ' ' . ((int)$phoneItem['type_id'] === AvailablePhoneList::GENERAL_ID ? Department::DEPARTMENT_LIST[(int)$phoneItem['department_id']] : AvailablePhoneList::PERSONAL)
-                        . ' (' . $phoneItem['phone'] . ')';
-                }
+        if (($department = $leadForm->getLead()->lDep) && $params = $department->getParams()) {
+            $phoneList = new AvailablePhoneList(Auth::id(), $leadForm->getLead()->project_id, $department->dep_id, $params->defaultPhoneType);
+            foreach ($phoneList->getList() as $phoneItem) {
+                $fromPhoneNumbers[$phoneItem['phone']] = $phoneItem['project']
+                    . ' ' . ((int)$phoneItem['type_id'] === AvailablePhoneList::GENERAL_ID ? Department::DEPARTMENT_LIST[(int)$phoneItem['department_id']] : AvailablePhoneList::PERSONAL)
+                    . ' (' . $phoneItem['phone'] . ')';
             }
         }
+
 
         return $this->render($tmpl, [
             'leadForm' => $leadForm,

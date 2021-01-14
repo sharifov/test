@@ -79,6 +79,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'cl_ip',
             'cl_locale',
             'cl_marketing_country',
+            'cl_call_recording_disabled:booleanByLabel',
         ],
     ]) ?>
     </div>

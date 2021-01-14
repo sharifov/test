@@ -18,7 +18,6 @@ use common\models\UserConnection;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use common\models\UserProjectParams;
-use frontend\widgets\CallBox;
 use frontend\widgets\newWebPhone\call\socket\MissedCallMessage;
 use http\Exception\InvalidArgumentException;
 use sales\auth\Auth;
@@ -40,6 +39,7 @@ use sales\services\cleaner\form\DbCleanerParamsForm;
 use Yii;
 use common\models\Call;
 use common\models\search\CallSearch;
+use yii\base\InvalidConfigException;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
@@ -95,7 +95,7 @@ class CallController extends FController
             ],
             'access' => [
                 'allowActions' => [
-                    'get-users-for-call',
+                    'get-users-for-call', 'list-api', 'static-data-api'
                 ],
             ],
         ];
@@ -178,7 +178,6 @@ class CallController extends FController
      */
     public function actionView2($id)
     {
-
         $model = $this->findModel($id);
         $this->checkAccess($model);
 
@@ -404,108 +403,6 @@ class CallController extends FController
         ]);
     }
 
-    //todo remove
-//    public function actionUserMapOld()
-//    {
-//
-//        $this->layout = '@frontend/themes/gentelella_v2/views/layouts/main_tv';
-//
-//        /** @var Employee $user */
-//        $user = Yii::$app->user->identity;
-//
-//
-//
-//        $searchModel = new CallSearch();
-//        $searchModel2 = new UserConnectionSearch();
-//        $params = Yii::$app->request->queryParams;
-//
-//        //if (Yii::$app->user->identity->canRole('supervision')) {
-//            //$params['CallSearch']['supervision_id'] = $userId;
-//            //$params['CallSearch']['status'] = Employee::STATUS_ACTIVE;
-//        //}
-//
-//        $accessDepartmentModels = $user->udDeps;
-//
-//        if($accessDepartmentModels) {
-//            $accessDepartments = ArrayHelper::map($accessDepartmentModels, 'dep_id', 'dep_id');
-//        } else {
-//            $accessDepartments = [];
-//        }
-//
-//        $isSuper = ($user->isSupervision() || $user->isExSuper() || $user->isSupSuper());
-//
-//        if ($isSuper && !in_array(Department::DEPARTMENT_SUPPORT, $accessDepartments, true)) {
-//            $userGroupsModel = $user->ugsGroups;
-//
-//            if ($userGroupsModel) {
-//                $userGroups = ArrayHelper::map($userGroupsModel, 'ug_id', 'ug_id');
-//            } else {
-//                $userGroups = [];
-//            }
-//
-//            $params['UserConnectionSearch']['ug_ids'] = $userGroups;
-//            $params['CallSearch']['ug_ids'] = $userGroups;
-//        }
-//
-//        //VarDumper::dump($accessDepartments, 10, true); exit;
-//
-//
-//        if (!$accessDepartments || in_array(Department::DEPARTMENT_SALES, $accessDepartments, true)) {
-//            $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_SALES;
-//            $dataProviderOnlineDep1 = $searchModel2->searchUserCallMap($params);
-//        } else {
-//            $dataProviderOnlineDep1 = null;
-//        }
-//
-//        if (!$accessDepartments || in_array(Department::DEPARTMENT_EXCHANGE, $accessDepartments, true)) {
-//            $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_EXCHANGE;
-//            $dataProviderOnlineDep2 = $searchModel2->searchUserCallMap($params);
-//        } else {
-//            $dataProviderOnlineDep2 = null;
-//        }
-//
-//        if (!$accessDepartments || in_array(Department::DEPARTMENT_SUPPORT, $accessDepartments, true)) {
-//            $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_SUPPORT;
-//            $dataProviderOnlineDep3 = $searchModel2->searchUserCallMap($params);
-//        } else {
-//            $dataProviderOnlineDep3 = null;
-//        }
-//
-//        if (!$accessDepartments) {
-//            $params['UserConnectionSearch']['dep_id'] = 0;
-//            $dataProviderOnline = $searchModel2->searchUserCallMap($params);
-//        } else {
-//            $dataProviderOnline = null;
-//        }
-//
-//        $params['CallSearch']['dep_ids'] = $accessDepartments;
-//        $params['CallSearch']['status_ids'] = [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING, Call::STATUS_QUEUE, Call::STATUS_IVR, Call::STATUS_DELAY];
-//        $dataProvider3 = $searchModel->searchUserCallMap($params);
-//
-//        $params['CallSearch']['status_ids'] = [Call::STATUS_COMPLETED, Call::STATUS_BUSY, Call::STATUS_FAILED, Call::STATUS_NO_ANSWER, Call::STATUS_CANCELED];
-//        $params['CallSearch']['limit'] = 10;
-//        $dataProvider2 = $searchModel->searchUserCallMapHistory($params);
-//
-//        //$searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
-//        //$searchModel->datetime_end = date('Y-m-d');
-//
-//        //$searchModel->date_range = $searchModel->datetime_start.' - '. $searchModel->datetime_end;
-//
-//        //var_dump($dataProvider3->getModels()); die();
-//
-//        return $this->render('user-map/user-map', [
-//            'dataProviderOnlineDep1' => $dataProviderOnlineDep1,
-//            'dataProviderOnlineDep2' => $dataProviderOnlineDep2,
-//            'dataProviderOnlineDep3' => $dataProviderOnlineDep3,
-//            'dataProviderOnline' => $dataProviderOnline,
-//
-//
-//            'dataProvider2' => $dataProvider2,
-//            'dataProvider3' => $dataProvider3,
-//            //'searchModel' => $searchModel,
-//        ]);
-//
-//    }
 
     public function actionRealtimeUserMap()
     {
@@ -598,9 +495,83 @@ class CallController extends FController
         }
     }
 
+    /**
+     * @return string
+     * @throws InvalidConfigException
+     */
+    public function actionRealtimeMap(): string
+    {
+        $centrifugoEnabled = Yii::$app->params['centrifugo']['enabled'] ?? false;
+        $centrifugoWsConnectionUrl = Yii::$app->params['centrifugo']['wsConnectionUrl'] ?? '';
+
+        if (!$centrifugoEnabled) {
+            throw new InvalidConfigException('The "centrifugo" is not enabled.');
+        }
+
+        if (empty($centrifugoWsConnectionUrl)) {
+            throw new InvalidConfigException('The "wsConnectionUrl" property must be set in config params.');
+        }
+
+        $this->layout = '@frontend/themes/gentelella_v2/views/layouts/main_tv2';
+        $cfChannelName = Call::CHANNEL_REALTIME_MAP; // . '#' . Auth::id();
+
+        return $this->render('realtime-map', [
+            //'cfChannels' => [$cfChannelName],
+            'cfChannelName' => $cfChannelName,
+            'cfConnectionUrl' => $centrifugoWsConnectionUrl,
+            'cfToken' => Yii::$app->centrifugo->generateConnectionToken(Auth::id())
+        ]);
+    }
+
+    /**
+     * @return array
+     * @throws \Exception
+     */
+    public function actionListApi(): array
+    {
+        $response = [];
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $callList = [];
+        $calls = Call::find()->where(['c_status_id' => [Call::STATUS_IVR, Call::STATUS_QUEUE, Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING, Call::STATUS_IVR, Call::STATUS_DELAY]])
+            //->andWhere(['c_id' => 1097179])
+            ->orderBy(['c_id' => SORT_DESC])
+            ->limit(1000)->all();
+
+        if ($calls) {
+            foreach ($calls as $call) {
+                $callList[] = $call->getApiData();
+            }
+        }
+        $response['callList'] = $callList;
+        return $response;
+    }
+
+    /**
+     * @return array
+     */
+    public function actionStaticDataApi(): array
+    {
+        $response = [];
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $response['projectList'] = Project::getList();
+        $response['depList'] = Department::DEPARTMENT_LIST;
+        $response['userList'] = Employee::getList();
+
+        $response['callStatusList'] = Call::STATUS_LIST;
+        $response['callSourceList'] = Call::SHORT_SOURCE_LIST;
+        $response['callTypeList'] = Call::TYPE_LIST;
+        $response['callUserAccessStatusTypeList'] = CallUserAccess::STATUS_TYPE_LIST;
+
+        return $response;
+    }
+
+
+
+
     public function actionUserMap2()
     {
-
         $this->layout = '@frontend/themes/gentelella_v2/views/layouts/main_tv';
 
         /** @var Employee $user */
@@ -929,64 +900,6 @@ class CallController extends FController
             'projectList'       => $projectList,
         ]);
     }
-
-    /**
-     * @return string
-     */
-    public function actionCallBox(): string
-    {
-        $id = Yii::$app->request->get('id');
-        $status = Yii::$app->request->get('status');
-
-        $keyCache = 'cal-box-request-' . $id . '-' . $status;
-
-        //Yii::$app->cache->delete($keyCache);
-
-        $result = Yii::$app->cache->get($keyCache);
-
-        if ($result === false) {
-            $box = CallBox::getInstance();
-            $result = $box->run();
-            if ($result) {
-                Yii::$app->cache->set($keyCache, $result, 30);
-            }
-        }
-
-        //VarDumper::dump($data); exit;
-
-        return $result;
-    }
-
-    /**
-     * @return string
-     */
-    public function actionIncomingCallWidget(): string
-    {
-        //$id = Yii::$app->request->get('id');
-        // $status = Yii::$app->request->get('status');
-
-        // $keyCache = 'cal-box-request-' . $id . '-' . $status;
-
-        //Yii::$app->cache->delete($keyCache);
-
-        //$result = Yii::$app->cache->get($keyCache);
-
-        //if($result === false) {
-
-//            $box = IncomingCallWidget::getInstance();
-//            $result = $box->run();
-
-            /*if($result) {
-                Yii::$app->cache->set($keyCache, $result, 30);
-            }*/
-        //}
-
-        //VarDumper::dump($data); exit;
-
-//        return $result;
-        return '';
-    }
-
 
     /**
      * @return string

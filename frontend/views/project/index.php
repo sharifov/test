@@ -16,7 +16,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
     <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <p>
         <?= Html::a('<i class="fa fa-plus"></i> Create Project', ['create'], ['class' => 'btn btn-success']) ?>
@@ -34,7 +34,6 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'tableOptions' => ['class' => 'table table-bordered table-hover'],
         'rowOptions' => static function (\common\models\Project $model) {
-
             if ($model->closed) {
                 return [
                     'class' => 'danger'
@@ -109,6 +108,13 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             [
+                'attribute' => 'p_update_user_id',
+                'value' => static function (\common\models\Project $model) {
+                    return $model->pUpdateUser ? $model->pUpdateUser->username : ' - ';
+                },
+            ],
+
+            [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'last_update'
             ],
@@ -132,8 +138,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ]),
             ],*/
-
-            //'custom_data:ntext',
 
 
         ],

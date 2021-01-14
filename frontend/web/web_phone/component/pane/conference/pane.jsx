@@ -69,6 +69,8 @@ class ConferencePane extends React.Component {
 
                     <SoundIndication/>
 
+                    <RecordIndicator call={call} canRecordingDisabled={this.props.controls.canRecordingDisabled}/>
+
                 </div>
 
                 <ActivePaneControls call={call} controls={this.props.controls}/>

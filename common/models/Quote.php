@@ -8,12 +8,14 @@ use common\models\local\FlightSegment;
 use common\models\local\LeadLogMessage;
 use common\models\query\QuoteQuery;
 use frontend\helpers\JsonHelper;
+use sales\behaviors\metric\MetricQuoteCounterBehavior;
 use sales\entities\EventTrait;
 use sales\events\quote\QuoteSendEvent;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\services\parsingDump\lib\ParsingDump;
 use sales\services\parsingDump\ReservationService;
+use sales\traits\MetricObjectCounterTrait;
 use Yii;
 use yii\base\ErrorException;
 use yii\base\InvalidArgumentException;
@@ -63,6 +65,7 @@ use yii\helpers\VarDumper;
 class Quote extends \yii\db\ActiveRecord
 {
     use EventTrait;
+    use MetricObjectCounterTrait;
 
     public const SCENARIO_API_UPDATE = 'api_update';
 
@@ -197,11 +200,11 @@ class Quote extends \yii\db\ActiveRecord
     {
         return [
             ['main_airline_code', 'required', 'on' => self::SCENARIO_DEFAULT],
-            [['uid', 'reservation_dump'], 'required'],
+            [['uid', 'reservation_dump', 'gds'], 'required'],
             [['lead_id', 'status' ], 'integer'],
-            [[ 'check_payment'], 'boolean'],
-            [['created', 'updated', 'created_by_seller', 'employee_name', 'employee_id', 'gds', 'last_ticket_date', 'service_fee_percent'], 'safe'],
-            [['uid', 'record_locator', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'fare_type', 'gds_offer_id'], 'string', 'max' => 255],
+            [['check_payment'], 'boolean'],
+            [['created', 'updated', 'created_by_seller', 'employee_name', 'employee_id', 'last_ticket_date', 'service_fee_percent'], 'safe'],
+            [['uid', 'record_locator', 'cabin', 'trip_type', 'main_airline_code', 'fare_type', 'gds_offer_id'], 'string', 'max' => 255],
 
             [['pricing_info', 'tickets', 'origin_search_data', 'reservation_dump'], 'string'],
             [['status'], 'checkStatus'],
@@ -213,6 +216,8 @@ class Quote extends \yii\db\ActiveRecord
             ['type_id', 'in', 'range' => array_keys(self::TYPE_LIST)],
 
             ['pcc', 'string', 'max' => 50],
+
+            ['gds', 'string', 'max' => 1],
         ];
     }
 
@@ -267,6 +272,9 @@ class Quote extends \yii\db\ActiveRecord
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
+            'metric' => [
+                'class' => MetricQuoteCounterBehavior::class,
+            ],
         ];
     }
 
@@ -288,6 +296,7 @@ class Quote extends \yii\db\ActiveRecord
         $quote->lead_id = $leadId;
         $quote->uid = uniqid();
         $quote->status = self::STATUS_CREATED;
+        $quote->setMetricLabels(['action' => 'created', 'type_creation' => 'clone_by_uid']);
         return $quote;
     }
 

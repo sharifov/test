@@ -17,10 +17,12 @@ var PhoneWidgetPaneActive = function () {
 
     let btnHoldShow = true;
     let btnTransferShow = true;
+    let canRecordingDisabled = false;
 
-    function setup(btnHoldShowInit, btnTransferShowInit) {
+    function setup(btnHoldShowInit, btnTransferShowInit, canRecordingDisabledInit) {
         btnHoldShow = btnHoldShowInit;
         btnTransferShow = btnTransferShowInit;
+        canRecordingDisabled = canRecordingDisabledInit;
     }
 
     function initControls() {
@@ -64,6 +66,7 @@ var PhoneWidgetPaneActive = function () {
             },
             addPerson: {active: false},
             dialpad: {active: true},
+            canRecordingDisabled: canRecordingDisabled
         };
         if (call.data.typeId === 3) {
             controls.hold.active = false;

@@ -62,4 +62,12 @@ return [
         'enabled' => '{{ common.config.params.centrifugo.enabled:bool }}',
         'wsConnectionUrl' => '{{ common.config.params.centrifugo.wsConnectionUrl:str }}',
     ],
+
+    'clientChat' => [
+        'projectConfig' => [
+            'params' => [
+                'endpoint' => 'https://livechat.travelinsides.com'
+            ]
+        ]
+    ]
 ];

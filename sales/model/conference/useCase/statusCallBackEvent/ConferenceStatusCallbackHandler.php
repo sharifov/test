@@ -2,6 +2,7 @@
 
 namespace sales\model\conference\useCase\statusCallBackEvent;
 
+use common\components\jobs\UpdateConferenceParticipantCallIdJob;
 use common\models\Call;
 use common\models\Conference;
 use common\models\ConferenceParticipant;
@@ -299,6 +300,9 @@ class ConferenceStatusCallbackHandler
         $participant->cp_identity = $form->participant_identity;
         if ($call = $this->findAndUpdateCall($form->CallSid, $conference)) {
             $participant->cp_call_id = $call->c_id;
+        } else {
+            $job = new UpdateConferenceParticipantCallIdJob($participant->cp_call_sid, $participant->cp_cf_sid);
+            \Yii::$app->queue_job->delay(5)->push($job);
         }
         return $participant;
     }

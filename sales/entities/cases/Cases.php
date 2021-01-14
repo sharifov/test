@@ -11,6 +11,8 @@ use common\models\DepartmentPhoneProject;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Project;
+use sales\behaviors\metric\MetricCasesCounterBehavior;
+use sales\behaviors\metric\MetricLeadCounterBehavior;
 use sales\entities\cases\events\CasesAssignLeadEvent;
 use sales\entities\cases\events\CasesCreatedEvent;
 use sales\entities\cases\events\CasesFollowUpStatusEvent;
@@ -579,6 +581,15 @@ class Cases extends ActiveRecord implements Objectable
         ];
     }
 
+    public function behaviors(): array
+    {
+        return [
+            'metric' => [
+                'class' => MetricCasesCounterBehavior::class,
+            ],
+        ];
+    }
+
     /**
      * @return string
      */
@@ -644,5 +655,10 @@ class Cases extends ActiveRecord implements Objectable
     public function getDepartmentId(): ?int
     {
         return $this->cs_dep_id;
+    }
+
+    public function getTypeCreateName(): string
+    {
+        return CasesSourceType::getName($this->cs_source_type_id);
     }
 }

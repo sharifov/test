@@ -8,6 +8,7 @@ use common\components\jobs\SmsPriceJob;
 use common\models\query\SmsQuery;
 use DateTime;
 use modules\twilio\components\TwilioCommunicationService;
+use sales\behaviors\metric\MetricSmsCounterBehavior;
 use sales\entities\cases\Cases;
 use sales\entities\EventTrait;
 use sales\events\sms\IncomingSmsCreatedByLeadTypeEvent;
@@ -316,11 +317,9 @@ class Sms extends \yii\db\ActiveRecord
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
-            /*'user' => [
-                'class' => BlameableBehavior::class,
-                'createdByAttribute' => 's_created_user_id',
-                'updatedByAttribute' => 's_updated_user_id',
-            ],*/
+            'metric' => [
+                'class' => MetricSmsCounterBehavior::class,
+            ],
         ];
     }
 

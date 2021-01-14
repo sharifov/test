@@ -75,14 +75,6 @@ use yii\web\JqueryAsset;
 use yii\widgets\ActiveFormAsset;
 use yii\widgets\MaskedInputAsset;
 
-$params = array_merge(
-    require __DIR__ . '/../../common/config/params.php',
-    require __DIR__ . '/../../common/config/params-local.php',
-    require __DIR__ . '/params.php',
-    require __DIR__ . '/params-local.php'
-);
-$appVersion = $params['release']['version'] ?? '';
-
 Yii::setAlias('@webroot', __DIR__ . '/../../frontend/web');
 Yii::setAlias('@web', '/');
 
@@ -178,6 +170,25 @@ return [
 
     'targets' => [
 
+        'AllSharedAsset' => [
+            'class' => AllSharedAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'all-shared.min.js',
+            'css' => 'all-shared.min.css',
+        ],
+
+        'AllSharedGroupAsset' => [
+            'class' => AllSharedGroupAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'all-shared-group.min.js',
+            'css' => 'all-shared-group.min.css',
+            'depends' => [
+                AllSharedGroupAsset::class,
+            ]
+        ],
+
         'FontAwesomeAsset' => [
             'class' => FontAwesomeAsset::class,
             'basePath' => '@webroot/fontawesome/build',
@@ -193,8 +204,8 @@ return [
             'class' => GlyphiconAsset::class,
             'basePath' => '@webroot/fontawesome/build',
             'baseUrl' => '@web/fontawesome/build',
-            'js' => 'glyphicon-{hash}.js',
-            'css' => 'glyphicon-{hash}.css',
+            'js' => 'glyphicon.min.js',
+            'css' => 'glyphicon.min.css',
             'depends' => [
                 GlyphiconAsset::class,
             ]
@@ -204,29 +215,10 @@ return [
             'class' => PageLoaderAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'page-loader-{hash}.js',
-            'css' => 'page-loader-{hash}.css',
+            'js' => 'page-loader.min.js',
+            'css' => 'page-loader.min.css',
             'depends' => [
                 PageLoaderAsset::class,
-            ]
-        ],
-
-        'AllSharedAsset' => [
-            'class' => AllSharedAsset::class,
-            'basePath' => '@webroot/all_shared/build',
-            'baseUrl' => '@web/all_shared/build',
-            'js' => 'all-shared-{hash}.js',
-            'css' => 'all-shared-{hash}.css',
-        ],
-
-        'AllSharedGroupAsset' => [
-            'class' => AllSharedGroupAsset::class,
-            'basePath' => '@webroot/all_shared/build',
-            'baseUrl' => '@web/all_shared/build',
-            'js' => 'all-shared-group-{hash}.js',
-            'css' => 'all-shared-group-{hash}.css',
-            'depends' => [
-                AllSharedGroupAsset::class,
             ]
         ],
 
@@ -234,8 +226,8 @@ return [
             'class' => GentelellaGroupAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'gentelella-{hash}.js',
-            'css' => 'gentelella-{hash}.css',
+            'js' => 'gentelella.min.js',
+            'css' => 'gentelella.min.css',
             'depends' => [GentelellaGroupAsset::class]
         ],
 
@@ -243,52 +235,41 @@ return [
             'class' => GentelellaCrudGroupAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'gentelella-crud-group-{hash}.js',
-            'css' => 'gentelella-crud-group-{hash}.css',
+            'js' => 'gentelella-crud-group.min.js',
+            'css' => 'gentelella-crud-group.min.css',
             'depends' => [GentelellaCrudGroupAsset::class]
         ],
 
-//        'FontAwesomeAsset' => [
-//            'class' => FontAwesomeAsset::class,
-//            'basePath' => '@webroot/fontawesome/build',
-//            'baseUrl' => '@web/fontawesome/build',
-//            'js' => 'fontawesome-{hash}.js',
-//            'css' => 'fontawesome-{hash}.css',
-//            'depends' => [
-//                FontAwesomeAsset::class,
-//                GlyphiconAsset::class,
-//            ]
-//        ],
         'NotificationSocketAsset' => [
             'class' => NotificationSocketAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'notification-socket-{hash}.js',
-            'css' => 'notification-socket-{hash}.css',
+            'js' => 'notification-socket.min.js',
+            'css' => 'notification-socket.min.css',
             'depends' => [ NotificationSocketAsset::class ]
         ],
         'CentrifugeAsset' => [
             'class' => CentrifugeAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'centrifuge-{hash}.js',
-            'css' => 'centrifuge-{hash}.css',
+            'js' => 'centrifuge.min.js',
+            'css' => 'centrifuge.min.css',
             'depends' => [ CentrifugeAsset::class ]
         ],
         'ClientChatWidgetAsset' => [
             'class' => ClientChatWidgetAsset::class,
             'basePath' => '@webroot/client_chat/build',
             'baseUrl' => '@web/client_chat/build',
-            'js' => 'client_chat_widget-{hash}.js',
-            'css' => 'client_chat_widget-{hash}.css',
+            'js' => 'client_chat_widget.min.js',
+            'css' => 'client_chat_widget.min.css',
             'depends' => [ ClientChatWidgetAsset::class ]
         ],
         'ClientChatAsset' => [
             'class' => ClientChatAsset::class,
             'basePath' => '@webroot/client_chat/build',
             'baseUrl' => '@web/client_chat/build',
-            'js' => 'client_chat-{hash}.js',
-            'css' => 'client_chat-{hash}.css',
+            'js' => 'client_chat.min.js',
+            'css' => 'client_chat.min.css',
             'depends' => [ ClientChatAsset::class ]
         ],
 
@@ -296,48 +277,48 @@ return [
             'class' => CallBoxAsset::class,
             'basePath' => '@webroot/client_chat/build',
             'baseUrl' => '@web/client_chat/build',
-            'js' => 'call_box-{hash}.js',
-            'css' => 'call_box-{hash}.css',
+            'js' => 'call_box.min.js',
+            'css' => 'call_box.min.css',
             'depends' => [ CallBoxAsset::class ]
         ],
         'EditToolAsset' => [
             'class' => EditToolAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'edit_tool-{hash}.js',
-            'css' => 'edit_tool-{hash}.css',
+            'js' => 'edit_tool.min.js',
+            'css' => 'edit_tool.min.css',
             'depends' => [ EditToolAsset::class ]
         ],
         'NewWebPhoneGroupAsset' => [
             'class' => NewWebPhoneGroupAsset::class,
             'basePath' => '@webroot/web_phone/build',
             'baseUrl' => '@web/web_phone/build',
-            'js' => 'web_phone-{hash}.js',
-            'css' => 'web_phone-{hash}.css',
+            'js' => 'web_phone.min.js',
+            'css' => 'web_phone.min.css',
             'depends' => [ NewWebPhoneGroupAsset::class ]
         ],
         'ActiveFormAsset' => [
             'class' => ActiveFormAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'yii-active-form-{hash}.js',
-            'css' => 'yii-active-form-{hash}.css',
+            'js' => 'yii-active-form.min.js',
+            'css' => 'yii-active-form.min.css',
             'depends' => [ ActiveFormAsset::class ]
         ],
         'ValidationAsset' => [
             'class' => ValidationAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'yii-validation-{hash}.js',
-            'css' => 'yii-validation-{hash}.css',
+            'js' => 'yii-validation.min.js',
+            'css' => 'yii-validation.min.css',
             'depends' => [ ValidationAsset::class ]
         ],
         'GridViewAsset' => [
             'class' => GridViewAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'yii-grid-view-{hash}.js',
-            'css' => 'yii-grid-view-{hash}.css',
+            'js' => 'yii-grid-view.min.js',
+            'css' => 'yii-grid-view.min.css',
             'depends' => [ GridViewAsset::class ]
         ],
 
@@ -345,8 +326,8 @@ return [
             'class' => PopoverXAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'popover-x-k-{hash}.js',
-            'css' => 'popover-x-k-{hash}.css',
+            'js' => 'popover-x-k.min.js',
+            'css' => 'popover-x-k.min.css',
             'depends' => [PopoverXAsset::class],
             'bsPluginEnabled' => false,
             'bsDependencyEnabled' => false
@@ -355,8 +336,8 @@ return [
             'class' => KartikEditableAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'editable-k-{hash}.js',
-            'css' => 'editable-k-{hash}.css',
+            'js' => 'editable-k.min.js',
+            'css' => 'editable-k.min.css',
             'depends' => [ KartikEditableAsset::class ],
             'bsPluginEnabled' => false,
             'bsDependencyEnabled' => false
@@ -365,8 +346,8 @@ return [
             'class' => KartikEditablePjaxAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'editable-pjax-k-{hash}.js',
-            'css' => 'editable-pjax-k-{hash}.css',
+            'js' => 'editable-pjax-k.min.js',
+            'css' => 'editable-pjax-k.min.css',
             'depends' => [ KartikEditablePjaxAsset::class ],
             'bsPluginEnabled' => false,
             'bsDependencyEnabled' => false
@@ -375,8 +356,8 @@ return [
             'class' => KartikActiveFormAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'active-form-k-{hash}.js',
-            'css' => 'active-form-{hash}.css',
+            'js' => 'active-form-k.min.js',
+            'css' => 'active-form-k.min.css',
             'depends' => [ KartikActiveFormAsset::class ],
             'bsPluginEnabled' => false,
             'bsDependencyEnabled' => false
@@ -386,8 +367,8 @@ return [
             'class' => WidgetAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'kartik-widget-asset-{hash}.js',
-            'css' => 'kartik-widget-asset-{hash}.css',
+            'js' => 'kartik-widget-asset.min.js',
+            'css' => 'kartik-widget-asset.min.css',
             'depends' => [ WidgetAsset::class ],
             'bsPluginEnabled' => false,
             'bsDependencyEnabled' => false
@@ -397,8 +378,8 @@ return [
             'class' => ImperaviAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'imperavi-asset-{hash}.js',
-            'css' => 'imperavi-asset-{hash}.css',
+            'js' => 'imperavi-asset.min.js',
+            'css' => 'imperavi-asset.min.css',
             'depends' => [ ImperaviAsset::class ],
         ],
 
@@ -406,8 +387,8 @@ return [
             'class' => MultipleInputAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'multiple-input-{hash}.js',
-            'css' => 'multiple-input-{hash}.css',
+            'js' => 'multiple-input.min.js',
+            'css' => 'multiple-input.min.css',
             'depends' => [ MultipleInputAsset::class ],
         ],
 
@@ -415,8 +396,8 @@ return [
             'class' => Select2Asset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'kartik-select2-{hash}.js',
-            'css' => 'kartik-select2-{hash}.css',
+            'js' => 'kartik-select2.min.js',
+            'css' => 'kartik-select2.min.css',
             'depends' => [ Select2Asset::class ],
             'bsPluginEnabled' => false,
             'bsDependencyEnabled' => false
@@ -426,9 +407,9 @@ return [
             'class' => Select2KrajeeAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'krajee-select2-{hash}.js',
-            'css' => 'krajee-select2-{hash}.css',
-            'depends' => [ ThemeKrajeeBs4Asset::class, ThemeKrajeeAsset::class ],
+            'js' => 'krajee-select2.min.js',
+            'css' => 'krajee-select2.min.css',
+            'depends' => [ Select2KrajeeAsset::class, ThemeKrajeeBs4Asset::class, ThemeKrajeeAsset::class ],
             'bsPluginEnabled' => false,
             'bsDependencyEnabled' => false
         ],
@@ -436,16 +417,16 @@ return [
             'class' => PhoneInputAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'phone-input-{hash}.js',
-            'css' => 'phone-input-{hash}.css',
+            'js' => 'phone-input.min.js',
+            'css' => 'phone-input.min.css',
             'depends' => [ PhoneInputAsset::class ],
         ],
         'KartikDateRangePickerAsset' => [
             'class' => DateRangePickerAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'kartik-date-range-picker-{hash}.js',
-            'css' => 'kartik-date-range-picker-{hash}.css',
+            'js' => 'kartik-date-range-picker.min.js',
+            'css' => 'kartik-date-range-picker.min.css',
             'depends' => [ DateRangePickerAsset::class ],
             'bsPluginEnabled' => false,
             'bsDependencyEnabled' => false
@@ -455,8 +436,8 @@ return [
             'class' => DatePickerAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'bootstrap-datepicker-{hash}.js',
-            'css' => 'bootstrap-datepicker-{hash}.css',
+            'js' => 'bootstrap-datepicker.min.js',
+            'css' => 'bootstrap-datepicker.min.css',
             'depends' => [ DatePickerAsset::class ],
             'bsPluginEnabled' => false,
             'bsDependencyEnabled' => false
@@ -466,8 +447,8 @@ return [
             'class' => CKEditorWidgetAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'ckeditor-widget-{hash}.js',
-            'css' => 'ckeditor-widget-{hash}.css',
+            'js' => 'ckeditor-widget.min.js',
+            'css' => 'ckeditor-widget.min.css',
             'depends' => [ CKEditorWidgetAsset::class ],
         ],
 
@@ -475,8 +456,8 @@ return [
             'class' => Timeline2Asset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'timeline2-{hash}.js',
-            'css' => 'timeline2-{hash}.css',
+            'js' => 'timeline2.min.js',
+            'css' => 'timeline2.min.css',
             'depends' => [ Timeline2Asset::class ],
         ],
 
@@ -484,8 +465,8 @@ return [
             'class' => TimelineAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'timeline-{hash}.js',
-            'css' => 'timeline-{hash}.css',
+            'js' => 'timeline.min.js',
+            'css' => 'timeline.min.css',
             'depends' => [ TimelineAsset::class ],
         ],
 
@@ -493,8 +474,8 @@ return [
             'class' => \dosamigos\datepicker\DatePickerAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'dosamigos-datepicker-{hash}.js',
-            'css' => 'dosamigos-datepicker-{hash}.css',
+            'js' => 'dosamigos-datepicker.min.js',
+            'css' => 'dosamigos-datepicker.min.css',
             'depends' => [ \dosamigos\datepicker\DatePickerAsset::class ],
         ],
 
@@ -502,16 +483,16 @@ return [
             'class' => KDNJsonEditorAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'jsoneditor-{hash}.js',
-            'css' => 'jsoneditor-{hash}.css',
+            'js' => 'jsoneditor.min.js',
+            'css' => 'jsoneditor.min.css',
             'depends' => [ KDNJsonEditorAsset::class, ],
         ],
         'KartikExportMenuAsset' => [
             'class' => KartikExportMenuAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'export-menu-{hash}.js',
-            'css' => 'export-menu-{hash}.css',
+            'js' => 'export-menu.min.js',
+            'css' => 'export-menu.min.css',
             'depends' => [ KartikExportMenuAsset::class ],
             'bsPluginEnabled' => false,
             'bsDependencyEnabled' => false
@@ -520,8 +501,8 @@ return [
             'class' => ExportColumnAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'export-column-{hash}.js',
-            'css' => 'export-column-{hash}.css',
+            'js' => 'export-column.min.js',
+            'css' => 'export-column.min.css',
             'depends' => [ ExportColumnAsset::class ],
             'bsPluginEnabled' => false,
             'bsDependencyEnabled' => false
@@ -530,8 +511,8 @@ return [
             'class' => DropdownAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'dropdown-{hash}.js',
-            'css' => 'dropdown-{hash}.css',
+            'js' => 'dropdown.min.js',
+            'css' => 'dropdown.min.css',
             'depends' => [ DropdownAsset::class ],
             'bsPluginEnabled' => false,
             'bsDependencyEnabled' => false
@@ -540,8 +521,8 @@ return [
             'class' => DialogAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'dialog-{hash}.js',
-            'css' => 'dialog-{hash}.css',
+            'js' => 'dialog.min.js',
+            'css' => 'dialog.min.css',
             'depends' => [ DialogAsset::class ],
             'bsPluginEnabled' => false,
             'bsDependencyEnabled' => false
@@ -550,8 +531,8 @@ return [
             'class' => DialogYiiAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'dialog-yii-{hash}.js',
-            'css' => 'dialog-yii-{hash}.css',
+            'js' => 'dialog-yii.min.js',
+            'css' => 'dialog-yii.min.css',
             'depends' => [ DialogYiiAsset::class ],
             'bsPluginEnabled' => false,
             'bsDependencyEnabled' => false
@@ -560,8 +541,8 @@ return [
             'class' => KartikDialogBootstrapAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'dialog-bootstrap-{hash}.js',
-            'css' => 'dialog-bootstrap-{hash}.css',
+            'js' => 'dialog-bootstrap.min.js',
+            'css' => 'dialog-bootstrap.min.css',
             'depends' => [ KartikDialogBootstrapAsset::class ],
             'bsPluginEnabled' => false,
             'bsDependencyEnabled' => false
@@ -570,16 +551,16 @@ return [
             'class' => BootstrapProgressbar::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'bootstrap-progressbar-{hash}.js',
-            'css' => 'bootstrap-progressbar-{hash}.css',
+            'js' => 'bootstrap-progressbar.min.js',
+            'css' => 'bootstrap-progressbar.min.css',
             'depends' => [ BootstrapProgressbar::class ],
         ],
         'KartikGridViewAsset' => [
             'class' => KartikGridViewAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'kartik-gridview-{hash}.js',
-            'css' => 'kartik-gridview-{hash}.css',
+            'js' => 'kartik-gridview.min.js',
+            'css' => 'kartik-gridview.min.css',
             'depends' => [ KartikGridViewAsset::class ],
             'bsPluginEnabled' => false,
             'bsDependencyEnabled' => false
@@ -588,8 +569,8 @@ return [
             'class' => KartikGridResizeColumnsAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'kartik-grid-resize-column-{hash}.js',
-            'css' => 'kartik-grid-resize-column-{hash}.css',
+            'js' => 'kartik-grid-resize-column.min.js',
+            'css' => 'kartik-grid-resize-column.min.css',
             'depends' => [ KartikGridResizeColumnsAsset::class ],
             'bsPluginEnabled' => false,
             'bsDependencyEnabled' => false
@@ -598,8 +579,8 @@ return [
             'class' => KartikGridExportAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'kartik-grid-export-{hash}.js',
-            'css' => 'kartik-grid-export-{hash}.css',
+            'js' => 'kartik-grid-export.min.js',
+            'css' => 'kartik-grid-export.min.css',
             'depends' => [ KartikGridExportAsset::class ],
             'bsPluginEnabled' => false,
             'bsDependencyEnabled' => false
@@ -608,8 +589,8 @@ return [
             'class' => KartikCheckboxColumnAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'kartik-grid-checkbox-{hash}.js',
-            'css' => 'kartik-grid-checkbox-{hash}.css',
+            'js' => 'kartik-grid-checkbox.min.js',
+            'css' => 'kartik-grid-checkbox.min.css',
             'depends' => [ KartikCheckboxColumnAsset::class ],
             'bsPluginEnabled' => false,
             'bsDependencyEnabled' => false
@@ -618,8 +599,8 @@ return [
             'class' => KartikGridToggleDataAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'kartik-grid-toggle-{hash}.js',
-            'css' => 'kartik-grid-toggle-{hash}.css',
+            'js' => 'kartik-grid-toggle.min.js',
+            'css' => 'kartik-grid-toggle.min.css',
             'depends' => [ KartikGridToggleDataAsset::class ],
             'bsPluginEnabled' => false,
             'bsDependencyEnabled' => false
@@ -628,8 +609,8 @@ return [
             'class' => \kartik\daterange\MomentAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'kartik-moment-{hash}.js',
-            'css' => 'kartik-moment-{hash}.css',
+            'js' => 'kartik-moment.min.js',
+            'css' => 'kartik-moment.min.css',
             'depends' => [ \kartik\daterange\MomentAsset::class ],
             'bsPluginEnabled' => false,
             'bsDependencyEnabled' => false
@@ -638,8 +619,8 @@ return [
             'class' => KartikGridFloatHeadAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'kartik-gridfloathead-{hash}.js',
-            'css' => 'kartik-gridfloathead-{hash}.css',
+            'js' => 'kartik-gridfloathead.min.js',
+            'css' => 'kartik-gridfloathead.min.css',
             'depends' => [ KartikGridFloatHeadAsset::class ],
             'bsPluginEnabled' => false,
             'bsDependencyEnabled' => false
@@ -648,8 +629,8 @@ return [
             'class' => TimePickerAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'kartik-timepicker-{hash}.js',
-            'css' => 'kartik-timepicker-{hash}.css',
+            'js' => 'kartik-timepicker.min.js',
+            'css' => 'kartik-timepicker.min.css',
             'depends' => [ TimePickerAsset::class ],
             'bsPluginEnabled' => false,
             'bsDependencyEnabled' => false
@@ -658,120 +639,120 @@ return [
             'class' => MultiSelectAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'dosamigos-multiselect-{hash}.js',
-            'css' => 'dosamigos-multiselect-{hash}.css',
+            'js' => 'dosamigos-multiselect.min.js',
+            'css' => 'dosamigos-multiselect.min.css',
             'depends' => [ MultiSelectAsset::class ],
         ],
         'LanguagePluginAsset' => [
             'class' => LanguagePluginAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'language-plugin-{hash}.js',
-            'css' => 'language-plugin-{hash}.css',
+            'js' => 'language-plugin.min.js',
+            'css' => 'language-plugin.min.css',
             'depends' => [ LanguagePluginAsset::class ],
         ],
         'ScanPluginAsset' => [
             'class' => ScanPluginAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'scan-plugin-{hash}.js',
-            'css' => 'scan-plugin-{hash}.css',
+            'js' => 'scan-plugin.min.js',
+            'css' => 'scan-plugin.min.css',
             'depends' => [ ScanPluginAsset::class ],
         ],
         'TranslationPluginAsset' => [
             'class' => TranslationPluginAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'translation-plugin-{hash}.js',
-            'css' => 'translation-plugin-{hash}.css',
+            'js' => 'translation-plugin.min.js',
+            'css' => 'translation-plugin.min.css',
             'depends' => [ TranslationPluginAsset::class ],
         ],
         'LanguageAsset' => [
             'class' => LanguageAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'language-{hash}.js',
-            'css' => 'language-{hash}.css',
+            'js' => 'language.min.js',
+            'css' => 'language.min.css',
             'depends' => [ LanguageAsset::class ],
         ],
         'FrontendTranslationAsset' => [
             'class' => FrontendTranslationAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'frontend-translation-{hash}.js',
-            'css' => 'frontend-translation-{hash}.css',
+            'js' => 'frontend-translation.min.js',
+            'css' => 'frontend-translation.min.css',
             'depends' => [ FrontendTranslationAsset::class ],
         ],
         'FrontendTranslationPluginAsset' => [
             'class' => FrontendTranslationPluginAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'frontend-translation-plugin-{hash}.js',
-            'css' => 'frontend-translation-plugin-{hash}.css',
+            'js' => 'frontend-translation-plugin.min.js',
+            'css' => 'frontend-translation-plugin.min.css',
             'depends' => [ FrontendTranslationPluginAsset::class ],
         ],
         'TranslateAsset' => [
             'class' => TranslateAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'translate-{hash}.js',
-            'css' => 'translate-{hash}.css',
+            'js' => 'translate.min.js',
+            'css' => 'translate.min.css',
             'depends' => [ TranslateAsset::class ],
         ],
         'TranslateManagerAsset' => [
             'class' => TranslateManagerAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'translate-manager-{hash}.js',
-            'css' => 'translate-manager-{hash}.css',
+            'js' => 'translate-manager.min.js',
+            'css' => 'translate-manager.min.css',
             'depends' => [ TranslateManagerAsset::class ],
         ],
         'TranslatePluginAsset' => [
             'class' => TranslatePluginAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'translate-plugin-{hash}.js',
-            'css' => 'translate-plugin-{hash}.css',
+            'js' => 'translate-plugin.min.js',
+            'css' => 'translate-plugin.min.css',
             'depends' => [ TranslatePluginAsset::class ],
         ],
         'LajaxLanguageItemPluginAsset' => [
             'class' => LajaxLanguageItemPluginAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'lang-asset-{hash}.js',
-            'css' => 'lang-asset-{hash}.css',
+            'js' => 'lang-asset.min.js',
+            'css' => 'lang-asset.min.css',
             'depends' => [ LajaxLanguageItemPluginAsset::class ],
         ],
         'DateTimePickerAsset' => [
             'class' => DateTimePickerAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'dosamigos-datetimepicker-{hash}.js',
-            'css' => 'dosamigos-datetimepicker-{hash}.css',
+            'js' => 'dosamigos-datetimepicker.min.js',
+            'css' => 'dosamigos-datetimepicker.min.css',
             'depends' => [ DateTimePickerAsset::class ],
         ],
         'MaskedInputAsset' => [
             'class' => MaskedInputAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'maskedinput-{hash}.js',
-            'css' => 'maskedinput-{hash}.css',
+            'js' => 'maskedinput.min.js',
+            'css' => 'maskedinput.min.css',
             'depends' => [ MaskedInputAsset::class ],
         ],
         'WebAudioRecorder' => [
             'class' => WebAudioRecorder::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'webaudiorecorder-{hash}.js',
-            'css' => 'webaudiorecorder-{hash}.css',
+            'js' => 'webaudiorecorder.min.js',
+            'css' => 'webaudiorecorder.min.css',
             'depends' => [ WebAudioRecorder::class ],
         ],
         'WebPhoneAsset' => [
             'class' => WebPhoneAsset::class,
             'basePath' => '@webroot/all_shared/build',
             'baseUrl' => '@web/all_shared/build',
-            'js' => 'web-phone-{hash}.js',
-            'css' => 'web-phone-{hash}.css',
+            'js' => 'web-phone.min.js',
+            'css' => 'web-phone.min.css',
             'depends' => [ WebPhoneAsset::class ],
         ]
     ],
@@ -979,8 +960,8 @@ return [
                 'sourcePath' => null
             ],
         ],
-        'hashCallback' => static function ($path) use ($appVersion) {
-            return hash('md4', $path . $appVersion);
+        'hashCallback' => static function ($path) {
+            return hash('md4', $path);
         },
     ],
 ];

@@ -8,7 +8,6 @@ use common\models\UserCallStatus;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
 use sales\auth\Auth;
-use Yii;
 use yii\bootstrap\Widget;
 
 /**
@@ -27,14 +26,7 @@ class NewWebPhoneWidget extends Widget
             return '';
         }
 
-        $useNewWebPhoneWidget = Yii::$app->params['settings']['use_new_web_phone_widget'] ?? false;
-
         $userPhoneProject = $this->getUserProjectParams($this->userId);
-
-        if (!$useNewWebPhoneWidget) {
-            return '';
-        }
-
 
         return $this->render('web_phone_new', [
             'formattedPhoneProject' => json_encode($this->formatDataForSelectList($userPhoneProject)),

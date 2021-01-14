@@ -225,7 +225,7 @@ use frontend\extensions\DatePicker;
                                 'separator' => ' - '
                             ]
                         ]
-                    ])->label('Status date From / To');
+                    ])->label('Lead flow Status date From / To');
 ?>
                 </div>
             </div>
@@ -249,7 +249,12 @@ use frontend\extensions\DatePicker;
 
                 <?php //php  echo $form->field($model, 'called_expert')?>
                 <div class="col-md-6">
-                    <?php echo $form->field($model, 'employee_id')->dropDownList($lists->getEmployees(true), ['prompt' => '-']) ?>
+                    <?php echo $form->field($model, 'employee_id')->widget(Select2::class, [
+                        'data' => $lists->getEmployees(true),
+                        'size' => Select2::SMALL,
+                        'options' => ['placeholder' => 'Select user', 'multiple' => false],
+                        'pluginOptions' => ['allowClear' => true],
+                    ]); ?>
                 </div>
             </div>
 
@@ -289,10 +294,24 @@ use frontend\extensions\DatePicker;
                     ])->label('Last Action From / To');
 ?>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <?= $form->field($model, 'l_is_test')->dropDownList([0 => 'False',1 => 'True'], ['prompt' => '-'])->label('Is Test') ?>
+                <div class="col-md-12">
+                    <?= $form->field($model, 'statusRangeTime', [
+                        'options' => ['class' => 'form-group']
+                    ])->widget(\kartik\daterange\DateRangePicker::class, [
+                        'presetDropdown' => false,
+                        'hideInput' => true,
+                        'convertFormat' => true,
+                        'pluginOptions' => [
+                            'timePicker' => true,
+                            'timePickerIncrement' => 1,
+                            'timePicker24Hour' => true,
+                            'locale' => [
+                                'format' => 'd-M-Y H:i',
+                                'separator' => ' - '
+                            ]
+                        ]
+                    ])->label('Status Dt From / To');
+?>
                 </div>
             </div>
         </div>
@@ -323,6 +342,11 @@ use frontend\extensions\DatePicker;
         <div class="col-md-1">
             <?= $form->field($model, 'chatsQtyTo')->textInput() ?>
         </div>
+        <!--<div class="row">-->
+            <div class="col-md-1">
+                <?= $form->field($model, 'l_is_test')->dropDownList([0 => 'False',1 => 'True'], ['prompt' => '-'])->label('Is Test') ?>
+            </div>
+      <!--  </div>-->
     </div>
 
     <div class="row">

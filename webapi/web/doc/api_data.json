@@ -2493,13 +2493,20 @@
             "optional": false,
             "field": "lead.source_id",
             "description": "<p>Source ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "lead.uid",
+            "description": "<p>Uid</p>"
           }
         ]
       },
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n   \"apiKey\": \"d190c378e131ccfd8a889c8ee8994cb55f22fbeeb93f9b99007e8e7ecc24d0dd\",\n   \"lead\": {\n       \"lead_id\": 302,\n       \"source_id\": 38,\n   }\n}",
+          "content": "{\n   \"apiKey\": \"d190c378e131ccfd8a889c8ee8994cb55f22fbeeb93f9b99007e8e7ecc24d0dd\",\n   \"lead\": {\n       \"lead_id\": 302,\n       \"source_id\": 38,\n       \"uid\": \"5fe2081025a25\"\n   }\n}",
           "type": "json"
         }
       ]
@@ -3380,7 +3387,8 @@
           {
             "group": "Parameter",
             "type": "string",
-            "optional": true,
+            "size": "1",
+            "optional": false,
             "field": "Quote.gds",
             "description": "<p>gds</p>"
           },

@@ -1117,7 +1117,7 @@ class LeadController extends ApiBaseController
      * @apiParam {object}           lead                                               Lead data array
      * @apiParam {int}                  lead.lead_id                                   Lead ID
      * @apiParam {int}                  lead.source_id                                 Source ID
-     *
+     * @apiParam {string}               lead.uid                                       Uid
      *
      * @apiParamExample {json} Request-Example:
      * {
@@ -1125,6 +1125,7 @@ class LeadController extends ApiBaseController
      *    "lead": {
      *        "lead_id": 302,
      *        "source_id": 38,
+     *        "uid": "5fe2081025a25"
      *    }
      * }
      *
@@ -1303,6 +1304,8 @@ class LeadController extends ApiBaseController
                             }
                         }
                     }
+
+                    $lead->sendNotifOnProcessingStatusChanged();
 
 //                    if (!empty($leadAttributes['info_tickets'])) {
 //                        $result = $lead->sendSoldEmail($leadAttributes['info_tickets']);

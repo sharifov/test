@@ -13,6 +13,7 @@
             data.sentAcceptCallRequest = false;
             data.sentAddNoteRequest = false;
             data.sentRejectInternalRequest = false;
+            data.sentRecordingRequest = false;
         }
 
         this.add = function (data) {

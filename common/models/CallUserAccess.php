@@ -29,7 +29,6 @@ use yii\db\ActiveRecord;
  */
 class CallUserAccess extends \yii\db\ActiveRecord
 {
-
     public const STATUS_TYPE_PENDING = 1;
     public const STATUS_TYPE_ACCEPT = 2;
     public const STATUS_TYPE_SKIP = 3;
@@ -265,6 +264,11 @@ class CallUserAccess extends \yii\db\ActiveRecord
             NativeEventDispatcher::recordEvent(CallUserAccessEvents::class, CallUserAccessEvents::UPDATE, [CallUserAccessEvents::class, 'updateUserStatus'], $this);
             NativeEventDispatcher::trigger(CallUserAccessEvents::class, CallUserAccessEvents::UPDATE);
         }
+
+        // $this->sendFrontendData();
+//        if ($call) {
+//            $call->sendFrontendData();
+//        }
     }
 
     /**
@@ -288,5 +292,25 @@ class CallUserAccess extends \yii\db\ActiveRecord
     {
         parent::afterDelete();
         NativeEventDispatcher::trigger(CallUserAccessEvents::class, CallUserAccessEvents::DELETE);
+    }
+
+    /**
+     * @param string $action
+     * @return mixed
+     * @throws \Exception
+     */
+    public function sendFrontendData(string $action = 'update')
+    {
+        return Yii::$app->centrifugo->setSafety(false)
+            ->publish(
+                Call::CHANNEL_REALTIME_MAP,
+                [
+                    'object'  => 'callUserAccess',
+                    'action'  => $action,
+                    'data' => [
+                        'callUserAccess' => $this->attributes
+                    ]
+                ]
+            );
     }
 }

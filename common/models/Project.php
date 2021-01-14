@@ -9,13 +9,17 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\projectConfig\ClientChatProjectConfig;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\phoneLine\phoneLine\entity\PhoneLine;
-use sales\model\project\entity\CustomData;
+use sales\model\project\entity\params\Params;
 use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
 use Yii;
+use yii\behaviors\TimestampBehavior;
+use yii\behaviors\BlameableBehavior;
 use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\httpclient\CurlTransport;
+use common\components\validators\IsArrayValidator;
 
 /**
  * Class Project
@@ -29,14 +33,15 @@ use yii\httpclient\CurlTransport;
  * @property string|null $contact_info
  * @property int|null $closed
  * @property string|null $last_update
- * @property string|null $custom_data
  * @property int|null $sort_order
  * @property string|null $email_postfix
  * @property string|null $ga_tracking_id
  * @property string|null $project_key
+ * @property int|null $p_update_user_id
+ * @property array|string|null $p_params_json
  *
  * @property ContactInfo $contactInfo
- * @property CustomData|null $customData
+ * @property Params|null $params
  *
  * @property ApiUser[] $apiUsers
  * @property Call[] $calls
@@ -51,6 +56,7 @@ use yii\httpclient\CurlTransport;
  * @property Email[] $emails
  * @property EmployeeContactInfo[] $employeeContactInfos
  * @property Lead[] $leads
+ * @property Employee $pUpdateUser
  * @property PhoneLine[] $phoneLines
  * @property ProjectEmailTemplate[] $projectEmailTemplates
  * @property ProjectEmployeeAccess[] $projectEmployeeAccesses
@@ -67,7 +73,7 @@ class Project extends \yii\db\ActiveRecord
 {
     private ContactInfo $_contactInfo;
 
-    private ?CustomData $customData = null;
+    private ?Params $params = null;
 
     /**
      * @return string
@@ -84,13 +90,34 @@ class Project extends \yii\db\ActiveRecord
     {
         return [
             [['sort_order'], 'integer', 'min' => 0, 'max' => 100],
+            [['p_update_user_id'], 'integer'],
             [['closed'], 'boolean'],
-            [['contact_info', 'custom_data'], 'string'],
+            [['contact_info'], 'string'],
             [['last_update'], 'safe'],
             [['name', 'link', 'api_key', 'ga_tracking_id'], 'string', 'max' => 255],
             [['email_postfix'], 'string', 'max' => 100],
             [['project_key'], 'string', 'max' => 50],
             [['project_key'], 'unique'],
+            [['p_update_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['p_update_user_id' => 'id']],
+            ['p_params_json', IsArrayValidator::class],
+        ];
+    }
+
+    public function behaviors()
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['last_update'],
+                ],
+                'value' => date('Y-m-d H:i:s')
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'p_update_user_id',
+                'updatedByAttribute' => 'p_update_user_id',
+            ],
         ];
     }
 
@@ -106,12 +133,13 @@ class Project extends \yii\db\ActiveRecord
             'api_key' => 'Api Key',
             'contact_info' => 'Contact Info',
             'closed' => 'Closed',
-            'last_update' => 'Last Update',
-            'custom_data' => 'Custom Data',
+            'last_update' => 'Updated Dt',
             'sort_order' => 'Sort',
             'email_postfix' => 'Email postfix',
             'ga_tracking_id' => 'GA Tracking Id',
             'project_key' => 'Project Key',
+            'p_update_user_id' => 'Updated User',
+            'p_params_json' => 'Parameters',
         ];
     }
 
@@ -141,13 +169,13 @@ class Project extends \yii\db\ActiveRecord
         return $this->_contactInfo;
     }
 
-    public function getCustomData(): CustomData
+    public function getParams(): Params
     {
-        if ($this->customData !== null) {
-            return $this->customData;
+        if ($this->params !== null) {
+            return $this->params;
         }
-        $this->customData = new CustomData($this->custom_data, $this->id);
-        return $this->customData;
+        $this->params = Params::fromArray($this->p_params_json ?: []);
+        return $this->params;
     }
 
     /**
@@ -171,7 +199,7 @@ class Project extends \yii\db\ActiveRecord
     {
         $projects = [];
         foreach (self::find()->all() as $item) {
-            if ($item->getCustomData()->sms_enabled !== false) {
+            if ($item->getParams()->sms->isEnabled()) {
                 $projects[$item->id] = $item->name;
             }
         }
@@ -212,54 +240,51 @@ class Project extends \yii\db\ActiveRecord
         if ($projectsData) {
             if ($projectsData['error']) {
                 $data['error'] = 'Error: ' . $projectsData['error'];
-            } else {
-                if (isset($projectsData['data']['data']) && $projectsData['data']['data']) {
-                    foreach ($projectsData['data']['data'] as $projectItem) {
-                        $pr = self::findOne($projectItem['id']);
-                        if (!$pr) {
-                            $pr = new self();
-                            $pr->id = $projectItem['id'];
-                            $data['created'][] = $projectItem['id'];
-                            //$pr->custom_data = @json_encode(['name' => $projectItem['name'], 'phone' => '', 'email' => '']);
-                        } else {
-                            $data['updated'][] = $projectItem['id'];
-                        }
+            } elseif (isset($projectsData['data']['data']) && $projectsData['data']['data']) {
+                foreach ($projectsData['data']['data'] as $projectItem) {
+                    $pr = self::findOne($projectItem['id']);
+                    if (!$pr) {
+                        $pr = new self();
+                        $pr->id = $projectItem['id'];
+                        $pr->p_params_json = Params::default();
+                        $data['created'][] = $projectItem['id'];
+                    } else {
+                        $data['updated'][] = $projectItem['id'];
+                    }
 
-                        $pr->attributes = $projectItem;
+                    $pr->attributes = $projectItem;
 
-                        $pr->name = $projectItem['name'];
-                        $pr->project_key = $projectItem['project_key'];
-                        $pr->link = $projectItem['link'];
-                        $pr->closed = (bool)$projectItem['closed'];
-                        $pr->last_update = date('Y-m-d H:i:s');
-                        /*if(isset(Yii::$app->user) && Yii::$app->user->id) {
-                            $pr->pr_updated_user_id = Yii::$app->user->id;
-                        }*/
-                        if (!$pr->save()) {
-                            Yii::error(
-                                VarDumper::dumpAsString($pr->errors),
-                                'Project:synchronizationProjects:Project:save'
-                            );
-                        } else {
-                            if ($projectItem['sources']) {
-                                foreach ($projectItem['sources'] as $sourceId => $sourceAttr) {
-                                    $source = Sources::findOne(['id' => $sourceId]);
+                    $pr->name = $projectItem['name'];
+                    $pr->project_key = $projectItem['project_key'];
+                    $pr->link = $projectItem['link'];
+                    $pr->closed = (bool)$projectItem['closed'];
+                    /* $pr->last_update = date('Y-m-d H:i:s');
+                     if (isset(Yii::$app->user) && Yii::$app->user->id) {
+                         $pr->p_update_user_id = Yii::$app->user->id;
+                     }*/
+                    if (!$pr->save()) {
+                        Yii::error(
+                            VarDumper::dumpAsString($pr->errors),
+                            'Project:synchronizationProjects:Project:save'
+                        );
+                    } elseif ($projectItem['sources']) {
+                        foreach ($projectItem['sources'] as $sourceId => $sourceAttr) {
+                            $source = Sources::findOne(['id' => $sourceId]);
 
-                                    if (!$source) {
-                                        $source = new Sources();
-                                        $source->project_id = $pr->id;
-                                    }
+                            if (!$source) {
+                                $source = new Sources();
+                                $source->id = $sourceId;
+                                $source->project_id = $pr->id;
+                            }
 
-                                    $source->scenario = Sources::SCENARIO_SYNCH;
+                            $source->scenario = Sources::SCENARIO_SYNCH;
 
-                                    $source->attributes = $sourceAttr;
-                                    if (!$source->save()) {
-                                        Yii::error(
-                                            VarDumper::dumpAsString($source->errors),
-                                            'Project:synchronizationProjects:Sources:save'
-                                        );
-                                    }
-                                }
+                            $source->attributes = $sourceAttr;
+                            if (!$source->save()) {
+                                Yii::error(
+                                    VarDumper::dumpAsString($source->errors),
+                                    'Project:synchronizationProjects:Sources:save'
+                                );
                             }
                         }
                     }
@@ -496,6 +521,16 @@ class Project extends \yii\db\ActiveRecord
     public function getLeads(): ActiveQuery
     {
         return $this->hasMany(Lead::class, ['project_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[PUpdateUser]].
+     *
+     * @return ActiveQuery
+     */
+    public function getPUpdateUser(): ActiveQuery
+    {
+        return $this->hasOne(Employee::class, ['id' => 'p_update_user_id']);
     }
 
     /**

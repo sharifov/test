@@ -2,6 +2,7 @@
 
 namespace sales\model\clientChat\entity\projectConfig;
 
+use sales\helpers\app\AppParamsHelper;
 use sales\model\clientChat\entity\channelTranslate\ClientChatChannelTranslate;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use Yii;
@@ -84,7 +85,7 @@ class ProjectConfigApiResponseDto
     {
         $params = Json::decode($projectConfig->ccpc_params_json);
 
-        $this->endpoint = $params['endpoint'] ?? '';
+        $this->endpoint = AppParamsHelper::getClientChatProjectConfigEndpoint();
         $this->notificationSound = $params['notificationSound'] ?? '';
         $this->registrationEnabled = (bool) ($params['registrationEnabled'] ?? true);
 

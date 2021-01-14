@@ -50,7 +50,7 @@ class OnlineConnection extends \yii\bootstrap\Widget
         $ipAddress = Yii::$app->request->remoteIP;
         $webSocketHost = (Yii::$app->request->isSecureConnection ? 'wss' : 'ws') . '://' . Yii::$app->request->serverName . '/ws';// . ':8888';
 
-        return $this->render('online_connection2', [
+        return $this->render('online_connection', [
             'userId' =>  $userId,
             'userIdentity' =>  UserCallIdentity::getClientId($userId),
             'controllerId' => $controllerId,

@@ -11,10 +11,10 @@ use common\models\CallUserAccess;
  */
 class CallUserAccessQuery extends \yii\db\ActiveQuery
 {
-    /*public function active()
+    public function byCall(int $callId): self
     {
-        return $this->andWhere('[[status]]=1');
-    }*/
+        return $this->andWhere(['cua_call_id' => $callId]);
+    }
 
     /**
      * {@inheritdoc}

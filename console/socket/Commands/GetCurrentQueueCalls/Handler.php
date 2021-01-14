@@ -28,21 +28,25 @@ class Handler
                 ]
             ];
         }
-
         $userId = (int)$params['userId'];
+        $finishedCallSid = null;
+        if (isset($params['finishedCallSid'])) {
+            $finishedCallSid = (string)$params['finishedCallSid'];
+        }
+
         $userStatusType = UserCallStatus::find()->select(['us_type_id'])->where(['us_user_id' => $userId])->orderBy(['us_id' => SORT_DESC])->limit(1)->asArray()->one();
 
         return [
             'cmd' => 'updateCurrentCalls',
             'userId' => $userId,
-            'data' => $this->getCallsData($userId),
+            'data' => $this->getCallsData($userId, $finishedCallSid),
             'userStatus' => (int)($userStatusType['us_type_id'] ?? UserCallStatus::STATUS_TYPE_OCCUPIED),
         ];
     }
 
-    private function getCallsData($userId): array
+    private function getCallsData($userId, $finishedCallSid): array
     {
-        $calls = $this->currentQueueCallsService->getQueuesCalls($userId);
+        $calls = $this->currentQueueCallsService->getQueuesCalls($userId, $finishedCallSid);
         $data = $calls->toArray();
         unset($calls);
         return $data;

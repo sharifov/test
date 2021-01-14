@@ -1,6 +1,7 @@
 <?php
 
 use yii\helpers\Html;
+use yii\helpers\Json;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
@@ -62,7 +63,8 @@ use yii\widgets\ActiveForm;
     <?php
 
     try {
-        echo $form->field($model, 'custom_data')->widget(
+        $model->p_params_json = Json::encode($model->p_params_json);
+        echo $form->field($model, 'p_params_json')->widget(
             \kdn\yii2\JsonEditor::class,
             [
                 'clientOptions' => [
@@ -74,7 +76,8 @@ use yii\widgets\ActiveForm;
             ]
         );
     } catch (Exception $exception) {
-        echo $form->field($model, 'custom_data')->textarea(['rows' => 6]);
+        $model->p_params_json = '{}';
+        echo $form->field($model, 'p_params_json')->textarea(['rows' => 6]);
     }
 
     ?>

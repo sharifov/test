@@ -50,7 +50,7 @@ use common\models\LeadFlow;
                     }
                     ?>
                     </td>
-                    <td><?= $item->lf_description ? nl2br(\yii\helpers\Html::encode($item->lf_description)) : '-' ?></td>
+                    <td><?= $item->lf_description ? nl2br($item->lf_description) : '-' ?></td>
                 </tr>
             <?php endforeach;
         else : ?>

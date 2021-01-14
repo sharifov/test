@@ -9,6 +9,8 @@ use Prometheus\Histogram;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
 use yii\base\Component;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Inflector;
 
 /**
  * Class Metrics
@@ -153,6 +155,59 @@ class Metrics extends Component
                 \Yii::error(AppHelper::throwableLog($throwable), 'Metrics:serviceCounter:Throwable');
             }
         }
+    }
+
+    public function counterMetric(
+        string $name,
+        string $namespace,
+        array $labels = [],
+        string $prefix = '',
+        int $value = 1
+    ): void {
+        if ($this->isMetricsEnabled) {
+            $labels = self::prepareLabels($labels);
+            try {
+                $counter = $this->registry->getOrRegisterCounter(
+                    $namespace,
+                    self::keyFormatter($name, 'cnt', $prefix),
+                    self::helpFormatter($name, $prefix),
+                    array_keys($labels)
+                );
+                $counter->incBy($value, array_values($labels));
+            } catch (\Throwable $throwable) {
+                \Yii::error(
+                    ArrayHelper::merge(AppHelper::throwableLog($throwable), func_get_args()),
+                    'Metrics:counterMetrics:Throwable'
+                );
+            }
+        }
+    }
+
+    public static function stringToMetricStandard(string $string, string $separator = '_'): string
+    {
+        return Inflector::slug(Inflector::camel2id($string, $separator), $separator);
+    }
+
+    public static function prepareLabels(array $labels): array
+    {
+        $result = [];
+        foreach ($labels as $key => $value) {
+            $result[self::stringToMetricStandard($key)] = self::stringToMetricStandard($value);
+        }
+        return $result;
+    }
+
+    private static function keyFormatter(string $name, string $postfix, string $prefix = ''): string
+    {
+        return self::stringToMetricStandard($prefix . '_' . $name . '_' . $postfix);
+    }
+
+    private static function helpFormatter(string $name, string $prefix = ''): string
+    {
+        if ($prefix) {
+            return $prefix . ' ' . $name;
+        }
+        return $name;
     }
 
     /**

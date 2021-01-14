@@ -164,7 +164,8 @@ class DepartmentPhoneProjectController extends FController
     "voice": "Polly.Joanna",
     "say": "Please hold, while you are connected to the next available agent.",
     "play": "https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3"
-  }
+  },
+  "call_recording_disabled": false
 }';
         }
 

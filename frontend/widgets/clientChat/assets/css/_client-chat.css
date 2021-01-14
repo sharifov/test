@@ -30,7 +30,7 @@
     z-index: 1040;
 }
 ._cc-fabs {
-    bottom: 260px;
+    bottom: 130px;
     position: fixed;
     margin: 1em;
     right: 0;
@@ -125,7 +125,7 @@
     width: 370px;
     position: fixed;
     right: 85px;
-    bottom: 270px;
+    bottom: 140px;
     font-size: 12px;
     line-height: 22px;
     font-weight: 500;
@@ -227,6 +227,7 @@
     text-transform: capitalize;
     font-size: 16px;
     font-weight: 600;
+    word-break: break-all;
 }
 ._cc-additional-info {
     width: 100%;

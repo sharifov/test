@@ -65,6 +65,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
                 <?= $form->field($contactForm, 'is_public')->checkbox() ?>
                 <?= $form->field($contactForm, 'disabled')->checkbox() ?>
                 <?= $form->field($contactForm, 'cl_project_id')->dropDownList($projectList, ['prompt' => '-'])->label('Project') ?>
+                <?= $form->field($contactForm, 'cl_call_recording_disabled')->checkbox() ?>
 
                 <?php echo Html::checkbox(
                     'ucl_favorite',

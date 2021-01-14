@@ -18,16 +18,21 @@ use common\models\UserProfile;
 use common\models\UserProjectParams;
 use sales\auth\Auth;
 use sales\entities\cases\Cases;
+use sales\helpers\app\AppHelper;
 use sales\helpers\UserCallIdentity;
+use sales\model\call\services\RecordManager;
+use sales\model\call\useCase\checkRecording\CheckRecordingForm;
 use sales\model\call\useCase\conference\create\CreateCallForm;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
 use sales\model\phone\AvailablePhoneList;
 use sales\model\user\entity\userStatus\UserStatus;
+use sales\services\client\ClientManageService;
 use thamtech\uuid\helpers\UuidHelper;
 use yii\base\Exception;
 use yii\helpers\Html;
 use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotAcceptableHttpException;
 use yii\web\Response;
 use yii\filters\AccessControl;
@@ -36,8 +41,33 @@ use yii\helpers\VarDumper;
 use yii\filters\VerbFilter;
 use Yii;
 
+/**
+ * Class PhoneController
+ *
+ * @property ClientManageService $clientManageService
+ */
 class PhoneController extends FController
 {
+    private ClientManageService $clientManageService;
+
+    public function __construct($id, $module, ClientManageService $clientManageService, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->clientManageService = $clientManageService;
+    }
+
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'access' => [
+                'allowActions' => [
+                    'ajax-recording-disable',
+                ],
+            ],
+        ];
+
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
 
     public function actionIndex()
     {
@@ -284,6 +314,42 @@ class PhoneController extends FController
         return $this->asJson($response);
     }
 
+    public function actionAjaxCheckRecording(): Response
+    {
+        $form = new CheckRecordingForm();
+
+        if (!$form->load(Yii::$app->request->post())) {
+            return $this->asJson([
+                'success' => false,
+                'message' => 'Data not found.',
+            ]);
+        }
+
+        if (!$form->validate()) {
+            return $this->asJson([
+                'success' => false,
+                'message' => VarDumper::dumpAsString($form->getErrors()),
+            ]);
+        }
+
+        if (!$form->contactId && $form->toPhone) {
+            $form->contactId = $this->clientManageService->getByPhone($form->toPhone, $form->projectId);
+        }
+
+        $recordManager = RecordManager::createCall(
+            Auth::id(),
+            $form->projectId,
+            $form->departmentId,
+            null, //$form->fromPhone,
+            $form->contactId
+        );
+
+        return $this->asJson([
+            'success' => true,
+            'value' => $recordManager->isDisabledRecord() ? 1 : 0,
+        ]);
+    }
+
     /**
      * @return array
      */
@@ -476,7 +542,7 @@ class PhoneController extends FController
                         ], 'AjaxCallRedirect:Call:resetRepeat');
                     }
                 }
-                $resultApi = $communication->callForward($sid, $from, $to);
+                $resultApi = $communication->callForward($sid, $from, $to, $originalCall->isRecordingDisable());
                 if ($resultApi && isset($resultApi['result']['sid'])) {
                     $result = [
                         'error' => false,
@@ -937,15 +1003,8 @@ class PhoneController extends FController
 
             $result = Yii::$app->communication->hangUp($call->c_call_sid);
 
-            if (isset($result['result']['status']) && ($result['result']['status'] !== $call->c_call_status)) {
-                $call->c_call_status = (string)$result['result']['status'];
-                $call->setStatusByTwilioStatus($call->c_call_status);
-                if (!$call->save()) {
-                    Yii::error(VarDumper::dumpAsString([
-                        'errors' => $call->getErrors(),
-                        'model' => $call->getAttributes(),
-                    ]), 'PhoneController:AjaxHangup:Call:save');
-                }
+            if (isset($result['result']['status']) && !$call->isEqualTwStatus((string)$result['result']['status'])) {
+                $this->processCall($call, (string)$result['result']['status']);
             }
         } catch (\Throwable $e) {
             $result = [
@@ -954,6 +1013,180 @@ class PhoneController extends FController
             ];
         }
         return $this->asJson($result);
+    }
+
+    private function processCall(Call $call, $status): void
+    {
+        try {
+            $call->c_call_status = $status;
+            $call->setStatusByTwilioStatus($call->c_call_status);
+            if (!$call->save()) {
+                Yii::error([
+                    'errors' => $call->getErrors(),
+                    'model' => $call->getAttributes(),
+                ], 'PhoneController:AjaxHangup:processCall:Call:save');
+                return;
+            }
+            if (!$call->isTwFinishStatus()) {
+                return;
+            }
+            if (!$call->c_conference_id) {
+                return;
+            }
+            $this->processConference($call->c_conference_id);
+        } catch (\Throwable $e) {
+            Yii::error([
+                'error' => $e->getMessage(),
+                'callId' => $call->c_id,
+            ], 'PhoneController:AjaxHangup:processCall:Throwable');
+        }
+    }
+
+    private function processConference(int $conferenceId): void
+    {
+        $conference = Conference::findOne($conferenceId);
+        if (!$conference) {
+            Yii::error([
+                'message' => 'Not found conference',
+                'Id' => $conferenceId,
+            ], 'PhoneController:AjaxHangup:processConference');
+            return;
+        }
+        if ($conference->isEnd()) {
+            return;
+        }
+
+        $conferenceInfo = $this->getConferenceInfo($conference->cf_sid);
+
+        if (!$conferenceInfo) {
+            return;
+        }
+
+        if (empty($conferenceInfo['status'])) {
+            return;
+        }
+
+        if ($conferenceInfo['status'] !== Conference::COMPLETED) {
+            return;
+        }
+
+        $endDt = empty($conferenceInfo['dateUpdated']['date']) ? date('Y-m-d H:i:s') : date('Y-m-d H:i:s', strtotime($conferenceInfo['dateUpdated']['date']));
+        $this->completeConference($conference, $endDt);
+    }
+
+    private function completeConference(Conference $conference, string $endDt): void
+    {
+        $conference->end($endDt);
+        if (!$conference->save()) {
+            \Yii::error([
+                'errors' => $conference->getErrors(),
+                'model' => $conference->getAttributes(),
+            ], 'PhoneController:processConference:Conference:Save');
+            return;
+        }
+
+        $this->completeConferenceParticipants($conference);
+    }
+
+    private function completeConferenceParticipants(Conference $conference): void
+    {
+        $participants = $conference->conferenceParticipants;
+        if (!$participants) {
+            return;
+        }
+        foreach ($participants as $participant) {
+            if (!$participant->isLeave()) {
+                $participant->leave($conference->cf_end_dt);
+                if (!$participant->save()) {
+                    \Yii::error([
+                        'message' => 'Participant not saved',
+                        'participantId' => $participant->cp_id,
+                        'conferenceId' => $conference->cf_id,
+                        'errors' => $conference->getErrors(),
+                        'model' => $conference->getAttributes(),
+                    ], 'PhoneController:processConference:Participant:Save');
+                }
+            }
+            $call = Call::find()->andWhere(['c_call_sid' => $participant->cp_call_sid])->one();
+            if ($call && !$call->isTwFinishStatus()) {
+                try {
+                    $result = $this->getCallInfo($call->c_call_sid);
+                    if (isset($result['status']) && !$call->isEqualTwStatus($result['status'])) {
+                        $call->c_call_status = $result['status'];
+                        $call->setStatusByTwilioStatus($call->c_call_status);
+                        if (!$call->save()) {
+                            Yii::error([
+                                'errors' => $call->getErrors(),
+                                'model' => $call->getAttributes(),
+                            ], 'PhoneController:AjaxHangup:processCall:completeConferenceParticipants:Call:save');
+                            return;
+                        }
+                    }
+                } catch (\Throwable $e) {
+                    Yii::error([
+                        'message' => 'Call not saved',
+                        'callId' => $call->c_id,
+                        'participantId' => $participant->cp_id,
+                        'conferenceId' => $conference->cf_id,
+                        'error' => $e->getMessage(),
+                    ], 'PhoneController:AjaxHangup:processCall:completeConferenceParticipants:Call:Throwable');
+                }
+            }
+        }
+    }
+
+    private function getConferenceInfo(string $conferenceSid): array
+    {
+        try {
+            $result = \Yii::$app->communication->getConferenceInfo($conferenceSid);
+            if ($result['error']) {
+                \Yii::error(VarDumper::dumpAsString([
+                    'result' => $result,
+                    'conferenceSid' => $conferenceSid,
+                ]), 'PhoneController:getConferenceInfo:Result');
+            } else {
+                if (!empty($result['result'])) {
+                    return $result['result'];
+                }
+                Yii::error([
+                    'message' => 'Not found result',
+                    'conferenceSid' => $conferenceSid,
+                ], 'PhoneController:getConferenceInfo:Result');
+            }
+        } catch (\Throwable $e) {
+            \Yii::error(VarDumper::dumpAsString([
+                'error' => AppHelper::throwableFormatter($e),
+                'conferenceSid' => $conferenceSid,
+            ]), 'PhoneController:getConferenceInfo:Throwable');
+        }
+        return [];
+    }
+
+    private function getCallInfo(string $callSid): array
+    {
+        try {
+            $result = \Yii::$app->communication->getCallInfo($callSid);
+            if ($result['error']) {
+                \Yii::error(VarDumper::dumpAsString([
+                    'result' => $result,
+                    'callSid' => $callSid,
+                ]), 'PhoneController:getCallInfo:Result');
+            } else {
+                if (!empty($result['result'])) {
+                    return $result['result'];
+                }
+                Yii::error([
+                    'message' => 'Not found result',
+                    'callSid' => $callSid,
+                ], 'PhoneController:getCallInfo:Result');
+            }
+        } catch (\Throwable $e) {
+            \Yii::error(VarDumper::dumpAsString([
+                'error' => AppHelper::throwableFormatter($e),
+                'callSid' => $callSid,
+            ]), 'PhoneController:getCallInfo:Throwable');
+        }
+        return [];
     }
 
     public function actionAjaxHoldConferenceCall(): Response
@@ -986,7 +1219,11 @@ class PhoneController extends FController
             if (!$call->currentParticipant->isHold()) {
                 throw new \Exception('Invalid type of Participant');
             }
-            $result = Yii::$app->communication->unholdConferenceCall($data['conferenceSid'], $data['keeperSid']);
+            $result = Yii::$app->communication->unholdConferenceCall(
+                $data['conferenceSid'],
+                $data['keeperSid'],
+                $data['recordingDisabled']
+            );
         } catch (\Throwable $e) {
             $result = [
                 'error' => true,
@@ -1019,6 +1256,11 @@ class PhoneController extends FController
 
             $from = $call->cParent->c_to ?? $call->c_from;
 
+            $conference = Conference::find()->bySid($call->c_conference_sid)->one();
+            if (!$conference) {
+                throw new \DomainException('Conference not found. SID: ' . $call->c_conference_sid);
+            }
+
             $result = Yii::$app->communication->joinToConference(
                 $call->c_call_sid,
                 $call->c_conference_sid,
@@ -1026,7 +1268,8 @@ class PhoneController extends FController
                 $from,
                 UserCallIdentity::getClientId(Auth::id()),
                 $source_type_id,
-                Auth::id()
+                Auth::id(),
+                $conference->isRecordingDisabled()
             );
             Yii::$app->session->set($key, time());
         } catch (\Throwable $e) {
@@ -1103,6 +1346,81 @@ class PhoneController extends FController
             ];
         }
         return $this->asJson($result);
+    }
+
+    //todo actionAjaxRecordingEnable
+
+    public function actionAjaxRecordingDisable(): Response
+    {
+        if (!Auth::can('PhoneWidget_CallRecordingDisabled')) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
+        try {
+            $sid = (string)Yii::$app->request->post('sid');
+            $call = $this->getDataForRecordingConferenceCall($sid, Auth::id());
+            if ($call->c_recording_disabled) {
+                throw new \DomainException('Recording already disabled.');
+            }
+            $result = Yii::$app->communication->recordingDisable($call->c_conference_sid);
+            $isError = (bool)($result['error'] ?? true);
+            if ($isError) {
+                throw new \DomainException($result['message']);
+            }
+            $anyError = false;
+            if ($result['result']) {
+                $conference = Conference::find()->bySid($call->c_conference_sid)->one();
+                if ($conference) {
+                    $conference->recordingDisable();
+                    $conference->save(false);
+                }
+                $users = [];
+                $notifications = [];
+                foreach ($result['result'] as $callSid => $res) {
+                    $call = Call::find()->bySid($callSid)->one();
+                    $users[$call->c_created_user_id] = $call->c_created_user_id;
+                    if ($res['error']) {
+                        $anyError = true;
+                    } else {
+                        if ($call) {
+                            $call->recordingDisable();
+                            $call->save(false);
+                            $notifications[] = [
+                                'data' => [
+                                    'command' => 'recordingDisable',
+                                    'call' => ['sid' => $call->c_call_sid],
+                                ]
+                            ];
+                        }
+                    }
+                }
+                foreach ($users as $user) {
+                    foreach ($notifications as $notification) {
+                        Notifications::publish('recordingDisable', ['user_id' => $user], $notification);
+                    }
+                }
+            }
+            if ($anyError) {
+                Yii::error([
+                    'message' => 'Stop recording error',
+                    'callSid' => $call->c_call_sid,
+                    'result' => $result
+                ], 'PhoneController:actionAjaxRecordingDisable');
+                return $this->asJson([
+                    'error' => true,
+                    'message' => 'Operation error. The call is still recording. Please retry.',
+                ]);
+            }
+            return $this->asJson([
+                'error' => false,
+                'result' => $result,
+            ]);
+        } catch (\Throwable $e) {
+            return $this->asJson([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
     private function getJoinCall(string $sid): Call
@@ -1220,10 +1538,80 @@ class PhoneController extends FController
         }
 
         return [
+            'recordingDisabled' => $conference->isRecordingDisabled(),
             'conferenceSid' => $conference->cf_sid,
             'keeperSid' => $keeperSid,
             'call' => $call,
         ];
+    }
+
+    private function getDataForRecordingConferenceCall(string $sid, int $userId): Call
+    {
+        if (!$sid) {
+            throw new BadRequestHttpException('Not found Call SID in request');
+        }
+
+        if (!$call = Call::findOne(['c_call_sid' => $sid])) {
+            throw new BadRequestHttpException('Not found Call. Sid: ' . $sid);
+        }
+
+        if (!$call->isOwner($userId)) {
+            throw new BadRequestHttpException('Is not your Call');
+        }
+
+        if (!$participant = $call->currentParticipant) {
+            throw new BadRequestHttpException('Not found Participant');
+        }
+
+        if (!($participant->isAgent() || $participant->isUser())) {
+            throw new BadRequestHttpException('Invalid type of Participant');
+        }
+
+        if (!($call->isIn() || $call->isOut() || $call->isReturn())) {
+            throw new BadRequestHttpException('Invalid Call type');
+        }
+
+        if (!$call->isStatusInProgress()) {
+            throw new BadRequestHttpException('Invalid Call Status');
+        }
+
+        if (!$call->isConferenceType()) {
+            throw new BadRequestHttpException('Call is not conference Call. Sid: ' . $sid);
+        }
+
+        if (!$call->c_conference_id) {
+            throw new BadRequestHttpException('Call not updated. Please wait some seconds.');
+        }
+
+        if (!$conference = Conference::findOne(['cf_id' => $call->c_conference_id])) {
+            throw new BadRequestHttpException('Not found conference. SID: ' . $call->c_conference_sid);
+        }
+
+        if (!$conference->isCreator($userId)) {
+            throw new BadRequestHttpException('You are not conference creator. Sid: ' . $sid);
+        }
+
+        if (!$participants = $conference->conferenceParticipants) {
+            throw new BadRequestHttpException('Not found participants on Conference Sid: ' . $call->c_conference_sid);
+        }
+
+        if (count($participants) < 2) {
+            throw new BadRequestHttpException('Please wait. Count participant must be more then 2');
+        }
+
+        $callIsOneOfParticipants = false;
+        foreach ($participants as $participant) {
+            if ($participant->cp_call_id === $call->c_id) {
+                $callIsOneOfParticipants = true;
+                break;
+            }
+        }
+
+        if (!$callIsOneOfParticipants) {
+            throw new BadRequestHttpException('Call is not One of participants on Conference Sid: ' . $call->c_conference_sid);
+        }
+
+        return $call;
     }
 
     private function getCallForMuteUnmuteParticipant(string $sid, int $userId): Call
@@ -1365,6 +1753,8 @@ class PhoneController extends FController
 
             Yii::$app->cache->set($key, (time() + 10), 10);
 
+            $recordingManager = RecordManager::toUser($createdUser->id);
+
             $result = Yii::$app->communication->callToUser(
                 UserCallIdentity::getClientId($createdUser->id),
                 UserCallIdentity::getClientId($user_id),
@@ -1396,8 +1786,10 @@ class PhoneController extends FController
                     'queue' => Call::QUEUE_DIRECT,
                     'conference' => [],
                     'isConferenceCreator' => 'false',
+                    'recordingDisabled' => $recordingManager->isDisabledRecord(),
                 ],
-                str_replace('-', '', UuidHelper::uuid())
+                str_replace('-', '', UuidHelper::uuid()),
+                $recordingManager->isDisabledRecord()
             );
         } catch (\Throwable $e) {
             $result = [

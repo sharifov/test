@@ -311,7 +311,6 @@ class ClientAccountController extends BaseController
         try {
             $clientAccount = ClientAccount::createFromApi($form);
             $clientAccount = $this->clientAccountRepository->save($clientAccount);
-
             $this->clientManageService->createOrLinkByClientAccount($clientAccount);
 
             return new SuccessResponse(

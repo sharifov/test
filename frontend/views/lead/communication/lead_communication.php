@@ -233,7 +233,7 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
 
                                 <div class="col-sm-6 form-group">
                                     <?= $form3->field($previewSmsForm, 's_phone_from')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
-                                    <?php //= $form3->field($previewSmsForm, 's_lead_id')->hiddenInput()->label(false); ?>
+                                    <?php //= $form3->field($previewSmsForm, 's_lead_id')->hiddenInput()->label(false);?>
                                     <?= $form3->field($previewSmsForm, 's_language_id')->hiddenInput()->label(false); ?>
                                     <?= $form3->field($previewSmsForm, 's_sms_tpl_id')->hiddenInput()->label(false); ?>
                                     <?= $form3->field($previewSmsForm, 's_quote_list')->hiddenInput()->label(false) ?>
@@ -384,12 +384,12 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                                 </div>
 
                                 <div class="col-sm-3 form-group message-field-sms" id="sms-template-group">
-                                    <?php //= $form->field($comForm, 'c_sms_tpl_id')->dropDownList(\common\models\SmsTemplateType::getList(false), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_id']) ?>
+                                    <?php //= $form->field($comForm, 'c_sms_tpl_id')->dropDownList(\common\models\SmsTemplateType::getList(false), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_id'])?>
                                     <?= $form->field($comForm, 'c_sms_tpl_key')->dropDownList(\common\models\SmsTemplateType::getKeyList(false, \common\models\Department::DEPARTMENT_SALES), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_key']) ?>
                                 </div>
 
                                 <div class="col-sm-3 form-group message-field-email" id="email-template-group" style="display: none;">
-                                    <?php //= $form->field($comForm, 'c_email_tpl_id')->dropDownList(\common\models\EmailTemplateType::getList(false, \common\models\Department::DEPARTMENT_SALES), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_id']) ?>
+                                    <?php //= $form->field($comForm, 'c_email_tpl_id')->dropDownList(\common\models\EmailTemplateType::getList(false, \common\models\Department::DEPARTMENT_SALES), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_id'])?>
                                     <?= $form->field($comForm, 'c_email_tpl_key')->dropDownList(\common\models\EmailTemplateType::getKeyList(false, \common\models\Department::DEPARTMENT_SALES), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_key']) ?>
                                 </div>
 
@@ -417,25 +417,23 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                                 </div>
 
                                 <div class="col-sm-3 form-group message-field-phone message-field-sms" id="phone-numbers-group" style="display: block;">
-                                    <?= $form->field($comForm, 'c_phone_number')->dropDownList($clientPhones, ['prompt' => '---', 'class' => 'form-control', 'id' => !SettingHelper::isLeadCommunicationNewCallWidgetEnabled() ? 'c_phone_number' : 'call-to-number']) ?>
+                                    <?= $form->field($comForm, 'c_phone_number')->dropDownList($clientPhones, ['prompt' => '---', 'class' => 'form-control', 'id' => 'call-to-number']) ?>
                                 </div>
 
-                                <?php if (SettingHelper::isLeadCommunicationNewCallWidgetEnabled()) : ?>
-                                    <div class="col-sm-3 form-group message-field-phone" style="display: block;">
-                                        <?= Html::label('Phone from', null, ['class' => 'control-label']) ?>
-                                        <?= Html::dropDownList('call-from-number', null, $fromPhoneNumbers, ['prompt' => '---', 'id' => 'call-from-number', 'class' => 'form-control', 'label'])?>
-                                    </div>
-                                    <div class="col-sm-3 form-group message-field-phone" style="display: block;">
-                                        <?= Html::button('<i class="fa fa-phone-square"></i> Make Call', ['class' => 'btn btn-sm btn-success', 'id' => 'btn-make-call-communication-block', 'style' => 'margin-top: 28px'])?>
-                                    </div>
-                                    <?=Html::hiddenInput('call-lead-id', $lead->id, ['id' => 'call-lead-id'])?>
-                                    <?=Html::hiddenInput('call-case-id', null, ['id' => 'call-case-id'])?>
-                                    <?=Html::hiddenInput('call-project-id', $lead->project_id, ['id' => 'call-project-id'])?>
-                                    <?=Html::hiddenInput('call-source-type-id', Call::SOURCE_LEAD, ['id' => 'call-source-type-id'])?>
-                                    <?=Html::hiddenInput('call-department-id', $lead->l_dep_id, ['id' => 'call-department-id'])?>
-                                    <?=Html::hiddenInput('call-client-id', $lead->client_id, ['id' => 'call-client-id'])?>
-                                    <?=Html::hiddenInput('call-client-name', ($lead->client_id ? $lead->client->getShortName() : ''), ['id' => 'call-client-name'])?>
-                                <?php endif; ?>
+                                <div class="col-sm-3 form-group message-field-phone" style="display: block;">
+                                    <?= Html::label('Phone from', null, ['class' => 'control-label']) ?>
+                                    <?= Html::dropDownList('call-from-number', null, $fromPhoneNumbers, ['prompt' => '---', 'id' => 'call-from-number', 'class' => 'form-control', 'label'])?>
+                                </div>
+                                <div class="col-sm-3 form-group message-field-phone" style="display: block;">
+                                    <?= Html::button('<i class="fa fa-phone-square"></i> Make Call', ['class' => 'btn btn-sm btn-success', 'id' => 'btn-make-call-communication-block', 'style' => 'margin-top: 28px'])?>
+                                </div>
+                                <?=Html::hiddenInput('call-lead-id', $lead->id, ['id' => 'call-lead-id'])?>
+                                <?=Html::hiddenInput('call-case-id', null, ['id' => 'call-case-id'])?>
+                                <?=Html::hiddenInput('call-project-id', $lead->project_id, ['id' => 'call-project-id'])?>
+                                <?=Html::hiddenInput('call-source-type-id', Call::SOURCE_LEAD, ['id' => 'call-source-type-id'])?>
+                                <?=Html::hiddenInput('call-department-id', $lead->l_dep_id, ['id' => 'call-department-id'])?>
+                                <?=Html::hiddenInput('call-client-id', $lead->client_id, ['id' => 'call-client-id'])?>
+                                <?=Html::hiddenInput('call-client-name', ($lead->client_id ? $lead->client->getShortName() : ''), ['id' => 'call-client-name'])?>
                             </div>
                             <div id="sms-input-box" class="message-field-sms" >
                                 <div class="form-group" id="sms-textarea-div">
@@ -459,7 +457,7 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
 
                             <div id="email-input-box" class="message-field-email" style="display: none;">
                                 <div class="form-group" id="email-textarea-div">
-                                    <?php //= $form->field($comForm, 'c_email_message')->textarea(['rows' => 4, 'class' => 'form-control', 'id' => 'email-message']) ?>
+                                    <?php //= $form->field($comForm, 'c_email_message')->textarea(['rows' => 4, 'class' => 'form-control', 'id' => 'email-message'])?>
 
 
                                     <?php
@@ -489,7 +487,7 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                                     //                                        'removeButtons' => 'Subscript,Superscript,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe',
                                     //                                        'removePlugins' => 'elementspath',
                                     //                                    ]
-                                    //                                ]) ?>
+                                    //                                ])?>
 
                                 </div>
                                 <div class="btn-wrapper">
@@ -499,59 +497,6 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                                     ) ?>
                                 </div>
                             </div>
-                            <?php if (!SettingHelper::isLeadCommunicationNewCallWidgetEnabled()) : ?>
-                                <div class="chat__call call-box message-field-phone" id="call-box" style="display: none;">
-
-                                    <div class="call-box__interlocutor">
-                                        <div class="call-box__interlocutor-name"><?php echo Html::encode($leadForm->getClient()->first_name . ' ' . $leadForm->getClient()->last_name); ?></div>
-                                        <div class="call-box__interlocutor-number" id="div-call-phone-number"><?=$comForm->c_phone_number?></div>
-                                    </div>
-                                    <div class="call-box__img <?=$comForm->c_voice_status == 1 ? 'call-box__img--waiting' : ''?>" id="div-call-img">
-                                        <?=Html::img('/img/user.png', ['class' => 'img-circle img-responsive', 'alt' => 'client'])?>
-                                    </div>
-
-                                    <div class="call-box__status call-box__status--waiting" style="display: block" id="div-call-message">
-                                        <?php if ($comForm->c_voice_status == 0) :?>
-                                            Waiting
-                                        <?php endif;?>
-                                        <?php if ($comForm->c_voice_status == 1) :?>
-                                            Connection ... <?=$comForm->c_voice_sid?>
-                                        <?php endif;?>
-                                        <?php if ($comForm->c_voice_status == 2) :?>
-                                            Canceled Call
-                                        <?php endif;?>
-                                        <?php if ($comForm->c_voice_status == 5) :?>
-                                            Error Call
-                                        <?php endif;?>
-                                    </div>
-                                    <?php if ($comForm->c_voice_status == 1) :?>
-                                        <div class="call-box__status call-box__status--call" style="display: block" id="div-call-time"><i class="fa fa-clock-o"></i>&nbsp;<strong id="div-call-timer">00:00</strong></div>
-                                    <?php endif;?>
-
-
-                                    <?php if ($call_type_id == \common\models\UserProfile::CALL_TYPE_WEB) : ?>
-                                        <div class="call-box__btns">
-
-                                            <?= Html::a('<i class="fa fa-phone"></i>', '#', ['class' => 'btn call-box__btn call-box__btn--call', 'id' => 'btn-start-web-call',
-                                                'data-project-id' => $leadForm->getLead()->project_id,
-                                                'data-lead-id' => $leadForm->getLead()->id,
-                                                'data-source-type-id' => Call::SOURCE_LEAD,
-                                                'disabled' => ($comForm->c_voice_status == 1 ? true : false)
-                                            ]) ?>
-
-                                            <?php /*<a href="#" class="call-phone" data-project-id="6" data-lead-id="92138" data-phone="+37369594567">+37369594567</a> - Alex <br/>*/?>
-
-                                            <?php //= Html::button('<i class="fa fa-microphone-slash"></i>', ['class' => 'btn call-box__btn call-box__btn--mute']) ?>
-                                            <?php /*= Html::button('<i class="fa fa-pause"></i>', ['class' => 'btn call-box__btn call-box__btn--pause', 'disabled' => true, 'id' => 'btn-pause'])*/ ?>
-                                        </div>
-                                    <?php else : ?>
-                                        <div class="call-box__btns">
-                                            <?= Html::submitButton('<i class="fa fa-phone"></i>', ['class' => 'btn call-box__btn call-box__btn--call', 'id' => 'btn-start-call', 'disabled' => ($comForm->c_voice_status == 1 ? true : false), 'onclick' => '$("#c_voice_status").val(1)']) ?>
-                                            <?= Html::submitButton('<i class="fa fa-stop"></i>', ['class' => 'btn call-box__btn call-box__btn--stop', 'disabled' => $comForm->c_voice_status == 1 ? false : true, 'id' => 'btn-stop-call', 'onclick' => '$("#c_voice_status").val(2)']) ?>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                            <?php endif; ?>
 
                             <?= $form2->field($comForm, 'c_voice_status')->hiddenInput(['id' => 'c_voice_status'])->label(false); ?>
                             <?= $form2->field($comForm, 'c_voice_sid')->hiddenInput(['id' => 'c_voice_sid'])->label(false); ?>
@@ -684,58 +629,6 @@ $jsPath = Yii::$app->request->baseUrl . '/js/sounds/';
             $.pjax.reload({url: currentUrl, container: '#<?= $pjaxContainerId ?>', push: false, replace: false, timeout: 6000, async: false});
         }
 
-        function stopCall(duration) {
-            $('#div-call-img').removeClass('call-box__img--waiting');
-            //$('#div-call-message').hide();
-            //$('#div-call-time').hide();
-            $('#btn-start-call').attr('disabled', false);
-            $('#btn-stop-call').attr('disabled', true);
-            stopCallTimer(duration);
-        }
-
-        function startCall() {
-
-            $('#div-call-img').addClass('call-box__img--waiting');
-            $('#div-call-message').show();
-            $('#div-call-time').show();
-            $('#btn-start-call').attr('disabled', true);
-            $('#btn-stop-call').attr('disabled', false);
-
-            //startCallTimer();
-        }
-
-        function callUpdate(obj) {
-            console.log(obj);
-            //status: "completed", duration: "1", snr: "3"
-            $('#div-call-message').html(obj.snr + ' - ' + obj.status);
-
-            if(obj.status == 'completed') {
-                stopCall(obj.duration); //updateCommunication();
-                updateCommunication();
-            } else if(obj.status == 'in-progress') {
-                startCallTimer();
-                //$('#div-call-timer').timer('resume');
-            } else if(obj.status == 'initiated') {
-                startCall();
-            } else if(obj.status == 'busy') {
-                stopCall(0);
-                updateCommunication();
-            } else if(obj.status == 'no-answer') {
-                stopCall(0);
-                updateCommunication();
-            }
-        }
-
-        function startCallTimer() {
-            $('#div-call-timer').timer('remove');
-            $('#div-call-timer').timer({format: '%M:%S', seconds: 0}).timer('start');
-        }
-
-        function stopCallTimer(sec) {
-            $('#div-call-timer').timer('remove');
-            $('#div-call-timer').timer({format: '%M:%S', seconds: sec}).timer('pause');
-        }
-
     </script>
 
     <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/timer.jquery/0.9.0/timer.jquery.min.js"></script>-->
@@ -757,10 +650,6 @@ $js = <<<JS
     $('body').on("change", '#c_type_id', function () {
         initializeMessageType($(this).val());
     });
-
-    $('body').on("change", '#c_phone_number', function () {
-        $('#div-call-phone-number').text($(this).val());
-    });
     
     // $(document).on("change", '#call-from-number', function () {
     //     let value = $(this).val();
@@ -778,33 +667,6 @@ $js = <<<JS
             $('#sms-textarea-div').hide();
         }
     });
-    
-    $('body').on('click', '#btn-start-web-call', function(e) {
-        
-        var phone_number = $('#c_phone_number').val();
-        var project_id = $(this).data('project-id');
-        var lead_id = $(this).data('lead-id');
-        var source_type_id = $(this).data('source-type-id');
-        
-        //alert(phoneNumber);
-        
-        e.preventDefault();
-        
-        if(phone_number) {
-        
-            $('#web-phone-dial-modal .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
-            $('#web-phone-dial-modal').modal();
-            
-            $.post(ajaxPhoneDialUrl, {'phone_number': phone_number, 'project_id': project_id, 'lead_id': lead_id, 'source_type_id': source_type_id},
-                function (data) {
-                    $('#web-phone-dial-modal .modal-body').html(data);
-                }
-            );
-        } else {
-            alert('Warning: Select client phone number');
-        }        
-    });   
-    
     
     $('body').on("change", '#c_email_tpl_key', function () {
                 
@@ -884,32 +746,6 @@ $js = <<<JS
             loaderInner = '<span class="spinner-border spinner-border-sm"></span> Loading';
         btn.html(loaderInner).prop('disabled', true);
     });
-           
-    //startCallTimer();
-    
-    /*$('body').on('click', '#btn-start-call', function() {
-        $('#div-call-img').addClass('call-box__img--waiting');
-        $('#div-call-message').show();
-        $('#div-call-time').show();
-        $(this).attr('disabled', true);
-        $('#btn-stop-call').attr('disabled', false);
-        
-    });
-    
-    $('body').on('click', '#btn-stop-call', function() {
-        $('#div-call-img').removeClass('call-box__img--waiting');
-        
-        $('#div-call-message').hide();
-        $('#div-call-time').hide();
-        $(this).attr('disabled', true);
-        $('#btn-start-call').attr('disabled', false);
-    });*/ 
-    
-    /*$('[data-toggle="tooltip"]').tooltip();
-
-    $('[data-toggle="popover"]').on('click', function (e) {
-        $('[data-toggle="popover"]').not(this).popover('hide');
-    });*/
     
 JS;
 

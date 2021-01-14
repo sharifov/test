@@ -39,8 +39,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'ga_tracking_id',
             //'contact_info:ntext',
             'closed:boolean',
+            'p_update_user_id:userName',
             'last_update',
-            //'custom_data:ntext',
             'sort_order'
         ],
     ]) ?>
@@ -53,7 +53,11 @@ $this->params['breadcrumbs'][] = $this->title;
         <?=\yii\helpers\VarDumper::dumpAsString($model->contactInfo->attributes, 10, true) ?>
     </div>
     <div class="col-md-5 bg-white">
-        <h2>Custom data:</h2>
+        <h2>Parameters:</h2>
+        <?=\yii\helpers\VarDumper::dumpAsString($model->p_params_json, 10, true) ?>
+    </div>
+    <div class="col-md-5 bg-white">
+        <h2>Custom Data:</h2>
         <?=\yii\helpers\VarDumper::dumpAsString(@json_decode($model->custom_data, true), 10, true) ?>
     </div>
 

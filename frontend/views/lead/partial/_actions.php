@@ -147,28 +147,13 @@ $user = Yii::$app->user->identity;
     }
 
 
-
     $project = $leadModel->project;
     $projectStyles = '';
     if ($project) {
-        $projectCustomData = $project->custom_data;
-        if (!empty($projectCustomData)) {
-            $projectCustomDataArr = json_decode($projectCustomData, true);
-            if (!empty($projectCustomDataArr)) {
-                $stylesArr = [];
-                foreach ($projectCustomDataArr as $styleKey => $styleEntry) {
-                    if (is_array($styleEntry)) {
-                        continue;
-                    }
-                    if (!empty($styleEntry)) {
-                        $stylesArr[] = $styleKey . ':' . $styleEntry;
-                    }
-                }
-                $stylesArr[] = 'background-image:url(https://communication.travelinsides.com/imgs/' . strtolower($project->name) . '/logo_white.png);background-repeat: no-repeat;background-position: center right;background-size: 101px;background-origin: content-box;';
-                if (!empty($stylesArr)) {
-                    $projectStyles = ' style="' . implode(';', $stylesArr) . '"';
-                }
-            }
+        $styleParams = $project->getParams()->style;
+        if (!$styleParams->isEmpty()) {
+            $defaultStyle = 'background-image:url(https://communication.travelinsides.com/imgs/' . strtolower($project->name) . '/logo_white.png);background-repeat: no-repeat;background-position: center right;background-size: 101px;background-origin: content-box;';
+            $projectStyles = ' style="' . $defaultStyle . $styleParams->toString() . '"';
         }
     }
 
@@ -218,7 +203,7 @@ $user = Yii::$app->user->identity;
             echo Html::button('<i class="fa fa-plus"></i> ' . $title . '', $options);
         }  ?>
 
-        <?php if ($leadModel->isSold() && ($user->isAdmin() || $user->isSupervision())) :?>
+        <?php if (Auth::can('lead/split-profit', ['lead' => $leadModel]) && Auth::can('/lead/split-profit')) :?>
             <?= Html::button('<i class="fa fa-money"></i> Split profit', [
                     'class' => 'btn btn-default',
                     'id' => 'split-profit',
@@ -230,20 +215,20 @@ $user = Yii::$app->user->identity;
                 'size' => Modal::SIZE_LARGE
             ])?>
             <?php Modal::end()?>
+        <?php endif;?>
 
-            <?php if ($leadModel->tips > 0) :?>
-                <?= Html::button('<i class="fa fa-money"></i> Split tips', [
-                        'class' => 'btn btn-default',
-                        'id' => 'split-tips',
-                        'data-url' => Url::to(['lead/split-tips', 'id' => $leadModel->id]),
-                    ])?>
+        <?php if (Auth::can('lead/split-tips', ['lead' => $leadModel]) && Auth::can('/lead/split-tips')) :?>
+            <?= Html::button('<i class="fa fa-money"></i> Split tips', [
+                'class' => 'btn btn-default',
+                'id' => 'split-tips',
+                'data-url' => Url::to(['lead/split-tips', 'id' => $leadModel->id]),
+            ])?>
 
-                <?php Modal::begin(['id' => 'split-tips-modal',
-                    'title' => 'Split tips',
-                    'size' => Modal::SIZE_LARGE
-                ])?>
-                <?php Modal::end()?>
-            <?php endif;?>
+            <?php Modal::begin(['id' => 'split-tips-modal',
+                'title' => 'Split tips',
+                'size' => Modal::SIZE_LARGE
+            ])?>
+            <?php Modal::end()?>
         <?php endif;?>
     </div>
 

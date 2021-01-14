@@ -74,4 +74,31 @@ class DepartmentSearch extends Department
 
         return $dataProvider;
     }
+
+    public function searchByCallRecording($params): ActiveDataProvider
+    {
+        $query = static::find();
+        $query->andWhere(['like', 'dep_params', '"call_recording_disabled":true']);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'pageParam' => 'department-page',
+                'pageSizeParam' => 'department-per-page',
+            ],
+            'sort' => [
+                'sortParam' => 'department-sort',
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            return $dataProvider;
+        }
+
+        $query->andFilterWhere(['like', 'dep_name', $this->dep_name]);
+
+        return $dataProvider;
+    }
 }

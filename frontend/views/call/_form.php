@@ -33,6 +33,9 @@ use yii\widgets\ActiveForm;
     <?= $form->field($model, 'c_parent_call_sid')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'c_call_duration')->textInput(['maxlength' => true]) ?>
+
+    <?= $form->field($model, 'c_recording_disabled')->checkbox() ?>
+
     </div>
     <div class="col-md-6">
 

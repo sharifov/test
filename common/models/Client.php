@@ -2,7 +2,9 @@
 
 namespace common\models;
 
+use common\components\Metrics;
 use common\models\query\ClientQuery;
+use sales\behaviors\metric\MetricClientCounterBehavior;
 use sales\entities\cases\Cases;
 use sales\entities\EventTrait;
 use sales\model\client\entity\events\ClientCreatedEvent;
@@ -42,6 +44,7 @@ use yii\helpers\ArrayHelper;
  * @property string|null $cl_ip
  * @property string|null $cl_locale
  * @property string|null $cl_marketing_country
+ * @property bool $cl_call_recording_disabled
  *
  * @property ClientEmail[] $clientEmails
  * @property ClientPhone[] $clientPhones
@@ -190,6 +193,9 @@ class Client extends ActiveRecord
 
             ['cl_marketing_country', 'string', 'max' => 10],
             ['cl_marketing_country', 'filter', 'filter' => 'strtoupper', 'skipOnEmpty' => true],
+
+            ['cl_call_recording_disabled', 'default', 'value' => false],
+            ['cl_call_recording_disabled', 'boolean'],
         ];
     }
 
@@ -221,7 +227,8 @@ class Client extends ActiveRecord
             'cl_ppn' => 'PPN',
             'cl_ip' => 'IP',
             'cl_locale' => 'Locale',
-            'cl_marketing_country' => 'Market country'
+            'cl_marketing_country' => 'Market country',
+            'cl_call_recording_disabled' => 'Call recording disabled',
         ];
     }
 
@@ -339,7 +346,10 @@ class Client extends ActiveRecord
                     ActiveRecord::EVENT_BEFORE_INSERT => ['created', 'updated'],
                     ActiveRecord::EVENT_BEFORE_UPDATE => ['updated'],
                 ],
-                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+                'value' => date('Y-m-d H:i:s')
+            ],
+            'metric' => [
+                'class' => MetricClientCounterBehavior::class,
             ],
         ];
     }
@@ -501,5 +511,10 @@ class Client extends ActiveRecord
         $this->cl_excluded = true;
         $this->cl_ppn = $ppn;
         $this->recordEvent(new ClientExcludedEvent($this->id));
+    }
+
+    public function getTypeCreateName(): string
+    {
+        return self::TYPE_CREATE_LIST[$this->cl_type_create] ?? 'Undefined';
     }
 }

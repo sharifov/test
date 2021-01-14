@@ -70,6 +70,7 @@ use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessReposi
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
 use sales\repositories\project\ProjectRepository;
+use sales\repositories\quote\QuoteRepository;
 use sales\services\client\ClientManageService;
 use sales\services\clientChatCouchNote\ClientChatCouchNoteForm;
 use sales\services\clientChatMessage\ClientChatMessageService;
@@ -116,6 +117,7 @@ use yii\web\Response;
  * @property ClientManageService $clientManageService
  * @property ClientChatActionPermission $actionPermissions
  * @property ClientChatCouchNoteRepository  $clientChatCouchNoteRepository
+ * @property QuoteRepository $quoteRepository
  * @property array|null $channels
  */
 class ClientChatController extends FController
@@ -178,6 +180,8 @@ class ClientChatController extends FController
      */
     private ClientManageService $clientManageService;
 
+    private QuoteRepository $quoteRepository;
+
     private ClientChatActionPermission $actionPermissions;
     private ?array $channels;
 
@@ -202,6 +206,7 @@ class ClientChatController extends FController
         ClientManageService $clientManageService,
         ClientChatActionPermission $actionPermissions,
         ClientChatCouchNoteRepository $clientChatCouchNoteRepository,
+        QuoteRepository $quoteRepository,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -223,6 +228,7 @@ class ClientChatController extends FController
         $this->clientManageService = $clientManageService;
         $this->actionPermissions = $actionPermissions;
         $this->clientChatCouchNoteRepository = $clientChatCouchNoteRepository;
+        $this->quoteRepository = $quoteRepository;
         $this->channels = ClientChatChannel::getListByUserId(Auth::id());
     }
 
@@ -1314,6 +1320,7 @@ class ClientChatController extends FController
                     $captures[] = [
                         'price' => $price,
                         'data' => $capture,
+                        'quoteId' => $quote->id
                     ];
                 }
             }
@@ -1345,7 +1352,7 @@ class ClientChatController extends FController
 
     public function actionSendOffer(): Response
     {
-        $out = ['error' => false, 'message' => ''];
+        $out = ['error' => false, 'message' => '', 'warning' => ''];
         $chatId = (int)\Yii::$app->request->post('chatId');
         $leadId = (int)\Yii::$app->request->post('leadId');
 
@@ -1370,6 +1377,18 @@ class ClientChatController extends FController
 
             Yii::$app->chatBot->sendMessage($message, $headers);
             $this->removeQuoteCaptures(Auth::id(), $clientChat->cch_id, $lead->id);
+
+            $quoteList = ArrayHelper::getColumn($captures, 'quoteId');
+            foreach ($quoteList as $quoteId) {
+                $quote = Quote::findOne($quoteId);
+                if ($quote) {
+                    $quote->setStatusSend();
+                    if (!$this->quoteRepository->save($quote)) {
+                        Yii::error($quote->errors, 'ClientChatController::sendOffer:Quote:save');
+                        $out['warning'] = 'Update status of Quote(' . $quoteId . ') failed';
+                    }
+                }
+            }
         } catch (\DomainException $e) {
             $out['error'] = true;
             $out['message'] = $e->getMessage();

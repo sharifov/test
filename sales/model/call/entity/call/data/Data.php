@@ -9,11 +9,13 @@ use yii\helpers\Json;
  *
  * @property Repeat $repeat
  * @property QueueLongTime $queueLongTime
+ * @property CreatorType $creatorType
  */
 class Data
 {
     public Repeat $repeat;
     public QueueLongTime $queueLongTime;
+    public CreatorType $creatorType;
 
     public function __construct(?string $json)
     {
@@ -25,6 +27,7 @@ class Data
             $data = Json::decode($json);
             $this->repeat = new Repeat(empty($data['repeat']) ? [] : $data['repeat']);
             $this->queueLongTime = new QueueLongTime(empty($data['queueLongTime']) ? [] : $data['queueLongTime']);
+            $this->creatorType = new CreatorType(empty($data['creatorType']) ? [] : $data['creatorType']);
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => $e->getMessage(),
@@ -39,6 +42,7 @@ class Data
         return Json::encode([
             'repeat' => $this->repeat->toArray(),
             'queueLongTime' => $this->queueLongTime->toArray(),
+            'creatorType' => $this->creatorType->toArray(),
         ]);
     }
 
@@ -46,5 +50,6 @@ class Data
     {
         $this->repeat = new Repeat([]);
         $this->queueLongTime = new QueueLongTime([]);
+        $this->creatorType = new CreatorType([]);
     }
 }

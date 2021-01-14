@@ -6,6 +6,7 @@ use common\components\jobs\CallPriceJob;
 use common\components\jobs\CheckClientCallJoinToConferenceJob;
 use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
+use sales\behaviors\metric\MetricCallCounterBehavior;
 use sales\helpers\PhoneFormatter;
 use sales\helpers\UserCallIdentity;
 use sales\model\call\entity\call\data\Data;
@@ -22,6 +23,7 @@ use sales\events\call\CallCreatedEvent;
 use sales\helpers\cases\CasesUrlHelper;
 use sales\helpers\lead\LeadUrlHelper;
 use sales\model\call\entity\call\events\CallEvents;
+use sales\model\call\services\RecordManager;
 use sales\model\call\socket\CallUpdateMessage;
 use sales\model\callLog\services\CallLogTransferService;
 use sales\model\conference\service\ConferenceDataService;
@@ -94,6 +96,7 @@ use Locale;
  * @property bool $c_is_new
  * @property string|null $c_data_json
  * @property string $recordingUrl
+ * @property bool $c_recording_disabled
  *
  * @property Data|null $data
  *
@@ -234,6 +237,10 @@ class Call extends \yii\db\ActiveRecord
         self::SOURCE_TRANSFER_CALL  => 'Transfer',
         self::SOURCE_CONFERENCE_CALL  => 'Conference',
         self::SOURCE_REDIAL_CALL  => 'Redial',
+        self::SOURCE_LISTEN  => 'Listen',
+        self::SOURCE_COACH  => 'Coach',
+        self::SOURCE_BARGE  => 'Barge',
+        self::SOURCE_INTERNAL  => 'Internal',
         self::SOURCE_LEAD  => 'Lead',
         self::SOURCE_CASE  => 'Case',
     ];
@@ -246,6 +253,8 @@ class Call extends \yii\db\ActiveRecord
     public const QUEUE_HOLD = 'hold';
     public const QUEUE_GENERAL = 'general';
     public const QUEUE_DIRECT = 'direct';
+
+    public const CHANNEL_REALTIME_MAP = 'realtimeMapChannel';
 
     private ?Data $data = null;
 
@@ -314,6 +323,9 @@ class Call extends \yii\db\ActiveRecord
             ['c_data_json', 'string'],
 
             ['c_call_sid', 'unique'],
+
+            ['c_recording_disabled', 'default', 'value' => false],
+            ['c_recording_disabled', 'boolean'],
         ];
     }
 
@@ -361,6 +373,7 @@ class Call extends \yii\db\ActiveRecord
             'c_conference_sid' => 'Conference SID',
             'c_language_id' => 'Language ID',
             'c_data_json' => 'Data',
+            'c_recording_disabled' => 'Recording disabled',
         ];
     }
 
@@ -377,6 +390,9 @@ class Call extends \yii\db\ActiveRecord
                     ActiveRecord::EVENT_BEFORE_UPDATE => ['c_updated_dt'],
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+            ],
+            'metric' => [
+                'class' => MetricCallCounterBehavior::class,
             ],
         ];
     }
@@ -797,7 +813,8 @@ class Call extends \yii\db\ActiveRecord
         $conferenceBase = (bool)(\Yii::$app->params['settings']['voip_conference_base'] ?? false);
 
 //        $userListSocketNotification = [];
-        $isChangedStatus = isset($changedAttributes['c_status_id']);
+//        $isChangedStatus = isset($changedAttributes['c_status_id']);
+        $isChangedStatus = array_key_exists('c_status_id', $changedAttributes);
         $isChangedStatusFromEmptyInclude = array_key_exists('c_status_id', $changedAttributes);
 
         if ($this->c_parent_id && $this->isOut() && ($lead = $this->cLead) && $lead->isCallPrepare()) {
@@ -1024,22 +1041,6 @@ class Call extends \yii\db\ActiveRecord
                                 );
                             }
                         }
-//                    $lead = $this->cLead;
-//
-//                    if ($lead && !$lead->employee_id && $this->c_created_user_id && $lead->status === Lead::STATUS_PENDING) {
-//                        Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $lead->attributes]), 'info\Call:Lead:afterSave');
-//                        $lead->employee_id = $this->c_created_user_id;
-//                        $lead->status = Lead::STATUS_PROCESSING;
-//                        // $lead->l_call_status_id = Lead::CALL_STATUS_PROCESS;
-//                        $lead->l_answered = true;
-//                        if ($lead->save()) {
-//                            Notifications::create($lead->employee_id, 'AutoCreated new Lead (' . $lead->id . ')', 'A new lead (' . $lead->id . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);
-//                            $userListSocketNotification[$lead->employee_id] = $lead->employee_id;
-//                            Notifications::sendSocket('openUrl', ['user_id' => $lead->employee_id], ['url' => $host . '/lead/view/' . $lead->gid], false);
-//                        } else {
-//                            Yii::error(VarDumper::dumpAsString($lead->errors), 'Call:afterSave:Lead:update');
-//                        }
-//                    }
                     }
 
 
@@ -1047,18 +1048,6 @@ class Call extends \yii\db\ActiveRecord
                         $case = $this->cCase;
 
                         if ($case && !$case->cs_user_id && $this->c_created_user_id && $case->isPending()) {
-                            // Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Case' => $case->attributes]), 'info\Call:Case:afterSave');
-//                        $case->cs_user_id = $this->c_created_user_id;
-//                        $case->cs_status = CasesStatus::STATUS_PROCESSING;
-
-//                        if ($case->save()) {
-//                            Notifications::create($case->cs_user_id, 'AutoCreated new Case (' . $case->cs_id . ')', 'A new Case (' . $case->cs_id . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);
-//                            $userListSocketNotification[$case->cs_user_id] = $case->cs_user_id;
-//                            Notifications::sendSocket('openUrl', ['user_id' => $case->cs_user_id], ['url' => $host . '/cases/view/' . $case->cs_gid], false);
-//                        } else {
-//                            Yii::error(VarDumper::dumpAsString($case->errors), 'Call:afterSave:Case:update');
-//                        }
-
                             try {
                                 $casesManageService = Yii::createObject(CasesManageService::class);
                                 $casesManageService->callAutoTake(
@@ -1329,6 +1318,8 @@ class Call extends \yii\db\ActiveRecord
                 Yii::$app->queue_job->delay(60)->priority(10)->push($job);
             }
         }
+
+        $this->sendFrontendData();
     }
 
     public static function getQueueName(Call $call): string
@@ -1383,7 +1374,7 @@ class Call extends \yii\db\ActiveRecord
 //                    //$parentCall->setStatusDelay();
 //                    //$parentCall->update();
 //                } else {
-                    $call->setStatusDelay();
+                $call->setStatusDelay();
                 //}
 
                 if ($call->c_created_user_id && (int) $call->c_created_user_id !== $user_id) {
@@ -1433,6 +1424,20 @@ class Call extends \yii\db\ActiveRecord
                     }
                 }
 
+                $isDisabledRecord = (RecordManager::acceptCall(
+                    $user_id,
+                    $call->c_project_id,
+                    $call->c_dep_id,
+                    null,
+                    $call->c_client_id
+                ))->isDisabledRecord();
+
+                if ($isDisabledRecord) {
+                    $call->recordingDisable();
+                } else {
+                    $call->recordingEnable();
+                }
+
                 if ($call->update() === false) {
                     Yii::error(VarDumper::dumpAsString(['call' => $call->getAttributes(), 'error' => $call->getErrors()]), 'Call:applyCallToAgent:call:update');
                 } else {
@@ -1457,7 +1462,8 @@ class Call extends \yii\db\ActiveRecord
                         $call->c_call_sid,
                         UserCallIdentity::getClientId($user_id),
                         $call->c_from,
-                        $user_id
+                        $user_id,
+                        $call->isRecordingDisable()
                     );
 
                     if ($res) {
@@ -1533,6 +1539,7 @@ class Call extends \yii\db\ActiveRecord
                 $callUserAccess->acceptPending();
             } else {
                 $callUserAccess->acceptPending();
+                $callUserAccess->cua_created_dt = date("Y-m-d H:i:s");
             }
 
             if (!$callUserAccess->save()) {
@@ -1917,6 +1924,11 @@ class Call extends \yii\db\ActiveRecord
         return $this->c_status_id;
     }
 
+    public function isEqualTwStatus(string $status): bool
+    {
+        return $this->c_call_status === $status;
+    }
+
 
     /**
      * @return bool
@@ -2203,6 +2215,9 @@ class Call extends \yii\db\ActiveRecord
         return $this->c_source_type_id === self::SOURCE_INTERNAL;
     }
 
+    /**
+     * @return Data
+     */
     public function getData(): Data
     {
         if ($this->data !== null) {
@@ -2212,9 +2227,65 @@ class Call extends \yii\db\ActiveRecord
         return $this->data;
     }
 
+    /**
+     * @param Data $data
+     */
     public function setData(Data $data): void
     {
         $this->c_data_json = $data->toJson();
         $this->data = $data;
+    }
+
+    public function recordingDisable(): void
+    {
+        $this->c_recording_disabled = true;
+    }
+
+    public function recordingEnable(): void
+    {
+        $this->c_recording_disabled = false;
+    }
+
+    public function isRecordingDisable(): bool
+    {
+        return $this->c_recording_disabled ? true : false;
+    }
+
+    /**
+     * @return array
+     * @throws \Exception
+     */
+    public function getApiData(): array
+    {
+        $data = $this->attributes;
+        $callUserAccesses = CallUserAccess::find()->select(['cua_user_id', 'cua_status_id', 'cua_created_dt'])
+            ->where(['cua_call_id' => $this->c_id])
+            ->orderBy(['cua_created_dt' => SORT_ASC])
+            //->limit(random_int(4, 7))
+            ->asArray()->all();
+
+        $data['userAccessList'] = $callUserAccesses;
+        return $data;
+    }
+
+    /**
+     * @param string $action
+     * @return mixed
+     * @throws \Exception
+     */
+    public function sendFrontendData(string $action = 'update')
+    {
+        return Yii::$app->centrifugo->setSafety(false)
+            ->publish(
+                self::CHANNEL_REALTIME_MAP,
+                [
+                    'object' => 'call',
+                    'action'  => $action,
+                    'id'      => $this->c_id,
+                    'data' => [
+                        'call' => $this->getApiData(),
+                    ]
+                ]
+            );
     }
 }

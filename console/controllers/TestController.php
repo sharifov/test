@@ -2,6 +2,9 @@
 
 namespace console\controllers;
 
+use common\models\CallUserAccess;
+use common\models\Lead;
+use common\models\Call;
 use common\models\Notifications;
 use Faker\Factory;
 use modules\twilio\src\entities\conferenceLog\ConferenceLog;
@@ -9,6 +12,8 @@ use sales\model\client\useCase\excludeInfo\ClientExcludeIpChecker;
 use sales\model\clientChat\cannedResponse\entity\ClientChatCannedResponse;
 use sales\model\clientChat\cannedResponseCategory\entity\ClientChatCannedResponseCategory;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChat\entity\projectConfig\ClientChatProjectConfig;
+use sales\model\clientChat\entity\projectConfig\ProjectConfigApiResponseDto;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatMessage\ClientChatMessageRepository;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
@@ -23,18 +28,31 @@ use sales\model\conference\entity\aggregate\log\HtmlFormatter;
 use sales\model\conference\entity\conferenceEventLog\ConferenceEventLog;
 use sales\model\conference\entity\conferenceEventLog\EventFactory;
 use sales\model\conference\entity\conferenceEventLog\events\ParticipantJoin;
+use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
 use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackForm;
+use sales\model\project\entity\params\Params;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
 use yii\console\Controller;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
 use yii\console\ExitCode;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 
 class TestController extends Controller
 {
+    public function actionDisconnectCalls()
+    {
+        $userId = 295;
+        $prepare = new PrepareCurrentCallsForNewCall($userId);
+        $prepare->prepare();
+    }
+
     public function actionTest()
     {
+        VarDumper::dump(Params::default());
+        die;
         $data = [
             'id' => '5c23460e-6fc1-4ea6-a368-df52ca5b293e',
             'rid' => 'b1ee59aa-5315-4714-88ee-4487f7ccca31',
@@ -191,5 +209,90 @@ class TestController extends Controller
 
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+    }
+
+
+    public function actionTestLead($leadId)
+    {
+        $lead = Lead::findOne(['id' => $leadId]);
+
+        if (!$lead) {
+            echo Console::renderColoredString('%r --- Error: Lead not found by id ' . $leadId . '   %r' . ' %n', true), PHP_EOL;
+        }
+
+        $additionalInfo = $lead->getAdditionalInformationFormFirstElement();
+
+        $additionalInfo->vtf_processed = true;
+        $additionalInfo->tkt_processed = false;
+        $additionalInfo->exp_processed = true;
+
+        $lead->additional_information = Json::encode(ArrayHelper::toArray($additionalInfo));
+
+        if (!$lead->save()) {
+            echo Console::renderColoredString('%r --- Error: Lead not saved %r' . ' %n', true), PHP_EOL;
+        }
+
+        $lead->sendNotifOnProcessingStatusChanged();
+    }
+
+    public function actionShowChatProjectConfigDto($projectId)
+    {
+        $config = ClientChatProjectConfig::findOne(['ccpc_project_id' => (int)$projectId]);
+        if (!$config) {
+            echo Console::renderColoredString('%r --- Error: project config not found %r' . ' %n', true), PHP_EOL;
+            exit;
+        }
+
+        $dto = new ProjectConfigApiResponseDto($config);
+        echo $dto->endpoint . PHP_EOL;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function actionTestCentrifugo()
+    {
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+        $n = 0;
+        while (true) {
+            $n++;
+            $calls = Call::find()
+                ->where(['c_status_id' => [Call::STATUS_IVR, Call::STATUS_QUEUE, Call::STATUS_COMPLETED]])
+                ->andWhere('c_id > FLOOR(RAND()*(3368194-100000)+100000)')
+                //->orderBy('RAND()')
+                ->limit(rand(1, 2))->all(); //['c_id' => SORT_DESC]
+            foreach ($calls as $call) {
+                $call->c_status_id = random_int(1, 12);
+                $call->c_source_type_id = random_int(1, 12);
+                $call->c_updated_dt = date("Y-m-d H:i:s", strtotime('-' . random_int(1, 60) . ' minutes'));
+                $call->c_created_dt = $call->c_updated_dt;
+                $call->c_queue_start_dt = date("Y-m-d H:i:s", strtotime('-' . random_int(1, 15) . ' minutes'));
+                $call->sendFrontendData('update');
+                echo ' - ' . $call->c_id . PHP_EOL;
+            }
+            usleep(0.9 * 1000000);
+            if ($n > 100000) {
+                break;
+            }
+        }
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    }
+
+
+    /**
+     * @throws \Exception
+     */
+    public function actionTestCentrifugo2()
+    {
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+        $n = 0;
+        while (true) {
+            $n++;
+            usleep(0.9 * 1000000);
+            if ($n > 100000) {
+                break;
+            }
+        }
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
 }

@@ -133,6 +133,7 @@ class CallUpdateMessage
                 'sid' => $data['conference']['sid'],
                 'duration' => $data['conference']['duration'],
                 'participants' => $participants,
+                'recordingDisabled' => $data['conference']['recordingDisabled'],
             ]);
 
             if ($call->c_created_user_id === $data['conference']['creator']) {
@@ -161,6 +162,7 @@ class CallUpdateMessage
             'isCoach' => $isCoach,
             'isMute' => $isMute,
             'isBarge' => $isBarge,
+            'isJoin' => $call->isJoin(),
             'project' => $call->c_project_id ? $call->cProject->name : '',
             'source' => $source,
             'isEnded' => $call->isEnded(),
@@ -178,6 +180,7 @@ class CallUpdateMessage
             'queue' => Call::getQueueName($call),
             'conference' => $conference !== null ? $conference->getData() : null,
             'isConferenceCreator' => $isConferenceCreator,
+            'recordingDisabled' => $call->c_recording_disabled,
         ];
     }
 }

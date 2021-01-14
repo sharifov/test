@@ -10,6 +10,7 @@ use sales\access\EmployeeProjectAccess;
 use sales\helpers\user\UserFinder;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use yii\db\ActiveQuery;
+use yii\db\Expression;
 
 /**
  * @see ClientChat
@@ -175,11 +176,14 @@ class Scopes extends \yii\db\ActiveQuery
         return $this->byOwner(null)->orWhere(['cch_status_id' => ClientChat::STATUS_TRANSFER]);
     }
 
-    public function conditionSetUserAccess(): Scopes
+    public function conditionSetUserAccess($userId): Scopes
     {
         return $this->byOwner(null)
             ->andWhere(['cch_status_id' => ClientChat::STATUS_PENDING])
-            ->orWhere(['cch_status_id' => ClientChat::STATUS_TRANSFER])
+            ->orWhere(new Expression('cch_status_id = :transferStatus and cch_owner_user_id <> :userId'), [
+                'transferStatus' => ClientChat::STATUS_TRANSFER,
+                'userId' => $userId
+            ])
             ->andWhere(['NOT IN', 'cch_status_id', ClientChat::CLOSED_STATUS_GROUP]);
     }
 

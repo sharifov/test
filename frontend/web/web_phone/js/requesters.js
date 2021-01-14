@@ -14,6 +14,8 @@
             'callLogInfoUrl': '',
             'callInfoUrl': '',
             'clientInfoUrl': '',
+            'recordingEnableUrl': '',
+            'recordingDisableUrl': '',
         };
 
         this.init = function (settings) {
@@ -21,11 +23,6 @@
         };
 
         this.hold = function (call) {
-            //todo remove after removed old widget
-            let btn = $('.btn-hold-call');
-            btn.html('<i class="fa fa-spinner fa-spin"> </i> <span>On Hold</span>');
-            btn.prop('disabled', true);
-
             $.ajax({
                 type: 'post',
                 data: {
@@ -36,27 +33,16 @@
                 .done(function (data) {
                     if (data.error) {
                         createNotify('Hold', data.message, 'error');
-                        btn.html('<i class="fa fa-pause"> </i> <span>Hold</span>');
-                        btn.prop('disabled', false);
-
                         call.unSetHoldUnHoldRequestState();
                     }
                 })
                 .fail(function () {
                     createNotify('Hold', 'Server error', 'error');
-                    btn.html('<i class="fa fa-pause"> </i> <span>Hold</span>');
-                    btn.prop('disabled', false);
-
                     call.unSetHoldUnHoldRequestState();
                 })
         };
 
         this.unHold = function (call) {
-            //todo remove after removed old widget
-            let btn = $('.btn-hold-call');
-            btn.html('<i class="fa fa-spinner fa-spin"> </i> <span>Resume</span>');
-            btn.prop('disabled', true);
-
             $.ajax({
                 type: 'post',
                 data: {
@@ -67,17 +53,11 @@
                 .done(function (data) {
                     if (data.error) {
                         createNotify('Resume', data.message, 'error');
-                        btn.html('<i class="fa fa-play"> </i> <span>Resume</span>');
-                        btn.prop('disabled', false);
-
                         call.unSetHoldUnHoldRequestState();
                     }
                 })
                 .fail(function () {
                     createNotify('Resume', 'Server error', 'error');
-                    btn.html('<i class="fa fa-play"> </i> <span>Resume</span>');
-                    btn.prop('disabled', false);
-
                     call.unSetHoldUnHoldRequestState();
                 })
         };
@@ -313,6 +293,46 @@
                 .fail(function (xhr, textStatus, errorThrown) {
                     createNotify(text, xhr.responseText, 'error');
                 });
+        };
+
+        this.recordingEnable = function (call) {
+            $.ajax({
+                type: 'post',
+                data: {
+                    'sid': call.data.callSid
+                },
+                url: this.settings.recordingEnableUrl
+            })
+                .done(function (data) {
+                    if (data.error) {
+                        createNotify('Recording enable', data.message, 'error');
+                        call.unSetRecordingRequestState();
+                    }
+                })
+                .fail(function () {
+                    createNotify('Recording enable', 'Server error', 'error');
+                    call.unSetRecordingRequestState();
+                })
+        };
+
+        this.recordingDisable = function (call) {
+            $.ajax({
+                type: 'post',
+                data: {
+                    'sid': call.data.callSid
+                },
+                url: this.settings.recordingDisableUrl
+            })
+                .done(function (data) {
+                    if (data.error) {
+                        createNotify('Recording disable', data.message, 'error');
+                        call.unSetRecordingRequestState();
+                    }
+                })
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    createNotify('Recording disable', jqXHR.responseText, 'error');
+                    call.unSetRecordingRequestState();
+                })
         };
     }
 

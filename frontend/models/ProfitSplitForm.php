@@ -77,7 +77,7 @@ class ProfitSplitForm extends Model
         //var_dump($attribute);die;
         $employee = $this->getLead()->employee;
         $profitSplit = $this->getProfitSplit();
-        if (!empty($profitSplit)) {
+        if ($employee && !empty($profitSplit)) {
             foreach ($profitSplit as $entry) {
                 if (!empty($entry->ps_user_id) && $employee->id == $entry->ps_user_id) {
                     $this->addError('mainAgent', \Yii::t('user', $employee->username . ' already is main agent'));

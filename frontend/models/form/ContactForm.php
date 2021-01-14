@@ -24,6 +24,7 @@ use sales\forms\lead\PhoneCreateForm;
  * @property bool $disabled
  * @property int $rating
  * @property int $cl_type_id
+ * @property bool $cl_cl_call_recording_disabled
  *
  * @property int|null $userId
  * @property EmailCreateForm[] $emails
@@ -52,6 +53,7 @@ class ContactForm extends CompositeForm
     public $updated;
     public $uuid;
     public $cl_project_id;
+    public $cl_call_recording_disabled;
 
     /**
      * ContactForm constructor.
@@ -71,6 +73,7 @@ class ContactForm extends CompositeForm
         }, self::createCountMultiField($countPhones));
 
         $this->userId = $userId;
+        $this->cl_call_recording_disabled = false;
 
         parent::__construct($config);
     }
@@ -97,6 +100,9 @@ class ContactForm extends CompositeForm
 
             ['cl_project_id', 'integer'],
             ['cl_project_id', 'exist', 'skipOnEmpty' => true, 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['cl_project_id' => 'id']],
+
+            ['cl_call_recording_disabled', 'default', 'value' => false],
+            ['cl_call_recording_disabled', 'boolean'],
         ];
     }
 
@@ -156,5 +162,12 @@ class ContactForm extends CompositeForm
     public function internalForms(): array
     {
         return ['emails', 'phones',];
+    }
+
+    public function attributeLabels(): array
+    {
+        return [
+            'cl_call_recording_disabled' => 'Call recording disabled',
+        ];
     }
 }

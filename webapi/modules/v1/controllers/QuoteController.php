@@ -4,6 +4,7 @@ namespace webapi\modules\v1\controllers;
 
 use common\components\BackOffice;
 use common\components\purifier\Purifier;
+use common\components\SearchService;
 use common\models\EmployeeContactInfo;
 use common\models\GlobalLog;
 use common\models\Lead;
@@ -25,6 +26,7 @@ use sales\logger\db\LogDTO;
 use sales\repositories\lead\LeadRepository;
 use sales\services\quote\addQuote\TripService;
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
@@ -556,6 +558,7 @@ class QuoteController extends ApiBaseController
                     }
                     $response['status'] = 'Success';
                     $transaction->commit();
+                    $model->lead->sendNotifOnProcessingStatusChanged();
 
                     //Add logs after changed model attributes
 
@@ -713,7 +716,7 @@ class QuoteController extends ApiBaseController
      * @apiParam {string}           [Quote.record_locator]      record_locator
      * @apiParam {string}           [Quote.pcc]                 pcc
      * @apiParam {string}           [Quote.cabin]               cabin
-     * @apiParam {string}           [Quote.gds]                 gds
+     * @apiParam {string{1}}        Quote.gds                   gds
      * @apiParam {string}           [Quote.trip_type]           trip_type
      * @apiParam {string}           [Quote.main_airline_code]   main_airline_code
      * @apiParam {string}           [Quote.reservation_dump]    reservation_dump
@@ -850,6 +853,7 @@ class QuoteController extends ApiBaseController
             $quote->attributes = $quoteAttributes;
             $quote->lead_id = $lead->id;
             $quote->employee_id = null;
+            $quote->setMetricLabels(['action' => 'created', 'type_creation' => 'web_api']);
 
             $type = $quoteAttributes['type_id'] ?? null;
             $this->setTypeQuoteInsert($type, $quote, $lead);
@@ -857,6 +861,10 @@ class QuoteController extends ApiBaseController
             $quote->save();
             if ($quote->hasErrors()) {
                 throw new \RuntimeException($quote->getErrorSummary(false)[0]);
+            }
+
+            if (!ArrayHelper::keyExists($quote->gds, SearchService::GDS_LIST)) {
+                $warnings[] = 'Quote GDS (' . $quote->gds . ') not found in GDS_LIST.';
             }
 
             $tripsSegmentsData = $quote->getTripsSegmentsData();
