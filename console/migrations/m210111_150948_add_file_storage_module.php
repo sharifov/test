@@ -32,6 +32,7 @@ class m210111_150948_add_file_storage_module extends Migration
             'fs_path' => $this->string(250),
             'fs_size' => $this->integer(),
             'fs_private' => $this->boolean(),
+            'fs_md5_hash' => $this->string(32),
             'fs_expired_dt' => $this->dateTime(),
             'fs_created_dt' => $this->dateTime(),
         ], $tableOptions);

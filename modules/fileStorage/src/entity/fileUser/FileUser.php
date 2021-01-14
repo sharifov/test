@@ -16,6 +16,14 @@ use Yii;
  */
 class FileUser extends \yii\db\ActiveRecord
 {
+    public static function create(int $fileId, int $userId): self
+    {
+        $file = new static();
+        $file->fus_fs_id = $fileId;
+        $file->fus_user_id = $userId;
+        return $file;
+    }
+
     public function rules(): array
     {
         return [

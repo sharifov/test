@@ -30,6 +30,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'fs_private')->checkbox() ?>
 
+        <?= $form->field($model, 'fs_md5_hash')->textInput(['maxlength' => true]) ?>
+
         <?= $form->field($model, 'fs_expired_dt')->widget(DateTimePicker::class) ?>
 
         <?= $form->field($model, 'fs_created_dt')->widget(DateTimePicker::class) ?>

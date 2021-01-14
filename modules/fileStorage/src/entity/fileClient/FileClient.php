@@ -16,6 +16,14 @@ use Yii;
  */
 class FileClient extends \yii\db\ActiveRecord
 {
+    public static function create(int $fileId, int $clientId): self
+    {
+        $file = new static();
+        $file->fcl_fs_id = $fileId;
+        $file->fcl_client_id = $clientId;
+        return $file;
+    }
+
     public function rules(): array
     {
         return [

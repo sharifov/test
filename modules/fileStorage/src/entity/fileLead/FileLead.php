@@ -16,6 +16,14 @@ use Yii;
  */
 class FileLead extends \yii\db\ActiveRecord
 {
+    public static function create(int $fileId, int $leadId): self
+    {
+        $file = new static();
+        $file->fld_fs_id = $fileId;
+        $file->fld_lead_id = $leadId;
+        return $file;
+    }
+
     public function rules(): array
     {
         return [

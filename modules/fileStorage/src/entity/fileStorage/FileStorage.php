@@ -21,6 +21,7 @@ use Yii;
  * @property string|null $fs_path
  * @property int|null $fs_size
  * @property bool|null $fs_private
+ * @property string $fs_md5_hash
  * @property string|null $fs_expired_dt
  * @property string|null $fs_created_dt
  *
@@ -33,11 +34,29 @@ use Yii;
  */
 class FileStorage extends \yii\db\ActiveRecord
 {
+    public static function createByLead(
+        string $name,
+        Path $path,
+        int $size,
+        Uid $uid,
+        string $mimeType,
+        string $hash,
+        \DateTimeImmutable $createdDt
+    ): self {
+        $file = new static();
+        $file->fs_name = $name;
+        $file->fs_path = $path->getValue();
+        $file->fs_size = $size;
+        $file->fs_uid = $uid->getValue();
+        $file->fs_mime_type = $mimeType;
+        $file->fs_md5_hash = $hash;
+        $file->fs_created_dt = $createdDt->format('Y-m-d H:i:s');
+        return $file;
+    }
+
     public function rules(): array
     {
         return [
-            ['fs_created_dt', 'safe'],
-
             ['fs_expired_dt', 'safe'],
 
             ['fs_mime_type', 'string', 'max' => 127],
@@ -55,6 +74,8 @@ class FileStorage extends \yii\db\ActiveRecord
 
             ['fs_uid', 'string', 'max' => 32],
             ['fs_uid', 'unique'],
+
+            ['fs_md5_hash', 'string', 'max' => 32],
         ];
     }
     public function getCases(): \yii\db\ActiveQuery
@@ -93,6 +114,7 @@ class FileStorage extends \yii\db\ActiveRecord
             'fs_path' => 'Path',
             'fs_size' => 'Size',
             'fs_private' => 'Private',
+            'fs_md5_hash' => 'Hash',
             'fs_expired_dt' => 'Expired Dt',
             'fs_created_dt' => 'Created Dt',
         ];

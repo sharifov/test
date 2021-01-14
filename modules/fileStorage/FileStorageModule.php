@@ -26,6 +26,11 @@ class FileStorageModule extends Module
         ];
     }
 
+    public static function getUploadMaxSize()
+    {
+        return 220 * 1024 * 1024;
+    }
+
     public static function getListMenu(string $modulePath = 'file-storage'): array
     {
         $items = [

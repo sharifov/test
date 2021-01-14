@@ -30,9 +30,11 @@ use frontend\models\CommunicationForm;
 use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
+use modules\fileStorage\src\widgets\FileStorageUploadWidget;
 use sales\auth\Auth;
 use yii\bootstrap4\Modal;
 use yii\data\ActiveDataProvider;
+use yii\helpers\Url;
 
 \frontend\themes\gentelella_v2\assets\AssetLeadCommunication::register($this);
 
@@ -71,6 +73,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
     'lead' => $lead,
     'title' => $this->title
 ]) ?>
+
 
 
 <div class="main-sidebars">
@@ -213,6 +216,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
 
             <?php //php \yii\helpers\VarDumper::dump(Yii::$app->user->identity->callExpertCountByShiftTime)?>
 
+            <?= FileStorageUploadWidget::byLead($lead->id) ?>
 
             <?php if (!$lead->client->isExcluded()) : ?>
                 <?php if (Auth::can('lead-view/call-expert/view', ['lead' => $lead])) : ?>

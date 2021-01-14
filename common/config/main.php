@@ -212,5 +212,6 @@ return [
         \common\bootstrap\SetUp::class,
         \common\bootstrap\SetUpListeners::class,
         \common\bootstrap\Logger::class,
+        \common\bootstrap\FileStorageBootstrap::class,
     ],
 ];

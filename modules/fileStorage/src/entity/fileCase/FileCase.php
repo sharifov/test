@@ -16,6 +16,14 @@ use Yii;
  */
 class FileCase extends \yii\db\ActiveRecord
 {
+    public static function create(int $fileId, int $caseId): self
+    {
+        $file = new static();
+        $file->fc_fs_id = $fileId;
+        $file->fc_case_id = $caseId;
+        return $file;
+    }
+
     public function rules(): array
     {
         return [

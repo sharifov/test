@@ -3,7 +3,7 @@
 namespace modules\fileStorage\src\entity\fileStorage;
 
 /**
- * @see FileStorage
+ * @see FileSystem
  */
 class Scopes extends \yii\db\ActiveQuery
 {
