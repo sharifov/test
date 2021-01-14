@@ -9,6 +9,7 @@ use frontend\helpers\JsonHelper;
 use frontend\models\form\CreditCardForm;
 use http\Exception\RuntimeException;
 use sales\entities\cases\Cases;
+use sales\forms\caseSale\CaseSaleRequestBoForm;
 use sales\helpers\app\AppHelper;
 use sales\model\saleTicket\useCase\create\SaleTicketService;
 use sales\repositories\cases\CasesSaleRepository;
@@ -426,13 +427,15 @@ class CasesSaleService
                 }
             } else {
                 $responseStr = VarDumper::dumpAsString($response->content);
-                throw new \RuntimeException('BO request Error: ' . $responseStr, 20);
+                throw new \RuntimeException('BO request Error: ' . $responseStr, -1);
             }
-        } catch (\Throwable $exception) {
-            \Yii::error(
-                VarDumper::dumpAsString([$exception->getMessage(), $params], 20),
-                'CasesSaleService:searchRequestToBackOffice:Fail'
-            );
+        } catch (\Throwable $throwable) {
+            $message = VarDumper::dumpAsString([$throwable->getMessage(), $params], 20);
+            if ($throwable->getCode() > 0) {
+                Yii::error($message, 'CasesSaleService:searchRequestToBackOffice:Fail');
+            } else {
+                Yii::info($message, 'info\CasesSaleService:searchRequestToBackOffice:Fail');
+            }
         }
         return [];
     }
@@ -460,9 +463,8 @@ class CasesSaleService
                     return $result;
                 }
                 throw new \RuntimeException('BO request Error. Broken data. : ' . VarDumper::dumpAsString($response));
-            } else {
-                throw new \RuntimeException('BO request Error. Not isOk. : ' . VarDumper::dumpAsString($response->content));
             }
+            throw new \RuntimeException('BO request Error. Not isOk. : ' . VarDumper::dumpAsString($response->content));
         } catch (\Throwable $exception) {
             throw new BadRequestHttpException($exception->getMessage());
         }
@@ -526,6 +528,19 @@ class CasesSaleService
      */
     public function getSaleFromBo(?string $order_uid = null, ?string $email = null, ?string $phone = null): array
     {
+        $form = new CaseSaleRequestBoForm();
+        $form->orderUid = $order_uid;
+        $form->email = $email;
+        $form->phone = $phone;
+
+        if (!$form->validate()) {
+            Yii::info(
+                [$form->getErrors(), $form->getAttributes()],
+                'info\CasesSaleService:getSaleFromBo:validate'
+            );
+            return [];
+        }
+
         if ($order_uid && $result = $this->searchRequestToBackOffice(['confirmation_number' => $order_uid])) {
             return $result;
         }
