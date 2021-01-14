@@ -4,12 +4,9 @@ return [
     'components' => [
         'apiService' => [
             'class' => \modules\hotel\components\ApiHotelService::class,
-            'url' => 'https://dev-hotels.travel-dev.com/api/v1/',
-            'username' => 'hotels',
-            'password' => '',
+            'url' => '{{ modules.hotel.config.components.apiService.url:str }}',
+            'username' => '{{ modules.hotel.config.components.apiService.username:str }}',
+            'password' => '{{ modules.hotel.config.components.apiService.password:str }}',
         ],
-    ],
-    'params' => [
-
     ],
 ];

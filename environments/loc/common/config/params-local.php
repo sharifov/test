@@ -1,27 +1,56 @@
 <?php
 
 return [
-    'getAirportUrl' => 'https://backoffice.travelinsides.com/api/v2/airport/search',
-    'sync' => [
+    'appEnv' => 'loc',
+    'appInstance' => '{{ common.config.params.appInstance:str }}',
+
+    'url_address'      => '{{ common.config.params.url_address:str }}',
+    'url_api_address'  => '{{ common.config.params.url_api_address:str }}',
+
+    'backOffice' => [
         'ver' => '1.0.0',
-        'apiKey' => '5394bbedf41dd2c0403897ca621f188b',
-        'serverUrl' => 'http://loc.backoffice.com/api/sync'
+        'apiKey' => '{{ common.config.params.backOffice.apiKey:str }}',
+        'serverUrl' => '{{ common.config.params.backOffice.serverUrl:str }}',
+        'serverUrlV2' => '{{ common.config.params.backOffice.serverUrlV2:str }}',
+        'serverUrlV3' => '{{ common.config.params.backOffice.serverUrlV3:str }}',
+        'webHookEndpoint' => 'webhook/ping',
+        'username' => '{{ common.config.params.backOffice.username:str }}',
+        'password' => '{{ common.config.params.backOffice.password:str }}'
     ],
-    'AWS_MAILER' => [
-        'host' => 'email-smtp.us-east-1.amazonaws.com',
-        'port' => '587',
-        'security' => 'tls',
-        'username' => 'AKIAI5VDT2W5LGW7T3TQ',
-        'password' => 'Avufe0iKvYJGNT+Dv8LyVBesiCbMX2ZaB5HC4kBc/2Zn'
-    ],
+
     'crypt' => [
         'method'    => 'aes-256-cbc',
-        'password'  => '',
-        'iv'        => '',
+        'password'  => '{{ common.config.params.crypt.password:str }}',
+        'iv'        => '{{ common.config.params.crypt.iv:str }}',
     ],
+
+    'telegram' => [
+        'webhook_url'   => '{{ common.config.params.telegram.webhook_url:str }}',
+    ],
+
+    'use_browser_call_access' => '{{ common.config.params.use_browser_call_access:bool }}',
+
+    'liveChatRealTimeVisitors' => '{{ common.config.params.liveChatRealTimeVisitors:str }}',
+
+    'price_line_ftp_credential' => [
+        'url' => '{{ common.config.params.price_line_ftp_credential.url:str }}',
+        'port' => '{{ common.config.params.price_line_ftp_credential.port:int }}',
+        'protocol' => '{{ common.config.params.price_line_ftp_credential.protocol:str }}',
+        'path' => 'reports',
+        'user' => '{{ common.config.params.price_line_ftp_credential.user:str }}',
+        'pass' => '{{ common.config.params.price_line_ftp_credential.pass:str }}',
+    ],
+
     'centrifugo' => [
         'enabled' => '{{ common.config.params.centrifugo.enabled:bool }}',
         'wsConnectionUrl' => '{{ common.config.params.centrifugo.wsConnectionUrl:str }}',
     ],
-    'appEnv' => 'loc',
+
+    'clientChat' => [
+        'projectConfig' => [
+            'params' => [
+                'endpoint' => '{{ common.config.params.clientChat.projectConfig.params.endpoint:str }}',
+            ]
+        ]
+    ],
 ];

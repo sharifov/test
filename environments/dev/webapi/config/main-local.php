@@ -29,15 +29,12 @@ return [
                         'driver' => [
                             'scheme' => 'https',
                             'basePath' => '/api/v4',
-                            'url' => '{{ webapi.config.main.components.log.targets.containerSettings.url:str }}',
-                            'login_id' => '{{ webapi.config.main.components.log.targets.containerSettings.login_id:str }}',
-                            'password' => '{{ webapi.config.main.components.log.targets.containerSettings.password:str }}'
+                            'url' => '{{ common.config.params.mattermostLogTarget.containerSettings.url:str }}',
+                            'login_id' => '{{ common.config.params.mattermostLogTarget.containerSettings.login_id:str }}',
+                            'password' => '{{ common.config.params.mattermostLogTarget.containerSettings.password:str }}',
                         ],
-//                        'guzzle' => [
-//                            //put here any options for Guzzle
-//                        ]
                     ],
-                    'chanelId' => '{{ webapi.config.main.components.log.targets.chanelId:str }}',
+                    'chanelId' => '{{ common.config.params.mattermostLogTarget.chanelId:str }}',
                     'handlerClassName' => \common\components\logger\MattermostJobHandler::class,
                     'appPrefix' => 'DEV - CRM - API',
                 ],

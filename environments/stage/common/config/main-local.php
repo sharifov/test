@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'name' => 'CRM - STAGE',
     'components' => [
         'db' => [
             'class' => 'yii\db\Connection',
@@ -9,7 +10,7 @@ return [
             'password' => '{{ common.config.main.components.db.password:str }}',
             'charset' => 'utf8mb4',
             'enableSchemaCache' => '{{ common.config.main.components.db.enableSchemaCache:bool }}',
-            'schemaCacheDuration' => '{{ common.config.main.components.db.schemaCacheDuration:int }}'
+            'schemaCacheDuration' => '{{ common.config.main.components.db.schemaCacheDuration:int }}',
         ],
         'db_postgres' => [
             'class' => 'yii\db\Connection',
@@ -20,39 +21,76 @@ return [
             'enableSchemaCache' => '{{ common.config.main.components.db_postgres.enableSchemaCache:bool }}',
             'schemaCacheDuration' => '{{ common.config.main.components.db_postgres.schemaCacheDuration:int }}',
         ],
+        'formatter' => [
+            'class' => 'yii\i18n\Formatter',
+            'timeZone' => 'Europe/Chisinau',
+            'defaultTimeZone' => 'Europe/Chisinau',
+            'dateFormat' => 'php:d-M-Y',
+            'datetimeFormat' => 'php:d-M-Y H:i:s',
+            'timeFormat' => 'php:H:i',
+
+            'thousandSeparator' => ',',
+            'decimalSeparator' => '.',
+        ],
+        'formatter_search' => [
+            'class' => 'yii\i18n\Formatter',
+            'dateFormat' => 'php:d-M-Y',
+            'datetimeFormat' => 'php:d-M-Y H:i:s',
+            'timeFormat' => 'php:H:i',
+            'thousandSeparator' => ',',
+            'decimalSeparator' => '.',
+        ],
+        'redis' => [
+            'class' => \yii\redis\Connection::class,
+            'hostname' => '{{ common.config.main.components.redis.hostname:str }}',
+            'port' => '{{ common.config.main.components.redis.port:int }}',
+            'database' => '{{ common.config.main.components.redis.database:int }}',
+            'password' => '{{ common.config.main.components.redis.password:str }}',
+            'unixSocket' => null,
+        ],
+        'session' => [
+            'class' => \yii\redis\Session::class,
+        ],
+        'cache' => [
+            'class' => 'yii\redis\Cache',
+            'redis' => [
+                'hostname' => '{{ common.config.main.components.cache.redis.hostname:str }}',
+                'port' => '{{ common.config.main.components.cache.redis.port:int }}',
+                'password' => '{{ common.config.main.components.cache.redis.password:str }}',
+                'database' => '{{ common.config.main.components.cache.redis.database:str }}',
+                'unixSocket' => null,
+            ],
+        ],
+        'cacheFile' => [
+            'class' => 'yii\caching\FileCache',
+            'defaultDuration' => 10 * 60,
+            'gcProbability' => 100,
+        ],
+        'webApiCache' => [
+            'class' => 'yii\caching\FileCache',
+            'cachePath' => '@webapi/runtime/cache'
+        ],
+        'consoleCache' => [
+            'class' => 'yii\caching\FileCache',
+            'cachePath' => '@console/runtime/cache'
+        ],
         'mailer' => [
             'class' => 'yii\swiftmailer\Mailer',
             'viewPath' => '@common/mail',
+            'useFileTransport' => false,
         ],
         'communication' => [
             'class' => \common\components\CommunicationService::class,
             'url' => '{{ common.config.main.components.communication.url:str }}',
             'username' => '{{ common.config.main.components.communication.username:str }}',
             'password' => '{{ common.config.main.components.communication.password:str }}',
-            'recording_url' => '{{ common.config.main.components.communication.recording_url:str }}',
-            'voipApiUsername' => '{{ common.config.main.components.communication.voipApiUsername:str }}',
+            'voipApiUsername' => '{{ common.config.main.components.communication.voipApiUsername:str }}'
         ],
         'airsearch' => [
             'class' => \common\components\AirSearchService::class,
             'url' => '{{ common.config.main.components.airsearch.url:str }}',
             'username' => '{{ common.config.main.components.airsearch.username:str }}',
             'password' => '{{ common.config.main.components.airsearch.password:str }}',
-        ],
-        'cache' => [
-            'class' => 'yii\caching\MemCache',
-            'servers' => [
-                [
-                    'host' => '{{ common.config.main.components.cache.server1.host:str }}',
-                    'port' => '{{ common.config.main.components.cache.server1.port:int }}',
-                ],
-            ],
-            'useMemcached' => '{{ common.config.main.components.cache.useMemcached:bool }}',
-            'keyPrefix' => 'MemCache'
-        ],
-        'telegram' => [
-            'class' => \aki\telegram\Telegram::class,
-            'botUsername' => '{{ common.config.main.components.telegram.botUsername:str }}',
-            'botToken' => '{{ common.config.main.components.telegram.botToken:str }}',
         ],
         'currency' => [
             'class' => \common\components\CurrencyService::class,
@@ -62,7 +100,6 @@ return [
         ],
         'rchat' => [
             'class' => \common\components\RocketChat::class,
-            'url' => '{{ common.config.main.components.rchat.url:str }}',
             'username' => '{{ common.config.main.components.rchat.username:str }}',
             'password' => '{{ common.config.main.components.rchat.password:str }}',
             'host' => '{{ common.config.main.components.rchat.host:str }}',
@@ -73,15 +110,63 @@ return [
             'username' => '{{ common.config.main.components.chatBot.username:str }}',
             'password' => '{{ common.config.main.components.chatBot.password:str }}',
         ],
-        'gaRequestService' => [
-            'class' => \common\components\ga\GaRequestService::class,
-            'url' => '{{ common.config.main.components.gaRequestService.url:str }}',
-        ],
         'travelServices' => [
             'class' => \common\components\TravelServices::class,
             'url' => '{{ common.config.main.components.travelServices.url:str }}',
             'username' => '{{ common.config.main.components.travelServices.username:str }}',
             'password' => '{{ common.config.main.components.travelServices.password:str }}',
+        ],
+        'queue_sms_job' => [
+            'class' => \yii\queue\beanstalk\Queue::class,
+            'host' => '{{ common.config.params.queue.host:str }}',
+            'port' => '{{ common.config.params.queue.port:int }}',
+            'tube' => 'queue_sms_job',
+        ],
+        'queue_email_job' => [
+            'class' => \yii\queue\beanstalk\Queue::class,
+            'host' => '{{ common.config.params.queue.host:str }}',
+            'port' => '{{ common.config.params.queue.port:int }}',
+            'tube' => 'queue_email_job',
+        ],
+        'queue_phone_check' => [
+            'class' => \yii\queue\beanstalk\Queue::class,
+            'host' => '{{ common.config.params.queue.host:str }}',
+            'port' => '{{ common.config.params.queue.port:int }}',
+            'tube' => 'queue_phone_check',
+        ],
+        'queue_job' => [
+            'class' => \yii\queue\beanstalk\Queue::class,
+            'host' => '{{ common.config.params.queue.host:str }}',
+            'port' => '{{ common.config.params.queue.port:int }}',
+            'tube' => 'queue_job',
+        ],
+        'queue_system_services' => [
+            'class' => \yii\queue\beanstalk\Queue::class,
+            'host' => '{{ common.config.params.queue.host:str }}',
+            'port' => '{{ common.config.params.queue.port:int }}',
+            'tube' => 'queue_system_services',
+        ],
+        'queue_client_chat_job' => [
+            'class' => \yii\queue\beanstalk\Queue::class,
+            'host' => '{{ common.config.params.queue.host:str }}',
+            'port' => '{{ common.config.params.queue.port:int }}',
+            'tube' => 'queue_client_chat_job',
+            'as idAccess' => sales\behaviors\JobIdAccessBehavior::class
+        ],
+        'queue_virtual_cron' => [
+            'class' => \kivork\VirtualCron\Queue\Queue::class,
+            'host' => '{{ common.config.params.queue.host:str }}',
+            'port' => '{{ common.config.params.queue.port:int }}',
+            'tube' => 'queue_virtual_cron',
+        ],
+        'telegram' => [
+            'class' => \aki\telegram\Telegram::class,
+            'botUsername' => '{{ common.config.main.components.telegram.botUsername:str }}',
+            'botToken' => '{{ common.config.main.components.telegram.botToken:str }}',
+        ],
+        'gaRequestService' => [
+            'class' => \common\components\ga\GaRequestService::class,
+            'url' => '{{ common.config.main.components.gaRequestService.url:str }}',
         ],
         'centrifugo' => [
             'class'  => \sorokinmedia\centrifugo\Client::class,
@@ -95,11 +180,11 @@ return [
                 'prefix' => php_uname('n'),
                 'host' => '{{ common.config.main.components.prometheus.redisOptions.host:str }}',
                 'port' => '{{ common.config.main.components.prometheus.redisOptions.port:int }}',
-                'password' => null,
+                'password' => '{{ common.config.main.components.prometheus.redisOptions.password:str }}',
+                'database' => '{{ common.config.main.components.prometheus.redisOptions.database:int }}',
                 'timeout' => 0.1,
                 'read_timeout' => 10,
                 'persistent_connections' => false,
-                'database' => 3,
             ],
             'useHttpBasicAuth' => '{{ common.config.main.components.prometheus.useHttpBasicAuth:bool }}',
             'authUsername' => '{{ common.config.main.components.prometheus.authUsername:str }}',

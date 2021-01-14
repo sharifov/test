@@ -42,6 +42,7 @@ class RocketChat extends Component
     public string $username;
     public string $password;
     public string $host;
+    public string $apiEntranceUrl = '/api/v1/';
 
     private string $currentUserId;
     private string $currentAuthToken;
@@ -52,6 +53,7 @@ class RocketChat extends Component
     public function init(): void
     {
         parent::init();
+        $this->url = $this->host . $this->apiEntranceUrl;
         $this->initRequest();
     }
 

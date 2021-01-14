@@ -9,7 +9,4 @@ return [
             'password' => '{{ modules.hotel.config.components.apiService.password:str }}',
         ],
     ],
-    'params' => [
-
-    ],
 ];

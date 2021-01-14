@@ -1,8 +1,5 @@
 <?php
 
 return [
-    'api'   => [
-        'username'  => 'apiuser',
-        'password'  => 'zeitstyle2018',
-    ]
+    'host' => '{{ webapi.config.params.host:str }}',
 ];
