@@ -390,15 +390,14 @@ $script = <<< JS
             sessionStorage.removeItem(storageName);
         }
         refreshSelectedState();
-    });
-        
+    });        
     
-    $(document).ready(function() {
+    $(document).ready(function() {        
         refreshSelectedState();
     });
         
-    $(pjaxContainer).on('pjax:end', function() {
-        refreshSelectedState();
+    $(pjaxContainer).on('pjax:end', function() { 
+        sessionStorage.removeItem(storageName);
     });
     
     $('body').on('click', '.btn-show-checked-ids', function(e) {
