@@ -2268,7 +2268,7 @@ class ClientChatController extends FController
                                     Notifications::createAndPublish(
                                         $oldOwnerId,
                                         'Chat was taken to ' . $newOwner->nickname,
-                                        Auth::user()->nickname . ' has take your Client Chat to ' . $newOwner->nickname,
+                                        Auth::user()->nickname . ' has take your Chat to ' . $newOwner->nickname,
                                         Notifications::TYPE_INFO,
                                         true
                                     );
