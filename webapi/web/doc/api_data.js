@@ -442,7 +442,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "\nHTTP/1.1 200 OK\n  {\n      \"status\": 200,\n      \"message\": \"OK\",\n      \"data\": {\n         \"ClientAccount created successfully\": 123\n      },\n      \"technical\": {\n          \"action\": \"/v2/client-account/create\",\n          \"response_id\": 11934216,\n          \"request_dt\": \"2020-03-17 08:31:30\",\n          \"response_dt\": \"2020-03-17 08:31:30\",\n          \"execution_time\": 0.156,\n          \"memory_usage\": 979248\n      },\n      \"request\": {\n          \"uuid\": \"f04f9609-31e1-4dba-bffd-a689d4391fef\"\n      }\n  }",
+          "content": "\nHTTP/1.1 200 OK\n  {\n      \"status\": 200,\n      \"message\": \"OK\",\n      \"data\": {\n         \"uuid\": \"f04f9609-31e1-4dba-bffd-a689d4391fef\"\n      },\n      \"technical\": {\n          \"action\": \"/v2/client-account/create\",\n          \"response_id\": 11934216,\n          \"request_dt\": \"2020-03-17 08:31:30\",\n          \"response_dt\": \"2020-03-17 08:31:30\",\n          \"execution_time\": 0.156,\n          \"memory_usage\": 979248\n      },\n      \"request\": {\n          \"uuid\": \"f04f9609-31e1-4dba-bffd-a689d4391fef\"\n      }\n  }",
           "type": "json"
         }
       ]
