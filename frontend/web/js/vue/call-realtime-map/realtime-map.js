@@ -3,7 +3,7 @@ let Timer = {
     //props:['from'],
     props: {
         fromDt: {
-            type: String,
+            //type: String,
             required: true
         }
     },
@@ -33,7 +33,7 @@ let Timer = {
             }, 1000);
         },
         getTimeInSeconds() {
-            return Math.round((moment.utc().valueOf() - moment.utc(this.fromDt).valueOf()) / 1000)
+            return this.fromDt ? Math.round((moment.utc().valueOf() - moment.utc(this.fromDt).valueOf()) / 1000) : 0
         }
     },
     created() {
@@ -55,7 +55,7 @@ const callItemComponent = {
     data() {
         return {
             show: true,
-            showStatusList: [1, 2, 3, 4, 10],
+            showStatusList: [1, 2, 3, 4, 10, 12],
             userAccessList2: []
         }
     },
@@ -71,7 +71,8 @@ const callItemComponent = {
         if (this.showStatusList.includes(this.item.c_status_id)) {
             this.show = true;
         } else {
-            this.show = false;
+            //this.show = false;
+            this.removeElement(this.item.c_id);
         }
     },
     computed: {
@@ -90,13 +91,26 @@ const callItemComponent = {
         callTypeName() {
             return this.item.c_call_type_id > 0 ? this.$root.callTypeList[this.item.c_call_type_id] : '-'
         },
+        clientFullName() {
+            let name = '';
+            if (this.item.client) {
+                name += this.item.client.first_name ? this.item.client.first_name : ''
+                name += this.item.client.last_name ? this.item.client.last_name : ''
+                //'middle_name'
+                name = name.trim()
+                if (name === 'ClientName') {
+                    name = '- noname -';
+                }
+            }
+            return name
+        },
 
         callStatusTimerDateTime() {
             let dt = this.item.c_created_dt;
             if (this.item.c_updated_dt) {
                 dt = this.item.c_updated_dt;
             }
-            if (this.item.c_status_id == 2 && this.item.c_queue_start_dt) {
+            if (parseInt(this.item.c_status_id) === 2 && this.item.c_queue_start_dt) {
                 dt = this.item.c_queue_start_dt;
             }
             // console.log(dt);
@@ -167,18 +181,12 @@ const callItemComponent = {
         //     "12": "Hold"
         // },
 
-        beforeEnter: function (el) {
-            // el.style.opacity = 0
-            console.log('beforeEnter');
-        },
-
-        enter: function (el, done) {
-            console.log('enter');
-        },
-        leave: function (el, done) {
-            console.log('leave');
-            this.removeElement(this.item.c_id);
-        }
+        // "callTypeList": {
+        //     "1": "Outgoing",
+        //     "2": "Incoming",
+        //     "3": "Join",
+        //     "4": "Return"
+        // },
 
     }
 }
@@ -230,22 +238,29 @@ var callMapApp = Vue.createApp({
         },
 
         callList1: function () {
-            return this.getCallListByStatusId([1, 2, 3])
+            return this.getCallListByStatusId([1, 2])
         },
         callList2: function () {
-            return this.getCallListByStatusId([4, 10])
+            return this.getCallListByStatusId([1, 2, 3, 4, 10, 12])
         },
         onlineUserCounter: function () {
             return this.onlineUserList.length
         }
     },
     methods: {
-        getCallListByStatusId(statusList) {
+        getCallListByStatusId(statusList, typeList) {
             return this.callList.filter(function (item) {
                 if (item.c_status_id) {
                     let statusId = parseInt(item.c_status_id)
+                    let callTypeId = parseInt(item.c_call_type_id)
                     if (statusList.includes(statusId)) {
-                        return item
+                        if (typeList) {
+                            if (typeList.includes(callTypeId)) {
+                                return item
+                            }
+                        } else {
+                            return item
+                        }
                     }
                 }
             })

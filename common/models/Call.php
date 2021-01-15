@@ -2266,6 +2266,18 @@ class Call extends \yii\db\ActiveRecord
             ->asArray()->all();
 
         $data['userAccessList'] = $callUserAccesses;
+        if ($this->c_client_id) {
+            $client = Client::find()->select(['first_name', 'last_name'])
+                ->where(['id' => $this->c_client_id])
+                ->one();
+            if ($client) {
+                $data['client'] = [
+                    'first_name' => $client->first_name,
+                    'last_name' => $client->last_name,
+                    'middle_name' => $client->middle_name
+                ];
+            }
+        }
         return $data;
     }
 

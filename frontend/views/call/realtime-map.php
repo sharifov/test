@@ -12,6 +12,12 @@ $this->title = 'Realtime Call Map';
     #realtime-map-app table {margin: 2px 0 1px 0}
     .card-body {padding: 0 0 0 0}
 
+    .crop-line {
+        white-space: nowrap;
+        overflow-x: hidden;
+        text-overflow: ellipsis;
+    }
+
     .list-move {
         transition: transform 0.8s;
     }
@@ -45,24 +51,20 @@ $this->title = 'Realtime Call Map';
                 <td class="text-center" style="width:35px">
                     {{ index + 1 }}
                 </td>
-                <td class="text-center" style="width:50px">
-                    <u><a :href="'/call/view?id=' + item.c_id" target="_blank">{{ item.c_id }}</a></u>
-<!--                    <span class="badge badge-danger">{{ callTypeName }}</span>-->
-                </td>
-                <td class="text-center" style="width:95px">
-                    <i class="fa fa-clock-o"></i> {{ createdDateTime("HH:mm:ss") }}
-                </td>
-
-                <td class="text-center" style="width:120px">
-                    <span class="badge badge-info">{{ projectName }}</span>
-                </td>
                 <td class="text-center" style="width:80px">
-                    <span v-if="item.c_dep_id" class="label label-default">{{ departmentName }}</span>
+                    <u><a :href="'/call/view?id=' + item.c_id" target="_blank">{{ item.c_id }}</a></u><br>
+                    <b>{{ callTypeName }}</b>
                 </td>
                 <td class="text-center" style="width:90px">
+                    <i class="fa fa-clock-o"></i> {{ createdDateTime("HH:mm") }}<br>
                     <span v-if="item.c_source_type_id">{{ callSourceName }}</span>
                 </td>
-                <td class="text-left" style="width:65px">
+
+                <td class="text-center" style="width:140px">
+                    <span class="badge badge-info">{{ projectName }}</span><br>
+                    <span v-if="item.c_dep_id" class="label label-default">{{ departmentName }}</span>
+                </td>
+                <td class="text-left" style="width:70px">
                     <?php //<img v-if="getCountryByPhoneNumber(item.c_from)" :src="'https://purecatamphetamine.github.io/country-flag-icons/3x2/' + getCountryByPhoneNumber(item.c_from) + '.svg'" width="20"/> &nbsp; ?>
                     <img v-if="getCountryByPhoneNumber(item.c_from)" :src="'https://flagcdn.com/20x15/' + getCountryByPhoneNumber(item.c_from).toLowerCase() + '.png'" width="20" height="15" :alt="getCountryByPhoneNumber(item.c_from)"/>
                     {{ getCountryByPhoneNumber(item.c_from) }}
@@ -74,10 +76,16 @@ $this->title = 'Realtime Call Map';
                     </small>
                 </td>*/ ?>
 
-                <td class="text-left" style="width:150px">
-                    <i v-if="item.c_client_id" class="fa fa-male text-info fa-1x fa-border"></i>
-                    <i v-if="!item.c_client_id" class="fa fa-phone fa-1x fa-border"></i>
-                    {{ formatPhoneNumber(item.c_from) }}
+                <td class="text-left" style="width:180px">
+                    <div v-if="item.c_client_id" class="crop-line">
+                        <i class="fa fa-male text-info fa-1x fa-border"></i>&nbsp;
+                        <span v-if="item.client">
+                            <a :href="'/client/view?id=' + item.c_client_id" target="_blank">
+                                <small style="text-transform: uppercase">{{ clientFullName }}</small>
+                            </a>
+                        </span>
+                    </div>
+                    <i class="fa fa-phone fa-1x fa-border"></i> {{ formatPhoneNumber(item.c_from) }}
                 </td>
 
                 <td class="text-center" style="width:120px">
@@ -90,7 +98,9 @@ $this->title = 'Realtime Call Map';
                 <td class="text-left" style="width:160px">
                     <div v-if="item.c_created_user_id">
                         <i class="fa fa-user fa-1x fa-border text-success"></i>
-                        {{ getUserName(item.c_created_user_id) }}
+                        {{ getUserName(item.c_created_user_id) }}<br>
+                        <i class="fa fa-phone fa-1x fa-border"></i>
+                        <small>{{ formatPhoneNumber(item.c_to) }}</small>
                     </div>
                     <div v-else>
                         <i class="fa fa-phone fa-1x fa-border"></i>
@@ -118,14 +128,21 @@ $this->title = 'Realtime Call Map';
         <div class="top_tiles col-md-12">
             <div class="animated flipInY col-md-2 col-sm-6 ">
                 <div class="tile-stats">
-                    <div class="icon"><i class="fa fa-spinner"></i></div>
+                    <div class="icon"><i class="fa fa-list"></i></div>
+                    <div class="count">{{ callList.length }}</div>
+                    <h3>Call Items</h3>
+                </div>
+            </div>
+            <div class="animated flipInY col-md-2 col-sm-6 ">
+                <div class="tile-stats">
+                    <div class="icon"><i class="fa fa-recycle"></i></div>
                     <div class="count">{{ ivrCounter }}</div>
                     <h3>IVR</h3>
                 </div>
             </div>
             <div class="animated flipInY col-md-2 col-sm-6 ">
                 <div class="tile-stats">
-                    <div class="icon"><i class="fa fa-recycle"></i></div>
+                    <div class="icon"><i class="fa fa-pause"></i></div>
                     <div class="count">{{ queueCounter }}</div>
                     <h3>Queue</h3>
                 </div>
@@ -140,17 +157,11 @@ $this->title = 'Realtime Call Map';
             <div class="animated flipInY col-md-2 col-sm-6 ">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-stop"></i></div>
-                    <div class="count">{{ delayCounter }}</div>
-                    <h3>Delay</h3>
+                    <div class="count">{{ delayCounter }} / {{ holdCounter }}</div>
+                    <h3>Delay / Hold</h3>
                 </div>
             </div>
-            <div class="animated flipInY col-md-2 col-sm-6 ">
-                <div class="tile-stats">
-                    <div class="icon"><i class="fa fa-pause"></i></div>
-                    <div class="count">{{ holdCounter }}</div>
-                    <h3>Hold</h3>
-                </div>
-            </div>
+
             <div class="animated flipInY col-md-2 col-sm-6 ">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-user"></i></div>
@@ -163,7 +174,7 @@ $this->title = 'Realtime Call Map';
     <div class="row">
         <div class="col-md-5" >
             <div class="card card-default">
-                <div class="card-header"> Incoming Calls in IVR, QUEUE, RINGING ({{ callList1.length }})</div>
+                <div class="card-header"> All Calls in IVR, QUEUE ({{ callList1.length }})</div>
                 <transition-group name="list" tag="div" class="card-body row">
                     <div v-for="(item, index) in callList1" class="list-item col-md-12" :key="item">
                         <call-item-component :item="item" :key="item.с_id" :index="index"></call-item-component>
@@ -173,7 +184,7 @@ $this->title = 'Realtime Call Map';
         </div>
         <div class="col-md-5">
             <div class="card card-default">
-                <div class="card-header"> Incoming Calls in PROGRESS, DELAY ({{ callList2.length }})</div>
+                <div class="card-header"> All Calls RINGING, in PROGRESS, DELAY, HOLD ({{ callList2.length }})</div>
                 <transition-group name="list" tag="div" class="card-body row">
                     <div v-for="(item, index) in callList2" class="list-item col-md-12" :key="item">
                         <call-item-component :item="item" :key="item.с_id" :index="index"></call-item-component>

@@ -264,7 +264,8 @@ class TestController extends Controller
             foreach ($calls as $call) {
                 $call->c_status_id = random_int(1, 12);
                 $call->c_source_type_id = random_int(1, 12);
-                $call->c_updated_dt = date("Y-m-d H:i:s", strtotime('-' . random_int(1, 60) . ' minutes'));
+                $call->c_call_type_id = random_int(1, 4);
+                $call->c_updated_dt = null; //date("Y-m-d H:i:s", strtotime('-' . random_int(1, 60) . ' minutes'));
                 $call->c_created_dt = $call->c_updated_dt;
                 $call->c_queue_start_dt = date("Y-m-d H:i:s", strtotime('-' . random_int(1, 15) . ' minutes'));
                 $call->sendFrontendData('update');

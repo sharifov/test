@@ -574,7 +574,7 @@ class CallController extends FController
 
         /** @var Employee $user */
         $user = \Yii::$app->user->identity;
-        $response['userTimeZone'] = $user->timezone ?: 'UTC';
+        $response['userTimeZone'] = null; //$user->timezone ?: 'UTC';
 
         return $response;
     }
