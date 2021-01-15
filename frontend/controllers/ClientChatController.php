@@ -2278,7 +2278,7 @@ class ClientChatController extends FController
 
                                     $clientChatLink = Purifier::createChatShortLink($chat);
                                     Notifications::createAndPublish(
-                                        $newOwner,
+                                        $newOwner->id,
                                         'Chat assigned',
                                         Auth::user()->nickname . ' has assigned Client Chat (' . $clientChatLink . ')',
                                         Notifications::TYPE_INFO,
