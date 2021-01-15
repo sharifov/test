@@ -42,6 +42,7 @@ class FileStorage extends \yii\db\ActiveRecord
         Uid $uid,
         string $mimeType,
         string $hash,
+        bool $private,
         \DateTimeImmutable $createdDt
     ): self {
         $file = new static();
@@ -52,6 +53,7 @@ class FileStorage extends \yii\db\ActiveRecord
         $file->fs_uid = $uid->getValue();
         $file->fs_mime_type = $mimeType;
         $file->fs_md5_hash = $hash;
+        $file->fs_private = $private;
         $file->fs_created_dt = $createdDt->format('Y-m-d H:i:s');
         return $file;
     }

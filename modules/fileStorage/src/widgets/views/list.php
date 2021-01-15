@@ -1,11 +1,13 @@
 <?php
 
+use modules\fileStorage\src\UrlGenerator;
 use yii\helpers\Html;
 use yii\web\View;
 
 /** @var View $this */
 /** @var array $files */
 /** @var string $uploadWidget */
+/** @var UrlGenerator $urlGenerator */
 
 $countFiles = count($files);
 ?>
@@ -29,9 +31,9 @@ $countFiles = count($files);
             </tr>
             <?php foreach ($files as $file) : ?>
                 <tr>
-                    <td><?= Html::a('<i class="fa fa-download"> </i>', $file['url']) ?></td>
-                    <td><?= Html::encode($file['name']) ?></td>
-                    <td><?= Html::encode($file['title']) ?></td>
+                    <td><?= Html::a('<i class="fa fa-download"> </i>', $urlGenerator->generate($file['fs_path'])) ?></td>
+                    <td><?= Html::encode($file['fs_name']) ?></td>
+                    <td><?= Html::encode($file['fs_title']) ?></td>
                 </tr>
             <?php endforeach; ?>
         </table>

@@ -99,6 +99,7 @@ class LeadUploader
                 $uid,
                 $file->type,
                 md5_file($file->tempName),
+                false,
                 new \DateTimeImmutable()
             );
             try {

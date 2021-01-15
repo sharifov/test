@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = 'Update';
 
             <?= $activeForm->field($form, 'fs_private')->checkbox() ?>
 
-            <?= $activeForm->field($form, 'fs_expired_dt')->widget(DateTimePicker::class) ?>
+            <?php //= $activeForm->field($form, 'fs_expired_dt')->widget(DateTimePicker::class) ?>
 
             <div class="form-group">
                 <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

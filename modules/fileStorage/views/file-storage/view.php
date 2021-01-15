@@ -37,7 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'fs_name',
                 'fs_title',
                 'fs_path',
-                'fs_size',
+                'fs_size:shortSize',
                 'fs_md5_hash',
                 'fs_private:booleanByLabel',
                 'fs_expired_dt:byUserDatetime',
