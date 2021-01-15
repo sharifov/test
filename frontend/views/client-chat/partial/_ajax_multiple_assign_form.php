@@ -11,7 +11,7 @@ use sales\model\clientChat\entity\ClientChat;
 use yii\widgets\ActiveForm;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
-
+use yii\helpers\Url;
 ?>
 
 <?php if (!$alertMessage) : ?>
@@ -27,12 +27,15 @@ use yii\widgets\Pjax;
             'id' => 'cc-submit-multiple-assign-form',
             'options' => ['data-pjax' => 1],
             'enableClientValidation' => false,
+            'enableAjaxValidation' => true,
+            'validateOnChange' => false,
+            'validateOnBlur' => false,
+            'validationUrl' => Url::to(['client-chat/validate-multiple-assign']),
         ]) ?>
 
             <?php $form->errorSummary($formMultipleAssign); ?>
 
             <?= $form->field($formMultipleAssign, 'chatIds')->hiddenInput()->label(false) ?>
-
 
             <?php if (Auth::can('client-chat/multiple/assign/manage')) : ?>
                 <label class="control-label">Assign Chats</label>
