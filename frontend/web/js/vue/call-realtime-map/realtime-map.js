@@ -241,7 +241,7 @@ var callMapApp = Vue.createApp({
             return this.getCallListByStatusId([1, 2])
         },
         callList2: function () {
-            return this.getCallListByStatusId([1, 2, 3, 4, 10, 12])
+            return this.getCallListByStatusId([3, 4, 10, 12])
         },
         onlineUserCounter: function () {
             return this.onlineUserList.length
