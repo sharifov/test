@@ -25,7 +25,9 @@ class MultipleCloseForm extends Model
             ['chatIds', 'each', 'rule' => ['exist', 'targetClass' => ClientChat::class, 'targetAttribute' => 'cch_id']],
 
             ['toArchive', 'boolean'],
-            [['toArchive'], 'default', 'value' => false],
+            ['toArchive', 'default', 'value' => false],
+            ['toArchive', 'filter', 'filter' => 'boolval'],
+            ['toArchive', 'compare', 'compareValue' => true, 'message' => 'Please fix the following errors: Check to confirm'],
         ];
     }
 

@@ -96,6 +96,7 @@ use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
+use yii\widgets\ActiveForm;
 
 /**
  * Class ClientChatController
@@ -269,6 +270,8 @@ class ClientChatController extends FController
                     'view',
                     'ajax-multiple-assign',
                     'ajax-multiple-close',
+                    'validate-multiple-assign',
+                    'validate-multiple-close',
                 ],
             ],
         ];
@@ -2226,6 +2229,16 @@ class ClientChatController extends FController
         throw new BadRequestHttpException();
     }
 
+    public function actionValidateMultipleAssign()
+    {
+        $form = new MultipleAssignForm(Auth::id());
+        if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($form);
+        }
+        throw new BadRequestHttpException();
+    }
+
     public function actionAjaxMultipleAssign()
     {
         if (!Yii::$app->request->isPost) {
@@ -2265,7 +2278,7 @@ class ClientChatController extends FController
 
                                     $clientChatLink = Purifier::createChatShortLink($chat);
                                     Notifications::createAndPublish(
-                                        $newOwner,
+                                        $newOwner->id,
                                         'Chat assigned',
                                         Auth::user()->nickname . ' has assigned Client Chat (' . $clientChatLink . ')',
                                         Notifications::TYPE_INFO,
@@ -2281,23 +2294,34 @@ class ClientChatController extends FController
                         setTimeout(()=>{window.location.reload();}, 1000);</script>';
                 } catch (\Throwable $throwable) {
                     $alertMessage .= VarDumper::dumpAsString($throwable->getMessage()) . '<br />';
+                    \Yii::error(
+                        AppHelper::throwableLog($throwable, true),
+                        'ClientChatController:actionAjaxMultipleAssign'
+                    );
                 }
             }
             $alertMessage .= ErrorsToStringHelper::extractFromModel($form) . '<br />';
         }
 
-        $chatIds = Yii::$app->request->post('chatIds');
-
-        if (empty($chatIds)) {
-            $alertMessage .= 'Select the chats you want to update';
+        if (!$form->chatIds) {
+            $chatIds = Yii::$app->request->post('chatIds');
+            $form->chatIds = ClientChatHelper::prepareChatIds($chatIds);
         }
-
-        $form->chatIds = $chatIds;
 
         return $this->renderAjax('partial/_ajax_multiple_assign_form', [
             'formMultipleAssign' => $form,
             'alertMessage' => $alertMessage,
         ]);
+    }
+
+    public function actionValidateMultipleClose()
+    {
+        $form = new MultipleCloseForm();
+        if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($form);
+        }
+        throw new BadRequestHttpException();
     }
 
     public function actionAjaxMultipleClose()
@@ -2328,18 +2352,19 @@ class ClientChatController extends FController
                         setTimeout(()=>{window.location.reload();}, 1000);</script>';
                 } catch (\Throwable $throwable) {
                     $alertMessage .= VarDumper::dumpAsString($throwable->getMessage()) . '<br />';
+                    \Yii::error(
+                        AppHelper::throwableLog($throwable, true),
+                        'ClientChatController:actionAjaxMultipleClose'
+                    );
                 }
             }
             $alertMessage .= ErrorsToStringHelper::extractFromModel($form) . '<br />';
         }
 
-        $chatIds = Yii::$app->request->post('chatIds');
-
-        if (empty($chatIds)) {
-            $alertMessage .= 'Select the chats you want to update';
+        if (!$form->chatIds) {
+            $chatIds = Yii::$app->request->post('chatIds');
+            $form->chatIds = ClientChatHelper::prepareChatIds($chatIds);
         }
-
-        $form->chatIds = $chatIds;
 
         return $this->renderAjax('partial/_ajax_multiple_close_form', [
             'formMultipleClose' => $form,

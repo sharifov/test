@@ -4,6 +4,7 @@ namespace sales\helpers\clientChat;
 
 use common\models\Employee;
 use common\models\UserProfile;
+use frontend\helpers\JsonHelper;
 use sales\auth\Auth;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
@@ -136,5 +137,14 @@ class ClientChatHelper
             return null;
         }
         return null;
+    }
+
+    public static function prepareChatIds(string $sourceIds): string
+    {
+        $ids = JsonHelper::decode($sourceIds);
+        $ids = array_filter($ids, static function ($value) {
+            return !is_null($value);
+        });
+        return $ids ? JsonHelper::encode($ids) : '[]';
     }
 }
