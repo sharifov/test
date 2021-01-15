@@ -270,6 +270,8 @@ class ClientChatController extends FController
                     'view',
                     'ajax-multiple-assign',
                     'ajax-multiple-close',
+                    'validate-multiple-assign',
+                    'validate-multiple-close',
                 ],
             ],
         ];
