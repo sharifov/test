@@ -634,11 +634,11 @@ class EmployeeController extends FController
                 }
             }
 
-            if ($user->isAnySupervision()) {
+            /*if ($user->isAnySupervision()) {
                 if ($model->isAdmin()) {
                     throw new NotFoundHttpException('Access denied for Admin user: ' . $model->id);
                 }
-            }
+            }*/
 
             $modelUserParams = UserParams::findOne($model->id);
             if (!$modelUserParams) {
