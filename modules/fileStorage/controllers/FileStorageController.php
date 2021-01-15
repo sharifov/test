@@ -74,7 +74,7 @@ class FileStorageController extends FController
     /**
      * @return string|Response
      */
-    public function _actionCreate()
+    public function create()
     {
         $model = new FileStorage();
 
