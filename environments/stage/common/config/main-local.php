@@ -57,7 +57,7 @@ return [
                 'hostname' => '{{ common.config.main.components.cache.redis.hostname:str }}',
                 'port' => '{{ common.config.main.components.cache.redis.port:int }}',
                 'password' => '{{ common.config.main.components.cache.redis.password:str }}',
-                'database' => '{{ common.config.main.components.cache.redis.database:str }}',
+                'database' => '{{ common.config.main.components.cache.redis.database:int }}',
                 'unixSocket' => null,
             ],
         ],
