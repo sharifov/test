@@ -2294,7 +2294,10 @@ class ClientChatController extends FController
                         setTimeout(()=>{window.location.reload();}, 1000);</script>';
                 } catch (\Throwable $throwable) {
                     $alertMessage .= VarDumper::dumpAsString($throwable->getMessage()) . '<br />';
-                    \Yii::error(AppHelper::throwableLog($throwable), 'ClientChatController:actionAjaxMultipleAssign');
+                    \Yii::error(
+                        AppHelper::throwableLog($throwable, true),
+                        'ClientChatController:actionAjaxMultipleAssign'
+                    );
                 }
             }
             $alertMessage .= ErrorsToStringHelper::extractFromModel($form) . '<br />';
@@ -2349,6 +2352,10 @@ class ClientChatController extends FController
                         setTimeout(()=>{window.location.reload();}, 1000);</script>';
                 } catch (\Throwable $throwable) {
                     $alertMessage .= VarDumper::dumpAsString($throwable->getMessage()) . '<br />';
+                    \Yii::error(
+                        AppHelper::throwableLog($throwable, true),
+                        'ClientChatController:actionAjaxMultipleClose'
+                    );
                 }
             }
             $alertMessage .= ErrorsToStringHelper::extractFromModel($form) . '<br />';
