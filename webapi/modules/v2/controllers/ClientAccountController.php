@@ -315,7 +315,7 @@ class ClientAccountController extends BaseController
 
             return new SuccessResponse(
                 new DataMessage(
-                    new Message('ClientAccount created successfully', $clientAccount->ca_id)
+                    new Message('uuid', $clientAccount->ca_uuid),
                 )
             );
         } catch (\Throwable $throwable) {
