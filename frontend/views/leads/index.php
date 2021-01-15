@@ -175,8 +175,8 @@ $this->registerJs($js);
             'class' => \common\components\grid\project\ProjectColumn::class,
             'attribute' => 'project_id',
             'relation' => 'project',
-            'onlyUserProjects' => true,
-            'filter' => $showFilter,
+            'onlyUserProjects' => $showFilter,
+            'filter' => $showFilter ? null : false,
         ],
         [
             'attribute' => 'client_id',

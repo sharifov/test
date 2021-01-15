@@ -163,7 +163,7 @@ class LeadSearch extends Lead
         return [
             [['datetime_start', 'datetime_end', 'createTimeRange'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id', 'l_duplicate_lead_id', 'l_type_create'], 'integer'],
+            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'projectId', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id', 'l_duplicate_lead_id', 'l_type_create'], 'integer'],
             [['email_status', 'quote_status', 'l_is_test'], 'integer'],
             [['lfOwnerId', 'userGroupId', 'departmentId', 'projectId', 'createdType'], 'integer'],
 
@@ -222,6 +222,7 @@ class LeadSearch extends Lead
             'smsQtyFrom' => 'Sms From', 'smsQtyTo' => 'Sms To',
             'callsQtyFrom' => 'Calls From', 'callsQtyTo' => 'Calls To',
             'chatsQtyFrom' => 'Chats From', 'chatsQtyTo' => 'Chats To',
+            'projectId' => 'Project'
         ];
         return array_merge(parent::attributeLabels(), $labels2);
     }
@@ -340,6 +341,10 @@ class LeadSearch extends Lead
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
+        }
+
+        if ($this->projectId) {
+            $query->andWhere(['project_id' => $this->projectId]);
         }
 
         // grid filtering conditions
