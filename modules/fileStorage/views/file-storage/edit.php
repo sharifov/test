@@ -5,7 +5,6 @@ use yii\bootstrap4\Html;
 use sales\widgets\DateTimePicker;
 use yii\widgets\ActiveForm;
 
-
 /* @var $this yii\web\View */
 /* @var $form EditForm */
 /* @var $this yii\web\View */
