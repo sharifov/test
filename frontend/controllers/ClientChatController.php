@@ -2265,18 +2265,18 @@ class ClientChatController extends FController
                                 if ($oldOwnerId = $chat->cch_owner_user_id) {
                                     $this->clientChatService->takeClientChat($chat, $newOwner, ClientChatStatusLog::ACTION_MULTIPLE_TAKE);
 
+                                    Notifications::createAndPublish(
+                                        $oldOwnerId,
+                                        'Chat was taken to ' . $newOwner->nickname,
+                                        Auth::user()->nickname . ' has take your Client Chat to ' . $newOwner->nickname,
+                                        Notifications::TYPE_INFO,
+                                        true
+                                    );
+
                                     Notifications::pub(
                                         [ClientChatChannel::getPubSubKey($chat->cch_channel_id)],
                                         'refreshChatPage',
                                         ['data' => ClientChatAccessMessage::chatTakenBy($chat->cch_id, $newOwner->nickname, Auth::user()->nickname)]
-                                    );
-
-                                    Notifications::createAndPublish(
-                                        $oldOwnerId,
-                                        'Chat was taken',
-                                        Auth::user()->nickname . ' has take your Client Chat to ' . $newOwner->nickname,
-                                        Notifications::TYPE_INFO,
-                                        true
                                     );
                                 } else {
                                     $this->clientChatService->acceptFromMultipleUpdate($chat, $form->assignUserId);
