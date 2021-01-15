@@ -25,4 +25,9 @@ class FileSystem
     {
         $this->filesystemOperator->writeStream($location, $contents, array_merge($this->configurator->getUploadConfig(), $config));
     }
+
+    public function delete(string $location): void
+    {
+        $this->filesystemOperator->delete($location);
+    }
 }

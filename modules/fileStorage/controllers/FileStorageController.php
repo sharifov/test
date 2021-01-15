@@ -126,7 +126,16 @@ class FileStorageController extends FController
      */
     public function actionDelete($id): Response
     {
-        $this->findModel($id)->delete();
+        $model = $this->findModel($id);
+
+        try {
+            $this->fileStorageService->remove($model->fs_id);
+            Yii::$app->session->addFlash('success', 'Success');
+        } catch (\DomainException $e) {
+            Yii::$app->session->addFlash('error', $e->getMessage());
+        } catch (\Throwable $e) {
+            Yii::$app->session->addFlash('error', 'Server error. Try again later.');
+        }
 
         return $this->redirect(['index']);
     }
