@@ -11,6 +11,7 @@ use sales\model\clientChat\entity\ClientChat;
 use yii\widgets\ActiveForm;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
+use yii\helpers\Url;
 
 ?>
 
@@ -27,6 +28,10 @@ use yii\widgets\Pjax;
             'id' => 'cc-submit-multiple-close-form',
             'options' => ['data-pjax' => 1],
             'enableClientValidation' => false,
+            'enableAjaxValidation' => true,
+            'validateOnChange' => false,
+            'validateOnBlur' => false,
+            'validationUrl' => Url::to(['client-chat/validate-multiple-close']),
         ]) ?>
 
             <?php $form->errorSummary($formMultipleClose); ?>
@@ -34,6 +39,7 @@ use yii\widgets\Pjax;
             <?= $form->field($formMultipleClose, 'chatIds')->hiddenInput()->label(false); ?>
 
             <label class="control-label">Please confirm closing chats:</label>
+
             <?php echo $form->field($formMultipleClose, 'toArchive')->checkbox()->label(false) ?>
 
             <div class="text-center">
