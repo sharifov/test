@@ -3,6 +3,8 @@
 namespace modules\fileStorage\controllers;
 
 use frontend\controllers\FController;
+use modules\fileStorage\src\FileStorageService;
+use modules\fileStorage\src\useCase\fileStorage\update\EditForm;
 use Yii;
 use modules\fileStorage\src\entity\fileStorage\FileStorage;
 use modules\fileStorage\src\entity\fileStorage\search\FileStorageSearch;
@@ -12,8 +14,21 @@ use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\db\StaleObjectException;
 
+/**
+ * Class FileStorageController
+ *
+ * @property FileStorageService $fileStorageService
+ */
 class FileStorageController extends FController
 {
+    private FileStorageService $fileStorageService;
+
+    public function __construct($id, $module, FileStorageService $fileStorageService, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->fileStorageService = $fileStorageService;
+    }
+
     /**
     * @return array
     */
@@ -77,16 +92,28 @@ class FileStorageController extends FController
      * @return string|Response
      * @throws NotFoundHttpException
      */
-    public function actionUpdate($id)
+    public function actionEdit($id)
     {
         $model = $this->findModel($id);
+        $form = new EditForm($model);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $this->fileStorageService->edit($form);
+            } catch (\DomainException $e) {
+                Yii::$app->session->addFlash('error', $e->getMessage());
+            } catch (\Throwable $e) {
+                Yii::error([
+                    'message' => 'File storage edit error',
+                    'error' => $e->getMessage(),
+                ], 'FileStorageController::actionUpdate');
+                Yii::$app->session->addFlash('error', 'Server error. Try again.');
+            }
             return $this->redirect(['view', 'id' => $model->fs_id]);
         }
 
-        return $this->render('update', [
-            'model' => $model,
+        return $this->render('edit', [
+            'form' => $form,
         ]);
     }
 

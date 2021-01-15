@@ -31,7 +31,7 @@ class FileStorageListWidget extends Widget
             ->select(['fs_name as name', 'fs_path as url', 'fs_title as title', 'fld_fs_id'])
             ->byLead($id)
             ->innerJoinWith('file', false)
-            ->orderBy(['fld_fs_id' => SORT_ASC])
+            ->orderBy(['fld_fs_id' => SORT_DESC])
             ->asArray()
             ->all();
 

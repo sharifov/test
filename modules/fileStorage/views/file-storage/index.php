@@ -33,7 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'fs_name',
             'fs_title',
 
-            ['class' => 'yii\grid\ActionColumn'],
+            ['class' => 'yii\grid\ActionColumn', 'template' => '{view} {delete}'],
         ],
     ]); ?>
 

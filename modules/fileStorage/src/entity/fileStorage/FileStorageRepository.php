@@ -8,15 +8,15 @@ class FileStorageRepository
 {
     public function find(int $id): FileStorage
     {
-        if ($task = FileStorage::findOne($id)) {
-            return $task;
+        if ($file = FileStorage::findOne($id)) {
+            return $file;
         }
         throw new NotFoundException('FileStorage is not found.');
     }
 
-    public function save(FileStorage $task): void
+    public function save(FileStorage $file): void
     {
-        if (!$task->save(false)) {
+        if (!$file->save(false)) {
             throw new \RuntimeException('FileStorage saving error.');
         }
     }

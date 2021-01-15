@@ -52,6 +52,7 @@ class FileStorageUploadController extends Controller
         }
 
         $form = new UploadForm();
+        $form->load(\Yii::$app->request->post());
         $form->file = UploadedFile::getInstance($form, 'file');
 
         if (!$form->validate()) {
@@ -63,7 +64,13 @@ class FileStorageUploadController extends Controller
         }
 
         try {
-            $this->leadUploader->upload($lead->id, $lead->client_id, $lead->project->project_key, $form->file);
+            $this->leadUploader->upload(
+                $lead->id,
+                $lead->client_id,
+                $lead->project->project_key,
+                $form->fs_title,
+                $form->file
+            );
         } catch (\DomainException $e) {
             return $this->asJson([
                 'error' => true,

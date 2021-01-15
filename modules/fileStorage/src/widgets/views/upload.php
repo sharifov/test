@@ -28,6 +28,7 @@ $idForm = 'file-storage-upload-form-id';
                 'id' => $idForm,
                 'action' => $url,
             ]) ?>
+                <?= $activeForm->field($form, 'fs_title')->textInput() ?>
                 <?= $activeForm->field($form, 'file')->fileInput() ?>
                 <?= Html::submitButton('Upload', ['class' => 'file-storage-upload-btn btn btn-success']) ?>
             <?php ActiveForm::end() ?>
@@ -38,6 +39,8 @@ $idForm = 'file-storage-upload-form-id';
 
 $fileId = Html::getInputId($form, 'file');
 $fileName = Html::getInputName($form, 'file');
+$titleId = Html::getInputId($form, 'fs_title');
+$titleName = Html::getInputName($form, 'fs_title');
 
 $js = <<<JS
 $('#{$idForm}').on('beforeSubmit', function (e) {
@@ -45,7 +48,9 @@ $('#{$idForm}').on('beforeSubmit', function (e) {
     let yiiform = $(this);
     let file = $('#{$fileId}').prop('files')[0];
     let formData = new FormData();
+    let title = $('#{$titleId}').val();
     formData.append('{$fileName}', file);
+    formData.append('{$titleName}', title);
     fileStorageUploadButtonDisable();
     $.ajax({
         url: yiiform.attr('action'),
@@ -61,11 +66,13 @@ $('#{$idForm}').on('beforeSubmit', function (e) {
                 createNotify('Upload file', data.message, 'error');
             } else {
                 yiiform.yiiActiveForm('updateAttribute', '{$fileId}', data.errors.file);
+                yiiform.yiiActiveForm('updateAttribute', '{$titleId}', data.errors.fs_title);
             }
         } else {
             createNotify('Upload file', 'Success', 'success');
+            $('#{$fileId}').val('');
+            $('#{$titleId}').val('');
         }
-        $('#{$fileId}').val('');
         fileStorageUploadButtonEnable();
     })
     .fail(function() {

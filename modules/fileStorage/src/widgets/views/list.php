@@ -43,7 +43,7 @@ $countFiles = count($files);
 
 $js = <<<JS
 function addFileToFileStorageList(data) {
-    $('.file-storage-list').append('<tr><td><a href="' + data.url + '"><i class="fa fa-download"> </i></a></td><td>' + data.name + '</td><td>' + data.title + '</td></tr>');
+    $('.file-storage-list tr:first').after('<tr><td><a href="' + data.url + '"><i class="fa fa-download"> </i></a></td><td>' + data.name + '</td><td>' + data.title + '</td></tr>');
     let counter = $('.file-storage-list-counter');
     let count = parseInt(counter.attr('data-count'));
     count++;

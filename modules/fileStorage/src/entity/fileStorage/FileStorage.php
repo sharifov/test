@@ -36,6 +36,7 @@ class FileStorage extends \yii\db\ActiveRecord
 {
     public static function createByLead(
         string $name,
+        ?string $title,
         Path $path,
         int $size,
         Uid $uid,
@@ -45,6 +46,7 @@ class FileStorage extends \yii\db\ActiveRecord
     ): self {
         $file = new static();
         $file->fs_name = $name;
+        $file->fs_title = $title;
         $file->fs_path = $path->getValue();
         $file->fs_size = $size;
         $file->fs_uid = $uid->getValue();
@@ -54,10 +56,17 @@ class FileStorage extends \yii\db\ActiveRecord
         return $file;
     }
 
+    public function edit(?string $title, ?bool $private, \DateTimeImmutable $expiredDt): void
+    {
+        $this->fs_title = $title;
+        $this->fs_private = $private;
+        $this->fs_expired_dt = $expiredDt->format('Y-m-d H:i:s');
+    }
+
     public function rules(): array
     {
         return [
-            ['fs_expired_dt', 'safe'],
+            ['fs_expired_dt', 'datetime', 'php:Y-m-d H:i:s'],
 
             ['fs_mime_type', 'string', 'max' => 127],
 

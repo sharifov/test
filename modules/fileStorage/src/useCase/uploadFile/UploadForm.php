@@ -11,10 +11,12 @@ use yii\web\UploadedFile;
  * Class UploadForm
  *
  * @property $file
+ * @property $fs_title
  */
 class UploadForm extends Model
 {
     public $file;
+    public $fs_title;
 
     public function rules(): array
     {
@@ -22,6 +24,9 @@ class UploadForm extends Model
             ['file', 'required'],
             ['file', FileValidator::class],
             ['file', 'validateName','skipOnError' => true],
+
+            ['fs_title', 'default', 'value' => null],
+            ['fs_title', 'string', 'max' => 100],
         ];
     }
 
@@ -36,5 +41,12 @@ class UploadForm extends Model
         if (!$validator->validate($file->name, $error)) {
             $this->addError('file', 'Filename: ' . $error);
         }
+    }
+
+    public function attributeLabels(): array
+    {
+        return [
+            'fs_title' => 'Title',
+        ];
     }
 }

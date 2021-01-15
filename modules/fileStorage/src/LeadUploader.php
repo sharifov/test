@@ -52,12 +52,12 @@ class LeadUploader
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function upload(int $leadId, int $clientId, string $projectKey, UploadedFile $file): void
+    public function upload(int $leadId, int $clientId, string $projectKey, ?string $title, UploadedFile $file): void
     {
         /** @var $fileStorage FileStorage */
         /** @var $fileClient FileClient */
         /** @var $fileLead FileLead */
-        [$fileStorage, $fileClient, $fileLead] = $this->saveFile($leadId, $clientId, $projectKey, $file);
+        [$fileStorage, $fileClient, $fileLead] = $this->saveFile($leadId, $clientId, $projectKey, $title, $file);
 
         try {
             $stream = fopen($file->tempName, 'r+');
@@ -86,13 +86,14 @@ class LeadUploader
         }
     }
 
-    private function saveFile(int $leadId, int $clientId, string $projectKey, UploadedFile $file): array
+    private function saveFile(int $leadId, int $clientId, string $projectKey, ?string $title, UploadedFile $file): array
     {
-        return $this->postgresTransactionManager->wrap(function () use ($leadId, $clientId, $projectKey, $file) {
+        return $this->postgresTransactionManager->wrap(function () use ($leadId, $clientId, $projectKey, $title, $file) {
             $uid = Uid::next();
             $path = new Path(PathGenerator::byClient($clientId, $projectKey, $file->name, $uid));
             $fileStorage = FileStorage::createByLead(
                 $file->name,
+                $title,
                 $path,
                 $file->size,
                 $uid,

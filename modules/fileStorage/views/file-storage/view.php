@@ -18,7 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="col-md-4">
 
         <p>
-            <?= Html::a('Update', ['update', 'id' => $model->fs_id], ['class' => 'btn btn-primary']) ?>
+            <?= Html::a('Edit', ['edit', 'id' => $model->fs_id], ['class' => 'btn btn-primary']) ?>
             <?= Html::a('Delete', ['delete', 'id' => $model->fs_id], [
                 'class' => 'btn btn-danger',
                 'data' => [
