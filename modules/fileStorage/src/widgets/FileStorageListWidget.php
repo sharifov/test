@@ -2,6 +2,7 @@
 
 namespace modules\fileStorage\src\widgets;
 
+use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\entity\fileLead\FileLead;
 use modules\fileStorage\src\UrlGenerator;
 use yii\base\Widget;
@@ -27,6 +28,9 @@ class FileStorageListWidget extends Widget
 
     public function run(): string
     {
+        if (!FileStorageSettings::isEnabled()) {
+            return '';
+        }
         return $this->render('list', [
             'files' => $this->files,
             'uploadWidget' => $this->uploadWidget,

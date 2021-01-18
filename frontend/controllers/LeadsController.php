@@ -7,6 +7,7 @@ use common\models\search\LeadFlightSegmentSearch;
 use common\models\search\LeadSearch;
 use common\models\search\QuoteSearch;
 use frontend\widgets;
+use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\entity\fileLead\FileLead;
 use modules\fileStorage\src\entity\fileLead\FileLeadQuery;
 use Yii;
@@ -125,7 +126,11 @@ class LeadsController extends FController
             $dataProvider = $searchModel->searchAgent($params);
         } else {
             $dataProvider = $searchModel->search($params);
-            if (is_array($searchModel->show_fields) && in_array('count_files', $searchModel->show_fields, false)) {
+            if (
+                FileStorageSettings::isEnabled()
+                && is_array($searchModel->show_fields)
+                && in_array('count_files', $searchModel->show_fields, false)
+            ) {
                 $models = $dataProvider->getModels();
                 $ids = ArrayHelper::getColumn($models, 'id');
                 $files = FileLead::find()

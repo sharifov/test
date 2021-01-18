@@ -3,6 +3,7 @@
 namespace modules\fileStorage\controllers;
 
 use common\models\Lead;
+use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\LeadUploader;
 use modules\fileStorage\src\useCase\uploadFile\UploadForm;
 use yii\filters\VerbFilter;
@@ -38,6 +39,16 @@ class FileStorageUploadController extends Controller
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
+    public function beforeAction($action): bool
+    {
+        if (parent::beforeAction($action)) {
+            if (!FileStorageSettings::isEnabled() || !FileStorageSettings::isUploadEnabled()) {
+                throw new NotFoundHttpException();
+            }
+        }
+        return false;
     }
 
     public function actionUploadByLead()

@@ -2,6 +2,7 @@
 
 namespace modules\fileStorage\src\widgets;
 
+use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\useCase\uploadFile\UploadForm;
 use yii\base\Widget;
 use yii\helpers\Url;
@@ -25,6 +26,12 @@ class FileStorageUploadWidget extends Widget
 
     public function run(): string
     {
+        if (!FileStorageSettings::isEnabled()) {
+            return '';
+        }
+        if (!FileStorageSettings::isUploadEnabled()) {
+            return '';
+        }
         $form = new UploadForm();
         return $this->render('upload', ['form' => $form, 'url' => $this->url]);
     }
