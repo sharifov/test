@@ -32,13 +32,16 @@ class MultipleAssignForm extends Model
     public function rules(): array
     {
         return [
-            [['chatIds', 'assignUserId'], 'required'],
             ['chatIds', 'filter', 'filter' => static function ($value) {
                 return Json::decode($value);
             }],
+            ['chatIds', 'required', 'isEmpty' => function ($value) {
+                return !count($value);
+            }, 'message' => 'Please select chats'],
             ['chatIds', 'each', 'rule' => ['filter', 'filter' => 'intval']],
             ['chatIds', 'each', 'rule' => ['exist', 'targetClass' => ClientChat::class, 'targetAttribute' => 'cch_id']],
 
+            ['assignUserId', 'required'],
             ['assignUserId', 'integer'],
             ['assignUserId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             ['assignUserId', 'in', 'range' => array_keys($this->getCommonUsers()), 'skipOnEmpty' => true],
