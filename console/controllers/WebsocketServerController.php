@@ -387,17 +387,18 @@ class WebsocketServerController extends Controller
                     //$userOnline = UserOnline::find()->where(['uo_user_id' => $row['user_id']])->one();
                 }
 
-                $subQuery = UserConnection::find()->select(['DISTINCT(uc_user_id)']);
-                $userOnlineForDelete = UserOnline::find()->where(['NOT IN', 'uo_user_id', $subQuery])->all();
+//                $subQuery = UserConnection::find()->select(['DISTINCT(uc_user_id)']);
+//                $userOnlineForDelete = UserOnline::find()->where(['NOT IN', 'uo_user_id', $subQuery])->all();
+//
+//                unset($subQuery);
+//
+//                if ($userOnlineForDelete) {
+//                    foreach ($userOnlineForDelete as $item) {
+//                        $item->delete();
+//                    }
+//                }
+//                unset($userOnlineForDelete);
 
-                unset($subQuery);
-
-                if ($userOnlineForDelete) {
-                    foreach ($userOnlineForDelete as $item) {
-                        $item->delete();
-                    }
-                }
-                unset($userOnlineForDelete);
                 //\Yii::$app->db->createCommand('DELETE FROM user_online WHERE uo_user_id NOT IN (SELECT DISTINCT(uc_user_id) FROM user_connection)')->execute();
             }
 

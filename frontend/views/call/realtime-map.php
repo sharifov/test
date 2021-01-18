@@ -18,6 +18,13 @@ $this->title = 'Realtime Call Map';
         text-overflow: ellipsis;
     }
 
+    .truncate {
+        width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
     .list-move {
         transition: transform 0.8s;
     }
@@ -197,8 +204,8 @@ $this->title = 'Realtime Call Map';
             <div class="card card-default">
                 <div class="card-header"> Online Users  ({{ onlineUserCounter }}), TimeZone: {{ userTimeZone }}</div>
                 <transition-group name="list" tag="div" class="card-body">
-                    <div v-for="(item, index) in onlineUserList" class="list-item col-md-6" :key="item">
-                        <i class="fa fa-user text-success"></i> {{ getUserName(item.uo_user_id) }}
+                    <div v-for="(item, index) in onlineUserList" class="list-item col-md-6 truncate" :key="item">
+                        <i class="fa fa-user text-success"></i> {{ getUserName(item.uo_user_id) }}_123456789012
                     </div>
                 </transition-group>
             </div>
