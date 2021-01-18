@@ -18,7 +18,7 @@ class UserController extends Controller
      * @throws \Throwable
      * @throws \yii\db\StaleObjectException
      */
-    public function actionto(): void
+    public function actionUpdateOnlineStatus(): void
     {
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
         $timeStart = microtime(true);
