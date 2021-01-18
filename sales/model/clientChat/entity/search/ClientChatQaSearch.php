@@ -136,6 +136,10 @@ class ClientChatQaSearch extends ClientChat
             ->andFilterWhere(['like', 'cch_ip', $this->cch_ip])
             ->andFilterWhere(['like', 'cch_language_id', $this->cch_language_id]);
 
+        if ($this->ownerUserID) {
+            $query->andWhere(['cch_owner_user_id' => $this->ownerUserID]);
+        }
+
         if ($this->createdRangeDate) {
             $dateRange = explode(' - ', $this->createdRangeDate);
             if ($dateRange[0] && $dateRange[1]) {
@@ -245,6 +249,10 @@ class ClientChatQaSearch extends ClientChat
      */
     private function filterQuery(Scopes $query): ActiveQuery
     {
+        if ($this->ownerUserID) {
+            $query->andWhere(['cch_owner_user_id' => $this->ownerUserID]);
+        }
+
         if ($this->createdRangeDate) {
             $dateRange = explode(' - ', $this->createdRangeDate);
             if ($dateRange[0] && $dateRange[1]) {
