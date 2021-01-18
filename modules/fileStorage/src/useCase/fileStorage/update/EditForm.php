@@ -32,6 +32,7 @@ class EditForm extends Model
     public function rules(): array
     {
         return [
+            ['fs_title', 'trim'],
             ['fs_title', 'string', 'max' => 100],
 
             ['fs_private', 'boolean'],
@@ -40,7 +41,7 @@ class EditForm extends Model
         ];
     }
 
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'fs_title' => 'Title',

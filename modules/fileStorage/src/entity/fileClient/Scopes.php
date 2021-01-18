@@ -7,6 +7,16 @@ namespace modules\fileStorage\src\entity\fileClient;
 */
 class Scopes extends \yii\db\ActiveQuery
 {
+    public function byClient(int $clientId): self
+    {
+        return $this->andWhere(['fcl_client_id' => $clientId]);
+    }
+
+    public function byFile(int $fileId): self
+    {
+        return $this->andWhere(['fcl_fs_id' => $fileId]);
+    }
+
     /**
     * @return FileClient[]|array
     */

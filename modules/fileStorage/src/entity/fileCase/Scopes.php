@@ -7,6 +7,16 @@ namespace modules\fileStorage\src\entity\fileCase;
 */
 class Scopes extends \yii\db\ActiveQuery
 {
+    public function byCase(int $caseId): self
+    {
+        return $this->andWhere(['fc_case_id' => $caseId]);
+    }
+
+    public function byFile(int $fileId): self
+    {
+        return $this->andWhere(['fc_fs_id' => $fileId]);
+    }
+
     /**
     * @return FileCase[]|array
     */

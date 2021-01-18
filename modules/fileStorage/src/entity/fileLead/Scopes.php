@@ -12,6 +12,11 @@ class Scopes extends \yii\db\ActiveQuery
         return $this->andWhere(['fld_lead_id' => $leadId]);
     }
 
+    public function byFile(int $fileId): self
+    {
+        return $this->andWhere(['fld_fs_id' => $fileId]);
+    }
+
     /**
     * @return FileLead[]|array
     */

@@ -65,15 +65,33 @@ class FileStorage extends \yii\db\ActiveRecord
         $this->fs_expired_dt = $expiredDt->format('Y-m-d H:i:s');
     }
 
+    public function rename(string $name): void
+    {
+        $this->fs_name = $name;
+        $this->changePath();
+    }
+
+    private function changePath(): void
+    {
+        $positionLastChunk = strrpos($this->fs_path, '/');
+        if ($positionLastChunk === false) {
+            throw new \DomainException('Path value is error.');
+        }
+        $this->fs_path = substr($this->fs_path, 0, $positionLastChunk) . '/' . $this->fs_name;
+    }
+
     public function rules(): array
     {
         return [
             ['fs_expired_dt', 'datetime', 'php:Y-m-d H:i:s'],
 
+            ['fs_mime_type', 'trim'],
             ['fs_mime_type', 'string', 'max' => 127],
 
+            ['fs_name', 'trim'],
             ['fs_name', 'string', 'max' => 100],
 
+            ['fs_path', 'trim'],
             ['fs_path', 'string', 'max' => 250],
 
             ['fs_private', 'boolean'],
@@ -81,11 +99,14 @@ class FileStorage extends \yii\db\ActiveRecord
             ['fs_size', 'default', 'value' => null],
             ['fs_size', 'integer'],
 
+            ['fs_title', 'trim'],
             ['fs_title', 'string', 'max' => 100],
 
+            ['fs_uid', 'trim'],
             ['fs_uid', 'string', 'max' => 32],
             ['fs_uid', 'unique'],
 
+            ['fs_md5_hash', 'trim'],
             ['fs_md5_hash', 'string', 'max' => 32],
         ];
     }

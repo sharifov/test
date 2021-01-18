@@ -36,7 +36,8 @@ class UploadForm extends Model
         $file = $this->file;
 
         $validator = new StringValidator([
-            'max' => 100
+            'min' => 1,
+            'max' => 100,
         ]);
         if (!$validator->validate($file->name, $error)) {
             $this->addError('file', 'Filename: ' . $error);

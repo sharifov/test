@@ -4,6 +4,7 @@ namespace modules\fileStorage\controllers;
 
 use frontend\controllers\FController;
 use modules\fileStorage\src\FileStorageService;
+use modules\fileStorage\src\useCase\fileStorage\rename\RenameForm;
 use modules\fileStorage\src\useCase\fileStorage\update\EditForm;
 use Yii;
 use modules\fileStorage\src\entity\fileStorage\FileStorage;
@@ -100,6 +101,7 @@ class FileStorageController extends FController
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
                 $this->fileStorageService->edit($form);
+                Yii::$app->session->addFlash('success', 'Success');
             } catch (\DomainException $e) {
                 Yii::$app->session->addFlash('error', $e->getMessage());
             } catch (\Throwable $e) {
@@ -138,6 +140,37 @@ class FileStorageController extends FController
         }
 
         return $this->redirect(['index']);
+    }
+
+    /**
+     * @param integer $id
+     * @return string|Response
+     * @throws NotFoundHttpException
+     */
+    public function actionRename($id)
+    {
+        $model = $this->findModel($id);
+        $form = new RenameForm($model);
+
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $this->fileStorageService->rename($form->fs_id, $form->getName());
+                Yii::$app->session->addFlash('success', 'Success');
+            } catch (\DomainException $e) {
+                Yii::$app->session->addFlash('error', $e->getMessage());
+            } catch (\Throwable $e) {
+                Yii::error([
+                    'message' => 'File storage rename error',
+                    'error' => $e->getMessage(),
+                ], 'FileStorageController::actionRename');
+                Yii::$app->session->addFlash('error', 'Server error. Try again.');
+            }
+            return $this->redirect(['view', 'id' => $model->fs_id]);
+        }
+
+        return $this->render('rename', [
+            'form' => $form,
+        ]);
     }
 
     /**

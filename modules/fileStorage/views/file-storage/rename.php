@@ -2,7 +2,6 @@
 
 use modules\fileStorage\src\useCase\fileStorage\update\EditForm;
 use yii\bootstrap4\Html;
-use sales\widgets\DateTimePicker;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
@@ -10,13 +9,13 @@ use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $activeForm ActiveForm */
 
-$this->title = 'Edit File Storage: ' . $form->fs_id;
+$this->title = 'Rename File Storage: ' . $form->fs_id;
 $this->params['breadcrumbs'][] = ['label' => 'File Storages', 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $form->fs_id, 'url' => ['view', 'id' => $form->fs_id]];
-$this->params['breadcrumbs'][] = 'Update';
+$this->params['breadcrumbs'][] = 'Rename';
 
 ?>
-<div class="file-storage-edit">
+<div class="file-storage-rename">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
@@ -26,11 +25,7 @@ $this->params['breadcrumbs'][] = 'Update';
 
             <?php $activeForm = ActiveForm::begin(); ?>
 
-            <?= $activeForm->field($form, 'fs_title')->textInput(['maxlength' => true]) ?>
-
-            <?php //= $activeForm->field($form, 'fs_private')->checkbox() ?>
-
-            <?php //= $activeForm->field($form, 'fs_expired_dt')->widget(DateTimePicker::class) ?>
+            <?= $activeForm->field($form, 'fs_name')->textInput(['maxlength' => true]) ?>
 
             <div class="form-group">
                 <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

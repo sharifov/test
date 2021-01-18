@@ -21,13 +21,33 @@ class FileSystem
         $this->configurator = $configurator;
     }
 
+    /**
+     * @param string $location
+     * @param $contents
+     * @param array $config
+     * @throws \League\Flysystem\FilesystemException
+     */
     public function writeStream(string $location, $contents, array $config = []): void
     {
         $this->filesystemOperator->writeStream($location, $contents, array_merge($this->configurator->getUploadConfig(), $config));
     }
 
+    /**
+     * @param string $location
+     * @throws \League\Flysystem\FilesystemException
+     */
     public function delete(string $location): void
     {
         $this->filesystemOperator->delete($location);
+    }
+
+    /**
+     * @param string $oldLocation
+     * @param string $newLocation
+     * @throws \League\Flysystem\FilesystemException
+     */
+    public function rename(string $oldLocation, string $newLocation): void
+    {
+        $this->filesystemOperator->move($oldLocation, $newLocation);
     }
 }
