@@ -1349,8 +1349,7 @@ $(document).on('click', '.js-couch-note-btn', function (e) {
         dataType: 'json'    
     })
     .done(function(dataResponse) {        
-        if (dataResponse.status > 0) { 
-            createNotify('Success', dataResponse.message, 'success');
+        if (dataResponse.status > 0) {
             $('#couchNoteMessage').val('');
         } else if (dataResponse.message.length) {
             createNotify('Error', dataResponse.message, 'error');
