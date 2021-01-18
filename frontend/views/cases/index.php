@@ -265,7 +265,8 @@ $gridId = 'cases-grid-id';
                     }
                     return $out;
                 },
-                'format' => 'raw'
+                'format' => 'raw',
+                'visible' => $searchModel->showFields && in_array('sale_info', $searchModel->showFields, true),
             ],
             [
                 'class' => 'yii\grid\ActionColumn',

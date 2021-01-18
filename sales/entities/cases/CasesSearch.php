@@ -72,6 +72,7 @@ use yii\db\Query;
  * @property int|null $chatsQtyFrom
  * @property int|null $chatsQtyTo
  * @property int|null $caseUserGroup
+ * @property array $showFields
  */
 class CasesSearch extends Cases
 {
@@ -119,6 +120,8 @@ class CasesSearch extends Cases
     public $datetime_start;
     public $datetime_end;
     public $date_range;
+
+    public $showFields = [];
 
     private $cacheSaleData = [];
 
@@ -174,6 +177,10 @@ class CasesSearch extends Cases
             ],
             [['datetime_start', 'datetime_end'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+
+            ['showFields', 'filter', 'filter' => static function ($value) {
+                return is_array($value) ? $value : [];
+            }, 'skipOnEmpty' => true],
         ];
     }
 
@@ -1005,5 +1012,12 @@ class CasesSearch extends Cases
         ];
 
         return new SqlDataProvider($paramsData);
+    }
+
+    public function getViewFields(): array
+    {
+        return [
+            'sale_info' => 'Sale info',
+        ];
     }
 }
