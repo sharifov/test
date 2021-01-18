@@ -245,6 +245,15 @@ class ClientChatQaSearch extends ClientChat
      */
     private function filterQuery(Scopes $query): ActiveQuery
     {
+        if ($this->createdRangeDate) {
+            $dateRange = explode(' - ', $this->createdRangeDate);
+            if ($dateRange[0] && $dateRange[1]) {
+                $fromDate = date('Y-m-d', strtotime($dateRange[0]));
+                $toDate = date('Y-m-d', strtotime($dateRange[1]));
+                $query->andWhere(['BETWEEN', 'DATE(cch_created_dt)', $fromDate, $toDate]);
+            }
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'cch_id' => $this->cch_id,
