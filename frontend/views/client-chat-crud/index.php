@@ -397,7 +397,7 @@ $script = <<< JS
     });
         
     $(pjaxContainer).on('pjax:end', function() { 
-        sessionStorage.removeItem(storageName);
+       refreshSelectedState();
     });
     
     $('body').on('click', '.btn-show-checked-ids', function(e) {
