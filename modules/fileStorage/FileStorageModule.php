@@ -15,22 +15,6 @@ class FileStorageModule extends Module
         $this->setViewPath('@modules/fileStorage/views');
     }
 
-    public static function getMimeTypes(): array
-    {
-        return [
-            'image/jpeg' => 'image/jpeg',
-            'image/png' => 'image/png',
-            'text/plain' => 'text/plain',
-            'application/pdf' => 'application/pdf',
-            'application/msword' => 'application/msword',
-        ];
-    }
-
-    public static function getUploadMaxSize()
-    {
-        return 220 * 1024 * 1024;
-    }
-
     public static function getListMenu(string $modulePath = 'file-storage'): array
     {
         $items = [

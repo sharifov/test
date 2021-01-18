@@ -1,6 +1,6 @@
 <?php
 
-use modules\fileStorage\FileStorageModule;
+use modules\fileStorage\FileStorageSettings;
 use sales\widgets\DateTimePicker;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
@@ -18,7 +18,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'fs_uid')->textInput(['maxlength' => true]) ?>
 
-        <?= $form->field($model, 'fs_mime_type')->dropDownList(FileStorageModule::getMimeTypes(), ['prompt' => 'Select type']) ?>
+        <?= $form->field($model, 'fs_mime_type')->dropDownList(FileStorageSettings::getMimeTypes(), ['prompt' => 'Select type']) ?>
 
         <?= $form->field($model, 'fs_name')->textInput(['maxlength' => true]) ?>
 

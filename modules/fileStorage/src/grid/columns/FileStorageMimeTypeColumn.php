@@ -2,7 +2,7 @@
 
 namespace  modules\fileStorage\src\grid\columns;
 
-use modules\fileStorage\FileStorageModule;
+use modules\fileStorage\FileStorageSettings;
 use yii\grid\DataColumn;
 
 /**
@@ -22,7 +22,7 @@ class FileStorageMimeTypeColumn extends DataColumn
         parent::init();
 
         if ($this->filter === null) {
-            $this->filter = FileStorageModule::getMimeTypes();
+            $this->filter = FileStorageSettings::getMimeTypes();
         }
     }
 }

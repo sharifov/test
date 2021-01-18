@@ -2,14 +2,14 @@
 
 namespace modules\fileStorage\src\validator;
 
-use modules\fileStorage\FileStorageModule;
+use modules\fileStorage\FileStorageSettings;
 
 class FileValidator extends \yii\validators\FileValidator
 {
     public function init()
     {
-        $this->maxSize = FileStorageModule::getUploadMaxSize();
-        $this->mimeTypes = array_keys(FileStorageModule::getMimeTypes());
+        $this->maxSize = FileStorageSettings::getUploadMaxSize();
+        $this->mimeTypes = array_keys(FileStorageSettings::getMimeTypes());
         parent::init();
     }
 }
