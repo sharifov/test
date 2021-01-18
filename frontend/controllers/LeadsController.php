@@ -146,7 +146,7 @@ class LeadsController extends FController
                 $dataProvider->setModels($models);
             }
         }
-        
+
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
