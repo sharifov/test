@@ -28,6 +28,7 @@ use sales\model\project\entity\projectLocale\ProjectLocale;
 use yii\helpers\Html;
 use yii\bootstrap4\Modal;
 use vova07\imperavi\Widget;
+use yii\helpers\VarDumper;
 
 $c_type_id = $comForm->c_type_id;
 
@@ -172,7 +173,7 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                             <?php if ($isAdmin) :?>
                                 <div class="row" style="display: none" id="email-data-content-div">
                         <pre><?php
-                            //\yii\helpers\VarDumper::dump($previewEmailForm->e_content_data, 10, true);
+                            //VarDumper::dump($previewEmailForm->e_content_data, 10, true);
                             echo json_encode($previewEmailForm->e_content_data);
                         ?>
                         </pre>

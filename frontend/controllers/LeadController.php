@@ -52,6 +52,7 @@ use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
+use sales\model\airportLang\helpers\AirportLangHelper;
 use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\permissions\ClientChatActionPermission;
@@ -618,6 +619,7 @@ class LeadController extends FController
 
 
                     $language = $comForm->c_language_id ?: 'en-US';
+                    $lang = AirportLangHelper::getLangFromLocale($language);
 
                     $previewEmailForm->e_lead_id = $lead->id;
                     $previewEmailForm->e_email_tpl_id = $comForm->c_email_tpl_id;
@@ -629,15 +631,11 @@ class LeadController extends FController
                         $tpl = EmailTemplateType::findOne($comForm->c_email_tpl_id);
                         //$mailSend = $communication->mailSend(7, 'cl_offer', 'test@gmail.com', 'test2@gmail.com', $content_data, $data, 'ru-RU', 10);
 
-
-                        //VarDumper::dump($content_data, 10 , true); exit;
-
                         if ($comForm->offerList) {
                             $content_data = $lead->getOfferEmailData($comForm->offerList, $projectContactInfo);
                         } else {
-                            $content_data = $lead->getEmailData2($comForm->quoteList, $projectContactInfo);
+                            $content_data = $lead->getEmailData2($comForm->quoteList, $projectContactInfo, $lang);
                         }
-
 
                         $content_data['content'] = $comForm->c_email_message;
                         $content_data['subject'] = $comForm->c_email_subject;

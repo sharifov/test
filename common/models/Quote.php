@@ -13,6 +13,7 @@ use sales\entities\EventTrait;
 use sales\events\quote\QuoteSendEvent;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
+use sales\model\airportLang\service\AirportLangService;
 use sales\services\parsingDump\lib\ParsingDump;
 use sales\services\parsingDump\ReservationService;
 use sales\traits\MetricObjectCounterTrait;
@@ -707,7 +708,6 @@ class Quote extends \yii\db\ActiveRecord
 
     public static function parseDump($string, $validation = true, &$itinerary = [], $onView = false)
     {
-
         if (!empty($itinerary) && $validation) {
             $itinerary = [];
         }
@@ -1336,7 +1336,6 @@ class Quote extends \yii\db\ActiveRecord
 
     public function getBaggageInfoByTrip(QuoteTrip $trip): array
     {
-
         $caryOn = 1;
         $checked = 0;
 
@@ -1444,7 +1443,6 @@ class Quote extends \yii\db\ActiveRecord
      */
     public function cloneQuote(&$newQuote, $lead)
     {
-
         $prices = [];
         foreach ($lead->getPaxTypes() as $type) {
             $newQPrice = new QuotePrice();
@@ -1668,11 +1666,7 @@ class Quote extends \yii\db\ActiveRecord
         ];
     }
 
-
-
-
-
-    public function getInfoForEmail2(): array
+    public function getInfoForEmail2(?string $lang = null): array
     {
         $trips = [];
         $quoteCabinClasses = [];
@@ -1711,13 +1705,8 @@ class Quote extends \yii\db\ActiveRecord
                         }
                     }
 
-                    $tripMarketingAirlines[$airlineCodeM] = $airlineNameM; /*[
-                        'airlineName' => $airlineName,
-                        'airlineCode' => $airlineCode,
-                    ];*/
-
+                    $tripMarketingAirlines[$airlineCodeM] = $airlineNameM;
                     $quoteMarketingAirlines[$airlineCodeM] = $airlineNameM;
-
 
                     $airlineCodeO = $airlineNameO = $segment->qs_operating_airline;
 
@@ -1742,25 +1731,25 @@ class Quote extends \yii\db\ActiveRecord
 
                 $dateDiff = strtotime($lastSegment->qs_arrival_time) - strtotime($firstSegment->qs_departure_time);
 
+                if (!($lang && $departCity = AirportLangService::getAirportLangCity($firstSegment->qs_departure_airport_code, $lang))) {
+                    $departCity = $firstSegment->departureAirport->city ?? $firstSegment->qs_departure_airport_code;
+                }
+
+                if (!($lang && $arriveCity = AirportLangService::getAirportLangCity($lastSegment->qs_arrival_airport_code, $lang))) {
+                    $arriveCity = $lastSegment->arrivalAirport->city ?? $lastSegment->qs_arrival_airport_code;
+                }
+
                 $trips[] = [
                     'cabinClasses' => $tripCabinClasses,
                     'marketingAirlines' => $tripMarketingAirlines,
                     'operatingAirlines' => $tripOperatingAirlines,
-
-
-                    //'airlineCode' => isset($marketingAirlines[0]) ? $marketingAirlines[0]['airlineName'] : '',
-                    //'airlineName' => isset($marketingAirlines[0]) ? $marketingAirlines[0]['airlineCode'] : '',
-
-                    //'departureDate' => Yii::$app->formatter_search->asDatetime(strtotime($firstSegment->qs_departure_time),'MMM d'),
-                    //'departureTime' => Yii::$app->formatter_search->asDatetime(strtotime($firstSegment->qs_departure_time),'h:mm a'),
                     'departDateTime' => date('Y-m-d H:i:s', strtotime($firstSegment->qs_departure_time)),
                     'departAirportIATA' => $firstSegment->qs_departure_airport_code,
-                    //'departAirportName' => $firstSegment->qs_departure_airport_,
-                    'departCity' => $firstSegment->departureAirport ? $firstSegment->departureAirport->city : $firstSegment->qs_departure_airport_code,
-                    'arriveDateTime' => date('Y-m-d H:i:s', strtotime($lastSegment->qs_arrival_time)), //Yii::$app->formatter_search->asDatetime(strtotime($lastSegment->qs_arrival_time),'h:mm a'),
+                    'departCity' => $departCity,
+                    'arriveDateTime' => date('Y-m-d H:i:s', strtotime($lastSegment->qs_arrival_time)),
                     'arriveDatePlus' => round($dateDiff / (60 * 60 * 24)),
                     'arriveAirportIATA' => $lastSegment->qs_arrival_airport_code,
-                    'arriveCity' => $lastSegment->arrivalAirport ? $lastSegment->arrivalAirport->city : $lastSegment->qs_arrival_airport_code,
+                    'arriveCity' => $arriveCity,
                     'flightDuration' => SearchService::durationInMinutes($trip->qt_duration),
                     'flightDurationMinutes' => $trip->qt_duration,
                     'stopsQuantity' => $stopCnt,
@@ -1768,8 +1757,6 @@ class Quote extends \yii\db\ActiveRecord
                 ];
             }
         }
-
-
 
         return [
             'cabinClasses' => $quoteCabinClasses,
@@ -2261,7 +2248,7 @@ class Quote extends \yii\db\ActiveRecord
                 stripos($row, "CBI") !== false) &&
                 stripos($row, "XT") !== false
             ) {
-                    $priceRows[] = $row;
+                $priceRows[] = $row;
             }
 
             if (stripos($row, "VALIDATING CARRIER") !== false && empty($validatingCarrierRow)) {

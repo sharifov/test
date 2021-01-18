@@ -2,6 +2,7 @@
 
 namespace sales\model\airportLang\service;
 
+use common\models\Airports;
 use sales\model\airportLang\entity\AirportLang;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -225,6 +226,27 @@ class AirportLangService
             $airportLangObjects[$key] = $airportLang;
         }
         return $airportLang;
+    }
+
+    /**
+     * @param string $iata
+     * @param string|null $lang
+     * @return string
+     */
+    public static function getCityByIataAndLang(string $iata, ?string $lang = null): string
+    {
+        if ($lang && $airportLangCity = self::getAirportLangCity($iata, $lang)) {
+            return $airportLangCity;
+        }
+        if ($airportCity = Airports::find()->select(['city'])->where(['iata' => $iata])->scalar()) {
+            return $airportCity;
+        }
+        return $iata;
+    }
+
+    public static function getAirportLangCity(string $iata, ?string $lang = null): ?string
+    {
+        return AirportLang::find()->select(['ail_city'])->where(['ail_iata' => $iata])->andWhere(['ail_lang' => $lang])->scalar();
     }
 
     private static function isDisabled(array $item): bool

@@ -49,6 +49,7 @@ use sales\events\lead\LeadTrashEvent;
 use sales\helpers\lead\LeadHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\interfaces\Objectable;
+use sales\model\airportLang\service\AirportLangService;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\callLog\entity\callLogLead\CallLogLead;
@@ -3891,13 +3892,13 @@ Reason: {reason}',
         return $result;
     }
 
-
     /**
      * @param array $quoteIds
      * @param $projectContactInfo
+     * @param string|null $lang
      * @return array
      */
-    public function getEmailData2(array $quoteIds, $projectContactInfo): array
+    public function getEmailData2(array $quoteIds, $projectContactInfo, ?string $lang = null): array
     {
         $project = $this->project;
 
@@ -3928,7 +3929,7 @@ Reason: {reason}',
                         //'shortUrl' => $quoteModel->quotePrice(),
                     ];
 
-                    $quoteItem = array_merge($quoteItem, $quoteModel->getInfoForEmail2());
+                    $quoteItem = array_merge($quoteItem, $quoteModel->getInfoForEmail2($lang));
 
                     $content_data['quotes'][] = $quoteItem;
                 }
@@ -3981,21 +3982,8 @@ Reason: {reason}',
             $departIATA = $firstSegment->origin;
             $arriveIATA = $lastSegment->destination;
 
-            $departAirport = Airports::find()->where(['iata' => $firstSegment->origin])->one();
-            if ($departAirport) {
-                $departCity = $departAirport->city;
-            } else {
-                $departCity = $firstSegment->origin;
-            }
-
-
-            $arriveAirport = Airports::find()->where(['iata' => $firstSegment->destination])->one();
-            if ($arriveAirport) {
-                $arriveCity = $arriveAirport->city;
-            } else {
-                $arriveCity = $firstSegment->destination;
-            }
-
+            $departCity = AirportLangService::getCityByIataAndLang($firstSegment->origin, $lang);
+            $arriveCity = AirportLangService::getCityByIataAndLang($firstSegment->destination, $lang);
 
             /** @property string $origin
              * @property string $destination
@@ -4005,23 +3993,17 @@ Reason: {reason}',
              * @property string $created
              * @property string $updated
              * @property string $origin_label
-             * @property string $destination_label*/
-
-
+             * @property string $destination_label */
             foreach ($leadSegments as $segmentModel) {
-                $destAirport = Airports::find()->where(['iata' => $segmentModel->destination])->one();
-                $origAirport = Airports::find()->where(['iata' => $segmentModel->origin])->one();
-
                 $requestSegments[] = [
                     'departureDate' => $segmentModel->departure,
                     'originIATA' => $segmentModel->origin,
                     'destinationIATA' => $segmentModel->destination,
-                    'originCity' => $origAirport ? $origAirport->city : $segmentModel->origin,
-                    'destinationCity' => $destAirport ? $destAirport->city : $segmentModel->destination,
+                    'originCity' => AirportLangService::getCityByIataAndLang($segmentModel->origin, $lang),
+                    'destinationCity' => AirportLangService::getCityByIataAndLang($segmentModel->destination, $lang),
                 ];
             }
         }
-
 
         $content_data['request'] = [
             'arriveCity'    => $arriveCity,
