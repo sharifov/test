@@ -69,6 +69,8 @@ use sales\auth\Auth;
  * @property int|null $chatsQtyTo
  * @property array $show_fields
  * @property int|null $quoteTypeId
+ *
+ * @property $count_files
  */
 class LeadSearch extends Lead
 {
@@ -145,6 +147,7 @@ class LeadSearch extends Lead
     public $callsQtyTo;
     public $chatsQtyFrom;
     public $chatsQtyTo;
+    public $count_files;
 
     public $show_fields = [];
 
@@ -291,6 +294,7 @@ class LeadSearch extends Lead
             'status_flow' => 'Status flow',
             'l_last_action_dt' => 'Last Action',
             'check_list' => 'Check List',
+            'count_files' => 'Files',
         ];
         return $data;
     }
@@ -313,7 +317,7 @@ class LeadSearch extends Lead
      */
     public function search($params)
     {
-        $query = Lead::find()->with('project', 'source', 'employee', 'client');
+        $query = static::find()->with('project', 'source', 'employee', 'client');
         $query->select([
             Lead::tableName() . '.*',
             'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")

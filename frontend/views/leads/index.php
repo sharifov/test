@@ -309,6 +309,15 @@ $this->registerJs($js);
             ]
         ],
         [
+            'label' => 'Files',
+            'attribute' => 'count_files',
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
+            'visible' => $searchModel->show_fields && in_array('count_files', $searchModel->show_fields, true),
+        ],
+
+        [
             'label' => 'Communication',
             'value' => static function (Lead $model) {
                 $str = $model->getCommunicationInfo();
