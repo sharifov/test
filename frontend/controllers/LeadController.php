@@ -25,6 +25,7 @@ use common\models\ProjectEmailTemplate;
 use common\models\search\LeadCallExpertSearch;
 use common\models\search\LeadChecklistSearch;
 use kivork\rbacExportImport\src\formatters\FileSizeFormatter;
+use modules\fileStorage\src\services\url\UrlGenerator;
 use modules\offer\src\entities\offer\search\OfferSearch;
 use modules\offer\src\entities\offerSendLog\CreateDto;
 use modules\offer\src\entities\offerSendLog\OfferSendLogType;
@@ -110,6 +111,7 @@ use common\models\local\LeadLogMessage;
  * @property QuoteRepository $quoteRepository
  * @property TransactionManager $transaction
  * @property ClientChatActionPermission $chatActionPermission
+ * @property UrlGenerator $fileStorageUrlGenerator
  */
 class LeadController extends FController
 {
@@ -123,6 +125,7 @@ class LeadController extends FController
     private $quoteRepository;
     private $transaction;
     private $chatActionPermission;
+    private UrlGenerator $fileStorageUrlGenerator;
 
     public function __construct(
         $id,
@@ -137,6 +140,7 @@ class LeadController extends FController
         QuoteRepository $quoteRepository,
         TransactionManager $transaction,
         ClientChatActionPermission $chatActionPermission,
+        UrlGenerator $fileStorageUrlGenerator,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -150,6 +154,7 @@ class LeadController extends FController
         $this->quoteRepository = $quoteRepository;
         $this->transaction = $transaction;
         $this->chatActionPermission = $chatActionPermission;
+        $this->fileStorageUrlGenerator = $fileStorageUrlGenerator;
     }
 
     public function behaviors(): array
@@ -459,7 +464,7 @@ class LeadController extends FController
 
                     $data = [];
                     if ($previewEmailForm->files) {
-                        $data['files'] = $previewEmailForm->getFilesPath();
+                        $data['files'] = $this->fileStorageUrlGenerator->generateForExternal($previewEmailForm->getFilesPath());
                     }
                     $mailResponse = $mail->sendMail($data);
 

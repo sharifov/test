@@ -8,13 +8,13 @@ use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemOperator;
 use League\Flysystem\Local\LocalFilesystemAdapter;
 use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
-use modules\fileStorage\src\AwsS3Configurator;
-use modules\fileStorage\src\AwsS3UrlGenerator;
-use modules\fileStorage\src\Configurator;
+use modules\fileStorage\src\services\configurator\AwsS3Configurator;
+use modules\fileStorage\src\services\url\AwsS3UrlGenerator;
+use modules\fileStorage\src\services\configurator\Configurator;
 use modules\fileStorage\src\FileSystem as FSystem;
-use modules\fileStorage\src\LocalConfigurator;
-use modules\fileStorage\src\LocalUrlGenerator;
-use modules\fileStorage\src\UrlGenerator;
+use modules\fileStorage\src\services\configurator\LocalConfigurator;
+use modules\fileStorage\src\services\url\LocalUrlGenerator;
+use modules\fileStorage\src\services\url\UrlGenerator;
 use yii\base\BootstrapInterface;
 
 class FileStorage implements BootstrapInterface
@@ -60,7 +60,8 @@ class FileStorage implements BootstrapInterface
             if ($fileStorageParams['useRemoteStorage']) {
                 return new AwsS3UrlGenerator(
                     $fileStorageParams['remoteStorage']['cdn']['host'],
-                    $fileStorageParams['remoteStorage']['cdn']['prefix']
+                    $fileStorageParams['remoteStorage']['cdn']['prefix'],
+                    $fileStorageParams['remoteStorage']['s3']['uploadConfig']['visibility'] === 'private'
                 );
             }
             return new LocalUrlGenerator($fileStorageParams['localStorage']['url']);

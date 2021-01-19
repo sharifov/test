@@ -3,6 +3,7 @@
 namespace modules\fileStorage\src;
 
 use League\Flysystem\FilesystemOperator;
+use modules\fileStorage\src\services\configurator\Configurator;
 
 /**
  * Class FileSystem

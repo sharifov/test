@@ -13,6 +13,7 @@ use modules\fileStorage\src\entity\fileStorage\FileStorage;
 use modules\fileStorage\src\entity\fileStorage\FileStorageRepository;
 use modules\fileStorage\src\entity\fileStorage\Path;
 use modules\fileStorage\src\entity\fileStorage\Uid;
+use modules\fileStorage\src\services\PathGenerator;
 use sales\dispatchers\EventDispatcher;
 use sales\services\PostgresTransactionManager;
 use yii\web\UploadedFile;

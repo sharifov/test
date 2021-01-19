@@ -1,6 +1,6 @@
 <?php
 
-use modules\fileStorage\src\UrlGenerator;
+use modules\fileStorage\src\services\url\UrlGenerator;
 use yii\helpers\Html;
 use yii\web\View;
 

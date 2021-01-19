@@ -5,7 +5,7 @@ namespace modules\fileStorage\src\widgets;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\entity\fileCase\FileCaseQuery;
 use modules\fileStorage\src\entity\fileLead\FileLeadQuery;
-use modules\fileStorage\src\UrlGenerator;
+use modules\fileStorage\src\services\url\UrlGenerator;
 use yii\base\Widget;
 
 /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\fileStorage\src;
+namespace modules\fileStorage\src\services;
 
 use League\Flysystem\FilesystemException;
 use League\Flysystem\UnableToDeleteFile;
@@ -10,6 +10,7 @@ use modules\fileStorage\src\entity\fileStorage\events\FileRemovedEvent;
 use modules\fileStorage\src\entity\fileStorage\events\FileRenamedEvent;
 use modules\fileStorage\src\entity\fileStorage\FileStorageQuery;
 use modules\fileStorage\src\entity\fileStorage\FileStorageRepository;
+use modules\fileStorage\src\FileSystem;
 use modules\fileStorage\src\useCase\fileStorage\update\EditForm;
 use sales\dispatchers\EventDispatcher;
 

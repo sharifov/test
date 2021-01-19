@@ -4,7 +4,7 @@ namespace modules\fileStorage\src\listeners;
 
 use common\models\Notifications;
 use modules\fileStorage\src\entity\fileStorage\events\FileCreatedByLeadEvent;
-use modules\fileStorage\src\UrlGenerator;
+use modules\fileStorage\src\services\url\UrlGenerator;
 
 /**
  * Class AddFileByLeadSocketListener

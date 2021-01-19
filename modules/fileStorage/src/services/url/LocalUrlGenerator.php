@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\fileStorage\src;
+namespace modules\fileStorage\src\services\url;
 
 /**
  * Class LocalUrlGenerator
@@ -19,5 +19,17 @@ class LocalUrlGenerator implements UrlGenerator
     public function generate(string $path): string
     {
         return $this->url . '/' . $path;
+    }
+
+    public function generateForExternal(array $files): array
+    {
+        $links = [
+            'private' => [],
+            'public' => []
+        ];
+        foreach ($files as $file) {
+            $links['public'][] = $this->generate($file);
+        }
+        return $links;
     }
 }

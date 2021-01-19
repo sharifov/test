@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\fileStorage\src;
+namespace modules\fileStorage\src\services;
 
 use modules\fileStorage\src\entity\fileStorage\Uid;
 

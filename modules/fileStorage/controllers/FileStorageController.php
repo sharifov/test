@@ -3,7 +3,7 @@
 namespace modules\fileStorage\controllers;
 
 use frontend\controllers\FController;
-use modules\fileStorage\src\FileStorageService;
+use modules\fileStorage\src\services\FileStorageService;
 use modules\fileStorage\src\useCase\fileStorage\rename\RenameForm;
 use modules\fileStorage\src\useCase\fileStorage\update\EditForm;
 use Yii;

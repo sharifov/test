@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\fileStorage\src;
+namespace modules\fileStorage\src\services\configurator;
 
 interface Configurator
 {

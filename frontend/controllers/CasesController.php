@@ -27,6 +27,7 @@ use frontend\helpers\JsonHelper;
 use frontend\models\CaseCommunicationForm;
 use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
+use modules\fileStorage\src\services\url\UrlGenerator;
 use sales\auth\Auth;
 use sales\entities\cases\CasesSourceType;
 use sales\entities\cases\CasesStatus;
@@ -103,6 +104,7 @@ use yii\widgets\ActiveForm;
  * @property QuoteRepository $quoteRepository
  * @property TransactionManager $transaction
  * @property ClientChatActionPermission $chatActionPermission
+ * @property UrlGenerator $fileStorageUrlGenerator
  */
 class CasesController extends FController
 {
@@ -120,6 +122,7 @@ class CasesController extends FController
     private $quoteRepository;
     private $transaction;
     private $chatActionPermission;
+    private UrlGenerator $fileStorageUrlGenerator;
 
     public function __construct(
         $id,
@@ -138,6 +141,7 @@ class CasesController extends FController
         QuoteRepository $quoteRepository,
         TransactionManager $transaction,
         ClientChatActionPermission $chatActionPermission,
+        UrlGenerator $fileStorageUrlGenerator,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -155,6 +159,7 @@ class CasesController extends FController
         $this->quoteRepository = $quoteRepository;
         $this->transaction = $transaction;
         $this->chatActionPermission = $chatActionPermission;
+        $this->fileStorageUrlGenerator = $fileStorageUrlGenerator;
     }
 
     public function behaviors(): array
@@ -266,7 +271,7 @@ class CasesController extends FController
 
                     $data = [];
                     if ($previewEmailForm->files) {
-                        $data['files'] = $previewEmailForm->getFilesPath();
+                        $data['files'] = $this->fileStorageUrlGenerator->generateForExternal($previewEmailForm->getFilesPath());
                     }
                     $mailResponse = $mail->sendMail($data);
 
