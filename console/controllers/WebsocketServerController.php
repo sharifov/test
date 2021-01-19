@@ -166,8 +166,6 @@ class WebsocketServerController extends Controller
 
                 $uid = uniqid('', false);
 
-
-
                 $userConnection = new UserConnection();
                 $userConnection->uc_connection_uid = $uid;
                 $userConnection->uc_connection_id = $request->fd;
@@ -181,6 +179,7 @@ class WebsocketServerController extends Controller
                 $userConnection->uc_user_id = $userId;
                 $userConnection->uc_app_instance = \Yii::$app->params['appInstance'] ?? null;
                 $userConnection->uc_sub_list = $subList ? @json_encode($subList) : null;
+                //$userConnection->uc_idle_state = false;
 
                 if ($userConnection->save()) {
 //                    $um = UserMonitor::find()->where(['um_user_id' => $userId, 'um_type_id' => UserMonitor::TYPE_ONLINE])->limit(1)->orderBy(['um_id' => SORT_DESC])->one();
@@ -199,8 +198,7 @@ class WebsocketServerController extends Controller
                             UserMonitor::addEvent($uo->uo_user_id, UserMonitor::TYPE_ONLINE);
                             UserMonitor::addEvent($uo->uo_user_id, UserMonitor::TYPE_ACTIVE);
                         } else {
-                            echo 'UserOnline:save' . PHP_EOL;
-                            VarDumper::dump($uo->errors);
+                            echo 'Error: UserOnline:save' . PHP_EOL;
                         }
                         unset($uo);
                     } else {
@@ -212,8 +210,8 @@ class WebsocketServerController extends Controller
                     }
                     unset($userOnline);
                 } else {
-                    echo 'UserConnection:save' . PHP_EOL;
-                    VarDumper::dump($userConnection->errors);
+                    echo 'Error: UserConnection:save' . PHP_EOL;
+                    // VarDumper::dump($userConnection->errors);
                 }
 
                 $server->tblConnections->set($request->fd, [
@@ -461,14 +459,13 @@ class WebsocketServerController extends Controller
 
         //$out['data'] = print_r($params, true);
 
-// TODO: FIX idle
-//        if ($controller === 'idle' && $action === 'set') {
-//            if (isset($params['val'])) {
-//                $val = (bool) $params['val'];
-//
-//                UserConnection::updateAll(['uc_idle_state' => $val, 'uc_idle_state_dt' => date('Y-m-d H:i:s')], ['uc_connection_id' => $frame->fd, 'uc_app_instance' => \Yii::$app->params['appInstance']]);
-//
-//                //echo "\r\n";
+        if ($controller === 'idle' && $action === 'set') {
+            if (isset($params['val'])) {
+                $val = (bool) $params['val'];
+
+                UserConnection::updateAll(['uc_idle_state' => $val, 'uc_idle_state_dt' => date('Y-m-d H:i:s')], ['uc_connection_id' => $frame->fd, 'uc_app_instance' => \Yii::$app->params['appInstance']]);
+
+                //echo "\r\n";
 //                $uc = UserConnection::find()->where(['uc_connection_id' => $frame->fd, 'uc_app_instance' => \Yii::$app->params['appInstance']])->one();
 //                if ($uc && $uc->uc_user_id) {
 //                    if ($val) {
@@ -476,21 +473,21 @@ class WebsocketServerController extends Controller
 //                    } else {
 //                        UserMonitor::setUserActive($uc->uc_user_id);
 //                    }
-//
+
 //                    UserMonitor::updateGlobalIdle($uc->uc_user_id);
-//
-////                    print_r($uc->attributes);
-////                    $uc->uc_idle_state = $val;
-////                    $uc->uc_idle_state_dt = date('Y-m-d H:i:s');
-////                    $uc->save();
+
+//                    print_r($uc->attributes);
+//                    $uc->uc_idle_state = $val;
+//                    $uc->uc_idle_state_dt = date('Y-m-d H:i:s');
+//                    $uc->save();
 //                }
-//
+
 //                unset($uc, $val);
-//            }
-//        }
+                unset($val, $params['val']);
+            }
+        }
 
 
-// TODO: FIX uc_window_state
 //        if ($controller === 'window' && $action === 'set') {
 //            if (isset($params['val'])) {
 //                $val = (bool) $params['val'];

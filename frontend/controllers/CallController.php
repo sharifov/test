@@ -521,11 +521,13 @@ class CallController extends FController
         }
 
         $this->layout = '@frontend/themes/gentelella_v2/views/layouts/main_tv2';
-        $cfChannelName = Call::CHANNEL_REALTIME_MAP; // . '#' . Auth::id();
+        $cfChannelName = Call::CHANNEL_REALTIME_MAP;
+        $userOnlineChannel = Call::CHANNEL_USER_ONLINE;
 
         return $this->render('realtime-map', [
             //'cfChannels' => [$cfChannelName],
             'cfChannelName' => $cfChannelName,
+            'cfUserOnlineChannel' => $userOnlineChannel,
             'cfConnectionUrl' => $centrifugoWsConnectionUrl,
             'cfToken' => Yii::$app->centrifugo->generateConnectionToken(Auth::id())
         ]);

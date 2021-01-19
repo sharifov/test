@@ -117,7 +117,7 @@ class UserOnline extends ActiveRecord
             try {
                 return Yii::$app->centrifugo->setSafety(false)
                     ->publish(
-                        Call::CHANNEL_REALTIME_MAP,
+                        Call::CHANNEL_USER_ONLINE,
                         [
                             'object' => 'userOnline',
                             'action' => $action,

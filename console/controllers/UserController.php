@@ -4,6 +4,7 @@ namespace console\controllers;
 
 use common\models\UserConnection;
 use common\models\UserOnline;
+use sales\model\user\entity\monitor\UserMonitor;
 use yii\console\Controller;
 use yii\helpers\Console;
 
@@ -30,6 +31,22 @@ class UserController extends Controller
                 $item->delete();
             }
         }
+
+        $userOnline = UserOnline::find()->all();
+        if ($userOnline) {
+            foreach ($userOnline as $item) {
+                $isUserIdle = UserMonitor::isUserIdle($item->uo_user_id);
+                if ((bool) $item->uo_idle_state !== $isUserIdle) {
+                    $item->uo_idle_state = $isUserIdle;
+                    $item->uo_idle_state_dt = date('Y-m-d H:i:s');
+                    if (!$item->update()) {
+                        \Yii::error($item->errors, 'UserController:actionUpdateOnlineStatus:UserOnline:update');
+                    }
+                    echo ' - ' . $item->uo_user_id . ' : ' . ($isUserIdle ? 'idle' : 'active') . PHP_EOL;
+                }
+            }
+        }
+
         $timeEnd = number_format(round(microtime(true) - $timeStart, 2), 2);
         $resultInfo = ' -- Execute Time: ' . $timeEnd;
         echo $resultInfo;

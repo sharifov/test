@@ -257,6 +257,7 @@ class Call extends \yii\db\ActiveRecord
     public const QUEUE_DIRECT = 'direct';
 
     public const CHANNEL_REALTIME_MAP = 'realtimeMapChannel';
+    public const CHANNEL_USER_ONLINE = 'userOnlineChannel';
 
     private ?Data $data = null;
 

@@ -245,6 +245,16 @@ var callMapApp = Vue.createApp({
         },
         onlineUserCounter: function () {
             return this.onlineUserList.length
+        },
+        idleUserList: function () {
+            return this.onlineUserList.filter(function (item) {
+                if (item.uo_idle_state) {
+                    let idleState = parseInt(item.uo_idle_state)
+                    if (idleState === 1) {
+                            return item
+                    }
+                }
+            })
         }
     },
     methods: {
