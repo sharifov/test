@@ -2,6 +2,7 @@
 
 namespace frontend\assets;
 
+use frontend\themes\gentelella_v2\assets\SimpleAsset;
 use yii\web\AssetBundle;
 
 /**
@@ -50,6 +51,7 @@ class VueAsset extends AssetBundle
         $this->js[] = ['https://cdnjs.cloudflare.com/ajax/libs/libphonenumber-js/1.9.6/libphonenumber-js.min.js', 'position' => \yii\web\View::POS_HEAD];
     }
 
-//    public $depends = [
-//    ];
+    public $depends = [
+        SimpleAsset::class
+    ];
 }
