@@ -298,11 +298,11 @@ class ClientChatRequestService
                     Notifications::pub(
                         [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],
                         'clientChatUpdateClientStatus',
-                        ['data' => [
-                                'cchId' => $clientChat->cch_id,
-                                'isOnline' => (int)$clientChat->cch_client_online,
-                                'statusMessage' => Html::encode($clientChat->getClientStatusMessage()),
-                            ]]
+                        [
+                            'cchId' => $clientChat->cch_id,
+                            'isOnline' => (int)$clientChat->cch_client_online,
+                            'statusMessage' => Html::encode($clientChat->getClientStatusMessage()),
+                        ]
                     );
 //                        Notifications::publish('clientChatUpdateClientStatus', ['user_id' => $clientChat->cch_owner_user_id], [
 //                            'cchId' => $clientChat->cch_id,
