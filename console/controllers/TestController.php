@@ -324,7 +324,7 @@ class TestController extends Controller
                 //$item->uo_user_id = Employee::find()->select('id')->limit(1)->orderBy('RAND()')->scalar();
                 $item->uo_user_id = $users[random_int(0, 4)];
                 //$item->cua_user_id = 188;
-                $item->uo_idle_state = random_int(0, 1);
+                $item->uo_idle_state = (bool) random_int(0, 1);
                 $item->sendFrontendData('insert');
 
                 VarDumper::dump($item->attributes);

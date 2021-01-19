@@ -233,7 +233,7 @@ $this->title = 'Realtime Call Map';
                 <div class="card-header"> Online Users  ({{ onlineUserCounter }}), TimeZone: {{ userTimeZone }}</div>
                 <transition-group name="fade2" tag="div" class="card-body">
                     <div v-for="(item, index) in onlineUserList" class="list-item col-md-6 truncate" :key="item">
-                        <i :class="'fa fa-user text-' + ((item.uo_idle_state || parseInt(item.uo_idle_state) === 1) ? 'warning' : 'success')"></i> {{ getUserName(item.uo_user_id) }}
+                        <i :class="'fa fa-user text-' + (item.uo_idle_state ? 'warning' : 'success')"></i> {{ getUserName(item.uo_user_id) }}
                     </div>
                 </transition-group>
             </div>
