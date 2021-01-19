@@ -252,8 +252,8 @@ class CallQueueJob extends BaseObject implements JobInterface
                         $user = Employee::findOne($originalAgentId);
 
                         if ($user && $user->isOnline() /*&& $user->isCallStatusReady() && $user->isCallFree()*/) {
-                            $depListIds = array_keys($user->getUserDepartmentList());
-                            if (in_array($call->c_dep_id, $depListIds, true)) {
+//                            $depListIds = array_keys($user->getUserDepartmentList());
+//                            if (in_array($call->c_dep_id, $depListIds, true)) {
                                 $isCalled = Call::applyCallToAgentAccess($call, $user->id);
 
                                 // Yii::info('Accept one user ('. ($isCalled ? 'isCalled' : 'NotIsCalled' ) .') - CallId: ' . $this->call_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-Accept-one');
@@ -270,7 +270,7 @@ class CallQueueJob extends BaseObject implements JobInterface
                                     $job->call_id = $call->c_id;
                                     $jobId = Yii::$app->queue_job->delay($timeStartCallUserAccess)->priority(100)->push($job);
                                 }
-                            }
+//                            }
                         }
                     }
 
