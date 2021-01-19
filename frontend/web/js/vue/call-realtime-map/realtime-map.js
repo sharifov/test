@@ -249,10 +249,7 @@ var callMapApp = Vue.createApp({
         idleUserList: function () {
             return this.onlineUserList.filter(function (item) {
                 if (item.uo_idle_state) {
-                    let idleState = parseInt(item.uo_idle_state)
-                    if (idleState === 1) {
-                            return item
-                    }
+                    return item
                 }
             })
         }
