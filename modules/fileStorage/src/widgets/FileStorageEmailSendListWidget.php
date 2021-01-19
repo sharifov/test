@@ -25,7 +25,7 @@ class FileStorageEmailSendListWidget extends Widget
 
     public static function byLead(array $files): string
     {
-        if (!FileStorageSettings::isEnabled()) {
+        if (!FileStorageSettings::canEmailAttach()) {
             return '';
         }
         return self::widget([
@@ -36,7 +36,7 @@ class FileStorageEmailSendListWidget extends Widget
 
     public static function byCase(array $files): string
     {
-        if (!FileStorageSettings::isEnabled()) {
+        if (!FileStorageSettings::canEmailAttach()) {
             return '';
         }
         return self::widget([

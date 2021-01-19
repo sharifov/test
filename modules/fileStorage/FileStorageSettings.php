@@ -16,9 +16,19 @@ class FileStorageSettings
         return (bool)(\Yii::$app->params['settings']['file_upload_enabled'] ?? true);
     }
 
+    public static function canUpload(): bool
+    {
+        return self::isEnabled() && self::isUploadEnabled();
+    }
+
     public static function isDownloadEnabled(): bool
     {
         return (bool)(\Yii::$app->params['settings']['file_download_enabled'] ?? true);
+    }
+
+    public static function canDownload(): bool
+    {
+        return self::isEnabled() && self::isDownloadEnabled();
     }
 
     public static function getUploadMaxSize()
@@ -44,5 +54,10 @@ class FileStorageSettings
     public static function isEmailAttachEnabled(): bool
     {
         return (bool)(\Yii::$app->params['settings']['file_email_attach_enabled'] ?? true);
+    }
+
+    public static function canEmailAttach(): bool
+    {
+        return self::isEnabled() && self::isEmailAttachEnabled();
     }
 }

@@ -3,15 +3,15 @@
 namespace modules\fileStorage\src\listeners;
 
 use common\models\Notifications;
-use modules\fileStorage\src\entity\fileStorage\events\FileCreatedByCaseEvent;
+use modules\fileStorage\src\entity\fileStorage\events\FileUploadedByCaseEvent;
 use modules\fileStorage\src\services\url\UrlGenerator;
 
 /**
- * Class AddFileByCaseSocketListener
+ * Class UploadedFileByCaseListUpdaterListener
  *
  * @property UrlGenerator $urlGenerator
  */
-class AddFileByCaseSocketListener
+class UploadedFileByCaseListUpdaterListener
 {
     private UrlGenerator $urlGenerator;
 
@@ -20,7 +20,7 @@ class AddFileByCaseSocketListener
         $this->urlGenerator = $urlGenerator;
     }
 
-    public function handle(FileCreatedByCaseEvent $event): void
+    public function handle(FileUploadedByCaseEvent $event): void
     {
         Notifications::publish('addFileToFileStorageList', ['case_id' => $event->caseId], [
             'url' => $this->urlGenerator->generate($event->path),

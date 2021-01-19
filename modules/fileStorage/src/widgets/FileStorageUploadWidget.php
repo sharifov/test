@@ -26,10 +26,7 @@ class FileStorageUploadWidget extends Widget
 
     public function run(): string
     {
-        if (!FileStorageSettings::isEnabled()) {
-            return '';
-        }
-        if (!FileStorageSettings::isUploadEnabled()) {
+        if (!FileStorageSettings::canUpload()) {
             return '';
         }
         $form = new UploadForm();

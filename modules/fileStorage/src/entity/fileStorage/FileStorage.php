@@ -7,7 +7,14 @@ use modules\fileStorage\src\entity\fileClient\FileClient;
 use modules\fileStorage\src\entity\fileLead\FileLead;
 use modules\fileStorage\src\entity\fileLog\FileLog;
 use modules\fileStorage\src\entity\fileShare\FileShare;
+use modules\fileStorage\src\entity\fileStorage\events\FileEditedEvent;
+use modules\fileStorage\src\entity\fileStorage\events\FileFailedEvent;
+use modules\fileStorage\src\entity\fileStorage\events\FileRemovedEvent;
+use modules\fileStorage\src\entity\fileStorage\events\FileRenamedEvent;
+use modules\fileStorage\src\entity\fileStorage\events\FileUploadedByCaseEvent;
+use modules\fileStorage\src\entity\fileStorage\events\FileUploadedByLeadEvent;
 use modules\fileStorage\src\entity\fileUser\FileUser;
+use sales\entities\EventTrait;
 use Yii;
 
 /**
@@ -35,6 +42,8 @@ use Yii;
  */
 class FileStorage extends \yii\db\ActiveRecord
 {
+    use EventTrait;
+
     public static function createByUpload(
         string $name,
         ?string $title,
@@ -65,12 +74,16 @@ class FileStorage extends \yii\db\ActiveRecord
         $this->fs_title = $title;
         $this->fs_private = $private;
         $this->fs_expired_dt = $expiredDt->format('Y-m-d H:i:s');
+        $this->recordEvent(new FileEditedEvent($this->fs_id, $this->fs_title));
     }
 
     public function rename(string $name): void
     {
+        $oldName = $this->fs_name;
+        $oldPath = $this->fs_path;
         $this->fs_name = $name;
         $this->changePath();
+        $this->recordEvent(new FileRenamedEvent($this->fs_id, $oldName, $this->fs_name, $oldPath, $this->fs_path));
     }
 
     private function changePath(): void
@@ -82,14 +95,32 @@ class FileStorage extends \yii\db\ActiveRecord
         $this->fs_path = substr($this->fs_path, 0, $positionLastChunk) . '/' . $this->fs_name;
     }
 
-    public function uploaded(): void
+    private function uploaded(): void
     {
         $this->fs_status = FileStorageStatus::UPLOADED;
+    }
+
+    public function uploadedByLead(int $leadId): void
+    {
+        $this->uploaded();
+        $this->recordEvent(new FileUploadedByLeadEvent($leadId, $this->fs_name, $this->fs_title, $this->fs_path));
+    }
+
+    public function uploadedByCase(int $caseId): void
+    {
+        $this->uploaded();
+        $this->recordEvent(new FileUploadedByCaseEvent($caseId, $this->fs_name, $this->fs_title, $this->fs_path));
     }
 
     public function failed(): void
     {
         $this->fs_status = FileStorageStatus::FAILED;
+        $this->recordEvent(new FileFailedEvent($this->fs_id));
+    }
+
+    public function remove(FileStorageRelations $relations): void
+    {
+        $this->recordEvent(new FileRemovedEvent($this->fs_id, $relations));
     }
 
     public function rules(): array
@@ -125,26 +156,32 @@ class FileStorage extends \yii\db\ActiveRecord
             ['fs_status', 'in', 'range' => array_keys(FileStorageStatus::getList())],
         ];
     }
+
     public function getCases(): \yii\db\ActiveQuery
     {
         return $this->hasMany(FileCase::class, ['fc_fs_id' => 'fs_id']);
     }
+
     public function getClients(): \yii\db\ActiveQuery
     {
         return $this->hasMany(FileClient::class, ['fcl_fs_id' => 'fs_id']);
     }
+
     public function getLeads(): \yii\db\ActiveQuery
     {
         return $this->hasMany(FileLead::class, ['fld_fs_id' => 'fs_id']);
     }
+
     public function getLogs(): \yii\db\ActiveQuery
     {
         return $this->hasMany(FileLog::class, ['fl_fs_id' => 'fs_id']);
     }
+
     public function getShares(): \yii\db\ActiveQuery
     {
         return $this->hasMany(FileShare::class, ['fsh_fs_id' => 'fs_id']);
     }
+
     public function getUsers(): \yii\db\ActiveQuery
     {
         return $this->hasMany(FileUser::class, ['fus_fs_id' => 'fs_id']);

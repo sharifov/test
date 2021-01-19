@@ -50,7 +50,7 @@ class FileStorageUploadController extends Controller
     public function beforeAction($action): bool
     {
         if (parent::beforeAction($action)) {
-            if (!FileStorageSettings::isEnabled() || !FileStorageSettings::isUploadEnabled()) {
+            if (!FileStorageSettings::canUpload()) {
                 throw new NotFoundHttpException();
             }
             return true;

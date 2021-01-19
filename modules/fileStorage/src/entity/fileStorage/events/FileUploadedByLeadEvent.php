@@ -3,14 +3,14 @@
 namespace modules\fileStorage\src\entity\fileStorage\events;
 
 /**
- * Class FileCreatedByLeadEvent
+ * Class FileUploadedByLeadEvent
  *
  * @property int $leadId
  * @property string $name
  * @property string|null $title
  * @property string $path
  */
-class FileCreatedByLeadEvent
+class FileUploadedByLeadEvent
 {
     public int $leadId;
     public string $name;

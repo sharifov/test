@@ -8,13 +8,11 @@ use modules\fileStorage\src\entity\fileCase\FileCase;
 use modules\fileStorage\src\entity\fileCase\FileCaseRepository;
 use modules\fileStorage\src\entity\fileClient\FileClient;
 use modules\fileStorage\src\entity\fileClient\FileClientRepository;
-use modules\fileStorage\src\entity\fileStorage\events\FileCreatedByCaseEvent;
 use modules\fileStorage\src\entity\fileStorage\FileStorage;
 use modules\fileStorage\src\entity\fileStorage\FileStorageRepository;
 use modules\fileStorage\src\entity\fileStorage\Path;
 use modules\fileStorage\src\entity\fileStorage\Uid;
 use modules\fileStorage\src\services\PathGenerator;
-use sales\dispatchers\EventDispatcher;
 use sales\services\PostgresTransactionManager;
 use yii\web\UploadedFile;
 
@@ -26,7 +24,6 @@ use yii\web\UploadedFile;
  * @property FileClientRepository $fileClientRepository
  * @property FileCaseRepository $fileCaseRepository
  * @property PostgresTransactionManager $postgresTransactionManager
- * @property EventDispatcher $eventDispatcher
  */
 class CaseUploader
 {
@@ -35,22 +32,19 @@ class CaseUploader
     private FileClientRepository $fileClientRepository;
     private FileCaseRepository $fileCaseRepository;
     private PostgresTransactionManager $postgresTransactionManager;
-    private EventDispatcher $eventDispatcher;
 
     public function __construct(
         FileSystem $fileStorage,
         FileStorageRepository $fileStorageRepository,
         FileClientRepository $fileClientRepository,
         FileCaseRepository $fileCaseRepository,
-        PostgresTransactionManager $postgresTransactionManager,
-        EventDispatcher $eventDispatcher
+        PostgresTransactionManager $postgresTransactionManager
     ) {
         $this->fileSystem = $fileStorage;
         $this->fileStorageRepository = $fileStorageRepository;
         $this->fileClientRepository = $fileClientRepository;
         $this->fileCaseRepository = $fileCaseRepository;
         $this->postgresTransactionManager = $postgresTransactionManager;
-        $this->eventDispatcher = $eventDispatcher;
     }
 
     public function upload(int $caseId, int $clientId, string $projectKey, ?string $title, UploadedFile $file): void
@@ -64,16 +58,8 @@ class CaseUploader
             $stream = fopen($file->tempName, 'r+');
             $this->fileSystem->writeStream($fileStorage->fs_path, $stream);
             fclose($stream);
-            $fileStorage->uploaded();
+            $fileStorage->uploadedByCase($caseId);
             $this->fileStorageRepository->save($fileStorage);
-            $this->eventDispatcher->dispatch(
-                new FileCreatedByCaseEvent(
-                    $caseId,
-                    $fileStorage->fs_name,
-                    $fileStorage->fs_title,
-                    $fileStorage->fs_path
-                )
-            );
         } catch (FilesystemException | UnableToWriteFile $e) {
             if (isset($stream) && $stream !== false && is_resource($stream)) {
                 fclose($stream);

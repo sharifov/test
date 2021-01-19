@@ -27,6 +27,7 @@ use frontend\helpers\JsonHelper;
 use frontend\models\CaseCommunicationForm;
 use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
+use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\services\url\UrlGenerator;
 use sales\auth\Auth;
 use sales\entities\cases\CasesSourceType;
@@ -270,7 +271,7 @@ class CasesController extends FController
                     $previewEmailForm->is_send = true;
 
                     $data = [];
-                    if ($previewEmailForm->files) {
+                    if (FileStorageSettings::canEmailAttach() && $previewEmailForm->files) {
                         $data['files'] = $this->fileStorageUrlGenerator->generateForExternal($previewEmailForm->getFilesPath());
                     }
                     $mailResponse = $mail->sendMail($data);

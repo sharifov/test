@@ -5,36 +5,28 @@ namespace modules\fileStorage\src\services;
 use League\Flysystem\FilesystemException;
 use League\Flysystem\UnableToDeleteFile;
 use League\Flysystem\UnableToMoveFile;
-use modules\fileStorage\src\entity\fileStorage\events\FileEditedEvent;
-use modules\fileStorage\src\entity\fileStorage\events\FileRemovedEvent;
-use modules\fileStorage\src\entity\fileStorage\events\FileRenamedEvent;
 use modules\fileStorage\src\entity\fileStorage\FileStorageQuery;
 use modules\fileStorage\src\entity\fileStorage\FileStorageRepository;
 use modules\fileStorage\src\FileSystem;
 use modules\fileStorage\src\useCase\fileStorage\update\EditForm;
-use sales\dispatchers\EventDispatcher;
 
 /**
  * Class FileStorageService
  *
  * @property FileStorageRepository $repository
  * @property FileSystem $fileSystem
- * @property EventDispatcher $eventDispatcher
  */
 class FileStorageService
 {
     private FileStorageRepository $repository;
     private FileSystem $fileSystem;
-    private EventDispatcher $eventDispatcher;
 
     public function __construct(
         FileStorageRepository $repository,
-        FileSystem $fileSystem,
-        EventDispatcher $eventDispatcher
+        FileSystem $fileSystem
     ) {
         $this->repository = $repository;
         $this->fileSystem = $fileSystem;
-        $this->eventDispatcher = $eventDispatcher;
     }
 
     public function edit(EditForm $form): void
@@ -46,7 +38,6 @@ class FileStorageService
             new \DateTimeImmutable($form->fs_expired_dt)
         );
         $this->repository->save($file);
-        $this->eventDispatcher->dispatch(new FileEditedEvent($form->fs_title));
     }
 
     public function remove(int $id): void
@@ -66,13 +57,8 @@ class FileStorageService
         }
 
         try {
+            $file->remove($relations);
             $this->repository->remove($file);
-            $this->eventDispatcher->dispatch(
-                new FileRemovedEvent(
-                    $file->fs_id,
-                    $relations
-                )
-            );
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => 'Remove file from filesystem error. File was deleted. But Records on DataBase was not deleted.',
@@ -86,11 +72,8 @@ class FileStorageService
     public function rename(int $id, string $name): void
     {
         $file = $this->repository->find($id);
-        $oldName = $file->fs_name;
         $oldLocation = $file->fs_path;
-
         $file->rename($name);
-        $newName = $file->fs_name;
         $newLocation = $file->fs_path;
 
         try {
@@ -106,15 +89,6 @@ class FileStorageService
 
         try {
             $this->repository->save($file);
-            $this->eventDispatcher->dispatch(
-                new FileRenamedEvent(
-                    $file->fs_id,
-                    $oldName,
-                    $newName,
-                    $oldLocation,
-                    $newLocation
-                )
-            );
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => 'Rename file on filesystem error. File was renamed. But Records on DataBase was not changed.',

@@ -7,6 +7,11 @@ namespace modules\fileStorage\src\entity\fileStorage;
  */
 class Scopes extends \yii\db\ActiveQuery
 {
+    public function byUid(string $uid): self
+    {
+        return $this->andWhere(['fs_uid' => $uid]);
+    }
+
     public function success(): self
     {
         return $this->andWhere(['fs_status' => FileStorageStatus::UPLOADED]);

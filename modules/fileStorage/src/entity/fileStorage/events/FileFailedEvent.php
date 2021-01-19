@@ -6,16 +6,13 @@ namespace modules\fileStorage\src\entity\fileStorage\events;
  * Class FileEditedEvent
  *
  * @property int $fileId
- * @property string|null $title
  */
-class FileEditedEvent
+class FileFailedEvent
 {
     public int $fileId;
-    public ?string $title;
 
-    public function __construct(int $fileId, ?string $title)
+    public function __construct(int $fileId)
     {
         $this->fileId = $fileId;
-        $this->title = $title;
     }
 }
