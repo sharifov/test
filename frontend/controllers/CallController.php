@@ -578,7 +578,7 @@ class CallController extends FController
         $response['callSourceList'] = Call::SHORT_SOURCE_LIST;
         $response['callTypeList'] = Call::TYPE_LIST;
         $response['callUserAccessStatusTypeList'] = CallUserAccess::STATUS_TYPE_LIST;
-        $response['onlineUserList'] = UserOnline::find()->asArray()->all();
+        $response['onlineUserList'] = UserOnline::find()->all();
 
 
         /** @var Employee $user */
