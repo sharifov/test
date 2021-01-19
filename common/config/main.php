@@ -91,7 +91,10 @@ return [
             'url2' => 'https://communication.api.travelinsides.com/v2/',
             'username' => 'sales',
             'password' => '',
-            'recording_url' => '',
+            'recording_url' => 'https://api.twilio.com/2010-04-01/Accounts/AC10f3c74efba7b492cbd7dca86077736c/Recordings/',
+            'securityCallRecordingUrl' => '/call/record/',
+            'securityConferenceRecordingUrl' => '/conference/record/',
+            'xAccelRedirectUrl' => '/twilio-records/2010-04-01/Accounts/AC10f3c74efba7b492cbd7dca86077736c/Recordings/',
             'voipApiUsername' => 'sales'
         ],
         'airsearch' => [

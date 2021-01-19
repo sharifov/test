@@ -3,6 +3,7 @@
 namespace common\components\grid\call;
 
 use common\models\Call;
+use sales\helpers\call\CallHelper;
 use yii\grid\DataColumn;
 use yii\helpers\Html;
 
@@ -29,6 +30,6 @@ class CallDurationColumn extends DataColumn
             $format = 'i:s';
         }
 
-        return  Html::button(gmdate($format, $model->{$this->attributeDuration}) . ' <i class="fa fa-volume-up"></i>', ['title' => $model->{$this->attributeDuration} . ' (sec)', 'class' => 'btn btn-' . ($model->{$this->attributeDuration} < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $model->{$this->attributeUrl} /*yii\helpers\Url::to(['call/record', 'sid' =>  $model->c_call_sid ])*/ ]);
+        return CallHelper::displayAudioBtn((string)$model->{$this->attributeUrl}, $format, (int)$model->{$this->attributeDuration});
     }
 }

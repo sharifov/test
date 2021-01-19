@@ -713,4 +713,25 @@ JS;
 }
 //}
 
-
+if (\sales\helpers\setting\SettingHelper::isCallRecordingLogEnabled()) {
+    $callRecodingLogUrl = Url::to(['/call/call-recording-log']);
+    $js = <<<JS
+        $(document).ready( function () {
+            document.addEventListener('play', function(e) {
+                let audioWrapper = $(e.target).closest('.audio-wrapper')[0] || undefined;
+                if (e.target.tagName === 'AUDIO' && audioWrapper && audioWrapper.hasAttribute('data-call-sid')) {
+                    let callSid = audioWrapper.getAttribute('data-call-sid');
+                    audioWrapper.removeAttribute('data-call-sid');
+                    $.post('$callRecodingLogUrl', {callSid: callSid}, function (data) {
+                        if (data.cacheDuration) {
+                            setTimeout(function () {
+                                $(audioWrapper).attr('data-call-sid', callSid);                         
+                            }, data.cacheDuration*1000);
+                        }
+                    }, 'json');
+                }
+            }, true);
+        });
+    JS;
+    $this->registerJs($js, \yii\web\View::POS_END, 'call-recording-log');
+}

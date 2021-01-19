@@ -2,6 +2,7 @@
 
 use frontend\helpers\EmailHelper;
 use sales\auth\Auth;
+use sales\helpers\call\CallHelper;
 use sales\model\clientChat\entity\ClientChat;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -59,10 +60,9 @@ use common\models\Call;
         </div>
         <div class="card-body">
             <?php if ($call->recordingUrl) :?>
-                <audio controls="controls" controlsList="nodownload" class="chat__audio">
-                    <source src="<?=$call->recordingUrl?>" type="audio/mpeg">
-                    Your browser does not support the audio element
-                </audio>
+            <div class="audio-wrapper" data-call-sid="<?= $call->c_call_sid ?>">
+                <?= CallHelper::displayAudioTag($call->recordingUrl, $call->c_call_sid, ['class' => 'chat__audio']) ?>
+            </div>
             <?php else : ?>
                 <div><i class="fa fa-volume-off"></i> ... <?=$call->c_call_status?></div>
             <?php endif;?>

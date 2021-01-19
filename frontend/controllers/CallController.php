@@ -11,6 +11,7 @@ use common\models\Lead;
 use common\models\Notifications;
 use common\models\Project;
 use common\models\ProjectEmployeeAccess;
+use common\models\query\CallQuery;
 use common\models\search\LeadSearch;
 use common\models\search\UserConnectionSearch;
 use common\models\Sources;
@@ -22,10 +23,15 @@ use common\models\UserProjectParams;
 use frontend\widgets\newWebPhone\call\socket\MissedCallMessage;
 use http\Exception\InvalidArgumentException;
 use sales\auth\Auth;
+use sales\helpers\app\AppHelper;
 use sales\helpers\call\CallHelper;
+use sales\helpers\setting\SettingHelper;
 use sales\model\call\services\currentQueueCalls\CurrentQueueCallsService;
 use sales\model\call\useCase\assignUsers\UsersForm;
 use sales\model\callLog\entity\callLog\CallLog;
+use sales\model\callLog\entity\callLog\CallLogQuery;
+use sales\model\callLog\entity\callLogRecord\CallLogRecord;
+use sales\model\callRecordingLog\entity\CallRecordingLog;
 use sales\model\conference\useCase\DisconnectFromAllActiveClientsCreatedConferences;
 use sales\model\callNote\useCase\addNote\CallNoteRepository;
 use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
@@ -44,6 +50,7 @@ use yii\base\InvalidConfigException;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
+use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -96,7 +103,7 @@ class CallController extends FController
             ],
             'access' => [
                 'allowActions' => [
-                    'get-users-for-call', 'list-api', 'static-data-api'
+                    'get-users-for-call', 'list-api', 'static-data-api', 'record'
                 ],
             ],
         ];
@@ -1174,39 +1181,75 @@ class CallController extends FController
     }
 
     /**
-     * @param string $sid
-     * @param bool $cfRecord
-     * @return string
-     *
-     * Potentially will be used future
-     *
+     * @param string $callSid
+     * @return void
+     * @throws NotFoundHttpException
      */
-    /*public function actionRecord(string $sid, bool $cfRecord = false):string
+    public function actionRecord(string $callSid): void
     {
-        if (!$cfRecord){
-            $recordUrl = Call::find()->select(['c_recording_url'])->where(['c_call_sid' => $sid])->one();
-            $url = $recordUrl->c_recording_url;
-        } else {
-            $recordUrl = Conference::find()->select(['cf_recording_url'])->where(['cf_sid' => $sid])->one();
-            $url = $recordUrl->cf_recording_url;
-        }
+        $cacheKey = 'call-recording-url-' . $callSid;
 
         try {
-            $twilioHeaders = array_change_key_case(get_headers($url, 1));
-            Yii::$app->response->format = Response::FORMAT_RAW;
-            $headers = Yii::$app->response->headers;
-            $headers->add('Accept-Ranges', 'bytes');
-            $headers->add('Content-Type', 'audio/x-wav');
-            if(isset($twilioHeaders['content-length'])){
-                $headers->add('Content-Length', $twilioHeaders['content-length']);
+            if (!$callRecordSid = Yii::$app->cacheFile->get($cacheKey)) {
+                $callLogRecord = CallLogQuery::getCallLogRecordByCallSid($callSid);
+
+                if ($callLogRecord && !empty($callLogRecord['clr_record_sid'])) {
+                    $callRecordSid = $callLogRecord['clr_record_sid'];
+                    $callRecordDuration = $callLogRecord['clr_duration'] + SettingHelper::getCallRecordingLogAdditionalCacheTimeout();
+                } elseif ($call = Call::find()->selectRecordingData()->bySid($callSid)->asArray()->one()) {
+                    $callRecordSid = $call['c_recording_sid'];
+                    $callRecordDuration = $call['c_recording_duration'] + SettingHelper::getCallRecordingLogAdditionalCacheTimeout();
+                } else {
+                    throw new NotFoundException('Call not found');
+                }
+
+                Yii::$app->cacheFile->set($cacheKey, $callRecordSid, $callRecordDuration);
             }
 
-            return file_get_contents($url);
+            header('X-Accel-Redirect: ' . Yii::$app->communication->xAccelRedirectUrl . $callRecordSid);
+        } catch (NotFoundException $e) {
+            throw new NotFoundHttpException($e->getMessage());
         }
-        catch (Exception $e) {
-            echo $e->getMessage();
+    }
+
+    public function actionCallRecordingLog()
+    {
+        $callSid = Yii::$app->request->post('callSid');
+
+        $cacheKey = 'call-sid-' . $callSid . '-user-' . Auth::id();
+
+        if (Yii::$app->cacheFile->exists($cacheKey)) {
+            return $this->asJson([
+                'cacheDuration' => 0
+            ]);
         }
-    }*/
+
+        $callLogRecord = CallLogQuery::getCallLogRecordByCallSid($callSid);
+
+        if ($callLogRecord && !empty($callLogRecord['clr_duration'])) {
+            $callRecordDuration = $callLogRecord['clr_duration'] + SettingHelper::getCallRecordingLogAdditionalCacheTimeout();
+        } elseif ($call = Call::find()->selectRecordingData()->bySid($callSid)->asArray()->one()) {
+            $callRecordDuration = $call['c_recording_duration'] + SettingHelper::getCallRecordingLogAdditionalCacheTimeout();
+        } else {
+            Yii::error('Call Recording Log error has occurred: call is not found', 'CallController::actionCallRecordingLog::callRecordingLog::find');
+            return $this->asJson([
+                'cacheDuration' => 0
+            ]);
+        }
+
+        $callRecordingLog = CallRecordingLog::create($callSid, Auth::id(), (int)date('Y'), (int)date('m'));
+        if (!$callRecordingLog->save(true)) {
+            Yii::error('Call Recording Log saving failed: ' . $callRecordingLog->getErrorSummary(false)[0], 'CallController::actionCallRecordingLog::callRecordingLog::save');
+            return $this->asJson([
+                'cacheDuration' => 0
+            ]);
+        }
+        Yii::$app->cacheFile->set($cacheKey, true, $callRecordDuration);
+
+        return $this->asJson([
+            'cacheDuration' => $callRecordDuration
+        ]);
+    }
 
     public function actionAjaxAddNote(): Response
     {

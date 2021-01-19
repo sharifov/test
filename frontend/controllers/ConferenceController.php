@@ -2,7 +2,11 @@
 
 namespace frontend\controllers;
 
+use common\models\Call;
 use sales\auth\Auth;
+use sales\helpers\setting\SettingHelper;
+use sales\model\callLog\entity\callLog\CallLogQuery;
+use sales\repositories\NotFoundException;
 use Yii;
 use common\models\Conference;
 use common\models\search\ConferenceSearch;
@@ -110,6 +114,28 @@ class ConferenceController extends FController
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
+    }
+
+    public function actionRecord(string $conferenceSid)
+    {
+        $cacheKey = 'conference-recording-url-' . $conferenceSid;
+
+        try {
+            if (!$conferenceRecordSid = Yii::$app->cacheFile->get($cacheKey)) {
+                if ($conference = Conference::find()->selectRecordingData()->bySid($conferenceSid)->asArray()->one()) {
+                    $conferenceRecordSid = $conference['cf_recording_sid'];
+                    $conferenceRecordDuration = $conference['cf_recording_duration'] + SettingHelper::getCallRecordingLogAdditionalCacheTimeout();
+                } else {
+                    throw new NotFoundException('Conference not found');
+                }
+
+                Yii::$app->cacheFile->set($cacheKey, $conferenceRecordSid, $conferenceRecordDuration);
+            }
+
+            header('X-Accel-Redirect: ' . Yii::$app->communication->xAccelRedirectUrl . $conferenceRecordSid);
+        } catch (NotFoundException $e) {
+            throw new NotFoundHttpException($e->getMessage());
+        }
     }
 
     /**
