@@ -34,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'crl_id',
                 'crl_call_sid',
                 'crl_user_id:username',
-                'crl_created_dt',
+                'crl_created_dt:byUserDateTime',
                 'crl_year',
                 'crl_month',
             ],

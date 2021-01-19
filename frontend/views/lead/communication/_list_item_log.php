@@ -78,9 +78,6 @@ $fromType = 'client';
             <div class="card-body">
                 <?php //  if($call->record && $call->record->clr_record_sid):?>
 
-                    <?php // Html::button(gmdate('i:s', $call->record->clr_duration) . ' <i class="fa fa-play-circle-o"></i>',
-                         // ['class' => 'btn btn-' . ($call->record->clr_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $call->record->recordingUrl /*yii\helpers\Url::to(['call/record', 'sid' =>  $call->c_call_sid ])*/ ]) ?>
-
                 <?php //  else: ?>
                     <div><?php //$call->getStatusIcon()?>  <?php // CallLogStatus::getName($call->cl_status_id) ?></div>
                 <?php // endif;?>

@@ -39,7 +39,7 @@ class RecordingUrlColumn extends DataColumn
         }
 
         if ($this->audioContent === self::AUDIO_BUTTON) {
-            return CallHelper::displayAudioBtn($model->recordingUrl, $format, (int)$model->record->clr_duration);
+            return CallHelper::displayAudioBtn($model->recordingUrl, $format, (int)$model->record->clr_duration, $model->cl_call_sid);
         }
 
         if ($this->audioContent === self::AUDIO_TAG) {

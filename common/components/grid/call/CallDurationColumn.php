@@ -30,6 +30,6 @@ class CallDurationColumn extends DataColumn
             $format = 'i:s';
         }
 
-        return CallHelper::displayAudioBtn((string)$model->{$this->attributeUrl}, $format, (int)$model->{$this->attributeDuration});
+        return CallHelper::displayAudioBtn((string)$model->{$this->attributeUrl}, $format, (int)$model->{$this->attributeDuration}, $model->{$this->attributeSid});
     }
 }

@@ -715,17 +715,20 @@ JS;
 
 if (\sales\helpers\setting\SettingHelper::isCallRecordingLogEnabled()) {
     $callRecodingLogUrl = Url::to(['/call/call-recording-log']);
+    $conferenceRecodingLogUrl = Url::to(['/conference/recording-log']);
     $js = <<<JS
         $(document).ready( function () {
             document.addEventListener('play', function(e) {
                 let audioWrapper = $(e.target).closest('.audio-wrapper')[0] || undefined;
-                if (e.target.tagName === 'AUDIO' && audioWrapper && audioWrapper.hasAttribute('data-call-sid')) {
-                    let callSid = audioWrapper.getAttribute('data-call-sid');
-                    audioWrapper.removeAttribute('data-call-sid');
-                    $.post('$callRecodingLogUrl', {callSid: callSid}, function (data) {
+                if (e.target.tagName === 'AUDIO' && audioWrapper && audioWrapper.hasAttribute('data-sid')) {
+                    let sid = audioWrapper.getAttribute('data-sid');
+                    audioWrapper.removeAttribute('data-sid');
+                    let isConferenceRecording = audioWrapper.hasAttribute('data-conference-recording');
+                    let url = isConferenceRecording ? '$conferenceRecodingLogUrl' : '$callRecodingLogUrl';
+                    $.post(url, {sid: sid}, function (data) {
                         if (data.cacheDuration) {
                             setTimeout(function () {
-                                $(audioWrapper).attr('data-call-sid', callSid);                         
+                                $(audioWrapper).attr('data-sid', sid);                         
                             }, data.cacheDuration*1000);
                         }
                     }, 'json');

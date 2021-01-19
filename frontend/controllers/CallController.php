@@ -1214,9 +1214,12 @@ class CallController extends FController
         }
     }
 
-    public function actionCallRecordingLog()
+    /**
+     * @return Response
+     */
+    public function actionCallRecordingLog(): Response
     {
-        $callSid = Yii::$app->request->post('callSid');
+        $callSid = Yii::$app->request->post('sid');
 
         $cacheKey = 'call-sid-' . $callSid . '-user-' . Auth::id();
 

@@ -249,16 +249,19 @@ class CallHelper
         ];
         $source = Html::tag('source', null, ['src' => $recordingUrl, 'type' => 'audio/mpeg']);
         $audio = Html::tag('audio', $source, ArrayHelper::merge($defaultAudioOptions, $audioOptions));
-        return Html::tag('div', $audio, ['class' => 'audio-wrapper', 'data-call-sid' => $callSid]);
+        return Html::tag('div', $audio, ['class' => 'audio-wrapper', 'data-sid' => $callSid]);
     }
 
-    public static function displayAudioBtn(string $recordingUrl, string $dateFormat, int $duration): string
+    public static function displayAudioBtn(string $recordingUrl, string $dateFormat, int $duration, string $sid, bool $isConferenceRecording = false): string
     {
         return Html::button(
             gmdate($dateFormat, $duration) . ' <i class="fa fa-volume-up"></i>',
             [
-                'title' => $duration . ' (sec)', 'class' => 'btn btn-' . ($duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url',
-                'data-source_src' => $recordingUrl
+                'title' => $duration . ' (sec)',
+                'class' => 'btn btn-' . ($duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url',
+                'data-source_src' => $recordingUrl,
+                'data-conference-recording' => $isConferenceRecording,
+                'data-sid' => $sid
             ]
         );
     }

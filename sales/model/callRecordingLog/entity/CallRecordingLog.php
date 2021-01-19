@@ -2,7 +2,6 @@
 
 namespace sales\model\callRecordingLog\entity;
 
-use common\models\Call;
 use common\models\Employee;
 use sales\model\callLog\entity\callLog\CallLog;
 use yii\behaviors\TimestampBehavior;
@@ -19,7 +18,7 @@ use yii\db\ActiveRecord;
  * @property int $crl_month
  *
  * @property Employee $user
- * @property Call $call
+ * @property CallLog $callLog
  */
 class CallRecordingLog extends \yii\db\ActiveRecord
 {
@@ -80,9 +79,9 @@ class CallRecordingLog extends \yii\db\ActiveRecord
         return $this->hasOne(Employee::class, ['id' => 'crl_user_id']);
     }
 
-    public function getCall(): \yii\db\ActiveQuery
+    public function getCallLog(): \yii\db\ActiveQuery
     {
-        return $this->hasOne(Call::class, ['c_call_sid' => 'crl_call_sid']);
+        return $this->hasOne(CallLog::class, ['cl_call_sid' => 'crl_call_sid']);
     }
 
     public static function tableName(): string

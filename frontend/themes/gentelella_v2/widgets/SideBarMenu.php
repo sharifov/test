@@ -276,6 +276,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Conference Debug', 'url' => ['/conference-debug/index']],
                         ['label' => 'Participants', 'url' => ['/conference-participant/index']],
                         ['label' => 'Participants Stats', 'url' => ['/conference-participant-stats/index']],
+                        ['label' => 'Twilio Recording Log', 'url' => ['/conference-recording-log-crud/index']],
                     ]
                 ],
                 ['label' => 'Call Note', 'url' => ['/call-note-crud/index'], 'icon' => 'list'],

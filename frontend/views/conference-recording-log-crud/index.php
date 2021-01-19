@@ -7,40 +7,42 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\callRecordingLog\entity\search\CallRecordingLogSearch */
+/* @var $searchModel sales\model\conference\entity\conferenceRecordingLog\search\ConferenceRecordingLogSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Call Recording Logs';
+$this->title = 'Conference Recording Logs';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="call-recording-log-index">
+<div class="conference-recording-log-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Create Call Recording Log', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('Create Conference Recording Log', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(['id' => 'pjax-call-recording-log']); ?>
+    <?php Pjax::begin(['id' => 'pjax-conference-recording-log']); ?>
         <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            'crl_id',
-            'crl_call_sid',
+            ['class' => 'yii\grid\SerialColumn'],
+
+            'cfrl_id',
+            'cfrl_conference_sid',
             [
                 'class' => UserSelect2Column::class,
                 'relation' => 'user',
-                'attribute' => 'crl_user_id'
+                'attribute' => 'cfrl_user_id'
             ],
             [
                 'class' => DateTimeColumn::class,
-                'attribute' => 'crl_created_dt',
+                'attribute' => 'cfrl_created_dt',
             ],
-            'crl_year',
-            'crl_month',
+            'cfrl_year',
+            'cfrl_month',
 
             ['class' => 'yii\grid\ActionColumn'],
         ],
