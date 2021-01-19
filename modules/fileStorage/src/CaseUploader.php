@@ -4,11 +4,11 @@ namespace modules\fileStorage\src;
 
 use League\Flysystem\FilesystemException;
 use League\Flysystem\UnableToWriteFile;
+use modules\fileStorage\src\entity\fileCase\FileCase;
+use modules\fileStorage\src\entity\fileCase\FileCaseRepository;
 use modules\fileStorage\src\entity\fileClient\FileClient;
 use modules\fileStorage\src\entity\fileClient\FileClientRepository;
-use modules\fileStorage\src\entity\fileLead\FileLead;
-use modules\fileStorage\src\entity\fileLead\FileLeadRepository;
-use modules\fileStorage\src\entity\fileStorage\events\FileCreatedByLeadEvent;
+use modules\fileStorage\src\entity\fileStorage\events\FileCreatedByCaseEvent;
 use modules\fileStorage\src\entity\fileStorage\FileStorage;
 use modules\fileStorage\src\entity\fileStorage\FileStorageRepository;
 use modules\fileStorage\src\entity\fileStorage\Path;
@@ -18,21 +18,21 @@ use sales\services\PostgresTransactionManager;
 use yii\web\UploadedFile;
 
 /**
- * Class LeadUploader
+ * Class CaseUploader
  *
  * @property FileSystem $fileSystem
  * @property FileStorageRepository $fileStorageRepository
  * @property FileClientRepository $fileClientRepository
- * @property FileLeadRepository $fileLeadRepository
+ * @property FileCaseRepository $fileCaseRepository
  * @property PostgresTransactionManager $postgresTransactionManager
  * @property EventDispatcher $eventDispatcher
  */
-class LeadUploader
+class CaseUploader
 {
     private FileSystem $fileSystem;
     private FileStorageRepository $fileStorageRepository;
     private FileClientRepository $fileClientRepository;
-    private FileLeadRepository $fileLeadRepository;
+    private FileCaseRepository $fileCaseRepository;
     private PostgresTransactionManager $postgresTransactionManager;
     private EventDispatcher $eventDispatcher;
 
@@ -40,32 +40,32 @@ class LeadUploader
         FileSystem $fileStorage,
         FileStorageRepository $fileStorageRepository,
         FileClientRepository $fileClientRepository,
-        FileLeadRepository $fileLeadRepository,
+        FileCaseRepository $fileCaseRepository,
         PostgresTransactionManager $postgresTransactionManager,
         EventDispatcher $eventDispatcher
     ) {
         $this->fileSystem = $fileStorage;
         $this->fileStorageRepository = $fileStorageRepository;
         $this->fileClientRepository = $fileClientRepository;
-        $this->fileLeadRepository = $fileLeadRepository;
+        $this->fileCaseRepository = $fileCaseRepository;
         $this->postgresTransactionManager = $postgresTransactionManager;
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function upload(int $leadId, int $clientId, string $projectKey, ?string $title, UploadedFile $file): void
+    public function upload(int $caseId, int $clientId, string $projectKey, ?string $title, UploadedFile $file): void
     {
         /** @var $fileStorage FileStorage */
         /** @var $fileClient FileClient */
-        /** @var $fileLead FileLead */
-        [$fileStorage, $fileClient, $fileLead] = $this->saveFile($leadId, $clientId, $projectKey, $title, $file);
+        /** @var $fileCase FileCase */
+        [$fileStorage, $fileClient, $fileCase] = $this->saveFile($caseId, $clientId, $projectKey, $title, $file);
 
         try {
             $stream = fopen($file->tempName, 'r+');
             $this->fileSystem->writeStream($fileStorage->fs_path, $stream);
             fclose($stream);
             $this->eventDispatcher->dispatch(
-                new FileCreatedByLeadEvent(
-                    $leadId,
+                new FileCreatedByCaseEvent(
+                    $caseId,
                     $fileStorage->fs_name,
                     $fileStorage->fs_title,
                     $fileStorage->fs_path
@@ -75,22 +75,22 @@ class LeadUploader
             if (isset($stream) && $stream !== false && is_resource($stream)) {
                 fclose($stream);
             }
-            $this->error('Upload FileStorage by Lead error.', $e->getMessage(), $leadId, $clientId, $projectKey);
-            $this->removeFile($fileStorage, $fileClient, $fileLead, $projectKey);
+            $this->error('Upload FileStorage by Lead error.', $e->getMessage(), $caseId, $clientId, $projectKey);
+            $this->removeFile($fileStorage, $fileClient, $fileCase, $projectKey);
             throw new \DomainException('Server error. Please try again.');
         } catch (\Throwable $e) {
             if (isset($stream) && $stream !== false && is_resource($stream)) {
                 fclose($stream);
             }
-            $this->error('Upload FileStorage by Lead error.', $e->getMessage(), $leadId, $clientId, $projectKey);
-            $this->removeFile($fileStorage, $fileClient, $fileLead, $projectKey);
+            $this->error('Upload FileStorage by Lead error.', $e->getMessage(), $caseId, $clientId, $projectKey);
+            $this->removeFile($fileStorage, $fileClient, $fileCase, $projectKey);
             throw new \DomainException('Server error. Please try again.');
         }
     }
 
-    private function saveFile(int $leadId, int $clientId, string $projectKey, ?string $title, UploadedFile $file): array
+    private function saveFile(int $caseId, int $clientId, string $projectKey, ?string $title, UploadedFile $file): array
     {
-        return $this->postgresTransactionManager->wrap(function () use ($leadId, $clientId, $projectKey, $title, $file) {
+        return $this->postgresTransactionManager->wrap(function () use ($caseId, $clientId, $projectKey, $title, $file) {
             $uid = Uid::next();
             $path = new Path(PathGenerator::byClient($clientId, $projectKey, $file->name, $uid));
             $fileStorage = FileStorage::create(
@@ -109,7 +109,7 @@ class LeadUploader
             } catch (\yii\db\IntegrityException $e) {
                 $error = $e->errorInfo[2];
                 if (stripos($error, 'ERROR:  duplicate key value violates unique constraint') === 0) {
-                    $this->error('Generated FileStorage duplicate UID', $e->getMessage(), $leadId, $clientId, $projectKey);
+                    $this->error('Generated FileStorage duplicate UID', $e->getMessage(), $caseId, $clientId, $projectKey);
                     throw new \DomainException('Server error. Try again.');
                 }
                 throw $e;
@@ -118,18 +118,18 @@ class LeadUploader
             $fileClient = FileClient::create($fileStorage->fs_id, $clientId);
             $this->fileClientRepository->save($fileClient);
 
-            $fileLead = FileLead::create($fileStorage->fs_id, $leadId);
-            $this->fileLeadRepository->save($fileLead);
+            $fileCase = FileCase::create($fileStorage->fs_id, $caseId);
+            $this->fileCaseRepository->save($fileCase);
 
-            return [$fileStorage, $fileClient, $fileLead];
+            return [$fileStorage, $fileClient, $fileCase];
         });
     }
 
-    private function removeFile(FileStorage $fileStorage, FileClient $fileClient, FileLead $fileLead, string $projectKey): void
+    private function removeFile(FileStorage $fileStorage, FileClient $fileClient, FileCase $fileCase, string $projectKey): void
     {
         try {
-            $this->postgresTransactionManager->wrap(function () use ($fileStorage, $fileClient, $fileLead) {
-                $this->fileLeadRepository->remove($fileLead);
+            $this->postgresTransactionManager->wrap(function () use ($fileStorage, $fileClient, $fileCase) {
+                $this->fileCaseRepository->remove($fileCase);
                 $this->fileClientRepository->remove($fileClient);
                 $this->fileStorageRepository->remove($fileStorage);
             });
@@ -137,7 +137,7 @@ class LeadUploader
             $this->error(
                 'File was not uploaded. But Records on DataBase was created and not deleted. FileStorageId: ' . $fileStorage->fs_id,
                 $e->getMessage(),
-                $fileLead->fld_lead_id,
+                $fileCase->fc_case_id,
                 $fileClient->fcl_client_id,
                 $projectKey
             );
@@ -145,14 +145,14 @@ class LeadUploader
         }
     }
 
-    private function error($message, $error, $leadId, $clientId, $projectKey): void
+    private function error($message, $error, $caseId, $clientId, $projectKey): void
     {
         \Yii::error([
             'message' => $message,
             'error' => $error,
-            'leadId' => $leadId,
+            'caseId' => $caseId,
             'clientId' => $clientId,
             'projectKey' => $projectKey
-        ], 'LeadUploader');
+        ], 'CaseUploader');
     }
 }

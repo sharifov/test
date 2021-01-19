@@ -227,6 +227,7 @@ class CasesController extends FController
         $userModel = Yii::$app->user->identity;
 
         $previewEmailForm = new CasePreviewEmailForm();
+        $previewEmailForm->e_case_id = $model->cs_id;
         $previewEmailForm->is_send = false;
 
 
@@ -263,7 +264,11 @@ class CasesController extends FController
 
                     $previewEmailForm->is_send = true;
 
-                    $mailResponse = $mail->sendMail();
+                    $data = [];
+                    if ($previewEmailForm->files) {
+                        $data['files'] = $previewEmailForm->getFilesPath();
+                    }
+                    $mailResponse = $mail->sendMail($data);
 
                     if (isset($mailResponse['error']) && $mailResponse['error']) {
                         //echo $mailResponse['error']; exit; //'Error: <strong>Email Message</strong> has not been sent to <strong>'.$mail->e_email_to.'</strong>'; exit;

@@ -420,6 +420,7 @@ class LeadController extends FController
 
 
         $previewEmailForm = new LeadPreviewEmailForm();
+        $previewEmailForm->e_lead_id = $lead->id;
         $previewEmailForm->is_send = false;
 
 
@@ -456,7 +457,11 @@ class LeadController extends FController
 
                     $previewEmailForm->is_send = true;
 
-                    $mailResponse = $mail->sendMail();
+                    $data = [];
+                    if ($previewEmailForm->files) {
+                        $data['files'] = $previewEmailForm->getFilesPath();
+                    }
+                    $mailResponse = $mail->sendMail($data);
 
                     if (isset($mailResponse['error']) && $mailResponse['error']) {
                         //echo $mailResponse['error']; exit; //'Error: <strong>Email Message</strong> has not been sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
@@ -483,7 +488,6 @@ class LeadController extends FController
 
                         Yii::$app->session->setFlash('send-success', '<strong>Email Message</strong> has been successfully sent to <strong>' . $mail->e_email_to . '</strong>');
                     }
-
                     $this->refresh('#communication-form');
                 } else {
                     $previewEmailForm->addError('e_email_subject', VarDumper::dumpAsString($mail->errors));

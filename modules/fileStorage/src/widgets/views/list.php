@@ -31,9 +31,9 @@ $countFiles = count($files);
             </tr>
             <?php foreach ($files as $file) : ?>
                 <tr>
-                    <td><?= Html::a('<i class="fa fa-download"> </i>', $urlGenerator->generate($file['fs_path'])) ?></td>
-                    <td><?= Html::encode($file['fs_name']) ?></td>
-                    <td><?= Html::encode($file['fs_title']) ?></td>
+                    <td><?= Html::a('<i class="fa fa-download"> </i>', $urlGenerator->generate($file['path'])) ?></td>
+                    <td><?= Html::encode($file['name']) ?></td>
+                    <td><?= Html::encode($file['title']) ?></td>
                 </tr>
             <?php endforeach; ?>
         </table>

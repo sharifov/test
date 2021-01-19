@@ -34,7 +34,7 @@ use Yii;
  */
 class FileStorage extends \yii\db\ActiveRecord
 {
-    public static function createByLead(
+    public static function create(
         string $name,
         ?string $title,
         Path $path,

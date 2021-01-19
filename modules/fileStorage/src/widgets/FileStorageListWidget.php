@@ -3,7 +3,8 @@
 namespace modules\fileStorage\src\widgets;
 
 use modules\fileStorage\FileStorageSettings;
-use modules\fileStorage\src\entity\fileLead\FileLead;
+use modules\fileStorage\src\entity\fileCase\FileCaseQuery;
+use modules\fileStorage\src\entity\fileLead\FileLeadQuery;
 use modules\fileStorage\src\UrlGenerator;
 use yii\base\Widget;
 
@@ -28,9 +29,6 @@ class FileStorageListWidget extends Widget
 
     public function run(): string
     {
-        if (!FileStorageSettings::isEnabled()) {
-            return '';
-        }
         return $this->render('list', [
             'files' => $this->files,
             'uploadWidget' => $this->uploadWidget,
@@ -40,17 +38,23 @@ class FileStorageListWidget extends Widget
 
     public static function byLead(int $id): string
     {
-        $files = FileLead::find()
-            ->select(['fs_name', 'fs_path', 'fs_title', 'fld_fs_id'])
-            ->byLead($id)
-            ->innerJoinWith('file', false)
-            ->orderBy(['fld_fs_id' => SORT_DESC])
-            ->asArray()
-            ->all();
-
+        if (!FileStorageSettings::isEnabled()) {
+            return '';
+        }
         return self::widget([
-            'files' => $files,
+            'files' => FileLeadQuery::getListByLead($id),
             'uploadWidget' => FileStorageUploadWidget::byLead($id),
+        ]);
+    }
+
+    public static function byCase(int $id): string
+    {
+        if (!FileStorageSettings::isEnabled()) {
+            return '';
+        }
+        return self::widget([
+            'files' => FileCaseQuery::getListByCase($id),
+            'uploadWidget' => FileStorageUploadWidget::byCase($id),
         ]);
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Employee;
+use modules\fileStorage\src\widgets\FileStorageListWidget;
 use sales\auth\Auth;
 use sales\helpers\cases\CasesViewRenderHelper;
 use yii\helpers\Html;
@@ -153,6 +154,16 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
             <?php else : ?>
                 <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
             <?php endif;?>
+        </div>
+
+
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+        </div>
+        <div class="col-md-6">
+            <?= FileStorageListWidget::byCase($model->cs_id) ?>
         </div>
     </div>
 

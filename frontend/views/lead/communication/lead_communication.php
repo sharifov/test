@@ -21,10 +21,12 @@ use frontend\models\CommunicationForm;
 use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
+use modules\fileStorage\src\widgets\FileStorageEmailSendListWidget;
 use sales\helpers\communication\StatisticsHelper;
 use sales\helpers\projectLocale\ProjectLocaleHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\model\project\entity\projectLocale\ProjectLocale;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\bootstrap4\Modal;
 use vova07\imperavi\Widget;
@@ -158,6 +160,11 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                             <div class="row">
                                 <div class="col-sm-12 form-group">
                                     <?= $form2->field($previewEmailForm, 'e_email_subject')->textInput(['class' => 'form-control', 'maxlength' => true]) ?>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6 form-group">
+                                    <?= FileStorageEmailSendListWidget::byLead($previewEmailForm->getFileList()) ?>
                                 </div>
                             </div>
                             <div class="form-group">
