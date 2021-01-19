@@ -1,6 +1,7 @@
 <?php
 
 use modules\fileStorage\src\grid\columns\FileStorageMimeTypeColumn;
+use modules\fileStorage\src\grid\columns\FileStorageStatusColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -28,6 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => FileStorageMimeTypeColumn::class],
             'fs_name',
             'fs_title',
+            ['class' => FileStorageStatusColumn::class],
 
             ['class' => 'yii\grid\ActionColumn', 'template' => '{view} {delete}'],
         ],

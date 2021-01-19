@@ -57,12 +57,14 @@ class CaseUploader
         /** @var $fileStorage FileStorage */
         /** @var $fileClient FileClient */
         /** @var $fileCase FileCase */
-        [$fileStorage, $fileClient, $fileCase] = $this->saveFile($caseId, $clientId, $projectKey, $title, $file);
+        [$fileStorage, $fileClient, $fileCase] = $this->create($caseId, $clientId, $projectKey, $title, $file);
 
         try {
             $stream = fopen($file->tempName, 'r+');
             $this->fileSystem->writeStream($fileStorage->fs_path, $stream);
             fclose($stream);
+            $fileStorage->uploaded();
+            $this->fileStorageRepository->save($fileStorage);
             $this->eventDispatcher->dispatch(
                 new FileCreatedByCaseEvent(
                     $caseId,
@@ -75,25 +77,25 @@ class CaseUploader
             if (isset($stream) && $stream !== false && is_resource($stream)) {
                 fclose($stream);
             }
-            $this->error('Upload FileStorage by Lead error.', $e->getMessage(), $caseId, $clientId, $projectKey);
-            $this->removeFile($fileStorage, $fileClient, $fileCase, $projectKey);
+            $this->error('Upload FileStorage by Case error.', $e->getMessage(), $caseId, $clientId, $projectKey);
+            $this->failed($fileStorage, $fileClient->fcl_client_id, $fileCase->fc_case_id, $projectKey);
             throw new \DomainException('Server error. Please try again.');
         } catch (\Throwable $e) {
             if (isset($stream) && $stream !== false && is_resource($stream)) {
                 fclose($stream);
             }
-            $this->error('Upload FileStorage by Lead error.', $e->getMessage(), $caseId, $clientId, $projectKey);
-            $this->removeFile($fileStorage, $fileClient, $fileCase, $projectKey);
+            $this->error('Upload FileStorage by Case error.', $e->getMessage(), $caseId, $clientId, $projectKey);
+            $this->failed($fileStorage, $fileClient->fcl_client_id, $fileCase->fc_case_id, $projectKey);
             throw new \DomainException('Server error. Please try again.');
         }
     }
 
-    private function saveFile(int $caseId, int $clientId, string $projectKey, ?string $title, UploadedFile $file): array
+    private function create(int $caseId, int $clientId, string $projectKey, ?string $title, UploadedFile $file): array
     {
         return $this->postgresTransactionManager->wrap(function () use ($caseId, $clientId, $projectKey, $title, $file) {
             $uid = Uid::next();
             $path = new Path(PathGenerator::byClient($clientId, $projectKey, $file->name, $uid));
-            $fileStorage = FileStorage::create(
+            $fileStorage = FileStorage::createByUpload(
                 $file->name,
                 $title,
                 $path,
@@ -142,6 +144,23 @@ class CaseUploader
                 $projectKey
             );
             throw new \DomainException('File was not uploaded. But Records on DataBase was created and not deleted. Please contact administrator.');
+        }
+    }
+
+    private function failed(FileStorage $fileStorage, int $clientId, int $caseId, string $projectKey): void
+    {
+        try {
+            $fileStorage->failed();
+            $this->fileStorageRepository->save($fileStorage);
+        } catch (\Throwable $e) {
+            $this->error(
+                'File was not uploaded. Records on DataBase was not marked "Failed". FileStorageId: ' . $fileStorage->fs_id,
+                $e->getMessage(),
+                $caseId,
+                $clientId,
+                $projectKey
+            );
+            throw new \DomainException('File was not uploaded. Records on DataBase was not marked "Failed". Please contact administrator.');
         }
     }
 

@@ -14,7 +14,12 @@ class FileCaseQuery
     {
         return FileCase::find()
             ->select(['fs_name as name', 'fs_path as path', 'fs_title as title', 'fc_fs_id as id'])
-            ->innerJoinWith('file', false)
+            ->innerJoinWith([
+                'file' => static function (\modules\fileStorage\src\entity\fileStorage\Scopes $query) {
+                    return $query->success();
+                }],
+                false
+            )
             ->byCase($caseId)
             ->orderBy(['id' => SORT_DESC])
             ->indexBy('id')

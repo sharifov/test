@@ -22,6 +22,7 @@ use Yii;
  * @property int|null $fs_size
  * @property bool|null $fs_private
  * @property string $fs_md5_hash
+ * @property int $fs_status
  * @property string|null $fs_expired_dt
  * @property string|null $fs_created_dt
  *
@@ -34,7 +35,7 @@ use Yii;
  */
 class FileStorage extends \yii\db\ActiveRecord
 {
-    public static function create(
+    public static function createByUpload(
         string $name,
         ?string $title,
         Path $path,
@@ -55,6 +56,7 @@ class FileStorage extends \yii\db\ActiveRecord
         $file->fs_md5_hash = $hash;
         $file->fs_private = $private;
         $file->fs_created_dt = $createdDt->format('Y-m-d H:i:s');
+        $file->fs_status = FileStorageStatus::PENDING;
         return $file;
     }
 
@@ -78,6 +80,16 @@ class FileStorage extends \yii\db\ActiveRecord
             throw new \DomainException('Path value is error.');
         }
         $this->fs_path = substr($this->fs_path, 0, $positionLastChunk) . '/' . $this->fs_name;
+    }
+
+    public function uploaded(): void
+    {
+        $this->fs_status = FileStorageStatus::UPLOADED;
+    }
+
+    public function failed(): void
+    {
+        $this->fs_status = FileStorageStatus::FAILED;
     }
 
     public function rules(): array
@@ -108,6 +120,9 @@ class FileStorage extends \yii\db\ActiveRecord
 
             ['fs_md5_hash', 'trim'],
             ['fs_md5_hash', 'string', 'max' => 32],
+
+            ['fs_status', 'integer'],
+            ['fs_status', 'in', 'range' => array_keys(FileStorageStatus::getList())],
         ];
     }
     public function getCases(): \yii\db\ActiveQuery
@@ -147,6 +162,7 @@ class FileStorage extends \yii\db\ActiveRecord
             'fs_size' => 'Size',
             'fs_private' => 'Private',
             'fs_md5_hash' => 'Hash',
+            'fs_status' => 'Status',
             'fs_expired_dt' => 'Expired Dt',
             'fs_created_dt' => 'Created Dt',
         ];

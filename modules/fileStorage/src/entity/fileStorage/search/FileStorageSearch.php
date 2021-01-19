@@ -19,6 +19,8 @@ class FileStorageSearch extends FileStorage
             ['fs_title', 'safe'],
 
             ['fs_uid', 'safe'],
+
+            ['fs_status', 'integer']
         ];
     }
 
@@ -40,6 +42,7 @@ class FileStorageSearch extends FileStorage
         $query->andFilterWhere([
             'fs_id' => $this->fs_id,
             'fs_mime_type' => $this->fs_mime_type,
+            'fs_status' => $this->fs_status,
         ]);
 
         $query->andFilterWhere(['like', 'fs_uid', $this->fs_uid])

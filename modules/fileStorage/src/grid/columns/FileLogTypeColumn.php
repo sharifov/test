@@ -2,12 +2,11 @@
 
 namespace  modules\fileStorage\src\grid\columns;
 
-use modules\fileStorage\FileStorageModule;
 use modules\fileStorage\src\entity\fileLog\FileLogType;
 use yii\grid\DataColumn;
 
 /**
- * Class QaTaskObjectTypeColumn
+ * Class FileLogTypeColumn
  *
  * Ex.
     [

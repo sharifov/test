@@ -57,12 +57,14 @@ class LeadUploader
         /** @var $fileStorage FileStorage */
         /** @var $fileClient FileClient */
         /** @var $fileLead FileLead */
-        [$fileStorage, $fileClient, $fileLead] = $this->saveFile($leadId, $clientId, $projectKey, $title, $file);
+        [$fileStorage, $fileClient, $fileLead] = $this->create($leadId, $clientId, $projectKey, $title, $file);
 
         try {
             $stream = fopen($file->tempName, 'r+');
             $this->fileSystem->writeStream($fileStorage->fs_path, $stream);
             fclose($stream);
+            $fileStorage->uploaded();
+            $this->fileStorageRepository->save($fileStorage);
             $this->eventDispatcher->dispatch(
                 new FileCreatedByLeadEvent(
                     $leadId,
@@ -76,24 +78,24 @@ class LeadUploader
                 fclose($stream);
             }
             $this->error('Upload FileStorage by Lead error.', $e->getMessage(), $leadId, $clientId, $projectKey);
-            $this->removeFile($fileStorage, $fileClient, $fileLead, $projectKey);
+            $this->failed($fileStorage, $fileClient->fcl_client_id, $fileLead->fld_lead_id, $projectKey);
             throw new \DomainException('Server error. Please try again.');
         } catch (\Throwable $e) {
             if (isset($stream) && $stream !== false && is_resource($stream)) {
                 fclose($stream);
             }
             $this->error('Upload FileStorage by Lead error.', $e->getMessage(), $leadId, $clientId, $projectKey);
-            $this->removeFile($fileStorage, $fileClient, $fileLead, $projectKey);
+            $this->failed($fileStorage, $fileClient->fcl_client_id, $fileLead->fld_lead_id, $projectKey);
             throw new \DomainException('Server error. Please try again.');
         }
     }
 
-    private function saveFile(int $leadId, int $clientId, string $projectKey, ?string $title, UploadedFile $file): array
+    private function create(int $leadId, int $clientId, string $projectKey, ?string $title, UploadedFile $file): array
     {
         return $this->postgresTransactionManager->wrap(function () use ($leadId, $clientId, $projectKey, $title, $file) {
             $uid = Uid::next();
             $path = new Path(PathGenerator::byClient($clientId, $projectKey, $file->name, $uid));
-            $fileStorage = FileStorage::create(
+            $fileStorage = FileStorage::createByUpload(
                 $file->name,
                 $title,
                 $path,
@@ -142,6 +144,23 @@ class LeadUploader
                 $projectKey
             );
             throw new \DomainException('File was not uploaded. But Records on DataBase was created and not deleted. Please contact administrator.');
+        }
+    }
+
+    private function failed(FileStorage $fileStorage, int $clientId, int $leadId, string $projectKey): void
+    {
+        try {
+            $fileStorage->failed();
+            $this->fileStorageRepository->save($fileStorage);
+        } catch (\Throwable $e) {
+            $this->error(
+                'File was not uploaded. Records on DataBase was not marked "Failed". FileStorageId: ' . $fileStorage->fs_id,
+                $e->getMessage(),
+                $leadId,
+                $clientId,
+                $projectKey
+            );
+            throw new \DomainException('File was not uploaded. Records on DataBase was not marked "Failed". Please contact administrator.');
         }
     }
 

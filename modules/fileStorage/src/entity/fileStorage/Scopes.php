@@ -3,10 +3,15 @@
 namespace modules\fileStorage\src\entity\fileStorage;
 
 /**
- * @see FileSystem
+ * @see FileStorage
  */
 class Scopes extends \yii\db\ActiveQuery
 {
+    public function success(): self
+    {
+        return $this->andWhere(['fs_status' => FileStorageStatus::UPLOADED]);
+    }
+
     /**
      * @param null $db
      * @return FileStorage[]|array

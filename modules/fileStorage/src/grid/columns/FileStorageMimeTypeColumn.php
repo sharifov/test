@@ -6,7 +6,7 @@ use modules\fileStorage\FileStorageSettings;
 use yii\grid\DataColumn;
 
 /**
- * Class QaTaskObjectTypeColumn
+ * Class FileStorageMimeTypeColumn
  *
  * Ex.
     [
