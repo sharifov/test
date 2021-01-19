@@ -14,12 +14,9 @@ class FileLeadQuery
     {
         return FileLead::find()
             ->select(['fs_name as name', 'fs_path as path', 'fs_title as title', 'fld_fs_id as id'])
-            ->innerJoinWith([
-                'file' => static function (\modules\fileStorage\src\entity\fileStorage\Scopes $query) {
+            ->innerJoinWith(['file' => static function (\modules\fileStorage\src\entity\fileStorage\Scopes $query) {
                     return $query->success();
-                }],
-                false
-            )
+            }], false)
             ->byLead($leadId)
             ->orderBy(['id' => SORT_DESC])
             ->indexBy('id')
