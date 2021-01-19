@@ -28,6 +28,7 @@ use yii\httpclient\Response;
  * @property string $url
  * @property string $username
  * @property string $password
+ * @property string $recordingUrl
  * @property string $securityCallRecordingUrl
  * @property string $securityConferenceRecordingUrl
  * @property string $xAccelRedirectUrl
@@ -42,9 +43,9 @@ class CommunicationService extends Component implements CommunicationServiceInte
     public $username;
     public $password;
     public $request;
-    public $recording_url = '';
-    public $securityCallRecordingUrl = '';
-    public $securityConferenceRecordingUrl = '';
+    public $recordingUrl = '';
+    public $securityCallRecordingUrl = '/call/record/';
+    public $securityConferenceRecordingUrl = '/conference/record/';
     public $xAccelRedirectUrl = '';
     public $voipApiUsername = '';
 
@@ -1194,11 +1195,11 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
     public function getCallRecordingUrl(string $callSid, string $recordingSid): string
     {
-        return SettingHelper::isCallRecordingSecurityEnabled() ? (Url::toRoute([$this->securityCallRecordingUrl, 'callSid' => $callSid])) : ($this->recording_url . $recordingSid);
+        return SettingHelper::isCallRecordingSecurityEnabled() ? (Url::toRoute([$this->securityCallRecordingUrl, 'callSid' => $callSid])) : ($this->recordingUrl . $recordingSid);
     }
 
     public function getConferenceRecordingCall(string $conferenceSid, string $recordingSid): string
     {
-        return SettingHelper::isCallRecordingSecurityEnabled() ? (Url::toRoute([$this->securityConferenceRecordingUrl, 'conferenceSid' => $conferenceSid])) : ($this->recording_url . $recordingSid);
+        return SettingHelper::isCallRecordingSecurityEnabled() ? (Url::toRoute([$this->securityConferenceRecordingUrl, 'conferenceSid' => $conferenceSid])) : ($this->recordingUrl . $recordingSid);
     }
 }

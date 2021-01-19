@@ -30,7 +30,7 @@ class VoiceMailRecord extends \yii\db\ActiveRecord
 
     public function getRecordingUrl(): string
     {
-        return $this->vmr_record_sid ? Yii::$app->communication->recording_url . $this->vmr_record_sid : '';
+        return $this->vmr_record_sid ? Yii::$app->communication->recordingUrl . $this->vmr_record_sid : '';
     }
 
     public function rules(): array

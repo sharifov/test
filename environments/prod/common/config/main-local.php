@@ -83,7 +83,9 @@ return [
             'url' => '{{ common.config.main.components.communication.url:str }}',
             'username' => '{{ common.config.main.components.communication.username:str }}',
             'password' => '{{ common.config.main.components.communication.password:str }}',
-            'voipApiUsername' => '{{ common.config.main.components.communication.voipApiUsername:str }}'
+            'voipApiUsername' => '{{ common.config.main.components.communication.voipApiUsername:str }}',
+            'xAccelRedirectUrl' => '{{ common.config.main.components.communication.xAccelRedirectUrl:str }}',
+            'recordingUrl' => '{{ common.config.main.components.communication.recordingUrl:str }}'
         ],
         'airsearch' => [
             'class' => \common\components\AirSearchService::class,
