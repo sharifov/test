@@ -294,22 +294,22 @@ class ClientChatRequestService
                 if ($clientChat->cch_client_online) {
                     $clientChat->cch_client_online = 0;
                     $this->clientChatRepository->save($clientChat);
-                    if ($clientChat->cch_owner_user_id) {
-                        Notifications::pub(
-                            [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],
-                            'clientChatUpdateClientStatus',
-                            ['data' => [
+//                    if ($clientChat->cch_owner_user_id) {
+                    Notifications::pub(
+                        [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],
+                        'clientChatUpdateClientStatus',
+                        ['data' => [
                                 'cchId' => $clientChat->cch_id,
                                 'isOnline' => (int)$clientChat->cch_client_online,
                                 'statusMessage' => Html::encode($clientChat->getClientStatusMessage()),
                             ]]
-                        );
+                    );
 //                        Notifications::publish('clientChatUpdateClientStatus', ['user_id' => $clientChat->cch_owner_user_id], [
 //                            'cchId' => $clientChat->cch_id,
 //                            'isOnline' => (int)$clientChat->cch_client_online,
 //                            'statusMessage' => Html::encode($clientChat->getClientStatusMessage()),
 //                        ]);
-                    }
+//                    }
                 }
             }
         }
