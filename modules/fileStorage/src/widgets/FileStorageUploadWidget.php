@@ -26,9 +26,6 @@ class FileStorageUploadWidget extends Widget
 
     public function run(): string
     {
-        if (!FileStorageSettings::canUpload()) {
-            return '';
-        }
         $form = new UploadForm();
         return $this->render('upload', ['form' => $form, 'url' => $this->url]);
     }
@@ -36,14 +33,14 @@ class FileStorageUploadWidget extends Widget
     public static function byLead(int $id): string
     {
         return self::widget([
-            'url' => Url::to(['/file-storage/file-storage-upload/upload-by-lead', 'id' => $id])
+            'url' => Url::to(['/file-storage/upload/by-lead', 'id' => $id])
         ]);
     }
 
     public static function byCase(int $id): string
     {
         return self::widget([
-            'url' => Url::to(['/file-storage/file-storage-upload/upload-by-case', 'id' => $id])
+            'url' => Url::to(['/file-storage/upload/by-case', 'id' => $id])
         ]);
     }
 }

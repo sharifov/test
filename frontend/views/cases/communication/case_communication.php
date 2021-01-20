@@ -19,6 +19,7 @@ use common\models\DepartmentPhoneProject;
 use frontend\models\CaseCommunicationForm;
 use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
+use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\widgets\FileStorageEmailSendListWidget;
 use sales\entities\cases\Cases;
 use sales\helpers\communication\StatisticsHelper;
@@ -156,11 +157,13 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
                             <?= $form2->field($previewEmailForm, 'e_email_subject')->textInput(['class' => 'form-control', 'maxlength' => true]) ?>
                         </div>
                     </div>
-                     <div class="row">
-                         <div class="col-sm-6 form-group">
-                             <?= FileStorageEmailSendListWidget::byCase($previewEmailForm->getFileList()) ?>
+                     <?php if (FileStorageSettings::canEmailAttach()) : ?>
+                         <div class="row">
+                             <div class="col-sm-6 form-group">
+                                 <?= FileStorageEmailSendListWidget::byCase($previewEmailForm->getFileList()) ?>
+                             </div>
                          </div>
-                     </div>
+                     <?php endif; ?>
                     <div class="form-group">
 
                         <?php echo $form2

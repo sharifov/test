@@ -4,7 +4,6 @@ namespace modules\fileStorage\src\widgets;
 
 use frontend\models\CasePreviewEmailForm;
 use frontend\models\LeadPreviewEmailForm;
-use modules\fileStorage\FileStorageSettings;
 use yii\base\Widget;
 
 /**
@@ -25,9 +24,6 @@ class FileStorageEmailSendListWidget extends Widget
 
     public static function byLead(array $files): string
     {
-        if (!FileStorageSettings::canEmailAttach()) {
-            return '';
-        }
         return self::widget([
             'files' => $files,
             'checkBoxName' => (new LeadPreviewEmailForm())->formName()
@@ -36,9 +32,6 @@ class FileStorageEmailSendListWidget extends Widget
 
     public static function byCase(array $files): string
     {
-        if (!FileStorageSettings::canEmailAttach()) {
-            return '';
-        }
         return self::widget([
             'files' => $files,
             'checkBoxName' => (new CasePreviewEmailForm())->formName()

@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Employee;
+use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\widgets\FileStorageListWidget;
 use sales\auth\Auth;
 use sales\helpers\cases\CasesViewRenderHelper;
@@ -159,13 +160,22 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
 
     </div>
 
-    <div class="row">
-        <div class="col-md-6">
+    <?php if (FileStorageSettings::isEnabled() && Auth::can('case-view/files/view', ['case' => $model])) : ?>
+        <div class="row">
+            <div class="col-md-6">
+            </div>
+            <div class="col-md-6">
+                <?= FileStorageListWidget::byCase(
+                    $model->cs_id,
+                    (
+                        FileStorageSettings::canUpload()
+                        && Auth::can('case-view/files/upload')
+                        && Auth::can('cases/update', ['case' => $model])
+                    )
+                ) ?>
+            </div>
         </div>
-        <div class="col-md-6">
-            <?= FileStorageListWidget::byCase($model->cs_id) ?>
-        </div>
-    </div>
+    <?php endif; ?>
 
     <div class="row">
         <div class="col-md-6">

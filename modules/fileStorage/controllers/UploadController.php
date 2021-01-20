@@ -3,25 +3,27 @@
 namespace modules\fileStorage\controllers;
 
 use common\models\Lead;
+use frontend\controllers\FController;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\CaseUploader;
 use modules\fileStorage\src\LeadUploader;
 use modules\fileStorage\src\useCase\uploadFile\UploadForm;
+use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
-use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
 
 /**
- * Class FileStorageUploadController
+ * Class UploadController
  *
  * @property LeadUploader $leadUploader
  * @property CaseUploader $caseUploader
  */
-class FileStorageUploadController extends Controller
+class UploadController extends FController
 {
     private LeadUploader $leadUploader;
     private CaseUploader $caseUploader;
@@ -36,11 +38,17 @@ class FileStorageUploadController extends Controller
     public function behaviors(): array
     {
         $behaviors = [
+            'access' => [
+                'allowActions' => [
+                    'by-lead',
+                    'by-case',
+                ],
+            ],
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
-                    'upload-by-lead' => ['POST'],
-                    'upload-by-case' => ['POST'],
+                    'by-lead' => ['POST'],
+                    'by-case' => ['POST'],
                 ],
             ],
         ];
@@ -58,7 +66,7 @@ class FileStorageUploadController extends Controller
         return false;
     }
 
-    public function actionUploadByLead()
+    public function actionByLead()
     {
         $leadId = (int)\Yii::$app->request->get('id');
         if (!$leadId) {
@@ -67,6 +75,10 @@ class FileStorageUploadController extends Controller
         $lead = Lead::findOne($leadId);
         if (!$lead) {
             throw new NotFoundHttpException('Lead is not found.');
+        }
+
+        if (!Auth::can('lead-view/files/upload') || !Auth::can('lead/manage', ['lead' => $lead])) {
+            throw new ForbiddenHttpException('Access denied.');
         }
 
         $form = new UploadForm();
@@ -113,7 +125,7 @@ class FileStorageUploadController extends Controller
         ]);
     }
 
-    public function actionUploadByCase()
+    public function actionByCase()
     {
         $caseId = (int)\Yii::$app->request->get('id');
         if (!$caseId) {
@@ -122,6 +134,10 @@ class FileStorageUploadController extends Controller
         $case = Cases::findOne($caseId);
         if (!$case) {
             throw new NotFoundHttpException('Case is not found.');
+        }
+
+        if (!Auth::can('case-view/files/upload') || !Auth::can('cases/update', ['case' => $case])) {
+            throw new ForbiddenHttpException('Access denied.');
         }
 
         $form = new UploadForm();

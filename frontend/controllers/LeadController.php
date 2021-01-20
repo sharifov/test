@@ -25,6 +25,7 @@ use common\models\ProjectEmailTemplate;
 use common\models\search\LeadCallExpertSearch;
 use common\models\search\LeadChecklistSearch;
 use kivork\rbacExportImport\src\formatters\FileSizeFormatter;
+use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\services\url\UrlGenerator;
 use modules\offer\src\entities\offer\search\OfferSearch;
 use modules\offer\src\entities\offerSendLog\CreateDto;
@@ -463,7 +464,7 @@ class LeadController extends FController
                     $previewEmailForm->is_send = true;
 
                     $data = [];
-                    if ($previewEmailForm->files) {
+                    if (FileStorageSettings::canEmailAttach() && $previewEmailForm->files) {
                         $data['files'] = $this->fileStorageUrlGenerator->generateForExternal($previewEmailForm->getFilesPath());
                     }
                     $mailResponse = $mail->sendMail($data);

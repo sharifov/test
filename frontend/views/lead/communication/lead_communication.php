@@ -21,6 +21,7 @@ use frontend\models\CommunicationForm;
 use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
+use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\widgets\FileStorageEmailSendListWidget;
 use sales\helpers\communication\StatisticsHelper;
 use sales\helpers\projectLocale\ProjectLocaleHelper;
@@ -162,11 +163,14 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                                     <?= $form2->field($previewEmailForm, 'e_email_subject')->textInput(['class' => 'form-control', 'maxlength' => true]) ?>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-sm-6 form-group">
-                                    <?= FileStorageEmailSendListWidget::byLead($previewEmailForm->getFileList()) ?>
+                            <?php if (FileStorageSettings::canEmailAttach()) : ?>
+                                <div class="row">
+                                    <div class="col-sm-6 form-group">
+                                        <?= FileStorageEmailSendListWidget::byLead($previewEmailForm->getFileList()) ?>
+                                    </div>
                                 </div>
-                            </div>
+                            <?php endif; ?>
+
                             <div class="form-group">
 
                         <?php echo $form2->field($previewEmailForm, 'e_email_message')->textarea(['style' => 'display:none', 'id' => 'e_email_message']) ?>

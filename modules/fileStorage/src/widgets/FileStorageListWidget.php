@@ -2,7 +2,6 @@
 
 namespace modules\fileStorage\src\widgets;
 
-use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\entity\fileCase\FileCaseQuery;
 use modules\fileStorage\src\entity\fileLead\FileLeadQuery;
 use modules\fileStorage\src\services\url\UrlGenerator;
@@ -36,25 +35,19 @@ class FileStorageListWidget extends Widget
         ]);
     }
 
-    public static function byLead(int $id): string
+    public static function byLead(int $id, bool $withUpload): string
     {
-        if (!FileStorageSettings::isEnabled()) {
-            return '';
-        }
         return self::widget([
             'files' => FileLeadQuery::getListByLead($id),
-            'uploadWidget' => FileStorageUploadWidget::byLead($id),
+            'uploadWidget' => $withUpload ?  FileStorageUploadWidget::byLead($id) : '',
         ]);
     }
 
-    public static function byCase(int $id): string
+    public static function byCase(int $id, bool $withUpload): string
     {
-        if (!FileStorageSettings::isEnabled()) {
-            return '';
-        }
         return self::widget([
             'files' => FileCaseQuery::getListByCase($id),
-            'uploadWidget' => FileStorageUploadWidget::byCase($id),
+            'uploadWidget' => $withUpload ? FileStorageUploadWidget::byCase($id) : '',
         ]);
     }
 }
