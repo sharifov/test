@@ -1018,6 +1018,11 @@ class CasesSearch extends Cases
     {
         return [
             'sale_info' => 'Sale info',
+            'cs_source_type_id' => 'Source type',
+            'cs_subject' => 'Subject',
+            'cs_lead_id' => 'Lead ID',
+            'communication' => 'Communication',
+            'status_flow' => 'Status Flow'
         ];
     }
 }
