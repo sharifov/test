@@ -9,6 +9,7 @@ namespace modules\fileStorage\src\entity\fileStorage\events;
  * @property string $name
  * @property string|null $title
  * @property string $path
+ * @property string $uid
  */
 class FileUploadedByLeadEvent
 {
@@ -16,12 +17,14 @@ class FileUploadedByLeadEvent
     public string $name;
     public ?string $title;
     public string $path;
+    public string $uid;
 
-    public function __construct(int $leadId, string $name, ?string $title, string $path)
+    public function __construct(int $leadId, string $name, ?string $title, string $path, string $uid)
     {
         $this->leadId = $leadId;
         $this->name = $name;
         $this->title = $title ?: '';
         $this->path = $path;
+        $this->uid = $uid;
     }
 }

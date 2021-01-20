@@ -5,22 +5,26 @@ namespace modules\fileStorage\src\services\url;
 /**
  * Class LocalUrlGenerator
  *
- * @property string $url
+ * @property string $externalUrl
  */
 class LocalUrlGenerator implements UrlGenerator
 {
-    private string $url;
+    private string $externalUrl;
 
     public function __construct(string $url)
     {
-        $this->url = rtrim($url, '/');
+        $this->externalUrl = rtrim($url, '/');
     }
 
-    public function generate(string $path): string
+    public function generate(FileInfo $file): string
     {
-        return $this->url . '/' . $path;
+        return $this->publicLink($file->path);
     }
 
+    /**
+     * @param FileInfo[] $files
+     * @return array[]
+     */
     public function generateForExternal(array $files): array
     {
         $links = [
@@ -28,8 +32,13 @@ class LocalUrlGenerator implements UrlGenerator
             'public' => []
         ];
         foreach ($files as $file) {
-            $links['public'][] = $this->generate($file);
+            $links['public'][] = $this->publicLink($file->path);
         }
         return $links;
+    }
+
+    private function publicLink(string $path): string
+    {
+        return $this->externalUrl . '/' . $path;
     }
 }

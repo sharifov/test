@@ -13,7 +13,7 @@ class FileCaseQuery
     public static function getListByCase(int $caseId): array
     {
         return FileCase::find()
-            ->select(['fs_name as name', 'fs_path as path', 'fs_title as title', 'fc_fs_id as id'])
+            ->select(['fs_name as name', 'fs_path as path', 'fs_title as title', 'fs_uid as uid', 'fc_fs_id as id'])
             ->innerJoinWith(['file' => static function (\modules\fileStorage\src\entity\fileStorage\Scopes $query) {
                     return $query->success();
             }], false)

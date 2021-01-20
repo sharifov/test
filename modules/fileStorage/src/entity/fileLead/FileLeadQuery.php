@@ -13,7 +13,7 @@ class FileLeadQuery
     public static function getListByLead(int $leadId): array
     {
         return FileLead::find()
-            ->select(['fs_name as name', 'fs_path as path', 'fs_title as title', 'fld_fs_id as id'])
+            ->select(['fs_name as name', 'fs_path as path', 'fs_title as title', 'fs_uid as uid', 'fld_fs_id as id'])
             ->innerJoinWith(['file' => static function (\modules\fileStorage\src\entity\fileStorage\Scopes $query) {
                     return $query->success();
             }], false)

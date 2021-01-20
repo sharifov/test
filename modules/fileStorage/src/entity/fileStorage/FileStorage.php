@@ -103,13 +103,13 @@ class FileStorage extends \yii\db\ActiveRecord
     public function uploadedByLead(int $leadId): void
     {
         $this->uploaded();
-        $this->recordEvent(new FileUploadedByLeadEvent($leadId, $this->fs_name, $this->fs_title, $this->fs_path));
+        $this->recordEvent(new FileUploadedByLeadEvent($leadId, $this->fs_name, $this->fs_title, $this->fs_path, $this->fs_uid));
     }
 
     public function uploadedByCase(int $caseId): void
     {
         $this->uploaded();
-        $this->recordEvent(new FileUploadedByCaseEvent($caseId, $this->fs_name, $this->fs_title, $this->fs_path));
+        $this->recordEvent(new FileUploadedByCaseEvent($caseId, $this->fs_name, $this->fs_title, $this->fs_path, $this->fs_uid));
     }
 
     public function failed(): void

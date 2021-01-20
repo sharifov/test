@@ -4,11 +4,11 @@ namespace modules\fileStorage\src\services\url;
 
 interface UrlGenerator
 {
-    public function generate(string $path): string;
+    public function generate(FileInfo $file): string;
 
     /**
-     * @param array $files
-     * @return array ['public' => ['https://host.com/...], 'private' => ['base/path/to/file']]
+     * @param FileInfo[] $files
+     * @return array => ['public' => ['https://host.com/...], 'private' => ['base/path/to/file']]
      */
     public function generateForExternal(array $files): array;
 }

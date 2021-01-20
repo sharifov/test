@@ -5,30 +5,40 @@ namespace modules\fileStorage\src\services\url;
 /**
  * Class AwsS3UrlGenerator
  *
- * @property string $url
+ * @property string $internalUrl
+ * @property string $externalUrl
  * @property bool $isPrivate
  */
 class AwsS3UrlGenerator implements UrlGenerator
 {
-    private string $url;
+    private string $internalUrl;
+    private string $externalUrl;
     private bool $isPrivate;
 
-    public function __construct(string $host, ?string $prefix, bool $isPrivate)
+    public function __construct($internalHost, string $cdnHost, ?string $cdnPrefix, bool $isPrivate)
     {
-        $host = rtrim($host, '/');
-        $this->url = $host;
-        $prefix = rtrim($prefix, '/');
+        $this->internalUrl = rtrim($internalHost, '/');
+        $host = rtrim($cdnHost, '/');
+        $this->externalUrl = $host;
+        $prefix = rtrim($cdnPrefix, '/');
         if ($prefix) {
-            $this->url .= '/' . $prefix;
+            $this->externalUrl .= '/' . $prefix;
         }
         $this->isPrivate = $isPrivate;
     }
 
-    public function generate(string $path): string
+    public function generate(FileInfo $file): string
     {
-        return $this->url . '/' . $path;
+        if ($this->isPrivate) {
+            return $this->privateLink($file->uid);
+        }
+        return $this->publicLink($file->path);
     }
 
+    /**
+     * @param FileInfo[] $files
+     * @return array[]
+     */
     public function generateForExternal(array $files): array
     {
         $links = [
@@ -37,11 +47,21 @@ class AwsS3UrlGenerator implements UrlGenerator
         ];
         foreach ($files as $file) {
             if ($this->isPrivate) {
-                $links['private'][] = $file;
+                $links['private'][] = $file->path;
             } else {
-                $links['public'][] = $this->generate($file);
+                $links['public'][] = $this->publicLink($file->path);
             }
         }
         return $links;
+    }
+
+    private function publicLink(string $path): string
+    {
+        return $this->externalUrl . '/' . $path;
+    }
+
+    private function privateLink(string $uid): string
+    {
+        return $this->internalUrl . '/file-storage/file-storage-get/view?uid=' . $uid;
     }
 }
