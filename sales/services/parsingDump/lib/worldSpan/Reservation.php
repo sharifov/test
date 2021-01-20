@@ -2,7 +2,9 @@
 
 namespace sales\services\parsingDump\lib\worldSpan;
 
+use common\models\Airports;
 use DateTime;
+use DateTimeZone;
 use sales\helpers\app\AppHelper;
 use sales\services\parsingDump\lib\ParseDumpInterface;
 use sales\services\parsingDump\lib\ParseReservationInterface;
@@ -107,28 +109,42 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
      * @param string $month
      * @param string $hour
      * @param string $minute
+     * @param DateTimeZone|null $timezone
      * @return DateTime|false
      */
-    public function createDateTime(string $day, string $month, string $hour, string $minute)
+    public function createDateTime(string $day, string $month, string $hour, string $minute, DateTimeZone $timezone = null)
     {
         $dateFormat = 'dM H:i';
         $dateString = $day . strtolower($month) . ' ' . $hour . ':' . $minute;
-        return DateTime::createFromFormat($dateFormat, $dateString);
+        return DateTime::createFromFormat($dateFormat, $dateString, $timezone);
     }
 
     private function postProcessing(array $data): array
     {
+        $departureTimeZone = null;
+        if ($departureAirport = Airports::findByIata($data['departure_airport_iata'])) {
+            $departureTimeZone = new \DateTimeZone($departureAirport->timezone);
+        }
+
         $data['departure_date_time'] = $this->createDateTime(
             $data['departure_date_day'],
             $data['departure_date_month'],
             $data['departure_time_hh'],
-            $data['departure_time_mm']
+            $data['departure_time_mm'],
+            $departureTimeZone
         );
+
+        $arrivalTimeZone = null;
+        if ($arrivalAirport = Airports::findByIata($data['arrival_airport_iata'])) {
+            $arrivalTimeZone = new \DateTimeZone($arrivalAirport->timezone);
+        }
+
         $data['arrival_date_time'] = $this->getArrivalDateTime(
             $data['departure_date_time'],
             $data['arrival_time_hh'],
             $data['arrival_time_mm'],
-            $data['arrival_offset']
+            $data['arrival_offset'],
+            $arrivalTimeZone
         );
         return $data;
     }
@@ -138,10 +154,16 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
      * @param string $arrivalHour
      * @param string $arrivalMinute
      * @param string $arrivalOffset
-     * @throws \Exception
+     * @param DateTimeZone|null $timezone
+     * @return DateTime|false|null
      */
-    public function getArrivalDateTime(?DateTime $departureDateTime, string $arrivalHour, string $arrivalMinute, string $arrivalOffset)
-    {
+    public function getArrivalDateTime(
+        ?DateTime $departureDateTime,
+        string $arrivalHour,
+        string $arrivalMinute,
+        string $arrivalOffset,
+        DateTimeZone $timezone = null
+    ) {
         if (!$departureDateTime) {
             return null;
         }
@@ -152,6 +174,7 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
         } else {
             $result = $sourceDate->modify($arrivalOffset . ' day')->setTime($arrivalHour, $arrivalMinute);
         }
+        $result->setTimezone($timezone);
         return $result;
     }
 

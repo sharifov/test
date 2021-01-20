@@ -2,7 +2,9 @@
 
 namespace sales\services\parsingDump\lib\amadeus;
 
+use common\models\Airports;
 use DateTime;
+use DateTimeZone;
 use sales\helpers\app\AppHelper;
 use sales\services\parsingDump\lib\ParseDumpInterface;
 use sales\services\parsingDump\lib\ParseReservationInterface;
@@ -114,12 +116,18 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
      */
     private function postProcessing(array $data): array
     {
+        $departureTimeZone = null;
+        if ($departureAirport = Airports::findByIata($data['departure_airport_iata'])) {
+            $departureTimeZone = new \DateTimeZone($departureAirport->timezone);
+        }
+
         $data['departure_date_time'] = $this->createDateTime(
             $data['departure_date_day'],
             $data['departure_date_month'],
             $data['departure_time_hh'],
             $data['departure_time_mm'],
-            $data['departure_am_pm']
+            $data['departure_am_pm'],
+            $departureTimeZone
         );
 
         if (isset($data['arrival_date_day'], $data['arrival_date_month'])) {
@@ -130,12 +138,18 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
             $arrivalDateMonth = $data['departure_date_month'];
         }
 
+        $arrivalTimeZone = null;
+        if ($arrivalAirport = Airports::findByIata($data['arrival_airport_iata'])) {
+            $arrivalTimeZone = new \DateTimeZone($arrivalAirport->timezone);
+        }
+
         $data['arrival_date_time'] = $this->createDateTime(
             $arrivalDateDay,
             $arrivalDateMonth,
             $data['arrival_time_hh'],
             $data['arrival_time_mm'],
-            $data['arrival_am_pm']
+            $data['arrival_am_pm'],
+            $arrivalTimeZone
         );
 
         return $data;
@@ -172,13 +186,14 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
      * @param string $hour
      * @param string $minute
      * @param string $ampm
+     * @param DateTimeZone|null $timezone
      * @return DateTime|false
      */
-    private function createDateTime(string $day, string $month, string $hour, string $minute, string $ampm)
+    private function createDateTime(string $day, string $month, string $hour, string $minute, string $ampm, DateTimeZone $timezone = null)
     {
         $dateFormat = 'dM g:i A';
         $ampm = ($ampm === 'A') ? 'AM' : 'PM';
         $dateString = $day . strtolower($month) . ' ' . $hour . ':' . $minute . ' ' . $ampm;
-        return DateTime::createFromFormat($dateFormat, $dateString);
+        return DateTime::createFromFormat($dateFormat, $dateString, $timezone);
     }
 }

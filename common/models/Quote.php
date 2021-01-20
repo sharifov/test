@@ -798,6 +798,9 @@ class Quote extends \yii\db\ActiveRecord
                 $rowTime = $rowExpl[1];
                 preg_match_all('/([0-9]{3,4})(N|A|P)?(\+([0-9])?)?/', $rowTime, $matches);
                 if (!empty($matches)) {
+                    $depCity = Airports::findByIata($depAirport);
+                    $arrCity = Airports::findByIata($arrAirport);
+
                     $now = new \DateTime();
                     $matches[1][0] = substr_replace($matches[1][0], ':', -2, 0);
                     $matches[1][1] = substr_replace($matches[1][1], ':', -2, 0);
@@ -808,13 +811,18 @@ class Quote extends \yii\db\ActiveRecord
                     } else {
                         $dateFormat = 'jM H:i';
                     }
+
                     $depDateTime = \DateTime::createFromFormat($dateFormat, $date);
                     if ($depDateTime == false) {
                         continue;
                     }
+
+                    $depTimezone = $depCity ? new \DateTimeZone($depCity->timezone) : null;
+                    $depDateTimeWithTimezone = \DateTime::createFromFormat($dateFormat, $date, $depTimezone);
+
                     if (
 /*$now->format('m') > $depDateTime->format('m')*/
-                        $now->getTimestamp() > $depDateTime->getTimestamp()
+                        $now->getTimestamp() > $depDateTimeWithTimezone->getTimestamp()
                     ) {
                         $date = date('Y') + 1 . $date;
                         $dateFormat = 'Y' . $dateFormat;
@@ -846,14 +854,6 @@ class Quote extends \yii\db\ActiveRecord
                     /*if ($depDateTime > $arrDateTime) {
                         $arrDateTime->add(\DateInterval::createFromDateString('+1 year'));
                     }*/
-                    $depCity = Airports::findByIata($depAirport);
-                    /*$timezone = ($depCity !== null && !empty($depCity->timezone))
-                    ? new \DateTimeZone($depCity->timezone)
-                    : new \DateTimeZone("UTC");*/
-                    $arrCity = Airports::findByIata($arrAirport);
-                    /*$timezone = ($arrCity !== null && !empty($arrCity->timezone))
-                        ? new \DateTimeZone($arrCity->timezone)
-                        : new \DateTimeZone("UTC");*/
                 }
 
                 $rowExpl = explode($depDate, $rowFl);
@@ -1038,6 +1038,9 @@ class Quote extends \yii\db\ActiveRecord
                     throw new \Exception('TripsSegmentsData is wrong, please check dump', -5);
                 }
 
+                $depCity = Airports::findByIata($depAirport);
+                $arrCity = Airports::findByIata($arrAirport);
+
                 $now = new \DateTime();
                 $matches[1][0] = substr_replace($matches[1][0], ':', -2, 0);
                 $matches[1][1] = substr_replace($matches[1][1], ':', -2, 0);
@@ -1052,9 +1055,13 @@ class Quote extends \yii\db\ActiveRecord
                 if ($depDateTime == false) {
                     continue;
                 }
+
+                $depTimezone = $depCity ? new \DateTimeZone($depCity->timezone) : null;
+                $depDateTimeWithTimezone = \DateTime::createFromFormat($dateFormat, $date, $depTimezone);
+
                 if (
 /*$now->format('m') > $depDateTime->format('m')*/
-                    $now->getTimestamp() > $depDateTime->getTimestamp()
+                    $now->getTimestamp() > $depDateTimeWithTimezone->getTimestamp()
                 ) {
                     $date = date('Y') + 1 . $date;
                     $dateFormat = 'Y' . $dateFormat;
@@ -1087,14 +1094,6 @@ class Quote extends \yii\db\ActiveRecord
                 /*if ($depDateTime > $arrDateTime) {
                     $arrDateTime->add(\DateInterval::createFromDateString('+1 year'));
                 }*/
-                $depCity = Airports::findByIata($depAirport);
-                /*$timezone = ($depCity !== null && !empty($depCity->timezone))
-                ? new \DateTimeZone($depCity->timezone)
-                : new \DateTimeZone("UTC");*/
-                $arrCity = Airports::findByIata($arrAirport);
-                /*$timezone = ($arrCity !== null && !empty($arrCity->timezone))
-                    ? new \DateTimeZone($arrCity->timezone)
-                    : new \DateTimeZone("UTC");*/
             }
 
             $rowExpl = explode($depDate, $rowFl);
