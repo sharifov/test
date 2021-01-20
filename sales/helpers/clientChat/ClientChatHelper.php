@@ -130,7 +130,7 @@ class ClientChatHelper
     public static function formatOffsetUtcToLeadOffsetGmt(?string $offset): ?string
     {
         if ($offset) {
-            if (preg_match('/^\+[0-9]{4}$/', $offset)) {
+            if (preg_match('/^([+\-])[0-9]{4}$/', $offset)) {
                 return substr_replace($offset, '.', 3, 0);
             }
             \Yii::error('Offset format is not valid: ' . $offset, 'ClientChatHelper::formatOffsetUtcToLeadOffsetGmt');
