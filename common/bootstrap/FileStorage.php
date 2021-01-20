@@ -66,7 +66,7 @@ class FileStorage implements BootstrapInterface
                     $fileStorageParams['remoteStorage']['s3']['uploadConfig']['visibility'] === 'private'
                 );
             }
-            return new LocalUrlGenerator($fileStorageParams['localStorage']['url']);
+            return new LocalUrlGenerator($internalUrl, $fileStorageParams['localStorage']['url']);
         });
     }
 }

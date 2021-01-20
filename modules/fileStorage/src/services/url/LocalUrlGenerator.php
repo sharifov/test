@@ -5,15 +5,18 @@ namespace modules\fileStorage\src\services\url;
 /**
  * Class LocalUrlGenerator
  *
+ * @property string $internalUrl
  * @property string $externalUrl
  */
 class LocalUrlGenerator implements UrlGenerator
 {
+    private string $internalUrl;
     private string $externalUrl;
 
-    public function __construct(string $url)
+    public function __construct(string $internalHost, string $externalUrl)
     {
-        $this->externalUrl = rtrim($url, '/');
+        $this->internalUrl = rtrim($internalHost, '/');
+        $this->externalUrl = rtrim($externalUrl, '/');
     }
 
     public function generate(FileInfo $file): string
@@ -40,5 +43,10 @@ class LocalUrlGenerator implements UrlGenerator
     private function publicLink(string $path): string
     {
         return $this->externalUrl . '/' . $path;
+    }
+
+    private function privateLink(string $link): string
+    {
+        return $this->internalUrl . '/file-storage/get/view?' . $link;
     }
 }

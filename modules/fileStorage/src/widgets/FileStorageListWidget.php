@@ -4,6 +4,7 @@ namespace modules\fileStorage\src\widgets;
 
 use modules\fileStorage\src\entity\fileCase\FileCaseQuery;
 use modules\fileStorage\src\entity\fileLead\FileLeadQuery;
+use modules\fileStorage\src\services\url\QueryParams;
 use modules\fileStorage\src\services\url\UrlGenerator;
 use yii\base\Widget;
 
@@ -19,6 +20,7 @@ class FileStorageListWidget extends Widget
     public array $files = [];
     public string $uploadWidget;
     public ?UrlGenerator $urlGenerator = null;
+    public QueryParams $queryParams;
 
     public function init()
     {
@@ -32,6 +34,7 @@ class FileStorageListWidget extends Widget
             'files' => $this->files,
             'uploadWidget' => $this->uploadWidget,
             'urlGenerator' => $this->urlGenerator,
+            'queryParams' => $this->queryParams,
         ]);
     }
 
@@ -40,6 +43,7 @@ class FileStorageListWidget extends Widget
         return self::widget([
             'files' => FileLeadQuery::getListByLead($id),
             'uploadWidget' => $withUpload ?  FileStorageUploadWidget::byLead($id) : '',
+            'queryParams' => QueryParams::byLead(),
         ]);
     }
 
@@ -48,6 +52,7 @@ class FileStorageListWidget extends Widget
         return self::widget([
             'files' => FileCaseQuery::getListByCase($id),
             'uploadWidget' => $withUpload ? FileStorageUploadWidget::byCase($id) : '',
+            'queryParams' => QueryParams::byCase(),
         ]);
     }
 }

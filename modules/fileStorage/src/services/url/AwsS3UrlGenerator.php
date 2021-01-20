@@ -15,7 +15,7 @@ class AwsS3UrlGenerator implements UrlGenerator
     private string $externalUrl;
     private bool $isPrivate;
 
-    public function __construct($internalHost, string $cdnHost, ?string $cdnPrefix, bool $isPrivate)
+    public function __construct(string $internalHost, string $cdnHost, ?string $cdnPrefix, bool $isPrivate)
     {
         $this->internalUrl = rtrim($internalHost, '/');
         $host = rtrim($cdnHost, '/');
@@ -30,7 +30,7 @@ class AwsS3UrlGenerator implements UrlGenerator
     public function generate(FileInfo $file): string
     {
         if ($this->isPrivate) {
-            return $this->privateLink($file->uid);
+            return $this->privateLink('uid=' . $file->uid . $file->queryParams->build());
         }
         return $this->publicLink($file->path);
     }
@@ -60,8 +60,8 @@ class AwsS3UrlGenerator implements UrlGenerator
         return $this->externalUrl . '/' . $path;
     }
 
-    private function privateLink(string $uid): string
+    private function privateLink(string $link): string
     {
-        return $this->internalUrl . '/file-storage/file-storage-get/view?uid=' . $uid;
+        return $this->internalUrl . '/file-storage/get/view?' . $link;
     }
 }

@@ -35,6 +35,16 @@ class FileSystem
 
     /**
      * @param string $location
+     * @return resource
+     * @throws \League\Flysystem\FilesystemException
+     */
+    public function readStream(string $location)
+    {
+        return $this->filesystemOperator->readStream($location);
+    }
+
+    /**
+     * @param string $location
      * @throws \League\Flysystem\FilesystemException
      */
     public function delete(string $location): void

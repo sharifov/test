@@ -5,6 +5,7 @@ namespace modules\fileStorage\src\listeners;
 use common\models\Notifications;
 use modules\fileStorage\src\entity\fileStorage\events\FileUploadedByCaseEvent;
 use modules\fileStorage\src\services\url\FileInfo;
+use modules\fileStorage\src\services\url\QueryParams;
 use modules\fileStorage\src\services\url\UrlGenerator;
 
 /**
@@ -24,7 +25,7 @@ class UploadedFileByCaseListUpdaterListener
     public function handle(FileUploadedByCaseEvent $event): void
     {
         Notifications::publish('addFileToFileStorageList', ['case_id' => $event->caseId], [
-            'url' => $this->urlGenerator->generate(new FileInfo($event->path, $event->uid)),
+            'url' => $this->urlGenerator->generate(new FileInfo($event->path, $event->uid, QueryParams::byCase())),
             'name' => $event->name,
             'title' => $event->title,
         ]);

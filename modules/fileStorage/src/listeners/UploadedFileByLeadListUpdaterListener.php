@@ -5,6 +5,7 @@ namespace modules\fileStorage\src\listeners;
 use common\models\Notifications;
 use modules\fileStorage\src\entity\fileStorage\events\FileUploadedByLeadEvent;
 use modules\fileStorage\src\services\url\FileInfo;
+use modules\fileStorage\src\services\url\QueryParams;
 use modules\fileStorage\src\services\url\UrlGenerator;
 
 /**
@@ -24,7 +25,7 @@ class UploadedFileByLeadListUpdaterListener
     public function handle(FileUploadedByLeadEvent $event): void
     {
         Notifications::publish('addFileToFileStorageList', ['lead_id' => $event->leadId], [
-            'url' => $this->urlGenerator->generate(new FileInfo($event->path, $event->uid)),
+            'url' => $this->urlGenerator->generate(new FileInfo($event->path, $event->uid, QueryParams::byLead())),
             'name' => $event->name,
             'title' => $event->title,
         ]);

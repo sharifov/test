@@ -1,6 +1,7 @@
 <?php
 
 use modules\fileStorage\src\services\url\FileInfo;
+use modules\fileStorage\src\services\url\QueryParams;
 use modules\fileStorage\src\services\url\UrlGenerator;
 use yii\helpers\Html;
 use yii\web\View;
@@ -9,6 +10,7 @@ use yii\web\View;
 /** @var array $files */
 /** @var string $uploadWidget */
 /** @var UrlGenerator $urlGenerator */
+/** @var QueryParams $queryParams  */
 
 $countFiles = count($files);
 ?>
@@ -32,7 +34,7 @@ $countFiles = count($files);
             </tr>
             <?php foreach ($files as $file) : ?>
                 <tr>
-                    <td><?= Html::a('<i class="fa fa-download"> </i>', $urlGenerator->generate(new FileInfo($file['path'], $file['uid']))) ?></td>
+                    <td><?= Html::a('<i class="fa fa-download"> </i>', $urlGenerator->generate(new FileInfo($file['path'], $file['uid'], $queryParams)), ['target' => 'blank']) ?></td>
                     <td><?= Html::encode($file['name']) ?></td>
                     <td><?= Html::encode($file['title']) ?></td>
                 </tr>
@@ -46,7 +48,7 @@ $countFiles = count($files);
 
 $js = <<<JS
 function addFileToFileStorageList(data) {
-    $('.file-storage-list tr:first').after('<tr><td><a href="' + data.url + '"><i class="fa fa-download"> </i></a></td><td>' + data.name + '</td><td>' + data.title + '</td></tr>');
+    $('.file-storage-list tr:first').after('<tr><td><a href="' + data.url + '" target="blank"><i class="fa fa-download"> </i></a></td><td>' + data.name + '</td><td>' + data.title + '</td></tr>');
     let counter = $('.file-storage-list-counter');
     let count = parseInt(counter.attr('data-count'));
     count++;
