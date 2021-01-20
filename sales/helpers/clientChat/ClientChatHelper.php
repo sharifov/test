@@ -141,7 +141,10 @@ class ClientChatHelper
 
     public static function prepareChatIds(string $sourceIds): string
     {
-        $ids = JsonHelper::decode($sourceIds);
+        if (!$ids = JsonHelper::decode($sourceIds)) {
+            return '[]';
+        }
+
         $ids = array_filter($ids, static function ($value) {
             return !is_null($value);
         });

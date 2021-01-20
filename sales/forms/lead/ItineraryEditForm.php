@@ -71,14 +71,9 @@ class ItineraryEditForm extends CompositeForm
             ['cabin', 'in', 'range' => array_keys(LeadHelper::cabinList())],
 
             [['adults', 'children', 'infants'], 'required'],
-            [['adults', 'children', 'infants'], 'integer', 'min' => 0, 'max' => 9],
+            ['adults', 'integer', 'min' => 1, 'max' => 9],
+            [['children', 'infants'], 'integer', 'min' => 0, 'max' => 9],
             [['adults', 'children', 'infants'], 'in', 'range' => array_keys(LeadHelper::adultsChildrenInfantsList())],
-
-            ['adults', function () {
-                if (!$this->adults && !$this->children) {
-                    $this->addError('adults', 'Adults or Children must be more 0.');
-                }
-            }],
 
             ['infants', function () {
                 if ($this->infants > $this->adults) {

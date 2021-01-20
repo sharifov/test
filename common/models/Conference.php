@@ -33,6 +33,7 @@ use yii\db\ActiveRecord;
  * @property ConferenceRoom $cfCr
  * @property ConferenceParticipant[] $conferenceParticipants
  * @property Call $call
+ * @property string $recordingUrl
  */
 class Conference extends \yii\db\ActiveRecord
 {
@@ -260,5 +261,10 @@ class Conference extends \yii\db\ActiveRecord
     public function isRecordingDisabled(): bool
     {
         return $this->cf_recording_disabled ? true : false;
+    }
+
+    public function getRecordingUrl(): string
+    {
+        return $this->cf_recording_sid ? Yii::$app->communication->getConferenceRecordingCall($this->cf_sid, $this->cf_recording_sid) : '';
     }
 }

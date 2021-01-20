@@ -8,6 +8,7 @@ use DateTime;
 use sales\model\callLog\entity\callLog\CallLogStatus;
 use sales\model\callLog\entity\callLog\CallLogType;
 use yii\bootstrap4\Dropdown;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 
 class CallHelper
@@ -237,5 +238,31 @@ class CallHelper
         $hours   = ($hours > 0) ? str_pad($hours, 2, "0", STR_PAD_LEFT) . $delimiter : '00' . $delimiter;
 
         return "$hours$minutes$seconds";
+    }
+
+    public static function displayAudioTag(string $recordingUrl, string $callSid, array $audioOptions = []): string
+    {
+        $defaultAudioOptions = [
+            'controls' => 'controls',
+            'controlslist' => 'nodownload',
+            'style' => 'width: 350px; height: 25px'
+        ];
+        $source = Html::tag('source', null, ['src' => $recordingUrl, 'type' => 'audio/mpeg']);
+        $audio = Html::tag('audio', $source, ArrayHelper::merge($defaultAudioOptions, $audioOptions));
+        return Html::tag('div', $audio, ['class' => 'audio-wrapper', 'data-sid' => $callSid]);
+    }
+
+    public static function displayAudioBtn(string $recordingUrl, string $dateFormat, int $duration, string $sid, bool $isConferenceRecording = false): string
+    {
+        return Html::button(
+            gmdate($dateFormat, $duration) . ' <i class="fa fa-volume-up"></i>',
+            [
+                'title' => $duration . ' (sec)',
+                'class' => 'btn btn-' . ($duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url',
+                'data-source_src' => $recordingUrl,
+                'data-conference-recording' => $isConferenceRecording,
+                'data-sid' => $sid
+            ]
+        );
     }
 }

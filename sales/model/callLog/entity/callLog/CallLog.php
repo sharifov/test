@@ -58,6 +58,7 @@ use yii\db\ActiveQuery;
  * @property CallLogQueue $queue
  * @property CallLogRecord $record
  * @property CallLog[] $childCalls
+ * @property string $recordingUrl
  */
 class CallLog extends \yii\db\ActiveRecord
 {
@@ -277,5 +278,10 @@ class CallLog extends \yii\db\ActiveRecord
         }
 
         return '<i class="' . $icon . '"></i>';
+    }
+
+    public function getRecordingUrl(): string
+    {
+        return \Yii::$app->communication->getCallRecordingUrl($this->cl_call_sid, ($this->record->clr_record_sid ?? ''));
     }
 }

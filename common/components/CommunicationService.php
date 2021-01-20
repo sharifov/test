@@ -9,12 +9,11 @@
 
 namespace common\components;
 
-use common\models\Conference;
-use common\models\ConferenceRoom;
+use sales\helpers\setting\SettingHelper;
 use sales\model\call\useCase\conference\create\CreateCallForm;
 use Yii;
 use yii\base\Component;
-use yii\helpers\Json;
+use yii\helpers\Url;
 use yii\helpers\VarDumper;
 use yii\httpclient\Client;
 use yii\httpclient\CurlTransport;
@@ -29,6 +28,10 @@ use yii\httpclient\Response;
  * @property string $url
  * @property string $username
  * @property string $password
+ * @property string $recordingUrl
+ * @property string $securityCallRecordingUrl
+ * @property string $securityConferenceRecordingUrl
+ * @property string $xAccelRedirectUrl
  * @property Request $request
  * @property string $voipApiUsername
  */
@@ -40,7 +43,10 @@ class CommunicationService extends Component implements CommunicationServiceInte
     public $username;
     public $password;
     public $request;
-    public $recording_url = '';
+    public $recordingUrl = '';
+    public $securityCallRecordingUrl = '/call/record/';
+    public $securityConferenceRecordingUrl = '/conference/record/';
+    public $xAccelRedirectUrl = '';
     public $voipApiUsername = '';
 
 
@@ -1185,5 +1191,15 @@ class CommunicationService extends Component implements CommunicationServiceInte
         }
 
         return $out;
+    }
+
+    public function getCallRecordingUrl(string $callSid, string $recordingSid): string
+    {
+        return SettingHelper::isCallRecordingSecurityEnabled() ? (Url::toRoute([$this->securityCallRecordingUrl, 'callSid' => $callSid])) : ($this->recordingUrl . $recordingSid);
+    }
+
+    public function getConferenceRecordingCall(string $conferenceSid, string $recordingSid): string
+    {
+        return SettingHelper::isCallRecordingSecurityEnabled() ? (Url::toRoute([$this->securityConferenceRecordingUrl, 'conferenceSid' => $conferenceSid])) : ($this->recordingUrl . $recordingSid);
     }
 }

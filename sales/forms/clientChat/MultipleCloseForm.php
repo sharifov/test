@@ -2,6 +2,7 @@
 
 namespace sales\forms\clientChat;
 
+use common\components\validators\IsArrayValidator;
 use sales\model\clientChat\entity\ClientChat;
 use yii\base\Model;
 use yii\helpers\Json;
@@ -17,13 +18,17 @@ class MultipleCloseForm extends Model
     public function rules(): array
     {
         return [
-            [['chatIds', 'toArchive'], 'required'],
             ['chatIds', 'filter', 'filter' => static function ($value) {
                 return Json::decode($value);
             }],
+            ['chatIds', IsArrayValidator::class, 'skipOnEmpty' => false],
+            ['chatIds', 'required', 'isEmpty' => function ($value) {
+                return !count($value);
+            }, 'message' => 'Please select chats'],
             ['chatIds', 'each', 'rule' => ['filter', 'filter' => 'intval']],
             ['chatIds', 'each', 'rule' => ['exist', 'targetClass' => ClientChat::class, 'targetAttribute' => 'cch_id']],
 
+            ['toArchive', 'required'],
             ['toArchive', 'boolean'],
             ['toArchive', 'default', 'value' => false],
             ['toArchive', 'filter', 'filter' => 'boolval'],

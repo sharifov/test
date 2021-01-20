@@ -2229,7 +2229,11 @@ class ClientChatController extends FController
         throw new BadRequestHttpException();
     }
 
-    public function actionValidateMultipleAssign()
+    /**
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function actionValidateMultipleAssign(): array
     {
         $form = new MultipleAssignForm(Auth::id());
         if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
@@ -2239,7 +2243,11 @@ class ClientChatController extends FController
         throw new BadRequestHttpException();
     }
 
-    public function actionAjaxMultipleAssign()
+    /**
+     * @return string
+     * @throws BadRequestHttpException
+     */
+    public function actionAjaxMultipleAssign(): string
     {
         if (!Yii::$app->request->isPost) {
             throw new BadRequestHttpException();
@@ -2270,7 +2278,7 @@ class ClientChatController extends FController
                                         'Chat was taken to ' . $newOwner->nickname,
                                         Auth::user()->nickname . ' has take your Chat to ' . $newOwner->nickname,
                                         Notifications::TYPE_INFO,
-                                        true
+                                        false
                                     );
 
                                     Notifications::pub(
@@ -2287,7 +2295,7 @@ class ClientChatController extends FController
                                         'Chat assigned',
                                         Auth::user()->nickname . ' has assigned Client Chat (' . $clientChatLink . ')',
                                         Notifications::TYPE_INFO,
-                                        true
+                                        false
                                     );
                                 }
                             }
@@ -2319,7 +2327,11 @@ class ClientChatController extends FController
         ]);
     }
 
-    public function actionValidateMultipleClose()
+    /**
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function actionValidateMultipleClose(): array
     {
         $form = new MultipleCloseForm();
         if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
@@ -2329,7 +2341,11 @@ class ClientChatController extends FController
         throw new BadRequestHttpException();
     }
 
-    public function actionAjaxMultipleClose()
+    /**
+     * @return string
+     * @throws BadRequestHttpException
+     */
+    public function actionAjaxMultipleClose(): string
     {
         if (!Yii::$app->request->isPost) {
             throw new BadRequestHttpException();

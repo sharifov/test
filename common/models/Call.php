@@ -9,6 +9,7 @@ use common\models\query\CallQuery;
 use sales\behaviors\metric\MetricCallCounterBehavior;
 use sales\helpers\app\AppHelper;
 use sales\helpers\PhoneFormatter;
+use sales\helpers\setting\SettingHelper;
 use sales\helpers\UserCallIdentity;
 use sales\model\call\entity\call\data\Data;
 use sales\model\call\helper\CallHelper;
@@ -256,6 +257,7 @@ class Call extends \yii\db\ActiveRecord
     public const QUEUE_DIRECT = 'direct';
 
     public const CHANNEL_REALTIME_MAP = 'realtimeMapChannel';
+    public const CHANNEL_USER_ONLINE = 'userOnlineChannel';
 
     private ?Data $data = null;
 
@@ -2176,7 +2178,7 @@ class Call extends \yii\db\ActiveRecord
      */
     public function getRecordingUrl(): string
     {
-        return $this->c_recording_sid ? Yii::$app->communication->recording_url . $this->c_recording_sid : '';
+        return $this->c_recording_sid ? Yii::$app->communication->getCallRecordingUrl($this->c_call_sid, $this->c_recording_sid) : '';
     }
 
     public function isConferenceType(): bool

@@ -2,6 +2,7 @@
 
 use common\models\Call;
 use sales\auth\Auth;
+use sales\helpers\call\CallHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\DetailView;
@@ -66,7 +67,7 @@ JS;
 
 
     <?php if ($model->recordingUrl) :?>
-        <audio controls="controls" controlsList="nodownload" style="width: 100%;"><source src="<?=$model->recordingUrl?>" type="audio/mpeg"></audio>
+        <?= CallHelper::displayAudioTag($model->recordingUrl, $model->c_call_sid, ['style' => 'width: 100%']) ?>
     <?php endif;?>
 
     <div class="col-md-6">

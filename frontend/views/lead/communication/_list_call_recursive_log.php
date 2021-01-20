@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Employee;
+use sales\helpers\call\CallHelper;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\callLog\entity\callLog\CallLogStatus;
 use yii\helpers\Html;
@@ -40,10 +41,7 @@ $child = $child ?? false;
                 </td>
                 <td style="width: 80px">
                     <?php  if ($callItem->record && $callItem->record->clr_record_sid) :?>
-                        <?=  Html::button(
-                            gmdate('i:s', $callItem->record->clr_duration) . ' <i class="fa fa-play-circle-o"></i>',
-                            ['class' => 'btn btn-' . ($callItem->record->clr_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $callItem->record->recordingUrl /*yii\helpers\Url::to(['call/record', 'sid' =>  $callItem->c_call_sid ])*/ ]
-                        ) ?>
+                        <?= CallHelper::displayAudioBtn($callItem->recordingUrl, 'i:s', $callItem->record->clr_duration, $callItem->cl_call_sid) ?>
                     <?php  endif;?>
                 </td>
                 <td class="text-center">

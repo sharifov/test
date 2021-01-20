@@ -106,7 +106,6 @@ use yii\widgets\ActiveForm;
  */
 class CasesController extends FController
 {
-
     private $casesCreateService;
     private $casesManageService;
     private $casesCommunicationService;
@@ -425,7 +424,7 @@ class CasesController extends FController
                     if ($model->isDepartmentSupport() && $departmentEmail = DepartmentEmailProject::find()->andWhere(['dep_id' => $comForm->dep_email_id])->withEmailList()->one()) {
 //                      $mailFrom = $departmentEmail->dep_email;
                         $mailFrom = $departmentEmail->getEmail();
-                    } else if ($model->cs_project_id) {
+                    } elseif ($model->cs_project_id) {
                         $upp = UserProjectParams::find()->where(['upp_project_id' => $model->cs_project_id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->one();
                         if ($upp) {
 //                            $mailFrom = $upp->upp_email;
@@ -818,7 +817,8 @@ class CasesController extends FController
             'locale' => '',
             'marketing_country' => '',
             'updateCaseBookingId' => false,
-            'updateCaseBookingHtml' => ''
+            'updateCaseBookingHtml' => '',
+            'caseBookingId' => ''
         ];
 
         $gid = Yii::$app->request->post('gid');
@@ -859,7 +859,8 @@ class CasesController extends FController
 
                 if (empty($model->cs_order_uid)) {
                     $model->cs_order_uid = $cs->css_sale_book_id;
-                } else if ($model->cs_order_uid !== $cs->css_sale_book_id) {
+                    $out['caseBookingId'] = $model->cs_order_uid;
+                } elseif ($model->cs_order_uid !== $cs->css_sale_book_id) {
                     $out['updateCaseBookingId'] = true;
                     $out['updateCaseBookingHtml'] = $this->renderPartial('sales/_sale_update_case_booking_id', [
                         'caseBookingId' => $model->cs_order_uid,
@@ -1332,7 +1333,6 @@ class CasesController extends FController
      */
     public function actionStatusHistory()
     {
-
         $caseGId = Yii::$app->request->get('gid');
         $case = $this->casesRepository->findByGid($caseGId);
         $searchModel = new CaseStatusLogSearch();

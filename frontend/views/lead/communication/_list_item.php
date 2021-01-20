@@ -3,6 +3,7 @@
 use common\models\Employee;
 use frontend\helpers\EmailHelper;
 use sales\auth\Auth;
+use sales\helpers\call\CallHelper;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
@@ -77,11 +78,7 @@ $fromType = 'client';
         </div>
         <div class="card-body">
             <?php if ($call->recordingUrl) :?>
-                <?=Html::button(
-                    gmdate('i:s', $call->c_recording_duration) . ' <i class="fa fa-play-circle-o"></i>',
-                    ['class' => 'btn btn-' . ($call->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $call->recordingUrl /*yii\helpers\Url::to(['call/record', 'sid' =>  $call->c_call_sid ])*/ ]
-                ) ?>
-
+                <?= CallHelper::displayAudioBtn($call->recordingUrl, 'i:s', $call->c_recording_duration, $call->c_call_sid) ?>
             <?php else : ?>
                 <div><?=$call->getStatusIcon()?>  <?=$call->getStatusName()?></div>
             <?php endif;?>

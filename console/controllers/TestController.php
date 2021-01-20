@@ -3,9 +3,11 @@
 namespace console\controllers;
 
 use common\models\CallUserAccess;
+use common\models\Employee;
 use common\models\Lead;
 use common\models\Call;
 use common\models\Notifications;
+use common\models\UserOnline;
 use Faker\Factory;
 use modules\twilio\src\entities\conferenceLog\ConferenceLog;
 use sales\model\client\useCase\excludeInfo\ClientExcludeIpChecker;
@@ -298,6 +300,36 @@ class TestController extends Controller
                 VarDumper::dump($item->attributes);
             }
             usleep(0.1 * 1000000);
+            if ($n > 100000) {
+                break;
+            }
+        }
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function actionUserOnline()
+    {
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+        $n = 0;
+
+        $users = [340, 635, 615, 600, 595];
+
+        while (true) {
+            $n++;
+            $userList = UserOnline::find()->limit(5)->orderBy('RAND()')->all();
+            foreach ($userList as $item) {
+                //$item->uo_user_id = Employee::find()->select('id')->limit(1)->orderBy('RAND()')->scalar();
+                $item->uo_user_id = $users[random_int(0, 4)];
+                //$item->cua_user_id = 188;
+                $item->uo_idle_state = (bool) random_int(0, 1);
+                $item->sendFrontendData('insert');
+
+                VarDumper::dump($item->attributes);
+            }
+            usleep(1 * 1000000);
             if ($n > 100000) {
                 break;
             }

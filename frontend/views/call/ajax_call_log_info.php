@@ -1,5 +1,6 @@
 <?php
 
+use sales\helpers\call\CallHelper;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\callLog\entity\callLog\CallLogStatus;
 use sales\model\client\helpers\ClientFormatter;
@@ -20,9 +21,7 @@ $this->title = 'Call Id: ' . $model->cl_id;
     </h2>
 
     <?php if ($model->record) : ?>
-        <audio controls="controls" controlsList="nodownload" style="width: 100%;">
-            <source src="<?= $model->record->getRecordingUrl() ?>" type="audio/mpeg">
-        </audio>
+        <?= CallHelper::displayAudioTag($model->recordingUrl, $model->cl_call_sid, ['style' => 'width: 100%;']) ?>
     <?php endif; ?>
 
     <div class="col-md-6">

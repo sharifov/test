@@ -16,6 +16,11 @@ class ConferenceQuery extends \yii\db\ActiveQuery
         return $this->andWhere(['cf_sid' => $sid]);
     }
 
+    public function selectRecordingData(): self
+    {
+        return $this->select(['cf_recording_sid', 'cf_recording_duration']);
+    }
+
     /**
      * @param null $db
      * @return Conference|array|null

@@ -91,7 +91,8 @@ return [
             'url2' => 'https://communication.api.travelinsides.com/v2/',
             'username' => 'sales',
             'password' => '',
-            'recording_url' => '',
+            'recordingUrl' => '',
+            'xAccelRedirectUrl' => '',
             'voipApiUsername' => 'sales'
         ],
         'airsearch' => [

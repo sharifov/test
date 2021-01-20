@@ -3,6 +3,7 @@
 /* @var $cfConnectionUrl string */
 /* @var $cfToken string */
 /* @var $cfChannelName string */
+/* @var $cfUserOnlineChannel string */
 
 $this->title = 'Realtime Call Map';
 //\frontend\assets\VueAsset::register($this);
@@ -15,6 +16,13 @@ $this->title = 'Realtime Call Map';
     .crop-line {
         white-space: nowrap;
         overflow-x: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .truncate {
+        width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
         text-overflow: ellipsis;
     }
 
@@ -33,11 +41,38 @@ $this->title = 'Realtime Call Map';
         /*transform: translateY(30px);*/
     }
 
-
     .fade-enter-active, .fade-leave-active {
         transition: opacity .2s;
     }
     .fade-enter, .fade-leave-to {
+        opacity: 0;
+    }
+
+    .fade2 {
+        backface-visibility: hidden;
+        z-index: 1;
+    }
+
+    /* moving */
+    .fade2-move {
+        transition: all 600ms ease-in-out 50ms;
+    }
+
+    /* appearing */
+    .fade2-enter-active {
+        transition: all 800ms ease-out;
+    }
+
+    /* disappearing */
+    .fade2-leave-active {
+        transition: all 400ms ease-in;
+        position: absolute;
+        z-index: 0;
+    }
+
+    /* appear at / disappear to */
+    .fade2-enter,
+    .fade2-leave-to {
         opacity: 0;
     }
 
@@ -112,7 +147,7 @@ $this->title = 'Realtime Call Map';
             </tbody>
         </table>
         <div v-if="item.userAccessList && item.userAccessList.length > 0" class="text-right" style="margin-bottom: 5px">
-            <transition-group name=”fade”>
+            <transition-group name="fade">
             <span class="label" :class="{ 'label-success': access.cua_status_id == 2, 'label-default': access.cua_status_id != 2 }"
                   v-for="(access, index) in item.userAccessList" :key="access.cua_user_id"
                   style="margin-right: 4px" :title="getUserAccessStatusTypeName(access.cua_status_id)">
@@ -165,8 +200,8 @@ $this->title = 'Realtime Call Map';
             <div class="animated flipInY col-md-2 col-sm-6 ">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-user"></i></div>
-                    <div class="count">{{ onlineUserCounter }}</div>
-                    <h3>OnLine</h3>
+                    <div class="count">{{ idleUserList.length }} / {{ onlineUserCounter }}</div>
+                    <h3>Idle / OnLine</h3>
                 </div>
             </div>
         </div>
@@ -194,11 +229,11 @@ $this->title = 'Realtime Call Map';
         </div>
 
         <div class="col-md-2">
-            <div class="card card-default">
+            <div class="card card-default" style="min-height: 98%">
                 <div class="card-header"> Online Users  ({{ onlineUserCounter }}), TimeZone: {{ userTimeZone }}</div>
-                <transition-group name="list" tag="div" class="card-body">
-                    <div v-for="(item, index) in onlineUserList" class="list-item col-md-6" :key="item">
-                        <i class="fa fa-user text-success"></i> {{ getUserName(item.uo_user_id) }}
+                <transition-group name="fade2" tag="div" class="card-body">
+                    <div v-for="(item, index) in onlineUserList" class="list-item col-md-6 truncate" :key="item">
+                        <i :class="'fa fa-user text-' + (item.uo_idle_state ? 'warning' : 'success')"></i> {{ getUserName(item.uo_user_id) }}
                     </div>
                 </transition-group>
             </div>
@@ -212,6 +247,7 @@ $this->title = 'Realtime Call Map';
 <?php
 $js = <<<JS
 let cfChannelName = '$cfChannelName';
+let cfUserOnlineChannel = '$cfUserOnlineChannel';
 let cfToken = '$cfToken';
 let cfConnectionUrl = '$cfConnectionUrl';
 
@@ -235,34 +271,43 @@ centrifuge.on('connect', function(ctx){
             //callMapApp.addCall(jsonData.data.call);
             //let data = JSON.parse(jsonData.data);
             callMapApp.addCall(jsonData.data.call);
-        } else if (jsonData.object === 'userOnline') {
+        } 
+        //console.log(message);
+    });
+    
+    var subUserOnline = centrifuge.subscribe(cfUserOnlineChannel, function(message) {
+        let jsonData = message.data;
+        // console.log(jsonData.data);
+        if (jsonData.object === 'userOnline') {
             if (jsonData.action === 'delete') {
                 callMapApp.deleteUserOnline(jsonData.data.userOnline);
             } else {
+                //console.info(jsonData.data);
                 callMapApp.addUserOnline(jsonData.data.userOnline);
             }
         }
-        //console.log(message);
+        //console.log(jsonData.data.userOnline.uo_idle_state);
     });
+   
 
-    subscription.on('ready', function(){
-        subscription.presence(function(message) {
-            console.log('subscription.presence');        
-            // information about who connected to channel at moment received
-        });
-        subscription.history(function(message) {
-            console.log('subscription.history');
-            // information about last messages sent into channel received
-        });
-        subscription.on('join', function(message) {
-            console.log('subscription.join');
-            // someone connected to channel
-        });
-        subscription.on('leave', function(message) {
-            console.log('subscription.leave');
-            // someone disconnected from channel
-        });
-    });
+    // subscription.on('ready', function(){
+    //     subscription.presence(function(message) {
+    //         console.log('subscription.presence');        
+    //         // information about who connected to channel at moment received
+    //     });
+    //     subscription.history(function(message) {
+    //         console.log('subscription.history');
+    //         // information about last messages sent into channel received
+    //     });
+    //     subscription.on('join', function(message) {
+    //         console.log('subscription.join');
+    //         // someone connected to channel
+    //     });
+    //     subscription.on('leave', function(message) {
+    //         console.log('subscription.leave');
+    //         // someone disconnected from channel
+    //     });
+    // });
 
     
 });
