@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Employee;
 use yii\db\Migration;
 
 /**
@@ -7,12 +8,27 @@ use yii\db\Migration;
  */
 class m210121_084517_add_permission_file_view extends Migration
 {
+    public $roles = [
+        Employee::ROLE_ADMIN,
+        Employee::ROLE_SUPER_ADMIN,
+    ];
+
     /**
      * {@inheritdoc}
      */
     public function safeUp()
     {
+        $auth = Yii::$app->authManager;
 
+        $leadView = $auth->createPermission('file-storage/view');
+        $leadView->description = 'File storage view';
+        $auth->add($leadView);
+
+        foreach ($this->roles as $item) {
+            if ($role = $auth->getRole($item)) {
+                $auth->addChild($role, $leadView);
+            }
+        }
     }
 
     /**
@@ -20,23 +36,16 @@ class m210121_084517_add_permission_file_view extends Migration
      */
     public function safeDown()
     {
-        echo "m210121_084517_add_permission_file_view cannot be reverted.\n";
+        $auth = Yii::$app->authManager;
 
-        return false;
+        $permissions = [
+            'file-storage/view',
+        ];
+
+        foreach ($permissions as $permissionName) {
+            if ($permission = $auth->getPermission($permissionName)) {
+                $auth->remove($permission);
+            }
+        }
     }
-
-    /*
-    // Use up()/down() to run migration code without a transaction.
-    public function up()
-    {
-
-    }
-
-    public function down()
-    {
-        echo "m210121_084517_add_permission_file_view cannot be reverted.\n";
-
-        return false;
-    }
-    */
 }
