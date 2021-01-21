@@ -46,7 +46,6 @@ class CallRecordingLog extends \yii\db\ActiveRecord
 
             ['crl_user_id', 'required'],
             ['crl_user_id', 'integer'],
-            ['crl_call_sid', 'exist', 'skipOnError' => true, 'targetClass' => CallLog::class, 'targetAttribute' => ['crl_call_sid' => 'cl_call_sid']],
             ['crl_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['crl_user_id' => 'id']],
 
             ['crl_year', 'required'],

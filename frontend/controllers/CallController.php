@@ -1192,7 +1192,7 @@ class CallController extends FController
      */
     public function actionRecord(string $callSid): void
     {
-        $cacheKey = 'call-recording-url-' . $callSid;
+        $cacheKey = 'call-recording-url-' . $callSid . '-user-' . Auth::id();
 
         try {
             if (!$callRecordSid = Yii::$app->cacheFile->get($cacheKey)) {
@@ -1200,63 +1200,28 @@ class CallController extends FController
 
                 if ($callLogRecord && !empty($callLogRecord['clr_record_sid'])) {
                     $callRecordSid = $callLogRecord['clr_record_sid'];
-                    $callRecordDuration = $callLogRecord['clr_duration'] + SettingHelper::getCallRecordingLogAdditionalCacheTimeout();
+                    $callRecordDuration = $callLogRecord['clr_duration'];
                 } elseif ($call = Call::find()->selectRecordingData()->bySid($callSid)->asArray()->one()) {
                     $callRecordSid = $call['c_recording_sid'];
-                    $callRecordDuration = $call['c_recording_duration'] + SettingHelper::getCallRecordingLogAdditionalCacheTimeout();
+                    $callRecordDuration = $call['c_recording_duration'];
                 } else {
                     throw new NotFoundException('Call not found');
                 }
 
-                Yii::$app->cacheFile->set($cacheKey, $callRecordSid, $callRecordDuration);
+                Yii::$app->cacheFile->set($cacheKey, $callRecordSid, $callRecordDuration  + SettingHelper::getCallRecordingLogAdditionalCacheTimeout());
+
+                if (SettingHelper::isCallRecordingLogEnabled()) {
+                    $callRecordingLog = CallRecordingLog::create($callSid, Auth::id(), (int)date('Y'), (int)date('m'));
+                    if (!$callRecordingLog->save(true)) {
+                        Yii::error('Call Recording Log saving failed: ' . $callRecordingLog->getErrorSummary(false)[0], 'CallController::actionCallRecordingLog::callRecordingLog::save');
+                    }
+                }
             }
 
             header('X-Accel-Redirect: ' . Yii::$app->communication->xAccelRedirectUrl . $callRecordSid);
         } catch (NotFoundException $e) {
             throw new NotFoundHttpException($e->getMessage());
         }
-    }
-
-    /**
-     * @return Response
-     */
-    public function actionCallRecordingLog(): Response
-    {
-        $callSid = Yii::$app->request->post('sid', '');
-
-        $cacheKey = 'call-sid-' . $callSid . '-user-' . Auth::id();
-
-        if (Yii::$app->cacheFile->exists($cacheKey)) {
-            return $this->asJson([
-                'cacheDuration' => 0
-            ]);
-        }
-
-        $callLogRecord = CallLogQuery::getCallLogRecordByCallSid($callSid);
-
-        if ($callLogRecord && !empty($callLogRecord['clr_duration'])) {
-            $callRecordDuration = $callLogRecord['clr_duration'] + SettingHelper::getCallRecordingLogAdditionalCacheTimeout();
-        } elseif ($call = Call::find()->selectRecordingData()->bySid($callSid)->asArray()->one()) {
-            $callRecordDuration = $call['c_recording_duration'] + SettingHelper::getCallRecordingLogAdditionalCacheTimeout();
-        } else {
-            Yii::error('Call Recording Log error has occurred: call is not found', 'CallController::actionCallRecordingLog::callRecordingLog::find');
-            return $this->asJson([
-                'cacheDuration' => 0
-            ]);
-        }
-
-        $callRecordingLog = CallRecordingLog::create($callSid, Auth::id(), (int)date('Y'), (int)date('m'));
-        if (!$callRecordingLog->save(true)) {
-            Yii::error('Call Recording Log saving failed: ' . $callRecordingLog->getErrorSummary(false)[0], 'CallController::actionCallRecordingLog::callRecordingLog::save');
-            return $this->asJson([
-                'cacheDuration' => 0
-            ]);
-        }
-        Yii::$app->cacheFile->set($cacheKey, true, $callRecordDuration);
-
-        return $this->asJson([
-            'cacheDuration' => $callRecordDuration
-        ]);
     }
 
     public function actionAjaxAddNote(): Response

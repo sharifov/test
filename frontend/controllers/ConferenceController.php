@@ -121,7 +121,7 @@ class ConferenceController extends FController
 
     public function actionRecord(string $conferenceSid)
     {
-        $cacheKey = 'conference-recording-url-' . $conferenceSid;
+        $cacheKey = 'conference-recording-url-' . $conferenceSid . '-user-' . Auth::id();
 
         try {
             if (!$conferenceRecordSid = Yii::$app->cacheFile->get($cacheKey)) {
@@ -133,50 +133,19 @@ class ConferenceController extends FController
                 }
 
                 Yii::$app->cacheFile->set($cacheKey, $conferenceRecordSid, $conferenceRecordDuration);
+
+                if (SettingHelper::isCallRecordingLogEnabled()) {
+                    $conferenceRecordingLog = ConferenceRecordingLog::create($conferenceSid, Auth::id(), (int)date('Y'), (int)date('m'));
+                    if (!$conferenceRecordingLog->save(true)) {
+                        Yii::error('Conference Recording Log saving failed: ' . $conferenceRecordingLog->getErrorSummary(false)[0], 'ConferenceController::actionRecordingLog::conferenceRecordingLog::save');
+                    }
+                }
             }
 
             header('X-Accel-Redirect: ' . Yii::$app->communication->xAccelRedirectUrl . $conferenceRecordSid);
         } catch (NotFoundException $e) {
             throw new NotFoundHttpException($e->getMessage());
         }
-    }
-
-    /**
-     * @return Response
-     */
-    public function actionRecordingLog(): Response
-    {
-        $conferenceSid = Yii::$app->request->post('sid');
-
-        $cacheKey = 'conference-sid-' . $conferenceSid . '-user-' . Auth::id();
-
-        if (Yii::$app->cacheFile->exists($cacheKey)) {
-            return $this->asJson([
-                'cacheDuration' => 0
-            ]);
-        }
-
-        if ($conference = Conference::find()->selectRecordingData()->bySid($conferenceSid)->asArray()->one()) {
-            $conferenceRecordDuration = $conference['cf_recording_duration'] + SettingHelper::getCallRecordingLogAdditionalCacheTimeout();
-        } else {
-            Yii::error('Conference Recording Log error has occurred: conference is not found', 'ConferenceController::actionRecordingLog::conferenceRecordingLog::find');
-            return $this->asJson([
-                'cacheDuration' => 0
-            ]);
-        }
-
-        $conferenceRecordingLog = ConferenceRecordingLog::create($conferenceSid, Auth::id(), (int)date('Y'), (int)date('m'));
-        if (!$conferenceRecordingLog->save(true)) {
-            Yii::error('Conference Recording Log saving failed: ' . $conferenceRecordingLog->getErrorSummary(false)[0], 'ConferenceController::actionRecordingLog::conferenceRecordingLog::save');
-            return $this->asJson([
-                'cacheDuration' => 0
-            ]);
-        }
-        Yii::$app->cacheFile->set($cacheKey, true, $conferenceRecordDuration);
-
-        return $this->asJson([
-            'cacheDuration' => $conferenceRecordDuration
-        ]);
     }
 
     /**
