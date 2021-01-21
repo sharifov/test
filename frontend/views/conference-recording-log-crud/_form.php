@@ -1,5 +1,6 @@
 <?php
 
+use sales\widgets\UserSelect2Widget;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
@@ -14,13 +15,11 @@ use yii\widgets\ActiveForm;
 
         <?php $form = ActiveForm::begin(); ?>
 
-        <?= $form->field($model, 'cfrl_id')->textInput() ?>
+        <?= $form->field($model, 'cfrl_id')->hiddenInput()->label(false) ?>
 
         <?= $form->field($model, 'cfrl_conference_sid')->textInput(['maxlength' => true]) ?>
 
-        <?= $form->field($model, 'cfrl_user_id')->textInput() ?>
-
-        <?= $form->field($model, 'cfrl_created_dt')->textInput() ?>
+        <?= $form->field($model, 'cfrl_user_id')->widget(UserSelect2Widget::class) ?>
 
         <?= $form->field($model, 'cfrl_year')->textInput() ?>
 

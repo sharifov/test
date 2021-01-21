@@ -45,7 +45,7 @@ class ConferenceRecordingLog extends \yii\db\ActiveRecord
             ['cfrl_created_dt', 'safe'],
 
             ['cfrl_month', 'required'],
-            ['cfrl_month', 'integer'],
+            ['cfrl_month', 'integer', 'max' => 12, 'min' => 1],
 
             ['cfrl_user_id', 'required'],
             ['cfrl_user_id', 'integer'],
