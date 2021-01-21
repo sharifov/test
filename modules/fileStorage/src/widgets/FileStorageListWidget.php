@@ -6,6 +6,7 @@ use modules\fileStorage\src\entity\fileCase\FileCaseQuery;
 use modules\fileStorage\src\entity\fileLead\FileLeadQuery;
 use modules\fileStorage\src\services\url\QueryParams;
 use modules\fileStorage\src\services\url\UrlGenerator;
+use sales\auth\Auth;
 use yii\base\Widget;
 
 /**
@@ -35,6 +36,7 @@ class FileStorageListWidget extends Widget
             'uploadWidget' => $this->uploadWidget,
             'urlGenerator' => $this->urlGenerator,
             'queryParams' => $this->queryParams,
+            'canView' => Auth::can('file-storage/view')
         ]);
     }
 

@@ -11,6 +11,7 @@ use yii\web\View;
 /** @var string $uploadWidget */
 /** @var UrlGenerator $urlGenerator */
 /** @var QueryParams $queryParams  */
+/** @var bool $canView  */
 
 $countFiles = count($files);
 ?>
@@ -34,7 +35,7 @@ $countFiles = count($files);
             </tr>
             <?php foreach ($files as $file) : ?>
                 <tr>
-                    <td><?= Html::a('<i class="fa fa-download"> </i>', $urlGenerator->generate(new FileInfo($file['path'], $file['uid'], $queryParams)), ['target' => 'blank']) ?></td>
+                    <td><?= !$canView ? '' : Html::a('<i class="fa fa-download"> </i>', $urlGenerator->generate(new FileInfo($file['path'], $file['uid'], $queryParams)), ['target' => 'blank']) ?></td>
                     <td><?= Html::encode($file['name']) ?></td>
                     <td><?= Html::encode($file['title']) ?></td>
                 </tr>
@@ -45,10 +46,14 @@ $countFiles = count($files);
 </div>
 
 <?php
-
+$canView = $canView ? 'true' : 'false';
 $js = <<<JS
 function addFileToFileStorageList(data) {
-    $('.file-storage-list tr:first').after('<tr><td><a href="' + data.url + '" target="blank"><i class="fa fa-download"> </i></a></td><td>' + data.name + '</td><td>' + data.title + '</td></tr>');
+    let url = '';
+    if ({$canView}) {
+        url = '<a href="' + data.url + '" target="blank"><i class="fa fa-download"> </i></a>';
+    }
+    $('.file-storage-list tr:first').after('<tr><td>' + url + '</td><td>' + data.name + '</td><td>' + data.title + '</td></tr>');
     let counter = $('.file-storage-list-counter');
     let count = parseInt(counter.attr('data-count'));
     count++;

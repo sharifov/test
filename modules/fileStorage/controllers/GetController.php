@@ -56,6 +56,10 @@ class GetController extends FController
 
     public function actionView()
     {
+        if (!Auth::can('file-storage/view')) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
         $form = new \modules\fileStorage\src\useCase\view\ViewForm();
 
         if (!$form->load(\Yii::$app->request->get()) || !$form->validate()) {
