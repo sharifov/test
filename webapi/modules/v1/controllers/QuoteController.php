@@ -394,16 +394,15 @@ class QuoteController extends ApiBaseController
             $response['itinerary']['trips'] = $model->getTrips();
             $response['itinerary']['price'] = $model->getQuotePriceData(); //$model->quotePrice();
 
-            if ($model->isAlternative()) {
-                if ($lastOriginQuota = Quote::find()->where(['lead_id' => $model->lead_id, 'type_id' => Quote::TYPE_ORIGINAL])->one()) {
-                    $response['itineraryOrigin']['uid'] = $lastOriginQuota->uid;
-                    $response['itineraryOrigin']['typeId'] = $lastOriginQuota->type_id;
-                    $response['itineraryOrigin']['typeName'] = Quote::getTypeName($lastOriginQuota->type_id);
-                    $response['itineraryOrigin']['tripType'] = $lastOriginQuota->trip_type;
-                    $response['itineraryOrigin']['mainCarrier'] = $lastOriginQuota->mainAirline->name ?? $lastOriginQuota->main_airline_code;
-                    $response['itineraryOrigin']['trips'] = $lastOriginQuota->getTrips();
-                    $response['itineraryOrigin']['price'] = $lastOriginQuota->getQuotePriceData();
-                }
+            if ($model->isAlternative() && $originalQuote = Quote::getOriginalQuoteByLeadId($model->lead_id)) {
+                /** @var Quote $originalQuote */
+                $response['itineraryOrigin']['uid'] = $originalQuote->uid;
+                $response['itineraryOrigin']['typeId'] = $originalQuote->type_id;
+                $response['itineraryOrigin']['typeName'] = Quote::getTypeName($originalQuote->type_id);
+                $response['itineraryOrigin']['tripType'] = $originalQuote->trip_type;
+                $response['itineraryOrigin']['mainCarrier'] = $originalQuote->mainAirline->name ?? $originalQuote->main_airline_code;
+                $response['itineraryOrigin']['trips'] = $originalQuote->getTrips();
+                $response['itineraryOrigin']['price'] = $originalQuote->getQuotePriceData();
             }
 
             if ($model->lead) {

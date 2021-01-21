@@ -2507,4 +2507,15 @@ class Quote extends \yii\db\ActiveRecord
         }
         return null;
     }
+
+    /**
+     * @param int $leadId
+     * @return ActiveRecord|null
+     */
+    public static function getOriginalQuoteByLeadId(int $leadId)
+    {
+        return self::find()
+            ->where(['lead_id' => $leadId, 'type_id' => self::TYPE_ORIGINAL])
+            ->one();
+    }
 }
