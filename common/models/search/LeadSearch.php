@@ -68,6 +68,7 @@ use sales\auth\Auth;
  * @property int|null $chatsQtyFrom
  * @property int|null $chatsQtyTo
  * @property array $show_fields
+ * @property int|null $quoteTypeId
  */
 class LeadSearch extends Lead
 {
@@ -147,6 +148,8 @@ class LeadSearch extends Lead
 
     public $show_fields = [];
 
+    public $quoteTypeId;
+
     private $leadBadgesRepository;
 
     public function __construct($config = [])
@@ -212,6 +215,9 @@ class LeadSearch extends Lead
                 return (string) $value;
             }, 'skipOnEmpty' => true],
             [['client_phone'], 'string', 'max' => 20],
+
+            ['quoteTypeId', 'integer'],
+            ['quoteTypeId', 'in', 'range' => array_keys(Quote::TYPE_LIST)],
         ];
     }
 
@@ -222,7 +228,8 @@ class LeadSearch extends Lead
             'smsQtyFrom' => 'Sms From', 'smsQtyTo' => 'Sms To',
             'callsQtyFrom' => 'Calls From', 'callsQtyTo' => 'Calls To',
             'chatsQtyFrom' => 'Chats From', 'chatsQtyTo' => 'Chats To',
-            'projectId' => 'Project'
+            'projectId' => 'Project',
+            'quoteTypeId' => 'Quote Type',
         ];
         return array_merge(parent::attributeLabels(), $labels2);
     }
@@ -554,6 +561,17 @@ class LeadSearch extends Lead
 
         if ($this->createdType) {
             $query->andWhere(['l_type_create' => $this->createdType]);
+        }
+
+        if ($this->quoteTypeId) {
+             $query->andWhere([
+                'IN',
+                'leads.id',
+                Quote::find()
+                    ->select(['DISTINCT(lead_id)'])
+                    ->where(['type_id' => $this->quoteTypeId])
+                    ->groupBy('lead_id')
+             ]);
         }
 
         if (!empty($this->emailsQtyFrom) || !empty($this->emailsQtyTo)) {
@@ -1565,6 +1583,11 @@ class LeadSearch extends Lead
 
         if ($this->quote_pnr) {
             $query->andWhere(['LIKE','leads.additional_information', new Expression('\'%"pnr":%"' . $this->quote_pnr . '"%\'')]);
+        }
+
+        if ($this->quoteTypeId) {
+            $subQuery = Quote::find()->select(['DISTINCT(lead_id)'])->where(['type_id' => $this->quoteTypeId])->groupBy('lead_id');
+            $query->andWhere(['IN', 'leads.id', $subQuery]);
         }
 
         return $dataProvider;
