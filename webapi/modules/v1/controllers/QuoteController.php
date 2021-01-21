@@ -314,17 +314,32 @@ class QuoteController extends ApiBaseController
             $response['agentDirectLine'] = ($userProjectParams && $userProjectParams->getPhone()) ? $userProjectParams->getPhone() : sprintf('%s', $model->lead->project->contactInfo->phone);
             $response['generalEmail'] = $model->lead->project->contactInfo->email;
             $response['generalDirectLine'] = sprintf('%s', $model->lead->project->contactInfo->phone);
+
+            $response['itinerary']['typeId'] = $model->type_id;
+            $response['itinerary']['typeName'] = Quote::getTypeName($model->type_id);
             $response['itinerary']['tripType'] = $model->trip_type;
             $response['itinerary']['mainCarrier'] = $model->mainAirline ? $model->mainAirline->name : $model->main_airline_code;
             $response['itinerary']['trips'] = $model->getTrips();
             $response['itinerary']['price'] = $model->getQuotePriceData(); //$model->quotePrice();
 
-            $response['typeId'] = $model->type_id;
-            $response['typeName'] = Quote::getTypeName($model->type_id);
+            if ($model->isAlternative()) {
+                if ($lastOriginQuota = Quote::find()->where(['lead_id' => $model->lead_id, 'type_id' => Quote::TYPE_ORIGINAL])->one()) {
+                    $response['itineraryOrigin']['uid'] = $lastOriginQuota->uid;
+                    $response['itineraryOrigin']['typeId'] = $lastOriginQuota->type_id;
+                    $response['itineraryOrigin']['typeName'] = Quote::getTypeName($lastOriginQuota->type_id);
+                    $response['itineraryOrigin']['tripType'] = $lastOriginQuota->trip_type;
+                    $response['itineraryOrigin']['mainCarrier'] = $lastOriginQuota->mainAirline->name ?? $lastOriginQuota->main_airline_code;
+                    $response['itineraryOrigin']['trips'] = $lastOriginQuota->getTrips();
+                    $response['itineraryOrigin']['price'] = $lastOriginQuota->getQuotePriceData();
+                }
+            }
 
-            if ($model->lead && $model->isAlternative()) {
-                $response['lead']['additionalInformation'] =
-                    $model->lead->additional_information ? JsonHelper::decode($model->lead->additional_information) : ''; /* TODO::  */
+            if ($model->lead) {
+                ArrayHelper::setValue(
+                    $response,
+                    'lead.additionalInformation',
+                    $model->lead->additional_information ? JsonHelper::decode($model->lead->additional_information) : ''
+                );
             }
 
             if ((int)$model->status === Quote::STATUS_SEND) {
