@@ -85,4 +85,50 @@ return [
         ],
         'chanelId' => '',
     ],
+    's3' => [
+        'credentials' => [
+            'key' => '',
+            'secret' => '',
+        ],
+        'region' => 'us-east-1',
+        'version' => '2006-03-01',
+    ],
+    'fileStorage' => [
+        'useRemoteStorage' => true,
+        'remoteStorage' => [
+            'cdn' => [
+                'host' => '',
+                'prefix' => '',
+            ],
+            's3' => [
+                'bucket' => '',
+                'prefix' => '',
+                'uploadConfig' => [
+                    'visibility' => 'private',// Required: [private or public] for FlySystem -> ACL native S3
+                    // League\Flysystem\AwsS3V3\AwsS3V3Adapter\AVAILABLE_OPTIONS
+                    'ServerSideEncryption' => 'AES256',
+                ],
+            ],
+        ],
+        'localStorage' => [
+            'path' => '', // absolute path to server directory
+            'url' => '', // full web address: https://sales.test/fs
+            'converterConfig' => [
+                'fileDir' => [
+                    'file' => [
+                        'public' => 0644,
+                        'private' => 0600,
+                    ],
+                    'dir' => [
+                        'public' => 0755,
+                        'private' => 0700,
+                    ],
+                ],
+                'defaultForDirectories' => 'private'
+            ],
+            'uploadConfig' => [
+                'visibility' => 'private',// [private or public] for FlySystem
+            ],
+        ],
+    ],
 ];

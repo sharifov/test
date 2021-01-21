@@ -47,7 +47,7 @@ class FileStorageService
 
         try {
             $this->fileSystem->delete($file->fs_path);
-        } catch (FilesystemException | UnableToDeleteFile $e) {
+        //} catch (FilesystemException | UnableToDeleteFile $e) {
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => 'Remove file from filesystem error.',
@@ -78,7 +78,7 @@ class FileStorageService
 
         try {
             $this->fileSystem->rename($oldLocation, $newLocation);
-        } catch (FilesystemException | UnableToMoveFile $e) {
+//        } catch (FilesystemException | UnableToMoveFile $e) {
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => 'Rename file on filesystem error.',

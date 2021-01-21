@@ -53,4 +53,51 @@ return [
             ]
         ]
     ],
+
+    's3' => [
+        'credentials' => [
+            'key' => '{{ common.config.params.s3.credentials.key:str }}',
+            'secret' => '{{ common.config.params.s3.credentials.secret:str }}',
+        ],
+        'region' => 'us-east-1',
+        'version' => '2006-03-01',
+    ],
+    'fileStorage' => [
+        'useRemoteStorage' => '{{ common.config.params.fileStorage.useRemoteStorage:bool }}',
+        'remoteStorage' => [
+            'cdn' => [
+                'host' => '{{ common.config.params.fileStorage.remoteStorage.cdn.host:str }}',
+                'prefix' => '{{ common.config.params.fileStorage.remoteStorage.cdn.prefix:str }}',
+            ],
+            's3' => [
+                'bucket' => '{{ common.config.params.fileStorage.remoteStorage.s3.bucket:str }}',
+                'prefix' => 'crmdata',
+                'uploadConfig' => [
+                    'visibility' => 'private',// Required: [private or public] for FlySystem -> ACL native S3
+                    // League\Flysystem\AwsS3V3\AwsS3V3Adapter\AVAILABLE_OPTIONS
+                    'ServerSideEncryption' => 'AES256',
+                ],
+            ],
+        ],
+        'localStorage' => [
+            'path' => '{{ common.config.params.fileStorage.localStorage.path:str }}',
+            'url' => '{{ common.config.params.fileStorage.localStorage.url:str }}',
+            'converterConfig' => [
+                'fileDir' => [
+                    'file' => [
+                        'public' => 0644,
+                        'private' => 0600,
+                    ],
+                    'dir' => [
+                        'public' => 0755,
+                        'private' => 0700,
+                    ],
+                ],
+                'defaultForDirectories' => 'private'
+            ],
+            'uploadConfig' => [
+                'visibility' => 'private',// [private or public] for FlySystem
+            ],
+        ]
+    ],
 ];
