@@ -53,7 +53,7 @@ class CallRecordingLog extends \yii\db\ActiveRecord
             ['crl_year', 'integer'],
 
             ['crl_month', 'required'],
-            ['crl_month', 'integer'],
+            ['crl_month', 'integer', 'max' => 12, 'min' => 1],
         ];
     }
 
