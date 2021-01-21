@@ -725,13 +725,15 @@ if (\sales\helpers\setting\SettingHelper::isCallRecordingLogEnabled()) {
                     audioWrapper.removeAttribute('data-sid');
                     let isConferenceRecording = audioWrapper.hasAttribute('data-conference-recording');
                     let url = isConferenceRecording ? '$conferenceRecodingLogUrl' : '$callRecodingLogUrl';
-                    $.post(url, {sid: sid}, function (data) {
-                        if (data.cacheDuration) {
-                            setTimeout(function () {
-                                $(audioWrapper).attr('data-sid', sid);                         
-                            }, data.cacheDuration*1000);
-                        }
-                    }, 'json');
+                    if (sid) {
+                        $.post(url, {sid: sid}, function (data) {
+                            if (data.cacheDuration) {
+                                setTimeout(function () {
+                                    $(audioWrapper).attr('data-sid', sid);                         
+                                }, data.cacheDuration*1000);
+                            }
+                        }, 'json');
+                    }
                 }
             }, true);
         });
