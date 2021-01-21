@@ -59,7 +59,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'cf_recording_duration',
                 'label' => 'Recording',
                 'value' => static function (\common\models\Conference $model) {
-                    return $model->cf_recording_duration ? CallHelper::displayAudioBtn($model->recordingUrl, 'i:s', $model->cf_recording_duration, $model->cf_sid, true) : '-';
+                    return $model->cf_recording_duration ? CallHelper::displayAudioBtn($model->recordingUrl, 'i:s', $model->cf_recording_duration) : '-';
                 },
                 'format' => 'raw',
                 'contentOptions' => ['class' => 'text-right'],

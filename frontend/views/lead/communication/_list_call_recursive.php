@@ -35,7 +35,7 @@ $user = Yii::$app->user->identity;
                 </td>
                 <td>
                     <?php if ($callItem->recordingUrl) :?>
-                        <?= CallHelper::displayAudioBtn($callItem->recordingUrl, 'i:s', $callItem->c_recording_duration, $callItem->c_call_sid) ?>
+                        <?= CallHelper::displayAudioBtn($callItem->recordingUrl, 'i:s', $callItem->c_recording_duration) ?>
                     <?php endif;?>
                 </td>
                 <td class="text-center">

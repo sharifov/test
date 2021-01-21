@@ -29,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <div class="col-md-6">
         <?php if ($model->recordingUrl) :?>
-            <?= CallHelper::displayAudioTag($model->recordingUrl, $model->c_call_sid, ['style' => 'width: 100%']) ?>
+            <?= CallHelper::displayAudioTag($model->recordingUrl, ['style' => 'width: 100%']) ?>
         <?php endif;?>
 
         <?= DetailView::widget([

@@ -39,11 +39,11 @@ class RecordingUrlColumn extends DataColumn
         }
 
         if ($this->audioContent === self::AUDIO_BUTTON) {
-            return CallHelper::displayAudioBtn($model->recordingUrl, $format, (int)$model->record->clr_duration, $model->cl_call_sid);
+            return CallHelper::displayAudioBtn($model->recordingUrl, $format, (int)$model->record->clr_duration);
         }
 
         if ($this->audioContent === self::AUDIO_TAG) {
-            return CallHelper::displayAudioTag($model->recordingUrl, (string)$model->cl_call_sid, $this->audioContentOptions);
+            return CallHelper::displayAudioTag($model->recordingUrl, $this->audioContentOptions);
         }
 
         throw new InvalidConfigException('AudioContent value is not valid');

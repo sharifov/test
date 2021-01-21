@@ -67,7 +67,7 @@ JS;
 
 
     <?php if ($model->recordingUrl) :?>
-        <?= CallHelper::displayAudioTag($model->recordingUrl, $model->c_call_sid, ['style' => 'width: 100%']) ?>
+        <?= CallHelper::displayAudioTag($model->recordingUrl, ['style' => 'width: 100%']) ?>
     <?php endif;?>
 
     <div class="col-md-6">

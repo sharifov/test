@@ -60,9 +60,7 @@ use common\models\Call;
         </div>
         <div class="card-body">
             <?php if ($call->recordingUrl) :?>
-            <div class="audio-wrapper" data-call-sid="<?= $call->c_call_sid ?>">
-                <?= CallHelper::displayAudioTag($call->recordingUrl, $call->c_call_sid, ['class' => 'chat__audio']) ?>
-            </div>
+                <?= CallHelper::displayAudioTag($call->recordingUrl, ['class' => 'chat__audio']) ?>
             <?php else : ?>
                 <div><i class="fa fa-volume-off"></i> ... <?=$call->c_call_status?></div>
             <?php endif;?>

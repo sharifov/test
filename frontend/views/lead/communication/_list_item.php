@@ -78,7 +78,7 @@ $fromType = 'client';
         </div>
         <div class="card-body">
             <?php if ($call->recordingUrl) :?>
-                <?= CallHelper::displayAudioBtn($call->recordingUrl, 'i:s', $call->c_recording_duration, $call->c_call_sid) ?>
+                <?= CallHelper::displayAudioBtn($call->recordingUrl, 'i:s', $call->c_recording_duration) ?>
             <?php else : ?>
                 <div><?=$call->getStatusIcon()?>  <?=$call->getStatusName()?></div>
             <?php endif;?>
