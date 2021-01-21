@@ -395,7 +395,6 @@ class QuoteController extends ApiBaseController
             $response['itinerary']['price'] = $model->getQuotePriceData(); //$model->quotePrice();
 
             if ($model->isAlternative() && $originalQuote = Quote::getOriginalQuoteByLeadId($model->lead_id)) {
-                /** @var Quote $originalQuote */
                 $response['itineraryOrigin']['uid'] = $originalQuote->uid;
                 $response['itineraryOrigin']['typeId'] = $originalQuote->type_id;
                 $response['itineraryOrigin']['typeName'] = Quote::getTypeName($originalQuote->type_id);

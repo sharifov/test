@@ -2510,12 +2510,10 @@ class Quote extends \yii\db\ActiveRecord
 
     /**
      * @param int $leadId
-     * @return ActiveRecord|null
+     * @return Quote|null
      */
-    public static function getOriginalQuoteByLeadId(int $leadId)
+    public static function getOriginalQuoteByLeadId(int $leadId): ?Quote
     {
-        return self::find()
-            ->where(['lead_id' => $leadId, 'type_id' => self::TYPE_ORIGINAL])
-            ->one();
+        return self::findOne(['lead_id' => $leadId, 'type_id' => self::TYPE_ORIGINAL]);
     }
 }
