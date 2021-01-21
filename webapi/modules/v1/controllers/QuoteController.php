@@ -16,6 +16,7 @@ use common\models\Quote;
 use common\models\QuotePrice;
 use common\models\UserProjectParams;
 use common\models\VisitorLog;
+use frontend\helpers\JsonHelper;
 use frontend\widgets\notification\NotificationMessage;
 use modules\invoice\src\exceptions\InvoiceCodeException;
 use modules\lead\src\entities\lead\LeadQuery;
@@ -212,6 +213,8 @@ class QuoteController extends ApiBaseController
      *       "vl_visit_dt": "2020-02-14 12:00:00",
      *       "vl_created_dt": "2020-02-28 17:17:33"
      *   },
+     *   "typeId": 2,
+     *   "typeName": "Alternative",
      *   "action": "v1/quote/get-info",
      *   "response_id": 173,
      *   "request_dt": "2018-08-16 06:42:03",
@@ -315,6 +318,14 @@ class QuoteController extends ApiBaseController
             $response['itinerary']['mainCarrier'] = $model->mainAirline ? $model->mainAirline->name : $model->main_airline_code;
             $response['itinerary']['trips'] = $model->getTrips();
             $response['itinerary']['price'] = $model->getQuotePriceData(); //$model->quotePrice();
+
+            $response['typeId'] = $model->type_id;
+            $response['typeName'] = Quote::getTypeName($model->type_id);
+
+            if ($model->lead && $model->isAlternative()) {
+                $response['lead']['additionalInformation'] =
+                    $model->lead->additional_information ? JsonHelper::decode($model->lead->additional_information) : ''; /* TODO::  */
+            }
 
             if ((int)$model->status === Quote::STATUS_SEND) {
                 $excludeIP = Quote::isExcludedIP($clientIP);

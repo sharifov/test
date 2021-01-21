@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Quote;
 use kartik\select2\Select2;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -40,6 +41,9 @@ use yii\widgets\ActiveForm;
                 </div>
                 <div class="col-md-6">
                     <?= $form->field($model, 'hybrid_uid')->textInput(['title' => 'Hybrid UID'])->label('Booking ID') ?>
+                </div>
+                <div class="col-md-6">
+                    <?= $form->field($model, 'quoteTypeId')->dropDownList(Quote::TYPE_LIST, ['prompt' => '-']) ?>
                 </div>
             </div>
 

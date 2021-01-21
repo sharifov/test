@@ -30,7 +30,7 @@ class QuoteController extends ApiBaseController
      * @api {post} /v2/quote/get-info Get Quote
      * @apiVersion 0.2.0
      * @apiName GetQuote
-     * @apiGroup Quotes
+     * @apiGroup Quotes v2
      * @apiPermission Authorized User
      *
      * @apiHeader {string} Authorization    Credentials <code>base64_encode(Username:Password)</code>
@@ -330,6 +330,8 @@ class QuoteController extends ApiBaseController
      *   "agentDirectLine": "",
      *   "generalEmail": "info@wowfare.com",
      *   "generalDirectLine": "+37379731662",
+     *   "typeId": 2,
+     *   "typeName": "Alternative",
      *   "client": {
      *       "uuid": "35009a79-1a05-49d7-b876-2b884d0f825b"
      *       "client_id": 331968,
@@ -477,6 +479,9 @@ class QuoteController extends ApiBaseController
             $response['agentDirectLine'] = ($userProjectParams && $userProjectParams->getPhone()) ? $userProjectParams->getPhone() : sprintf('%s', $model->lead->project->contactInfo->phone);
             $response['generalEmail'] = $model->lead->project->contactInfo->email;
             $response['generalDirectLine'] = sprintf('%s', $model->lead->project->contactInfo->phone);
+
+            $response['typeId'] = $model->type_id;
+            $response['typeName'] = Quote::getTypeName($model->type_id);
 
             /** @var Lead $lead */
             $lead = $model->lead;
