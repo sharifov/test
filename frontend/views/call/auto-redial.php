@@ -814,7 +814,7 @@ $duration = 10;
                 [
                     'attribute' => 'c_recording_url',
                     'value' => static function (\common\models\Call $model) {
-                        return $model->recordingUrl ? CallHelper::displayAudioTag($model->recordingUrl, $model->c_call_sid) : '-';
+                        return $model->recordingUrl ? CallHelper::displayAudioBtn($model->recordingUrl, 'i:s', $model->c_recording_duration) : '-';
                     },
                     'format' => 'raw'
                 ],

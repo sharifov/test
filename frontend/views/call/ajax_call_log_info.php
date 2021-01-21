@@ -21,7 +21,7 @@ $this->title = 'Call Id: ' . $model->cl_id;
     </h2>
 
     <?php if ($model->record) : ?>
-        <?= CallHelper::displayAudioTag($model->recordingUrl, $model->cl_call_sid, ['style' => 'width: 100%;']) ?>
+        <?= CallHelper::displayAudioTag($model->recordingUrl, ['style' => 'width: 100%;']) ?>
     <?php endif; ?>
 
     <div class="col-md-6">

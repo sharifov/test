@@ -41,7 +41,7 @@ $child = $child ?? false;
                 </td>
                 <td style="width: 80px">
                     <?php  if ($callItem->record && $callItem->record->clr_record_sid) :?>
-                        <?= CallHelper::displayAudioBtn($callItem->recordingUrl, 'i:s', $callItem->record->clr_duration, $callItem->cl_call_sid) ?>
+                        <?= CallHelper::displayAudioBtn($callItem->recordingUrl, 'i:s', $callItem->record->clr_duration) ?>
                     <?php  endif;?>
                 </td>
                 <td class="text-center">

@@ -413,7 +413,7 @@ if ($user->isAdmin() || $user->isQa()) {
                                 if ($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_VOICE) {
                                     $call = \common\models\Call::findOne($model['id']);
                                     if ($call && $call->recordingUrl) {
-                                        $view = CallHelper::displayAudioTag($call->recordingUrl, $call->c_call_sid);
+                                        $view = CallHelper::displayAudioBtn($call->recordingUrl, 'i:s', $call->c_recording_duration);
                                     }
                                 } elseif ($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_SMS) {
                                     $sms = \common\models\Sms::findOne($model['id']);
