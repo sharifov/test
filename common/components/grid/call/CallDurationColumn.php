@@ -11,6 +11,7 @@ class CallDurationColumn extends DataColumn
 {
     public $attributeDuration = 'c_recording_duration';
     public $attributeSid = 'c_recording_sid';
+    public $attributeCallSid = 'c_call_sid';
     public $attributeUrl = 'recordingUrl';
     public $label = 'Recording';
     public $format = 'raw';
@@ -30,6 +31,6 @@ class CallDurationColumn extends DataColumn
             $format = 'i:s';
         }
 
-        return CallHelper::displayAudioBtn((string)$model->{$this->attributeUrl}, $format, (int)$model->{$this->attributeDuration}, $model->{$this->attributeSid});
+        return CallHelper::displayAudioBtn((string)$model->{$this->attributeUrl}, $format, (int)$model->{$this->attributeDuration}, $model->{$this->attributeCallSid});
     }
 }
