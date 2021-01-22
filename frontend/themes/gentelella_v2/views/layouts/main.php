@@ -164,6 +164,8 @@ $bundle = \frontend\assets\AppAsset::register($this);
                         <?php /*php if($isAdmin):*/ ?>
 
                             <?= frontend\widgets\OnlineConnection::widget() ?>
+                            <?= frontend\widgets\UserMonitor::widget() ?>
+
                             <?php //= frontend\widgets\Notifications::widget()?>
                             <?php
                             if (Yii::$app->params['settings']['notification_web_socket']) {

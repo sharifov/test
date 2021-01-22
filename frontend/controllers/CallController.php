@@ -509,6 +509,9 @@ class CallController extends FController
      */
     public function actionRealtimeMap(): string
     {
+//        $this->isAutoLogoutEnabled = false;
+//        $this->isIdleMonitorEnabled = false;
+
         $centrifugoEnabled = Yii::$app->params['centrifugo']['enabled'] ?? false;
         $centrifugoWsConnectionUrl = Yii::$app->params['centrifugo']['wsConnectionUrl'] ?? '';
 

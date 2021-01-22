@@ -15,6 +15,9 @@ use yii2mod\rbac\filters\AccessControl;
 class FController extends Controller
 {
 
+    /**
+     * @return array
+     */
     public function behaviors()
     {
         $behaviors = [
@@ -39,12 +42,12 @@ class FController extends Controller
             /** @var Employee $user */
             $user = \Yii::$app->user->identity;
 
- //           $user->loadCache(new \sales\model\user\entity\UserCache($user, \Yii::$app->cache));
-
             $timezone = $user->userParams ? $user->userParams->up_timezone : null;
             if ($timezone) {
                 \Yii::$app->formatter->timeZone = $timezone;
             }
+
+            unset($user, $timezone);
 
             if (isset(\Yii::$app->params['limitUserConnections']) && \Yii::$app->params['limitUserConnections'] > 0) {
                 $countConnections = UserConnection::find()->where(['uc_user_id' => \Yii::$app->user->id])->count();
