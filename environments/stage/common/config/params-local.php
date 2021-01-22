@@ -71,7 +71,7 @@ return [
             ],
             's3' => [
                 'bucket' => '{{ common.config.params.fileStorage.remoteStorage.s3.bucket:str }}',
-                'prefix' => 'crmdata',
+                'prefix' => '{{ common.config.params.fileStorage.remoteStorage.s3.prefix:str }}',
                 'uploadConfig' => [
                     'visibility' => 'private',// Required: [private or public] for FlySystem -> ACL native S3
                     // League\Flysystem\AwsS3V3\AwsS3V3Adapter\AVAILABLE_OPTIONS
