@@ -260,21 +260,18 @@ class CasesController extends FController
                 }
 
                 $mail->e_email_to = $previewEmailForm->e_email_to;
-                //$mail->e_email_data = [];
                 $mail->e_created_dt = date('Y-m-d H:i:s');
                 $mail->e_created_user_id = Yii::$app->user->id;
-
+                $attachments = [];
+                if (FileStorageSettings::canEmailAttach() && $previewEmailForm->files) {
+                    $attachments['files'] = $this->fileStorageUrlGenerator->generateForExternal($previewEmailForm->getFilesPath());
+                }
+                $mail->e_email_data = json_encode($attachments);
                 if ($mail->save()) {
                     $mail->e_message_id = $mail->generateMessageId();
                     $mail->update();
-
                     $previewEmailForm->is_send = true;
-
-                    $data = [];
-                    if (FileStorageSettings::canEmailAttach() && $previewEmailForm->files) {
-                        $data['files'] = $this->fileStorageUrlGenerator->generateForExternal($previewEmailForm->getFilesPath());
-                    }
-                    $mailResponse = $mail->sendMail($data);
+                    $mailResponse = $mail->sendMail($attachments);
 
                     if (isset($mailResponse['error']) && $mailResponse['error']) {
                         //echo $mailResponse['error']; exit; //'Error: <strong>Email Message</strong> has not been sent to <strong>'.$mail->e_email_to.'</strong>'; exit;

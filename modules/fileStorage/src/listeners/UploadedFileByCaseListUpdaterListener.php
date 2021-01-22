@@ -25,7 +25,7 @@ class UploadedFileByCaseListUpdaterListener
     public function handle(FileUploadedByCaseEvent $event): void
     {
         Notifications::publish('addFileToFileStorageList', ['case_id' => $event->caseId], [
-            'url' => $this->urlGenerator->generate(new FileInfo($event->path, $event->uid, QueryParams::byCase())),
+            'url' => $this->urlGenerator->generate(new FileInfo($event->name, $event->path, $event->uid, QueryParams::byCase())),
             'name' => $event->name,
             'title' => $event->title,
         ]);

@@ -41,15 +41,20 @@ class AwsS3UrlGenerator implements UrlGenerator
      */
     public function generateForExternal(array $files): array
     {
-        $links = [
-            'private' => [],
-            'public' => []
-        ];
+        $links = [];
         foreach ($files as $file) {
             if ($this->isPrivate) {
-                $links['private'][] = $file->path;
+                $links[] = [
+                    'value' => $file->path,
+                    'name' => $file->name,
+                    'type_id' => UrlGenerator::TYPE_PRIVATE,
+                ];
             } else {
-                $links['public'][] = $this->publicLink($file->path);
+                $links[] = [
+                    'value' => $this->publicLink($file->path),
+                    'name' => $file->name,
+                    'type_id' => UrlGenerator::TYPE_PUBLIC,
+                ];
             }
         }
         return $links;

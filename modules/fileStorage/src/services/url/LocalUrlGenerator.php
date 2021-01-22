@@ -30,12 +30,13 @@ class LocalUrlGenerator implements UrlGenerator
      */
     public function generateForExternal(array $files): array
     {
-        $links = [
-            'private' => [],
-            'public' => []
-        ];
+        $links = [];
         foreach ($files as $file) {
-            $links['public'][] = $this->publicLink($file->path);
+            $links[] = [
+                'value' => $this->publicLink($file->path),
+                'name' => $file->name,
+                'type_id' => UrlGenerator::TYPE_PUBLIC,
+            ];
         }
         return $links;
     }

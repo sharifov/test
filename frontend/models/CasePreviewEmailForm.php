@@ -147,7 +147,11 @@ class CasePreviewEmailForm extends Model
         $availableFiles = $this->getFileList();
         foreach ($this->files as $fileId) {
             if (array_key_exists($fileId, $availableFiles)) {
-                $files[] = new \modules\fileStorage\src\services\url\FileInfo($availableFiles[$fileId]['path'], $availableFiles[$fileId]['uid']);
+                $files[] = new \modules\fileStorage\src\services\url\FileInfo(
+                    $availableFiles[$fileId]['name'],
+                    $availableFiles[$fileId]['path'],
+                    $availableFiles[$fileId]['uid']
+                );
             }
         }
         return $files;
