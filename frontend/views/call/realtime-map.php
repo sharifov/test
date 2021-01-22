@@ -10,6 +10,12 @@ $this->title = 'Realtime Call Map';
 ?>
 
 <style>
+    @-webkit-keyframes alertPulse {
+        0% {background-color: #f5dad8; color: #000000; opacity: 1;}
+        50% {opacity: #ce5252; opacity: 0.75; }
+        100% {opacity: #e85858; opacity: 1;}
+    }
+
     #realtime-map-app table {margin: 2px 0 1px 0}
     .card-body {padding: 0 0 0 0}
 
@@ -56,16 +62,21 @@ $this->title = 'Realtime Call Map';
     /* moving */
     .fade2-move {
         transition: all 600ms ease-in-out 50ms;
+        opacity: 1;
     }
 
     /* appearing */
     .fade2-enter-active {
-        transition: all 800ms ease-out;
+        /*transition: all 800ms ease-out;*/
+        animation: alertPulse 2s ease-out;
+        animation-iteration-count: infinite;
+        opacity: 1;
     }
 
     /* disappearing */
     .fade2-leave-active {
-        transition: all 400ms ease-in;
+        /*transition: all 400ms ease-in;*/
+        animation: scale-up-center;
         position: absolute;
         z-index: 0;
     }

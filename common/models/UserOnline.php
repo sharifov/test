@@ -37,6 +37,7 @@ class UserOnline extends ActiveRecord
         return [
             [['uo_updated_dt', 'uo_idle_state_dt'], 'safe'],
             [['uo_idle_state'], 'boolean'],
+            [['uo_idle_state'], 'filter', 'filter' => 'boolval'],
             [['uo_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['uo_user_id' => 'id']],
         ];
     }
