@@ -17,7 +17,7 @@ class Scopes extends \yii\db\ActiveQuery
 
     public function byTsVectorMessage(string $searchSubString): Scopes
     {
-        return $this->andWhere(new Expression("to_tsvector('english', cr_message) @@ to_tsquery('english', :message)"), ['message' => $searchSubString]);
+        return $this->andWhere(new Expression("to_tsvector('english', cr_message) @@ to_tsquery('english', :message)"), ['message' => $searchSubString . ':*']);
     }
 
     public function joinCategory(): Scopes
