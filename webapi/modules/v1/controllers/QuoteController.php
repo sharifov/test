@@ -821,6 +821,7 @@ class QuoteController extends ApiBaseController
      * @apiParam {string}           [Quote.fare_type]           fare_type
      * @apiParam {string}           [Quote.employee_name]       employee_name
      * @apiParam {bool}             [Quote.created_by_seller]   created_by_seller
+     * @apiParam {int}              [Quote.type_id]             type_id
      * @apiParam {object}           QuotePrice[]                QuotePrice data array
      * @apiParam {string}           [QuotePrice.uid]            uid
      * @apiParam {string}           [QuotePrice.passenger_type] passenger_type
@@ -854,7 +855,8 @@ class QuoteController extends ApiBaseController
      *          "check_payment": "1",
      *          "fare_type": "TOUR",
      *          "employee_name": "Barry",
-     *          "created_by_seller": false
+     *          "created_by_seller": false,
+     *          "type_id" : 0
      *      },
      *      "QuotePrice": [
      *          {
