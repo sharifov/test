@@ -30,6 +30,9 @@ class FileStorageSearch extends FileStorage
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => [
+                'defaultOrder' => ['fs_id' => SORT_DESC]
+            ]
         ]);
 
         $this->load($params);
