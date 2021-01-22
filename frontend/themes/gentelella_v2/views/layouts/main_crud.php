@@ -134,6 +134,7 @@ $bundle = \frontend\assets\AppCrudAsset::register($this);
                         <?php /*php if($isAdmin):*/ ?>
 
                             <?php echo frontend\widgets\OnlineConnection::widget() ?>
+                            <?php echo frontend\widgets\UserMonitor::widget() ?>
 
                             <?php //= frontend\widgets\Notifications::widget() ?>
                             <?php

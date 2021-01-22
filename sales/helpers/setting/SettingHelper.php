@@ -105,4 +105,5 @@ class SettingHelper
     {
         return (int) (Yii::$app->params['settings']['call_recording_log_additional_cache_timeout'] ?? 60);
     }
+
 }

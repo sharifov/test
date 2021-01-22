@@ -255,7 +255,7 @@ class UserMonitor extends \yii\db\ActiveRecord
     /**
      * @return int
      */
-    public static function isAutologoutTimerSec(): int
+    public static function autoLogoutTimerSec(): int
     {
         return \Yii::$app->params['settings']['autologout_timer_sec'] ?? 0;
     }
