@@ -21,22 +21,41 @@ class ClientChatTranslate
             'subtitle'  => Yii::t('clientChat', 'Trying to reconnect', [], $language),
         ];
 
-        $data['waiting_for_response']   = Yii::t('clientChat', 'Waiting for response', [], $language);
-        $data['waiting_for_agent']      = Yii::t('clientChat', 'Waiting for an agent', [], $language);
-        $data['video_reply']            = Yii::t('clientChat', 'Video message', [], $language);
-        $data['audio_reply']            = Yii::t('clientChat', 'Audio message', [], $language);
-        $data['image_reply']            = Yii::t('clientChat', 'Image message', [], $language);
-        $data['new_message']            = Yii::t('clientChat', 'New message', [], $language);
-        $data['agent']                  = Yii::t('clientChat', 'Agent', [], $language);
-        $data['textarea_placeholder']   = Yii::t('clientChat', 'Type a message...', [], $language);
-        $data['transfer_department']   = Yii::t('clientChat', 'The chat was transferred to the department {{name}}', [], $language);
-        $data['videocall_started']   = Yii::t('clientChat', 'Video call started', [], $language);
-        $data['videocall_ended']   = Yii::t('clientChat', 'Video call ended', [], $language);
+        $data['waiting_for_response']       = Yii::t('clientChat', 'Waiting for response', [], $language);
+        $data['waiting_for_agent']          = Yii::t('clientChat', 'Waiting for an agent', [], $language);
 
-        $data['departmentTitle']   = Yii::t('clientChat', 'New chat', [], $language);
-        $data['departmentTitleTaken']   = Yii::t('clientChat', 'taken by {{agentName}}', [], $language);
-        $data['departmentSubtitle']   = Yii::t('clientChat', 'subtitle {{name}}', [], $language);
-        $data['departmentSubtitleTaken']   = Yii::t('clientChat', 'subtitle taken {{name}}', [], $language);
+        $data['generic_reply']              = Yii::t('clientChat', 'Message', [], $language);
+        $data['video_reply']                = Yii::t('clientChat', 'Video message', [], $language);
+        $data['audio_reply']                = Yii::t('clientChat', 'Audio message', [], $language);
+        $data['image_reply']                = Yii::t('clientChat', 'Image message', [], $language);
+        $data['attachment_reply']           = Yii::t('clientChat', 'Attachment message', [], $language);
+
+        $data['new_message']                = Yii::t('clientChat', 'New message', [], $language);
+        $data['new_video']                  = Yii::t('clientChat', 'New video', [], $language);
+        $data['new_audio']                  = Yii::t('clientChat', 'New audio', [], $language);
+        $data['new_image']                  = Yii::t('clientChat', 'New image', [], $language);
+        $data['new_attachment']             = Yii::t('clientChat', 'New attachment', [], $language);
+        $data['new_offer']                  = Yii::t('clientChat', 'New offer', [], $language);
+
+        $data['agent']                      = Yii::t('clientChat', 'Agent', [], $language);
+        $data['textarea_placeholder']       = Yii::t('clientChat', 'Type a message...', [], $language);
+        $data['textarea_rec_placeholder']   = Yii::t('clientChat', 'Recording...', [], $language);
+        $data['is_typing']                  = Yii::t('clientChat', '{{ agentName }} is typing', [], $language);
+        $data['transfer_department']        = Yii::t('clientChat', 'The chat was transferred to the department {{name}}', [], $language);
+        $data['transfer_agent']             = Yii::t('clientChat', 'The chat was transferred to the agent {{name}}', [], $language);
+        $data['all_offers']                 = Yii::t('clientChat', 'All offers', [], $language);
+        $data['trip_details']               = Yii::t('clientChat', 'Trip details', [], $language);
+        $data['conversation_ended']         = Yii::t('clientChat', 'Conversation has ended', [], $language);
+        $data['videocall_started']          = Yii::t('clientChat', 'Video call started', [], $language);
+        $data['videocall_ended']            = Yii::t('clientChat', 'Video call ended', [], $language);
+
+        $data['departmentTitle']            = Yii::t('clientChat', 'New chat', [], $language);
+        $data['departmentTitleTaken']       = Yii::t('clientChat', 'taken by {{agentName}}', [], $language);
+        $data['departmentSubtitle']         = Yii::t('clientChat', 'subtitle {{name}}', [], $language);
+        $data['departmentSubtitleTaken']    = Yii::t('clientChat', 'subtitle taken {{name}}', [], $language);
+
+        $data['offerBtn']           = Yii::t('clientChat', 'Offer', [], $language);
+        $data['view_offer_details'] = Yii::t('clientChat', 'View details', [], $language);
 
         $data['registration'] = [
             'title'                     => Yii::t('clientChat_registration', 'We are ready to help you', [], $language),
@@ -57,7 +76,7 @@ class ClientChatTranslate
             'active'                        => Yii::t('clientChat_conversations', 'Active', [], $language),
             'archived'                      => Yii::t('clientChat_conversations', 'Archived Chats', [], $language),
             'start_new'                     => Yii::t('clientChat_conversations', 'New Chat', [], $language),
-            'conversation_ended'            => Yii::t('clientChat_conversations', 'Conversation has ended', [], $language),
+            'delete'                        => Yii::t('clientChat_conversations', 'Delete', [], $language),
         ];
 
         $data['file_upload'] = [
