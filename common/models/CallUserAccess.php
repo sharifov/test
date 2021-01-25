@@ -24,6 +24,7 @@ use yii\db\ActiveRecord;
  * @property int $cua_status_id
  * @property string $cua_created_dt
  * @property string $cua_updated_dt
+ * @property string $cua_priority
  *
  * @property Call $cuaCall
  * @property Employee $cuaUser
@@ -64,6 +65,10 @@ class CallUserAccess extends \yii\db\ActiveRecord
             [['cua_call_id', 'cua_user_id'], 'unique', 'targetAttribute' => ['cua_call_id', 'cua_user_id']],
             [['cua_call_id'], 'exist', 'skipOnError' => true, 'targetClass' => Call::class, 'targetAttribute' => ['cua_call_id' => 'c_id']],
             [['cua_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['cua_user_id' => 'id']],
+
+            ['cua_priority', 'default', 'value' => 0],
+            ['cua_priority', 'integer', 'min' => 0, 'max' => 6500],
+            ['cua_priority', 'filter', 'filter' => 'intval', 'skipOnError' => true, 'skipOnEmpty' => true],
         ];
     }
 
@@ -78,6 +83,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
             'cua_status_id' => 'Status ID',
             'cua_created_dt' => 'Created Dt',
             'cua_updated_dt' => 'Updated Dt',
+            'cua_priority' => 'Priority',
         ];
     }
 
