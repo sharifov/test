@@ -170,8 +170,9 @@ $this->title = 'Realtime Call Map';
 </script>
 
 <div id="realtime-map-app" class="col-md-12">
-    <div class="row">
-        <div class="top_tiles col-md-12">
+
+
+    <div class="top_tiles row">
             <div class="animated flipInY col-md-2 col-sm-6 ">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-list"></i></div>
@@ -216,7 +217,8 @@ $this->title = 'Realtime Call Map';
                 </div>
             </div>
         </div>
-    </div>
+
+
     <div class="row">
         <div class="col-md-5" >
             <div class="card card-default">
