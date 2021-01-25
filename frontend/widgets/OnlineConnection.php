@@ -1,11 +1,5 @@
 <?php
 
-/**
- * @link http://www.yiiframework.com/
- * @copyright Copyright (c) 2008 Yii Software LLC
- * @license http://www.yiiframework.com/license/
- */
-
 namespace frontend\widgets;
 
 use common\models\Lead;
@@ -33,6 +27,9 @@ class OnlineConnection extends \yii\bootstrap\Widget
         parent::init();
     }
 
+    /**
+     * @return string
+     */
     public function run()
     {
         $leadId = null;
@@ -43,27 +40,34 @@ class OnlineConnection extends \yii\bootstrap\Widget
         $this->subscribeToLeadChannel($leadId, $subList);
         $this->subscribeToCaseChannel($caseId, $subList);
         $this->subscribeToClientChatChannel($userId, $subList);
-
-        $controllerId = Yii::$app->controller->id;
-        $actionId = Yii::$app->controller->action->id;
         $pageUrl = urlencode(\yii\helpers\Url::current());
-        $ipAddress = Yii::$app->request->remoteIP;
-        $webSocketHost = (Yii::$app->request->isSecureConnection ? 'wss' : 'ws') . '://' . Yii::$app->request->serverName . '/ws';// . ':8888';
+        $wsHost = (Yii::$app->request->isSecureConnection ? 'wss' : 'ws') .
+            '://' . Yii::$app->request->serverName . '/ws';
+
+        $urlParams = [
+            'user_id' => $userId,
+            'controller_id' => Yii::$app->controller->id,
+            'action_id' => Yii::$app->controller->action->id,
+            'page_url' => $pageUrl,
+            'lead_id' => $leadId,
+            'case_id' => $caseId,
+            'ip'    => Yii::$app->request->remoteIP,
+            'sub_list' => $subList,
+        ];
+
+        $wsUrl = $wsHost . '/?' . http_build_query($urlParams);
 
         return $this->render('online_connection', [
             'userId' =>  $userId,
-            'userIdentity' =>  UserCallIdentity::getClientId($userId),
-            'controllerId' => $controllerId,
-            'actionId' => $actionId,
-            'pageUrl' => $pageUrl,
-            'ipAddress' =>  $ipAddress,
-            'webSocketHost' => $webSocketHost,
-            'subList' => $subList,
-            'leadId' => $leadId,
-            'caseId' => $caseId
+            'wsUrl' =>  $wsUrl,
+            'userIdentity' =>  UserCallIdentity::getClientId($userId)
         ]);
     }
 
+    /**
+     * @param $leadId
+     * @param $subList
+     */
     private function subscribeToLeadChannel(&$leadId, &$subList): void
     {
         if (Yii::$app->controller->action->uniqueId === 'lead/view') {
@@ -72,7 +76,7 @@ class OnlineConnection extends \yii\bootstrap\Widget
                 $gid = Yii::$app->request->get('gid');
                 if ($gid) {
                     $lead = Lead::find()->select(['id'])->where(['gid' => $gid])->asArray()->one();
-                    if ($lead && $lead['id']) {
+                    if ($lead && !empty($lead['id'])) {
                         $leadId = $lead['id'];
                         $subList[] = 'lead-' . $leadId;
                         unset($lead);
@@ -82,13 +86,17 @@ class OnlineConnection extends \yii\bootstrap\Widget
         }
     }
 
+    /**
+     * @param $caseId
+     * @param $subList
+     */
     private function subscribeToCaseChannel(&$caseId, &$subList): void
     {
         if (Yii::$app->controller->action->uniqueId === 'cases/view') {
             $gid = Yii::$app->request->get('gid');
             if ($gid) {
                 $case = Cases::find()->select(['cs_id'])->where(['cs_gid' => $gid])->limit(1)->asArray()->one();
-                if ($case && $case['cs_id']) {
+                if ($case && !empty($case['cs_id'])) {
                     $caseId = $case['cs_id'];
                     $subList[] = 'case-' . $caseId;
                     unset($case);
@@ -97,13 +105,17 @@ class OnlineConnection extends \yii\bootstrap\Widget
         }
     }
 
+    /**
+     * @param $userId
+     * @param $subList
+     */
     private function subscribeToClientChatChannel($userId, &$subList): void
     {
         if (ArrayHelper::isIn(Yii::$app->controller->action->uniqueId, self::CHAT_SUBSCRIBE_LIST)) {
             $cchId = Yii::$app->request->get('chid');
             if ($cchId) {
                 $chat = ClientChat::find()->select(['cch_id'])->byId($cchId)->asArray()->one();
-                if ($chat && $chat['cch_id']) {
+                if ($chat && !empty($chat['cch_id'])) {
                     $subList[] = 'chat-' . $chat['cch_id'];
                     unset($chat);
                 }

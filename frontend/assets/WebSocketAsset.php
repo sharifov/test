@@ -1,17 +1,13 @@
 <?php
-/**
- * @link http://www.yiiframework.com/
- * @copyright Copyright (c) 2008 Yii Software LLC
- * @license http://www.yiiframework.com/license/
- */
 
 namespace frontend\assets;
 
+use Yii;
 use yii\web\AssetBundle;
 
 /**
  * @author Alexandr
- * @since 1.0
+ * @since 1.1
  */
 class WebSocketAsset extends AssetBundle
 {
@@ -21,10 +17,21 @@ class WebSocketAsset extends AssetBundle
     public $css = [
     ];
 
-    public $js = [
-        //'js/pnotify/pnotify.custom.min.js',
-        '/js/reconnecting-websocket.min.js'
-    ];
+
+//    public $js = [
+//        //'js/pnotify/pnotify.custom.min.js',
+//        '/js/reconnecting-websocket.min.js',
+//        '/js/websocket-commands.js'
+//    ];
+
+    public function init()
+    {
+        parent::init();
+
+        $version = Yii::$app->params['release']['version'] ?? '' ;
+        $this->js[] = ['/js/reconnecting-websocket.min.js'];
+        $this->js[] = ['/js/websocket-commands.js?v=' . $version];
+    }
 
 //    public $depends = [
 //        'yii\web\YiiAsset',
