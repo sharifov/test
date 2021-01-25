@@ -54,7 +54,6 @@ class ClientChatTranslate
         $data['departmentSubtitle']         = Yii::t('clientChat', 'subtitle {{name}}', [], $language);
         $data['departmentSubtitleTaken']    = Yii::t('clientChat', 'subtitle taken {{name}}', [], $language);
 
-        $data['offerBtn']           = Yii::t('clientChat', 'Offer', [], $language);
         $data['view_offer_details'] = Yii::t('clientChat', 'View details', [], $language);
 
         $data['registration'] = [
