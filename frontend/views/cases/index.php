@@ -123,10 +123,9 @@ $gridId = 'cases-grid-id';
                 'format' => 'client'
             ],
             [
-                'header' => 'Client Info',
+                'header' => 'Client',
                 'format' => 'raw',
                 'value' => static function (Cases $case) use ($user) {
-
                     if ($case->client) {
                         $clientName = $case->client->first_name . ' ' . $case->client->last_name;
                         if ($clientName === 'Client Name') {
@@ -141,7 +140,7 @@ $gridId = 'cases-grid-id';
                         $clientName = '-';
                     }
 
-                    $str = $clientName . '<br>';
+                    /*$str = $clientName . '<br>';
 
                     if ($user->isAgent() && $case->isOwner($user->id)) {
                         $str .= '- // - // - // -';
@@ -157,7 +156,9 @@ $gridId = 'cases-grid-id';
                         ['statistics' => $statistics->setCountAll()]
                     );
 
-                    return $str ?? '-';
+                    return $str ?? '-';*/
+
+                    return $clientName;
                 },
                 'options' => [
                     'style' => 'width:180px'
@@ -186,12 +187,50 @@ $gridId = 'cases-grid-id';
                 },
                 'filter' => CaseCategory::getList(array_keys(EmployeeDepartmentAccess::getDepartments()))
             ],
-            [
+            /*[
                 'class' => CasesStatusColumn::class,
+            ],*/
+            [
+                'attribute' => 'cs_status',
+                'value' => static function (Cases $model) {
+                    $value = CasesStatus::getName($model->cs_status);
+                    return '<span class="label ' . CasesStatus::getClass($model->cs_status) . '">' . $value . '</span>';
+                },
+                'format' => 'raw'
+            ],
+            [
+                'label' => 'Status Dt',
+                'value' => static function (Cases $model) {
+                    return '<i class="fa fa-calendar"></i> ' .  Yii::$app->formatter->asDatetime(strtotime($model->lastLogRecord->csl_start_dt)) ;
+                },
+                'format' => 'raw'
+            ],
+            [
+                'label' => 'Status Flow',
+                'value' => static function (Cases $model) {
+                    $str = '';
+                    if ($model->lastLogRecord) {
+                        $str .= '<span class="label label-default">' . Yii::$app->formatter->asDatetime(strtotime($model->lastLogRecord->csl_start_dt)) . '</span>';
+                        $str .= '<br>';
+                        $str .= $model->lastLogRecord->csl_start_dt ? Yii::$app->formatter->asRelativeTime(strtotime($model->lastLogRecord->csl_start_dt)) : '';
+                    } else {
+                        $str = ' - ';
+                    }
+                    return $str;
+                },
+                'format' => 'raw',
+                'options' => [
+                    'style' => 'width:100px'
+                ],
+                'contentOptions' => [
+                    'class' => 'text-center'
+                ],
+                'visible' => $searchModel->showFields && in_array('status_flow', $searchModel->showFields, true),
             ],
             [
                 'class' => CasesSourceTypeColumn::class,
                 'attribute' => 'cs_source_type_id',
+                'visible' => $searchModel->showFields && in_array('cs_source_type_id', $searchModel->showFields, true),
             ],
             [
                 'class' => \common\components\grid\cases\NeedActionColumn::class,
@@ -201,7 +240,8 @@ $gridId = 'cases-grid-id';
                 'attribute' => 'cs_subject',
                 'contentOptions' => [
                     'style' => 'word-break: break-all; white-space:normal'
-                ]
+                ],
+                'visible' => $searchModel->showFields && in_array('cs_subject', $searchModel->showFields, true),
             ],
             /*[
                 'attribute' => 'cs_user_id',
@@ -211,6 +251,23 @@ $gridId = 'cases-grid-id';
                 'format' => 'raw',
                 'filter' => $userFilter
             ],*/
+
+            [
+                'label' => 'Communication',
+                'value' => static function (Cases $case) {
+                    $statistics = new StatisticsHelper($case->cs_id, StatisticsHelper::TYPE_CASE);
+
+                    return Yii::$app->getView()->render(
+                        '/partial/_communication_statistic_list',
+                        ['statistics' => $statistics->setCountAll()]
+                    );
+                },
+                'format' => 'raw',
+                'contentOptions' => [
+                    'class' => 'text-center'
+                ],
+                'visible' => $searchModel->showFields && in_array('communication', $searchModel->showFields, true),
+            ],
 
             [
                 'class' => \common\components\grid\UserSelect2Column::class,
@@ -224,7 +281,8 @@ $gridId = 'cases-grid-id';
                 'value' => static function (Cases $model) {
                     return $model->lead ? $model->lead->uid : '-';
                 },
-                'filter' => false
+                'filter' => false,
+                'visible' => $searchModel->showFields && in_array('cs_lead_id', $searchModel->showFields, true),
             ],
             [
                 'attribute' => 'cs_order_uid',
@@ -265,7 +323,8 @@ $gridId = 'cases-grid-id';
                     }
                     return $out;
                 },
-                'format' => 'raw'
+                'format' => 'raw',
+                'visible' => $searchModel->showFields && in_array('sale_info', $searchModel->showFields, true),
             ],
             [
                 'class' => 'yii\grid\ActionColumn',
