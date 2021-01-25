@@ -20,6 +20,8 @@ class CallUserAccessSearch extends CallUserAccess
         return [
             [['cua_call_id', 'cua_user_id', 'cua_status_id'], 'integer'],
             [['cua_created_dt', 'cua_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
+
+            ['cua_priority', 'integer'],
         ];
     }
 
@@ -72,6 +74,7 @@ class CallUserAccessSearch extends CallUserAccess
             'cua_call_id' => $this->cua_call_id,
             'cua_user_id' => $this->cua_user_id,
             'cua_status_id' => $this->cua_status_id,
+            'cua_priority' => $this->cua_priority,
             //'cua_created_dt' => $this->cua_created_dt,
             //'cua_updated_dt' => $this->cua_updated_dt,
         ]);

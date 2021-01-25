@@ -47,6 +47,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'filter' => \common\models\CallUserAccess::getStatusTypeList()
             ],
+            'cua_priority',
             /*[
                 'attribute' => 'cua_created_dt',
                 'value' => static function (\common\models\CallUserAccess $model) {

@@ -46,6 +46,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw',
             ],
+            'cua_priority',
             [
                 'attribute' => 'cua_created_dt',
                 'value' => static function (\common\models\CallUserAccess $model) {

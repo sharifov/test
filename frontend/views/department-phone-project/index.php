@@ -107,6 +107,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'dpp_show_on_site',
             ],
 
+            'dpp_priority',
+
             [
                 'class' => \common\components\grid\UserSelect2Column::class,
                 'attribute' => 'dpp_updated_user_id',

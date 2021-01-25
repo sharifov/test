@@ -27,6 +27,8 @@ class DepartmentPhoneProjectSearch extends DepartmentPhoneProject
             ['dpp_phone_list_id', 'integer'],
 
             [['dpp_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
+
+            ['dpp_priority', 'integer'],
         ];
     }
 
@@ -83,6 +85,7 @@ class DepartmentPhoneProjectSearch extends DepartmentPhoneProject
             'dpp_phone_list_id' => $this->dpp_phone_list_id,
             'dpp_language_id' => $this->dpp_language_id,
             'dpp_allow_transfer' => $this->dpp_allow_transfer,
+            'dpp_priority' => $this->dpp_priority,
         ]);
 
         $query
