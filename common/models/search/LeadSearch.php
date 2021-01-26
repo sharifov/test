@@ -2078,22 +2078,20 @@ class LeadSearch extends Lead
         return $dataProvider;
     }
 
-    public function searchAlternative($params, Employee $user): ActiveDataProvider
+    public function searchAlternative($params, Employee $user, ?int $limit): ActiveDataProvider
     {
-        $query = $this->leadBadgesRepository->getProcessingQuery($user)->with('project');
+        $this->limit = $limit;
+        $query = $this->leadBadgesRepository->getFailedBookingsQuery($user);
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
-
         $leadTable = Lead::tableName();
+
+        $this->load($params);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort' => ['defaultOrder' => ['l_last_action_dt' => SORT_DESC],'attributes' => ['id','updated','created','status', 'l_last_action_dt']],
-            'pagination' => [
-                'pageSize' => 30,
-            ],
+            'sort' => ['defaultOrder' => ['created' => SORT_DESC]],
+            'pagination' => $this->limit > 0 ? false : ['pageSize' => 20],
         ]);
-
-        $this->load($params);
 
         if (!$this->validate()) {
             $query->where('0=1');
@@ -2105,38 +2103,23 @@ class LeadSearch extends Lead
                 ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
         }
 
-        if ($this->l_last_action_dt) {
-            $query->andFilterWhere(['>=', 'l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->l_last_action_dt))])
-                ->andFilterWhere(['<=', 'l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->l_last_action_dt) + 3600 * 24)]);
+        if (empty($params['is_test']) && !$user->checkIfUsersIpIsAllowed()) {
+            $query->andWhere([Lead::tableName() . '.l_is_test' => 0]);
         }
 
         $query->andFilterWhere([
             $leadTable . '.id' => $this->id,
-            $leadTable . '.project_id' => $this->project_id,
-            $leadTable . '.employee_id' => $this->employee_id,
-            $leadTable . '.status' => $this->status,
-            $leadTable . '.l_answered' => $this->l_answered,
-            $leadTable . '.l_init_price' => $this->l_init_price,
+            $leadTable . '.cabin' => $this->cabin,
+            $leadTable . '.request_ip' => $this->request_ip,
         ]);
 
-        if ($this->email_status > 0) {
-            if ($this->email_status == 2) {
-                $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) > 0'));
-            } else {
-                $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) = 0'));
-            }
+        if ($this->limit > 0) {
+            $query->limit($this->limit);
         }
 
-        if ($this->quote_status > 0) {
-            $subQuery = Quote::find()->select(['COUNT(*)'])->where('quotes.lead_id = leads.id')->andWhere(['status' => [Quote::STATUS_APPLIED, Quote::STATUS_SEND, Quote::STATUS_OPENED] ]);
-            if ($this->quote_status == 2) {
-                $query->andWhere(new Expression('(' . $subQuery->createCommand()->getRawSql() . ') > 0'));
-            } else {
-                $query->andWhere(new Expression('(' . $subQuery->createCommand()->getRawSql() . ') = 0'));
-            }
+        if ($user->isAdmin()) {
+            $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'project', 'leadFlightSegments']);
         }
-
-        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'leadChecklists', 'leadChecklists.lcType', 'employee']);
 
         $subQuery = Quote::find()->select(['DISTINCT(lead_id)'])->where(['type_id' => Quote::TYPE_ALTERNATIVE])->groupBy('lead_id');
         $query->andWhere(['IN', 'leads.id', $subQuery]);

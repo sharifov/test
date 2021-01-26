@@ -1610,27 +1610,39 @@ class LeadController extends FController
 
     public function actionAlternative(): string
     {
-        $searchModel = new LeadSearch();
+        $user = Auth::user();
 
-        $params = Yii::$app->request->queryParams;
-        $params2 = Yii::$app->request->post();
-        $params = array_merge($params, $params2);
-
-        /** @var Employee $user */
-        $user = Yii::$app->user->identity;
+        $checkShiftTime = true;
+        $isAccessNewLead = true;
+        $accessLeadByFrequency = [];
+        $limit = null;
 
         if ($user->isAgent()) {
-            $isAgent = true;
-        } else {
-            $isAgent = false;
+            $checkShiftTime = $user->checkShiftTime();
+            $userParams = $user->userParams;
+            if ($userParams) {
+                if ($userParams->up_inbox_show_limit_leads > 0) {
+                    $limit = $userParams->up_inbox_show_limit_leads;
+                }
+            } else {
+                throw new NotFoundHttpException('Not set user params for agent! Please ask supervisor to set shift time and other.');
+            }
+            $accessLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes([], [Lead::STATUS_BOOK_FAILED]);
+            if (!$accessLeadByFrequency['access']) {
+                $isAccessNewLead = $accessLeadByFrequency['access'];
+            }
         }
 
-        $dataProvider = $searchModel->searchAlternative($params, $user);
+        $searchModel = new LeadSearch();
+        $dataProvider = $searchModel->searchAlternative(Yii::$app->request->queryParams, $user, $limit);
 
         return $this->render('alternative', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'isAgent' => $isAgent,
+            'checkShiftTime' => $checkShiftTime,
+            'isAccessNewLead' => $isAccessNewLead,
+            'accessLeadByFrequency' => $accessLeadByFrequency,
+            'user' => $user,
         ]);
     }
 

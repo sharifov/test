@@ -177,7 +177,7 @@ class LeadBadgesRepository
 
     public function getAlternativeQuery(Employee $user): ActiveQuery
     {
-        $query = Lead::find()->andWhere([Lead::tableName() . '.status' => array_keys(Lead::getProcessingStatuses())]);
+        $query = Lead::find()->andWhere([Lead::tableName() . '.status' => Lead::STATUS_BOOK_FAILED])->andWhere(['<>', 'l_call_status_id', Lead::CALL_STATUS_QUEUE]);
 
         $subQuery = Quote::find()->select(['DISTINCT(lead_id)'])->where(['type_id' => Quote::TYPE_ALTERNATIVE])->groupBy('lead_id');
         $query->andWhere(['IN', 'leads.id', $subQuery]);
@@ -189,13 +189,7 @@ class LeadBadgesRepository
         $conditions = [];
 
         if ($user->isAgent() || $user->isExAgent()) {
-            $conditions = $this->isOwner($user->id);
-        }
-
-        if ($user->isSupervision() || $user->isExSuper()) {
-            $conditions = [
-                Lead::tableName() . '.employee_id' => $this->usersIdsInCommonGroups($user->id)
-            ];
+            $conditions = $this->freeLead();
         }
 
         $query->andWhere($this->createSubQuery($user->id, $conditions));
