@@ -1,3 +1,26 @@
+let userComponent = {
+    template: '<i :class="userIconClass() + \' \' + stateClass()"></i> {{ userName() }}',
+    props: {
+        item: Object,
+        index: Number
+    },
+    data() {
+        return {
+        }
+    },
+    methods: {
+        userName() {
+            return this.$root.getUserName(this.item.uo_user_id)
+        },
+        userIconClass() {
+            return this.$root.getUserIconClass(this.item.uo_user_id)
+        },
+        stateClass() {
+            return 'text-' + (this.item.uo_idle_state ? 'warning' : 'success')
+        }
+    }
+}
+
 let Timer = {
     template: '<span class="badge badge-warning">{{ timerIndicator }}</span>',
     //props:['from'],
@@ -192,9 +215,11 @@ const callItemComponent = {
 }
 
 
+
 var callMapApp = Vue.createApp({
     components: {
-        'callItemComponent': callItemComponent
+        'callItemComponent': callItemComponent,
+        'userComponent': userComponent
     },
     data() {
         return {
@@ -207,7 +232,8 @@ var callMapApp = Vue.createApp({
             callSourceList: [],
             callUserAccessStatusTypeList: [],
             callList: [],
-            onlineUserList: []
+            onlineUserList: [],
+            userStatusList: []
         }
     },
     created() {
@@ -303,6 +329,43 @@ var callMapApp = Vue.createApp({
             });
         },
 
+
+
+        userStatusFindIndex(userId) {
+            let index = -1
+            userId = parseInt(userId)
+            if (this.userStatusList) {
+                index = this.userStatusList.findIndex(x => parseInt(x.us_user_id) === userId)
+            }
+            return index
+        },
+
+        userStatusFind(userId) {
+            userId = parseInt(userId)
+            return this.userStatusList.find(x => parseInt(x.us_user_id) === userId);
+        },
+
+        deleteUserStatus(data) {
+            let index = this.userStatusFindIndex(data.us_user_id)
+            this.userStatusList.splice(index, 1);
+        },
+        addUserStatus(data) {
+            let index = this.userStatusFindIndex(data.us_user_id)
+            if (index > -1) {
+                return this.updateUserStatus(data);
+            }
+            this.userStatusList = [data, ...this.userStatusList];
+        },
+        updateUserStatus(data) {
+            this.userStatusList = this.userStatusList.map((x) => {
+                if (parseInt(x.us_user_id) === parseInt(data.us_user_id)) {
+                    return data;
+                }
+                return x;
+            });
+        },
+
+
         removeCall(index) {
             this.callList.splice(index, 1);
         },
@@ -315,7 +378,7 @@ var callMapApp = Vue.createApp({
         },
         updateCall(callData) {
             this.callList = this.callList.map((x) => {
-                if (x.c_id === callData.c_id) {
+                if (parseInt(x.c_id) === parseInt(callData.c_id)) {
                     return callData;
                 }
                 return x;
@@ -343,6 +406,7 @@ var callMapApp = Vue.createApp({
                     this.callSourceList = response.data.callSourceList;
                     this.callUserAccessStatusTypeList = response.data.callUserAccessStatusTypeList;
                     this.onlineUserList = response.data.onlineUserList;
+                    this.userStatusList = response.data.userStatusList;
                     this.userTimeZone = response.data.userTimeZone;
                 })
                 .catch(error => {
@@ -379,10 +443,6 @@ var callMapApp = Vue.createApp({
                 if (call) {
                     //let userAccess = this.userAccessFind(call.userAccessList, data.cua_user_id);
                     //console.log(data);
-                    //console.log(userAccess);
-                    //console.log(call.userAccessList);
-
-                    //if (userAccess) {
                     //console.info(call.userAccessList[0]);
                     let index = this.userAccessFindIndex(call.userAccessList, data.cua_user_id);
                     if (index > -1) {
@@ -406,8 +466,22 @@ var callMapApp = Vue.createApp({
                 }
             }
         },
-        getUserName: function (userId) {
+        getUserName(userId) {
             return userId > 0 ? this.userList[userId] : userId
+        },
+        getUserIconClass(userId) {
+            let iconClass = 'fa fa-user'
+            let item = this.userStatusFind(userId)
+            if (item) {
+                if (item.us_is_on_call) {
+                    iconClass = 'fa fa-phone'
+                } else if (item.us_call_phone_status) {
+                    iconClass = 'fa fa-microphone-slash'
+                } else if (item.us_has_call_access) {
+                    iconClass = 'fa fa-random'
+                }
+            }
+            return iconClass
         },
     }
 }).mount('#realtime-map-app');

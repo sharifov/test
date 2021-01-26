@@ -4,11 +4,11 @@ namespace sales\model\user\entity\userStatus;
 
 use common\models\Call;
 use common\models\Employee;
+use sales\helpers\app\AppHelper;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
-use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "user_status".
@@ -24,6 +24,8 @@ use yii\helpers\VarDumper;
  */
 class UserStatus extends ActiveRecord
 {
+    public const CHANNEL_NAME = 'userStatusChannel';
+
     /**
      * @return string
      */
@@ -40,6 +42,7 @@ class UserStatus extends ActiveRecord
         return [
             [['us_gl_call_count'], 'integer'],
             [['us_call_phone_status', 'us_is_on_call', 'us_has_call_access'], 'boolean'],
+            [['us_call_phone_status', 'us_is_on_call', 'us_has_call_access'], 'filter', 'filter' => 'boolval'],
             [['us_updated_dt'], 'safe'],
             [['us_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['us_user_id' => 'id']],
         ];
@@ -102,6 +105,56 @@ class UserStatus extends ActiveRecord
             $user->userStatus->us_is_on_call = false;
             if (!$user->userStatus->save()) {
                 Yii::error('Cant update user status', 'UserStatus:updateIsOnnCall');
+            }
+        }
+    }
+
+    /**
+     * @param bool $insert
+     * @param array $changedAttributes
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+        $this->sendFrontendData($insert ? 'insert' : 'update');
+    }
+
+    /**
+     * @return bool
+     */
+    public function beforeDelete(): bool
+    {
+        if (!parent::beforeDelete()) {
+            return false;
+        }
+        $this->sendFrontendData('delete');
+        return true;
+    }
+
+    /**
+     * @param string $action
+     * @return false|mixed
+     */
+    public function sendFrontendData(string $action = 'update')
+    {
+        $enabled = !empty(Yii::$app->params['centrifugo']['enabled']);
+        if ($enabled) {
+            try {
+                return Yii::$app->centrifugo->setSafety(false)
+                    ->publish(
+                        self::CHANNEL_NAME,
+                        [
+                            'object' => 'userStatus',
+                            'action' => $action,
+                            'id' => $this->us_user_id,
+                            'data' => [
+                                'userStatus' => $this->attributes,
+                            ]
+                        ]
+                    );
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableFormatter($throwable), 'UserStatus:sendFrontendData:Throwable');
+                return false;
             }
         }
     }

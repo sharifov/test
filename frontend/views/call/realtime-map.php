@@ -4,6 +4,7 @@
 /* @var $cfToken string */
 /* @var $cfChannelName string */
 /* @var $cfUserOnlineChannel string */
+/* @var $cfUserStatusChannel string */
 
 $this->title = 'Realtime Call Map';
 //\frontend\assets\VueAsset::register($this);
@@ -246,7 +247,7 @@ $this->title = 'Realtime Call Map';
                 <div class="card-header"> Online Users  ({{ onlineUserCounter }}), TimeZone: {{ userTimeZone }}</div>
                 <transition-group name="fade2" tag="div" class="card-body">
                     <div v-for="(item, index) in onlineUserList" class="list-item col-md-6 truncate" :key="item">
-                        <i :class="'fa fa-user text-' + (item.uo_idle_state ? 'warning' : 'success')"></i> {{ getUserName(item.uo_user_id) }}
+                        <user-component :item="item" :key="item.uo_user_id" :index="index"></user-component>
                     </div>
                 </transition-group>
             </div>
@@ -261,6 +262,7 @@ $this->title = 'Realtime Call Map';
 $js = <<<JS
 let cfChannelName = '$cfChannelName';
 let cfUserOnlineChannel = '$cfUserOnlineChannel';
+let cfUserStatusChannel = '$cfUserStatusChannel';
 let cfToken = '$cfToken';
 let cfConnectionUrl = '$cfConnectionUrl';
 
@@ -297,6 +299,19 @@ centrifuge.on('connect', function(ctx){
             } else {
                 //console.info(jsonData.data);
                 callMapApp.addUserOnline(jsonData.data.userOnline);
+            }
+        }
+        //console.log(jsonData.data.userOnline.uo_idle_state);
+    });
+    
+    var subUserStatus = centrifuge.subscribe(cfUserStatusChannel, function(message) {
+        let jsonData = message.data;
+        // console.log(jsonData.data);
+        if (jsonData.object === 'userStatus') {
+            if (jsonData.action === 'delete') {
+                callMapApp.deleteUserStatus(jsonData.data.userStatus);
+            } else {
+                callMapApp.addUserStatus(jsonData.data.userStatus);
             }
         }
         //console.log(jsonData.data.userOnline.uo_idle_state);
