@@ -2078,6 +2078,72 @@ class LeadSearch extends Lead
         return $dataProvider;
     }
 
+    public function searchAlternative($params, Employee $user): ActiveDataProvider
+    {
+        $query = $this->leadBadgesRepository->getProcessingQuery($user)->with('project');
+        $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
+
+        $leadTable = Lead::tableName();
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => ['defaultOrder' => ['l_last_action_dt' => SORT_DESC],'attributes' => ['id','updated','created','status', 'l_last_action_dt']],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            $query->where('0=1');
+            return $dataProvider;
+        }
+
+        if ($this->created) {
+            $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
+                ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
+        }
+
+        if ($this->l_last_action_dt) {
+            $query->andFilterWhere(['>=', 'l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->l_last_action_dt))])
+                ->andFilterWhere(['<=', 'l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->l_last_action_dt) + 3600 * 24)]);
+        }
+
+        $query->andFilterWhere([
+            $leadTable . '.id' => $this->id,
+            $leadTable . '.project_id' => $this->project_id,
+            $leadTable . '.employee_id' => $this->employee_id,
+            $leadTable . '.status' => $this->status,
+            $leadTable . '.l_answered' => $this->l_answered,
+            $leadTable . '.l_init_price' => $this->l_init_price,
+        ]);
+
+        if ($this->email_status > 0) {
+            if ($this->email_status == 2) {
+                $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) > 0'));
+            } else {
+                $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) = 0'));
+            }
+        }
+
+        if ($this->quote_status > 0) {
+            $subQuery = Quote::find()->select(['COUNT(*)'])->where('quotes.lead_id = leads.id')->andWhere(['status' => [Quote::STATUS_APPLIED, Quote::STATUS_SEND, Quote::STATUS_OPENED] ]);
+            if ($this->quote_status == 2) {
+                $query->andWhere(new Expression('(' . $subQuery->createCommand()->getRawSql() . ') > 0'));
+            } else {
+                $query->andWhere(new Expression('(' . $subQuery->createCommand()->getRawSql() . ') = 0'));
+            }
+        }
+
+        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'leadChecklists', 'leadChecklists.lcType', 'employee']);
+
+        $subQuery = Quote::find()->select(['DISTINCT(lead_id)'])->where(['type_id' => Quote::TYPE_ALTERNATIVE])->groupBy('lead_id');
+        $query->andWhere(['IN', 'leads.id', $subQuery]);
+
+        return $dataProvider;
+    }
+
     /**
      * @param $params
      * @param Employee $user

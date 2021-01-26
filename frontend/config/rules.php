@@ -115,6 +115,9 @@ return [
         'pattern' => '/',
         'route' => 'site/index',
     ],
-
+    [
+        'pattern' => 'queue/alternative',
+        'route' => 'lead/alternative',
+    ],
 
 ];

@@ -5,6 +5,7 @@ namespace sales\repositories\lead;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\ProfitSplit;
+use common\models\Quote;
 use common\models\TipsSplit;
 use common\models\UserGroup;
 use common\models\UserGroupAssign;
@@ -167,6 +168,39 @@ class LeadBadgesRepository
     public function getProcessingCount(Employee $user): int
     {
         return $this->getProcessingQuery($user)->count();
+    }
+
+    public function getAlternativeCount(Employee $user): int
+    {
+        return $this->getAlternativeQuery($user)->count();
+    }
+
+    public function getAlternativeQuery(Employee $user): ActiveQuery
+    {
+        $query = Lead::find()->andWhere([Lead::tableName() . '.status' => array_keys(Lead::getProcessingStatuses())]);
+
+        $subQuery = Quote::find()->select(['DISTINCT(lead_id)'])->where(['type_id' => Quote::TYPE_ALTERNATIVE])->groupBy('lead_id');
+        $query->andWhere(['IN', 'leads.id', $subQuery]);
+
+        if ($user->isAdmin()) {
+            return $query;
+        }
+
+        $conditions = [];
+
+        if ($user->isAgent() || $user->isExAgent()) {
+            $conditions = $this->isOwner($user->id);
+        }
+
+        if ($user->isSupervision() || $user->isExSuper()) {
+            $conditions = [
+                Lead::tableName() . '.employee_id' => $this->usersIdsInCommonGroups($user->id)
+            ];
+        }
+
+        $query->andWhere($this->createSubQuery($user->id, $conditions));
+
+        return $query;
     }
 
     /**

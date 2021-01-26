@@ -1608,6 +1608,32 @@ class LeadController extends FController
         ]);
     }
 
+    public function actionAlternative(): string
+    {
+        $searchModel = new LeadSearch();
+
+        $params = Yii::$app->request->queryParams;
+        $params2 = Yii::$app->request->post();
+        $params = array_merge($params, $params2);
+
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+        if ($user->isAgent()) {
+            $isAgent = true;
+        } else {
+            $isAgent = false;
+        }
+
+        $dataProvider = $searchModel->searchAlternative($params, $user);
+
+        return $this->render('alternative', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'isAgent' => $isAgent,
+        ]);
+    }
+
 
     /**
      * @return string

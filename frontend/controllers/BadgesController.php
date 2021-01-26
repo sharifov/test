@@ -135,6 +135,11 @@ class BadgesController extends FController
                         $result['failed-bookings'] = $count;
                     }
                     break;
+                case 'alternative':
+                    if ($count = $this->getAlternative()) {
+                        $result['alternative'] = $count;
+                    }
+                    break;
             }
         }
         return $result;
@@ -219,6 +224,16 @@ class BadgesController extends FController
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
         return $this->leadBadgesRepository->getProcessingCount($user);
+    }
+
+    private function getAlternative(): ?int
+    {
+        if (!Yii::$app->user->can('/lead/alternative')) {
+            return null;
+        }
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        return $this->leadBadgesRepository->getAlternativeCount($user);
     }
 
     /**
