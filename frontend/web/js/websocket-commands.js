@@ -62,10 +62,10 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
 
         socket.onmessage = function (e) {
             // onlineObj.find('i').removeClass('danger').removeClass('success').addClass('warning');
-            // console.info('socket.onmessage');
+            console.info('socket.onmessage');
             try {
                 var obj = JSON.parse(e.data); // $.parseJSON( e.data );
-                // console.log(obj);
+                console.log(obj);
             } catch (error) {
                 console.error('Invalid JSON data on socket.onmessage');
                 console.error(e.data);

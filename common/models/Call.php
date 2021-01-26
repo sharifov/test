@@ -1540,9 +1540,11 @@ class Call extends \yii\db\ActiveRecord
                 $callUserAccess->cua_call_id = $call->c_id;
                 $callUserAccess->cua_user_id = $user_id;
                 $callUserAccess->acceptPending();
+                $callUserAccess->cua_priority = $call->getPriority();
             } else {
                 $callUserAccess->acceptPending();
                 $callUserAccess->cua_created_dt = date("Y-m-d H:i:s");
+                $callUserAccess->cua_priority = $call->getPriority();
             }
 
             if (!$callUserAccess->save()) {
@@ -2309,5 +2311,17 @@ class Call extends \yii\db\ActiveRecord
                 return false;
             }
         }
+    }
+
+    public function serPriority(int $value): void
+    {
+        $data = $this->getData();
+        $data->priority = $value;
+        $this->setData($data);
+    }
+
+    public function getPriority(): int
+    {
+        return $this->getData()->priority;
     }
 }

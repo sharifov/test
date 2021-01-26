@@ -392,6 +392,7 @@ class TwilioController extends ApiBaseNoAuthController
                         $data->repeat->reset();
                         $data->queueLongTime->reset();
                         $call->setData($data);
+                        $call->serPriority(0);
                         if (!$call->save()) {
                             Yii::error(VarDumper::dumpAsString($call->errors), 'API:Twilio:RedirectCall:Call:update:1');
                         }
@@ -413,6 +414,7 @@ class TwilioController extends ApiBaseNoAuthController
                     $call->c_created_user_id = null;
                     $depPhone = DepartmentPhoneProject::findOne($id);
                     if ($depPhone) {
+                        $call->serPriority($depPhone->dpp_priority);
                         if ($call->c_project_id !== $depPhone->dpp_project_id) {
                             $call->c_project_id = $depPhone->dpp_project_id;
                         }
