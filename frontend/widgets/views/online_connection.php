@@ -16,6 +16,7 @@ use yii\helpers\Url;
 </li>
 
 <?php
+$ccNotificationUpdateUrl = '';
 $js = <<<JS
    
     window.socket = null;
@@ -24,7 +25,8 @@ $js = <<<JS
     
     let userId = '$userId';
     let wsUrl = '$wsUrl';
+    let ccNotificationUpdateUrl = '$ccNotificationUpdateUrl';
 
-    wsInitConnect(wsUrl, 10000, userId, $('#online-connection-indicator'));
+    wsInitConnect(wsUrl, 10000, userId, $('#online-connection-indicator'), ccNotificationUpdateUrl);
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY, 'ws-connection-js');

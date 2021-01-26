@@ -41,7 +41,7 @@ window.sendCommandUpdatePhoneWidgetCurrentCalls = function (finishedCallSid, use
     socketSend('Call', 'GetCurrentQueueCalls', {'userId': userId, 'finishedCallSid': finishedCallSid});
 };
 
-function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj)
+function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificationUpdateUrl)
 {
 
 
@@ -294,7 +294,7 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj)
                             }
                         }
                         if ($('#notify-pjax-cc').length > 0) {
-                            pjaxReload({container: '#notify-pjax-cc', url: '{$ccNotificationUpdateUrl}'});
+                            pjaxReload({container: '#notify-pjax-cc', url: ccNotificationUpdateUrl});
                         }
 
                         if (obj.data.cchId && obj.data.moment) {
