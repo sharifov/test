@@ -240,6 +240,21 @@ use yii\web\JsExpression;
                     </div>
                 <?php endif; ?>
 
+                <?php if ($filter->permissions->canClientEmail()) : ?>
+                    <div class="col-md-12">
+                        <?php echo Html::label('Client Email:', null, ['class' => 'control-label']); ?>
+                        <?php echo Html::textInput(
+                            Html::getInputName($filter, 'clientEmail'),
+                            $filter->clientEmail,
+                            [
+                                'id' => Html::getInputId($filter, 'clientEmail'),
+                                'class' => 'form-control',
+                                'autocomplete' => 'off',
+                                'onchange' => new JsExpression('window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");'),
+                            ]
+                        ) ?>
+                    </div>
+                <?php endif; ?>
             </div>
 
         <?php endif; ?>

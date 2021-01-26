@@ -20,6 +20,7 @@ use sales\auth\Auth;
  * @property $group_free_to_take
  * @property $group_team_chats
  * @property $client_name
+ * @property $client_email
  */
 class Permissions
 {
@@ -36,6 +37,7 @@ class Permissions
     private $group_free_to_take;
     private $group_team_chats;
     private $client_name;
+    private $client_email;
 
     public function canChannel(): bool
     {
@@ -162,6 +164,15 @@ class Permissions
         }
         $this->client_name = Auth::can('client-chat/dashboard/filter/client_name');
         return $this->client_name;
+    }
+
+    public function canClientEmail(): bool
+    {
+        if ($this->client_email !== null) {
+            return $this->client_email;
+        }
+        $this->client_email = Auth::can('client-chat/dashboard/filter/client_email');
+        return $this->client_email;
     }
 
     public function canAdditionalFilter(): bool
