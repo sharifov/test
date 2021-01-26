@@ -36,6 +36,7 @@ use yii\bootstrap4\Modal;
  *
  * @var $fromPhoneNumbers array
  * @var bool $smsEnabled
+ * @var array $unsubscribedEmails
  */
 
 $this->title = 'Case ' . $model->cs_id;
@@ -60,6 +61,8 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
 } else {
     $unsubscribe = false;
 }
+
+$unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_email');
 ?>
 
 <div class="cases-view">
@@ -114,7 +117,8 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
             <?= $this->render('_client_info', [
                 'caseModel'      => $model,
                 'isAdmin'       => $isAdmin,
-                'unsubscribe' => $unsubscribe
+                'unsubscribe' => $unsubscribe,
+                'unsubscribedEmails' => $unsubscribedEmails,
             ])
 ?>
             <?php \yii\widgets\Pjax::end(); ?>
@@ -149,7 +153,8 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
                         'isAdmin'       => $isAdmin,
                         'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_case'],
                         'fromPhoneNumbers' => $fromPhoneNumbers,
-                        'smsEnabled' => $smsEnabled
+                        'smsEnabled' => $smsEnabled,
+                        'unsubscribedEmails' => $unsubscribedEmails,
                     ]);
                     ?>
             <?php else : ?>

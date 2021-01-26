@@ -12,7 +12,7 @@
  * @var $lead Lead
  * @var $fromPhoneNumbers array
  * @var bool $smsEnabled
- *
+ * @var $unsubscribedEmails array
  */
 
 use common\models\Call;
@@ -38,9 +38,7 @@ $c_type_id = $comForm->c_type_id;
 $pjaxContainerId = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled ? 'pjax-lead-communication-log' : 'pjax-lead-communication';
 $pjaxContainerIdForm = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled ? 'pjax-lead-communication-log-form' : 'pjax-lead-communication-form';
 $listItemView = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled ? '_list_item_log' : '_list_item';
-
-$unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscribes, 'eu_email'));
-
+$unsubscribedEmails = @json_encode($unsubscribedEmails);
 ?>
 
     <div class="x_panel">
@@ -592,10 +590,12 @@ JS;
 var emails = '$unsubscribedEmails';
 $('#email option').each(function() {             
     if (emails.includes($(this).attr('value'))){                
-        $(this).attr('disabled', 'disabled');
+        //$(this).attr('disabled', 'disabled');
+        $(this).html($(this).attr('value') + ' (unsubscribed)')
     }
     if ($(this).attr('value') == ""){
-        $(this).removeAttr('disabled')
+        $(this).html('---')
+        //$(this).removeAttr('disabled')
     }
 });    
             

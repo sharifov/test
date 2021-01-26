@@ -39,10 +39,10 @@ class ClientEmail extends \yii\db\ActiveRecord
     ];
 
     public const EMAIL_TYPE_ICONS = [
-        self::EMAIL_VALID => '<i class="fa fa-envelope success"></i> ',
-        self::EMAIL_FAVORITE => '<i class="fa fa-envelope warning"></i> ',
-        self::EMAIL_INVALID => '<i class="fa fa-envelope danger"></i> ',
-        self::EMAIL_NOT_SET => '<i class="fa fa-envelope"></i> '
+        self::EMAIL_VALID => "<i title=" . self::EMAIL_TYPE[self::EMAIL_VALID] . " class='fa fa-envelope success'></i> ",
+        self::EMAIL_FAVORITE => "<i title=" . self::EMAIL_TYPE[self::EMAIL_FAVORITE] . " class='fa fa-envelope warning'></i> ",
+        self::EMAIL_INVALID => "<i title=" . self::EMAIL_TYPE[self::EMAIL_INVALID] . " class='fa fa-envelope danger'></i> ",
+        self::EMAIL_NOT_SET => "<i title=" . self::EMAIL_TYPE[self::EMAIL_NOT_SET] . " class='fa fa-envelope'></i> "
     ];
 
     public const EMAIL_TYPE_LABELS = [

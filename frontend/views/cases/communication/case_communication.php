@@ -11,6 +11,7 @@
  * @var $isCommunicationLogEnabled bool
  * @var $fromPhoneNumbers array
  * @var bool $smsEnabled
+ * @var array $unsubscribedEmails
  */
 
 use common\models\Call;
@@ -37,6 +38,7 @@ $c_type_id = $comForm->c_type_id;
 $pjaxContainerId = $isCommunicationLogEnabled ? 'pjax-case-communication-log' : 'pjax-case-communication';
 $pjaxContainerIdForm = $isCommunicationLogEnabled ? 'pjax-case-communication-log-form' : 'pjax-case-communication-form';
 $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communication/_list_item';
+$unsubscribedEmails =  @json_encode($unsubscribedEmails);
 
 ?>
 
@@ -638,6 +640,16 @@ JS;
     }
 
     initializeMessageType($c_type_id);
+
+let emails = '$unsubscribedEmails';
+$('#email option').each(function() {             
+    if (emails.includes($(this).attr('value'))){ 
+        $(this).html($(this).attr('value') + ' (unsubscribed)')
+    }
+    if ($(this).attr('value') == ""){
+        $(this).html('---')       
+    }
+});  
 
 JS;
 

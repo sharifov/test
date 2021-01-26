@@ -69,6 +69,8 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
 } else {
     $unsubscribe = false;
 }
+
+$unsubscribedEmails = array_column($lead->project->emailUnsubscribes, 'eu_email');
 ?>
 
 <?= $this->render('partial/_view_header', [
@@ -149,7 +151,8 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
                     'lead' => $lead,
                     'leadForm' => $leadForm,
                     'is_manager' => $is_manager,
-                    'unsubscribe' => $unsubscribe
+                    'unsubscribe' => $unsubscribe,
+                    'unsubscribedEmails' => $unsubscribedEmails,
                 ]) ?>
             <?php endif; ?>
 
@@ -210,6 +213,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
                     'lead' => $lead,
                     'fromPhoneNumbers' => $fromPhoneNumbers,
                     'unsubscribe' => $unsubscribe,
+                    'unsubscribedEmails' => $unsubscribedEmails,
                     'smsEnabled' => $smsEnabled,
                 ]); ?>
                 <?php /*else: */ ?><!--
