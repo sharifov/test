@@ -16,7 +16,9 @@ use yii\helpers\Url;
 </li>
 
 <?php
-$ccNotificationUpdateUrl = '';
+$ccNotificationUpdateUrl = Url::to(['/client-chat/refresh-notification']);
+$discardUnreadMessageUrl = Url::to(['/client-chat/discard-unread-messages']);
+
 $js = <<<JS
    
     window.socket = null;
@@ -26,7 +28,8 @@ $js = <<<JS
     let userId = '$userId';
     let wsUrl = '$wsUrl';
     let ccNotificationUpdateUrl = '$ccNotificationUpdateUrl';
+    let discardUnreadMessageUrl = '$discardUnreadMessageUrl';
 
-    wsInitConnect(wsUrl, 10000, userId, $('#online-connection-indicator'), ccNotificationUpdateUrl);
+    wsInitConnect(wsUrl, 10000, userId, $('#online-connection-indicator'), ccNotificationUpdateUrl, discardUnreadMessageUrl);
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY, 'ws-connection-js');

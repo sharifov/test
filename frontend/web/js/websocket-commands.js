@@ -41,7 +41,7 @@ window.sendCommandUpdatePhoneWidgetCurrentCalls = function (finishedCallSid, use
     socketSend('Call', 'GetCurrentQueueCalls', {'userId': userId, 'finishedCallSid': finishedCallSid});
 };
 
-function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificationUpdateUrl)
+function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificationUpdateUrl, discardUnreadMessageUrl)
 {
 
 
@@ -248,7 +248,7 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                         let activeChatId = localStorage.getItem('activeChatId');
 
                         if (document.visibilityState == "visible" && window.name === 'chat' && activeChatId == obj.data.cchId && obj.data.cchUnreadMessages) {
-                            $.post('{$discardUnreadMessageUrl}', {cchId: activeChatId});
+                            $.post(discardUnreadMessageUrl, {cchId: activeChatId});
                             return false;
                         }
 
