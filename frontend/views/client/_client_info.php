@@ -10,7 +10,7 @@ use yii\widgets\DetailView;
 
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
-
+$unsubscribedEmails = array_column($model->project->emailUnsubscribes, 'eu_email');
 ?>
 <div class="row">
     <div class="col-md-6">
@@ -50,10 +50,11 @@ $user = Yii::$app->user->identity;
                 ],
                 [
                     'label' => 'Emails',
-                    'value' => static function (Client $model) {
+                    'value' => static function (Client $model) use ($unsubscribedEmails) {
                         $data = [];
                         foreach ($model->clientEmails as $k => $email) {
-                            $data[] = '<i class="fa fa-envelope"></i> <code>' . Html::encode($email->email) . '</code> ' . $email::getEmailTypeLabel($email->type);
+                            $unsubscribedIcon = in_array($email->email, $unsubscribedEmails) ? ' <i title="Unsubscribed" class="fa fa-bell-slash"></i>' : '';
+                            $data[] = '<i class="fa fa-envelope"></i> <code>' . Html::encode($email->email) . '</code> ' . $email::getEmailTypeLabel($email->type) . $unsubscribedIcon;
                         }
                         return implode('<br>', $data);
                     },
