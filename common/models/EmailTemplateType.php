@@ -24,6 +24,7 @@ use yii\helpers\VarDumper;
  * @property string $etp_created_dt
  * @property string $etp_updated_dt
  * @property int $etp_dep_id
+ * @property int $etp_ignore_unsubscribe
  *
  * @property Email[] $emails
  * @property Employee $etpCreatedUser
@@ -47,7 +48,7 @@ class EmailTemplateType extends \yii\db\ActiveRecord
     {
         return [
             [['etp_key', 'etp_name', 'etp_origin_name'], 'required'],
-            [['etp_created_user_id', 'etp_updated_user_id', 'etp_dep_id'], 'integer'],
+            [['etp_created_user_id', 'etp_updated_user_id', 'etp_dep_id', 'etp_ignore_unsubscribe'], 'integer'],
             [['etp_created_dt', 'etp_updated_dt'], 'safe'],
             [['etp_key'], 'string', 'max' => 50],
             [['etp_name', 'etp_origin_name'], 'string', 'max' => 100],
@@ -75,6 +76,7 @@ class EmailTemplateType extends \yii\db\ActiveRecord
             'etp_created_dt' => 'Created Dt',
             'etp_updated_dt' => 'Updated Dt',
             'etp_dep_id' => 'Department',
+            'etp_ignore_unsubscribe' => 'Ignore Unsubscribe',
         ];
     }
 
@@ -233,5 +235,24 @@ class EmailTemplateType extends \yii\db\ActiveRecord
 
         $data = $query->asArray()->all();
         return ArrayHelper::map($data, 'etp_key', 'etp_name');
+    }
+
+    /**
+     * @param bool $withHidden
+     * @param int|null $dep_id
+     * @return array
+     */
+    public static function getEmailTemplateTypesList(bool $withHidden, ?int $dep_id): array
+    {
+        $query = self::find()->select(['etp_key', 'etp_name', 'etp_ignore_unsubscribe'])->orderBy(['etp_name' => SORT_ASC]);
+        if (!$withHidden) {
+            $query->andWhere(['etp_hidden' => false]);
+        }
+
+        if ($dep_id !== null) {
+            $query->andWhere(['etp_dep_id' => $dep_id]);
+        }
+
+        return $query->asArray()->all();
     }
 }

@@ -39,7 +39,7 @@ $pjaxContainerId = $isCommunicationLogEnabled ? 'pjax-case-communication-log' : 
 $pjaxContainerIdForm = $isCommunicationLogEnabled ? 'pjax-case-communication-log-form' : 'pjax-case-communication-form';
 $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communication/_list_item';
 $unsubscribedEmails =  @json_encode($unsubscribedEmails);
-
+$emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesList(false, $model->cs_dep_id);
 ?>
 
 <div class="x_panel">
@@ -411,9 +411,13 @@ $unsubscribedEmails =  @json_encode($unsubscribedEmails);
                                 <?= $form->field($comForm, 'c_sms_tpl_key')->dropDownList(\common\models\SmsTemplateType::getKeyList(false, $model->cs_dep_id), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_key']) ?>
                             </div>
 
+                            <div class="col-sm-3 form-group message-field-email" id="email-address" style="display: none;">
+                                <?= $form->field($comForm, 'c_email_to')->dropDownList($clientEmails, ['prompt' => '---', 'class' => 'form-control', 'id' => 'email']) ?>
+                            </div>
+
                             <div class="col-sm-3 form-group message-field-email" id="email-template-group" style="display: none;">
                                 <?php //= $form->field($comForm, 'c_email_tpl_id')->dropDownList(\common\models\EmailTemplateType::getList(false, \common\models\Department::DEPARTMENT_SALES), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_id'])?>
-                                <?= $form->field($comForm, 'c_email_tpl_key')->dropDownList(\common\models\EmailTemplateType::getKeyList(false, $model->cs_dep_id), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_key']) ?>
+                                <?= $form->field($comForm, 'c_email_tpl_key')->dropDownList([], ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_key']) ?>
                             </div>
 
                             <div class="col-sm-3 form-group message-field-sms message-field-email" id="language-group" style="display: block;">
@@ -436,10 +440,6 @@ $unsubscribedEmails =  @json_encode($unsubscribedEmails);
                                             ],
                                         ]
                                     ) ?>
-                            </div>
-
-                            <div class="col-sm-3 form-group message-field-email" id="email-address" style="display: none;">
-                                <?= $form->field($comForm, 'c_email_to')->dropDownList($clientEmails, ['prompt' => '---', 'class' => 'form-control', 'id' => 'email']) ?>
                             </div>
 
                             <?php if ($model->isDepartmentSupport()) : ?>
@@ -641,7 +641,7 @@ JS;
 
     initializeMessageType($c_type_id);
 
-let emails = '$unsubscribedEmails';
+var emails = '$unsubscribedEmails';
 $('#email option').each(function() {             
     if (emails.includes($(this).attr('value'))){ 
         $(this).html($(this).attr('value') + ' (unsubscribed)')
@@ -698,6 +698,7 @@ $tpl_email_blank_key = \frontend\models\CommunicationForm::TPL_TYPE_EMAIL_BLANK_
 $tpl_email_support_blank_page_key = \frontend\models\CommunicationForm::TPL_TYPE_EMAIL_SUPPORT_BLANK_PAGE_KEY;
 $tpl_email_exchange_blank_page_key = \frontend\models\CommunicationForm::TPL_TYPE_EMAIL_EXCHANGE_BLANK_PAGE_KEY;
 $tpl_sms_blank_key = \frontend\models\CommunicationForm::TPL_TYPE_SMS_BLANK_KEY;
+$emailTemplateTypes = @json_encode($emailTemplateTypes);
 
 $js = <<<JS
 
@@ -707,6 +708,7 @@ $js = <<<JS
     const tpl_sms_blank_key = '$tpl_sms_blank_key';
     let projectId = '{$model->project->id}';
     let project = '{$model->project->name}';
+    let emailTemplateTypes = '{$emailTemplateTypes}';
 
     $('body').on("change", '#c_type_id', function () {
         initializeMessageType($(this).val());        
@@ -752,7 +754,24 @@ $js = <<<JS
         //}
     });
 
-
+    $('body').on("change", '#email', function () {
+        let etpOptions = '<option>---</option>';      
+        
+        if (emails.includes(this.value)){ 
+            $.each(JSON.parse(emailTemplateTypes), function(key, item) {                 
+                if (item.etp_ignore_unsubscribe == 1) {                    
+                   etpOptions += '<option value="'+ item.etp_key+'">' + item.etp_name + '</option>';
+                }
+            }); 
+            document.getElementById("c_email_tpl_key").innerHTML = etpOptions;
+        } else {
+             $.each(JSON.parse(emailTemplateTypes), function(key, item) {
+                   etpOptions += '<option value="'+ item.etp_key+'">' + item.etp_name + '</option>';              
+            }); 
+            document.getElementById("c_email_tpl_key").innerHTML = etpOptions;
+        }
+    });
+    
     $('body').on('click', '.chat__details', function () {
         
         let id = $(this).data('id');        
