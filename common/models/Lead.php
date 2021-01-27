@@ -1494,7 +1494,14 @@ class Lead extends ActiveRecord implements Objectable
 
     public function isAlternative(): bool
     {
-        return $this->status === self::STATUS_ALTERNATIVE;
+        //return $this->status === self::STATUS_ALTERNATIVE; /* TODO::  */
+
+        return Quote::find()
+            ->where([
+                'type_id' => Quote::TYPE_ALTERNATIVE,
+                'lead_id' => $this->id,
+            ])
+            ->exists();
     }
 
 
