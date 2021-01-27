@@ -2081,7 +2081,7 @@ class LeadSearch extends Lead
     public function searchAlternative($params, Employee $user, ?int $limit): ActiveDataProvider
     {
         $this->limit = $limit;
-        $query = $this->leadBadgesRepository->getFailedBookingsQuery($user);
+        $query = $this->leadBadgesRepository->getAlternativeQuery($user);
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
         $leadTable = Lead::tableName();
 
@@ -2120,9 +2120,6 @@ class LeadSearch extends Lead
         if ($user->isAdmin()) {
             $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'project', 'leadFlightSegments']);
         }
-
-        $subQuery = Quote::find()->select(['DISTINCT(lead_id)'])->where(['type_id' => Quote::TYPE_ALTERNATIVE])->groupBy('lead_id');
-        $query->andWhere(['IN', 'leads.id', $subQuery]);
 
         return $dataProvider;
     }
