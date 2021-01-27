@@ -203,30 +203,10 @@ $gridId = 'cases-grid-id';
                 'value' => static function (Cases $model) {
                     return '<i class="fa fa-calendar"></i> ' .  Yii::$app->formatter->asDatetime(strtotime($model->lastLogRecord->csl_start_dt)) ;
                 },
-                'format' => 'raw'
-            ],
-            [
-                'label' => 'Status Flow',
-                'value' => static function (Cases $model) {
-                    $str = '';
-                    if ($model->lastLogRecord) {
-                        $str .= '<span class="label label-default">' . Yii::$app->formatter->asDatetime(strtotime($model->lastLogRecord->csl_start_dt)) . '</span>';
-                        $str .= '<br>';
-                        $str .= $model->lastLogRecord->csl_start_dt ? Yii::$app->formatter->asRelativeTime(strtotime($model->lastLogRecord->csl_start_dt)) : '';
-                    } else {
-                        $str = ' - ';
-                    }
-                    return $str;
-                },
                 'format' => 'raw',
-                'options' => [
-                    'style' => 'width:100px'
-                ],
-                'contentOptions' => [
-                    'class' => 'text-center'
-                ],
-                'visible' => $searchModel->showFields && in_array('status_flow', $searchModel->showFields, true),
+                'visible' => $searchModel->showFields && in_array('status_dt', $searchModel->showFields, true),
             ],
+
             [
                 'class' => CasesSourceTypeColumn::class,
                 'attribute' => 'cs_source_type_id',

@@ -1022,7 +1022,7 @@ class CasesSearch extends Cases
             'cs_subject' => 'Subject',
             'cs_lead_id' => 'Lead ID',
             'communication' => 'Communication',
-            'status_flow' => 'Status Flow'
+            'status_dt' => 'Status Dt'
         ];
     }
 }
