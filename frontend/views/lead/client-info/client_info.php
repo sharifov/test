@@ -145,8 +145,7 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                                 echo $this->render('_client_manage_email', [
                                     'clientEmails' => $emails,
                                     'lead' => $lead,
-                                    'manageClientInfoAccess' => $manageClientInfoAccess,
-                                    'unsubscribedEmails' => $unsubscribedEmails,
+                                    'manageClientInfoAccess' => $manageClientInfoAccess
                                 ]);
                             }
                             ?>
