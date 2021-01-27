@@ -8,6 +8,16 @@ use common\models\DepartmentPhoneProject;
 use common\models\Lead;
 use common\models\UserProjectParams;
 use frontend\widgets\notification\NotificationMessage;
+use modules\fileStorage\src\entity\fileCase\FileCase;
+use modules\fileStorage\src\entity\fileCase\FileCaseRepository;
+use modules\fileStorage\src\entity\fileClient\FileClient;
+use modules\fileStorage\src\entity\fileClient\FileClientRepository;
+use modules\fileStorage\src\entity\fileLead\FileLead;
+use modules\fileStorage\src\entity\fileLead\FileLeadRepository;
+use modules\fileStorage\src\entity\fileStorage\FileStorage;
+use modules\fileStorage\src\entity\fileStorage\FileStorageRepository;
+use modules\fileStorage\src\FileSystem;
+use modules\fileStorage\src\services\CreateByApiDto;
 use sales\entities\cases\Cases;
 use sales\forms\lead\EmailCreateForm;
 use sales\helpers\app\AppHelper;
@@ -99,6 +109,11 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 
             /** @var CommunicationService $communication */
             $communication = Yii::$app->communication;
+            $fileSystem = Yii::createObject(FileSystem::class);
+            $fileStorageRepository = Yii::createObject(FileStorageRepository::class);
+            $fileClientRepository = Yii::createObject(FileClientRepository::class);
+            $fileCaseRepository = Yii::createObject(FileCaseRepository::class);
+            $fileLeadRepository = Yii::createObject(FileLeadRepository::class);
 
             $leadArray = [];
             $caseArray = [];
@@ -254,6 +269,32 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                             if ($userID) {
                                 $userLead = ['user' => $userID, 'lead_short_link' => Purifier::createLeadShortLink($lead)];
                                 array_push($notifyByLeads, $userLead);
+                            }
+                        }
+
+                        if ($attachPaths = ArrayHelper::getValue($mail, 'attach_paths')) {
+                            foreach (explode(',', $attachPaths) as $path) {
+                                if (!$fileSystem->fileExists($path)) {
+                                    \Yii::warning('File not exist : ' . $path, 'ReceiveEmailsJob:Attach:fileExists');
+                                    continue;
+                                }
+
+                                $createByApiDto = new CreateByApiDto($path, $fileSystem);
+                                $fileStorage = FileStorage::createByApi($createByApiDto);
+                                $fileStorageRepository->save($fileStorage);
+
+                                if ($email->e_client_id && $fileStorage->fs_id) {
+                                    $fileClient = FileClient::create($fileStorage->fs_id, $email->e_client_id);
+                                    $fileClientRepository->save($fileClient);
+                                }
+                                if ($email->e_case_id && $fileStorage->fs_id) {
+                                    $fileCase = FileCase::create($fileStorage->fs_id, $email->e_case_id);
+                                    $fileCaseRepository->save($fileCase);
+                                }
+                                if ($email->e_lead_id && $fileStorage->fs_id) {
+                                    $fileLead = FileLead::create($fileStorage->fs_id, $email->e_lead_id);
+                                    $fileLeadRepository->save($fileLead);
+                                }
                             }
                         }
 

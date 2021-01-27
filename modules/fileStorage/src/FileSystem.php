@@ -61,4 +61,54 @@ class FileSystem
     {
         $this->filesystemOperator->move($oldLocation, $newLocation);
     }
+
+    /**
+     * @param string $location
+     * @return string
+     * @throws \League\Flysystem\FilesystemException
+     */
+    public function read(string $location): string
+    {
+        return $this->filesystemOperator->read($location);
+    }
+
+    /**
+     * @param string $location
+     * @return bool
+     * @throws \League\Flysystem\FilesystemException
+     */
+    public function fileExists(string $location): bool
+    {
+        return $this->filesystemOperator->fileExists($location);
+    }
+
+    /**
+     * @param string $location
+     * @return int
+     * @throws \League\Flysystem\FilesystemException
+     */
+    public function fileSize(string $location): int
+    {
+        return $this->filesystemOperator->fileSize($location);
+    }
+
+    /**
+     * @param string $location
+     * @return string
+     * @throws \League\Flysystem\FilesystemException
+     */
+    public function mimeType(string $location): string
+    {
+        return $this->filesystemOperator->mimeType($location);
+    }
+
+    /**
+     * @param string $location
+     * @return string
+     * @throws \League\Flysystem\FilesystemException
+     */
+    public function visibility(string $location): string
+    {
+        return $this->filesystemOperator->visibility($location);
+    }
 }

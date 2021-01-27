@@ -14,6 +14,7 @@ use modules\fileStorage\src\entity\fileStorage\events\FileRenamedEvent;
 use modules\fileStorage\src\entity\fileStorage\events\FileUploadedByCaseEvent;
 use modules\fileStorage\src\entity\fileStorage\events\FileUploadedByLeadEvent;
 use modules\fileStorage\src\entity\fileUser\FileUser;
+use modules\fileStorage\src\services\CreateByApiDto;
 use sales\entities\EventTrait;
 use Yii;
 
@@ -218,5 +219,21 @@ class FileStorage extends \yii\db\ActiveRecord
     public static function getDb(): \yii\db\Connection
     {
         return Yii::$app->get('db_postgres');
+    }
+
+    public static function createByApi(CreateByApiDto $dto): self
+    {
+        $file = new static();
+        $file->fs_name = $dto->name;
+        $file->fs_title = $dto->title;
+        $file->fs_path = $dto->path;
+        $file->fs_size = $dto->size;
+        $file->fs_uid = $dto->uid;
+        $file->fs_mime_type = $dto->mimeType;
+        $file->fs_md5_hash = $dto->md5Hash;
+        $file->fs_private = $dto->private;
+        $file->fs_created_dt = $dto->createdDt;
+        $file->fs_status = $dto->status;
+        return $file;
     }
 }

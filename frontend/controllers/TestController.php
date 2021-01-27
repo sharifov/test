@@ -919,10 +919,10 @@ class TestController extends FController
     {
         $job = new ReceiveEmailsJob();
 
-        $job->last_email_id = 18964;
+        $job->last_email_id = 1635;
 
         $data = [
-            'last_email_id' => 18964,
+            'last_email_id' => 1635,
             'run_all' => 'ok',
         ];
 
@@ -931,9 +931,7 @@ class TestController extends FController
         /** @var Queue $queue */
         $queue = \Yii::$app->queue_email_job;
 
-        $queue->push($job);
-
-        return 'ok';
+        return $queue->push($job);
     }
 
     public function actionCallTimer()
