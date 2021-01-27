@@ -12,7 +12,7 @@ use yii\web\View;
  * @var $manageClientInfoAccess bool
  * @var $unsubscribedEmails array
  */
-//var_dump($unsubscribedEmails); die();
+$unsubscribedEmails = array_column($lead->project->emailUnsubscribes, 'eu_email');
 ?>
 
 <table class="table table-condensed table-bordered">
