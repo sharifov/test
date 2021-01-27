@@ -91,8 +91,6 @@ class SideBarMenu extends \yii\bootstrap\Widget
         $menuLItems[] = ['label' => 'Sold <span id="badges-sold" data-type="sold" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/sold'], 'icon' => 'flag text-success'];
         $menuLItems[] = ['label' => 'Duplicate <span id="badges-duplicate" data-type="duplicate" class="label-danger label pull-right bginfo"></span>', 'url' => ['/queue/duplicate'], 'icon' => 'list text-danger'];
         $menuLItems[] = ['label' => 'Trash <span id="badges-trash" class="label-danger label pull-right"></span>', 'url' => ['/queue/trash'], 'icon' => 'trash-o text-danger'];
-        $menuLItems[] = ['label' => 'Alternative <span id="badges-alternative" data-type="alternative" class="label-warning label pull-right bginfo"></span> ', 'url' => ['/queue/alternative'], 'icon' => 'spinner'];
-
         $menuLItems[] = ['label' => 'Import Leads', 'url' => ['/lead/import'], 'icon' => 'upload'];
 
 
