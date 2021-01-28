@@ -63,7 +63,7 @@ class SettingHelper
 
     public static function quoteSearchProcessingFee(): float
     {
-        return (float) (Yii::$app->params['settings']['quote_search_processing_fee'] ?? 0.00);
+        return (float) (Yii::$app->params['settings']['quote_search_processing_fee'] ?? 25.00);
     }
 
     public static function userSiteActivityLogHistoryDays(): int
