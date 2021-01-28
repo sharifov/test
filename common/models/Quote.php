@@ -55,6 +55,7 @@ use yii\helpers\VarDumper;
  * @property string $tickets
  * @property string $origin_search_data
  * @property string $gds_offer_id
+ * @property float $agent_processing_fee
  *
  * @property QuotePrice[] $quotePrices
  * @property int $quotePricesCount
@@ -219,6 +220,8 @@ class Quote extends \yii\db\ActiveRecord
             ['pcc', 'string', 'max' => 50],
 
             ['gds', 'string', 'max' => 1],
+
+            [['agent_processing_fee'], 'number'],
         ];
     }
 
@@ -258,7 +261,8 @@ class Quote extends \yii\db\ActiveRecord
             'type_id' => 'Type',
             'tickets'   => 'Tickets JSON',
             'origin_search_data' => 'Original Search JSON',
-            'gds_offer_id' => 'GDS Offer ID'
+            'gds_offer_id' => 'GDS Offer ID',
+            'agent_processing_fee' => 'Agent Processing Fee'
         ];
     }
 
@@ -431,8 +435,8 @@ class Quote extends \yii\db\ActiveRecord
     public function getFinalProfit()
     {
         $final = $this->lead->final_profit;
-        if ($this->lead->getAgentsProcessingFee()) {
-            $final -= $this->lead->getAgentsProcessingFee();
+        if (!is_null($this->agent_processing_fee)) {
+            $final -= $this->agent_processing_fee;
         } else {
             $final -= ($this->lead->adults + $this->lead->children) * SettingHelper::processingFee();
         }
@@ -486,8 +490,12 @@ class Quote extends \yii\db\ActiveRecord
      */
     public function getProcessingFee()
     {
-        if ($this->lead->getAgentsProcessingFee()) {
-            return $this->lead->getAgentsProcessingFee();
+        if ($this->isCreatedFromSearch()) {
+            return $this->agent_processing_fee;
+        }
+
+        if ($this->agent_processing_fee) {
+            return $this->agent_processing_fee;
         }
 
         if (!$this->employee) {
@@ -701,9 +709,17 @@ class Quote extends \yii\db\ActiveRecord
                                 }*/
             }
 
+            if ($lead = $this->lead) {
+                $this->agent_processing_fee = ($lead->adults + $lead->children) * ($this->isCreatedFromSearch() ? SettingHelper::quoteSearchProcessingFee() : SettingHelper::processingFee());
+            }
             return true;
         }
         return false;
+    }
+
+    public function isCreatedFromSearch(): bool
+    {
+        return !empty($this->origin_search_data);
     }
 
     public static function parseDump($string, $validation = true, &$itinerary = [], $onView = false)
@@ -2014,7 +2030,7 @@ class Quote extends \yii\db\ActiveRecord
             'mark_up' => $priceData['total']['mark_up'],
             'taxes' => $priceData['total']['taxes'],
             'currency' => 'USD',
-            'isCC' => boolval(!$this->check_payment),
+            'isCC' => (bool)!$this->check_payment,
             'fare_type' => empty($this->fare_type) ? self::FARE_TYPE_PUB : $this->fare_type,
         ];
         return $result;

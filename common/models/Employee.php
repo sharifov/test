@@ -1749,7 +1749,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $quote = Quote::findOne(['id' => $entry['q_id']]);
             if ($entry['final_profit'] !== null) {
                 $totalProfit = $entry['final_profit'];
-                $agentsProcessingFee = ($entry['agents_processing_fee']) ? $entry['agents_processing_fee'] : $entry['pax_cnt'] * SettingHelper::processingFee();
+                $agentsProcessingFee = !is_null($quote->agent_processing_fee) ? $quote->agent_processing_fee : $entry['pax_cnt'] * SettingHelper::processingFee();
                 $totalProfit -= $agentsProcessingFee;
             } else {
                 $totalProfit = $quote->getEstimationProfit();

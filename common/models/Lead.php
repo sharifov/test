@@ -3445,7 +3445,11 @@ Reason: {reason}',
             $this->children = (int) $this->children;
             $this->infants = (int) $this->infants;
             $this->bo_flight_id = (int) $this->bo_flight_id;
-            $this->agents_processing_fee = ($this->adults + $this->children) * SettingHelper::processingFee();
+            if (($this->isBooked() || $this->isSold()) && $quote = $this->getBookedQuote()) {
+                $this->agents_processing_fee = $quote->agent_processing_fee;
+            } else {
+                $this->agents_processing_fee = ($this->adults + $this->children) * SettingHelper::processingFee();
+            }
             $this->oldAdditionalInformation = $this->oldAttributes['additional_information'] ?? '';
             return true;
         }
@@ -3639,7 +3643,7 @@ Reason: {reason}',
             return $this->processingFeePerPax;
         }
 
-        $this->processingFeePerPax = SettingHelper::processingFee();
+        $this->processingFeePerPax = $this->agents_processing_fee;
 
         if ($this->employee_id && $this->employee) {
             $groups = $this->employee->ugsGroups;
