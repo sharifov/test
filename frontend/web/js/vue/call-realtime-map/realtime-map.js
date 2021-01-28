@@ -1,5 +1,5 @@
 let userComponent = {
-    template: '<i :class="userIconClass() + \' \' + stateClass()"></i> {{ userName() }}',
+    template: '<i :class="userIconClass()"></i> {{ userName() }}',
     props: {
         item: Object,
         index: Number
@@ -15,9 +15,9 @@ let userComponent = {
         userIconClass() {
             return this.$root.getUserIconClass(this.item.uo_user_id)
         },
-        stateClass() {
-            return 'text-' + (this.item.uo_idle_state ? 'warning' : 'success')
-        }
+        // stateClass() {
+        //     return 'text-' + (this.item.uo_idle_state ? 'info' : 'success')
+        // }
     }
 }
 
@@ -233,7 +233,8 @@ var callMapApp = Vue.createApp({
             callUserAccessStatusTypeList: [],
             callList: [],
             onlineUserList: [],
-            userStatusList: []
+            userStatusList: [],
+            sortingOnline: -1,
         }
     },
     created() {
@@ -329,7 +330,9 @@ var callMapApp = Vue.createApp({
             });
         },
 
-
+        userOnlineList() {
+            return this.onlineUserList.slice(0).sort((a, b) => this.getUserName(a.uo_user_id).toUpperCase() < this.getUserName(b.uo_user_id).toUpperCase() ? this.sortingOnline : -this.sortingOnline)
+        },
 
         userStatusFindIndex(userId) {
             let index = -1
@@ -474,9 +477,9 @@ var callMapApp = Vue.createApp({
             let item = this.userStatusFind(userId)
             if (item) {
                 if (item.us_is_on_call) {
-                    iconClass = 'fa fa-phone'
+                    iconClass = 'fa fa-phone text-success'
                 } else if (item.us_call_phone_status) {
-                    iconClass = 'fa fa-tty'
+                    iconClass = 'fa fa-tty text-danger'
                 } else if (item.us_has_call_access) {
                     iconClass = 'fa fa-random'
                 }
