@@ -2,6 +2,7 @@
 
 namespace sales\model\call\entity\call\data;
 
+use common\models\Call;
 use yii\helpers\Json;
 
 /**
@@ -30,7 +31,7 @@ class Data
             $this->repeat = new Repeat(empty($data['repeat']) ? [] : $data['repeat']);
             $this->queueLongTime = new QueueLongTime(empty($data['queueLongTime']) ? [] : $data['queueLongTime']);
             $this->creatorType = new CreatorType(empty($data['creatorType']) ? [] : $data['creatorType']);
-            $this->priority = empty($data['priority']) ? 0 : (int)$data['priority'];
+            $this->priority = empty($data['priority']) ? Call::DEFAULT_PRIORITY_VALUE : (int)$data['priority'];
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => $e->getMessage(),
@@ -55,6 +56,6 @@ class Data
         $this->repeat = new Repeat([]);
         $this->queueLongTime = new QueueLongTime([]);
         $this->creatorType = new CreatorType([]);
-        $this->priority = 0;
+        $this->priority = Call::DEFAULT_PRIORITY_VALUE;
     }
 }

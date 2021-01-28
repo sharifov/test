@@ -447,7 +447,7 @@ class CommunicationController extends ApiBaseController
                         null,
                         $callFromInternalPhone,
                         null,
-                        0
+                        Call::DEFAULT_PRIORITY_VALUE
                     );
                     $callModel->c_source_type_id = Call::SOURCE_DIRECT_CALL;
 

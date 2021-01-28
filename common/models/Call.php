@@ -259,6 +259,8 @@ class Call extends \yii\db\ActiveRecord
     public const CHANNEL_REALTIME_MAP = 'realtimeMapChannel';
     public const CHANNEL_USER_ONLINE = 'userOnlineChannel';
 
+    public const DEFAULT_PRIORITY_VALUE = 0;
+
     private ?Data $data = null;
 
     //public $c_recording_url = '';
