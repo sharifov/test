@@ -177,10 +177,7 @@ class LeadBadgesRepository
 
     public function getAlternativeQuery(Employee $user): ActiveQuery
     {
-        $query = Lead::find()->andWhere([Lead::tableName() . '.status' => Lead::STATUS_BOOK_FAILED])->andWhere(['<>', 'l_call_status_id', Lead::CALL_STATUS_QUEUE]);
-
-        $subQuery = Quote::find()->select(['DISTINCT(lead_id)'])->where(['type_id' => Quote::TYPE_ALTERNATIVE])->groupBy('lead_id');
-        $query->andWhere(['IN', 'leads.id', $subQuery]);
+        $query = Lead::find()->andWhere([Lead::tableName() . '.status' => Lead::STATUS_ALTERNATIVE])->andWhere(['<>', 'l_call_status_id', Lead::CALL_STATUS_QUEUE]);
 
         if ($user->isAdmin()) {
             return $query;
