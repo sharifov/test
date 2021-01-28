@@ -33,7 +33,8 @@ class TelegramSendMessageJob implements RetryableJobInterface
                 $tgm = Yii::$app->telegram;
                 $tgm->sendMessage([
                     'chat_id' => $telegramChatId,
-                    'text' => strip_tags($this->text),
+                    'text' => strip_tags($this->text . PHP_EOL . '_Environment: ' . strtoupper(YII_ENV) . '_'),
+                    'parse_mode' => 'markdown'
                 ]);
 
                 unset($tgm);
@@ -46,6 +47,7 @@ class TelegramSendMessageJob implements RetryableJobInterface
                 Yii::info(VarDumper::dumpAsString([
                     'message' => $errorMessage,
                     'userId' => $this->user_id,
+                    'env' => YII_ENV,
                 ]), 'info\TelegramJob:execute:catch');
 
                 UserProfile::disableTelegramByUserId((int) $this->user_id);
@@ -60,6 +62,7 @@ class TelegramSendMessageJob implements RetryableJobInterface
                 Yii::error(VarDumper::dumpAsString([
                     'message' => $errorMessage,
                     'userId' => $this->user_id,
+                    'env' => YII_ENV,
                 ]), 'TelegramJob:execute:catch');
             }
         }
