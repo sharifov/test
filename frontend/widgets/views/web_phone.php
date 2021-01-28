@@ -536,7 +536,7 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
 
                     incomingSoundOff();
 
-                    window.sendCommandUpdatePhoneWidgetCurrentCalls(conn.parameters.CallSid, userId);
+                    window.sendCommandUpdatePhoneWidgetCurrentCalls(conn.parameters.CallSid, userId, window.generalLinePriorityIsEnabled);
                 });
 
                 // device.on('ringing', function (conn) {

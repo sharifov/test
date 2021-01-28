@@ -76,19 +76,22 @@ function PhoneWidgetPaneQueue(initQueues) {
     }
 
     function generalShow() {
+        let showPriority = PhoneWidgetCall.queues.priority.count() > 0;
         ReactDOM.render(
-            React.createElement(QueueItem, {groups: queues.general.all(), type: 'general', name: ''}),
+            React.createElement(QueueItem, {groups: queues.general.all(), type: 'general', name: '', 'showPriority': showPriority}),
             document.getElementById('queue-separator')
         );
         activeQueue = 'general';
     }
 
     function allShow() {
+        let showPriority = PhoneWidgetCall.queues.priority.count() > 0;
         ReactDOM.render(
             React.createElement(AllQueues, {
                 active: mergeActiveCalls(),
                 direct: queues.direct.all(),
-                general: queues.general.all()
+                general: queues.general.all(),
+                showPriority: showPriority
             }),
             document.getElementById('queue-separator')
         );
@@ -131,7 +134,7 @@ function PhoneWidgetPaneQueue(initQueues) {
     function updateCounters() {
         $('.call-filter__toggle--line-active').html(queues.hold.count() + queues.active.count());
         $('.call-filter__toggle--line-direct').html(queues.direct.count());
-        $('.call-filter__toggle--line-general').html(queues.general.count());
+        $('.call-filter__toggle--line-general').html(queues.general.count() + (queues.priority.count() > 0 ? 1 : 0));
     }
 
     function clearIndicators (target) {

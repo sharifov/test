@@ -105,4 +105,9 @@ class SettingHelper
     {
         return (int) (Yii::$app->params['settings']['call_recording_log_additional_cache_timeout'] ?? 60);
     }
+
+    public static function isGeneralLinePriorityEnable(): bool
+    {
+        return (bool)(\Yii::$app->params['settings']['enable_general_line_priority'] ?? false);
+    }
 }

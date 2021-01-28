@@ -16,6 +16,7 @@
             'clientInfoUrl': '',
             'recordingEnableUrl': '',
             'recordingDisableUrl': '',
+            'acceptPriorityCallUrl': ''
         };
 
         this.init = function (settings) {
@@ -332,6 +333,37 @@
                 .fail(function (jqXHR, textStatus, errorThrown) {
                     createNotify('Recording disable', jqXHR.responseText, 'error');
                     call.unSetRecordingRequestState();
+                })
+        };
+
+        this.acceptPriorityCall = function (key) {
+            PhoneWidgetCall.queues.priority.accept();
+            window.phoneWidget.eventDispatcher.dispatch(window.phoneWidget.events.priorityCallUpdate,{'isSentAcceptCallRequestState': true});
+            window.phoneWidget.notifier.off(key);
+            PhoneWidgetCall.audio.incoming.off(key);
+            $.ajax({
+                type: 'post',
+                url: this.settings.acceptPriorityCallUrl,
+                dataType: 'json',
+                data: {
+                    act: 'accept',
+                }
+            })
+                .done(function (data) {
+                    if (data.error) {
+                        createNotify('Accept Call', data.message, 'error');
+                        window.phoneWidget.eventDispatcher.dispatch(window.phoneWidget.events.priorityCallUpdate,{'isSentAcceptCallRequestState': false});
+                        PhoneWidgetCall.queues.priority.unAccept();
+                        window.phoneWidget.notifier.on(key);
+                        PhoneWidgetCall.audio.incoming.on(key);
+                    }
+                })
+                .fail(function () {
+                    createNotify('Accept Call', 'Server error', 'error');
+                    window.phoneWidget.eventDispatcher.dispatch(window.phoneWidget.events.priorityCallUpdate,{'isSentAcceptCallRequestState': false});
+                    PhoneWidgetCall.queues.priority.unAccept();
+                    window.phoneWidget.notifier.on(key);
+                    PhoneWidgetCall.audio.incoming.on(key);
                 })
         };
     }

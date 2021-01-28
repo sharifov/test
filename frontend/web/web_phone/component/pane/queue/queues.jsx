@@ -9,8 +9,8 @@ function AllQueues(props) {
                 ? <QueueItem groups={props.direct} name="Direct Line" type="direct"/>
                 : ''
             }
-            {countProperties(props.general) > 0
-                ? <QueueItem groups={props.general} name="General Line" type="general"/>
+            {countProperties(props.general) > 0 || props.showPriority
+                ? <QueueItem groups={props.general} name="General Line" type="general" showPriority={props.showPriority}/>
                 : ''
             }
         </React.Fragment>
@@ -22,6 +22,10 @@ function QueueItem(props) {
         <li className="queue-separator__item" data-queue-type={props.type}>
             {props.name
                 ? <div className="queue-separator__name">{props.name}</div>
+                : ''
+            }
+            {props.showPriority
+                ? <PriorityItem/>
                 : ''
             }
             <Groups groups={props.groups}/>

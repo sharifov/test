@@ -10,6 +10,7 @@ namespace sales\model\call\services\currentQueueCalls;
  * @property OutgoingQueueCall[] $outgoing
  * @property ActiveQueueCall[] $active
  * @property ActiveConference[] $conference
+ * @property PriorityQueueCall[] $priority
  * @property string $lastActiveQueue
  */
 class QueueCalls
@@ -23,21 +24,29 @@ class QueueCalls
     public array $outgoing;
     public array $active;
     public array $conference;
+    public array $priority;
 
     public string $lastActiveQueue;
 
-    public function __construct(array $hold, array $incoming, array $outgoing, array $active, array $conference)
-    {
+    public function __construct(
+        array $hold,
+        array $incoming,
+        array $outgoing,
+        array $active,
+        array $conference,
+        array $priority
+    ) {
         $this->hold = $hold;
         $this->incoming = $incoming;
         $this->outgoing = $outgoing;
         $this->active = $active;
         $this->conference = $conference;
+        $this->priority = $priority;
     }
 
     public function isEmpty(): bool
     {
-        return !$this->incoming && !$this->outgoing && !$this->active && !$this->hold;
+        return !$this->incoming && !$this->outgoing && !$this->active && !$this->hold && !$this->priority;
     }
 
     public function isLastIncoming(): bool
@@ -88,6 +97,11 @@ class QueueCalls
             $conferences[] = $item->getData();
         }
 
+        $priority = [];
+        foreach ($this->priority as $item) {
+            $priority[] = $item->getData();
+        }
+
         return [
             'isEmpty' => false,
             'hold' => $hold,
@@ -95,6 +109,7 @@ class QueueCalls
             'outgoing' => $outgoing,
             'active' => $active,
             'conferences' => $conferences,
+            'priority' => $priority,
             'lastActive' => $this->lastActiveQueue
         ];
     }

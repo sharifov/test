@@ -1146,6 +1146,76 @@ class CallController extends FController
         return $this->asJson($response);
     }
 
+    public function actionAjaxAcceptPriorityCall(): Response
+    {
+        $response = [
+            'error' => true,
+            'message' => 'Internal Server Error'
+        ];
+/*
+        try {
+
+            $callUserAccess = CallUserAccess::find()->where([
+                'cua_user_id' => Auth::id(),
+                'cua_call_id' => $call->c_id,
+                'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING
+            ])->one();
+
+            if ($callUserAccess) {
+                $userId = Auth::id();
+                switch ($action) {
+                    case 'accept':
+                        $key = 'accept_call_' . $callUserAccess->cua_call_id;
+                        $result = (bool)Yii::$app->redis->setnx($key, $userId);
+                        $isOk = true;
+                        $value = null;
+
+                        if (!$result) {
+                            $value = (int)Yii::$app->redis->get($key);
+                            if ($value !== $userId) {
+                                $isOk = false;
+                            }
+                        }
+
+                        if ($isOk) {
+                            $prepare = new PrepareCurrentCallsForNewCall($userId);
+                            if ($prepare->prepare()) {
+                                $this->callService->acceptCall($callUserAccess, Auth::user());
+                            }
+                            Yii::$app->redis->expire($key, 5);
+                        } else {
+                            Notifications::publish('callAlreadyTaken', ['user_id' => $userId], ['callSid' => $call->c_call_sid]);
+                            Yii::info(VarDumper::dumpAsString([
+                                'callId' => $callUserAccess->cua_call_id,
+                                'userId' => $userId,
+                                'acceptedUserId' => $value,
+                            ]), 'info\NewPhoneWidgetAcceptRedisReservation');
+                        }
+
+                        $response['error'] = false;
+                        $response['message'] = 'success';
+                        break;
+                    case 'busy':
+                        $this->callService->busyCall($callUserAccess, Auth::user());
+                        $response['error'] = false;
+                        $response['message'] = 'success';
+                        break;
+                }
+            } else {
+                Notifications::publish('callAlreadyTaken', ['user_id' => Auth::id()], ['callSid' => $call->c_call_sid]);
+                $response = [
+                    'error' => false,
+                    'message' => '',
+                ];
+            }
+        } catch (\RuntimeException | NotFoundException $e) {
+            $response['message'] = $e->getMessage();
+        }
+*/
+
+        return $this->asJson($response);
+    }
+
     public function actionReturnHoldCall(): Response
     {
         $call_sid = \Yii::$app->request->post('call_sid');

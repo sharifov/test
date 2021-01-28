@@ -1,7 +1,12 @@
 (function () {
 
     let types = {
-        incomingCall: 'incomingCall'
+        incomingCall: 'incomingCall',
+        priorityCall: 'priorityCall'
+    };
+
+    let keys = {
+        priorityCall: 'priorityCall'
     };
 
     function Collection() {
@@ -319,4 +324,5 @@
 
     window.phoneWidget.notifier = new Notifier();
     window.phoneWidget.notifier.types = types;
+    window.phoneWidget.notifier.keys = keys;
 })();

@@ -29,13 +29,14 @@ class CallController
             ];
         }
         $userId = (int)$params['userId'];
+        $generalLinePriorityIsEnabled = (bool)($params['generalLinePriorityIsEnabled'] ?? false);
         $finishedCallSid = null;
         if (isset($params['finishedCallSid'])) {
             $finishedCallSid = (string)$params['finishedCallSid'];
         }
 
         $userStatusType = UserCallStatus::find()->select(['us_type_id'])->where(['us_user_id' => $userId])->orderBy(['us_id' => SORT_DESC])->limit(1)->asArray()->one();
-        $calls = $this->currentQueueCallsService->getQueuesCalls($userId, $finishedCallSid);
+        $calls = $this->currentQueueCallsService->getQueuesCalls($userId, $finishedCallSid, $generalLinePriorityIsEnabled);
 
         return [
             'cmd' => 'updateCurrentCalls',

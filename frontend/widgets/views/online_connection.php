@@ -1,5 +1,6 @@
 <?php
 
+use sales\helpers\setting\SettingHelper;
 use yii\helpers\Url;
 
 /* @var $this \yii\web\View */
@@ -18,12 +19,13 @@ use yii\helpers\Url;
 <?php
 $ccNotificationUpdateUrl = Url::to(['/client-chat/refresh-notification']);
 $discardUnreadMessageUrl = Url::to(['/client-chat/discard-unread-messages']);
-
+$generalLinePriorityIsEnabled = SettingHelper::isGeneralLinePriorityEnable() ? 'true' : 'false';
 $js = <<<JS
    
     window.socket = null;
     window.socketConnectionId = null;
     window.userIdentity = '$userIdentity';
+    window.generalLinePriorityIsEnabled = {$generalLinePriorityIsEnabled};
     
     let userId = '$userId';
     let wsUrl = '$wsUrl';

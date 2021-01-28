@@ -37,8 +37,12 @@ function pushDialogOnTop(chatID)
     }
 }
 
-window.sendCommandUpdatePhoneWidgetCurrentCalls = function (finishedCallSid, userId) {
-    socketSend('Call', 'GetCurrentQueueCalls', {'userId': userId, 'finishedCallSid': finishedCallSid});
+window.sendCommandUpdatePhoneWidgetCurrentCalls = function (finishedCallSid, userId, generalLinePriorityIsEnabled) {
+    socketSend('Call', 'GetCurrentQueueCalls', {
+        'userId': userId,
+        'finishedCallSid': finishedCallSid,
+        'generalLinePriorityIsEnabled': generalLinePriorityIsEnabled
+    });
 };
 
 function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificationUpdateUrl, discardUnreadMessageUrl)
@@ -56,7 +60,7 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
             onlineObj.attr('title', 'Online Connection: opened').find('i').removeClass('danger').addClass('warning');
             // console.log(e);
 
-            window.sendCommandUpdatePhoneWidgetCurrentCalls('', userId);
+            window.sendCommandUpdatePhoneWidgetCurrentCalls('', userId, window.generalLinePriorityIsEnabled);
 
         };
 
@@ -162,6 +166,30 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                             // if (obj.cua_status_id === 2) {
                             // PhoneWidgetCall.removeIncomingRequest(obj.callSid);
                             // }
+                        }
+                    }
+
+                    if (obj.cmd === 'addPriorityCall') {
+                        if (typeof PhoneWidgetCall === 'object') {
+                            if (typeof obj.data !== 'undefined') {
+                                PhoneWidgetCall.socket(obj.data);
+                            }
+                        }
+                    }
+
+                    if (obj.cmd === 'removePriorityCall') {
+                        if (typeof PhoneWidgetCall === 'object') {
+                            if (typeof obj.data !== 'undefined') {
+                                PhoneWidgetCall.socket(obj.data);
+                            }
+                        }
+                    }
+
+                    if (obj.cmd === 'resetPriorityCall') {
+                        if (typeof PhoneWidgetCall === 'object') {
+                            if (typeof obj.data !== 'undefined') {
+                                PhoneWidgetCall.socket(obj.data);
+                            }
                         }
                     }
 
