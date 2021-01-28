@@ -2,6 +2,7 @@
 
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
+use sales\widgets\UserSelect2Widget;
 
 /* @var $this yii\web\View */
 /* @var $model modules\fileStorage\src\entity\fileUser\FileUser */
@@ -16,7 +17,11 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'fus_fs_id')->textInput() ?>
 
-        <?= $form->field($model, 'fus_user_id')->textInput() ?>
+        <?= $form->field($model, 'fus_user_id')->widget(UserSelect2Widget::class, [
+            'data' => $model->fus_user_id ? [
+                $model->fus_user_id => $model->user->username
+            ] : [],
+        ]) ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
