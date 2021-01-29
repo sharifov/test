@@ -1032,9 +1032,7 @@ class EmployeeController extends FController
 
             try {
                 $rocketChat = \Yii::$app->rchat;
-                $rocketChat->updateSystemAuth(false);
-
-                $result = $rocketChat->deleteUser($userProfile->up_rc_user_id, $user->nickname ?: $user->username);
+                $result = $rocketChat->updateUser($userProfile->up_rc_user_id, ['active' => false]);
 
                 if (isset($result['error']) && !$result['error']) {
                     $userProfile->up_rc_user_password = null;
