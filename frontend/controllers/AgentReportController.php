@@ -14,26 +14,6 @@ use common\models\Email;
  */
 class AgentReportController extends FController
 {
-
-    public function validateDateParams($params)
-    {
-       /* if(!isset($params['AgentActivitySearch']['date_from'])){
-            $params['AgentActivitySearch']['date_from'] = date('Y-m-d 00:00');
-        }else{
-            $params['AgentActivitySearch']['date_from'] = date('Y-m-d 00:00:00', strtotime($params['AgentActivitySearch']['date_from']));
-        }
-        if(!isset($params['AgentActivitySearch']['date_to'])){
-            $params['AgentActivitySearch']['date_to'] = date('Y-m-d 23:59');
-        }else{
-            $params['AgentActivitySearch']['date_to'] = date('Y-m-d 23:59', strtotime($params['AgentActivitySearch']['date_to']));
-        }*/
-
-        return $params;
-    }
-
-    /**
-     * @return mixed
-     */
     public function actionIndex()
     {
         $searchModel = new AgentActivitySearch();
@@ -45,12 +25,6 @@ class AgentReportController extends FController
 
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
-
-        /*if(Yii::$app->user->identity->canRole('supervision')) {
-            $params['AgentActivitySearch']['supervision_id'] = Yii::$app->user->id;
-        }
-        $params = $this->validateDateParams($params);
-        */
 
         $dataProvider = $searchModel->searchAgentLeads($params, $user);
 
@@ -65,7 +39,6 @@ class AgentReportController extends FController
         $searchModel = new AgentActivitySearch();
         $params = Yii::$app->request->queryParams;
 
-        $params = $this->validateDateParams($params);
         $dataProvider = $searchModel->searchCalls($params);
 
         if ($params['AgentActivitySearch']['c_call_type_id'] == Call::CALL_TYPE_OUT) {
@@ -88,7 +61,6 @@ class AgentReportController extends FController
         $searchModel = new AgentActivitySearch();
         $params = Yii::$app->request->queryParams;
 
-        $params = $this->validateDateParams($params);
         $dataProvider = $searchModel->searchSms($params);
 
         $title = (isset($params['AgentActivitySearch']['s_type_id']) && $params['AgentActivitySearch']['s_type_id'] == Sms::TYPE_OUTBOX) ? 'SMS Sent' : 'SMS Received';
@@ -105,7 +77,6 @@ class AgentReportController extends FController
         $searchModel = new AgentActivitySearch();
         $params = Yii::$app->request->queryParams;
 
-        $params = $this->validateDateParams($params);
         $dataProvider = $searchModel->searchEmail($params);
 
         $title = (isset($params['AgentActivitySearch']['e_type_id']) && $params['AgentActivitySearch']['e_type_id'] == Email::TYPE_OUTBOX) ? 'Emails Sent' : 'Emails Received';
@@ -122,7 +93,6 @@ class AgentReportController extends FController
         $searchModel = new AgentActivitySearch();
         $params = Yii::$app->request->queryParams;
 
-        $params = $this->validateDateParams($params);
         $dataProvider = $searchModel->searchClonedLeads($params);
 
         $title = 'Cloned Leads';
@@ -139,7 +109,6 @@ class AgentReportController extends FController
         $searchModel = new AgentActivitySearch();
         $params = Yii::$app->request->queryParams;
 
-        $params = $this->validateDateParams($params);
         $dataProvider = $searchModel->searchCreatedLeads($params);
 
         $title = 'Created Leads';
@@ -156,7 +125,6 @@ class AgentReportController extends FController
         $searchModel = new AgentActivitySearch();
         $params = Yii::$app->request->queryParams;
 
-        $params = $this->validateDateParams($params);
         $dataProvider = $searchModel->searchSoldLeads($params);
 
         $title = 'Sold Leads';
@@ -173,7 +141,6 @@ class AgentReportController extends FController
         $searchModel = new AgentActivitySearch();
         $params = Yii::$app->request->queryParams;
 
-        $params = $this->validateDateParams($params);
         $dataProvider = $searchModel->searchFromToLeads($params);
 
         $title = $params['title'];
