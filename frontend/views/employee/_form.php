@@ -450,7 +450,20 @@ JS;
         </div>
     </div>
     <?php if (!$model->isNewRecord && (Auth::can('/employee/register-to-rocket-chat') && Auth::can('/employee/un-register-from-rocket-chat'))) : ?>
-        <h5>Rocket Chat Credentials</h5>
+        <?php
+        $activeStatus = '';
+        if ($modelProfile->up_rc_active === 1 && $modelProfile->up_rc_user_id) {
+            $activeStatus = '<i class="fa fa-check" title="User is active"></i>';
+        }
+        if ($modelProfile->up_rc_active === 0 && $modelProfile->up_rc_user_id) {
+            $activeStatus = '<i class="fa fa-lock" title="User not active"></i>';
+        }
+        ?>
+
+        <h5>
+            Rocket Chat Credentials &nbsp;
+            <span id="rc_active_status"><?php echo $activeStatus ?></span>
+        </h5>
         <div class="well">
             <div class="form-group">
                 <div class="row">
@@ -471,9 +484,9 @@ JS;
                 <div class="row">
                     <div class="col-md-6">
                 <?php
-                    $displayRegister = ($modelProfile->up_rc_user_id) ? 'block' : 'none';
+                    $displayRegister = ($modelProfile->up_rc_active === 1 && $modelProfile->up_rc_user_id) ? 'block' : 'none';
                     echo Html::button(
-                        '<i class="fa fa-rocket fa-flip-horizontal"></i>  Deactivate user',
+                        '<i class="fa fa-lock"></i>  Deactivate user',
                         [
                             'id' => 'un_register_from_rc',
                             'class' => 'btn btn-success rc_btns',
@@ -483,6 +496,22 @@ JS;
                             'data-user_id' => $model->getId(),
                             'title' => 'Deactivate user',
                             'style' => 'width: 200px; display:' . $displayRegister,
+                        ]
+                    )
+                ?>
+                <?php
+                    $displayActivate = ($modelProfile->up_rc_active === 0 && $modelProfile->up_rc_user_id) ? 'block' : 'none';
+                    echo Html::button(
+                        '<i class="fa fa-check"></i>  Activate user',
+                        [
+                            'id' => 'activate_to_rc',
+                            'class' => 'btn btn-success rc_btns',
+                            'data-inner' => '',
+                            'data-class' => 'btn btn-success rc_btns',
+                            'data-pjax' => '0',
+                            'data-user_id' => $model->getId(),
+                            'title' => 'Activate user',
+                            'style' => 'width: 200px; display:' . $displayActivate,
                         ]
                     )
                 ?>
@@ -897,6 +926,7 @@ JS;
 <?php
 $validateCredentialRcUrl = Url::to(['/employee/validate-rocket-chat-credential']);
 $refreshTokenRcUrl = Url::to(['/employee/refresh-rocket-chat-user-token']);
+$activateToRcUrl = Url::to(['/employee/activate-to-rocket-chat']);
 $js = <<<JS
 
     //  $(document).on('click', '.unblock-user', function(e) {
@@ -1097,6 +1127,7 @@ $js = <<<JS
                 createNotify('Success', 'The request was successful', 'success');
                 $('#register_to_rc').hide();
                 $('#un_register_from_rc').show();
+                 $('#rc_active_status').html('<i class="fa fa-check" title="User is active"></i>'); 
             } else {
                 createNotify('Error', dataResponse.message, 'error');
             } 
@@ -1125,14 +1156,11 @@ $js = <<<JS
         })
         .done(function(dataResponse) {
             if (dataResponse.status === 1) {
-                $('#userprofile-up_rc_user_password').val('');
-                $('#userprofile-up_rc_auth_token').val('');
-                $('#userprofile-up_rc_user_id').val('');
-                $('#userprofile-up_rc_token_expired').val('');
-                
+                                
                 createNotify('Success', 'The request was successful', 'success');
                 $('#un_register_from_rc').hide();
-                $('#register_to_rc').show();                
+                $('#activate_to_rc').show(); 
+                $('#rc_active_status').html('<i class="fa fa-lock" title="User not active"></i>');               
             } else {
                 createNotify('Error', dataResponse.message, 'error');
             } 
@@ -1144,6 +1172,39 @@ $js = <<<JS
         })
         .always(function() {
             setTimeout(loadingBtn, 4000, $('#un_register_from_rc'), false);     
+        });        
+    });
+    
+    $(document).on('click', '#activate_to_rc', function (e) { 
+        e.preventDefault();
+        
+        let btn = $(this);
+        loadingBtn(btn, true);    
+        
+        $.ajax({
+            url: '{$activateToRcUrl}',
+            type: 'POST',
+            data: {id: btn.data('user_id')},
+            dataType: 'json'    
+        })
+        .done(function(dataResponse) {
+            if (dataResponse.status === 1) {
+                
+                createNotify('Success', 'The request was successful', 'success');
+                $('#activate_to_rc').hide();
+                $('#un_register_from_rc').show();   
+                $('#rc_active_status').html('<i class="fa fa-check" title="User is active"></i>');             
+            } else {
+                createNotify('Error', dataResponse.message, 'error');
+            } 
+            loadingBtn($('#activate_to_rc'), false);      
+        })
+        .fail(function(error) {
+            loadingBtn($('#activate_to_rc'), false);
+            createNotify('Error', 'Server error. Please try again later', 'error');
+        })
+        .always(function() {
+            setTimeout(loadingBtn, 4000, $('#activate_to_rc'), false);     
         });        
     });
     

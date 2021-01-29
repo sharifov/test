@@ -31,6 +31,7 @@ use yii\caching\TagDependency;
  * @property string $up_rc_user_id
  * @property string $up_rc_user_password
  * @property string $up_rc_token_expired
+ * @property bool|null $up_rc_active
  * @property bool $up_call_recording_disabled
  *
  * @property Employee $upUser
@@ -92,6 +93,8 @@ class UserProfile extends \yii\db\ActiveRecord
             [['up_rc_user_id'], 'string', 'max' => 20],
             [['up_rc_user_password'], 'string', 'max' => 50],
             [['up_rc_token_expired'], 'safe' ],
+            ['up_show_in_contact_list', 'default', 'value' => true],
+            ['up_rc_active', 'boolean'],
 
             ['up_show_in_contact_list', 'default', 'value' => false],
             ['up_show_in_contact_list', 'boolean'],
@@ -135,6 +138,7 @@ class UserProfile extends \yii\db\ActiveRecord
             'up_rc_user_password' => 'Rocket Chat User Password',
             'up_rc_token_expired' => 'Rocket Chat Token Expired',
             'up_call_recording_disabled' => 'Call recording disabled',
+            'up_rc_active' => 'Rocket Chat Active',
         ];
     }
 
