@@ -252,6 +252,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'format' => 'raw',
         ],
         [
+            'attribute' => 'agents_processing_fee'
+        ],
+        [
+            'attribute' => 'final_profit'
+        ],
+        [
             'label' => 'Tips',
             'value' => static function (\common\models\Lead $model) {
                 if ($model->getTotalTips() == 0) {
