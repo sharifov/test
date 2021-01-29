@@ -122,6 +122,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'html',
             ],
             [
+                'attribute' => 'agent_processing_fee'
+            ],
+            [
                 'attribute' => 'status',
                 'value' => function (\common\models\Quote $model) {
                     return $model->getStatusName(true);
