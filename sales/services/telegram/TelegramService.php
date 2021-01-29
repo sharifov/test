@@ -13,6 +13,7 @@ use Yii;
 class TelegramService
 {
     public const DESCRIPTION_BOT_BLOCKED_BY_USER = 'Forbidden: bot was blocked by the user';
+    public const DESCRIPTION_USER_NOT_SUBSCRIBED_ON_BOT = 'Bad Request: chat not found';
 
     /**
      * @param string $responseBody
@@ -43,6 +44,16 @@ class TelegramService
     {
         $response = self::getResponseFromStringBody($responseBody);
         return !empty($response['description']) && $response['description'] === self::DESCRIPTION_BOT_BLOCKED_BY_USER;
+    }
+
+    /**
+     * @param string $responseBody
+     * @return bool
+     */
+    public static function isUserSubscribedOnBot(string $responseBody): bool
+    {
+        $response = self::getResponseFromStringBody($responseBody);
+        return !empty($response['description']) && $response['description'] === self::DESCRIPTION_USER_NOT_SUBSCRIBED_ON_BOT;
     }
 
     /**
