@@ -392,7 +392,7 @@ class TwilioController extends ApiBaseNoAuthController
                         $data->repeat->reset();
                         $data->queueLongTime->reset();
                         $call->setData($data);
-                        $call->serPriority(0);
+                        $call->serPriority(Call::DEFAULT_PRIORITY_VALUE);
                         if (!$call->save()) {
                             Yii::error(VarDumper::dumpAsString($call->errors), 'API:Twilio:RedirectCall:Call:update:1');
                         }

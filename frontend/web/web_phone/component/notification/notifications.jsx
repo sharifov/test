@@ -113,7 +113,7 @@ class PriorityCallNotificationItem extends React.Component {
 
         let info =
             <div className="incoming-notification__project">
-                <b className="incoming-notification__position" style={{'fontSize':'14px'}}>Priority call </b>
+                <b className="incoming-notification__position" style={{'fontSize':'14px'}}>General line call </b>
             </div>;
 
         return (

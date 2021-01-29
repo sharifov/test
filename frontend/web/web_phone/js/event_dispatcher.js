@@ -37,7 +37,7 @@
 
         dispatch(event, data) {
             if (this.events[event] === undefined) {
-                console.error(`This event: ${event} does not exist`);
+                // console.error(`This event: ${event} does not exist`);
                 return false;
             }
 

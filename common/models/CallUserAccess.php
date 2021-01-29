@@ -192,8 +192,8 @@ class CallUserAccess extends \yii\db\ActiveRecord
                     SettingHelper::isGeneralLinePriorityEnable()
                     && ($call->c_source_type_id === Call::SOURCE_GENERAL_LINE || $call->c_source_type_id === Call::SOURCE_REDIRECT_CALL)
                 ) {
-                    $message = 'New priority Call';
-                    if ($ntf = Notifications::create($this->cua_user_id, 'New Priority Call', $message, Notifications::TYPE_SUCCESS, true)) {
+                    $message = 'New General Line Call';
+                    if ($ntf = Notifications::create($this->cua_user_id, 'New General Line Call', $message, Notifications::TYPE_SUCCESS, true)) {
                         //Notifications::socket($this->cua_user_id, null, 'getNewNotification', [], true);
                         $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
                         Notifications::publish('getNewNotification', ['user_id' => $this->cua_user_id], $dataNotification);

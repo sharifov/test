@@ -2,19 +2,22 @@ class PriorityItem extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            isSentAcceptCallRequestState: false
+            isSentAcceptCallRequestState: false,
+            count: props.count
         };
     }
 
     componentDidMount() {
-        window.phoneWidget.eventDispatcher.addListener(window.phoneWidget.events.priorityCallUpdate, this.priorityCallUpdateHandler());
+        window.phoneWidget.eventDispatcher.addListener(window.phoneWidget.events.priorityQueueAccepted, this.priorityQueueAcceptedHandler());
+        window.phoneWidget.eventDispatcher.addListener(window.phoneWidget.events.priorityQueueCounterChanged, this.priorityQueueCounterChangedHandler());
     }
 
     componentWillUnmount() {
-        window.phoneWidget.eventDispatcher.removeListener(window.phoneWidget.events.priorityCallUpdate, this.priorityCallUpdateHandler());
+        window.phoneWidget.eventDispatcher.removeListener(window.phoneWidget.events.priorityQueueAccepted, this.priorityQueueAcceptedHandler());
+        window.phoneWidget.eventDispatcher.removeListener(window.phoneWidget.events.priorityQueueCounterChanged, this.priorityQueueCounterChangedHandler());
     }
 
-    priorityCallUpdateHandler() {
+    priorityQueueAcceptedHandler() {
         let self = this;
         return function (event) {
             //only for minify version
@@ -26,6 +29,18 @@ class PriorityItem extends React.Component {
         }
     }
 
+    priorityQueueCounterChangedHandler() {
+        let self = this;
+        return function (event) {
+            //only for minify version
+            window.phoneWidget.emptyFunc('PriorityItem.priorityQueueCounterChangedHandler');
+
+            self.setState({
+                count: event.count
+            });
+        }
+    }
+
     render() {
         return (
             <ul className="call-in-progress" style={{'marginBottom' : '15px'}}>
@@ -33,7 +48,7 @@ class PriorityItem extends React.Component {
                     <div className="call-in-progress__call-item call-list-item" >
                         <div className="call-list-item__info">
                             <ul className="call-list-item__info-list call-info-list">
-                                <li className="call-info-list__item"><span className="call-info-list__number">Priority call</span> </li>
+                                <li className="call-info-list__item"><span className="call-info-list__number">General line call ({this.state.count})</span> </li>
                             </ul>
                             {/*<div className="call-list-item__info-action call-info-action">
                                 <span className="call-info-action__timer">

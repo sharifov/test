@@ -118,14 +118,14 @@ class CallService
 
     /**
      * @param CallUserAccess $callUserAccess
-     * @param Employee $user
+     * @param int $userId
      * @return bool
      */
-    public function acceptCall(CallUserAccess $callUserAccess, Employee $user): bool
+    public function acceptCall(CallUserAccess $callUserAccess, int $userId): bool
     {
         $callUserAccess->acceptCall();
         $this->callUserAccessRepository->save($callUserAccess);
-        if (($call = $callUserAccess->cuaCall) && Call::applyCallToAgent($call, $user->id)) {
+        if (($call = $callUserAccess->cuaCall) && Call::applyCallToAgent($call, $userId)) {
             Notifications::pingUserMap();
             return true;
         }

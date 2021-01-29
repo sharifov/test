@@ -1192,7 +1192,7 @@ var PhoneWidgetCall = function () {
             'project': data.project,
             'department': data.department,
             'isShow': true,
-            'eventName': window.phoneWidget.events.priorityCallUpdate
+            'eventName': window.phoneWidget.events.priorityQueueAccepted
         };
     }
 

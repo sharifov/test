@@ -2436,7 +2436,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $query->innerJoin('user_profile AS up', 'uo.uo_user_id = up.up_user_id');
         $query->innerJoin('user_project_params AS upp', 'uo.uo_user_id = upp.upp_user_id');
 
-        $query->andWhere(['us.us_call_phone_status' => true, 'us.us_is_on_call' => false, 'us.us_has_call_access' => false]);
+        $query->andWhere(['us.us_call_phone_status' => true, 'us.us_is_on_call' => false]);
+
+        if (!SettingHelper::isGeneralLinePriorityEnable()) {
+            $query->andWhere(['us.us_has_call_access' => false]);
+        }
+
         $query->andWhere(['up.up_call_type_id' => UserProfile::CALL_TYPE_WEB]);
         $query->andWhere(['upp.upp_allow_general_line' => true, 'upp.upp_project_id' => $project_id]);
 

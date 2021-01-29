@@ -1,5 +1,6 @@
 window.phoneWidget.events = {
     callUpdate: 'callUpdate',
     conferenceUpdate: 'conferenceUpdate',
-    priorityCallUpdate: 'priorityCallUpdate'
+    priorityQueueAccepted: 'priorityQueueAccepted',
+    priorityQueueCounterChanged: 'priorityQueueCounterChanged',
 };
