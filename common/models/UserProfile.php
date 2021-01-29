@@ -197,4 +197,13 @@ class UserProfile extends \yii\db\ActiveRecord
             $profile->save(false);
         }
     }
+
+    public static function removeTelegramUser(int $userId): void
+    {
+        if ($profile = self::findOne(['up_user_id' => $userId])) {
+            $profile->up_telegram = '';
+            $profile->up_telegram_enable = false;
+            $profile->save(false);
+        }
+    }
 }
