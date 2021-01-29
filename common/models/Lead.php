@@ -3613,7 +3613,7 @@ Reason: {reason}',
             return $this->agentsProcessingFee;
         }
 
-        $this->agentsProcessingFee = $this->agents_processing_fee ?: ($this->getProcessingFeePerPax() * (int)($this->adults + $this->children));
+        $this->agentsProcessingFee = !is_null($this->agents_processing_fee) ? $this->agents_processing_fee : ($this->getProcessingFeePerPax() * (int)($this->adults + $this->children));
 
         return $this->agentsProcessingFee;
     }
@@ -3627,7 +3627,8 @@ Reason: {reason}',
         }
 
         if ($this->final_profit !== null) {
-            $this->finalProfit = (float)$this->final_profit - ($this->getProcessingFeePerPax() * (int)($this->adults + $this->children));
+            $processingFee = !is_null($this->agents_processing_fee) ? $this->agents_processing_fee : ($this->getProcessingFeePerPax() * (int)($this->adults + $this->children));
+            $this->finalProfit = (float)$this->final_profit - $processingFee;
         } else {
             $this->finalProfit = null;
         }
@@ -3643,20 +3644,25 @@ Reason: {reason}',
             return $this->processingFeePerPax;
         }
 
-        $this->processingFeePerPax = $this->agents_processing_fee;
-
-        if ($this->employee_id && $this->employee) {
-            $groups = $this->employee->ugsGroups;
-            if ($groups) {
-                foreach ($groups as $group) {
-                    if ($group->ug_processing_fee) {
-                        $this->processingFeePerPax = $group->ug_processing_fee;
-                        break;
-                    }
-                }
-                unset($groups);
-            }
+        $quote = $this->getBookedQuote();
+        if ($quote && $quote->isCreatedFromSearch()) {
+            $this->processingFeePerPax = SettingHelper::quoteSearchProcessingFee();
+        } else {
+            $this->processingFeePerPax = SettingHelper::processingFee();
         }
+
+//        if ($this->employee_id && $this->employee) {
+//            $groups = $this->employee->ugsGroups;
+//            if ($groups) {
+//                foreach ($groups as $group) {
+//                    if ($group->ug_processing_fee) {
+//                        $this->processingFeePerPax = $group->ug_processing_fee;
+//                        break;
+//                    }
+//                }
+//                unset($groups);
+//            }
+//        }
 
         return $this->processingFeePerPax;
     }
