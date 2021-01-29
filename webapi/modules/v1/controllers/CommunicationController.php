@@ -1168,7 +1168,7 @@ class CommunicationController extends ApiBaseController
 //            }
 
             $call->c_recording_disabled = (bool)($calData['call_recording_disabled'] ?? false);
-            $call->serPriority($priority);
+            $call->setDataPriority($priority);
 
             if (!$call->save()) {
                 \Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:findOrCreateCall:Call:save');

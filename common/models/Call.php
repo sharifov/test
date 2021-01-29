@@ -12,6 +12,8 @@ use sales\helpers\PhoneFormatter;
 use sales\helpers\setting\SettingHelper;
 use sales\helpers\UserCallIdentity;
 use sales\model\call\entity\call\data\Data;
+use sales\model\call\entity\call\data\QueueLongTime;
+use sales\model\call\entity\call\data\Repeat;
 use sales\model\call\helper\CallHelper;
 use frontend\widgets\newWebPhone\call\socket\MissedCallMessage;
 use frontend\widgets\newWebPhone\call\socket\RemoveIncomingRequestMessage;
@@ -1542,11 +1544,11 @@ class Call extends \yii\db\ActiveRecord
                 $callUserAccess->cua_call_id = $call->c_id;
                 $callUserAccess->cua_user_id = $user_id;
                 $callUserAccess->acceptPending();
-                $callUserAccess->cua_priority = $call->getPriority();
+                $callUserAccess->cua_priority = $call->getDataPriority();
             } else {
                 $callUserAccess->acceptPending();
                 $callUserAccess->cua_created_dt = date("Y-m-d H:i:s");
-                $callUserAccess->cua_priority = $call->getPriority();
+                $callUserAccess->cua_priority = $call->getDataPriority();
             }
 
             if (!$callUserAccess->save()) {
@@ -2237,7 +2239,7 @@ class Call extends \yii\db\ActiveRecord
     /**
      * @param Data $data
      */
-    public function setData(Data $data): void
+    private function setData(Data $data): void
     {
         $this->c_data_json = $data->toJson();
         $this->data = $data;
@@ -2315,15 +2317,51 @@ class Call extends \yii\db\ActiveRecord
         }
     }
 
-    public function serPriority(int $value): void
+    public function setDataPriority(int $value): void
     {
         $data = $this->getData();
         $data->priority = $value;
         $this->setData($data);
     }
 
-    public function getPriority(): int
+    public function getDataPriority(): int
     {
         return $this->getData()->priority;
+    }
+
+    public function setDataRepeat($jobId, $departmentPhoneId, $createdJobTime): void
+    {
+        $data = $this->getData();
+        $data->repeat = new Repeat([
+            'jobId' => $jobId,
+            'departmentPhoneId' => $departmentPhoneId,
+            'createdJobTime' => $createdJobTime
+        ]);
+        $this->setData($data);
+    }
+
+    public function resetDataRepeat(): void
+    {
+        $data = $this->getData();
+        $data->repeat->reset();
+        $this->setData($data);
+    }
+
+    public function setDataQueueLongTime($jobId, $departmentPhoneId, $createdJobTime): void
+    {
+        $data = $this->getData();
+        $data->queueLongTime = new QueueLongTime([
+            'jobId' => $jobId,
+            'departmentPhoneId' => $departmentPhoneId,
+            'createdJobTime' => $createdJobTime
+        ]);
+        $this->setData($data);
+    }
+
+    public function resetDataQueueLongTime(): void
+    {
+        $data = $this->getData();
+        $data->queueLongTime->reset();
+        $this->setData($data);
     }
 }
