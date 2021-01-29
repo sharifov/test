@@ -37,7 +37,7 @@ $countFiles = count($files);
                 <tr>
                     <td><?= !$canView ? '' : Html::a('<i class="fa fa-download"> </i>', $urlGenerator->generate(new FileInfo($file['name'], $file['path'], $file['uid'], $queryParams)), ['target' => 'blank']) ?></td>
                     <td><?= Html::encode($file['name']) ?></td>
-                    <td><?= Html::encode($file['title']) ?></td>
+                    <td><span style="word-break: break-all;"><?= Html::encode($file['title']) ?></span></td>
                 </tr>
             <?php endforeach; ?>
         </table>
