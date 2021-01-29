@@ -473,7 +473,7 @@ JS;
                 <?php
                     $displayRegister = ($modelProfile->up_rc_user_id) ? 'block' : 'none';
                     echo Html::button(
-                        '<i class="fa fa-rocket fa-flip-horizontal"></i>  Deactivate user',
+                        '<i class="fa fa-rocket fa-flip-horizontal"></i>  UnRegister from Rocket Chat',
                         [
                             'id' => 'un_register_from_rc',
                             'class' => 'btn btn-success rc_btns',
@@ -481,7 +481,7 @@ JS;
                             'data-class' => 'btn btn-success rc_btns',
                             'data-pjax' => '0',
                             'data-user_id' => $model->getId(),
-                            'title' => 'Deactivate user',
+                            'title' => 'UnRegister from Rocket Chat',
                             'style' => 'width: 200px; display:' . $displayRegister,
                         ]
                     )
