@@ -675,6 +675,8 @@ class Lead extends ActiveRecord implements Objectable
         $clone->clone_id = $this->id;
         $clone->employee_id = null;
         $clone->l_type_create = self::TYPE_CREATE_CLONE;
+        $clone->bo_flight_id = 0;
+        $clone->final_profit = null;
         $clone->recordEvent(new LeadCreatedCloneEvent($clone));
         return $clone;
     }
