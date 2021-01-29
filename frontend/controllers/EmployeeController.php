@@ -980,8 +980,6 @@ class EmployeeController extends FController
                         throw new \RuntimeException(VarDumper::dumpAsString($login['error']));
                     }
 
-                    $userProfile->up_rc_active = true;
-
                     if (!empty($login['data']['authToken'])) {
                         $userProfile->up_rc_auth_token = $login['data']['authToken'];
                         $userProfile->up_rc_token_expired = $rocketChat::generateTokenExpired();
@@ -1033,15 +1031,14 @@ class EmployeeController extends FController
             $out = ['status' => 0, 'message' => ''];
 
             try {
-                if (!$userProfile->up_rc_user_id) {
-                    throw new \RuntimeException('Error rc_user_id is empty');
-                }
-
                 $rocketChat = \Yii::$app->rchat;
                 $result = $rocketChat->updateUser($userProfile->up_rc_user_id, ['active' => false]);
 
                 if (isset($result['error']) && !$result['error']) {
-                    $userProfile->up_rc_active = false;
+                    $userProfile->up_rc_user_password = null;
+                    $userProfile->up_rc_user_id = null;
+                    $userProfile->up_rc_auth_token = null;
+                    $userProfile->up_rc_token_expired = null;
 
                     if (!$userProfile->save()) {
                         throw new \RuntimeException($userProfile->getErrorSummary(false)[0]);
@@ -1064,55 +1061,6 @@ class EmployeeController extends FController
             return $out;
         }
 
-        throw new BadRequestHttpException('User or userProfile is required.');
-    }
-
-    /**
-     * @return array
-     * @throws BadRequestHttpException
-     */
-    public function actionActivateToRocketChat(): array
-    {
-        if (!Yii::$app->request->isPost) {
-            throw new BadRequestHttpException();
-        }
-
-        \Yii::$app->response->format = Response::FORMAT_JSON;
-
-        $userId = (int)Yii::$app->request->post('id');
-        $user = Employee::findOne($userId);
-
-        if (Yii::$app->request->isAjax && $user && $userProfile = $user->userProfile) {
-            $out = ['status' => 0, 'message' => ''];
-
-            try {
-                if (!$userProfile->up_rc_user_id) {
-                    throw new \RuntimeException('Error rc_user_id is empty');
-                }
-
-                $rocketChat = \Yii::$app->rchat;
-                $result = $rocketChat->updateUser($userProfile->up_rc_user_id, ['active' => true]);
-
-                if (isset($result['error']) && !$result['error']) {
-                    $userProfile->up_rc_active = true;
-
-                    if (!$userProfile->save()) {
-                        throw new \RuntimeException($userProfile->getErrorSummary(false)[0]);
-                    }
-                } else {
-                    $errorMessage = $rocketChat::getErrorMessageFromResult($result);
-                    throw new \RuntimeException('Error from RocketChat. ' . $errorMessage);
-                }
-                $out['status'] = 1;
-            } catch (\Throwable $throwable) {
-                Yii::error(
-                    AppHelper::throwableFormatter($throwable),
-                    'EmployeeController:actionActivateToRocketChat:Throwable'
-                );
-                $out['message'] = $throwable->getMessage();
-            }
-            return $out;
-        }
         throw new BadRequestHttpException('User or userProfile is required.');
     }
 
