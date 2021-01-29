@@ -224,6 +224,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
             if (
                 SettingHelper::isGeneralLinePriorityEnable()
                 && ($call->c_source_type_id === Call::SOURCE_GENERAL_LINE || $call->c_source_type_id === Call::SOURCE_REDIRECT_CALL)
+                && !$call->isHold()
             ) {
                 if ($this->isPending()) {
                     Notifications::publish(
