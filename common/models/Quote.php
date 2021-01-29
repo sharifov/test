@@ -713,11 +713,11 @@ class Quote extends \yii\db\ActiveRecord
                 /*                if(!$this->employee_id && Yii::$app->user->id) {
                                     $this->employee_id = Yii::$app->user->id;
                                 }*/
+                if ($lead = $this->lead) {
+                    $this->agent_processing_fee = ($lead->adults + $lead->children) * ($this->isCreatedFromSearch() ? SettingHelper::quoteSearchProcessingFee() : SettingHelper::processingFee());
+                }
             }
 
-            if ($lead = $this->lead) {
-                $this->agent_processing_fee = ($lead->adults + $lead->children) * ($this->isCreatedFromSearch() ? SettingHelper::quoteSearchProcessingFee() : SettingHelper::processingFee());
-            }
             return true;
         }
         return false;
