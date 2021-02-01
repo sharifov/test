@@ -1,0 +1,78 @@
+#realtime-map-app table {margin: 2px 0 1px 0}
+.card-body {padding: 0 0 0 0}
+
+.crop-line {
+    white-space: nowrap;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+}
+
+.truncate {
+    width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.list-move {
+    transition: transform 0.8s;
+}
+
+.list-item {
+    display: inline-block;
+}
+.list-enter-active, .list-leave-active {
+    transition: all 0.4s;
+}
+.list-enter, .list-leave-to {
+    opacity: 0;
+    /*transform: translateY(30px);*/
+}
+
+.fade-enter-active, .fade-leave-active {
+    transition: opacity .2s;
+}
+.fade-enter, .fade-leave-to {
+    opacity: 0;
+}
+
+.fade2 {
+    backface-visibility: hidden;
+    z-index: 1;
+}
+
+/* moving */
+.fade2-move {
+    transition: all 600ms ease-in-out 50ms;
+}
+
+/* appearing */
+.fade2-enter-active {
+    transition: all 800ms ease-out;
+}
+
+/* disappearing */
+.fade2-leave-active {
+    transition: all 400ms ease-in;
+    position: absolute;
+    z-index: 0;
+}
+
+/* appear at / disappear to */
+.fade2-enter,
+.fade2-leave-to {
+    opacity: 0;
+}
+
+.call-menu {
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    margin: 0 auto;
+    border-radius: 100%;
+    transition: all .3s ease-in-out;
+}
+.call-menu:hover {
+    background-color: #596b7d;
+    color: #fff;
+}
