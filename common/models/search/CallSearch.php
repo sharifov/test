@@ -395,6 +395,66 @@ class CallSearch extends Call
         return $dataProvider;
     }
 
+    /**
+     * @param array $params
+     * @return array|Call[]
+     */
+    public function searchMonitorIncomingCalls(array $params): array
+    {
+        $query = static::find()
+            ->select('*')
+            ->andWhere(['c_call_type_id' => Call::CALL_TYPE_IN])
+            ->andWhere(['c_source_type_id' => [Call::SOURCE_GENERAL_LINE, Call::SOURCE_REDIRECT_CALL]]);
+
+        $query->leftJoin(ConferenceParticipant::tableName(), 'cp_call_id = c_id AND cp_type_id = ' . ConferenceParticipant::TYPE_AGENT  . ' AND cp_status_id <> ' . ConferenceParticipant::STATUS_LEAVE  . ' AND cp_status_id IS NOT NULL');
+
+        $this->load($params);
+
+        if ($this->limit > 0) {
+            $query->limit($this->limit);
+        }
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            $query->where('0=1');
+            return [];
+        }
+
+        /*$query->andWhere(['c_call_status' => [Call::CALL_STATUS_RINGING]]);
+        $query->orWhere(['c_call_status' => [Call::CALL_STATUS_IN_PROGRESS]]);
+        $query->orWhere(['c_call_status' => [Call::CALL_STATUS_QUEUE]]);*/
+
+        $query->andWhere(['or',
+            ['c_parent_id' => null],
+            ['c_status_id' => [Call::STATUS_DELAY, Call::STATUS_QUEUE]],
+        ]);
+
+        if ($this->status_ids) {
+            $query->andWhere(['c_status_id' => $this->status_ids]);
+        }
+
+        if ($this->dep_ids) {
+            $query->andWhere(['c_dep_id' => $this->dep_ids]);
+        }
+
+        if ($this->project_ids) {
+            $query->andWhere(['c_project_id' => $this->project_ids]);
+        }
+
+        if ($this->ug_ids) {
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])
+                //->join('JOIN', 'user_department', 'ud_user_id = ugs_user_id and ud_dep_id <> :depId', ['depId' => 'ud_dep_id'])
+                ->where(['ugs_group_id' => $this->ug_ids]);
+            $query->andWhere(['IN', 'c_created_user_id', $subQuery]);
+        }
+
+        $query->with(['cProject', 'cLead', /*'cLead.leadFlightSegments',*/ 'cCreatedUser', 'cDep', 'callUserAccesses', 'cuaUsers', 'cugUgs', 'calls']);
+
+        $query->orderBy(['c_queue_start_dt' => SORT_DESC]);
+
+        return $query->all();
+    }
+
     public function searchRealtimeUserCallMap($params)
     {
         $this->load($params);

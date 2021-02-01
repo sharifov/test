@@ -167,7 +167,7 @@ return [
         TranslatePluginAsset::class,
         LajaxLanguageItemPluginAsset::class,
 
-        MomentAsset::class
+//        MomentAsset::class
     ],
 
     'targets' => [
@@ -757,14 +757,14 @@ return [
             'css' => 'web-phone.min.css',
             'depends' => [ WebPhoneAsset::class ],
         ],
-        'MomentAsset' => [
-            'class' => MomentAsset::class,
-            'basePath' => '@webroot/all_shared/build',
-            'baseUrl' => '@web/all_shared/build',
-            'js' => 'moment.min.js',
-            'css' => 'moment.min.css',
-            'depends' => [ MomentAsset::class ],
-        ]
+//        'MomentAsset' => [
+//            'class' => MomentAsset::class,
+//            'basePath' => '@webroot/all_shared/build',
+//            'baseUrl' => '@web/all_shared/build',
+//            'js' => 'moment.min.js',
+//            'css' => 'moment.min.css',
+//            'depends' => [ MomentAsset::class ],
+//        ]
     ],
 
     'assetManager' => [

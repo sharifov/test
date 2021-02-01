@@ -590,6 +590,12 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Client Chat Monitor', 'url' => ['/client-chat/monitor'], 'icon' => 'map'],
                 ['label' => 'Agents Ratings', 'url' => ['/stats/agent-ratings'], 'icon' => 'star-half-empty'],
                 ['label' => 'Stats Agents & Leads', 'url' => ['/report/agents'], 'icon' => 'users'],
+                [
+                    'label' => 'Monitor', 'url' => 'javascript:', 'icon' => 'map',
+                    'items' => [
+                        ['label' => Yii::t('menu', 'Incoming Call'), 'url' => ['/monitor/call-incoming']],
+                    ]
+                ]
             ]
         ];
 

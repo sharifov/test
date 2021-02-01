@@ -23,6 +23,7 @@ use common\models\UserProjectParams;
 use frontend\widgets\newWebPhone\call\socket\MissedCallMessage;
 use http\Exception\InvalidArgumentException;
 use sales\auth\Auth;
+use sales\guards\call\CallDisplayGuard;
 use sales\helpers\app\AppHelper;
 use sales\helpers\call\CallHelper;
 use sales\helpers\setting\SettingHelper;
@@ -1343,6 +1344,19 @@ class CallController extends FController
         ]);
     }
 
+    public function actionGetCallInfo(): string
+    {
+        $callSid = Yii::$app->request->get('sid', '');
+
+        $call = $this->findCallModel($callSid);
+
+        $callGuard = new CallDisplayGuard();
+        return $this->renderAjax('monitor/_call_info', [
+            'call' => $call,
+            'callGuard' => $callGuard
+        ]);
+    }
+
     private function addUsersForCall(Call $call, array $users): array
     {
         $result = [];
@@ -1401,6 +1415,15 @@ class CallController extends FController
         }
 
         return $query->indexBy('id')->all();
+    }
+
+    protected function findCallModel(string $sid): Call
+    {
+        if (($model = Call::findOne(['c_call_sid' => $sid])) !== null) {
+            return $model;
+        }
+
+        throw new NotFoundHttpException('The requested page does not exist.');
     }
 
     protected function findCallLogModel(string $sid): CallLog
