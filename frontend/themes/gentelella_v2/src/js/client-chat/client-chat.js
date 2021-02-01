@@ -51,6 +51,26 @@
         });
     };
 
+    window.refreshClientChatFilter = function (formId, formName, loadChannelsUrl) {
+        let filterParams = getClientChatFilterParams(formId);
+        let urlParams = new URLSearchParams(window.location.search);
+        urlParams.delete('page');
+
+        let otherUrlParams = new URLSearchParams();
+
+        urlParams.forEach(function(value, key) {
+            if (key.indexOf(formName) !== 0) {
+                otherUrlParams.set(key, value);
+            }
+        });
+
+        window.history.replaceState({}, '', loadChannelsUrl + '?' + filterParams + '&' + otherUrlParams.toString());
+
+        $('.cc_btn_read_filter').removeClass('active');
+        pjaxReload({container: '#pjax-client-chat-channel-list'});
+        window.refreshChannelList();
+    };
+
     window.updateClientChatFilter = function(formId, formName, loadChannelsUrl) {
         let filterParams = getClientChatFilterParams(formId);
         let urlParams = new URLSearchParams(window.location.search);
