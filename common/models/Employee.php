@@ -20,6 +20,7 @@ use sales\model\user\entity\ShiftTime;
 use sales\model\user\entity\StartTime;
 use sales\model\user\entity\UserCache;
 use sales\model\user\entity\userStatus\UserStatus;
+use sales\model\userClientChatData\entity\UserClientChatData;
 use sales\validators\SlugValidator;
 use Yii;
 use yii\base\NotSupportedException;
@@ -80,6 +81,7 @@ use yii\web\NotFoundHttpException;
  * @property UserProjectParams[] $userProjectParams
  * @property Project[] $uppProjects
  * @property UserProfile $userProfile
+ * @property UserClientChatData $userClientChatData
  * @property UserOnline $userOnline
  * @property UserStatus $userStatus
  * @property string|bool|null $timezone
@@ -734,6 +736,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function getUserProfile()
     {
         return $this->hasOne(UserProfile::class, ['up_user_id' => 'id']);
+    }
+
+    public function getUserClientChatData(): ActiveQuery
+    {
+        return $this->hasOne(UserClientChatData::class, ['uccd_employee_id' => 'id']);
     }
 
     public function canCall()

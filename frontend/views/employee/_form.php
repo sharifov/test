@@ -5,6 +5,7 @@ use common\models\UserProductType;
 use common\models\UserProjectParams;
 use frontend\models\UserFailedLogin;
 use modules\product\src\entities\productType\ProductType;
+use sales\access\UserClientChatDataAccess;
 use sales\auth\Auth;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
@@ -449,8 +450,25 @@ JS;
             </div>
         </div>
     </div>
-    <?php if (!$model->isNewRecord && (Auth::can('/employee/register-to-rocket-chat') && Auth::can('/employee/un-register-from-rocket-chat'))) : ?>
-        <h5>Rocket Chat Credentials</h5>
+    <?php if (!$model->isNewRecord) : ?>
+        <?php
+
+        $chatActiveStatus = null;
+        $activeStatusIco = '';
+        if ($model->userClientChatData && $model->userClientChatData->isActive()) {
+            $activeStatusIco = '<i class="fa fa-check" title="User is active"></i>';
+            $chatActiveStatus = true;
+        }
+        if ($model->userClientChatData && !$model->userClientChatData->isActive()) {
+            $activeStatusIco = '<i class="fa fa-lock" title="User not active"></i>';
+            $chatActiveStatus = false;
+        }
+        ?>
+
+        <h5>
+            Rocket Chat Credentials &nbsp;
+            <span id="rc_active_status"><?php echo $activeStatusIco ?></span>
+        </h5>
         <div class="well">
             <div class="form-group">
                 <div class="row">
@@ -460,48 +478,92 @@ JS;
                                 $modelProfile->up_rc_user_id => $modelProfile->upUser->username
                             ] : [],
                         ]) */ ?>
-                        <?= $form->field($modelProfile, 'up_rc_user_id')->textInput(['maxlength' => true]) ?>
+                        <?= $form->field($modelProfile, 'up_rc_user_id')->textInput(['maxlength' => true, 'readonly' => true]) ?>
                         <?= $form->field($modelProfile, 'up_rc_token_expired')->widget(\sales\widgets\DateTimePicker::class) ?>
                     </div>
                     <div class="col-md-7">
                         <?= $form->field($modelProfile, 'up_rc_user_password')->passwordInput(['autocomplete' => "off"]) ?>
-                        <?= $form->field($modelProfile, 'up_rc_auth_token')->textInput(['maxlength' => true]) ?>
+                        <?= $form->field($modelProfile, 'up_rc_auth_token')->textInput(['maxlength' => true, 'readonly' => true]) ?>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-6">
-                <?php
-                    $displayRegister = ($modelProfile->up_rc_user_id) ? 'block' : 'none';
-                    echo Html::button(
-                        '<i class="fa fa-rocket fa-flip-horizontal"></i>  UnRegister from Rocket Chat',
-                        [
-                            'id' => 'un_register_from_rc',
-                            'class' => 'btn btn-success rc_btns',
-                            'data-inner' => '',
-                            'data-class' => 'btn btn-success rc_btns',
-                            'data-pjax' => '0',
-                            'data-user_id' => $model->getId(),
-                            'title' => 'UnRegister from Rocket Chat',
-                            'style' => 'width: 200px; display:' . $displayRegister,
-                        ]
-                    )
-                ?>
-                <?php
-                    $displayUnRegister = ($modelProfile->up_rc_user_id) ? 'none' : 'block';
-                    echo Html::button(
-                        '<i class="fa fa-rocket"></i>  Register to Rocket Chat',
-                        [
-                            'id' => 'register_to_rc',
-                            'class' => 'btn btn-success rc_btns',
-                            'data-inner' => '',
-                            'data-class' => 'btn btn-success rc_btns',
-                            'data-pjax' => '0',
-                            'data-user_id' => $model->getId(),
-                            'title' => 'Register to Rocket Chat',
-                            'style' => 'width: 170px; margin-left: 0; display:' . $displayUnRegister,
-                        ]
-                    )
-                ?>
+                <?php if (Auth::can('/employee/deactivate-from-rocket-chat')) : ?>
+                    <?php
+                        $displayRegister = ($chatActiveStatus === true && $modelProfile->up_rc_user_id) ? 'block' : 'none';
+                        echo Html::button(
+                            '<i class="fa fa-lock"></i>  Deactivate user',
+                            [
+                                'id' => 'deactivate_from_rc',
+                                'class' => 'btn btn-success rc_btns',
+                                'data-inner' => '',
+                                'data-class' => 'btn btn-success rc_btns',
+                                'data-pjax' => '0',
+                                'data-user_id' => $model->getId(),
+                                'title' => 'Deactivate user',
+                                'style' => 'width: 200px; margin-left: 0; display:' . $displayRegister,
+                            ]
+                        )
+                    ?>
+                <?php endif ?>
+
+                <?php if (Auth::can('/employee/activate-to-rocket-chat')) : ?>
+                    <?php
+                        $displayActivate = ($chatActiveStatus === false && $modelProfile->up_rc_user_id) ? 'block' : 'none';
+                        echo Html::button(
+                            '<i class="fa fa-check"></i>  Activate user',
+                            [
+                                'id' => 'activate_to_rc',
+                                'class' => 'btn btn-success rc_btns',
+                                'data-inner' => '',
+                                'data-class' => 'btn btn-success rc_btns',
+                                'data-pjax' => '0',
+                                'data-user_id' => $model->getId(),
+                                'title' => 'Activate user',
+                                'style' => 'width: 200px; margin-left: 0; display:' . $displayActivate,
+                            ]
+                        )
+                    ?>
+                <?php endif ?>
+
+                <?php if (Auth::can('/employee/register-to-rocket-chat')) : ?>
+                    <?php
+                        $displayRegister = ($modelProfile->up_rc_user_id) ? 'none' : 'block';
+                        echo Html::button(
+                            '<i class="fa fa-rocket"></i>  Register to Rocket Chat',
+                            [
+                                'id' => 'register_to_rc',
+                                'class' => 'btn btn-success rc_btns',
+                                'data-inner' => '',
+                                'data-class' => 'btn btn-success rc_btns',
+                                'data-pjax' => '0',
+                                'data-user_id' => $model->getId(),
+                                'title' => 'Register to Rocket Chat',
+                                'style' => 'width: 170px; margin-left: 0; display:' . $displayRegister,
+                            ]
+                        )
+                    ?>
+                <?php endif ?>
+
+                <?php if (Auth::can('/employee/un-register-from-rocket-chat')) : ?>
+                    <?php
+                        $displayUnRegister = ($modelProfile->up_rc_user_id) ? 'block' : 'none';
+                        echo Html::button(
+                            '<i class="fa fa-rocket fa-flip-horizontal"></i>  Delete from Rocket Chat',
+                            [
+                                'id' => 'un_register_from_rc',
+                                'class' => 'btn btn-success rc_btns',
+                                'data-inner' => '',
+                                'data-class' => 'btn btn-success rc_btns',
+                                'data-pjax' => '0',
+                                'data-user_id' => $model->getId(),
+                                'title' => 'UnRegister from Rocket Chat',
+                                'style' => 'width: 200px; margin-left: 0; display:' . $displayUnRegister,
+                            ]
+                        )
+                    ?>
+                <?php endif ?>
+
                     </div>
                     <?php if ($modelProfile->up_rc_user_id && $modelProfile->up_rc_auth_token && Auth::can('/employee/validate-rocket-chat-credential')) : ?>
                         <div class="col-md-6" style="text-align: right">
@@ -897,6 +959,8 @@ JS;
 <?php
 $validateCredentialRcUrl = Url::to(['/employee/validate-rocket-chat-credential']);
 $refreshTokenRcUrl = Url::to(['/employee/refresh-rocket-chat-user-token']);
+$activateToRcUrl = Url::to(['/employee/activate-to-rocket-chat']);
+$deactivateFromRcUrl = Url::to(['/employee/deactivate-from-rocket-chat']);
 $js = <<<JS
 
     //  $(document).on('click', '.unblock-user', function(e) {
@@ -1094,9 +1158,15 @@ $js = <<<JS
                 $('#userprofile-up_rc_user_id').val(dataResponse.rc_user_id);
                 $('#userprofile-up_rc_token_expired').val(dataResponse.rc_token_expired);
                 
-                createNotify('Success', 'The request was successful', 'success');
+                if (dataResponse.message.length) {
+                    createNotify('Success', dataResponse.message, 'success');
+                } else {
+                    createNotify('Success', 'The request was successful', 'success');
+                }
                 $('#register_to_rc').hide();
+                $('#deactivate_from_rc').show();
                 $('#un_register_from_rc').show();
+                $('#rc_active_status').html('<i class="fa fa-check" title="User is active"></i>'); 
             } else {
                 createNotify('Error', dataResponse.message, 'error');
             } 
@@ -1112,7 +1182,11 @@ $js = <<<JS
     });
     
     $(document).on('click', '#un_register_from_rc', function (e) { 
-        e.preventDefault();
+        e.preventDefault();   
+                
+        if(!confirm('Are you sure you want to delete the user and all his data (rooms, messages etc.)?')) {
+            return false;
+        }
         
         let btn = $(this);
         loadingBtn(btn, true);    
@@ -1130,9 +1204,16 @@ $js = <<<JS
                 $('#userprofile-up_rc_user_id').val('');
                 $('#userprofile-up_rc_token_expired').val('');
                 
-                createNotify('Success', 'The request was successful', 'success');
-                $('#un_register_from_rc').hide();
-                $('#register_to_rc').show();                
+                if (dataResponse.message.length) {
+                    createNotify('Success', dataResponse.message, 'success');
+                } else {
+                    createNotify('Success', 'The request was successful', 'success');
+                }
+                $('#un_register_from_rc').hide();                 
+                $('#activate_to_rc').hide();
+                $('#deactivate_from_rc').hide();   
+                $('#rc_active_status').html('');
+                $('#register_to_rc').show();               
             } else {
                 createNotify('Error', dataResponse.message, 'error');
             } 
@@ -1144,6 +1225,78 @@ $js = <<<JS
         })
         .always(function() {
             setTimeout(loadingBtn, 4000, $('#un_register_from_rc'), false);     
+        });        
+    });
+    
+    $(document).on('click', '#activate_to_rc', function (e) { 
+        e.preventDefault();
+        
+        let btn = $(this);
+        loadingBtn(btn, true);    
+        
+        $.ajax({
+            url: '{$activateToRcUrl}',
+            type: 'POST',
+            data: {id: btn.data('user_id')},
+            dataType: 'json'    
+        })
+        .done(function(dataResponse) {
+            if (dataResponse.status === 1) {                
+                if (dataResponse.message.length) {
+                    createNotify('Success', dataResponse.message, 'success');
+                } else {
+                    createNotify('Success', 'The request was successful', 'success');
+                }
+                $('#activate_to_rc').hide();
+                $('#deactivate_from_rc').show();   
+                $('#rc_active_status').html('<i class="fa fa-check" title="User is active"></i>');             
+            } else {
+                createNotify('Error', dataResponse.message, 'error');
+            } 
+            loadingBtn($('#activate_to_rc'), false);      
+        })
+        .fail(function(error) {
+            loadingBtn($('#activate_to_rc'), false);
+            createNotify('Error', 'Server error. Please try again later', 'error');
+        })
+        .always(function() {
+            setTimeout(loadingBtn, 4000, $('#activate_to_rc'), false);     
+        });        
+    });
+    
+    $(document).on('click', '#deactivate_from_rc', function (e) { 
+        e.preventDefault();
+        
+        let btn = $(this);
+        loadingBtn(btn, true);    
+        
+        $.ajax({
+            url: '{$deactivateFromRcUrl}',
+            type: 'POST',
+            data: {id: btn.data('user_id')},
+            dataType: 'json'    
+        })
+        .done(function(dataResponse) {
+            if (dataResponse.status === 1) {                
+                if (dataResponse.message.length) {
+                    createNotify('Success', dataResponse.message, 'success');
+                } else {
+                    createNotify('Success', 'The request was successful', 'success');
+                }
+                $('#activate_to_rc').show();
+                $('#deactivate_from_rc').hide();   
+                $('#rc_active_status').html('<i class="fa fa-lock" title="User not active"></i>');       
+            } else {
+                createNotify('Error', dataResponse.message, 'error');
+            } 
+            loadingBtn($('#deactivate_from_rc'), false);      
+        })
+        .fail(function(error) {
+            loadingBtn($('#deactivate_from_rc'), false);
+            createNotify('Error', 'Server error. Please try again later', 'error');
+        })
+        .always(function() {
+            setTimeout(loadingBtn, 4000, $('#deactivate_from_rc'), false);     
         });        
     });
     

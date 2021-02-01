@@ -258,6 +258,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Canned Response', 'url' => ['/client-chat-canned-response-crud/index']],
                         ['label' => 'Canned Response Category', 'url' => ['/client-chat-canned-response-category-crud/index']],
                         ['label' => 'Chat Forms', 'url' => ['/client-chat-form-crud/index']],
+                        ['label' => 'User Chat Data', 'url' => ['/user-client-chat-data-crud/index']],
                     ],
                 ],
                 ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'list'],
