@@ -47,7 +47,7 @@ use yii\web\JsExpression;
                             'size' => Select2::SIZE_SMALL,
                             'pluginEvents' => [
                                 'change' => new \yii\web\JsExpression('function (e) {
-                                        window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
+                                        window.refreshClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
                                     }'),
                             ],
                             'pluginOptions' => [
@@ -71,7 +71,7 @@ use yii\web\JsExpression;
                             'size' => Select2::SIZE_SMALL,
                             'pluginEvents' => [
                                 'change' => new \yii\web\JsExpression('function (e) {
-                                    window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
+                                    window.refreshClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
                                 }'),
                             ],
                             'pluginOptions' => [
@@ -121,7 +121,7 @@ use yii\web\JsExpression;
                             ],
                             'pluginEvents' => [
                                 'change' => new \yii\web\JsExpression('function (e) {
-                                    window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
+                                    window.refreshClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
                                 }'),
                             ],
                         ]); ?>
@@ -136,7 +136,7 @@ use yii\web\JsExpression;
                             'size' => Select2::SIZE_SMALL,
                             'pluginEvents' => [
                                 'change' => new \yii\web\JsExpression('function (e) {
-                                        window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
+                                        window.refreshClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
                                     }'),
                             ],
                             'pluginOptions' => [
@@ -186,14 +186,14 @@ use yii\web\JsExpression;
                                         $("#filterform-rangedate-start").val(picker.startDate.format(format));
                                         $("#filterform-rangedate-end").val(picker.endDate.format(format));
                                     } 
-                                    window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
+                                    window.refreshClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
                                 }'),
                                 'cancel.daterangepicker' => new JsExpression('function(ev, picker) {
                                     $(".range-value").val("");
                                     $(".kv-drp-container input").each(function() {
                                         $(this).val("");
                                     });
-                                    window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
+                                    window.refreshClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
                                 }'),
                             ],
                         ]); ?>
@@ -209,7 +209,7 @@ use yii\web\JsExpression;
                             'size' => Select2::SIZE_SMALL,
                             'pluginEvents' => [
                                 'change' => new \yii\web\JsExpression('function (e) {
-                                        window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
+                                        window.refreshClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
                                     }'),
                             ],
                             'pluginOptions' => [
@@ -234,7 +234,7 @@ use yii\web\JsExpression;
                                 'id' => Html::getInputId($filter, 'clientName'),
                                 'class' => 'form-control',
                                 'autocomplete' => 'off',
-                                'onchange' => new JsExpression('window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");'),
+                                'onchange' => new JsExpression('window.refreshClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");'),
                             ]
                         ) ?>
                     </div>

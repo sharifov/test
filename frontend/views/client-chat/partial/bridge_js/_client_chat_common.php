@@ -270,13 +270,13 @@ $(document).on('click', '.cc_btn_group_filter', function () {
     let newValue = $(this).attr('data-group-id');
     let groupInput = $(document).find('#{$filter->getGroupInputId()}');
     groupInput.val(newValue);
-    window.updateClientChatFilter('{$filter->getId()}', '{$filter->formName()}', '{$loadChannelsUrl}');
+    window.refreshClientChatFilter('{$filter->getId()}', '{$filter->formName()}', '{$loadChannelsUrl}');
     sessionStorage.selectedChats = '{}';
     refreshUserSelectedState();    
 });
 
 $(document).on('click', '#{$filter->getReadUnreadInputId()}', function () {
-    window.updateClientChatFilter('{$filter->getId()}', '{$filter->formName()}', '{$loadChannelsUrl}');
+    window.refreshClientChatFilter('{$filter->getId()}', '{$filter->formName()}', '{$loadChannelsUrl}');
 });
 
 function clientChatResetUnreadMessageCounter(chatId) {
@@ -648,6 +648,7 @@ window.refreshChatInfo = function (cch_id, callable, ref, socketConnectionId) {
 }
 
 window.refreshChatPage = function (cchId) {    
+    updateUrl(cchId);
     preReloadChat(cchId);
     refreshChannelList();
     refreshChatInfo(cchId);    
@@ -725,6 +726,12 @@ reloadChat = function(chatData) {
         $('#_rc-iframe-wrapper').append(chatData.iframe);  
         resolve(chatData);                  
     }); 
+}
+
+window.updateUrl = function(chatId) {
+    let params = new URLSearchParams(window.location.search);
+    params.set('chid', chatId);
+    window.history.replaceState({}, '', '{$loadChannelsUrl}?'+params.toString());
 }
 
 preReloadChat = function(cchId) {
@@ -1203,7 +1210,7 @@ $(document).on('click', '#reset_additional', function (e) {
         $(this).val('');          
     }); 
     $('#resetAdditionalFilter').val('1');
-    window.updateClientChatFilter("{$filter->getId()}", "{$filter->formName()}", "{$loadChannelsUrl}");
+    window.refreshClientChatFilter("{$filter->getId()}", "{$filter->formName()}", "{$loadChannelsUrl}");
 });  
 
 $(document).on('click', '#btn_additional_filters', function (e) {
