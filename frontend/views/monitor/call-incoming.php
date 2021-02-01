@@ -31,7 +31,9 @@ MonitorCallIncomingAsset::register($this);
                     <div class="x_content">
                         <transition-group name="fade2" tag="div" class="card-body">
                             <div v-for="(item, index) in onlineUserList" class="list-item col-md-2 truncate" :key="item">
-                                <i :class="'fa fa-user text-' + (item.uo_idle_state ? 'warning' : 'success')"></i> {{ getUserName(item.uo_user_id) }}
+                                <i v-if="item.us_is_on_call ? 'true' : 'false'" :class="'fa fa-phone text-success'"></i>
+                                <i v-else-if="item.us_call_phone_status ? 'true' : 'false'" :class="'fa fa-tty text-danger'"></i>
+                                <i v-else-if="item.us_has_call_access ? 'true' : 'false'" :class="'fa fa-random'"></i> {{ getUserName(item.uo_user_id) }}
                             </div>
                         </transition-group>
                     </div>
