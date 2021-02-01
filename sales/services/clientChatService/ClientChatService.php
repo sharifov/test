@@ -420,7 +420,7 @@ class ClientChatService
             $clientChat->assignOwner($ownerId)->inProgress($ownerId, ClientChatStatusLog::ACTION_CHAT_ACCEPT);
             $_self->clientChatRepository->save($clientChat);
             $_self->clientChatMessageService->touchUnreadMessage($clientChat->cch_id);
-//            $_self->assignAgentToRcChannel($clientChat->cch_rid, $clientChat->cchOwnerUser->userProfile->up_rc_user_id ?? '');
+            $_self->assignAgentToRcChannel($clientChat->cch_rid, $clientChat->cchOwnerUser->userProfile->up_rc_user_id ?? '');
         });
     }
 
@@ -493,19 +493,19 @@ class ClientChatService
             }
 //            $chatUserAccess->transferAccept();
 
-//            if ((int)$oldChannelId !== (int)$newClientChat->cch_channel_id) {
-//                $botTransferChatResult = \Yii::$app->chatBot->transferDepartment($clientChat->cch_rid, $clientChat->ccv->ccvCvd->cvd_visitor_rc_id, (string)$oldChannelId, (string)$newClientChat->cch_channel_id);
-//                if ($botTransferChatResult['error']) {
-//                    throw new \RuntimeException('[Chat Bot Transfer] ' . $botTransferChatResult['error']['message'] ?? 'Cant read error message from Chat Bot response');
-//                }
-//
-//                $success = $botTransferChatResult['data']['success'] ?? false;
-//                if (!$success) {
-//                    throw new \RuntimeException('[Chat Bot Transfer] ' . ($botTransferChatResult['data']['message'] ?? 'Cant read error message from Chat Bot response'));
-//                }
-//            }
-//
-//            $this->assignAgentToRcChannel($newClientChat->cch_rid, $newClientChat->cchOwnerUser->userProfile->up_rc_user_id ?? '');
+            if ((int)$oldChannelId !== (int)$newClientChat->cch_channel_id) {
+                $botTransferChatResult = \Yii::$app->chatBot->transferDepartment($clientChat->cch_rid, $clientChat->ccv->ccvCvd->cvd_visitor_rc_id, (string)$oldChannelId, (string)$newClientChat->cch_channel_id);
+                if ($botTransferChatResult['error']) {
+                    throw new \RuntimeException('[Chat Bot Transfer] ' . $botTransferChatResult['error']['message'] ?? 'Cant read error message from Chat Bot response');
+                }
+
+                $success = $botTransferChatResult['data']['success'] ?? false;
+                if (!$success) {
+                    throw new \RuntimeException('[Chat Bot Transfer] ' . ($botTransferChatResult['data']['message'] ?? 'Cant read error message from Chat Bot response'));
+                }
+            }
+
+            $this->assignAgentToRcChannel($newClientChat->cch_rid, $newClientChat->cchOwnerUser->userProfile->up_rc_user_id ?? '');
 
             if ($lastMessage) {
                 $lastMessageNew = $this->clientChatLastMessageRepository->cloneToNewChat($lastMessage, $newClientChat->cch_id);
