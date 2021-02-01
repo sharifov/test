@@ -53,7 +53,6 @@ use sales\model\coupon\entity\couponCase\CouponCase;
 use sales\model\coupon\useCase\send\SendCouponsForm;
 use sales\model\department\department\Params;
 use sales\model\phone\AvailablePhoneList;
-use sales\model\project\entity\CustomData;
 use sales\model\saleTicket\useCase\create\SaleTicketService;
 use sales\repositories\cases\CaseCategoryRepository;
 use sales\repositories\cases\CasesRepository;
@@ -1265,8 +1264,8 @@ class CasesController extends FController
         try {
             $mailPreview = Yii::$app->communication->mailPreview(
                 $case->cs_project_id,
-                $customData->object->case->feedbackTemplateTypeKey,
-                $customData->object->case->feedbackEmailFrom,
+                $params->object->case->feedbackTemplateTypeKey,
+                $params->object->case->feedbackEmailFrom,
                 $form->sendTo,
                 $content,
                 $form->language
@@ -1277,7 +1276,7 @@ class CasesController extends FController
             }
 
             $this->sendFeedbackEmail(
-                $customData,
+                $params,
                 $case,
                 $form,
                 $user,
@@ -1305,7 +1304,7 @@ class CasesController extends FController
         $mail->e_case_id = $case->cs_id;
         $templateTypeId = EmailTemplateType::find()
             ->select(['etp_id'])
-            ->andWhere(['etp_key' => $customData->object->case->feedbackTemplateTypeKey])
+            ->andWhere(['etp_key' => $params->object->case->feedbackTemplateTypeKey])
             ->asArray()
             ->one();
         if ($templateTypeId) {
@@ -1315,8 +1314,8 @@ class CasesController extends FController
         $mail->e_status_id = Email::STATUS_PENDING;
         $mail->e_email_subject = $subject;
         $mail->body_html = $body;
-        $mail->e_email_from = $customData->object->case->feedbackEmailFrom;
-        $mail->e_email_from_name = $customData->object->case->feedbackNameFrom ?: $user->nickname;
+        $mail->e_email_from = $params->object->case->feedbackEmailFrom;
+        $mail->e_email_from_name = $params->object->case->feedbackNameFrom ?: $user->nickname;
         $mail->e_email_to_name = $case->client ? $case->client->full_name : '';
         $mail->e_language_id = $form->language;
         $mail->e_email_to = $form->sendTo;
