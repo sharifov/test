@@ -156,6 +156,7 @@ const callItemComponent = {
             this.show = true;
         } else {
             //this.show = false;
+            alert(3);
             this.removeElement(this.item.c_id);
         }
     },
@@ -209,6 +210,7 @@ const callItemComponent = {
     // },
     methods: {
         removeElement(index) {
+            alert(1);
             this.$root.removeCall(index); //callList.splice(index, 1);
             //this.$delete(this.finds, index)
         },
@@ -406,7 +408,7 @@ var callMapApp = Vue.createApp({
         },
 
         removeCall(index) {
-            console.log(index);
+            alert(2);
             this.callList = this.callList.splice(index, 1);
         },
         addCall(callData) {

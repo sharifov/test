@@ -75,9 +75,9 @@ use yii\widgets\DetailView;
         </div>
         <div class="col-md-12">
             <div class="d-flex">
-                <add-user :show="true" :call-id="<?= $call->c_id ?>"></add-user>
+                <add-user :show="<?= Auth::can('call/assignUsers', ['call' => $call]) ? 'true' : 'false' ?>" :call-id="<?= $call->c_id ?>"></add-user>
 
-                <join-user :show="true"
+                <join-user :show="<?= $callGuard->canDisplayJoinUserBtn($call, Auth::user()) ? 'true' : 'false'?>"
                            :join-listen-source="<?= Call::SOURCE_LISTEN ?>"
                            :join-coach-source="<?= Call::SOURCE_COACH ?>"
                            :join-barge-source="<?= Call::SOURCE_BARGE ?>"
