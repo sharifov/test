@@ -46,11 +46,11 @@ $user = Yii::$app->user->identity;
         ) ?>
     <?php endif; ?>
 
-    <?php if ($user->canRoute('/call/user-map')) :?>
+    <?php if ($user->canRoute('/call/realtime-map')) :?>
         <?=Html::a(
             '<span class="fa fa-map"></span>',
-            ['/call/user-map'],
-            ['target' => '_blank', 'data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'Call Map']
+            ['/call/realtime-map'],
+            ['target' => '_blank', 'data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'Call realtime Map']
         ) ?>
     <?php endif; ?>
 

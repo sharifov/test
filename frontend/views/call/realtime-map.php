@@ -62,8 +62,9 @@ $this->title = 'Realtime Call Map';
 
     /* moving */
     .fade2-move {
-        transition: all 600ms ease-in-out 50ms;
+        /*transition: all 600ms ease-in-out 50ms;*/
         opacity: 1;
+        transition: opacity 2s ease-in-out;
     }
 
     /* appearing */
@@ -77,7 +78,7 @@ $this->title = 'Realtime Call Map';
     /* disappearing */
     .fade2-leave-active {
         /*transition: all 400ms ease-in;*/
-        animation: scale-up-center;
+        animation: scale-up-center 2s;
         position: absolute;
         z-index: 0;
     }
@@ -246,7 +247,7 @@ $this->title = 'Realtime Call Map';
             <div class="card card-default" style="min-height: 98%">
                 <div class="card-header"> Online Users  ({{ onlineUserCounter }}), TimeZone: {{ userTimeZone }}</div>
                 <transition-group name="fade2" tag="div" class="card-body">
-                    <div v-for="(item, index) in onlineUserList" class="list-item col-md-6 truncate" :key="item">
+                    <div v-for="(item, index) in userOnlineList()" class="list-item col-md-6 truncate" :key="item">
                         <user-component :item="item" :key="item.uo_user_id" :index="index"></user-component>
                     </div>
                 </transition-group>

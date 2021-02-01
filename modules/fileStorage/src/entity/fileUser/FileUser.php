@@ -30,11 +30,11 @@ class FileUser extends \yii\db\ActiveRecord
             [['fus_fs_id', 'fus_user_id'], 'unique', 'targetAttribute' => ['fus_fs_id', 'fus_user_id']],
 
             ['fus_fs_id', 'required'],
-            ['fus_fs_id', 'integer'],
+            ['fus_fs_id', 'integer', 'min' => 1, 'max' => 4294967295],
             ['fus_fs_id', 'exist', 'skipOnError' => true, 'targetClass' => FileStorage::class, 'targetAttribute' => ['fus_fs_id' => 'fs_id']],
 
             ['fus_user_id', 'required'],
-            ['fus_user_id', 'integer'],
+            ['fus_user_id', 'integer', 'min' => 1, 'max' => 4294967295],
             ['fus_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['fus_user_id' => 'id']],
         ];
     }
