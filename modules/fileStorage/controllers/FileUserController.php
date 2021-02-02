@@ -11,6 +11,7 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\db\StaleObjectException;
+use Exception;
 
 class FileUserController extends FController
 {
@@ -121,10 +122,13 @@ class FileUserController extends FController
      */
     protected function findModel($fus_fs_id, $fus_user_id): FileUser
     {
-        if (($model = FileUser::findOne(['fus_fs_id' => $fus_fs_id, 'fus_user_id' => $fus_user_id])) !== null) {
-            return $model;
+        try {
+            if (($model = FileUser::findOne(['fus_fs_id' => $fus_fs_id, 'fus_user_id' => $fus_user_id])) !== null) {
+                return $model;
+            }
+            throw new NotFoundHttpException('The requested page does not exist');
+        } catch (Exception $exception) {
+            throw new NotFoundHttpException('The requested page does not exist');
         }
-
-        throw new NotFoundHttpException('The requested page does not exist.');
     }
 }
