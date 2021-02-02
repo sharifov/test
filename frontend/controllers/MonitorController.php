@@ -16,6 +16,7 @@ use sales\auth\Auth;
 use sales\guards\call\CallDisplayGuard;
 use sales\helpers\app\AppParamsHelper;
 use sales\helpers\call\CallHelper;
+use sales\model\user\entity\userStatus\UserStatus;
 use yii\base\InvalidConfigException;
 use yii\helpers\ArrayHelper;
 use yii\web\Response;
@@ -39,6 +40,7 @@ class MonitorController extends FController
             'cfChannelName' => Call::CHANNEL_REALTIME_MAP,
             'cfUserOnlineChannel' => Call::CHANNEL_USER_ONLINE,
             'cfConnectionUrl' => $centrifugoWsConnectionUrl,
+            'cfUserStatusChannel' => UserStatus::CHANNEL_NAME,
             'cfToken' => \Yii::$app->centrifugo->generateConnectionToken(Auth::id())
         ]);
     }
@@ -109,6 +111,7 @@ class MonitorController extends FController
         $response['callTypeList'] = Call::TYPE_LIST;
         $response['callUserAccessStatusTypeList'] = CallUserAccess::STATUS_TYPE_LIST;
         $response['onlineUserList'] = $userOnlineSearch->searchUserByIncomingCall($params);
+        $response['userStatusList'] = UserStatus::find()->asArray()->all();
 
         $response['userTimeZone'] = Auth::user()->timezone ?: 'UTC';
 

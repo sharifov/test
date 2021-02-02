@@ -5,6 +5,7 @@
 /* @var $cfToken string */
 /* @var $cfChannelName string */
 /* @var $cfUserOnlineChannel string */
+/* @var $cfUserStatusChannel string */
 
 use frontend\assets\MonitorCallIncomingAsset;
 
@@ -30,10 +31,8 @@ MonitorCallIncomingAsset::register($this);
                     </div>
                     <div class="x_content">
                         <transition-group name="fade2" tag="div" class="card-body">
-                            <div v-for="(item, index) in onlineUserList" class="list-item col-md-2 truncate" :key="item">
-                                <i v-if="item.us_is_on_call ? 'true' : 'false'" :class="'fa fa-phone text-success'"></i>
-                                <i v-else-if="item.us_call_phone_status ? 'true' : 'false'" :class="'fa fa-tty text-danger'"></i>
-                                <i v-else-if="item.us_has_call_access ? 'true' : 'false'" :class="'fa fa-random'"></i> {{ getUserName(item.uo_user_id) }}
+                            <div v-for="(item, index) in userOnlineList()" class="list-item truncate" :key="item" style="width: 150px;">
+                                <user-component :item="item" :key="item.uo_user_id" :index="index"></user-component>
                             </div>
                         </transition-group>
                     </div>
@@ -136,6 +135,7 @@ let cfChannelName = '$cfChannelName';
 let cfUserOnlineChannel = '$cfUserOnlineChannel';
 let cfToken = '$cfToken';
 let cfConnectionUrl = '$cfConnectionUrl';
+let cfUserStatusChannel = '$cfUserStatusChannel';
 
 var centrifuge = new Centrifuge(cfConnectionUrl, {debug: false});
 centrifuge.setToken(cfToken);
@@ -167,6 +167,19 @@ centrifuge.on('connect', function(ctx){
                 callMapApp.addUserOnline(jsonData.data.userOnline);
             }
         }
+    });
+    
+    var subUserStatus = centrifuge.subscribe(cfUserStatusChannel, function(message) {
+        let jsonData = message.data;
+        // console.log(jsonData.data);
+        if (jsonData.object === 'userStatus') {
+            if (jsonData.action === 'delete') {
+                callMapApp.deleteUserStatus(jsonData.data.userStatus);
+            } else {
+                callMapApp.addUserStatus(jsonData.data.userStatus);
+            }
+        }
+        //console.log(jsonData.data.userOnline.uo_idle_state);
     });
 });
 

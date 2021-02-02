@@ -7,6 +7,7 @@ use common\models\ProjectEmployeeAccess;
 use common\models\UserConnection;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
+use sales\model\user\entity\userStatus\UserStatus;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\UserOnline;
@@ -91,9 +92,9 @@ class UserOnlineSearch extends UserOnline
 
     /**
      * @param $params
-     * @return array|UserConnection[]
+     * @return array
      */
-    public function searchUserByIncomingCall($params)
+    public function searchUserByIncomingCall($params): array
     {
         $query = self::find();
 
@@ -130,6 +131,6 @@ class UserOnlineSearch extends UserOnline
         $query->cache(5);
         //$query->with(['ucUser']);
 
-        return $query->all();
+        return $query->asArray()->all();
     }
 }
