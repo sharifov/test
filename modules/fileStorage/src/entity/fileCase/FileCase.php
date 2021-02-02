@@ -30,11 +30,11 @@ class FileCase extends \yii\db\ActiveRecord
             [['fc_fs_id', 'fc_case_id'], 'unique', 'targetAttribute' => ['fc_fs_id', 'fc_case_id']],
 
             ['fc_case_id', 'required'],
-            ['fc_case_id', 'integer'],
+            ['fc_case_id', 'integer', 'min' => 1, 'max' => 2147483647, 'tooBig' => '{attribute} is out of range for type integer'],
             ['fc_case_id', 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['fc_case_id' => 'cs_id']],
 
             ['fc_fs_id', 'required'],
-            ['fc_fs_id', 'integer'],
+            ['fc_fs_id', 'integer', 'min' => 1, 'max' => 2147483647, 'tooBig' => '{attribute} is out of range for type integer'],
             ['fc_fs_id', 'exist', 'skipOnError' => true, 'targetClass' => FileStorage::class, 'targetAttribute' => ['fc_fs_id' => 'fs_id']],
         ];
     }

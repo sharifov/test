@@ -28,7 +28,7 @@ class FileLog extends \yii\db\ActiveRecord
             ['fl_created_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
 
             ['fl_fs_id', 'required'],
-            ['fl_fs_id', 'integer'],
+            ['fl_fs_id', 'integer', 'min' => 1, 'max' => 2147483647, 'tooBig' => '{attribute} is out of range for type integer'],
             ['fl_fs_id', 'exist', 'skipOnError' => true, 'targetClass' => FileStorage::class, 'targetAttribute' => ['fl_fs_id' => 'fs_id']],
 
             ['fl_fsh_id', 'default', 'value' => null],

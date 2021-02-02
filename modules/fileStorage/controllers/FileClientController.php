@@ -121,10 +121,14 @@ class FileClientController extends FController
      */
     protected function findModel($fcl_fs_id, $fcl_client_id): FileClient
     {
-        if (($model = FileClient::findOne(['fcl_fs_id' => $fcl_fs_id, 'fcl_client_id' => $fcl_client_id])) !== null) {
-            return $model;
-        }
+        try {
+            if (($model = FileClient::findOne(['fcl_fs_id' => $fcl_fs_id, 'fcl_client_id' => $fcl_client_id])) !== null) {
+                return $model;
+            }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+            throw new NotFoundHttpException('The requested page does not exist.');
+        } catch (\Throwable $e) {
+            throw new NotFoundHttpException('The requested page does not exist');
+        }
     }
 }

@@ -121,10 +121,14 @@ class FileCaseController extends FController
      */
     protected function findModel($fc_fs_id, $fc_case_id): FileCase
     {
-        if (($model = FileCase::findOne(['fc_fs_id' => $fc_fs_id, 'fc_case_id' => $fc_case_id])) !== null) {
-            return $model;
-        }
+        try {
+            if (($model = FileCase::findOne(['fc_fs_id' => $fc_fs_id, 'fc_case_id' => $fc_case_id])) !== null) {
+                return $model;
+            }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+            throw new NotFoundHttpException('The requested page does not exist.');
+        } catch (\Throwable $e) {
+            throw new NotFoundHttpException('The requested page does not exist');
+        }
     }
 }

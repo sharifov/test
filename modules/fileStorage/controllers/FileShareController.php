@@ -118,10 +118,14 @@ class FileShareController extends FController
      */
     protected function findModel($id): FileShare
     {
-        if (($model = FileShare::findOne($id)) !== null) {
-            return $model;
-        }
+        try {
+            if (($model = FileShare::findOne($id)) !== null) {
+                return $model;
+            }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+            throw new NotFoundHttpException('The requested page does not exist.');
+        } catch (\Throwable $e) {
+            throw new NotFoundHttpException('The requested page does not exist');
+        }
     }
 }

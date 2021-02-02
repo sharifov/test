@@ -121,10 +121,14 @@ class FileLeadController extends FController
      */
     protected function findModel($fld_fs_id, $fld_lead_id): FileLead
     {
-        if (($model = FileLead::findOne(['fld_fs_id' => $fld_fs_id, 'fld_lead_id' => $fld_lead_id])) !== null) {
-            return $model;
-        }
+        try {
+            if (($model = FileLead::findOne(['fld_fs_id' => $fld_fs_id, 'fld_lead_id' => $fld_lead_id])) !== null) {
+                return $model;
+            }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+            throw new NotFoundHttpException('The requested page does not exist.');
+        } catch (\Throwable $e) {
+            throw new NotFoundHttpException('The requested page does not exist');
+        }
     }
 }

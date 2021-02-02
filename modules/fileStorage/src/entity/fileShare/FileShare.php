@@ -39,7 +39,7 @@ class FileShare extends \yii\db\ActiveRecord
             ['fsh_expired_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
 
             ['fsh_fs_id', 'required'],
-            ['fsh_fs_id', 'integer'],
+            ['fsh_fs_id', 'integer', 'min' => 1, 'max' => 2147483647, 'tooBig' => '{attribute} is out of range for type integer'],
             ['fsh_fs_id', 'exist', 'skipOnError' => true, 'targetClass' => FileStorage::class, 'targetAttribute' => ['fsh_fs_id' => 'fs_id']],
         ];
     }

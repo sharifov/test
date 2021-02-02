@@ -30,11 +30,11 @@ class FileLead extends \yii\db\ActiveRecord
             [['fld_fs_id', 'fld_lead_id'], 'unique', 'targetAttribute' => ['fld_fs_id', 'fld_lead_id']],
 
             ['fld_fs_id', 'required'],
-            ['fld_fs_id', 'integer'],
+            ['fld_fs_id', 'integer', 'min' => 1, 'max' => 2147483647, 'tooBig' => '{attribute} is out of range for type integer'],
             ['fld_fs_id', 'exist', 'skipOnError' => true, 'targetClass' => FileStorage::class, 'targetAttribute' => ['fld_fs_id' => 'fs_id']],
 
             ['fld_lead_id', 'required'],
-            ['fld_lead_id', 'integer'],
+            ['fld_lead_id', 'integer', 'min' => 1, 'max' => 2147483647, 'tooBig' => '{attribute} is out of range for type integer'],
             ['fld_lead_id', 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['fld_lead_id' => 'id']],
         ];
     }

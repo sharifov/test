@@ -30,11 +30,11 @@ class FileClient extends \yii\db\ActiveRecord
             [['fcl_fs_id', 'fcl_client_id'], 'unique', 'targetAttribute' => ['fcl_fs_id', 'fcl_client_id']],
 
             ['fcl_client_id', 'required'],
-            ['fcl_client_id', 'integer'],
+            ['fcl_client_id', 'integer', 'min' => 1, 'max' => 2147483647, 'tooBig' => '{attribute} is out of range for type integer'],
             ['fcl_client_id', 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['fcl_client_id' => 'id']],
 
             ['fcl_fs_id', 'required'],
-            ['fcl_fs_id', 'integer'],
+            ['fcl_fs_id', 'integer', 'min' => 1, 'max' => 2147483647, 'tooBig' => '{attribute} is out of range for type integer'],
             ['fcl_fs_id', 'exist', 'skipOnError' => true, 'targetClass' => FileStorage::class, 'targetAttribute' => ['fcl_fs_id' => 'fs_id']],
         ];
     }

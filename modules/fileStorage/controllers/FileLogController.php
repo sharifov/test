@@ -117,10 +117,14 @@ class FileLogController extends FController
      */
     protected function findModel($id): FileLog
     {
-        if (($model = FileLog::findOne($id)) !== null) {
-            return $model;
-        }
+        try {
+            if (($model = FileLog::findOne($id)) !== null) {
+                return $model;
+            }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+            throw new NotFoundHttpException('The requested page does not exist.');
+        } catch (\Throwable $e) {
+            throw new NotFoundHttpException('The requested page does not exist');
+        }
     }
 }
