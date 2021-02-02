@@ -92,9 +92,9 @@ class UserOnlineSearch extends UserOnline
 
     /**
      * @param $params
-     * @return array
+     * @return array|UserOnline[]
      */
-    public function searchUserByIncomingCall($params): array
+    public function searchUserByIncomingCall($params)
     {
         $query = self::find();
 
@@ -131,6 +131,6 @@ class UserOnlineSearch extends UserOnline
         $query->cache(5);
         //$query->with(['ucUser']);
 
-        return $query->asArray()->all();
+        return $query->all();
     }
 }

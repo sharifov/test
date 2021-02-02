@@ -111,7 +111,7 @@ class MonitorController extends FController
         $response['callTypeList'] = Call::TYPE_LIST;
         $response['callUserAccessStatusTypeList'] = CallUserAccess::STATUS_TYPE_LIST;
         $response['onlineUserList'] = $userOnlineSearch->searchUserByIncomingCall($params);
-        $response['userStatusList'] = UserStatus::find()->asArray()->all();
+        $response['userStatusList'] = UserStatus::find()->all();
 
         $response['userTimeZone'] = Auth::user()->timezone ?: 'UTC';
 
