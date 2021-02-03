@@ -23,6 +23,7 @@ use common\models\UserProjectParams;
 use frontend\widgets\newWebPhone\call\socket\MissedCallMessage;
 use http\Exception\InvalidArgumentException;
 use sales\auth\Auth;
+use sales\entities\cases\Cases;
 use sales\guards\call\CallDisplayGuard;
 use sales\helpers\app\AppHelper;
 use sales\helpers\call\CallHelper;
@@ -50,6 +51,7 @@ use Yii;
 use common\models\Call;
 use common\models\search\CallSearch;
 use yii\base\InvalidConfigException;
+use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
@@ -1154,14 +1156,22 @@ class CallController extends FController
 
         try {
             $callUserAccess = CallUserAccess::find()
+                ->select([CallUserAccess::tableName() . '.*'])
+                ->addSelect(['is_owner' => new Expression('if ((' . Lead::tableName() . '.employee_id is not null and ' . Lead::tableName() . '.employee_id = cua_user_id) or (cs_user_id is not null and cs_user_id = cua_user_id), 1, 0)')])
                 ->innerJoin(Call::tableName(), 'c_id = cua_call_id')
+                ->leftJoin(Lead::tableName(), Lead::tableName() . '.id = c_lead_id')
+                ->leftJoin(Cases::tableName(), 'cs_id = c_case_id')
                 ->andWhere([
                     'cua_user_id' => Auth::id(),
                     'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING
                 ])
                 ->andWhere(['c_source_type_id' => [Call::SOURCE_GENERAL_LINE, Call::SOURCE_REDIRECT_CALL]])
                 ->andWhere(['<>', 'c_status_id', Call::STATUS_HOLD])
-                ->orderBy(['cua_priority' => SORT_DESC, 'cua_created_dt' => SORT_ASC])->all();
+                ->orderBy([
+                    'cua_priority' => SORT_DESC,
+                    'is_owner' => SORT_DESC,
+                    'cua_created_dt' => SORT_ASC
+                ])->all();
 
             $reserver = Yii::createObject(CallReserver::class);
 
