@@ -150,7 +150,9 @@ class CasePreviewEmailForm extends Model
                 $files[] = new \modules\fileStorage\src\services\url\FileInfo(
                     $availableFiles[$fileId]['name'],
                     $availableFiles[$fileId]['path'],
-                    $availableFiles[$fileId]['uid']
+                    $availableFiles[$fileId]['uid'],
+                    $availableFiles[$fileId]['title'],
+                    null
                 );
             }
         }

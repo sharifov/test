@@ -25,7 +25,7 @@ class UploadedFileByLeadListUpdaterListener
     public function handle(FileUploadedByLeadEvent $event): void
     {
         Notifications::publish('addFileToFileStorageList', ['lead_id' => $event->leadId], [
-            'url' => $this->urlGenerator->generate(new FileInfo($event->name, $event->path, $event->uid, QueryParams::byLead())),
+            'url' => $this->urlGenerator->generate(new FileInfo($event->name, $event->path, $event->uid, $event->title, QueryParams::byLead())),
             'name' => $event->name,
             'title' => $event->title,
         ]);

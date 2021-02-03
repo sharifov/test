@@ -7,7 +7,7 @@ namespace modules\fileStorage\src\entity\fileStorage\events;
  *
  * @property int $caseId
  * @property string $name
- * @property string|null $title
+ * @property string $title
  * @property string $path
  * @property string $uid
  */
@@ -15,7 +15,7 @@ class FileUploadedByCaseEvent
 {
     public int $caseId;
     public string $name;
-    public ?string $title;
+    public string $title;
     public string $path;
     public string $uid;
 

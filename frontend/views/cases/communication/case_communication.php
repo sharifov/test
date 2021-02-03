@@ -779,13 +779,18 @@ $js = <<<JS
         let from = $(this).data('from');
         let to = $(this).data('to');
         let subject = $(this).data('subject');
+        let files = $(this).data('files');
+        
+        if (files) {
+            files = '<hr>' + files;
+        }
         
         var obj = document.getElementById('object-email-view');
         obj.data = '/email/view?id='+id+'&preview=1';
         obj.parentNode.replaceChild(obj.cloneNode(true), obj);
         
         var popup = $('#modal-email-view');
-        popup.find('#modal-email-view-label').html('<h6>' + subject + '<br>' + from + '<br>' + to + '<br>' +  date + '</h6>');
+        popup.find('#modal-email-view-label').html('<h6>' + subject + '<br>' + from + '<br>' + to + '<br>' +  date + '</h6>' + files);
         //previewPopup.find('.modal-body').html(data);
         popup.modal('show');
         return false;

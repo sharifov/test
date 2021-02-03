@@ -47,12 +47,14 @@ class AwsS3UrlGenerator implements UrlGenerator
                 $links[] = [
                     'value' => $file->path,
                     'name' => $file->name,
+                    'title' => $file->title,
                     'type_id' => UrlGenerator::TYPE_PRIVATE,
                 ];
             } else {
                 $links[] = [
                     'value' => $this->publicLink($file->path),
                     'name' => $file->name,
+                    'title' => $file->title,
                     'type_id' => UrlGenerator::TYPE_PUBLIC,
                 ];
             }
