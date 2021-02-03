@@ -2364,4 +2364,56 @@ class Call extends \yii\db\ActiveRecord
         $data->queueLongTime->reset();
         $this->setData($data);
     }
+
+    /**
+     * @return array
+     */
+    public static function getStatusListApi(): array
+    {
+        $data = [];
+        if (self::STATUS_LIST) {
+            foreach (self::STATUS_LIST as $id => $name) {
+                $data[] = [
+                    'id' => $id,
+                    'name' => $name,
+                ];
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * @return array
+     */
+    public static function getSourceListApi(): array
+    {
+        $data = [];
+        if (self::SOURCE_LIST) {
+            foreach (self::SOURCE_LIST as $id => $name) {
+                $data[] = [
+                    'id' => $id,
+                    'name' => $name,
+                ];
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * @return array
+     */
+    public static function getTypeListApi(): array
+    {
+        $data = [];
+        if (self::TYPE_LIST) {
+            foreach (self::TYPE_LIST as $id => $name) {
+                $data[] = [
+                    'id' => $id,
+                    'name' => $name,
+                ];
+            }
+        }
+        return $data;
+    }
+
 }
