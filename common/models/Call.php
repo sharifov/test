@@ -2415,5 +2415,4 @@ class Call extends \yii\db\ActiveRecord
         }
         return $data;
     }
-
 }

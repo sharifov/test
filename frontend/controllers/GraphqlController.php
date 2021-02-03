@@ -11,7 +11,6 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use yii\web\Response;
 
-
 class GraphqlController extends FController
 {
     /**
