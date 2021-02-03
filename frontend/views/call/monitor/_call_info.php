@@ -8,6 +8,7 @@
 
 use common\models\Call;
 use sales\auth\Auth;
+use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 ?>
