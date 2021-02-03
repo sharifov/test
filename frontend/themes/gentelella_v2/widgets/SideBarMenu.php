@@ -483,6 +483,18 @@ class SideBarMenu extends \yii\bootstrap\Widget
 
                 ['label' => 'Call recording disabled', 'url' => ['/call-recording-disabled/list'], 'icon' => 'list'],
 
+                [
+                    'label' => 'Shift Schedules',
+                    'url' => 'javascript:',
+                    'icon' => 'calendar',
+                    'items' => [
+                        ['label' => 'Shift', 'url' => ['/shift-crud/index']],
+                        ['label' => 'Shift Schedule Rule', 'url' => ['/shift-schedule-rule-crud/index']],
+                        ['label' => 'User Shift Assign', 'url' => ['/user-shift-assign-crud/index']],
+                        ['label' => 'User Shift Schedule', 'url' => ['/user-shift-schedule-crud/index']],
+                    ]
+                ],
+
             ]
         ];
 

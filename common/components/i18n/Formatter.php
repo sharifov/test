@@ -56,9 +56,11 @@ use sales\model\emailList\entity\EmailList;
 use sales\model\emailList\helpers\formatters\EmailListFormatter;
 use sales\model\phoneList\entity\PhoneList;
 use sales\model\phoneList\helpers\formatters\PhoneListFormatter;
+use sales\model\shiftSchedule\entity\shift\Shift;
 use sales\model\user\entity\paymentCategory\UserPaymentCategory;
 use sales\model\user\entity\payroll\UserPayroll;
 use yii\bootstrap4\Html;
+use yii\helpers\Url;
 use yii\helpers\VarDumper;
 
 class Formatter extends \yii\i18n\Formatter
@@ -741,6 +743,19 @@ class Formatter extends \yii\i18n\Formatter
         }
 
         return \sales\model\clientChat\Formatter::asClientChat($chat);
+    }
+
+    public function asShift(?Shift $model): string
+    {
+        if ($model === null) {
+            return $this->nullDisplay;
+        }
+
+        return \yii\helpers\Html::a(
+            'shift: ' . $model->sh_name . '(' . $model->sh_id . ')',
+            Url::to(['/shift-crud/view', 'id' => $model->sh_id]),
+            ['target' => '_blank', 'data-pjax' => 0]
+        );
     }
 
     /**
