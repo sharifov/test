@@ -1116,6 +1116,33 @@ class EmployeeController extends FController
                     $errorMessage = $rocketChat::getErrorMessageFromResult($result);
                     throw new \RuntimeException('Error from RocketChat. ' . $errorMessage);
                 }
+
+                if (!$rocketUsername = $user['username']) {
+                    throw new \RuntimeException('Not found Username for this user(' . $userId . ')');
+                }
+                if (!$rocketPassword = $user->userProfile->up_rc_user_password) {
+                    throw new \RuntimeException('Not found Rocket Chat Auth Password for this user(' . $userId . ')');
+                }
+
+                $resultLogin = \Yii::$app->rchat->login($rocketUsername, $rocketPassword);
+
+                if ($resultLogin['error'] !== false) {
+                    if ($resultLogin['error'] === 'You must be logged in to do this.') {
+                        throw new \RuntimeException('Invalid credential');
+                    }
+                    throw new \RuntimeException((string)$resultLogin['error']);
+                }
+
+                if (empty($resultLogin['data']['authToken'])) {
+                    throw new \RuntimeException('index authToken not found in rocket chat api response');
+                }
+
+                $user->userProfile->up_rc_auth_token = $resultLogin['data']['authToken'];
+                $user->userProfile->up_rc_token_expired = \Yii::$app->rchat::generateTokenExpired();
+                if (!$user->userProfile->save()) {
+                    throw new \RuntimeException($user->userProfile->getErrorSummary(false)[0]);
+                }
+
                 $out['status'] = 1;
                 $out['message'] = 'Request Activate To Rocket Chat was successful';
             } catch (\Throwable $throwable) {
