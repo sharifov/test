@@ -548,9 +548,9 @@ var callMapApp = Vue.createApp({
             let iconClass = 'fa fa-user'
             let item = this.userStatusFind(userId)
             if (item) {
-                if (+item.us_is_on_call) {
+                if ((+item.us_is_on_call)) {
                     iconClass = 'fa fa-phone text-success'
-                } else if (+item.us_call_phone_status) {
+                } else if (!(+item.us_call_phone_status)) {
                     iconClass = 'fa fa-tty text-danger'
                 } else if (+item.us_has_call_access) {
                     iconClass = 'fa fa-random'
