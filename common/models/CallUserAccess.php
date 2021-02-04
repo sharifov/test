@@ -383,4 +383,21 @@ class CallUserAccess extends \yii\db\ActiveRecord
         }
         return false;
     }
+
+    /**
+     * @return array
+     */
+    public static function getStatusTypeListApi(): array
+    {
+        $data = [];
+        if (self::STATUS_TYPE_LIST) {
+            foreach (self::STATUS_TYPE_LIST as $id => $name) {
+                $data[] = [
+                    'id' => $id,
+                    'name' => $name,
+                ];
+            }
+        }
+        return $data;
+    }
 }
