@@ -338,6 +338,11 @@ var callMapApp = Vue.createApp({
             onlineUserList: [],
             userStatusList: [],
             sortingOnline: -1,
+            isAdmin: false,
+            userAccessDepartments: [],
+            userAccessProjects: [],
+            accessCallSourceType: [],
+            accessCallType: []
         };
     },
     created() {
@@ -420,6 +425,11 @@ var callMapApp = Vue.createApp({
             if (index > -1) {
                 return this.updateUserOnline(data);
             }
+
+            if (!this.isAdmin && (!this.userAccessDepartments.includes(data.uo_user_id.toString()) || !this.userAccessProjects.includes(data.uo_user_id.toString()))) {
+                return false;
+            }
+
             this.onlineUserList = [data, ...this.onlineUserList];
             //this.callList.push(callData);
         },
@@ -445,6 +455,11 @@ var callMapApp = Vue.createApp({
             if (this.callList.find(x => x.c_id === callData.c_id)) {
                 return this.updateCall(callData);
             } else {
+
+                if (!this.accessCallSourceType.includes(callData.c_source_type_id) || !this.accessCallType.includes(callData.c_call_type_id)) {
+                    return false;
+                }
+
                 this.callList = [callData, ...this.callList];
             }
             //this.callList.push(callData);
@@ -481,6 +496,11 @@ var callMapApp = Vue.createApp({
                     this.onlineUserList = response.data.onlineUserList;
                     this.userTimeZone = response.data.userTimeZone;
                     this.userStatusList = response.data.userStatusList;
+                    this.isAdmin = response.data.isAdmin;
+                    this.userAccessDepartments = response.data.userAccessDepartments;
+                    this.userAccessProjects = response.data.userAccessProjects;
+                    this.accessCallSourceType = response.data.accessCallSourceType;
+                    this.accessCallType = response.data.accessCallType;
                 })
                 .catch(error => {
                     console.log(this.callUserAccessStatusTypeList);

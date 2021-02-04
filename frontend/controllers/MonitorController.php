@@ -4,18 +4,15 @@ namespace frontend\controllers;
 
 use common\models\Call;
 use common\models\CallUserAccess;
-use common\models\ConferenceParticipant;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Project;
+use common\models\ProjectEmployeeAccess;
 use common\models\search\CallSearch;
-use common\models\search\UserConnectionSearch;
 use common\models\search\UserOnlineSearch;
-use common\models\UserOnline;
+use common\models\UserDepartment;
 use sales\auth\Auth;
-use sales\guards\call\CallDisplayGuard;
 use sales\helpers\app\AppParamsHelper;
-use sales\helpers\call\CallHelper;
 use sales\model\user\entity\userStatus\UserStatus;
 use yii\base\InvalidConfigException;
 use yii\helpers\ArrayHelper;
@@ -60,18 +57,20 @@ class MonitorController extends FController
         $params = \Yii::$app->request->queryParams;
 
         $withOutDepartments = 0;
+        $departments = $user->udDeps;
         if ($isAdmin) {
             $accessDepartments = [];
-        } elseif ($departments = $user->udDeps) {
+        } elseif ($departments) {
             $accessDepartments = ArrayHelper::getColumn($departments, 'dep_id');
         } else {
             $accessDepartments = [$withOutDepartments];
         }
 
         $withOutProjects = 0;
+        $projects = $user->projects;
         if ($isAdmin) {
             $accessProjects = [];
-        } elseif ($projects = $user->projects) {
+        } elseif ($projects) {
             $accessProjects = ArrayHelper::getColumn($projects, 'id');
         } else {
             $accessProjects = [$withOutProjects];
@@ -115,6 +114,16 @@ class MonitorController extends FController
         $response['userStatusList'] = UserStatus::find()->all();
 
         $response['userTimeZone'] = Auth::user()->timezone ?: 'UTC';
+
+        $response['isAdmin'] = $isAdmin;
+        $departments = UserDepartment::find()->usersByDep(ArrayHelper::getColumn($departments, 'dep_id'))->asArray()->all();
+        $projects = ProjectEmployeeAccess::find()->usersByProject(ArrayHelper::getColumn($projects, 'id'))->asArray()->all();
+
+        $response['userAccessDepartments'] = ArrayHelper::getColumn($departments, 'ud_user_id');
+        $response['userAccessProjects'] = ArrayHelper::getColumn($projects, 'employee_id');
+
+        $response['accessCallSourceType'] = [Call::SOURCE_GENERAL_LINE, Call::SOURCE_REDIRECT_CALL];
+        $response['accessCallType'] = [Call::CALL_TYPE_IN];
 
         return $response;
     }
