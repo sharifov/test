@@ -21,7 +21,7 @@ MonitorCallIncomingAsset::register($this);
             <div class="col-md-6">
                 <div class="x_panel">
                     <div class="x_title">
-                        <h2>Online Users  ({{ onlineUserCounter }}), TimeZone: {{ userTimeZone }}</h2>
+                        <h2 v-cloak>Online Users  ({{ onlineUserCounter }}), TimeZone: {{ userTimeZone }}</h2>
                         <ul class="nav navbar-right panel_toolbox">
                             <li>
                                 <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
@@ -53,27 +53,27 @@ MonitorCallIncomingAsset::register($this);
                         <div class="tile_count">
                             <div class="col-md-4 col-sm-4  tile_stats_count">
                                 <span class="count_top"><i class="fa fa-list"></i> Call Items</span>
-                                <div class="count">{{ callList.length }}</div>
+                                <div class="count" v-cloak>{{ callList.length }}</div>
                             </div>
                             <div class="col-md-4 col-sm-4  tile_stats_count">
                                 <span class="count_top"><i class="fa fa-recycle"></i> IVR</span>
-                                <div class="count">{{ ivrCounter }}</div>
+                                <div class="count" v-cloak>{{ ivrCounter }}</div>
                             </div>
                             <div class="col-md-4 col-sm-4  tile_stats_count">
                                 <span class="count_top"><i class="fa fa-pause"></i> Queue</span>
-                                <div class="count">{{ queueCounter }}</div>
+                                <div class="count" v-cloak>{{ queueCounter }}</div>
                             </div>
                             <div class="col-md-4 col-sm-4  tile_stats_count">
                                 <span class="count_top"><i class="fa fa-phone"></i> InProgress / Ringing</span>
-                                <div class="count">{{ inProgressCounter }} / {{ ringingCounter }}</div>
+                                <div class="count" v-cloak>{{ inProgressCounter }} / {{ ringingCounter }}</div>
                             </div>
                             <div class="col-md-4 col-sm-4  tile_stats_count">
                                 <span class="count_top"><i class="fa fa-stop"></i> Delay / Hold</span>
-                                <div class="count">{{ delayCounter }} / {{ holdCounter }}</div>
+                                <div class="count"v-cloak>{{ delayCounter }} / {{ holdCounter }}</div>
                             </div>
                             <div class="col-md-4 col-sm-4  tile_stats_count">
                                 <span class="count_top"><i class="fa fa-user"></i> Idle / OnLine</span>
-                                <div class="count">{{ idleUserList.length }} / {{ onlineUserCounter }}</div>
+                                <div class="count" v-cloak>{{ idleUserList.length }} / {{ onlineUserCounter }}</div>
                             </div>
                         </div>
                     </div>
@@ -85,7 +85,7 @@ MonitorCallIncomingAsset::register($this);
             <div class="col-md-12">
                 <div class="x_panel">
                     <div class="x_title">
-                        <h2>Calls in Queue: IVR, Queued, Hold, Delay ({{ callListQueued.length }})</h2>
+                      <h2>Calls in Queue: IVR, Queued, Hold, Delay (<span v-cloak style="color: inherit">{{ callListQueued.length }} </span>)</h2>
                         <ul class="nav navbar-right panel_toolbox">
                             <li>
                                 <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
@@ -106,7 +106,7 @@ MonitorCallIncomingAsset::register($this);
             <div class="col-md-12">
                 <div class="x_panel">
                     <div class="x_title">
-                        <h2>Calls in Progress: Ringing, In Progress ({{ callListInProgress.length }})</h2>
+                      <h2>Calls in Progress: Ringing, In Progress (<span v-cloak style="color: inherit">{{ callListInProgress.length }}</span>)</h2>
                         <ul class="nav navbar-right panel_toolbox">
                             <li>
                                 <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
@@ -190,3 +190,10 @@ centrifuge.connect();
 JS;
 
 $this->registerJs($js);
+
+$css = <<<CSS
+[v-cloak] {display: none}
+CSS;
+
+$this->registerCss($css);
+
