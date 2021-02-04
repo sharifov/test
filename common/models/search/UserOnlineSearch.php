@@ -18,6 +18,7 @@ use common\models\UserOnline;
  * @property array $dep_ids
  * @property array $ug_ids
  * @property array $project_ids
+ * @property array $user_id
  */
 class UserOnlineSearch extends UserOnline
 {
@@ -27,13 +28,15 @@ class UserOnlineSearch extends UserOnline
 
     public array $project_ids = [];
 
+    public int $user_id = 0;
+
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['uo_user_id', 'uo_idle_state'], 'integer'],
+            [['uo_user_id', 'uo_idle_state', 'user_id'], 'integer'],
             [['uo_updated_dt', 'uo_idle_state_dt'], 'date', 'format' => 'php:Y-m-d'],
             ['dep_ids', 'each', 'rule' => ['integer']],
             ['ug_ids', 'each', 'rule' => ['integer']],
@@ -94,7 +97,7 @@ class UserOnlineSearch extends UserOnline
      * @param $params
      * @return array|UserOnline[]
      */
-    public function searchUserByIncomingCall($params)
+    public function searchUserByIncomingCall($params): array
     {
         $query = self::find();
 
@@ -114,7 +117,7 @@ class UserOnlineSearch extends UserOnline
 
             if (in_array(0, $this->dep_ids)) {
                 $subQuery = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['ud_dep_id' => array_keys(Department::DEPARTMENT_LIST)]);
-                $query->andWhere(['NOT IN', 'uo_user_id', $subQuery]);
+                $query->orWhere(['NOT IN', 'uo_user_id', $subQuery]);
             }
         }
 
@@ -127,6 +130,8 @@ class UserOnlineSearch extends UserOnline
             $subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(employee_id)'])->where(['project_id' => $this->project_ids]);
             $query->andWhere(['IN', 'uo_user_id', $subQuery]);
         }
+
+        $query->orWhere(['uo_user_id' => $this->user_id]);
 
         $query->cache(5);
         //$query->with(['ucUser']);

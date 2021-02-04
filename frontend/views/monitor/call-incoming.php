@@ -8,6 +8,7 @@
 /* @var $cfUserStatusChannel string */
 
 use frontend\assets\MonitorCallIncomingAsset;
+use yii\web\View;
 
 $this->title = 'Realtime Call Map';
 
@@ -21,7 +22,7 @@ MonitorCallIncomingAsset::register($this);
             <div class="col-md-6">
                 <div class="x_panel">
                     <div class="x_title">
-                        <h2 v-cloak>Online Users  ({{ onlineUserCounter }}), TimeZone: {{ userTimeZone }}</h2>
+                      <h2>Online Users  (<span v-cloak style="color: inherit">{{ onlineUserCounter }}</span>), TimeZone: <span v-cloak style="color: inherit">{{ userTimeZone }}</span></h2>
                         <ul class="nav navbar-right panel_toolbox">
                             <li>
                                 <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
@@ -195,5 +196,5 @@ $css = <<<CSS
 [v-cloak] {display: none}
 CSS;
 
-$this->registerCss($css);
+$this->registerCss($css, ['position' => View::POS_HEAD]);
 

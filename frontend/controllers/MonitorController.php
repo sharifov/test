@@ -79,27 +79,28 @@ class MonitorController extends FController
 
         $accessGroups = [];
 
-        $params['UserOnline']['ug_ids'] = $accessGroups;
-        $params['UserOnline']['project_ids'] = $accessProjects;
+        $params['UserOnlineSearch']['ug_ids'] = $accessGroups;
+        $params['UserOnlineSearch']['project_ids'] = $accessProjects;
+        $params['UserOnlineSearch']['user_id'] = Auth::id();
 
         if ($isAdmin || in_array(Department::DEPARTMENT_SALES, $accessDepartments, true)) {
-            $params['UserOnline']['dep_ids'][] = Department::DEPARTMENT_SALES;
+            $params['UserOnlineSearch']['dep_ids'][] = Department::DEPARTMENT_SALES;
         }
 
         if ($isAdmin || in_array(Department::DEPARTMENT_EXCHANGE, $accessDepartments, true)) {
-            $params['UserOnline']['dep_ids'][] = Department::DEPARTMENT_EXCHANGE;
+            $params['UserOnlineSearch']['dep_ids'][] = Department::DEPARTMENT_EXCHANGE;
         }
 
         if ($isAdmin || in_array(Department::DEPARTMENT_SUPPORT, $accessDepartments, true)) {
-            $params['UserOnline']['dep_ids'][] = Department::DEPARTMENT_SUPPORT;
+            $params['UserOnlineSearch']['dep_ids'][] = Department::DEPARTMENT_SUPPORT;
         }
 
         if ($isAdmin || in_array(Department::DEPARTMENT_SCHEDULE_CHANGE, $accessDepartments, true)) {
-            $params['UserOnline']['dep_ids'][] = Department::DEPARTMENT_SCHEDULE_CHANGE;
+            $params['UserOnlineSearch']['dep_ids'][] = Department::DEPARTMENT_SCHEDULE_CHANGE;
         }
 
         if ($isAdmin || in_array($withOutDepartments, $accessDepartments, true)) {
-            $params['UserOnline']['dep_ids'][] = $withOutDepartments;
+            $params['UserOnlineSearch']['dep_ids'][] = $withOutDepartments;
         }
 
         $response['projectList'] = Project::getList();
