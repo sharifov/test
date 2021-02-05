@@ -2,6 +2,7 @@
 
 use common\models\Call;
 use yii\helpers\Html;
+use yii\helpers\VarDumper;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
@@ -75,7 +76,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'c_id',
                 'c_call_sid',
                 'c_parent_call_sid',
+                'c_parent_id',
                 'c_conference_sid',
+                'c_conference_id',
 
                 [
                     'attribute' => 'c_call_type_id',
@@ -124,12 +127,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 'c_language_id',
                 'c_recording_disabled:booleanByLabel',
-
-
             ],
         ]) ?>
 
-
+Data
+<pre>
+<?php VarDumper::dump(json_decode($model->c_data_json, true));?>
+</pre>
     </div>
     <div class="col-md-6">
     <?= DetailView::widget([
@@ -148,6 +152,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],*/
             'c_sequence_number',
             'c_lead_id',
+            'c_case_id',
 
             [
                 'attribute' => 'c_created_user_id',
@@ -175,7 +180,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'c_com_call_id',
 
-            //'c_project_id',
             [
                 'attribute' => 'c_project_id',
                 'value' => static function (\common\models\Call $model) {
@@ -183,6 +187,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'filter' => \common\models\Project::getList()
             ],
+
+            [
+                'attribute' => 'c_source_type_id',
+                'value' => static function (\common\models\Call $model) {
+                    return Call::SOURCE_LIST[$model->c_source_type_id] ?? null;
+                },
+            ],
+
             'c_error_message',
             'c_is_new:boolean',
             [
@@ -191,8 +203,17 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->c_price ? '$' . number_format($model->c_price, 5) : '-';
                 },
             ],
+            'c_offset_gmt:ntext:Offset gmt',
+            'c_from_country:ntext:From country',
+            'c_from_state:ntext:From state',
+            'c_from_city:ntext:From city',
+            'c_is_transfer:boolean',
+            'c_queue_start_dt',
+            'c_group_id',
+            'c_is_conference:boolean',
         ],
     ]) ?>
+
     </div>
 
 </div>

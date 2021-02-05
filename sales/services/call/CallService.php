@@ -89,6 +89,8 @@ class CallService
             null
         );
 
+        $call->setDataCreatedParams($data);
+
         if (!$call->save()) {
             \Yii::error(VarDumper::dumpAsString($call->errors), 'CallService:guardDeclined:Call:save');
             throw new \Exception('CallService:guardDeclined: Can not save call in db', 1);

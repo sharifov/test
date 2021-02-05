@@ -2317,6 +2317,13 @@ class Call extends \yii\db\ActiveRecord
         }
     }
 
+    public function setDataCreatedParams(array $params): void
+    {
+        $data = $this->getData();
+        $data->createdParams = $params;
+        $this->setData($data);
+    }
+
     public function setDataPriority(int $value): void
     {
         $data = $this->getData();

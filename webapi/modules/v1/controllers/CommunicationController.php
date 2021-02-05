@@ -830,6 +830,8 @@ class CommunicationController extends ApiBaseController
                 $call->setConferenceType();
             }
 
+            $call->setDataCreatedParams($callOriginalData);
+
 
 //            if ($call->c_parent_call_sid) {
 //
@@ -1169,6 +1171,7 @@ class CommunicationController extends ApiBaseController
 
             $call->c_recording_disabled = (bool)($calData['call_recording_disabled'] ?? false);
             $call->setDataPriority($priority);
+            $call->setDataCreatedParams($calData);
 
             if (!$call->save()) {
                 \Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:findOrCreateCall:Call:save');
@@ -1357,6 +1360,8 @@ class CommunicationController extends ApiBaseController
             $call->c_created_user_id = null;
 
             self::copyDataFromCustomParams($call, $customParameters);
+
+            $call->setDataCreatedParams($callData);
         }
 
         $preCallStatus = $call->c_call_status;

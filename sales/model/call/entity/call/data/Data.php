@@ -12,6 +12,7 @@ use yii\helpers\Json;
  * @property QueueLongTime $queueLongTime
  * @property CreatorType $creatorType
  * @property int $priority
+ * @property array $createdParams
  */
 class Data
 {
@@ -19,6 +20,7 @@ class Data
     public QueueLongTime $queueLongTime;
     public CreatorType $creatorType;
     public int $priority;
+    public array $createdParams;
 
     public function __construct(?string $json)
     {
@@ -32,6 +34,7 @@ class Data
             $this->queueLongTime = new QueueLongTime(empty($data['queueLongTime']) ? [] : $data['queueLongTime']);
             $this->creatorType = new CreatorType(empty($data['creatorType']) ? [] : $data['creatorType']);
             $this->priority = empty($data['priority']) ? Call::DEFAULT_PRIORITY_VALUE : (int)$data['priority'];
+            $this->createdParams = empty($data['createdParams']) ? [] : $data['createdParams'];
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => $e->getMessage(),
@@ -48,6 +51,7 @@ class Data
             'queueLongTime' => $this->queueLongTime->toArray(),
             'creatorType' => $this->creatorType->toArray(),
             'priority' => $this->priority,
+            'createdParams' => $this->createdParams,
         ]);
     }
 
@@ -57,5 +61,6 @@ class Data
         $this->queueLongTime = new QueueLongTime([]);
         $this->creatorType = new CreatorType([]);
         $this->priority = Call::DEFAULT_PRIORITY_VALUE;
+        $this->createdParams = [];
     }
 }
