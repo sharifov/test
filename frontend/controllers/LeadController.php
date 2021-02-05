@@ -657,12 +657,32 @@ class LeadController extends FController
 
                         $mailPreview = $communication->mailPreview($lead->project_id, ($tpl ? $tpl->etp_key : ''), $mailFrom, $comForm->c_email_to, $content_data, $language);
 
+                        if ($tpl) {
+                            $tplConfigQuotes = $tpl->etp_params_json['quotes'];
+                            if ($tplConfigQuotes['originalRequired'] === true) {
+                                $checkOriginalQuoteExistence = false;
+                                foreach ($lead->quotes as $quote) {
+                                    if ($quote->type_id === Quote::TYPE_ORIGINAL) {
+                                        $checkOriginalQuoteExistence = true;
+                                    }
+                                }
+                            }
+                        }
 
                         if ($mailPreview && isset($mailPreview['data'])) {
+                            $selectedQuotes = count($comForm->quoteList);
                             if (isset($mailPreview['error']) && $mailPreview['error']) {
                                 $errorJson = @json_decode($mailPreview['error'], true);
                                 $comForm->addError('c_email_preview', 'Communication Server response: ' . ($errorJson['message'] ?? $mailPreview['error']));
                                 Yii::error($mailPreview['error'], 'LeadController:view:mailPreview');
+                                $comForm->c_preview_email = 0;
+                            } elseif (isset($checkOriginalQuoteExistence) && !$checkOriginalQuoteExistence) {
+                                $comForm->addError('originalQuotesRequired', 'Original quote required');
+                                Yii::info('Lead dont have quote with type original', 'info\LeadController:view:mailPreview');
+                                $comForm->c_preview_email = 0;
+                            } elseif (!(isset($tplConfigQuotes['minSelectedCount']) && $tplConfigQuotes['minSelectedCount'] <= $selectedQuotes) || !(isset($tplConfigQuotes['maxSelectedCount']) && $tplConfigQuotes['maxSelectedCount'] >= $selectedQuotes)) {
+                                $comForm->addError('minMaxSelectedQuotes', 'Allowed quantity of selected quotes is from ' . $tplConfigQuotes['minSelectedCount'] . ' to ' . $tplConfigQuotes['maxSelectedCount'] . ' inclusive. You selected ' . $selectedQuotes . '.');
+                                Yii::info('Allowed quantity of selected quotes is from ' . $tplConfigQuotes['minSelectedCount'] . ' to ' . $tplConfigQuotes['maxSelectedCount'] . ' inclusive. You selected ' . $selectedQuotes . '.', 'info\LeadController:view:mailPreview');
                                 $comForm->c_preview_email = 0;
                             } else {
                                 if ($comForm->offerList) {

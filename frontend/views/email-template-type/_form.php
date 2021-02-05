@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use yii\helpers\Json;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\EmailTemplateType */
@@ -24,6 +25,27 @@ use yii\widgets\ActiveForm;
     <?= $form->field($model, 'etp_ignore_unsubscribe')->checkbox() ?>
 
     <?= $form->field($model, 'etp_hidden')->checkbox() ?>
+
+        <?php
+
+        try {
+            $model->etp_params_json = Json::encode($model->etp_params_json);
+            echo $form->field($model, 'etp_params_json')->widget(
+                \kdn\yii2\JsonEditor::class,
+                [
+                    'clientOptions' => [
+                        'modes' => ['code', 'form', 'tree', 'view'], //'text',
+                        'mode' => 'tree'
+                    ],
+                    //'collapseAll' => ['view'],
+                    'expandAll' => ['tree', 'form'],
+                ]
+            );
+        } catch (Exception $exception) {
+            $model->etp_params_json = '{}';
+            echo $form->field($model, 'etp_params_json')->textarea(['rows' => 6]);
+        }
+        ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
