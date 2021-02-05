@@ -385,7 +385,8 @@ class CommunicationController extends ApiBaseController
                     $call_source_id,
                     false,
                     $call_language_id,
-                    $departmentPhone->dpp_priority
+                    $departmentPhone->dpp_priority,
+                    $departmentPhone->dpp_phone_list_id
                 );
 
                 if ($departmentPhone->dugUgs) {
@@ -447,7 +448,8 @@ class CommunicationController extends ApiBaseController
                         null,
                         $callFromInternalPhone,
                         null,
-                        Call::DEFAULT_PRIORITY_VALUE
+                        Call::DEFAULT_PRIORITY_VALUE,
+                        $upp->upp_phone_list_id
                     );
                     $callModel->c_source_type_id = Call::SOURCE_DIRECT_CALL;
 
@@ -830,6 +832,14 @@ class CommunicationController extends ApiBaseController
                 $call->setConferenceType();
             }
 
+            if (!empty($callOriginalData['phone_list_id'])) {
+                $call->setDataPhoneListId((int)$callOriginalData['phone_list_id']);
+            }
+
+            if (!empty($callOriginalData['FromAgentPhone'])) {
+                $call->c_from = $callOriginalData['FromAgentPhone'];
+            }
+
             $call->setDataCreatedParams($callOriginalData);
 
 
@@ -1065,6 +1075,7 @@ class CommunicationController extends ApiBaseController
      * @param bool $callFromInternalPhone
      * @param string|null $callLanguageId
      * @param int $priority
+     * @param int $phoneListId
      * @return Call
      * @throws \Exception
      */
@@ -1077,7 +1088,8 @@ class CommunicationController extends ApiBaseController
         ?int $call_source_id,
         bool $callFromInternalPhone,
         ?string $callLanguageId,
-        int $priority
+        int $priority,
+        ?int $phoneListId
     ): Call {
         $call = null;
         $parentCall = null;
@@ -1172,6 +1184,7 @@ class CommunicationController extends ApiBaseController
             $call->c_recording_disabled = (bool)($calData['call_recording_disabled'] ?? false);
             $call->setDataPriority($priority);
             $call->setDataCreatedParams($calData);
+            $call->setDataPhoneListId($phoneListId);
 
             if (!$call->save()) {
                 \Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:findOrCreateCall:Call:save');
@@ -1281,8 +1294,18 @@ class CommunicationController extends ApiBaseController
 
         if ($customParameters->to) {
             $call->c_to = $customParameters->to;
+        } else {
+            if (!$call->isInternal()) {
+                if (UserCallIdentity::canParse($call->c_to)) {
+                    $call->c_to = null;
+                }
+            }
         }
+
         $call->c_recording_disabled = $customParameters->call_recording_disabled;
+        if ($customParameters->phone_list_id) {
+            $call->setDataPhoneListId($customParameters->phone_list_id);
+        }
     }
 
     private static function copyUpdatedData(Call $from, Call $to): void

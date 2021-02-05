@@ -787,13 +787,14 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $out;
     }
 
-    public function callForward($sid, $from, $to, $callRecordingDisabled): array
+    public function callForward($sid, $from, $to, $callRecordingDisabled, $phoneListId): array
     {
         $data = [
             'sid' => $sid,
             'from' => $from,
             'to' => $to,
             'call_recording_disabled' => $callRecordingDisabled,
+            'phone_list_id' => $phoneListId
         ];
 
         $response = $this->sendRequest('twilio-conference/forward', $data);
@@ -801,7 +802,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $this->processConferenceResponse($response);
     }
 
-    public function acceptConferenceCall($id, $sid, $to, $from, $userId, $callRecordingDisabled): array
+    public function acceptConferenceCall($id, $sid, $to, $from, $userId, $callRecordingDisabled, $phoneListId, $toNumber): array
     {
         $data = [
             'call_id' => $id,
@@ -810,6 +811,8 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'from' => $from,
             'user_id' => $userId,
             'call_recording_disabled' => $callRecordingDisabled,
+            'phone_list_id' => $phoneListId,
+            'to_number' => $toNumber,
         ];
 
         $response = $this->sendRequest('twilio-conference/accept-call', $data);
@@ -883,7 +886,10 @@ class CommunicationService extends Component implements CommunicationServiceInte
         string $conferenceSid,
         string $to,
         int $userId,
-        bool $callRecordingDisabled
+        bool $callRecordingDisabled,
+        ?int $phoneListId,
+        ?string $toNumber,
+        ?string $from
     ): array {
         $data = [
             'callSid' => $callSid,
@@ -893,7 +899,10 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'to' => $to,
             'user_id' => $userId,
             'voipApiUsername' => $this->voipApiUsername,
-            'call_recording_disabled' => $callRecordingDisabled
+            'call_recording_disabled' => $callRecordingDisabled,
+            'phone_list_id' => $phoneListId,
+            'to_number' => $toNumber,
+            'from' => $from
         ];
 
         $response = $this->sendRequest('twilio-conference/return-to-conference-call', $data);
@@ -944,7 +953,9 @@ class CommunicationService extends Component implements CommunicationServiceInte
         string $to,
         string $source_type_id,
         int $user_id,
-        bool $callRecordingDisabled
+        bool $callRecordingDisabled,
+        ?int $phoneListId,
+        ?string $toNumber
     ): array {
         $data = [
             'callSid' => $callSid,
@@ -954,7 +965,9 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'to' => $to,
             'source_type_id' => $source_type_id,
             'user_id' => $user_id,
-            'call_recording_disabled' => $callRecordingDisabled
+            'call_recording_disabled' => $callRecordingDisabled,
+            'phone_list_id' => $phoneListId,
+            'to_number' => $toNumber
         ];
 
         $response = $this->sendRequest('twilio-conference/join-to-conference', $data);

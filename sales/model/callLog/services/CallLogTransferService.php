@@ -81,6 +81,7 @@ class CallLogTransferService
     public function transfer(Call $call): void
     {
         $this->call = $call->getAttributes();
+        $this->call['phone_list_id'] = $call->getDataPhoneListId();
 
         $debugEnable = Yii::$app->params['settings']['call_log_debug_enable'] ?? false;
         if ($debugEnable) {
@@ -377,6 +378,7 @@ class CallLogTransferService
             $log->cl_group_id = $this->map('cl_group_id', 'c_group_id');
             $log->cl_status_id = $this->map('cl_status_id', 'c_status_id');
 
+            /*
             if ($this->call['c_from'] && $this->call['c_call_type_id'] == Call::CALL_TYPE_OUT) {
                 if ($phoneList = PhoneList::find()->select(['pl_id'])->andWhere(['pl_phone_number' => $this->call['c_from']])->asArray()->one()) {
                     $log->cl_phone_list_id = $phoneList['pl_id'];
@@ -386,6 +388,9 @@ class CallLogTransferService
                     $log->cl_phone_list_id = $phoneList['pl_id'];
                 }
             }
+            */
+            $log->cl_phone_list_id = $this->call['phone_list_id'];
+
 
             if ($log->cl_call_created_dt) {
                 $time = strtotime($log->cl_call_created_dt);

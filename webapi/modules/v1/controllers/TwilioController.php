@@ -344,11 +344,15 @@ class TwilioController extends ApiBaseNoAuthController
 
             $call = Call::find()->where(['c_call_sid' => $sid])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
 
-            if ($isTransfer && $call->isOut()) {
-                $from = $call->c_from;
+            if ($call->isOut()) {
                 $call->c_from = $call->c_to;
-                $call->c_to = $from;
             }
+
+//            if ($isTransfer && $call->isOut()) {
+//                $from = $call->c_from;
+//                $call->c_from = $call->c_to;
+//                $call->c_to = $from;
+//            }
             if ($isTransfer) {
                 if ($type === 'user') {
                     $call->c_source_type_id = Call::SOURCE_DIRECT_CALL;
@@ -391,6 +395,7 @@ class TwilioController extends ApiBaseNoAuthController
                         $call->resetDataRepeat();
                         $call->resetDataQueueLongTime();
                         $call->setDataPriority(Call::DEFAULT_PRIORITY_VALUE);
+                        $call->c_to = null;
                         if (!$call->save()) {
                             Yii::error(VarDumper::dumpAsString($call->errors), 'API:Twilio:RedirectCall:Call:update:1');
                         }
@@ -412,6 +417,7 @@ class TwilioController extends ApiBaseNoAuthController
                     $call->c_created_user_id = null;
                     $depPhone = DepartmentPhoneProject::findOne($id);
                     if ($depPhone) {
+                        $call->c_to = $depPhone->dpp_phone_list_id ? $depPhone->phoneList->pl_phone_number : null;
                         $call->setDataPriority($depPhone->dpp_priority);
                         if ($call->c_project_id !== $depPhone->dpp_project_id) {
                             $call->c_project_id = $depPhone->dpp_project_id;

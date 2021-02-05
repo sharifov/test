@@ -13,6 +13,7 @@ use yii\helpers\Json;
  * @property CreatorType $creatorType
  * @property int $priority
  * @property array $createdParams
+ * @property int|null $phoneListId
  */
 class Data
 {
@@ -21,6 +22,7 @@ class Data
     public CreatorType $creatorType;
     public int $priority;
     public array $createdParams;
+    public ?int $phoneListId;
 
     public function __construct(?string $json)
     {
@@ -35,6 +37,7 @@ class Data
             $this->creatorType = new CreatorType(empty($data['creatorType']) ? [] : $data['creatorType']);
             $this->priority = empty($data['priority']) ? Call::DEFAULT_PRIORITY_VALUE : (int)$data['priority'];
             $this->createdParams = empty($data['createdParams']) ? [] : $data['createdParams'];
+            $this->phoneListId = empty($data['phoneListId']) ? null : (int)$data['phoneListId'];
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => $e->getMessage(),
@@ -52,6 +55,7 @@ class Data
             'creatorType' => $this->creatorType->toArray(),
             'priority' => $this->priority,
             'createdParams' => $this->createdParams,
+            'phoneListId' => $this->phoneListId,
         ]);
     }
 
@@ -62,5 +66,6 @@ class Data
         $this->creatorType = new CreatorType([]);
         $this->priority = Call::DEFAULT_PRIORITY_VALUE;
         $this->createdParams = [];
+        $this->phoneListId = null;
     }
 }

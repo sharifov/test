@@ -26,6 +26,7 @@ use sales\model\call\useCase\conference\create\CreateCallForm;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
 use sales\model\phone\AvailablePhoneList;
+use sales\model\phoneList\entity\PhoneList;
 use sales\model\user\entity\userStatus\UserStatus;
 use sales\services\client\ClientManageService;
 use thamtech\uuid\helpers\UuidHelper;
@@ -531,6 +532,10 @@ class PhoneController extends FController
                     /** @var Call $call */
                     $call->resetDataRepeat();
                     $call->resetDataQueueLongTime();
+                    if ($call->isOut()) {
+                        $call->c_from = $call->c_to;
+                    }
+                    $call->c_to = $to;
                     if (!$call->save()) {
                         Yii::error([
                             'message' => 'Not saved call',
@@ -540,7 +545,13 @@ class PhoneController extends FController
                         ], 'AjaxCallRedirect:Call:resetRepeat');
                     }
                 }
-                $resultApi = $communication->callForward($sid, $from, $to, $originalCall->isRecordingDisable());
+                $resultApi = $communication->callForward(
+                    $sid,
+                    $from,
+                    $to,
+                    $originalCall->isRecordingDisable(),
+                    $call->getDataPhoneListId()
+                );
                 if ($resultApi && isset($resultApi['result']['sid'])) {
                     $result = [
                         'error' => false,
@@ -1250,7 +1261,7 @@ class PhoneController extends FController
                 throw new \Exception('Please wait ' . (15 - $diff) . ' seconds.');
             }
 
-            $from = $call->cParent->c_to ?? $call->c_from;
+//            $from = $call->cParent->c_to ?? $call->c_from;
 
             $conference = Conference::find()->bySid($call->c_conference_sid)->one();
             if (!$conference) {
@@ -1261,11 +1272,13 @@ class PhoneController extends FController
                 $call->c_call_sid,
                 $call->c_conference_sid,
                 $call->c_project_id,
-                $from,
+                $call->c_from, //$from
                 UserCallIdentity::getClientId(Auth::id()),
                 $source_type_id,
                 Auth::id(),
-                $conference->isRecordingDisabled()
+                $conference->isRecordingDisabled(),
+                $call->getDataPhoneListId(),
+                $call->c_to
             );
             Yii::$app->session->set($key, time());
         } catch (\Throwable $e) {
@@ -1896,6 +1909,28 @@ class PhoneController extends FController
                     'message' => 'Phone From not found',
                 ];
             }
+        } catch (\Throwable $e) {
+            $result = [
+                'error' => true,
+                'message' => $e->getMessage(),
+            ];
+        }
+
+        return $this->asJson($result);
+    }
+
+    public function actionAjaxGetPhoneListId()
+    {
+        try {
+            $phone = (string)Yii::$app->request->post('phone');
+            $phoneList = PhoneList::find()->select(['pl_id'])->andWhere(['pl_phone_number' => $phone])->asArray()->one();
+            if (!$phoneList) {
+                throw new \DomainException('Not found phone list. Phone: ' . $phone);
+            }
+            $result = [
+                'error' => false,
+                'phone_list_id' => (int)$phoneList['pl_id'],
+            ];
         } catch (\Throwable $e) {
             $result = [
                 'error' => true,
