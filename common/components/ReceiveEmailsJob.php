@@ -18,6 +18,7 @@ use modules\fileStorage\src\entity\fileStorage\FileStorage;
 use modules\fileStorage\src\entity\fileStorage\FileStorageRepository;
 use modules\fileStorage\src\FileSystem;
 use modules\fileStorage\src\services\CreateByApiDto;
+use modules\fileStorage\src\services\url\UrlGenerator;
 use sales\entities\cases\Cases;
 use sales\forms\lead\EmailCreateForm;
 use sales\helpers\app\AppHelper;
@@ -114,6 +115,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
             $fileClientRepository = Yii::createObject(FileClientRepository::class);
             $fileCaseRepository = Yii::createObject(FileCaseRepository::class);
             $fileLeadRepository = Yii::createObject(FileLeadRepository::class);
+            $urlGenerator = Yii::createObject(UrlGenerator::class);
 
             $leadArray = [];
             $caseArray = [];
@@ -273,6 +275,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                         }
 
                         if ($attachPaths = ArrayHelper::getValue($mail, 'attach_paths')) {
+                            $emailDataAttachments = [];
                             foreach (explode(',', $attachPaths) as $path) {
                                 if (!$fileSystem->fileExists($path)) {
                                     \Yii::warning('File not exist : ' . $path, 'ReceiveEmailsJob:Attach:fileExists');
@@ -282,6 +285,12 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                                 $createByApiDto = new CreateByApiDto($path, $fileSystem);
                                 $fileStorage = FileStorage::createByApi($createByApiDto);
                                 $fileStorageRepository->save($fileStorage);
+
+                                $emailDataAttachments['files'][] = [
+                                    'value' => $fileStorage->fs_path,
+                                    'name' => $fileStorage->fs_name,
+                                    'type_id' => $fileStorage->fs_private ? $urlGenerator::TYPE_PRIVATE : $urlGenerator::TYPE_PUBLIC,
+                                ];
 
                                 if ($email->e_client_id && $fileStorage->fs_id) {
                                     $fileClient = FileClient::create($fileStorage->fs_id, $email->e_client_id);
@@ -294,6 +303,15 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                                 if ($email->e_lead_id && $fileStorage->fs_id) {
                                     $fileLead = FileLead::create($fileStorage->fs_id, $email->e_lead_id);
                                     $fileLeadRepository->save($fileLead);
+                                }
+                            }
+                            if ($emailDataAttachments) {
+                                $email->e_email_data = json_encode($emailDataAttachments);
+                                if (!$email->save()) {
+                                    \Yii::error(VarDumper::dumpAsString([
+                                        'communicationId' => $mail['ei_id'],
+                                        'error' => $email->errors,
+                                    ]), 'ReceiveEmailsJob:saveAttachEmailData');
                                 }
                             }
                         }
