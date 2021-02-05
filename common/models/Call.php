@@ -2388,8 +2388,8 @@ class Call extends \yii\db\ActiveRecord
     public static function getSourceListApi(): array
     {
         $data = [];
-        if (self::SOURCE_LIST) {
-            foreach (self::SOURCE_LIST as $id => $name) {
+        if (self::SHORT_SOURCE_LIST) {
+            foreach (self::SHORT_SOURCE_LIST as $id => $name) {
                 $data[] = [
                     'id' => $id,
                     'name' => $name,

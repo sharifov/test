@@ -100,19 +100,22 @@ const callItemComponent = {
     },
     computed: {
         projectName() {
-            return this.item.c_project_id > 0 ? this.$root.projectList[this.item.c_project_id] : '-'
+            return this.$root.getProjectName(this.item.c_project_id)
         },
         departmentName() {
-            return this.item.c_dep_id ? this.$root.depList[this.item.c_dep_id] : '-'
+            return this.$root.getDepartmentName(this.item.c_dep_id)
         },
         callSourceName() {
-            return this.item.c_source_type_id > 0 ? this.$root.callSourceList[this.item.c_source_type_id] : '-'
+            return this.$root.getCallSourceName(this.item.c_source_type_id)
+            //return this.item.c_source_type_id > 0 ? this.$root.callSourceList[this.item.c_source_type_id] : '-'
         },
         callStatusName() {
-            return this.item.c_status_id > 0 ? this.$root.callStatusList[this.item.c_status_id] : '-'
+            return this.$root.getCallStatusName(this.item.c_status_id)
+            //return this.item.c_status_id > 0 ? this.$root.callStatusList[this.item.c_status_id] : '-'
         },
         callTypeName() {
-            return this.item.c_call_type_id > 0 ? this.$root.callTypeList[this.item.c_call_type_id] : '-'
+            return this.$root.getCallTypeName(this.item.c_call_type_id)
+            //return this.item.c_call_type_id > 0 ? this.$root.callTypeList[this.item.c_call_type_id] : '-'
         },
         clientFullName() {
             let name = '';
@@ -157,7 +160,8 @@ const callItemComponent = {
             return this.$root.getUserName(userId)
         },
         getUserAccessStatusTypeName: function (statusTypeId) {
-            return statusTypeId > 0 ? this.$root.callUserAccessStatusTypeList[statusTypeId] : statusTypeId
+            return this.$root.getUserAccessStatusTypeName(statusTypeId)
+            //return statusTypeId > 0 ? this.$root.callUserAccessStatusTypeList[statusTypeId] : statusTypeId
         },
         createdDateTime(format) {
             let val = '';
@@ -241,7 +245,8 @@ var callMapApp = Vue.createApp({
         setInterval(() => {
             this.getStaticData();
         }, 60 * 60 * 1000); // 1 hour
-        this.getStaticData();
+        // this.getStaticData();
+        this.getStaticData2();
         this.getCalls();
     },
     computed: {
@@ -397,20 +402,114 @@ var callMapApp = Vue.createApp({
                     console.error("There was an error!", error);
                 })
         },
-        getStaticData() {
+        convertListToArray(data) {
+            return this.data.map((x) => {
+                let arrayItem = [];
+                arrayItem[x.id] = x.name;
+                return arrayItem;
+            });
+        },
+        // getStaticData() {
+        //     axios
+        //         .get('/call/static-data-api')
+        //         .then(response => {
+        //             this.projectList = response.data.projectList;
+        //             this.depList = response.data.depList;
+        //             this.userList = response.data.userList;
+        //             this.callStatusList = response.data.callStatusList;
+        //             this.callTypeList = response.data.callTypeList;
+        //             this.callSourceList = response.data.callSourceList;
+        //             this.callUserAccessStatusTypeList = response.data.callUserAccessStatusTypeList;
+        //             this.onlineUserList = response.data.onlineUserList;
+        //             this.userStatusList = response.data.userStatusList;
+        //             this.userTimeZone = response.data.userTimeZone;
+        //         })
+        //         .catch(error => {
+        //             console.error("There was an error!", error);
+        //         })
+        // },
+
+        getStaticData2() {
+
+            let data =  {
+                query: `query {
+                    myUser{
+                        username
+                        userParams {
+                            up_timezone
+                        }
+                    }
+                    projectList {
+                        id
+                        name
+                    }
+                    departmentList {
+                        dep_id
+                        dep_name
+                    }
+                    userList {
+                        id
+                        username
+                    }
+                    callStatusList {
+                        id
+                        name
+                    }
+                    callSourceList {
+                        id
+                        name
+                    }
+                    callTypeList {
+                        id
+                        name
+                    }
+                    callUserAccessStatusTypeList {
+                        id
+                        name
+                    }
+                    onlineUserList {
+                        uo_user_id
+                        uo_updated_dt
+                        uo_idle_state
+                        uo_idle_state_dt
+                    }
+                    userStatusList {
+                        us_user_id
+                        us_gl_call_count
+                        us_call_phone_status
+                        us_is_on_call
+                        us_has_call_access us_updated_dt
+                    }
+                    myUserParams {
+                        up_timezone
+                    }
+                }`,
+                variables: {
+                    userId: 1
+                }
+            }
+
+            //let data2 = {query: `query{myUserParams{up_timezone}}`}
+            let options = {headers:{'Content-Type': 'application/json'}}
+
             axios
-                .get('/call/static-data-api')
+                //.get('/call/static-data-api')
+                .post('/graphql/index', data, options)
                 .then(response => {
-                    this.projectList = response.data.projectList;
-                    this.depList = response.data.depList;
-                    this.userList = response.data.userList;
-                    this.callStatusList = response.data.callStatusList;
-                    this.callTypeList = response.data.callTypeList;
-                    this.callSourceList = response.data.callSourceList;
-                    this.callUserAccessStatusTypeList = response.data.callUserAccessStatusTypeList;
-                    this.onlineUserList = response.data.onlineUserList;
-                    this.userStatusList = response.data.userStatusList;
-                    this.userTimeZone = response.data.userTimeZone;
+                    let rData = response.data.data;
+                    //console.log(this.convertListToArray(rData.callStatusList));
+
+                    //data.myUser.userParams.up_timezone
+                    this.projectList = rData.projectList;
+                    this.depList = rData.departmentList;
+                    this.userList = rData.userList;
+                    this.callStatusList = rData.callStatusList;
+                    this.callTypeList = rData.callTypeList;
+                    this.callSourceList = rData.callSourceList;
+                    this.callUserAccessStatusTypeList = rData.callUserAccessStatusTypeList;
+                    this.onlineUserList = rData.onlineUserList;
+                    this.userStatusList = rData.userStatusList;
+                    this.userTimeZone = rData.myUser.userParams.up_timezone;
                 })
                 .catch(error => {
                     console.error("There was an error!", error);
@@ -469,9 +568,72 @@ var callMapApp = Vue.createApp({
                 }
             }
         },
-        getUserName(userId) {
-            return userId > 0 ? this.userList[userId] : userId
+        findUserById(userId) {
+            userId = parseInt(userId)
+            return this.userList ? this.userList.find(item => parseInt(item.id) === userId) : null
         },
+
+        findProjectById(id) {
+            id = parseInt(id)
+            return this.projectList ? this.projectList.find(item => parseInt(item.id) === id) : null
+        },
+        findDepartmentById(id) {
+            id = parseInt(id)
+            return this.depList ? this.depList.find(item => parseInt(item.dep_id) === id) : null
+        },
+
+        findCallSourceById(id) {
+            id = parseInt(id)
+            return this.callSourceList ? this.callSourceList.find(item => parseInt(item.id) === id) : null
+        },
+
+        findCallStatusById(id) {
+            id = parseInt(id)
+            return this.callStatusList ? this.callStatusList.find(item => parseInt(item.id) === id) : null
+        },
+
+        findCallTypeById(id) {
+            id = parseInt(id)
+            return this.callTypeList ? this.callTypeList.find(item => parseInt(item.id) === id) : null
+        },
+
+        findCallUserAccessStatusTypeById(id) {
+            id = parseInt(id)
+            return this.callUserAccessStatusTypeList ? this.callUserAccessStatusTypeList.find(item => parseInt(item.id) === id) : null
+        },
+
+        getUserName(userId) {
+            let item = this.findUserById(userId)
+            return item ? item.username : userId;
+            //return userId > 0 ? this.userList[userId] : userId
+        },
+        getProjectName(id) {
+            let item = this.findProjectById(id)
+            return item ? item.name : id;
+        },
+        getDepartmentName(id) {
+            let item = this.findDepartmentById(id)
+            return item ? item.dep_name : id;
+        },
+
+        getCallSourceName(id) {
+            let item = this.findCallSourceById(id)
+            return item ? item.name : id;
+        },
+        getCallStatusName(id) {
+            let item = this.findCallStatusById(id)
+            return item ? item.name : id;
+        },
+        getCallTypeName(id) {
+            let item = this.findCallTypeById(id)
+            return item ? item.name : id;
+        },
+
+        getUserAccessStatusTypeName(id) {
+            let item = this.findCallUserAccessStatusTypeById(id)
+            return item ? item.name : id;
+        },
+
         getUserIconClass(userId) {
             let iconClass = 'fa fa-user'
             let item = this.userStatusFind(userId)
