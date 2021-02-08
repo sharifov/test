@@ -7,6 +7,7 @@ use yii\helpers\ArrayHelper;
 use yii\httpclient\Client;
 use yii\httpclient\CurlTransport;
 use yii\helpers\VarDumper;
+use yii\httpclient\Exception;
 use yii\httpclient\Request;
 use yii\httpclient\Response;
 
@@ -17,6 +18,7 @@ use yii\httpclient\Response;
  * @property string $url
  * @property string $username
  * @property string $password
+ * @property string $searchQuoteEndpoint
  * @property Request $request
  */
 class AirSearchService extends Component
@@ -24,6 +26,8 @@ class AirSearchService extends Component
     public string $username;
     public string $password;
     public string $url;
+    public string $searchQuoteEndpoint;
+
     public array $options = [CURLOPT_ENCODING => 'gzip'];
     public Request $request;
 
@@ -61,7 +65,7 @@ class AirSearchService extends Component
      * @param array $options
      * @param string|null $format
      * @return \yii\httpclient\Response
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
      */
     public function sendRequest(
         string $action = '',
@@ -105,7 +109,7 @@ class AirSearchService extends Component
      * @param string $code
      * @return mixed
      * @throws \yii\base\InvalidConfigException
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
      */
     public function generateCoupons(int $count = 0, string $code = '')
     {
@@ -132,7 +136,7 @@ class AirSearchService extends Component
     /**
      * @param string $code
      * @return mixed|null
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
      */
     public function validateCoupon(string $code)
     {
@@ -157,7 +161,7 @@ class AirSearchService extends Component
     /**
      * @param array $params
      * @return mixed|null
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
      */
     public function getCoupons(array $params)
     {
@@ -178,7 +182,7 @@ class AirSearchService extends Component
     /**
      * @param string $ip
      * @return mixed|null
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
      */
     public function checkExcludeIp(string $ip)
     {
@@ -193,5 +197,24 @@ class AirSearchService extends Component
             'AirSearchService::checkIp'
         );
         return null;
+    }
+
+    /**
+     * @param array $params
+     * @param string $method
+     * @return array
+     * @throws Exception
+     */
+    public function searchQuotes(array $params, string $method = 'GET'): array
+    {
+        $result = ['data' => [], 'error' => ''];
+        $response = $this->sendRequest($this->searchQuoteEndpoint, $params, $method);
+
+        if ($response->isOk) {
+            $result['data'] = $response->data;
+        } else {
+            $result['error'] = $response->content;
+        }
+        return $result;
     }
 }

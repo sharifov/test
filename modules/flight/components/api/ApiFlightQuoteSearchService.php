@@ -15,13 +15,14 @@ class ApiFlightQuoteSearchService extends ApiService
         $out = ['error' => false, 'data' => []];
 
         try {
-            $response = \Yii::$app->airsearch->sendRequest('v1/search', $data, 'GET');
+            $response = \Yii::$app->airsearch->searchQuotes($data);
 
-            if ($response->isOk) {
-                $out['data'] = $response->data;
-            } else {
-                $out['error'] = 'Error (' . $response->statusCode . '): ' . $response->content;
-                \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Flight::Component::ApiFlightQuoteSearchService::search');
+            if (!$out['data'] = $response['data']) {
+                $out['error'] = $response['error'];
+                \Yii::error(
+                    VarDumper::dumpAsString($out['error'], 10),
+                    'Flight::Component::ApiFlightQuoteSearchService::search'
+                );
             }
         } catch (\Throwable $e) {
             \Yii::error(VarDumper::dumpAsString($e, 10), 'Flight::Component::ApiFlightQuoteSearchService::search::throwable');

@@ -92,6 +92,7 @@ return [
             'url' => '{{ common.config.main.components.airsearch.url:str }}',
             'username' => '{{ common.config.main.components.airsearch.username:str }}',
             'password' => '{{ common.config.main.components.airsearch.password:str }}',
+            'searchQuoteEndpoint' => 'v1/internalsearch',
         ],
         'currency' => [
             'class' => \common\components\CurrencyService::class,
