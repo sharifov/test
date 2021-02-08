@@ -3,11 +3,11 @@
 namespace sales\model\client\listeners;
 
 use common\components\jobs\CheckClientExcludeIpJob;
-use sales\model\client\entity\events\ClientCreatedEvent;
+use sales\model\client\entity\events\ClientChangeIpEvent;
 
 class ClientCreatedCheckExcludeListener
 {
-    public function handle(ClientCreatedEvent $event): void
+    public function handle(ClientChangeIpEvent $event): void
     {
         if (!$event->client->cl_ip) {
             return;

@@ -70,6 +70,7 @@ use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
 use sales\repositories\quote\QuoteRepository;
+use sales\services\client\ClientManageService;
 use sales\services\email\EmailService;
 use sales\services\lead\LeadAssignService;
 use sales\services\lead\LeadCloneService;
@@ -2061,6 +2062,12 @@ class LeadController extends FController
                 $form->client->projectId = $form->projectId;
                 $form->client->typeCreate = Client::TYPE_CREATE_LEAD;
                 $lead = $this->leadManageService->createManuallyByDefault($form, Yii::$app->user->id, Yii::$app->user->id, LeadFlow::DESCRIPTION_MANUAL_CREATE);
+
+                if (!empty($form->requestIp)) {
+                    $clientManageService = \Yii::createObject(ClientManageService::class);
+                    $clientManageService->checkIpChanged($lead->client, $form->requestIp);
+                }
+
                 Yii::$app->session->setFlash('success', 'Lead save');
                 return $this->redirect(['/lead/view', 'gid' => $lead->gid]);
             } catch (\Throwable $e) {

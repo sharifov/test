@@ -2,6 +2,7 @@
 
 use sales\events\quote\QuoteSendEvent;
 use sales\listeners\quote\QuoteSendEventListener;
+use sales\model\client\entity\events\ClientChangeIpEvent;
 use sales\model\client\entity\events\ClientCreatedEvent;
 use sales\model\client\entity\events\ClientExcludedEvent;
 use sales\model\client\listeners\ClientCreatedCheckExcludeListener;
@@ -68,6 +69,9 @@ return [
         ClientExcludeNotifierListener::class,
     ],
     ClientCreatedEvent::class => [
+        ClientCreatedCheckExcludeListener::class,
+    ],
+    ClientChangeIpEvent::class => [
         ClientCreatedCheckExcludeListener::class,
     ],
 
