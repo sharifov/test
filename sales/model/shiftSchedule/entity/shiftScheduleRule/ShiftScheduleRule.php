@@ -3,10 +3,10 @@
 namespace sales\model\shiftSchedule\entity\shiftScheduleRule;
 
 use common\models\Employee;
+use Cron\CronExpression;
 use sales\model\shiftSchedule\entity\shift\Shift;
 use sales\model\shiftSchedule\entity\userShiftAssign\UserShiftAssign;
 use sales\model\shiftSchedule\entity\userShiftSchedule\UserShiftSchedule;
-use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -41,6 +41,9 @@ use yii\db\ActiveRecord;
 class ShiftScheduleRule extends \yii\db\ActiveRecord
 {
     private const MAX_VALUE_INT = 2147483647;
+
+    private const CRON_EXPRESSION_MINUTES = '*';
+    private const CRON_EXPRESSION_HOURS = '*';
 
     public function behaviors(): array
     {
@@ -95,6 +98,8 @@ class ShiftScheduleRule extends \yii\db\ActiveRecord
 
             ['ssr_created_user_id', 'integer'],
             ['ssr_updated_user_id', 'integer'],
+
+            [['ssr_cron_expression', 'ssr_cron_expression_exclude'], 'validateCronExpression']
         ];
     }
 
@@ -158,5 +163,17 @@ class ShiftScheduleRule extends \yii\db\ActiveRecord
     public static function tableName(): string
     {
         return 'shift_schedule_rule';
+    }
+
+    public function validateCronExpression($attribute, $params, $validator): bool
+    {
+        $expression = self::CRON_EXPRESSION_MINUTES . ' ' . self::CRON_EXPRESSION_HOURS . ' ' . $this->$attribute;
+        $isValidCronExpression = CronExpression::isValidExpression($expression);
+
+        if (!$isValidCronExpression) {
+            $this->addError($attribute, 'Expression not valid');
+            return false;
+        }
+        return true;
     }
 }

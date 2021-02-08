@@ -1,5 +1,6 @@
 <?php
 
+use frontend\widgets\cronExpression\CronExpressionWidget;
 use kartik\time\TimePicker;
 use sales\model\shiftSchedule\widget\ShiftSelectWidget;
 use yii\bootstrap4\Html;
@@ -12,9 +13,8 @@ use yii\widgets\ActiveForm;
 
 <div class="shift-schedule-rule-form">
 
+    <?php $form = ActiveForm::begin(); ?>
     <div class="col-md-3">
-
-        <?php $form = ActiveForm::begin(); ?>
 
         <?= $form->field($model, 'ssr_shift_id')->widget(ShiftSelectWidget::class) ?>
 
@@ -42,10 +42,6 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'ssr_duration_time')->input('number', ['maxlength' => true]) ?>
 
-        <?= $form->field($model, 'ssr_cron_expression')->textInput(['maxlength' => true]) ?>
-
-        <?= $form->field($model, 'ssr_cron_expression_exclude')->textInput(['maxlength' => true]) ?>
-
         <?= $form->field($model, 'ssr_enabled')->checkbox() ?>
 
         <?= $form->field($model, 'ssr_start_time_utc')->widget(TimePicker::class, [
@@ -70,8 +66,13 @@ use yii\widgets\ActiveForm;
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
         </div>
 
-        <?php ActiveForm::end(); ?>
-
     </div>
+
+    <div class="col-md-9">
+        <?= $form->field($model, 'ssr_cron_expression')->widget(CronExpressionWidget::class) ?>
+
+        <?= $form->field($model, 'ssr_cron_expression_exclude')->widget(CronExpressionWidget::class) ?>
+    </div>
+  <?php ActiveForm::end(); ?>
 
 </div>

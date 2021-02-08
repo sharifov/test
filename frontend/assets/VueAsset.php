@@ -13,8 +13,9 @@ use yii\web\AssetBundle;
  */
 class VueAsset extends AssetBundle
 {
-    public $basePath = '@webroot';
-    public $baseUrl = '@web';
+    public $sourcePath = null;
+    public $basePath = null;
+    public $baseUrl = null;
 
 //    public $css = [
 //        'https://cdn.jsdelivr.net/npm/animate.css@4.1',
