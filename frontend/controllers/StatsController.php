@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\models\ApiLog;
 use common\models\Employee;
+use common\models\search\ApiLogSearch;
 use common\models\search\CallSearch;
 use kartik\export\ExportMenu;
 use sales\entities\call\CallGraphsSearch;
@@ -308,7 +309,7 @@ class StatsController extends FController
                 $lastDate = date('Y-m-d H:i:s', strtotime($date[1] . ' 23:59:59'));
             }
 
-            $apiStats = ApiLog::getApiLogStats($currentDate, $lastDate, $range, $userApiId, $action);
+            $apiStats = ApiLogSearch::getApiLogStats($currentDate, $lastDate, $range, $userApiId, $action);
 
             return $this->renderAjax('api-report', [
                 'apiStats' => $apiStats,
@@ -319,7 +320,7 @@ class StatsController extends FController
             $currentDate =  date('Y-m-d', strtotime('-0 day'));
             $chartTimeFormat = 'H:i';
 
-            $apiStats = ApiLog::getApiLogStats($currentDate, $currentDate, $range = 'H', '', '');
+            $apiStats = ApiLogSearch::getApiLogStats($currentDate, $currentDate, $range = 'H', '', '');
             return $this->render('api-report', [
                 'apiStats' => $apiStats,
                 'format' => $chartTimeFormat,
