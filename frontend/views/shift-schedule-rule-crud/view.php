@@ -49,7 +49,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'ssr_timezone',
                 'ssr_start_time_loc',
                 'ssr_end_time_loc',
-                'ssr_duration_time:datetime',
+                'ssr_duration_time',
                 'ssr_cron_expression',
                 'ssr_cron_expression_exclude',
                 'ssr_enabled:booleanByLabel',
