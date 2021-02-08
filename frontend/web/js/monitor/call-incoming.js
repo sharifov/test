@@ -460,6 +460,10 @@ var callMapApp = Vue.createApp({
                     return false;
                 }
 
+                if (!this.isAdmin && (!this.userAccessDepartments.includes(callData.c_dep_id.toString()) || !this.userAccessProjects.includes(callData.c_project_id.toString()))) {
+                    return false;
+                }
+
                 this.callList = [callData, ...this.callList];
             }
             //this.callList.push(callData);
@@ -535,13 +539,9 @@ var callMapApp = Vue.createApp({
             if (data && data.cua_call_id) {
                 let call = this.callFind(data.cua_call_id);
                 if (call) {
-                    //let userAccess = this.userAccessFind(call.userAccessList, data.cua_user_id);
-                    //console.log(data);
-                    //console.info(call.userAccessList[0]);
                     let index = this.userAccessFindIndex(call.userAccessList, data.cua_user_id);
                     if (index > -1) {
                         call.userAccessList[index] = data;
-                        //  }
                     } else {
                         call.userAccessList = [data, ...call.userAccessList];
                     }
