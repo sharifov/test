@@ -278,7 +278,10 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                             $emailDataAttachments = [];
                             foreach (explode(',', $attachPaths) as $path) {
                                 if (!$fileSystem->fileExists($path)) {
-                                    \Yii::warning('File not exist : ' . $path, 'ReceiveEmailsJob:Attach:fileExists');
+                                    \Yii::warning(VarDumper::dumpAsString([
+                                        'communicationId' => $mail['ei_id'],
+                                        'error' => 'File not exist : ' . $path,
+                                    ]), 'ReceiveEmailsJob:Attach:fileExists');
                                     continue;
                                 }
 
