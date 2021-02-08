@@ -988,8 +988,10 @@ $js = <<<JS
     });
     
     initDevice();
-         
-     function muteEvent(data)
+
+JS;
+$muteJs = <<<JS
+ function muteEvent(data)
      {
          if (typeof PhoneWidgetCall !== 'object') {
             return;
@@ -1005,8 +1007,9 @@ $js = <<<JS
             call.unMute();
         }
      }
-
 JS;
+
 if (Yii::$app->controller->module->id != 'user-management') {
     $this->registerJs($js, \yii\web\View::POS_READY);
+    $this->registerJs($muteJs, \yii\web\View::POS_END);
 }
