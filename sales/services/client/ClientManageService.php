@@ -622,4 +622,19 @@ class ClientManageService
         }
         return $result;
     }
+
+    /**
+     * @param Client $client
+     * @param string|null $ip
+     * @return string|null
+     */
+    public function checkIpChanged(Client $client, ?string $ip): ?string
+    {
+        if (!empty($ip) && empty($client->cl_ip)) {
+            $client->changeIp($ip);
+            $this->clientRepository->save($client);
+            return $ip;
+        }
+        return null;
+    }
 }

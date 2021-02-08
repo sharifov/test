@@ -5,14 +5,17 @@ namespace sales\model\client\entity\events;
 use common\models\Client;
 
 /**
- * Class ClientCreatedEvent
+ * Class ClientChangeIpEvent
  *
  * @property Client $client
  */
-class ClientCreatedEvent implements ClientEventInterface
+class ClientChangeIpEvent implements ClientEventInterface
 {
     public Client $client;
 
+    /**
+     * @param Client $client
+     */
     public function __construct(Client $client)
     {
         $this->client = $client;
