@@ -38,6 +38,7 @@ use frontend\themes\gentelella_v2\assets\FontAwesomeAsset;
 use frontend\themes\gentelella_v2\assets\groups\GentelellaCrudGroupAsset;
 use frontend\themes\gentelella_v2\assets\groups\GentelellaGroupAsset;
 use frontend\widgets\clientChat\ClientChatWidgetAsset;
+use frontend\widgets\cronExpression\CronExpressionAssets;
 use frontend\widgets\newWebPhone\NewWebPhoneGroupAsset;
 use frontend\widgets\notification\NotificationSocketAsset;
 use kartik\base\WidgetAsset;
@@ -166,6 +167,8 @@ return [
         TranslateManagerAsset::class,
         TranslatePluginAsset::class,
         LajaxLanguageItemPluginAsset::class,
+
+        CronExpressionAssets::class
 
 //        MomentAsset::class
     ],
@@ -764,7 +767,15 @@ return [
 //            'js' => 'moment.min.js',
 //            'css' => 'moment.min.css',
 //            'depends' => [ MomentAsset::class ],
-//        ]
+//        ],
+        'CronExpressionAssets' => [
+            'class' => CronExpressionAssets::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'cron-expression.min.js',
+            'css' => 'cron-expression.min.css',
+            'depends' => [ CronExpressionAssets::class ],
+        ]
     ],
 
     'assetManager' => [
