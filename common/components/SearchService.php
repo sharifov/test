@@ -26,6 +26,7 @@ class SearchService
     public const GDS_PKFARE        = 'P';
     public const GDS_TRAVELPORT    = 'T';
     public const GDS_ONEPOINT      = 'M';
+    public const GDS_NDC_PROXY     = 'Y';
     public const GDS_AMADEUS_IGNORE_AVAIL = 'B';
 
     public const GDS_LIST = [
@@ -40,6 +41,7 @@ class SearchService
         self::GDS_APOLLO => 'Apollo',
         self::GDS_PKFARE => 'Pkfare',
         self::GDS_AMADEUS_IGNORE_AVAIL => 'Amadeus ignore avail',
+        self::GDS_NDC_PROXY => 'Ndc Proxy',
     ];
 
     public const
