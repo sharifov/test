@@ -9,7 +9,7 @@ use common\models\Client;
  *
  * @property Client $client
  */
-class ClientChangeIpEvent
+class ClientChangeIpEvent implements ClientEventInterface
 {
     public Client $client;
 
@@ -19,5 +19,10 @@ class ClientChangeIpEvent
     public function __construct(Client $client)
     {
         $this->client = $client;
+    }
+
+    public function getClient(): Client
+    {
+        return $this->client;
     }
 }
