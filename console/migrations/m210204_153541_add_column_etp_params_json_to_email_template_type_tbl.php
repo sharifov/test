@@ -15,8 +15,8 @@ class m210204_153541_add_column_etp_params_json_to_email_template_type_tbl exten
      */
     public function safeUp()
     {
-       /* $this->addColumn('{{%email_template_type}}', 'etp_params_json', $this->json());
-        $this->update('{{%email_template_type}}', ['etp_params_json' => EmailTemplateType::etpParamsInit()]);*/
+        $this->addColumn('{{%email_template_type}}', 'etp_params_json', $this->json());
+        $this->update('{{%email_template_type}}', ['etp_params_json' => EmailTemplateType::etpParamsInit()]);
 
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
