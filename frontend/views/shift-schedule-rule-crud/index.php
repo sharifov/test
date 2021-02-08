@@ -8,6 +8,7 @@ use sales\model\shiftSchedule\widget\ShiftSelectWidget;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\DurationColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\shiftSchedule\entity\shiftScheduleRule\search\SearchShiftScheduleRule */
@@ -25,7 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(['id' => 'pjax-shift-schedule-rule']); ?>
-        <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+        <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -46,7 +47,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'ssr_timezone',
             'ssr_start_time_loc',
             'ssr_end_time_loc',
-            'ssr_duration_time:datetime',
+            'ssr_duration_time',
+            /*[
+                'class' => DurationColumn::class,
+                'attribute' => 'ssr_duration_time',
+                'startAttribute' => 'ssr_duration_time',
+                'options' => ['style' => 'width:180px'],
+            ],*/
             'ssr_cron_expression',
             'ssr_cron_expression_exclude',
             ['class' => BooleanColumn::class, 'attribute' => 'ssr_enabled'],

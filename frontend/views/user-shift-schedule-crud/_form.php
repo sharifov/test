@@ -25,9 +25,21 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'uss_description')->textarea(['maxlength' => true]) ?>
 
-        <?= $form->field($model, 'uss_start_utc_dt')->widget(DateTimePickerWidget::class) ?>
+        <?= $form->field($model, 'uss_start_utc_dt')->widget(DateTimePickerWidget::class, [
+            'clientOptions' => [
+                'autoclose' => true,
+                'format' => 'yyyy-mm-dd hh:ii:ss',
+                'todayBtn' => true
+            ]
+        ]) ?>
 
-        <?= $form->field($model, 'uss_end_utc_dt')->widget(DateTimePickerWidget::class) ?>
+        <?= $form->field($model, 'uss_end_utc_dt')->widget(DateTimePickerWidget::class, [
+            'clientOptions' => [
+                'autoclose' => true,
+                'format' => 'yyyy-mm-dd hh:ii:ss',
+                'todayBtn' => true
+            ]
+        ]) ?>
 
         <?= $form->field($model, 'uss_duration')->textInput() ?>
 

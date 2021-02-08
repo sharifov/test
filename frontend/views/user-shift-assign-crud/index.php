@@ -3,6 +3,8 @@
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\DateTimeColumn;
+use common\components\grid\UserSelect2Column;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\shiftSchedule\entity\userShiftAssign\search\SearchUserShiftAssign */
@@ -26,10 +28,26 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            'usa_user_id:username',
+            //'usa_user_id:username',
+            [
+                'label' => 'User',
+                'class' => UserSelect2Column::class,
+                'relation' => 'user',
+                'attribute' => 'usa_user_id'
+            ],
             'usa_ssr_id',
-            'usa_created_dt',
-            'usa_created_user_id',
+            //'usa_created_dt',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'usa_created_dt',
+            ],
+            //'usa_created_user_id',
+            [
+                'label' => 'Created User',
+                'class' => UserSelect2Column::class,
+                'relation' => 'createdUser',
+                'attribute' => 'usa_created_user_id'
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],
