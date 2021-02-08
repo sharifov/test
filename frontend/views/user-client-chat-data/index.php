@@ -13,7 +13,7 @@ use yii\widgets\Pjax;
 /* @var sales\model\userClientChatData\entity\UserClientChatDataSearch $searchModel */
 /* @var yii\data\ActiveDataProvider $dataProvider */
 
-$this->title = 'User Client Chat Data CRUD';
+$this->title = 'User Client Chat Data';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="user-client-chat-data-index">
@@ -30,7 +30,6 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            'uccd_id',
             [
                 'class' => UserSelect2Column::class,
                 'attribute' => 'uccd_employee_id',
@@ -74,20 +73,14 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'class' => ActionColumn::class,
-                'template' => '{view}{update}{delete}',
+                'template' => '{view}&nbsp; {update}&nbsp;',
                 'buttons' => [
-                    'delete' => static function ($url, UserClientChatData $model) {
+                    'update' => static function ($url, UserClientChatData $model) {
                         return Html::a(
-                            '<span class="glyphicon glyphicon-trash"></span>',
-                            ['user-client-chat-data-crud/delete', 'id' => $model->uccd_id],
+                            '<i class="fa fa-pencil-square-o" aria-hidden="true"></i>',
+                            ['user-client-chat-data/update', 'id' => $model->uccd_id],
                             [
-                                'title' => 'UserClientChat CRUD delete',
-                                'data-pjax' => 0,
-                                'data' => [
-                                    'confirm' => 'Warning. Item will be hard deleted without synchronization with RC server.',
-                                    'id' => $model->uccd_id,
-                                    'method' => 'post',
-                                ],
+                                'title' => 'Manage UserClientChat',
                             ]
                         );
                     }

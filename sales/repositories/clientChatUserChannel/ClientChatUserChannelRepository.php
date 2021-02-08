@@ -13,10 +13,15 @@ class ClientChatUserChannelRepository
      */
     public function findByUserId(int $id): array
     {
-        if ($channels = ClientChatUserChannel::find()->byUserId($id)->all()) {
+        if ($channels = $this->getChannelsByUserId($id)) {
             return $channels;
         }
         throw new NotFoundException('Not Found data in Client Chat User Channel by user id: ' . $id);
+    }
+
+    public function getChannelsByUserId(int $id): ?array
+    {
+        return ClientChatUserChannel::find()->byUserId($id)->all();
     }
 
     public function findByPrimaryKeys(int $userId, int $channelId): ClientChatUserChannel

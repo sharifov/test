@@ -89,10 +89,6 @@ use yii\widgets\Pjax;
                         ],*/
                         'up_telegram',
                         'up_telegram_enable:boolean',
-                        'up_rc_auth_token',
-                        'up_rc_user_id',
-                        'up_rc_user_password',
-                        'up_rc_token_expired'
 
                     ],
                 ]) ?>

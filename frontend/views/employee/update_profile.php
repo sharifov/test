@@ -199,10 +199,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ],*/
             'up_telegram',
             'up_telegram_enable:boolean',
-            'up_rc_auth_token',
-            'up_rc_user_id',
-            'up_rc_user_password',
-            'up_rc_token_expired'
 
            /* @property int $up_user_id
  * @property int $up_call_type_id

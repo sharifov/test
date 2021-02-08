@@ -18,15 +18,9 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <div class="col-md-4">
+
         <p>
             <?= Html::a('Update', ['update', 'id' => $model->uccd_id], ['class' => 'btn btn-primary']) ?>
-            <?= Html::a('Delete', ['delete', 'id' => $model->uccd_id], [
-                'class' => 'btn btn-danger',
-                'data' => [
-                    'confirm' => 'Warning. Item will be hard deleted without synchronization with RC server.',
-                    'method' => 'post',
-                ],
-            ]) ?>
         </p>
 
         <?= DetailView::widget([

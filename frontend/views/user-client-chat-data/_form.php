@@ -20,8 +20,6 @@ use dosamigos\datepicker\DatePicker;
         <?php echo $form->field($model, 'uccd_employee_id')->textInput(['maxlength' => true]) ?>
         <?php echo $form->field($model, 'uccd_rc_user_id')->textInput(['maxlength' => true]) ?>
         <?php echo $form->field($model, 'uccd_auth_token')->textInput(['maxlength' => true]) ?>
-        <?php echo $form->field($model, 'uccd_username')->textInput(['maxlength' => true]) ?>
-        <?php echo $form->field($model, 'uccd_name')->textInput(['maxlength' => true]) ?>
         <?php echo $form->field($model, 'uccd_password')->passwordInput(['maxlength' => true]) ?>
 
         <?php echo $form->field($model, 'uccd_token_expired')->widget(DateTimePicker::class) ?>

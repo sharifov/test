@@ -12,6 +12,7 @@ use sales\model\clientChat\permissions\ClientChatActionPermission;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatNote\entity\ClientChatNote;
+use sales\model\userClientChatData\service\UserClientChatDataService;
 use sales\services\clientChatCouchNote\ClientChatCouchNoteForm;
 use yii\bootstrap4\Alert;
 use yii\data\ActiveDataProvider;
@@ -39,7 +40,7 @@ $this->title = 'My Client Chat';
 
 ClientChatAsset::register($this);
 
-$userRcAuthToken = Auth::user()->userProfile ? Auth::user()->userProfile->up_rc_auth_token : '';
+$userRcAuthToken = UserClientChatDataService::getCurrentAuthToken() ?? '';
 ?>
 
 <?php if ($filter->isEmptyChannels()) : ?>

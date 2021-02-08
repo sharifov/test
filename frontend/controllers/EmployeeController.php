@@ -27,6 +27,7 @@ use sales\model\userClientChatData\entity\UserClientChatData;
 use sales\model\userClientChatData\entity\UserClientChatDataScopes;
 use sales\model\userVoiceMail\entity\search\UserVoiceMailSearch;
 use sales\repositories\clientChatUserChannel\ClientChatUserChannelRepository;
+use sales\services\clientChat\ClientChatRequesterService;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
 use Yii;
@@ -689,9 +690,6 @@ class EmployeeController extends FController
             $model->prepareSave($attr);
 
             $updateRC = [];
-            if ($model->isAttributeChanged('nickname_client_chat') && $model->validate(['nickname_client_chat'])) {
-                $updateRC['name'] = $model->nickname_client_chat;
-            }
             if ($model->isAttributeChanged('email') && $model->validate(['email'])) {
                 $updateRC['email'] = $model->email;
             }
@@ -712,10 +710,6 @@ class EmployeeController extends FController
 
                 if ($modelProfile->load(Yii::$app->request->post())) {
                     $modelProfile->up_updated_dt = date('Y-m-d H:i:s');
-
-                    if ($modelProfile->isAttributeChanged('up_rc_user_password') && $modelProfile->validate(['up_rc_user_password'])) {
-                        $updateRC['password'] = $modelProfile->up_rc_user_password;
-                    }
 
                     if (!$modelProfile->save()) {
                         Yii::error(VarDumper::dumpAsString($modelProfile->errors, 10), 'EmployeeController:actionUpdate:modelProfile:save');
@@ -762,6 +756,8 @@ class EmployeeController extends FController
                     }
                 }
 
+                $userClientChatData = UserClientChatData::findOne(['uccd_employee_id' => $model->id]);
+
                 if (isset($attr['client_chat_user_channel'])) {
                     ClientChatUserChannel::deleteAll(['ccuc_user_id' => $model->id]);
                     if ($attr['client_chat_user_channel']) {
@@ -774,7 +770,7 @@ class EmployeeController extends FController
                             $clientChatChanel->save();
                         }
 
-                        if (!empty($modelProfile->up_rc_user_id)) {
+                        if ($userClientChatData && $userClientChatData->isRegisteredInRc()) {
 //                            $this->clientChatUserAccessService->disableUserAccessToAllChats($model->id);
                             $this->clientChatUserAccessService->setUserAccessToAllChatsByChannelIds($attr['client_chat_user_channel'], $model->id);
                         } else {
@@ -786,9 +782,9 @@ class EmployeeController extends FController
                     TagDependency::invalidate(Yii::$app->cache, ClientChatUserChannel::cacheTags($model->id));
                 }
 
-                if (!empty($updateRC) && !empty($modelProfile->up_rc_user_id)) {
+                if (!empty($updateRC) && $userClientChatData && $userClientChatData->isRegisteredInRc()) {
                     $job = new RocketChatUserUpdateJob();
-                    $job->userId = $modelProfile->up_rc_user_id;
+                    $job->userId = $userClientChatData->getRcUserId();
                     $job->data = $updateRC;
                     Yii::$app->queue_job->priority(10)->push($job);
                 }
@@ -925,293 +921,6 @@ class EmployeeController extends FController
     }
 
     /**
-     * @param int $id
-     * @return array
-     * @throws BadRequestHttpException
-     */
-    public function actionRegisterToRocketChat(int $id): array
-    {
-        \Yii::$app->response->format = Response::FORMAT_JSON;
-
-        $user = Employee::findOne($id);
-
-        if (Yii::$app->request->isAjax && $user) {
-            $out = ['status' => 0, 'message' => ''];
-
-            try {
-                $userChannels = $this->clientChatUserChannelRepository->findByUserId($user->id);
-
-                $rocketChat = \Yii::$app->rchat;
-                $rocketChat->updateSystemAuth(false);
-                $password = $rocketChat::generatePassword();
-
-                $rocketChatUsername = $user->nickname_client_chat ?: $user->username;
-                $result = $rocketChat->createUser(
-                    $user->username,
-                    $password,
-                    $rocketChatUsername,
-                    $user->email
-                );
-
-                if (isset($result['error']) && !$result['error']) {
-                    if (empty($result['data']['_id'])) {
-                        throw new \RuntimeException('Empty result[data][_id]. ' .
-                            VarDumper::dumpAsString(['userId' => $id, 'data' => $result]));
-                    }
-                    if (!$userProfile = UserProfile::findOne(['up_user_id' => $id])) {
-                        $userProfile = new UserProfile();
-                        $userProfile->up_user_id = $id;
-                    }
-                    $userProfile->up_rc_user_password = $password;
-                    $userProfile->up_rc_user_id = $result['data']['_id'];
-
-                    $login = $rocketChat->login($user->username, $password);
-
-                    if (isset($login['error']) && $login['error']) {
-                        throw new \RuntimeException(VarDumper::dumpAsString($login['error']));
-                    }
-
-                    if (!empty($login['data']['authToken'])) {
-                        $userProfile->up_rc_auth_token = $login['data']['authToken'];
-                        $userProfile->up_rc_token_expired = $rocketChat::generateTokenExpired();
-                    }
-
-                    if (!$userProfile->save()) {
-                        throw new \RuntimeException($userProfile->getErrorSummary(false)[0]);
-                    }
-
-                    $userClientChatData = UserClientChatData::getOrCreateByEmployeeId($id);
-                    $userClientChatData->uccd_active = true;
-
-                    if (!$userClientChatData->save()) {
-                        throw new \RuntimeException($userClientChatData->getErrorSummary(false)[0]);
-                    }
-
-                    $userChannels = ArrayHelper::getColumn(ArrayHelper::toArray($userChannels), 'ccuc_channel_id');
-                    if ($userChannels) {
-                        $this->clientChatUserAccessService->setUserAccessToAllChatsByChannelIds($userChannels, $user->id);
-                    }
-                } else {
-                    $errorMessage = $rocketChat::getErrorMessageFromResult($result);
-                    throw new \RuntimeException('Error from RocketChat. ' . $errorMessage);
-                }
-                $out['status'] = 1;
-                $out['message'] = 'Request Register To Rocket Chat was successful';
-                $out['rc_user_id'] = $userProfile->up_rc_user_id;
-                $out['rc_user_password'] = $password;
-                $out['rc_token_expired'] = $userProfile->up_rc_token_expired;
-                $out['rc_auth_token'] = $userProfile->up_rc_auth_token;
-            } catch (\Throwable $throwable) {
-                Yii::error(
-                    AppHelper::throwableFormatter($throwable),
-                    'EmployeeController:actionRegisterToRocketChat:Throwable'
-                );
-                $out['message'] = $throwable->getMessage();
-            }
-            return $out;
-        }
-
-        throw new BadRequestHttpException();
-    }
-
-    /**
-     * @param int $id
-     * @param ClientChatUserAccessService $clientChatUserAccessService
-     * @return array
-     * @throws BadRequestHttpException
-     */
-    public function actionUnRegisterFromRocketChat(int $id): array
-    {
-        \Yii::$app->response->format = Response::FORMAT_JSON;
-
-        $user = Employee::findOne($id);
-
-        if (Yii::$app->request->isAjax && $user && $userProfile = $user->userProfile) {
-            $out = ['status' => 0, 'message' => ''];
-
-            try {
-                if (!$userProfile->up_rc_user_id) {
-                    throw new \RuntimeException('Error rc_user_id is empty');
-                }
-
-                $rocketChat = \Yii::$app->rchat;
-                $rocketChat->updateSystemAuth(false);
-
-                $result = $rocketChat->deleteUser($userProfile->up_rc_user_id, $user->nickname ?: $user->username);
-
-                if (isset($result['error']) && !$result['error']) {
-                    $userProfile->up_rc_user_password = null;
-                    $userProfile->up_rc_user_id = null;
-                    $userProfile->up_rc_auth_token = null;
-                    $userProfile->up_rc_token_expired = null;
-
-                    if (!$userProfile->save()) {
-                        throw new \RuntimeException($userProfile->getErrorSummary(false)[0]);
-                    }
-
-                    $this->clientChatUserAccessService->disableUserAccessToAllChats($userProfile->up_user_id);
-//                    $this->clientChatMessageService->discardAllUnreadMessagesForUser($userProfile->up_user_id);
-
-                    $userClientChatData = UserClientChatData::getOrCreateByEmployeeId($id);
-                    $userClientChatData->uccd_active = false;
-                    if (!$userClientChatData->save()) {
-                        throw new \RuntimeException($userClientChatData->getErrorSummary(false)[0]);
-                    }
-                } else {
-                    $errorMessage = $rocketChat::getErrorMessageFromResult($result);
-                    throw new \RuntimeException('Error from RocketChat. ' . $errorMessage);
-                }
-                $out['status'] = 1;
-                $out['message'] = 'Request Un Register From Rocket Chat was successful';
-            } catch (\Throwable $throwable) {
-                Yii::error(
-                    AppHelper::throwableFormatter($throwable),
-                    'EmployeeController:actionUnRegisterFromRocketChat:Throwable'
-                );
-                $out['message'] = $throwable->getMessage();
-            }
-            return $out;
-        }
-
-        throw new BadRequestHttpException('User or userProfile is required.');
-    }
-
-    /**
-     * @return array
-     * @throws BadRequestHttpException|NotFoundHttpException
-     */
-    public function actionActivateToRocketChat(): array
-    {
-        if (!Yii::$app->request->isPost) {
-            throw new BadRequestHttpException();
-        }
-        $userId = (int) Yii::$app->request->post('id');
-        if (!$user = (Employee::findOne($userId))) {
-            throw new NotFoundHttpException('User not found. UserId:' . $userId);
-        }
-        if (!$userProfile = $user->userProfile) {
-            throw new NotFoundHttpException('UserProfile not found from UserId:' . $userId);
-        }
-
-        if (Yii::$app->request->isAjax) {
-            \Yii::$app->response->format = Response::FORMAT_JSON;
-            $out = ['status' => 0, 'message' => ''];
-
-            try {
-                if (!$userProfile->up_rc_user_id) {
-                    throw new \RuntimeException('Error rc_user_id is empty');
-                }
-
-                $rocketChat = \Yii::$app->rchat;
-                $result = $rocketChat->updateUser($userProfile->up_rc_user_id, ['active' => true]);
-
-                if (isset($result['error']) && !$result['error']) {
-                    $userClientChatData = UserClientChatData::getOrCreateByEmployeeId($userId);
-                    $userClientChatData->uccd_active = true;
-
-                    if (!$userClientChatData->save()) {
-                        throw new \RuntimeException($userClientChatData->getErrorSummary(false)[0]);
-                    }
-                } else {
-                    $errorMessage = $rocketChat::getErrorMessageFromResult($result);
-                    throw new \RuntimeException('Error from RocketChat. ' . $errorMessage);
-                }
-
-                if (!$rocketUsername = $user['username']) {
-                    throw new \RuntimeException('Not found Username for this user(' . $userId . ')');
-                }
-                if (!$rocketPassword = $user->userProfile->up_rc_user_password) {
-                    throw new \RuntimeException('Not found Rocket Chat Auth Password for this user(' . $userId . ')');
-                }
-
-                $resultLogin = \Yii::$app->rchat->login($rocketUsername, $rocketPassword);
-
-                if ($resultLogin['error'] !== false) {
-                    if ($resultLogin['error'] === 'You must be logged in to do this.') {
-                        throw new \RuntimeException('Invalid credential');
-                    }
-                    throw new \RuntimeException((string)$resultLogin['error']);
-                }
-
-                if (empty($resultLogin['data']['authToken'])) {
-                    throw new \RuntimeException('index authToken not found in rocket chat api response');
-                }
-
-                $user->userProfile->up_rc_auth_token = $resultLogin['data']['authToken'];
-                $user->userProfile->up_rc_token_expired = \Yii::$app->rchat::generateTokenExpired();
-                if (!$user->userProfile->save()) {
-                    throw new \RuntimeException($user->userProfile->getErrorSummary(false)[0]);
-                }
-
-                $out['status'] = 1;
-                $out['message'] = 'Request Activate To Rocket Chat was successful';
-            } catch (\Throwable $throwable) {
-                Yii::error(
-                    AppHelper::throwableFormatter($throwable),
-                    'EmployeeController:actionActivateToRocketChat:Throwable'
-                );
-                $out['message'] = $throwable->getMessage();
-            }
-            return $out;
-        }
-        throw new BadRequestHttpException('Request must by isAjax');
-    }
-
-    /**
-     * @return array
-     * @throws BadRequestHttpException|NotFoundHttpException
-     */
-    public function actionDeactivateFromRocketChat(): array
-    {
-        if (!Yii::$app->request->isPost) {
-            throw new BadRequestHttpException();
-        }
-        $userId = (int) Yii::$app->request->post('id');
-        if (!$user = (Employee::findOne($userId))) {
-            throw new NotFoundHttpException('User not found. UserId:' . $userId);
-        }
-        if (!$userProfile = $user->userProfile) {
-            throw new NotFoundHttpException('UserProfile not found from UserId:' . $userId);
-        }
-
-        if (Yii::$app->request->isAjax) {
-            \Yii::$app->response->format = Response::FORMAT_JSON;
-            $out = ['status' => 0, 'message' => ''];
-
-            try {
-                if (!$userProfile->up_rc_user_id) {
-                    throw new \RuntimeException('Error rc_user_id is empty');
-                }
-
-                $rocketChat = \Yii::$app->rchat;
-                $result = $rocketChat->updateUser($userProfile->up_rc_user_id, ['active' => false]);
-
-                if (isset($result['error']) && !$result['error']) {
-                    $userClientChatData = UserClientChatData::getOrCreateByEmployeeId($userId);
-                    $userClientChatData->uccd_active = false;
-
-                    if (!$userClientChatData->save()) {
-                        throw new \RuntimeException($userClientChatData->getErrorSummary(false)[0]);
-                    }
-                } else {
-                    $errorMessage = $rocketChat::getErrorMessageFromResult($result);
-                    throw new \RuntimeException('Error from RocketChat. ' . $errorMessage);
-                }
-                $out['status'] = 1;
-                $out['message'] = 'Request Deactivate From Rocket Chat was successful';
-            } catch (\Throwable $throwable) {
-                Yii::error(
-                    AppHelper::throwableFormatter($throwable),
-                    'EmployeeController:actionDeactivateFromRocketChat:Throwable'
-                );
-                $out['message'] = $throwable->getMessage();
-            }
-            return $out;
-        }
-        throw new BadRequestHttpException('Request must by isAjax');
-    }
-
-    /**
      * @param string $str
      * @param string $term
      * @return string
@@ -1219,99 +928,5 @@ class EmployeeController extends FController
     public static function formatText(string $str, string $term): string
     {
         return preg_replace('~' . $term . '~i', '<b style="color: #e15554"><u>$0</u></b>', $str);
-    }
-
-    public function actionValidateRocketChatCredential()
-    {
-        if (!Yii::$app->request->isPost) {
-            throw new BadRequestHttpException();
-        }
-
-        try {
-            $userId = (int)Yii::$app->request->post('id');
-            if (!$userId) {
-                throw new \Exception('Not found user Id');
-            }
-            $user = Employee::findOne($userId);
-            if (!$user) {
-                throw new \Exception('Not found User with Id ' . $userId);
-            }
-            if (!$rocketUserId = $user->userProfile->up_rc_user_id) {
-                throw new \Exception('Not found Rocket Chat User Id for this user(' . $userId . ')');
-            }
-            if (!$rocketToken = $user->userProfile->up_rc_auth_token) {
-                throw new \Exception('Not found Rocket Chat Auth Token for this user(' . $userId . ')');
-            }
-
-            $result = \Yii::$app->rchat->me($rocketUserId, $rocketToken);
-
-            if ($result['error'] !== false) {
-                if ($result['error'] === 'You must be logged in to do this.') {
-                    throw new \Exception('Invalid credential');
-                }
-                throw new \Exception((string)$result['error']);
-            }
-        } catch (\Throwable $e) {
-            return $this->asJson([
-                'error' => true,
-                'message' => $e->getMessage(),
-            ]);
-        }
-        return $this->asJson([
-            'error' => false,
-            'message' => 'OK',
-        ]);
-    }
-
-    public function actionRefreshRocketChatUserToken()
-    {
-        if (!Yii::$app->request->isPost) {
-            throw new BadRequestHttpException();
-        }
-
-        try {
-            $userId = (int)Yii::$app->request->post('id');
-            if (!$userId) {
-                throw new \RuntimeException('Not found user Id');
-            }
-            $user = Employee::findOne($userId);
-            if (!$user) {
-                throw new \RuntimeException('Not found User with Id ' . $userId);
-            }
-            if (!$rocketUsername = $user['username']) {
-                throw new \RuntimeException('Not found Username for this user(' . $userId . ')');
-            }
-            if (!$rocketPassword = $user->userProfile->up_rc_user_password) {
-                throw new \RuntimeException('Not found Rocket Chat Auth Password for this user(' . $userId . ')');
-            }
-
-            $result = \Yii::$app->rchat->login($rocketUsername, $rocketPassword);
-
-            if ($result['error'] !== false) {
-                if ($result['error'] === 'You must be logged in to do this.') {
-                    throw new \RuntimeException('Invalid credential');
-                }
-                throw new \RuntimeException((string)$result['error']);
-            }
-
-            if (empty($result['data']['authToken'])) {
-                throw new \RuntimeException('index authToken not found in rocket chat api response');
-            }
-
-            $user->userProfile->up_rc_auth_token = $result['data']['authToken'];
-            $user->userProfile->up_rc_token_expired = \Yii::$app->rchat::generateTokenExpired();
-            if (!$user->userProfile->save()) {
-                throw new \RuntimeException($user->userProfile->getErrorSummary(false)[0]);
-            }
-        } catch (\Throwable $e) {
-            return $this->asJson([
-                'error' => true,
-                'message' => $e->getMessage(),
-            ]);
-        }
-        return $this->asJson([
-            'error' => false,
-            'message' => 'OK',
-        ]);
     }
 }

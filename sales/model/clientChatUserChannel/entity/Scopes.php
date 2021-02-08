@@ -5,6 +5,7 @@ namespace sales\model\clientChatUserChannel\entity;
 use common\models\Employee;
 use common\models\UserOnline;
 use common\models\UserProfile;
+use sales\model\userClientChatData\entity\UserClientChatData;
 use yii\db\Expression;
 
 /**
@@ -31,8 +32,8 @@ class Scopes extends \yii\db\ActiveQuery
     {
         return $this->join(
             'INNER JOIN',
-            UserProfile::tableName(),
-            new Expression('ccuc_user_id = up_user_id and (up_rc_user_id <> \' \' or up_rc_user_id is not null)')
+            UserClientChatData::tableName(),
+            new Expression('ccuc_user_id = uccd_employee_id AND (uccd_rc_user_id <> \' \' OR uccd_rc_user_id IS NOT NULL)')
         );
     }
 

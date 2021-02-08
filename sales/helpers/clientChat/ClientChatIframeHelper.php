@@ -80,7 +80,7 @@ class ClientChatIframeHelper
 
     public function getUserRcAuthToken(): string
     {
-        return $this->employee->userProfile ? $this->employee->userProfile->up_rc_auth_token : '';
+        return $this->employee->userClientChatData ? $this->employee->userClientChatData->getAuthToken() : '';
     }
 
     private function getLiveGoto(): string

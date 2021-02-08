@@ -382,7 +382,7 @@ class ClientChatRequestService
         $this->sendLastChatMessageToMonitor($clientChat, $message);
 
         if ($message->isGuestUttered()) {
-            if ($clientChat->hasOwner() && $clientChat->cchOwnerUser->userProfile && $clientChat->cchOwnerUser->userProfile->isRegisteredInRc()) {
+            if ($clientChat->hasOwner() && $clientChat->cchOwnerUser->userProfile && $clientChat->cchOwnerUser->userClientChatData->isRegisteredInRc()) {
                 if (!UserConnectionActiveChat::find()->andWhere(['ucac_chat_id' => $clientChat->cch_id])->exists()) {
                     $countUnreadByChatMessages = $this->clientChatMessageService->increaseUnreadMessages($clientChat->cch_id);
                     $this->updateMessageInfoNotification($countUnreadByChatMessages, $clientChat, $message);
@@ -403,7 +403,7 @@ class ClientChatRequestService
             (Yii::createObject(ClientChatLastMessageRepository::class))->createOrUpdateByMessage($message);
         } elseif ($message->isAgentUttered()) {
             $this->clientChatMessageService->touchUnreadMessage($clientChat->cch_id);
-            if ($clientChat->hasOwner() && $clientChat->cchOwnerUser->userProfile && $clientChat->cchOwnerUser->userProfile->isRegisteredInRc()) {
+            if ($clientChat->hasOwner() && $clientChat->cchOwnerUser->userProfile && $clientChat->cchOwnerUser->userClientChatData->isRegisteredInRc()) {
                 Notifications::publish('clientChatUpdateItemInfo', ['user_id' => $clientChat->cch_owner_user_id], [
                     'data' => [
                         'cchId' => $clientChat->cch_id,

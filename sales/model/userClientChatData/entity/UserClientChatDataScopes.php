@@ -3,7 +3,7 @@
 namespace sales\model\userClientChatData\entity;
 
 /**
-* @see UserClientChatData
+* @see UserClientChatDataService
 */
 class UserClientChatDataScopes extends \yii\db\ActiveQuery
 {

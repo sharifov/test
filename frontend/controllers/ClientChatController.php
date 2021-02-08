@@ -67,6 +67,7 @@ use sales\model\clientChatUnread\entity\ClientChatUnread;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\user\entity\userConnectionActiveChat\UserConnectionActiveChat;
+use sales\model\userClientChatData\service\UserClientChatDataService;
 use sales\repositories\clientChatChannel\ClientChatChannelRepository;
 use sales\repositories\clientChatStatusLogRepository\ClientChatStatusLogRepository;
 use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
@@ -443,7 +444,7 @@ class ClientChatController extends FController
             'couchNoteForm' => new ClientChatCouchNoteForm($clientChat, Auth::user()),
             'iframe' => (new ClientChatIframeHelper($clientChat))->generateIframe(),
             'isClosed' => (int) $clientChat->isInClosedStatusGroup(),
-            'userRcAuthToken' => Auth::user()->userProfile ? Auth::user()->userProfile->up_rc_auth_token : '',
+            'userRcAuthToken' => UserClientChatDataService::getCurrentAuthToken() ?? '',
             'filter' => (new FilterForm($this->channels))->loadDefaultValuesByPermissions(),
         ]);
     }
@@ -1375,7 +1376,7 @@ class ClientChatController extends FController
 
             $message = $this->createOfferMessage($clientChat, ArrayHelper::getColumn($captures, 'data'));
 
-            if (($rocketUserId = Auth::user()->userProfile->up_rc_user_id) && ($rocketToken = Auth::user()->userProfile->up_rc_auth_token)) {
+            if (($rocketUserId = UserClientChatDataService::getCurrentRcUserId()) && ($rocketToken = UserClientChatDataService::getCurrentAuthToken())) {
                 $headers = [
                     'X-User-Id' => $rocketUserId,
                     'X-Auth-Token' => $rocketToken,
@@ -1558,10 +1559,10 @@ class ClientChatController extends FController
         }
         try {
             if (Yii::$app->request->isPjax && $form->load(Yii::$app->request->post()) && $form->validate()) {
-                if (!$userProfile = UserProfile::findOne(['up_user_id' => Auth::id()])) {
-                    throw new NotFoundException('User Profile is not found');
+                if (!$userClientChatData = UserClientChatDataService::getCurrentUserChatData()) {
+                    throw new NotFoundException('UserClientChatData is not found');
                 }
-                if (!$userProfile->isRegisteredInRc()) {
+                if (!$userClientChatData->isRegisteredInRc()) {
                     throw new \DomainException('You dont have rocketchat credentials');
                 }
 
@@ -1584,8 +1585,8 @@ class ClientChatController extends FController
                 $this->clientChatService->createByAgent(
                     $form,
                     Auth::id(),
-                    $userProfile->up_rc_user_id,
-                    $userProfile->up_rc_auth_token,
+                    $userClientChatData->getRcUserId(),
+                    $userClientChatData->getAuthToken(),
                     $clientChatRequest,
                     $client,
                     $channel
@@ -2076,7 +2077,7 @@ class ClientChatController extends FController
                 ],
             ];
 
-            if (($rocketUserId = Auth::user()->userProfile->up_rc_user_id) && ($rocketToken = Auth::user()->userProfile->up_rc_auth_token)) {
+            if (($rocketUserId = UserClientChatDataService::getCurrentRcUserId()) && ($rocketToken = UserClientChatDataService::getCurrentAuthToken())) {
                 $headers = [
                     'X-User-Id' => $rocketUserId,
                     'X-Auth-Token' => $rocketToken,
