@@ -25,6 +25,7 @@ use yii\helpers\VarDumper;
  * @property string $etp_updated_dt
  * @property int $etp_dep_id
  * @property int $etp_ignore_unsubscribe
+ * @property mixed $etp_params_json
  *
  * @property Email[] $emails
  * @property Employee $etpCreatedUser
@@ -33,12 +34,30 @@ use yii\helpers\VarDumper;
  */
 class EmailTemplateType extends \yii\db\ActiveRecord
 {
+    public function __construct(array $config = [])
+    {
+        parent::__construct($config);
+        $this->etp_params_json = self::etpParamsInit();
+    }
+
     /**
      * {@inheritdoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'email_template_type';
+    }
+
+    public static function etpParamsInit(): array
+    {
+        return [
+            'quotes' => [
+                'selectRequired' => false,
+                'originalRequired' => false,
+                'minSelectedCount' => 0,
+                'maxSelectedCount' => 0
+            ]
+        ];
     }
 
     /**
@@ -49,7 +68,7 @@ class EmailTemplateType extends \yii\db\ActiveRecord
         return [
             [['etp_key', 'etp_name', 'etp_origin_name'], 'required'],
             [['etp_created_user_id', 'etp_updated_user_id', 'etp_dep_id', 'etp_ignore_unsubscribe'], 'integer'],
-            [['etp_created_dt', 'etp_updated_dt'], 'safe'],
+            [['etp_created_dt', 'etp_updated_dt', 'etp_params_json'], 'safe'],
             [['etp_key'], 'string', 'max' => 50],
             [['etp_name', 'etp_origin_name'], 'string', 'max' => 100],
             [['etp_key'], 'unique'],
@@ -63,7 +82,7 @@ class EmailTemplateType extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'etp_id' => 'ID',
@@ -77,6 +96,7 @@ class EmailTemplateType extends \yii\db\ActiveRecord
             'etp_updated_dt' => 'Updated Dt',
             'etp_dep_id' => 'Department',
             'etp_ignore_unsubscribe' => 'Ignore Unsubscribe',
+            'etp_params_json' => 'Params',
         ];
     }
 
@@ -254,5 +274,35 @@ class EmailTemplateType extends \yii\db\ActiveRecord
         }
 
         return $query->asArray()->all();
+    }
+
+    public static function isJson($content): bool
+    {
+        if (!is_array($content)) {
+            json_decode($content);
+            return (json_last_error() === JSON_ERROR_NONE);
+        }
+
+        return false;
+    }
+
+    public function beforeSave($insert): bool
+    {
+        if (self::isJson($this->etp_params_json)) {
+            $this->etp_params_json = json_decode($this->etp_params_json);
+        } else {
+            $this->etp_params_json = $this->getOldAttribute('etp_params_json') ?? self::etpParamsInit();
+        }
+
+        return parent::beforeSave($insert);
+    }
+
+    public function getParams(): array
+    {
+        if ($this->etp_params_json !== null) {
+            return $this->etp_params_json;
+        }
+
+        return self::etpParamsInit();
     }
 }
