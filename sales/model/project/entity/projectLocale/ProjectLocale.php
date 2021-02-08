@@ -191,6 +191,18 @@ class ProjectLocale extends \yii\db\ActiveRecord
             ->scalar();
     }
 
+    public static function getDefaultMarketCountryByProject(int $projectId): ?string
+    {
+        return self::find()
+            ->select(['pl_market_country'])
+            ->byProject($projectId)
+            ->andWhere(['pl_language_id' => null])
+            ->andWhere(['IS NOT', 'pl_market_country', null])
+            ->enabled()
+            ->default()
+            ->scalar();
+    }
+
     /**
      * {@inheritdoc}
      * @return ProjectLocaleScopes the active query used by this AR class.
@@ -198,5 +210,36 @@ class ProjectLocale extends \yii\db\ActiveRecord
     public static function find()
     {
         return new ProjectLocaleScopes(static::class);
+    }
+
+    /**
+     * @param int $projectId
+     * @param string|null $language
+     * @param string|null $country
+     * @return ProjectLocale|null
+     */
+    public static function getByProjectLanguageMarket(int $projectId, ?string $language, ?string $country): ?ProjectLocale
+    {
+        return self::find()
+            ->byProject($projectId)
+            ->byLanguage($language)
+            ->byMarketCountry($country)
+            ->enabled()
+            ->one();
+    }
+
+    /**
+     * @param int $projectId
+     * @return ProjectLocale|null
+     */
+    public static function getDefaultProjectLocale(int $projectId): ?ProjectLocale
+    {
+        return self::find()
+            ->byProject($projectId)
+            ->andWhere(['pl_language_id' => null])
+            ->andWhere(['IS NOT', 'pl_market_country', null])
+            ->enabled()
+            ->default()
+            ->one();
     }
 }

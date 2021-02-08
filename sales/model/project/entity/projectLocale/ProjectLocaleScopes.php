@@ -44,6 +44,16 @@ class ProjectLocaleScopes extends \yii\db\ActiveQuery
         return $this->andWhere(['pl_project_id' => $projectId]);
     }
 
+    public function byLanguage(?string $languageId): ProjectLocaleScopes
+    {
+        return $this->andWhere(['pl_language_id' => $languageId]);
+    }
+
+    public function byMarketCountry(?string $marketCountry): ProjectLocaleScopes
+    {
+        return $this->andWhere(['pl_market_country' => $marketCountry]);
+    }
+
     public function languageNotNull(): ProjectLocaleScopes
     {
         return $this->andWhere(['IS NOT', 'pl_language_id', null]);
