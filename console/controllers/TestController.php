@@ -336,4 +336,23 @@ class TestController extends Controller
         }
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
+
+    /**
+     * @throws \Exception
+     */
+    public function actionTestCentrifugoCall($id)
+    {
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+
+        $call = Call::find()
+            ->where(['c_id' => $id])
+            ->one(); //['c_id' => SORT_DESC]
+        if ($call) {
+            $call->c_status_id = Call::STATUS_COMPLETED;
+            $call->sendFrontendData('update');
+            echo ' - ' . $call->c_id . PHP_EOL;
+        }
+
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    }
 }
