@@ -342,7 +342,9 @@ var callMapApp = Vue.createApp({
             userAccessDepartments: [],
             userAccessProjects: [],
             accessCallSourceType: [],
-            accessCallType: []
+            accessCallType: [],
+            userDepartments: [],
+            userProjects: []
         };
     },
     created() {
@@ -460,7 +462,7 @@ var callMapApp = Vue.createApp({
                     return false;
                 }
 
-                if (!this.isAdmin && (!this.userAccessDepartments.includes(callData.c_dep_id.toString()) || !this.userAccessProjects.includes(callData.c_project_id.toString()))) {
+                if (!this.isAdmin && (!this.userDepartments.includes(callData.c_dep_id) || !this.userProjects.includes(callData.c_project_id))) {
                     return false;
                 }
 
@@ -505,6 +507,8 @@ var callMapApp = Vue.createApp({
                     this.userAccessProjects = response.data.userAccessProjects;
                     this.accessCallSourceType = response.data.accessCallSourceType;
                     this.accessCallType = response.data.accessCallType;
+                    this.userDepartments = response.data.userDepartments;
+                    this.userProjects = response.data.userProjects;
                 })
                 .catch(error => {
                     console.log(this.callUserAccessStatusTypeList);
