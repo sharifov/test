@@ -410,7 +410,7 @@ $isQuoteAssignedToFlight = false;
         </div>
         <div class="quote__footer-right">
             <?= Html::button('<i class="fa fa-eye"></i>&nbsp; <span>Details</span>', [
-                'class' => 'btn btn-primary search_details__btn',
+                'class' => 'btn btn-primary search_quote_details__btn',
                 'data-title' => implode(', ', $tripsInfo),
                 'data-target' => '#search_result_item_' . $resultKey,
             ]) ?>

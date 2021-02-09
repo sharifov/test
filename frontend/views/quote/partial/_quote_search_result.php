@@ -24,9 +24,9 @@ use yii\widgets\Pjax;
 
 if ($quotes && (isset($quotes['count']) && $quotes['count'] > 0)) :
     $js = <<<JS
-    $(document).on('click','.search_details__btn', function (e) {
+    $(document).on('click','.search_quote_details__btn', function (e) {
         e.preventDefault();
-        let modal = $('#modal-lg');
+        let modal = $('#modal-md');
         $('#modal-lg-label').html($(this).data('title'));
         let target = $($(this).data('target')).html();
         modal.find('.modal-body').html(target);
