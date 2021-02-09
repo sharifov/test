@@ -4,7 +4,7 @@ namespace frontend\controllers;
 
 use common\models\Email;
 use common\models\EmailTemplateType;
-use frontend\models\CasePreviewEmailForm;
+use frontend\models\CaseCouponPreviewEmailForm;
 use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
@@ -196,7 +196,7 @@ class CouponController extends FController
 
                     if ($result['error']) {
                     } else {
-                        $previewEmailForm = new CasePreviewEmailForm($result['data']);
+                        $previewEmailForm = new CaseCouponPreviewEmailForm($result['data']);
                         $previewEmailForm->e_email_from_name = Auth::user()->nickname;
                         $previewEmailForm->coupon_list = json_encode($form->couponIds);
 
@@ -234,7 +234,7 @@ class CouponController extends FController
 
     public function actionSend(): string
     {
-        $previewEmailForm = new CasePreviewEmailForm();
+        $previewEmailForm = new CaseCouponPreviewEmailForm();
 
         if ($previewEmailForm->load(Yii::$app->request->post())) {
             if ($previewEmailForm->validate()) {
