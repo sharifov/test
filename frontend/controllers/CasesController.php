@@ -232,7 +232,6 @@ class CasesController extends FController
         $userModel = Yii::$app->user->identity;
 
         $previewEmailForm = new CasePreviewEmailForm();
-        $previewEmailForm->scenario = CasePreviewEmailForm::SCENARIO_SEND_EMAIL;
         $previewEmailForm->e_case_id = $model->cs_id;
         $previewEmailForm->is_send = false;
 

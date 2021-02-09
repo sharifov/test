@@ -9,7 +9,7 @@ use yii\web\View;
 /** @var $sendCouponsForm \sales\model\coupon\useCase\send\SendCouponsForm */
 /** @var View $this */
 /** @var Cases $model */
-/** @var \frontend\models\CasePreviewEmailForm $previewEmailForm */
+/** @var \frontend\models\CaseCouponPreviewEmailForm $previewEmailForm */
 
 if ($model) {
     $urlRequestCoupons = Url::to(['/coupon/request', 'caseId' => $model->cs_id]);

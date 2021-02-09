@@ -2,11 +2,9 @@
 
 namespace frontend\models;
 
-use common\components\validators\IsArrayValidator;
 use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\Language;
-use modules\fileStorage\src\entity\fileCase\FileCaseQuery;
 use sales\entities\cases\Cases;
 use yii\base\Model;
 
@@ -31,11 +29,9 @@ use yii\base\Model;
  * @property boolean $is_send
  * @property string $keyCache
  *
- * @property array $files
- *
  */
 
-class CasePreviewEmailForm extends Model
+class CaseCouponPreviewEmailForm extends Model
 {
     public $e_case_id;
     public $e_email_from;
@@ -55,10 +51,6 @@ class CasePreviewEmailForm extends Model
 
     public $coupon_list;
     public $keyCache;
-
-    public $files;
-
-    private $fileList;
 
     public function __construct(array $data = [], $config = [])
     {
@@ -95,10 +87,6 @@ class CasePreviewEmailForm extends Model
             [['e_case_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['e_case_id' => 'cs_id']],
             [['e_email_tpl_id'], 'exist', 'skipOnError' => true, 'targetClass' => EmailTemplateType::class, 'targetAttribute' => ['e_email_tpl_id' => 'etp_id']],
             ['keyCache', 'safe'],
-
-            ['files', IsArrayValidator::class],
-            ['files', 'each', 'rule' => ['integer'], 'skipOnError' => true, 'skipOnEmpty' => true],
-            ['files', 'each', 'rule' => ['in', 'range' => array_keys($this->getFileList()), 'skipOnEmpty' => true], 'skipOnError' => true, 'skipOnEmpty' => true],
         ];
     }
 
@@ -127,35 +115,5 @@ class CasePreviewEmailForm extends Model
             'e_language_id'     => 'Language',
             'e_user_id'         => 'Agent ID',
         ];
-    }
-
-    public function getFileList(): array
-    {
-        if ($this->fileList !== null) {
-            return $this->fileList;
-        }
-        $this->fileList = FileCaseQuery::getListByCase($this->e_case_id);
-        return $this->fileList;
-    }
-
-    public function getFilesPath(): array
-    {
-        $files = [];
-        if (!$this->files) {
-            return $files;
-        }
-        $availableFiles = $this->getFileList();
-        foreach ($this->files as $fileId) {
-            if (array_key_exists($fileId, $availableFiles)) {
-                $files[] = new \modules\fileStorage\src\services\url\FileInfo(
-                    $availableFiles[$fileId]['name'],
-                    $availableFiles[$fileId]['path'],
-                    $availableFiles[$fileId]['uid'],
-                    $availableFiles[$fileId]['title'],
-                    null
-                );
-            }
-        }
-        return $files;
     }
 }
