@@ -173,6 +173,7 @@ API Documentation
  sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc3" -t ./webapi/web/apidoc/template3 -f ".*\\.php$"
  sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc4" -t ./webapi/web/apidoc/template4 -f ".*\\.php$"
  sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc5" -t ./webapi/web/apidoc/template5 -f ".*\\.php$"
+ sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc6" -t ./webapi/web/apidoc/template6 -f ".*\\.php$"
  ```
 
 Install Supervisor
