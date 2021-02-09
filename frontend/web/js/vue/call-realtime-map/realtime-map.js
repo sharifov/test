@@ -322,7 +322,8 @@ var callMapApp = Vue.createApp({
             if (index > -1) {
                 return this.updateUserOnline(data);
             }
-            this.onlineUserList = [data, ...this.onlineUserList];
+            //this.onlineUserList = [data, ...this.onlineUserList];
+            this.onlineUserList.push(data)
             //this.callList.push(callData);
         },
 
@@ -404,7 +405,9 @@ var callMapApp = Vue.createApp({
             }
         },
         addCall(callData) {
-            this.callList = [callData, ...this.callList];
+            this.callList.push(callData);
+            //this.callList = [callData, ...this.callList];
+            //this.callList = [...this.callList, callData];
         },
         updateCall(callData) {
             this.callList = this.callList.map((x) => {
