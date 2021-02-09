@@ -19,28 +19,22 @@ return [
         'no-reply' => 'no-reply@techork.com',
     ],
 
-    'email_to' => [
-        'bcc_sales' => 'supers@wowfare.com'
-    ],
     'lead' => [
         'call2DelayTime' => 2 * 60 * 60,     // 2 hours
     ],
-    'ipinfodb_key' => '9079611957f72155dea3bb7ab848ee101c268564ab64921ca5345c4bce7af5b7',
+    'ipinfodb_key' => '',
     'backOffice' => [
         'ver' => '1.0.0',
-        'apiKey' => '5394bbedf41dd2c0403897ca621f188b',
-        'serverUrl' => 'https://backoffice.travelinsides.com/api/sync',
         'webHookEndpoint' => 'webhook/ping',
+        'apiKey' => '',
+        'serverUrl' => 'https://backoffice.travelinsides.com/api/sync',
+        'serverUrlV2' => 'https://backoffice.travelinsides.com/api/v2',
         'serverUrlV3' => 'https://backoffice.travelinsides.com/api/v3',
         'username' => '',
-        'password' => ''
+        'password' => '',
     ],
-    'global_phone' => '+16692011799',
 
     'telegram' => [
-        'bot_username'  => 'CrmKivorkBot',
-        'token'         => '817992632:AAE6UXJRqDscAZc9gUBScEpaT_T4zGukdos',
-        //'webhook_url'   => 'https://api-sales.dev.travelinsides.com/v1/telegram/webhook'
         'webhook_url'   => 'https://sales.api.travelinsides.com/v1/telegram/webhook'
     ],
     'use_browser_call_access' => true,
@@ -61,21 +55,80 @@ return [
         'port' => "22",
         'protocol' => "sftp",
         'path' => "reports",
-        'user' => "priceline",
-        'pass' => "ajfhiuEfbhvRyfbb(_&*^@31emdiow2rdfn2",
+        'user' => "",
+        'pass' => "",
     ],
-
     'centrifugo' => [
         'enabled' => false,
         'wsConnectionUrl' => 'wss://app.sales.com/centrifugo/connection/websocket',
     ],
-
     'clientChat' => [
         'projectConfig' => [
             'params' => [
                 'endpoint' => ''
             ]
         ]
-    ]
-
+    ],
+    'queue' => [
+        'host' => 'localhost',
+        'port' => 11300,
+    ],
+    'mattermostLogTarget' => [
+        'containerSettings' =>  [
+            'driver' => [
+                'scheme' => 'https',
+                'basePath' => '/api/v4',
+                'url' => 'chat.travel-dev.com',
+                'login_id' => '',
+                'password' => ''
+            ],
+        ],
+        'chanelId' => '',
+    ],
+    's3' => [
+        'credentials' => [
+            'key' => '',
+            'secret' => '',
+        ],
+        'region' => 'us-east-1',
+        'version' => '2006-03-01',
+    ],
+    'fileStorage' => [
+        'useRemoteStorage' => true,
+        'remoteStorage' => [
+            'cdn' => [
+                'host' => '',
+                'prefix' => '',
+            ],
+            's3' => [
+                'bucket' => '',
+                'prefix' => '',
+                'uploadConfig' => [
+                    'visibility' => 'private',// Required: [private or public] for FlySystem -> ACL native S3
+                    // League\Flysystem\AwsS3V3\AwsS3V3Adapter\AVAILABLE_OPTIONS
+                    'ServerSideEncryption' => 'AES256',
+                ],
+            ],
+        ],
+        'localStorage' => [
+            'path' => '', // absolute path to server directory
+            'url' => '', // full web address: https://sales.test/fs
+            'converterConfig' => [
+                'fileDir' => [
+                    'file' => [
+                        'public' => 0644,
+                        'private' => 0600,
+                    ],
+                    'dir' => [
+                        'public' => 0755,
+                        'private' => 0700,
+                    ],
+                ],
+                'defaultForDirectories' => 'private'
+            ],
+            'uploadConfig' => [
+                'visibility' => 'private',// [private or public] for FlySystem
+            ],
+        ],
+    ],
 ];

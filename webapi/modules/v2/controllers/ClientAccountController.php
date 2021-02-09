@@ -244,7 +244,7 @@ class ClientAccountController extends BaseController
      *       "status": 200,
      *       "message": "OK",
      *       "data": {
-     *          "ClientAccount created successfully": 123
+     *          "uuid": "f04f9609-31e1-4dba-bffd-a689d4391fef"
      *       },
      *       "technical": {
      *           "action": "/v2/client-account/create",
@@ -315,7 +315,7 @@ class ClientAccountController extends BaseController
 
             return new SuccessResponse(
                 new DataMessage(
-                    new Message('ClientAccount created successfully', $clientAccount->ca_id)
+                    new Message('uuid', $clientAccount->ca_uuid),
                 )
             );
         } catch (\Throwable $throwable) {

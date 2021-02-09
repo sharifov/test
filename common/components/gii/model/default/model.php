@@ -30,9 +30,9 @@ use Yii;
 <?php endforeach; ?>
 <?php if (!empty($relations)) : ?>
  *
-    <?php foreach ($relations as $name => $relation) : ?>
+<?php foreach ($relations as $name => $relation) : ?>
  * @property <?= $relation[1] . ($relation[2] ? '[]' : '') . ' $' . lcfirst($name) . "\n" ?>
-    <?php endforeach; ?>
+<?php endforeach; ?>
 <?php endif; ?>
  */
 class <?= $className ?> extends <?= '\\' . ltrim($generator->baseClass, '\\') . "\n" ?>
@@ -50,6 +50,7 @@ class <?= $className ?> extends <?= '\\' . ltrim($generator->baseClass, '\\') . 
         ];
     }
 <?php foreach ($relations as $name => $relation) : ?>
+
     public function get<?= $name ?>(): \yii\db\ActiveQuery
     {
         <?= $relation[0] . "\n" ?>
@@ -80,10 +81,8 @@ class <?= $className ?> extends <?= '\\' . ltrim($generator->baseClass, '\\') . 
         return '<?= $generator->generateTableName($tableName) ?>';
     }
 <?php if ($generator->db !== 'db') : ?>
-    /**
-    * @return \yii\db\Connection the database connection used by this AR class.
-    */
-    public static function getDb()
+
+    public static function getDb(): \yii\db\Connection
     {
         return Yii::$app->get('<?= $generator->db ?>');
     }

@@ -13,11 +13,7 @@ class QueueLongTimeNotificationJobCreator
         $job = new CallQueueLongTimeNotificationJob($call->c_id, $depPhoneProjectId, microtime());
         $jobId = Yii::$app->queue_job->delay($delay)->priority(100)->push($job);
         if ($jobId) {
-            $data = $call->getData();
-            $data->queueLongTime->jobId = $jobId;
-            $data->queueLongTime->departmentPhoneId = $job->departmentPhoneProjectId;
-            $data->queueLongTime->createdJobTime = $job->createdTime;
-            $call->setData($data);
+            $call->setDataQueueLongTime($jobId, $job->departmentPhoneProjectId, $job->createdTime);
             if (!$call->save()) {
                 Yii::error([
                     'message' => 'Call save error',

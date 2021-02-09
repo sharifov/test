@@ -175,8 +175,8 @@ $this->registerJs($js);
             'class' => \common\components\grid\project\ProjectColumn::class,
             'attribute' => 'project_id',
             'relation' => 'project',
-            'onlyUserProjects' => true,
-            'filter' => $showFilter,
+            'onlyUserProjects' => $showFilter,
+            'filter' => $showFilter ? null : false,
         ],
         [
             'attribute' => 'client_id',
@@ -308,6 +308,15 @@ $this->registerJs($js);
                 'class' => 'text-center'
             ]
         ],
+        [
+            'label' => 'Files',
+            'attribute' => 'count_files',
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
+            'visible' => $searchModel->show_fields && in_array('count_files', $searchModel->show_fields, true),
+        ],
+
         [
             'label' => 'Communication',
             'value' => static function (Lead $model) {

@@ -30,6 +30,7 @@ use yii\db\ActiveRecord;
  * @property int|null $dpp_phone_list_id
  * @property string|null $dpp_language_id
  * @property int|null $dpp_allow_transfer
+ * @property int $dpp_priority
  *
  * @property array $user_group_list
  *
@@ -97,6 +98,10 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
             [['dpp_language_id'], 'exist', 'skipOnError' => true, 'targetClass' => Language::class, 'targetAttribute' => ['dpp_language_id' => 'language_id']],
 
             [['dpp_dep_id', 'dpp_project_id', 'dpp_phone_list_id'], 'unique', 'targetAttribute' => ['dpp_dep_id', 'dpp_project_id', 'dpp_phone_list_id']],
+
+            ['dpp_priority', 'default', 'value' => 0],
+            ['dpp_priority', 'integer', 'max' => 6500, 'min' => 0],
+            ['dpp_priority', 'filter', 'filter' => 'intval', 'skipOnError' => true, 'skipOnEmpty' => true],
         ];
     }
 
@@ -124,6 +129,7 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
             'phoneList.pl_phone_number' => 'Phone List',
             'dpp_language_id' => 'Language ID',
             'dpp_allow_transfer' => 'Allow transfer',
+            'dpp_priority' => 'Priority',
         ];
     }
 

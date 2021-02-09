@@ -16,6 +16,7 @@ use common\models\Quote;
 use common\models\QuotePrice;
 use common\models\UserProjectParams;
 use common\models\VisitorLog;
+use frontend\helpers\JsonHelper;
 use frontend\widgets\notification\NotificationMessage;
 use modules\invoice\src\exceptions\InvoiceCodeException;
 use modules\lead\src\entities\lead\LeadQuery;
@@ -97,6 +98,8 @@ class QuoteController extends ApiBaseController
      * {
      *   "status": "Success",
      *   "itinerary": {
+     *       "typeId": 2,
+     *       "typeName": "Alternative",
      *       "tripType": "OW",
      *       "mainCarrier": "WOW air",
      *       "trips": [
@@ -177,6 +180,65 @@ class QuoteController extends ApiBaseController
      *           "isCC": false
      *       }
      *   },
+     *  "itineraryOrigin": {
+     *      "uid": "5f207ec202212",
+     *      "typeId": 1,
+     *      "typeName": "Original",
+     *      "tripType": "OW",
+     *      "mainCarrier": "WOW air",
+     *      "trips": [
+     *           {
+     *               "segments": [
+     *                   {
+     *                       "carrier": "WW",
+     *                       "airlineName": "WOW air",
+     *                       "departureAirport": "BOS",
+     *                       "arrivalAirport": "KEF",
+     *                       "departureDateTime": {
+     *                           "date": "2018-09-19 19:00:00.000000",
+     *                           "timezone_type": 3,
+     *                           "timezone": "UTC"
+     *                       },
+     *                       "arrivalDateTime": {
+     *                           "date": "2018-09-20 04:30:00.000000",
+     *                           "timezone_type": 3,
+     *                           "timezone": "UTC"
+     *                       },
+     *                       "flightNumber": "126",
+     *                       "bookingClass": "O",
+     *                       "departureCity": "Boston",
+     *                       "arrivalCity": "Reykjavik",
+     *                       "flightDuration": 330,
+     *                       "layoverDuration": 0,
+     *                       "cabin": "E",
+     *                       "departureCountry": "United States",
+     *                       "arrivalCountry": "Iceland"
+     *                   }
+     *               ],
+     *               "totalDuration": 1190,
+     *               "routing": "BOS-KEF",
+     *               "title": "Boston - London"
+     *           }
+     *       ],
+     *       "price": {
+     *           "detail": {
+     *               "ADT": {
+     *                   "selling": 350.2,
+     *                   "fare": 237,
+     *                   "taxes": 113.2,
+     *                   "tickets": 1
+     *               }
+     *           },
+     *           "tickets": 1,
+     *           "selling": 350.2,
+     *           "amountPerPax": 350.2,
+     *           "fare": 237,
+     *           "mark_up": 0,
+     *           "taxes": 113.2,
+     *           "currency": "USD",
+     *           "isCC": false
+     *       }
+     *   },
      *   "errors": [],
      *   "uid": "5b7424e858e91",
      *   "lead_id": 123456,
@@ -212,6 +274,19 @@ class QuoteController extends ApiBaseController
      *       "vl_visit_dt": "2020-02-14 12:00:00",
      *       "vl_created_dt": "2020-02-28 17:17:33"
      *   },
+     *  "lead": {
+     *       "additionalInformation": [
+     *           {
+     *              "pnr": "example_pnr",
+     *               "bo_sale_id": "example_sale_id",
+     *              "vtf_processed": null,
+     *              "tkt_processed": null,
+     *              "exp_processed": null,
+     *              "passengers": [],
+     *              "paxInfo": []
+     *          }
+     *      ]
+     *  },
      *   "action": "v1/quote/get-info",
      *   "response_id": 173,
      *   "request_dt": "2018-08-16 06:42:03",
@@ -311,10 +386,31 @@ class QuoteController extends ApiBaseController
             $response['agentDirectLine'] = ($userProjectParams && $userProjectParams->getPhone()) ? $userProjectParams->getPhone() : sprintf('%s', $model->lead->project->contactInfo->phone);
             $response['generalEmail'] = $model->lead->project->contactInfo->email;
             $response['generalDirectLine'] = sprintf('%s', $model->lead->project->contactInfo->phone);
+
+            $response['itinerary']['typeId'] = $model->type_id;
+            $response['itinerary']['typeName'] = Quote::getTypeName($model->type_id);
             $response['itinerary']['tripType'] = $model->trip_type;
             $response['itinerary']['mainCarrier'] = $model->mainAirline ? $model->mainAirline->name : $model->main_airline_code;
             $response['itinerary']['trips'] = $model->getTrips();
             $response['itinerary']['price'] = $model->getQuotePriceData(); //$model->quotePrice();
+
+            if ($model->isAlternative() && $originalQuote = Quote::getOriginalQuoteByLeadId($model->lead_id)) {
+                $response['itineraryOrigin']['uid'] = $originalQuote->uid;
+                $response['itineraryOrigin']['typeId'] = $originalQuote->type_id;
+                $response['itineraryOrigin']['typeName'] = Quote::getTypeName($originalQuote->type_id);
+                $response['itineraryOrigin']['tripType'] = $originalQuote->trip_type;
+                $response['itineraryOrigin']['mainCarrier'] = $originalQuote->mainAirline->name ?? $originalQuote->main_airline_code;
+                $response['itineraryOrigin']['trips'] = $originalQuote->getTrips();
+                $response['itineraryOrigin']['price'] = $originalQuote->getQuotePriceData();
+            }
+
+            if ($model->lead) {
+                ArrayHelper::setValue(
+                    $response,
+                    'lead.additionalInformation',
+                    $model->lead->additional_information ? JsonHelper::decode($model->lead->additional_information) : ''
+                );
+            }
 
             if ((int)$model->status === Quote::STATUS_SEND) {
                 $excludeIP = Quote::isExcludedIP($clientIP);
@@ -725,6 +821,7 @@ class QuoteController extends ApiBaseController
      * @apiParam {string}           [Quote.fare_type]           fare_type
      * @apiParam {string}           [Quote.employee_name]       employee_name
      * @apiParam {bool}             [Quote.created_by_seller]   created_by_seller
+     * @apiParam {int}              [Quote.type_id]             type_id
      * @apiParam {object}           QuotePrice[]                QuotePrice data array
      * @apiParam {string}           [QuotePrice.uid]            uid
      * @apiParam {string}           [QuotePrice.passenger_type] passenger_type
@@ -758,7 +855,8 @@ class QuoteController extends ApiBaseController
      *          "check_payment": "1",
      *          "fare_type": "TOUR",
      *          "employee_name": "Barry",
-     *          "created_by_seller": false
+     *          "created_by_seller": false,
+     *          "type_id" : 0
      *      },
      *      "QuotePrice": [
      *          {

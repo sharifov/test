@@ -204,7 +204,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <?php
 $storageName = Inflector::variablize($this->title);
-$selectAllUrl = Url::to(array_merge(['/client-chat-crud/select-all'], Yii::$app->getRequest()->getQueryParams()));
+//$selectAllUrl = Url::to(array_merge(['/client-chat-crud/select-all'], Yii::$app->getRequest()->getQueryParams()));
+$selectAllUrl = Url::to(['/client-chat-crud/select-all']);
 $deleteSelectedUrl = Url::to(array_merge(['/client-chat-crud/delete-selected'], Yii::$app->getRequest()->getQueryParams()));
 $pjaxContainer = '#client_chat_crud' ;
 
@@ -271,9 +272,12 @@ $script = <<< JS
             
         } else {    
             btn.html(loadingInner).prop('disabled', true);
-                
+                let queryParams = ''
+                if (window.location.href.indexOf('?') > 0) {
+                    queryParams = window.location.href.slice(window.location.href.indexOf('?'))
+                }                
             $.ajax({
-                url: selectAllUrl,
+                url: selectAllUrl + queryParams,
                 type: 'POST',
                 dataType: 'json'    
             })
@@ -386,15 +390,14 @@ $script = <<< JS
             sessionStorage.removeItem(storageName);
         }
         refreshSelectedState();
-    });
-        
+    });        
     
-    $(document).ready(function() {
+    $(document).ready(function() {        
         refreshSelectedState();
     });
         
-    $(pjaxContainer).on('pjax:end', function() {
-        refreshSelectedState();
+    $(pjaxContainer).on('pjax:end', function() { 
+       refreshSelectedState();
     });
     
     $('body').on('click', '.btn-show-checked-ids', function(e) {

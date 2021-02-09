@@ -400,18 +400,12 @@ class Email extends \yii\db\ActiveRecord
         return $text;
     }
 
-
-    /**
-     * @return array
-     */
-    public function sendMail(): array
+    public function sendMail(array $data = []): array
     {
-
         $out = ['error' => false];
 
         /** @var CommunicationService $communication */
         $communication = Yii::$app->communication;
-        $data = [];
         $data['project_id'] = $this->e_project_id;
 
         $content_data['email_body_html'] = $this->getEmailBodyHtml();

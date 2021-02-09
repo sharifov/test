@@ -2,17 +2,28 @@
 
 namespace sales\model\callLog\grid\columns;
 
+use sales\helpers\call\CallHelper;
 use sales\model\callLog\entity\callLog\CallLog;
+use yii\base\InvalidConfigException;
 use yii\grid\DataColumn;
 use yii\helpers\Html;
 
 class RecordingUrlColumn extends DataColumn
 {
+    const AUDIO_TAG = 1;
+    const AUDIO_BUTTON = 2;
+
     public $attribute = 'cl_duration';
     public $label = 'Recording';
     public $format = 'raw';
     public $options = ['style' => 'width: 80px'];
     public $contentOptions = ['class' => 'text-right'];
+    public $audioContent = self::AUDIO_BUTTON;
+    public $audioContentOptions = [
+        'controls' => 'controls',
+        'controlslist' => 'nodownload',
+        'style' => 'width: 350px; height: 25px'
+    ];
 
     protected function renderDataCellContent($model, $key, $index): string
     {
@@ -27,12 +38,14 @@ class RecordingUrlColumn extends DataColumn
             $format = 'i:s';
         }
 
-        return Html::button(
-            gmdate($format, $model->record->clr_duration) . ' <i class="fa fa-volume-up"></i>',
-            [
-                'title' => $model->record->clr_duration . ' (sec)', 'class' => 'btn btn-' . ($model->record->clr_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url',
-                'data-source_src' => $model->record->getRecordingUrl()
-            ]
-        );
+        if ($this->audioContent === self::AUDIO_BUTTON) {
+            return CallHelper::displayAudioBtn($model->recordingUrl, $format, (int)$model->record->clr_duration);
+        }
+
+        if ($this->audioContent === self::AUDIO_TAG) {
+            return CallHelper::displayAudioTag($model->recordingUrl, $this->audioContentOptions);
+        }
+
+        throw new InvalidConfigException('AudioContent value is not valid');
     }
 }

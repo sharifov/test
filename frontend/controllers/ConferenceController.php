@@ -2,7 +2,13 @@
 
 namespace frontend\controllers;
 
+use common\models\Call;
 use sales\auth\Auth;
+use sales\helpers\setting\SettingHelper;
+use sales\model\callLog\entity\callLog\CallLogQuery;
+use sales\model\callRecordingLog\entity\CallRecordingLog;
+use sales\model\conference\entity\conferenceRecordingLog\ConferenceRecordingLog;
+use sales\repositories\NotFoundException;
 use Yii;
 use common\models\Conference;
 use common\models\search\ConferenceSearch;
@@ -10,6 +16,7 @@ use frontend\controllers\FController;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * ConferenceController implements the CRUD actions for Conference model.
@@ -110,6 +117,35 @@ class ConferenceController extends FController
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
+    }
+
+    public function actionRecord(string $conferenceSid)
+    {
+        $cacheKey = 'conference-recording-url-' . $conferenceSid . '-user-' . Auth::id();
+
+        try {
+            if (!$conferenceRecordSid = Yii::$app->cacheFile->get($cacheKey)) {
+                if ($conference = Conference::find()->selectRecordingData()->bySid($conferenceSid)->asArray()->one()) {
+                    $conferenceRecordSid = $conference['cf_recording_sid'];
+                    $conferenceRecordDuration = $conference['cf_recording_duration'] + SettingHelper::getCallRecordingLogAdditionalCacheTimeout();
+                } else {
+                    throw new NotFoundException('Conference not found');
+                }
+
+                Yii::$app->cacheFile->set($cacheKey, $conferenceRecordSid, $conferenceRecordDuration);
+
+                if (SettingHelper::isCallRecordingLogEnabled()) {
+                    $conferenceRecordingLog = ConferenceRecordingLog::create($conferenceSid, Auth::id(), (int)date('Y'), (int)date('m'));
+                    if (!$conferenceRecordingLog->save(true)) {
+                        Yii::error('Conference Recording Log saving failed: ' . $conferenceRecordingLog->getErrorSummary(false)[0], 'ConferenceController::actionRecordingLog::conferenceRecordingLog::save');
+                    }
+                }
+            }
+
+            header('X-Accel-Redirect: ' . Yii::$app->communication->xAccelRedirectUrl . $conferenceRecordSid);
+        } catch (NotFoundException $e) {
+            throw new NotFoundHttpException($e->getMessage());
+        }
     }
 
     /**

@@ -61,6 +61,11 @@ class SettingHelper
         return (float) (\Yii::$app->params['settings']['processing_fee'] ?? 25.00);
     }
 
+    public static function quoteSearchProcessingFee(): float
+    {
+        return (float) (Yii::$app->params['settings']['quote_search_processing_fee'] ?? 25.00);
+    }
+
     public static function userSiteActivityLogHistoryDays(): int
     {
         return (int) (Yii::$app->params['settings']['user_site_activity_log_history_days'] ?? 3);
@@ -89,5 +94,25 @@ class SettingHelper
     public static function cleanCallAfterDays(): int
     {
         return (int) (Yii::$app->params['settings']['clean_call_after_days'] ?? 10);
+    }
+
+    public static function isCallRecordingSecurityEnabled(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['call_recording_security'] ?? false);
+    }
+
+    public static function isCallRecordingLogEnabled(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['enable_call_recording_log'] ?? false);
+    }
+
+    public static function getCallRecordingLogAdditionalCacheTimeout(): int
+    {
+        return (int) (Yii::$app->params['settings']['call_recording_log_additional_cache_timeout'] ?? 60);
+    }
+
+    public static function isGeneralLinePriorityEnable(): bool
+    {
+        return (bool)(\Yii::$app->params['settings']['enable_general_line_priority'] ?? false);
     }
 }

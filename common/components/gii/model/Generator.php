@@ -59,6 +59,20 @@ class Generator extends \yii\gii\generators\model\Generator
                 $tmpRules[] = $rule['rule'];
             }
         }
+        foreach($tmpRules as $key => $rule) {
+            $tmpRules[$key] = str_replace('::className()', '::class', $rule);
+        }
         return $tmpRules;
+    }
+
+    protected function generateRelations()
+    {
+        $relations = parent::generateRelations();
+        foreach($relations as $tableKey => $tables) {
+            foreach($tables as $relationKey => $relation) {
+                $relations[$tableKey][$relationKey] = str_replace('::className()', '::class', $relation);
+            }
+        }
+        return $relations;
     }
 }

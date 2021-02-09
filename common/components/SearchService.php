@@ -18,12 +18,16 @@ class SearchService
 {
     public const GDS_SABRE         = 'S';
     public const GDS_AMADEUS       = 'A';
-    public const GDS_TRAVELPORT    = 'T';
+    public const GDS_WORLDSPAN     = 'W';
+    public const GDS_APOLLO        = 'L';
+    public const GDS_COCKPIT       = 'C';
     public const GDS_AIRWANDER     = 'G';
     public const GDS_TRAVELFUSION  = 'F';
-    public const GDS_COCKPIT       = 'C';
+    public const GDS_PKFARE        = 'P';
+    public const GDS_TRAVELPORT    = 'T';
     public const GDS_ONEPOINT      = 'M';
-    public const GDS_WORLDSPAN     = 'W';
+    public const GDS_NDC_PROXY     = 'Y';
+    public const GDS_AMADEUS_IGNORE_AVAIL = 'B';
 
     public const GDS_LIST = [
         self::GDS_SABRE => 'Sabre',
@@ -34,6 +38,10 @@ class SearchService
         self::GDS_TRAVELFUSION => 'TravelFusion',
         self::GDS_COCKPIT => 'Cockpit',
         self::GDS_ONEPOINT => 'OnePoint',
+        self::GDS_APOLLO => 'Apollo',
+        self::GDS_PKFARE => 'Pkfare',
+        self::GDS_AMADEUS_IGNORE_AVAIL => 'Amadeus ignore avail',
+        self::GDS_NDC_PROXY => 'Ndc Proxy',
     ];
 
     public const
@@ -189,9 +197,7 @@ class SearchService
             );
         }
 
-
-
-        return $result; //json_decode((string)$result, true, 512, JSON_THROW_ON_ERROR);
+        return $result;
     }
 
     /**

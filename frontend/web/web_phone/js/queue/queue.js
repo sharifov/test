@@ -224,11 +224,107 @@
         return new QueueItem(new Queue(), 'inProgress');
     }
 
+    function PriorityItem(project, department, count) {
+        return {
+            project: project,
+            department: department,
+            count: count
+        };
+    }
+
+    function Priority() {
+        this.items = [];
+        this.accepted = false;
+
+        this.reset = function () {
+            this.items = [];
+            this.counterChanged();
+        };
+
+        this.remove = function (project, department) {
+            let item = this.findByCondition(project, department);
+            if (item.count === 0) {
+                if (item.index === null) {
+                    return;
+                }
+                this.items.splice(item.index, 1);
+                this.counterChanged();
+                return;
+            }
+            this.items[item.index].count--;
+            if (this.items[item.index].count < 1) {
+                this.items.splice(item.index, 1);
+            }
+            this.counterChanged();
+        };
+
+        this.add = function (project, department) {
+            this.addMany(project, department, 1);
+        };
+
+        this.addMany = function (project, department, count) {
+            let item = this.findByCondition(project, department);
+            if (item.count === 0) {
+                this.items.push(new PriorityItem(project, department, count));
+                this.counterChanged();
+                return;
+            }
+            this.items[item.index].count += count;
+            this.counterChanged();
+        };
+
+        this.findByCondition = function (project, department) {
+            let index = null;
+            this.items.forEach(function (item, i) {
+                if (item.project === project && item.department === department) {
+                    index = i;
+                }
+            });
+            if (index === null) {
+                return {
+                    'count': 0,
+                    'index': null
+                };
+            }
+            return {
+                'count': this.items[index].count,
+                'index': index
+            };
+        };
+
+        this.count = function () {
+            let count = 0;
+            this.items.forEach(function (item) {
+                count += item.count;
+            });
+            return count;
+        };
+
+        this.accept = function () {
+            this.accepted = true;
+            window.phoneWidget.eventDispatcher.dispatch(window.phoneWidget.events.priorityQueueAccepted,{'isSentAcceptCallRequestState': true});
+        };
+
+        this.unAccept = function () {
+            this.accepted = false;
+            window.phoneWidget.eventDispatcher.dispatch(window.phoneWidget.events.priorityQueueAccepted,{'isSentAcceptCallRequestState': false});
+        };
+
+        this.isAccepted = function () {
+            return this.accepted === true;
+        };
+
+        this.counterChanged = function () {
+            window.phoneWidget.eventDispatcher.dispatch(window.phoneWidget.events.priorityQueueCounterChanged,{count: this.count()});
+        };
+    }
+
     window.phoneWidget.queue = {
         Queue: Queue,
         Direct: Direct,
         Hold: Hold,
         General: General,
-        Active: Active
+        Active: Active,
+        Priority: Priority
     }
 })();

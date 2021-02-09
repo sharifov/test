@@ -10,14 +10,17 @@ use yii\web\View;
  * @var $lead Lead
  * @var $clientEmails ClientEmail[]
  * @var $manageClientInfoAccess bool
+ * @var $unsubscribedEmails array
  */
+$unsubscribedEmails = array_column($lead->project->emailUnsubscribes, 'eu_email');
 ?>
 
 <table class="table table-condensed table-bordered">
     <?php foreach ($clientEmails as $key => $email) : ?>
         <tr>
-            <td title="<?= ClientEmail::EMAIL_TYPE[$email->type] ?? '' ?>"  class="text-center" style="width:33px; background-color: #eef3f9">
+            <td class="text-center" style="width:33px; background-color: #eef3f9">
                 <?= ClientEmail::EMAIL_TYPE_ICONS[$email->type] ?? '' ?>
+                <?= in_array($email->email, $unsubscribedEmails) ? '<i title="Unsubscribed" class="fa fa-bell-slash"></i>' : '' ?>
             </td>
             <td class="<?= ClientEmail::EMAIL_TYPE_TEXT_DECORATION[$email->type] ?? '' ?>"> <?= \yii\helpers\Html::encode($email->email)?></td>
 

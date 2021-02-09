@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Quote;
 use kartik\select2\Select2;
 use sales\access\ListsAccess;
 use yii\helpers\Html;
@@ -139,7 +140,7 @@ use frontend\extensions\DatePicker;
 
         <div class="col-md-3">
             <div class="row">
-                <div class="col-md-6"><?php echo $form->field($model, 'project_id')->dropDownList($lists->getProjects(), ['prompt' => '-']) ?></div>
+                <div class="col-md-6"><?php echo $form->field($model, 'projectId')->dropDownList($lists->getProjects(), ['prompt' => '-']) ?></div>
                 <div class="col-md-6"><?php echo $form->field($model, 'source_id')->dropDownList($lists->getSources(true), ['prompt' => '-']) ?></div>
             </div>
             <div class="row">
@@ -347,6 +348,11 @@ use frontend\extensions\DatePicker;
                 <?= $form->field($model, 'l_is_test')->dropDownList([0 => 'False',1 => 'True'], ['prompt' => '-'])->label('Is Test') ?>
             </div>
       <!--  </div>-->
+
+        <div class="col-md-1">
+            <?= $form->field($model, 'quoteTypeId')->dropDownList(Quote::TYPE_LIST, ['prompt' => '-']) ?>
+        </div>
+
     </div>
 
     <div class="row">

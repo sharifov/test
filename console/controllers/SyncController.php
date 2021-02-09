@@ -21,9 +21,11 @@ use common\models\ProjectEmployeeAccess;
 use common\models\Quote;
 use common\models\QuotePrice;
 use common\models\Sources;
+use sales\model\airportLang\service\AirportLangService;
 use yii\console\Controller;
 use Yii;
 use yii\helpers\Console;
+use yii\helpers\VarDumper;
 
 class SyncController extends Controller
 {
@@ -379,7 +381,7 @@ class SyncController extends Controller
                         if (!$quote->save(false)) {
                             echo 'LEAD: ' . $quote->lead_id . PHP_EOL;
                             var_dump($quote->getErrors());
-                            //exit;
+                        //exit;
                         } else {
                             $quote->created = $item['created'];
                             $quote->update(false, ['created']);
@@ -443,5 +445,44 @@ class SyncController extends Controller
                 }
             }
         }
+    }
+
+    public function actionAirportsLang($limit = 99999)
+    {
+        echo Console::renderColoredString('%y --- Start %w[' . date('Y-m-d H:i:s') . '] %y' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
+        $timeStart = microtime(true);
+
+        $result = AirportLangService::synchronization(0);
+
+        if ($result) {
+            if ($result['error']) {
+                echo Console::renderColoredString('%R --- Error: %r' . VarDumper::dumpAsString($result['error']) . ' %n'), PHP_EOL;
+            } else {
+                if ($result['info']) {
+                    $message = implode(', ', $result['info']);
+                    echo Console::renderColoredString('%y --- Info: %w' . $message . ' %n'), PHP_EOL;
+                }
+
+                if ($result['created']) {
+                    $message = '(' . count($result['created']) . ') ';
+                    echo Console::renderColoredString('%y --- Created AirportLand: %w' . $message . ' %n'), PHP_EOL;
+                }
+                if ($result['updated']) {
+                    $message = 'Updated AirportLand (' . count($result['updated']) . ') ';
+                    echo Console::renderColoredString('%y --- Updated AirportLand: %w' . $message . ' %n'), PHP_EOL;
+                }
+                if ($result['errored']) {
+                    $message = '(' . count($result['errored']) . '): "' . implode(', ', $result['errored']);
+                    echo Console::renderColoredString('%r --- Errored AirportLand: %R' . $message . ' %n'), PHP_EOL;
+                }
+            }
+        }
+
+        $timeEnd = microtime(true);
+        $time = number_format(round($timeEnd - $timeStart, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . ']%n'), PHP_EOL;
     }
 }

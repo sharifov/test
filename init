@@ -135,6 +135,7 @@ function copyFile($root, $source, $target, &$all, $params)
                 }
             }
         }
+        copy($root . '/' . $target, $root . '/' . $target . '_' . date('Y-m-d_H:i:s') .'.bak');
         file_put_contents($root . '/' . $target, file_get_contents($root . '/' . $source));
         return true;
     }
@@ -255,7 +256,7 @@ function setInitConfig($root, $paths)
 //                                $patternList[$nl] = '~(\'?)(\{\{[ ]*' . $keyVal . '[ ]*\}\})(\'?)~';
 //                                $replaceList[$nl] = '\\1' . $val . '\\3';
                             $patternList[] = '\'{{ ' . $keyVal . ' }}\'';
-                            $replaceList[] = '\'' . $val . '\'';
+                            $replaceList[] = ($val === 'null') ? 'null' : '\'' . $val . '\'';
                             $patternList[] = '{{ ' . $keyVal . ' }}';
                             $replaceList[] = $val;
                             break;

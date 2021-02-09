@@ -7,9 +7,13 @@ use common\components\jobs\CheckClientCallJoinToConferenceJob;
 use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
 use sales\behaviors\metric\MetricCallCounterBehavior;
+use sales\helpers\app\AppHelper;
 use sales\helpers\PhoneFormatter;
+use sales\helpers\setting\SettingHelper;
 use sales\helpers\UserCallIdentity;
 use sales\model\call\entity\call\data\Data;
+use sales\model\call\entity\call\data\QueueLongTime;
+use sales\model\call\entity\call\data\Repeat;
 use sales\model\call\helper\CallHelper;
 use frontend\widgets\newWebPhone\call\socket\MissedCallMessage;
 use frontend\widgets\newWebPhone\call\socket\RemoveIncomingRequestMessage;
@@ -255,6 +259,9 @@ class Call extends \yii\db\ActiveRecord
     public const QUEUE_DIRECT = 'direct';
 
     public const CHANNEL_REALTIME_MAP = 'realtimeMapChannel';
+    public const CHANNEL_USER_ONLINE = 'userOnlineChannel';
+
+    public const DEFAULT_PRIORITY_VALUE = 0;
 
     private ?Data $data = null;
 
@@ -1537,9 +1544,11 @@ class Call extends \yii\db\ActiveRecord
                 $callUserAccess->cua_call_id = $call->c_id;
                 $callUserAccess->cua_user_id = $user_id;
                 $callUserAccess->acceptPending();
+                $callUserAccess->cua_priority = $call->getDataPriority();
             } else {
                 $callUserAccess->acceptPending();
                 $callUserAccess->cua_created_dt = date("Y-m-d H:i:s");
+                $callUserAccess->cua_priority = $call->getDataPriority();
             }
 
             if (!$callUserAccess->save()) {
@@ -2175,7 +2184,7 @@ class Call extends \yii\db\ActiveRecord
      */
     public function getRecordingUrl(): string
     {
-        return $this->c_recording_sid ? Yii::$app->communication->recording_url . $this->c_recording_sid : '';
+        return $this->c_recording_sid ? Yii::$app->communication->getCallRecordingUrl($this->c_call_sid, $this->c_recording_sid) : '';
     }
 
     public function isConferenceType(): bool
@@ -2230,7 +2239,7 @@ class Call extends \yii\db\ActiveRecord
     /**
      * @param Data $data
      */
-    public function setData(Data $data): void
+    private function setData(Data $data): void
     {
         $this->c_data_json = $data->toJson();
         $this->data = $data;
@@ -2265,27 +2274,145 @@ class Call extends \yii\db\ActiveRecord
             ->asArray()->all();
 
         $data['userAccessList'] = $callUserAccesses;
+        if ($this->c_client_id) {
+            $client = Client::find()->select(['first_name', 'last_name'])
+                ->where(['id' => $this->c_client_id])
+                ->one();
+            if ($client) {
+                $data['client'] = [
+                    'first_name' => $client->first_name,
+                    'last_name' => $client->last_name,
+                    'middle_name' => $client->middle_name
+                ];
+            }
+        }
         return $data;
     }
 
     /**
      * @param string $action
-     * @return mixed
-     * @throws \Exception
+     * @return false|mixed
      */
     public function sendFrontendData(string $action = 'update')
     {
-        return Yii::$app->centrifugo->setSafety(false)
-            ->publish(
-                self::CHANNEL_REALTIME_MAP,
-                [
-                    'object' => 'call',
-                    'action'  => $action,
-                    'id'      => $this->c_id,
-                    'data' => [
-                        'call' => $this->getApiData(),
+        $enabled = !empty(Yii::$app->params['centrifugo']['enabled']);
+        if ($enabled) {
+            try {
+                return Yii::$app->centrifugo->setSafety(false)
+                ->publish(
+                    self::CHANNEL_REALTIME_MAP,
+                    [
+                        'object' => 'call',
+                        'action' => $action,
+                        'id' => $this->c_id,
+                        'data' => [
+                            'call' => $this->getApiData(),
+                        ]
                     ]
-                ]
-            );
+                );
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableFormatter($throwable), 'Call:sendFrontendData:Throwable');
+                return false;
+            }
+        }
+    }
+
+    public function setDataPriority(int $value): void
+    {
+        $data = $this->getData();
+        $data->priority = $value;
+        $this->setData($data);
+    }
+
+    public function getDataPriority(): int
+    {
+        return $this->getData()->priority;
+    }
+
+    public function setDataRepeat($jobId, $departmentPhoneId, $createdJobTime): void
+    {
+        $data = $this->getData();
+        $data->repeat = new Repeat([
+            'jobId' => $jobId,
+            'departmentPhoneId' => $departmentPhoneId,
+            'createdJobTime' => $createdJobTime
+        ]);
+        $this->setData($data);
+    }
+
+    public function resetDataRepeat(): void
+    {
+        $data = $this->getData();
+        $data->repeat->reset();
+        $this->setData($data);
+    }
+
+    public function setDataQueueLongTime($jobId, $departmentPhoneId, $createdJobTime): void
+    {
+        $data = $this->getData();
+        $data->queueLongTime = new QueueLongTime([
+            'jobId' => $jobId,
+            'departmentPhoneId' => $departmentPhoneId,
+            'createdJobTime' => $createdJobTime
+        ]);
+        $this->setData($data);
+    }
+
+    public function resetDataQueueLongTime(): void
+    {
+        $data = $this->getData();
+        $data->queueLongTime->reset();
+        $this->setData($data);
+    }
+
+    /**
+     * @return array
+     */
+    public static function getStatusListApi(): array
+    {
+        $data = [];
+        if (self::STATUS_LIST) {
+            foreach (self::STATUS_LIST as $id => $name) {
+                $data[] = [
+                    'id' => $id,
+                    'name' => $name,
+                ];
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * @return array
+     */
+    public static function getSourceListApi(): array
+    {
+        $data = [];
+        if (self::SHORT_SOURCE_LIST) {
+            foreach (self::SHORT_SOURCE_LIST as $id => $name) {
+                $data[] = [
+                    'id' => $id,
+                    'name' => $name,
+                ];
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * @return array
+     */
+    public static function getTypeListApi(): array
+    {
+        $data = [];
+        if (self::TYPE_LIST) {
+            foreach (self::TYPE_LIST as $id => $name) {
+                $data[] = [
+                    'id' => $id,
+                    'name' => $name,
+                ];
+            }
+        }
+        return $data;
     }
 }

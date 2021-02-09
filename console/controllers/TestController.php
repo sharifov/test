@@ -3,9 +3,11 @@
 namespace console\controllers;
 
 use common\models\CallUserAccess;
+use common\models\Employee;
 use common\models\Lead;
 use common\models\Call;
 use common\models\Notifications;
+use common\models\UserOnline;
 use Faker\Factory;
 use modules\twilio\src\entities\conferenceLog\ConferenceLog;
 use sales\model\client\useCase\excludeInfo\ClientExcludeIpChecker;
@@ -264,7 +266,8 @@ class TestController extends Controller
             foreach ($calls as $call) {
                 $call->c_status_id = random_int(1, 12);
                 $call->c_source_type_id = random_int(1, 12);
-                $call->c_updated_dt = date("Y-m-d H:i:s", strtotime('-' . random_int(1, 60) . ' minutes'));
+                $call->c_call_type_id = random_int(1, 4);
+                $call->c_updated_dt = null; //date("Y-m-d H:i:s", strtotime('-' . random_int(1, 60) . ' minutes'));
                 $call->c_created_dt = $call->c_updated_dt;
                 $call->c_queue_start_dt = date("Y-m-d H:i:s", strtotime('-' . random_int(1, 15) . ' minutes'));
                 $call->sendFrontendData('update');
@@ -288,11 +291,68 @@ class TestController extends Controller
         $n = 0;
         while (true) {
             $n++;
-            usleep(0.9 * 1000000);
+            $acessList = CallUserAccess::find()->limit(5)->orderBy('RAND()')->all();
+            foreach ($acessList as $item) {
+                $item->cua_call_id = 3368193;
+                //$item->cua_user_id = 188;
+                $item->sendFrontendData('insert');
+
+                VarDumper::dump($item->attributes);
+            }
+            usleep(0.1 * 1000000);
             if ($n > 100000) {
                 break;
             }
         }
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function actionUserOnline()
+    {
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+        $n = 0;
+
+        $users = [340, 635, 615, 600, 595];
+
+        while (true) {
+            $n++;
+            $userList = UserOnline::find()->limit(5)->orderBy('RAND()')->all();
+            foreach ($userList as $item) {
+                //$item->uo_user_id = Employee::find()->select('id')->limit(1)->orderBy('RAND()')->scalar();
+                $item->uo_user_id = $users[random_int(0, 4)];
+                //$item->cua_user_id = 188;
+                $item->uo_idle_state = (bool) random_int(0, 1);
+                $item->sendFrontendData('insert');
+
+                VarDumper::dump($item->attributes);
+            }
+            usleep(1 * 1000000);
+            if ($n > 100000) {
+                break;
+            }
+        }
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function actionTestCentrifugoCall($id)
+    {
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+
+        $call = Call::find()
+            ->where(['c_id' => $id])
+            ->one(); //['c_id' => SORT_DESC]
+        if ($call) {
+            $call->c_status_id = Call::STATUS_COMPLETED;
+            $call->sendFrontendData('update');
+            echo ' - ' . $call->c_id . PHP_EOL;
+        }
+
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
 }

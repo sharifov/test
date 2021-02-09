@@ -37,29 +37,31 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php if ($model->recordingUrl) :?>
     <div class="col-md-12">
-        <script>
-            window.WS_InitOptions = {
-                pluginCdnTemplate: "https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/3.3.2/plugin/wavesurfer.[name].min.js"
-            };
-        </script>
+        <div class="audio-wrapper" data-call-sid="<?= $model->c_call_sid ?>">
+            <script>
+                window.WS_InitOptions = {
+                    pluginCdnTemplate: "https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/3.3.2/plugin/wavesurfer.[name].min.js"
+                };
+            </script>
 
-        <wavesurfer
-                data-url="<?= $model->recordingUrl  ?>"
-                data-plugins="minimap,timeline,cursor"
+            <wavesurfer
+                    data-url="<?= $model->recordingUrl  ?>"
+                    data-plugins="minimap,timeline,cursor"
 
-                data-split-channels="true"
-                data-media-controls="false"
+                    data-split-channels="true"
+                    data-media-controls="false"
 
-                data-minimap-height="30"
-                data-minimap-wave-color="#ddd"
-                data-minimap-progress-color="#999"
-                data-timeline-font-size="13px"
-                data-timeline-container="#timeline"
-        >
-        </wavesurfer>
+                    data-minimap-height="30"
+                    data-minimap-wave-color="#ddd"
+                    data-minimap-progress-color="#999"
+                    data-timeline-font-size="13px"
+                    data-timeline-container="#timeline"
+            >
+            </wavesurfer>
 
-        <div id="timeline"></div>
-        <br/>
+            <div id="timeline"></div>
+            <br/>
+        </div>
     </div>
     <?php endif;?>
 

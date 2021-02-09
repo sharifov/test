@@ -30,9 +30,13 @@ use frontend\models\CommunicationForm;
 use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
+use modules\fileStorage\FileStorageSettings;
+use modules\fileStorage\src\widgets\FileStorageListWidget;
+use modules\fileStorage\src\widgets\FileStorageUploadWidget;
 use sales\auth\Auth;
 use yii\bootstrap4\Modal;
 use yii\data\ActiveDataProvider;
+use yii\helpers\Url;
 
 \frontend\themes\gentelella_v2\assets\AssetLeadCommunication::register($this);
 
@@ -65,12 +69,15 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
 } else {
     $unsubscribe = false;
 }
+
+$unsubscribedEmails = array_column($lead->project->emailUnsubscribes, 'eu_email');
 ?>
 
 <?= $this->render('partial/_view_header', [
     'lead' => $lead,
     'title' => $this->title
 ]) ?>
+
 
 
 <div class="main-sidebars">
@@ -144,7 +151,8 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
                     'lead' => $lead,
                     'leadForm' => $leadForm,
                     'is_manager' => $is_manager,
-                    'unsubscribe' => $unsubscribe
+                    'unsubscribe' => $unsubscribe,
+                    'unsubscribedEmails' => $unsubscribedEmails,
                 ]) ?>
             <?php endif; ?>
 
@@ -205,6 +213,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
                     'lead' => $lead,
                     'fromPhoneNumbers' => $fromPhoneNumbers,
                     'unsubscribe' => $unsubscribe,
+                    'unsubscribedEmails' => $unsubscribedEmails,
                     'smsEnabled' => $smsEnabled,
                 ]); ?>
                 <?php /*else: */ ?><!--
@@ -213,6 +222,16 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
 
             <?php //php \yii\helpers\VarDumper::dump(Yii::$app->user->identity->callExpertCountByShiftTime)?>
 
+            <?php if (FileStorageSettings::isEnabled() && Auth::can('lead-view/files/view', ['lead' => $lead])) : ?>
+                <?= FileStorageListWidget::byLead(
+                    $lead->id,
+                    (
+                         FileStorageSettings::canUpload()
+                         && Auth::can('lead-view/files/upload')
+                         && Auth::can('lead/manage', ['lead' => $lead])
+                    )
+                ) ?>
+            <?php endif; ?>
 
             <?php if (!$lead->client->isExcluded()) : ?>
                 <?php if (Auth::can('lead-view/call-expert/view', ['lead' => $lead])) : ?>

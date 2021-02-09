@@ -4,6 +4,7 @@ namespace sales\helpers\clientChat;
 
 use common\models\Employee;
 use common\models\UserProfile;
+use frontend\helpers\JsonHelper;
 use sales\auth\Auth;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
@@ -129,12 +130,24 @@ class ClientChatHelper
     public static function formatOffsetUtcToLeadOffsetGmt(?string $offset): ?string
     {
         if ($offset) {
-            if (preg_match('/^\+[0-9]{4}$/', $offset)) {
+            if (preg_match('/^([+\-])[0-9]{4}$/', $offset)) {
                 return substr_replace($offset, '.', 3, 0);
             }
             \Yii::error('Offset format is not valid: ' . $offset, 'ClientChatHelper::formatOffsetUtcToLeadOffsetGmt');
             return null;
         }
         return null;
+    }
+
+    public static function prepareChatIds(string $sourceIds): string
+    {
+        if (!$ids = JsonHelper::decode($sourceIds)) {
+            return '[]';
+        }
+
+        $ids = array_filter($ids, static function ($value) {
+            return !is_null($value);
+        });
+        return $ids ? JsonHelper::encode($ids) : '[]';
     }
 }

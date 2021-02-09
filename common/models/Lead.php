@@ -49,6 +49,7 @@ use sales\events\lead\LeadTrashEvent;
 use sales\helpers\lead\LeadHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\interfaces\Objectable;
+use sales\model\airportLang\service\AirportLangService;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\callLog\entity\callLogLead\CallLogLead;
@@ -674,6 +675,8 @@ class Lead extends ActiveRecord implements Objectable
         $clone->clone_id = $this->id;
         $clone->employee_id = null;
         $clone->l_type_create = self::TYPE_CREATE_CLONE;
+        $clone->bo_flight_id = 0;
+        $clone->final_profit = null;
         $clone->recordEvent(new LeadCreatedCloneEvent($clone));
         return $clone;
     }
@@ -1495,8 +1498,6 @@ class Lead extends ActiveRecord implements Objectable
     {
         return $this->status === self::STATUS_ALTERNATIVE;
     }
-
-
 
     /**
      * @param int|null $newOwnerId
@@ -3444,7 +3445,11 @@ Reason: {reason}',
             $this->children = (int) $this->children;
             $this->infants = (int) $this->infants;
             $this->bo_flight_id = (int) $this->bo_flight_id;
-            $this->agents_processing_fee = ($this->adults + $this->children) * SettingHelper::processingFee();
+            if (($this->isBooked() || $this->isSold()) && $quote = $this->getBookedQuote()) {
+                $this->agents_processing_fee = $quote->agent_processing_fee;
+            } else {
+                $this->agents_processing_fee = ($this->adults + $this->children) * SettingHelper::processingFee();
+            }
             $this->oldAdditionalInformation = $this->oldAttributes['additional_information'] ?? '';
             return true;
         }
@@ -3608,7 +3613,7 @@ Reason: {reason}',
             return $this->agentsProcessingFee;
         }
 
-        $this->agentsProcessingFee = $this->agents_processing_fee ?: ($this->getProcessingFeePerPax() * (int)($this->adults + $this->children));
+        $this->agentsProcessingFee = !is_null($this->agents_processing_fee) ? $this->agents_processing_fee : ($this->getProcessingFeePerPax() * (int)($this->adults + $this->children));
 
         return $this->agentsProcessingFee;
     }
@@ -3622,7 +3627,8 @@ Reason: {reason}',
         }
 
         if ($this->final_profit !== null) {
-            $this->finalProfit = (float)$this->final_profit - ($this->getProcessingFeePerPax() * (int)($this->adults + $this->children));
+            $processingFee = !is_null($this->agents_processing_fee) ? $this->agents_processing_fee : ($this->getProcessingFeePerPax() * (int)($this->adults + $this->children));
+            $this->finalProfit = (float)$this->final_profit - $processingFee;
         } else {
             $this->finalProfit = null;
         }
@@ -3638,20 +3644,25 @@ Reason: {reason}',
             return $this->processingFeePerPax;
         }
 
-        $this->processingFeePerPax = SettingHelper::processingFee();
-
-        if ($this->employee_id && $this->employee) {
-            $groups = $this->employee->ugsGroups;
-            if ($groups) {
-                foreach ($groups as $group) {
-                    if ($group->ug_processing_fee) {
-                        $this->processingFeePerPax = $group->ug_processing_fee;
-                        break;
-                    }
-                }
-                unset($groups);
-            }
+        $quote = $this->getBookedQuote();
+        if ($quote && $quote->isCreatedFromSearch()) {
+            $this->processingFeePerPax = SettingHelper::quoteSearchProcessingFee();
+        } else {
+            $this->processingFeePerPax = SettingHelper::processingFee();
         }
+
+//        if ($this->employee_id && $this->employee) {
+//            $groups = $this->employee->ugsGroups;
+//            if ($groups) {
+//                foreach ($groups as $group) {
+//                    if ($group->ug_processing_fee) {
+//                        $this->processingFeePerPax = $group->ug_processing_fee;
+//                        break;
+//                    }
+//                }
+//                unset($groups);
+//            }
+//        }
 
         return $this->processingFeePerPax;
     }
@@ -3891,13 +3902,13 @@ Reason: {reason}',
         return $result;
     }
 
-
     /**
      * @param array $quoteIds
      * @param $projectContactInfo
+     * @param string|null $lang
      * @return array
      */
-    public function getEmailData2(array $quoteIds, $projectContactInfo): array
+    public function getEmailData2(array $quoteIds, $projectContactInfo, ?string $lang = null): array
     {
         $project = $this->project;
 
@@ -3928,7 +3939,7 @@ Reason: {reason}',
                         //'shortUrl' => $quoteModel->quotePrice(),
                     ];
 
-                    $quoteItem = array_merge($quoteItem, $quoteModel->getInfoForEmail2());
+                    $quoteItem = array_merge($quoteItem, $quoteModel->getInfoForEmail2($lang));
 
                     $content_data['quotes'][] = $quoteItem;
                 }
@@ -3981,21 +3992,8 @@ Reason: {reason}',
             $departIATA = $firstSegment->origin;
             $arriveIATA = $lastSegment->destination;
 
-            $departAirport = Airports::find()->where(['iata' => $firstSegment->origin])->one();
-            if ($departAirport) {
-                $departCity = $departAirport->city;
-            } else {
-                $departCity = $firstSegment->origin;
-            }
-
-
-            $arriveAirport = Airports::find()->where(['iata' => $firstSegment->destination])->one();
-            if ($arriveAirport) {
-                $arriveCity = $arriveAirport->city;
-            } else {
-                $arriveCity = $firstSegment->destination;
-            }
-
+            $departCity = AirportLangService::getCityByIataAndLang($firstSegment->origin, $lang);
+            $arriveCity = AirportLangService::getCityByIataAndLang($firstSegment->destination, $lang);
 
             /** @property string $origin
              * @property string $destination
@@ -4005,23 +4003,17 @@ Reason: {reason}',
              * @property string $created
              * @property string $updated
              * @property string $origin_label
-             * @property string $destination_label*/
-
-
+             * @property string $destination_label */
             foreach ($leadSegments as $segmentModel) {
-                $destAirport = Airports::find()->where(['iata' => $segmentModel->destination])->one();
-                $origAirport = Airports::find()->where(['iata' => $segmentModel->origin])->one();
-
                 $requestSegments[] = [
                     'departureDate' => $segmentModel->departure,
                     'originIATA' => $segmentModel->origin,
                     'destinationIATA' => $segmentModel->destination,
-                    'originCity' => $origAirport ? $origAirport->city : $segmentModel->origin,
-                    'destinationCity' => $destAirport ? $destAirport->city : $segmentModel->destination,
+                    'originCity' => AirportLangService::getCityByIataAndLang($segmentModel->origin, $lang),
+                    'destinationCity' => AirportLangService::getCityByIataAndLang($segmentModel->destination, $lang),
                 ];
             }
         }
-
 
         $content_data['request'] = [
             'arriveCity'    => $arriveCity,

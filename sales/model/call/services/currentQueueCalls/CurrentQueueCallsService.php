@@ -8,6 +8,7 @@ use common\models\Conference;
 use common\models\ConferenceParticipant;
 use common\models\Department;
 use common\models\Employee;
+use common\models\Project;
 use sales\helpers\UserCallIdentity;
 use sales\model\call\helper\CallHelper;
 use sales\model\conference\service\ConferenceDataService;
@@ -19,7 +20,7 @@ class CurrentQueueCallsService
     private bool $canContactDetails;
     private bool $canCallInfo;
 
-    public function getQueuesCalls(int $userId, ?string $excludeCallSid): QueueCalls
+    public function getQueuesCalls(int $userId, ?string $excludeCallSid, bool $generalLinePriorityIsEnabled): QueueCalls
     {
         $this->userId = $userId;
 
@@ -27,8 +28,9 @@ class CurrentQueueCallsService
         $this->canContactDetails = $auth->checkAccess($this->userId, '/client/ajax-get-info');
         $this->canCallInfo = $auth->checkAccess($this->userId, '/call/ajax-call-info');
 
+        $priorityQueue = $this->getPriorityCalls($generalLinePriorityIsEnabled);
         $holdQueue = $this->getHoldCalls($excludeCallSid);
-        $incomingQueue = $this->getIncomingCalls($excludeCallSid);
+        $incomingQueue = $this->getIncomingCalls($excludeCallSid, $generalLinePriorityIsEnabled);
         $outgoingQueue = $this->getOutgoingCalls($excludeCallSid);
         $activeQueue = $this->getActiveCalls($excludeCallSid);
         $conferences = $this->getActiveConferences($activeQueue['calls']);
@@ -39,6 +41,7 @@ class CurrentQueueCallsService
             $outgoingQueue['calls'],
             $activeQueue['calls'],
             $conferences,
+            $priorityQueue
         );
 
         if ($incomingQueue['last_time'] > $outgoingQueue['last_time'] && $incomingQueue['last_time'] > $activeQueue['last_time']) {
@@ -353,9 +356,10 @@ class CurrentQueueCallsService
 
     /**
      * @param string|null $excludeCallSid
+     * @param bool $generalLinePriorityIsEnabled
      * @return IncomingQueueCall[]
      */
-    private function getIncomingCalls(?string $excludeCallSid): array
+    private function getIncomingCalls(?string $excludeCallSid, bool $generalLinePriorityIsEnabled): array
     {
         $calls = [];
         $last_time = 0;
@@ -365,6 +369,10 @@ class CurrentQueueCallsService
             ->joinWith(['cuaCall'])
             ->where(['cua_user_id' => $this->userId, 'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING])
             ->andWhere(['<>', 'c_status_id', Call::STATUS_HOLD]);
+
+        if ($generalLinePriorityIsEnabled) {
+            $query = $query->andWhere(['NOT IN', 'c_source_type_id', [Call::SOURCE_GENERAL_LINE, Call::SOURCE_REDIRECT_CALL]]);
+        }
 
         if ($excludeCallSid) {
             $query = $query->andWhere(['<>', 'c_call_sid', $excludeCallSid]);
@@ -472,6 +480,44 @@ class CurrentQueueCallsService
                 'isClient' => $call->c_client_id ? $call->cClient->isClient() : false,
                 'clientId' => $call->c_client_id,
                 'recordingDisabled' => $call->c_recording_disabled ? true : false,
+            ]);
+        }
+
+        return $calls;
+    }
+
+    /**
+     * @param bool $generalLinePriorityIsEnabled
+     * @return PriorityQueueCall[]
+     */
+    private function getPriorityCalls(bool $generalLinePriorityIsEnabled): array
+    {
+        $calls = [];
+
+        if (!$generalLinePriorityIsEnabled) {
+            return $calls;
+        }
+
+        $queue = CallUserAccess::find()
+            ->select(['count(*) as count', Project::tableName() . '.name as project', 'dep_name as department'])
+            ->innerJoin(Call::tableName(), 'c_id = cua_call_id')
+            ->innerJoin(Project::tableName(), 'c_project_id = ' . Project::tableName() . '.id')
+            ->innerJoin(Department::tableName(), 'c_dep_id = dep_id')
+            ->andWhere([
+                'cua_user_id' => $this->userId,
+                'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING
+            ])
+            ->andWhere(['c_source_type_id' => [Call::SOURCE_GENERAL_LINE, Call::SOURCE_REDIRECT_CALL]])
+            ->andWhere(['<>', 'c_status_id', Call::STATUS_HOLD])
+            ->groupBy(['c_project_id', 'c_dep_id'])
+            ->asArray()
+            ->all();
+
+        foreach ($queue as $item) {
+            $calls[] = new PriorityQueueCall([
+                'count' => (int)$item['count'],
+                'project' => $item['project'],
+                'department' => $item['department'],
             ]);
         }
 

@@ -152,6 +152,14 @@ class ClientChatAccessMessage
         ];
     }
 
+    public static function chatTakenBy(int $chatId, string $newOwnerNickname, string $supervisorNickname): array
+    {
+        return [
+            'message' => $supervisorNickname . ' has take your Client Chat to ' . $newOwnerNickname,
+            'cchId' => $chatId,
+        ];
+    }
+
     public static function chatArchive(int $chatId): array
     {
         return [

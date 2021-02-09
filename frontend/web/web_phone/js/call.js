@@ -21,7 +21,8 @@ var PhoneWidgetCall = function () {
         'hold': new window.phoneWidget.queue.Hold(waitQueue),
         'general': new window.phoneWidget.queue.General(waitQueue),
         'outgoing': new window.phoneWidget.queue.Queue(),
-        'active': window.phoneWidget.queue.Active()
+        'active': window.phoneWidget.queue.Active(),
+        'priority': new window.phoneWidget.queue.Priority()
     };
 
     let storage = {
@@ -351,7 +352,7 @@ var PhoneWidgetCall = function () {
             if (panes.active.isActive()) {
                 needRefresh = true;
             }
-            if (queues.wait.count() > 0) {
+            if (queues.wait.count() > 0 || queues.priority.count() > 0) {
                 if (window.phoneWidget.notifier.refresh()) {
                     openWidget();
                     panes.queue.openAllCalls();
@@ -670,6 +671,9 @@ var PhoneWidgetCall = function () {
             }
             console.log('Undefined type action');
         });
+        $(document).on('click', '.btn-item-call-priority', function () {
+            acceptPriorityCall();
+        });
     }
 
     function returnHoldCall(callSid)
@@ -721,6 +725,19 @@ var PhoneWidgetCall = function () {
 
             callRequester.accept(call);
         }
+    }
+
+    function acceptPriorityCall()
+    {
+        if (!checkDevice('Accept Call')) {
+            return false;
+        }
+
+        if (queues.priority.isAccepted()) {
+            return false;
+        }
+
+        callRequester.acceptPriorityCall(window.phoneWidget.notifier.keys.priorityCall);
     }
 
     function changeStatus(status) {
@@ -973,7 +990,7 @@ var PhoneWidgetCall = function () {
     function hideNotificationEvent() {
         $(document).on('click', '.pw-notification-hide', function(e) {
             e.preventDefault();
-            let key = $(this).attr('data-call-sid');
+            let key = $(this).attr('data-key');
             hideNotification(key);
             if (panes.incoming.isEqual(key)) {
                 panes.incoming.removeCallSid();
@@ -1108,6 +1125,18 @@ var PhoneWidgetCall = function () {
             recordingEnable(data.call.sid);
             return;
         }
+        if (data.command === 'addPriorityCall') {
+            addPriorityCall(data);
+            return;
+        }
+        if (data.command === 'removePriorityCall') {
+            removePriorityCall(data);
+            return;
+        }
+        if (data.command === 'resetPriorityCall') {
+            resetPriorityCall();
+            return;
+        }
     }
 
     function addCallToHistory(data) {
@@ -1138,6 +1167,33 @@ var PhoneWidgetCall = function () {
             window.phoneWidget.notifier.types.incomingCall,
             createIncomingCallNotification(call, isShow)
         );
+    }
+
+    function addPriorityCallNotification(data) {
+        // let key = data.project + '.' + data.department;
+        return window.phoneWidget.notifier.add(
+            window.phoneWidget.notifier.keys.priorityCall,
+            window.phoneWidget.notifier.types.priorityCall,
+            createPriorityCallNotification(data)
+        );
+    }
+
+    function addFirstPriorityCallNotification(data) {
+        // let key = data.project + '.' + data.department;
+        return window.phoneWidget.notifier.addAndShowOnlyDesktop(
+            window.phoneWidget.notifier.keys.priorityCall,
+            window.phoneWidget.notifier.types.priorityCall,
+            createPriorityCallNotification(data)
+        );
+    }
+
+    function createPriorityCallNotification(data) {
+        return  {
+            'project': data.project,
+            'department': data.department,
+            'isShow': true,
+            'eventName': window.phoneWidget.events.priorityQueueAccepted
+        };
     }
 
     function createIncomingCallNotification(call, isShow) {
@@ -1192,6 +1248,11 @@ var PhoneWidgetCall = function () {
             }
         });
 
+        data.priority.forEach(function (item) {
+            queues.priority.addMany(item.project, item.department, item.count);
+            addPriorityCallNotification(item);
+        });
+
         let outgoingExist = false;
         data.outgoing.forEach(function (call) {
             queues.outgoing.add(call);
@@ -1238,6 +1299,7 @@ var PhoneWidgetCall = function () {
         queues.outgoing.reset();
         queues.active.reset();
         storage.conference.reset();
+        queues.priority.reset();
     }
 
     function updateCurrentCalls(data, userStatus) {
@@ -1249,6 +1311,44 @@ var PhoneWidgetCall = function () {
         refreshPanes();
         window.phoneWidget.notifier.reset();
         loadCalls(data);
+    }
+
+    function addPriorityCall(data) {
+        console.log('add priority call');
+        queues.priority.add(data.project, data.department);
+
+        // if (queues.active.count() > 0 || queues.outgoing.count() > 0 || panes.incoming.isActive()) {
+            addPriorityCallNotification(data);
+        // } else {
+            // addFirstPriorityCallNotification(data);
+            // panes.incoming.init(call, (queues.direct.count() + queues.general.count()), (queues.active.count() + queues.hold.count()));
+        // }
+        panes.queue.refresh();
+        audio.incoming.refresh();
+        //iconUpdate();
+        openWidget();
+    }
+
+    function removePriorityCall(data) {
+        console.log('remove priority call');
+        queues.priority.remove(data.project, data.department);
+        if (queues.priority.count() < 1) {
+            window.phoneWidget.notifier.remove(window.phoneWidget.notifier.keys.priorityCall);
+        }
+        panes.queue.refresh();
+        audio.incoming.refresh();
+        //iconUpdate();
+    }
+
+    function resetPriorityCall() {
+        console.log('reset priority call');
+        queues.priority.reset();
+        if (queues.priority.count() < 1) {
+            window.phoneWidget.notifier.remove(window.phoneWidget.notifier.keys.priorityCall);
+        }
+        panes.queue.refresh();
+        audio.incoming.refresh();
+        //iconUpdate();
     }
 
     return {

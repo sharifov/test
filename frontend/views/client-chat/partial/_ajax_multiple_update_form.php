@@ -70,4 +70,3 @@ JS;
         'closeButton' => false
     ]) ?>
 <?php endif; ?>
-

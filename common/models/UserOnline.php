@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use sales\helpers\app\AppHelper;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -36,6 +37,7 @@ class UserOnline extends ActiveRecord
         return [
             [['uo_updated_dt', 'uo_idle_state_dt'], 'safe'],
             [['uo_idle_state'], 'boolean'],
+            [['uo_idle_state'], 'filter', 'filter' => 'boolval'],
             [['uo_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['uo_user_id' => 'id']],
         ];
     }
@@ -78,5 +80,58 @@ class UserOnline extends ActiveRecord
     public function getUoUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'uo_user_id']);
+    }
+
+    /**
+     * @param bool $insert
+     * @param array $changedAttributes
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+        $this->sendFrontendData($insert ? 'insert' : 'update');
+    }
+
+    /**
+     * @return bool
+     */
+    public function beforeDelete(): bool
+    {
+        if (!parent::beforeDelete()) {
+            return false;
+        }
+        $this->sendFrontendData('delete');
+        return true;
+    }
+
+
+
+
+    /**
+     * @param string $action
+     * @return false|mixed
+     */
+    public function sendFrontendData(string $action = 'update')
+    {
+        $enabled = !empty(Yii::$app->params['centrifugo']['enabled']);
+        if ($enabled) {
+            try {
+                return Yii::$app->centrifugo->setSafety(false)
+                    ->publish(
+                        Call::CHANNEL_USER_ONLINE,
+                        [
+                            'object' => 'userOnline',
+                            'action' => $action,
+                            'id' => $this->uo_user_id,
+                            'data' => [
+                                'userOnline' => $this->attributes,
+                            ]
+                        ]
+                    );
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableFormatter($throwable), 'UserOnline:sendFrontendData:Throwable');
+                return false;
+            }
+        }
     }
 }

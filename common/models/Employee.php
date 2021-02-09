@@ -20,6 +20,7 @@ use sales\model\user\entity\ShiftTime;
 use sales\model\user\entity\StartTime;
 use sales\model\user\entity\UserCache;
 use sales\model\user\entity\userStatus\UserStatus;
+use sales\model\userClientChatData\entity\UserClientChatData;
 use sales\validators\SlugValidator;
 use Yii;
 use yii\base\NotSupportedException;
@@ -80,6 +81,7 @@ use yii\web\NotFoundHttpException;
  * @property UserProjectParams[] $userProjectParams
  * @property Project[] $uppProjects
  * @property UserProfile $userProfile
+ * @property UserClientChatData $userClientChatData
  * @property UserOnline $userOnline
  * @property UserStatus $userStatus
  * @property string|bool|null $timezone
@@ -734,6 +736,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function getUserProfile()
     {
         return $this->hasOne(UserProfile::class, ['up_user_id' => 'id']);
+    }
+
+    public function getUserClientChatData(): ActiveQuery
+    {
+        return $this->hasOne(UserClientChatData::class, ['uccd_employee_id' => 'id']);
     }
 
     public function canCall()
@@ -1749,7 +1756,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $quote = Quote::findOne(['id' => $entry['q_id']]);
             if ($entry['final_profit'] !== null) {
                 $totalProfit = $entry['final_profit'];
-                $agentsProcessingFee = ($entry['agents_processing_fee']) ? $entry['agents_processing_fee'] : $entry['pax_cnt'] * SettingHelper::processingFee();
+                $agentsProcessingFee = !is_null($quote->agent_processing_fee) ? $quote->agent_processing_fee : $entry['pax_cnt'] * SettingHelper::processingFee();
                 $totalProfit -= $agentsProcessingFee;
             } else {
                 $totalProfit = $quote->getEstimationProfit();
@@ -2436,7 +2443,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $query->innerJoin('user_profile AS up', 'uo.uo_user_id = up.up_user_id');
         $query->innerJoin('user_project_params AS upp', 'uo.uo_user_id = upp.upp_user_id');
 
-        $query->andWhere(['us.us_call_phone_status' => true, 'us.us_is_on_call' => false, 'us.us_has_call_access' => false]);
+        $query->andWhere(['us.us_call_phone_status' => true]);
+
+        if (!SettingHelper::isGeneralLinePriorityEnable()) {
+            $query->andWhere(['us.us_has_call_access' => false]);
+            $query->andWhere(['us.us_is_on_call' => false]);
+        }
+
         $query->andWhere(['up.up_call_type_id' => UserProfile::CALL_TYPE_WEB]);
         $query->andWhere(['upp.upp_allow_general_line' => true, 'upp.upp_project_id' => $project_id]);
 

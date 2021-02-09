@@ -292,6 +292,10 @@ $jsCode = <<<JS
                         jsCountryClientEl.text(data.marketing_country);      
                     }
                     
+                    if (data.caseBookingId) {
+                        $('#caseBookingId').html(data.caseBookingId);
+                    }
+                    
                     if (data.updateCaseBookingId) {
                         var modal = $('#modalCaseSm');                
                         modal.find('.modal-header').html('<h3>Update Case Booking Id <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');

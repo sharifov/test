@@ -68,6 +68,9 @@ use sales\auth\Auth;
  * @property int|null $chatsQtyFrom
  * @property int|null $chatsQtyTo
  * @property array $show_fields
+ * @property int|null $quoteTypeId
+ *
+ * @property $count_files
  */
 class LeadSearch extends Lead
 {
@@ -144,8 +147,11 @@ class LeadSearch extends Lead
     public $callsQtyTo;
     public $chatsQtyFrom;
     public $chatsQtyTo;
+    public $count_files;
 
     public $show_fields = [];
+
+    public $quoteTypeId;
 
     private $leadBadgesRepository;
 
@@ -163,7 +169,7 @@ class LeadSearch extends Lead
         return [
             [['datetime_start', 'datetime_end', 'createTimeRange'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id', 'l_duplicate_lead_id', 'l_type_create'], 'integer'],
+            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'projectId', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id', 'l_duplicate_lead_id', 'l_type_create'], 'integer'],
             [['email_status', 'quote_status', 'l_is_test'], 'integer'],
             [['lfOwnerId', 'userGroupId', 'departmentId', 'projectId', 'createdType'], 'integer'],
 
@@ -212,6 +218,9 @@ class LeadSearch extends Lead
                 return (string) $value;
             }, 'skipOnEmpty' => true],
             [['client_phone'], 'string', 'max' => 20],
+
+            ['quoteTypeId', 'integer'],
+            ['quoteTypeId', 'in', 'range' => array_keys(Quote::TYPE_LIST)],
         ];
     }
 
@@ -222,6 +231,8 @@ class LeadSearch extends Lead
             'smsQtyFrom' => 'Sms From', 'smsQtyTo' => 'Sms To',
             'callsQtyFrom' => 'Calls From', 'callsQtyTo' => 'Calls To',
             'chatsQtyFrom' => 'Chats From', 'chatsQtyTo' => 'Chats To',
+            'projectId' => 'Project',
+            'quoteTypeId' => 'Quote Type',
         ];
         return array_merge(parent::attributeLabels(), $labels2);
     }
@@ -283,6 +294,7 @@ class LeadSearch extends Lead
             'status_flow' => 'Status flow',
             'l_last_action_dt' => 'Last Action',
             'check_list' => 'Check List',
+            'count_files' => 'Files',
         ];
         return $data;
     }
@@ -305,7 +317,7 @@ class LeadSearch extends Lead
      */
     public function search($params)
     {
-        $query = Lead::find()->with('project', 'source', 'employee', 'client');
+        $query = static::find()->with('project', 'source', 'employee', 'client');
         $query->select([
             Lead::tableName() . '.*',
             'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")
@@ -340,6 +352,10 @@ class LeadSearch extends Lead
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
+        }
+
+        if ($this->projectId) {
+            $query->andWhere(['project_id' => $this->projectId]);
         }
 
         // grid filtering conditions
@@ -549,6 +565,17 @@ class LeadSearch extends Lead
 
         if ($this->createdType) {
             $query->andWhere(['l_type_create' => $this->createdType]);
+        }
+
+        if ($this->quoteTypeId) {
+             $query->andWhere([
+                'IN',
+                'leads.id',
+                Quote::find()
+                    ->select(['DISTINCT(lead_id)'])
+                    ->where(['type_id' => $this->quoteTypeId])
+                    ->groupBy('lead_id')
+             ]);
         }
 
         if (!empty($this->emailsQtyFrom) || !empty($this->emailsQtyTo)) {
@@ -1562,6 +1589,11 @@ class LeadSearch extends Lead
             $query->andWhere(['LIKE','leads.additional_information', new Expression('\'%"pnr":%"' . $this->quote_pnr . '"%\'')]);
         }
 
+        if ($this->quoteTypeId) {
+            $subQuery = Quote::find()->select(['DISTINCT(lead_id)'])->where(['type_id' => $this->quoteTypeId])->groupBy('lead_id');
+            $query->andWhere(['IN', 'leads.id', $subQuery]);
+        }
+
         return $dataProvider;
     }
 
@@ -2042,6 +2074,52 @@ class LeadSearch extends Lead
 
         /*  $sqlRaw = $query->createCommand()->getRawSql();
          VarDumper::dump($sqlRaw, 10, true); exit; */
+
+        return $dataProvider;
+    }
+
+    public function searchAlternative($params, Employee $user, ?int $limit): ActiveDataProvider
+    {
+        $this->limit = $limit;
+        $query = $this->leadBadgesRepository->getAlternativeQuery($user);
+        $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
+        $leadTable = Lead::tableName();
+
+        $this->load($params);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => ['defaultOrder' => ['created' => SORT_DESC]],
+            'pagination' => $this->limit > 0 ? false : ['pageSize' => 20],
+        ]);
+
+        if (!$this->validate()) {
+            $query->where('0=1');
+            return $dataProvider;
+        }
+
+        if ($this->created) {
+            $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
+                ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
+        }
+
+        if (empty($params['is_test']) && !$user->checkIfUsersIpIsAllowed()) {
+            $query->andWhere([Lead::tableName() . '.l_is_test' => 0]);
+        }
+
+        $query->andFilterWhere([
+            $leadTable . '.id' => $this->id,
+            $leadTable . '.cabin' => $this->cabin,
+            $leadTable . '.request_ip' => $this->request_ip,
+        ]);
+
+        if ($this->limit > 0) {
+            $query->limit($this->limit);
+        }
+
+        if ($user->isAdmin()) {
+            $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'project', 'leadFlightSegments']);
+        }
 
         return $dataProvider;
     }

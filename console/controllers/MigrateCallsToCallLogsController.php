@@ -407,6 +407,10 @@ class MigrateCallsToCallLogsController extends Controller
             $this->outTransferSecondaryOutChildCall($call, $log);
             return;
         }
+        if ($call['c_id'] == 3369020) {
+            print_r($call);
+            die;
+        }
 
         $this->createCallLogs($call, $log, [], []);
     }

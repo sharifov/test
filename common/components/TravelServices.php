@@ -9,6 +9,8 @@
 
 namespace common\components;
 
+use sales\model\airline\service\AirlineService;
+use sales\model\airportLang\service\AirportLangService;
 use yii\base\Component;
 use yii\helpers\VarDumper;
 use yii\httpclient\Client;
@@ -101,7 +103,7 @@ class TravelServices extends Component
 
         $metrics = \Yii::$container->get(Metrics::class);
         if ($response->isOk) {
-            $metrics->serviceCounter('travel', ['type' => 'success', 'action' => $action]);
+            $metrics->serviceCounter('travel', ['type' => 'success', 'action' => strtok($action, '?')]);
         } else {
             $metrics->serviceCounter('travel', ['type' => 'error', 'action' => $action]);
         }
@@ -150,6 +152,82 @@ class TravelServices extends Component
             \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'TravelServices:airportExport');
         }
 
+        return $out;
+    }
+
+    public function airportExportLocalized(
+        int $lastUpdate = 0,
+        int $pageLimit = 99999,
+        int $pageIndex = 0,
+        string $lang = '',
+        string $format = 'json'
+    ): array {
+        $out = ['error' => false, 'data' => []];
+
+        $data = [];
+        if (!empty($lang)) {
+            $data['lang'] = $lang;
+        }
+        if (!empty($lastUpdate)) {
+            $data['lastUpdate'] = $lastUpdate;
+        }
+        if (!empty($pageLimit)) {
+            $data['pageLimit'] = $pageLimit;
+        }
+        if (!empty($pageIndex)) {
+            $data['pageIndex'] = $pageIndex;
+        }
+        if (!empty($format)) {
+            $data['format'] = $format;
+        }
+
+        $params = http_build_query($data);
+        $response = $this->sendRequest(AirportLangService::SERVICE_ENDPOINT . '?' . $params, [], 'get');
+
+        if ($response->isOk) {
+            if (isset($response->data['Data'])) {
+                $out['data'] = $response->data;
+            } else {
+                $out['error'] = 'Not found in response array data key [Data]';
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'TravelServices:airportExportLocalized');
+        }
+        return $out;
+    }
+
+    public function airlineExport(int $lastUpdate = 0, int $limit = 99999, bool $ad = false, string $format = 'json'): array
+    {
+        $out = ['error' => false, 'data' => []];
+
+        $data = [];
+        if (!empty($lastUpdate)) {
+            $data['lastUpdate'] = $lastUpdate;
+        }
+        if (!empty($limit)) {
+            $data['limit'] = $limit;
+        }
+        if (!empty($ad)) {
+            $data['ad'] = $ad;
+        }
+        if (!empty($format)) {
+            $data['format'] = $format;
+        }
+
+        $params = http_build_query($data);
+        $response = $this->sendRequest(AirlineService::SERVICE_ENDPOINT . '?' . $params, [], 'get');
+
+        if ($response->isOk) {
+            if (isset($response->data['Data'])) {
+                $out['data'] = $response->data;
+            } else {
+                $out['error'] = 'Not found in response array data key [Data]';
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'TravelServices:airlineExport');
+        }
         return $out;
     }
 }

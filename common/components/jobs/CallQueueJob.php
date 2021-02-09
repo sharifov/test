@@ -14,6 +14,8 @@ use common\models\Client;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Notifications;
+use common\models\ProjectEmployeeAccess;
+use common\models\UserGroupAssign;
 use sales\forms\lead\PhoneCreateForm;
 use sales\helpers\app\AppHelper;
 use sales\repositories\cases\CasesRepository;
@@ -25,6 +27,7 @@ use sales\services\client\ClientManageService;
 use sales\services\lead\LeadManageService;
 use yii\base\BaseObject;
 use yii\base\Exception;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\queue\JobInterface;
 use Yii;
@@ -252,25 +255,43 @@ class CallQueueJob extends BaseObject implements JobInterface
                         $user = Employee::findOne($originalAgentId);
 
                         if ($user && $user->isOnline() /*&& $user->isCallStatusReady() && $user->isCallFree()*/) {
-                            $depListIds = array_keys($user->getUserDepartmentList());
-                            if (in_array($call->c_dep_id, $depListIds, true)) {
-                                $isCalled = Call::applyCallToAgentAccess($call, $user->id);
+//                            $depListIds = array_keys($user->getUserDepartmentList());
+//                            if (in_array($call->c_dep_id, $depListIds, true)) {
 
-                                // Yii::info('Accept one user ('. ($isCalled ? 'isCalled' : 'NotIsCalled' ) .') - CallId: ' . $this->call_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-Accept-one');
-
-
-                                if ((int)$call->c_source_type_id === Call::SOURCE_GENERAL_LINE) {
-                                    $timeStartCallUserAccess = (int) (Yii::$app->params['settings']['time_start_call_user_access_general'] ?? 0);
-                                } else {
-                                    $timeStartCallUserAccess = (int) (Yii::$app->params['settings']['time_start_call_user_access_direct'] ?? 0);
+                            $isProjectAccess = ProjectEmployeeAccess::find()->andWhere(['employee_id' => $user->id, 'project_id' => $call->c_project_id])->exists();
+                            if ($isProjectAccess) {
+                                $isGroupAccess = true;
+                                if ($call->cugUgs) {
+                                    $callGroups = ArrayHelper::map($call->cugUgs, 'ug_id', 'ug_id');
+                                    if ($callGroups) {
+                                        $userGroups = UserGroupAssign::find()
+                                            ->select(['ugs_group_id'])
+                                            ->andWhere(['ugs_user_id' => $user->id])
+                                            ->indexBy('ugs_group_id')->column();
+                                        $isGroupAccess = array_intersect_key($callGroups, $userGroups) ? true : false;
+                                    }
                                 }
 
-                                if ($timeStartCallUserAccess) {
-                                    $job = new CallUserAccessJob();
-                                    $job->call_id = $call->c_id;
-                                    $jobId = Yii::$app->queue_job->delay($timeStartCallUserAccess)->priority(100)->push($job);
+                                if ($isGroupAccess) {
+                                    $isCalled = Call::applyCallToAgentAccess($call, $user->id);
+
+                                    // Yii::info('Accept one user ('. ($isCalled ? 'isCalled' : 'NotIsCalled' ) .') - CallId: ' . $this->call_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-Accept-one');
+
+
+                                    if ((int)$call->c_source_type_id === Call::SOURCE_GENERAL_LINE) {
+                                        $timeStartCallUserAccess = (int)(Yii::$app->params['settings']['time_start_call_user_access_general'] ?? 0);
+                                    } else {
+                                        $timeStartCallUserAccess = (int)(Yii::$app->params['settings']['time_start_call_user_access_direct'] ?? 0);
+                                    }
+
+                                    if ($timeStartCallUserAccess) {
+                                        $job = new CallUserAccessJob();
+                                        $job->call_id = $call->c_id;
+                                        $jobId = Yii::$app->queue_job->delay($timeStartCallUserAccess)->priority(100)->push($job);
+                                    }
                                 }
                             }
+//                            }
                         }
                     }
 

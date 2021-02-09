@@ -46,8 +46,112 @@ class PhoneWidgetNotification extends React.Component {
 function NotificationItem(props) {
     if (props.notification.type === window.phoneWidget.notifier.types.incomingCall) {
         return <IncomingCallNotificationItem notification={props.notification} source={props.source}/>
+    } else if (props.notification.type === window.phoneWidget.notifier.types.priorityCall) {
+        return <PriorityCallNotificationItem notification={props.notification} source={props.source}/>
     }
     return null;
+}
+
+class PriorityCallNotificationItem extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            notification: props.notification
+        };
+    }
+
+    componentDidMount() {
+        if (this.props.source === 'phone') {
+            window.phoneWidget.eventDispatcher.addListener(this.state.notification.eventName, this.phoneUpdateHandler());
+        } else {
+            window.phoneWidget.eventDispatcher.addListener(this.state.notification.eventName, this.desktopUpdateHandler());
+        }
+    }
+
+    componentWillUnmount() {
+        if (this.props.source === 'phone') {
+            window.phoneWidget.eventDispatcher.removeListener(this.state.notification.eventName, this.phoneUpdateHandler());
+        } else {
+            window.phoneWidget.eventDispatcher.removeListener(this.state.notification.eventName, this.desktopUpdateHandler());
+        }
+    }
+
+    phoneUpdateHandler() {
+        let self = this;
+        return function (event) {
+            //only for minify version
+            window.phoneWidget.emptyFunc('PriorityCallNotificationItem.phoneUpdateHandler');
+
+            let notification = self.state.notification;
+
+            notification.isSentAcceptCallRequestState = event.isSentAcceptCallRequestState;
+
+            self.setState({
+                notification: notification
+            });
+        }
+    }
+
+    desktopUpdateHandler() {
+        let self = this;
+        return function (event) {
+            //only for minify version
+            window.phoneWidget.emptyFunc('PriorityCallNotificationItem.desktopUpdateHandler');
+
+            let notification = self.state.notification;
+
+            notification.isSentAcceptCallRequestState = event.isSentAcceptCallRequestState;
+
+            self.setState({
+                notification: notification
+            });
+        }
+    }
+
+    render () {
+        let notification = this.state.notification;
+
+        let info =
+            <div className="incoming-notification__project">
+                <b className="incoming-notification__position" style={{'fontSize':'14px'}}>General line call </b>
+            </div>;
+
+        return (
+            <li className={(notification.isDeleted || notification.isNew || notification.willHide) ? 'phone-notifications__item' : 'phone-notifications__item phone-notifications__item--shown'}>
+                <div className="incoming-notification">
+                    <div className="incoming-notification__inner">
+                        <div className="incoming-notification__info">
+                            <div className="incoming-notification__general-info">
+                                <b className="incoming-notification__name">&nbsp;</b>
+                                {info}
+                                <span className="incoming-notification__phone">&nbsp;</span>
+                            </div>
+                        </div>
+                        <div className="incoming-notification__action-list">
+                            <div className="incoming-notification__dynamic">
+                                 <a href="#" className="incoming-notification__action incoming-notification__action--phone btn-item-call-priority">
+                                     {notification.isSentAcceptCallRequestState
+                                        ? < i className="fa fa-spinner fa-spin"> </i>
+                                        : < i className="fa fa-phone"> </i>
+                                     }
+                                </a>
+                            </div>
+                            {this.props.source === 'phone'
+                                ? <a href="#" data-key={notification.key}
+                                     className="incoming-notification__action incoming-notification__action--min pw-notification-hide">
+                                    <i className="fa fa-long-arrow-alt-down"> </i>
+                                </a>
+                                : <a href="#" data-key={notification.key}
+                                     className="incoming-notification__action incoming-notification__action--max pw-notification-hide">
+                                    <i className="fa fa-long-arrow-down"> </i>
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </li>
+        );
+    }
 }
 
 class IncomingCallNotificationItem extends React.Component {
@@ -185,11 +289,11 @@ class IncomingCallNotificationItem extends React.Component {
                                 </a>
                             </div>
                             {this.props.source === 'phone'
-                                ? <a href="#" data-call-sid={notification.key}
+                                ? <a href="#" data-key={notification.key}
                                      className="incoming-notification__action incoming-notification__action--min pw-notification-hide">
                                     <i className="fa fa-long-arrow-alt-down"> </i>
                                 </a>
-                                : <a href="#" data-call-sid={notification.key}
+                                : <a href="#" data-key={notification.key}
                                      className="incoming-notification__action incoming-notification__action--max pw-notification-hide">
                                     <i className="fa fa-long-arrow-down"> </i>
                                 </a>

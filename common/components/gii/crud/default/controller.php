@@ -52,8 +52,8 @@ use yii\helpers\ArrayHelper;
 
 class <?= $controllerClass ?> extends <?= StringHelper::basename($generator->baseControllerClass) . "\n" ?>
 {
-    <?php if ($isCrud) : ?>
-public function init(): void
+<?php if ($isCrud) : ?>
+    public function init(): void
     {
         parent::init();
         $this->layoutCrud();
@@ -71,7 +71,7 @@ public function init(): void
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
-    <?php else : ?>
+<?php else : ?>
     /**
     * @return array
     */

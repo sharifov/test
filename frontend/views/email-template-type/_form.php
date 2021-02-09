@@ -21,6 +21,8 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'etp_dep_id')->dropDownList(\common\models\Department::getList(), ['prompt' => '-']) ?>
 
+    <?= $form->field($model, 'etp_ignore_unsubscribe')->checkbox() ?>
+
     <?= $form->field($model, 'etp_hidden')->checkbox() ?>
 
     <div class="form-group">

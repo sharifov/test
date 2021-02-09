@@ -166,6 +166,27 @@ class UserMonitor extends \yii\db\ActiveRecord
     /**
      * @param int $userId
      * @return bool
+     */
+    public static function isUserIdle(int $userId): bool
+    {
+        $idleState = false;
+        $ucList = UserConnection::find()->select(['uc_idle_state'])->where(['uc_user_id' => $userId])->all();
+        if ($ucList) {
+            $idleState = true;
+            foreach ($ucList as $uc) {
+                if (!$uc->uc_idle_state) {
+                    $idleState = false;
+                    break;
+                }
+            }
+        }
+        unset($ucList);
+        return $idleState;
+    }
+
+    /**
+     * @param int $userId
+     * @return bool
      * @throws \Throwable
      * @throws \yii\db\StaleObjectException
      */
@@ -174,24 +195,15 @@ class UserMonitor extends \yii\db\ActiveRecord
         $out = false;
         $userOnline = UserOnline::find()->where(['uo_user_id' => $userId])->one();
         if ($userOnline) {
-            $ucList = UserConnection::find()->select(['uc_idle_state'])->where(['uc_user_id' => $userId])->all();
-            if ($ucList) {
-                $idleState = true;
-                foreach ($ucList as $uc) {
-                    if (!$uc->uc_idle_state) {
-                        $idleState = false;
-                        break;
-                    }
-                }
+            $isUserIdle = UserMonitor::isUserIdle($userId);
 
-                if ($userOnline->uo_idle_state !== $idleState) {
-                    $userOnline->uo_idle_state = $idleState;
-                    $userOnline->uo_idle_state_dt = date('Y-m-d H:i:s');
-                    $userOnline->update();
-                    $out = true;
-                }
+            if ((bool) $userOnline->uo_idle_state !== $isUserIdle) {
+                $userOnline->uo_idle_state = $isUserIdle;
+                $userOnline->uo_idle_state_dt = date('Y-m-d H:i:s');
+                $userOnline->update();
+                $out = true;
             }
-            unset($userOnline, $ucList, $idleState);
+            unset($userOnline, $isUserIdle);
         }
         return $out;
     }
@@ -243,7 +255,7 @@ class UserMonitor extends \yii\db\ActiveRecord
     /**
      * @return int
      */
-    public static function isAutologoutTimerSec(): int
+    public static function autoLogoutTimerSec(): int
     {
         return \Yii::$app->params['settings']['autologout_timer_sec'] ?? 0;
     }

@@ -3,6 +3,7 @@
 namespace sales\model\clientChat\entity\search;
 
 use common\models\Client;
+use common\models\ClientEmail;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Project;
@@ -505,6 +506,11 @@ class ClientChatSearch extends ClientChat
                 ['like', 'client.first_name', $filter->clientName],
                 ['like', 'client.last_name', $filter->clientName]
             ]);
+        }
+
+        if ($filter->clientEmail) {
+            $subQuery = ClientEmail::find()->select(['DISTINCT(client_id)'])->where(['=', 'email', $filter->clientEmail]);
+            $query->andWhere(['IN', 'cch_client_id', $subQuery]);
         }
 
         $query->join('JOIN', ['client' => Client::tableName()], 'cch_client_id = client.id');

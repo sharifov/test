@@ -109,6 +109,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php endif; ?>
 
         <h4>Params:</h4>
+        <?php $paramsNum = 0; ?>
         <table class="table table-bordered table-hover">
             <thead>
             <tr>
@@ -119,65 +120,59 @@ $this->params['breadcrumbs'][] = $this->title;
             </thead>
             <tbody>
             <tr>
-                <td>0</td>
+                <td><?php echo $paramsNum++ ?></td>
                 <td>appHostname</td>
                 <td><?=Yii::$app->params['appHostname'] ?? ''?></td>
             </tr>
             <tr>
-                <td>1</td>
+                <td><?php echo $paramsNum++ ?></td>
                 <td>appName</td>
                 <td><?=Yii::$app->params['appName'] ?? ''?></td>
             </tr>
             <tr>
-                <td>2</td>
+                <td><?php echo $paramsNum++ ?></td>
                 <td>appEnv</td>
                 <td><?=Yii::$app->params['appEnv'] ?? ''?></td>
             </tr>
             <tr>
-                <td>3</td>
+                <td><?php echo $paramsNum++ ?></td>
                 <td>appInstance</td>
                 <td><?=Yii::$app->params['appInstance'] ?? ''?></td>
             </tr>
             <tr>
-                <td>4</td>
+                <td><?php echo $paramsNum++ ?></td>
                 <td>url_address</td>
                 <td><?=Yii::$app->params['url_address'] ?? ''?></td>
             </tr>
             <tr>
-                <td>5</td>
+                <td><?php echo $paramsNum++ ?></td>
                 <td>url_api_address</td>
                 <td><?=Yii::$app->params['url_api_address'] ?? ''?></td>
             </tr>
             <tr>
-                <td>6</td>
+                <td><?php echo $paramsNum++ ?></td>
                 <td>backOffice serverUrl</td>
                 <td><?=Yii::$app->params['backOffice']['serverUrl'] ?? ''?></td>
             </tr>
             <tr>
-                <td>7</td>
+                <td><?php echo $paramsNum++ ?></td>
                 <td>backOffice serverUrlV3</td>
                 <td><?=Yii::$app->params['backOffice']['serverUrlV3'] ?? ''?></td>
             </tr>
             <tr>
-                <td>8</td>
+                <td><?php echo $paramsNum++ ?></td>
                 <td>getAirportUrl</td>
-                <td><?=Yii::$app->params['getAirportUrl'] ?? ''?></td>
+                <td><?=Yii::$app->params['backOffice']['serverUrlV2'] . '/airport/search' ?? ''?></td>
             </tr>
 
             <tr>
-                <td>9</td>
+                <td><?php echo $paramsNum++ ?></td>
                 <td>searchApiUrl</td>
-                <td><?=Yii::$app->params['searchApiUrl'] ?? ''?></td>
+                <td>Not used</td>
             </tr>
 
             <tr>
-                <td>10</td>
-                <td>global_phone</td>
-                <td><?=Yii::$app->params['global_phone'] ?? ''?></td>
-            </tr>
-
-            <tr>
-                <td>11</td>
+                <td><?php echo $paramsNum++ ?></td>
                 <td>centrifugo</td>
                 <td>
                     <table class="table table-bordered table-hover">

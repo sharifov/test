@@ -2,6 +2,8 @@
 
 namespace common\models;
 
+use common\models\query\ProjectEmployeeAccessQuery;
+
 /**
  * This is the model class for table "project_employee_access".
  *
@@ -61,5 +63,10 @@ class ProjectEmployeeAccess extends \yii\db\ActiveRecord
     public function getProject()
     {
         return $this->hasOne(Project::class, ['id' => 'project_id']);
+    }
+
+    public static function find()
+    {
+        return new ProjectEmployeeAccessQuery(static::class);
     }
 }

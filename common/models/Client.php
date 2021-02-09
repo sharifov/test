@@ -7,6 +7,7 @@ use common\models\query\ClientQuery;
 use sales\behaviors\metric\MetricClientCounterBehavior;
 use sales\entities\cases\Cases;
 use sales\entities\EventTrait;
+use sales\model\client\entity\events\ClientChangeIpEvent;
 use sales\model\client\entity\events\ClientCreatedEvent;
 use sales\model\client\entity\events\ClientExcludedEvent;
 use sales\model\clientAccount\entity\ClientAccount;
@@ -516,5 +517,14 @@ class Client extends ActiveRecord
     public function getTypeCreateName(): string
     {
         return self::TYPE_CREATE_LIST[$this->cl_type_create] ?? 'Undefined';
+    }
+
+    /**
+     * @param string $ip
+     */
+    public function changeIp(string $ip): void
+    {
+        $this->cl_ip = $ip;
+        $this->recordEvent(new ClientChangeIpEvent($this));
     }
 }

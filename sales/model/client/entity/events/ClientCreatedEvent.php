@@ -9,12 +9,17 @@ use common\models\Client;
  *
  * @property Client $client
  */
-class ClientCreatedEvent
+class ClientCreatedEvent implements ClientEventInterface
 {
     public Client $client;
 
     public function __construct(Client $client)
     {
         $this->client = $client;
+    }
+
+    public function getClient(): Client
+    {
+        return $this->client;
     }
 }

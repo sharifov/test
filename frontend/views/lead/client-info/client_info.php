@@ -15,7 +15,10 @@ use yii\helpers\Url;
 use yii\bootstrap4\Modal;
 use sales\auth\Auth;
 
-/** @var Employee $user */
+/**
+ * @var Employee $user
+ * @var $unsubscribedEmails array
+ */
 $user = Yii::$app->user->identity;
 
 $formId = sprintf('%s-form', $leadForm->getClient()->formName());

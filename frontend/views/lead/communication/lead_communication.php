@@ -12,7 +12,7 @@
  * @var $lead Lead
  * @var $fromPhoneNumbers array
  * @var bool $smsEnabled
- *
+ * @var $unsubscribedEmails array
  */
 
 use common\models\Call;
@@ -21,22 +21,25 @@ use frontend\models\CommunicationForm;
 use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
+use modules\fileStorage\FileStorageSettings;
+use modules\fileStorage\src\widgets\FileStorageEmailSendListWidget;
 use sales\helpers\communication\StatisticsHelper;
 use sales\helpers\projectLocale\ProjectLocaleHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\model\project\entity\projectLocale\ProjectLocale;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\bootstrap4\Modal;
 use vova07\imperavi\Widget;
+use yii\helpers\VarDumper;
 
 $c_type_id = $comForm->c_type_id;
 
 $pjaxContainerId = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled ? 'pjax-lead-communication-log' : 'pjax-lead-communication';
 $pjaxContainerIdForm = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled ? 'pjax-lead-communication-log-form' : 'pjax-lead-communication-form';
 $listItemView = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled ? '_list_item_log' : '_list_item';
-
-$unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscribes, 'eu_email'));
-
+$unsubscribedEmails = @json_encode($unsubscribedEmails);
+$emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesList(false, \common\models\Department::DEPARTMENT_SALES);
 ?>
 
     <div class="x_panel">
@@ -159,6 +162,14 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                                     <?= $form2->field($previewEmailForm, 'e_email_subject')->textInput(['class' => 'form-control', 'maxlength' => true]) ?>
                                 </div>
                             </div>
+                            <?php if (FileStorageSettings::canEmailAttach()) : ?>
+                                <div class="row">
+                                    <div class="col-sm-6 form-group">
+                                        <?= FileStorageEmailSendListWidget::byLead($previewEmailForm->getFileList()) ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+
                             <div class="form-group">
 
                         <?php echo $form2->field($previewEmailForm, 'e_email_message')->textarea(['style' => 'display:none', 'id' => 'e_email_message']) ?>
@@ -172,7 +183,7 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                             <?php if ($isAdmin) :?>
                                 <div class="row" style="display: none" id="email-data-content-div">
                         <pre><?php
-                            //\yii\helpers\VarDumper::dump($previewEmailForm->e_content_data, 10, true);
+                            //VarDumper::dump($previewEmailForm->e_content_data, 10, true);
                             echo json_encode($previewEmailForm->e_content_data);
                         ?>
                         </pre>
@@ -388,9 +399,13 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                                     <?= $form->field($comForm, 'c_sms_tpl_key')->dropDownList(\common\models\SmsTemplateType::getKeyList(false, \common\models\Department::DEPARTMENT_SALES), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_key']) ?>
                                 </div>
 
+                                <div class="col-sm-3 form-group message-field-email" id="email-address" style="display: none;">
+                                    <?= $form->field($comForm, 'c_email_to')->dropDownList($clientEmails, ['prompt' => '---', 'class' => 'form-control', 'id' => 'email']) ?>
+                                </div>
+
                                 <div class="col-sm-3 form-group message-field-email" id="email-template-group" style="display: none;">
                                     <?php //= $form->field($comForm, 'c_email_tpl_id')->dropDownList(\common\models\EmailTemplateType::getList(false, \common\models\Department::DEPARTMENT_SALES), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_id'])?>
-                                    <?= $form->field($comForm, 'c_email_tpl_key')->dropDownList(\common\models\EmailTemplateType::getKeyList(false, \common\models\Department::DEPARTMENT_SALES), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_key']) ?>
+                                    <?= $form->field($comForm, 'c_email_tpl_key')->dropDownList([], ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_key']) ?>
                                 </div>
 
                                 <div class="col-sm-3 form-group message-field-sms message-field-email" id="language-group" style="display: block;">
@@ -406,11 +421,6 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                                             ['prompt' => '---', 'class' => 'form-control', 'id' => 'language']
                                         ) ?>
                                 </div>
-
-                                <div class="col-sm-3 form-group message-field-email" id="email-address" style="display: none;">
-                                    <?= $form->field($comForm, 'c_email_to')->dropDownList($clientEmails, ['prompt' => '---', 'class' => 'form-control', 'id' => 'email']) ?>
-                                </div>
-
 
                                 <div class="col-sm-12 form-group message-field-email" id="email-subtitle-group" style="display: none;">
                                     <?= $form->field($comForm, 'c_email_subject')->textInput(['class' => 'form-control', 'id' => 'email-subtitle', 'maxlength' => true]) ?>
@@ -580,10 +590,12 @@ JS;
 var emails = '$unsubscribedEmails';
 $('#email option').each(function() {             
     if (emails.includes($(this).attr('value'))){                
-        $(this).attr('disabled', 'disabled');
+        //$(this).attr('disabled', 'disabled');
+        $(this).html($(this).attr('value') + ' (unsubscribed)')
     }
     if ($(this).attr('value') == ""){
-        $(this).removeAttr('disabled')
+        $(this).html('---')
+        //$(this).removeAttr('disabled')
     }
 });    
             
@@ -639,6 +651,7 @@ $tpl_sms_blank_key = CommunicationForm::TPL_TYPE_SMS_BLANK_KEY;
 
 $projectId = $lead->project_id;
 $project = $lead->project->name ?? '';
+$emailTemplateTypes = @json_encode($emailTemplateTypes);
 
 $js = <<<JS
 
@@ -646,6 +659,7 @@ $js = <<<JS
     const tpl_sms_blank_key = '$tpl_sms_blank_key';
     let projectId = '{$projectId}';
     let project = '{$project}';
+    let emailTemplateTypes = '{$emailTemplateTypes}';
 
     $('body').on("change", '#c_type_id', function () {
         initializeMessageType($(this).val());
@@ -683,8 +697,25 @@ $js = <<<JS
             }
         //}
     });
-
-
+    
+    $('body').on("change", '#email', function () {
+        let etpOptions = '<option>---</option>';      
+        
+        if (emails.includes(this.value)){ 
+            $.each(JSON.parse(emailTemplateTypes), function(key, item) {                 
+                if (item.etp_ignore_unsubscribe == 1) {                    
+                   etpOptions += '<option value="'+ item.etp_key+'">' + item.etp_name + '</option>';
+                }
+            }); 
+            document.getElementById("c_email_tpl_key").innerHTML = etpOptions;
+        } else {
+             $.each(JSON.parse(emailTemplateTypes), function(key, item) {
+                   etpOptions += '<option value="'+ item.etp_key+'">' + item.etp_name + '</option>';              
+            }); 
+            document.getElementById("c_email_tpl_key").innerHTML = etpOptions;
+        }
+    });
+    
     $('body').on('click', '.chat__details', function () {
         
         let id = $(this).data('id');
@@ -692,6 +723,11 @@ $js = <<<JS
         let from = $(this).data('from');
         let to = $(this).data('to');
         let subject = $(this).data('subject');
+        let files = $(this).data('files');
+        
+        if (files) {
+            files = '<hr>' + files;
+        }
         
         var obj = document.getElementById('object-email-view');
         obj.data = '/email/view?id='+id+'&preview=1';
@@ -699,7 +735,7 @@ $js = <<<JS
         
         let popup = $('#modal-email-view');
         
-        popup.find('#modal-email-view-label').html('<h6>' + subject + '<br>' + from + '<br>' + to + '<br>' +  date + '</h6>');
+        popup.find('#modal-email-view-label').html('<h6>' + subject + '<br>' + from + '<br>' + to + '<br>' +  date + '</h6>' + files);
         //previewPopup.find('.modal-body').html(data);
         popup.modal('show');
         return false;

@@ -529,10 +529,8 @@ class PhoneController extends FController
 
                 if ($call = Call::find()->andWhere(['c_call_sid' => $sid])->one()) {
                     /** @var Call $call */
-                    $data = $call->getData();
-                    $data->repeat->reset();
-                    $data->queueLongTime->reset();
-                    $call->setData($data);
+                    $call->resetDataRepeat();
+                    $call->resetDataQueueLongTime();
                     if (!$call->save()) {
                         Yii::error([
                             'message' => 'Not saved call',
@@ -567,10 +565,8 @@ class PhoneController extends FController
             } else {
                 if ($call = Call::find()->andWhere(['c_call_sid' => $sid])->one()) {
                     /** @var Call $call */
-                    $data = $call->getData();
-                    $data->repeat->reset();
-                    $data->queueLongTime->reset();
-                    $call->setData($data);
+                    $call->resetDataRepeat();
+                    $call->resetDataQueueLongTime();
                     if (!$call->save()) {
                         Yii::error([
                             'message' => 'Not saved call',

@@ -29,6 +29,7 @@ use yii\helpers\Html;
  * @property $rangeDate
  * @property $showFilter
  * @property $clientName
+ * @property $clientEmail
  * @property $resetAdditionalFilter
  * @property array       $channels
  * @property Permissions $permissions
@@ -47,6 +48,7 @@ class FilterForm extends Model
     public const DEFAULT_VALUE_TO_DATE = null;
     public const DEFAULT_VALUE_SHOW_FILTER = 1;
     public const DEFAULT_VALUE_CLIENT_NAME = null;
+    public const DEFAULT_VALUE_CLIENT_EMAIL = null;
 
     public $channelId;
     public $status;
@@ -63,6 +65,7 @@ class FilterForm extends Model
     public $resetAdditionalFilter = false;
     public $showFilter;
     public $clientName;
+    public $clientEmail;
 
     private array $channels;
 
@@ -74,6 +77,7 @@ class FilterForm extends Model
         'rangeDate',
         'status',
         'clientName',
+        'clientEmail'
     ];
 
     public function __construct(array $channels, $config = [])
@@ -138,6 +142,9 @@ class FilterForm extends Model
             ['resetAdditionalFilter', 'boolean'],
 
             [['clientName'], 'string', 'max' => 30],
+
+            ['clientEmail', 'email'],
+            ['clientEmail', 'string', 'max' => 100],
         ];
     }
 
@@ -226,6 +233,9 @@ class FilterForm extends Model
         }
         if ($this->clientName === null || $this->hasErrors('clientName')) {
             $this->clientName = self::DEFAULT_VALUE_CLIENT_NAME;
+        }
+        if ($this->clientEmail === null || $this->hasErrors('clientEmail')) {
+            $this->clientEmail = self::DEFAULT_VALUE_CLIENT_EMAIL;
         }
     }
 
@@ -350,6 +360,7 @@ class FilterForm extends Model
             'userId' => 'User ID',
             'rangeDate' => 'Created range dates',
             'clientName' => 'Client Name',
+            'clientEmail' => 'Client Email'
         ];
     }
 
@@ -376,6 +387,7 @@ class FilterForm extends Model
         $this->toDate = self::DEFAULT_VALUE_TO_DATE;
         $this->status = self::DEFAULT_VALUE_STATUS;
         $this->clientName = self::DEFAULT_VALUE_CLIENT_NAME;
+        $this->clientEmail = self::DEFAULT_VALUE_CLIENT_EMAIL;
         return $this;
     }
 }

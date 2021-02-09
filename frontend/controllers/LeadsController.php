@@ -7,9 +7,13 @@ use common\models\search\LeadFlightSegmentSearch;
 use common\models\search\LeadSearch;
 use common\models\search\QuoteSearch;
 use frontend\widgets;
+use modules\fileStorage\FileStorageSettings;
+use modules\fileStorage\src\entity\fileLead\FileLead;
+use modules\fileStorage\src\entity\fileLead\FileLeadQuery;
 use Yii;
 use common\models\Lead;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -122,6 +126,30 @@ class LeadsController extends FController
             $dataProvider = $searchModel->searchAgent($params);
         } else {
             $dataProvider = $searchModel->search($params);
+            if (
+                FileStorageSettings::isEnabled()
+                && is_array($searchModel->show_fields)
+                && in_array('count_files', $searchModel->show_fields, false)
+            ) {
+                $models = $dataProvider->getModels();
+                $ids = ArrayHelper::getColumn($models, 'id');
+                $files = FileLead::find()
+                    ->select('count(*), fld_lead_id')
+                    ->andWhere(['fld_lead_id' => $ids])
+                    ->groupBy(['fld_lead_id'])
+                    ->asArray()
+                    ->indexBy('fld_lead_id')
+                    ->all();
+                /** @var LeadSearch $model */
+                foreach ($models as $model) {
+                    if (array_key_exists($model->id, $files)) {
+                        $model->count_files = $files[$model->id]['count'];
+                    } else {
+                        $model->count_files = 0;
+                    }
+                }
+                $dataProvider->setModels($models);
+            }
         }
 
         return $this->render('index', [

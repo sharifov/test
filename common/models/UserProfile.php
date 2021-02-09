@@ -92,6 +92,7 @@ class UserProfile extends \yii\db\ActiveRecord
             [['up_rc_user_id'], 'string', 'max' => 20],
             [['up_rc_user_password'], 'string', 'max' => 50],
             [['up_rc_token_expired'], 'safe' ],
+            ['up_show_in_contact_list', 'default', 'value' => true],
 
             ['up_show_in_contact_list', 'default', 'value' => false],
             ['up_show_in_contact_list', 'boolean'],
@@ -189,6 +190,15 @@ class UserProfile extends \yii\db\ActiveRecord
     public static function disableTelegramByUserId(int $userId): void
     {
         if ($profile = self::findOne(['up_user_id' => $userId])) {
+            $profile->up_telegram_enable = false;
+            $profile->save(false);
+        }
+    }
+
+    public static function removeTelegramUser(int $userId): void
+    {
+        if ($profile = self::findOne(['up_user_id' => $userId])) {
+            $profile->up_telegram = '';
             $profile->up_telegram_enable = false;
             $profile->save(false);
         }

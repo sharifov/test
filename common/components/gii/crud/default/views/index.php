@@ -45,27 +45,27 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= !empty($generator->searchModelClass) ? "'filterModel' => \$searchModel,\n        'columns' => [\n" : "'columns' => [\n"; ?>
             ['class' => 'yii\grid\SerialColumn'],
 
-    <?php
-    $count = 0;
-    if (($tableSchema = $generator->getTableSchema()) === false) {
-        foreach ($generator->getColumnNames() as $name) {
-            if (++$count < 6) {
-                echo "            '" . $name . "',\n";
-            } else {
-                echo "            //'" . $name . "',\n";
-            }
-        }
-    } else {
-        foreach ($tableSchema->columns as $column) {
-            $format = $generator->generateColumnFormat($column);
-            if (++$count < 6) {
-                echo "            '" . $column->name . ($format === 'text' ? "" : ":" . $format) . "',\n";
-            } else {
-                echo "            //'" . $column->name . ($format === 'text' ? "" : ":" . $format) . "',\n";
-            }
+<?php
+$count = 0;
+if (($tableSchema = $generator->getTableSchema()) === false) {
+    foreach ($generator->getColumnNames() as $name) {
+        if (++$count < 6) {
+            echo "            '" . $name . "',\n";
+        } else {
+            echo "            //'" . $name . "',\n";
         }
     }
-    ?>
+} else {
+    foreach ($tableSchema->columns as $column) {
+        $format = $generator->generateColumnFormat($column);
+        if (++$count < 6) {
+            echo "            '" . $column->name . ($format === 'text' ? "" : ":" . $format) . "',\n";
+        } else {
+            echo "            //'" . $column->name . ($format === 'text' ? "" : ":" . $format) . "',\n";
+        }
+    }
+}
+?>
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

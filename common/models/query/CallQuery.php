@@ -34,6 +34,11 @@ class CallQuery extends \yii\db\ActiveQuery
         return $this->andWhere(['c_call_sid' => $sid]);
     }
 
+    public function selectRecordingData(): self
+    {
+        return $this->select(['c_recording_sid', 'c_recording_duration']);
+    }
+
     public function byCreatedUser(int $userId): self
     {
         return $this->andWhere(['c_created_user_id' => $userId]);

@@ -28,15 +28,12 @@ $config = [
                         'driver' => [
                             'scheme' => 'https',
                             'basePath' => '/api/v4',
-                            'url' => '{{ frontend.config.main.components.log.targets.containerSettings.url:str }}',
-                            'login_id' => '{{ frontend.config.main.components.log.targets.containerSettings.login_id:str }}',
-                            'password' => '{{ frontend.config.main.components.log.targets.containerSettings.password:str }}'
+                            'url' => '{{ common.config.params.mattermostLogTarget.containerSettings.url:str }}',
+                            'login_id' => '{{ common.config.params.mattermostLogTarget.containerSettings.login_id:str }}',
+                            'password' => '{{ common.config.params.mattermostLogTarget.containerSettings.password:str }}',
                         ],
-//                        'guzzle' => [
-//                            //put here any options for Guzzle
-//                        ]
                     ],
-                    'chanelId' => '{{ frontend.config.main.components.log.targets.chanelId:str }}',
+                    'chanelId' => '{{ common.config.params.mattermostLogTarget.chanelId:str }}',
                     'handlerClassName' => \common\components\logger\MattermostJobHandler::class,
                     'appPrefix' => 'DEV - CRM - Frontend',
                 ],
@@ -50,20 +47,5 @@ $config['modules']['debug'] = [
     'class' => 'yii\debug\Module',
     'allowedIPs' => ['127.0.0.1', '*']  //allowing ip's
 ];
-
-
-/*if (!YII_ENV_TEST) {
-    // configuration adjustments for 'dev' environment
-    $config['bootstrap'][] = 'debug';
-    $config['modules']['debug'] = [
-        'class' => 'yii\debug\Module',
-        'allowedIPs' => ['127.0.0.1', '178.18.45.25', '217.26.162.22']  //allowing ip's
-    ];
-
-    $config['bootstrap'][] = 'gii';
-    $config['modules']['gii'] = [
-        'class' => 'yii\gii\Module',
-    ];
-}*/
 
 return $config;

@@ -11,20 +11,31 @@ use common\models\Lead;
 use common\models\Notifications;
 use common\models\Project;
 use common\models\ProjectEmployeeAccess;
+use common\models\query\CallQuery;
 use common\models\search\LeadSearch;
 use common\models\search\UserConnectionSearch;
 use common\models\Sources;
 use common\models\UserConnection;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
+use common\models\UserOnline;
 use common\models\UserProjectParams;
 use frontend\widgets\newWebPhone\call\socket\MissedCallMessage;
 use http\Exception\InvalidArgumentException;
 use sales\auth\Auth;
+use sales\entities\cases\Cases;
+use sales\guards\call\CallDisplayGuard;
+use sales\helpers\app\AppHelper;
 use sales\helpers\call\CallHelper;
+use sales\helpers\setting\SettingHelper;
 use sales\model\call\services\currentQueueCalls\CurrentQueueCallsService;
+use sales\model\call\services\reserve\CallReserver;
+use sales\model\call\services\reserve\Key;
 use sales\model\call\useCase\assignUsers\UsersForm;
 use sales\model\callLog\entity\callLog\CallLog;
+use sales\model\callLog\entity\callLog\CallLogQuery;
+use sales\model\callLog\entity\callLogRecord\CallLogRecord;
+use sales\model\callRecordingLog\entity\CallRecordingLog;
 use sales\model\conference\useCase\DisconnectFromAllActiveClientsCreatedConferences;
 use sales\model\callNote\useCase\addNote\CallNoteRepository;
 use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
@@ -40,9 +51,11 @@ use Yii;
 use common\models\Call;
 use common\models\search\CallSearch;
 use yii\base\InvalidConfigException;
+use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
+use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -95,7 +108,7 @@ class CallController extends FController
             ],
             'access' => [
                 'allowActions' => [
-                    'get-users-for-call', 'list-api', 'static-data-api'
+                    'get-users-for-call', 'list-api', 'static-data-api', 'record'
                 ],
             ],
         ];
@@ -501,6 +514,9 @@ class CallController extends FController
      */
     public function actionRealtimeMap(): string
     {
+//        $this->isAutoLogoutEnabled = false;
+//        $this->isIdleMonitorEnabled = false;
+
         $centrifugoEnabled = Yii::$app->params['centrifugo']['enabled'] ?? false;
         $centrifugoWsConnectionUrl = Yii::$app->params['centrifugo']['wsConnectionUrl'] ?? '';
 
@@ -513,11 +529,15 @@ class CallController extends FController
         }
 
         $this->layout = '@frontend/themes/gentelella_v2/views/layouts/main_tv2';
-        $cfChannelName = Call::CHANNEL_REALTIME_MAP; // . '#' . Auth::id();
+        $cfChannelName = Call::CHANNEL_REALTIME_MAP;
+        $userOnlineChannel = Call::CHANNEL_USER_ONLINE;
+        $userStatusChannel = UserStatus::CHANNEL_NAME;
 
         return $this->render('realtime-map', [
             //'cfChannels' => [$cfChannelName],
             'cfChannelName' => $cfChannelName,
+            'cfUserOnlineChannel' => $userOnlineChannel,
+            'cfUserStatusChannel' => $userStatusChannel,
             'cfConnectionUrl' => $centrifugoWsConnectionUrl,
             'cfToken' => Yii::$app->centrifugo->generateConnectionToken(Auth::id())
         ]);
@@ -533,7 +553,12 @@ class CallController extends FController
         Yii::$app->response->format = Response::FORMAT_JSON;
 
         $callList = [];
-        $calls = Call::find()->where(['c_status_id' => [Call::STATUS_IVR, Call::STATUS_QUEUE, Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING, Call::STATUS_IVR, Call::STATUS_DELAY]])
+        $calls = Call::find()->where(['c_status_id' =>
+            [
+                Call::STATUS_IVR, Call::STATUS_QUEUE, Call::STATUS_IN_PROGRESS,
+                Call::STATUS_RINGING, Call::STATUS_HOLD, Call::STATUS_DELAY
+            ]
+        ])
             //->andWhere(['c_id' => 1097179])
             ->orderBy(['c_id' => SORT_DESC])
             ->limit(1000)->all();
@@ -563,6 +588,13 @@ class CallController extends FController
         $response['callSourceList'] = Call::SHORT_SOURCE_LIST;
         $response['callTypeList'] = Call::TYPE_LIST;
         $response['callUserAccessStatusTypeList'] = CallUserAccess::STATUS_TYPE_LIST;
+        $response['onlineUserList'] = UserOnline::find()->all();
+        $response['userStatusList'] = UserStatus::find()->all();
+
+
+        /** @var Employee $user */
+        $user = \Yii::$app->user->identity;
+        $response['userTimeZone'] = $user->timezone ?: 'UTC';
 
         return $response;
     }
@@ -1064,34 +1096,25 @@ class CallController extends FController
                     'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING
                 ])->one();
 
+                $reserver = Yii::createObject(CallReserver::class);
+
                 if ($callUserAccess) {
                     $userId = Auth::id();
                     switch ($action) {
                         case 'accept':
-                            $key = 'accept_call_' . $callUserAccess->cua_call_id;
-                            $result = (bool)Yii::$app->redis->setnx($key, $userId);
-                            $isOk = true;
-                            $value = null;
-
-                            if (!$result) {
-                                $value = (int)Yii::$app->redis->get($key);
-                                if ($value !== $userId) {
-                                    $isOk = false;
-                                }
-                            }
-
-                            if ($isOk) {
+                            $key = new Key($callUserAccess->cua_call_id);
+                            $isReserved = $reserver->reserve($key, $userId);
+                            if ($isReserved) {
                                 $prepare = new PrepareCurrentCallsForNewCall($userId);
                                 if ($prepare->prepare()) {
-                                    $this->callService->acceptCall($callUserAccess, Auth::user());
+                                    $this->callService->acceptCall($callUserAccess, $userId);
                                 }
-                                Yii::$app->redis->expire($key, 5);
                             } else {
                                 Notifications::publish('callAlreadyTaken', ['user_id' => $userId], ['callSid' => $call->c_call_sid]);
                                 Yii::info(VarDumper::dumpAsString([
                                     'callId' => $callUserAccess->cua_call_id,
                                     'userId' => $userId,
-                                    'acceptedUserId' => $value,
+                                    'acceptedUserId' => $reserver->getReservedUser($key),
                                 ]), 'info\NewPhoneWidgetAcceptRedisReservation');
                             }
 
@@ -1114,6 +1137,73 @@ class CallController extends FController
             } catch (\RuntimeException | NotFoundException $e) {
                 $response['message'] = $e->getMessage();
             }
+        }
+
+        return $this->asJson($response);
+    }
+
+    public function actionAjaxAcceptPriorityCall(): Response
+    {
+        if (!SettingHelper::isGeneralLinePriorityEnable()) {
+            throw new NotFoundHttpException();
+        }
+
+        $response = [
+            'error' => false,
+            'message' => '',
+        ];
+        $userId = Auth::id();
+
+        try {
+            $callUserAccess = CallUserAccess::find()
+                ->select([CallUserAccess::tableName() . '.*'])
+                ->addSelect(['is_owner' => new Expression('if ((' . Lead::tableName() . '.employee_id is not null and ' . Lead::tableName() . '.employee_id = cua_user_id) or (cs_user_id is not null and cs_user_id = cua_user_id), 1, 0)')])
+                ->innerJoin(Call::tableName(), 'c_id = cua_call_id')
+                ->leftJoin(Lead::tableName(), Lead::tableName() . '.id = c_lead_id')
+                ->leftJoin(Cases::tableName(), 'cs_id = c_case_id')
+                ->andWhere([
+                    'cua_user_id' => Auth::id(),
+                    'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING
+                ])
+                ->andWhere(['c_source_type_id' => [Call::SOURCE_GENERAL_LINE, Call::SOURCE_REDIRECT_CALL]])
+                ->andWhere(['<>', 'c_status_id', Call::STATUS_HOLD])
+                ->orderBy([
+                    'cua_priority' => SORT_DESC,
+                    'is_owner' => SORT_DESC,
+                    'cua_created_dt' => SORT_ASC
+                ])->all();
+
+            $reserver = Yii::createObject(CallReserver::class);
+
+            $isReserved = false;
+            foreach ($callUserAccess as $access) {
+                $isReserved = $reserver->reserve(new Key($access->cua_call_id), $userId);
+                if (!$isReserved) {
+                    continue;
+                }
+                $prepare = new PrepareCurrentCallsForNewCall($userId);
+                if ($prepare->prepare()) {
+                    $this->callService->acceptCall($access, $userId);
+                }
+                break;
+            }
+
+            if (!$isReserved) {
+                Notifications::publish('resetPriorityCall', ['user_id' => $userId], ['data' => ['command' => 'resetPriorityCall']]);
+                $response['error'] = true;
+                $response['message'] = 'Phone line queue is empty.';
+            }
+        } catch (\RuntimeException | NotFoundException $e) {
+            $response['error'] = true;
+            $response['message'] = $e->getMessage();
+        } catch (\Throwable $e) {
+            Yii::error([
+                'message' => 'Accept priority call',
+                'error' => $e->getMessage(),
+                'userId' => $userId,
+            ], 'CallController::actionAjaxAcceptPriorityCall');
+            $response['error'] = true;
+            $response['message'] = 'Internal server error.';
         }
 
         return $this->asJson($response);
@@ -1162,39 +1252,43 @@ class CallController extends FController
     }
 
     /**
-     * @param string $sid
-     * @param bool $cfRecord
-     * @return string
-     *
-     * Potentially will be used future
-     *
+     * @param string $callSid
+     * @return void
+     * @throws NotFoundHttpException
      */
-    /*public function actionRecord(string $sid, bool $cfRecord = false):string
+    public function actionRecord(string $callSid): void
     {
-        if (!$cfRecord){
-            $recordUrl = Call::find()->select(['c_recording_url'])->where(['c_call_sid' => $sid])->one();
-            $url = $recordUrl->c_recording_url;
-        } else {
-            $recordUrl = Conference::find()->select(['cf_recording_url'])->where(['cf_sid' => $sid])->one();
-            $url = $recordUrl->cf_recording_url;
-        }
+        $cacheKey = 'call-recording-url-' . $callSid . '-user-' . Auth::id();
 
         try {
-            $twilioHeaders = array_change_key_case(get_headers($url, 1));
-            Yii::$app->response->format = Response::FORMAT_RAW;
-            $headers = Yii::$app->response->headers;
-            $headers->add('Accept-Ranges', 'bytes');
-            $headers->add('Content-Type', 'audio/x-wav');
-            if(isset($twilioHeaders['content-length'])){
-                $headers->add('Content-Length', $twilioHeaders['content-length']);
+            if (!$callRecordSid = Yii::$app->cacheFile->get($cacheKey)) {
+                $callLogRecord = CallLogQuery::getCallLogRecordByCallSid($callSid);
+
+                if ($callLogRecord && !empty($callLogRecord['clr_record_sid'])) {
+                    $callRecordSid = $callLogRecord['clr_record_sid'];
+                    $callRecordDuration = $callLogRecord['clr_duration'];
+                } elseif ($call = Call::find()->selectRecordingData()->bySid($callSid)->asArray()->one()) {
+                    $callRecordSid = $call['c_recording_sid'];
+                    $callRecordDuration = $call['c_recording_duration'];
+                } else {
+                    throw new NotFoundException('Call not found');
+                }
+
+                Yii::$app->cacheFile->set($cacheKey, $callRecordSid, $callRecordDuration  + SettingHelper::getCallRecordingLogAdditionalCacheTimeout());
+
+                if (SettingHelper::isCallRecordingLogEnabled()) {
+                    $callRecordingLog = CallRecordingLog::create($callSid, Auth::id(), (int)date('Y'), (int)date('m'));
+                    if (!$callRecordingLog->save(true)) {
+                        Yii::error('Call Recording Log saving failed: ' . $callRecordingLog->getErrorSummary(false)[0], 'CallController::actionCallRecordingLog::callRecordingLog::save');
+                    }
+                }
             }
 
-            return file_get_contents($url);
+            header('X-Accel-Redirect: ' . Yii::$app->communication->xAccelRedirectUrl . $callRecordSid);
+        } catch (NotFoundException $e) {
+            throw new NotFoundHttpException($e->getMessage());
         }
-        catch (Exception $e) {
-            echo $e->getMessage();
-        }
-    }*/
+    }
 
     public function actionAjaxAddNote(): Response
     {
@@ -1283,6 +1377,19 @@ class CallController extends FController
         ]);
     }
 
+    public function actionGetCallInfo(): string
+    {
+        $callSid = Yii::$app->request->get('sid', '');
+
+        $call = $this->findCallModel($callSid);
+
+        $callGuard = new CallDisplayGuard();
+        return $this->renderAjax('monitor/_call_info', [
+            'call' => $call,
+            'callGuard' => $callGuard
+        ]);
+    }
+
     private function addUsersForCall(Call $call, array $users): array
     {
         $result = [];
@@ -1341,6 +1448,15 @@ class CallController extends FController
         }
 
         return $query->indexBy('id')->all();
+    }
+
+    protected function findCallModel(string $sid): Call
+    {
+        if (($model = Call::findOne(['c_call_sid' => $sid])) !== null) {
+            return $model;
+        }
+
+        throw new NotFoundHttpException('The requested page does not exist.');
     }
 
     protected function findCallLogModel(string $sid): CallLog

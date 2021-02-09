@@ -19,6 +19,8 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'cua_status_id')->dropDownList(\common\models\CallUserAccess::getStatusTypeList()) ?>
 
+    <?= $form->field($model, 'cua_priority')->textInput() ?>
+
     <?php //= $form->field($model, 'cua_created_dt')->textInput() ?>
 
     <?php //= $form->field($model, 'cua_updated_dt')->textInput() ?>

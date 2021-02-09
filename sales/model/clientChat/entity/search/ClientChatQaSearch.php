@@ -17,6 +17,7 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use sales\model\clientChat\entity\ClientChat;
+use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -135,6 +136,10 @@ class ClientChatQaSearch extends ClientChat
             ->andFilterWhere(['like', 'cch_ip', $this->cch_ip])
             ->andFilterWhere(['like', 'cch_language_id', $this->cch_language_id]);
 
+        if ($this->ownerUserID) {
+            $query->andWhere(['cch_owner_user_id' => $this->ownerUserID]);
+        }
+
         if ($this->createdRangeDate) {
             $dateRange = explode(' - ', $this->createdRangeDate);
             if ($dateRange[0] && $dateRange[1]) {
@@ -233,7 +238,7 @@ class ClientChatQaSearch extends ClientChat
             return [];
         }
         $query->select('cch_id');
-        //$this->filterQuery($query);
+        $this->filterQuery($query);
 
         return ArrayHelper::map($query->asArray()->all(), 'cch_id', 'cch_id');
     }
@@ -242,8 +247,21 @@ class ClientChatQaSearch extends ClientChat
      * @param Scopes $query
      * @return Scopes
      */
-    private function filterQuery(Scopes $query)
+    private function filterQuery(Scopes $query): ActiveQuery
     {
+        if ($this->ownerUserID) {
+            $query->andWhere(['cch_owner_user_id' => $this->ownerUserID]);
+        }
+
+        if ($this->createdRangeDate) {
+            $dateRange = explode(' - ', $this->createdRangeDate);
+            if ($dateRange[0] && $dateRange[1]) {
+                $fromDate = date('Y-m-d', strtotime($dateRange[0]));
+                $toDate = date('Y-m-d', strtotime($dateRange[1]));
+                $query->andWhere(['BETWEEN', 'DATE(cch_created_dt)', $fromDate, $toDate]);
+            }
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'cch_id' => $this->cch_id,

@@ -49,6 +49,9 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
     public const ACTION_CHAT_ACCEPT = 17;
     public const ACTION_AUTO_RETURN = 18;
     public const ACTION_AUTO_REOPEN = 19;
+    public const ACTION_MULTIPLE_UPDATE_CLOSE = 20;
+    public const ACTION_MULTIPLE_TAKE = 21;
+    public const ACTION_MULTIPLE_ACCEPT = 22;
 
     private const ACTION_LIST = [
         self::ACTION_OPEN => 'Open By Client',
@@ -70,6 +73,9 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
         self::ACTION_CHAT_ACCEPT => 'Chat Accept',
         self::ACTION_AUTO_RETURN => 'Auto Return',
         self::ACTION_AUTO_REOPEN => 'Auto Reopen',
+        self::ACTION_MULTIPLE_UPDATE_CLOSE => 'Multiple Update Close',
+        self::ACTION_MULTIPLE_TAKE => 'Multiple Update Take',
+        self::ACTION_MULTIPLE_ACCEPT => 'Multiple Update Accept',
     ];
 
     private const ACTION_LABEL_LIST = [
@@ -92,6 +98,8 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
         self::ACTION_CHAT_ACCEPT => 'badge badge-success',
         self::ACTION_AUTO_RETURN => 'badge badge-info',
         self::ACTION_AUTO_REOPEN => 'badge badge-info',
+        self::ACTION_MULTIPLE_UPDATE_CLOSE => 'badge badge-red',
+        self::ACTION_MULTIPLE_TAKE => 'badge badge-info',
     ];
 
     public function rules(): array

@@ -86,8 +86,9 @@ function refreshClientChatWidget(obj) {
         case 'accept':
             window.chat.removeRequest(data.chatId, data.userId, data.chatUserAccessId);
             if (document.visibilityState == "visible") {
-                if (window.name === 'chat') {
-                    window.location.href = data.url;
+                if (window.name === 'chat' && typeof window.refreshChatPage === 'function') {
+                    // window.location.href = data.url;
+                    window.refreshChatPage(data.chatId);
                 } else {
                     window.open(data.url);
                 }

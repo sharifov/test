@@ -27,6 +27,8 @@ use frontend\helpers\JsonHelper;
 use frontend\models\CaseCommunicationForm;
 use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
+use modules\fileStorage\FileStorageSettings;
+use modules\fileStorage\src\services\url\UrlGenerator;
 use sales\auth\Auth;
 use sales\entities\cases\CasesSourceType;
 use sales\entities\cases\CasesStatus;
@@ -51,7 +53,6 @@ use sales\model\coupon\entity\couponCase\CouponCase;
 use sales\model\coupon\useCase\send\SendCouponsForm;
 use sales\model\department\department\Params;
 use sales\model\phone\AvailablePhoneList;
-use sales\model\project\entity\CustomData;
 use sales\model\saleTicket\useCase\create\SaleTicketService;
 use sales\repositories\cases\CaseCategoryRepository;
 use sales\repositories\cases\CasesRepository;
@@ -103,10 +104,10 @@ use yii\widgets\ActiveForm;
  * @property QuoteRepository $quoteRepository
  * @property TransactionManager $transaction
  * @property ClientChatActionPermission $chatActionPermission
+ * @property UrlGenerator $fileStorageUrlGenerator
  */
 class CasesController extends FController
 {
-
     private $casesCreateService;
     private $casesManageService;
     private $casesCommunicationService;
@@ -121,6 +122,7 @@ class CasesController extends FController
     private $quoteRepository;
     private $transaction;
     private $chatActionPermission;
+    private UrlGenerator $fileStorageUrlGenerator;
 
     public function __construct(
         $id,
@@ -139,6 +141,7 @@ class CasesController extends FController
         QuoteRepository $quoteRepository,
         TransactionManager $transaction,
         ClientChatActionPermission $chatActionPermission,
+        UrlGenerator $fileStorageUrlGenerator,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -156,6 +159,7 @@ class CasesController extends FController
         $this->quoteRepository = $quoteRepository;
         $this->transaction = $transaction;
         $this->chatActionPermission = $chatActionPermission;
+        $this->fileStorageUrlGenerator = $fileStorageUrlGenerator;
     }
 
     public function behaviors(): array
@@ -228,6 +232,7 @@ class CasesController extends FController
         $userModel = Yii::$app->user->identity;
 
         $previewEmailForm = new CasePreviewEmailForm();
+        $previewEmailForm->e_case_id = $model->cs_id;
         $previewEmailForm->is_send = false;
 
 
@@ -254,17 +259,18 @@ class CasesController extends FController
                 }
 
                 $mail->e_email_to = $previewEmailForm->e_email_to;
-                //$mail->e_email_data = [];
                 $mail->e_created_dt = date('Y-m-d H:i:s');
                 $mail->e_created_user_id = Yii::$app->user->id;
-
+                $attachments = [];
+                if (FileStorageSettings::canEmailAttach() && $previewEmailForm->files) {
+                    $attachments['files'] = $this->fileStorageUrlGenerator->generateForExternal($previewEmailForm->getFilesPath());
+                }
+                $mail->e_email_data = json_encode($attachments);
                 if ($mail->save()) {
                     $mail->e_message_id = $mail->generateMessageId();
                     $mail->update();
-
                     $previewEmailForm->is_send = true;
-
-                    $mailResponse = $mail->sendMail();
+                    $mailResponse = $mail->sendMail($attachments);
 
                     if (isset($mailResponse['error']) && $mailResponse['error']) {
                         //echo $mailResponse['error']; exit; //'Error: <strong>Email Message</strong> has not been sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
@@ -425,7 +431,7 @@ class CasesController extends FController
                     if ($model->isDepartmentSupport() && $departmentEmail = DepartmentEmailProject::find()->andWhere(['dep_id' => $comForm->dep_email_id])->withEmailList()->one()) {
 //                      $mailFrom = $departmentEmail->dep_email;
                         $mailFrom = $departmentEmail->getEmail();
-                    } else if ($model->cs_project_id) {
+                    } elseif ($model->cs_project_id) {
                         $upp = UserProjectParams::find()->where(['upp_project_id' => $model->cs_project_id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->one();
                         if ($upp) {
 //                            $mailFrom = $upp->upp_email;
@@ -818,7 +824,8 @@ class CasesController extends FController
             'locale' => '',
             'marketing_country' => '',
             'updateCaseBookingId' => false,
-            'updateCaseBookingHtml' => ''
+            'updateCaseBookingHtml' => '',
+            'caseBookingId' => ''
         ];
 
         $gid = Yii::$app->request->post('gid');
@@ -859,7 +866,8 @@ class CasesController extends FController
 
                 if (empty($model->cs_order_uid)) {
                     $model->cs_order_uid = $cs->css_sale_book_id;
-                } else if ($model->cs_order_uid !== $cs->css_sale_book_id) {
+                    $out['caseBookingId'] = $model->cs_order_uid;
+                } elseif ($model->cs_order_uid !== $cs->css_sale_book_id) {
                     $out['updateCaseBookingId'] = true;
                     $out['updateCaseBookingHtml'] = $this->renderPartial('sales/_sale_update_case_booking_id', [
                         'caseBookingId' => $model->cs_order_uid,
@@ -1256,8 +1264,8 @@ class CasesController extends FController
         try {
             $mailPreview = Yii::$app->communication->mailPreview(
                 $case->cs_project_id,
-                $customData->object->case->feedbackTemplateTypeKey,
-                $customData->object->case->feedbackEmailFrom,
+                $params->object->case->feedbackTemplateTypeKey,
+                $params->object->case->feedbackEmailFrom,
                 $form->sendTo,
                 $content,
                 $form->language
@@ -1268,7 +1276,7 @@ class CasesController extends FController
             }
 
             $this->sendFeedbackEmail(
-                $customData,
+                $params,
                 $case,
                 $form,
                 $user,
@@ -1296,7 +1304,7 @@ class CasesController extends FController
         $mail->e_case_id = $case->cs_id;
         $templateTypeId = EmailTemplateType::find()
             ->select(['etp_id'])
-            ->andWhere(['etp_key' => $customData->object->case->feedbackTemplateTypeKey])
+            ->andWhere(['etp_key' => $params->object->case->feedbackTemplateTypeKey])
             ->asArray()
             ->one();
         if ($templateTypeId) {
@@ -1306,8 +1314,8 @@ class CasesController extends FController
         $mail->e_status_id = Email::STATUS_PENDING;
         $mail->e_email_subject = $subject;
         $mail->body_html = $body;
-        $mail->e_email_from = $customData->object->case->feedbackEmailFrom;
-        $mail->e_email_from_name = $customData->object->case->feedbackNameFrom ?: $user->nickname;
+        $mail->e_email_from = $params->object->case->feedbackEmailFrom;
+        $mail->e_email_from_name = $params->object->case->feedbackNameFrom ?: $user->nickname;
         $mail->e_email_to_name = $case->client ? $case->client->full_name : '';
         $mail->e_language_id = $form->language;
         $mail->e_email_to = $form->sendTo;
@@ -1332,7 +1340,6 @@ class CasesController extends FController
      */
     public function actionStatusHistory()
     {
-
         $caseGId = Yii::$app->request->get('gid');
         $case = $this->casesRepository->findByGid($caseGId);
         $searchModel = new CaseStatusLogSearch();

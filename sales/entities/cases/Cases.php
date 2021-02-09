@@ -64,6 +64,7 @@ use Yii;
  * @property CaseStatusLog[] $caseStatusLogs
  * @property DepartmentPhoneProject[] $departmentPhonesByProjectAndDepartment
  * @property CaseSale[] $caseSale
+ * @property string $cs_category [varchar(50)]
  */
 class Cases extends ActiveRecord implements Objectable
 {

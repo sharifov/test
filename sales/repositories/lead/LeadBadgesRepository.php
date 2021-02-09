@@ -5,6 +5,7 @@ namespace sales\repositories\lead;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\ProfitSplit;
+use common\models\Quote;
 use common\models\TipsSplit;
 use common\models\UserGroup;
 use common\models\UserGroupAssign;
@@ -167,6 +168,30 @@ class LeadBadgesRepository
     public function getProcessingCount(Employee $user): int
     {
         return $this->getProcessingQuery($user)->count();
+    }
+
+    public function getAlternativeCount(Employee $user): int
+    {
+        return $this->getAlternativeQuery($user)->count();
+    }
+
+    public function getAlternativeQuery(Employee $user): ActiveQuery
+    {
+        $query = Lead::find()->andWhere([Lead::tableName() . '.status' => Lead::STATUS_ALTERNATIVE])->andWhere(['<>', 'l_call_status_id', Lead::CALL_STATUS_QUEUE]);
+
+        if ($user->isAdmin()) {
+            return $query;
+        }
+
+        $conditions = [];
+
+        if ($user->isAgent() || $user->isExAgent()) {
+            $conditions = $this->freeLead();
+        }
+
+        $query->andWhere($this->createSubQuery($user->id, $conditions));
+
+        return $query;
     }
 
     /**

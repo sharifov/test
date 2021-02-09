@@ -83,6 +83,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
 
 
         $menuLItems[] = ['label' => 'Failed Bookings <span id="badges-failed-bookings" data-type="failed-bookings" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/failed-bookings'], 'icon' => 'recycle'];
+        $menuLItems[] = ['label' => 'Alternative <span id="badges-alternative" data-type="alternative" class="label-warning label pull-right bginfo"></span> ', 'url' => ['/queue/alternative'], 'icon' => 'recycle'];
         $menuLItems[] = ['label' => 'Bonus <span id="badges-bonus" data-type="bonus" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/bonus'], 'icon' => 'recycle'];
         $menuLItems[] = ['label' => 'Follow Up <span id="badges-follow-up" data-type="follow-up" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/follow-up'], 'icon' => 'recycle'];
         $menuLItems[] = ['label' => 'Processing <span id="badges-processing" data-type="processing" class="label-warning label pull-right bginfo"></span> ', 'url' => ['/queue/processing'], 'icon' => 'spinner'];
@@ -90,7 +91,6 @@ class SideBarMenu extends \yii\bootstrap\Widget
         $menuLItems[] = ['label' => 'Sold <span id="badges-sold" data-type="sold" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/sold'], 'icon' => 'flag text-success'];
         $menuLItems[] = ['label' => 'Duplicate <span id="badges-duplicate" data-type="duplicate" class="label-danger label pull-right bginfo"></span>', 'url' => ['/queue/duplicate'], 'icon' => 'list text-danger'];
         $menuLItems[] = ['label' => 'Trash <span id="badges-trash" class="label-danger label pull-right"></span>', 'url' => ['/queue/trash'], 'icon' => 'trash-o text-danger'];
-
         $menuLItems[] = ['label' => 'Import Leads', 'url' => ['/lead/import'], 'icon' => 'upload'];
 
 
@@ -223,6 +223,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Leads', 'url' => ['/call-log-lead/index']],
                         ['label' => 'Queue', 'url' => ['/call-log-queue/index']],
                         ['label' => 'Record', 'url' => ['/call-log-record/index']],
+                        ['label' => 'Twilio Recording Log', 'url' => ['/call-recording-log-crud/index']],
                     ],
                 ],
                 [
@@ -257,6 +258,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Canned Response', 'url' => ['/client-chat-canned-response-crud/index']],
                         ['label' => 'Canned Response Category', 'url' => ['/client-chat-canned-response-category-crud/index']],
                         ['label' => 'Chat Forms', 'url' => ['/client-chat-form-crud/index']],
+                        ['label' => 'User Chat Data', 'url' => ['/user-client-chat-data-crud/index']],
                     ],
                 ],
                 ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'list'],
@@ -275,6 +277,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Conference Debug', 'url' => ['/conference-debug/index']],
                         ['label' => 'Participants', 'url' => ['/conference-participant/index']],
                         ['label' => 'Participants Stats', 'url' => ['/conference-participant-stats/index']],
+                        ['label' => 'Twilio Recording Log', 'url' => ['/conference-recording-log-crud/index']],
                     ]
                 ],
                 ['label' => 'Call Note', 'url' => ['/call-note-crud/index'], 'icon' => 'list'],
@@ -441,9 +444,11 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Phone Blacklist', 'url' => ['/phone-blacklist/index'], 'icon' => 'phone'],
                 ['label' => 'Email List', 'url' => ['/email-list/index'], 'icon' => 'envelope-o'],
 
-                ['label' => 'Airlines', 'url' => ['/settings/airlines'], 'icon' => 'plane'],
-                //['label' => 'Airports', 'url' => ['/settings/airports'], 'icon' => 'plane'],
+                //['label' => 'Airlines', 'url' => ['/settings/airlines'], 'icon' => 'plane'],
+                ['label' => 'Airlines', 'url' => ['/airline-crud/index'], 'icon' => 'space-shuttle'],
                 ['label' => 'Airports', 'url' => ['/airports/index'], 'icon' => 'plane'],
+                ['label' => 'Airport Lang', 'url' => ['/airport-lang-crud/index'], 'icon' => 'language'],
+
                 ['label' => 'ACL (IP)', 'url' => ['/settings/acl'], 'icon' => 'user-secret'],
                 ['label' => 'API Users', 'url' => ['/api-user/index'], 'icon' => 'users'],
                 ['label' => 'Tasks', 'url' => ['/task/index'], 'icon' => 'list'],
@@ -477,6 +482,18 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ],
 
                 ['label' => 'Call recording disabled', 'url' => ['/call-recording-disabled/list'], 'icon' => 'list'],
+
+                [
+                    'label' => 'Shift Schedules',
+                    'url' => 'javascript:',
+                    'icon' => 'calendar',
+                    'items' => [
+                        ['label' => 'Shift', 'url' => ['/shift-crud/index']],
+                        ['label' => 'Shift Schedule Rule', 'url' => ['/shift-schedule-rule-crud/index']],
+                        ['label' => 'User Shift Assign', 'url' => ['/user-shift-assign-crud/index']],
+                        ['label' => 'User Shift Schedule', 'url' => ['/user-shift-schedule-crud/index']],
+                    ]
+                ],
 
             ]
         ];
@@ -527,6 +544,15 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 'url' => 'javascript:',
                 'icon' => 'hotel',
                 'items' => \modules\hotel\HotelModule::getListMenu()
+            ];
+        }
+
+        if (class_exists('\modules\fileStorage\FileStorageModule')) {
+            $menuModuleItems[] = [
+                'label' => 'File storage',
+                'url' => 'javascript:',
+                'icon' => 'list',
+                'items' => \modules\fileStorage\FileStorageModule::getListMenu()
             ];
         }
 
@@ -586,6 +612,12 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Client Chat Monitor', 'url' => ['/client-chat/monitor'], 'icon' => 'map'],
                 ['label' => 'Agents Ratings', 'url' => ['/stats/agent-ratings'], 'icon' => 'star-half-empty'],
                 ['label' => 'Stats Agents & Leads', 'url' => ['/report/agents'], 'icon' => 'users'],
+                [
+                    'label' => 'Monitor', 'url' => 'javascript:', 'icon' => 'map',
+                    'items' => [
+                        ['label' => Yii::t('menu', 'Incoming Call'), 'url' => ['/monitor/call-incoming']],
+                    ]
+                ]
             ]
         ];
 

@@ -4,20 +4,12 @@
 /* @var $content string */
 
 use common\models\Employee;
-use frontend\assets\groups\AllSharedAsset;
-use frontend\themes\gentelella_v2\assets\groups\GentelellaCrudAsset;
 use frontend\widgets\notification\NotificationSocketWidget;
 use frontend\widgets\notification\NotificationWidget;
 use sales\auth\Auth;
 use yii\helpers\Html;
 
 $bundle = \frontend\assets\AppCrudAsset::register($this);
-
-
-//$this->registerCssFile('@frontend/themes/gentelella/css/custom.css');
-//Yii::$app->view->registerCssFile('@frontend/themes/gentelella/css/custom.css', ['depends'=>'yiister\gentelella_v2\assets\Asset']);
-
-
 ?>
 <?php $this->beginPage(); ?>
 <!DOCTYPE html>
@@ -27,30 +19,16 @@ $bundle = \frontend\assets\AppCrudAsset::register($this);
     <?php
         $this->registerMetaTag(['http-equiv' => 'Content-Type', 'content' => 'text/html; charset=UTF-8']);
         $this->registerMetaTag(['http-equiv' => 'X-UA-Compatible', 'content' => 'IE=edge']);
-
         $this->registerMetaTag(['charset' => Yii::$app->charset]);
         $this->registerMetaTag(['name' => 'viewport', 'content' => 'width=device-width, initial-scale=1']);
         $this->metaTags[] = Html::csrfMetaTags();
         $this->registerMetaTag(['name' => 'robots', 'content' => 'noindex, nofollow']);
         $this->registerMetaTag(['name' => 'msapplication-TileColor', 'content' => '#a9e04b']);
-        //$this->registerLinkTag(['rel' => 'icon', 'type' => 'image/png', 'href' => Helper::publishStatic('images/favicons/16x16.png'), 'sizes' => '16x16']);
         $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'href' => Yii::$app->request->baseUrl . '/favicon.ico']);
         $this->head();
-
-        //$this->head();
-
         $host = 'CRM';
         echo Html::tag('title', ucfirst($host) . ' - ' . Html::encode($this->title));
     ?>
-    <?php /*<link rel="stylesheet" href="<?= Yii::$app->getAssetManager()->publish(Yii::getAlias('@frontend').'/web/css/style_theme.css')[1];?>"/>*/ ?>
-    <?php //php $this->head() ?>
-    <?php /*<link rel="shortcut icon" href="<?php echo Yii::$app->request->baseUrl; ?>/favicon.ico" type="image/x-icon" />*/ ?>
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
 </head>
 <body class="nav-<?= !empty($_COOKIE['menuIsCollapsed']) && $_COOKIE['menuIsCollapsed'] === 'true' ? 'sm' : 'md' ?>">
 <?php $this->beginBody(); ?>
@@ -83,7 +61,6 @@ $bundle = \frontend\assets\AppCrudAsset::register($this);
                 </div>
 
                 <!-- sidebar menu -->
-                <?php //= $this->render('_sidebar_menu') ?>
                 <?= \frontend\themes\gentelella_v2\widgets\SideBarMenu::widget(['user' => $user]); ?>
                 <!-- /sidebar menu -->
 
@@ -130,36 +107,20 @@ $bundle = \frontend\assets\AppCrudAsset::register($this);
                                 </li>
                             </ul>
                         </li>
+                        <?php echo frontend\widgets\OnlineConnection::widget() ?>
+                        <?php echo frontend\widgets\UserMonitor::widget() ?>
 
-                        <?php /*php if($isAdmin):*/ ?>
-
-                            <?php echo frontend\widgets\OnlineConnection::widget() ?>
-
-                            <?php //= frontend\widgets\Notifications::widget() ?>
-                            <?php
-                            if (Yii::$app->params['settings']['notification_web_socket']) {
-                                echo NotificationSocketWidget::widget(['userId' => Auth::id()]);
-                            } else {
-                                echo NotificationWidget::widget(['userId' => Auth::id()]);
-                            }
-                            ?>
-                        <?php /*= CentrifugoNotificationWidget::widget([
-                            'userId' => Auth::id(),
-                            'widgetView => 'index',
-                            'userAllowedChannels' => [
-                                'ownUserChannel#' . Auth::id(),
-                                'multipleUsersChannel#658,659'
-                            ]
-                        ]) */ ?>
+                        <?php
+                        if (Yii::$app->params['settings']['notification_web_socket']) {
+                            echo NotificationSocketWidget::widget(['userId' => Auth::id()]);
+                        } else {
+                            echo NotificationWidget::widget(['userId' => Auth::id()]);
+                        }
+                        ?>
 
                         <li class="nav-item">
                             <a href="javascript:;" class="info-number" data-status="1" title="Incoming Call - Volume ON" id="incoming-sound-indicator"><i class="fa fa-volume-up text-success"> </i></a>
                         </li>
-
-                        <?php /*php endif;*/?>
-
-                        <?php //= frontend\widgets\ChatNotifications::widget(); ?>
-
                     </ul>
                 </nav>
             </div>
@@ -233,12 +194,6 @@ $bundle = \frontend\assets\AppCrudAsset::register($this);
         <!-- /footer content -->
     </div>
 </div>
-<?php /*<div id="custom_notifications" class="custom-notifications dsp_none">
-    <ul class="list-unstyled notifications clearfix" data-tabbed_notifications="notif-group">
-    </ul>
-    <div class="clearfix"></div>
-    <div id="notif-group" class="tabbed_notifications"></div>
-</div>*/ ?>
 <!-- /footer content -->
 
 <!-- modals -->

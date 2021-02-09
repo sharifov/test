@@ -5,10 +5,12 @@ namespace sales\model\clientChatRequest\useCase\api\create;
 use common\components\purifier\Purifier;
 use common\models\Notifications;
 use Exception;
+use frontend\widgets\clientChat\ClientChatAccessMessage;
 use frontend\widgets\notification\NotificationMessage;
 use sales\helpers\ErrorsToStringHelper;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
+use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatFeedback\ClientChatFeedbackRepository;
 use sales\model\clientChatFeedback\entity\ClientChatFeedback;
 use sales\model\clientChatLastMessage\ClientChatLastMessageRepository;
@@ -292,13 +294,15 @@ class ClientChatRequestService
                 if ($clientChat->cch_client_online) {
                     $clientChat->cch_client_online = 0;
                     $this->clientChatRepository->save($clientChat);
-                    if ($clientChat->cch_owner_user_id) {
-                        Notifications::publish('clientChatUpdateClientStatus', ['user_id' => $clientChat->cch_owner_user_id], [
+                    Notifications::pub(
+                        [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],
+                        'clientChatUpdateClientStatus',
+                        [
                             'cchId' => $clientChat->cch_id,
                             'isOnline' => (int)$clientChat->cch_client_online,
                             'statusMessage' => Html::encode($clientChat->getClientStatusMessage()),
-                        ]);
-                    }
+                        ]
+                    );
                 }
             }
         }

@@ -36,8 +36,10 @@ class PhoneList extends \yii\db\ActiveRecord
     public function rules(): array
     {
         return [
-            ['pl_phone_number', PhoneValidator::class, 'required' => true],
+            //['pl_phone_number', PhoneValidator::class, 'required' => true, 'boralesValidatorEnable' => true],
+            ['pl_phone_number', 'match', 'pattern' => '/^\+[1-9]\d{6,13}$/', 'message' => 'The format of {attribute} is invalid.'],
             ['pl_phone_number', 'unique'],
+            ['pl_phone_number', 'required'],
 
             ['pl_title', 'string', 'max' => 50],
 

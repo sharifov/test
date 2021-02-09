@@ -25,6 +25,8 @@ use common\models\ProjectEmailTemplate;
 use common\models\search\LeadCallExpertSearch;
 use common\models\search\LeadChecklistSearch;
 use kivork\rbacExportImport\src\formatters\FileSizeFormatter;
+use modules\fileStorage\FileStorageSettings;
+use modules\fileStorage\src\services\url\UrlGenerator;
 use modules\offer\src\entities\offer\search\OfferSearch;
 use modules\offer\src\entities\offerSendLog\CreateDto;
 use modules\offer\src\entities\offerSendLog\OfferSendLogType;
@@ -52,6 +54,7 @@ use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
+use sales\model\airportLang\helpers\AirportLangHelper;
 use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\permissions\ClientChatActionPermission;
@@ -67,6 +70,7 @@ use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
 use sales\repositories\quote\QuoteRepository;
+use sales\services\client\ClientManageService;
 use sales\services\email\EmailService;
 use sales\services\lead\LeadAssignService;
 use sales\services\lead\LeadCloneService;
@@ -109,6 +113,7 @@ use common\models\local\LeadLogMessage;
  * @property QuoteRepository $quoteRepository
  * @property TransactionManager $transaction
  * @property ClientChatActionPermission $chatActionPermission
+ * @property UrlGenerator $fileStorageUrlGenerator
  */
 class LeadController extends FController
 {
@@ -122,6 +127,7 @@ class LeadController extends FController
     private $quoteRepository;
     private $transaction;
     private $chatActionPermission;
+    private UrlGenerator $fileStorageUrlGenerator;
 
     public function __construct(
         $id,
@@ -136,6 +142,7 @@ class LeadController extends FController
         QuoteRepository $quoteRepository,
         TransactionManager $transaction,
         ClientChatActionPermission $chatActionPermission,
+        UrlGenerator $fileStorageUrlGenerator,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -149,6 +156,7 @@ class LeadController extends FController
         $this->quoteRepository = $quoteRepository;
         $this->transaction = $transaction;
         $this->chatActionPermission = $chatActionPermission;
+        $this->fileStorageUrlGenerator = $fileStorageUrlGenerator;
     }
 
     public function behaviors(): array
@@ -419,6 +427,7 @@ class LeadController extends FController
 
 
         $previewEmailForm = new LeadPreviewEmailForm();
+        $previewEmailForm->e_lead_id = $lead->id;
         $previewEmailForm->is_send = false;
 
 
@@ -445,17 +454,18 @@ class LeadController extends FController
                 }
 
                 $mail->e_email_to = $previewEmailForm->e_email_to;
-                //$mail->e_email_data = [];
                 $mail->e_created_dt = date('Y-m-d H:i:s');
                 $mail->e_created_user_id = Yii::$app->user->id;
-
+                $attachments = [];
+                if (FileStorageSettings::canEmailAttach() && $previewEmailForm->files) {
+                    $attachments['files'] = $this->fileStorageUrlGenerator->generateForExternal($previewEmailForm->getFilesPath());
+                }
+                $mail->e_email_data = json_encode($attachments);
                 if ($mail->save()) {
                     $mail->e_message_id = $mail->generateMessageId();
                     $mail->update();
-
                     $previewEmailForm->is_send = true;
-
-                    $mailResponse = $mail->sendMail();
+                    $mailResponse = $mail->sendMail($attachments);
 
                     if (isset($mailResponse['error']) && $mailResponse['error']) {
                         //echo $mailResponse['error']; exit; //'Error: <strong>Email Message</strong> has not been sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
@@ -482,7 +492,6 @@ class LeadController extends FController
 
                         Yii::$app->session->setFlash('send-success', '<strong>Email Message</strong> has been successfully sent to <strong>' . $mail->e_email_to . '</strong>');
                     }
-
                     $this->refresh('#communication-form');
                 } else {
                     $previewEmailForm->addError('e_email_subject', VarDumper::dumpAsString($mail->errors));
@@ -618,6 +627,7 @@ class LeadController extends FController
 
 
                     $language = $comForm->c_language_id ?: 'en-US';
+                    $lang = AirportLangHelper::getLangFromLocale($language);
 
                     $previewEmailForm->e_lead_id = $lead->id;
                     $previewEmailForm->e_email_tpl_id = $comForm->c_email_tpl_id;
@@ -629,15 +639,11 @@ class LeadController extends FController
                         $tpl = EmailTemplateType::findOne($comForm->c_email_tpl_id);
                         //$mailSend = $communication->mailSend(7, 'cl_offer', 'test@gmail.com', 'test2@gmail.com', $content_data, $data, 'ru-RU', 10);
 
-
-                        //VarDumper::dump($content_data, 10 , true); exit;
-
                         if ($comForm->offerList) {
                             $content_data = $lead->getOfferEmailData($comForm->offerList, $projectContactInfo);
                         } else {
-                            $content_data = $lead->getEmailData2($comForm->quoteList, $projectContactInfo);
+                            $content_data = $lead->getEmailData2($comForm->quoteList, $projectContactInfo, $lang);
                         }
-
 
                         $content_data['content'] = $comForm->c_email_message;
                         $content_data['subject'] = $comForm->c_email_subject;
@@ -1603,6 +1609,44 @@ class LeadController extends FController
         ]);
     }
 
+    public function actionAlternative(): string
+    {
+        $user = Auth::user();
+
+        $checkShiftTime = true;
+        $isAccessNewLead = true;
+        $accessLeadByFrequency = [];
+        $limit = null;
+
+        if ($user->isAgent()) {
+            $checkShiftTime = $user->checkShiftTime();
+            $userParams = $user->userParams;
+            if ($userParams) {
+                if ($userParams->up_inbox_show_limit_leads > 0) {
+                    $limit = $userParams->up_inbox_show_limit_leads;
+                }
+            } else {
+                throw new NotFoundHttpException('Not set user params for agent! Please ask supervisor to set shift time and other.');
+            }
+            $accessLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes([], [Lead::STATUS_BOOK_FAILED]);
+            if (!$accessLeadByFrequency['access']) {
+                $isAccessNewLead = $accessLeadByFrequency['access'];
+            }
+        }
+
+        $searchModel = new LeadSearch();
+        $dataProvider = $searchModel->searchAlternative(Yii::$app->request->queryParams, $user, $limit);
+
+        return $this->render('alternative', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'checkShiftTime' => $checkShiftTime,
+            'isAccessNewLead' => $isAccessNewLead,
+            'accessLeadByFrequency' => $accessLeadByFrequency,
+            'user' => $user,
+        ]);
+    }
+
 
     /**
      * @return string
@@ -2018,6 +2062,12 @@ class LeadController extends FController
                 $form->client->projectId = $form->projectId;
                 $form->client->typeCreate = Client::TYPE_CREATE_LEAD;
                 $lead = $this->leadManageService->createManuallyByDefault($form, Yii::$app->user->id, Yii::$app->user->id, LeadFlow::DESCRIPTION_MANUAL_CREATE);
+
+                if (!empty($form->requestIp)) {
+                    $clientManageService = \Yii::createObject(ClientManageService::class);
+                    $clientManageService->checkIpChanged($lead->client, $form->requestIp);
+                }
+
                 Yii::$app->session->setFlash('success', 'Lead save');
                 return $this->redirect(['/lead/view', 'gid' => $lead->gid]);
             } catch (\Throwable $e) {

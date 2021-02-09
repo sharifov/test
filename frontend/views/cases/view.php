@@ -1,6 +1,8 @@
 <?php
 
 use common\models\Employee;
+use modules\fileStorage\FileStorageSettings;
+use modules\fileStorage\src\widgets\FileStorageListWidget;
 use sales\auth\Auth;
 use sales\helpers\cases\CasesViewRenderHelper;
 use yii\helpers\Html;
@@ -34,6 +36,7 @@ use yii\bootstrap4\Modal;
  *
  * @var $fromPhoneNumbers array
  * @var bool $smsEnabled
+ * @var array $unsubscribedEmails
  */
 
 $this->title = 'Case ' . $model->cs_id;
@@ -58,6 +61,8 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
 } else {
     $unsubscribe = false;
 }
+
+$unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_email');
 ?>
 
 <div class="cases-view">
@@ -112,7 +117,8 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
             <?= $this->render('_client_info', [
                 'caseModel'      => $model,
                 'isAdmin'       => $isAdmin,
-                'unsubscribe' => $unsubscribe
+                'unsubscribe' => $unsubscribe,
+                'unsubscribedEmails' => $unsubscribedEmails,
             ])
 ?>
             <?php \yii\widgets\Pjax::end(); ?>
@@ -147,14 +153,34 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
                         'isAdmin'       => $isAdmin,
                         'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_case'],
                         'fromPhoneNumbers' => $fromPhoneNumbers,
-                        'smsEnabled' => $smsEnabled
+                        'smsEnabled' => $smsEnabled,
+                        'unsubscribedEmails' => $unsubscribedEmails,
                     ]);
                     ?>
             <?php else : ?>
                 <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
             <?php endif;?>
         </div>
+
+
     </div>
+
+    <?php if (FileStorageSettings::isEnabled() && Auth::can('case-view/files/view', ['case' => $model])) : ?>
+        <div class="row">
+            <div class="col-md-6">
+            </div>
+            <div class="col-md-6">
+                <?= FileStorageListWidget::byCase(
+                    $model->cs_id,
+                    (
+                        FileStorageSettings::canUpload()
+                        && Auth::can('case-view/files/upload')
+                        && Auth::can('cases/update', ['case' => $model])
+                    )
+                ) ?>
+            </div>
+        </div>
+    <?php endif; ?>
 
     <div class="row">
         <div class="col-md-6">

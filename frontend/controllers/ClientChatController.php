@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use common\components\i18n\Formatter;
 use common\components\purifier\Purifier;
 use common\models\Department;
+use common\models\Employee;
 use common\models\Lead;
 use common\models\Notifications;
 use common\models\Project;
@@ -26,6 +27,8 @@ use sales\entities\chat\ChatFeedbackGraphSearch;
 use sales\entities\chat\ChatGraphsSearch;
 use sales\forms\clientChat\ClientChatSearchCannedResponse;
 use sales\forms\clientChat\ClientChatSendCannedMessage;
+use sales\forms\clientChat\MultipleAssignForm;
+use sales\forms\clientChat\MultipleCloseForm;
 use sales\forms\clientChat\MultipleUpdateForm;
 use sales\forms\clientChat\RealTimeStartChatForm;
 use sales\guards\clientChat\ClientChatManageGuard;
@@ -93,6 +96,7 @@ use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
+use yii\widgets\ActiveForm;
 
 /**
  * Class ClientChatController
@@ -264,6 +268,10 @@ class ClientChatController extends FController
                     'ajax-couch-note-view',
                     'ajax-reload-chat',
                     'view',
+                    'ajax-multiple-assign',
+                    'ajax-multiple-close',
+                    'validate-multiple-assign',
+                    'validate-multiple-close',
                 ],
             ],
         ];
@@ -1130,7 +1138,8 @@ class ClientChatController extends FController
                     $clientChat->cch_owner_user_id,
                     'Chat was taken',
                     'Client Chat was taken by ' . $takeClientChat->cchOwnerUser->nickname . ' (' . $clientChatLink . ')',
-                    Notifications::TYPE_INFO
+                    Notifications::TYPE_INFO,
+                    true
                 );
 
                 $result['message'] = 'Client Chat was successfully taken';
@@ -2218,5 +2227,169 @@ class ClientChatController extends FController
             return $result;
         }
         throw new BadRequestHttpException();
+    }
+
+    /**
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function actionValidateMultipleAssign(): array
+    {
+        $form = new MultipleAssignForm(Auth::id());
+        if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($form);
+        }
+        throw new BadRequestHttpException();
+    }
+
+    /**
+     * @return string
+     * @throws BadRequestHttpException
+     */
+    public function actionAjaxMultipleAssign(): string
+    {
+        if (!Yii::$app->request->isPost) {
+            throw new BadRequestHttpException();
+        }
+
+        $alertMessage = '';
+        $form = new MultipleAssignForm(Auth::id());
+
+        if (Yii::$app->request->isPjax && $form->load(Yii::$app->request->post())) {
+            if ($form->validate()) {
+                try {
+                    if (!Auth::can('client-chat/multiple/assign/manage')) {
+                        throw new ForbiddenHttpException('Access denied', -1);
+                    }
+                    if ($form->assignUserId) {
+                        foreach ($form->chatIds as $chatId) {
+                            $chat = ClientChat::findOne(['cch_id' => $chatId]);
+                            if (
+                                ($chat && (int) $chat->cch_owner_user_id !== (int) $form->assignUserId)
+                                &&
+                                $newOwner = Employee::findOne(['id' => $form->assignUserId])
+                            ) {
+                                if ($oldOwnerId = $chat->cch_owner_user_id) {
+                                    $this->clientChatService->takeClientChat($chat, $newOwner, ClientChatStatusLog::ACTION_MULTIPLE_TAKE);
+
+                                    Notifications::createAndPublish(
+                                        $oldOwnerId,
+                                        'Chat was taken to ' . $newOwner->nickname,
+                                        Auth::user()->nickname . ' has take your Chat to ' . $newOwner->nickname,
+                                        Notifications::TYPE_INFO,
+                                        false
+                                    );
+
+                                    Notifications::pub(
+                                        [ClientChatChannel::getPubSubKey($chat->cch_channel_id)],
+                                        'refreshChatPage',
+                                        ['data' => ClientChatAccessMessage::chatTakenBy($chat->cch_id, $newOwner->nickname, Auth::user()->nickname)]
+                                    );
+                                } else {
+                                    $this->clientChatService->acceptFromMultipleUpdate($chat, $form->assignUserId);
+
+                                    $clientChatLink = Purifier::createChatShortLink($chat);
+                                    Notifications::createAndPublish(
+                                        $newOwner->id,
+                                        'Chat assigned',
+                                        Auth::user()->nickname . ' has assigned Client Chat (' . $clientChatLink . ')',
+                                        Notifications::TYPE_INFO,
+                                        false
+                                    );
+                                }
+                            }
+                        }
+                    }
+                    return '<script>sessionStorage.selectedChats = "{}"; 
+                        $("#modal-sm").modal("hide"); 
+                        createNotify("Success", "Chats updated successfully", "success"); 
+                        setTimeout(()=>{window.location.reload();}, 1000);</script>';
+                } catch (\Throwable $throwable) {
+                    $alertMessage .= VarDumper::dumpAsString($throwable->getMessage()) . '<br />';
+                    \Yii::error(
+                        AppHelper::throwableLog($throwable, true),
+                        'ClientChatController:actionAjaxMultipleAssign'
+                    );
+                }
+            }
+            $alertMessage .= ErrorsToStringHelper::extractFromModel($form) . '<br />';
+        }
+
+        if (!$form->chatIds) {
+            $chatIds = Yii::$app->request->post('chatIds');
+            $form->chatIds = ClientChatHelper::prepareChatIds($chatIds);
+        }
+
+        return $this->renderAjax('partial/_ajax_multiple_assign_form', [
+            'formMultipleAssign' => $form,
+            'alertMessage' => $alertMessage,
+        ]);
+    }
+
+    /**
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function actionValidateMultipleClose(): array
+    {
+        $form = new MultipleCloseForm();
+        if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($form);
+        }
+        throw new BadRequestHttpException();
+    }
+
+    /**
+     * @return string
+     * @throws BadRequestHttpException
+     */
+    public function actionAjaxMultipleClose(): string
+    {
+        if (!Yii::$app->request->isPost) {
+            throw new BadRequestHttpException();
+        }
+
+        $alertMessage = '';
+        $form = new MultipleCloseForm();
+
+        if (Yii::$app->request->isPjax && $form->load(Yii::$app->request->post())) {
+            if ($form->validate()) {
+                try {
+                    if (!Auth::can('client-chat/multiple/archive/manage')) {
+                        throw new ForbiddenHttpException('Access denied', -1);
+                    }
+                    if ($form->toArchive) {
+                        foreach ($form->chatIds as $chatId) {
+                            if ($chat = ClientChat::findOne(['cch_id' => $chatId])) {
+                                $this->clientChatService->closeFromMultipleUpdate($chatId, Auth::user());
+                            }
+                        }
+                    }
+                    return '<script>sessionStorage.selectedChats = "{}"; 
+                        $("#modal-sm").modal("hide"); 
+                        createNotify("Success", "Chats updated successfully", "success"); 
+                        setTimeout(()=>{window.location.reload();}, 1000);</script>';
+                } catch (\Throwable $throwable) {
+                    $alertMessage .= VarDumper::dumpAsString($throwable->getMessage()) . '<br />';
+                    \Yii::error(
+                        AppHelper::throwableLog($throwable, true),
+                        'ClientChatController:actionAjaxMultipleClose'
+                    );
+                }
+            }
+            $alertMessage .= ErrorsToStringHelper::extractFromModel($form) . '<br />';
+        }
+
+        if (!$form->chatIds) {
+            $chatIds = Yii::$app->request->post('chatIds');
+            $form->chatIds = ClientChatHelper::prepareChatIds($chatIds);
+        }
+
+        return $this->renderAjax('partial/_ajax_multiple_close_form', [
+            'formMultipleClose' => $form,
+            'alertMessage' => $alertMessage
+        ]);
     }
 }

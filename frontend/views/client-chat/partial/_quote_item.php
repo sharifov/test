@@ -82,7 +82,7 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                 <?php if ($model->isApplied() && $model->lead->final_profit !== null) :?>
                     <button id="quote_profit_<?= $model->id?>" data-toggle="popover" data-html="true" data-trigger="click" data-placement="top" data-container="body" title="Final Profit" class="popover-class quote__profit btn btn-info"
                      data-content='<?= $model->getEstimationProfitText();?>'>
-                        <?= '$' . $model->getFinalProfit();?>
+                        <?= '$' . $model->lead->getFinalProfit();?>
                     </button>
                 <?php else :?>
                     <a id="quote_profit_<?= $model->id?>" data-toggle="popover" data-html="true" data-trigger="click" data-placement="top" data-container="body" title="Estimation Profit" class="popover-class quote__profit"

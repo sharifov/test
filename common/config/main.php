@@ -1,5 +1,10 @@
 <?php
 
+$commonParams = yii\helpers\ArrayHelper::merge(
+    require __DIR__ . '/../../common/config/params.php',
+    require __DIR__ . '/../../common/config/params-local.php',
+);
+
 return [
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
@@ -8,6 +13,22 @@ return [
     'vendorPath' => dirname(dirname(__DIR__)) . '/vendor',
     'timeZone' => 'UTC',
     'components' => [
+        'db' => [
+            'class' => 'yii\db\Connection',
+            'dsn' => '',
+            'username' => '',
+            'password' => '',
+            'charset' => 'utf8mb4',
+        ],
+        'db_postgres' => [
+            'class' => 'yii\db\Connection',
+            'dsn' => '',
+            'username' => '',
+            'password' => '',
+            'charset' => '',
+            'enableSchemaCache' => true,
+            'schemaCacheDuration' => 3600,
+        ],
         'formatter' => [
             'class' => 'yii\i18n\Formatter',
             'timeZone' => 'Europe/Chisinau',
@@ -34,9 +55,17 @@ return [
             'unixSocket' => null,
             'port' => 6379,
             'database' => 0,
+            'password' => null,
         ],
         'cache' => [
-            'class' => 'yii\caching\FileCache',
+            'class' => 'yii\redis\Cache',
+            'redis' => [
+                'hostname' => 'localhost',
+                'port' => 6379,
+                'password' => null,
+                'unixSocket' => null,
+                'database' => 1,
+            ],
         ],
         'cacheFile' => [
             'class' => 'yii\caching\FileCache',
@@ -56,101 +85,93 @@ return [
             'viewPath' => '@common/mail',
             'useFileTransport' => true,
         ],
-        'mailer2' => [
-            'class' => 'yii\swiftmailer\Mailer',
-            'viewPath' => '@common/mail',
-            'useFileTransport' => true,
-        ],
         'communication' => [
             'class' => \common\components\CommunicationService::class,
             'url' => 'https://communication.api.travelinsides.com/v1/',
             'url2' => 'https://communication.api.travelinsides.com/v2/',
             'username' => 'sales',
             'password' => '',
-            'recording_url' => 'https://api.twilio.com/2010-04-01/Accounts/AC10f3c74efba7b492cbd7dca86077736c/Recordings/',
+            'recordingUrl' => '',
+            'xAccelRedirectUrl' => '',
             'voipApiUsername' => 'sales'
         ],
         'airsearch' => [
             'class' => \common\components\AirSearchService::class,
             'url' => 'https://airsearch.api.travelinsides.com/',
-            'username' => 'SAL101',
-            'password' => 'c940e3484fe9fcc73ed12a7fcec469b4',
+            'username' => '',
+            'password' => '',
         ],
         'currency' => [
             'class' => \common\components\CurrencyService::class,
             'url' => 'https://airsearch.api.travelinsides.com/v1/',
-            'username' => 'SAL101',
-            'password' => 'c940e3484fe9fcc73ed12a7fcec469b4',
+            'username' => '',
+            'password' => '',
         ],
         'rchat' => [
             'class' => \common\components\RocketChat::class,
-            'url' => 'https://rocketchat.travel-dev.com/api/v1/',
             'username' => '',
             'password' => '',
             'host' => 'https://rocketchat.travel-dev.com',
         ],
-
         'chatBot' => [
             'class' => \common\components\ChatBot::class,
             'url' => 'https://chatbot.travel-dev.com/private/api/v1/',
             'username' => '',
             'password' => '',
         ],
-
         'travelServices' => [
             'class' => \common\components\TravelServices::class,
             'url' => 'https://geonames.travelinsides.com/api/v1/',
             'username' => '',
             'password' => '',
         ],
-
         'queue_sms_job' => [
             'class' => \yii\queue\beanstalk\Queue::class,
-            'host' => 'localhost',
-            'port' => 11300,
+            'host' => $commonParams['queue']['host'],
+            'port' => $commonParams['queue']['port'],
             'tube' => 'queue_sms_job',
         ],
         'queue_email_job' => [
             'class' => \yii\queue\beanstalk\Queue::class,
-            'host' => 'localhost',
-            'port' => 11300,
+            'host' => $commonParams['queue']['host'],
+            'port' => $commonParams['queue']['port'],
             'tube' => 'queue_email_job',
         ],
         'queue_phone_check' => [
             'class' => \yii\queue\beanstalk\Queue::class,
-            'host' => 'localhost',
-            'port' => 11300,
+            'host' => $commonParams['queue']['host'],
+            'port' => $commonParams['queue']['port'],
             'tube' => 'queue_phone_check',
         ],
         'queue_job' => [
             'class' => \yii\queue\beanstalk\Queue::class,
-            'host' => 'localhost',
-            'port' => 11300,
+            'host' => $commonParams['queue']['host'],
+            'port' => $commonParams['queue']['port'],
             'tube' => 'queue_job',
         ],
         'queue_system_services' => [
             'class' => \yii\queue\beanstalk\Queue::class,
-            'host' => 'localhost',
-            'port' => 11300,
+            'host' => $commonParams['queue']['host'],
+            'port' => $commonParams['queue']['port'],
             'tube' => 'queue_system_services',
         ],
         'queue_client_chat_job' => [
             'class' => \yii\queue\beanstalk\Queue::class,
-            'host' => 'localhost',
-            'port' => 11300,
+            'host' => $commonParams['queue']['host'],
+            'port' => $commonParams['queue']['port'],
             'tube' => 'queue_client_chat_job',
             'as idAccess' => sales\behaviors\JobIdAccessBehavior::class
         ],
         'queue_virtual_cron' => [
             'class' => \kivork\VirtualCron\Queue\Queue::class,
-            'host' => 'localhost',
-            'port' => 11300,
+            'host' => $commonParams['queue']['host'],
+            'port' => $commonParams['queue']['port'],
             'tube' => 'queue_virtual_cron',
         ],
         'telegram' => [
             'class' => \aki\telegram\Telegram::class,
-            'botUsername' => 'CrmKivorkBot',
-            'botToken' => '817992632:AAE6UXJRqDscAZc9gUBScEpaT_T4zGukdos',
+            'botUsername' => '',
+            'botToken' => '',
         ],
         'gaRequestService' => [
             'class' => \common\components\ga\GaRequestService::class,
@@ -176,7 +197,7 @@ return [
             'class'  => \sorokinmedia\centrifugo\Client::class,
             'host'   => 'http://localhost:8000/api',
             'secret' => '',
-            'apikey' => ''
+            'apikey' => '',
         ],
     ],
     'bootstrap' => [
@@ -188,8 +209,9 @@ return [
         'queue_system_services',
         'queue_virtual_cron',
         \common\components\SettingsBootstrap::class,
-        common\bootstrap\SetUp::class,
-        common\bootstrap\SetUpListeners::class,
-        common\bootstrap\Logger::class,
+        \common\bootstrap\SetUp::class,
+        \common\bootstrap\SetUpListeners::class,
+        \common\bootstrap\Logger::class,
+        \common\bootstrap\FileStorage::class,
     ],
 ];

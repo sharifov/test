@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use sales\model\airportLang\entity\AirportLangSearch;
 use Yii;
 use common\models\Airports;
 use common\models\search\AirportsSearch;
@@ -60,8 +61,17 @@ class AirportsController extends FController
      */
     public function actionView($id)
     {
+        $airport = $this->findModel($id);
+
+        $searchModel = new AirportLangSearch();
+        $params[$searchModel->formName()] = ['ail_iata' => $airport->iata];
+        $dataProvider = $searchModel->search($params);
+        $dataProvider->sort = false;
+
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $airport,
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 

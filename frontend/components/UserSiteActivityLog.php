@@ -31,6 +31,9 @@ class UserSiteActivityLog extends Behavior
             /*if (strpos(Yii::$app->request->getAbsoluteUrl(), 'lead/check-updates') !== false) {
                 return true;
             }*/
+            if (strpos(Yii::$app->request->getAbsoluteUrl(), 'call/record') !== false) {
+                return;
+            }
             $request_url = mb_substr(Yii::$app->request->getAbsoluteUrl(), 0, 490);
 
             $settings = Yii::$app->params['settings'];

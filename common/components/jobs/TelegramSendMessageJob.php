@@ -33,7 +33,8 @@ class TelegramSendMessageJob implements RetryableJobInterface
                 $tgm = Yii::$app->telegram;
                 $tgm->sendMessage([
                     'chat_id' => $telegramChatId,
-                    'text' => strip_tags($this->text),
+                    'text' => strip_tags($this->text . PHP_EOL . '_Environment: ' . strtoupper(YII_ENV) . '_'),
+                    'parse_mode' => 'markdown'
                 ]);
 
                 unset($tgm);
@@ -54,6 +55,20 @@ class TelegramSendMessageJob implements RetryableJobInterface
                     $this->user_id,
                     'Telegram was disabled',
                     'Telegram was disabled due to blocking on the client side',
+                    Notifications::TYPE_INFO
+                );
+            } elseif (TelegramService::isUserSubscribedOnBot($errorMessage)) {
+                Yii::info(VarDumper::dumpAsString([
+                    'message' => $errorMessage,
+                    'userId' => $this->user_id,
+                ]), 'info\TelegramJob:execute:catch');
+
+                UserProfile::removeTelegramUser((int) $this->user_id);
+
+                Notifications::createAndPublish(
+                    $this->user_id,
+                    'Telegram bot was changed',
+                    'Please try to subscribe to new Telegram Bot',
                     Notifications::TYPE_INFO
                 );
             } else {

@@ -201,7 +201,9 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                         'contentOptions' => ['class' => 'text-right'],
                         'format' => 'currency'
                     ],
-
+                    [
+                        'attribute' => 'agent_processing_fee'
+                    ],
                     [
                         'attribute' => 'created',
                         'value' => function (\common\models\QuotePrice $model) {

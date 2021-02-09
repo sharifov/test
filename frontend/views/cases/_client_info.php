@@ -10,7 +10,10 @@ use sales\auth\Auth;
 
 /* @var $this yii\web\View */
 /* @var $caseModel \sales\entities\cases\Cases */
-/* @var $isAdmin boolean */
+/**
+ * @var $isAdmin boolean
+ * @var $unsubscribedEmails array
+ */
 ?>
 
     <div class="x_panel">
@@ -140,7 +143,6 @@ use sales\auth\Auth;
                                 [
                                     'label' => 'Phones',
                                     'value' => function (\common\models\Client $model) {
-
                                         $phones = $model->clientPhones;
                                         $data = [];
                                         if ($phones) {
@@ -160,15 +162,15 @@ use sales\auth\Auth;
 
                                 [
                                     'label' => 'Emails',
-                                    'value' => function (\common\models\Client $model) {
-
+                                    'value' => function (\common\models\Client $model) use ($unsubscribedEmails) {
                                         $emails = $model->clientEmails;
                                         $data = [];
                                         if ($emails) {
                                             foreach ($emails as $k => $email) {
+                                                $unsubscribedIcon = in_array($email->email, $unsubscribedEmails) ? ' <i title="Unsubscribed" class="fa fa-bell-slash"></i>' : '';
                                                 $data[] = '<i class="fa fa-envelope"></i> 
                                                            <code class="' . $email::getEmailTypeTextDecoration($email->type) . '"
-                                                                 title="' . $email::getEmailType($email->type) . '">' . Html::encode($email->email) . '</code> ' . $email::getEmailTypeLabel($email->type);
+                                                                 title="' . $email::getEmailType($email->type) . '">' . Html::encode($email->email) . '</code> ' . $email::getEmailTypeLabel($email->type) . $unsubscribedIcon;
                                             }
                                         }
 

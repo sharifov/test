@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <div class="lead-index">
 
-    <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+    <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]);?>
 
     <?= $this->render('_search_sold', ['model' => $searchModel]); ?>
 <p>
@@ -153,7 +153,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'header' => 'Client',
             'format' => 'raw',
             'value' => static function (\common\models\Lead $model) use ($isAgent) {
-
                 if ($model->client) {
                     $clientName = $model->client->first_name . ' ' . $model->client->last_name;
                     if ($clientName === 'Client Name') {
@@ -288,7 +287,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'attribute' => 'last_ticket_date',
             'value' => static function (Lead $model) {
 //                return ($model->appliedQuote && $model->appliedQuote->last_ticket_date) ? Yii::$app->formatter->asDate($model->appliedQuote->last_ticket_date) : '-';
-                return ( $model->leadFlowSold && $model->leadFlowSold->created ) ? Yii::$app->formatter->asDatetime(strtotime($model->leadFlowSold->created)) : '';
+                return ($model->leadFlowSold && $model->leadFlowSold->created) ? Yii::$app->formatter->asDatetime(strtotime($model->leadFlowSold->created)) : '';
             },
             //'format' => 'datetime',
             'filter' => DatePicker::widget([

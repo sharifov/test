@@ -1,5 +1,6 @@
 <?php
 
+use sales\helpers\call\CallHelper;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -28,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <div class="col-md-6">
         <?php if ($model->recordingUrl) :?>
-            <audio controls="controls" controlsList="nodownload" style="width: 100%;"><source src="<?=$model->recordingUrl?>" type="audio/mpeg"></>
+            <?= CallHelper::displayAudioTag($model->recordingUrl, ['style' => 'width: 100%']) ?>
         <?php endif;?>
 
         <?= DetailView::widget([

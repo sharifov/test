@@ -384,7 +384,8 @@ class CommunicationController extends ApiBaseController
                     $call_dep_id,
                     $call_source_id,
                     false,
-                    $call_language_id
+                    $call_language_id,
+                    $departmentPhone->dpp_priority
                 );
 
                 if ($departmentPhone->dugUgs) {
@@ -444,7 +445,9 @@ class CommunicationController extends ApiBaseController
                         $upp->upp_project_id,
                         $call_dep_id,
                         null,
-                        $callFromInternalPhone
+                        $callFromInternalPhone,
+                        null,
+                        Call::DEFAULT_PRIORITY_VALUE
                     );
                     $callModel->c_source_type_id = Call::SOURCE_DIRECT_CALL;
 
@@ -1058,12 +1061,22 @@ class CommunicationController extends ApiBaseController
      * @param int|null $call_dep_id
      * @param int|null $call_source_id
      * @param bool $callFromInternalPhone
-     * @param string|null $call_language_id
+     * @param string|null $callLanguageId
+     * @param int $priority
      * @return Call
      * @throws \Exception
      */
-    protected function findOrCreateCall(string $callSid, ?string $parentCallSid, array $calData, int $call_project_id, ?int $call_dep_id, ?int $call_source_id = null, bool $callFromInternalPhone = false, ?string $callLanguageId = null): Call
-    {
+    protected function findOrCreateCall(
+        string $callSid,
+        ?string $parentCallSid,
+        array $calData,
+        int $call_project_id,
+        ?int $call_dep_id,
+        ?int $call_source_id,
+        bool $callFromInternalPhone,
+        ?string $callLanguageId,
+        int $priority
+    ): Call {
         $call = null;
         $parentCall = null;
         $clientPhone = null;
@@ -1155,6 +1168,7 @@ class CommunicationController extends ApiBaseController
 //            }
 
             $call->c_recording_disabled = (bool)($calData['call_recording_disabled'] ?? false);
+            $call->setDataPriority($priority);
 
             if (!$call->save()) {
                 \Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:findOrCreateCall:Call:save');

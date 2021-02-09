@@ -210,6 +210,25 @@ use yii\widgets\ActiveForm;
         </div>
     </div>
 
+    <div class="row">
+        <div class="col-md-6">
+            <h2><i class="fa fa-list"></i> Show Additional fields</h2>
+            <?= $form->field($model, 'showFields')->widget(Select2::class, [
+                'data' => $model->getViewFields(),
+                'size' => Select2::SIZE_SMALL,
+                'pluginOptions' => [
+                    'closeOnSelect' => false,
+                    'allowClear' => true,
+                ],
+                'options' => [
+                    'placeholder' => 'Choose additional fields...',
+                    'multiple' => true,
+                    'id' => 'showFields',
+                ],
+            ])->label(false) ?>
+        </div>
+    </div>
+
     <div class="form-group text-center">
         <?= Html::submitButton('<i class="fa fa-search"></i> Search cases', ['class' => 'btn btn-primary']) ?>
         <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset form', ['cases/index'], ['class' => 'btn btn-warning']) ?>

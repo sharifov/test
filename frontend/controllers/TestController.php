@@ -109,6 +109,7 @@ use sales\entities\cases\CaseCategory;
 use sales\events\lead\LeadCreatedByApiEvent;
 use sales\forms\api\communication\voice\finish\FinishForm;
 use sales\forms\api\communication\voice\record\RecordForm;
+use sales\model\airportLang\service\AirportLangService;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatForm\entity\ClientChatForm;
 use sales\model\clientChatForm\helper\ClientChatFormTranslateHelper;
@@ -196,6 +197,7 @@ use yii\base\Event;
 use yii\caching\DbDependency;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
@@ -917,10 +919,10 @@ class TestController extends FController
     {
         $job = new ReceiveEmailsJob();
 
-        $job->last_email_id = 18964;
+        $job->last_email_id = 1635;
 
         $data = [
-            'last_email_id' => 18964,
+            'last_email_id' => 1635,
             'run_all' => 'ok',
         ];
 
@@ -929,9 +931,7 @@ class TestController extends FController
         /** @var Queue $queue */
         $queue = \Yii::$app->queue_email_job;
 
-        $queue->push($job);
-
-        return 'ok';
+        return $queue->push($job);
     }
 
     public function actionCallTimer()

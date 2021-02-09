@@ -48,6 +48,14 @@ return [
         'pattern' => 'cases/ajax-refresh-sale-info/<caseId>/<caseSaleId>',
         'route' => 'cases/ajax-refresh-sale-info'
     ],
+    [
+        'pattern' => 'call/record/<callSid>',
+        'route' => 'call/record'
+    ],
+    [
+        'pattern' => 'conference/record/<conferenceSid>',
+        'route' => 'conference/record'
+    ],
 
     [
         'pattern' => 'take/<gid>',
@@ -107,6 +115,9 @@ return [
         'pattern' => '/',
         'route' => 'site/index',
     ],
-
+    [
+        'pattern' => 'queue/alternative',
+        'route' => 'lead/alternative',
+    ],
 
 ];

@@ -1,6 +1,7 @@
 <?php
 
 use sales\formatters\client\ClientTimeFormatter;
+use sales\helpers\call\CallHelper;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 //use kartik\grid\GridView;
@@ -757,7 +758,9 @@ $duration = 10;
             'rowOptions' => function (\common\models\Call $model, $index, $widget, $grid) {
                 if ($model->isStatusBusy() || $model->isStatusNoAnswer()) {
                     return ['class' => 'danger'];
-                } elseif ($model->isStatusRinging() || $model->isStatusQueue()) {
+                }
+
+                if ($model->isStatusRinging() || $model->isStatusQueue()) {
                     return ['class' => 'warning'];
                 }
             },
@@ -811,7 +814,7 @@ $duration = 10;
                 [
                     'attribute' => 'c_recording_url',
                     'value' => static function (\common\models\Call $model) {
-                        return  $model->recordingUrl ? '<audio controls="controls" controlsList="nodownload" style="width: 350px; height: 25px"><source src="' . $model->recordingUrl . '" type="audio/mpeg"> </audio>' : '-';
+                        return $model->recordingUrl ? CallHelper::displayAudioBtn($model->recordingUrl, 'i:s', $model->c_recording_duration) : '-';
                     },
                     'format' => 'raw'
                 ],

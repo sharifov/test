@@ -1,6 +1,7 @@
 <?php
 
 use kartik\select2\Select2;
+use sales\auth\Auth;
 use sales\model\clientChat\dashboard\FilterForm;
 use sales\model\clientChat\dashboard\GroupFilter;
 use sales\model\clientChat\entity\ClientChat;
@@ -46,7 +47,7 @@ use yii\web\JsExpression;
                             'size' => Select2::SIZE_SMALL,
                             'pluginEvents' => [
                                 'change' => new \yii\web\JsExpression('function (e) {
-                                        window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
+                                        window.refreshClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
                                     }'),
                             ],
                             'pluginOptions' => [
@@ -70,7 +71,7 @@ use yii\web\JsExpression;
                             'size' => Select2::SIZE_SMALL,
                             'pluginEvents' => [
                                 'change' => new \yii\web\JsExpression('function (e) {
-                                    window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
+                                    window.refreshClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
                                 }'),
                             ],
                             'pluginOptions' => [
@@ -120,7 +121,7 @@ use yii\web\JsExpression;
                             ],
                             'pluginEvents' => [
                                 'change' => new \yii\web\JsExpression('function (e) {
-                                    window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
+                                    window.refreshClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
                                 }'),
                             ],
                         ]); ?>
@@ -135,7 +136,7 @@ use yii\web\JsExpression;
                             'size' => Select2::SIZE_SMALL,
                             'pluginEvents' => [
                                 'change' => new \yii\web\JsExpression('function (e) {
-                                        window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
+                                        window.refreshClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
                                     }'),
                             ],
                             'pluginOptions' => [
@@ -185,14 +186,14 @@ use yii\web\JsExpression;
                                         $("#filterform-rangedate-start").val(picker.startDate.format(format));
                                         $("#filterform-rangedate-end").val(picker.endDate.format(format));
                                     } 
-                                    window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
+                                    window.refreshClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
                                 }'),
                                 'cancel.daterangepicker' => new JsExpression('function(ev, picker) {
                                     $(".range-value").val("");
                                     $(".kv-drp-container input").each(function() {
                                         $(this).val("");
                                     });
-                                    window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
+                                    window.refreshClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
                                 }'),
                             ],
                         ]); ?>
@@ -208,7 +209,7 @@ use yii\web\JsExpression;
                             'size' => Select2::SIZE_SMALL,
                             'pluginEvents' => [
                                 'change' => new \yii\web\JsExpression('function (e) {
-                                        window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
+                                        window.refreshClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
                                     }'),
                             ],
                             'pluginOptions' => [
@@ -233,12 +234,27 @@ use yii\web\JsExpression;
                                 'id' => Html::getInputId($filter, 'clientName'),
                                 'class' => 'form-control',
                                 'autocomplete' => 'off',
-                                'onchange' => new JsExpression('window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");'),
+                                'onchange' => new JsExpression('window.refreshClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");'),
                             ]
                         ) ?>
                     </div>
                 <?php endif; ?>
 
+                <?php if ($filter->permissions->canClientEmail()) : ?>
+                    <div class="col-md-12">
+                        <?php echo Html::label('Client Email:', null, ['class' => 'control-label']); ?>
+                        <?php echo Html::textInput(
+                            Html::getInputName($filter, 'clientEmail'),
+                            $filter->clientEmail,
+                            [
+                                'id' => Html::getInputId($filter, 'clientEmail'),
+                                'class' => 'form-control',
+                                'autocomplete' => 'off',
+                                'onchange' => new JsExpression('window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");'),
+                            ]
+                        ) ?>
+                    </div>
+                <?php endif; ?>
             </div>
 
         <?php endif; ?>
@@ -296,8 +312,52 @@ use yii\web\JsExpression;
                         <span class="sr-only">Toggle Dropdown</span>
                     </button>
                     <div class="dropdown-menu">
-                        <?= \yii\helpers\Html::a('<i class="fa fa-edit text-warning"></i> Multiple update', null, ['class' => 'dropdown-item btn-multiple-update'])?>
-<!--                        <div class="dropdown-divider"></div>-->
+                        <p>
+                            <?php echo
+                                Html::a(
+                                    '<i class="fa fa-edit text-warning"></i> Multiple update status',
+                                    null,
+                                    ['class' => 'dropdown-item btn-multiple-update',
+                                        'data' => [
+                                            'url' => Url::to(['client-chat/ajax-multiple-update']),
+                                            'title' => 'Multiple update status',
+                                        ],
+                                    ]
+                                )
+                            ?>
+                        </p>
+                        <?php if (Auth::can('client-chat/multiple/assign/manage')) : ?>
+                            <p>
+                                <?php echo
+                                    Html::a(
+                                        '<i class="fa fa-user text-success"></i> Multiple Assign Chats',
+                                        null,
+                                        ['class' => 'dropdown-item btn-multiple-update',
+                                            'data' => [
+                                                'url' => Url::to(['client-chat/ajax-multiple-assign']),
+                                                'title' => 'Assign Chats',
+                                            ],
+                                        ]
+                                    )
+                                ?>
+                            </p>
+                        <?php endif ?>
+                        <?php if (Auth::can('client-chat/multiple/archive/manage')) : ?>
+                            <p>
+                                <?php echo
+                                    Html::a(
+                                        '<i class="fa fa-times-circle text-danger"></i> Multiple Close Chats',
+                                        null,
+                                        ['class' => 'dropdown-item btn-multiple-update',
+                                            'data' => [
+                                                'url' => Url::to(['client-chat/ajax-multiple-close']),
+                                                'title' => 'Close Chats',
+                                            ],
+                                        ]
+                                    )
+                                ?>
+                            </p>
+                        <?php endif ?>
                     </div>
                 </div>
             </div>

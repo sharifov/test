@@ -39,6 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->etpDep ? $model->etpDep->dep_name : '-';
                 },
             ],
+            'etp_ignore_unsubscribe:boolean',
             [
                 'attribute' => 'etp_updated_user_id',
                 'value' => static function (\common\models\EmailTemplateType $model) {
