@@ -34,19 +34,39 @@ $this->title = 'Realtime Call Map';
     }
 
     .list-move {
-        transition: transform 0.8s;
+        transition: transform 1.1s;
     }
 
     .list-item {
         display: inline-block;
     }
     .list-enter-active, .list-leave-active {
-        transition: all 0.4s;
+        transition: all 2.4s;
     }
     .list-enter, .list-leave-to {
         opacity: 0;
-        /*transform: translateY(30px);*/
+        transform: translateX(200px);
     }
+
+
+    .list2-move {
+        transition: transform 1.4s;
+        /*opacity: 1;*/
+        /*transition: opacity 2s ease-in-out;*/
+    }
+
+    .list2-item {
+        display: inline-block;
+    }
+    .list2-enter-active, .list2-leave-active {
+        transition: all 2.1s;
+    }
+    .list2-enter, .list2-leave-to {
+        opacity: 0;
+        transform: translateX(200px);
+    }
+
+
 
     .fade-enter-active, .fade-leave-active {
         transition: opacity .2s;
@@ -235,7 +255,7 @@ $this->title = 'Realtime Call Map';
         <div class="col-md-5">
             <div class="card card-default">
                 <div class="card-header"> All Calls RINGING, in PROGRESS, DELAY, HOLD ({{ callList2.length }})</div>
-                <transition-group name="list" tag="div" class="card-body row">
+                <transition-group name="list2" tag="div" class="card-body row">
                     <div v-for="(item, index) in callList2" class="list-item col-md-12" :key="item">
                         <call-item-component :item="item" :key="item.с_id" :index="index"></call-item-component>
                     </div>
@@ -286,7 +306,7 @@ centrifuge.on('connect', function(ctx){
         } else if (jsonData.object === 'call') {
             //callMapApp.addCall(jsonData.data.call);
             //let data = JSON.parse(jsonData.data);
-            callMapApp.addCall(jsonData.data.call);
+            callMapApp.actionCall(jsonData.data.call);
         } 
         //console.log(message);
     });

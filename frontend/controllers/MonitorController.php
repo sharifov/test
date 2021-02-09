@@ -115,12 +115,16 @@ class MonitorController extends FController
 
         $response['userTimeZone'] = Auth::user()->timezone ?: 'UTC';
 
-        $response['isAdmin'] = $isAdmin;
-        $departments = UserDepartment::find()->usersByDep(ArrayHelper::getColumn($departments, 'dep_id'))->asArray()->all();
-        $projects = ProjectEmployeeAccess::find()->usersByProject(ArrayHelper::getColumn($projects, 'id'))->asArray()->all();
+        $response['userDepartments'] = ArrayHelper::getColumn($departments, 'dep_id');
+        $response['userProjects'] = ArrayHelper::getColumn($projects, 'id');
 
-        $response['userAccessDepartments'] = ArrayHelper::getColumn($departments, 'ud_user_id');
-        $response['userAccessProjects'] = ArrayHelper::getColumn($projects, 'employee_id');
+        $response['isAdmin'] = $isAdmin;
+        $usersAccessDepartments = UserDepartment::find()->usersByDep($response['userDepartments'])->asArray()->all();
+        $userAccessProjects = ProjectEmployeeAccess::find()->usersByProject($response['userProjects'])->asArray()->all();
+
+        $response['userAccessDepartments'] = ArrayHelper::getColumn($usersAccessDepartments, 'ud_user_id');
+        $response['userAccessProjects'] = ArrayHelper::getColumn($userAccessProjects, 'employee_id');
+
 
         $response['accessCallSourceType'] = [Call::SOURCE_GENERAL_LINE, Call::SOURCE_REDIRECT_CALL];
         $response['accessCallType'] = [Call::CALL_TYPE_IN];

@@ -342,7 +342,9 @@ var callMapApp = Vue.createApp({
             userAccessDepartments: [],
             userAccessProjects: [],
             accessCallSourceType: [],
-            accessCallType: []
+            accessCallType: [],
+            userDepartments: [],
+            userProjects: []
         };
     },
     created() {
@@ -460,6 +462,10 @@ var callMapApp = Vue.createApp({
                     return false;
                 }
 
+                if (!this.isAdmin && (!this.userDepartments.includes(callData.c_dep_id) || !this.userProjects.includes(callData.c_project_id))) {
+                    return false;
+                }
+
                 this.callList = [callData, ...this.callList];
             }
             //this.callList.push(callData);
@@ -501,6 +507,8 @@ var callMapApp = Vue.createApp({
                     this.userAccessProjects = response.data.userAccessProjects;
                     this.accessCallSourceType = response.data.accessCallSourceType;
                     this.accessCallType = response.data.accessCallType;
+                    this.userDepartments = response.data.userDepartments;
+                    this.userProjects = response.data.userProjects;
                 })
                 .catch(error => {
                     console.log(this.callUserAccessStatusTypeList);
@@ -535,13 +543,9 @@ var callMapApp = Vue.createApp({
             if (data && data.cua_call_id) {
                 let call = this.callFind(data.cua_call_id);
                 if (call) {
-                    //let userAccess = this.userAccessFind(call.userAccessList, data.cua_user_id);
-                    //console.log(data);
-                    //console.info(call.userAccessList[0]);
                     let index = this.userAccessFindIndex(call.userAccessList, data.cua_user_id);
                     if (index > -1) {
                         call.userAccessList[index] = data;
-                        //  }
                     } else {
                         call.userAccessList = [data, ...call.userAccessList];
                     }

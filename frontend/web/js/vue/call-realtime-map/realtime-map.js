@@ -78,26 +78,13 @@ const callItemComponent = {
     data() {
         return {
             show: true,
-            showStatusList: [1, 2, 3, 4, 10, 12],
             userAccessList2: []
         }
     },
-    created() {
-        // this.show = true;
-        /*if (this.showStatusList.includes(this.item.c_status_id)) {
-            this.show = true;
-        } else {
-            this.show = false;
-        }*/
-    },
-    updated() {
-        if (this.showStatusList.includes(this.item.c_status_id)) {
-            this.show = true;
-        } else {
-            //this.show = false;
-            this.removeElement(this.item.c_id);
-        }
-    },
+    // created() {
+    // },
+    // updated() {
+    // },
     computed: {
         projectName() {
             return this.$root.getProjectName(this.item.c_project_id)
@@ -193,21 +180,6 @@ const callItemComponent = {
             return ''
         },
 
-        // "callStatusList": {
-        //     "1": "IVR",
-        //     "2": "Queued",
-        //     "3": "Ringing",
-        //     "4": "In progress",
-        //     "5": "Completed",
-        //     "6": "Busy",
-        //     "7": "No answer",
-        //     "8": "Failed",
-        //     "9": "Canceled",
-        //     "10": "Delay",
-        //     "11": "Declined",
-        //     "12": "Hold"
-        // },
-
         // "callTypeList": {
         //     "1": "Outgoing",
         //     "2": "Incoming",
@@ -226,8 +198,21 @@ var callMapApp = Vue.createApp({
         'userComponent': userComponent
     },
     data() {
+        // STATUS_IVR            = 1;
+        // STATUS_QUEUE          = 2;
+        // STATUS_RINGING        = 3;
+        // STATUS_IN_PROGRESS    = 4;
+        // STATUS_COMPLETED      = 5;
+        // STATUS_BUSY           = 6;
+        // STATUS_NO_ANSWER      = 7;
+        // STATUS_FAILED         = 8;
+        // STATUS_CANCELED       = 9;
+        // STATUS_DELAY          = 10;
+        // STATUS_DECLINED       = 11;
+        // STATUS_HOLD           = 12;
         return {
             userTimeZone: 'UTC',
+            showStatusList: [1, 2, 3, 4, 10, 12],
             projectList: [],
             depList: [],
             userList: [],
@@ -305,6 +290,21 @@ var callMapApp = Vue.createApp({
             })
         },
 
+        getCallListNotInByStatusId(statusList) {
+            return this.callList.filter(function (item) {
+                let exist = false;
+                if (item.c_status_id) {
+                    let statusId = parseInt(item.c_status_id)
+                    if (statusList.includes(statusId)) {
+                        exist = true;
+                    }
+                }
+                if (!exist) {
+                    return item
+                }
+            })
+        },
+
         userOnlineFindIndex(userId) {
             let index = -1
             userId = parseInt(userId)
@@ -322,7 +322,8 @@ var callMapApp = Vue.createApp({
             if (index > -1) {
                 return this.updateUserOnline(data);
             }
-            this.onlineUserList = [data, ...this.onlineUserList];
+            //this.onlineUserList = [data, ...this.onlineUserList];
+            this.onlineUserList.push(data)
             //this.callList.push(callData);
         },
 
@@ -374,15 +375,39 @@ var callMapApp = Vue.createApp({
         },
 
 
+        findCallById(id) {
+            id = parseInt(id)
+            return this.callList ? this.callList.find(item => parseInt(item.c_id) === id) : null
+        },
+        findCallIndexById(id) {
+            let index = -1
+            id = parseInt(id)
+            if (this.callList) {
+                index = this.callList.findIndex(item => parseInt(item.c_id) === id)
+            }
+            return index
+        },
         removeCall(index) {
             this.callList.splice(index, 1);
         },
-        addCall(callData) {
-            if (this.callList.find(x => x.c_id === callData.c_id)) {
-                return this.updateCall(callData);
+        actionCall(callData) {
+            if (this.callList.find(x => parseInt(x.c_id) === parseInt(callData.c_id))) {
+                if (this.showStatusList.includes(callData.c_status_id)) {
+                    return this.updateCall(callData);
+                } else {
+                    this.removeCall(this.findCallIndexById(callData.c_id));
+                    return false;
+                }
             }
-            this.callList = [callData, ...this.callList];
-            //this.callList.push(callData);
+
+            if (this.showStatusList.includes(callData.c_status_id)) {
+                this.addCall(callData);
+            }
+        },
+        addCall(callData) {
+            this.callList.push(callData);
+            //this.callList = [callData, ...this.callList];
+            //this.callList = [...this.callList, callData];
         },
         updateCall(callData) {
             this.callList = this.callList.map((x) => {
