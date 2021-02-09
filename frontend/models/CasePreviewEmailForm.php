@@ -37,6 +37,8 @@ use yii\base\Model;
 
 class CasePreviewEmailForm extends Model
 {
+    public const SCENARIO_SEND_EMAIL = 'send_email';
+
     public $e_case_id;
     public $e_email_from;
     public $e_email_to;
@@ -96,9 +98,9 @@ class CasePreviewEmailForm extends Model
             [['e_email_tpl_id'], 'exist', 'skipOnError' => true, 'targetClass' => EmailTemplateType::class, 'targetAttribute' => ['e_email_tpl_id' => 'etp_id']],
             ['keyCache', 'safe'],
 
-            ['files', IsArrayValidator::class],
-            ['files', 'each', 'rule' => ['integer'], 'skipOnError' => true, 'skipOnEmpty' => true],
-            ['files', 'each', 'rule' => ['in', 'range' => array_keys($this->getFileList()), 'skipOnEmpty' => true], 'skipOnError' => true, 'skipOnEmpty' => true],
+            ['files', IsArrayValidator::class, 'on' => self::SCENARIO_SEND_EMAIL],
+            ['files', 'each', 'rule' => ['integer'], 'skipOnError' => true, 'skipOnEmpty' => true, 'on' => self::SCENARIO_SEND_EMAIL],
+            ['files', 'each', 'rule' => ['in', 'range' => array_keys($this->getFileList()), 'skipOnEmpty' => true], 'skipOnError' => true, 'skipOnEmpty' => true, 'on' => self::SCENARIO_SEND_EMAIL],
         ];
     }
 
