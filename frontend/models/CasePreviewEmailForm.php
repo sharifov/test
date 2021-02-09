@@ -96,9 +96,9 @@ class CasePreviewEmailForm extends Model
             [['e_email_tpl_id'], 'exist', 'skipOnError' => true, 'targetClass' => EmailTemplateType::class, 'targetAttribute' => ['e_email_tpl_id' => 'etp_id']],
             ['keyCache', 'safe'],
 
-//            ['files', IsArrayValidator::class],
-//            ['files', 'each', 'rule' => ['integer'], 'skipOnError' => true, 'skipOnEmpty' => true],
-//            ['files', 'each', 'rule' => ['in', 'range' => array_keys($this->getFileList())], 'skipOnError' => true, 'skipOnEmpty' => true],
+            ['files', IsArrayValidator::class],
+            ['files', 'each', 'rule' => ['integer'], 'skipOnError' => true, 'skipOnEmpty' => true],
+            ['files', 'each', 'rule' => ['in', 'range' => array_keys($this->getFileList()), 'skipOnEmpty' => true], 'skipOnError' => true, 'skipOnEmpty' => true],
         ];
     }
 
