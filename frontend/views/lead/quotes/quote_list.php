@@ -28,16 +28,18 @@ use yii\widgets\Pjax;
         <h2><i class="fa fa-folder-o"></i> Quotes</h2>
         <ul class="nav navbar-right panel_toolbox">
             <?php if ($leadForm->mode !== $leadForm::VIEW_MODE || $is_manager) : ?>
-            <li>
-                <?=Html::a('<i class="fa fa-search warning"></i> Quote Search', null, ['class' => '', 'id' => 'search-quotes-btn', 'data-url' => Url::to(['quote/ajax-search-quotes', 'leadId' => $leadForm->getLead()->id])])?>
-            </li>
-            <li>
                 <?php if ($lead->leadFlightSegmentsCount) :?>
+                <li>
+                    <?=Html::a('<i class="fa fa-search warning"></i> Quote Search', null, ['class' => '', 'id' => 'search-quotes-btn', 'data-url' => Url::to(['quote/ajax-search-quotes', 'leadId' => $leadForm->getLead()->id])])?>
+                </li>
+                <li>
                     <?=Html::a('<i class="fa fa-search warning"></i> Quick Search', null, ['class' => '', 'id' => 'quick-search-quotes-btn', 'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id])])?>
+                </li>
                 <?php else : ?>
+                <li>
                     <span class="badge badge-warning"><i class="fa fa-warning"></i> Warning: Flight Segments is empty!</span>
+                </li>
                 <?php endif; ?>
-            </li>
                 <?php if (!$lead->client->isExcluded()) : ?>
                 <li>
                     <?= Html::a('<i class="fa fa-plus-circle success"></i> Add Quote', null, ['class' => 'add-clone-alt-quote', 'data-uid' => 0, 'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0])])?>

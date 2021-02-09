@@ -8,6 +8,7 @@ use common\models\Lead;
 use common\models\Notifications;
 use common\models\Quote;
 use common\models\QuotePrice;
+use frontend\helpers\JsonHelper;
 use frontend\helpers\QuoteHelper;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
 use PhpParser\Node\Expr\Empty_;
@@ -115,6 +116,8 @@ class QuoteController extends FController
                     $quotes = SearchService::getOnlineQuotes($lead);
                     if ($quotes && !empty($quotes['data']) && empty($quotes['error'])) {
                         \Yii::$app->cacheFile->set($keyCache, $quotes = QuoteHelper::formatQuoteData($quotes['data']), 600);
+                    } else {
+                        throw new \RuntimeException(!empty($quotes['error']) ? JsonHelper::decode($quotes['error'])['Message'] : 'No search results');
                     }
                 }
 
