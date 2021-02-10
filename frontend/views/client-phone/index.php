@@ -5,7 +5,6 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use dosamigos\datepicker\DatePicker;
 use common\components\grid\DateTimeColumn;
-use sales\helpers\phone\MaskPhoneHelper;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\ClentPhoneSearch */
@@ -45,13 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw'
             ],
             //'client_id',
-            //'phone',
-            [
-                'attribute' => 'phone',
-                'value' => static function (\common\models\ClientPhone $model) {
-                    return MaskPhoneHelper::masking($model->phone);
-                },
-            ],
+            'phone',
             'cp_title',
             [
                 'attribute' => 'type',

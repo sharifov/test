@@ -32,7 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
 </h1>
 <div class="lead-index">
 
-    <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]);?>
+    <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
 
     <div class="row">
         <?php $form = ActiveForm::begin([
@@ -158,6 +158,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'header' => 'Client',
             'format' => 'raw',
             'value' => static function (\common\models\Lead $model) {
+
                 if ($model->client) {
                     $clientName = $model->client->first_name . ' ' . $model->client->last_name;
                     if ($clientName === 'Client Name') {
@@ -170,10 +171,10 @@ $this->params['breadcrumbs'][] = $this->title;
                         $clientName = ClientFormatter::formatExclude($model->client)  . $clientName;
                     }
 
-                    //$str = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
-                    //$str .= $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
+                    $str = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
+                    $str .= $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
 
-                    //$clientName .= '<br>' . $str;
+                    $clientName .= '<br>' . $str;
                 } else {
                     $clientName = '-';
                 }
@@ -348,6 +349,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'template' => '{action}',
             'buttons' => [
                 'action' => function ($url, \common\models\Lead $model, $key) {
+
                     $buttons = '';
 
                     $buttons .= Html::a('<i class="fa fa-search"></i> view', [

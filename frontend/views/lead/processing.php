@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <h1><i class="fa fa-spinner"></i> <?=\yii\helpers\Html::encode($this->title)?></h1>
 <div class="lead-index">
 
-    <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]);?>
+    <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
     <?= $this->render('_search_processing', ['model' => $searchModel]); ?>
 
     <?php
@@ -58,13 +58,14 @@ $this->params['breadcrumbs'][] = $this->title;
             'attribute' => 'created',
             'label' => 'Pending Time',
             'value' => static function (\common\models\Lead $model) {
+
                 $createdTS = strtotime($model->created);
 
                 $diffTime = time() - $createdTS;
                 $diffHours = (int) ($diffTime / (60 * 60));
 
 
-                $str = ($diffHours > 3 && $diffHours < 73) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+                $str = ($diffHours > 3 && $diffHours < 73 ) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
                 $str .= '<br><i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
 
                 return $str;
@@ -114,6 +115,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'header' => 'Client',
             'format' => 'raw',
             'value' => static function (\common\models\Lead $model) {
+
                 if ($model->client) {
                     $clientName = $model->client->first_name . ' ' . $model->client->last_name;
                     if ($clientName === 'Client Name') {
@@ -126,11 +128,11 @@ $this->params['breadcrumbs'][] = $this->title;
                         $clientName = ClientFormatter::formatExclude($model->client)  . $clientName;
                     }
 
-                    $str = '';
-                    //$str = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
-                    //$str .= $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
+                    $str = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
+                    $str .= $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
 
-                    $clientName .= /*'<br>' .*/ $str;
+
+                    $clientName .= '<br>' . $str;
                 } else {
                     $clientName = '-';
                 }

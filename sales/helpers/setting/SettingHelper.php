@@ -115,9 +115,4 @@ class SettingHelper
     {
         return (bool)(\Yii::$app->params['settings']['enable_general_line_priority'] ?? false);
     }
-
-    public static function clientDataPrivacyEnable(): bool
-    {
-        return (bool)(\Yii::$app->params['settings']['client_data_privacy_enabled'] ?? false);
-    }
 }

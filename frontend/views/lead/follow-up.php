@@ -112,11 +112,11 @@ $this->params['breadcrumbs'][] = $this->title;
                         $clientName = ClientFormatter::formatExclude($lead->client)  . $clientName;
                     }
 
-                    $str = '';
-                    //$str = $lead->client && $lead->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($lead->client->clientEmails, 'email', 'email')) . '' : '';
-                    //$str .= $lead->client && $lead->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($lead->client->clientPhones, 'phone', 'phone')) . '' : '';
+                    $str = $lead->client && $lead->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($lead->client->clientEmails, 'email', 'email')) . '' : '';
+                    $str .= $lead->client && $lead->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($lead->client->clientPhones, 'phone', 'phone')) . '' : '';
 
-                    $clientName .= /*'<br>' .*/ $str;
+
+                    $clientName .= '<br>' . $str;
                 } else {
                     $clientName = '-';
                 }

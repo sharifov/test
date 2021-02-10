@@ -3,8 +3,6 @@
 use common\components\grid\DateTimeColumn;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
-use sales\helpers\phone\MaskPhoneHelper;
 
 /* @var $this yii\web\View */
 /* @var $model sales\model\sms\entity\smsDistributionList\SmsDistributionList */
@@ -37,14 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'sdl_com_id',
             'sdl_project_id',
             'sdl_phone_from',
-            //'sdl_phone_to',
-            [
-                'attribute' => 'sdl_phone_to',
-                'value' => static function (SmsDistributionList $model) {
-
-                    return MaskPhoneHelper::masking($model->sdl_phone_to);
-                }
-            ],
+            'sdl_phone_to',
             'sdl_client_id:client',
             'sdl_text:ntext',
             'sdl_start_dt:byUserDateTime',

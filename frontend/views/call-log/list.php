@@ -6,7 +6,6 @@ use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
 use sales\model\callLog\entity\callLog\search\CallLogSearch;
 use common\models\Project;
-use sales\helpers\phone\MaskPhoneHelper;
 
 /**
  * @var $searchModel sales\model\callLog\entity\callLog\search\CallLogSearch
@@ -56,9 +55,6 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'To',
                 'attribute' => 'cl_phone_to',
-                'value' => static function (CallLogSearch $log) {
-                    return MaskPhoneHelper::masking($log->cl_phone_to);
-                }
             ],
             [
                 'attribute' => 'cl_duration',

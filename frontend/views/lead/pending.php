@@ -39,7 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
 
-    <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]);?>
+    <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
 
     <?php
 
@@ -75,13 +75,14 @@ $this->params['breadcrumbs'][] = $this->title;
             'attribute' => 'pending',
             'label' => 'Pending Time',
             'value' => static function (\common\models\Lead $model) {
+
                 $createdTS = strtotime($model->created);
 
                 $diffTime = time() - $createdTS;
                 $diffHours = (int) ($diffTime / (60 * 60));
 
 
-                $str = ($diffHours > 3 && $diffHours < 73) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+                $str = ($diffHours > 3 && $diffHours < 73 ) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
                 $str .= '<br><i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
 
                 return $str;
@@ -97,14 +98,15 @@ $this->params['breadcrumbs'][] = $this->title;
             'header' => 'Request',
             'format' => 'raw',
             'value' => static function (\common\models\Lead $model) {
+
                 $clientName = trim($model->l_client_first_name . ' ' . $model->l_client_last_name);
 
                 if ($clientName) {
                     $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName) . '';
                 }
-                $str = '';
-                //$str = $model->l_client_email ? '<br><i class="fa fa-envelope"></i> ' . $model->l_client_email : '';
-                //$str .= $model->l_client_phone ? '<br><i class="fa fa-phone"></i>' . $model->l_client_phone : '';
+
+                $str = $model->l_client_email ? '<br><i class="fa fa-envelope"></i> ' . $model->l_client_email : '';
+                $str .= $model->l_client_phone ? '<br><i class="fa fa-phone"></i>' . $model->l_client_phone : '';
                 $clientName .= $str;
 
                 return $clientName;
@@ -120,6 +122,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'header' => 'Client',
             'format' => 'raw',
             'value' => static function (\common\models\Lead $model) {
+
                 if ($model->client) {
                     $clientName = trim($model->client->first_name . ' ' . $model->client->last_name);
 
@@ -134,9 +137,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     if ($model->client->isExcluded()) {
                         $clientName = ClientFormatter::formatExclude($model->client)  . $clientName;
                     }
-                    $str = '';
-                    //$str = $model->client->clientEmails ? '<br><i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
-                    //$str .= $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
+
+                    $str = $model->client->clientEmails ? '<br><i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
+                    $str .= $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
 
                     $clientName .= $str;
                 } else {
@@ -253,6 +256,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'header' => 'Depart',
             'value' => static function (\common\models\Lead $model) {
+
                 $segments = $model->leadFlightSegments;
 
                 if ($segments) {
@@ -274,6 +278,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'header' => 'Segments',
             'value' => static function (\common\models\Lead $model) {
+
                 $segments = $model->leadFlightSegments;
                 $segmentData = [];
                 if ($segments) {
@@ -284,7 +289,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 $segmentStr = implode('<br>', $segmentData);
                 return '' . $segmentStr . '';
-            // return $model->leadFlightSegmentsCount ? Html::a($model->leadFlightSegmentsCount, ['lead-flight-segment/index', "LeadFlightSegmentSearch[lead_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0]) : '-' ;
+                // return $model->leadFlightSegmentsCount ? Html::a($model->leadFlightSegmentsCount, ['lead-flight-segment/index', "LeadFlightSegmentSearch[lead_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0]) : '-' ;
             },
             'format' => 'raw',
             //'visible' => ! $isAgent,

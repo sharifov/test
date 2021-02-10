@@ -2,7 +2,6 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-use sales\helpers\email\MaskEmailHelper;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\Email */
@@ -66,7 +65,7 @@ use sales\helpers\email\MaskEmailHelper;
             <div class="col-md-12">
                 From: <strong><i class="fa fa-user"></i></strong>
                 <span><?=Html::encode($model->e_email_from)?></span> To:
-                <i class="fa fa-user"></i> <strong><?=Html::encode(MaskEmailHelper::masking($model->e_email_to))?></strong>
+                <i class="fa fa-user"></i> <strong><?=Html::encode($model->e_email_to)?></strong>
                 <a class="sender-dropdown"><i class="fa fa-chevron-down"></i></a>
                 <?php if ($model->eProject) :?>
                     <span class="label label-info"><?=Html::encode($model->eProject->name)?></span>

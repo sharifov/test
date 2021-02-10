@@ -2,8 +2,6 @@
 
 use common\models\Client;
 use yii\helpers\Html;
-use sales\helpers\email\MaskEmailHelper;
-use sales\helpers\phone\MaskPhoneHelper;
 
 /**
  * @var $this yii\web\View
@@ -33,7 +31,7 @@ use sales\helpers\phone\MaskPhoneHelper;
                 <?php foreach ($phones as $phone) : ?>
                     <span class="_rc-client-phone">
                         <i class="fa fa-phone"> </i>
-                        <code><?= Html::encode(MaskPhoneHelper::masking($phone->phone)) ?></code>
+                        <code><?= Html::encode($phone->phone) ?></code>
                     </span>
                 <?php endforeach; ?>
             </td>
@@ -47,7 +45,7 @@ use sales\helpers\phone\MaskPhoneHelper;
                 <?php foreach ($emails as $email) : ?>
                     <span class="_rc-client-email">
                         <i class="fa fa-envelope"> </i>
-                        <code><?= Html::encode(MaskEmailHelper::masking($email->email)) ?></code>
+                        <code><?= Html::encode($email->email) ?></code>
                     </span>
                 <?php endforeach; ?>
 

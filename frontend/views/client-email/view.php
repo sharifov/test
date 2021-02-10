@@ -3,7 +3,6 @@
 use common\models\ClientEmail;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-use sales\helpers\email\MaskEmailHelper;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\ClientEmail */
@@ -32,14 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'id',
-            //'email:email',
-            [
-                'attribute' => 'email',
-                'value' => static function (\common\models\ClientEmail $model) {
-                    return MaskEmailHelper::masking($model->email);
-                },
-                'format' => 'email'
-            ],
+            'email:email',
             'ce_title',
             [
                 'attribute' => 'client_id',

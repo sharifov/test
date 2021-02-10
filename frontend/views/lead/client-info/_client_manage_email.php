@@ -4,7 +4,6 @@ use common\models\ClientEmail;
 use common\models\Lead;
 use yii\helpers\Url;
 use yii\web\View;
-use sales\helpers\email\MaskEmailHelper;
 
 /**
  * @var $this View
@@ -23,7 +22,7 @@ $unsubscribedEmails = array_column($lead->project->emailUnsubscribes, 'eu_email'
                 <?= ClientEmail::EMAIL_TYPE_ICONS[$email->type] ?? '' ?>
                 <?= in_array($email->email, $unsubscribedEmails) ? '<i title="Unsubscribed" class="fa fa-bell-slash"></i>' : '' ?>
             </td>
-            <td class="<?= ClientEmail::EMAIL_TYPE_TEXT_DECORATION[$email->type] ?? '' ?>"> <?= \yii\helpers\Html::encode(MaskEmailHelper::masking($email->email))?></td>
+            <td class="<?= ClientEmail::EMAIL_TYPE_TEXT_DECORATION[$email->type] ?? '' ?>"> <?= \yii\helpers\Html::encode($email->email)?></td>
 
             <td class="text-right" style="width: 70px">
                 <?php if ($count = $email->countUsersSameEmail()) : ?>

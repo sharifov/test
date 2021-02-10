@@ -6,7 +6,6 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
-use sales\helpers\email\MaskEmailHelper;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\ClientEmailSearch */
@@ -45,14 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw'
             ],
-            //'email:email',
-            [
-                'attribute' => 'email',
-                'value' => static function (\common\models\ClientEmail $model) {
-                    return MaskEmailHelper::masking($model->email);
-                },
-                'format' => 'email'
-            ],
+            'email:email',
             'ce_title',
             'comments:text',
             /*[
