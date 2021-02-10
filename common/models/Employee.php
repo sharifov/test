@@ -392,7 +392,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
-            [['username', 'auth_key', 'password_hash', 'email', 'form_roles', 'full_name', 'nickname', 'nickname_client_chat'], 'required'],
+            [['username', 'auth_key', 'password_hash', 'email', 'form_roles', 'full_name', 'nickname'], 'required'],
             [['password'], 'required', 'on' => self::SCENARIO_REGISTER],
             [['email', 'password', 'username', 'full_name', 'nickname', 'nickname_client_chat'], 'trim'],
             [['password'], 'string', 'min' => 8],
@@ -400,10 +400,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             [['password_hash', 'password_reset_token', 'email', 'nickname_client_chat'], 'string', 'max' => 255],
             [['username', 'full_name', 'nickname'], 'string', 'min' => 3, 'max' => 50],
             [['auth_key'], 'string', 'max' => 32],
-            [['username', 'nickname_client_chat'], 'unique'],
+            [['username'], 'unique'],
             [['email'], 'unique'],
             [['email'], 'email'],
-            /*[['nickname_client_chat'], SlugValidator::class],*/
             ['email', 'filter', 'filter' => 'strtolower', 'skipOnEmpty' => true],
             [['username'], 'match' ,'pattern' => '/^[a-z0-9_\-\.]+$/i', 'message' => 'Username can contain only characters ("a-z", "0-9", "_", "-", ".")'],
             [['make_user_project_params'], 'boolean'],
