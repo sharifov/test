@@ -12,6 +12,8 @@ use sales\model\clientChat\entity\ClientChat;
 /* @var yii\web\View $this */
 /* @var ClientChat|null $clientChat */
 /* @var FilterForm $filter */
+/* @var string $agentToken */
+/* @var string $server */
 
 $userRcAuthToken = UserClientChatDataService::getCurrentAuthToken() ?? '';
 $clientChatId = $clientChat ? $clientChat->cch_id : 0;
@@ -361,11 +363,11 @@ window.loadClientChatData = function (cch_id, data, ref) {
     let chatEl = $('#_rc-' + cch_id);
     let chatIsShowInput = parseInt(chatEl.data('isShowInput'), 10);
     
-    if (!chatEl.length) {
-        $('#_rc-iframe-wrapper').append(data.iframe);
-    } else if (chatEl.length && chatIsShowInput !== data.isShowInput) {
-        chatEl.attr('src', data.iframeSrc);
-    }
+    // if (!chatEl.length) {
+    //     $('#_rc-iframe-wrapper').append(data.iframe);
+    // } else if (chatEl.length && chatIsShowInput !== data.isShowInput) {
+    //     chatEl.attr('src', data.iframeSrc);
+    // }
     
     $('#couch_note_box').html('');
     if (!isClosed) {
@@ -387,7 +389,7 @@ window.loadClientChatData = function (cch_id, data, ref) {
     
     localStorage.setItem('activeChatId', cch_id);
     
-    chatEl.show();
+//    chatEl.show();
     window.removeCcLoadFromIframe();
     
     if(data.message.length) {
@@ -395,6 +397,26 @@ window.loadClientChatData = function (cch_id, data, ref) {
             createNotify('Error', item, 'error');
         });
     }
+}
+
+window.initChatDialog = function (agentToken, server, rid, readonly) {
+  let chatDialogContainer = document.getElementById('chat-dialog');
+  
+  let params = {
+    token: agentToken,
+    server: server,
+    rid: rid,
+    readonly: readonly
+  };
+  
+  if (typeof window.chatDialog === 'function') {
+  console.log('update');
+    window.chatDialog(params);
+  } else {
+    console.log('init');
+    window.chatDialog = window.k.crmChat(chatDialogContainer, params);
+  }
+  
 }
 
 $(document).on('click', '._cc-list-item', function () {
@@ -408,6 +430,7 @@ $(document).on('click', '._cc-list-item', function () {
     currentChatId = cch_id;
     let ownerId = $(this).attr('data-owner-id');
     currentChatOwnerId = ownerId;
+    let rid = $(this).data('rid');
     
     // if (ownerId === userId) {
     //     addChatToActiveConnection();    
@@ -424,10 +447,12 @@ $(document).on('click', '._cc-list-item', function () {
     $('._cc-list-item').removeClass('_cc_active');
     $(ref).addClass('_cc_active');
     
-    let chatEl = $('#_rc-' + cch_id);
-    if (chatEl.length) {
-        chatEl.show();
-    }
+    // let chatEl = $('#_rc-' + cch_id);
+    // if (chatEl.length) {
+    //     chatEl.show();
+    // }
+    
+    window.initChatDialog('$agentToken', '$server', rid, true);
     
     window.refreshChatInfo(cch_id, loadClientChatData, ref, window.socketConnectionId);
     
@@ -1378,6 +1403,9 @@ $(document).on('click', '.js-couch-note-btn', function (e) {
 });
 
 refreshUserSelectedState();
+
+(function(){function b(){var a=document.createElement("script");a.type="text/javascript";a.async=!0;a.src="https://cdn.travelinsides.com/npmstatic/chatapi-dev.min.js";document.getElementsByTagName("head")[0].appendChild(a)}window.k=window.k||{};window.k.livechat=window.k.livechat||{};var c=[];["create","setCustomProps","track","onReady"].forEach(function(a){window.k.livechat[a]=function(){c.push([a,arguments])}});window.k.livechat.queue=c;"complete"===document.readyState?
+b():window.addEventListener("load",b)})();
 JS;
 $this->registerJs($js);
 

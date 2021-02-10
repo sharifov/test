@@ -76,7 +76,9 @@
     position: relative;
     padding-bottom: 10px;
 }
-#_rc-iframe-wrapper ._rc-iframe {
+#_rc-iframe-wrapper ._rc-iframe,
+#chat-dialog
+{
     border: none;
     width: 100%;
     height: calc(100vh - 160px);
@@ -664,4 +666,9 @@
 }
 .client-name-info {
     width: 100%;
+}
+#chat-dialog {
+    width: 100%;
+    height: 100%;
+    background: #e6e6e6;
 }
