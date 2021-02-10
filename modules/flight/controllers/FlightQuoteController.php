@@ -255,6 +255,9 @@ class FlightQuoteController extends FController
 
             $quotes = $form->applyFilters($quotes);
 
+//            print_r($quotes['results'][0]);die;
+
+
             $dataProvider = new ArrayDataProvider([
                 'allModels' => $quotes['results'] ?? [],
                 'pagination' => [
@@ -323,6 +326,14 @@ class FlightQuoteController extends FController
                 if ($quote['key'] === $key) {
                     $selectedQuote = $quote;
                     break;
+                }
+
+                if (isset($quote['ngsItineraries'])) {
+                    foreach ($quote['ngsItineraries'] as $ngsItinerary) {
+                        if ($ngsItinerary['key'] === $key) {
+                            $selectedQuote = $ngsItinerary;
+                        }
+                    }
                 }
             }
 

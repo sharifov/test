@@ -163,7 +163,7 @@ class FlightQuoteHelper
                             foreach ($segment->flightQuoteSegmentPaxBaggages as $baggage) {
                                 if (($baggage->qsb_allow_pieces && $baggage->qsb_allow_pieces > 0)) {
                                     $info = $baggage->qsb_allow_pieces . ' pcs';
-                                } else if ($baggage->qsb_allow_weight) {
+                                } elseif ($baggage->qsb_allow_weight) {
                                     $info = $baggage->qsb_allow_weight . $baggage->qsb_allow_unit;
                                 }
 
@@ -357,7 +357,6 @@ class FlightQuoteHelper
 
     public static function parseDump($string, $validation = true, &$itinerary = [], $onView = false)
     {
-
         if (!empty($itinerary) && $validation) {
             $itinerary = [];
         }
