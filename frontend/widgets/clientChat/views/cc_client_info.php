@@ -4,6 +4,8 @@ use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\client\helpers\ClientFormatter;
 use sales\model\clientChat\entity\ClientChat;
 use yii\helpers\Html;
+use sales\helpers\email\MaskEmailHelper;
+use sales\helpers\phone\MaskPhoneHelper;
 
 /** @var ClientChat $clientChat */
 
@@ -33,7 +35,7 @@ $client = $clientChat->cchClient;
                     <span class="_rc-client-email"> <i class="fa fa-envelope"> </i>
                     <?php foreach ($emails as $key => $email) : ?>
                         <?php $class = (bool) $key ? 'client_info_email' : '' ?>
-                        <code class="<?php echo $class ?>"><?= Html::encode($email->email) ?></code><br />
+                        <code class="<?php echo $class ?>"><?= Html::encode(MaskEmailHelper::masking($email->email)) ?></code><br />
                     <?php endforeach; ?>
                     </span>
                 </div>
@@ -44,7 +46,7 @@ $client = $clientChat->cchClient;
                     <span class="_rc-client-phone"><i class="fa fa-phone"> </i>
                     <?php foreach ($phones as $key => $phone) : ?>
                         <?php $class = (bool) $key ? 'client_info_phone' : '' ?>
-                        <code class="<?php echo $class ?>"><?= Html::encode($phone->phone) ?></code><br />
+                        <code class="<?php echo $class ?>"><?= Html::encode(MaskPhoneHelper::masking($phone->phone)) ?></code><br />
                     <?php endforeach; ?>
                     </span>
                 </div>
