@@ -237,7 +237,7 @@ class HotelQuote extends ActiveRecord implements Quotable
                     $qRoom->hqr_payment_type = $room['paymentType'] ?? null;
                     $qRoom->hqr_board_code = $room['boardCode'] ?? null;
                     $qRoom->hqr_board_name = $room['boardName'] ?? null;
-                    $qRoom->hqr_amount = $room['amount'] - $room['markup'] ?? null;
+                    $qRoom->hqr_amount = $room['amount'] - ($room['markup'] ?? 0);
                     $qRoom->hqr_rate_comments = $qRoom->prepareRateComments($room);
                     $qRoom->hqr_currency = $currency;
                     $qRoom->hqr_service_fee_percent = ProductTypePaymentMethodQuery::getDefaultPercentFeeByProductType($hQuote->hqProductQuote->pqProduct->pr_type_id) ?? (self::SERVICE_FEE * 100);
@@ -253,7 +253,7 @@ class HotelQuote extends ActiveRecord implements Quotable
                     } else {
                         $qRoom->hqr_cancel_amount = $room['cancellationPolicies']['amount'] ?? null;
                     }
-                    if ($room['cancellationPolicies'][0]['from']) {
+                    if (isset($room['cancellationPolicies']) && $room['cancellationPolicies'][0]['from']) {
                         $qRoom->hqr_cancel_from_dt = date("Y-m-d H:i:s", strtotime($room['cancellationPolicies'][0]['from']));
                     } else {
                         $qRoom->hqr_cancel_from_dt = $room['cancellationPolicies']['from'] ?? null;
