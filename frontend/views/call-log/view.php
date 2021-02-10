@@ -2,6 +2,8 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use sales\model\callLog\entity\callLog\CallLog;
+use sales\helpers\phone\MaskPhoneHelper;
 
 /* @var $this yii\web\View */
 /* @var $model sales\model\callLog\entity\callLog\CallLog */
@@ -43,6 +45,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     'cl_duration',
                     'cl_phone_from',
                     'cl_phone_to',
+                    [
+                        'attribute' => 'cl_phone_to',
+                        'value' => static function (CallLog $model) {
+
+                            return MaskPhoneHelper::masking($model->cl_phone_to);
+                        }
+                    ],
                     'phoneList.pl_phone_number',
                     'cl_user_id:userName',
                     'cl_department_id:department',

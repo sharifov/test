@@ -9,6 +9,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
+use sales\helpers\phone\MaskPhoneHelper;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\sms\entity\smsDistributionList\search\SmsDistributionListSearch */
@@ -103,7 +104,14 @@ $gridId = 'sms-grid-id';
                 'filter' => SmsDistributionList::getStatusList()
             ],
             'sdl_phone_from',
-            'sdl_phone_to',
+            //'sdl_phone_to',
+            [
+                'attribute' => 'sdl_phone_to',
+                'value' => static function (SmsDistributionList $model) {
+
+                    return MaskPhoneHelper::masking($model->sdl_phone_to);
+                }
+            ],
             'sdl_client_id:client',
             [
                 'label' => 'Client Name',

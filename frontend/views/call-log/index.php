@@ -8,6 +8,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use yii\web\View;
+use sales\helpers\phone\MaskPhoneHelper;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\callLog\entity\callLog\search\CallLogSearch */
@@ -76,7 +77,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'case'
             ],
             'cl_phone_from',
-            'cl_phone_to',
+            //'cl_phone_to',
+            [
+                'attribute' => 'cl_phone_to',
+                'value' => static function (CallLog $model) {
+
+                    return MaskPhoneHelper::masking($model->cl_phone_to);
+                }
+            ],
             [
                 'class' => \common\components\grid\PhoneSelect2Column::class,
                 'attribute' => 'cl_phone_list_id',
