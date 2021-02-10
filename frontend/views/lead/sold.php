@@ -168,15 +168,15 @@ $this->params['breadcrumbs'][] = $this->title;
                     $clientName = '-';
                 }
 
-                if ($isAgent && Yii::$app->user->id !== $model->employee_id) {
+                /*if ($isAgent && Yii::$app->user->id !== $model->employee_id) {
                     $emails = '- // - // - // -';
                     $phones = '- // - // - // -';
                 } else {
                     $emails = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
                     $phones = $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
-                }
+                }*/
 
-                return $clientName . '<br/>' . $emails . '<br/>' . $phones;
+                return $clientName /*. '<br/>' . $emails . '<br/>' . $phones*/;
             },
             'contentOptions' => [
                 'style' => 'width: 200px;'

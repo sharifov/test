@@ -7,6 +7,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
+use sales\helpers\email\MaskEmailHelper;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\EmailSearch */
@@ -109,7 +110,13 @@ $user = Yii::$app->user->identity;
 //                'format' => 'raw',
 //                'filter' => $projectList
 //            ],
-            'e_email_from',
+            //'e_email_from',
+            [
+                'attribute' => 'e_email_from',
+                'value' => static function (\common\models\Email $model) {
+                    return MaskEmailHelper::masking($model->e_email_from);
+                },
+            ],
             'e_email_to',
 
             'e_lead_id',

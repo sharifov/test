@@ -41,7 +41,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <div class="lead-failed-bookings">
 
-        <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+        <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]);?>
 
         <div class="row">
             <?php if (!$checkShiftTime) : ?>
@@ -141,7 +141,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'header' => 'Client',
                 'format' => 'raw',
                 'value' => static function (\common\models\Lead $model) {
-
                     if ($model->client) {
                         $clientName = $model->client->first_name . ' ' . $model->client->last_name;
                         if ($clientName === 'Client Name') {
@@ -153,9 +152,9 @@ $this->params['breadcrumbs'][] = $this->title;
                         if ($model->client->isExcluded()) {
                             $clientName = ClientFormatter::formatExclude($model->client)  . $clientName;
                         }
-
-                        $str = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
-                        $str .= $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
+                        $str = '';
+                        //$str = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
+                        //$str .= $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
 
                         $clientName .= '<br>' . $str;
                     } else {
@@ -196,7 +195,6 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'header' => 'Depart',
                 'value' => static function (\common\models\Lead $model) {
-
                     $segments = $model->leadFlightSegments;
 
                     if ($segments) {
@@ -218,7 +216,6 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'header' => 'Segments',
                 'value' => static function (\common\models\Lead $model) {
-
                     $segments = $model->leadFlightSegments;
                     $segmentData = [];
                     if ($segments) {
@@ -229,7 +226,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     $segmentStr = implode('<br>', $segmentData);
                     return '' . $segmentStr . '';
-                    // return $model->leadFlightSegmentsCount ? Html::a($model->leadFlightSegmentsCount, ['lead-flight-segment/index', "LeadFlightSegmentSearch[lead_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0]) : '-' ;
+                // return $model->leadFlightSegmentsCount ? Html::a($model->leadFlightSegmentsCount, ['lead-flight-segment/index', "LeadFlightSegmentSearch[lead_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0]) : '-' ;
                 },
                 'format' => 'raw',
                 'visible' => !$user->isAgent(),

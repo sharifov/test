@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use sales\helpers\email\MaskEmailHelper;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\Email */
@@ -47,7 +48,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'e_project_id',
                 'e_email_from:email',
                 'e_email_from_name',
-                'e_email_to:email',
+                //'e_email_to:email',
+                [
+                    'attribute' => 'e_email_to',
+                    'value' => static function (\common\models\Email $model) {
+                        return MaskEmailHelper::masking($model->e_email_to);
+                    },
+                ],
                 'e_email_to_name',
                 'e_email_cc:email',
                 'e_email_bc:email',
