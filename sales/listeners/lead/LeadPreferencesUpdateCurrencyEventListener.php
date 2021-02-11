@@ -2,6 +2,7 @@
 
 namespace sales\listeners\lead;
 
+use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository;
 use modules\product\src\services\ProductQuoteService;
 use sales\events\lead\LeadPreferencesUpdateCurrencyEvent;
 
@@ -35,12 +36,21 @@ class LeadPreferencesUpdateCurrencyEventListener
         $products = $event->leadPreference->lead->products;
         $clientCurrency = $event->leadPreference->prefCurrency;
 
+        $productQuoteOptionRepository = \Yii::createObject(ProductQuoteOptionRepository::class);
+
         if ($products) {
             foreach ($products as $product) {
                 if ($productQuotes = $product->productQuotes) {
                     foreach ($productQuotes as $productQuote) {
                         try {
                             $this->productQuoteService->recountProductQuoteClientPrice($productQuote, $clientCurrency);
+                            $productQuoteOptions = $productQuote->productQuoteOptions;
+                            if ($productQuoteOptions) {
+                                foreach ($productQuoteOptions as $productQuoteOption) {
+                                    $productQuoteOption->calculateClientPrice();
+                                    $productQuoteOptionRepository->save($productQuoteOption);
+                                }
+                            }
                         } catch (\Throwable $e) {
                             \Yii::warning($e->getMessage(), 'LeadPreferencesUpdateCurrencyEventListener::handle::Throwable');
                         }
