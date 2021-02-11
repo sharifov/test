@@ -5,6 +5,7 @@ namespace modules\product\src\guards;
 use modules\product\src\entities\productType\ProductType;
 use modules\flight\FlightModule;
 use modules\hotel\HotelModule;
+use modules\attraction\AttractionModule;
 use modules\product\src\exceptions\ProductCodeException;
 
 class ProductAvailableGuard
@@ -20,6 +21,12 @@ class ProductAvailableGuard
         if ($productTypeId === ProductType::PRODUCT_HOTEL) {
             if (!class_exists(HotelModule::class)) {
                 throw new \DomainException('Product Hotel is unavailable', ProductCodeException::PRODUCT_HOTEL_UNAVAILABLE);
+            }
+            return;
+        }
+        if ($productTypeId === ProductType::PRODUCT_ATTRACTION) {
+            if (!class_exists(AttractionModule::class)) {
+                throw new \DomainException('Product Attraction is unavailable', ProductCodeException::PRODUCT_ATTRACTION_UNAVAILABLE);
             }
             return;
         }

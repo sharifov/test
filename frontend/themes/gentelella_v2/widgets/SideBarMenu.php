@@ -530,6 +530,15 @@ class SideBarMenu extends \yii\bootstrap\Widget
 
         $menuModuleItems = [];
 
+        if (class_exists('\modules\attraction\AttractionModule')) {
+            $menuModuleItems[] = [
+                'label' => 'Attraction module',
+                'url' => 'javascript:',
+                'icon' => 'plane',
+                'items' => \modules\attraction\AttractionModule::getListMenu()
+            ];
+        }
+
         if (class_exists('\modules\flight\FlightModule')) {
             $menuModuleItems[] = [
                 'label' => 'Flight module',

@@ -12,6 +12,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productType\ProductType;
 use modules\flight\models\Flight;
 use modules\hotel\models\Hotel;
+use modules\attraction\models\Attraction;
 use modules\product\src\entities\product\events\ProductCreateEvent;
 use modules\product\src\interfaces\Productable;
 use modules\product\src\useCases\product\create\ProductCreateForm;
@@ -39,6 +40,8 @@ use yii\db\ActiveRecord;
  * @property $pr_market_price
  * @property $pr_client_budget
  *
+ * @property Attraction[] $attractions
+ * @property Attraction $attraction
  * @property Flight[] $flights
  * @property Flight $flight
  * @property Hotel[] $hotels
@@ -98,6 +101,11 @@ class Product extends \yii\db\ActiveRecord implements Serializable
     public function isHotel(): bool
     {
         return $this->pr_type_id === ProductType::PRODUCT_HOTEL;
+    }
+
+    public function isAttraction(): bool
+    {
+        return $this->pr_type_id === ProductType::PRODUCT_ATTRACTION;
     }
 
     public function getChildProduct(): ?Productable
@@ -190,6 +198,15 @@ class Product extends \yii\db\ActiveRecord implements Serializable
         ];
     }
 
+    public function getAttractions(): ActiveQuery
+    {
+        return $this->hasMany(Attraction::class, ['atn_product_id' => 'pr_id']);
+    }
+
+    public function getAttraction(): ActiveQuery
+    {
+        return $this->hasOne(Attraction::class, ['atn_product_id' => 'pr_id'])->orderBy(['atn_id' => SORT_DESC])->limit(1);
+    }
 
     /**
      * @return ActiveQuery

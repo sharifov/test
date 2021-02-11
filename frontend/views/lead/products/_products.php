@@ -82,6 +82,12 @@ JS;
         ]) ?>
     <?php endif; ?>
 
+    <?php if ((int) $product->isAttraction() && $product->attraction) : ?>
+        <?= $this->render('@modules/attraction/views/attraction/partial/_product_attraction', [
+            'product' => $product,
+        ]) ?>
+    <?php endif; ?>
+
 <?php endforeach; ?>
 
 <?php \yii\widgets\Pjax::end()?>
