@@ -145,6 +145,7 @@ JS;
         Cruise "<b><?=\yii\helpers\Html::encode($model->crq_data_json['cruiseLine']['name'])?></b>"
         | <b><?= $model->crq_data_json['ship']['name'] ?></b>
         | "<b><?=\yii\helpers\Html::encode($cruiseProduct->crs_destination_label)?></b>"
+        | <?= date('F j, Y', strtotime($model->crq_data_json['departureDate'])) ?> - <?= date('F j, Y', strtotime($model->crq_data_json['returnDate']))?>
         | <?= ProductQuoteStatus::asFormat($model->productQuote->pq_status_id) ?>
 
         <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $model->productQuote->pq_profit_amount ?>
