@@ -20,4 +20,12 @@ use yii\widgets\DetailView;
             </div>
         </div>
     </div>
+    <div class="row">
+        <div class="col-md-12">
+            <?= $this->render('_view_product_quote_list', [
+                'hotelProduct' => $model,
+                'dataProviderQuotes' => $dataProviderQuotes
+            ]) ?>
+        </div>
+    </div>
 </div>

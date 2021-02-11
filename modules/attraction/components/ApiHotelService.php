@@ -7,7 +7,7 @@
  * Time: 09:50 AM
  */
 
-namespace modules\hotel\components;
+namespace modules\attraction\components;
 
 use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLog;
 use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus;

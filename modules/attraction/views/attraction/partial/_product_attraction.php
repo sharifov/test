@@ -84,7 +84,7 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
 
                         <?= Html::a('<i class="fa fa-search"></i> Search Quotes', null, [
                             'data-url' => \yii\helpers\Url::to([
-                                '/hotel/hotel-quote/search-ajax',
+                                '/attraction/attraction-quote/search-ajax',
                                 'id' => $product->attraction->atn_id
                             ]),
                             'data-hotel-id' => $product->attraction->atn_id,
