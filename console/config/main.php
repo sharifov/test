@@ -35,6 +35,7 @@ return [
                 'modules\qaTask\migrations',
                 'kivork\VirtualCron\Migrations',
                 'modules\rentCar\migrations',
+                'modules\cruise\migrations',
             ],
         ],
 

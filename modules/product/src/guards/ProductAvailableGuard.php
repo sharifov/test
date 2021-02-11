@@ -2,6 +2,7 @@
 
 namespace modules\product\src\guards;
 
+use modules\cruise\CruiseModule;
 use modules\product\src\entities\productType\ProductType;
 use modules\flight\FlightModule;
 use modules\hotel\HotelModule;
@@ -26,7 +27,13 @@ class ProductAvailableGuard
         }
         if ($productTypeId === ProductType::PRODUCT_RENT_CAR) {
             if (!class_exists(RentCarModule::class)) {
-                throw new \DomainException('Product Hotel is unavailable', ProductCodeException::PRODUCT_RENT_CAR_UNAVAILABLE);
+                throw new \DomainException('Product Rent Car is unavailable', ProductCodeException::PRODUCT_RENT_CAR_UNAVAILABLE);
+			}
+			return;
+		}
+        if ($productTypeId === ProductType::PRODUCT_CRUISE) {
+            if (!class_exists(CruiseModule::class)) {
+                throw new \DomainException('Product Cruise is unavailable', ProductCodeException::PRODUCT_CRUISE_UNAVAILABLE);
             }
             return;
         }

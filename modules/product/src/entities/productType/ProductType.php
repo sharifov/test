@@ -32,6 +32,7 @@ class ProductType extends \yii\db\ActiveRecord
     public const PRODUCT_FLIGHT = 1;
     public const PRODUCT_HOTEL  = 2;
     public const PRODUCT_RENT_CAR  = 3;
+    public const PRODUCT_CRUISE = 4;
 
     public const ALLOW_CALL_EXPERT = [
         self::PRODUCT_FLIGHT,

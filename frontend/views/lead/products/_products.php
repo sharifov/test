@@ -84,6 +84,12 @@ JS;
 
     <?php if ((int) $product->isRenTCar() && $product->rentCar) : ?>
         <?= $this->render('@modules/rentCar/views/rent-car/partial/_product_rent_car', [
+        	'product' => $product,
+        ]) ?>
+    <?php endif; ?>
+
+    <?php if ((int) $product->isCruise() && $product->cruise) : ?>
+        <?= $this->render('@modules/cruise/views/cruise/partial/_product_cruise', [
             'product' => $product,
         ]) ?>
     <?php endif; ?>

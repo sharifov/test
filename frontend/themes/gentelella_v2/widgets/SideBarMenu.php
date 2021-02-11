@@ -563,6 +563,15 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 'url' => 'javascript:',
                 'icon' => 'car',
                 'items' => \modules\rentCar\RentCarModule::getListMenu()
+			];
+		}
+
+        if (class_exists('\modules\cruise\CruiseModule')) {
+            $menuModuleItems[] = [
+                'label' => 'Cruise',
+                'url' => 'javascript:',
+                'icon' => 'list',
+                'items' => \modules\cruise\CruiseModule::getListMenu()
             ];
         }
 

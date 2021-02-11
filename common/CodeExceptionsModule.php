@@ -18,4 +18,5 @@ class CodeExceptionsModule
     public const CASES = 21;
     public const CLIENT_CHAT = 22;
     public const RENT_CAR = 23;
+    public const CRUISE = 33;
 }
