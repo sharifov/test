@@ -129,6 +129,7 @@ class ApiHotelService extends Component
         $data['checkIn'] = $checkIn;
         $data['checkOut'] = $checkOut;
         $data['destination'] = $destination;
+        $data['showMarkup'] = true;
 
         if ($rooms) {
             $data['rooms'] = $rooms;

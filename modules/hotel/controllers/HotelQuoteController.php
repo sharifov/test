@@ -112,7 +112,6 @@ class HotelQuoteController extends FController
      */
     public function actionSearchAjax()
     {
-
         $hotelId = (int) Yii::$app->request->get('id');
         $hotel = $this->hotelRepository->find($hotelId);
 
@@ -126,6 +125,9 @@ class HotelQuoteController extends FController
             }
         }
         $hotelList = $result['hotels'] ?? [];
+
+//        echo '<pre>';
+//        print_r($hotelList);die;
 
         $dataProvider = new ArrayDataProvider([
             'allModels' => $hotelList,

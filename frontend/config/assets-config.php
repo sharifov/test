@@ -68,6 +68,7 @@ use lajax\translatemanager\bundles\TranslateAsset;
 use lajax\translatemanager\bundles\TranslateManagerAsset;
 use lajax\translatemanager\bundles\TranslatePluginAsset;
 use lajax\translatemanager\bundles\TranslationPluginAsset;
+use modules\hotel\assets\HotelAsset;
 use unclead\multipleinput\assets\MultipleInputAsset;
 use yii\bootstrap4\BootstrapPluginAsset;
 use yii\grid\GridViewAsset;
@@ -168,7 +169,8 @@ return [
         TranslatePluginAsset::class,
         LajaxLanguageItemPluginAsset::class,
 
-        CronExpressionAssets::class
+        CronExpressionAssets::class,
+        HotelAsset::class
 
 //        MomentAsset::class
     ],
@@ -775,6 +777,14 @@ return [
             'js' => 'cron-expression.min.js',
             'css' => 'cron-expression.min.css',
             'depends' => [ CronExpressionAssets::class ],
+        ],
+        'HotelAsset' => [
+            'class' => HotelAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'hotel-asset.min.js',
+            'css' => 'hotel-asset.min.css',
+            'depends' => [ HotelAsset::class ],
         ]
     ],
 

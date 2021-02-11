@@ -54,7 +54,7 @@ class HotelQuoteSearchService
 
             if (isset($response['data']['hotels'])) {
                 $result = $response['data'];
-                \Yii::$app->cacheFile->set($keyCache, $result, 100);
+                \Yii::$app->cacheFile->set($keyCache, $result, 600);
             } else {
                 $result = [];
                 \Yii::error('Not found response[data][hotels]', 'useCases:api:searchQuote:HotelQuoteSearchService:search');
