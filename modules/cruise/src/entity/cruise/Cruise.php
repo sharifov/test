@@ -101,4 +101,30 @@ class Cruise extends \yii\db\ActiveRecord implements Productable
     {
         return self::find()->byProduct($productId)->limit(1)->one();
     }
+
+    public function getAdults(): int
+    {
+        $count = 0;
+        foreach ($this->cabins as $cabin) {
+            foreach ($cabin->paxes as $pax) {
+                if ($pax->isAdult()) {
+                    $count++;
+                }
+            }
+        }
+        return $count;
+    }
+
+    public function getChildren(): int
+    {
+        $count = 0;
+        foreach ($this->cabins as $cabin) {
+            foreach ($cabin->paxes as $pax) {
+                if ($pax->isChild()) {
+                    $count++;
+                }
+            }
+        }
+        return $count;
+    }
 }

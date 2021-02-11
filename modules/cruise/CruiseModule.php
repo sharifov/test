@@ -55,6 +55,7 @@ class CruiseModule extends \yii\base\Module
             ['label' => 'Request', 'url' => ['/' . $modulePath . '/cruise/index']],
             ['label' => 'Request Cabin', 'url' => ['/' . $modulePath . '/cruise-cabin/index']],
             ['label' => 'Request Cabin Rooms Pax', 'url' => ['/' . $modulePath . '/cruise-cabin-pax/index']],
+            ['label' => 'Quotes', 'url' => ['/' . $modulePath . '/cruise-quote/index']],
 //            ['label' => 'Hotel Quote', 'url' => ['/' . $modulePath . '/hotel-quote/index']],
 //            ['label' => 'Hotel Quote Rooms', 'url' => ['/' . $modulePath . '/hotel-quote-room/index']],
 //            ['label' => 'Hotel Quote Service log', 'url' => ['/' . $modulePath . '/hotel-quote-service-log-crud/index']],

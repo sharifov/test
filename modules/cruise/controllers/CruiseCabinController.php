@@ -180,11 +180,32 @@ class CruiseCabinController extends Controller
                 throw new BadRequestHttpException('Not found this Cruise');
             }
 
+            if ($cruise->cabins) {
+                throw new BadRequestHttpException('Cabin already exist');
+            }
+
             $model->crc_cruise_id = $cruiseId;
         }
 
         return $this->renderAjax('create_ajax_form', [
             'model' => $model,
         ]);
+    }
+
+    public function actionDeleteAjax(): array
+    {
+        $id = Yii::$app->request->post('id');
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        try {
+            $model = $this->findModel($id);
+            if (!$model->delete()) {
+                throw new \Exception('Hotel Cabin (' . $id . ') not deleted', 2);
+            }
+        } catch (\Throwable $throwable) {
+            return ['error' => 'Error: ' . $throwable->getMessage()];
+        }
+
+        return ['message' => 'Successfully cabin room (' . $model->crc_id . ')'];
     }
 }

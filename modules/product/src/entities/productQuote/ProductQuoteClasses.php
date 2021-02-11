@@ -2,6 +2,7 @@
 
 namespace modules\product\src\entities\productQuote;
 
+use modules\cruise\src\entity\cruiseQuote\CruiseQuote;
 use modules\flight\models\FlightQuote;
 use modules\hotel\models\HotelQuote;
 use modules\product\src\entities\productType\ProductType;
@@ -13,6 +14,7 @@ class ProductQuoteClasses
         ProductType::PRODUCT_FLIGHT => FlightQuote::class,
         ProductType::PRODUCT_HOTEL => HotelQuote::class,
         ProductType::PRODUCT_RENT_CAR => RentCarQuote::class,
+        ProductType::PRODUCT_CRUISE => CruiseQuote::class,
     ];
 
     public static function getClass(int $type): string

@@ -50,6 +50,17 @@ class m210210_113136_create_tables_cruise extends Migration
 
         $this->addForeignKey('FK-cruise_cabin_pax-crp_cruise_cabin_id', '{{%cruise_cabin_pax}}', ['crp_cruise_cabin_id'], '{{%cruise_cabin}}', ['crc_id'], 'CASCADE', 'CASCADE');
         $this->createIndex('IND-cruise_cabin_pax-crp_type_id', '{{%cruise_cabin_pax}}', ['crp_type_id']);
+
+        $this->createTable('{{%cruise_quote}}', [
+            'crq_id' => $this->primaryKey(),
+            'crq_hash_key' => $this->string(50),
+            'crq_product_quote_id' => $this->integer(),
+            'crq_cruise_id' => $this->integer(),
+            'crq_data_json' => $this->json(),
+        ], $tableOptions);
+
+        $this->addForeignKey('FK-cruise_quote-crq_product_quote_id', '{{%cruise_quote}}', ['crq_product_quote_id'], '{{%product_quote}}', ['pq_id'], 'CASCADE', 'CASCADE');
+        $this->addForeignKey('FK-cruise_quote-crq_cruise_id', '{{%cruise_quote}}', ['crq_cruise_id'], '{{%cruise}}', ['crs_id'], 'CASCADE', 'CASCADE');
     }
 
     /**
@@ -57,6 +68,7 @@ class m210210_113136_create_tables_cruise extends Migration
      */
     public function safeDown()
     {
+        $this->dropTable('{{%cruise_quote}}');
         $this->dropTable('{{%cruise_cabin_pax}}');
         $this->dropTable('{{%cruise_cabin}}');
         $this->dropTable('{{%cruise}}');

@@ -1,22 +1,21 @@
 <?php
 
 use modules\cruise\src\entity\cruise\Cruise;
+use modules\cruise\src\entity\cruiseQuote\search\CruiseQuoteSearch;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $model Cruise */
-///* @var $dataProviderQuotes \yii\data\ActiveDataProvider */
-
 
 \yii\web\YiiAsset::register($this);
 
 
-//$searchModel = new HotelQuoteSearch();
-//$params = Yii::$app->request->queryParams;
-//$params['HotelQuoteSearch']['hq_hotel_id'] = $model->ph_id;
-//$dataProviderQuotes = $searchModel->searchProduct($params);
+$searchModel = new CruiseQuoteSearch();
+$params = Yii::$app->request->queryParams;
+$params['CruiseQuoteSearch']['crq_cruise_id'] = $model->crs_id;
+$dataProviderQuotes = $searchModel->searchProduct($params);
 
 ?>
 <div class="cruise-view-search">
@@ -54,31 +53,13 @@ use yii\widgets\Pjax;
                                 <?=$cabin->getChildrenCount() ? ', <i class="fa fa-child"></i> ' . $cabin->getChildrenCount() : ''?>
                             </b>
                             <ul class="nav navbar-right panel_toolbox">
-                                <li>
-                                    <?= \yii\bootstrap4\Html::a('<i class="fa fa-edit warning"></i> Update', null, [
-                                        'data-url' => \yii\helpers\Url::to(['/cruise/cruise-cabin/update-ajax', 'id' => $cabin->crc_id]),
-                                        'class' => 'btn-update-cruise-cabin'
-                                    ])?>
-                                </li>
+
 
                                 <?php //php if ($is_manager) : ?>
                                 <!--                    <li>-->
                                 <!--                        --><?php //=Html::a('<i class="fa fa-plus-circle success"></i> Add Quote', null, ['class' => 'add-clone-alt-quote', 'data-uid' => 0, 'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0])])?>
                                 <!--                    </li>-->
-                                <li class="dropdown">
-                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-cog"></i></a>
-                                    <div class="dropdown-menu" role="menu">
 
-                                        <?= \yii\bootstrap4\Html::a('<i class="fa fa-remove"></i> Delete Cabin', null, [
-                                            'data-url' => \yii\helpers\Url::to(['/cruise/cruise-cabin/delete-ajax']),
-                                            'data-cabin-id' => $cabin->crc_id,
-                                            'data-cruise-id' => $model->crs_id,
-                                            'class' => 'dropdown-item text-danger btn-delete-cruise-cabin'
-                                        ]) ?>
-
-
-                                    </div>
-                                </li>
                                 <?php //php endif; ?>
                                 <li>
                                     <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
@@ -148,14 +129,11 @@ use yii\widgets\Pjax;
 <!---->
 <!--    <div class="row">-->
 <!--        <div class="col-md-12">-->
-<?php /* $this->render('_view_product_quote_list', [
-                'cruiseProduct' => $model,
-                'dataProviderQuotes' => $dataProviderQuotes
-            ])
-        */    ?>
+    <?= $this->render('_view_product_quote_list', [
+        'cruiseProduct' => $model,
+        'dataProviderQuotes' => $dataProviderQuotes
+    ]) ?>
 <!--        </div>-->
 <!--    </div>-->
-
-
 
 </div>
