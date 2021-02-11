@@ -253,10 +253,9 @@ class FlightQuoteController extends FController
                 $params = ['page' => 1];
             }
 
-            $quotes = $form->applyFilters($quotes);
-
-//            print_r($quotes['results'][0]);die;
-
+            if (!empty($quotes['results'])) {
+                $quotes = $form->applyFilters($quotes);
+            }
 
             $dataProvider = new ArrayDataProvider([
                 'allModels' => $quotes['results'] ?? [],
