@@ -13,6 +13,7 @@ class m210210_133156_add_base_permissions extends Migration
         '/rent-car/default/*',
         '/rent-car/rent-car/*',
         '/rent-car/rent-car-crud/*',
+        '/rent-car/rent-car-quote/*',
         '/rent-car/rent-car-quote-crud/*',
     ];
 
