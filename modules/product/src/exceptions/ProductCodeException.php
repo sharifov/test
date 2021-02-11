@@ -12,6 +12,7 @@ class ProductCodeException
 
     public const PRODUCT_FLIGHT_UNAVAILABLE = Module::PRODUCT . 200;
     public const PRODUCT_HOTEL_UNAVAILABLE = Module::PRODUCT . 201;
+    public const PRODUCT_RENT_CAR_UNAVAILABLE = Module::PRODUCT . 201;
 
     public const INVALID_PRODUCT_TYPE_PRODUCTABLE_REPOSITORY = Module::PRODUCT . 300;
     public const INVALID_PRODUCT_TYPE_GUARD = Module::PRODUCT . 301;

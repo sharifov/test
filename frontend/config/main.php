@@ -333,6 +333,9 @@ return [
         'file-storage' => [
             'class' => FileStorageModule::class,
         ],
+        'rent-car' => [
+            'class' => \modules\rentCar\RentCarModule::class,
+        ],
     ],
     'as beforeRequest' => [
         'class' => \frontend\components\UserSiteActivityLog::class,

@@ -49,7 +49,7 @@ class ProductQuoteSerializer extends Serializer
     {
         $quoteData = $this->toArray();
 
-        if (!$quote = $this->model->getChildQuote()) {
+        if ($quote = $this->model->getChildQuote()) {
             $quoteData['data'] = $quote->serialize();
         }
 

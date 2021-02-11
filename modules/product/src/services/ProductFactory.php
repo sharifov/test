@@ -7,6 +7,7 @@ use modules\flight\models\Flight;
 use modules\hotel\models\Hotel;
 use modules\product\src\exceptions\ProductCodeException;
 use modules\product\src\interfaces\Productable;
+use modules\rentCar\src\entity\rentCar\RentCar;
 
 class ProductFactory
 {
@@ -17,6 +18,8 @@ class ProductFactory
                 return Flight::create($productId);
             case ProductType::PRODUCT_HOTEL:
                 return Hotel::create($productId);
+            case ProductType::PRODUCT_RENT_CAR:
+                return RentCar::create($productId);
         }
         throw new \DomainException('Invalid product type', ProductCodeException::INVALID_PRODUCT_TYPE_FACTORY);
     }

@@ -17,6 +17,9 @@ class ProductTypeFormatter
             case ProductType::PRODUCT_HOTEL:
                 $class = 'warning';
                 break;
+            case ProductType::PRODUCT_RENT_CAR:
+                $class = 'green';
+                break;
             default:
                 $class = 'default';
         }

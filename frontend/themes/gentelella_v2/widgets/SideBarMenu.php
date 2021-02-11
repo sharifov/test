@@ -557,6 +557,15 @@ class SideBarMenu extends \yii\bootstrap\Widget
             ];
         }
 
+        if (class_exists('\modules\rentCar\RentCarModule')) {
+            $menuModuleItems[] = [
+                'label' => 'Rent Car module',
+                'url' => 'javascript:',
+                'icon' => 'car',
+                'items' => \modules\rentCar\RentCarModule::getListMenu()
+            ];
+        }
+
         if ($menuModuleItems) {
             $menuItems[] = [
                 'label' => 'Modules',

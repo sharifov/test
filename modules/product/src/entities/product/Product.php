@@ -15,6 +15,7 @@ use modules\hotel\models\Hotel;
 use modules\product\src\entities\product\events\ProductCreateEvent;
 use modules\product\src\interfaces\Productable;
 use modules\product\src\useCases\product\create\ProductCreateForm;
+use modules\rentCar\src\entity\rentCar\RentCar;
 use sales\entities\EventTrait;
 use sales\entities\serializer\Serializable;
 use yii\behaviors\BlameableBehavior;
@@ -48,6 +49,8 @@ use yii\db\ActiveRecord;
  * @property ProductType $prType
  * @property Employee $prUpdatedUser
  * @property ProductQuote[] $productQuotes
+ * @property RentCar $rentCar
+ * @property RentCar[] $rentCars
  *
  * @property Productable|null $childProduct
  */
@@ -98,6 +101,11 @@ class Product extends \yii\db\ActiveRecord implements Serializable
     public function isHotel(): bool
     {
         return $this->pr_type_id === ProductType::PRODUCT_HOTEL;
+    }
+
+    public function isRenTCar(): bool
+    {
+        return $this->pr_type_id === ProductType::PRODUCT_RENT_CAR;
     }
 
     public function getChildProduct(): ?Productable
@@ -221,6 +229,19 @@ class Product extends \yii\db\ActiveRecord implements Serializable
     public function getHotel(): ActiveQuery
     {
         return $this->hasOne(Hotel::class, ['ph_product_id' => 'pr_id'])->orderBy(['ph_id' => SORT_DESC])->limit(1);
+    }
+
+    public function getRentCars(): ActiveQuery
+    {
+        return $this->hasMany(RentCar::class, ['prc_product_id' => 'pr_id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getRentCar(): ActiveQuery
+    {
+        return $this->hasOne(RentCar::class, ['prc_product_id' => 'pr_id'])->orderBy(['prc_id' => SORT_DESC])->limit(1);
     }
 
     /**

@@ -449,7 +449,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     /**
      * @return string
      */
-    private static function generateGid(): string
+    public static function generateGid(): string
     {
         return md5(uniqid('fq', true));
     }

@@ -6,6 +6,7 @@ use modules\product\src\entities\productType\ProductType;
 use modules\flight\FlightModule;
 use modules\hotel\HotelModule;
 use modules\product\src\exceptions\ProductCodeException;
+use modules\rentCar\RentCarModule;
 
 class ProductAvailableGuard
 {
@@ -20,6 +21,12 @@ class ProductAvailableGuard
         if ($productTypeId === ProductType::PRODUCT_HOTEL) {
             if (!class_exists(HotelModule::class)) {
                 throw new \DomainException('Product Hotel is unavailable', ProductCodeException::PRODUCT_HOTEL_UNAVAILABLE);
+            }
+            return;
+        }
+        if ($productTypeId === ProductType::PRODUCT_RENT_CAR) {
+            if (!class_exists(RentCarModule::class)) {
+                throw new \DomainException('Product Hotel is unavailable', ProductCodeException::PRODUCT_RENT_CAR_UNAVAILABLE);
             }
             return;
         }

@@ -5,12 +5,14 @@ namespace modules\product\src\entities\productQuote;
 use modules\flight\models\FlightQuote;
 use modules\hotel\models\HotelQuote;
 use modules\product\src\entities\productType\ProductType;
+use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 
 class ProductQuoteClasses
 {
     private const CLASSES = [
         ProductType::PRODUCT_FLIGHT => FlightQuote::class,
         ProductType::PRODUCT_HOTEL => HotelQuote::class,
+        ProductType::PRODUCT_RENT_CAR => RentCarQuote::class,
     ];
 
     public static function getClass(int $type): string
