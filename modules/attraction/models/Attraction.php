@@ -2,6 +2,8 @@
 
 namespace modules\attraction\models;
 
+use modules\attraction\src\entities\attraction\events\AttractionUpdateRequestEvent;
+use modules\attraction\src\useCases\request\update\AttractionUpdateRequestForm;
 use modules\product\src\interfaces\Productable;
 use modules\product\src\entities\product\Product;
 use sales\entities\EventTrait;
@@ -12,15 +14,24 @@ use yii\db\ActiveQuery;
  *
  * @property int $atn_id
  * @property int|null $atn_product_id
- *  @property string|null $atn_date_from
+ * @property string|null $atn_date_from
  * @property string|null $atn_date_to
  * @property string|null $atn_destination
+ * @property string|null $atn_destination_code
  *
  * @property Product $atnProduct
  */
 class Attraction extends \yii\db\ActiveRecord implements Productable
 {
     use EventTrait;
+
+    private const DESTINATION_TYPE_COUNTRY  = 0;
+    private const DESTINATION_TYPE_CITY     = 1;
+
+    private const DESTINATION_TYPE_LIST = [
+        self::DESTINATION_TYPE_COUNTRY  => 'Countries',
+        self::DESTINATION_TYPE_CITY     => 'Cities/Zones'
+    ];
 
     /**
      * {@inheritdoc}
@@ -41,6 +52,7 @@ class Attraction extends \yii\db\ActiveRecord implements Productable
 
             [['atn_date_from', 'atn_date_to'], 'safe'],
             [['atn_destination'], 'string', 'max' => 100],
+            [['atn_destination_code'], 'string', 'max' => 10],
         ];
     }
 
@@ -65,9 +77,20 @@ class Attraction extends \yii\db\ActiveRecord implements Productable
         return $attraction;
     }
 
+    public function updateRequest(AttractionUpdateRequestForm $form): void
+    {
+        $this->attributes = $form->attributes;
+        $this->recordEvent(new AttractionUpdateRequestEvent($this));
+    }
+
     public function getId(): int
     {
         return $this->atn_id;
+    }
+
+    public static function getDestinationList(): array
+    {
+        return self::DESTINATION_TYPE_LIST;
     }
 
     public function serialize(): array

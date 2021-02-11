@@ -1,17 +1,13 @@
 <?php
 
 use modules\product\src\entities\product\Product;
-use common\widgets\Alert;
-use modules\flight\models\Flight;
-use modules\flight\models\forms\ItineraryEditForm;
-use modules\flight\src\helpers\FlightFormatHelper;
+use modules\hotel\models\search\HotelQuoteSearch;
 use yii\helpers\Html;
-use yii\helpers\Url;
 use yii\widgets\DetailView;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $product Product */
-/* @var  $pjaxRequest bool */
 
 
 
@@ -24,19 +20,16 @@ $params['HotelQuoteSearch']['hq_hotel_id'] = $model->ph_id;
 $dataProviderQuotes = $searchModel->searchProduct($params);*/
 
 $pjaxId = 'pjax-product-' . $product->pr_id;
-$pjaxRequest = $pjaxRequest ?? false;
-
-$chevronClass = $pjaxRequest ? 'fa fa-chevron-up' : 'fa fa-chevron-down'
 ?>
-<?php \yii\widgets\Pjax::begin(['id' => $pjaxId,  'enablePushState' => false, 'enableReplaceState' => false, 'timeout' => 2000])?>
+<?php \yii\widgets\Pjax::begin(['id' => $pjaxId, 'enablePushState' => false, 'enableReplaceState' => false, 'timeout' => 2000])?>
     <div class="x_panel">
         <div class="x_title">
             <h2>
                 <a class="collapse-link">
-                    <i class="fa fa-plane" title="ID: <?=$product->pr_id?>"></i> <?=Html::encode($product->prType->pt_name)?> <?=$product->pr_name ? ' - ' . Html::encode($product->pr_name) : ''?>
-                    <?php //if ($product->flight->flightQuotes) :?>
-                        <sup title="Number of quotes">(<?php //=count($product->flight->flightQuotes)?>)</sup>
-                    <?php //endif;?>
+                    <i class="fas fa-hotel" title="ID: <?=$product->pr_id?>"></i> <?=Html::encode($product->prType->pt_name)?> <?=$product->pr_name ? ' - ' . Html::encode($product->pr_name) : ''?>
+                    <?php if ($product->productQuotes) :?>
+                        <sup title="Number of quotes">(<?=count($product->productQuotes)?>)</sup>
+                    <?php endif;?>
                 </a>
                 <?php if ($product->pr_description) :?>
                     <a  id="product_description_<?=$product->pr_id?>"
@@ -49,113 +42,64 @@ $chevronClass = $pjaxRequest ? 'fa fa-chevron-up' : 'fa fa-chevron-down'
             </h2>
             <ul class="nav navbar-right panel_toolbox">
                 <?php //php if ($is_manager) :?>
-                <li>
-                        <span style="font-size: 13px; padding: 5px; display: flex; align-items: center;color: #596b7d;">
-                             <?php /*if ($segments = $product->flight->flightSegments) :*/?>
-                                 <?php /*if (isset($segments[0]) && $segments[0]->fs_origin_iata) : */?>
-                                     (<b><?php /*= Html::encode($segments[0]->fs_origin_iata) */?></b>)
-                                 <?php /*endif; */?>
-                             <?php /*endif; */?>
-                        </span>
-                </li>
-                <li>
-                        <span style="font-size: 13px; padding: 5px; display: flex; align-items: center;color: #596b7d;">
-                            <?php
-                           /* switch ($product->flight->fl_trip_type_id) {
-                                case Flight::TRIP_TYPE_ONE_WAY:
-                                    $iconClass = 'fa fa-long-arrow-right';
-                                    break;
-                                case Flight::TRIP_TYPE_ROUND_TRIP:
-                                    $iconClass = 'fa fa-exchange';
-                                    break;
-                                case Flight::TRIP_TYPE_MULTI_DESTINATION:
-                                    $iconClass = 'fa fa-random';
-                                    break;
-                                default:
-                                    $iconClass = '';
-                            }*/
-                            ?>
-                            <i class="<?php //=$iconClass?> text-success" aria-hidden="true" style="margin-right: 10px;"></i>
-                            <?php //if ($product->flight->fl_trip_type_id) :?>
-                                <?php //= FlightFormatHelper::tripTypeName($product->flight->fl_trip_type_id)?> •&nbsp;
-                            <?php //endif;?>
+                <?php //=Html::a('<i class="fa fa-plus-circle success"></i> Add Quote', null, ['class' => 'add-clone-alt-quote', 'data-uid' => 0, 'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0])])?>
 
-                            <?php //if ($product->flight->fl_cabin_class) :?>
-                                <b><?php //= FlightFormatHelper::cabinName($product->flight->fl_cabin_class)?></b>&nbsp;•&nbsp;
-                            <?php //endif;?>
-
-                            <?php //= (int)$product->flight->fl_adults + (int)$product->flight->fl_children + (int)$product->flight->fl_infants?> pax
+                <li title="Destination">
+                        <span style="font-size: 13px; padding: 5px; display: flex; align-items: center;color: #596b7d;">
+                            <?php if ($product->attraction->atn_destination_code) :?>
+                                (<b><?= Html::encode($product->attraction->atn_destination_code) ?></b>)
+                                <?= Html::encode($product->attraction->atn_destination) ?>
+                            <?php endif; ?>
                         </span>
                 </li>
                 <li>
                         <span style="font-size: 13px; padding: 5px; display: flex; align-items: center;color: #596b7d;">
-                            <?php //if ($product->flight->fl_adults) :?>
-                                <span style="font-size: 12px; color: #596b7d;display: flex;align-items: center;"><strong class="label label-success"
-                                                                                                                         style="margin-left: 7px;padding: 4px 6px;margin-right: 2px;"
-                                                                                                                         style="margin-left: 7px;"><?php //= $product->flight->fl_adults?></strong> ADT</span>
-                            <?php //endif;?>
-                            <?php //if ($product->flight->fl_children) :?>
-                                <span style="font-size: 12px; color: #596b7d;display: flex;align-items: center;"><strong class="label label-success"
-                                                                                                                         style="margin-left: 7px;padding: 4px 6px;margin-right: 2px;"
-                                                                                                                         style="margin-left: 7px;"><?php //= $product->flight->fl_children?></strong> CHD</span>
-                            <?php //endif;?>
-                            <?php //if ($product->flight->fl_infants) :?>
-                                <span style="font-size: 12px; color: #596b7d;display: flex;align-items: center;"><strong class="label label-success"
-                                                                                                                         style="margin-left: 7px;padding: 4px 6px;margin-right: 2px;"
-                                                                                                                         style="margin-left: 7px;"><?php //= $product->flight->fl_infants?></strong> INF</span>
-                            <?php //endif;?>
+                             <?php if ($product->attraction->atn_date_from) :?>
+                                 <b><?= Yii::$app->formatter->asDate(strtotime($product->attraction->atn_date_from)) ?></b>
+                             <?php endif; ?>
                         </span>
-                </li>
-                <li>
-                            <span style="font-size: 13px; padding: 5px; display: flex; align-items: center;color: #596b7d;">
-                                <?php /*if ($segments = $product->flight->flightSegments) :*/?>
-                                     <?php /*if (isset($segments[0]) && $segments[0]->fs_departure_date) : */?>
-                                         <b><?php /*= Yii::$app->formatter->asDate(strtotime($segments[0]->fs_departure_date)) */?></b>
-                                     <?php /*endif; */?>
-                                 <?php /*endif; */?>
-                            </span>
                 </li>
                 <li>
                     <div style="margin-right: 50px"></div>
                 </li>
+
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-bars warning"></i> <span class="text-warning">Actions</span></a>
                     <div class="dropdown-menu" role="menu">
                         <?php /*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Update Request', null, [
-                                'class' => 'dropdown-item text-danger btn-update-product',
-                                'data-product-id' => $product->pr_id
-                            ])*/ ?>
+                            'class' => 'dropdown-item text-danger btn-update-product',
+                            'data-product-id' => $product->pr_id
+                        ])*/ ?>
 
-                        <h6 class="dropdown-header">P<?=$product->pr_id?> - A<?= $product->attraction->atn_id ?></h6>
+                        <h6 class="dropdown-header">P<?=$product->pr_id?> - A<?=$product->attraction->atn_id?></h6>
 
                         <?= Html::a('<i class="fa fa-edit"></i> Update Request', null, [
-                            'data-url' => Url::to([
-                                '/flight/flight/ajax-update-itinerary-view',
+                            'data-url' => \yii\helpers\Url::to([
+                                '/attraction/attraction/update-ajax',
                                 'id' => $product->attraction->atn_id
                             ]),
-                            'data-flight-id' => $product->attraction->atn_id,
-                            'data-pjax-id' => $pjaxId,
-                            'class' => 'dropdown-item text-warning btn-update-flight-request'
+                            'data-hotel-id' => $product->attraction->atn_id,
+                            'class' => 'dropdown-item text-warning btn-update-hotel-request'
                         ]) ?>
 
                         <?= Html::a('<i class="fa fa-search"></i> Search Quotes', null, [
                             'data-url' => \yii\helpers\Url::to([
-                                '/flight/flight-quote/ajax-search-quote',
+                                '/hotel/hotel-quote/search-ajax',
                                 'id' => $product->attraction->atn_id
                             ]),
-                            'data-pjax-id' => $pjaxId,
-                            'class' => 'dropdown-item text-success btn-search-flight-quotes'
+                            'data-hotel-id' => $product->attraction->atn_id,
+                            'class' => 'dropdown-item text-success btn-search-hotel-quotes'
                         ]) ?>
 
-                        <?= Html::a('<i class="fa fa-plus"></i> Add Quote', null, [
+
+                       <!-- <?php /*= Html::a('<i class="fa fa-plus"></i> Add Room', null, [
                             'data-url' => \yii\helpers\Url::to([
-                                '/flight/flight-quote/ajax-add-quote-content'
+                                '/hotel/hotel-room/create-ajax',
+                                'id' => $product->attraction->atn_id,
                             ]),
-                            'data-flight-id' => $product->attraction->atn_id,
-                            'data-lead-id' => $product->pr_lead_id,
-                            'data-pjax-reload-id' => $pjaxId,
-                            'class' => 'dropdown-item text-success btn-add-flight-quote'
-                        ]) ?>
+                            'data-hotel-id' => $product->attraction->atn_id,
+                            'class' => 'dropdown-item btn-add-hotel-room'
+                        ]) */?> -->
 
                         <div class="dropdown-divider"></div>
                         <?= Html::a('<i class="fa fa-edit"></i> Update Product', null, [
@@ -163,7 +107,7 @@ $chevronClass = $pjaxRequest ? 'fa fa-chevron-up' : 'fa fa-chevron-down'
                             'data-product-id' => $product->pr_id,
                         ]) ?>
                         <?= Html::a(
-                            '<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete Flight',
+                            '<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete Attraction',
                             null,
                             [
                                 'class' => 'dropdown-item text-danger btn-delete-product',
@@ -173,16 +117,16 @@ $chevronClass = $pjaxRequest ? 'fa fa-chevron-up' : 'fa fa-chevron-down'
 
                     </div>
                 </li>
-                <?php //php endif;?>
                 <li>
-                    <a class="collapse-link"><i class="<?= $chevronClass ?>"></i></a>
+                    <a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
                 </li>
+                <?php //php endif;?>
+
             </ul>
             <div class="clearfix"></div>
         </div>
-        <div class="x_content" <?php if (!$pjaxRequest) :
-            ?>style="display: none" <?php
-                               endif; ?>>
+        <div class="x_content" style="display: none">
+            <?php //php if ((int) $product->pr_type_id === \common\models\ProductType::PRODUCT_HOTEL && $product->hotel):?>
             <?php \yii\widgets\Pjax::begin(['id' => 'pjax-product-search-' . $product->pr_id, 'enablePushState' => false, 'timeout' => 5000])?>
             <?= $this->render('_view_search', [
                 'model' => $product->attraction,
@@ -190,38 +134,7 @@ $chevronClass = $pjaxRequest ? 'fa fa-chevron-up' : 'fa fa-chevron-down'
                 //'dataProviderRooms'
             ]) ?>
             <?php \yii\widgets\Pjax::end();?>
-           <!-- <div class="row">
-                <div class="col-md-12">
-                    <?php /*= Alert::widget() */?>
-                </div>
-            </div>-->
-            <?php //= $this->render('_view_flight_request', [ 'itineraryForm' => (new ItineraryEditForm($product->flight)) ])?>
-
-            <!-- <div class="row">
-                <div class="col-md-12">
-                    <div class="col-md-6">
-                        <?php /*= DetailView::widget([
-                            'model' => $product->flight,
-                            'attributes' => [
-                                'fl_stops',
-                                'fl_delayed_charge:booleanByLabel',
-                            ],
-                        ]) */ ?>
-                    </div>
-                    <div class="col-md-6">
-                        <?php /*DetailView::widget([
-                            'model' => $product,
-                            'attributes' => [
-                                'pr_market_price',
-                                'pr_client_budget',
-                            ],
-                        ])*/ ?>
-                    </div>
-                </div>
-            </div> -->
-
-            <?php //= $this->render('../../flight-quote/partial/_quote_list', ['product' => $product])?>
-
+            <?php //php endif;?>
         </div>
     </div>
 <?php \yii\widgets\Pjax::end()?>
@@ -232,31 +145,73 @@ $chevronClass = $pjaxRequest ? 'fa fa-chevron-up' : 'fa fa-chevron-down'
 
 $js = <<<JS
 
-   $('body').off('click', '.btn-update-flight-request').on('click', '.btn-update-flight-request', function (e) {
-       e.preventDefault();
-       let updateHotelRequestUrl = $(this).data('url');
-       let pjaxId = $(this).data('pjaxId');
-       
-       let modal = $('#modal-md');
-       modal.find('.modal-body').html('');
-       modal.find('.modal-title').html('Update flight request');
-       modal.find('.modal-body').load(updateHotelRequestUrl, {pjaxIdWrap: pjaxId}, function( response, status, xhr ) {
-           modal.modal({
-             backdrop: 'static',
-             show: true
-           });
-       });
-   });
-  
-     $('body').off('click', '.btn-search-flight-quotes').on('click', '.btn-search-flight-quotes', function (e) {
+    $('body').off('click', '.btn-update-hotel-request').on('click', '.btn-update-hotel-request', function (e) {
+        e.preventDefault();
+        let updateHotelRequestUrl = $(this).data('url');
+        //$('#preloader').removeClass('d-none');
+        
+        let modal = $('#modal-sm');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Update Attraction request');
+        modal.find('.modal-body').load(updateHotelRequestUrl, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            modal.modal({
+              backdrop: 'static',
+              show: true
+            });
+        });
+    });
+
+    /*$('body').off('click', '.btn-add-hotel-room').on('click', '.btn-add-hotel-room', function (e) {
+        e.preventDefault();
+        let url = $(this).data('url');
+        //$('#preloader').removeClass('d-none');
+        
+        let modal = $('#modal-df');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Add Room request');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
+        });
+    });*/
+    
+    /*$('body').off('click', '.btn-update-hotel-room').on('click', '.btn-update-hotel-room', function (e) {
+        e.preventDefault();
+        let url = $(this).data('url');
+                
+        let modal = $('#modal-df');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Update Room request');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
+        });
+    });*/
+    
+    
+     $('body').off('click', '.btn-search-hotel-quotes').on('click', '.btn-search-hotel-quotes', function (e) {
         e.preventDefault();
         $('#preloader').removeClass('d-none');          
         let url = $(this).data('url');
-        let pjaxId = $(this).data('pjax-id');;
         let modal = $('#modal-lg');
         modal.find('.modal-body').html('');
-        modal.find('.modal-title').html('Search flight Quotes');
-        modal.find('.modal-body').load(url, {pjaxId: pjaxId}, function( response, status, xhr ) {
+        modal.find('.modal-title').html('Search Attraction Quotes');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
             if (status == 'error') {
                 alert(response);
             } else {
@@ -269,33 +224,57 @@ $js = <<<JS
         });
     });
     
-     $('body').off('click', '.btn-add-flight-quote').on('click', '.btn-add-flight-quote', function (e) {
-        e.preventDefault();
-        $('#preloader').removeClass('d-none');          
-        let url = $(this).data('url');
-        let flightId = $(this).data('flight-id');
-        let leadId = $(this).data('lead-id');
-        let pjaxReloadId = $(this).data('pjax-reload-id');
-        let modal = $('#modal-md');
-        modal.find('.modal-body').html('');
-        modal.find('.modal-title').html('Add Quote');
-        modal.find('.modal-body').load(url, {flightId: flightId, leadId: leadId, pjaxReloadId: pjaxReloadId}, function( response, status, xhr ) {
+    
+    /*$('body').off('click', '.btn-delete-hotel-room').on('click', '.btn-delete-hotel-room', function(e) {
+        
+        if(!confirm('Are you sure you want to delete this room?')) {
+            return '';
+        }
+        
+      e.preventDefault();
+      $('#preloader').removeClass('d-none');
+      let roomId = $(this).data('room-id');
+      let hotelId = $(this).data('hotel-id');
+      let url = $(this).data('url');
+           
+
+      $.ajax({
+          url: url,
+          type: 'post',
+          data: {'id': roomId},
+          dataType: 'json',
+      })
+          .done(function(data) {
+              if (data.error) {
+                  alert(data.error);
+                  new PNotify({
+                        title: 'Error: delete room',
+                        type: 'error',
+                        text: data.error,
+                        hide: true
+                    });
+              } else {
+                  pjaxReload({
+                      container: '#pjax-hotel-rooms-' + hotelId
+                  });
+                  new PNotify({
+                        title: 'The room was successfully removed',
+                        type: 'success',
+                        text: data.message,
+                        hide: true
+                    });
+              }
+          })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        }).always(function() {
             $('#preloader').addClass('d-none');
-            if (status == 'error') {
-                new PNotify({
-                    'title': 'Error',
-                    'type': 'error',
-                    'text': xhr.statusText
-                })
-            } else {
-                modal.modal({
-                  backdrop: 'static',
-                  show: true
-                });
-            }
         });
-    });
+      // return false;
+    });*/
+    
+    
     
 JS;
 
-$this->registerJs($js, \yii\web\View::POS_READY, 'update-flight-request-js');
+$this->registerJs($js, \yii\web\View::POS_READY, 'update-hotel-request-js');

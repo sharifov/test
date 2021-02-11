@@ -2,8 +2,9 @@
 
 namespace modules\attraction\controllers;
 
-use modules\hotel\src\useCases\request\update\HotelUpdateRequestForm;
-use modules\hotel\src\useCases\request\update\HotelRequestUpdateService;
+use modules\attraction\models\Attraction;
+use modules\attraction\src\useCases\request\update\AttractionUpdateRequestForm;
+use modules\attraction\src\useCases\request\update\AttractionRequestUpdateService;
 use modules\product\src\entities\productType\ProductType;
 use modules\hotel\src\helpers\HotelFormatHelper;
 use Yii;
@@ -20,16 +21,16 @@ use yii\web\Response;
 /**
  * HotelController implements the CRUD actions for Hotel model.
  *
- * @property HotelRequestUpdateService $hotelRequestUpdateService
+ * @property AttractionRequestUpdateService $attractionRequestUpdateService
  */
-class HotelController extends FController
+class AttractionController extends FController
 {
-    private $hotelRequestUpdateService;
+    private $attractionRequestUpdateService;
 
-    public function __construct($id, $module, HotelRequestUpdateService $hotelRequestUpdateService, $config = [])
+    public function __construct($id, $module, AttractionRequestUpdateService $attractionRequestUpdateService, $config = [])
     {
         parent::__construct($id, $module, $config);
-        $this->hotelRequestUpdateService = $hotelRequestUpdateService;
+        $this->attractionRequestUpdateService = $attractionRequestUpdateService;
     }
 
     /**
@@ -119,22 +120,22 @@ class HotelController extends FController
         $id = Yii::$app->request->get('id');
 
         try {
-            $hotel = $this->findModel($id);
+            $attraction = $this->findModel($id);
         } catch (\Throwable $throwable) {
             return '<script>alert("' . $throwable->getMessage() . '")</script>';
         }
 
-        $form = new HotelUpdateRequestForm($hotel);
+        $form = new AttractionUpdateRequestForm($attraction);
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
-            $out = '<script>$("#modal-sm").modal("hide"); pjaxReload({container: "#pjax-product-search-' . $hotel->ph_product_id . '"});';
+            $out = '<script>$("#modal-sm").modal("hide"); pjaxReload({container: "#pjax-product-search-' . $attraction->atn_product_id . '"});';
             try {
-                $this->hotelRequestUpdateService->update($form);
-                $out .= 'new PNotify({title: "Hotel update request", type: "success", text: "Success" , hide: true});';
+                $this->attractionRequestUpdateService->update($form);
+                $out .= 'new PNotify({title: "Attraction update request", type: "success", text: "Success" , hide: true});';
             } catch (\DomainException $e) {
-                $out .= 'new PNotify({title: "Hotel update request", type: "error", text: "' . $e->getMessage() . '" , hide: true});';
+                $out .= 'new PNotify({title: "Attraction update request", type: "error", text: "' . $e->getMessage() . '" , hide: true});';
             } catch (\Throwable $e) {
-                $out .= 'new PNotify({title: "Hotel update request", type: "error", text: "Server error" , hide: true});';
+                $out .= 'new PNotify({title: "Attraction update request", type: "error", text: "Server error" , hide: true});';
                 Yii::error($e, 'HotelController:actionUpdateAjax');
             }
 
@@ -215,12 +216,12 @@ class HotelController extends FController
      * Finds the Hotel model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return Hotel the loaded model
+     * @return Attraction the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id): Hotel
+    protected function findModel($id): Attraction
     {
-        if (($model = Hotel::findOne($id)) !== null) {
+        if (($model = Attraction::findOne($id)) !== null) {
             return $model;
         }
 

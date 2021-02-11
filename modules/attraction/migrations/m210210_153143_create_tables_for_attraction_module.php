@@ -13,6 +13,7 @@ class m210210_153143_create_tables_for_attraction_module extends Migration
 {
     public $routes = [
         '/attraction/default/*',
+        '/attraction/attraction/*',
     ];
 
     public $roles = [
@@ -34,7 +35,8 @@ class m210210_153143_create_tables_for_attraction_module extends Migration
             'atn_product_id'  => $this->integer(),
             'atn_date_from'   => $this->date(),
             'atn_date_to'     => $this->date(),
-            'atn_destination' => $this->string(100)
+            'atn_destination' => $this->string(100),
+            'atn_destination_code' => $this->string(10)
         ], $tableOptions);
 
         $this->addForeignKey('FK-attraction-atn_product_id', '{{%attraction}}', ['atn_product_id'], '{{%product}}', ['pr_id'], 'CASCADE', 'CASCADE');
