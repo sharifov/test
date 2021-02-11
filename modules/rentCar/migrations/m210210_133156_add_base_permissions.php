@@ -10,10 +10,10 @@ use yii\db\Migration;
 class m210210_133156_add_base_permissions extends Migration
 {
     public $routes = [
-        '/rentCar/default/*',
-        '/rentCar/rent-car/*',
-        '/rentCar/rent-car-crud/*',
-        '/rentCar/rent-car-quote-crud/*',
+        '/rent-car/default/*',
+        '/rent-car/rent-car/*',
+        '/rent-car/rent-car-crud/*',
+        '/rent-car/rent-car-quote-crud/*',
     ];
 
     public $roles = [
