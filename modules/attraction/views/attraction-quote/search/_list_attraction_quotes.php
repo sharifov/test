@@ -24,7 +24,7 @@
         type: <?=(\yii\helpers\Html::encode($dataHotel[$key]['__typename']) ?? '')?>
     </td>
     <td>
-        duration: <i class="fa fa-clock-o"> </i><?=(\yii\helpers\Html::encode($dataHotel[$key]['duration']['formatted']) ?? '')?>
+        duration: <i class="fa fa-clock-o"> </i><?=(\yii\helpers\Html::encode($dataHotel[$key]['duration']['formatted'] ?? ''))?>
     </td>
     <!--<td title="<?php /*//=(\yii\helpers\Html::encode($attraction['boardCode']))*/?>">
         <?php /*//=(\yii\helpers\Html::encode($attraction['boardName']))*/?>
