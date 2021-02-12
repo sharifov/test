@@ -23,7 +23,7 @@ class RentCarProductQuoteDto
      */
     public static function create(RentCar $rentCar, array $data): ProductQuote
     {
-        $totalPrice = number_format($rentCar->calculateDays() * RentCarDataParser::getPricePerDay($data), 2);
+        $totalPrice = $rentCar->calculateDays() * RentCarDataParser::getPricePerDay($data);
 
         $model = new ProductQuote();
         $model->pq_product_id = $rentCar->prc_product_id;
