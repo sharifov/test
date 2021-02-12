@@ -120,6 +120,10 @@ class HotelQuoteController extends FController
         if ($hotel) {
             try {
                 $result = $this->hotelQuoteSearchService->search(HotelQuoteSearchGuard::guard($hotel));
+
+                if (isset($result['error'])) {
+                    throw new \DomainException($result['error']);
+                }
             } catch (\DomainException $e) {
                 Yii::$app->session->setFlash('error', $e->getMessage());
             }
