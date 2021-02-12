@@ -38,9 +38,9 @@ class RentCarHelper
         return $result;
     }
 
-    public static function locationByIata(string $iata): string
+    public static function locationByIata(?string $iata): string
     {
-        if ($airport = Airports::findByIata($iata)) {
+        if ($iata && $airport = Airports::findByIata($iata)) {
             return $airport->city . ', ' . $airport->country . ' (' . $iata . ')';
         }
         return '';
