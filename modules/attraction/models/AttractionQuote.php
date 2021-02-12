@@ -73,9 +73,9 @@ class AttractionQuote extends \yii\db\ActiveRecord
         ];
     }
 
-    public static function getHashKey(string $roomKey): string
+    public static function getHashKey(array $quote, Attraction $request): string
     {
-        return md5($roomKey);
+        return md5(json_encode($quote) . '|' . $request->atn_date_from . '|' . $request->atn_date_to . '|' . time());
     }
 
     public static function generateGid(): string
@@ -96,7 +96,7 @@ class AttractionQuote extends \yii\db\ActiveRecord
         if (isset($quoteData['id']) && $quoteId = $quoteData['id']) {
             $totalAmount = 0;
             if (isset($quoteId)) {
-                $hashKey = self::getHashKey($quoteId);
+                $hashKey = self::getHashKey($quoteData, $attractionRequest);
 
                 $aQuote = self::find()->where([
                     'atnq_attraction_id' => $attractionRequest->atn_id,
