@@ -1,6 +1,9 @@
 <?php
 
+use common\models\Airports;
+use modules\rentCar\src\entity\rentCar\RentCar;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuoteSearch;
+use modules\rentCar\src\helpers\RentCarHelper;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 use yii\widgets\Pjax;
@@ -30,16 +33,41 @@ $dataProviderQuotes = $searchModel->searchProduct($params);
                 <?= DetailView::widget([
                     'model' => $model,
                     'attributes' => [
-                        'prc_pick_up_date:date',
-                        'prc_drop_off_date:date',
+                        [
+                            'attribute' => 'prc_pick_up_date',
+                            'value' => static function (RentCar $rentCar) {
+                                return Yii::$app->formatter->asDate($rentCar->prc_pick_up_date) . ' / ' .
+                                    Yii::$app->formatter->asTime($rentCar->prc_pick_up_time);
+                            },
+                            'format' => 'raw',
+                        ],
+                        [
+                            'attribute' => 'prc_pick_up_code',
+                            'value' => static function (RentCar $rentCar) {
+                                return RentCarHelper::locationByIata($rentCar->prc_pick_up_code);
+                            },
+                            'format' => 'raw',
+                        ],
+                        [
+                            'attribute' => 'prc_drop_off_date',
+                            'value' => static function (RentCar $rentCar) {
+                                return Yii::$app->formatter->asDate($rentCar->prc_drop_off_date) . ' / ' .
+                                    Yii::$app->formatter->asTime($rentCar->prc_drop_off_time);
+                            },
+                            'format' => 'raw',
+                        ],
+                        [
+                            'attribute' => 'prc_drop_off_code',
+                            'value' => static function (RentCar $rentCar) {
+                                $dropOffCode = $rentCar->prc_drop_off_code ?: $rentCar->prc_pick_up_code;
+                                return RentCarHelper::locationByIata($dropOffCode);
+                            },
+                            'format' => 'raw',
+                        ],
                     ],
                 ]) ?>
             </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-12">
+            <?php if ($model->prcProduct->pr_market_price || $model->prcProduct->pr_client_budget) : ?>
             <div class="col-md-6">
                 <?= DetailView::widget([
                     'model' => $model->prcProduct,
@@ -49,6 +77,7 @@ $dataProviderQuotes = $searchModel->searchProduct($params);
                     ],
                 ]) ?>
             </div>
+            <?php endif ?>
         </div>
     </div>
 

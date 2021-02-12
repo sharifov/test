@@ -50,8 +50,6 @@ JS;
     <div class="x_title">
 
         <span class="badge badge-white">Q<?=($modelQuote->rcq_product_quote_id)?></span>
-            | <?=Html::encode($modelQuote->rcqProductQuote->pq_name)?>
-
             | <?= ProductQuoteStatus::asFormat($modelQuote->rcqProductQuote->pq_status_id) ?>
 
         <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $modelQuote->rcqProductQuote->pq_profit_amount ?>
@@ -98,7 +96,10 @@ JS;
                 </div>
             </li>
         </ul>
+
         <div class="clearfix"></div>
+        &nbsp;<?=Html::encode($modelQuote->rcqProductQuote->pq_name)?> | <?php echo $modelQuote->rcq_vendor_name ?>
+
     </div>
     <div class="x_content" style="display: block">
         <div class="row">

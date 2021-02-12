@@ -2,6 +2,7 @@
 
 namespace modules\rentCar\src\helpers;
 
+use common\models\Airports;
 use DateInterval;
 use DatePeriod;
 use DateTime;
@@ -35,5 +36,13 @@ class RentCarHelper
             $result[$time] = $time;
         }
         return $result;
+    }
+
+    public static function locationByIata(string $iata): string
+    {
+        if ($airport = Airports::findByIata($iata)) {
+            return $airport->city . ', ' . $airport->country . ' (' . $iata . ')';
+        }
+        return '';
     }
 }
