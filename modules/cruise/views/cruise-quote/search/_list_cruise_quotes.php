@@ -6,6 +6,8 @@
 /* @var $key int */
 /* @var $cruise Cruise */
 
+/* @var $existsQuote array */
+
 use modules\cruise\src\entity\cruise\Cruise;
 use yii\data\ArrayDataProvider;
 use yii\helpers\Url;
@@ -23,83 +25,152 @@ use yii\web\View;
 
 ?>
 
-<div class="quote__wrapper">
-    <div class="offer">
-        <div class="row">
-            <div class="col col-12">
-                <div class="d-flex">
-                    <div class="offer__preview px-3">
+    <div class="quote">
+        <div class="quote__heading">
+            <div class="quote__heading-left">
+        <span class="quote__id">
+          <strong>#<?= $key + 1 ?></strong>
+        </span>
+                <span class="quote__vc">
+        <?= $dataCruise['cruiseLine']['name'] ?>, <?= $dataCruise['length'] ?> days
+        </span>
+            </div>
+            <div class="quote__heading-right">
+        <span class="quote__vc">
+
+            <?php if (!empty($dataCruise['cabins'][0]['price'])) : ?>
+                <span class="mr-1">
+                <strong>
+                  From:
+                </strong>
+              </span>
+
+                <strong class="text-success">
+                $<?= $dataCruise['cabins'][0]['price'] ?>
+              </strong>
+
+            <?php endif; ?>
+        </span>
+            </div>
+
+        </div>
+
+        <div class="quote__wrapper">
+            <div class="">
+                <div class="row">
+                    <div class="col-3">
                         <img
                                 src="<?= $dataCruise['ship']['shipImage']['standard'] ?>"
                                 alt="liner-model" class="img-thumbnail">
                     </div>
-                    <div class="offer__description w-100">
-                        <div class="offer__item-brand d-flex flex-column mb-3">
-                            <h5 class="mb-0">
-                                <img height="20px" src="<?= $dataCruise['cruiseLine']['logoImage']['standard'] ?>" alt="<?= $dataCruise['cruiseLine']['name'] . ', ' . $dataCruise['ship']['name'] ?>" class="cruise-line-logo">
-                                <?= $dataCruise['ship']['name'] ?>
-                            </h5>
-                        </div>
-                        <ul class="offer__option-list list-unstyled mb-4">
-                            <li class="offer__option mb-2">
-                                <div class="d-flex">
-                                    <div>
-                                        <b class="offer-option__key text-secondary">Destination</b>: <?= $dataCruise['itinerary']['destination']['destination'] ?> (<?= $dataCruise['itinerary']['destination']['subDestination'] ?>)
-                                    </div>
-                                    <div class="ml-4">
-                                        <b class="offer-option__key text-secondary">Dates</b>:
-                                        <span class="offer-option__value"><?= date('F j, Y', strtotime($dataCruise['departureDate'])) ?> - <?= date('F j, Y', strtotime($dataCruise['returnDate']))?></span>
-                                    </div>
-                                </div>
-                            </li>
+                    <div class="col-9">
+                        <h5 class="mb-2">
+                            <img src="<?= $dataCruise['cruiseLine']['logoImage']['standard'] ?>"
+                                 alt="<?= $dataCruise['cruiseLine']['name'] . ', ' . $dataCruise['ship']['name'] ?> height="
+                                 20" class="mr-1"><span class="mr-1"><?= $dataCruise['ship']['name'] ?></span></h5>
+                        <div class="text-secondary" style="font-size: 14px">
+                            <div class="mb-2">
+                                <i class="fa fa-map-marker"></i>
+                                <span><strong>Destination:</strong> <?= $dataCruise['itinerary']['destination']['destination'] ?> (<?= $dataCruise['itinerary']['destination']['subDestination'] ?></span>
+                            </div>
+                            <div class="mb-2">
+                      <span>
+                        <i class="fa fa-calendar"></i>
+                        <strong>Dates:</strong> <?= date('F j, Y', strtotime($dataCruise['departureDate'])) ?> - <?= date('F j, Y', strtotime($dataCruise['returnDate'])) ?>
+                            </div>
                             <?php if (!empty($dataCruise['itinerary']['locations'])) : ?>
-                                <li class="offer__option d-flex">
-                                    <b class="offer-option__key text-secondary">Itinerary</b>:
-                                    <ul class="offer-option__value list-unstyled d-flex offer__itinerary-list flex-wrap">
-                                        <?php foreach ($dataCruise['itinerary']['locations'] as $location) : ?>
-                                            <li>
-                                                <span><?= $location['location']['name']?> (<?= $location['location']['countryName']?>)</span>
+                                <div class="mb-2">
+                                    <i class="fa fa-ship"></i>
+                                    <strong>Itinerary:</strong>
+                                    <ul class="list-inline d-inline">
+                                        <?php foreach ($dataCruise['itinerary']['locations'] as $keyLocation => $location) : ?>
+                                            <li class="list-inline-item">
+                                                <?= $location['location']['name'] ?>
+                                                (<?= $location['location']['countryName'] ?>)
+                                                <?php
+                                                if ($keyLocation + 1 < count($dataCruise['itinerary']['locations'])) {
+                                                    echo '→';
+                                                }
+                                                ?>
                                             </li>
-                                        <?php endforeach;?>
+                                        <?php endforeach; ?>
                                     </ul>
-                                </li>
-                            <?php endif;?>
-                        </ul>
-                        <?php if ($dataCruise['cabins']) : ?>
-                            <h6 class="mb-3">Choose cabin experience</h6>
-                            <ul class="list-unstyled mb-0 offer__cabin-table">
-
-                                <li>
-                                    <table class="table mb-0">
-                                        <tbody>
-                                        <?php foreach ($dataCruise['cabins'] as $cabin) : ?>
-                                            <tr id="tr-cruise-quote-<?= ($dataCruise['id'] . $cabin['code']) ?>">
-                                                <td style="width: 200px"><img width="150px" src="<?= $cabin['imgUrl'] ?>"></td>
-                                                <td><?= $cabin['name'] ?></td>
-                                                <td class="text-right">$<?= $cabin['price'] ?></td>
-                                                <td>
-                                                    <button
-                                                            class="btn btn-sm btn-success btn-add-cruise-quote"
-                                                            data-url="<?= Url::to(['/cruise/cruise-quote/add-ajax?cruiseId=' . $cruise->crs_id])?>"
-                                                            data-cruise-quote-id="<?= $dataCruise['id'] ?>"
-                                                            data-cabin-code="<?= $cabin['code'] ?>"
-                                                    >Add quote</button>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach;?>
-                                        </tbody>
-                                    </table>
-                                </li>
-                            </ul>
-                        <?php endif;?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </div>
+                <?php if ($dataCruise['cabins']) : ?>
+                    <table class="table table-bordered table-sm" style="font-size: 14px">
+                        <thead class="thead-light">
+                        <tr>
+                            <th>#</th>
+                            <th></th>
+                            <th>Cabin</th>
+                            <th>Experience</th>
+                            <th>Travelers</th>
+                            <th>Price</th>
+                            <th class="text-right"></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($dataCruise['cabins'] as $keyCabin => $cabin) : ?>
+                            <?php $isExist = in_array($dataCruise['id'] . $cabin['code'], $existsQuote, false); ?>
+                            <tr id="tr-cruise-quote-<?= ($dataCruise['id'] . $cabin['code']) ?>"
+                                <?php
+                                if ($isExist) {
+                                    echo ' class="table-success"';
+                                }
+                                ?>
+                            >
+                                <th><?= $keyCabin + 1 ?></th>
+                                <td>
+                                    <img src="<?= $cabin['imgUrl'] ?>" class="img-thumbnail"
+                                         style="max-width: 70px; max-height: 70px;">
+                                </td>
+                                <td>
+                                    <div><?= $cabin['name'] ?></div>
+                                </td>
+                                <td><?= $cabin['experience'] ?></td>
+                                <td>
+                                    <?php if ($cruise->getAdults()) : ?>
+                                        <span class="ml-2"><?= $cruise->getAdults() ?> <i
+                                                    class="fa fa-user text-secondary"></i></span>
+                                    <?php endif; ?>
+                                    <?php if ($cruise->getChildren()) : ?>
+                                        <span class="ml-2"><?= $cruise->getChildren() ?> <i
+                                                    class="fa fa-child text-secondary"></i></span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>$<?= $cabin['price'] ?></td>
+                                <td>
+                                    <?php if ($isExist) : ?>
+                                    <button
+                                            class="btn btn-sm btn-success btn-add-cruise-quote"
+                                            disabled="disabled"
+                                    ><i class="fa fa-check"></i> Added
+                                    </button>
+                                </td>
+                                    <?php else : ?>
+                                    <button
+                                            class="btn btn-sm btn-success btn-add-cruise-quote"
+                                            data-url="<?= Url::to(['/cruise/cruise-quote/add-ajax?cruiseId=' . $cruise->crs_id]) ?>"
+                                            data-cruise-quote-id="<?= $dataCruise['id'] ?>"
+                                            data-cabin-code="<?= $cabin['code'] ?>"
+                                    >Add quote
+                                    </button></td>
+                                    <?php endif; ?>
+                            </tr>
+                        <?php endforeach; ?>
+
+                        </tbody>
+                    </table>
+                <?php endif; ?>
             </div>
 
         </div>
     </div>
-</div>
-    <hr>
+
 <?php /*
 <table class="table table-striped table-bordered">
     <tr>

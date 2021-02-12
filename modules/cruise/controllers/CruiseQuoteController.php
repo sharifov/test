@@ -153,6 +153,14 @@ class CruiseQuoteController extends FController
         if (!$cruise) {
             throw new NotFoundHttpException('Not found.');
         }
+        $existsQuote = [];
+        $cruiseQuotes = CruiseQuote::find()->select(['crq_data_json'])->andWhere(['crq_cruise_id' => $cruise->crs_id])->asArray()->all();
+        foreach ($cruiseQuotes as $cruiseQuote) {
+            $data = @json_decode($cruiseQuote['crq_data_json'], true);
+            if ($data && is_array($data)) {
+                $existsQuote[] = $data['id'] . $data['cabin']['code'];
+            }
+        }
 
         try {
             if (!$cruise->cabins) {
@@ -188,6 +196,7 @@ class CruiseQuoteController extends FController
         return $this->renderAjax('search/_search_quotes', [
             'dataProvider' => $dataProvider,
             'cruise' => $cruise,
+            'existsQuote' => $existsQuote,
         ]);
     }
 
@@ -278,7 +287,6 @@ class CruiseQuoteController extends FController
                 return $this->asJson(['message' => $e->getMessage()]);
             } catch (\Throwable $e) {
                 Yii::error($e->getTraceAsString(), 'HotelQuoteController::actionAjaxUpdateAgentMarkup::Throwable');
-                return $this->asJson(['message' => 'Server error']);
             }
 
             return $this->asJson(['output' => $value]);

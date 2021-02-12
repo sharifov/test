@@ -7,6 +7,7 @@ use yii\widgets\Pjax;
 /* @var $this yii\web\View */
 /* @var $cruise Cruise */
 /* @var $dataProvider yii\data\ArrayDataProvider */
+/* @var $existsQuote array */
 
 ?>
 <style>
@@ -113,45 +114,7 @@ use yii\widgets\Pjax;
         border-color: #3e444f;
     }
 
-    .offer {
-        width: 100%;
-    }
-    .offer__preview img {
-        width: 200px;
-        min-width: 200px;
-    }
-    .offer__preview--xs img {
-        width: 160px;
-        min-width: 160px;
-    }
-    .offer__itinerary-list {
-        margin-left: 2px;
-    }
-    .offer__itinerary-list li {
-        position: relative;
-    }
-    .offer__itinerary-list li:not(:first-child) {
-        padding-left: 22px;
-    }
-    .offer__itinerary-list li:not(:first-child):before {
-        content: "";
-        height: 4px;
-        width: 4px;
-        border-radius: 50%;
-        position: absolute;
-        left: 9px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: #a0a0a0;
-    }
-    .offer__cabin-table .table td {
-        vertical-align: middle;
-    }
-    .offer__cabin-table .table td:first-child {
-        width: 80%;
-    }
 
-    /*# sourceMappingURL=styles.css.map */
 
 </style>
 <div class="cruise-quote-index">
@@ -170,8 +133,8 @@ use yii\widgets\Pjax;
             'class' => 'table table-bordered',
         ],*/
         'emptyText' => '<div class="text-center">Not found any cruises</div><br>',
-        'itemView' => function ($dataCruise, $key, $index, $widget) use ($cruise) {
-            return $this->render('_list_cruise_quotes', ['dataCruise' => $dataCruise, 'index' => $index, 'key' => $key, 'cruise' => $cruise]);
+        'itemView' => function ($dataCruise, $key, $index, $widget) use ($cruise, $existsQuote) {
+            return $this->render('_list_cruise_quotes', ['dataCruise' => $dataCruise, 'index' => $index, 'key' => $key, 'cruise' => $cruise, 'existsQuote' => $existsQuote]);
         },
         //'layout' => "{items}<div class=\"text-center\" style='margin-top: -20px; margin-bottom: -25px'>{pager}</div>", // {summary}\n<div class="text-center">{pager}</div>
         'itemOptions' => [
@@ -234,7 +197,7 @@ $js = <<<JS
                     });
                   
                   btnAdd.html('<i class="fa fa-check"></i> Added');//.find('i').text('Added').removeClass('fa-spin fa-spinner').addClass('fa-check');
-                  $('#tr-cruise-quote-' + quoteId + cabinCode).addClass('bg-success');
+                  $('#tr-cruise-quote-' + quoteId + cabinCode).addClass('table-success');
               }
           })
         .fail(function( jqXHR, textStatus ) {
