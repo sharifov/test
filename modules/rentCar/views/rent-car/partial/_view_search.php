@@ -44,6 +44,9 @@ $dataProviderQuotes = $searchModel->searchProduct($params);
                         [
                             'attribute' => 'prc_pick_up_code',
                             'value' => static function (RentCar $rentCar) {
+                                if (!$rentCar->prc_pick_up_code) {
+                                    return Yii::$app->formatter->nullDisplay;
+                                }
                                 return RentCarHelper::locationByIata($rentCar->prc_pick_up_code);
                             },
                             'format' => 'raw',
@@ -60,6 +63,9 @@ $dataProviderQuotes = $searchModel->searchProduct($params);
                             'attribute' => 'prc_drop_off_code',
                             'value' => static function (RentCar $rentCar) {
                                 $dropOffCode = $rentCar->prc_drop_off_code ?: $rentCar->prc_pick_up_code;
+                                if (!$dropOffCode) {
+                                    return Yii::$app->formatter->nullDisplay;
+                                }
                                 return RentCarHelper::locationByIata($dropOffCode);
                             },
                             'format' => 'raw',

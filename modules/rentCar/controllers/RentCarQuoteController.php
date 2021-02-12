@@ -8,6 +8,7 @@ use modules\rentCar\RentCarModule;
 use modules\rentCar\src\entity\dto\RentCarProductQuoteDto;
 use modules\rentCar\src\entity\dto\RentCarQuoteDto;
 use modules\rentCar\src\entity\rentCar\RentCar;
+use modules\rentCar\src\forms\RentCarSearchForm;
 use modules\rentCar\src\helpers\RentCarDataParser;
 use modules\rentCar\src\helpers\RentCarQuoteHelper;
 use sales\helpers\app\AppHelper;
@@ -32,38 +33,49 @@ class RentCarQuoteController extends FController
 
     public function actionSearchAjax()
     {
-        $rentCarId = (int) Yii::$app->request->get('id');
-        $rentCar = $this->findRentCar($rentCarId);
+        try {
+            $rentCarId = (int) Yii::$app->request->get('id');
+            $rentCar = $this->findRentCar($rentCarId);
 
-        $apiRentCarService = RentCarModule::getInstance()->apiService;
-
-        $result = $apiRentCarService->search(
-            $rentCar->prc_pick_up_code,
-            $rentCar->prc_pick_up_date,
-            $rentCar->prc_pick_up_time,
-            $rentCar->prc_drop_off_time,
-            $rentCar->prc_drop_off_code,
-            $rentCar->prc_drop_off_date
-        );
-
-        $dataList = \Yii::$app->cacheFile->get($rentCar->prc_request_hash_key);
-
-        if ($dataList === false) {
-            if ($dataList = RentCarDataParser::prepareDataList($result['data'])) {
-                \Yii::$app->cacheFile->set($rentCar->prc_request_hash_key, $dataList, 300);
+            $form = new RentCarSearchForm($rentCar);
+            if (!$form->validate()) {
+                throw new \RuntimeException($form->getErrorSummary(false)[0]);
             }
+
+            $apiRentCarService = RentCarModule::getInstance()->apiService;
+
+            $result = $apiRentCarService->search(
+                $rentCar->prc_pick_up_code,
+                $rentCar->prc_pick_up_date,
+                $rentCar->prc_pick_up_time,
+                $rentCar->prc_drop_off_time,
+                $rentCar->prc_drop_off_code,
+                $rentCar->prc_drop_off_date
+            );
+
+            $dataList = \Yii::$app->cacheFile->get($rentCar->prc_request_hash_key);
+
+            if ($dataList === false) {
+                if ($dataList = RentCarDataParser::prepareDataList($result['data'])) {
+                    \Yii::$app->cacheFile->set($rentCar->prc_request_hash_key, $dataList, 300);
+                }
+            }
+
+            $dataProvider = new ArrayDataProvider([
+                'allModels' => $dataList,
+                'pagination' => [
+                    'pageSize' => 10,
+                ],
+            ]);
+        } catch (\Throwable $throwable) {
+            Yii::warning(AppHelper::throwableLog($throwable, true), 'RentCarQuoteController:actionAddQuote');
+            $error  = $throwable->getMessage();
         }
 
-        $dataProvider = new ArrayDataProvider([
-            'allModels' => $dataList,
-            'pagination' => [
-                'pageSize' => 10,
-            ],
-        ]);
-
         return $this->renderAjax('search/_search_quotes', [
-            'dataProvider' => $dataProvider,
-            'rentCar' => $rentCar,
+            'dataProvider' => $dataProvider ?? null,
+            'rentCar' => $rentCar ?? null,
+            'error' => $error ?? null,
         ]);
     }
 
