@@ -17,6 +17,8 @@ class m210210_153143_create_tables_for_attraction_module extends Migration
         '/attraction/attraction-quote/*',
     ];
 
+    public $processingFeeAmount = ['processing_fee_amount' => 15];
+
     public $roles = [
         Employee::ROLE_ADMIN,
         Employee::ROLE_SUPER_ADMIN,
@@ -31,6 +33,17 @@ class m210210_153143_create_tables_for_attraction_module extends Migration
             $tableOptions = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE=InnoDB';
         }
 
+        $this->insert('{{%product_type}}', [
+            'pt_id'             => 5,
+            'pt_key'            => 'attraction',
+            'pt_name'           => 'Attraction',
+            'pt_enabled'        => false,
+            'pt_settings'       => json_encode($this->processingFeeAmount),
+            'pt_service_fee_percent' => 2.5,
+            'pt_created_dt'     => date('Y-m-d H:i:s'),
+            'pt_updated_dt'     => date('Y-m-d H:i:s'),
+        ]);
+
         $this->createTable('{{%attraction}}', [
             'atn_id'          => $this->primaryKey(),
             'atn_product_id'  => $this->integer(),
@@ -38,7 +51,7 @@ class m210210_153143_create_tables_for_attraction_module extends Migration
             'atn_date_to'     => $this->date(),
             'atn_destination' => $this->string(100),
             'atn_destination_code' => $this->string(10),
-            'atn_request_hash_key' => $this->string(32)
+            'atn_request_hash_key' => $this->string(32),
 
         ], $tableOptions);
 
@@ -50,9 +63,11 @@ class m210210_153143_create_tables_for_attraction_module extends Migration
             'atnq_hash_key'               => $this->string(32)->unique(),
             'atnq_product_quote_id'       => $this->integer(),
             'atnq_json_response'          => $this->json(),
-            //'atnq_destination_name'       => $this->string(255),
-            //'atnq_hotel_name'             => $this->string(200)->notNull(),
-            //'atnq_hotel_list_id'          => $this->integer(),
+            'atnq_booking_id'             => $this->string(100),
+            'atnq_attraction_name'        => $this->string(255),
+            'atnq_supplier_name'          => $this->string(255),
+            'atnq_type_name'          => $this->string(100),
+
         ], $tableOptions);
 
         $this->addForeignKey('FK-attraction_quote-atnq_attraction_id', '{{%attraction_quote}}', ['atnq_attraction_id'], '{{%attraction}}', ['atn_id'], 'CASCADE', 'CASCADE');
@@ -68,6 +83,7 @@ class m210210_153143_create_tables_for_attraction_module extends Migration
     {
         $this->dropTable('{{%attraction_quote}}');
         $this->dropTable('{{%attraction}}');
+        $this->delete('{{%product_type}}', ['IN', 'pt_key', ['attraction']]);
 
         (new \console\migrations\RbacMigrationService())->down($this->routes, $this->roles);
     }

@@ -5,6 +5,7 @@ namespace modules\attraction\models;
 use modules\attraction\models\Attraction;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use sales\helpers\product\ProductQuoteHelper;
 use yii\db\ActiveQuery;
 use Yii;
 use yii\helpers\VarDumper;
@@ -17,6 +18,10 @@ use yii\helpers\VarDumper;
  * @property string|null $atnq_hash_key
  * @property int|null $atnq_product_quote_id
  * @property string|null $atnq_json_response
+ * @property string|null $atnq_booking_id
+ * @property string|null $atnq_attraction_name
+ * @property string|null $atnq_supplier_name
+ * @property string|null $atnq_type_name
  *
  * @property Attraction $atnqAttraction
  * @property ProductQuote $atnqProductQuote
@@ -44,6 +49,9 @@ class AttractionQuote extends \yii\db\ActiveRecord
             [['atnq_hash_key'], 'unique'],
             [['atnq_attraction_id'], 'exist', 'skipOnError' => true, 'targetClass' => Attraction::class, 'targetAttribute' => ['atnq_attraction_id' => 'atn_id']],
             [['atnq_product_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['atnq_product_quote_id' => 'pq_id']],
+            [['atnq_booking_id'], 'string', 'max' => 100],
+            [['atnq_type_name'], 'string', 'max' => 100],
+            [['atnq_attraction_name', 'atnq_supplier_name'], 'string', 'max' => 255],
         ];
     }
 
@@ -58,6 +66,10 @@ class AttractionQuote extends \yii\db\ActiveRecord
             'atnq_hash_key' => 'Hash Key',
             'atnq_product_quote_id' => 'Product Quote ID',
             'atnq_json_response' => 'Json Response',
+            'atnq_booking_id' => 'Booking ID',
+            'atnq_attraction_name' => 'Attraction Name',
+            'atnq_supplier_name' => 'Supplier Name',
+            'atnq_type_name' => 'Type Name'
         ];
     }
 
@@ -90,37 +102,39 @@ class AttractionQuote extends \yii\db\ActiveRecord
                     'atnq_attraction_id' => $attractionRequest->atn_id,
                     'atnq_hash_key' => $hashKey
                 ])->one();
-
+                $totalAmount = substr($quoteData['leadTicket']['price']['lead']['formatted'], 1);
+                //var_dump($totalAmount); die();
                 if (!$aQuote) {
                     $prQuote = new ProductQuote();
                     $prQuote->pq_product_id = $attractionRequest->atn_product_id;
                     $prQuote->pq_origin_currency = $currency;
-                    //$prQuote->pq_client_currency = ProductQuoteHelper::getClientCurrencyCode($hotelRequest->phProduct);
+                    $prQuote->pq_client_currency = ProductQuoteHelper::getClientCurrencyCode($attractionRequest->atnProduct);
 
                     $prQuote->pq_owner_user_id = Yii::$app->user->id;
-                    //$prQuote->pq_price = (float)$totalAmount;
-                    //$prQuote->pq_origin_price = (float)$totalAmount;
-                    //$prQuote->pq_client_price = (float)$totalAmount;
+                    $prQuote->pq_price = (float)$totalAmount;
+                    $prQuote->pq_origin_price = (float)$totalAmount;
+                    $prQuote->pq_client_price = (float)$totalAmount;
                     $prQuote->pq_status_id = ProductQuoteStatus::PENDING;
                     $prQuote->pq_gid = self::generateGid();
                     $prQuote->pq_service_fee_sum = 0;
                     //$prQuote->pq_client_currency_rate = ProductQuoteHelper::getClientCurrencyRate($hotelRequest->phProduct);
                     $prQuote->pq_origin_currency_rate = 1;
-                    $prQuote->pq_name = $quoteData['name'];
+                    $prQuote->pq_name = mb_substr($quoteData['name'], 0, 40);
 
                     if ($prQuote->save()) {
                         $aQuote = new self();
                         $aQuote->atnq_hash_key = $hashKey;
                         $aQuote->atnq_attraction_id = $attractionRequest->atn_id;
                         $aQuote->atnq_product_quote_id = $prQuote->pq_id;
-                        //$aQuote->hq_hotel_name = $hotelModel->hl_name;
-                        //$aQuote->hq_destination_name = $hotelModel->hl_destination_name;
+                        $aQuote->atnq_attraction_name = $quoteData['name'];
+                        $aQuote->atnq_supplier_name = $quoteData['supplierName'];
+                        $aQuote->atnq_type_name = $quoteData['__typename'];
                         //$aQuote->hq_request_hash = $hotelRequest->ph_request_hash_key;
 
                         if (!$aQuote->save()) {
                             Yii::error(
                                 VarDumper::dumpAsString($aQuote->errors),
-                                'Model:HotelQuote:findOrCreateByData:HotelQuote:save'
+                                'Model:AttractionQuote:findOrCreateByData:AttractionQuote:save'
                             );
                         }
                     }
@@ -129,6 +143,22 @@ class AttractionQuote extends \yii\db\ActiveRecord
         }
 
         return $aQuote;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isBooking(): bool
+    {
+        return (!empty($this->atnq_booking_id));
+    }
+
+    /**
+     * @return bool
+     */
+    public function isBookable(): bool
+    {
+        return (ProductQuoteStatus::isBookable($this->atnqProductQuote->pq_status_id) && !$this->isBooking());
     }
 
     /**
@@ -148,6 +178,6 @@ class AttractionQuote extends \yii\db\ActiveRecord
      */
     public function getAtnqProductQuote(): ActiveQuery
     {
-        return $this->hasOne(ProductQuote::className(), ['pq_id' => 'atnq_product_quote_id']);
+        return $this->hasOne(ProductQuote::class, ['pq_id' => 'atnq_product_quote_id']);
     }
 }

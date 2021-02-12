@@ -5,7 +5,7 @@ use yii\widgets\DetailView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $hotelProduct modules\hotel\models\Hotel */
+/* @var $attractionProduct modules\attraction\models\Attraction*/
 /* @var $dataProviderQuotes \yii\data\ActiveDataProvider */
 
 
@@ -13,7 +13,7 @@ use yii\widgets\Pjax;
 
 //$searchModel = new HotelRoomSearch();
 //$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-$pjaxId = 'pjax-product-quote-list-' . $hotelProduct->ph_product_id;
+$pjaxId = 'pjax-product-quote-list-' . $attractionProduct->atn_product_id;
 ?>
 <div class="hotel-view-product-quotes">
     <?php \yii\widgets\Pjax::begin(['id' => $pjaxId, 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
@@ -21,7 +21,7 @@ $pjaxId = 'pjax-product-quote-list-' . $hotelProduct->ph_product_id;
     <div class="x_panel">
         <div class="x_title">
             <h2>
-                <i class="fa fa-folder-o"></i> Hotel Quotes
+                <i class="fa fa-folder-o"></i> Attraction Quotes
                 <?php if ($dataProviderQuotes->totalCount) : ?>
                     <sup>(<?=$dataProviderQuotes->totalCount?>)</sup>
                 <?php endif; ?>
@@ -31,10 +31,10 @@ $pjaxId = 'pjax-product-quote-list-' . $hotelProduct->ph_product_id;
                 <li>
                     <?= Html::a('<i class="fa fa-search warning"></i> Search Quotes', null, [
                         'data-url' => \yii\helpers\Url::to([
-                            '/hotel/hotel-quote/search-ajax',
-                            'id' => $hotelProduct->ph_id
+                            '/attraction/attraction-quote/search-ajax',
+                            'id' => $attractionProduct->atn_id
                         ]),
-                        'data-hotel-id' => $hotelProduct->ph_id,
+                        'data-hotel-id' => $attractionProduct->atn_id,
                         'class' => 'btn-search-hotel-quotes'
                     ]) ?>
                 </li>
@@ -54,9 +54,9 @@ $pjaxId = 'pjax-product-quote-list-' . $hotelProduct->ph_product_id;
 <!--                        --><?php //= Html::a('<i class="fa fa-search"></i> Search Quotes', null, [
 //                            'data-url' => \yii\helpers\Url::to([
 //                                '/hotel/hotel-quote/search-ajax',
-//                                'id' => $hotelProduct->ph_id
+//                                'id' => $attractionProduct->ph_id
 //                            ]),
-//                            'data-hotel-id' => $hotelProduct->ph_id,
+//                            'data-hotel-id' => $attractionProduct->ph_id,
 //                            'class' => 'dropdown-item text-success btn-search-hotel-quotes'
 //                        ]) ?>
 <!---->
@@ -78,8 +78,8 @@ $pjaxId = 'pjax-product-quote-list-' . $hotelProduct->ph_product_id;
                     'class' => 'table table-bordered',
                 ],*/
                 'emptyText' => '<div class="text-center">Not found quotes</div><br>',
-                'itemView' => function ($model, $key, $index, $widget) use ($hotelProduct) {
-                    return $this->render('_list_product_quote', ['model' => $model, 'index' => $index, 'key' => $key, 'hotelProduct' => $hotelProduct]);
+                'itemView' => function ($model, $key, $index, $widget) use ($attractionProduct) {
+                    return $this->render('_list_product_quote', ['model' => $model, 'index' => $index, 'key' => $key, 'attractionProduct' => $attractionProduct]);
                 },
                 //'layout' => "{items}<div class=\"text-center\" style='margin-top: -20px; margin-bottom: -25px'>{pager}</div>", // {summary}\n<div class="text-center">{pager}</div>
                 'itemOptions' => [

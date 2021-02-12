@@ -1,8 +1,22 @@
 <?php
 
-use yii\bootstrap4\Html;
+use modules\attraction\models\search\AttractionQuoteSearch;
+use yii\helpers\Html;
 use yii\widgets\DetailView;
+use yii\widgets\Pjax;
 
+/* @var $this yii\web\View */
+/* @var $model modules\attraction\models\Attraction */
+///* @var $dataProviderQuotes \yii\data\ActiveDataProvider */
+
+
+\yii\web\YiiAsset::register($this);
+
+
+$searchModel = new AttractionQuoteSearch();
+$params = Yii::$app->request->queryParams;
+$params['AttractionQuoteSearch']['atnq_attraction_id'] = $model->atn_id;
+$dataProviderQuotes = $searchModel->searchProduct($params);
 ?>
 
 <div class="attraction-view-search">
@@ -23,7 +37,7 @@ use yii\widgets\DetailView;
     <div class="row">
         <div class="col-md-12">
             <?= $this->render('_view_product_quote_list', [
-                'hotelProduct' => $model,
+                'attractionProduct' => $model,
                 'dataProviderQuotes' => $dataProviderQuotes
             ]) ?>
         </div>

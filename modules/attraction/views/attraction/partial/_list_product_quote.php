@@ -3,8 +3,8 @@
 /* @var $this yii\web\View */
 /* @var $index int */
 /* @var $key int */
-/* @var $hotelProduct Hotel */
-/* @var $model HotelQuote */
+/* @var $attractionProduct \modules\attraction\models\Attraction */
+/* @var $model \modules\attraction\models\AttractionQuote */
 
 use kartik\editable\Editable;
 use modules\hotel\models\Hotel;
@@ -19,7 +19,7 @@ use yii\widgets\Pjax;
 
 ?>
 
-<?php if ($model->hqProductQuote) : ?>
+<?php if ($model->atnqProductQuote) : ?>
     <?php
     $js = <<<JS
     $('body').off('click', '.btn-book-quote').on('click', '.btn-book-quote', function (e) {
@@ -137,21 +137,21 @@ JS;
     $this->registerJs($js, \yii\web\View::POS_READY);
     ?>
 
-    <?php Pjax::begin(['id' => 'pjax-product-quote-' . $model->hqProductQuote->pq_id, 'timeout' => 2000, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
+    <?php Pjax::begin(['id' => 'pjax-product-quote-' . $model->atnqProductQuote->pq_id, 'timeout' => 2000, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
 <div class="x_panel">
     <div class="x_title">
 
-        <span class="badge badge-white">Q<?=($model->hq_product_quote_id)?></span> Hotel "<b><?=\yii\helpers\Html::encode($model->hqHotelList->hl_name)?></b>"
-            (<?=\yii\helpers\Html::encode($model->hqHotelList->hl_star)?>),
-            <?php //=\yii\helpers\Html::encode($model->hqProductQuote->pq_name)?>
-            <?=\yii\helpers\Html::encode($model->hq_destination_name ?? '')?>
-             <?php //=\yii\helpers\Html::encode($model->hqProductQuote->pq_gid)?>
+        <span class="badge badge-white">Q<?=($model->atnq_product_quote_id)?></span> Attraction "<b><?=\yii\helpers\Html::encode($model->atnq_attraction_name)?></b>"
+            <?php //=\yii\helpers\Html::encode($model->hqHotelList->hl_star)?>
+            <?php //=\yii\helpers\Html::encode($model->atnqProductQuote->pq_name)?>
+            <?php //=\yii\helpers\Html::encode($model->hq_destination_name ?? '')?>
+             <?php //=\yii\helpers\Html::encode($model->atnqProductQuote->pq_gid)?>
 
-        | <?= ProductQuoteStatus::asFormat($model->hqProductQuote->pq_status_id) ?>
+        | <?= ProductQuoteStatus::asFormat($model->atnqProductQuote->pq_status_id) ?>
 
-        <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $model->hqProductQuote->pq_profit_amount ?>
+        <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $model->atnqProductQuote->pq_profit_amount ?>
 
-        <?php if ($model->hqProductQuote->pq_clone_id) : ?>
+        <?php if ($model->atnqProductQuote->pq_clone_id) : ?>
             <span class="badge badge-warning" style="padding-left: 5px">CLONE</span>
         <?php endif;?>
 
@@ -159,14 +159,14 @@ JS;
 <!--            <li>-->
 <!--                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>-->
 <!--            </li>-->
-            <li class="dropdown dropdown-offer-menu" data-product-quote-id="<?=($model->hq_product_quote_id)?>" data-lead-id="<?=($hotelProduct->phProduct->pr_lead_id)?>" data-url="<?= Url::to(['/offer/offer/list-menu-ajax'])?>">
+            <li class="dropdown dropdown-offer-menu" data-product-quote-id="<?=($model->atnq_product_quote_id)?>" data-lead-id="<?=($attractionProduct->atnProduct->pr_lead_id)?>" data-url="<?= Url::to(['/offer/offer/list-menu-ajax'])?>">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="far fa-handshake"></i> Offers</a>
                 <div class="dropdown-menu" role="menu">
                     <?php // ajax loaded content ?>
                 </div>
             </li>
 
-            <li class="dropdown dropdown-order-menu" data-product-quote-id="<?=($model->hq_product_quote_id)?>" data-lead-id="<?=($hotelProduct->phProduct->pr_lead_id)?>" data-url="<?= Url::to(['/order/order/list-menu-ajax'])?>">
+            <li class="dropdown dropdown-order-menu" data-product-quote-id="<?=($model->atnq_product_quote_id)?>" data-lead-id="<?=($attractionProduct->atnProduct->pr_lead_id)?>" data-url="<?= Url::to(['/order/order/list-menu-ajax'])?>">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fas fa-money-check-alt"></i> Orders</a>
                 <div class="dropdown-menu" role="menu">
                     <?php // ajax loaded content ?>
@@ -176,7 +176,7 @@ JS;
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-bars text-warning"></i></a>
                 <div class="dropdown-menu" role="menu">
-                    <h6 class="dropdown-header">Quote Q<?=($model->hq_product_quote_id)?></h6>
+                    <h6 class="dropdown-header">Quote Q<?=($model->atnq_product_quote_id)?></h6>
                     <?php /*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Update Request', null, [
                                 'class' => 'dropdown-item text-danger btn-update-product',
                                 'data-product-id' => $product->pr_id
@@ -185,8 +185,8 @@ JS;
 
                     <!-- Level three dropdown-->
                     <div class="dropdown-submenu">
-                        <a id="dropdownMenu<?=($model->hq_product_quote_id)?>" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="dropdown-item dropdown-toggle">Add to Offer</a>
-                        <div aria-labelledby="dropdownMenu<?=($model->hq_product_quote_id)?>" class="dropdown-menu">
+                        <a id="dropdownMenu<?=($model->atnq_product_quote_id)?>" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="dropdown-item dropdown-toggle">Add to Offer</a>
+                        <div aria-labelledby="dropdownMenu<?=($model->atnq_product_quote_id)?>" class="dropdown-menu">
                             <a href="#" class="dropdown-item">3rd level</a>
                             <a href="#" class="dropdown-item">3rd level</a>
                         </div>
@@ -204,16 +204,16 @@ JS;
 
                     <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-warning"></i> Clone quote', null, [
                         'class' => 'dropdown-item text-warning btn-clone-product-quote',
-                        'data-product-quote-id' => $model->hq_product_quote_id,
-                        'data-hotel-quote-id' => $model->hq_id,
-                        'data-product-id' => $model->hqProductQuote->pq_product_id,
+                        'data-product-quote-id' => $model->atnq_product_quote_id,
+                        'data-hotel-quote-id' => $model->atnq_id,
+                        'data-product-id' => $model->atnqProductQuote->pq_product_id,
                     ]) ?>
 
                     <?= Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
                         'class' => 'dropdown-item text-success btn-add-product-quote-option',
-                        //'data-product-quote-id' => $model->hq_product_quote_id,
-                        'data-url' => Url::to(['/product/product-quote-option/create-ajax', 'id' => $model->hq_product_quote_id]),
-                        //'data-product-id' => $model->hqProductQuote->pq_product_id,
+                        //'data-product-quote-id' => $model->atnq_product_quote_id,
+                        'data-url' => Url::to(['/product/product-quote-option/create-ajax', 'id' => $model->atnq_product_quote_id]),
+                        //'data-product-id' => $model->atnqProductQuote->pq_product_id,
                     ]) ?>
 
                     <?php if ($model->isBookable()) : ?>
@@ -223,8 +223,8 @@ JS;
                             [
                                 'class' => 'dropdown-item btn-book-quote',
                                 'data-url' => Url::to('/hotel/hotel-quote/ajax-book'),
-                                'data-hotel-quote-id' => $model->hq_id,
-                                'data-product-id' => $model->hqProductQuote->pq_product_id,
+                                'data-hotel-quote-id' => $model->atnq_id,
+                                'data-product-id' => $model->atnqProductQuote->pq_product_id,
                             ]
                         ) ?>
                     <?php endif; ?>
@@ -235,8 +235,8 @@ JS;
                             [
                                 'class' => 'dropdown-item text-danger btn-cancel-book-quote',
                                 'data-url' => Url::to('/hotel/hotel-quote/ajax-cancel-book'),
-                                'data-hotel-quote-id' => $model->hq_id,
-                                'data-product-id' => $model->hqProductQuote->pq_product_id,
+                                'data-hotel-quote-id' => $model->atnq_id,
+                                'data-product-id' => $model->atnqProductQuote->pq_product_id,
                             ]
                         ) ?>
                     <?php endif; ?>
@@ -246,24 +246,24 @@ JS;
                         null,
                         [
                             'class' => 'dropdown-item text-secondary btn-product-api-service-log',
-                            'data-url' => Url::to(['/hotel/hotel-quote-service-log/hotel-quote-log', 'id' => $model->hq_id]),
-                            'data-hotel-quote-id' => $model->hq_id,
-                            'data-product-id' => $model->hqProductQuote->pq_product_id,
+                            'data-url' => Url::to(['/hotel/hotel-quote-service-log/hotel-quote-log', 'id' => $model->atnq_id]),
+                            'data-hotel-quote-id' => $model->atnq_id,
+                            'data-product-id' => $model->atnqProductQuote->pq_product_id,
                         ]
                     )?>
 
                     <?= Html::a('<i class="fa fa-list"></i> Status log', null, [
                         'class' => 'dropdown-item text-secondary btn-product-quote-status-log',
-                        'data-url' => Url::to(['/product/product-quote-status-log/show', 'gid' => $model->hqProductQuote->pq_gid]),
-                        'data-gid' => $model->hqProductQuote->pq_gid,
+                        'data-url' => Url::to(['/product/product-quote-status-log/show', 'gid' => $model->atnqProductQuote->pq_gid]),
+                        'data-gid' => $model->atnqProductQuote->pq_gid,
                     ]) ?>
 
                     <div class="dropdown-divider"></div>
                     <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [
                         'class' => 'dropdown-item text-danger btn-delete-product-quote',
-                        'data-product-quote-id' => $model->hq_product_quote_id,
-                        'data-hotel-quote-id' => $model->hq_id,
-                        'data-product-id' => $model->hqProductQuote->pq_product_id,
+                        'data-product-quote-id' => $model->atnq_product_quote_id,
+                        'data-hotel-quote-id' => $model->atnq_id,
+                        'data-product-id' => $model->atnqProductQuote->pq_product_id,
                     ]) ?>
                 </div>
             </li>
@@ -278,11 +278,13 @@ JS;
             'leadForm' => $leadForm,
             'is_manager' => $is_manager,
         ])*/ ?>
-        <i class="fa fa-user"></i> <?=$model->hqProductQuote->pqCreatedUser ? Html::encode($model->hqProductQuote->pqCreatedUser->username) : '-'?>,
-        <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($model->hqProductQuote->pq_created_dt)) ?>,
-        <i title="code: <?=\yii\helpers\Html::encode($model->hq_hash_key)?>">Hash: <?=\yii\helpers\Html::encode($model->hq_hash_key)?></i>
+        <i class="fa fa-user"></i> <?=$model->atnqProductQuote->pqCreatedUser ? Html::encode($model->atnqProductQuote->pqCreatedUser->username) : '-'?>,
+        <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($model->atnqProductQuote->pq_created_dt)) ?>,
+        <i title="code: <?=\yii\helpers\Html::encode($model->atnq_hash_key)?>">Hash: <?=\yii\helpers\Html::encode($model->atnq_hash_key)?></i>
 
-        <?php if ($model->hotelQuoteRooms) :
+
+
+        <?php if ($model->atnqProductQuote) :
             $totalAmountRoom = 0;
             $adlTotalCount = 0;
             $chdTotalCount = 0;
@@ -306,7 +308,7 @@ JS;
                         <th>SFS, $</th>
                         <th>SP, $</th>
                     </tr>
-                    <?php foreach ($model->hotelQuoteRooms as $room) :
+                    <?php /*foreach ($model->hotelQuoteRooms as $room) :
                         $totalAmountRoom += (float) $room->hqr_amount;
                         $adlTotalCount += $room->hqr_adults;
                         $chdTotalCount += $room->hqr_children;
@@ -315,80 +317,80 @@ JS;
                         $totalExMkp += $room->hqr_agent_mark_up;
 
                         $sfs = round(($room->hqr_amount + $room->hqr_system_mark_up + $room->hqr_agent_mark_up) * $room->hqr_service_fee_percent / 100, 2);
-                        ?>
+                        */?>
 
-                    <tr>
+                        <tr>
+                            <td title="<?=Html::encode($model->atnq_id)?>"><?=Html::encode($model->atnq_id)?></td>
+                            <td title="code: <?=Html::encode($model->atnq_hash_key)?>, class: <?=Html::encode('$room->hqr_class')?>"><?=Html::encode('$room->hqr_room_name')?></td>
 
-                        <td title="<?=Html::encode($room->hqr_key)?>"><?=Html::encode($room->hqr_id)?></td>
-                        <td title="code: <?=Html::encode($room->hqr_code)?>, class: <?=Html::encode($room->hqr_class)?>"><?=Html::encode($room->hqr_room_name)?></td>
-
-                        <td title="code: <?=Html::encode($room->hqr_board_code)?>">
-                            <?=Html::encode($room->hqr_board_name)?>
-                            <?php if ($room->hqr_rate_comments) :?>
-                                <i class="fa fa-info-circle green" title="Rate Comments: <?=Html::encode($room->hqr_rate_comments)?>"></i>
-                            <?php endif;?>
-                        </td>
-                        <td class="text-center"><?=$room->hqr_adults ? '<i class="fa fa-user"></i> ' . ($room->hqr_adults) : '-'?></td>
-                        <td class="text-center"><?=$room->hqr_children ? '<i class="fa fa-child"></i> ' . ($room->hqr_children) : '-'?></td>
-                        <td>
-                            <?php if ($room->hqr_cancel_amount) : ?>
-                                <?=Html::encode($room->hqr_cancel_amount)?>, <?=Html::encode($room->hqr_cancel_from_dt)?>
-                            <?php endif; ?>
-                        </td>
-                        <td><?= Html::encode($room->hqr_amount) ?></td>
-                        <td><?= Html::encode($room->hqr_system_mark_up) ?></td>
-                        <td>
-                            <?= Editable::widget([
-                                'name' => 'extra_markup[' . $room->hqr_id . ']',
-                                'asPopover' => false,
-                                'pjaxContainerId' => 'pjax-product-quote-' . $model->hqProductQuote->pq_id,
-                                'value' => number_format($room->hqr_agent_mark_up, 2),
-                                'header' => 'Extra markup',
-                                'size' => 'sm',
-                                'inputType' => Editable::INPUT_TEXT,
-                                'buttonsTemplate' => '{submit}',
-                                'pluginEvents' => ['editableSuccess' => "function(event, val, form, data) { pjaxReload({container: '#pjax-product-quote-{$model->hqProductQuote->pq_id}'}); }",],
-                                'inlineSettings' => [
-                                    'templateBefore' => '<div class="editable-pannel">{loading}',
-                                    'templateAfter' => '{buttons}{close}</div>'],
-                                'options' => ['class' => 'form-control','style' => 'width:50px;', 'placeholder' => 'Enter extra markup','resetButton' => '<i class="fa fa-ban"></i>'],
-                                'formOptions' => [
-                                    'action' => Url::toRoute(['/hotel/hotel-quote/ajax-update-agent-markup'])
-                                ]
-                            ]) ?>
-                        </td>
-                        <td><?= Html::encode($room->hqr_service_fee_percent) ?>%</td>
-                        <td><?= $sfs ?></td>
-    <!--                    <td>--><?php ////=Html::encode($room->hqr_id)?><!--</td>-->
-                        <td class="text-right"><?=number_format($room->hqr_amount + $room->hqr_system_mark_up + $room->hqr_agent_mark_up + $sfs, 2)?> <?=Html::encode($room->hqr_currency)?></td>
-                    </tr>
-                    <?php endforeach; ?>
+                            <td title="code: <?=Html::encode('$room->hqr_board_code')?>">
+                                <?=Html::encode('$room->hqr_board_name')?>
+                                <?php if ('$room->hqr_rate_comments') :?>
+                                    <i class="fa fa-info-circle green" title="Rate Comments: <?=Html::encode('$room->hqr_rate_comments')?>"></i>
+                                <?php endif;?>
+                            </td>
+                            <td class="text-center"><?='$room->hqr_adults' ? '<i class="fa fa-user"></i> ' . '($room->hqr_adults)' : '-'?></td>
+                            <td class="text-center"><?='$room->hqr_children' ? '<i class="fa fa-child"></i> ' . '($room->hqr_children)' : '-'?></td>
+                            <td>
+                                <?php /*if ($room->hqr_cancel_amount) : */?><!--
+                                    <?/*=Html::encode($room->hqr_cancel_amount)*/?>, <?/*=Html::encode($room->hqr_cancel_from_dt)*/?>
+                                --><?php /*endif; */?>
+                            </td>
+                            <td><?= Html::encode('$room->hqr_amount)') ?></td>
+                            <td><?= Html::encode('$room->hqr_system_mark_up)') ?></td>
+                            <td>
+                                <!-- <?/*= Editable::widget([
+                                    'name' => 'extra_markup[' . $room->hqr_id . ']',
+                                    'asPopover' => false,
+                                    'pjaxContainerId' => 'pjax-product-quote-' . $model->hqProductQuote->pq_id,
+                                    'value' => number_format($room->hqr_agent_mark_up, 2),
+                                    'header' => 'Extra markup',
+                                    'size' => 'sm',
+                                    'inputType' => Editable::INPUT_TEXT,
+                                    'buttonsTemplate' => '{submit}',
+                                    'pluginEvents' => ['editableSuccess' => "function(event, val, form, data) { pjaxReload({container: '#pjax-product-quote-{$model->hqProductQuote->pq_id}'}); }",],
+                                    'inlineSettings' => [
+                                        'templateBefore' => '<div class="editable-pannel">{loading}',
+                                        'templateAfter' => '{buttons}{close}</div>'],
+                                    'options' => ['class' => 'form-control','style' => 'width:50px;', 'placeholder' => 'Enter extra markup','resetButton' => '<i class="fa fa-ban"></i>'],
+                                    'formOptions' => [
+                                        'action' => Url::toRoute(['/hotel/hotel-quote/ajax-update-agent-markup'])
+                                    ]
+                                ]) */?> -->
+                            </td>
+                            <td><?= Html::encode('$room->hqr_service_fee_percent') ?>%</td>
+                            <td><?= '$sfs' ?></td>
+                            <td class="text-right"><?='number_format($room->hqr_amount + $room->hqr_system_mark_up + $room->hqr_agent_mark_up + $sfs, 2)'?> <?=Html::encode('$room->hqr_currency')?></td>
+                        </tr>
+                    <?php /*endforeach; */?>
                     <tr>
                         <td colspan="3" class="text-right">Room Total: </td>
-                        <td class="text-center"><?=$adlTotalCount ? '<i class="fa fa-user"></i> ' . $adlTotalCount : '-'?></td>
-                        <td class="text-center"><?=$chdTotalCount ? '<i class="fa fa-child"></i> ' . $chdTotalCount : '-'?></td>
+                        <td class="text-center"><?='$adlTotalCount' ? '<i class="fa fa-user"></i> ' . '$adlTotalCount' : '-'?></td>
+                        <td class="text-center"><?='$chdTotalCount' ? '<i class="fa fa-child"></i> ' . '$chdTotalCount' : '-'?></td>
                         <td class="text-right"></td>
-                        <td class="text-right"><?= number_format($totalNp, 2) ?></td>
-                        <td class="text-right"><?= number_format($totalMkp, 2) ?></td>
-                        <td class="text-right"><?= number_format($totalExMkp, 2) ?></td>
+                        <td class="text-right"><?= 'number_format($totalNp, 2)' ?></td>
+                        <td class="text-right"><?= 'number_format($totalMkp, 2)' ?></td>
+                        <td class="text-right"><?= 'number_format($totalExMkp, 2)' ?></td>
                         <td class="text-right"></td>
-                        <td class="text-right"><?= number_format($model->hqProductQuote->pq_service_fee_sum, 2) ?></td>
+                        <td class="text-right"><?= 'number_format($model->hqProductQuote->pq_service_fee_sum, 2)' ?></td>
 
                         <?php
-                            $price = round((float) $model->hqProductQuote->pq_price, 2);
-                            $totalAmountRoom = round($totalAmountRoom, 2);
-                        ?>
+/*                        $price = round((float) $model->hqProductQuote->pq_price, 2);
+                        $totalAmountRoom = round($totalAmountRoom, 2);
+                        */?>
 
-                        <td class="text-right <?=( $totalAmountRoom !== $price) ? 'danger' : ''?>">
-                            <b title="<?=$totalAmountRoom?> & <?=$price?>"><?=number_format($price, 2)?> USD</b>
+                        <td class="text-right <?='( $totalAmountRoom !== $price)' ? 'danger' : ''?>">
+                           <!-- <b title="<?/*=$totalAmountRoom*/?> & <?/*=$price*/?>"><?/*=number_format($price, 2)*/?> USD</b>-->
                         </td>
                     </tr>
                 </table>
             </div>
         <?php endif; ?>
 
-        <?= $this->render('@frontend/views/lead/quotes/partial/_quote_option_list', ['productQuote' => $model->hqProductQuote]) ?>
-        <?= $this->render('@frontend/views/lead/quotes/partial/_quote_total', ['productQuote' => $model->hqProductQuote]) ?>
+
+
+        <?= $this->render('@frontend/views/lead/quotes/partial/_quote_option_list', ['productQuote' => $model->atnqProductQuote]) ?>
+        <?= $this->render('@frontend/views/lead/quotes/partial/_quote_total', ['productQuote' => $model->atnqProductQuote]) ?>
 
     </div>
 </div>
