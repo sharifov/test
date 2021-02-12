@@ -8,6 +8,7 @@ use modules\cruise\src\entity\cruiseQuote\search\CruiseQuoteSearch;
 use modules\cruise\src\services\search\CruiseQuoteSearch as SearchService;
 use modules\cruise\src\services\search\Params;
 use modules\cruise\src\useCase\createQuote\CreateQuoteService;
+use modules\cruise\src\useCase\updateMarkup\CruiseMarkupService;
 use sales\auth\Auth;
 use Yii;
 use modules\cruise\src\entity\cruiseQuote\CruiseQuote;
@@ -15,6 +16,7 @@ use yii\base\Exception;
 use yii\data\ArrayDataProvider;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -24,12 +26,20 @@ class CruiseQuoteController extends FController
 {
     private \modules\cruise\src\services\search\CruiseQuoteSearch $cruiseQuoteSearch;
     private CreateQuoteService $createQuoteService;
+    private CruiseMarkupService $cruiseMarkupService;
 
-    public function __construct($id, $module, SearchService $cruiseQuoteSearch, CreateQuoteService $createQuoteService, $config = [])
-    {
+    public function __construct(
+        $id,
+        $module,
+        SearchService $cruiseQuoteSearch,
+        CreateQuoteService $createQuoteService,
+        CruiseMarkupService $cruiseMarkupService,
+        $config = []
+    ) {
         parent::__construct($id, $module, $config);
         $this->cruiseQuoteSearch = $cruiseQuoteSearch;
         $this->createQuoteService = $createQuoteService;
+        $this->cruiseMarkupService = $cruiseMarkupService;
     }
 
     /**
@@ -252,5 +262,28 @@ class CruiseQuoteController extends FController
             'product_id' => $productId,
             'message' => 'Successfully added quote. Cruise "' . Html::encode($quote['cruiseLine']['name']) . '", Cruise Quote Id: (' . $createdQuoteId . ')'
         ];
+    }
+
+    public function actionAjaxUpdateAgentMarkup(): Response
+    {
+        $extraMarkup = Yii::$app->request->post('extra_markup');
+
+        $cruiseQuoteId = array_key_first($extraMarkup);
+        $value = $extraMarkup[$cruiseQuoteId];
+
+        if ($cruiseQuoteId && $value !== null) {
+            try {
+                $this->cruiseMarkupService->updateAgentMarkup($cruiseQuoteId, $value);
+            } catch (\RuntimeException $e) {
+                return $this->asJson(['message' => $e->getMessage()]);
+            } catch (\Throwable $e) {
+                Yii::error($e->getTraceAsString(), 'HotelQuoteController::actionAjaxUpdateAgentMarkup::Throwable');
+                return $this->asJson(['message' => 'Server error']);
+            }
+
+            return $this->asJson(['output' => $value]);
+        }
+
+        throw new BadRequestHttpException();
     }
 }

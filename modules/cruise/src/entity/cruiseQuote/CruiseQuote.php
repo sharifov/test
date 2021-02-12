@@ -17,6 +17,14 @@ use Yii;
  * @property int|null $crq_product_quote_id
  * @property int|null $crq_cruise_id
  * @property string|null $crq_data_json
+ * @property $crq_amount
+ * @property $crq_amount_per_person
+ * @property $crq_currency
+ * @property $crq_adults
+ * @property $crq_children
+ * @property $crq_system_mark_up
+ * @property $crq_agent_mark_up
+ * @property $crq_service_fee_percent
  *
  * @property Cruise $cruise
  * @property ProductQuote $productQuote
@@ -56,6 +64,14 @@ class CruiseQuote extends \yii\db\ActiveRecord implements Quotable
             'crq_product_quote_id' => 'Product Quote ID',
             'crq_cruise_id' => 'Cruise ID',
             'crq_data_json' => 'Data Json',
+            'crq_amount' => 'Amount',
+            'crq_amount_per_person' => 'Amount per person',
+            'crq_currency' => 'Currency',
+            'crq_adults' => 'Adults',
+            'crq_children' => 'Children',
+            'crq_system_mark_up' => 'System mark up',
+            'crq_agent_mark_up' => 'Agent mark up',
+            'crq_service_fee_percent' => 'Service fee percent',
         ];
     }
 

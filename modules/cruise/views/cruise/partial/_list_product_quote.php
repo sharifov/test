@@ -280,23 +280,57 @@ JS;
         <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($model->productQuote->pq_created_dt)) ?>,
         <i title="code: <?=\yii\helpers\Html::encode($model->crq_hash_key)?>">Hash: <?=\yii\helpers\Html::encode($model->crq_hash_key)?></i>
 
+        <?php
+        $sfs = round(($model->crq_amount + $model->crq_system_mark_up + $model->crq_agent_mark_up) * $model->crq_service_fee_percent / 100, 2);
+        ?>
             <div class="overflow_auto" style="overflow: auto">
                 <table class="table table-striped table-bordered">
                     <tr>
-                        <th width="250">Cabin Name</th>
-                        <th>Price, USD</th>
+                        <th width="150">Cabin Name</th>
+                        <th>Per person, $</th>
                         <th>Adult</th>
                         <th>Children</th>
+                        <th>NP, $</th>
+                        <th>Mkp, $</th>
+                        <th>Ex Mkp, $</th>
+                        <th>SFP, %</th>
+                        <th>SFS, $</th>
+                        <th>SP, $</th>
                     </tr>
                     <tr>
                         <th><?= $model->crq_data_json['cabin']['name'] ?></th>
-                        <th><?= number_format($model->crq_data_json['cabin']['price'], 2) ?></th>
-                        <th><?= $model->getAdults() ?></th>
-                        <th><?= $model->getChildren() ?></th>
+                        <th><?= $model->crq_amount_per_person ?></th>
+                        <th><?= $model->crq_adults ?></th>
+                        <th><?= $model->crq_children ?></th>
+                        <th><?= $model->crq_amount ?></th>
+                        <th><?= $model->crq_system_mark_up ?></th>
+                        <td>
+                            <?= Editable::widget([
+                                'name' => 'extra_markup[' . $model->crq_id . ']',
+                                'asPopover' => false,
+                                'pjaxContainerId' => 'pjax-product-quote-' . $model->productQuote->pq_id,
+                                'value' => number_format($model->crq_agent_mark_up, 2),
+                                'header' => 'Extra markup',
+                                'size' => 'sm',
+                                'inputType' => Editable::INPUT_TEXT,
+                                'buttonsTemplate' => '{submit}',
+                                'pluginEvents' => ['editableSuccess' => "function(event, val, form, data) { pjaxReload({container: '#pjax-product-quote-{$model->productQuote->pq_id}'}); }",],
+                                'inlineSettings' => [
+                                    'templateBefore' => '<div class="editable-pannel">{loading}',
+                                    'templateAfter' => '{buttons}{close}</div>'],
+                                'options' => ['class' => 'form-control','style' => 'width:50px;', 'placeholder' => 'Enter extra markup','resetButton' => '<i class="fa fa-ban"></i>'],
+                                'formOptions' => [
+                                    'action' => Url::toRoute(['/cruise/cruise-quote/ajax-update-agent-markup'])
+                                ]
+                            ]) ?>
+                        </td>
+                        <th><?= $model->crq_service_fee_percent ?></th>
+                        <th><?= $sfs ?></th>
+                        <th><?= $total = number_format($model->crq_amount + $model->crq_system_mark_up + $model->crq_agent_mark_up + $sfs, 2)?> <?=Html::encode($model->crq_currency)?> </th>
                     </tr>
                     <tr>
                         <td class="text-right">Total: </td>
-                        <td class="text-left" colspan="3"><?= number_format(($model->crq_data_json['cabin']['price'] * ($model->getAdults() + $model->getChildren())), 2) ?></td>
+                        <td class="text-left" colspan="3"><?= $total ?></td>
                     </tr>
 
                 </table>

@@ -23,7 +23,7 @@ class m210212_090745_add_processing_fee_cruise extends Migration
 
         $settings = json_decode($productCruise->pt_settings, true);
 
-        if (array_key_exists('processing_fee_amount', $settings)) {
+        if ($settings && is_array($settings) && array_key_exists('processing_fee_amount', $settings)) {
             return;
         }
 
@@ -47,7 +47,7 @@ class m210212_090745_add_processing_fee_cruise extends Migration
 
         $settings = json_decode($productCruise->pt_settings, true);
 
-        if (array_key_exists('processing_fee_amount', $settings)) {
+        if ($settings && is_array($settings) && array_key_exists('processing_fee_amount', $settings)) {
             unset($settings['processing_fee_amount']);
             $productCruise->pt_settings = json_encode($settings);
             $productCruise->save();
