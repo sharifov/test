@@ -34,7 +34,21 @@ use yii\web\View;
             Price per day:
           </span>
           <strong class="text-dark">
-            <?php echo RentCarDataParser::getPriceCurrencySymbol($dataRentCar) ?><?php echo RentCarDataParser::getPricePerDay($dataRentCar) ?>
+            <?php
+               $perDay = RentCarDataParser::getPricePerDay($dataRentCar);
+            ?>
+            <?php echo RentCarDataParser::getPriceCurrencySymbol($dataRentCar) ?><?php echo $perDay ?>
+          </strong>
+        </span>
+        <span class="quote__vc">
+          <span class="mr-1">
+            Days:
+          </span>
+          <strong class="text-dark">
+            <?php
+               $days = $rentCar->calculateDays();
+            ?>
+            <?php echo $days ?>
           </strong>
         </span>
         <span class="quote__vc">
@@ -44,7 +58,10 @@ use yii\web\View;
             </strong>
           </span>
           <strong class="text-success">
-            <?php echo RentCarDataParser::getPriceCurrencySymbol($dataRentCar) ?><?php echo RentCarDataParser::getPriceTotal($dataRentCar) ?>
+            <?php
+                $total = (int) $perDay * $days;
+            ?>
+            <?php echo RentCarDataParser::getPriceCurrencySymbol($dataRentCar) ?><?php echo $total ?>
           </strong>
         </span>
       </div>

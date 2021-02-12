@@ -100,8 +100,7 @@ class RentCarQuoteController extends FController
             $rentCarQuote = RentCarQuoteDto::create(
                 $quoteData,
                 $productQuote->pq_id,
-                $rentCar->prc_id,
-                $rentCar->prc_request_hash_key
+                $rentCar
             );
             if (!$rentCarQuote->save()) {
                 throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($rentCarQuote));

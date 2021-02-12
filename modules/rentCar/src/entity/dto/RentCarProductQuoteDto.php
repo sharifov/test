@@ -23,15 +23,17 @@ class RentCarProductQuoteDto
      */
     public static function create(RentCar $rentCar, array $data): ProductQuote
     {
+        $totalPrice = number_format($rentCar->calculateDays() * RentCarDataParser::getPricePerDay($data), 2);
+
         $model = new ProductQuote();
         $model->pq_product_id = $rentCar->prc_product_id;
         $model->pq_origin_currency = RentCarDataParser::getPriceCurrencyCode($data);
         $model->pq_client_currency = ProductQuoteHelper::getClientCurrencyCode($rentCar->prcProduct);
 
         $model->pq_owner_user_id = Yii::$app->user->id;
-        $model->pq_price = RentCarDataParser::getPriceTotal($data);
-        $model->pq_origin_price = RentCarDataParser::getPriceTotal($data);
-        $model->pq_client_price = RentCarDataParser::getPriceTotal($data);
+        $model->pq_price = $totalPrice;
+        $model->pq_origin_price = $totalPrice;
+        $model->pq_client_price = $totalPrice;
         $model->pq_status_id = ProductQuoteStatus::PENDING;
         $model->pq_gid = ProductQuote::generateGid();
         $model->pq_service_fee_sum = 0;
