@@ -43,7 +43,7 @@
       <div class="container-fluid">
         <div class="row">
           <div class="col-2">
-            <?php if (isset($dataHotel[$key]['image'], $dataHotel[$key]['url'])) : ?>
+            <?php if (isset($dataHotel[$key]['image']['url'])) : ?>
                 <img src="<?= $dataHotel[$key]['image']['url'] ?>" alt="Attraction Name" class="img-thumbnail" style="max-width: 200px;">
             <?php else : ?>
               <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve"> <g transform="translate(1 1)"> <g>
