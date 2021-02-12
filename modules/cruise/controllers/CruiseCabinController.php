@@ -2,6 +2,7 @@
 
 namespace modules\cruise\controllers;
 
+use frontend\controllers\FController;
 use modules\cruise\src\entity\cruise\Cruise;
 use modules\cruise\src\entity\cruiseCabinPax\CruiseCabinPax;
 use modules\cruise\src\useCase\createCabin\CreateCabinForm;
@@ -11,13 +12,12 @@ use modules\cruise\src\entity\cruiseCabin\CruiseCabin;
 use modules\cruise\src\entity\cruiseCabin\search\CruiseCabinSearch;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\db\StaleObjectException;
 
-class CruiseCabinController extends Controller
+class CruiseCabinController extends FController
 {
     /**
     * @return array

@@ -2,16 +2,16 @@
 
 namespace modules\cruise\controllers;
 
+use frontend\controllers\FController;
 use Yii;
 use modules\cruise\src\entity\cruiseCabinPax\CruiseCabinPax;
 use modules\cruise\src\entity\cruiseCabinPax\search\CruiseCabinPaxSearch;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\db\StaleObjectException;
 
-class CruiseCabinPaxController extends Controller
+class CruiseCabinPaxController extends FController
 {
     /**
     * @return array

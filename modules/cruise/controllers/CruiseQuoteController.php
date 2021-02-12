@@ -2,6 +2,7 @@
 
 namespace modules\cruise\controllers;
 
+use frontend\controllers\FController;
 use modules\cruise\src\entity\cruise\Cruise;
 use modules\cruise\src\entity\cruiseQuote\search\CruiseQuoteSearch;
 use modules\cruise\src\services\search\CruiseQuoteSearch as SearchService;
@@ -14,13 +15,12 @@ use yii\base\Exception;
 use yii\data\ArrayDataProvider;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\db\StaleObjectException;
 
-class CruiseQuoteController extends Controller
+class CruiseQuoteController extends FController
 {
     private \modules\cruise\src\services\search\CruiseQuoteSearch $cruiseQuoteSearch;
     private CreateQuoteService $createQuoteService;
@@ -145,6 +145,12 @@ class CruiseQuoteController extends Controller
         }
 
         try {
+            if (!$cruise->cabins) {
+                throw new \DomainException('Please add cabin.');
+            }
+            if (!$cruise->crs_departure_date_from && !$cruise->crs_arrival_date_to) {
+                throw new \DomainException('Please update request.');
+            }
             $params = new Params($cruise);
             if (!$params->validate()) {
                 throw new \DomainException('Invalid params. Errors: ' . VarDumper::dumpAsString($params->getErrors()));

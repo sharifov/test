@@ -86,15 +86,16 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
                             'class' => 'dropdown-item text-success btn-search-cruise-quotes'
                         ]) ?>
 
-
-                        <?= Html::a('<i class="fa fa-plus"></i> Add Cabin', null, [
-                            'data-url' => \yii\helpers\Url::to([
-                                '/cruise/cruise-cabin/create-ajax',
-                                'id' => $product->cruise->crs_id,
-                            ]),
-                            'data-cruise-id' => $product->cruise->crs_id,
-                            'class' => 'dropdown-item btn-add-cruise-cabin'
-                        ]) ?>
+                        <?php if (!$product->cruise->cabins) : ?>
+                            <?= Html::a('<i class="fa fa-plus"></i> Add Cabin', null, [
+                                'data-url' => \yii\helpers\Url::to([
+                                    '/cruise/cruise-cabin/create-ajax',
+                                    'id' => $product->cruise->crs_id,
+                                ]),
+                                'data-cruise-id' => $product->cruise->crs_id,
+                                'class' => 'dropdown-item btn-add-cruise-cabin'
+                            ]) ?>
+                        <?php endif; ?>
 
                         <div class="dropdown-divider"></div>
                         <?= Html::a('<i class="fa fa-edit"></i> Update Product', null, [

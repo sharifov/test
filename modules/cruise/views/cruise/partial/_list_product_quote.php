@@ -170,19 +170,19 @@ JS;
                 <div class="dropdown-menu" role="menu">
                     <h6 class="dropdown-header">Quote Q<?=($model->crq_product_quote_id)?></h6>
 
-                    <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-warning"></i> Clone quote', null, [
+                    <?php /*= Html::a('<i class="glyphicon glyphicon-remove-circle text-warning"></i> Clone quote', null, [
                         'class' => 'dropdown-item text-warning btn-clone-product-quote',
                         'data-product-quote-id' => $model->crq_product_quote_id,
                         'data-cruise-quote-id' => $model->crq_id,
                         'data-product-id' => $model->productQuote->pq_product_id,
-                    ]) ?>
+                    ]) */ ?>
 
-                    <?= Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
+                    <?php /*= Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
                         'class' => 'dropdown-item text-success btn-add-product-quote-option',
                         //'data-product-quote-id' => $model->hq_product_quote_id,
                         'data-url' => Url::to(['/product/product-quote-option/create-ajax', 'id' => $model->crq_product_quote_id]),
                         //'data-product-id' => $model->hqProductQuote->pq_product_id,
-                    ]) ?>
+                    ]) */ ?>
 
                     <?php /* if ($model->isBookable()) : ?>
                         <?= Html::a(
@@ -209,7 +209,7 @@ JS;
                         ) ?>
                     <?php endif;*/  ?>
 
-                    <?= Html::a(
+                    <?php /*= Html::a(
                         '<i class="fa fa-list"></i> API Service Log',
                         null,
                         [
@@ -218,13 +218,13 @@ JS;
                             'data-cruise-quote-id' => $model->crq_id,
                             'data-product-id' => $model->productQuote->pq_product_id,
                         ]
-                    )?>
+                    ) */ ?>
 
-                    <?= Html::a('<i class="fa fa-list"></i> Status log', null, [
+                    <?php  /*= Html::a('<i class="fa fa-list"></i> Status log', null, [
                         'class' => 'dropdown-item text-secondary btn-product-quote-status-log',
                         'data-url' => Url::to(['/product/product-quote-status-log/show', 'gid' => $model->productQuote->pq_gid]),
                         'data-gid' => $model->productQuote->pq_gid,
-                    ]) ?>
+                    ]) */ ?>
 
                     <div class="dropdown-divider"></div>
                     <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [

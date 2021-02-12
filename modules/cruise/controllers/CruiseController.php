@@ -2,12 +2,12 @@
 
 namespace modules\cruise\controllers;
 
+use frontend\controllers\FController;
 use modules\cruise\src\useCase\updateCruiseRequest\CruiseUpdateRequestForm;
 use modules\cruise\src\useCase\updateCruiseRequest\CruiseUpdateService;
 use Yii;
 use modules\cruise\src\entity\cruise\Cruise;
 use modules\cruise\src\entity\cruise\search\CruiseSearch;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -18,7 +18,7 @@ use yii\db\StaleObjectException;
  *
  * @property CruiseUpdateService $cruiseUpdateService
  */
-class CruiseController extends Controller
+class CruiseController extends FController
 {
     private CruiseUpdateService $cruiseUpdateService;
 
