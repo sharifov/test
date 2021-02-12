@@ -60,7 +60,8 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
                                 'id' => $product->rentCar->prc_id
                             ]),
                             'data-model-id' => $product->rentCar->prc_id,
-                            'class' => 'dropdown-item text-warning btn-update-rent-car-request'
+                            'data-product-id' => $product->pr_id,
+                            'class' => 'dropdown-item text-warning btn-update-rent-car-request btn-update-request',
                         ]) ?>
 
                         <?= Html::a('<i class="fa fa-search"></i> Search Quotes', null, [
