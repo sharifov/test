@@ -46,14 +46,28 @@ $this->params['breadcrumbs'][] = $this->title;
                 'e_lead_id',
                 'e_case_id',
                 'e_project_id',
-                'e_email_from:email',
+                //'e_email_from:email',
+                [
+                    'attribute' => 'e_email_from',
+                    'value' => static function (\common\models\Email $model) {
+                        if ($model->e_type_id == $model::TYPE_INBOX) {
+                            return MaskEmailHelper::masking($model->e_email_from);
+                        }
+                        return $model->e_email_from;
+                    },
+                    'format' => 'email'
+                ],
                 'e_email_from_name',
                 //'e_email_to:email',
                 [
                     'attribute' => 'e_email_to',
                     'value' => static function (\common\models\Email $model) {
-                        return MaskEmailHelper::masking($model->e_email_to);
+                        if ($model->e_type_id == $model::TYPE_OUTBOX) {
+                            return MaskEmailHelper::masking($model->e_email_to);
+                        }
+                        return $model->e_email_to;
                     },
+                    'format' => 'email'
                 ],
                 'e_email_to_name',
                 'e_email_cc:email',
