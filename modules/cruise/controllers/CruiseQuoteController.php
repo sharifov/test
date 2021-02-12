@@ -287,7 +287,6 @@ class CruiseQuoteController extends FController
                 return $this->asJson(['message' => $e->getMessage()]);
             } catch (\Throwable $e) {
                 Yii::error($e->getTraceAsString(), 'HotelQuoteController::actionAjaxUpdateAgentMarkup::Throwable');
-                return $this->asJson(['message' => 'Server error']);
             }
 
             return $this->asJson(['output' => $value]);
