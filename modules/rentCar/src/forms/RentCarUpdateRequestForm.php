@@ -67,12 +67,11 @@ class RentCarUpdateRequestForm extends Model
 
     public function validateDateTime($attribute, $params, $validator): void
     {
-        $formatDt = 'Y-m-d H:i';
         $pickUpSource = $this->pick_up_date . ' ' . $this->pick_up_time;
-        $pickUpDt = DateTime::createFromFormat($formatDt, $pickUpSource);
+        $pickUpDt = DateTime::createFromFormat(RentCar::FORMAT_DT, $pickUpSource);
 
         $dropOffSource = $this->drop_off_date . ' ' . $this->drop_off_time;
-        $dropOffDt = DateTime::createFromFormat($formatDt, $dropOffSource);
+        $dropOffDt = DateTime::createFromFormat(RentCar::FORMAT_DT, $dropOffSource);
 
         if ($pickUpDt > $dropOffDt) {
             $this->addError($attribute, 'DropOff date/time must be younger PickUp');

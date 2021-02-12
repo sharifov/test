@@ -142,11 +142,12 @@ JS;
     <div class="x_title">
 
         <span class="badge badge-white">Q<?=($model->crq_product_quote_id)?></span>
-        Cruise "<b><?=\yii\helpers\Html::encode($model->crq_data_json['cruiseLine']['name'])?></b>"
-        | <b><?= $model->crq_data_json['ship']['name'] ?></b>
+        <?= ProductQuoteStatus::asFormat($model->productQuote->pq_status_id) ?>
+        | "<b><?=\yii\helpers\Html::encode($model->crq_data_json['cruiseLine']['name'])?></b>"
+        <?php /* | <b><?= $model->crq_data_json['ship']['name'] ?></b>
         | "<b><?=\yii\helpers\Html::encode($cruiseProduct->crs_destination_label)?></b>"
         | <?= date('F j, Y', strtotime($model->crq_data_json['departureDate'])) ?> - <?= date('F j, Y', strtotime($model->crq_data_json['returnDate']))?>
-        | <?= ProductQuoteStatus::asFormat($model->productQuote->pq_status_id) ?>
+        */ ?>
 
         <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $model->productQuote->pq_profit_amount ?>
 
@@ -238,6 +239,41 @@ JS;
         </ul>
         <div class="clearfix"></div>
     </div>
+
+    <div class="offer__description w-100">
+        <div class="offer__item-brand d-flex flex-column mb-3">
+            <h5 class="mb-0">
+                <img height="20px" src="<?= $model->crq_data_json['cruiseLine']['logoImage']['standard'] ?>" alt="<?= $model->crq_data_json['cruiseLine']['name'] . ', ' . $model->crq_data_json['ship']['name'] ?>" class="cruise-line-logo">
+                <?= $model->crq_data_json['ship']['name'] ?>
+            </h5>
+        </div>
+        <ul class="offer__option-list list-unstyled mb-4">
+            <li class="offer__option mb-2">
+                <div class="d-flex">
+                    <div>
+                        <b class="offer-option__key text-secondary">Destination</b>: <?= $model->crq_data_json['itinerary']['destination']['destination'] ?> (<?= $model->crq_data_json['itinerary']['destination']['subDestination'] ?>)
+                    </div>
+                    <div class="ml-4">
+                        <b class="offer-option__key text-secondary">Dates</b>:
+                        <span class="offer-option__value"><?= date('F j, Y', strtotime($model->crq_data_json['departureDate'])) ?> - <?= date('F j, Y', strtotime($model->crq_data_json['returnDate']))?></span>
+                    </div>
+                </div>
+            </li>
+            <?php if (!empty($model->crq_data_json['itinerary']['locations'])) : ?>
+                <li class="offer__option d-flex">
+                    <b class="offer-option__key text-secondary">Itinerary</b>:&nbsp;
+                    <ul class="offer-option__value list-unstyled d-flex offer__itinerary-list flex-wrap">
+                        <?php foreach ($model->crq_data_json['itinerary']['locations'] as $location) : ?>
+                            <li style="margin-right: 5px">
+                                <span> <b><?= $location['location']['name']?></b> (<?= $location['location']['countryName']?>)</span>
+                            </li>
+                        <?php endforeach;?>
+                    </ul>
+                </li>
+            <?php endif;?>
+        </ul>
+    </div>
+
     <div class="x_content" style="display: block">
 
         <i class="fa fa-user"></i> <?=$model->productQuote->pqCreatedUser ? Html::encode($model->productQuote->pqCreatedUser->username) : '-'?>,

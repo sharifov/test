@@ -82,12 +82,12 @@ JS;
         ]) ?>
     <?php endif; ?>
 
-
     <?php if ((int) $product->isAttraction() && $product->attraction) : ?>
         <?= $this->render('@modules/attraction/views/attraction/partial/_product_attraction', [
             'product' => $product,
         ]) ?>
     <?php endif; ?>
+
     <?php if ((int) $product->isRenTCar() && $product->rentCar) : ?>
         <?= $this->render('@modules/rentCar/views/rent-car/partial/_product_rent_car', [
             'product' => $product,
@@ -278,14 +278,14 @@ $js = <<<JS
         });
       // return false;
     });
-    
-    $('body').on('click', '.btn-delete-product-quote', function(e) {
+        
+    $('body').off('click', '.btn-delete-product-quote').on('click', '.btn-delete-product-quote', function (e) {
         
         let productQuoteId = $(this).data('product-quote-id');
         let productId = $(this).data('product-id');
         
       if(!confirm('Are you sure you want to delete quote ('+ productQuoteId +') ?')) {
-        return '';
+        return false;
       }
         
       e.preventDefault();
@@ -307,7 +307,7 @@ $js = <<<JS
   //        contentType: false,
   //        cache: false,
 //          processData: false,
-          dataType: 'json',
+          dataType: 'json'
       })
           .done(function(data) {
               if (data.error) {

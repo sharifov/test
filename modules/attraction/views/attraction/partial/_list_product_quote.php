@@ -140,7 +140,6 @@ JS;
     <?php Pjax::begin(['id' => 'pjax-product-quote-' . $model->atnqProductQuote->pq_id, 'timeout' => 2000, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
 <div class="x_panel">
     <div class="x_title">
-
         <span class="badge badge-white">Q<?=($model->atnq_product_quote_id)?></span> Attraction "<b><?=\yii\helpers\Html::encode($model->atnq_attraction_name)?></b>"
             <?php //=\yii\helpers\Html::encode($model->hqHotelList->hl_star)?>
             <?php //=\yii\helpers\Html::encode($model->atnqProductQuote->pq_name)?>
@@ -177,30 +176,6 @@ JS;
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-bars text-warning"></i></a>
                 <div class="dropdown-menu" role="menu">
                     <h6 class="dropdown-header">Quote Q<?=($model->atnq_product_quote_id)?></h6>
-                    <?php /*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Update Request', null, [
-                                'class' => 'dropdown-item text-danger btn-update-product',
-                                'data-product-id' => $product->pr_id
-                            ])*/ ?>
-                   <?php /* <div class="dropdown-divider"></div>
-
-                    <!-- Level three dropdown-->
-                    <div class="dropdown-submenu">
-                        <a id="dropdownMenu<?=($model->atnq_product_quote_id)?>" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="dropdown-item dropdown-toggle">Add to Offer</a>
-                        <div aria-labelledby="dropdownMenu<?=($model->atnq_product_quote_id)?>" class="dropdown-menu">
-                            <a href="#" class="dropdown-item">3rd level</a>
-                            <a href="#" class="dropdown-item">3rd level</a>
-                        </div>
-                    </div>*/ ?>
-                    <!-- End Level three -->
-
-<!--                    <ul>-->
-<!--                        <li class="dropdown">-->
-<!--                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Dropdown</a>-->
-<!--                            <div class="dropdown-menu" role="menu">-->
-<!--                                <a href="#" class="dropdown-item"><i class="fa fa-cog"></i> aaa</a>-->
-<!--                            </div>-->
-<!--                        </li>-->
-<!--                    </ul>-->
 
                     <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-warning"></i> Clone quote', null, [
                         'class' => 'dropdown-item text-warning btn-clone-product-quote',
@@ -209,36 +184,36 @@ JS;
                         'data-product-id' => $model->atnqProductQuote->pq_product_id,
                     ]) ?>
 
-                    <?= Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
+                   <!-- <? /*= Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
                         'class' => 'dropdown-item text-success btn-add-product-quote-option',
                         //'data-product-quote-id' => $model->atnq_product_quote_id,
                         'data-url' => Url::to(['/product/product-quote-option/create-ajax', 'id' => $model->atnq_product_quote_id]),
                         //'data-product-id' => $model->atnqProductQuote->pq_product_id,
-                    ]) ?>
+                    ]) */?> -->
 
                     <?php if ($model->isBookable()) : ?>
-                        <?= Html::a(
+                    <!-- <? /*= Html::a(
                             '<i class="fa fa-share-square"></i> Book',
                             null,
                             [
                                 'class' => 'dropdown-item btn-book-quote',
-                                'data-url' => Url::to('/hotel/hotel-quote/ajax-book'),
+                                'data-url' => Url::to('/attraction/hotel-quote/ajax-book'),
                                 'data-hotel-quote-id' => $model->atnq_id,
                                 'data-product-id' => $model->atnqProductQuote->pq_product_id,
                             ]
-                        ) ?>
+                        ) */?> -->
                     <?php endif; ?>
                     <?php if ($model->isBooking()) : ?>
-                        <?= Html::a(
+                    <!-- <? /*= Html::a(
                             '<i class="fa fa-share-square"></i> Cancel Book',
                             null,
                             [
                                 'class' => 'dropdown-item text-danger btn-cancel-book-quote',
-                                'data-url' => Url::to('/hotel/hotel-quote/ajax-cancel-book'),
+                                'data-url' => Url::to('/attraction/hotel-quote/ajax-cancel-book'),
                                 'data-hotel-quote-id' => $model->atnq_id,
                                 'data-product-id' => $model->atnqProductQuote->pq_product_id,
                             ]
-                        ) ?>
+                        ) */?> -->
                     <?php endif; ?>
 
                     <?= Html::a(
@@ -246,7 +221,7 @@ JS;
                         null,
                         [
                             'class' => 'dropdown-item text-secondary btn-product-api-service-log',
-                            'data-url' => Url::to(['/hotel/hotel-quote-service-log/hotel-quote-log', 'id' => $model->atnq_id]),
+                            'data-url' => Url::to(['/attraction/hotel-quote-service-log/hotel-quote-log', 'id' => $model->atnq_id]),
                             'data-hotel-quote-id' => $model->atnq_id,
                             'data-product-id' => $model->atnqProductQuote->pq_product_id,
                         ]

@@ -105,19 +105,22 @@ $dataProviderQuotes = $searchModel->searchProduct($params);
             </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="col-md-6">
-                <?= DetailView::widget([
-                    'model' => $model->product,
-                    'attributes' => [
-                        'pr_market_price',
-                        'pr_client_budget',
-                    ],
-                ]) ?>
+    <?php if ($model->product->pr_market_price || $model->product->pr_client_budget) : ?>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="col-md-6">
+                    <?= DetailView::widget([
+                        'model' => $model->product,
+                        'attributes' => [
+                            'pr_market_price',
+                            'pr_client_budget',
+                        ],
+                    ]) ?>
+                </div>
             </div>
         </div>
-    </div>
+
+    <?php endif;?>
 
     <!--    <div class="row">-->
 <!--        <div class="col-md-12">-->

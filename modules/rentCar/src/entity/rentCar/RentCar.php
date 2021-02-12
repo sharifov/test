@@ -2,6 +2,7 @@
 
 namespace modules\rentCar\src\entity\rentCar;
 
+use DateTime;
 use modules\product\src\entities\product\Product;
 use modules\product\src\interfaces\Productable;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
@@ -35,6 +36,8 @@ use yii\db\ActiveRecord;
 class RentCar extends ActiveRecord implements Productable
 {
     use EventTrait;
+
+    public const FORMAT_DT = 'Y-m-d H:i';
 
     public function rules(): array
     {
@@ -159,5 +162,31 @@ class RentCar extends ActiveRecord implements Productable
     public static function findByProduct(int $productId): ?Productable
     {
         return self::find()->byProduct($productId)->one();
+    }
+
+    /**
+     * @return DateTime|false
+     */
+    public function generatePickUpDate()
+    {
+        return DateTime::createFromFormat('Y-m-d', $this->prc_pick_up_date);
+    }
+
+    /**
+     * @return DateTime|false
+     */
+    public function generateDropOffDate()
+    {
+        return DateTime::createFromFormat('Y-m-d', $this->prc_drop_off_date);
+    }
+
+    public function calculateDays(): int
+    {
+        if (($pickUpDt = $this->generatePickUpDate()) && ($dropOffDt = $this->generateDropOffDate())) {
+            if ($days = $pickUpDt->diff($dropOffDt)->days) {
+                return (int) $days + 1;
+            }
+        }
+        return 1;
     }
 }
