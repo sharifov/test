@@ -5,9 +5,9 @@
 /* @var $index int */
 /* @var $key int */
 
-/* @var $hotelSearch Hotel */
+/* @var $hotelSearch \modules\attraction\models\Attraction */
 
-use modules\hotel\models\Hotel;
+//use modules\hotel\models\Hotel;
 
 //var_dump($hotelSearch); die();
 ?>
@@ -24,20 +24,20 @@ use modules\hotel\models\Hotel;
         type: <?=(\yii\helpers\Html::encode($dataHotel[$key]['__typename']))?>
     </td>
     <td>
-        duration: <?=(\yii\helpers\Html::encode($dataHotel[$key]['duration']['formatted']))?>
+        duration: <i class="fa fa-clock-o"> </i><?=(\yii\helpers\Html::encode($dataHotel[$key]['duration']['formatted']))?>
     </td>
-    <td title="<?php //=(\yii\helpers\Html::encode($attraction['boardCode']))?>">
-        <?php //=(\yii\helpers\Html::encode($attraction['boardName']))?>
-    </td>
-    <td>
-        rooms: <?php //=(\yii\helpers\Html::encode($attraction['rooms']))?>
-    </td>
-    <td>
-        <i class="fa fa-user"></i> <?php //=(\yii\helpers\Html::encode($attraction['adults'] ?? 0))?>
-    </td>
-    <td>
-        <i class="fa fa-child"></i> <?php //=(\yii\helpers\Html::encode($attraction['children'] ?? 0))?>
-    </td>
+    <!--<td title="<?php /*//=(\yii\helpers\Html::encode($attraction['boardCode']))*/?>">
+        <?php /*//=(\yii\helpers\Html::encode($attraction['boardName']))*/?>
+    </td>-->
+    <!--<td>
+        rooms: <?php /*//=(\yii\helpers\Html::encode($attraction['rooms']))*/?>
+    </td>-->
+    <!--<td>
+        <i class="fa fa-user"></i> <?php /*//=(\yii\helpers\Html::encode($attraction['adults'] ?? 0))*/?>
+    </td>-->
+    <!--<td>
+        <i class="fa fa-child"></i> <?php /*//=(\yii\helpers\Html::encode($attraction['children'] ?? 0))*/?>
+    </td>-->
 
     <td>
         <?= \yii\helpers\Html::encode($dataHotel[$key]['leadTicket']['price']['lead']['formatted'] ?? '0')?>
