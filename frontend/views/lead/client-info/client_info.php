@@ -117,55 +117,56 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
             </div>
             <?php endif; ?>
 
-            <div class="row">
-                <div class="col-md-4">
-                    <?= $this->render('_client_manage_name', [
-                        'client' => $lead->client
-                    ]) ?>
-                </div>
-
-                <div class="col-md-4">
-                    <div id="client-manage-phone">
-                        <?php if ($phones = $lead->client->clientPhones) : ?>
-                            <?php
-                            if ($leadForm->viewPermission) {
-                                echo $this->render('_client_manage_phone', [
-                                    'clientPhones' => $phones,
-                                    'lead' => $lead,
-                                    'manageClientInfoAccess' => $manageClientInfoAccess
-                                ]);
-                            }
-                            ?>
-                        <?php endif; ?>
+            <div class="" style="max-height: 150px; overflow-x: hidden;">
+                <div class="row">
+                    <div class="col-md-4">
+                        <?= $this->render('_client_manage_name', [
+                            'client' => $lead->client
+                        ]) ?>
                     </div>
-                    <div id="client-manage-email">
-                        <?php if ($emails = $lead->client->clientEmails) : ?>
-                            <?php
-                            if ($leadForm->viewPermission) {
-                                echo $this->render('_client_manage_email', [
-                                    'clientEmails' => $emails,
-                                    'lead' => $lead,
-                                    'manageClientInfoAccess' => $manageClientInfoAccess
-                                ]);
-                            }
-                            ?>
-                        <?php endif; ?>
+
+                    <div class="col-md-4">
+                        <div id="client-manage-phone">
+                            <?php if ($phones = $lead->client->clientPhones) : ?>
+                                <?php
+                                if ($leadForm->viewPermission) {
+                                    echo $this->render('_client_manage_phone', [
+                                        'clientPhones' => $phones,
+                                        'lead' => $lead,
+                                        'manageClientInfoAccess' => $manageClientInfoAccess
+                                    ]);
+                                }
+                                ?>
+                            <?php endif; ?>
+                        </div>
+                        <div id="client-manage-email">
+                            <?php if ($emails = $lead->client->clientEmails) : ?>
+                                <?php
+                                if ($leadForm->viewPermission) {
+                                    echo $this->render('_client_manage_email', [
+                                        'clientEmails' => $emails,
+                                        'lead' => $lead,
+                                        'manageClientInfoAccess' => $manageClientInfoAccess
+                                    ]);
+                                }
+                                ?>
+                            <?php endif; ?>
+                        </div>
                     </div>
-                </div>
 
-                <div class="col-md-4">
-                    <?= \frontend\widgets\client\ClientCounterWidget::widget([
-                        'clientId' => $leadForm->getClient()->id,
-                        'userId' => $user->id
-                    ]) ?>
+                    <div class="col-md-4">
+                        <?= \frontend\widgets\client\ClientCounterWidget::widget([
+                            'clientId' => $leadForm->getClient()->id,
+                            'userId' => $user->id
+                        ]) ?>
 
-                    <?php if (!empty($leadForm->getLead()->request_ip)) : ?>
-                        <?= $this->render('_client_ip_info', ['lead' => $leadForm->getLead()]) ?>
-                    <?php endif; ?>
+                        <?php if (!empty($leadForm->getLead()->request_ip)) : ?>
+                            <?= $this->render('_client_ip_info', ['lead' => $leadForm->getLead()]) ?>
+                        <?php endif; ?>
 
+                    </div>
                 </div>
             </div>
-
         </div>
     </div>
 
