@@ -172,7 +172,7 @@ class AttractionQuoteController extends FController
 
         try {
             if (!$attractionId) {
-                throw new Exception('Hotel Request param not found', 2);
+                throw new Exception('Attraction Request param not found', 2);
             }
 
             /*if (!$hotelCode) {
@@ -204,9 +204,9 @@ class AttractionQuoteController extends FController
 
             //$currency = $hotelData['currency'] ?? 'USD';
 
-            $hotelQuote = AttractionQuote::findOrCreateByData($quoteData, $attraction, $currency = 'USD');
+            $attractionQuote = AttractionQuote::findOrCreateByData($quoteData, $attraction, $currency = 'USD');
 
-            if (!$hotelQuote) {
+            if (!$attractionQuote) {
                 throw new Exception('Not added attraction quote - id:  (' . $quoteKey . ')', 8);
             }
 
@@ -218,7 +218,7 @@ class AttractionQuoteController extends FController
 
         return [
             'product_id' => $productId,
-            'message' => 'Successfully added quote. Hotel "' . Html::encode($attraction->atnProduct->pr_name) . '", Hotel Quote Id: (' . $hotelQuote->atnq_id . ')'
+            'message' => 'Successfully added quote. Hotel "' . Html::encode($attraction->atnProduct->pr_name) . '", Attraction Quote Id: (' . $attractionQuote->atnq_id . ')'
         ];
     }
 
