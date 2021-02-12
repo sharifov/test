@@ -33,7 +33,14 @@ if ($quotes && (isset($quotes['count']) && $quotes['count'] > 0)) :
         modal.find('.modal-body').html(target);
         modal.css('z-index', '1052');
         modal.modal('show');
-        $('.modal-backdrop.show').last().css('z-index', '1051');
+        $('.modal-backdrop.show, #modal-lg').last().css('z-index', '1051');
+    });
+    
+    $('#modal-lg, .flight_quote_ngs_btn').off().on('click', '.flight_quote_ngs_btn', function (e) {
+        e.preventDefault(); 
+        let target = $(this).attr('data-target');
+        let collapseDiv = document.getElementById(target);
+        collapseDiv.classList.toggle("show");
     });
 
 // init listeners
@@ -110,12 +117,13 @@ JS;
         $('.search-results__wrapper').removeClass('loading');
     });
     
-    $('#flight-details__modal, .search-result__quote').off().on('click', '.flight_create_quote__btn', function (e) {
+    $('#flight-details__modal, .search-result__quote_wrapper').off().on('click', '.flight_create_quote__btn', function (e) {
         e.preventDefault();
         var key = $(this).data('key');
         var gds = $(this).data('gds');
         var searchResId = $(this).data('result');
-        $('#preloader').removeClass('hidden');
+        var btn = $(this);
+        $('#preloader').removeClass('d-none');
         $.ajax({
             url: '$urlCreateFlightQuoteFromSearch',
             type: 'post',
@@ -126,11 +134,13 @@ JS;
             success: function (data) {
                 var error = '';
                 
-                $('#preloader').addClass('hidden');
+                $('#preloader').addClass('d-none');
                 if(data.status == true){
                     //$('#search-results__modal').modal('hide');
                     $('#flight-details__modal').modal('hide');
-                    $('#'+searchResId).addClass('quote--selected').find('.flight_create_quote__btn').remove();
+                    $('#'+searchResId).addClass('quote--selected')
+                    btn.closest('.card-footer').remove();
+                    btn.remove();
 
                     // $.pjax.reload({container: '#quotes_list', async: false});
                     $('.popover-class[data-toggle="popover"]').popover({ sanitize: false });

@@ -29,13 +29,7 @@ use yii\helpers\StringHelper;
     }
     ?>
 
-    <div
-        id="dialog-<?= $clientChat['cch_id'] ?>"
-        data-owner-id="<?= $clientChat['cch_owner_user_id'] ?>"
-        class="_cc-list-item <?= $isClosed ? 'cc_closed' : ($isIdle && $isOwner ? 'cc_idle' : '') ?> <?= $clientChatId && $clientChatId === (int)$clientChat['cch_id'] ? '_cc_active' : '' ?>"
-        data-rid="<?= $clientChat['cch_rid'] ?>"
-        data-cch-id="<?= $clientChat['cch_id'] ?>"
-        data-is-closed="<?= (int) $isClosed ?>">
+    <div id="dialog-<?= $clientChat['cch_id'] ?>" data-owner-id="<?= $clientChat['cch_owner_user_id'] ?>" class="_cc-list-item <?= $isClosed ? 'cc_closed' : ($isIdle && $isOwner ? 'cc_idle' : '') ?> <?= $clientChatId && $clientChatId === (int)$clientChat['cch_id'] ? '_cc_active' : '' ?>" data-rid="<?= $clientChat['cch_rid'] ?>" data-cch-id="<?= $clientChat['cch_id'] ?>" data-is-closed="<?= (int) $isClosed ?>">
 
         <div class="_cc-item-icon-wrapper">
             <span class="_cc-item-icon-round">
@@ -75,7 +69,7 @@ use yii\helpers\StringHelper;
                 <?php // Pjax::begin(['id' => 'chat-last-message-refresh-' . $clientChat['cch_id']])?>
                 <div id="chat-last-message-<?= $clientChat['cch_id'] ?>">
                     <?php if ($clientChat['last_message']) : ?>
-                        <p title="Last <?= $clientChat['last_message_type_id'] === ClientChatLastMessage::TYPE_CLIENT ? 'client' : 'agent' ?>  message"><small><i class="fa fa-comment-o"> </i> <?= StringHelper::truncate($clientChat['last_message'], 40, '...')?></small></p>
+                        <p title="Last <?= $clientChat['last_message_type_id'] === ClientChatLastMessage::TYPE_CLIENT ? 'client' : 'agent' ?>  message"><small><i class="fa fa-comment-o"> </i> <?= Html::encode(StringHelper::truncate($clientChat['last_message'], 40, '...'))?></small></p>
                     <?php endif; ?>
                 </div>
                 <?php // Pjax::end()?>

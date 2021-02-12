@@ -4,6 +4,7 @@ use frontend\assets\groups\BootstrapGroupAsset;
 use kivork\rbacExportImport\src\rbac\DbManager;
 use kivork\rbacExportImport\RbacImportExportModule;
 use common\models\Employee;
+use modules\cruise\CruiseModule;
 use modules\email\EmailModule;
 use modules\fileStorage\FileStorageModule;
 use modules\flight\FlightModule;
@@ -336,6 +337,12 @@ return [
         ],
         'file-storage' => [
             'class' => FileStorageModule::class,
+        ],
+        'rent-car' => [
+            'class' => \modules\rentCar\RentCarModule::class,
+        ],
+        'cruise' => [
+            'class' => CruiseModule::class,
         ],
     ],
     'as beforeRequest' => [

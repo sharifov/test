@@ -135,7 +135,8 @@ $chevronClass = $pjaxRequest ? 'fa fa-chevron-up' : 'fa fa-chevron-down'
                                 ]),
                                 'data-flight-id' => $product->flight->fl_id,
                                 'data-pjax-id' => $pjaxId,
-                                'class' => 'dropdown-item text-warning btn-update-flight-request'
+                                'class' => 'dropdown-item text-warning btn-update-flight-request btn-update-request',
+                                'data-product-id' => $product->pr_id
                             ]) ?>
 
                             <?= Html::a('<i class="fa fa-search"></i> Search Quotes', null, [

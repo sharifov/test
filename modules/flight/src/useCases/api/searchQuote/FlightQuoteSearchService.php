@@ -46,6 +46,7 @@ class FlightQuoteSearchService
             'adt' => $flight->fl_adults,
             'chd' => $flight->fl_children,
             'inf' => $flight->fl_infants,
+            'ngs' => true
         ];
 
         if ($gdsCode) {

@@ -87,6 +87,10 @@ $js = <<<JS
                   pjaxReload({ container: '#pjax-lead-call-expert', timeout: 5000, async: false });
                   
                   $('#modal-sm').modal('hide');
+                  
+                  setTimeout(function () {
+                      $('.btn-update-request[data-product-id="'+data.productId+'"]').trigger('click');
+                  }, 500);
               }
               // btnSubmit.prop('disabled', false);
           })

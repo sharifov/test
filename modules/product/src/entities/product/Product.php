@@ -4,6 +4,7 @@ namespace modules\product\src\entities\product;
 
 use common\models\Employee;
 use common\models\Lead;
+use modules\cruise\src\entity\cruise\Cruise;
 use modules\product\src\entities\product\dto\CreateDto;
 use modules\product\src\entities\product\events\ProductClientBudgetChangedEvent;
 use modules\product\src\entities\product\events\ProductMarketPriceChangedEvent;
@@ -16,6 +17,7 @@ use modules\attraction\models\Attraction;
 use modules\product\src\entities\product\events\ProductCreateEvent;
 use modules\product\src\interfaces\Productable;
 use modules\product\src\useCases\product\create\ProductCreateForm;
+use modules\rentCar\src\entity\rentCar\RentCar;
 use sales\entities\EventTrait;
 use sales\entities\serializer\Serializable;
 use yii\behaviors\BlameableBehavior;
@@ -46,11 +48,15 @@ use yii\db\ActiveRecord;
  * @property Flight $flight
  * @property Hotel[] $hotels
  * @property Hotel $hotel
+ * @property Cruise[] $cruises
+ * @property Cruise $cruise
  * @property Employee $prCreatedUser
  * @property Lead $prLead
  * @property ProductType $prType
  * @property Employee $prUpdatedUser
  * @property ProductQuote[] $productQuotes
+ * @property RentCar $rentCar
+ * @property RentCar[] $rentCars
  *
  * @property Productable|null $childProduct
  */
@@ -103,9 +109,19 @@ class Product extends \yii\db\ActiveRecord implements Serializable
         return $this->pr_type_id === ProductType::PRODUCT_HOTEL;
     }
 
+
     public function isAttraction(): bool
     {
         return $this->pr_type_id === ProductType::PRODUCT_ATTRACTION;
+    }
+    public function isRenTCar(): bool
+    {
+        return $this->pr_type_id === ProductType::PRODUCT_RENT_CAR;
+    }
+
+    public function isCruise(): bool
+    {
+        return $this->pr_type_id === ProductType::PRODUCT_CRUISE;
     }
 
     public function getChildProduct(): ?Productable
@@ -238,6 +254,35 @@ class Product extends \yii\db\ActiveRecord implements Serializable
     public function getHotel(): ActiveQuery
     {
         return $this->hasOne(Hotel::class, ['ph_product_id' => 'pr_id'])->orderBy(['ph_id' => SORT_DESC])->limit(1);
+    }
+
+    public function getRentCars(): ActiveQuery
+    {
+        return $this->hasMany(RentCar::class, ['prc_product_id' => 'pr_id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getRentCar(): ActiveQuery
+    {
+        return $this->hasOne(RentCar::class, ['prc_product_id' => 'pr_id'])->orderBy(['prc_id' => SORT_DESC])->limit(1);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getCruises(): ActiveQuery
+    {
+        return $this->hasMany(Cruise::class, ['crs_product_id' => 'pr_id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getCruise(): ActiveQuery
+    {
+        return $this->hasOne(Cruise::class, ['crs_product_id' => 'pr_id'])->orderBy(['crs_id' => SORT_DESC])->limit(1);
     }
 
     /**
