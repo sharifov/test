@@ -58,7 +58,7 @@ class AttractionUpdateRequestForm extends Model
     {
         return [
             'atn_date_from' => 'Date From',
-            'atn_date_to' => 'Check Out',
+            'atn_date_to' => 'Date To',
             'atn_destination' => 'Destination',
             'atn_destination_code' => 'Destination code',
         ];

@@ -18,13 +18,13 @@
         <?= $key + 1 ?>
     </td>
     <td>
-        <b><?=\yii\helpers\Html::encode($dataHotel[$key]['name'])?></b>
+        <b><?=\yii\helpers\Html::encode($dataHotel[$key]['name'] ?? '')?></b>
     </td>
     <td>
-        type: <?=(\yii\helpers\Html::encode($dataHotel[$key]['__typename']))?>
+        type: <?=(\yii\helpers\Html::encode($dataHotel[$key]['__typename']) ?? '')?>
     </td>
     <td>
-        duration: <i class="fa fa-clock-o"> </i><?=(\yii\helpers\Html::encode($dataHotel[$key]['duration']['formatted']))?>
+        duration: <i class="fa fa-clock-o"> </i><?=(\yii\helpers\Html::encode($dataHotel[$key]['duration']['formatted']) ?? '')?>
     </td>
     <!--<td title="<?php /*//=(\yii\helpers\Html::encode($attraction['boardCode']))*/?>">
         <?php /*//=(\yii\helpers\Html::encode($attraction['boardName']))*/?>
@@ -49,7 +49,7 @@
             <?= \yii\bootstrap4\Html::a('<i class="fa fa-plus"></i> add Quote', null, [
                 'data-url' => \yii\helpers\Url::to(['/attraction/attraction-quote/add-ajax', 'atn_id' => $hotelSearch->atn_id]),
                 //'data-hotel-code' => $dataHotel['code'],
-                'data-quote-key' => $dataRoom['id'],
+                'data-quote-key' => $dataRoom['id'] ?? '',
                 'class' => 'btn btn-success btn-add-hotel-quote'
             ]) ?>
         <?php endif; ?>
