@@ -56,8 +56,8 @@ class HotelQuoteSearchService
                 $result = $response['data'];
                 \Yii::$app->cacheFile->set($keyCache, $result, 600);
             } else {
-                $result = isset($response['error']) ? $response : [];
-                \Yii::error('Not found response[data][hotels]', 'useCases:api:searchQuote:HotelQuoteSearchService:search');
+                $result = isset($response['error']) ? $response : ['error' => 'Unknown error has occurred.'];
+//                \Yii::error('Not found response[data][hotels]', 'useCases:api:searchQuote:HotelQuoteSearchService:search');
             }
         }
 
