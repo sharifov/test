@@ -79,7 +79,7 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
                                 'id' => $product->attraction->atn_id
                             ]),
                             'data-hotel-id' => $product->attraction->atn_id,
-                            'class' => 'dropdown-item text-warning btn-update-hotel-request'
+                            'class' => 'dropdown-item text-warning btn-update-attraction-request'
                         ]) ?>
 
                         <?= Html::a('<i class="fa fa-search"></i> Search Quotes', null, [
@@ -88,7 +88,7 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
                                 'id' => $product->attraction->atn_id
                             ]),
                             'data-hotel-id' => $product->attraction->atn_id,
-                            'class' => 'dropdown-item text-success btn-search-hotel-quotes'
+                            'class' => 'dropdown-item text-success btn-search-attraction-quotes'
                         ]) ?>
 
 
@@ -145,7 +145,7 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
 
 $js = <<<JS
 
-    $('body').off('click', '.btn-update-hotel-request').on('click', '.btn-update-hotel-request', function (e) {
+    $('body').off('click', '.btn-update-attraction-request').on('click', '.btn-update-attraction-request', function (e) {
         e.preventDefault();
         let updateHotelRequestUrl = $(this).data('url');
         //$('#preloader').removeClass('d-none');
@@ -204,7 +204,7 @@ $js = <<<JS
     });*/
     
     
-     $('body').off('click', '.btn-search-hotel-quotes').on('click', '.btn-search-hotel-quotes', function (e) {
+     $('body').off('click', '.btn-search-attraction-quotes').on('click', '.btn-search-attraction-quotes', function (e) {
         e.preventDefault();
         $('#preloader').removeClass('d-none');          
         let url = $(this).data('url');
@@ -277,4 +277,4 @@ $js = <<<JS
     
 JS;
 
-$this->registerJs($js, \yii\web\View::POS_READY, 'update-hotel-request-js');
+$this->registerJs($js, \yii\web\View::POS_READY, 'update-attraction-request-js');
