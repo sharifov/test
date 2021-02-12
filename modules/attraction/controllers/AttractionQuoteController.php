@@ -141,11 +141,11 @@ class AttractionQuoteController extends FController
         }
 
         $hotelList = $result['data']['activityGroups'][0] ?? [];
-        //var_dump([array_values($hotelList)]); die();
-        //\yii\helpers\VarDumper::dump($hotelList['activityTiles'], 10, true); exit;
+//        echo '<pre>';
+//        VarDumper::dump($hotelList['activityTiles']);die;
         $dataProvider = new ArrayDataProvider([
             //'allModels' => [[$hotelList]],
-            'allModels' => [$hotelList['activityTiles']],
+            'allModels' => [$hotelList['activityTiles'] ?? []],
             'pagination' => [
                 'pageSize' => 10,
             ],

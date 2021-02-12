@@ -160,7 +160,7 @@ $js = <<<JS
         return false;
     });*/
       
-    $('body').off('click', '.btn-add-hotel-quote').on('click', '.btn-add-hotel-quote', function (e) {
+    $('body').off('click', '.btn-add-attraction-quote').on('click', '.btn-add-attraction-quote', function (e) {
         
       e.preventDefault();
       //$('#preloader').removeClass('d-none');

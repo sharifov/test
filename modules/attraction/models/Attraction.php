@@ -168,7 +168,7 @@ class Attraction extends \yii\db\ActiveRecord implements Productable
             }*/
 
             //$response = $apiHotelService->search($this->ph_check_in_date, $this->ph_check_out_date, $this->ph_destination_code, $rooms, $params);
-            $response = $apiHotelService->getAttractionQuotes();
+            $response = $apiHotelService->getAttractionQuotes($this);
 
             if (isset($response['data']['searchSummary'])) {
                 $result = $response['data'];
@@ -195,7 +195,7 @@ class Attraction extends \yii\db\ActiveRecord implements Productable
 
         if ($quoteKey && isset($result['activityGroups']) && $result['activityGroups']) {
             foreach ($result['activityGroups'][0]['activityTiles'] as $quote) {
-                $groupKey = (int)$quote['id'] ?? '';
+                $groupKey = (int)($quote['id'] ?? '');
                 if (!$groupKey) {
                     continue;
                 }
