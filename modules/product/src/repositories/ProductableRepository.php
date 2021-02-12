@@ -55,7 +55,7 @@ class ProductableRepository
         if ($typeId === ProductType::PRODUCT_RENT_CAR) {
             /** @var RentCar $product */
             return $this->rentCarRepository->save($product);
-		}
+        }
         if ($typeId === ProductType::PRODUCT_CRUISE) {
             /** @var Cruise $product */
             return $this->cruiseRepository->save($product);

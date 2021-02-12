@@ -82,9 +82,9 @@ JS;
         ]) ?>
     <?php endif; ?>
 
-    <?php if ((int) $product->isRenTCar() && $product->rentCar) : ?>
+    <?php if ((int)$product->isRenTCar() && $product->rentCar) : ?>
         <?= $this->render('@modules/rentCar/views/rent-car/partial/_product_rent_car', [
-        	'product' => $product,
+            'product' => $product,
         ]) ?>
     <?php endif; ?>
 

@@ -109,7 +109,7 @@ class Product extends \yii\db\ActiveRecord implements Serializable
     public function isRenTCar(): bool
     {
         return $this->pr_type_id === ProductType::PRODUCT_RENT_CAR;
-	}
+    }
 
     public function isCruise(): bool
     {

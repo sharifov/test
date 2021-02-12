@@ -24,7 +24,7 @@ class CreateQuoteService
             throw new \DomainException('This quote already exists.');
         }
 
-        $totalAmount = 100;
+        $totalAmount = $quote['cabin']['price'];
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             $prQuote = new ProductQuote();
@@ -40,7 +40,7 @@ class CreateQuoteService
             $prQuote->pq_service_fee_sum = 0;
             $prQuote->pq_client_currency_rate = ProductQuoteHelper::getClientCurrencyRate($cruise->product);
             $prQuote->pq_origin_currency_rate = 1;
-//        $prQuote->pq_name = mb_substr(implode(' & ', $nameArray), 0, 40);
+            $prQuote->pq_name = $quote['cabin']['code'];
             if (!$prQuote->save()) {
                 throw new \DomainException('Save quote error. Errors: ' . VarDumper::dumpAsString($prQuote->getErrors()));
             }
@@ -53,6 +53,17 @@ class CreateQuoteService
             if (!$cruiseQuote->save()) {
                 throw new \DomainException('Save Cruise Quote error. Errors: ' . VarDumper::dumpAsString($cruiseQuote->getErrors()));
             }
+
+            $totalSystemPrice = $prQuote->pq_price * ($cruise->getAdults() + $cruise->getChildren());
+            $systemPrice = ProductQuoteHelper::calcSystemPrice((float)$totalSystemPrice, $prQuote->pq_origin_currency);
+            $prQuote->setQuotePrice(
+                (float)$totalAmount,
+                (float)$systemPrice,
+                ProductQuoteHelper::roundPrice($systemPrice * $prQuote->pq_client_currency_rate),
+                0
+            );
+            $prQuote->recalculateProfitAmount();
+            $prQuote->save();
 
             $transaction->commit();
 

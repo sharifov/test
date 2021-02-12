@@ -28,9 +28,9 @@ class ProductAvailableGuard
         if ($productTypeId === ProductType::PRODUCT_RENT_CAR) {
             if (!class_exists(RentCarModule::class)) {
                 throw new \DomainException('Product Rent Car is unavailable', ProductCodeException::PRODUCT_RENT_CAR_UNAVAILABLE);
-			}
-			return;
-		}
+            }
+            return;
+        }
         if ($productTypeId === ProductType::PRODUCT_CRUISE) {
             if (!class_exists(CruiseModule::class)) {
                 throw new \DomainException('Product Cruise is unavailable', ProductCodeException::PRODUCT_CRUISE_UNAVAILABLE);
