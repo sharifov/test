@@ -128,7 +128,7 @@ JS;
                                 }
                                 $result = $model->rcq_vendor_name;
                                 if ($model->rcq_vendor_logo_url) {
-                                    $result .= ' <img src="' . $model->rcq_vendor_logo_url . '" height="18" />';
+                                    $result .= ' <img src="' . $model->rcq_vendor_logo_url . '" height="14" />';
                                 }
                                 return $result;
                             },
@@ -145,7 +145,7 @@ JS;
                     'attributes' => [
                         [
                             'attribute' => 'rcq_options',
-                            'value' => function (RentCarQuote $model) {
+                            'value' => static function (RentCarQuote $model) {
                                 if (!$model->rcq_options) {
                                     return Yii::$app->formatter->nullDisplay;
                                 }
@@ -159,7 +159,7 @@ JS;
                         ],
                         [
                             'attribute' => 'rcq_advantages',
-                            'value' => function (RentCarQuote $model) {
+                            'value' => static function (RentCarQuote $model) {
                                 if (!$model->rcq_advantages) {
                                     return Yii::$app->formatter->nullDisplay;
                                 }

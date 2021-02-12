@@ -2,6 +2,7 @@
 
 namespace modules\rentCar\src\forms;
 
+use DateTime;
 use modules\rentCar\src\entity\rentCar\RentCar;
 use yii\base\Model;
 
@@ -49,6 +50,8 @@ class RentCarUpdateRequestForm extends Model
             [['pick_up_date', 'drop_off_date'], 'date', 'format' => 'php:Y-m-d'],
 
             [['pick_up_time', 'drop_off_time'], 'date', 'format' => 'php:H:i'],
+
+            ['drop_off_date', 'validateDateTime'],
         ];
     }
 
@@ -60,5 +63,19 @@ class RentCarUpdateRequestForm extends Model
             'pick_up_date' => 'Pick up Date',
             'drop_off_date' => 'Drop off Data',
         ];
+    }
+
+    public function validateDateTime($attribute, $params, $validator): void
+    {
+        $formatDt = 'Y-m-d H:i';
+        $pickUpSource = $this->pick_up_date . ' ' . $this->pick_up_time;
+        $pickUpDt = DateTime::createFromFormat($formatDt, $pickUpSource);
+
+        $dropOffSource = $this->drop_off_date . ' ' . $this->drop_off_time;
+        $dropOffDt = DateTime::createFromFormat($formatDt, $dropOffSource);
+
+        if ($pickUpDt > $dropOffDt) {
+            $this->addError($attribute, 'DropOff date/time must be younger PickUp');
+        }
     }
 }
