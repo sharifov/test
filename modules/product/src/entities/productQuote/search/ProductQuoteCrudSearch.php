@@ -35,6 +35,7 @@ class ProductQuoteCrudSearch extends ProductQuote
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['pq_id' => SORT_DESC]],
         ]);
 
         $this->load($params);

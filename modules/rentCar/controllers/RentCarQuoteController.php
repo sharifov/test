@@ -8,6 +8,7 @@ use modules\rentCar\RentCarModule;
 use modules\rentCar\src\entity\dto\RentCarProductQuoteDto;
 use modules\rentCar\src\entity\dto\RentCarQuoteDto;
 use modules\rentCar\src\entity\rentCar\RentCar;
+use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use modules\rentCar\src\forms\RentCarSearchForm;
 use modules\rentCar\src\helpers\RentCarDataParser;
 use modules\rentCar\src\helpers\RentCarQuoteHelper;
@@ -17,6 +18,7 @@ use Yii;
 use yii\data\ArrayDataProvider;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
@@ -104,6 +106,7 @@ class RentCarQuoteController extends FController
                 throw new \RuntimeException('RentCar quote by token: (' . $token . ') not found', 3);
             }
 
+            $transaction = \Yii::$app->db->beginTransaction();
             $productQuote = RentCarProductQuoteDto::create($rentCar, $quoteData);
             if (!$productQuote->save()) {
                 throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($productQuote));
@@ -117,7 +120,15 @@ class RentCarQuoteController extends FController
             if (!$rentCarQuote->save()) {
                 throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($rentCarQuote));
             }
+
+            $productQuote = RentCarProductQuoteDto::priceUpdate($productQuote, $rentCarQuote);
+            if (!$productQuote->save()) {
+                throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($productQuote));
+            }
+
+            $transaction->commit();
         } catch (\Throwable $throwable) {
+            $transaction->rollBack();
             Yii::warning(AppHelper::throwableLog($throwable, true), 'RentCarQuoteController:actionAddQuote');
             return ['error' => 'Error: ' . $throwable->getMessage()];
         }
@@ -126,6 +137,44 @@ class RentCarQuoteController extends FController
             'product_id' => $rentCar->prc_product_id,
             'message' => 'Successfully added quote. Rent Car Quote Id: (' . $rentCarQuote->rcq_id . ')'
         ];
+    }
+
+    public function actionAjaxUpdateAgentMarkup(): Response
+    {
+        $extraMarkup = Yii::$app->request->post('extra_markup');
+
+        $quoteId = array_key_first($extraMarkup);
+        $value = $extraMarkup[$quoteId];
+
+        if ($quoteId && is_int($quoteId) && $value !== null) {
+            try {
+                if (!$rentCarQuote = RentCarQuote::findOne(['rcq_id' => $quoteId])) {
+                    throw new \RuntimeException('RentCarQuote not found by id (' . $quoteId . ')');
+                }
+                $transaction = \Yii::$app->db->beginTransaction();
+                $rentCarQuote->rcq_agent_mark_up = $value;
+                if (!$rentCarQuote->save()) {
+                    throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($rentCarQuote));
+                }
+
+                $productQuote = $rentCarQuote->rcqProductQuote;
+                $productQuote = RentCarProductQuoteDto::priceUpdate($productQuote, $rentCarQuote);
+                if (!$productQuote->save()) {
+                    throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($productQuote));
+                }
+                $transaction->commit();
+            } catch (\RuntimeException $e) {
+                $transaction->rollBack();
+                return $this->asJson(['message' => $e->getMessage()]);
+            } catch (\Throwable $e) {
+                $transaction->rollBack();
+                Yii::error($e->getTraceAsString(), 'RentCarQuoteController::actionAjaxUpdateAgentMarkup');
+            }
+
+            return $this->asJson(['output' => $value]);
+        }
+
+        throw new BadRequestHttpException();
     }
 
     /**

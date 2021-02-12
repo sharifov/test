@@ -38,6 +38,9 @@ use Yii;
  * @property int|null $rcq_updated_user_id
  * @property string|null $rcq_request_hash_key
  * @property string|null $rcq_offer_token
+ * @property float|null $rcq_system_mark_up
+ * @property float|null $rcq_agent_mark_up
+ * @property float|null $rcq_service_fee_percent
  *
  * @property ProductQuote $rcqProductQuote
  * @property RentCar $rcqRentCar
@@ -101,6 +104,9 @@ class RentCarQuote extends \yii\db\ActiveRecord implements Quotable
             ['rcq_vendor_name', 'string', 'max' => 255],
 
             ['rcq_offer_token', 'string', 'max' => 500],
+
+            [['rcq_system_mark_up', 'rcq_agent_mark_up', 'rcq_service_fee_percent'], 'default', 'value' => 0.00],
+            [['rcq_system_mark_up', 'rcq_agent_mark_up', 'rcq_service_fee_percent'], 'number'],
         ];
     }
 
@@ -142,7 +148,9 @@ class RentCarQuote extends \yii\db\ActiveRecord implements Quotable
             'rcq_updated_dt' => 'Updated Dt',
             'rcq_created_user_id' => 'Created User ID',
             'rcq_updated_user_id' => 'Updated User ID',
-            'rcq_request_hash_key' => 'Request hash key'
+            'rcq_request_hash_key' => 'Request hash key',
+            'rcq_system_mark_up' => 'System mark up',
+            'rcq_agent_mark_up' => 'Agent mark up',
         ];
     }
 
@@ -184,12 +192,11 @@ class RentCarQuote extends \yii\db\ActiveRecord implements Quotable
 
     public function getSystemMarkUp(): float
     {
-
-        return 0.00; /* TODO::  */
+        return $this->rcq_system_mark_up;
     }
 
     public function getAgentMarkUp(): float
     {
-        return 0.00; /* TODO::  */
+        return $this->rcq_agent_mark_up;
     }
 }

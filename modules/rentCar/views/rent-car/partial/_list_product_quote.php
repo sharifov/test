@@ -136,6 +136,7 @@ JS;
                             },
                             'format' => 'raw',
                         ],
+                        'rcq_days',
                         'rcq_price_per_day',
                         'rcq_currency',
                     ],
@@ -178,44 +179,25 @@ JS;
             </div>
         </div>
 
-        <div class="row">
-             <div class="col-md-12">
-                <table class="table table-bordered table-striped">
-                    <thead>
-                        <tr>
-                            <th>PickUp</th>
-                            <th>DropOff</th>
-                            <th>Price per Day</th>
-                            <th>Days</th>
-                            <th>Total</th>
-                            <th>Currency</th>
-                        </tr>
-                        <tr>
-                            <td>
-                                <?php echo Airports::getCityByIata($rentCar->prc_pick_up_code) ?> (<?php echo $rentCar->prc_pick_up_code ?>)<br />
-                                Date: <?php echo $rentCar->prc_pick_up_date ?>
-                            </td>
-                            <td>
-                                <?php $dropOffCode = $rentCar->prc_drop_off_code ?: $rentCar->prc_pick_up_code ?>
-                                <?php echo Airports::getCityByIata($dropOffCode) ?> (<?php echo $dropOffCode ?>)<br />
-                                Date: <?php echo $rentCar->prc_drop_off_date ?>
-                            </td>
-                            <td><?php echo $modelQuote->rcq_price_per_day ?></td>
-                            <td><?php echo $modelQuote->rcq_days ?></td>
-                            <td><?php echo number_format($modelQuote->rcq_price_per_day * $modelQuote->rcq_days, 2)  ?></td>
-                            <td><?php echo $modelQuote->rcq_currency ?></td>
-                        </tr>
-                    </thead>
-                </table>
-             </div>
-        </div>
+        <div class="row box-rc-prices">
+            <div class="col-md-12">
 
+                <?php Pjax::begin(['id' => 'pjax-quote_prices-' . $modelQuote->getId(), 'enablePushState' => false, 'enableReplaceState' => false]); ?>
+                    <?= $this->render('_quote_prices', [
+                        'rentCarQuote' => $modelQuote,
+                        'rentCar' => $rentCar,
+                    ]); ?>
+
+                    <?= $this->render('@frontend/views/lead/quotes/partial/_quote_option_list', ['productQuote' => $modelQuote->rcqProductQuote]) ?>
+                    <?= $this->render('@frontend/views/lead/quotes/partial/_quote_total', ['productQuote' => $modelQuote->rcqProductQuote]) ?>
+
+                <?php Pjax::end(); ?>
+
+            </div>
+        </div>
 
         <i class="fa fa-user"></i> <?=$modelQuote->rcqProductQuote->pqCreatedUser ? Html::encode($modelQuote->rcqProductQuote->pqCreatedUser->username) : '-'?>,
         <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($modelQuote->rcqProductQuote->pq_created_dt)) ?>
-
-        <?= $this->render('@frontend/views/lead/quotes/partial/_quote_option_list', ['productQuote' => $modelQuote->rcqProductQuote]) ?>
-        <?= $this->render('@frontend/views/lead/quotes/partial/_quote_total', ['productQuote' => $modelQuote->rcqProductQuote]) ?>
 
     </div>
 </div>
