@@ -8,6 +8,7 @@ use modules\cruise\CruiseModule;
 use modules\email\EmailModule;
 use modules\fileStorage\FileStorageModule;
 use modules\flight\FlightModule;
+use modules\attraction\AttractionModule;
 use modules\hotel\HotelModule;
 use modules\invoice\InvoiceModule;
 use modules\offer\OfferModule;
@@ -272,6 +273,9 @@ return [
             'viewPath' => '@frontend/views/rbac',
         ],
 
+        'attraction' => [
+            'class' => AttractionModule::class,
+        ],
 
         'flight' => [
             'class' => FlightModule::class,

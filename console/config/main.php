@@ -34,8 +34,10 @@ return [
                 'modules\invoice\migrations',
                 'modules\qaTask\migrations',
                 'kivork\VirtualCron\Migrations',
+                'modules\attraction\migrations',
                 'modules\rentCar\migrations',
                 'modules\cruise\migrations',
+
             ],
         ],
 

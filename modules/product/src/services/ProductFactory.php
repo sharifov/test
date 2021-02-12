@@ -5,6 +5,7 @@ namespace modules\product\src\services;
 use modules\cruise\src\entity\cruise\Cruise;
 use modules\product\src\entities\productType\ProductType;
 use modules\flight\models\Flight;
+use modules\attraction\models\Attraction;
 use modules\hotel\models\Hotel;
 use modules\product\src\exceptions\ProductCodeException;
 use modules\product\src\interfaces\Productable;
@@ -19,6 +20,8 @@ class ProductFactory
                 return Flight::create($productId);
             case ProductType::PRODUCT_HOTEL:
                 return Hotel::create($productId);
+            case ProductType::PRODUCT_ATTRACTION:
+                return Attraction::create($productId);
             case ProductType::PRODUCT_RENT_CAR:
                 return RentCar::create($productId);
             case ProductType::PRODUCT_CRUISE:

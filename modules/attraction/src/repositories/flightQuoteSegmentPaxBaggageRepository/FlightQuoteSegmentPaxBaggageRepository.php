@@ -1,0 +1,27 @@
+<?php
+
+namespace modules\flight\src\repositories\flightQuoteSegmentPaxBaggageRepository;
+
+use modules\flight\models\FlightQuoteSegmentPaxBaggage;
+use modules\flight\src\exceptions\AttractionCodeException;
+
+/**
+ * Class FlightQuoteSegmentPaxBaggageRepository
+ */
+class FlightQuoteSegmentPaxBaggageRepository
+{
+    public function save(FlightQuoteSegmentPaxBaggage $baggage): int
+    {
+        if (!$baggage->save()) {
+            throw new \RuntimeException($baggage->getErrorSummary(false)[0]);
+        }
+        return $baggage->qsb_id;
+    }
+
+    public function remove(FlightQuoteSegmentPaxBaggage $baggage): void
+    {
+        if (!$baggage->delete()) {
+            throw new \RuntimeException('Removing error', AttractionCodeException::FLIGHT_QUOTE_SEGMENT_PAX_BAGGAGE_REMOVE);
+        }
+    }
+}
