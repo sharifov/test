@@ -52,6 +52,9 @@ class CruiseCabinPaxForm extends CruiseCabinPax
 
     public function checkDateOfBirth(): void
     {
+        if ($this->hasErrors()) {
+            return;
+        }
         $ageRange = $this->getPaxAgeRangeByPaxId($this->crp_type_id);
         if ($this->crp_age !== null && $ageRange && ($this->crp_age < $ageRange['min'] || (isset($ageRange['max']) && $this->crp_age > $ageRange['max']))) {
             $message = 'The age of the ' . $this->getPaxTypeName() . ', should be from ' . $ageRange['min'] . ' ' . (isset($ageRange['max']) ? ' to ' . $ageRange['max'] : '') . ' years old';

@@ -164,7 +164,7 @@ class CruiseCabinController extends FController
                         }
                     }
 
-                    return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-product-search-' . $modelCabin->cruise->crs_product_id . '"});</script>';
+                    return '<script>$(\'.menu-btn-add-cabin\').html(\'\');$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-product-search-' . $modelCabin->cruise->crs_product_id . '"});</script>';
                 }
             }
             //return ['errors' => \yii\widgets\ActiveForm::validate($model)];

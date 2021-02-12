@@ -71,10 +71,11 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
                         <?= Html::a('<i class="fa fa-edit"></i> Update Request', null, [
                             'data-url' => \yii\helpers\Url::to([
                                 '/cruise/cruise/update-ajax',
-                                'id' => $product->cruise->crs_id
+                                'id' => $product->cruise->crs_id,
                             ]),
+                            'data-product-id' => $product->pr_id,
                             'data-cruise-id' => $product->cruise->crs_id,
-                            'class' => 'dropdown-item text-warning btn-update-cruise-request'
+                            'class' => 'dropdown-item text-warning btn-update-cruise-request btn-update-request'
                         ]) ?>
 
                         <?= Html::a('<i class="fa fa-search"></i> Search Quotes', null, [
@@ -87,14 +88,17 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
                         ]) ?>
 
                         <?php if (!$product->cruise->cabins) : ?>
-                            <?= Html::a('<i class="fa fa-plus"></i> Add Cabin', null, [
-                                'data-url' => \yii\helpers\Url::to([
-                                    '/cruise/cruise-cabin/create-ajax',
-                                    'id' => $product->cruise->crs_id,
-                                ]),
-                                'data-cruise-id' => $product->cruise->crs_id,
-                                'class' => 'dropdown-item btn-add-cruise-cabin'
-                            ]) ?>
+                            <div class="menu-btn-add-cabin">
+                                <?= Html::a('<i class="fa fa-plus"></i> Add Cabin', null, [
+                                    'data-url' => \yii\helpers\Url::to([
+                                        '/cruise/cruise-cabin/create-ajax',
+                                        'id' => $product->cruise->crs_id,
+                                    ]),
+                                    'data-cruise-id' => $product->cruise->crs_id,
+                                    'data-product-id' => $product->pr_id,
+                                    'class' => 'dropdown-item btn-add-cruise-cabin btn-add-cabin'
+                                ]) ?>
+                            </div>
                         <?php endif; ?>
 
                         <div class="dropdown-divider"></div>
