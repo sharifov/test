@@ -9,6 +9,7 @@ use yii\widgets\Pjax;
 /* @var yii\web\View $this */
 /* @var RentCar $rentCar */
 /* @var yii\data\ArrayDataProvider $dataProvider */
+/* @var string|null $error */
 
 ?>
 <div class="rent-car-quote-index">
@@ -18,20 +19,24 @@ use yii\widgets\Pjax;
         </div>
     </div>
 
-    <?php Pjax::begin(['timeout' => 15000, 'enablePushState' => false, 'enableReplaceState' => false, 'scrollTo' => false]); ?>
+    <?php if ($error) : ?>
+        <?php echo '<span class="text-danger">' . $error . '</span>' ?>
+    <?php else : ?>
+        <?php Pjax::begin(['timeout' => 15000, 'enablePushState' => false, 'enableReplaceState' => false, 'scrollTo' => false]); ?>
 
-    <?= \yii\widgets\ListView::widget([
-        'dataProvider' => $dataProvider,
-        'emptyText' => '<div class="text-center">Not found any rent car</div><br>',
-        'itemView' => function ($dataRentCar, $key, $index, $widget) use ($rentCar) {
-            return $this->render('_list_rent_car_quotes', ['dataRentCar' => $dataRentCar, 'index' => $index, 'key' => $key, 'rentCar' => $rentCar]);
-        },
-        'itemOptions' => [
+        <?= \yii\widgets\ListView::widget([
+            'dataProvider' => $dataProvider,
+            'emptyText' => '<div class="text-center">Not found any rent car</div><br>',
+            'itemView' => function ($dataRentCar, $key, $index, $widget) use ($rentCar) {
+                return $this->render('_list_rent_car_quotes', ['dataRentCar' => $dataRentCar, 'index' => $index, 'key' => $key, 'rentCar' => $rentCar]);
+            },
+            'itemOptions' => [
 
-            'tag' => false,
-        ],
-    ]) ?>
-    <?php Pjax::end(); ?>
+                'tag' => false,
+            ],
+        ]) ?>
+        <?php Pjax::end(); ?>
+    <?php endif ?>
 </div>
 
 <?php
