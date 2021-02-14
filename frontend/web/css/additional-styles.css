@@ -215,3 +215,10 @@ a.cw-call-contact-info {
         bottom: calc(50px + 68px);
     }
 }
+
+@media (min-width: 1368px) {
+    .dev-tile-adjust {
+        max-width: 10% !important;
+    }
+}
+
