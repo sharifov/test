@@ -54,7 +54,7 @@
             </div>
             <div class="col-md-2 col-sm-4  tile_stats_count dev-tile-adjust">
                 <span class="count_top"><i class="fa fa-user"></i> Chats</span>
-                <div class="count">7,325</div>
+                <div class="count">5,325</div>
                 <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>34% </i> From last Week</span>
             </div>
         </div>
@@ -310,8 +310,8 @@
                         </div>
                         <div class="w_center w_55">
                             <div class="progress">
-                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="60"
-                                     aria-valuemin="0" aria-valuemax="100" style="width: 66%;">
+                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="66"
+                                     aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
                                     <span class="sr-only">60% Complete</span>
                                 </div>
                             </div>
@@ -327,8 +327,8 @@
                         </div>
                         <div class="w_center w_55">
                             <div class="progress">
-                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="60"
-                                     aria-valuemin="0" aria-valuemax="100" style="width: 45%;">
+                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="45"
+                                     aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
                                     <span class="sr-only">60% Complete</span>
                                 </div>
                             </div>
@@ -344,8 +344,8 @@
                         </div>
                         <div class="w_center w_55">
                             <div class="progress">
-                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="60"
-                                     aria-valuemin="0" aria-valuemax="100" style="width: 25%;">
+                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="25"
+                                     aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
                                     <span class="sr-only">60% Complete</span>
                                 </div>
                             </div>
@@ -361,8 +361,8 @@
                         </div>
                         <div class="w_center w_55">
                             <div class="progress">
-                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="60"
-                                     aria-valuemin="0" aria-valuemax="100" style="width: 5%;">
+                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="5"
+                                     aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
                                     <span class="sr-only">60% Complete</span>
                                 </div>
                             </div>
@@ -378,14 +378,14 @@
                         </div>
                         <div class="w_center w_55">
                             <div class="progress">
-                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="60"
-                                     aria-valuemin="0" aria-valuemax="100" style="width: 2%;">
+                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow=2
+                                     aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
                                     <span class="sr-only">60% Complete</span>
                                 </div>
                             </div>
                         </div>
                         <div class="w_right w_20">
-                            <span>1k</span>
+                            <span>5,5k</span>
                         </div>
                         <div class="clearfix"></div>
                     </div>
@@ -396,7 +396,7 @@
                         <div class="w_center w_55">
                             <div class="progress">
                                 <div class="progress-bar bg-green" role="progressbar" aria-valuenow="60"
-                                     aria-valuemin="0" aria-valuemax="100" style="width: 2%;">
+                                     aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
                                     <span class="sr-only">60% Complete</span>
                                 </div>
                             </div>
@@ -447,10 +447,9 @@
                         </tr>
                         <tr>
                             <td>
-                                <iframe class="chartjs-hidden-iframe"
-                                        style="width: 100%; display: block; border: 0px; height: 0px; margin: 0px; position: absolute; inset: 0px;"></iframe>
-                                <canvas class="canvasDoughnut" height="140" width="140"
-                                        style="margin: 15px 10px 10px 0px; width: 140px; height: 140px;"></canvas>
+                               <!-- <iframe class="chartjs-hidden-iframe"  style="width: 100%; display: block; border: 0px; height: 0px; margin: 0px; position: absolute; inset: 0px;"></iframe>-->
+                                <!--<canvas id="productsShareChart" class="" height="440" width="440" style="margin: 15px 10px 10px 0px; width: 440px; height: 440px;"></canvas>-->
+                                <canvas id="productsShareChart"></canvas>
                             </td>
                             <td>
                                 <table class="tile_info">
@@ -483,7 +482,7 @@
                                         <td>
                                             <p><i class="fa fa-square red"></i>Attractions </p>
                                         </td>
-                                        <td>30%</td>
+                                        <td>25%</td>
                                     </tr>
                                     </tbody>
                                 </table>
@@ -522,8 +521,8 @@
                         </div>
                         <div class="w_center w_55">
                             <div class="progress">
-                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="60"
-                                     aria-valuemin="0" aria-valuemax="100" style="width: 66%;">
+                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="86"
+                                     aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
                                     <span class="sr-only">60% Complete</span>
                                 </div>
                             </div>
@@ -539,8 +538,8 @@
                         </div>
                         <div class="w_center w_55">
                             <div class="progress">
-                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="60"
-                                     aria-valuemin="0" aria-valuemax="100" style="width: 45%;">
+                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="72"
+                                     aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
                                     <span class="sr-only">60% Complete</span>
                                 </div>
                             </div>
@@ -556,8 +555,8 @@
                         </div>
                         <div class="w_center w_55">
                             <div class="progress">
-                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="60"
-                                     aria-valuemin="0" aria-valuemax="100" style="width: 25%;">
+                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="61"
+                                     aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
                                     <span class="sr-only">60% Complete</span>
                                 </div>
                             </div>
@@ -573,8 +572,8 @@
                         </div>
                         <div class="w_center w_55">
                             <div class="progress">
-                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="60"
-                                     aria-valuemin="0" aria-valuemax="100" style="width: 5%;">
+                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="54"
+                                     aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
                                     <span class="sr-only">60% Complete</span>
                                 </div>
                             </div>
@@ -2722,6 +2721,16 @@
     </div>
 </div>
 
+<?php
+$js = <<< JS
+    $(document).ready(function() {      
+        $('.progress .progress-bar').each(function() {
+            $(this).css("width", $(this).attr("aria-valuenow") + '%');
+        });
+    });
+JS;
+$this->registerJs($js, \yii\web\View::POS_END);
+?>
 
 <?php
 $transactionSummaryChart = <<< JS
@@ -2953,5 +2962,67 @@ let soldLeadsChart = new Chart(ctxSoldLeads, {
 
 JS;
 $this->registerJs($soldLeadsChart, \yii\web\View::POS_END);
+?>
+
+<?php
+$ProductsShareChart = <<< JS
+let ctxProductsShare = document.getElementById('productsShareChart').getContext('2d');
+let productsShareChart = new Chart(ctxProductsShare, {
+    type: 'doughnut', 
+    tooltipFillColor: "rgba(51, 51, 51, 0.55)",  
+    data: {
+        labels: ['Flight', 'Hotel', 'Car Rental', 'Cruise', 'Attractions'],
+        datasets: [{            
+            data: [30, 10, 20, 15, 25],
+            backgroundColor: ["#3498DB", "#26B99A", "#9B59B6", "#BDC3C7", "#E74C3C"],
+            hoverBackgroundColor: ["#49A9EA", "#36CAAB", "#B370CF", "#CFD4D8", "#E95E4F"],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: false,
+        maintainAspectRatio : false,
+        legend: {
+            display: false,
+            position: 'right',
+            //boxWidth: 20
+        },
+        layout: {
+            padding: {
+                left: -140,
+                right: 0,
+                top: 0,
+                bottom: 0
+            }
+        },
+        /*legendCallback: function (chart) {
+            console.log(chart)
+            var text = [];
+            text.push('<ul class="' + chart.id + '-legend">');
+
+            var data = chart.data;
+            var datasets = data.datasets;
+            var labels = data.labels;
+
+            if (datasets.length) {
+                for (var i = 0; i < datasets[0].data.length; ++i) {
+                    text.push('<li><span style="background-color:' + datasets[0].backgroundColor[i] + '"></span>');
+                    if (labels[i]) {
+                        text.push(labels[i] + ' (' + datasets[0].data[i] + '%)');
+                    }
+                    text.push('</li>');
+                }
+            }
+            text.push('</ul>');
+            return text.join('');
+        },*/
+    }
+});
+
+/*var legend = productsShareChart.generateLegend();
+document.getElementById("legend").innerHTML = legend;*/
+
+JS;
+$this->registerJs($ProductsShareChart, \yii\web\View::POS_END);
 ?>
 
