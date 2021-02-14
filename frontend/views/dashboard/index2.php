@@ -64,14 +64,14 @@
         <div class="col-md-12">
             <div class="x_panel">
                 <div class="x_title">
-                    <h2>Transaction Summary <small>Weekly progress</small></h2>
-                    <div class="filter">
+                    <h2>New Leads / New Clients Summary <small>Weekly progress</small></h2>
+                    <!--<div class="filter">
                         <div id="reportrange" class="pull-right"
                              style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc">
                             <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
                             <span>January 16, 2021 - February 14, 2021</span> <b class="caret"></b>
                         </div>
-                    </div>
+                    </div>-->
                     <div class="clearfix"></div>
                 </div>
                 <div class="x_content">
@@ -2740,7 +2740,7 @@ $transactionSummaryChart = <<< JS
         data: {
             labels: ['10/02/21', '10/02/21', '10/02/21', '11/02/21', '12/02/21', '13/02/21', '14/02/21'],
             datasets: [{
-                label: '* New leads',
+                label: 'New leads',
                 data: [12, 19, 3, 5, 2, 3, 8],
                 lineTension: 0,
                 //pointRadius: 3,
@@ -2763,7 +2763,7 @@ $transactionSummaryChart = <<< JS
                 borderWidth: 2
             },
             {
-                label: '* New Clients',
+                label: 'New Clients',
                 data: [10, 7, 13, 21, 7, 5, 19],
                 lineTension: 0,
                 //pointRadius: 3,
