@@ -356,7 +356,7 @@ class OfferController extends BaseController
      *                  "pq_gid":"1f2a619ee37af592dfd6c927ef00b795",
      *                  "pq_name":"Boat Tour in Miami with a Free Drink",
      *                  "pq_order_id":null,
-     *                  "pq_description":null,
+     *                  "pq_description":"example",
      *                  "pq_status_id":2,
      *                  "pq_price":28,
      *                  "pq_origin_price":28,
@@ -367,9 +367,9 @@ class OfferController extends BaseController
      *                  "data": {
      *                      "rcq_model_name":"Nissan Rogue or similar",
      *                      "rcq_category":"Midsize SUV,
-     *                      "rcq_image_url":null,
+     *                      "rcq_image_url":"https://example.com/inmage.jpg",
      *                      "rcq_vendor_name":Hertz Rental Company,
-     *                      "rcq_vendor_logo_url":null,
+     *                      "rcq_vendor_logo_url":"https://example.com/logo.jpg",
      *                      "rcq_options": {
      *                          "doors":4,
      *                          "person":5,
@@ -390,7 +390,7 @@ class OfferController extends BaseController
      *                    },
      *                   "product": {
      *                          "pr_type_id":5,
-     *                          "pr_name":"",
+     *                          "pr_name":"offer for my best client",
      *                          "pr_lead_id":15356,
      *                          "pr_description":"",
      *                          "pr_status_id":null,
