@@ -123,7 +123,7 @@ $fromType = 'client';
             </div>
             <div class="card-body">
                 <h5 class="chat__subtitle"><?= wordwrap(Html::encode($mail->e_email_subject), 60, '<br />', true)?></h5>
-                <div class="">
+                <div class="" style="word-wrap: break-word">
                 <?php echo \yii\helpers\StringHelper::truncate(Email::stripHtmlTags($mail->getEmailBodyHtml()), 300, '...', null, true)?>
                 </div>
             <?php if (Auth::can('email/view', ['email' => $mail])) : ?>
