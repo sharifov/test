@@ -15,10 +15,10 @@ $linkAttributes = ['target' => '_blank', 'data-pjax' => '0'];
 ?>
 <div class="row box-statistics">
     <div class="col-3">
+        <i class="fa fa-phone" aria-hidden="true" title="<?= Html::encode($statistics::HINT_CALLS) ?>"></i>
         <strong><?php echo $statistics::HINT_CALLS ?>: </strong>
         <?php
-            $text = $statistics->callCount .
-                '&nbsp;&nbsp;<i class="fa fa-phone success" aria-hidden="true" title="' . $statistics::HINT_CALLS . '"> </i>';
+            $text = $statistics->callCount;
         if (Auth::can('/call/index')) {
             $paramName = $statistics->isTypeCase() ? 'case_id' : 'lead_id';
             echo Html::a(
@@ -32,10 +32,10 @@ $linkAttributes = ['target' => '_blank', 'data-pjax' => '0'];
         ?>
     </div>
     <div class="col-3">
+        <i class="fas fa-sms" aria-hidden="true" title="<?= Html::encode($statistics::HINT_SMS) ?>"></i>
         <strong><?php echo $statistics::HINT_SMS ?>: </strong>
         <?php
-            $text = $statistics->smsCount .
-                '&nbsp;&nbsp;<i class="fas fa-sms info" aria-hidden="true" title="' . $statistics::HINT_SMS . '"> </i>';
+            $text = $statistics->smsCount;
         if (Auth::can('/sms/index')) {
             $paramName = $statistics->isTypeCase() ? 's_case_id' : 's_lead_id';
             echo Html::a(
@@ -49,10 +49,10 @@ $linkAttributes = ['target' => '_blank', 'data-pjax' => '0'];
         ?>
     </div>
     <div class="col-3">
+        <i class="fa fa-envelope" aria-hidden="true" title="<?= Html::encode($statistics::HINT_EMAILS) ?>"></i>
         <strong><?php echo $statistics::HINT_EMAILS ?></strong>
         <?php
-            $text = $statistics->emailCount .
-                '&nbsp;&nbsp;<i class="fa fa-envelope danger" aria-hidden="true" title="' . $statistics::HINT_EMAILS . '"> </i>';
+            $text = $statistics->emailCount;
         if (Auth::can('/email/index')) {
             $paramName = $statistics->isTypeCase() ? 'e_case_id' : 'e_lead_id';
             echo Html::a(
@@ -66,10 +66,10 @@ $linkAttributes = ['target' => '_blank', 'data-pjax' => '0'];
         ?>
     </div>
     <div class="col-3">
+        <i class="fa fa-comments-o" aria-hidden="true" title="<?= Html::encode($statistics::HINT_CHATS) ?>"></i>
         <strong><?php echo $statistics::HINT_CHATS ?></strong>
         <?php
-            $text = $statistics->clientChatCount .
-                '&nbsp;&nbsp;<i class="fa fa-comments-o warning" aria-hidden="true" title="' . $statistics::HINT_CHATS . '"> </i>';
+            $text = $statistics->clientChatCount;
         if (Auth::can('/client-chat-crud/index')) {
             $paramName = $statistics->isTypeCase() ? 'caseId' : 'leadId';
 
