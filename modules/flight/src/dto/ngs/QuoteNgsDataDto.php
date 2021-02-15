@@ -13,7 +13,7 @@ class QuoteNgsDataDto
     public function __construct(array $flightQuoteNgsData = [])
     {
         $this->name = $flightQuoteNgsData['name'] ?? '';
-        $this->stars = $flightQuoteNgsData['stars'] ?? '';
+        $this->stars = $flightQuoteNgsData['stars'] ?? 0;
         $this->list = $flightQuoteNgsData['list'] ?? [];
     }
 }
