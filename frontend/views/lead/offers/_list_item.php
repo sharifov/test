@@ -17,12 +17,15 @@ use yii\bootstrap4\Html;
 
             <?= Html::checkbox('offer_checkbox[' . $offer->of_id . ']', false, ['id' => 'off_ch' . $offer->of_id, 'class' => 'offer-checkbox', 'data-id' => $offer->of_id, 'style' => 'width: 16px; height: 16px;'])?>
             <small><span class="badge badge-white">OF<?=($offer->of_id)?></span></small>
+            <?= OfferStatus::asFormat($offer->of_status_id) ?>
+            (<span title="GID: <?=\yii\helpers\Html::encode($offer->of_gid)?>"><?=\yii\helpers\Html::encode($offer->of_uid)?></span>)
             "<b><?=\yii\helpers\Html::encode($offer->of_name)?></b>"
-            (<span title="UID"><?=\yii\helpers\Html::encode($offer->of_uid)?></span>)
-             <?= OfferStatus::asFormat($offer->of_status_id) ?>
+
              <?= OfferFormatter::asSentView($offer) ?>
 
-             <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $offer->of_profit_amount ?>
+            <?php if ($offer->of_profit_amount) : ?>
+                <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $offer->of_profit_amount ?>
+            <?php endif; ?>
 
         <ul class="nav navbar-right panel_toolbox">
             <!--            <li>-->
@@ -82,8 +85,9 @@ use yii\bootstrap4\Html;
 
             ?>
             <tr>
-                <th>Quote ID</th>
-                <th>Type</th>
+<!--                <th>Quote ID</th>-->
+                <th>Nr</th>
+                <th>Product</th>
                 <th>Name</th>
                 <th>Status</th>
                 <th>Created</th>
@@ -93,7 +97,9 @@ use yii\bootstrap4\Html;
                 <th>Client Price</th>
                 <th></th>
             </tr>
-            <?php if ($offer->offerProducts) :?>
+            <?php if ($offer->offerProducts) :
+                $nr = 1;
+                ?>
                 <?php foreach ($offer->offerProducts as $product) :
                         $quote = $product->opProductQuote;
                         $originTotalPrice += $quote->pq_price;
@@ -102,8 +108,10 @@ use yii\bootstrap4\Html;
                         $totalFee += $quote->pq_service_fee_sum;
                     ?>
                     <tr>
-                        <td title="Product Quote ID"><?=Html::encode($quote->pq_id)?></td>
+                        <td title="Product Quote ID: <?=Html::encode($quote->pq_id)?>"><?= $nr++ ?></td>
+
                         <td title="<?=Html::encode($quote->pq_product_id)?>">
+                            <?= $quote->pqProduct->prType->pt_icon_class ? Html::tag('i', '', ['class' => $quote->pqProduct->prType->pt_icon_class]) : '' ?>
                             <?=Html::encode($quote->pqProduct->prType->pt_name)?>
                             <?=$quote->pqProduct->pr_name ? ' - ' . Html::encode($quote->pqProduct->pr_name) : ''?>
                         </td>

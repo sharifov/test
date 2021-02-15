@@ -35,13 +35,24 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
-            'pt_id',
+            [
+                'attribute' => 'pt_id',
+                'options' => ['style' => 'width: 80px']
+            ],
             'pt_key',
             'pt_name',
+
+            [
+                'attribute' => 'pt_icon_class',
+                'value' => static function (ProductType $model) {
+                    return $model->pt_icon_class ? Html::tag('i', '', ['class' => $model->pt_icon_class]) . ' "' . Html::encode($model->pt_icon_class) . '"' : '-';
+                },
+                'format' => 'raw',
+                'options' => ['style' => 'width: 180px']
+            ],
             'pt_sort_order',
-            'pt_icon_class',
 //            'pt_service_fee_percent',
-            'pt_description:ntext',
+//            'pt_description:ntext',
             [
                     'label' => 'Count Payment Methods',
                 'class' => ProductTypeCountPaymentMethodsColumn::class,
