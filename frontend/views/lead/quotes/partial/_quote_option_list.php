@@ -80,7 +80,7 @@ $i = 1;
             <?php $i++ ?>
         <?php endforeach; ?>
         <tr>
-            <th colspan="4" class="text-right">Option Total: </th>
+            <th colspan="3" class="text-right">Option Total: </th>
             <?php
                 $totalAmountOption = round($totalAmountOption, 2);
                 $totalClientAmountOption = round($totalClientAmountOption, 2);

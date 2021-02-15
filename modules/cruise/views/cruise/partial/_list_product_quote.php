@@ -178,12 +178,10 @@ JS;
                         'data-product-id' => $model->productQuote->pq_product_id,
                     ]) */ ?>
 
-                    <?php /*= Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
+                    <?php echo Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
                         'class' => 'dropdown-item text-success btn-add-product-quote-option',
-                        //'data-product-quote-id' => $model->hq_product_quote_id,
                         'data-url' => Url::to(['/product/product-quote-option/create-ajax', 'id' => $model->crq_product_quote_id]),
-                        //'data-product-id' => $model->hqProductQuote->pq_product_id,
-                    ]) */ ?>
+                    ]) ?>
 
                     <?php /* if ($model->isBookable()) : ?>
                         <?= Html::a(
@@ -335,7 +333,10 @@ JS;
 
                 </table>
             </div>
+
+        <?= $this->render('@frontend/views/lead/quotes/partial/_quote_option_list', ['productQuote' => $model->productQuote]) ?>
         <?= $this->render('@frontend/views/lead/quotes/partial/_quote_total', ['productQuote' => $model->productQuote]) ?>
+
     </div>
 </div>
     <?php Pjax::end(); ?>
