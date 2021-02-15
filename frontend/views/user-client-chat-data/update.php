@@ -182,20 +182,21 @@ $js = <<<JS
                 } else {
                     createNotify('Success', 'The request was successful', 'success');
                 }
-                $('#activate_to_rc').prop('disabled', true).css('opacity', '0.3'); 
+                $(btn).prop('disabled', true).css('opacity', '0.3'); 
                 $('#deactivate_from_rc').prop('disabled', false).css('opacity', '1.0');   
                 $('#rc_active_status').html('<i class="fa fa-check" title="User is active"></i>');             
             } else {
                 createNotify('Error', dataResponse.message, 'error');
+                $(btn).prop('disabled', false).css('opacity', '1.0'); 
             } 
             loadingBtn(btn, false);      
         })
         .fail(function(error) {
-            loadingBtn($('#activate_to_rc'), false);
             createNotify('Error', 'Server error. Please try again later', 'error');
+            loadingBtn(btn, false);
+            $(btn).prop('disabled', false).css('opacity', '1.0');            
         })
-        .always(function() {
-            setTimeout(loadingBtn, 4000, $('#activate_to_rc'), false);     
+        .always(function() {                
         });        
     });
     
@@ -223,19 +224,20 @@ $js = <<<JS
                     createNotify('Success', 'The request was successful', 'success');
                 }
                 $('#activate_to_rc').prop('disabled', false).css('opacity', '1.0');
-                $('#deactivate_from_rc').prop('disabled', true).css('opacity', '0.3');
+                btn.prop('disabled', true).css('opacity', '0.3');
                 $('#rc_active_status').html('<i class="fa fa-lock" title="User not active"></i>');       
             } else {
                 createNotify('Error', dataResponse.message, 'error');
+                btn.prop('disabled', false).css('opacity', '1.0');
             } 
-            loadingBtn(btn, false);      
+            loadingBtn(btn, false);              
         })
         .fail(function(error) {
             loadingBtn($('#deactivate_from_rc'), false);
+            btn.prop('disabled', false).css('opacity', '1.0');
             createNotify('Error', 'Server error. Please try again later', 'error');
         })
-        .always(function() {
-            setTimeout(loadingBtn, 4000, $('#deactivate_from_rc'), false);     
+        .always(function() {                
         });        
     });
     
@@ -248,8 +250,7 @@ $js = <<<JS
         } else {            
             btnObj.removeClass()
                 .addClass(btnObj.data('class'))
-                .html(btnObj.data('inner'))
-                .prop('disabled', false);
+                .html(btnObj.data('inner'));
         }  
     }
     
