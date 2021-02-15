@@ -52,6 +52,7 @@ class Handler
         $this->transactionManager->wrap(function () use ($leadId, $cabinClass, $adults, $children, $infants, $segments) {
 
             $product = Product::create(new CreateDto($leadId, ProductType::PRODUCT_FLIGHT, null, null));
+            $product->detachBehavior('user');
             $this->productRepository->save($product);
 
             $flight = Flight::createByApi(
