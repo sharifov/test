@@ -308,12 +308,12 @@ class OfferController extends BaseController
      *                       }
      *                   },
      *                   "product": {
-     *                   "pr_type_id": 4,
-     *                   "pr_name": "Cruise test 1",
-     *                   "pr_lead_id": 513177,
-     *                   "pr_description": "",
-     *                   "pr_status_id": null,
-     *                   "pr_service_fee_percent": null
+     *                       "pr_type_id": 4,
+     *                       "pr_name": "Cruise test 1",
+     *                       "pr_lead_id": 513177,
+     *                       "pr_description": "",
+     *                       "pr_status_id": null,
+     *                       "pr_service_fee_percent": null
      *                   },
      *                   "productQuoteOptions": []
      *               }
