@@ -162,14 +162,14 @@ JS;
             <li class="dropdown dropdown-offer-menu" data-product-quote-id="<?=($model->hq_product_quote_id)?>" data-lead-id="<?=($hotelProduct->phProduct->pr_lead_id)?>" data-url="<?= Url::to(['/offer/offer/list-menu-ajax'])?>">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="far fa-handshake"></i> Offers</a>
                 <div class="dropdown-menu" role="menu">
-                    <?php // ajax loaded content ?>
+                    <?php // ajax loaded content?>
                 </div>
             </li>
 
             <li class="dropdown dropdown-order-menu" data-product-quote-id="<?=($model->hq_product_quote_id)?>" data-lead-id="<?=($hotelProduct->phProduct->pr_lead_id)?>" data-url="<?= Url::to(['/order/order/list-menu-ajax'])?>">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fas fa-money-check-alt"></i> Orders</a>
                 <div class="dropdown-menu" role="menu">
-                    <?php // ajax loaded content ?>
+                    <?php // ajax loaded content?>
                 </div>
             </li>
 
@@ -218,15 +218,15 @@ JS;
 
                     <?php if ($model->isBookable()) : ?>
                         <?= Html::a(
-                            '<i class="fa fa-share-square"></i> Book',
-                            null,
-                            [
+                        '<i class="fa fa-share-square"></i> Book',
+                        null,
+                        [
                                 'class' => 'dropdown-item btn-book-quote',
                                 'data-url' => Url::to('/hotel/hotel-quote/ajax-book'),
                                 'data-hotel-quote-id' => $model->hq_id,
                                 'data-product-id' => $model->hqProductQuote->pq_product_id,
                             ]
-                        ) ?>
+                    ) ?>
                     <?php endif; ?>
                     <?php if ($model->isBooking()) : ?>
                         <?= Html::a(
@@ -242,15 +242,15 @@ JS;
                     <?php endif; ?>
 
                     <?= Html::a(
-                        '<i class="fa fa-list"></i> API Service Log',
-                        null,
-                        [
+                            '<i class="fa fa-list"></i> API Service Log',
+                            null,
+                            [
                             'class' => 'dropdown-item text-secondary btn-product-api-service-log',
                             'data-url' => Url::to(['/hotel/hotel-quote-service-log/hotel-quote-log', 'id' => $model->hq_id]),
                             'data-hotel-quote-id' => $model->hq_id,
                             'data-product-id' => $model->hqProductQuote->pq_product_id,
                         ]
-                    )?>
+                        )?>
 
                     <?= Html::a('<i class="fa fa-list"></i> Status log', null, [
                         'class' => 'dropdown-item text-secondary btn-product-quote-status-log',
@@ -365,7 +365,7 @@ JS;
                     </tr>
                     <?php endforeach; ?>
                     <tr>
-                        <td colspan="3" class="text-right">Room Total: </td>
+                        <td colspan="2" class="text-right">Room Total: </td>
                         <td class="text-center"><?=$adlTotalCount ? '<i class="fa fa-user"></i> ' . $adlTotalCount : '-'?></td>
                         <td class="text-center"><?=$chdTotalCount ? '<i class="fa fa-child"></i> ' . $chdTotalCount : '-'?></td>
                         <td class="text-right"></td>
@@ -380,7 +380,7 @@ JS;
                             $totalAmountRoom = round($totalAmountRoom, 2);
                         ?>
 
-                        <td class="text-right <?=( $totalAmountRoom !== $price) ? 'danger' : ''?>">
+                        <td class="text-right <?=($totalAmountRoom !== $price) ? 'danger' : ''?>">
                             <b title="<?=$totalAmountRoom?> & <?=$price?>"><?=number_format($price, 2)?> USD</b>
                         </td>
                     </tr>
