@@ -63,4 +63,9 @@ class HotelQuoteSearchService
 
         return $result;
     }
+
+    public function clearCache(string $key): void
+    {
+        \Yii::$app->cacheFile->delete($key);
+    }
 }
