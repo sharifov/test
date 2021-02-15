@@ -60,7 +60,7 @@ $productQuote = $rentCarQuote->rcqProductQuote;
                         'inputType' => Editable::INPUT_TEXT,
                         'buttonsTemplate' => '{submit}',
                         'pluginEvents' => [
-                            'editableSuccess' => "function(event, val, form, data) { $.pjax.reload({container: '#pjax-quote_prices-{$rentCarQuote->getId()}', async: false}); $('#quote_profit_{$rentCarQuote->getId()}').popover('hide').popover('dispose');$.pjax.reload({container: '#pjax-quote_estimation_profit-{$rentCarQuote->getId()}', async: false});$('#quote_profit_{$rentCarQuote->getId()}').popover();$.pjax.reload({container: '#pjax-product-quote-{$productQuote->pq_id}', async: false});pjaxReload({container: '#pjax-lead-orders'})}",
+                            'editableSuccess' => "function(event, val, form, data) { $.pjax.reload({container: '#pjax-quote_prices-{$rentCarQuote->getId()}', async: false}); $('#quote_profit_{$rentCarQuote->getId()}').popover('hide').popover('dispose');$('#quote_profit_{$rentCarQuote->getId()}').popover();$.pjax.reload({container: '#pjax-product-quote-{$productQuote->pq_id}', async: false});pjaxReload({container: '#pjax-lead-orders'})}",
                         ],
                         'inlineSettings' => [
                             'templateBefore' => '<div class="editable-pannel">{loading}',

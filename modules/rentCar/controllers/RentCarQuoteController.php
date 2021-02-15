@@ -159,6 +159,7 @@ class RentCarQuoteController extends FController
 
                 $productQuote = $rentCarQuote->rcqProductQuote;
                 $productQuote = RentCarProductQuoteDto::priceUpdate($productQuote, $rentCarQuote);
+                $productQuote->recalculateProfitAmount();
                 if (!$productQuote->save()) {
                     throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($productQuote));
                 }
