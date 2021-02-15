@@ -330,12 +330,12 @@ JS;
                     </tr>
                     <tr>
                         <td class="text-right">Total: </td>
-                        <td class="text-left" colspan="3"><?= $total ?></td>
+                        <td class="text-left" colspan="9"><?= $total ?></td>
                     </tr>
 
                 </table>
             </div>
-
+        <?= $this->render('@frontend/views/lead/quotes/partial/_quote_total', ['productQuote' => $model->productQuote]) ?>
     </div>
 </div>
     <?php Pjax::end(); ?>
