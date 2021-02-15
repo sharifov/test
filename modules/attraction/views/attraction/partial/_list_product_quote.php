@@ -184,13 +184,6 @@ JS;
                         'data-product-id' => $model->atnqProductQuote->pq_product_id,
                     ]) */?> -->
 
-                   <!-- <? /*= Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
-                        'class' => 'dropdown-item text-success btn-add-product-quote-option',
-                        //'data-product-quote-id' => $model->atnq_product_quote_id,
-                        'data-url' => Url::to(['/product/product-quote-option/create-ajax', 'id' => $model->atnq_product_quote_id]),
-                        //'data-product-id' => $model->atnqProductQuote->pq_product_id,
-                    ]) */?> -->
-
                     <?php if ($model->isBookable()) : ?>
                     <!-- <? /*= Html::a(
                             '<i class="fa fa-share-square"></i> Book',
@@ -215,6 +208,11 @@ JS;
                             ]
                         ) */?> -->
                     <?php endif; ?>
+
+                    <?= Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
+                        'class' => 'dropdown-item text-success btn-add-product-quote-option',
+                        'data-url' => Url::to(['/product/product-quote-option/create-ajax', 'id' => $model->atnq_product_quote_id]),
+                    ]) ?>
 
                     <?= Html::a(
                         '<i class="fa fa-list"></i> API Service Log',

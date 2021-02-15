@@ -72,7 +72,7 @@ $user = Yii::$app->user->identity;
                         <?php endif; ?>
                     <?php endif; ?>
                 <?php else : ?>
-                    <span class="badge badge-warning"><i class="fa fa-warning"></i> Warning: Flight Segments is empty!</span>
+                    <?php //<span class="badge badge-warning"><i class="fa fa-warning"></i> Warning: Flight Segments is empty!</span> ?>
                 <?php endif; ?>
             </li>
             <li>

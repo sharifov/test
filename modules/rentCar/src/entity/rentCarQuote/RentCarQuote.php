@@ -166,7 +166,7 @@ class RentCarQuote extends \yii\db\ActiveRecord implements Quotable
 
     public function isBookable(): bool
     {
-        return true;
+        return !$this->rcqProductQuote->isDeclined();
     }
 
     public static function findByProductQuote(int $productQuoteId): ?Quotable

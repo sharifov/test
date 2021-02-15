@@ -38,7 +38,7 @@ class ProductQuoteOptionForm extends Model
     public function rules()
     {
         return [
-            [['pqo_product_quote_id', 'pqo_product_option_id', 'pqo_name'], 'required'],
+            [['pqo_product_quote_id', 'pqo_product_option_id'], 'required'],
             [['pqo_product_quote_id', 'pqo_product_option_id', 'pqo_status_id'], 'integer'],
             [['pqo_description'], 'string'],
             [['pqo_price', 'pqo_client_price', 'pqo_extra_markup'], 'number'],
@@ -55,11 +55,11 @@ class ProductQuoteOptionForm extends Model
     {
         return [
             'pqo_id' => 'ID',
-            'pqo_product_quote_id' => 'Product Quote ID',
-            'pqo_product_option_id' => 'Product Option ID',
+            'pqo_product_quote_id' => 'Product Quote',
+            'pqo_product_option_id' => 'Product Option',
             'pqo_name' => 'Name',
             'pqo_description' => 'Description',
-            'pqo_status_id' => 'Status ID',
+            'pqo_status_id' => 'Status',
             'pqo_price' => 'Price',
             'pqo_client_price' => 'Client Price',
             'pqo_extra_markup' => 'Extra Markup',

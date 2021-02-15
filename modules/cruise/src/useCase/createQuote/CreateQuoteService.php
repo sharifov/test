@@ -38,7 +38,7 @@ class CreateQuoteService
             $prQuote->pq_price = (float)$totalAmount;
             $prQuote->pq_origin_price = (float)$totalAmount;
             $prQuote->pq_client_price = (float)$totalAmount;
-            $prQuote->pq_status_id = ProductQuoteStatus::PENDING;
+            $prQuote->pq_status_id = ProductQuoteStatus::NEW;
             $prQuote->pq_gid = self::generateGid();
             $prQuote->pq_service_fee_sum = 0;
             $prQuote->pq_client_currency_rate = ProductQuoteHelper::getClientCurrencyRate($cruise->product);

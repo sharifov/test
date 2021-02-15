@@ -70,7 +70,7 @@ class ProductQuoteOption extends ActiveRecord implements Serializable
     public function rules(): array
     {
         return [
-            [['pqo_product_quote_id', 'pqo_name'], 'required'],
+            [['pqo_product_quote_id'], 'required'],
             [['pqo_product_quote_id', 'pqo_product_option_id', 'pqo_status_id', 'pqo_created_user_id', 'pqo_updated_user_id'], 'integer'],
             [['pqo_description'], 'string'],
             [['pqo_price', 'pqo_client_price', 'pqo_extra_markup'], 'number'],

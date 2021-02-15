@@ -80,6 +80,11 @@ JS;
                 <div class="dropdown-menu" role="menu">
                     <h6 class="dropdown-header">Quote Q<?=($modelQuote->rcq_product_quote_id)?></h6>
 
+                    <?= Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
+                        'class' => 'dropdown-item text-success btn-add-product-quote-option',
+                        'data-url' => Url::to(['/product/product-quote-option/create-ajax', 'id' => $modelQuote->rcq_product_quote_id]),
+                    ]) ?>
+
                     <?= Html::a('<i class="fa fa-list"></i> Status log', null, [
                         'class' => 'dropdown-item text-secondary btn-product-quote-status-log',
                         'data-url' => Url::to(['/product/product-quote-status-log/show', 'gid' => $modelQuote->rcqProductQuote->pq_gid]),
@@ -93,6 +98,7 @@ JS;
                         'data-model-quote-id' => $modelQuote->rcq_id,
                         'data-product-id' => $modelQuote->rcqProductQuote->pq_product_id,
                     ]) ?>
+
                 </div>
             </li>
         </ul>
