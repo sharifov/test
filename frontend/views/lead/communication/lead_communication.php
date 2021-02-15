@@ -183,8 +183,8 @@ $emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesLis
                             <?php if ($isAdmin) :?>
                                 <div class="row" style="display: none" id="email-data-content-div">
                         <pre><?php
-                            //VarDumper::dump($previewEmailForm->e_content_data, 10, true);
-                            echo json_encode($previewEmailForm->e_content_data);
+                            VarDumper::dump($previewEmailForm->e_content_data, 10, true);
+                            //echo json_encode($previewEmailForm->e_content_data);
                         ?>
                         </pre>
                                 </div>

@@ -28,6 +28,8 @@ class RentCarQuoteSerializer extends Serializer
             'rcq_currency',
             'rcq_options',
             'rcq_advantages',
+            'rcq_image_url',
+            'rcq_vendor_logo_url',
         ];
     }
 
