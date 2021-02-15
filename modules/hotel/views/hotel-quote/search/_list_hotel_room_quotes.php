@@ -29,9 +29,9 @@ $quoteExist = $hotelSearch->quoteExist($dataRoom['groupKey']);
     </tr>
   </thead>
   <tbody>
-    <?php foreach ($quoteRooms as $quoteRoom) : ?>
+    <?php foreach ($quoteRooms as $quoteRoomKey => $quoteRoom) : ?>
     <tr id="tr-hotel-quote-<?=($dataRoom['groupKey'])?>" <?= $quoteExist ? 'class="bg-success"' : '' ?>>
-      <th rowspan="<?= count($quoteRooms) ?>"><?= $key + 1 ?></th>
+      <th><?= $quoteRoomKey + 1 ?></th>
       <td>
         <div><?= Html::encode($quoteRoom['name']) ?></div>
 <!--        <div><small class="text-secondary">Non-Smoking, High Speed Internet Access, Coffee Maker, Hairdryer, Iron And Ironing Boa</small></div>-->
@@ -42,7 +42,7 @@ $quoteExist = $hotelSearch->quoteExist($dataRoom['groupKey']);
         <span class="ml-2"><i class="fa fa-child"></i> <?=(Html::encode($quoteRoom['children'] ?? 0))?></span>
       </td>
       <td>$<?=number_format(Html::encode($quoteRoom['amount'] - ($quoteRoom['markup'] ?? 0)), 2)?></td>
-      <td rowspan="<?= count($quoteRooms) ?>">
+      <td>
           <?php if ($quoteExist) :?>
             <span class="badge badge-white">Added</span>
           <?php else : ?>
