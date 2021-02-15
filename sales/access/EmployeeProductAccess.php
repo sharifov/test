@@ -34,10 +34,31 @@ class EmployeeProductAccess
                 ->select(['pt_name', 'pt_id'])
                 ->innerJoin('user_product_type', 'user_product_type.upt_product_type_id = product_type.pt_id')
                 ->where(['upt_user_id' => $this->user->id])
-                ->orderBy(['pt_name' => SORT_ASC])
+                //->orderBy(['pt_name' => SORT_ASC])
+                ->orderBy(['pt_sort_order' => SORT_ASC])
                 ->indexBy('pt_id')
                 ->asArray()
                 ->column();
+        }
+        return $list ?? [];
+    }
+
+    /**
+     * @return array
+     */
+    public function getProductItemList(): array
+    {
+        if ($this->user->can('product/manage/all')) {
+            $list = ProductType::getEnabledItemList();
+        } else {
+            $list = ProductType::find()
+                ->select(['pt_name', 'pt_id', 'pt_icon_class'])
+                ->innerJoin('user_product_type', 'user_product_type.upt_product_type_id = product_type.pt_id')
+                ->where(['upt_user_id' => $this->user->id])
+                ->orderBy(['pt_sort_order' => SORT_ASC])
+                //->indexBy('pt_id')
+                ->asArray()
+                ->all();
         }
         return $list ?? [];
     }
