@@ -366,9 +366,9 @@ class OfferController extends BaseController
      *                  "pq_client_currency":"USD",
      *                  "data": {
      *                      "rcq_model_name":"Nissan Rogue or similar",
-     *                      "rcq_category":"Midsize SUV,
+     *                      "rcq_category":"Midsize SUV",
      *                      "rcq_image_url":"https://example.com/inmage.jpg",
-     *                      "rcq_vendor_name":Hertz Rental Company,
+     *                      "rcq_vendor_name":"Hertz Rental Company",
      *                      "rcq_vendor_logo_url":"https://example.com/logo.jpg",
      *                      "rcq_options": {
      *                          "doors":4,
