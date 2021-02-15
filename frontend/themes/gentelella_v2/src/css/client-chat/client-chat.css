@@ -399,6 +399,8 @@
 }
 .x_panel .nav .create_case,
 .x_panel .nav .create_lead,
+.x_panel .nav .link_case,
+.x_panel .nav .link_lead,
 .x_panel .nav .btn_toggle_form {
     color: #0073ce;
 }
