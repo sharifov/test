@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -38,22 +38,26 @@ $this->params['breadcrumbs'][] = $this->title;
             'pt_id',
             'pt_key',
             'pt_name',
+            'pt_sort_order',
+            'pt_icon_class',
 //            'pt_service_fee_percent',
             'pt_description:ntext',
             [
+                    'label' => 'Count Payment Methods',
                 'class' => ProductTypeCountPaymentMethodsColumn::class,
             ],
             [
+                    'label' => 'Payment Fee percent',
                 'class' => ProductTypeDefaultPaymentMethodServiceFeeColumn::class,
             ],
             [
                 'class' => BooleanColumn::class,
                 'attribute' => 'pt_enabled',
             ],
-            [
-                'class' => DateTimeColumn::class,
-                'attribute' => 'pt_created_dt',
-            ],
+//            [
+//                'class' => DateTimeColumn::class,
+//                'attribute' => 'pt_created_dt',
+//            ],
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'pt_updated_dt',

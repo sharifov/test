@@ -32,6 +32,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'pt_id',
             'pt_key',
             'pt_name',
+            'pt_sort_order',
+            'pt_icon_class',
             'pt_description:ntext',
             'pt_settings',
             'pt_enabled:booleanByLabel',
