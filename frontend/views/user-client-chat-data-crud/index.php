@@ -8,6 +8,7 @@ use common\components\grid\UserSelect2Column;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use dosamigos\datepicker\DatePicker;
 
 /* @var yii\web\View $this */
 /* @var sales\model\userClientChatData\entity\UserClientChatDataSearch $searchModel */
@@ -50,7 +51,30 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw',
             ],
-            ['class' => DateTimeColumn::class, 'attribute' => 'uccd_token_expired'],
+            [
+                'attribute' => 'uccd_token_expired',
+                'value' => static function (UserClientChatData $model) {
+                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->uccd_token_expired));
+                },
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'uccd_token_expired',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                        'clearBtn' => true,
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' =>'Choose Date',
+                        'readonly' => '1',
+                    ],
+                    'clientEvents' => [
+                        'clearDate' => 'function (e) {$(e.target).find("input").change();}',
+                    ],
+                ]),
+                'format' => 'raw',
+            ],
             [
                 'attribute' => 'uccd_active',
                 'value' => static function (UserClientChatData $model) {
