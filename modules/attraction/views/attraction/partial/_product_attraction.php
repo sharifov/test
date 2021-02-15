@@ -26,7 +26,7 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
         <div class="x_title">
             <h2>
                 <a class="collapse-link">
-                    <i class="fas fa-hotel" title="ID: <?=$product->pr_id?>"></i> <?=Html::encode($product->prType->pt_name)?> <?=$product->pr_name ? ' - ' . Html::encode($product->pr_name) : ''?>
+                    <i class="fas fa-archway" title="ID: <?=$product->pr_id?>"></i> <?=Html::encode($product->prType->pt_name)?> <?=$product->pr_name ? ' - ' . Html::encode($product->pr_name) : ''?>
                     <?php if ($product->productQuotes) :?>
                         <sup title="Number of quotes">(<?=count($product->productQuotes)?>)</sup>
                     <?php endif;?>

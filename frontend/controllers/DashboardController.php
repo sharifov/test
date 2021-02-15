@@ -48,8 +48,18 @@ class DashboardController extends FController
             return $this->dashboardSupervision();
         }
 
-        if ($user->isAdmin()) {
+        /**
+         * Original dashboard disabled for presentation
+         */
+        if ($user->isAdmin() && false) {
             return $this->dashboardAdmin();
+        }
+
+        /**
+         * New dashboard for presentation
+         */
+        if ($user->isAdmin()) {
+            return $this->presentationDashboardAdmin();
         }
 
         if ($user->isQa()) {
@@ -65,6 +75,11 @@ class DashboardController extends FController
         }
 
         return $this->dashboardAgent();
+    }
+
+    public function presentationDashboardAdmin()
+    {
+        return $this->render('index2');
     }
 
     public function dashboardSupervision(): string
@@ -300,12 +315,12 @@ class DashboardController extends FController
         if (isset($out) && count($out)) {
             foreach ($out as $line) {
                 //if(!preg_match("/(grep|workqueue)/", $line)) {
-                    $tpmArr =  preg_split("#\s+#", $line);
-                    $com = '';
+                $tpmArr =  preg_split("#\s+#", $line);
+                $com = '';
                 for ($i = 10; $i < count($tpmArr); $i++) {
                     $com .= $tpmArr[$i] . ' ';
                 }
-                    $processList[] = [
+                $processList[] = [
                         'pid' => $tpmArr[1],
                         'stime' => $tpmArr[8],
                         'time' => $tpmArr[9],
