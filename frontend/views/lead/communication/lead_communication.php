@@ -187,6 +187,10 @@ $emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesLis
                             //echo json_encode($previewEmailForm->e_content_data);
                         ?>
                         </pre>
+                                    JSON:
+                                    <pre>
+                                        <?php Html::encode($previewEmailForm->e_content_data) ?>
+                                    </pre>
                                 </div>
                             <?php endif; ?>
 
