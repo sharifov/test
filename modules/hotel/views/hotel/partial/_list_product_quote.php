@@ -365,9 +365,11 @@ JS;
                     </tr>
                     <?php endforeach; ?>
                     <tr>
-                        <td colspan="2" class="text-right">Room Total: </td>
-                        <td class="text-center"><?=$adlTotalCount ? '<i class="fa fa-user"></i> ' . $adlTotalCount : '-'?></td>
-                        <td class="text-center"><?=$chdTotalCount ? '<i class="fa fa-child"></i> ' . $chdTotalCount : '-'?></td>
+                        <td colspan="3" class="text-right">Room Total: </td>
+                        <td class="text-center">
+                            <?=$adlTotalCount ? '<i class="fa fa-user"></i> ' . $adlTotalCount : '-'?>
+                            <?=$chdTotalCount ? ', <i class="fa fa-child"></i> ' . $chdTotalCount : '-'?>
+                        </td>
                         <td class="text-right"></td>
                         <td class="text-right"><?= number_format($totalNp, 2) ?></td>
                         <td class="text-right"><?= number_format($totalMkp, 2) ?></td>
