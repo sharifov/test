@@ -218,15 +218,15 @@ JS;
 
                     <?php if ($model->isBookable()) : ?>
                         <?= Html::a(
-                        '<i class="fa fa-share-square"></i> Book',
-                        null,
-                        [
+                            '<i class="fa fa-share-square"></i> Book',
+                            null,
+                            [
                                 'class' => 'dropdown-item btn-book-quote',
                                 'data-url' => Url::to('/hotel/hotel-quote/ajax-book'),
                                 'data-hotel-quote-id' => $model->hq_id,
                                 'data-product-id' => $model->hqProductQuote->pq_product_id,
                             ]
-                    ) ?>
+                        ) ?>
                     <?php endif; ?>
                     <?php if ($model->isBooking()) : ?>
                         <?= Html::a(
@@ -242,15 +242,15 @@ JS;
                     <?php endif; ?>
 
                     <?= Html::a(
-                            '<i class="fa fa-list"></i> API Service Log',
-                            null,
-                            [
+                        '<i class="fa fa-list"></i> API Service Log',
+                        null,
+                        [
                             'class' => 'dropdown-item text-secondary btn-product-api-service-log',
                             'data-url' => Url::to(['/hotel/hotel-quote-service-log/hotel-quote-log', 'id' => $model->hq_id]),
                             'data-hotel-quote-id' => $model->hq_id,
                             'data-product-id' => $model->hqProductQuote->pq_product_id,
-                        ]
-                        )?>
+                            ]
+                    )?>
 
                     <?= Html::a('<i class="fa fa-list"></i> Status log', null, [
                         'class' => 'dropdown-item text-secondary btn-product-quote-status-log',
