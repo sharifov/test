@@ -4,6 +4,7 @@ use modules\product\src\forms\ProductQuoteOptionForm;
 use modules\product\src\entities\productOption\ProductOptionQuery;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use kartik\select2\Select2;
 
 /* @var $this yii\web\View */
 /* @var $model ProductQuoteOptionForm */
@@ -32,17 +33,24 @@ $pjaxId = 'pjax-add-product-quote-option'; // . uniqid();
 
         <?= $form->field($model, 'pqo_product_quote_id')->hiddenInput()->label(false) ?>
 
-        <?= $form->field($model, 'pqo_product_option_id')->dropDownList(ProductOptionQuery::getList(true, $productTypeId), ['prompt' => '---']) ?>
+        <?php // echo $form->field($model, 'pqo_product_option_id')->dropDownList(ProductOptionQuery::getList(true, $productTypeId), ['prompt' => '---'])?>
+
+        <?php echo $form->field($model, 'pqo_product_option_id')->widget(Select2::class, [
+            'data' => ProductOptionQuery::getList(true, $productTypeId),
+            'size' => Select2::SMALL,
+            'options' => ['placeholder' => 'Select ', 'multiple' => false],
+            'pluginOptions' => ['allowClear' => true],
+        ]) ?>
 
         <?= $form->field($model, 'pqo_name')->textInput(['maxlength' => true]) ?>
 
         <?= $form->field($model, 'pqo_description')->textarea(['rows' => 3]) ?>
 
-        <?php //= $form->field($model, 'pqo_status_id')->dropDownList(\common\models\ProductQuoteOption::getStatusList(), ['prompt' => '---']) ?>
+        <?php //= $form->field($model, 'pqo_status_id')->dropDownList(\common\models\ProductQuoteOption::getStatusList(), ['prompt' => '---'])?>
 
         <?= $form->field($model, 'pqo_price')->input('number', ['min' => 0, 'max' => 1000, 'step' => 0.01]) ?>
 
-        <?php //= $form->field($model, 'pqo_client_price')->input('number', ['min' => 0, 'max' => 1000, 'step' => 0.01]) ?>
+        <?php //= $form->field($model, 'pqo_client_price')->input('number', ['min' => 0, 'max' => 1000, 'step' => 0.01])?>
 
         <?= $form->field($model, 'pqo_extra_markup')->input('number', ['min' => 0, 'max' => 1000, 'step' => 0.01]) ?>
 

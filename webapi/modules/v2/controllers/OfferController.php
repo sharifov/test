@@ -169,7 +169,8 @@ class OfferController extends BaseController
      *                               "qpp_origin_tax": "49.30",
      *                               "qpp_client_currency": "USD",
      *                               "qpp_client_fare": null,
-     *                               "qpp_client_tax": null
+     *                               "qpp_client_tax": null,
+     *                               "paxType":"ADT"
      *                           }
      *                       ]
      *                   },
