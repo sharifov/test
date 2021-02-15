@@ -172,13 +172,7 @@ class UserClientChatDataController extends FController
                     'uccd_password' => 'password',
                 ];
                 foreach ($updateFields as $column => $rcField) {
-                    if ($model->isAttributeChanged($column) && $model->validate([$column])) {
-                        $updateRC[$rcField] = $model->{$column};
-                    }
-                }
-                if (!$updateRC) {
-                    throw new \RuntimeException('Error. Fields (' .
-                        implode(',', $updateFields) . ') for sync is empty.');
+                    $updateRC[$rcField] = $model->{$column};
                 }
 
                 $rocketChat = \Yii::$app->rchat;
