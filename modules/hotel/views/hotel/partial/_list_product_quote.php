@@ -296,8 +296,7 @@ JS;
                         <th>ID</th>
                         <th>Room Name</th>
                         <th>Board Name</th>
-                        <th>Adult</th>
-                        <th>Children</th>
+                        <th>Pax</th>
                         <th>Cancel Amount</th>
                         <th>NP, $</th>
                         <th>Mkp, $</th>
@@ -328,8 +327,10 @@ JS;
                                 <i class="fa fa-info-circle green" title="Rate Comments: <?=Html::encode($room->hqr_rate_comments)?>"></i>
                             <?php endif;?>
                         </td>
-                        <td class="text-center"><?=$room->hqr_adults ? '<i class="fa fa-user"></i> ' . ($room->hqr_adults) : '-'?></td>
-                        <td class="text-center"><?=$room->hqr_children ? '<i class="fa fa-child"></i> ' . ($room->hqr_children) : '-'?></td>
+                        <td class="text-center">
+                            <?=$room->hqr_adults ? '<i class="fa fa-user"></i> ' . ($room->hqr_adults) : '-'?>
+                            <?=$room->hqr_children ? ', <i class="fa fa-child"></i> ' . ($room->hqr_children) : '-'?>
+                        </td>
                         <td>
                             <?php if ($room->hqr_cancel_amount) : ?>
                                 <?=Html::encode($room->hqr_cancel_amount)?>, <?=Html::encode($room->hqr_cancel_from_dt)?>
