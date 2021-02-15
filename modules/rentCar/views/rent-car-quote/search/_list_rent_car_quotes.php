@@ -5,11 +5,11 @@ use modules\rentCar\src\helpers\RentCarDataParser;
 use yii\data\ArrayDataProvider;
 use yii\web\View;
 
-/* @var $this yii\web\View */
-/* @var $dataRentCar array */
-/* @var $index int */
-/* @var $key int */
-/* @var $rentCar rentCar */
+/* @var yii\web\View $this */
+/* @var array $dataRentCar */
+/* @var int $index */
+/* @var int $key */
+/* @var rentCar $rentCar */
 
 ?>
 
@@ -116,11 +116,21 @@ use yii\web\View;
                     <div class="list-unstyled">
                       <li>
                         <strong>Pick-up: </strong>
-                        <span> <?php echo RentCarDataParser::getPickUpLocation($dataRentCar) ?></span>
+                        <?php $pickUp = RentCarDataParser::getPickUpLocation($dataRentCar);
+                            if ($rentCar->prc_pick_up_date) {
+                                $pickUp = Yii::$app->formatter->asDate($rentCar->prc_pick_up_date);
+                            }
+                        ?>
+                        <span> <?php echo $pickUp ?></span>
                       </li>
                       <li>
                         <strong>Drop-off: </strong>
-                        <span> <?php echo RentCarDataParser::getDropOffLocation($dataRentCar) ?></span>
+                        <?php $dropOff = RentCarDataParser::getDropOffLocation($dataRentCar);
+                            if ($rentCar->prc_drop_off_date) {
+                                $dropOff = Yii::$app->formatter->asDate($rentCar->prc_drop_off_date);
+                            }
+                        ?>
+                        <span> <?php echo $dropOff ?></span>
                       </li>
                     </div>
                   </div>
