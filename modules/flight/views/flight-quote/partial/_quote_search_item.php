@@ -2,6 +2,7 @@
 
 use common\components\SearchService;
 use frontend\helpers\QuoteHelper;
+use modules\flight\src\dto\ngs\QuoteNgsDataDto;
 use modules\flight\src\helpers\FlightQuoteHelper;
 use yii\bootstrap\Html;
 
@@ -43,11 +44,17 @@ $isQuoteAssignedToFlight = FlightQuoteHelper::isQuoteAssignedToFlight($flightQuo
                 </span>
                 <span class="quote__vc-name"><?= (!isset($airlines[$result['validatingCarrier']])) ?: $airlines[$result['validatingCarrier']];?><strong> [<?= $result['validatingCarrier']?>]</strong></span>
             </span>
+        <?php /*
         <div class="quote__gds">
           GDS: <strong><?= SearchService::getGDSName($result['gds'])?></strong>
         </div>
         <div class="quote__pcc">
           PCC: <strong><?= $result['pcc']?></strong>
+        </div>
+        */ ?>
+        <div>
+          <?php $ngsDto = new QuoteNgsDataDto($result['ngsFeatures'] ?? []); ?>
+          <strong><?= FlightQuoteHelper::formattedNgs($ngsDto) ?></strong>
         </div>
         <div class="quote__seats">
           Seats left: <strong class="text-danger"><i class="fa fa-fire"></i> <?= $result['maxSeats']?></strong>
