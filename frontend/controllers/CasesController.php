@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use _HumbugBox985cd1594210\Symfony\Component\Console\Exception\RuntimeException;
 use common\components\BackOffice;
 use common\components\CommunicationService;
 use common\models\CaseNote;
@@ -39,6 +40,7 @@ use sales\forms\cases\CasesChangeStatusForm;
 use sales\forms\cases\CasesClientUpdateForm;
 use sales\forms\cases\CasesCreateByChatForm;
 use sales\forms\cases\CasesCreateByWebForm;
+use sales\forms\cases\CasesLinkChatForm;
 use sales\forms\cases\CasesSaleForm;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
@@ -49,6 +51,8 @@ use sales\model\cases\useCases\cases\updateInfo\Handler;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\permissions\ClientChatActionPermission;
 use sales\model\clientChat\services\ClientChatAssignService;
+use sales\model\clientChatCase\entity\ClientChatCase;
+use sales\model\clientChatCase\entity\ClientChatCaseRepository;
 use sales\model\coupon\entity\couponCase\CouponCase;
 use sales\model\coupon\useCase\send\SendCouponsForm;
 use sales\model\department\department\Params;
@@ -1036,6 +1040,42 @@ class CasesController extends FController
         }
 
         return $this->renderAjax('create_by_chat', [
+            'model' => $form,
+        ]);
+    }
+
+    public function actionLinkChat()
+    {
+        if (!(Yii::$app->request->isAjax || Yii::$app->request->isPjax)) {
+            throw new BadRequestHttpException('Bad request.');
+        }
+
+        $chatId = (int)Yii::$app->request->get('chat_id');
+        $chat = ClientChat::findOne(['cch_id' => $chatId]);
+
+        if (!$chat) {
+            throw new NotFoundHttpException('Client chat not found.');
+        }
+
+        if (!$this->chatActionPermission->canLinkCase($chat)) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
+        $form = new CasesLinkChatForm();
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $clientChatCaseRepository = Yii::createObject(ClientChatCaseRepository::class);
+                $clientChatCase = ClientChatCase::create($form->chatId, $form->caseId, new \DateTimeImmutable('now'));
+                $clientChatCaseRepository->save($clientChatCase);
+                return "<script> $('#modal-sm').modal('hide');refreshChatInfo('" . $chat->cch_id . "')</script>";
+            } catch (\Throwable $e) {
+                Yii::error(AppHelper::throwableFormatter($e), 'CasesController:actionLinkChat');
+                return "<script> $('#modal-sm').modal('hide');createNotify('Link Case', '" . $e->getMessage() . "', 'error');</script>";
+            }
+        }
+
+        $form->chatId = $chatId;
+        return $this->renderAjax('link_chat', [
             'model' => $form,
         ]);
     }

@@ -968,6 +968,74 @@ $(document).on('click', '.create_case', function (e) {
 
 });
 
+$(document).on('click', '.link_case', function (e) {
+    e.preventDefault();
+    let url = $(this).attr('data-link');
+    let modal = $('#modal-sm');
+    let modalTitle = 'Link Case';
+    $.ajax({
+        type: 'post',
+        url: url,
+        data: {},
+        dataType: 'html',
+        beforeSend: function () {
+            modal.find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+            modal.find('.modal-title').html(modalTitle);
+            modal.modal('show');
+        },
+        success: function (data) {
+            modal.find('.modal-body').html(data);
+            modal.find('.modal-title').html(modalTitle);
+            $('#preloader').addClass('d-none');
+        },
+        error: function (xhr) {
+            if (xhr.status === 403) {
+                createNotify('Error', xhr.responseText, 'error');
+            } else {
+                createNotify('Error', 'Internal Server Error. Try again letter.', 'error');
+            }
+            setTimeout(function () {
+                $('#modal-sm').modal('hide');
+            }, 300)
+        },
+    })
+
+});
+
+$(document).on('click', '.link_lead', function (e) {
+    e.preventDefault();
+    let url = $(this).attr('data-link');
+    let modal = $('#modal-sm');
+    let modalTitle = 'Link Lead';
+    $.ajax({
+        type: 'post',
+        url: url,
+        data: {},
+        dataType: 'html',
+        beforeSend: function () {
+            modal.find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+            modal.find('.modal-title').html(modalTitle);
+            modal.modal('show');
+        },
+        success: function (data) {
+            modal.find('.modal-body').html(data);
+            modal.find('.modal-title').html(modalTitle);
+            $('#preloader').addClass('d-none');
+        },
+        error: function (xhr) {
+            if (xhr.status === 403) {
+                createNotify('Error', xhr.responseText, 'error');
+            } else {
+                createNotify('Error', 'Internal Server Error. Try again letter.', 'error');
+            }
+            setTimeout(function () {
+                $('#modal-sm').modal('hide');
+            }, 300)
+        },
+    })
+
+});
+
 $(document).on('click', '.btn_toggle_form', function (e) {
     $("#clientchatnote-ccn_note").val('');
     let modal = $('#add-note-model');

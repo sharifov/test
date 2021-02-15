@@ -282,6 +282,12 @@ $chatCounter = new ClientChatCounter($client->id);
             <div class="x_title">
                 <h2>Cases (<?= $counter->countActiveCases()?> / <?= $counter->countAllCases()?>) </h2>
                 <ul class="nav navbar-right panel_toolbox">
+                    <?php if ($actionPermissions->canLinkCase($clientChat)) : ?>
+                    <li>
+                        <a class="link link_case" data-link="<?= Url::to(['/cases/link-chat', 'chat_id' => $clientChat->cch_id]); ?>"><i class="fa fa-link"></i> Link Case</a>
+                    </li>
+                    <?php endif; ?>
+
                     <?php if ($actionPermissions->canCreateCase($clientChat)) : ?>
                     <li>
                         <a class="create_case" data-link="<?= Url::to(['/cases/create-by-chat', 'chat_id' => $clientChat->cch_id]); ?>"><i class="fa fa-plus"></i> Create Case</a>
@@ -315,6 +321,11 @@ $chatCounter = new ClientChatCounter($client->id);
             <div class="x_title">
                 <h2>Leads (<?= $counter->countActiveLeads()?> / <?= $counter->countAllLeads()?>) </h2>
                 <ul class="nav navbar-right panel_toolbox">
+                    <?php if ($actionPermissions->canLinkLead($clientChat)) : ?>
+                      <li>
+                        <a class="link_lead" data-link="<?= Url::to(['/lead/link-chat', 'chat_id' => $clientChat->cch_id]); ?>"><i class="fa fa-link"></i> Link Lead</a>
+                      </li>
+                    <?php endif; ?>
                     <?php if ($actionPermissions->canCreateLead($clientChat)) : ?>
                         <li>
                             <a class="create_lead" data-link="<?= Url::to(['/lead/create-by-chat', 'chat_id' => $clientChat->cch_id]); ?>"><i class="fa fa-plus"></i> Create Lead</a>

@@ -58,6 +58,8 @@ use sales\model\airportLang\helpers\AirportLangHelper;
 use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\permissions\ClientChatActionPermission;
+use sales\model\clientChatLead\entity\ClientChatLead;
+use sales\model\clientChatLead\entity\ClientChatLeadRepository;
 use sales\model\department\department\DefaultPhoneType;
 use sales\model\lead\useCases\lead\create\LeadCreateByChatForm;
 use sales\model\lead\useCases\lead\create\LeadManageForm;
@@ -65,6 +67,7 @@ use sales\model\lead\useCases\lead\import\LeadImportForm;
 use sales\model\lead\useCases\lead\import\LeadImportParseService;
 use sales\model\lead\useCases\lead\import\LeadImportService;
 use sales\model\lead\useCases\lead\import\LeadImportUploadForm;
+use sales\model\lead\useCases\lead\link\LeadLinkChatForm;
 use sales\model\phone\AvailablePhoneList;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
@@ -2173,6 +2176,42 @@ class LeadController extends FController
         }
 
         return $this->renderAjax('partial/_lead_create_by_chat', ['chat' => $chat, 'form' => $form]);
+    }
+
+    public function actionLinkChat()
+    {
+        if (!(Yii::$app->request->isAjax || Yii::$app->request->isPjax)) {
+            throw new BadRequestHttpException('Bad request.');
+        }
+
+        $chatId = (int)Yii::$app->request->get('chat_id');
+        $chat = ClientChat::findOne(['cch_id' => $chatId]);
+
+        if (!$chat) {
+            throw new NotFoundHttpException('Client chat not found.');
+        }
+
+        if (!$this->chatActionPermission->canLinkLead($chat)) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
+        $form = new LeadLinkChatForm();
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $clientChatLeadRepository = Yii::createObject(ClientChatLeadRepository::class);
+                $clientChatLead = ClientChatLead::create($form->chatId, $form->leadId, new \DateTimeImmutable('now'));
+                $clientChatLeadRepository->save($clientChatLead);
+                return "<script> $('#modal-sm').modal('hide');refreshChatInfo('" . $chat->cch_id . "')</script>";
+            } catch (\Throwable $e) {
+                Yii::error(AppHelper::throwableFormatter($e), 'LeadController:actionLinkChat');
+                return "<script> $('#modal-sm').modal('hide');createNotify('Link Lead', '" . $e->getMessage() . "', 'error');</script>";
+            }
+        }
+
+        $form->chatId = $chatId;
+        return $this->renderAjax('partial/link_chat', [
+            'model' => $form,
+        ]);
     }
 
     /**
