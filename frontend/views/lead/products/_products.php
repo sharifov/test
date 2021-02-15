@@ -12,6 +12,7 @@
 
 use common\models\Lead;
 use frontend\models\LeadForm;
+use sales\auth\Auth;
 use sales\forms\lead\ItineraryEditForm;
 use yii\helpers\Html;
 
@@ -25,7 +26,7 @@ use yii\helpers\Html;
 ?>
 
 <?php \yii\widgets\Pjax::begin(['id' => 'product-accordion', 'enablePushState' => false, 'enableReplaceState' => false])?>
-
+<?php if (Auth::can('lead-view/flight-default/view', ['lead' => $lead])) : ?>
 <div class="x_panel">
         <div class="x_title">
             <h2><i class="fa fa-plane"></i> Flight - default</h2>
@@ -68,7 +69,7 @@ JS;
             ]) ?>
         </div>
     </div>
-
+<?php endif; ?>
 <?php foreach ($products as $product) :?>
     <?php if ((int) $product->isHotel() && $product->hotel) : ?>
         <?= $this->render('@modules/hotel/views/hotel/partial/_product_hotel', [
