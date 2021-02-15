@@ -49,6 +49,7 @@ class AttractionUpdateRequestForm extends Model
 
             ['atn_date_from', 'compare', 'compareAttribute' => 'atn_date_to', 'operator' => '<', 'enableClientValidation' => true],
 
+            ['atn_destination', 'required'],
             ['atn_destination', 'string', 'max' => 100],
             ['atn_destination_code', 'string', 'max' => 10],
         ];

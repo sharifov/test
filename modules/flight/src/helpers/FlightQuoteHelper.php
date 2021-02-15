@@ -1186,13 +1186,13 @@ class FlightQuoteHelper
         $flightQuoteData = Json::decode($flightQuote->fq_origin_search_data);
 
         if (self::generateHashQuoteKey($flightQuoteData['key']) === $flightQuote->fq_hash_key) {
-            return new QuoteNgsDataDto($flightQuoteData['ngsFeatures']);
+            return new QuoteNgsDataDto($flightQuoteData['ngsFeatures'] ?? []);
         }
 
         if (isset($flightQuoteData['ngsItineraries'])) {
             foreach ($flightQuoteData['ngsItineraries'] as $ngsItinerary) {
                 if (self::generateHashQuoteKey($ngsItinerary['key']) === $flightQuote->fq_hash_key) {
-                    return new QuoteNgsDataDto($ngsItinerary['ngsFeatures']);
+                    return new QuoteNgsDataDto($ngsItinerary['ngsFeatures'] ?? []);
                 }
             }
         }
