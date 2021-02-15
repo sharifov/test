@@ -4,6 +4,7 @@ namespace modules\hotel\src\useCases\api\searchQuote;
 
 use modules\hotel\components\ApiHotelService;
 use modules\hotel\models\Hotel;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class HotelQuoteSearchService
@@ -54,6 +55,9 @@ class HotelQuoteSearchService
 
             if (isset($response['data']['hotels'])) {
                 $result = $response['data'];
+                $result['hotels'] = array_values(array_filter($result['hotels'], static function ($hotel) {
+                    return !empty($hotel['rooms']);
+                }));
                 \Yii::$app->cacheFile->set($keyCache, $result, 600);
             } else {
                 $result = isset($response['error']) ? $response : ['error' => 'Unknown error has occurred.'];

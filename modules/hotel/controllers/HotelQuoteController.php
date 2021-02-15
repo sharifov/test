@@ -130,9 +130,6 @@ class HotelQuoteController extends FController
         }
         $hotelList = $result['hotels'] ?? [];
 
-//        echo '<pre>';
-//        print_r($hotelList);die;
-
         $dataProvider = new ArrayDataProvider([
             'allModels' => $hotelList,
             'pagination' => [
