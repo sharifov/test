@@ -7,6 +7,7 @@ use frontend\controllers\FController;
 use modules\product\src\entities\productType\ProductType;
 use modules\rentCar\src\forms\RentCarUpdateRequestForm;
 use modules\rentCar\src\repositories\rentCar\RentCarRepository;
+use sales\auth\Auth;
 use Yii;
 use modules\rentCar\src\entity\rentCar\RentCar;
 use modules\rentCar\src\entity\rentCar\RentCarSearch;
@@ -51,6 +52,15 @@ class RentCarController extends FController
 
                 $rentCarRepository = Yii::createObject(RentCarRepository::class);
                 $rentCarRepository->save($rentCar);
+
+                if ($rentCarQuotes = $rentCar->rentCarQuotes) {
+                    foreach ($rentCarQuotes as $quote) {
+                        if ($productQuote = $quote->rcqProductQuote) {
+                            $productQuote->declined(Auth::id(), 'Request is updated');
+                            $productQuote->save();
+                        }
+                    }
+                }
 
                 $out .= 'new PNotify({title: "Rent Car update request", type: "success", text: "Success" , hide: true});';
             } catch (\DomainException $e) {
