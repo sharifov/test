@@ -177,12 +177,12 @@ JS;
                 <div class="dropdown-menu" role="menu">
                     <h6 class="dropdown-header">Quote Q<?=($model->atnq_product_quote_id)?></h6>
 
-                    <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-warning"></i> Clone quote', null, [
+                    <!--<?/*= Html::a('<i class="glyphicon glyphicon-remove-circle text-warning"></i> Clone quote', null, [
                         'class' => 'dropdown-item text-warning btn-clone-product-quote',
                         'data-product-quote-id' => $model->atnq_product_quote_id,
                         'data-hotel-quote-id' => $model->atnq_id,
                         'data-product-id' => $model->atnqProductQuote->pq_product_id,
-                    ]) ?>
+                    ]) */?> -->
 
                    <!-- <? /*= Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
                         'class' => 'dropdown-item text-success btn-add-product-quote-option',
