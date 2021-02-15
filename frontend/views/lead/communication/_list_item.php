@@ -162,7 +162,7 @@ $fromType = 'client';
         <?php endif; ?>
             <div class="chat__date"><?=Yii::$app->formatter->asDatetime(strtotime($sms->s_created_dt))?> <?=$sms->s_language_id ? '(' . $sms->s_language_id . ')' : ''?></div> <?php //11:01AM | June 9?>
         </div>
-        <div class="card-body">
+        <div class="card-body" style="word-wrap: break-word">
         <?=nl2br(Html::encode($sms->s_sms_text))?>
         </div>
     </div>
