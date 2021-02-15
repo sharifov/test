@@ -579,7 +579,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
             $menuModuleItems[] = [
                 'label' => 'Cruise',
                 'url' => 'javascript:',
-                'icon' => 'list',
+                'icon' => 'ship',
                 'items' => \modules\cruise\CruiseModule::getListMenu()
             ];
         }
