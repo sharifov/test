@@ -66,7 +66,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'options' => [
                         'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date',
+                        'placeholder' => 'Choose Date',
                         'readonly' => '1',
                     ],
                     'clientEvents' => [
