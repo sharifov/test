@@ -295,6 +295,9 @@ $emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesLis
 //                        $clientEmails[Yii::$app->user->identity->email] = Yii::$app->user->identity->email;
 
                         $clientEmails = $model->client ? $model->client->getEmailList() : [];
+                    foreach ($clientEmails as $key => $element) {
+                        $clientEmails[$key] = \sales\helpers\email\MaskEmailHelper::masking($element);
+                    }
                         $clientPhones = $model->client ? $model->client->getPhoneNumbersSms() : [];
 
                     if (Yii::$app->session->hasFlash('send-success')) {
@@ -643,7 +646,7 @@ JS;
 
 var emails = '$unsubscribedEmails';
 $('#email option').each(function() {             
-    if (emails.includes($(this).attr('value'))){ 
+    if (JSON.parse(emails).includes($(this).attr('value'))){ 
         $(this).html($(this).attr('value') + ' (unsubscribed)')
     }
     if ($(this).attr('value') == ""){
