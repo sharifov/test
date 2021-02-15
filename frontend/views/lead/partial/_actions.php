@@ -52,10 +52,10 @@ $user = Yii::$app->user->identity;
         'data-url' => Url::to(['lead/clone', 'id' => $leadModel->id])
     ]);
 
-    $buttonFollowUp = Html::a('<i class="fa fa-share-square fa-rotate-180"></i> Follow Up', '#', [
+    $buttonFollowUp = Html::a('<i class="fa fa-share-square fa-rotate-180"></i> To Bonus', '#', [
         'class' => 'add-reason btn btn-primary text-warning',
         'data-url' => Url::to(['lead-change-state/follow-up', 'gid' => $leadModel->gid]),
-        'title' => 'Follow Up'
+        'title' => 'To Bonus'
     ]);
 
     $buttonTrash = Html::a('<i class="fa fa-trash"></i> Trash', '#', [
