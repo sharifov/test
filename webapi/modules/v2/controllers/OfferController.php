@@ -350,7 +350,54 @@ class OfferController extends BaseController
      *                          "pr_service_fee_percent":null
      *                    },
      *                    "productQuoteOptions":[]
+     *                  },
+     *              {
+     *                  "pq_gid":"1f2a619ee37af592dfd6c927ef00b795",
+     *                  "pq_name":"Boat Tour in Miami with a Free Drink",
+     *                  "pq_order_id":null,
+     *                  "pq_description":null,
+     *                  "pq_status_id":2,
+     *                  "pq_price":28,
+     *                  "pq_origin_price":28,
+     *                  "pq_client_price":28,
+     *                  "pq_service_fee_sum":0,
+     *                  "pq_origin_currency":"USD",
+     *                  "pq_client_currency":"USD",
+     *                  "data": {
+     *                      "rcq_model_name":"Nissan Rogue or similar",
+     *                      "rcq_category":"Midsize SUV,
+     *                      "rcq_image_url":null,
+     *                      "rcq_vendor_name":Hertz Rental Company,
+     *                      "rcq_vendor_logo_url":null,
+     *                      "rcq_options": {
+     *                          "doors":4,
+     *                          "person":5,
+     *                          "ac_unit":"Air Conditioning",
+     *                          "mileage":"Unlimited mileage",
+     *                          "cleanliness":"Enhanced cleaning",
+     *                          "transmission":"Automatic"
+     *                       },
+     *                      "search_request": {
+     *                          "prc_product_id":234,
+     *                          "prc_pick_up_date":"2021-06-17",
+     *                          "prc_drop_off_date":"2021-06-24",
+     *                          "prc_pick_up_code":"KIV",
+     *                          "prc_drop_off_code":"KIV",
+     *                          "prc_pick_up_time":"01:45:00",
+     *                          "prc_drop_off_time":"04:00:00"
+     *                       }
+     *                    },
+     *                   "product": {
+     *                          "pr_type_id":5,
+     *                          "pr_name":"",
+     *                          "pr_lead_id":15356,
+     *                          "pr_description":"",
+     *                          "pr_status_id":null,
+     *                          "pr_service_fee_percent":null
+     *                    },
+     *                    "productQuoteOptions":[]
      *                  }
+     *
      *           ]
      *       },
      *       "technical": {

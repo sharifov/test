@@ -15,6 +15,7 @@ use yii\widgets\Pjax;
 $totalAmountOption = 0;
 $totalClientAmountOption = 0;
 $totalExtraMarkupOption = 0;
+$i = 1;
 ?>
 
 
@@ -24,7 +25,6 @@ $totalExtraMarkupOption = 0;
         <tr>
             <th>ID</th>
             <th>Option</th>
-            <th>Name / Description</th>
             <th>Status</th>
             <th style="width: 120px">Extra markup</th>
             <th style="width: 120px">Price</th>
@@ -37,12 +37,14 @@ $totalExtraMarkupOption = 0;
             $totalExtraMarkupOption += (float) $quoteOption->pqo_extra_markup;
             ?>
             <tr>
-                <td style="width: 60px" title="<?= Html::encode($quoteOption->pqo_id)?>"><?=Html::encode($quoteOption->pqo_id)?></td>
-                <td style="width: 120px"><?=$quoteOption->pqoProductOption ? Html::encode($quoteOption->pqoProductOption->po_name) : '' ?></td>
-                <td>
-                    <b><?=Html::encode($quoteOption->pqo_name)?></b>
-                    <?=$quoteOption->pqo_description ? '<br>' . Html::encode($quoteOption->pqo_description) . '' : ''?>
+                <td style="width: 60px" title="<?= Html::encode($quoteOption->pqo_id)?>"><?=$i?></td>
+                <td
+                    style="width: 120px"
+                    title="<?= Html::encode($quoteOption->pqo_name) . ' ' .  Html::encode($quoteOption->pqo_description) ?>"
+                    data-toggle="tooltip">
+                        <?=$quoteOption->pqoProductOption ? Html::encode($quoteOption->pqoProductOption->po_name) : '' ?>
                 </td>
+
                 <td class="text-center" style="width: 120px"><?= ProductQuoteOptionStatus::asFormat($quoteOption->pqo_status_id)?></td>
                 <td class="text-right" title="Extra Markup"><?=number_format($quoteOption->pqo_extra_markup, 2)?> USD</td>
                 <td class="text-right"><?=number_format($quoteOption->pqo_price, 2)?> USD</td>
@@ -75,6 +77,7 @@ $totalExtraMarkupOption = 0;
 
                 </td>
             </tr>
+            <?php $i++ ?>
         <?php endforeach; ?>
         <tr>
             <th colspan="4" class="text-right">Option Total: </th>
