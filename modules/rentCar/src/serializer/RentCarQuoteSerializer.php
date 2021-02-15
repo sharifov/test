@@ -24,8 +24,6 @@ class RentCarQuoteSerializer extends Serializer
             'rcq_model_name',
             'rcq_category',
             'rcq_vendor_name',
-            'rcq_price_per_day',
-            'rcq_currency',
             'rcq_options',
             'rcq_advantages',
             'rcq_image_url',
