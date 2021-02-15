@@ -1253,7 +1253,6 @@ class CommunicationService extends Component implements CommunicationServiceInte
         $response = $this->sendRequest('product/cruise-search', $data);
 
         if ($response->isOk) {
-            Yii::error($response->data);
             if (isset($response->data['data']['cruises'])) {
                 $out['data'] = $response->data['data']['cruises'];
             } else {
