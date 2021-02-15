@@ -4,9 +4,11 @@ namespace modules\rentCar\src\entity\rentCar;
 
 use DateTime;
 use modules\product\src\entities\product\Product;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\interfaces\Productable;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use modules\rentCar\src\serializer\RentCarSerializer;
+use sales\auth\Auth;
 use sales\entities\EventTrait;
 use Yii;
 use yii\behaviors\BlameableBehavior;
@@ -128,6 +130,32 @@ class RentCar extends ActiveRecord implements Productable
             return true;
         }
         return false;
+    }
+
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        if (isset($changedAttributes['prc_request_hash_key'])) {
+            $this->updateInvalidRequestQuotes();
+        }
+    }
+
+    public function updateInvalidRequestQuotes(): void
+    {
+        if ($this->rentCarQuotes) {
+            foreach ($this->rentCarQuotes as $quote) {
+                if (
+                    $quote->rcq_request_hash_key !== $this->prc_request_hash_key &&
+                    $quote->rcqProductQuote && $quote->rcqProductQuote->pq_status_id !== ProductQuoteStatus::DELIVERED
+                ) {
+                    $creatorId = Auth::id();
+                    $description = 'Find invalid request quotes and update status';
+                    $quote->rcqProductQuote->declined($creatorId, $description);
+                    $quote->rcqProductQuote->save();
+                }
+            }
+        }
     }
 
     public function generateRequestHashKey(): string

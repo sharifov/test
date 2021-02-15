@@ -53,15 +53,6 @@ class RentCarController extends FController
                 $rentCarRepository = Yii::createObject(RentCarRepository::class);
                 $rentCarRepository->save($rentCar);
 
-                if ($rentCarQuotes = $rentCar->rentCarQuotes) {
-                    foreach ($rentCarQuotes as $quote) {
-                        if ($productQuote = $quote->rcqProductQuote) {
-                            $productQuote->declined(Auth::id(), 'Request is updated');
-                            $productQuote->save();
-                        }
-                    }
-                }
-
                 $out .= 'new PNotify({title: "Rent Car update request", type: "success", text: "Success" , hide: true});';
             } catch (\DomainException $e) {
                 $out .= 'new PNotify({title: "Rent Car update request", type: "error", text: "' . $e->getMessage() . '" , hide: true});';
