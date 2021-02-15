@@ -273,6 +273,49 @@ class OfferController extends BaseController
      *                           "pqo_extra_markup": 1
      *                       }
      *                   ]
+     *               },
+     *               {
+     *                   "pq_gid": "1576705c738f49538f9335ae89528c75",
+     *                   "pq_name": "4A",
+     *                   "pq_order_id": null,
+     *                   "pq_description": null,
+     *                   "pq_status_id": 2,
+     *                   "pq_price": 557.87,
+     *                   "pq_origin_price": 539,
+     *                   "pq_client_price": 513.29,
+     *                   "pq_service_fee_sum": 18.87,
+     *                   "pq_origin_currency": "USD",
+     *                   "pq_client_currency": "EUR",
+     *                   "data": {
+     *                       "cruiseLine": {
+     *                           "code": "CV",
+     *                           "name": "Carnival Cruise Lines"
+     *                       },
+     *                       "departureDate": "2021-07-01",
+     *                       "returnDate": "2021-07-05",
+     *                       "destination": "Caribbean",
+     *                       "subDestination": "Western Caribbean",
+     *                       "ship": {
+     *                           "code": "BR",
+     *                           "name": "Carnival Breeze"
+     *                       },
+     *                       "cabin": {
+     *                           "code": "4A",
+     *                           "name": "Interior",
+     *                           "price": 539,
+     *                           "imgUrl": "https://mediaim.expedia.com/cruise/cv-br-2020-02-01/a7f6f5bd-aef2-417e-87d2-fb3fce2baeba.jpg?impolicy=resizecrop&ra=fit&rw=500",
+     *                           "experience": "INSIDE"
+     *                       }
+     *                   },
+     *                   "product": {
+     *                   "pr_type_id": 4,
+     *                   "pr_name": "Cruise test 1",
+     *                   "pr_lead_id": 513177,
+     *                   "pr_description": "",
+     *                   "pr_status_id": null,
+     *                   "pr_service_fee_percent": null
+     *                   },
+     *                   "productQuoteOptions": []
      *               }
      *           ]
      *       },
