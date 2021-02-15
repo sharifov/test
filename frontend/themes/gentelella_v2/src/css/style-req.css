@@ -6018,3 +6018,8 @@ td.selected-cell {
     background: #909090;
     border-radius: 10px;
 }
+@media (min-width: 1368px) {
+  .dev-tile-adjust {
+    max-width: 10% !important;
+  }
+}
