@@ -9,7 +9,7 @@
         <div class="tile_count">
             <div class="col-md-2 col-sm-4  tile_stats_count dev-tile-adjust">
                 <span class="count_top"><i class="fa fa-user"></i> New leads</span>
-                <div class="count">2500</div>
+                <div class="count">1120</div>
                 <span class="count_bottom"><i class="green">4% </i> From last Week</span>
             </div>
             <div class="col-md-2 col-sm-4  tile_stats_count dev-tile-adjust">
@@ -19,43 +19,43 @@
             </div>
             <div class="col-md-2 col-sm-4  tile_stats_count dev-tile-adjust">
                 <span class="count_top"><i class="fa fa-user"></i> Conversion</span>
-                <div class="count green">2,500</div>
-                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>34% </i> From last Week</span>
+                <div class="count green">12,500</div>
+                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>63% </i> From last Week</span>
             </div>
             <div class="col-md-2 col-sm-4  tile_stats_count dev-tile-adjust">
                 <span class="count_top"><i class="fa fa-user"></i> Profit</span>
-                <div class="count">4,567</div>
+                <div class="count">5,567</div>
                 <span class="count_bottom"><i class="red"><i class="fa fa-sort-desc"></i>12% </i> From last Week</span>
             </div>
             <div class="col-md-2 col-sm-4  tile_stats_count dev-tile-adjust">
                 <span class="count_top"><i class="fa fa-user"></i> New Clients</span>
-                <div class="count">2,315</div>
-                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>34% </i> From last Week</span>
+                <div class="count">8,185</div>
+                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>27% </i> From last Week</span>
             </div>
             <div class="col-md-2 col-sm-4  tile_stats_count dev-tile-adjust">
                 <span class="count_top"><i class="fa fa-user"></i> Return Clients</span>
-                <div class="count">7,325</div>
-                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>34% </i> From last Week</span>
+                <div class="count">9,725</div>
+                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>41% </i> From last Week</span>
             </div>
             <div class="col-md-2 col-sm-4  tile_stats_count dev-tile-adjust">
                 <span class="count_top"><i class="fa fa-user"></i> New Support Cases</span>
-                <div class="count">7,325</div>
-                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>34% </i> From last Week</span>
+                <div class="count">3,655</div>
+                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>17% </i> From last Week</span>
             </div>
             <div class="col-md-2 col-sm-4  tile_stats_count dev-tile-adjust">
                 <span class="count_top"><i class="fa fa-user"></i> Solved Support Cases</span>
-                <div class="count">7,325</div>
-                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>34% </i> From last Week</span>
+                <div class="count">4,325</div>
+                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>29% </i> From last Week</span>
             </div>
             <div class="col-md-2 col-sm-4  tile_stats_count dev-tile-adjust">
                 <span class="count_top"><i class="fa fa-user"></i> Incoming Calls</span>
-                <div class="count">7,325</div>
-                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>34% </i> From last Week</span>
+                <div class="count">6,334</div>
+                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>38% </i> From last Week</span>
             </div>
             <div class="col-md-2 col-sm-4  tile_stats_count dev-tile-adjust">
                 <span class="count_top"><i class="fa fa-user"></i> Chats</span>
                 <div class="count">5,325</div>
-                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>34% </i> From last Week</span>
+                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>61% </i> From last Week</span>
             </div>
         </div>
     </div>
@@ -75,10 +75,10 @@
                     <div class="clearfix"></div>
                 </div>
                 <div class="x_content">
-                    <div class="col-md-12 col-sm-12 ">
+                    <div class="col-md-9 col-sm-12 ">
                         <div class="demo-container" style="height:280px">
                             <div id="chart_plot_02" class="demo-placeholder" style="padding: 0px; position: relative;">
-                                <canvas id="transactionSummaryChart" width="1500" height="280"></canvas>
+                                <canvas id="transactionSummaryChart" width="1175" height="280"></canvas>
                                 <!--<canvas class="flot-base" width="1175" height="280"
                                         style="direction: ltr; position: absolute; left: 0px; top: 0px; width: 1175px; height: 280px;"></canvas>
                                 <div class="flot-text"
@@ -196,11 +196,11 @@
                             </div>
                         </div>
                     </div>
-                   <!-- <div class="col-md-3 col-sm-12 ">
+                    <div class="col-md-3 col-sm-12 ">
                         <div>
                             <div class="x_title">
                                 <h2>Top Profiles</h2>
-                                <ul class="nav navbar-right panel_toolbox">
+                                <!--<ul class="nav navbar-right panel_toolbox">
                                     <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                                     </li>
                                     <li class="dropdown">
@@ -213,7 +213,7 @@
                                     </li>
                                     <li><a class="close-link"><i class="fa fa-close"></i></a>
                                     </li>
-                                </ul>
+                                </ul>-->
                                 <div class="clearfix"></div>
                             </div>
                             <ul class="list-unstyled top_profiles scroll-view">
@@ -223,8 +223,8 @@
                                     </a>
                                     <div class="media-body">
                                         <a class="title" href="#">Ms. Mary Jane</a>
-                                        <p><strong>$2300. </strong> Agent Avarage Sales </p>
-                                        <p><small>12 Sales Today</small>
+                                        <p><strong>$1500. </strong> Agent Avarage Sales </p>
+                                        <p><small>21 Sales Today</small>
                                         </p>
                                     </div>
                                 </li>
@@ -233,9 +233,9 @@
                                         <i class="fa fa-user green"></i>
                                     </a>
                                     <div class="media-body">
-                                        <a class="title" href="#">Ms. Mary Jane</a>
-                                        <p><strong>$2300. </strong> Agent Avarage Sales </p>
-                                        <p><small>12 Sales Today</small>
+                                        <a class="title" href="#">Mr. Dillon Finnegan</a>
+                                        <p><strong>$762. </strong> Agent Avarage Sales </p>
+                                        <p><small>11 Sales Today</small>
                                         </p>
                                     </div>
                                 </li>
@@ -244,9 +244,9 @@
                                         <i class="fa fa-user blue"></i>
                                     </a>
                                     <div class="media-body">
-                                        <a class="title" href="#">Ms. Mary Jane</a>
-                                        <p><strong>$2300. </strong> Agent Avarage Sales </p>
-                                        <p><small>12 Sales Today</small>
+                                        <a class="title" href="#">Ms. Paula Vickie</a>
+                                        <p><strong>$3210. </strong> Agent Avarage Sales </p>
+                                        <p><small>32 Sales Today</small>
                                         </p>
                                     </div>
                                 </li>
@@ -255,9 +255,9 @@
                                         <i class="fa fa-user aero"></i>
                                     </a>
                                     <div class="media-body">
-                                        <a class="title" href="#">Ms. Mary Jane</a>
-                                        <p><strong>$2300. </strong> Agent Avarage Sales </p>
-                                        <p><small>12 Sales Today</small>
+                                        <a class="title" href="#">Mr. Trevor Cade</a>
+                                        <p><strong>$1420. </strong> Agent Avarage Sales </p>
+                                        <p><small>25 Sales Today</small>
                                         </p>
                                     </div>
                                 </li>
@@ -266,15 +266,15 @@
                                         <i class="fa fa-user green"></i>
                                     </a>
                                     <div class="media-body">
-                                        <a class="title" href="#">Ms. Mary Jane</a>
-                                        <p><strong>$2300. </strong> Agent Avarage Sales </p>
-                                        <p><small>12 Sales Today</small>
+                                        <a class="title" href="#">Mr. Thomas Geffrey</a>
+                                        <p><strong>$5623. </strong> Agent Avarage Sales </p>
+                                        <p><small>52 Sales Today</small>
                                         </p>
                                     </div>
                                 </li>
                             </ul>
                         </div>
-                    </div>-->
+                    </div>
                 </div>
             </div>
         </div>
@@ -2742,9 +2742,10 @@ $transactionSummaryChart = <<< JS
             datasets: [{
                 label: 'New leads',
                 data: [12, 19, 3, 5, 2, 3, 8],
-                lineTension: 0,
+                //lineTension: 0,
                 //pointRadius: 3,
-                backgroundColor: [
+                /*backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
                     'rgba(255, 99, 132, 0.2)',
                     'rgba(54, 162, 235, 0.2)',
                     'rgba(255, 206, 86, 0.2)',
@@ -2759,15 +2760,22 @@ $transactionSummaryChart = <<< JS
                     'rgba(75, 192, 192, 1)',
                     'rgba(153, 102, 255, 1)',
                     'rgba(255, 159, 64, 1)'
-                ],
+                ],*/
+                 backgroundColor: "rgba(38, 185, 154, 0.31)",
+                    borderColor: "rgba(38, 185, 154, 0.7)",
+                    pointBorderColor: "rgba(38, 185, 154, 0.7)",
+                    pointBackgroundColor: "rgba(38, 185, 154, 0.7)",
+                    pointHoverBackgroundColor: "#fff",
+                    pointHoverBorderColor: "rgba(220,220,220,1)",
+                    pointBorderWidth: 1,
                 borderWidth: 2
             },
             {
                 label: 'New Clients',
                 data: [10, 7, 13, 21, 7, 5, 19],
-                lineTension: 0,
+                //lineTension: 0,
                 //pointRadius: 3,
-                backgroundColor: [
+                /*backgroundColor: [
                     'rgba(255, 99, 132, 0.2)',
                     'rgba(54, 162, 235, 0.2)',
                     'rgba(255, 206, 86, 0.2)',
@@ -2782,7 +2790,15 @@ $transactionSummaryChart = <<< JS
                     'rgba(75, 192, 192, 1)',
                     'rgba(153, 102, 255, 1)',
                     'rgba(255, 159, 64, 1)'
-                ],
+                ],*/
+                
+                backgroundColor: "rgba(3, 88, 106, 0.3)",
+                    borderColor: "rgba(3, 88, 106, 0.70)",
+                    pointBorderColor: "rgba(3, 88, 106, 0.70)",
+                    pointBackgroundColor: "rgba(3, 88, 106, 0.70)",
+                    pointHoverBackgroundColor: "#fff",
+                    pointHoverBorderColor: "rgba(151,187,205,1)",
+                    pointBorderWidth: 1,
                 borderWidth: 2
             }]
         },
