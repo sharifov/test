@@ -8,6 +8,7 @@ namespace frontend\themes\gentelella_v2\widgets;
 
 use common\models\Employee;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
+use sales\auth\Auth;
 use Yii;
 
 /**
@@ -62,7 +63,9 @@ class SideBarMenu extends \yii\bootstrap\Widget
 
         $menuLItems = [];
 
-        $menuLItems[] = ['label' => 'Create Lead', 'url' => ['/lead/create'], 'icon' => 'plus'];
+        if (Auth::can('createLead')) {
+            $menuLItems[] = ['label' => 'Create Lead', 'url' => ['/lead/create'], 'icon' => 'plus'];
+        }
         $menuLItems[] = ['label' => 'Create New Lead', 'url' => ['/lead/create2'], 'icon' => 'plus', 'attributes' => ['data-ajax-link' => true, 'data-modal-title' => 'Create New Lead']];
 
 
