@@ -316,7 +316,41 @@ class OfferController extends BaseController
      *                       "pr_service_fee_percent": null
      *                   },
      *                   "productQuoteOptions": []
-     *               }
+     *               },
+     *               {
+     *                  "pq_gid":"1f2a619ee37af592dfd6c927ef00b795",
+     *                  "pq_name":"Boat Tour in Miami with a Free Drink",
+     *                  "pq_order_id":null,
+     *                  "pq_description":null,
+     *                  "pq_status_id":2,
+     *                  "pq_price":28,
+     *                  "pq_origin_price":28,
+     *                  "pq_client_price":28,
+     *                  "pq_service_fee_sum":0,
+     *                  "pq_origin_currency":"USD",
+     *                  "pq_client_currency":"USD",
+     *                  "data": {
+     *                      "atnq_booking_id":null,
+     *                      "atnq_attraction_name":"Boat Tour in Miami with a Free Drink",
+     *                      "atnq_supplier_name":"Miami Tour Company",
+     *                      "search_request": {
+     *                          "atn_product_id":234,
+     *                          "atn_date_from":"2021-06-17",
+     *                          "atn_date_to":"2021-06-24",
+     *                          "atn_destination":"Italy, Rome",
+     *                          "atn_destination_code":"ROE"
+     *                       }
+     *                    },
+     *                   "product": {
+     *                          "pr_type_id":5,
+     *                          "pr_name":"",
+     *                          "pr_lead_id":15356,
+     *                          "pr_description":"",
+     *                          "pr_status_id":null,
+     *                          "pr_service_fee_percent":null
+     *                    },
+     *                    "productQuoteOptions":[]
+     *                  }
      *           ]
      *       },
      *       "technical": {
