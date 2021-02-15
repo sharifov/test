@@ -3,6 +3,7 @@
 namespace modules\attraction\controllers;
 
 use common\components\CommunicationService;
+use common\models\Notifications;
 use frontend\controllers\FController;
 use modules\attraction\models\Attraction;
 use modules\attraction\models\AttractionQuote;
@@ -209,6 +210,12 @@ class AttractionQuoteController extends FController
             if (!$attractionQuote) {
                 throw new Exception('Not added attraction quote - id:  (' . $quoteKey . ')', 8);
             }
+
+            Notifications::pub(
+                ['lead-' . $attractionQuote->atnqProductQuote->pqProduct->pr_lead_id],
+                'addedQuote',
+                ['data' => ['productId' => $attractionQuote->atnqProductQuote->pq_product_id]]
+            );
 
             //$hotelList = $result['hotels'] ?? [];
         } catch (\Throwable $throwable) {

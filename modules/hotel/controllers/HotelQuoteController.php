@@ -2,6 +2,7 @@
 
 namespace modules\hotel\controllers;
 
+use common\models\Notifications;
 use frontend\controllers\FController;
 use modules\hotel\models\Hotel;
 use modules\hotel\models\HotelList;
@@ -195,6 +196,12 @@ class HotelQuoteController extends FController
             if (!$hotelQuote) {
                 throw new Exception('Not added hotel quote - hotel code (' . $hotelCode . ') room key (' . $quoteKey . ')', 8);
             }
+
+            Notifications::pub(
+                ['lead-' . $hotelQuote->hqProductQuote->pqProduct->pr_lead_id],
+                'addedQuote',
+                ['data' => ['productId' => $hotelQuote->hqProductQuote->pq_product_id]]
+            );
 
             //$hotelList = $result['hotels'] ?? [];
         } catch (\Throwable $throwable) {

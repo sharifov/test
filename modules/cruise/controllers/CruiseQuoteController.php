@@ -2,6 +2,7 @@
 
 namespace modules\cruise\controllers;
 
+use common\models\Notifications;
 use frontend\controllers\FController;
 use modules\cruise\src\entity\cruise\Cruise;
 use modules\cruise\src\entity\cruiseQuote\search\CruiseQuoteSearch;
@@ -262,6 +263,11 @@ class CruiseQuoteController extends FController
             }
 
             $createdQuoteId = $this->createQuoteService->create(Auth::id(), $quote, $cruise, 'USD');
+            Notifications::pub(
+                ['lead-' . $cruise->product->pr_lead_id],
+                'addedQuote',
+                ['data' => ['productId' => $cruise->crs_product_id]]
+            );
         } catch (\Throwable $throwable) {
             Yii::warning(VarDumper::dumpAsString($throwable->getTraceAsString()), 'app');
             return ['error' => 'Error: ' . $throwable->getMessage()];

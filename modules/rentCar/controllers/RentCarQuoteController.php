@@ -2,6 +2,7 @@
 
 namespace modules\rentCar\controllers;
 
+use common\models\Notifications;
 use frontend\controllers\FController;
 use modules\rentCar\components\ApiRentCarService;
 use modules\rentCar\RentCarModule;
@@ -125,6 +126,12 @@ class RentCarQuoteController extends FController
             if (!$productQuote->save()) {
                 throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($productQuote));
             }
+
+            Notifications::pub(
+                ['lead-' . $productQuote->pqProduct->pr_lead_id],
+                'addedQuote',
+                ['data' => ['productId' => $productQuote->pq_product_id]]
+            );
 
             $transaction->commit();
         } catch (\Throwable $throwable) {
