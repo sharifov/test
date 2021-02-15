@@ -275,6 +275,10 @@ $totalAmountQuote = 0.0;
                     </td>
 
                     <td>
+                      <?php $ngsDto = FlightQuoteHelper::getNgsDtoOfSelectedQuote($flightQuote); ?>
+
+                      <strong><?= FlightQuoteHelper::formattedNgs($ngsDto) ?></strong>
+                      <?php /*
                         <div class="quote__gds" title="GDS / <?php if (!empty($flightQuote->fq_gds_offer_id)) :
                             echo 'GDS Offer ID: ' . \yii\helpers\Html::encode($flightQuote->fq_gds_offer_id) . ' /';
                                                              endif; ?> PCC">
@@ -284,6 +288,9 @@ $totalAmountQuote = 0.0;
                             <?php endif; ?>
                             / <i><?= Html::encode($flightQuote->fq_gds_pcc)?></i>
                         </div>
+ */ ?>
+                      <div>
+                      </div>
                     </td>
                     <?php /*
                     <td>

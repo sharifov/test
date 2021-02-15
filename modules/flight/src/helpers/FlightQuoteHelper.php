@@ -13,6 +13,7 @@ use modules\flight\models\Flight;
 use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuote;
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
+use modules\flight\src\dto\ngs\QuoteNgsDataDto;
 use modules\flight\src\useCases\flightQuote\create\FlightQuotePaxPriceDTO;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuoteCreateForm;
 use modules\product\src\entities\product\Product;
@@ -24,6 +25,8 @@ use Yii;
 use yii\base\ErrorException;
 use yii\data\ActiveDataProvider;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
+use yii\helpers\Json;
 
 class FlightQuoteHelper
 {
@@ -1133,6 +1136,38 @@ class FlightQuoteHelper
         return '';
     }
 
+    public static function formattedNgs(QuoteNgsDataDto $ngsDto): string
+    {
+        if (!empty($ngsDto->name)) {
+            return '<span
+                data-toggle="tooltip"
+                data-html="true"
+                title="' . self::displayNgsList($ngsDto->list) . '">
+                ' . $ngsDto->name . '
+            </span>';
+        }
+        return '';
+    }
+
+    public static function displayNgsList(array $ngsList): string
+    {
+        $out = '';
+        if ($ngsList) {
+            $out .= "<div class='tooltip_quote_info_box'>";
+            $out .= '<p>NGS Features Name: </p>';
+
+            $out .= '<ul>';
+            foreach ($ngsList as $item) {
+                if (isset($item['commercialName']) && $item['commercialName']) {
+                    $out .= '<li><strong>' . Html::encode($item['commercialName']) . '</strong></li>';
+                }
+            }
+            $out .= '</ul>';
+            $out .= '</div>';
+        }
+        return $out;
+    }
+
     public static function formattedFreeBaggage(?array $meta, string $class = 'success'): string
     {
         if (!empty($meta['bags'])) {
@@ -1144,6 +1179,24 @@ class FlightQuoteHelper
             </span>';
         }
         return '';
+    }
+
+    public static function getNgsDtoOfSelectedQuote(FlightQuote $flightQuote): QuoteNgsDataDto
+    {
+        $flightQuoteData = Json::decode($flightQuote->fq_origin_search_data);
+
+        if (self::generateHashQuoteKey($flightQuoteData['key']) === $flightQuote->fq_hash_key) {
+            return new QuoteNgsDataDto($flightQuoteData['ngsFeatures']);
+        }
+
+        if (isset($flightQuoteData['ngsItineraries'])) {
+            foreach ($flightQuoteData['ngsItineraries'] as $ngsItinerary) {
+                if (self::generateHashQuoteKey($ngsItinerary['key']) === $flightQuote->fq_hash_key) {
+                    return new QuoteNgsDataDto($ngsItinerary['ngsFeatures']);
+                }
+            }
+        }
+        return new QuoteNgsDataDto();
     }
 
     /**
