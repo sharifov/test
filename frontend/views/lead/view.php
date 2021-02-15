@@ -200,6 +200,14 @@ $unsubscribedEmails = array_column($lead->project->emailUnsubscribes, 'eu_email'
                 ]) ?>
             <?php endif; ?>
 
+            <?php if (Auth::can('lead-view/notes/view', ['lead' => $lead])) : ?>
+                <?= $this->render('notes/agent_notes', [
+                    'lead' => $lead,
+                    'dataProviderNotes'  => $dataProviderNotes,
+                    'modelNote'  => $modelNote,
+                ]) ?>
+            <?php endif;?>
+            
             <?php if (Yii::$app->user->can('lead-view/communication-block/view', ['lead' => $lead])) : ?>
                 <?= $this->render('communication/lead_communication', [
                     'leadForm'      => $leadForm,
@@ -293,13 +301,7 @@ $unsubscribedEmails = array_column($lead->project->emailUnsubscribes, 'eu_email'
 //                    'is_manager' => $is_manager,
 //                ]);?>
 
-            <?php if (Auth::can('lead-view/notes/view', ['lead' => $lead])) : ?>
-                <?= $this->render('notes/agent_notes', [
-                    'lead' => $lead,
-                    'dataProviderNotes'  => $dataProviderNotes,
-                    'modelNote'  => $modelNote,
-                ]) ?>
-            <?php endif;?>
+
         </div>
 
         <div class="clearfix"></div>
