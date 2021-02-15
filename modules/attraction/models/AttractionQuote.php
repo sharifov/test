@@ -2,9 +2,10 @@
 
 namespace modules\attraction\models;
 
-use modules\attraction\models\Attraction;
+use modules\attraction\src\serializer\AttractionQuoteSerializer;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\interfaces\Quotable;
 use sales\helpers\product\ProductQuoteHelper;
 use yii\db\ActiveQuery;
 use Yii;
@@ -26,7 +27,7 @@ use yii\helpers\VarDumper;
  * @property Attraction $atnqAttraction
  * @property ProductQuote $atnqProductQuote
  */
-class AttractionQuote extends \yii\db\ActiveRecord
+class AttractionQuote extends \yii\db\ActiveRecord implements Quotable
 {
     /**
      * {@inheritdoc}
@@ -179,5 +180,36 @@ class AttractionQuote extends \yii\db\ActiveRecord
     public function getAtnqProductQuote(): ActiveQuery
     {
         return $this->hasOne(ProductQuote::class, ['pq_id' => 'atnq_product_quote_id']);
+    }
+
+    public static function findByProductQuote(int $productQuoteId): ?Quotable
+    {
+        return self::findOne(['atnq_product_quote_id' => $productQuoteId]);
+    }
+
+    public function serialize(): array
+    {
+        return (new AttractionQuoteSerializer($this))->getData();
+    }
+
+    public function getId(): int
+    {
+        return $this->atnq_id;
+    }
+
+    public function getProcessingFee(): float
+    {
+        $processingFeeAmount = $this->atnqProductQuote->pqProduct->prType->getProcessingFeeAmount();
+        return ProductQuoteHelper::roundPrice($processingFeeAmount);
+    }
+
+    public function getSystemMarkUp(): float
+    {
+        return 0.00;
+    }
+
+    public function getAgentMarkUp(): float
+    {
+        return 0.00;
     }
 }

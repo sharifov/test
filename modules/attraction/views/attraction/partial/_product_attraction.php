@@ -79,7 +79,8 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
                                 'id' => $product->attraction->atn_id
                             ]),
                             'data-hotel-id' => $product->attraction->atn_id,
-                            'class' => 'dropdown-item text-warning btn-update-attraction-request'
+                            'class' => 'dropdown-item text-warning btn-update-attraction-request btn-update-request',
+                            'data-product-id' => $product->pr_id
                         ]) ?>
 
                         <?= Html::a('<i class="fa fa-search"></i> Search Quotes', null, [

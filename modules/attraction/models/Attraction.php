@@ -4,7 +4,7 @@ namespace modules\attraction\models;
 
 use common\components\CommunicationService;
 use modules\attraction\src\entities\attraction\events\AttractionUpdateRequestEvent;
-use modules\attraction\src\useCases\api\searchQuote\AttractionQuoteSearchGuard;
+use modules\attraction\src\entities\attraction\serializer\AttractionSerializer;
 use modules\attraction\src\useCases\request\update\AttractionUpdateRequestForm;
 use modules\product\src\interfaces\Productable;
 use modules\product\src\entities\product\Product;

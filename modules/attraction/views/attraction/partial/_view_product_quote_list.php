@@ -35,7 +35,7 @@ $pjaxId = 'pjax-product-quote-list-' . $attractionProduct->atn_product_id;
                             'id' => $attractionProduct->atn_id
                         ]),
                         'data-hotel-id' => $attractionProduct->atn_id,
-                        'class' => 'btn-search-hotel-quotes'
+                        'class' => 'btn-search-attraction-quotes'
                     ]) ?>
                 </li>
 

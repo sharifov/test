@@ -20,7 +20,11 @@ class AttractionSerializer extends Serializer
     public static function fields(): array
     {
         return [
-            'atn_product_id'
+            'atn_product_id',
+            'atn_date_from',
+            'atn_date_to',
+            'atn_destination',
+            'atn_destination_code',
         ];
     }
 
