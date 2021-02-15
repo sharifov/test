@@ -92,7 +92,7 @@ class OfferController extends BaseController
      *               {
      *                   "pq_gid": "6fcfc43e977dabffe6a979ebda22a281",
      *                   "pq_name": "",
-     *                   "pq_order_id": null,
+     *                   "pq_order_id": 10,
      *                   "pq_description": null,
      *                   "pq_status_id": 1,
      *                   "pq_price": 92.3,
@@ -199,7 +199,7 @@ class OfferController extends BaseController
      *                   "data": {
      *                       "hotel": {
      *                           "hl_name": "Manzil Hotel",
-     *                           "hl_star": null,
+     *                           "hl_star": "2*",
      *                           "hl_category_name": "2 STARS",
      *                           "hl_destination_name": "Casablanca",
      *                           "hl_zone_name": "Casablanca",
@@ -210,7 +210,7 @@ class OfferController extends BaseController
      *                           "hl_postal_code": "20000",
      *                           "hl_city": "CASABLANCA",
      *                           "hl_email": "resa@manzilhotels.com",
-     *                           "hl_web": null,
+     *                           "hl_web": "",
      *                           "hl_phone_list": [
      *                              {
      *                                   "type": "PHONEBOOKING",
@@ -231,7 +231,7 @@ class OfferController extends BaseController
      *                                   "type": "GEN"
      *                               }
      *                           ],
-     *                           "hl_image_base_url": null
+     *                           "hl_image_base_url": ""
      *                       },
      *                       "rooms": [
      *                           {
@@ -239,12 +239,12 @@ class OfferController extends BaseController
      *                               "hqr_class": "NOR",
      *                               "hqr_amount": 349.99,
      *                               "hqr_currency": "USD",
-     *                               "hqr_cancel_amount": null,
-     *                               "hqr_cancel_from_dt": null,
+     *                               "hqr_cancel_amount": 293.58,
+     *                               "hqr_cancel_from_dt": "2020-05-14 20:59:00",
      *                               "hqr_board_name": "ROOM ONLY",
      *                               "hqr_rooms": 1,
      *                               "hqr_adults": 1,
-     *                               "hqr_children": null
+     *                               "hqr_children": 1
      *                           }
      *                       ]
      *                   },
@@ -254,16 +254,16 @@ class OfferController extends BaseController
      *                       "pr_lead_id": 371096,
      *                       "pr_description": "rrr",
      *                       "pr_status_id": 1,
-     *                       "pr_service_fee_percent": null
+     *                       "pr_service_fee_percent": 3.50
      *                   },
      *                   "productQuoteOptions": [
      *                       {
      *                           "pqo_name": "1323",
      *                           "pqo_description": "",
      *                           "pqo_status_id": 1,
-     *                           "pqo_price": null,
-     *                           "pqo_client_price": null,
-     *                           "pqo_extra_markup": null
+     *                           "pqo_price": 10.00,
+     *                           "pqo_client_price": 15.00,
+     *                           "pqo_extra_markup": 10.00
      *                       },
      *                       {
      *                           "pqo_name": "tests",
