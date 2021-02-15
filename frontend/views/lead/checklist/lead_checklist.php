@@ -94,7 +94,7 @@ $user = Yii::$app->user->identity;
 
 
         <?php
-            $checkListTypes = \common\models\LeadChecklistType::getList(true);
+            $checkListTypes = \common\models\LeadChecklistType::getFullList(true);
 
             $currentCheckList = $dataProvider->getModels();
 
@@ -113,8 +113,8 @@ $user = Yii::$app->user->identity;
 
                         </td>
                         <td>
-                            <span class="fa fa-square-o warning"></span>
-                            <?=Html::encode($checkListType)?>
+                            <span class="fa  fa-question-circle " title="<?=Html::encode($checkListType['lct_description'])?>"></span>
+                            <?=Html::encode($checkListType['lct_name'])?>
                         </td>
                     </tr>
                 <?php endforeach; ?>

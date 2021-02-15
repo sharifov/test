@@ -129,4 +129,13 @@ class LeadChecklistType extends \yii\db\ActiveRecord
         $data = $query->asArray()->all();
         return ArrayHelper::map($data, 'lct_id', 'lct_name');
     }
+
+    public static function getFullList(bool $enabled = true): array
+    {
+        $query = self::find()->orderBy(['lct_sort_order' => SORT_ASC]);
+        if ($enabled) {
+            $query->andWhere(['lct_enabled' => true]);
+        }
+        return $query->asArray()->indexBy('lct_id')->all();
+    }
 }
