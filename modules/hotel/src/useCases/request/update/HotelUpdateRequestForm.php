@@ -71,9 +71,9 @@ class HotelUpdateRequestForm extends Model
 
             ['ph_max_star_rate', 'integer'],
 
-            ['ph_max_price_rate', 'integer'],
+            ['ph_max_price_rate', 'integer', 'max' => 65000, 'min' => 0],
 
-            ['ph_min_price_rate', 'integer'],
+            ['ph_min_price_rate', 'integer', 'max' => 65000, 'min' => 0],
 
             ['ph_zone_code', 'integer'],
             ['ph_zone_code', 'string', 'max' => 11],
