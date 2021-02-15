@@ -23,7 +23,7 @@ use yii\bootstrap4\Html;
 
              <?= OfferFormatter::asSentView($offer) ?>
 
-            <?php if ($offer->of_profit_amount) : ?>
+            <?php if ($offer->of_profit_amount > 0) : ?>
                 <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $offer->of_profit_amount ?>
             <?php endif; ?>
 
