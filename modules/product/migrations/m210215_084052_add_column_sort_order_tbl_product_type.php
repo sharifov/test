@@ -4,6 +4,7 @@ namespace modules\product\migrations;
 
 use Yii;
 use yii\db\Migration;
+
 /**
  * Class m210215_084052_add_column_sort_order_tbl_product_type
  */
