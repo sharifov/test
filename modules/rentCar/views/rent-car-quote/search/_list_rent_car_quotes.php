@@ -117,18 +117,18 @@ use yii\web\View;
                       <li>
                         <strong>Pick-up: </strong>
                         <?php $pickUp = RentCarDataParser::getPickUpLocation($dataRentCar);
-                            if ($rentCar->prc_pick_up_date) {
-                                $pickUp = Yii::$app->formatter->asDate($rentCar->prc_pick_up_date);
-                            }
+                        if ($rentCar->prc_pick_up_date) {
+                            $pickUp = Yii::$app->formatter->asDate($rentCar->prc_pick_up_date);
+                        }
                         ?>
                         <span> <?php echo $pickUp ?></span>
                       </li>
                       <li>
                         <strong>Drop-off: </strong>
                         <?php $dropOff = RentCarDataParser::getDropOffLocation($dataRentCar);
-                            if ($rentCar->prc_drop_off_date) {
-                                $dropOff = Yii::$app->formatter->asDate($rentCar->prc_drop_off_date);
-                            }
+                        if ($rentCar->prc_drop_off_date) {
+                            $dropOff = Yii::$app->formatter->asDate($rentCar->prc_drop_off_date);
+                        }
                         ?>
                         <span> <?php echo $dropOff ?></span>
                       </li>
