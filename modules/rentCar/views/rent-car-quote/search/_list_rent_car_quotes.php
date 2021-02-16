@@ -1,6 +1,7 @@
 <?php
 
 use modules\rentCar\src\entity\rentCar\RentCar;
+use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use modules\rentCar\src\helpers\RentCarDataParser;
 use yii\data\ArrayDataProvider;
 use yii\web\View;
@@ -11,9 +12,11 @@ use yii\web\View;
 /* @var int $key */
 /* @var rentCar $rentCar */
 
+$token = RentCarDataParser::getOfferToken($dataRentCar, $rentCar->prc_request_hash_key);
+$exist = RentCarQuote::find()->where(['rcq_offer_token' => $token])->exists();
 ?>
 
-<div class="quote" id="box-quote-<?php echo RentCarDataParser::getOfferToken($dataRentCar, $rentCar->prc_request_hash_key) ?>">
+<div class="quote <?php echo $exist ? 'quote-added' : '' ?>" id="box-quote-<?php echo $token ?>">
     <div class="quote__heading">
       <div class="quote__heading-left">
         <span class="quote__id">
@@ -145,13 +148,22 @@ use yii\web\View;
     <div class="quote__footer">
       <div class="quote__footer-left"></div>
       <div class="quote__footer-right">
+        <?php if ($exist) : ?>
+        <button
+            type="button"
+            disabled
+            class="btn btn-success quote__footer-btn">
+                <i class="fa fa-check"></i> Added
+        </button>
+        <?php else : ?>
         <button
             type="button"
             class="btn btn-success quote__footer-btn js-add-rent-car-quote"
             data-request-id="<?php echo $rentCar->prc_id ?>"
-            data-token="<?php echo RentCarDataParser::getOfferToken($dataRentCar, $rentCar->prc_request_hash_key) ?>">
+            data-token="<?php echo $token ?>">
                 <i class="fa fa-plus"></i>&nbsp; <span>Add Quote</span>
         </button>
+        <?php endif ?>
       </div>
     </div>
   </div>
