@@ -275,8 +275,7 @@ JS;
     <div class="x_content" style="display: block">
 
         <i class="fa fa-user"></i> <?=$model->productQuote->pqCreatedUser ? Html::encode($model->productQuote->pqCreatedUser->username) : '-'?>,
-        <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($model->productQuote->pq_created_dt)) ?>,
-        <i title="code: <?=\yii\helpers\Html::encode($model->crq_hash_key)?>">Hash: <?=\yii\helpers\Html::encode($model->crq_hash_key)?></i>
+        <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($model->productQuote->pq_created_dt)) ?>
 
         <?php
         $sfs = round(($model->crq_amount + $model->crq_system_mark_up + $model->crq_agent_mark_up) * $model->crq_service_fee_percent / 100, 2);
