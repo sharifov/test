@@ -106,7 +106,7 @@ class NotificationsController extends FController
         if (!$model->n_read_dt) {
             $model->n_read_dt = date('Y-m-d H:i:s');
             $model->n_new = false;
-            if ($model->save()) {
+            if ($model->save() && false) {
                 $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::delete($model) : [];
                 Notifications::publish('getNewNotification', ['user_id' => $model->n_user_id], $dataNotification);
             }
@@ -132,7 +132,7 @@ class NotificationsController extends FController
     {
         $model = new Notifications();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post()) && $model->save() && false) {
             //Notifications::socket($model->n_user_id, null, 'getNewNotification', [], true);
             $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($model) : [];
             Notifications::publish('getNewNotification', ['user_id' => $model->n_user_id], $dataNotification);
@@ -154,7 +154,7 @@ class NotificationsController extends FController
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post()) && $model->save() && false) {
             return $this->redirect(['view', 'id' => $model->n_id]);
         }
 
@@ -173,7 +173,7 @@ class NotificationsController extends FController
     {
         $model = $this->findModel($id);
 
-        if ($model->delete()) {
+        if ($model->delete() && false) {
             NotificationCache::invalidate($model->n_user_id);
             $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::delete($model) : [];
             Notifications::publish('getNewNotification', ['user_id' => $model->n_user_id], $dataNotification);
@@ -196,7 +196,7 @@ class NotificationsController extends FController
         }
 
         $model->n_deleted = true;
-        if ($model->save()) {
+        if ($model->save() && false) {
             $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::delete($model) : [];
             Notifications::publish('getNewNotification', ['user_id' => $model->n_user_id], $dataNotification);
         }
