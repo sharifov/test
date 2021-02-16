@@ -89,9 +89,9 @@ use yii\widgets\ActiveForm;
             </div>
             <div class="col-md-4">
                 <?php
-                $emailBeforeMasking = $model->e_email_to;
+/*                $emailBeforeMasking = $model->e_email_to;
                 $model->e_email_to = \sales\helpers\email\MaskEmailHelper::masking($model->e_email_to)
-                ?>
+                */?>
 
                 <?= $form->field($model, 'e_email_to')->textInput(['maxlength' => true]) ?>
             </div>
@@ -168,7 +168,7 @@ use yii\widgets\ActiveForm;
 </div>
 
 <?php
-$js = <<< JS
+/*$js = <<< JS
 
 function submitForm(){
     let originalEmail = '$emailBeforeMasking'
@@ -177,4 +177,4 @@ function submitForm(){
 }
 JS;
 $this->registerJs($js, \yii\web\View::POS_HEAD);
-?>
+*/?>
