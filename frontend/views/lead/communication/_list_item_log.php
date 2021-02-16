@@ -56,7 +56,7 @@ $fromType = 'client';
 
                 <?php if ($call->isIn()) :?>
                     <div class="chat__sender">
-                        <span title="<?=Html::encode($call->cl_phone_from)?>">
+                        <span title="<?=Html::encode(MaskPhoneHelper::masking($call->cl_phone_from))?>">
                             <i class="fa fa-phone"></i> <?= $call->client ? Html::encode($call->client->full_name ?? '') : 'Client'?>
                         </span>
                         to
