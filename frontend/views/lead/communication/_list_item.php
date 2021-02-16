@@ -68,7 +68,7 @@ $fromType = 'client';
             <?php else : ?>
                 <div class="chat__sender">
                     from "<b title="<?=Html::encode($call->c_from)?>"><?=($call->cCreatedUser ? Html::encode($call->cCreatedUser->username) : '-') ?></b>" to <i class="fa fa-phone" title="<?=Html::encode(MaskPhoneHelper::masking($call->c_to))?>"></i>
-                    <?=Html::encode($call->c_to)?>
+                    <?=Html::encode(MaskPhoneHelper::masking($call->c_to))?>
                 </div>
             <?php endif;?>
 
