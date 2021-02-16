@@ -104,8 +104,8 @@ use yii\bootstrap4\Html;
                 <?php foreach ($offer->offerProducts as $product) :
                         $quote = $product->opProductQuote;
                         $originTotalPrice += $quote->pq_price;
-                        //$clientTotalPrice += $quote->pq_client_price;
-                        $clientTotalPrice += ProductQuoteHelper::calcClientPrice($quote->pq_client_price, $quote->pqProduct);
+                        $clientTotalPrice += $quote->pq_client_price;
+                        //$clientTotalPrice += ProductQuoteHelper::calcClientPrice($quote->pq_client_price, $quote->pqProduct);
                         $optionTotalPrice += $quote->optionAmountSum;
                         $totalFee += $quote->pq_service_fee_sum;
                     ?>
