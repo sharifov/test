@@ -142,14 +142,14 @@ use yii\bootstrap4\Html;
                     <th class="text-right"><?=number_format($optionTotalPrice, 2)?></th>
                     <th class="text-right"><?=number_format($totalFee, 2)?></th>
                     <th class="text-right"><?=number_format($originTotalPrice, 2)?></th>
-                    <th class="text-right"><?=number_format($clientTotalPrice, 2)?> <?=Html::encode($quote->pq_client_currency)?></th>
+                    <th class="text-right"><?=number_format($clientTotalPrice, 2)?> <?=Html::encode($offer->of_client_currency)?></th>
                     <th></th>
                 </tr>
                 <tr>
                     <th class="text-right" colspan="5">Total: </th>
-                    <td class="text-right" colspan="2">(price + opt + fee)</td>
-                    <th class="text-right"><?=number_format($originTotalPrice + $optionTotalPrice + $totalFee, 2)?></th>
-                    <th class="text-right"><?php //=number_format($clientTotalPrice, 2)?> <?=Html::encode($quote->pq_client_currency)?></th>
+                    <td class="text-right" colspan="2">(price + opt)</td>
+                    <th class="text-right"><?=number_format($originTotalPrice + $optionTotalPrice, 2)?></th>
+                    <th class="text-right"><?=number_format($clientTotalPrice, 2)?> <?=Html::encode($offer->of_client_currency)?></th>
                     <th></th>
                 </tr>
             <?php endif; ?>
@@ -160,7 +160,9 @@ use yii\bootstrap4\Html;
         <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($offer->of_created_dt)) ?>,
         <i class="fa fa-money" title="currency"></i> <?=Html::encode($offer->of_client_currency)?> <span title="Rate: <?=$offer->of_client_currency_rate?>">(<?=round($offer->of_client_currency_rate, 3)?>)</span>
 
-        <div class="text-right"><h4>Total: <?=number_format($offer->offerTotalCalcSum, 2)?> USD</h4></div>
+        <div class="text-right">
+            <h4>Total: <?=number_format($offer->offerTotalCalcSum, 2)?> USD, Client Total: <b><?=number_format($clientTotalPrice, 2)?> <?=Html::encode($offer->of_client_currency)?></b></h4>
+        </div>
 
 
     </div>
