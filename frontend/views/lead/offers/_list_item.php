@@ -164,7 +164,7 @@ use yii\bootstrap4\Html;
 
         <div class="text-right">
             <?php $clientTotal = '' ?>
-            <?php if (isset($clientTotalPrice)) : ?>
+            <?php if (isset($clientTotalPrice) && !empty($offer->of_client_currency)) : ?>
                 <?php $clientCurrency = $offer->of_client_currency ?: 'USD' ?>
                 <?php $clientTotal = ', Client Total: <b>' . number_format($clientTotalPrice, 2) . ' ' . Html::encode($clientCurrency) . '</b>' ?>
             <?php endif ?>
