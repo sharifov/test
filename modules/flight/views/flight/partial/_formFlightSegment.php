@@ -44,6 +44,7 @@ $select2Properties = [
 <?= $form->field($model, 'segments')->widget(MultipleInput::class, [
     'max' => 10,
 //    'allowEmptyList' => true,
+    'id' => 'flight_segment_multiple_input',
     'enableError' => true,
     'showGeneralError' => true,
     'columns' => [

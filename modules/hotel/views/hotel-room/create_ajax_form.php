@@ -29,6 +29,7 @@ $pjaxId = 'pjax-hotel-room-form';
         <?= $form->field($model, 'hr_room_name')->textInput(['maxlength' => true]) ?>
 
         <?= $form->field($model, 'hr_pax_list')->widget(\unclead\multipleinput\MultipleInput::class, [
+            'id' => 'hotel_room_create_multiple_input',
             'max'               => 10,
             'min'               => 1, // should be at least 2 rows
             'allowEmptyList'    => false,

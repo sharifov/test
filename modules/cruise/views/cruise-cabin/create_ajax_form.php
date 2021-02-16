@@ -31,6 +31,7 @@ $pjaxId = 'pjax-cruise-cabin-form';
         <?= $form->field($model, 'crc_name')->textInput(['maxlength' => true]) ?>
 
         <?= $form->field($model, 'crc_pax_list')->widget(\unclead\multipleinput\MultipleInput::class, [
+            'id' => 'cruise_create_cabin_multiple_input',
             'max'               => 10,
             'min'               => 1, // should be at least 2 rows
             'allowEmptyList'    => false,
