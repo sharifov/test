@@ -8,6 +8,7 @@ use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offer\OfferStatus;
 use modules\offer\src\helpers\formatters\OfferFormatter;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use sales\helpers\product\ProductQuoteHelper;
 use yii\bootstrap4\Html;
 
 ?>
@@ -103,7 +104,8 @@ use yii\bootstrap4\Html;
                 <?php foreach ($offer->offerProducts as $product) :
                         $quote = $product->opProductQuote;
                         $originTotalPrice += $quote->pq_price;
-                        $clientTotalPrice += $quote->pq_client_price;
+                        //$clientTotalPrice += $quote->pq_client_price;
+                        $clientTotalPrice += ProductQuoteHelper::calcClientPrice($quote->pq_client_price, $quote->pqProduct);
                         $optionTotalPrice += $quote->optionAmountSum;
                         $totalFee += $quote->pq_service_fee_sum;
                     ?>
