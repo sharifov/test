@@ -43,6 +43,7 @@ use sales\forms\cases\CasesCreateByWebForm;
 use sales\forms\cases\CasesLinkChatForm;
 use sales\forms\cases\CasesSaleForm;
 use sales\helpers\app\AppHelper;
+use sales\helpers\email\MaskEmailHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
@@ -278,7 +279,7 @@ class CasesController extends FController
 
                     if (isset($mailResponse['error']) && $mailResponse['error']) {
                         //echo $mailResponse['error']; exit; //'Error: <strong>Email Message</strong> has not been sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
-                        Yii::$app->session->setFlash('send-error', 'Error: <strong>Email Message</strong> has not been sent to <strong>' . $mail->e_email_to . '</strong>');
+                        Yii::$app->session->setFlash('send-error', 'Error: <strong>Email Message</strong> has not been sent to <strong>' . MaskEmailHelper::masking($mail->e_email_to) . '</strong>');
                         Yii::error('Error: Email Message has not been sent to ' . $mail->e_email_to . "\r\n " . $mailResponse['error'], 'CaseController:view:Email:sendMail');
                     } else {
                         //echo '<strong>Email Message</strong> has been successfully sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
@@ -300,7 +301,7 @@ class CasesController extends FController
                             }
                         }
 
-                        Yii::$app->session->setFlash('send-success', '<strong>Email Message</strong> has been successfully sent to <strong>' . $mail->e_email_to . '</strong>');
+                        Yii::$app->session->setFlash('send-success', '<strong>Email Message</strong> has been successfully sent to <strong>' . MaskEmailHelper::masking($mail->e_email_to) . '</strong>');
                     }
 
                     $this->refresh(); //'#communication-form'
