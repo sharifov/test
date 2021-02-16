@@ -10,7 +10,7 @@ use yii\db\Migration;
 class m210216_092341_add_permission_to_create_rule extends Migration
 {
     public $routes = [
-        '/qa-task-rules/create',
+        '/qa-task/qa-task-rules/create',
     ];
 
     public $roles = [
