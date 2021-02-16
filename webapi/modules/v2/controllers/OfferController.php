@@ -343,6 +343,7 @@ class OfferController extends BaseController
      *                      "atnq_booking_id":null,
      *                      "atnq_attraction_name":"Boat Tour in Miami with a Free Drink",
      *                      "atnq_supplier_name":"Miami Tour Company",
+     *                      "atnq_json_response": "description field: json origin data from search api",
      *                      "search_request": {
      *                          "atn_product_id":234,
      *                          "atn_date_from":"2021-06-17",
