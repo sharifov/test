@@ -197,6 +197,13 @@ class OfferController extends BaseController
      *                   "pq_origin_currency": "USD",
      *                   "pq_client_currency": "USD",
      *                   "data": {
+     *                      "hotel_request": {
+                                "ph_check_in_date": "2021-06-10",
+                                "ph_check_out_date": "2021-06-18",
+                                "ph_destination_code": "LON",
+                                "ph_destination_label": "United Kingdom, London",
+                                "destination_city": "London"
+                            },
      *                       "hotel": {
      *                           "hl_name": "Manzil Hotel",
      *                           "hl_star": "2*",

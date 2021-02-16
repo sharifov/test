@@ -21,24 +21,24 @@ class HotelSerializer extends Serializer
     public static function fields(): array
     {
         return [
-            'ph_product_id',
+            //'ph_product_id',
             'ph_check_in_date',
             'ph_check_out_date',
-            'ph_zone_code',
-            'ph_hotel_code',
+            //'ph_zone_code',
+            //'ph_hotel_code',
             'ph_destination_code',
             'ph_destination_label',
-            'ph_min_star_rate',
+            /*'ph_min_star_rate',
             'ph_max_star_rate',
             'ph_max_price_rate',
-            'ph_min_price_rate',
+            'ph_min_price_rate',*/
         ];
     }
 
     public function getData(): array
     {
         $data = $this->toArray();
-        $data['destination'] = $this->model->ph_destination_code ? Airports::getCityByIata($this->model->ph_destination_code) : '';
+        $data['destination_city'] = $this->model->ph_destination_code ? Airports::getCityByIata($this->model->ph_destination_code) : '';
 
         return $data;
     }
