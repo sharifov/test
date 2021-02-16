@@ -2738,10 +2738,10 @@ $transactionSummaryChart = <<< JS
     let transactionSummaryChart = new Chart(ctxTransactionSummary, {
         type: 'line',
         data: {
-            labels: ['10/02/21', '10/02/21', '10/02/21', '11/02/21', '12/02/21', '13/02/21', '14/02/21'],
+            labels: ['10/02/21', '11/02/21', '12/02/21', '13/02/21', '14/02/21', '15/02/21', '16/02/21'],
             datasets: [{
                 label: 'New leads',
-                data: [12, 19, 3, 5, 2, 3, 8],
+                data: [2580, 2652, 2574, 3121, 3253, 2334, 2596],
                 //lineTension: 0,
                 //pointRadius: 3,
                 /*backgroundColor: [
@@ -2772,7 +2772,7 @@ $transactionSummaryChart = <<< JS
             },
             {
                 label: 'New Clients',
-                data: [10, 7, 13, 21, 7, 5, 19],
+                data: [1858, 2149, 2188, 2622, 2928, 1914, 2181],
                 //lineTension: 0,
                 //pointRadius: 3,
                 /*backgroundColor: [
