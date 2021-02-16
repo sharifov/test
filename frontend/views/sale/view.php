@@ -12,6 +12,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
+use sales\helpers\phone\MaskPhoneHelper;
 
 /* @var $this yii\web\View */
 /* @var $data array */
@@ -317,7 +318,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                 <tr>
                                     <td><?=Html::encode($data['customerInfo']['firstName'] ?? '')?></td>
                                     <td><?=Html::encode($data['customerInfo']['lastName'] ?? '')?></td>
-                                    <td><?=Html::encode($data['customerInfo']['phoneNumber'] ?? '')?></td>
+                                    <td><?=Html::encode(MaskPhoneHelper::masking($data['customerInfo']['phoneNumber']) ?? '')?></td>
                                     <td><?=Html::encode($data['email'] ?? '')?></td>
                                 </tr>
                             </table>
