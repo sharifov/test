@@ -161,7 +161,11 @@ use yii\bootstrap4\Html;
         <i class="fa fa-money" title="currency"></i> <?=Html::encode($offer->of_client_currency)?> <span title="Rate: <?=$offer->of_client_currency_rate?>">(<?=round($offer->of_client_currency_rate, 3)?>)</span>
 
         <div class="text-right">
-            <h4>Total: <?=number_format($offer->offerTotalCalcSum, 2)?> USD, Client Total: <b><?=number_format($clientTotalPrice, 2)?> <?=Html::encode($offer->of_client_currency)?></b></h4>
+            <?php $clientTotal = '' ?>
+            <?php if (isset($clientTotalPrice)) : ?>
+                <?php $clientTotal = ', Client Total: <b>' . number_format($clientTotalPrice, 2) . ' ' . Html::encode($offer->of_client_currency) . '</b>' ?>
+            <?php endif ?>
+            <h4>Total: <b><?=number_format($offer->offerTotalCalcSum, 2)?> USD</b><?php echo $clientTotal ?></h4>
         </div>
 
 
