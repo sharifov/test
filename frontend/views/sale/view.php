@@ -5,6 +5,7 @@ use common\models\CaseSale;
 use kartik\editable\Editable;
 use kartik\popover\PopoverX;
 use sales\guards\cases\CaseManageSaleInfoGuard;
+use sales\helpers\email\MaskEmailHelper;
 use sales\model\saleTicket\entity\SaleTicket;
 use sales\model\saleTicket\useCase\sendEmail\SaleTicketHelper;
 use yii\grid\GridView;
@@ -319,7 +320,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                     <td><?=Html::encode($data['customerInfo']['firstName'] ?? '')?></td>
                                     <td><?=Html::encode($data['customerInfo']['lastName'] ?? '')?></td>
                                     <td><?=Html::encode(MaskPhoneHelper::masking($data['customerInfo']['phoneNumber']) ?? '')?></td>
-                                    <td><?=Html::encode($data['email'] ?? '')?></td>
+                                    <td><?=Html::encode(MaskEmailHelper::masking($data['email'] ?? '')) ?></td>
                                 </tr>
                             </table>
                         <?php endif;?>
