@@ -181,6 +181,8 @@ class ProductQuoteOption extends ActiveRecord implements Serializable
     public function calculateClientPrice(): void
     {
         $currencyRate = $this->pqoProductQuote->pq_client_currency_rate;
-        $this->pqo_client_price = ProductQuoteHelper::roundPrice(($this->pqo_extra_markup + $this->pqo_price) * $currencyRate);
+        $clientPrice = is_numeric($this->pqo_price) ? $this->pqo_price : 0.00;
+        $clientPrice = is_numeric($this->pqo_extra_markup) ? $clientPrice + $this->pqo_extra_markup : $clientPrice;
+        $this->pqo_client_price = ProductQuoteHelper::roundPrice($clientPrice * $currencyRate);
     }
 }
