@@ -6,6 +6,8 @@ use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $model modules\cruise\src\entity\cruiseQuote\CruiseQuote */
 /* @var $form ActiveForm */
+
+//$model->crq_data_json = json_encode($model->crq_data_json);
 ?>
 
 <div class="cruise-quote-form">
@@ -20,7 +22,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'crq_cruise_id')->textInput() ?>
 
-        <?= $form->field($model, 'crq_data_json')->textInput() ?>
+        <?php //= $form->field($model, 'crq_data_json')->textarea() ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
