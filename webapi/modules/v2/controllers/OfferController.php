@@ -315,6 +315,7 @@ class OfferController extends BaseController
      *                           "imgUrl": "https://mediaim.expedia.com/cruise/cv-br-2020-02-01/a7f6f5bd-aef2-417e-87d2-fb3fce2baeba.jpg?impolicy=resizecrop&ra=fit&rw=500",
      *                           "experience": "INSIDE"
      *                       },
+     *                       "destinationName": "Galveston",
      *                       "crq_data_json": "description field: json origin data from search api"
      *                   },
      *                   "product": {

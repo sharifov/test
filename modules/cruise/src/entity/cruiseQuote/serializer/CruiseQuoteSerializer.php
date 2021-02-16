@@ -4,6 +4,7 @@ namespace modules\cruise\src\entity\cruiseQuote\serializer;
 
 use modules\cruise\src\entity\cruiseQuote\CruiseQuote;
 use sales\entities\serializer\Serializer;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class CruiseQuoteSerializer
@@ -42,6 +43,9 @@ class CruiseQuoteSerializer extends Serializer
             $data['cabin'] = $this->model->crq_data_json['cabin'];
             $data['adults'] = $this->model->getAdults();
             $data['children'] = $this->model->getChildren();
+
+            $data['destinationName'] = ArrayHelper::getValue((array) $this->model->crq_data_json, 'itinerary.locations.0.location.name');
+
             $data['crq_data_json'] = $this->model->crq_data_json;
         }
 
