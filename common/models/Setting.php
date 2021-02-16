@@ -141,7 +141,7 @@ class Setting extends \yii\db\ActiveRecord
         parent::afterSave($insert, $changedAttributes);
         if (!$insert && isset($changedAttributes['s_value'])) {
             $staff = Employee::getAllEmployeesByRole([Employee::ROLE_SUPER_ADMIN, Employee::ROLE_ADMIN]);
-            foreach ($staff as $unit) {
+            /*foreach ($staff as $unit) {
                 Notifications::create(
                     $unit->id,
                     'Setting Changed: (' . $this->s_id . ')',
@@ -149,7 +149,7 @@ class Setting extends \yii\db\ActiveRecord
                     Notifications::TYPE_INFO,
                     true
                 );
-            }
+            }*/
         }
     }
 }

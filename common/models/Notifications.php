@@ -233,7 +233,7 @@ class Notifications extends ActiveRecord
             $model->n_popup_show = true;
         }
 
-        if (/*$model->save()*/ false) {
+        if ($model->save()) {
             return $model;
         }
 
