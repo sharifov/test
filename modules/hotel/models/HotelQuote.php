@@ -75,7 +75,7 @@ class HotelQuote extends ActiveRecord implements Quotable
             [['hq_hash_key', 'hq_request_hash'], 'string', 'max' => 32],
             [['hq_destination_name'], 'string', 'max' => 255],
             [['hq_hotel_name'], 'string', 'max' => 200],
-            [['hq_hash_key'], 'unique'],
+            [['hq_hotel_id', 'hq_hash_key'], 'unique', 'targetAttribute' => ['hq_hotel_id', 'hq_hash_key']],
             [['hq_hotel_id'], 'exist', 'skipOnError' => true, 'targetClass' => Hotel::class, 'targetAttribute' => ['hq_hotel_id' => 'ph_id']],
             [['hq_hotel_list_id'], 'exist', 'skipOnError' => true, 'targetClass' => HotelList::class, 'targetAttribute' => ['hq_hotel_list_id' => 'hl_id']],
             [['hq_product_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['hq_product_quote_id' => 'pq_id']],
