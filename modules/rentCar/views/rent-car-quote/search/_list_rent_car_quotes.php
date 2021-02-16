@@ -148,7 +148,7 @@ $exist = RentCarQuote::find()->where(['rcq_offer_token' => $token])->exists();
     <div class="quote__footer">
       <div class="quote__footer-left"></div>
       <div class="quote__footer-right">
-        <?php if($exist) : ?>
+        <?php if ($exist) : ?>
         <button
             type="button"
             disabled
