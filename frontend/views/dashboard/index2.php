@@ -172,27 +172,27 @@
                         </div>
                         <div class="tiles">
                             <div class="col-md-4 tile">
-                                <span>Revenue</span>
-                                <h2>231,809</h2>
+                                <span>Sold Leads</span>
+                                <h2>3297</h2>
                                 <span class="sparkline11 graph" style="height: 160px;">
                                     <!--<canvas width="198" height="40" style="display: inline-block; width: 198px; height: 40px; vertical-align: top;"></canvas>-->
-                                    <canvas id="revenueChart" width="200" height="40"></canvas>
-                                </span>
-                            </div>
-                            <div class="col-md-4 tile">
-                                <span>Sold Leads</span>
-                                <h2>$231,809</h2>
-                                <span class="sparkline22 graph" style="height: 160px;">
-                                    <!--<canvas width="200" height="40" style="display: inline-block; width: 200px; height: 40px; vertical-align: top;"></canvas>-->
                                     <canvas id="soldLeadsChart" width="200" height="40"></canvas>
                                 </span>
                             </div>
                             <div class="col-md-4 tile">
-                                <span>Conversion</span>
-                                <h2>231,809</h2>
+                                <span>Revenue, $</span>
+                                <h2>2357355</h2>
                                 <span class="sparkline11 graph" style="height: 160px;">
                                     <!--<canvas width="198" height="40" style="display: inline-block; width: 198px; height: 40px; vertical-align: top;"></canvas></span>-->
+                                    <canvas id="revenueChart" width="200" height="40"></canvas>
+                            </div>
+                            <div class="col-md-4 tile">
+                                <span>Conversion, %</span>
+                                <h2>17.3</h2>
+                                <span class="sparkline22 graph" style="height: 160px;">
+                                    <!--<canvas width="200" height="40" style="display: inline-block; width: 200px; height: 40px; vertical-align: top;"></canvas>-->
                                     <canvas id="conversionChart" width="200" height="40"></canvas>
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -223,8 +223,8 @@
                                     </a>
                                     <div class="media-body">
                                         <a class="title" href="#">Ms. Mary Jane</a>
-                                        <p><strong>$1500. </strong> Agent Avarage Sales </p>
-                                        <p><small>21 Sales Today</small>
+                                        <p><strong>$17191. </strong> Agent Weekly Revenue </p>
+                                        <p><small>24 Weekly sales</small>
                                         </p>
                                     </div>
                                 </li>
@@ -234,8 +234,8 @@
                                     </a>
                                     <div class="media-body">
                                         <a class="title" href="#">Mr. Dillon Finnegan</a>
-                                        <p><strong>$762. </strong> Agent Avarage Sales </p>
-                                        <p><small>11 Sales Today</small>
+                                        <p><strong>$16584. </strong> Agent Weekly Revenue </p>
+                                        <p><small>23 Weekly sales</small>
                                         </p>
                                     </div>
                                 </li>
@@ -245,8 +245,8 @@
                                     </a>
                                     <div class="media-body">
                                         <a class="title" href="#">Ms. Paula Vickie</a>
-                                        <p><strong>$3210. </strong> Agent Avarage Sales </p>
-                                        <p><small>32 Sales Today</small>
+                                        <p><strong>$14577. </strong> Agent Weekly Revenue </p>
+                                        <p><small>20 Weekly sales</small>
                                         </p>
                                     </div>
                                 </li>
@@ -256,8 +256,8 @@
                                     </a>
                                     <div class="media-body">
                                         <a class="title" href="#">Mr. Trevor Cade</a>
-                                        <p><strong>$1420. </strong> Agent Avarage Sales </p>
-                                        <p><small>25 Sales Today</small>
+                                        <p><strong>$13951. </strong> Agent Weekly Revenue </p>
+                                        <p><small>19 Weekly sales</small>
                                         </p>
                                     </div>
                                 </li>
@@ -267,8 +267,8 @@
                                     </a>
                                     <div class="media-body">
                                         <a class="title" href="#">Mr. Thomas Geffrey</a>
-                                        <p><strong>$5623. </strong> Agent Avarage Sales </p>
-                                        <p><small>52 Sales Today</small>
+                                        <p><strong>$13652. </strong> Agent Avarage Sales </p>
+                                        <p><small>19 Weekly sales</small>
                                         </p>
                                     </div>
                                 </li>
@@ -2818,13 +2818,13 @@ $this->registerJs($transactionSummaryChart, \yii\web\View::POS_END);
 
 <?php
 $revenueChart = <<< JS
-let ctxRevenue = document.getElementById('revenueChart').getContext('2d');
+let ctxRevenue = document.getElementById('soldLeadsChart').getContext('2d');
 let revenueChart = new Chart(ctxRevenue, {
     type: 'bar',       
     data: {
-        labels: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+        labels: ['', '', '', '', '', '', ''],
         datasets: [{            
-            data: [2, 4, 3, 4, 5, 4, 5, 4, 3, 4, 6, 2, 4, 3, 4, 5, 4, 5, 4, 3],
+            data: [353, 399, 407, 587, 743, 397, 411],
             backgroundColor: "#26B99A",
             borderWidth: 1
         }]
@@ -2870,13 +2870,13 @@ $this->registerJs($revenueChart, \yii\web\View::POS_END);
 
 <?php
 $conversionChart = <<< JS
-let ctxConversion = document.getElementById('conversionChart').getContext('2d');
+let ctxConversion = document.getElementById('revenueChart').getContext('2d');
 let conversionChart = new Chart(ctxConversion, {
     type: 'bar',   
     data: {
-        labels: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+        labels: ['', '', '', '', '', '', ''],
         datasets: [{            
-            data: [2, 4, 3, 4, 5, 4, 5, 4, 3, 4, 6, 2, 4, 3, 4, 5, 4, 5, 4, 3],
+            data: [249924, 283290, 308193, 427336, 511355, 279282, 297975],
             backgroundColor: "#26B99A",
             borderWidth: 1
         }]
@@ -2922,13 +2922,13 @@ $this->registerJs($conversionChart, \yii\web\View::POS_END);
 
 <?php
 $soldLeadsChart = <<< JS
-let ctxSoldLeads = document.getElementById('soldLeadsChart').getContext('2d');
+let ctxSoldLeads = document.getElementById('conversionChart').getContext('2d');
 let soldLeadsChart = new Chart(ctxSoldLeads, {
     type: 'line',   
     data: {
-        labels: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+        labels: ['', '', '', '', '', '', ''],
         datasets: [{            
-            data: [2, 4, 3, 4, 5, 4, 5, 4, 3, 4, 6, 2, 4, 3, 4, 5, 4, 5, 4, 3],
+            data: [19, 18.57, 18.61, 22.39, 25.38, 20.75, 18.85],
             lineTension: 0,
             backgroundColor: "#FFFFFF",
             borderColor: "#26B99A",
