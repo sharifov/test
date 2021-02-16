@@ -38,7 +38,7 @@ use frontend\extensions\DatePicker;
                     <?= $form->field($model, 'uid') ?>
                 </div>
                 <div class="col-md-3">
-                    <?= $form->field($model, 'bo_flight_id')->input('number', ['min' => 0]) ?>
+                    <?= $form->field($model, 'bo_flight_id')->input('number', ['min' => 0])->label('Sale ID') ?>
                 </div>
                 <div class="col-md-3">
                     <?= $form->field($model, 'gid')->textInput(['maxlength' => true]) ?>

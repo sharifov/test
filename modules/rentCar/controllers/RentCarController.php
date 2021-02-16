@@ -41,7 +41,9 @@ class RentCarController extends FController
         $form = new RentCarUpdateRequestForm($rentCar);
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
-            $out = '<script>$("#modal-sm").modal("hide"); pjaxReload({container: "#pjax-product-search-' . $rentCar->prc_product_id . '"});';
+            $out = '<script>$("#modal-sm").modal("hide"); 
+                    pjaxReload({container: "#pjax-product-search-' . $rentCar->prc_product_id . '"});
+                    pjaxReload({container: "#pjax-lead-offers"}); ';
             try {
                 $rentCar->prc_pick_up_code = $form->pick_up_code;
                 $rentCar->prc_pick_up_date = $form->pick_up_date;
