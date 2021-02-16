@@ -1711,7 +1711,7 @@
                         <div class="x_content">
                             <div class="dashboard-widget-content">
                                 <div class="col-md-4 hidden-small">
-                                    <h2 class="line_30">3297 Leads from 60 countries</h2>
+                                    <h2 class="line_30">3297 Leads from 171 countries</h2>
                                     <table class="countries_list">
                                         <tbody>
                                         <tr>
