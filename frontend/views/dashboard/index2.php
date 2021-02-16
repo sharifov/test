@@ -9,53 +9,53 @@
         <div class="tile_count">
             <div class="col-md-2 col-sm-4  tile_stats_count dev-tile-adjust">
                 <span class="count_top"><i class="fa fa-user"></i> New leads</span>
-                <div class="count">1120</div>
-                <span class="count_bottom"><i class="green">4% </i> From last Week</span>
+                <div class="count">18445</div>
+                <span class="count_bottom"><i class="green">3.5% </i> From last Week</span>
             </div>
             <div class="col-md-2 col-sm-4  tile_stats_count dev-tile-adjust">
                 <span class="count_top"><i class="fa fa-user"></i> Sold Leads</span>
-                <div class="count">123.50</div>
-                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>3% </i> From last Week</span>
+                <div class="count">2556</div>
+                <span class="count_bottom"><i class="red"><i class="fa fa-sort-desc"></i>7.7% </i> From last Week</span>
             </div>
             <div class="col-md-2 col-sm-4  tile_stats_count dev-tile-adjust">
                 <span class="count_top"><i class="fa fa-user"></i> Conversion</span>
-                <div class="count green">12,500</div>
-                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>63% </i> From last Week</span>
+                <div class="count green">19,3</div>
+                <span class="count_bottom"><i class="red"><i class="fa fa-sort-desc"></i>2.0% </i> From last Week</span>
             </div>
             <div class="col-md-2 col-sm-4  tile_stats_count dev-tile-adjust">
-                <span class="count_top"><i class="fa fa-user"></i> Profit</span>
-                <div class="count">5,567</div>
-                <span class="count_bottom"><i class="red"><i class="fa fa-sort-desc"></i>12% </i> From last Week</span>
+                <span class="count_top"><i class="fa fa-user"></i> Revenue, k</span>
+                <div class="count">2378,9</div>
+                <span class="count_bottom"><i class="red"><i class="fa fa-sort-desc"></i>0.9% </i> From last Week</span>
             </div>
             <div class="col-md-2 col-sm-4  tile_stats_count dev-tile-adjust">
                 <span class="count_top"><i class="fa fa-user"></i> New Clients</span>
-                <div class="count">8,185</div>
-                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>27% </i> From last Week</span>
+                <div class="count">12358</div>
+                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>8.2% </i> From last Week</span>
             </div>
             <div class="col-md-2 col-sm-4  tile_stats_count dev-tile-adjust">
                 <span class="count_top"><i class="fa fa-user"></i> Return Clients</span>
-                <div class="count">9,725</div>
-                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>41% </i> From last Week</span>
+                <div class="count">6086</div>
+                <span class="count_bottom"><i class="red"><i class="fa fa-sort-desc"></i>5.8% </i> From last Week</span>
             </div>
             <div class="col-md-2 col-sm-4  tile_stats_count dev-tile-adjust">
                 <span class="count_top"><i class="fa fa-user"></i> New Support Cases</span>
-                <div class="count">3,655</div>
-                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>17% </i> From last Week</span>
+                <div class="count">4893</div>
+                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>2.3% </i> From last Week</span>
             </div>
             <div class="col-md-2 col-sm-4  tile_stats_count dev-tile-adjust">
                 <span class="count_top"><i class="fa fa-user"></i> Solved Support Cases</span>
-                <div class="count">4,325</div>
-                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>29% </i> From last Week</span>
+                <div class="count">4159</div>
+                <span class="count_bottom"><i class="red"><i class="fa fa-sort-desc"></i>3.7% </i> From last Week</span>
             </div>
             <div class="col-md-2 col-sm-4  tile_stats_count dev-tile-adjust">
                 <span class="count_top"><i class="fa fa-user"></i> Incoming Calls</span>
-                <div class="count">6,334</div>
-                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>38% </i> From last Week</span>
+                <div class="count">14682</div>
+                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>10.7% </i> From last Week</span>
             </div>
             <div class="col-md-2 col-sm-4  tile_stats_count dev-tile-adjust">
                 <span class="count_top"><i class="fa fa-user"></i> Chats</span>
-                <div class="count">5,325</div>
-                <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>61% </i> From last Week</span>
+                <div class="count">34587</div>
+                <span class="count_bottom"><i class="red"><i class="fa fa-sort-desc"></i>3.2% </i> From last Week</span>
             </div>
         </div>
     </div>
