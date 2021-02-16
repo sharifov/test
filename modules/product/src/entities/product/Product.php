@@ -355,4 +355,12 @@ class Product extends \yii\db\ActiveRecord implements Serializable
             ->andWhere(['IN', 'pr_type_id', $typeIds])
             ->all();
     }
+
+    /**
+     * @return string
+     */
+    public function getIconClass(): string
+    {
+        return ($this->prType && $this->prType->pt_icon_class) ? $this->prType->pt_icon_class : '';
+    }
 }
