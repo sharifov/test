@@ -9,6 +9,7 @@
 
 
 use common\models\Employee;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -138,7 +139,7 @@ $user = Yii::$app->user->identity;
 
         <div class="row" id="div-checklist-form">
             <div class="col-md-5">
-                <?= $form->field($modelLeadChecklist, 'lc_type_id')->dropDownList($checkListTypes, ['prompt' => '--- select task ---']) ?>
+                <?= $form->field($modelLeadChecklist, 'lc_type_id')->dropDownList(ArrayHelper::map($checkListTypes, 'lct_id', 'lct_name'), ['prompt' => '--- select task ---']) ?>
             </div>
             <div class="col-md-7">
                 <?= $form->field($modelLeadChecklist, 'lc_notes')->textInput(['maxlength' => true]) ?>
