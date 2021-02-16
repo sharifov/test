@@ -2,6 +2,7 @@
 
 namespace modules\flight\src\entities\flightQuoteSegment\serializer;
 
+use common\models\Airports;
 use modules\flight\models\FlightQuoteSegment;
 use sales\entities\serializer\Serializer;
 
@@ -46,6 +47,9 @@ class FlightQuoteSegmentSerializer extends Serializer
     public function getData(): array
     {
         $data = $this->toArray();
+
+        $data['departureLocation'] = Airports::getCityByIata($this->model->fqs_departure_airport_iata);
+        $data['arrivalLocation'] = Airports::getCityByIata($this->model->fqs_arrival_airport_iata);
 
         if ($this->model->flightQuoteSegmentStops) {
             $data['stops'] = [];

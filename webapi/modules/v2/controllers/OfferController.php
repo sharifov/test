@@ -145,6 +145,8 @@ class OfferController extends BaseController
      *                               "fqs_ticket_id": null,
      *                               "fqs_recheck_baggage": 0,
      *                               "fqs_mileage": null,
+     *                               "departureLocation": "Chisinau",
+     *                               "arrivalLocation": "Bucharest",
      *                               "baggages": [
      *                                   {
      *                                       "qsb_flight_pax_code_id": 1,
