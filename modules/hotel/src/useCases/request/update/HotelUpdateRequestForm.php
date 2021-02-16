@@ -2,6 +2,7 @@
 
 namespace modules\hotel\src\useCases\request\update;
 
+use common\components\validators\NumberValidator;
 use modules\hotel\models\Hotel;
 use yii\base\Model;
 
@@ -71,9 +72,9 @@ class HotelUpdateRequestForm extends Model
 
             ['ph_max_star_rate', 'integer'],
 
-            ['ph_max_price_rate', 'integer', 'max' => 65000, 'min' => 0],
+            ['ph_max_price_rate', NumberValidator::class, 'min' => 0, 'max' => 999999],
 
-            ['ph_min_price_rate', 'integer', 'max' => 65000, 'min' => 0],
+            ['ph_min_price_rate', NumberValidator::class, 'min' => 0, 'max' => 999999],
 
             ['ph_zone_code', 'integer'],
             ['ph_zone_code', 'string', 'max' => 11],
