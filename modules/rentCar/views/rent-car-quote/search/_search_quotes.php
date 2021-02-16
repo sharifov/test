@@ -87,7 +87,7 @@ $js = <<<JS
                     });
                   
                   btnAdd.html('<i class="fa fa-check"></i> Added');
-                  $('#box-quote-' + token).addClass('bg-success');
+                  $('#box-quote-' + token).addClass('quote-added');
               }
           })
         .fail(function( jqXHR, textStatus ) {
@@ -103,6 +103,10 @@ JS;
 $this->registerJs($js, \yii\web\View::POS_READY, 'rent-car-search-quotes-js');
 
 $css = <<<CSS
+    .quote-added {
+        background-color: #d0e6ca!important;
+        opacity: 0.9;
+    }
     .quote {
       background-color: #fff;
       border: 1px solid #c2cad8;
