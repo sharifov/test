@@ -688,28 +688,32 @@
                         <div class="x_content">
                             <div class="dashboard-widget-content">
                                 <div class="col-md-4 hidden-small">
-                                    <h2 class="line_30">125.7k Views from 60 countries</h2>
+                                    <h2 class="line_30">19110 Leads from 171 countries</h2>
                                     <table class="countries_list">
                                         <tbody>
                                         <tr>
                                             <td>United States</td>
-                                            <td class="fs15 fw700 text-right">33%</td>
+                                            <td class="fs15 fw700 text-right">41.86%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>United Kingdom</td>
+                                            <td class="fs15 fw700 text-right">12.8%</td>
                                         </tr>
                                         <tr>
                                             <td>France</td>
-                                            <td class="fs15 fw700 text-right">27%</td>
+                                            <td class="fs15 fw700 text-right">8.91%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Italy</td>
+                                            <td class="fs15 fw700 text-right">7.76%</td>
                                         </tr>
                                         <tr>
                                             <td>Germany</td>
-                                            <td class="fs15 fw700 text-right">16%</td>
+                                            <td class="fs15 fw700 text-right">5.51%</td>
                                         </tr>
                                         <tr>
                                             <td>Spain</td>
-                                            <td class="fs15 fw700 text-right">11%</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Britain</td>
-                                            <td class="fs15 fw700 text-right">10%</td>
+                                            <td class="fs15 fw700 text-right">4.28%</td>
                                         </tr>
                                         </tbody>
                                     </table>
@@ -1707,28 +1711,32 @@
                         <div class="x_content">
                             <div class="dashboard-widget-content">
                                 <div class="col-md-4 hidden-small">
-                                    <h2 class="line_30">125.7k Views from 60 countries</h2>
+                                    <h2 class="line_30">3297 Leads from 60 countries</h2>
                                     <table class="countries_list">
                                         <tbody>
                                         <tr>
                                             <td>United States</td>
-                                            <td class="fs15 fw700 text-right">33%</td>
+                                            <td class="fs15 fw700 text-right">41.25%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>United Kingdom</td>
+                                            <td class="fs15 fw700 text-right">12.19%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Italy</td>
+                                            <td class="fs15 fw700 text-right">8.43%</td>
                                         </tr>
                                         <tr>
                                             <td>France</td>
-                                            <td class="fs15 fw700 text-right">27%</td>
+                                            <td class="fs15 fw700 text-right">7.91%</td>
                                         </tr>
                                         <tr>
                                             <td>Germany</td>
-                                            <td class="fs15 fw700 text-right">16%</td>
+                                            <td class="fs15 fw700 text-right">5.49%</td>
                                         </tr>
                                         <tr>
                                             <td>Spain</td>
-                                            <td class="fs15 fw700 text-right">11%</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Britain</td>
-                                            <td class="fs15 fw700 text-right">10%</td>
+                                            <td class="fs15 fw700 text-right">4.18%</td>
                                         </tr>
                                         </tbody>
                                     </table>
