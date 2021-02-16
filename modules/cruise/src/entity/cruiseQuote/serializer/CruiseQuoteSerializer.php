@@ -40,6 +40,8 @@ class CruiseQuoteSerializer extends Serializer
                 'name' => $this->model->crq_data_json['ship']['name'],
             ];
             $data['cabin'] = $this->model->crq_data_json['cabin'];
+            $data['adults'] = $this->model->getAdults();
+            $data['children'] = $this->model->getChildren();
         }
 
         return $data;
