@@ -2,6 +2,7 @@
 
 namespace modules\hotel\src\entities\hotel\serializer;
 
+use common\models\Airports;
 use modules\hotel\models\Hotel;
 use sales\entities\serializer\Serializer;
 
@@ -36,6 +37,9 @@ class HotelSerializer extends Serializer
 
     public function getData(): array
     {
-        return $this->toArray();
+        $data = $this->toArray();
+        $data['destination'] = $this->model->ph_destination_code ? Airports::getCityByIata($this->model->ph_destination_code) : '';
+
+        return $data;
     }
 }
