@@ -44,7 +44,7 @@ class CruiseQuoteSerializer extends Serializer
             $data['adults'] = $this->model->getAdults();
             $data['children'] = $this->model->getChildren();
 
-            $data['destinationName'] = ArrayHelper::getValue((array) $this->model->crq_data_json, 'itinerary.locations.0.location.name');
+            $data['departureName'] = ArrayHelper::getValue((array) $this->model->crq_data_json, 'itinerary.locations.0.location.name');
 
             $data['crq_data_json'] = $this->model->crq_data_json;
         }
