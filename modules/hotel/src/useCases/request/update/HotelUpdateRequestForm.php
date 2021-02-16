@@ -66,6 +66,7 @@ class HotelUpdateRequestForm extends Model
             ['ph_destination_code', 'required'],
             ['ph_destination_code', 'string', 'max' => 10],
 
+            ['ph_destination_label', 'required'],
             ['ph_destination_label', 'string', 'max' => 100],
 
             ['ph_min_star_rate', 'integer'],
