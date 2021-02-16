@@ -139,8 +139,13 @@ JS;
                     //$('#search-results__modal').modal('hide');
                     $('#flight-details__modal').modal('hide');
                     $('#'+searchResId).addClass('quote--selected')
-                    btn.closest('.card-footer').remove();
-                    btn.remove();
+                    let cardFooter = btn.closest('.card-footer');
+                    if (cardFooter.length) {
+                        btn.html('<p>Quote already assigned</p>');
+                    } else {
+                        btn.remove();
+                    }
+                    
 
                     // $.pjax.reload({container: '#quotes_list', async: false});
                     $('.popover-class[data-toggle="popover"]').popover({ sanitize: false });
