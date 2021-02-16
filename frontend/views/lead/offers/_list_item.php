@@ -165,7 +165,8 @@ use yii\bootstrap4\Html;
         <div class="text-right">
             <?php $clientTotal = '' ?>
             <?php if (isset($clientTotalPrice)) : ?>
-                <?php $clientTotal = ', Client Total: <b>' . number_format($clientTotalPrice, 2) . ' ' . Html::encode($offer->of_client_currency) . '</b>' ?>
+                <?php $clientCurrency = $offer->of_client_currency ?: 'USD' ?>
+                <?php $clientTotal = ', Client Total: <b>' . number_format($clientTotalPrice, 2) . ' ' . Html::encode($clientCurrency) . '</b>' ?>
             <?php endif ?>
             <h4>Total: <b><?=number_format($offer->offerTotalCalcSum, 2)?> USD</b><?php echo $clientTotal ?></h4>
         </div>
