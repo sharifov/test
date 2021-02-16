@@ -306,7 +306,7 @@
                     <h4><!--App Usage across versions--></h4>
                     <div class="widget_summary">
                         <div class="w_left w_25">
-                            <span>New Prospects</span>
+                            <span>New Leads</span>
                         </div>
                         <div class="w_center w_55">
                             <div class="progress">
@@ -317,13 +317,13 @@
                             </div>
                         </div>
                         <div class="w_right w_20">
-                            <span>123k</span>
+                            <span>19110</span>
                         </div>
                         <div class="clearfix"></div>
                     </div>
                     <div class="widget_summary">
                         <div class="w_left w_25">
-                            <span>In Progress</span>
+                            <span>Qualified</span>
                         </div>
                         <div class="w_center w_55">
                             <div class="progress">
@@ -334,13 +334,13 @@
                             </div>
                         </div>
                         <div class="w_right w_20">
-                            <span>53k</span>
+                            <span>16791</span>
                         </div>
                         <div class="clearfix"></div>
                     </div>
                     <div class="widget_summary">
                         <div class="w_left w_25">
-                            <span>Negotiation</span>
+                            <span>Offers sent</span>
                         </div>
                         <div class="w_center w_55">
                             <div class="progress">
@@ -351,13 +351,13 @@
                             </div>
                         </div>
                         <div class="w_right w_20">
-                            <span>23k</span>
+                            <span>12547</span>
                         </div>
                         <div class="clearfix"></div>
                     </div>
                     <div class="widget_summary">
                         <div class="w_left w_25">
-                            <span>Contract Signature</span>
+                            <span>Booked</span>
                         </div>
                         <div class="w_center w_55">
                             <div class="progress">
@@ -368,13 +368,13 @@
                             </div>
                         </div>
                         <div class="w_right w_20">
-                            <span>3k</span>
+                            <span>3395</span>
                         </div>
                         <div class="clearfix"></div>
                     </div>
                     <div class="widget_summary">
                         <div class="w_left w_25">
-                            <span>Won</span>
+                            <span>Sold</span>
                         </div>
                         <div class="w_center w_55">
                             <div class="progress">
@@ -385,24 +385,100 @@
                             </div>
                         </div>
                         <div class="w_right w_20">
-                            <span>5,5k</span>
+                            <span>3297</span>
                         </div>
                         <div class="clearfix"></div>
                     </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-sm-4 ">
+            <div class="x_panel tile fixed_height_320">
+                <div class="x_title">
+                    <h2>Support tickets weekly funnel</h2>
+                    <!--<ul class="nav navbar-right panel_toolbox">
+                        <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                               aria-expanded="false"><i class="fa fa-wrench"></i></a>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item" href="#">Settings 1</a>
+                                <a class="dropdown-item" href="#">Settings 2</a>
+                            </div>
+                        </li>
+                        <li><a class="close-link"><i class="fa fa-close"></i></a>
+                        </li>
+                    </ul>-->
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <h4><!--App Usage across versions--></h4>
                     <div class="widget_summary">
                         <div class="w_left w_25">
-                            <span>Lost</span>
+                            <span>New</span>
                         </div>
                         <div class="w_center w_55">
                             <div class="progress">
-                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="60"
+                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="86"
                                      aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
                                     <span class="sr-only">60% Complete</span>
                                 </div>
                             </div>
                         </div>
                         <div class="w_right w_20">
-                            <span>1,5k</span>
+                            <span>5005</span>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="widget_summary">
+                        <div class="w_left w_25">
+                            <span>Qualified</span>
+                        </div>
+                        <div class="w_center w_55">
+                            <div class="progress">
+                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="72"
+                                     aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+                                    <span class="sr-only">60% Complete</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="w_right w_20">
+                            <span>4911</span>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="widget_summary">
+                        <div class="w_left w_25">
+                            <span>Replied</span>
+                        </div>
+                        <div class="w_center w_55">
+                            <div class="progress">
+                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="61"
+                                     aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+                                    <span class="sr-only">60% Complete</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="w_right w_20">
+                            <span>4873</span>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="widget_summary">
+                        <div class="w_left w_25">
+                            <span>Solved</span>
+                        </div>
+                        <div class="w_center w_55">
+                            <div class="progress">
+                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="54"
+                                     aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+                                    <span class="sr-only">60% Complete</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="w_right w_20">
+                            <span>3752</span>
                         </div>
                         <div class="clearfix"></div>
                     </div>
@@ -447,7 +523,7 @@
                         </tr>
                         <tr>
                             <td>
-                               <!-- <iframe class="chartjs-hidden-iframe"  style="width: 100%; display: block; border: 0px; height: 0px; margin: 0px; position: absolute; inset: 0px;"></iframe>-->
+                                <!-- <iframe class="chartjs-hidden-iframe"  style="width: 100%; display: block; border: 0px; height: 0px; margin: 0px; position: absolute; inset: 0px;"></iframe>-->
                                 <!--<canvas id="productsShareChart" class="" height="440" width="440" style="margin: 15px 10px 10px 0px; width: 440px; height: 440px;"></canvas>-->
                                 <canvas id="productsShareChart"></canvas>
                             </td>
@@ -458,31 +534,31 @@
                                         <td>
                                             <p><i class="fa fa-square blue"></i>Flight </p>
                                         </td>
-                                        <td>30%</td>
+                                        <td>73%</td>
                                     </tr>
                                     <tr>
                                         <td>
                                             <p><i class="fa fa-square green"></i>Hotel </p>
                                         </td>
-                                        <td>10%</td>
+                                        <td>11%</td>
                                     </tr>
                                     <tr>
                                         <td>
                                             <p><i class="fa fa-square purple"></i>Car Rental </p>
                                         </td>
-                                        <td>20%</td>
+                                        <td>9%</td>
                                     </tr>
                                     <tr>
                                         <td>
                                             <p><i class="fa fa-square aero"></i>Cruise </p>
                                         </td>
-                                        <td>15%</td>
+                                        <td>5%</td>
                                     </tr>
                                     <tr>
                                         <td>
                                             <p><i class="fa fa-square red"></i>Attractions </p>
                                         </td>
-                                        <td>25%</td>
+                                        <td>2%</td>
                                     </tr>
                                     </tbody>
                                 </table>
@@ -490,99 +566,6 @@
                         </tr>
                         </tbody>
                     </table>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4 col-sm-4 ">
-            <div class="x_panel tile fixed_height_320">
-                <div class="x_title">
-                    <h2>Support tickets weekly funnel</h2>
-                    <!--<ul class="nav navbar-right panel_toolbox">
-                        <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-                        </li>
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
-                               aria-expanded="false"><i class="fa fa-wrench"></i></a>
-                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <a class="dropdown-item" href="#">Settings 1</a>
-                                <a class="dropdown-item" href="#">Settings 2</a>
-                            </div>
-                        </li>
-                        <li><a class="close-link"><i class="fa fa-close"></i></a>
-                        </li>
-                    </ul>-->
-                    <div class="clearfix"></div>
-                </div>
-                <div class="x_content">
-                    <h4><!--App Usage across versions--></h4>
-                    <div class="widget_summary">
-                        <div class="w_left w_25">
-                            <span>New</span>
-                        </div>
-                        <div class="w_center w_55">
-                            <div class="progress">
-                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="86"
-                                     aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
-                                    <span class="sr-only">60% Complete</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="w_right w_20">
-                            <span>123k</span>
-                        </div>
-                        <div class="clearfix"></div>
-                    </div>
-                    <div class="widget_summary">
-                        <div class="w_left w_25">
-                            <span>In Progress</span>
-                        </div>
-                        <div class="w_center w_55">
-                            <div class="progress">
-                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="72"
-                                     aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
-                                    <span class="sr-only">60% Complete</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="w_right w_20">
-                            <span>53k</span>
-                        </div>
-                        <div class="clearfix"></div>
-                    </div>
-                    <div class="widget_summary">
-                        <div class="w_left w_25">
-                            <span>Escalated</span>
-                        </div>
-                        <div class="w_center w_55">
-                            <div class="progress">
-                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="61"
-                                     aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
-                                    <span class="sr-only">60% Complete</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="w_right w_20">
-                            <span>23k</span>
-                        </div>
-                        <div class="clearfix"></div>
-                    </div>
-                    <div class="widget_summary">
-                        <div class="w_left w_25">
-                            <span>Solved</span>
-                        </div>
-                        <div class="w_center w_55">
-                            <div class="progress">
-                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="54"
-                                     aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
-                                    <span class="sr-only">60% Complete</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="w_right w_20">
-                            <span>3k</span>
-                        </div>
-                        <div class="clearfix"></div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -2989,7 +2972,7 @@ let productsShareChart = new Chart(ctxProductsShare, {
     data: {
         labels: ['Flight', 'Hotel', 'Car Rental', 'Cruise', 'Attractions'],
         datasets: [{            
-            data: [30, 10, 20, 15, 25],
+            data: [73, 11, 9, 5, 2],
             backgroundColor: ["#3498DB", "#26B99A", "#9B59B6", "#BDC3C7", "#E74C3C"],
             hoverBackgroundColor: ["#49A9EA", "#36CAAB", "#B370CF", "#CFD4D8", "#E95E4F"],
             borderWidth: 1
