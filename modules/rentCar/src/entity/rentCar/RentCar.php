@@ -160,7 +160,8 @@ class RentCar extends ActiveRecord implements Productable
 
     public function generateRequestHashKey(): string
     {
-        $sourceKey = $this->prc_pick_up_code . '|' .
+        $sourceKey = $this->prc_product_id . '|' .
+            $this->prc_pick_up_code . '|' .
             $this->prc_drop_off_code . '|' .
             $this->prc_pick_up_date . '|' .
             $this->prc_drop_off_date . '|' .
