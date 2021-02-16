@@ -114,6 +114,7 @@ class OfferController extends BaseController
      *                       "fq_main_airline": "SU",
      *                       "fq_fare_type_id": 1,
      *                       "fq_last_ticket_date": "2020-01-25",
+     *                       "fq_origin_search_data": "description field: json encoded origin data from search api",
      *                       "flight": {
      *                           "fl_product_id": 33,
      *                           "fl_trip_type_id": 1,
