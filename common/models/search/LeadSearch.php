@@ -233,6 +233,8 @@ class LeadSearch extends Lead
             'chatsQtyFrom' => 'Chats From', 'chatsQtyTo' => 'Chats To',
             'projectId' => 'Project',
             'quoteTypeId' => 'Quote Type',
+            'origin_airport' => 'Origin Location Code',
+            'destination_airport' => 'Destination Location Code'
         ];
         return array_merge(parent::attributeLabels(), $labels2);
     }
