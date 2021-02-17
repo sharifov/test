@@ -416,7 +416,7 @@ class QuoteController extends FController
                                         $price->net = $price->fare + $price->taxes;
                                         $price->mark_up = $paxEntry['markup'];
                                         $price->selling = $price->net + $price->mark_up + $price->extra_mark_up;
-                                        $price->service_fee = ($quote->check_payment) ? round($price->selling * (new Quote())->serviceFee, 2) : 0;
+                                        $price->service_fee = ($quote->check_payment) ? QuotePrice::calculateProcessingFeeAmount($price->selling, (new Quote())->serviceFeePercent) : 0;
                                         $price->selling += $price->service_fee;
 
                                         if (!$price->validate()) {
