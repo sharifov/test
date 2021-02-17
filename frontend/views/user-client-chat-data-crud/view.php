@@ -45,7 +45,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 'uccd_auth_token',
                 'uccd_employee_id:username',
-                'uccd_token_expired:byUserDateTime',
+                'uccd_token_expired',
                 'uccd_active:booleanByLabel',
                 'uccd_created_dt:byUserDateTime',
                 'uccd_updated_dt:byUserDateTime',
