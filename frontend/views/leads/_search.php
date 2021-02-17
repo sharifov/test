@@ -56,7 +56,7 @@ use frontend\extensions\DatePicker;
                     </div>
                     <div class="row">
                         <div class="col-md-6">
-                            <?= $form->field($model, 'client_email')//->input('email')  ?>
+                            <?= $form->field($model, 'client_email')//->input('email')?>
                         </div>
                         <div class="col-md-6">
                             <?= $form->field($model, 'client_phone') ?>
@@ -64,8 +64,7 @@ use frontend\extensions\DatePicker;
                     </div>
                     <div class="row">
                         <div class="col-md-4">
-                            <?= $form->field($model, 'createdType')->dropDownList(Lead::TYPE_CREATE_LIST,
-                                ['prompt' => '-']) ?>
+                            <?= $form->field($model, 'createdType')->dropDownList(Lead::TYPE_CREATE_LIST, ['prompt' => '-']) ?>
                         </div>
                     </div>
                 </div>
@@ -93,11 +92,8 @@ use frontend\extensions\DatePicker;
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6"><?php echo $form->field($model,
-                                'projectId')->dropDownList($lists->getProjects(),
-                                ['prompt' => '-']) ?></div>
-                        <div class="col-md-6"><?php echo $form->field($model,
-                                'source_id')->dropDownList($lists->getSources(true), ['prompt' => '-']) ?></div>
+                        <div class="col-md-6"><?php echo $form->field($model, 'projectId')->dropDownList($lists->getProjects(), ['prompt' => '-']) ?></div>
+                        <div class="col-md-6"><?php echo $form->field($model, 'source_id')->dropDownList($lists->getSources(true), ['prompt' => '-']) ?></div>
                     </div>
                     <div class="row">
                         <div class="col-md-4">
@@ -112,20 +108,19 @@ use frontend\extensions\DatePicker;
                             <?= $form->field($model, 'bo_flight_id')->input('number', ['min' => 0])->label('Sale ID') ?>
                         </div>
                         <div class="col-md-4">
-                            <?= $form->field($model,
-                                'hybrid_uid')->textInput(['title' => 'Hybrid UID'])->label('Booking ID') ?>
+                            <?= $form->field(
+                                $model,
+                                'hybrid_uid'
+                            )->textInput(['title' => 'Hybrid UID'])->label('Booking ID') ?>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-4"><?php echo $form->field($model, 'quote_pnr')->label('PNR') ?></div>
                         <div class="col-md-4">
-                            <?php echo $form->field($model, 'rating')->dropDownList(array_combine(range(1, 3),
-                                range(1, 3)),
-                                ['prompt' => '-']) ?>
+                            <?php echo $form->field($model, 'rating')->dropDownList(array_combine(range(1, 3), range(1, 3)), ['prompt' => '-']) ?>
                         </div>
                         <div class="col-md-4">
-                            <?= $form->field($model, 'l_answered')->dropDownList([1 => 'Yes', 0 => 'No'],
-                                ['prompt' => '-']) ?>
+                            <?= $form->field($model, 'l_answered')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => '-']) ?>
                         </div>
                     </div>
                     <div class="row">
@@ -146,7 +141,7 @@ use frontend\extensions\DatePicker;
                                     ]
                                 ]
                             ])->label('Created Date From / To');
-                            ?>
+?>
                         </div>
                     </div>
                     <div class="row">
@@ -167,7 +162,7 @@ use frontend\extensions\DatePicker;
                                     ]
                                 ]
                             ])->label('Status Date From / To');
-                            ?>
+?>
                         </div>
                     </div>
                     <div class="row">
@@ -188,7 +183,7 @@ use frontend\extensions\DatePicker;
                                     ]
                                 ]
                             ])->label('Updated Date From / To');
-                            ?>
+?>
                         </div>
                     </div>
                     <div class="row">
@@ -209,7 +204,7 @@ use frontend\extensions\DatePicker;
                                     ]
                                 ]
                             ])->label('Last Action From / To');
-                            ?>
+?>
                         </div>
                     </div>
                     <div class="row">
@@ -225,8 +220,7 @@ use frontend\extensions\DatePicker;
                             <?= $form->field($model, 'quoteTypeId')->dropDownList(Quote::TYPE_LIST, ['prompt' => '-']) ?>
                         </div>
                         <div class="col-md-6">
-                            <?= $form->field($model, 'l_is_test')->dropDownList([0 => 'False', 1 => 'True'],
-                                ['prompt' => '-'])->label('Is Test') ?>
+                            <?= $form->field($model, 'l_is_test')->dropDownList([0 => 'False', 1 => 'True'], ['prompt' => '-'])->label('Is Test') ?>
                         </div>
                     </div>
                 </div>
@@ -241,29 +235,27 @@ use frontend\extensions\DatePicker;
                     <h4 class="brief"><i>Trip</i></h4><br>
                     <div class="row">
                         <div class="col-md-6">
-                            <?php echo $form->field($model, 'trip_type')->dropDownList(Lead::TRIP_TYPE_LIST,
-                                ['prompt' => '-']) ?>
+                            <?php echo $form->field($model, 'trip_type')->dropDownList(Lead::TRIP_TYPE_LIST, ['prompt' => '-']) ?>
                         </div>
                         <div class="col-md-6">
-                            <?php echo $form->field($model, 'cabin')->dropDownList(Lead::CABIN_LIST,
-                                ['prompt' => '-']) ?>
+                            <?php echo $form->field($model, 'cabin')->dropDownList(Lead::CABIN_LIST, ['prompt' => '-']) ?>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-4">
-                            <?php echo $form->field($model, 'adults')->dropDownList(array_combine(range(0, 9),
-                                range(0, 9)),
-                                ['prompt' => '-']) ?>
+                            <?php echo $form->field($model, 'adults')->dropDownList(array_combine(range(0, 9), range(0, 9)), ['prompt' => '-']) ?>
                         </div>
                         <div class="col-md-4">
-                            <?php echo $form->field($model, 'children')->dropDownList(array_combine(range(0, 9),
-                                range(0, 9)),
-                                ['prompt' => '-']) ?>
+                            <?php echo $form->field($model, 'children')->dropDownList(array_combine( range(0, 9), range(0, 9)), ['prompt' => '-']) ?>
                         </div>
                         <div class="col-md-4">
-                            <?php echo $form->field($model, 'infants')->dropDownList(array_combine(range(0, 9),
-                                range(0, 9)),
-                                ['prompt' => '-']) ?>
+                            <?php echo $form->field($model, 'infants')->dropDownList(
+                                array_combine(
+                                    range(0, 9),
+                                    range(0, 9)
+                                ),
+                                ['prompt' => '-']
+                            ) ?>
                         </div>
                     </div>
                     <div class="row">
@@ -300,7 +292,7 @@ use frontend\extensions\DatePicker;
                                     ]
                                 ]
                             ])->label('Depart From / To');
-                            ?>
+?>
                         </div>
                     </div>
                     <!--<div class="row">
@@ -373,7 +365,7 @@ use frontend\extensions\DatePicker;
                     <?php //php  echo $form->field($model, 'snooze_for')?>
 
                     <!--<div class="row">
-                        <?php //php  echo $form->field($model, 'called_expert') ?>
+                        <?php //php  echo $form->field($model, 'called_expert')?>
                     </div>-->
                     <!--<div class="row">
                         <div class="col-md-6"><?php /*echo $form->field($model, 'notes_for_experts') */?></div>
@@ -415,10 +407,15 @@ use frontend\extensions\DatePicker;
         <div class="col-md-12">
             <br>
             <div class="form-group text-center">
-                <?= Html::submitButton('<i class="fa fa-search"></i> Search leads',
-                    ['name' => 'search', 'class' => 'btn btn-primary search_leads_btn']) ?>
-                <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset data', ['leads/index'],
-                    ['class' => 'btn btn-warning']) ?>
+                <?= Html::submitButton(
+                '<i class="fa fa-search"></i> Search leads',
+                ['name' => 'search', 'class' => 'btn btn-primary search_leads_btn']
+            ) ?>
+                <?= Html::a(
+                    '<i class="glyphicon glyphicon-repeat"></i> Reset data',
+                    ['leads/index'],
+                    ['class' => 'btn btn-warning']
+                ) ?>
             </div>
         </div>
     </div>
