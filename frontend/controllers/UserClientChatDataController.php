@@ -323,7 +323,7 @@ class UserClientChatDataController extends FController
             } catch (\Throwable $throwable) {
                 Yii::error(
                     AppHelper::throwableFormatter($throwable),
-                    'EmployeeController:actionActivateToRocketChat:Throwable'
+                    'UserClientChatDataController:actionActivateToRocketChat:Throwable'
                 );
                 $out['message'] = $throwable->getMessage();
             }
@@ -376,7 +376,7 @@ class UserClientChatDataController extends FController
             } catch (\Throwable $throwable) {
                 Yii::error(
                     AppHelper::throwableFormatter($throwable),
-                    'EmployeeController:actionDeactivateFromRocketChat:Throwable'
+                    'UserClientChatDataController:actionDeactivateFromRocketChat:Throwable'
                 );
                 $out['message'] = $throwable->getMessage();
             }
