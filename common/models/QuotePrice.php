@@ -195,6 +195,11 @@ class QuotePrice extends \yii\db\ActiveRecord
         return $this;
     }
 
+    public static function calculateProcessingFeeAmount(float $sellingPrice, float $serviceFeePercent): float
+    {
+        return round(($sellingPrice / (100 / 100 - $serviceFeePercent / 100)) - $sellingPrice, 2);
+    }
+
     public function toFloat(&$attributes = null)
     {
         if ($attributes === null) {
@@ -289,7 +294,7 @@ class QuotePrice extends \yii\db\ActiveRecord
 
         $this->selling = ($this->net + $this->mark_up + $this->extra_mark_up);
         if ($serviceFeePercent > 0) {
-            $this->service_fee = $this->selling * $serviceFeePercent / 100;
+            $this->service_fee = self::calculateProcessingFeeAmount((float)$this->selling, (float)$serviceFeePercent);
             $this->selling += $this->service_fee;
         }
         $this->net = round($this->net, 2);
