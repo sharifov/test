@@ -116,8 +116,7 @@ class UserClientChatDataController extends FController
                     $model->uccd_username,
                     $model->uccd_name,
                     $user->email,
-                    $model->uccd_password,
-                    $model->isActive()
+                    $model->uccd_password
                 );
 
                 $model->uccd_rc_user_id = $result['rcUserId'];
