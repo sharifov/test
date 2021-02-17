@@ -49,6 +49,9 @@ class FlightQuoteSegmentSerializer extends Serializer
     {
         $data = $this->toArray();
 
+        $data['departureLocation'] = Airports::getCityByIata($this->model->fqs_departure_airport_iata);
+        $data['arrivalLocation'] = Airports::getCityByIata($this->model->fqs_arrival_airport_iata);
+
         $data['operating_airline'] = '';
         if ($data['fqs_operating_airline']) {
             $airLine = Airline::find()->andWhere(['iata' => $data['fqs_operating_airline']])->asArray()->one();
