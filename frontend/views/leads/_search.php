@@ -246,16 +246,10 @@ use frontend\extensions\DatePicker;
                             <?php echo $form->field($model, 'adults')->dropDownList(array_combine(range(0, 9), range(0, 9)), ['prompt' => '-']) ?>
                         </div>
                         <div class="col-md-4">
-                            <?php echo $form->field($model, 'children')->dropDownList(array_combine( range(0, 9), range(0, 9)), ['prompt' => '-']) ?>
+                            <?php echo $form->field($model, 'children')->dropDownList(array_combine(range(0, 9), range(0, 9)), ['prompt' => '-']) ?>
                         </div>
                         <div class="col-md-4">
-                            <?php echo $form->field($model, 'infants')->dropDownList(
-                                array_combine(
-                                    range(0, 9),
-                                    range(0, 9)
-                                ),
-                                ['prompt' => '-']
-                            ) ?>
+                            <?php echo $form->field($model, 'infants')->dropDownList(array_combine(range(0, 9), range(0, 9)), ['prompt' => '-']) ?>
                         </div>
                     </div>
                     <div class="row">
@@ -276,9 +270,7 @@ use frontend\extensions\DatePicker;
                     </div>
                     <div class="row">
                         <div class="col-md-12">
-                            <?= $form->field($model, 'departRangeTime', [
-                                'options' => ['class' => 'form-group']
-                            ])->widget(\kartik\daterange\DateRangePicker::class, [
+                            <?= $form->field($model, 'departRangeTime', ['options' => ['class' => 'form-group']])->widget(\kartik\daterange\DateRangePicker::class, [
                                 'presetDropdown' => false,
                                 'hideInput' => true,
                                 'convertFormat' => true,
@@ -407,19 +399,11 @@ use frontend\extensions\DatePicker;
         <div class="col-md-12">
             <br>
             <div class="form-group text-center">
-                <?= Html::submitButton(
-                '<i class="fa fa-search"></i> Search leads',
-                ['name' => 'search', 'class' => 'btn btn-primary search_leads_btn']
-            ) ?>
-                <?= Html::a(
-                    '<i class="glyphicon glyphicon-repeat"></i> Reset data',
-                    ['leads/index'],
-                    ['class' => 'btn btn-warning']
-                ) ?>
+                <?= Html::submitButton('<i class="fa fa-search"></i> Search leads', ['name' => 'search', 'class' => 'btn btn-primary search_leads_btn']) ?>
+                <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset data', ['leads/index'], ['class' => 'btn btn-warning']) ?>
             </div>
         </div>
     </div>
 
     <?php ActiveForm::end(); ?>
-
 </div>
