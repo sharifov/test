@@ -420,7 +420,7 @@ class ClientChatService
             $clientChat->assignOwner($ownerId)->inProgress($ownerId, ClientChatStatusLog::ACTION_CHAT_ACCEPT);
             $_self->clientChatRepository->save($clientChat);
             $_self->clientChatMessageService->touchUnreadMessage($clientChat->cch_id);
-            $_self->assignAgentToRcChannel($clientChat->cch_rid, $clientChat->cchOwnerUser->userProfile->up_rc_user_id ?? '');
+            $_self->assignAgentToRcChannel($clientChat->cch_rid, $clientChat->cchOwnerUser->userClientChatData->getRcUserId() ?? '');
         });
     }
 
@@ -431,7 +431,7 @@ class ClientChatService
             $clientChat->assignOwner($ownerId)->inProgress($ownerId, ClientChatStatusLog::ACTION_MULTIPLE_ACCEPT);
             $_self->clientChatRepository->save($clientChat);
             $_self->clientChatMessageService->touchUnreadMessage($clientChat->cch_id);
-            $_self->assignAgentToRcChannel($clientChat->cch_rid, $clientChat->cchOwnerUser->userProfile->up_rc_user_id ?? '');
+            $_self->assignAgentToRcChannel($clientChat->cch_rid, $clientChat->cchOwnerUser->userClientChatData->getRcUserId() ?? '');
 
             if ($access = ClientChatUserAccess::find()->byChatId($clientChat->cch_id)->byUserId($ownerId)->one()) {
                 /** @var ClientChatUserAccess $access */
@@ -505,7 +505,7 @@ class ClientChatService
                 }
             }
 
-            $this->assignAgentToRcChannel($newClientChat->cch_rid, $newClientChat->cchOwnerUser->userProfile->up_rc_user_id ?? '');
+            $this->assignAgentToRcChannel($newClientChat->cch_rid, $newClientChat->cchOwnerUser->userClientChatData->getRcUserId() ?? '');
 
             if ($lastMessage) {
                 $lastMessageNew = $this->clientChatLastMessageRepository->cloneToNewChat($lastMessage, $newClientChat->cch_id);
@@ -712,7 +712,7 @@ class ClientChatService
                 $this->clientChatLastMessageRepository->save($lastMessageNew);
             }
 
-            $this->assignAgentToRcChannel($newClientChat->cch_rid, $owner->userProfile->up_rc_user_id ?? '');
+            $this->assignAgentToRcChannel($newClientChat->cch_rid, $owner->userClientChatData->getRcUserId() ?? '');
 
             return $newClientChat;
         });

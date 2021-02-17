@@ -83,7 +83,10 @@ class ReturnToHoldCall
                 $conference->cf_sid,
                 UserCallIdentity::getClientId($userId),
                 $userId,
-                $conference->isRecordingDisabled()
+                $conference->isRecordingDisabled(),
+                $call->getDataPhoneListId(),
+                $call->c_to,
+                $call->c_from
             );
             $isError = (bool)($result['error'] ?? true);
             if ($isError) {

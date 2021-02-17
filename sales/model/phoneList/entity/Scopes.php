@@ -14,7 +14,7 @@ class Scopes extends ActiveQuery
         return $this->andWhere(['pl_enabled' => true]);
     }
 
-    public function byPhone(string $phoneNumber): self
+    public function byPhone(?string $phoneNumber): self
     {
         return $this->andWhere(['pl_phone_number' => $phoneNumber]);
     }

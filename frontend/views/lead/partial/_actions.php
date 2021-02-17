@@ -503,6 +503,31 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
             }
         });
     });
+    
+    /***  Quick search quotes ***/
+    $(document).on('click','#search-quotes-btn', function (e) {
+        //$('#popover-quick-search').popover('hide');
+        e.preventDefault();
+        let url = $('#search-quotes-btn').data('url');
+        $('#preloader').removeClass('d-none');
+        var modal = $('#search-results__modal');
+        
+         $.ajax({
+            type: 'post',
+            data: {'gds': $('#gds-selector').val()},
+            url: url,
+            success: function (data) {
+                $('#preloader').addClass('d-none');
+                modal.find('.modal-body').html(data);
+                modal.modal('show');
+            },
+            error: function (error) {
+               // var obj = JSON.parse(error.data); // $.parseJSON( e.data );
+                $('#preloader').addClass('d-none');
+                createNotify('Error', error.statusText, 'error');
+            }
+        });
+    });
 
     /*** Send call expert request ***/
     $('#btn-call-expert').click(function (e) {
@@ -612,7 +637,7 @@ $js = <<<JS
         var key = $(this).data('key');
         var gds = $(this).data('gds');
         var searchResId = $(this).data('result');
-        $('#preloader').removeClass('hidden');
+        $('#preloader').removeClass('d-none');
         $.ajax({
         url: '$urlCreateQuoteFromSearch',
             type: 'post',
@@ -620,7 +645,7 @@ $js = <<<JS
             success: function (data) {
                 var error = '';
                 
-                $('#preloader').addClass('hidden');
+                $('#preloader').addClass('d-none');
                 if(data.status == true){
                     //$('#search-results__modal').modal('hide');
                     $('#flight-details__modal').modal('hide');
@@ -656,6 +681,7 @@ $js = <<<JS
             },
             error: function (error) {
                 console.log('Error: ' + error);
+                $('#preloader').addClass('d-none');
             }
         });
     });

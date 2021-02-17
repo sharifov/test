@@ -100,6 +100,7 @@ return [
             'url' => 'https://airsearch.api.travelinsides.com/',
             'username' => '',
             'password' => '',
+            'searchQuoteEndpoint' => 'v1/internalsearch',
         ],
         'currency' => [
             'class' => \common\components\CurrencyService::class,

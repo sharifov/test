@@ -16,6 +16,7 @@ use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatHold\entity\ClientChatHold;
 use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
+use sales\model\userClientChatData\entity\UserClientChatData;
 use sales\services\clientChatChannel\ClientChatChannelCodeException;
 use sales\services\clientChatChannel\ClientChatChannelService;
 use sales\services\clientChatService\ClientChatService;
@@ -62,21 +63,18 @@ class ClientChatController extends Controller
     {
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
-
-        $query = Employee::find()->select(['id', 'username', 'nickname', 'email', 'nickname_client_chat'])->leftJoin('user_profile', 'id=up_user_id');
-        $query->where(['up_rc_user_id' => null]);
-        $query->orWhere(['up_rc_user_id' => '']);
-
-        //echo $query->createCommand()->getRawSql(); exit;
+        $query = Employee::find()
+            ->select(['id', 'username', 'nickname', 'email', 'nickname_client_chat'])
+            ->leftJoin(UserClientChatData::tableName(), 'id = uccd_employee_id')
+            ->where(['uccd_employee_id' => null])
+            ->orWhere(['uccd_employee_id' => '']);
 
         if ($limit) {
             $query->limit($limit);
         }
-
         if ($offset) {
             $query->offset($offset);
         }
-
         if ($userId) {
             $query->andWhere(['id' => $userId]);
         }
@@ -102,28 +100,8 @@ class ClientChatController extends Controller
             if (isset($result['error']) && !$result['error']) {
                 printf(" - Registered: %s\n", $this->ansiFormat('Username: ' . $result['data']['username'] . ', ID: ' . $result['data']['_id'], Console::FG_BLUE));
 
-                $userProfile = UserProfile::findOne(['up_user_id' => $user['id']]);
-                //              if ($userProfile && $userProfile->up_rc_user_id) {
-                //                  continue;
-                //              }
-
-                if (!$userProfile) {
-                    $userProfile = new UserProfile();
-                    $userProfile->up_user_id = $user['id'];
-                }
-
-                $userProfile->up_rc_user_password = $pass;
-
                 if (empty($result['data']['_id'])) {
                     printf("\n --- Empty result[data][_id]: %s ---\n", $this->ansiFormat(VarDumper::dumpAsString(['user' => $user, 'data' => $result]), Console::FG_RED));
-                    continue;
-                }
-
-                $userProfile->up_rc_user_id = $result['data']['_id'];
-
-                if (!$userProfile->save()) {
-                    $errorMessage = VarDumper::dumpAsString(['profile' => $userProfile->attributes, 'errors' => $userProfile->errors]);
-                    \Yii::error($errorMessage, 'Console:ClientChat:RcCreateUserProfile:UserProfile:save');
                     continue;
                 }
 
@@ -136,14 +114,17 @@ class ClientChatController extends Controller
                     continue;
                 }
 
-                if (!empty($login['data']['authToken'])) {
-                    $userProfile->up_rc_auth_token = $login['data']['authToken'];
-                    $userProfile->up_rc_token_expired = $rocketChat::generateTokenExpired();
-                    if (!$userProfile->save()) {
-                        $errorMessage = VarDumper::dumpAsString(['profile' => $userProfile->attributes, 'errors' => $userProfile->errors]);
-                        \Yii::error($errorMessage, 'Console:ClientChat:RcCreateUserProfile:UserProfile:save:login');
-                    }
-                    printf("\n -- Logined: %s\n", $this->ansiFormat('Username: ' . $result['data']['username'], Console::FG_GREEN));
+                $userClientChatData = UserClientChatData::getOrCreateByEmployeeId($user['id']);
+                $userClientChatData->uccd_active = true;
+                $userClientChatData->uccd_password = $pass;
+                $userClientChatData->uccd_rc_user_id = $result['data']['_id'];
+                $userClientChatData->uccd_auth_token = $login['data']['authToken'];
+                $userClientChatData->uccd_token_expired = $rocketChat::generateTokenExpired();
+
+                if (!$userClientChatData->save()) {
+                    $errorMessage = VarDumper::dumpAsString(['profile' => $userClientChatData->attributes, 'errors' => $userClientChatData->errors]);
+                    \Yii::error($errorMessage, 'Console:ClientChat:RcCreateUserProfile:userClientChatData:save');
+                    continue;
                 }
             } else {
                 $errorMessage = $rocketChat::getErrorMessageFromResult($result);
@@ -166,22 +147,15 @@ class ClientChatController extends Controller
     {
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
-
-        $query = Employee::find()->select(['id', 'username', 'nickname', 'email', 'nickname_client_chat'])->leftJoin('user_profile', 'id=up_user_id');
-        $query->where(['IS NOT', 'up_rc_user_id', null]);
-
-        //echo $query->createCommand()->getRawSql(); exit;
-
+        $query = UserClientChatData::find();
         if ($limit) {
             $query->limit($limit);
         }
-
         if ($offset) {
             $query->offset($offset);
         }
-
         if ($userId) {
-            $query->andWhere(['id' => $userId]);
+            $query->andWhere(['uccd_employee_id' => $userId]);
         }
 
         $users = $query->asArray()->all();
@@ -190,30 +164,15 @@ class ClientChatController extends Controller
         $rocketChat->updateSystemAuth(false);
 
         foreach ($users as $user) {
-            $userProfile = UserProfile::findOne(['up_user_id' => $user['id']]);
+            $result = $rocketChat->deleteUser($user['uccd_rc_user_id'] ?? null, $user['uccd_username'], $deleteByUsername);
 
-            $result = $rocketChat->deleteUser($userProfile->up_rc_user_id ?? null, $user['username'], $deleteByUsername);
-
-            echo "\n-- " . $user['username'] . ' (' . $user['id'] . ') --' . PHP_EOL;
+            echo "\n-- " . $user['uccd_username'] . ' (' . $user['uccd_employee_id'] . ') --' . PHP_EOL;
 
             if (isset($result['error']) && !$result['error']) {
                 printf(" - Deleted: %s\n", $this->ansiFormat('Success', Console::FG_BLUE));
 
-
-                if (!$userProfile) {
-                    continue;
-                }
-
-                $userProfile->up_rc_user_password = null;
-                $userProfile->up_rc_user_id = null;
-                $userProfile->up_rc_auth_token = null;
-                $userProfile->up_rc_token_expired = null;
-
-
-                if (!$userProfile->save()) {
-                    $errorMessage = VarDumper::dumpAsString(['profile' => $userProfile->attributes, 'errors' => $userProfile->errors]);
-                    \Yii::error($errorMessage, 'Console:ClientChat:RcDeleteUserProfile:UserProfile:save');
-                    continue;
+                if ($userClientChatData = UserClientChatData::findOne(['uccd_id' => $user['uccd_id']])) {
+                    $userClientChatData->delete();
                 }
             } else {
                 $errorMessage = $rocketChat::getErrorMessageFromResult($result);
@@ -228,43 +187,7 @@ class ClientChatController extends Controller
     {
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
-        $query = UserProfile::find()->where(['not', ['up_rc_user_id' => null]])->orWhere(['<>', 'up_rc_user_id', '']);
-
-        if ($limit) {
-            $query->limit($limit);
-        }
-
-        if ($offset) {
-            $query->offset($offset);
-        }
-
-        if ($userId) {
-            $query->andWhere(['up_user_id' => $userId]);
-        }
-
-        $users = $query->all();
-
-        $rocketChat = \Yii::$app->rchat;
-        $rocketChat->updateSystemAuth(false);
-
-        foreach ($users as $user) {
-            echo "\n-- UserId " . ' (' . $user->up_user_id . ') --' . PHP_EOL;
-
-
-            $user->up_rc_user_password = null;
-            $user->up_rc_user_id = null;
-            $user->up_rc_auth_token = null;
-            $user->up_rc_token_expired = null;
-
-
-            if (!$user->save()) {
-                $errorMessage = VarDumper::dumpAsString(['profile' => $user->attributes, 'errors' => $user->errors]);
-                \Yii::error($errorMessage, 'Console:ClientChat:actionDeleteRcCredentialsFromCrm:UserProfile:save');
-                continue;
-            }
-
-            printf(" - Deleted: %s\n", $this->ansiFormat('Success', Console::FG_BLUE));
-        }
+        UserClientChatData::deleteAll();
 
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }

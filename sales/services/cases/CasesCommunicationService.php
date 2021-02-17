@@ -13,6 +13,7 @@ use sales\repositories\cases\CasesRepository;
 use sales\services\client\ClientManageService;
 use sales\services\TransactionManager;
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class CasesCommunicationService
@@ -53,7 +54,7 @@ class CasesCommunicationService
      * @param string|null $locale
      * @return array|mixed|null
      */
-    public static function getLocaleParams(Project $project, Client $client, ?string $locale)
+    public static function getLocaleParamsOld(Project $project, Client $client, ?string $locale) /* temporary do not remove */
     {
         $projectLocale = null;
         if ($client->cl_marketing_country) {
@@ -72,7 +73,15 @@ class CasesCommunicationService
                     ->andWhere(['pl_enabled' => true])
                     ->one();
             }
+        } elseif ($client->cl_locale) {
+            $projectLocale = ProjectLocale::find()
+                ->where(['pl_project_id' => $project->id])
+                ->andWhere(['pl_language_id' => $client->cl_locale])
+                ->andWhere(['IS', 'pl_market_country', null])
+                ->andWhere(['pl_enabled' => true])
+                ->one();
         }
+
         if (!$projectLocale) {
             $projectLocale = ProjectLocale::find()
                 ->where(['pl_project_id' => $project->id])
@@ -87,6 +96,53 @@ class CasesCommunicationService
             return JsonHelper::decode($projectLocale->pl_params);
         }
         return [];
+    }
+
+    /**
+     * @param int $projectId
+     * @param Client $client
+     * @param string|null $locale
+     * @return array|mixed|null
+     */
+    public static function getLocaleParams(int $projectId, Client $client, ?string $locale)
+    {
+        if ($locale && $client->cl_marketing_country) {
+            if ($params = self::searchParams($projectId, $locale, $client->cl_marketing_country)) {
+                return $params;
+            }
+        }
+
+        if ($locale && !$client->cl_marketing_country) {
+            if ($defaultMarketCountry = ProjectLocale::getDefaultMarketCountryByProject($projectId)) {
+                if ($params = self::searchParams($projectId, $locale, $defaultMarketCountry)) {
+                    return $params;
+                }
+            }
+        }
+
+        if ($projectLocale = ProjectLocale::getDefaultProjectLocale($projectId)) {
+            return JsonHelper::decode($projectLocale->pl_params);
+        }
+        return [];
+    }
+
+    private static function searchParams(int $projectId, ?string $language, ?string $marketingCountry): ?array
+    {
+        $projectLocale = ProjectLocale::getByProjectLanguageMarket($projectId, $language, $marketingCountry);
+        if ($projectLocale) {
+            return JsonHelper::decode($projectLocale->pl_params);
+        }
+
+        $projectLocaleByLocale = ProjectLocale::getByProjectLanguageMarket($projectId, $language, null);
+        $projectLocaleByMarket = ProjectLocale::getByProjectLanguageMarket($projectId, null, $marketingCountry);
+
+        if ($projectLocaleByLocale && $projectLocaleByMarket) {
+            return ArrayHelper::merge(
+                JsonHelper::decode($projectLocaleByLocale->pl_params),
+                JsonHelper::decode($projectLocaleByMarket->pl_params)
+            );
+        }
+        return null;
     }
 
     /**
@@ -109,7 +165,7 @@ class CasesCommunicationService
         }
         $localeParams = [];
         if ($project && $client = $case->client) {
-            $localeParams = self::getLocaleParams($project, $client, $locale);
+            $localeParams = self::getLocaleParams($project->id, $client, $locale);
         }
 
         $content_data['case'] = [

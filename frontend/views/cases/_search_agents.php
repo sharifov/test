@@ -152,14 +152,7 @@ use yii\widgets\ActiveForm;
 
         </div>
         <div class="col-md-1">
-            <?php
-                $types = ArrayHelper::map(
-                    CaseSale::find()->select('css_charge_type')->distinct()->where(['NOT', ['css_charge_type' => null]])->all(),
-                    'css_charge_type',
-                    'css_charge_type'
-                )
-                ?>
-            <?= $form->field($model, 'cssChargeType')->dropDownList($types, ['prompt' => '---']) ?>
+            <?= $form->field($model, 'cssChargeType')->dropDownList(CaseSale::getChargeTypesList(), ['prompt' => '---']) ?>
         </div>
         <div class="col-md-2">
             <?= $form->field($model, 'saleTicketSendEmailDate', [

@@ -68,7 +68,9 @@ JS;
 $this->registerJs($js);
 $this->title = 'API Logs Report';
 
-use yii\widgets\Pjax; ?>
+use yii\widgets\Pjax;
+
+?>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <div class="">
     <h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>
@@ -169,9 +171,9 @@ use yii\widgets\Pjax; ?>
                                                         <?php endforeach; ?>
                                                     ],
                                                     <?php foreach ($apiStats as $k => $item) : ?>
-                                                    ['<?= date($format, strtotime($item['timeLine']))?>',
+                                                    ['<?= date($format, strtotime($item['timeline']))?>',
                                                         <?php foreach ($actions as $k => $action) :?>
-                                                            <?= isset($item['cnt' . $k]) ? $item['cnt' . $k] : 0 ?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', '<?=$action['al_action']?>', '<?= isset($item['cnt' . $k]) ? $item['cnt' . $k] : 0 ?>', '<?= isset($item['exeTime' . $k]) ? round($item['exeTime' . $k], 2) : ''?>', '<?= isset($item['memUsage' . $k]) ? Yii::$app->formatter->asShortSize($item['memUsage' . $k], 2) : '' ?>'),
+                                                            <?= isset($item['cnt' . $k]) ? $item['cnt' . $k] : 0 ?>, customHTMLContent('<?= date($format, strtotime($item['timeline']))?>', '<?=$action['al_action']?>', '<?= isset($item['cnt' . $k]) ? $item['cnt' . $k] : 0 ?>', '<?= isset($item['exetime' . $k]) ? round($item['exetime' . $k], 2) : ''?>', '<?= isset($item['memusage' . $k]) ? Yii::$app->formatter->asShortSize($item['memusage' . $k], 2) : '' ?>'),
                                                         <?php endforeach; ?>
                                                     ],
                                                     <?php endforeach; ?>
@@ -231,11 +233,11 @@ use yii\widgets\Pjax; ?>
                                                 });
                                             }
 
-                                            function customHTMLContent(timeLine, api, apiCnt, avgTime, avgMem) {
+                                            function customHTMLContent(timeline, api, apiCnt, avgTime, avgMem) {
                                                 return '<div style="padding:5px 5px 5px 5px;">' +
                                                     '<table class="medals_layout">' +
                                                     '<tr>' +
-                                                    '<td style="padding-right:5px;">Time: </td>' + '<td><b>' + timeLine + '</b></td>' + '</tr>' +
+                                                    '<td style="padding-right:5px;">Time: </td>' + '<td><b>' + timeline + '</b></td>' + '</tr>' +
                                                     '<tr>' +
                                                     '<td style="padding-right:5px;">' + api +':</td>' + '<td><b>' + apiCnt + '</b></td>' + '</tr>' +
                                                     '<tr>' +

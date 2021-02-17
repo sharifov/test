@@ -1470,7 +1470,9 @@ class Call extends \yii\db\ActiveRecord
                         UserCallIdentity::getClientId($user_id),
                         $call->c_from,
                         $user_id,
-                        $call->isRecordingDisable()
+                        $call->isRecordingDisable(),
+                        $call->getDataPhoneListId(),
+                        $call->c_to
                     );
 
                     if ($res) {
@@ -2315,6 +2317,25 @@ class Call extends \yii\db\ActiveRecord
                 return false;
             }
         }
+    }
+
+    public function setDataCreatedParams(array $params): void
+    {
+        $data = $this->getData();
+        $data->createdParams = $params;
+        $this->setData($data);
+    }
+
+    public function setDataPhoneListId(?int $phoneListId): void
+    {
+        $data = $this->getData();
+        $data->phoneListId = $phoneListId;
+        $this->setData($data);
+    }
+
+    public function getDataPhoneListId(): ?int
+    {
+        return $this->getData()->phoneListId;
     }
 
     public function setDataPriority(int $value): void

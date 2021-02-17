@@ -98,7 +98,7 @@ class CasePreviewEmailForm extends Model
 
             ['files', IsArrayValidator::class],
             ['files', 'each', 'rule' => ['integer'], 'skipOnError' => true, 'skipOnEmpty' => true],
-            ['files', 'each', 'rule' => ['in', 'range' => array_keys($this->getFileList())], 'skipOnError' => true, 'skipOnEmpty' => true],
+            ['files', 'each', 'rule' => ['in', 'range' => array_keys($this->getFileList()), 'skipOnEmpty' => true], 'skipOnError' => true, 'skipOnEmpty' => true],
         ];
     }
 

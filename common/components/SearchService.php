@@ -183,20 +183,17 @@ class SearchService
             $params['ppn'] = $lead->client->cl_ppn;
         }
 
-        $response = \Yii::$app->airsearch->sendRequest('v1/search', $params, 'GET');
+        $response = \Yii::$app->airsearch->searchQuotes($params);
 
-        if ($response->isOk) {
-            $result['data'] = $response->data;
-        } else {
-            $result['error'] = $response->content;
+        if (!$result['data'] = $response['data']) {
+            $result['error'] = $response['error'];
             \Yii::error(
                 ['lead_id' => $lead->id,
                 'params' => $params,
-                'message' => $response->content],
+                'message' => $response['error']],
                 'SearchService::getOnlineQuotes'
             );
         }
-
         return $result;
     }
 

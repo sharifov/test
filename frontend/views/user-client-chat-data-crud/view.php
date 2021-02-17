@@ -1,5 +1,7 @@
 <?php
 
+use sales\helpers\text\SecureStringHelper;
+use sales\model\userClientChatData\entity\UserClientChatData;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
@@ -16,13 +18,12 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <div class="col-md-4">
-
         <p>
             <?= Html::a('Update', ['update', 'id' => $model->uccd_id], ['class' => 'btn btn-primary']) ?>
             <?= Html::a('Delete', ['delete', 'id' => $model->uccd_id], [
                 'class' => 'btn btn-danger',
                 'data' => [
-                    'confirm' => 'Are you sure you want to delete this item?',
+                    'confirm' => 'Warning. Item will be hard deleted without synchronization with RC server.',
                     'method' => 'post',
                 ],
             ]) ?>
@@ -32,7 +33,19 @@ $this->params['breadcrumbs'][] = $this->title;
             'model' => $model,
             'attributes' => [
                 'uccd_id',
+                'uccd_rc_user_id',
+                'uccd_username',
+                'uccd_name',
+                [
+                    'attribute' => 'uccd_password',
+                    'value' => static function (UserClientChatData $model) {
+                        return SecureStringHelper::generate((string) $model->uccd_password);
+                    },
+                    'format' => 'raw',
+                ],
+                'uccd_auth_token',
                 'uccd_employee_id:username',
+                'uccd_token_expired:byUserDateTime',
                 'uccd_active:booleanByLabel',
                 'uccd_created_dt:byUserDateTime',
                 'uccd_updated_dt:byUserDateTime',

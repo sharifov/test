@@ -1852,6 +1852,28 @@ class TestController extends FController
         exit();
     }
 
+    public function actionProjectLocaleParams(int $project_id, int $client_id, string $locale)
+    {
+        $casesCommunicationService = \Yii::createObject(CasesCommunicationService::class);
+
+        if (!$client = Client::findOne($client_id)) {
+            throw new NotFoundHttpException('Client not found.');
+        }
+
+        $result = $casesCommunicationService::getLocaleParams($project_id, $client, $locale);
+
+        VarDumper::dump([
+            'ParamProjectId' => $project_id,
+            'ParamLocale' => $locale,
+            'ParamClientId' => $client->id,
+            'ClientInfoLocale' => $client->cl_locale,
+            'ClientInfoMarketingCountry' => $client->cl_marketing_country,
+            str_repeat('=', 20) => str_repeat('=', 20),
+            'ResultProjectLocaleParam' => $result,
+        ], 10, true);
+        exit();
+    }
+
     public function actionFlushMetrics()
     {
         try {

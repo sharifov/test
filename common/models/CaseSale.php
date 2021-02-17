@@ -12,6 +12,7 @@ use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\Json;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "case_sale".
@@ -50,7 +51,6 @@ use yii\helpers\Json;
  */
 class CaseSale extends \yii\db\ActiveRecord
 {
-
     public const PASSENGER_MEAL = [
         "AVML" => "AVML - Vegetarian/Hindu",
         "BBML" => "BBML - Baby",
@@ -249,5 +249,16 @@ class CaseSale extends \yii\db\ActiveRecord
             return Json::encode($this->css_sale_data);
         }
         return $this->css_sale_data;
+    }
+
+    public static function getChargeTypesList(int $duration = 5 * 60): array
+    {
+        return Yii::$app->cacheFile->getOrSet(__FUNCTION__, static function () {
+            return ArrayHelper::map(
+                self::find()->select('css_charge_type')->distinct()->where(['NOT', ['css_charge_type' => null]])->all(),
+                'css_charge_type',
+                'css_charge_type'
+            );
+        }, $duration);
     }
 }

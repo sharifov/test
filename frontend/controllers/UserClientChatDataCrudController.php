@@ -5,13 +5,15 @@ namespace frontend\controllers;
 use Yii;
 use sales\model\userClientChatData\entity\UserClientChatData;
 use sales\model\userClientChatData\entity\UserClientChatDataSearch;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\db\StaleObjectException;
 use yii\helpers\ArrayHelper;
 
+/**
+ * Class UserClientChatDataCrudController
+ */
 class UserClientChatDataCrudController extends FController
 {
     public function init(): void

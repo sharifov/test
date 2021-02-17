@@ -6,6 +6,7 @@ use common\models\Employee;
 use common\models\UserOnline;
 use common\models\UserProfile;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
+use sales\model\userClientChatData\entity\UserClientChatData;
 
 /**
  * Class EmployeeQuery
@@ -51,7 +52,10 @@ class EmployeeQuery extends \yii\db\ActiveQuery
 
     public function registeredInRc(): EmployeeQuery
     {
-        return $this->innerJoin(UserProfile::tableName(), "up_user_id = id and up_rc_user_id is not null and up_rc_user_id <> ''");
+        return $this->innerJoin(
+            UserClientChatData::tableName(),
+            "uccd_employee_id = id AND uccd_rc_user_id IS NOT NULL AND uccd_rc_user_id <> ''"
+        );
     }
 
 //    public function supervisorsByGroups(array $groups)

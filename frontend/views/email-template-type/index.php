@@ -6,6 +6,8 @@ use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
 use common\components\grid\BooleanColumn;
 use common\components\grid\UserSelect2Column;
+use yii\helpers\StringHelper;
+use yii\helpers\VarDumper;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\EmailTemplateTypeSearch */
@@ -18,7 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
     <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <p>
         <?= Html::a('<i class="fa fa-plus"></i> Create Email Template Type', ['create'], ['class' => 'btn btn-success']) ?>
@@ -55,6 +57,30 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             ['class' => BooleanColumn::class, 'attribute' => 'etp_ignore_unsubscribe'],
+
+            [
+                'attribute' => 'etp_params_json',
+                'value' => static function (\common\models\EmailTemplateType $model) {
+                    $resultStr = '-';
+                    if ($model->etp_params_json) {
+                        $truncatedStr = StringHelper::truncate(
+                            Html::encode(VarDumper::dumpAsString($model->etp_params_json)),
+                            80,
+                            '...',
+                            null,
+                            false
+                        );
+
+                        $detailData = VarDumper::dumpAsString($model->etp_params_json, 10, true);
+                        $detailBox = '<div id="detail_' . $model->etp_id . '" style="display: none;">' . $detailData . '</div>';
+                        $detailBtn = ' <i class="fas fa-eye green showDetail" style="cursor: pointer;" data-idt="' . $model->etp_id . '"></i>';
+
+                        $resultStr = $truncatedStr . $detailBox . $detailBtn;
+                    }
+                    return '<small>' . $resultStr . '</small>';
+                },
+                'format' => 'raw'
+            ],
 
             [
                 'class' => UserSelect2Column::class,
@@ -130,3 +156,28 @@ $this->params['breadcrumbs'][] = $this->title;
     ]); ?>
     <?php Pjax::end(); ?>
 </div>
+
+<?php
+yii\bootstrap4\Modal::begin([
+    'title' => 'Config params',
+    'id' => 'modal',
+    'size' => \yii\bootstrap4\Modal::SIZE_SMALL,
+]);
+yii\bootstrap4\Modal::end();
+
+$jsCode = <<<JS
+    $(document).on('click', '.showDetail', function(){
+        
+        let id = $(this).data('idt');
+        let detailEl = $('#detail_' + id);
+        let modalBodyEl = $('#modal .modal-body');
+        
+        modalBodyEl.html(detailEl.html()); 
+        $('#modal-label').html('Email Template Params (' + id + ')');       
+        $('#modal').modal('show');
+        return false;
+    });
+JS;
+
+$this->registerJs($jsCode, \yii\web\View::POS_READY);
+?>

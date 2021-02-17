@@ -112,7 +112,9 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
             ['uss_type_id', 'integer', 'max' => 9, 'min' => 0],
 
             ['uss_created_dt', 'safe'],
+            //['uss_created_dt', 'date', 'format' => 'php:Y-m-d'],
             ['uss_updated_dt', 'safe'],
+            //['uss_created_dt', 'date', 'format' => 'php:Y-m-d'],
 
             ['uss_created_user_id', 'integer'],
             ['uss_updated_user_id', 'integer'],

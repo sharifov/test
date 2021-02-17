@@ -8,7 +8,12 @@ use common\models\Lead;
 use common\models\Notifications;
 use common\models\Quote;
 use common\models\QuotePrice;
+use frontend\helpers\JsonHelper;
+use frontend\helpers\QuoteHelper;
+use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
+use PhpParser\Node\Expr\Empty_;
 use sales\auth\Auth;
+use sales\forms\api\searchQuote\FlightQuoteSearchForm;
 use sales\helpers\app\AppHelper;
 use sales\model\clientChat\socket\ClientChatSocketCommands;
 use sales\forms\quotePrice\AddQuotePriceForm;
@@ -26,6 +31,7 @@ use sales\services\quote\addQuote\guard\LeadGuard;
 use sales\services\quote\addQuote\price\PreparePrices;
 use Yii;
 use yii\base\Model;
+use yii\data\ArrayDataProvider;
 use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\web\Response;
@@ -91,6 +97,73 @@ class QuoteController extends FController
 
     /**
      * @param $leadId
+     * @return string
+     * @throws \Exception
+     */
+    public function actionAjaxSearchQuotes($leadId): string
+    {
+        try {
+            $lead = Lead::findOne(['id' => $leadId]);
+            $gds = Yii::$app->request->post('gds', '');
+//            $pjaxId = Yii::$app->request->post('pjaxId', '');
+
+            if ($lead !== null) {
+                $keyCache = sprintf('quote-search-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey());
+
+                $quotes = \Yii::$app->cacheFile->get($keyCache);
+
+                if ($quotes === false) {
+                    $quotes = SearchService::getOnlineQuotes($lead);
+                    if ($quotes && !empty($quotes['data']) && empty($quotes['error'])) {
+                        \Yii::$app->cacheFile->set($keyCache, $quotes = QuoteHelper::formatQuoteData($quotes['data']), 600);
+                    } else {
+                        throw new \RuntimeException(!empty($quotes['error']) ? JsonHelper::decode($quotes['error'])['Message'] : 'No search results');
+                    }
+                }
+
+                $form = new FlightQuoteSearchForm();
+                $form->load(Yii::$app->request->post() ?: Yii::$app->request->get());
+
+                if (Yii::$app->request->isPost) {
+                    $params = ['page' => 1];
+                }
+
+                $quotes = $form->applyFilters($quotes);
+
+                $dataProvider = new ArrayDataProvider([
+                    'allModels' => $quotes['results'] ?? [],
+                    'pagination' => [
+                        'pageSize' => 10,
+                        'params' => array_merge(Yii::$app->request->get(), $form->getFilters(), $params ?? []),
+                    ],
+                    'sort' => [
+                        'attributes' => ['price', 'duration'],
+                        'defaultOrder' => [$form->getSortBy() => $form->getSortType()],
+                    ],
+                ]);
+
+                $viewData = SearchService::getAirlineLocationInfo($quotes);
+                $viewData['leadId'] = $leadId;
+                $viewData['gds'] = $gds;
+                $viewData['lead'] = $lead;
+                $viewData['quotes'] = $quotes;
+                $viewData['dataProvider'] = $dataProvider ?? new ArrayDataProvider();
+                $viewData['searchForm'] = $form;
+                $viewData['keyCache'] = $keyCache;
+//                    $viewData['pjaxId'] = $pjaxId;
+            } else {
+                throw new \Exception('Not found lead', -1);
+            }
+        } catch (\Throwable $throwable) {
+            AppHelper::throwableLogger($throwable, 'QuoteController:actionAjaxSearchQuotes');
+            $viewData['quotes'] = [];
+            $viewData['errorMessage'] = $throwable->getMessage();
+        }
+        return $this->renderAjax('partial/_quote_search_result', $viewData);
+    }
+
+    /**
+     * @param $leadId
      * @return array
      * @throws \yii\db\Exception
      */
@@ -107,13 +180,16 @@ class QuoteController extends FController
             //$gds = Yii::$app->request->post('gds');
             $gds = '';
             $key = Yii::$app->request->post('key');
+            $keyCache = Yii::$app->request->post('keyCache', '');
+            $createFromQuoteSearch = Yii::$app->request->post('createFromQuoteSearch', 0);
 
             if ($key && $lead) {
-                $keyCache = sprintf('quick-search-new-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey());
+                $keyCache = empty($keyCache) ? sprintf('quick-search-new-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey()) : $keyCache;
                 $resultSearch = Yii::$app->cacheFile->get($keyCache);
 
                 if ($resultSearch !== false) {
-                    foreach ($resultSearch['data']['results'] as $entry) {
+                    $result = $keyCache && $createFromQuoteSearch ? $resultSearch['results'] : $resultSearch['data']['results'];
+                    foreach ($result as $entry) {
                         if ($entry['key'] == $key) {
                             $transaction = Quote::getDb()->beginTransaction();
 

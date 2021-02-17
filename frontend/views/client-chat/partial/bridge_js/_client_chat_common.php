@@ -3,6 +3,7 @@
 use sales\auth\Auth;
 use sales\model\clientChat\dashboard\FilterForm;
 use sales\model\clientChat\dashboard\ReadUnreadFilter;
+use sales\model\userClientChatData\service\UserClientChatDataService;
 use yii\helpers\Url;
 use yii\web\JqueryAsset;
 use yii\web\View;
@@ -12,7 +13,7 @@ use sales\model\clientChat\entity\ClientChat;
 /* @var ClientChat|null $clientChat */
 /* @var FilterForm $filter */
 
-$userRcAuthToken = Auth::user()->userProfile ? Auth::user()->userProfile->up_rc_auth_token : '';
+$userRcAuthToken = UserClientChatDataService::getCurrentAuthToken() ?? '';
 $clientChatId = $clientChat ? $clientChat->cch_id : 0;
 $clientChatOwnerId = ($clientChat && $clientChat->cch_owner_user_id) ? $clientChat->cch_owner_user_id : 0;
 $readAll = ReadUnreadFilter::ALL;

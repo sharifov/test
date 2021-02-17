@@ -34,6 +34,7 @@ use yii\bootstrap4\Modal;
     $ajaxJoinToConferenceUrl = Url::to(['/phone/ajax-join-to-conference']);
     $ajaxHangupUrl = Url::to(['/phone/ajax-hangup']);
     $ajaxCreateCallUrl = Url::to(['/phone/ajax-create-call']);
+    $ajaxGetPhoneListIdUrl = Url::to(['/phone/ajax-get-phone-list-id']);
 
     $conferenceBase = 0;
 if (isset(Yii::$app->params['settings']['voip_conference_base'])) {
@@ -63,6 +64,7 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
     const ajaxJoinToConferenceUrl = '<?= $ajaxJoinToConferenceUrl ?>';
     const ajaxHangupUrl = '<?= $ajaxHangupUrl ?>';
     const ajaxCreateCallUrl = '<?= $ajaxCreateCallUrl ?>';
+    const ajaxGetPhoneListIdUrl = '<?= $ajaxGetPhoneListIdUrl ?>';
     const callOutBackendSide = parseInt('<?= $callOutBackendSide ?>');
 
     const clientId = '<?=$clientId?>';
@@ -729,28 +731,38 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
             return;
         }
 
-        let params = {
-            'To': phone_to,
-            'FromAgentPhone': phone_from,
-            'c_project_id': project_id,
-            'lead_id': lead_id,
-            'case_id': case_id,
-            'c_type': type,
-            'c_user_id': userId,
-            'is_conference_call': conferenceBase,
-            'c_source_type_id': source_type_id
-        };
+        $.post(ajaxGetPhoneListIdUrl, {'phone': phone_from}, function(data) {
+            if (data.error) {
+                var text = 'Error. Try again later';
+                if (data.message) {
+                    text = data.message;
+                }
+                new PNotify({title: "Make call", type: "error", text: text, hide: true});
+            } else {
+                let params = {
+                    'To': phone_to,
+                    'FromAgentPhone': phone_from,
+                    'c_project_id': project_id,
+                    'lead_id': lead_id,
+                    'case_id': case_id,
+                    'c_type': type,
+                    'c_user_id': userId,
+                    'is_conference_call': conferenceBase,
+                    'c_source_type_id': source_type_id,
+                    'phone_list_id': data.phone_list_id
+                };
 
+                // console.log(params);
+                webPhoneParams = params;
 
-        // console.log(params);
-        webPhoneParams = params;
-
-        if (device) {
-            console.log('Calling ' + params.To + '...');
-            // createNotify('Calling', 'Calling ' + params.To + '...', 'success');
-            connection = device.connect(params);
-            updateAgentStatus(connection, false, 0);
-        }
+                if (device) {
+                    console.log('Calling ' + params.To + '...');
+                    // createNotify('Calling', 'Calling ' + params.To + '...', 'success');
+                    connection = device.connect(params);
+                    updateAgentStatus(connection, false, 0);
+                }
+            }
+        }, 'json');
     }
 
     function joinListen(call_sid) {
@@ -819,26 +831,36 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
 
             return;
         }
+        $.post(ajaxGetPhoneListIdUrl, {'phone': phone_from}, function(data) {
+            if (data.error) {
+                var text = 'Error. Try again later';
+                if (data.message) {
+                    text = data.message;
+                }
+                new PNotify({title: "Make call", type: "error", text: text, hide: true});
+            } else {
+                let params = {
+                    'To': phone_to,
+                    'FromAgentPhone': phone_from,
+                    'c_project_id': project_id,
+                    'lead_id': lead_id,
+                    'c_type': type,
+                    'c_user_id': userId,
+                    'c_source_type_id': c_source_type_id,
+                    'is_conference_call': conferenceBase,
+                    'user_identity': window.userIdentity,
+                    'phone_list_id': data.phone_list_id
+                };
+                webPhoneParams = params;
 
-        let params = {
-            'To': phone_to,
-            'FromAgentPhone': phone_from,
-            'c_project_id': project_id,
-            'lead_id': lead_id,
-            'c_type': type,
-            'c_user_id': userId,
-            'c_source_type_id': c_source_type_id,
-            'is_conference_call': conferenceBase,
-            'user_identity': window.userIdentity
-        };
-        webPhoneParams = params;
-
-        if (device) {
-            console.log('Calling ' + params.To + '...');
-            // createNotify('Calling', 'Calling ' + params.To + '...', 'success');
-            connection = device.connect(params);
-            updateAgentStatus(connection, false, 0);
-        }
+                if (device) {
+                    console.log('Calling ' + params.To + '...');
+                    // createNotify('Calling', 'Calling ' + params.To + '...', 'success');
+                    connection = device.connect(params);
+                    updateAgentStatus(connection, false, 0);
+                }
+            }
+        }, 'json');
 
     }
 

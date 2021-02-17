@@ -101,6 +101,8 @@ class CommunicationForm extends Model
     public $quoteList = [];
     public $offerList;
 
+    public $originalQuotesRequired;
+    public $minMaxSelectedQuotes;
 
     /**
      * CommunicationForm constructor.
