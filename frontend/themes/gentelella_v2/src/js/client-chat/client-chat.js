@@ -22,7 +22,7 @@
             cache: false,
             data: {page: 1, channelId: params.get("channelId") | channelId},
             beforeSend: function () {
-                $("#_channel_list_wrapper").append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"> </i></div></div>');
+                // $("#_channel_list_wrapper").append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"> </i></div></div>');
             },
             success: function (data) {
                 $("._cc-list-wrapper").html(data.html);
@@ -46,7 +46,7 @@
                 window.history.replaceState({}, '', primaryUrl+"?"+params.toString());
             },
             complete: function () {
-                $("#_channel_list_wrapper").find('#_cc-load').remove();
+                // $("#_channel_list_wrapper").find('#_cc-load').remove();
             }
         });
     };

@@ -10,17 +10,42 @@
 
 ?>
 
-<div id="chat-dialog">
-</div>
+<div id="chat-dialog"></div>
 
 <?php
+
 $js = <<<JS
+(function(){function b(){
+    var a=document.createElement("script");
+    a.type="text/javascript";a.async=!0;
+    a.src="https://cdn.travelinsides.com/npmstatic/chatapi-dev.min.js";
+    document.getElementsByTagName("head")[0].appendChild(a)
+}
+window.k=window.k||{};
+window.k.livechat=window.k.livechat||{};
+var c=[];["create","setCustomProps","track","onReady"].forEach(function(a){
+    window.k.livechat[a]=function(){c.push([a,arguments])}
+});
+window.k.livechat.queue=c;
+b();
+// "complete"===document.readyState?b():window.addEventListener("load",b)
+})();
+JS;
+$this->registerJs($js, \yii\web\View::POS_HEAD);
+if ($rid) {
+    $js = <<<JS
 var t = setInterval(function() {
    if (window.k && window.k.crmChat) {
       clearInterval(t);
-      initChatDialog('$agentToken', '$server', '$rid', Boolean($readonly));
+      initChatDialog({
+        token: '$agentToken',
+        server: '$server',
+        rid: '$rid',
+        readonly: Boolean($readonly)
+      });
     }
   }, 50);
 JS;
 
-$this->registerJs($js);
+    $this->registerJs($js, \yii\web\View::POS_HEAD);
+}

@@ -370,7 +370,7 @@ class ClientChatController extends FController
                         'clientChatId' => $clientChat ? $clientChat->cch_id : '',
                         'formatter' => $formatter,
                         'resetUnreadMessagesChatId' => $resetUnreadMessagesChatId,
-                        'userId' => Auth::id(),
+                        'user' => Auth::user(),
                     ]);
                     $response['page'] = $page + 1;
                 }
@@ -2218,6 +2218,8 @@ class ClientChatController extends FController
                 $result['isClosed'] = (int) $clientChat->isInClosedStatusGroup();
                 $result['iframe'] = (new ClientChatIframeHelper($clientChat))->generateIframe();
                 $result['isShowInput'] = (int) ClientChatHelper::isShowInput($clientChat, Auth::user());
+                $result['readonly'] = (int) ClientChatHelper::isDialogReadOnly($clientChat, Auth::user());
+                $result['rid'] = $clientChat->cch_rid;
             } catch (\Throwable $throwable) {
                 AppHelper::throwableLogger(
                     $throwable,

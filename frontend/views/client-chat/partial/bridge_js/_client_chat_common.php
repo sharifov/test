@@ -399,21 +399,14 @@ window.loadClientChatData = function (cch_id, data, ref) {
     }
 }
 
-window.initChatDialog = function (agentToken, server, rid, readonly) {
+window.initChatDialog = function (params) {
   let chatDialogContainer = document.getElementById('chat-dialog');
+  chatDialogContainer.classList.add('active');
   
-  let params = {
-    token: agentToken,
-    server: server,
-    rid: rid,
-    readonly: readonly
-  };
-  
+  console.log(params);
   if (typeof window.chatDialog === 'function') {
-  console.log('update');
     window.chatDialog(params);
   } else {
-    console.log('init');
     window.chatDialog = window.k.crmChat(chatDialogContainer, params);
   }
   
@@ -431,6 +424,7 @@ $(document).on('click', '._cc-list-item', function () {
     let ownerId = $(this).attr('data-owner-id');
     currentChatOwnerId = ownerId;
     let rid = $(this).data('rid');
+    let readonly = $(this).data('is-readonly');
     
     // if (ownerId === userId) {
     //     addChatToActiveConnection();    
@@ -452,7 +446,12 @@ $(document).on('click', '._cc-list-item', function () {
     //     chatEl.show();
     // }
     
-    window.initChatDialog('$agentToken', '$server', rid, true);
+    initChatDialog({
+        token: '$agentToken',
+        server: '$server',
+        rid: rid,
+        readonly: Boolean(readonly)
+    });
     
     window.refreshChatInfo(cch_id, loadClientChatData, ref, window.socketConnectionId);
     
@@ -629,13 +628,13 @@ window.removeCcLoadFromIframe = function () {
 window.getChatHistory = function (cchId) {
     $("#_rc-iframe-wrapper").find('._rc-iframe').hide();
     $("#_rc-iframe-wrapper").find('#_cc-load').remove();
-    $("#_rc-iframe-wrapper").append(loaderIframe);
+    // $("#_rc-iframe-wrapper").append(loaderIframe);
         
     $.post('{$chatHistoryUrl}', {cchId: cchId}, function(data) {
         if (data.indexOf('iframe') !== -1) {
             $('#_rc-'+cchId).remove();
         }
-        $("#_rc-iframe-wrapper").append(data);
+        // $("#_rc-iframe-wrapper").append(data);
     });
 }
 
@@ -749,7 +748,11 @@ reloadCouchNote = function(chatData) {
 
 reloadChat = function(chatData) {
     return new Promise(function(resolve, reject) {
-        $('#_rc-iframe-wrapper').append(chatData.iframe);  
+        // $('#_rc-iframe-wrapper').append(chatData.iframe);  
+        window.initChatDialog({
+            rid: chatData.rid,
+            readonly: chatData.readonly
+        });
         resolve(chatData);                  
     }); 
 }
@@ -767,7 +770,7 @@ preReloadChat = function(cchId) {
     let iframeWrapperEl = $("#_rc-iframe-wrapper");
     iframeWrapperEl.find('._rc-iframe').hide();
     iframeWrapperEl.find('#_cc-load').remove();
-    iframeWrapperEl.append(loaderIframe);
+    // iframeWrapperEl.append(loaderIframe);
 }
 
 postReloadChat = function() {
@@ -778,7 +781,7 @@ postReloadChat = function() {
 function showAllLoaders(){
     // $('#cc-dialogs-wrapper').append(loaderIframe);
     $('#_cc_additional_info_wrapper').append(loaderIframe);
-    $("#_rc-iframe-wrapper").append(loaderIframe);    
+    // $("#_rc-iframe-wrapper").append(loaderIframe);    
 }
 
 function hideAllLoaders() {
@@ -1404,8 +1407,6 @@ $(document).on('click', '.js-couch-note-btn', function (e) {
 
 refreshUserSelectedState();
 
-(function(){function b(){var a=document.createElement("script");a.type="text/javascript";a.async=!0;a.src="https://cdn.travelinsides.com/npmstatic/chatapi-dev.min.js";document.getElementsByTagName("head")[0].appendChild(a)}window.k=window.k||{};window.k.livechat=window.k.livechat||{};var c=[];["create","setCustomProps","track","onReady"].forEach(function(a){window.k.livechat[a]=function(){c.push([a,arguments])}});window.k.livechat.queue=c;"complete"===document.readyState?
-b():window.addEventListener("load",b)})();
 JS;
 $this->registerJs($js);
 
