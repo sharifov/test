@@ -32,6 +32,7 @@ use sales\services\quote\addQuote\price\PreparePrices;
 use Yii;
 use yii\base\Model;
 use yii\data\ArrayDataProvider;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\web\Response;
@@ -51,6 +52,8 @@ use yii\widgets\ActiveForm;
  */
 class QuoteController extends FController
 {
+    private const RUNTIME_ERROR_QUOTES_NO_RESULTS = 100;
+
     /**
      * @param $leadId
      * @return string
@@ -114,21 +117,26 @@ class QuoteController extends FController
 
                 if ($quotes === false) {
                     $quotes = SearchService::getOnlineQuotes($lead);
-                    if ($quotes && !empty($quotes['data']) && empty($quotes['error'])) {
+                    if ($quotes && !empty($quotes['data']['results']) && empty($quotes['error'])) {
                         \Yii::$app->cacheFile->set($keyCache, $quotes = QuoteHelper::formatQuoteData($quotes['data']), 600);
                     } else {
-                        throw new \RuntimeException(!empty($quotes['error']) ? JsonHelper::decode($quotes['error'])['Message'] : 'No search results');
+                        throw new \RuntimeException(!empty($quotes['error']) ? JsonHelper::decode($quotes['error'])['Message'] : 'No search results', self::RUNTIME_ERROR_QUOTES_NO_RESULTS);
                     }
                 }
+//                VarDumper::dump($quotes);die;
 
                 $form = new FlightQuoteSearchForm();
                 $form->load(Yii::$app->request->post() ?: Yii::$app->request->get());
+
 
                 if (Yii::$app->request->isPost) {
                     $params = ['page' => 1];
                 }
 
+                $viewData = SearchService::getAirlineLocationInfo($quotes);
+
                 $quotes = $form->applyFilters($quotes);
+//                VarDumper::dump(ArrayHelper::toArray($form));die;
 
                 $dataProvider = new ArrayDataProvider([
                     'allModels' => $quotes['results'] ?? [],
@@ -142,7 +150,6 @@ class QuoteController extends FController
                     ],
                 ]);
 
-                $viewData = SearchService::getAirlineLocationInfo($quotes);
                 $viewData['leadId'] = $leadId;
                 $viewData['gds'] = $gds;
                 $viewData['lead'] = $lead;
@@ -155,9 +162,11 @@ class QuoteController extends FController
                 throw new \Exception('Not found lead', -1);
             }
         } catch (\Throwable $throwable) {
-            AppHelper::throwableLogger($throwable, 'QuoteController:actionAjaxSearchQuotes');
+            if ($throwable->getCode() !== self::RUNTIME_ERROR_QUOTES_NO_RESULTS) {
+                AppHelper::throwableLogger($throwable, 'QuoteController:actionAjaxSearchQuotes');
+                $viewData['errorMessage'] = $throwable->getMessage();
+            }
             $viewData['quotes'] = [];
-            $viewData['errorMessage'] = $throwable->getMessage();
         }
         return $this->renderAjax('partial/_quote_search_result', $viewData);
     }

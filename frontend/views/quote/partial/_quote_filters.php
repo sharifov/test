@@ -58,8 +58,8 @@ use yii\bootstrap4\Html;
                 ]) ?>
             </div>
 
-            <div class="col-md-1">
-                <?= $form->field($searchFrom, 'price', [
+            <div class="col-md-2">
+                <?php /*$form->field($searchFrom, 'price', [
                     'labelOptions' => [
                         'class' => 'control-label'
                     ]
@@ -68,7 +68,42 @@ use yii\bootstrap4\Html;
                     'min' => $minPrice,
                     'autocomplete' => false,
                     'step' => 0.01
-                ])->label('Max Price') ?>
+                ])->label('Max Price') */ ?>
+
+              <div class="form-group">
+                <div class="d-flex align-items-center justify-content-between">
+                  <label for="" class="control-label">Max Price</label>
+                  <span id="search-quote-price-value"></span>
+                </div>
+                <div class="d-flex justify-content-center align-items-center" style="width: 100%; height: 100%;">
+                  <div class="search-filters__slider" id="search-quote-price-filter"></div>
+                </div>
+                  <?= $form->field($searchFrom, 'price')->hiddenInput()->label(false) ?>
+                <script>
+                    var min = <?= $minPrice ?? 0 ?>;
+                    var max = <?= $maxPrice ?? 0 ?>;
+
+                    var start = '<?= $searchFrom->price ?>' || max;
+                    var sliderDuration = $('#search-quote-price-filter')[0];
+                    noUiSlider.create(sliderDuration, {
+                        start: [start],
+                        connect: [true, false],
+                        tooltips: {
+                            to: function(value){ return Number(value).toFixed(2);}
+                        },
+                        step: 0.01,
+                        range: {
+                            'min': min,
+                            'max': max
+                        }
+                    });
+
+                    sliderDuration.noUiSlider.on('update', function (values, handle) {
+                        $('#search-quote-price-filter').closest('.form-group').find('input').val(values[handle]);
+                        $('#search-quote-price-filter').closest('.form-group').find('#search-quote-price-value').html('$'+values[handle]);
+                    });
+                </script>
+              </div>
             </div>
 
             <div class="col-md-2">
@@ -77,7 +112,7 @@ use yii\bootstrap4\Html;
                         'class' => 'control-label'
                     ],
                 ])->dropDownList(Quote::getStopsLIst(), [
-                    'prompt' => '--'
+                              'prompt' => '--'
                 ]) ?>
             </div>
 
@@ -164,7 +199,7 @@ use yii\bootstrap4\Html;
                         <?= $form->field($searchFrom, 'rank')->hiddenInput()->label(false) ?>
                     </div>
                     <div class="d-flex justify-content-center align-items-center" style="width: 100%; height: 100%;">
-                        <div class="search-filters__slider" id="search-quote-rank-slider" data-min="0" data-max="10"></div>
+                        <div class="search-filters__slider" id="search-quote-rank-slider" data-min="0.0" data-max="10.0"></div>
                     </div>
                 </div>
                 <?php $ranks = explode('-', $searchFrom->rank) ?>
@@ -172,33 +207,122 @@ use yii\bootstrap4\Html;
                 <script>
                     var sliderRank = document.getElementById('search-quote-rank-slider');
 
-                    var maxRank = parseInt(sliderRank.getAttribute('data-max'), 10),
-                        minRank = parseInt(sliderRank.getAttribute('data-min'), 10),
-                        stepRank = 1;
+                    var maxRank = sliderRank.getAttribute('data-max'),
+                        minRank = sliderRank.getAttribute('data-min'),
+                        stepRank = 0.1;
 
                     noUiSlider.create(sliderRank, {
                         start: ['<?= $ranks[0] ?>', '<?= $ranks[1] ?>'],
                         connect: [false, true, false],
                         tooltips: [
-                            {to: function(value) {return parseInt(value, 10)}},
-                            {to: function(value) {return parseInt(value, 10)}}
+                            {to: function(value) {return value.toFixed(1)}},
+                            {to: function(value) {return value.toFixed(1)}}
                         ],
                         step: stepRank,
                         range: {
-                            'min': minRank,
-                            'max': maxRank
+                            'min': Number(minRank),
+                            'max': Number(maxRank)
                         }
                     });
 
                     sliderRank.noUiSlider.on('update', function (values, handle) {
-                        $('#search-quote-current-rank-value').html(parseInt(values[0], 10) + ' - ' + parseInt(values[1], 10));
+                        $('#search-quote-current-rank-value').html(Number(values[0]).toFixed(1) + ' - ' + Number(values[1]).toFixed(1));
                     });
 
                     sliderRank.noUiSlider.on('end', function(values) {
-                        $('#flightquotesearchform-rank').val(parseInt(values[0], 10) + '-' + parseInt(values[1], 10));
+                        $('#flightquotesearchform-rank').val(Number(values[0]).toFixed(1) + '-' + Number(values[1]).toFixed(1));
                     });
                 </script>
             </div>
+          <div class="col-md-3">
+            <div class="form-group">
+              <div class="d-flex align-items-center justify-content-between">
+                <label for="" class="control-label">Departure</label>
+                <span id="search-quote-departure-value"></span>
+              </div>
+              <div class="d-flex justify-content-center align-items-center" style="width: 100%; height: 100%;">
+                <div class="search-filters__slider" id="search-quote-departure-filter"></div>
+              </div>
+                <?= $form->field($searchFrom, 'departure')->hiddenInput()->label(false) ?>
+              <script>
+                  var min = <?= $searchFrom->arrivalMin ?>;
+                  var max = <?= $searchFrom->arrivalMax ?>;
+
+                  var end = '<?= $searchFrom->arrivalEnd ?>' || max;
+                  var start = '<?= $searchFrom->arrivalStart ?>' || min;
+                  var sliderDuration = $('#search-quote-arrival-filter')[0];
+                  noUiSlider.create(sliderDuration, {
+                      start: [start, end],
+                      connect: [false, true, false],
+                      tooltips: [{
+                          to: function(value){
+                              return window.helper.toHHMM(value * 60);
+                          }
+                      },  {
+                          to: function(value){
+                              return window.helper.toHHMM(value * 60);
+                          }
+                      }
+                      ],
+                      step: 15,
+                      range: {
+                          'min': min,
+                          'max': max
+                      }
+                  });
+
+                  sliderDuration.noUiSlider.on('update', function (values, handle) {
+                      $('#search-quote-arrival-filter').closest('.form-group').find('input').val(values[0] + ' - ' + values[1]);
+                      $('#search-quote-arrival-filter').closest('.form-group').find('#search-quote-arrival-value').html(window.helper.toHHMM(values[0] * 60) + ' - ' + window.helper.toHHMM(values[1] * 60));
+                  });
+              </script>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="form-group">
+              <div class="d-flex align-items-center justify-content-between">
+                <label for="" class="control-label">Arrival</label>
+                <span id="search-quote-arrival-value"></span>
+              </div>
+              <div class="d-flex justify-content-center align-items-center" style="width: 100%; height: 100%;">
+                <div class="search-filters__slider" id="search-quote-arrival-filter"></div>
+              </div>
+                <?= $form->field($searchFrom, 'arrival')->hiddenInput()->label(false) ?>
+              <script>
+                  var min = <?= $searchFrom->departureMin ?>;
+                  var max = <?= $searchFrom->departureMax ?>;
+
+                  var end = '<?= $searchFrom->departureEnd ?>' || max;
+                  var start = '<?= $searchFrom->departureStart ?>' || min;
+                  var sliderDuration = $('#search-quote-departure-filter')[0];
+                  noUiSlider.create(sliderDuration, {
+                      start: [start, end],
+                      connect: [false, true, false],
+                      tooltips: [{
+                          to: function(value){
+                              return window.helper.toHHMM(value * 60);
+                          }
+                      },  {
+                          to: function(value){
+                              return window.helper.toHHMM(value * 60);
+                          }
+                      }
+                      ],
+                      step: 15,
+                      range: {
+                          'min': min,
+                          'max': max
+                      }
+                  });
+
+                  sliderDuration.noUiSlider.on('update', function (values, handle) {
+                      $('#search-quote-departure-filter').closest('.form-group').find('input').val(values[0] + ' - ' + values[1]);
+                      $('#search-quote-departure-filter').closest('.form-group').find('#search-quote-departure-value').html(window.helper.toHHMM(values[0] * 60) + ' - ' + window.helper.toHHMM(values[1] * 60));
+                  });
+              </script>
+            </div>
+          </div>
         </div>
 
         <div class="row">

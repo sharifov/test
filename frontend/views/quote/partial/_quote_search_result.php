@@ -21,7 +21,7 @@ use yii\widgets\Pjax;
  * @var $searchForm FlightQuoteSearchForm
  * @var $keyCache string
  */
-
+//\yii\helpers\VarDumper::dump($airlines);die;
 if ($quotes && (isset($quotes['count']) && $quotes['count'] > 0)) :
     $js = <<<JS
     $(document).on('click','.search_quote_details__btn', function (e) {
