@@ -413,6 +413,9 @@ window.initChatDialog = function (params) {
 }
 
 $(document).on('click', '._cc-list-item', function () {
+    if (typeof window.initChatDialog !== 'function') {
+        return false;
+    }
     // $('#cc-dialogs-wrapper').append(loaderIframe); 
     let iframeWrapperEl = $("#_rc-iframe-wrapper");
     iframeWrapperEl.find('#_cc-load').remove();
