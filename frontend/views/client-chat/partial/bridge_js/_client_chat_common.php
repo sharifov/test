@@ -399,19 +399,6 @@ window.loadClientChatData = function (cch_id, data, ref) {
     }
 }
 
-window.initChatDialog = function (params) {
-  let chatDialogContainer = document.getElementById('chat-dialog');
-  chatDialogContainer.classList.add('active');
-  
-  console.log(params);
-  if (typeof window.chatDialog === 'function') {
-    window.chatDialog(params);
-  } else {
-    window.chatDialog = window.k.crmChat(chatDialogContainer, params);
-  }
-  
-}
-
 $(document).on('click', '._cc-list-item', function () {
     if (typeof window.initChatDialog !== 'function') {
         return false;

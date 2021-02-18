@@ -30,6 +30,19 @@ window.k.livechat.queue=c;
 b();
 // "complete"===document.readyState?b():window.addEventListener("load",b)
 })();
+
+window.initChatDialog = function (params) {
+  let chatDialogContainer = document.getElementById('chat-dialog');
+  chatDialogContainer.classList.add('active');
+  
+  console.log(params);
+  if (typeof window.chatDialog === 'function') {
+    window.chatDialog(params);
+  } else {
+    window.chatDialog = window.k.crmChat(chatDialogContainer, params);
+  }
+  
+}
 JS;
 $this->registerJs($js, \yii\web\View::POS_HEAD);
 if ($rid) {
