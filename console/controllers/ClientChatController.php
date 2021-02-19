@@ -2,6 +2,7 @@
 
 namespace console\controllers;
 
+use _HumbugBoxd11d6e1365a3\Symfony\Component\Console\Exception\RuntimeException;
 use common\models\Employee;
 use common\models\Notifications;
 use common\models\UserOnline;
@@ -17,6 +18,7 @@ use sales\model\clientChatHold\entity\ClientChatHold;
 use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\model\userClientChatData\entity\UserClientChatData;
+use sales\model\userClientChatData\service\UserClientChatDataService;
 use sales\services\clientChatChannel\ClientChatChannelCodeException;
 use sales\services\clientChatChannel\ClientChatChannelService;
 use sales\services\clientChatService\ClientChatService;
@@ -456,5 +458,30 @@ class ClientChatController extends Controller
 //            'Execute Time' => $time . ' sec',
 //            'End Time' => date('Y-m-d H:i:s'),
 //        ]), 'info\ClientChatController:actionCloseToArchiveOnTimeout:result');
+    }
+
+    public function actionRefreshRocketChatUserToken()
+    {
+        $userClientChatDataService = Yii::createObject(UserClientChatDataService::class);
+        $userClientChatData = UserClientChatData::find()->where(['uccd_active' => 1])->all();
+        $error = [];
+        $processed = 0;
+        $countItems = count($userClientChatData);
+        Console::startProgress($processed, $countItems, 'Counting objects: ', false);
+        foreach ($userClientChatData as $userChatData) {
+            try {
+                $userClientChatDataService->refreshRocketChatUserToken($userChatData);
+            } catch (\Throwable $e) {
+                $errorMessage = 'Refresh rocket chat user token error: ';
+                $error[] = 'Crm User id: ' . $userChatData->uccd_employee_id . ';' . $errorMessage . $e->getMessage();
+            }
+            $processed++;
+            Console::updateProgress($processed, $countItems);
+        }
+
+        if ($error) {
+            Yii::error(VarDumper::dumpAsString($error), 'Console::refreshRocketChatUserToken');
+        }
+        Console::endProgress(false);
     }
 }
