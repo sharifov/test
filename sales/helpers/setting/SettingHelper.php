@@ -115,4 +115,9 @@ class SettingHelper
     {
         return (bool)(\Yii::$app->params['settings']['enable_general_line_priority'] ?? false);
     }
+
+    public static function getFlightQuoteAutoSelectCount(): int
+    {
+        return (int)(Yii::$app->params['settings']['flight_quote_auto_select_count'] ?? 3);
+    }
 }
