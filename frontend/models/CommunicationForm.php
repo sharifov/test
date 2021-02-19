@@ -101,6 +101,7 @@ class CommunicationForm extends Model
     public $quoteList = [];
     public $offerList;
 
+    public $selectRequired;
     public $originalQuotesRequired;
     public $minMaxSelectedQuotes;
 
@@ -156,6 +157,9 @@ class CommunicationForm extends Model
                 'whenClient' => "function (attribute, value) { return $('#c_type_id').val() == " . self::TYPE_SMS . '; }'
             ],
 
+            [['c_email_tpl_key'], 'validateEmailTemplateKey'],
+            [['c_sms_tpl_key'], 'validateSmsTemplateKey'],
+
 
             /*[['c_sms_message'], 'required', 'when' => static function (CommunicationForm $model) {
                 return $model->c_sms_tpl_id != self::TPL_TYPE_SMS_OFFER && $model->c_type_id == self::TYPE_SMS;
@@ -171,13 +175,15 @@ class CommunicationForm extends Model
                     return $('#c_type_id').val() == " . self::TYPE_VOICE . '; }'
             ],
 
-
-
-            [['c_quotes'], 'required', 'when' => static function (CommunicationForm $model) {
+            /*[['c_quotes'], 'required', 'when' => static function (CommunicationForm $model) {
                 return ($model->c_email_tpl_key === self::TPL_TYPE_EMAIL_OFFER_KEY || $model->c_email_tpl_key === self::TPL_TYPE_EMAIL_OFFER_VIEW_KEY) && (int) $model->c_type_id === self::TYPE_EMAIL;
             },
                 'whenClient' => "function (attribute, value) { return ($('#c_type_id').val() == " . self::TYPE_EMAIL . " && ($('#c_email_tpl_key').val() == '" . self::TPL_TYPE_EMAIL_OFFER_VIEW_KEY . "' || $('#c_email_tpl_key').val() == '" . self::TPL_TYPE_EMAIL_OFFER_KEY . "')); }"
-            ],
+            ],*/
+
+            [['c_quotes'], 'required', 'when' => static function (CommunicationForm $model) {
+                return $model->selectRequired;
+            }, 'whenClient' => "function (attribute, value) { return false}"],
 
             [['c_quotes'], 'required', 'when' => static function (CommunicationForm $model) {
                 return ($model->c_sms_tpl_key === self::TPL_TYPE_SMS_OFFER_KEY || $model->c_sms_tpl_key === self::TPL_TYPE_SMS_OFFER_VIEW_KEY) && (int) $model->c_type_id === self::TYPE_SMS;
@@ -224,9 +230,6 @@ class CommunicationForm extends Model
 
             [['c_offers'], 'string'], //'each', 'rule' => ['integer']],
             [['c_offers'], 'validateOffers'],
-
-            [['c_email_tpl_key'], 'validateEmailTemplateKey'],
-            [['c_sms_tpl_key'], 'validateSmsTemplateKey'],
 
             [['c_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['c_user_id' => 'id']],
             [['c_language_id'], 'exist', 'skipOnError' => true, 'targetClass' => Language::class, 'targetAttribute' => ['c_language_id' => 'language_id']],
@@ -281,6 +284,7 @@ class CommunicationForm extends Model
             $this->addError($attribute, 'Not exist this Email Template (DB)');
         } else {
             $this->c_email_tpl_id = $tpl->etp_id;
+            $this->selectRequired = $tpl->etp_params_json['quotes']['selectRequired'];
         }
     }
 
