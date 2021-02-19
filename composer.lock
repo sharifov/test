@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5d4df929390763c68fcf8d1a4668d5d1",
+    "content-hash": "309b156be2f703fbb2841137a687af8e",
     "packages": [
         {
             "name": "2amigos/2fa-library",
@@ -677,16 +677,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.173.10",
+            "version": "3.173.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "fc5153fc7047b4092cd60659c907d4591b65caa0"
+                "reference": "4913ae66a988ffb3313bc138e8bd16273b68c8eb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/fc5153fc7047b4092cd60659c907d4591b65caa0",
-                "reference": "fc5153fc7047b4092cd60659c907d4591b65caa0",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/4913ae66a988ffb3313bc138e8bd16273b68c8eb",
+                "reference": "4913ae66a988ffb3313bc138e8bd16273b68c8eb",
                 "shasum": ""
             },
             "require": {
@@ -761,9 +761,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.173.10"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.173.12"
             },
-            "time": "2021-02-16T19:15:07+00:00"
+            "time": "2021-02-18T19:20:31+00:00"
         },
         {
             "name": "bacon/bacon-qr-code",
@@ -869,7 +869,7 @@
             "version": "v3.4.1",
             "source": {
                 "type": "git",
-                "url": "git@github.com:twbs/bootstrap.git",
+                "url": "https://github.com/twbs/bootstrap.git",
                 "reference": "68b0d231a13201eb14acd3dc84e51543d16e5f7e"
             },
             "dist": {
@@ -3569,7 +3569,7 @@
             "version": "v1.0",
             "source": {
                 "type": "git",
-                "url": "https://stash.travelinsides.com/scm/lib/yii2-bootstrap4-glyphicons.git",
+                "url": "git@bitbucket.org:techork/yii2-bootstrap4-glyphicons.git",
                 "reference": "f7f34329cad5f5d57befd4b3ea082761506e83a9"
             },
             "require": {
@@ -3608,7 +3608,7 @@
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://stash.travelinsides.com/scm/lib/yii2-mattermost-log-target.git",
+                "url": "git@bitbucket.org:techork/yii2-mattermost-log-target.git",
                 "reference": "149531dae450df7b13a526e66af7a854f0153721"
             },
             "require": {
@@ -3649,7 +3649,7 @@
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://stash.travelinsides.com/scm/lib/yii2-prometheus-client.git",
+                "url": "git@bitbucket.org:techork/yii2-prometheus-client.git",
                 "reference": "b66655424d09b9064d5f878cb9cce0b6d08dadd5"
             },
             "require": {
@@ -3693,7 +3693,7 @@
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://stash.travelinsides.com/scm/lib/yii2-rbac-export-import.git",
+                "url": "git@bitbucket.org:techork/yii2-rbac-export-import.git",
                 "reference": "796c5525ce609ac80cb6d0074bcf917a917d0f15"
             },
             "require": {
@@ -3734,7 +3734,7 @@
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://stash.travelinsides.com/scm/lib/yii2-virtual-cron.git",
+                "url": "git@bitbucket.org:techork/yii2-virtual-cron.git",
                 "reference": "e63dd51ee5f85d30cc99c2383074eb6c4c8e6dbf"
             },
             "require": {
@@ -5056,16 +5056,16 @@
         },
         {
             "name": "phpstan/phpdoc-parser",
-            "version": "0.4.10",
+            "version": "0.4.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpdoc-parser.git",
-                "reference": "5c1eb9aac80cb236f1b7fbe52e691afe4cc9f430"
+                "reference": "2ce4c6623376d2613cf02e055ea1a926d906cef7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/5c1eb9aac80cb236f1b7fbe52e691afe4cc9f430",
-                "reference": "5c1eb9aac80cb236f1b7fbe52e691afe4cc9f430",
+                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/2ce4c6623376d2613cf02e055ea1a926d906cef7",
+                "reference": "2ce4c6623376d2613cf02e055ea1a926d906cef7",
                 "shasum": ""
             },
             "require": {
@@ -5078,7 +5078,7 @@
                 "phpstan/phpstan": "^0.12.60",
                 "phpstan/phpstan-strict-rules": "^0.12.5",
                 "phpunit/phpunit": "^7.5.20",
-                "symfony/process": "^4.0"
+                "symfony/process": "^5.2"
             },
             "type": "library",
             "extra": {
@@ -5100,9 +5100,9 @@
             "description": "PHPDoc parser with support for nullable, intersection and generic types",
             "support": {
                 "issues": "https://github.com/phpstan/phpdoc-parser/issues",
-                "source": "https://github.com/phpstan/phpdoc-parser/tree/0.4.10"
+                "source": "https://github.com/phpstan/phpdoc-parser/tree/0.4.11"
             },
-            "time": "2020-12-12T15:45:28+00:00"
+            "time": "2021-02-19T11:57:27+00:00"
         },
         {
             "name": "pimple/pimple",
@@ -10741,16 +10741,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "0.12.76",
+            "version": "0.12.77",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "7aaaf9a759a29795e8f46d48041af1c1f1b23d38"
+                "reference": "1f10b8c8d118d01e7b492f9707999d456be5812c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/7aaaf9a759a29795e8f46d48041af1c1f1b23d38",
-                "reference": "7aaaf9a759a29795e8f46d48041af1c1f1b23d38",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/1f10b8c8d118d01e7b492f9707999d456be5812c",
+                "reference": "1f10b8c8d118d01e7b492f9707999d456be5812c",
                 "shasum": ""
             },
             "require": {
@@ -10781,7 +10781,7 @@
             "description": "PHPStan - PHP Static Analysis Tool",
             "support": {
                 "issues": "https://github.com/phpstan/phpstan/issues",
-                "source": "https://github.com/phpstan/phpstan/tree/0.12.76"
+                "source": "https://github.com/phpstan/phpstan/tree/0.12.77"
             },
             "funding": [
                 {
@@ -10797,7 +10797,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-02-13T11:47:44+00:00"
+            "time": "2021-02-17T16:22:19+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -13623,7 +13623,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=7.4",
+        "php": "^7.4|^8.0",
         "ext-json": "*",
         "ext-curl": "*",
         "ext-gd": "*",
