@@ -2,13 +2,25 @@
 
 /** @var ClientChat|null $clientChat */
 
+use sales\auth\Auth;
+use sales\helpers\clientChat\ClientChatDialogHelper;
+use sales\helpers\clientChat\ClientChatHelper;
 use sales\helpers\clientChat\ClientChatIframeHelper;
 use sales\model\clientChat\entity\ClientChat;
 
+$readonly = (int)ClientChatHelper::isDialogReadOnly($clientChat, Auth::user());
+$agentToken = ClientChatDialogHelper::getAgentToken(Auth::user());
+$server = Yii::$app->rchat->host;
 ?>
 
 <?php if ($clientChat) : ?>
-    <?php echo (new ClientChatIframeHelper($clientChat))->setReadOnly(true)->generateIframe(); ?>
+    <?php // (new ClientChatIframeHelper($clientChat))->setReadOnly(true)->generateIframe(); ?>
+    <?= $this->render('partial/_client_chat_dialog', [
+        'agentToken' => $agentToken,
+        'server' => $server,
+        'rid' => $clientChat->cch_rid ?? null,
+        'readonly' => $readonly
+    ]) ?>
 
     <?php
     $js = <<<JS

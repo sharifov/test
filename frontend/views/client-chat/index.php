@@ -86,7 +86,7 @@ $server = Yii::$app->rchat->host;
     if ($accessChatError) {
         $this->registerJs('createNotify("Client chat view", "You don\'t have access to this chat", "error")', View::POS_LOAD);
     } elseif ($clientChat) {
-        $iframeData = (new ClientChatIframeHelper($clientChat))->generateIframe();
+        // $iframeData = (new ClientChatIframeHelper($clientChat))->generateIframe();
 
         if ($client) {
             $infoData = $this->render(
