@@ -49,7 +49,7 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 
             <?= $model->getStatusSpan()?>
 
-            <span class="quote__id">QUID: <strong><?= $model->uid ?></strong></span>
+            <span class="quote__id" title="<?php echo $model->check_payment ?>">QUID: <strong><?= $model->uid ?></strong></span>
             <span class="quote__vc" title="Main Airline">
                 <span class="quote__vc-logo">
                     <img src="//www.gstatic.com/flights/airline_logos/70px/<?= $model->main_airline_code?>.png" alt="" class="quote__vc-img">
