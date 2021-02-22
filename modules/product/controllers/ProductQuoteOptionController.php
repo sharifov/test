@@ -71,6 +71,7 @@ class ProductQuoteOptionController extends FController
             if ($form->validate()) {
                 $model = new ProductQuoteOption();
                 $model->attributes = $form->attributes;
+                $model->calculateClientPrice();
 
                 $transaction = Yii::$app->db->beginTransaction();
                 try {
@@ -137,6 +138,7 @@ class ProductQuoteOptionController extends FController
         if ($form->load(Yii::$app->request->post())) {
             if ($form->validate()) {
                 $model->attributes = $form->attributes;
+                $model->calculateClientPrice();
 
                 $checkProfit = ($model->isAttributeChanged('pqo_extra_markup') || $model->isAttributeChanged('pqo_status_id'));
 

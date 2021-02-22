@@ -75,7 +75,7 @@ class HotelQuote extends ActiveRecord implements Quotable
             [['hq_hash_key', 'hq_request_hash'], 'string', 'max' => 32],
             [['hq_destination_name'], 'string', 'max' => 255],
             [['hq_hotel_name'], 'string', 'max' => 200],
-            [['hq_hash_key'], 'unique'],
+            [['hq_hotel_id', 'hq_hash_key'], 'unique', 'targetAttribute' => ['hq_hotel_id', 'hq_hash_key']],
             [['hq_hotel_id'], 'exist', 'skipOnError' => true, 'targetClass' => Hotel::class, 'targetAttribute' => ['hq_hotel_id' => 'ph_id']],
             [['hq_hotel_list_id'], 'exist', 'skipOnError' => true, 'targetClass' => HotelList::class, 'targetAttribute' => ['hq_hotel_list_id' => 'hl_id']],
             [['hq_product_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['hq_product_quote_id' => 'pq_id']],
@@ -180,7 +180,7 @@ class HotelQuote extends ActiveRecord implements Quotable
                     $prQuote->pq_price = (float)$totalAmount;
                     $prQuote->pq_origin_price = (float)$totalAmount;
                     $prQuote->pq_client_price = (float)$totalAmount;
-                    $prQuote->pq_status_id = ProductQuoteStatus::PENDING;
+                    $prQuote->pq_status_id = ProductQuoteStatus::NEW;
                     $prQuote->pq_gid = self::generateGid();
                     $prQuote->pq_service_fee_sum = 0;
                     $prQuote->pq_client_currency_rate = ProductQuoteHelper::getClientCurrencyRate($hotelRequest->phProduct);
@@ -237,7 +237,7 @@ class HotelQuote extends ActiveRecord implements Quotable
                     $qRoom->hqr_payment_type = $room['paymentType'] ?? null;
                     $qRoom->hqr_board_code = $room['boardCode'] ?? null;
                     $qRoom->hqr_board_name = $room['boardName'] ?? null;
-                    $qRoom->hqr_amount = $room['amount'] - $room['markup'] ?? null;
+                    $qRoom->hqr_amount = $room['amount'] - ($room['markup'] ?? 0);
                     $qRoom->hqr_rate_comments = $qRoom->prepareRateComments($room);
                     $qRoom->hqr_currency = $currency;
                     $qRoom->hqr_service_fee_percent = ProductTypePaymentMethodQuery::getDefaultPercentFeeByProductType($hQuote->hqProductQuote->pqProduct->pr_type_id) ?? (self::SERVICE_FEE * 100);
@@ -253,7 +253,7 @@ class HotelQuote extends ActiveRecord implements Quotable
                     } else {
                         $qRoom->hqr_cancel_amount = $room['cancellationPolicies']['amount'] ?? null;
                     }
-                    if ($room['cancellationPolicies'][0]['from']) {
+                    if (isset($room['cancellationPolicies']) && $room['cancellationPolicies'][0]['from']) {
                         $qRoom->hqr_cancel_from_dt = date("Y-m-d H:i:s", strtotime($room['cancellationPolicies'][0]['from']));
                     } else {
                         $qRoom->hqr_cancel_from_dt = $room['cancellationPolicies']['from'] ?? null;

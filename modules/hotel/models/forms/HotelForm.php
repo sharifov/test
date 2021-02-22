@@ -72,8 +72,8 @@ class HotelForm extends Model
             'ph_hotel_code' => 'Hotel Code',
             'ph_destination_code' => 'Destination',
             'ph_destination_label' => 'Destination',
-            'ph_min_star_rate' => 'Min. Rate',
-            'ph_max_star_rate' => 'Max. Rate',
+            'ph_min_star_rate' => 'Min. Stars',
+            'ph_max_star_rate' => 'Max. Stars',
             'ph_max_price_rate' => 'Max Price Rate',
             'ph_min_price_rate' => 'Min Price Rate',
         ];

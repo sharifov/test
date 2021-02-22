@@ -26,6 +26,8 @@ class HotelQuoteSerializer extends Serializer
     {
         $data = [];
 
+        $data['hotel_request'] = $this->model->hqHotel ? $this->model->hqHotel->serialize() : [];
+
         $data['hotel'] = $this->model->hqHotelList ? $this->model->hqHotelList->serialize() : [];
 
         if ($this->model->hotelQuoteRooms) {

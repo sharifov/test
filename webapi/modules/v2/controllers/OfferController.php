@@ -92,7 +92,7 @@ class OfferController extends BaseController
      *               {
      *                   "pq_gid": "6fcfc43e977dabffe6a979ebda22a281",
      *                   "pq_name": "",
-     *                   "pq_order_id": null,
+     *                   "pq_order_id": 10,
      *                   "pq_description": null,
      *                   "pq_status_id": 1,
      *                   "pq_price": 92.3,
@@ -114,6 +114,7 @@ class OfferController extends BaseController
      *                       "fq_main_airline": "SU",
      *                       "fq_fare_type_id": 1,
      *                       "fq_last_ticket_date": "2020-01-25",
+     *                       "fq_origin_search_data": "description field: json encoded origin data from search api",
      *                       "flight": {
      *                           "fl_product_id": 33,
      *                           "fl_trip_type_id": 1,
@@ -144,6 +145,8 @@ class OfferController extends BaseController
      *                               "fqs_ticket_id": null,
      *                               "fqs_recheck_baggage": 0,
      *                               "fqs_mileage": null,
+     *                               "departureLocation": "Chisinau",
+     *                               "arrivalLocation": "Bucharest",
      *                               "baggages": [
      *                                   {
      *                                       "qsb_flight_pax_code_id": 1,
@@ -169,7 +172,8 @@ class OfferController extends BaseController
      *                               "qpp_origin_tax": "49.30",
      *                               "qpp_client_currency": "USD",
      *                               "qpp_client_fare": null,
-     *                               "qpp_client_tax": null
+     *                               "qpp_client_tax": null,
+     *                               "paxType":"ADT"
      *                           }
      *                       ]
      *                   },
@@ -196,9 +200,16 @@ class OfferController extends BaseController
      *                   "pq_origin_currency": "USD",
      *                   "pq_client_currency": "USD",
      *                   "data": {
+     *                      "hotel_request": {
+                                "ph_check_in_date": "2021-06-10",
+                                "ph_check_out_date": "2021-06-18",
+                                "ph_destination_code": "LON",
+                                "ph_destination_label": "United Kingdom, London",
+                                "destination_city": "London"
+                            },
      *                       "hotel": {
      *                           "hl_name": "Manzil Hotel",
-     *                           "hl_star": null,
+     *                           "hl_star": "2*",
      *                           "hl_category_name": "2 STARS",
      *                           "hl_destination_name": "Casablanca",
      *                           "hl_zone_name": "Casablanca",
@@ -209,7 +220,7 @@ class OfferController extends BaseController
      *                           "hl_postal_code": "20000",
      *                           "hl_city": "CASABLANCA",
      *                           "hl_email": "resa@manzilhotels.com",
-     *                           "hl_web": null,
+     *                           "hl_web": "",
      *                           "hl_phone_list": [
      *                              {
      *                                   "type": "PHONEBOOKING",
@@ -230,7 +241,7 @@ class OfferController extends BaseController
      *                                   "type": "GEN"
      *                               }
      *                           ],
-     *                           "hl_image_base_url": null
+     *                           "hl_image_base_url": ""
      *                       },
      *                       "rooms": [
      *                           {
@@ -238,12 +249,12 @@ class OfferController extends BaseController
      *                               "hqr_class": "NOR",
      *                               "hqr_amount": 349.99,
      *                               "hqr_currency": "USD",
-     *                               "hqr_cancel_amount": null,
-     *                               "hqr_cancel_from_dt": null,
+     *                               "hqr_cancel_amount": 293.58,
+     *                               "hqr_cancel_from_dt": "2020-05-14 20:59:00",
      *                               "hqr_board_name": "ROOM ONLY",
      *                               "hqr_rooms": 1,
      *                               "hqr_adults": 1,
-     *                               "hqr_children": null
+     *                               "hqr_children": 1
      *                           }
      *                       ]
      *                   },
@@ -253,16 +264,16 @@ class OfferController extends BaseController
      *                       "pr_lead_id": 371096,
      *                       "pr_description": "rrr",
      *                       "pr_status_id": 1,
-     *                       "pr_service_fee_percent": null
+     *                       "pr_service_fee_percent": 3.50
      *                   },
      *                   "productQuoteOptions": [
      *                       {
      *                           "pqo_name": "1323",
      *                           "pqo_description": "",
      *                           "pqo_status_id": 1,
-     *                           "pqo_price": null,
-     *                           "pqo_client_price": null,
-     *                           "pqo_extra_markup": null
+     *                           "pqo_price": 10.00,
+     *                           "pqo_client_price": 15.00,
+     *                           "pqo_extra_markup": 10.00
      *                       },
      *                       {
      *                           "pqo_name": "tests",
@@ -273,7 +284,134 @@ class OfferController extends BaseController
      *                           "pqo_extra_markup": 1
      *                       }
      *                   ]
-     *               }
+     *               },
+     *               {
+     *                   "pq_gid": "1576705c738f49538f9335ae89528c75",
+     *                   "pq_name": "4A",
+     *                   "pq_order_id": null,
+     *                   "pq_description": null,
+     *                   "pq_status_id": 2,
+     *                   "pq_price": 557.87,
+     *                   "pq_origin_price": 539,
+     *                   "pq_client_price": 513.29,
+     *                   "pq_service_fee_sum": 18.87,
+     *                   "pq_origin_currency": "USD",
+     *                   "pq_client_currency": "EUR",
+     *                   "data": {
+     *                       "cruiseLine": {
+     *                           "code": "CV",
+     *                           "name": "Carnival Cruise Lines"
+     *                       },
+     *                       "departureDate": "2021-07-01",
+     *                       "returnDate": "2021-07-05",
+     *                       "destination": "Caribbean",
+     *                       "subDestination": "Western Caribbean",
+     *                       "ship": {
+     *                           "code": "BR",
+     *                           "name": "Carnival Breeze"
+     *                       },
+     *                       "cabin": {
+     *                           "code": "4A",
+     *                           "name": "Interior",
+     *                           "price": 539,
+     *                           "imgUrl": "https://mediaim.expedia.com/cruise/cv-br-2020-02-01/a7f6f5bd-aef2-417e-87d2-fb3fce2baeba.jpg?impolicy=resizecrop&ra=fit&rw=500",
+     *                           "experience": "INSIDE"
+     *                       },
+     *                       "departureName": "Galveston",
+     *                       "crq_data_json": "description field: json origin data from search api"
+     *                   },
+     *                   "product": {
+     *                       "pr_type_id": 4,
+     *                       "pr_name": "Cruise test 1",
+     *                       "pr_lead_id": 513177,
+     *                       "pr_description": "",
+     *                       "pr_status_id": null,
+     *                       "pr_service_fee_percent": null
+     *                   },
+     *                   "productQuoteOptions": []
+     *               },
+     *               {
+     *                  "pq_gid":"1f2a619ee37af592dfd6c927ef00b795",
+     *                  "pq_name":"Boat Tour in Miami with a Free Drink",
+     *                  "pq_order_id":null,
+     *                  "pq_description":null,
+     *                  "pq_status_id":2,
+     *                  "pq_price":28,
+     *                  "pq_origin_price":28,
+     *                  "pq_client_price":28,
+     *                  "pq_service_fee_sum":0,
+     *                  "pq_origin_currency":"USD",
+     *                  "pq_client_currency":"USD",
+     *                  "data": {
+     *                      "atnq_booking_id":null,
+     *                      "atnq_attraction_name":"Boat Tour in Miami with a Free Drink",
+     *                      "atnq_supplier_name":"Miami Tour Company",
+     *                      "atnq_json_response": "description field: json origin data from search api",
+     *                      "search_request": {
+     *                          "atn_product_id":234,
+     *                          "atn_date_from":"2021-06-17",
+     *                          "atn_date_to":"2021-06-24",
+     *                          "atn_destination":"Italy, Rome",
+     *                          "atn_destination_code":"ROE"
+     *                       }
+     *                    },
+     *                   "product": {
+     *                          "pr_type_id":5,
+     *                          "pr_name":"",
+     *                          "pr_lead_id":15356,
+     *                          "pr_description":"",
+     *                          "pr_status_id":null,
+     *                          "pr_service_fee_percent":null
+     *                    },
+     *                    "productQuoteOptions":[]
+     *                  },
+     *              {
+     *                  "pq_gid":"1f2a619ee37af592dfd6c927ef00b795",
+     *                  "pq_name":"Boat Tour in Miami with a Free Drink",
+     *                  "pq_order_id":null,
+     *                  "pq_description":"example",
+     *                  "pq_status_id":2,
+     *                  "pq_price":28,
+     *                  "pq_origin_price":28,
+     *                  "pq_client_price":28,
+     *                  "pq_service_fee_sum":0,
+     *                  "pq_origin_currency":"USD",
+     *                  "pq_client_currency":"USD",
+     *                  "data": {
+     *                      "rcq_model_name":"Nissan Rogue or similar",
+     *                      "rcq_category":"Midsize SUV",
+     *                      "rcq_image_url":"https://example.com/inmage.jpg",
+     *                      "rcq_vendor_name":"Hertz Rental Company",
+     *                      "rcq_vendor_logo_url":"https://example.com/logo.jpg",
+     *                      "rcq_options": {
+     *                          "doors":4,
+     *                          "person":5,
+     *                          "ac_unit":"Air Conditioning",
+     *                          "mileage":"Unlimited mileage",
+     *                          "cleanliness":"Enhanced cleaning",
+     *                          "transmission":"Automatic"
+     *                       },
+     *                      "search_request": {
+     *                          "prc_product_id":234,
+     *                          "prc_pick_up_date":"2021-06-17",
+     *                          "prc_drop_off_date":"2021-06-24",
+     *                          "prc_pick_up_code":"KIV",
+     *                          "prc_drop_off_code":"KIV",
+     *                          "prc_pick_up_time":"01:45:00",
+     *                          "prc_drop_off_time":"04:00:00"
+     *                       }
+     *                    },
+     *                   "product": {
+     *                          "pr_type_id":5,
+     *                          "pr_name":"offer for my best client",
+     *                          "pr_lead_id":15356,
+     *                          "pr_description":"",
+     *                          "pr_status_id":null,
+     *                          "pr_service_fee_percent":null
+     *                    },
+     *                    "productQuoteOptions":[]
+     *                  }
+     *
      *           ]
      *       },
      *       "technical": {

@@ -8,6 +8,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
+use sales\helpers\phone\MaskPhoneHelper;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\SmsSearch */
@@ -183,8 +184,26 @@ $user = Yii::$app->user->identity;
             //'s_lead_id',
             //'s_project_id',
 
-            's_phone_from',
-            's_phone_to',
+            //'s_phone_from',
+            [
+                'attribute' => 's_phone_from',
+                'value' => static function (\common\models\Sms $model) {
+                    if ($model->s_type_id == $model::TYPE_INBOX) {
+                        return MaskPhoneHelper::masking($model->s_phone_from);
+                    }
+                    return $model->s_phone_from;
+                }
+            ],
+            //'s_phone_to',
+            [
+                'attribute' => 's_phone_to',
+                'value' => static function (\common\models\Sms $model) {
+                    if ($model->s_type_id == $model::TYPE_OUTBOX) {
+                        return MaskPhoneHelper::masking($model->s_phone_to);
+                    }
+                    return $model->s_phone_to;
+                }
+            ],
             's_sms_text:ntext',
             //'s_tw_num_segments',
             [

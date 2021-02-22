@@ -47,10 +47,10 @@ class ItineraryEditForm extends CompositeForm
     {
         $this->flightId = $flight->fl_id;
         $this->productId = $flight->fl_product_id;
-        $this->cabin = $flight->fl_cabin_class;
-        $this->adults = $flight->fl_adults;
-        $this->children = $flight->fl_children;
-        $this->infants = $flight->fl_infants;
+        $this->cabin = $flight->fl_cabin_class ?? Flight::CABIN_CLASS_ECONOMY;
+        $this->adults = $flight->fl_adults ?? 1;
+        $this->children = $flight->fl_children ?? 0;
+        $this->infants = $flight->fl_infants ?? 0;
         $this->tripType = $flight->fl_trip_type_id;
         $this->fl_stops = $flight->fl_stops;
         $this->fl_delayed_charge = $flight->fl_delayed_charge;

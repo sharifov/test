@@ -144,6 +144,7 @@ class Order extends ActiveRecord
         $this->or_gid = self::generateGid();
         $this->or_uid = self::generateUid();
         $this->or_status_id = $dto->status;
+        $this->or_pay_status_id = $dto->payStatus;
         $this->or_lead_id = $dto->leadId;
         $this->or_name = $this->generateName();
         if ($this->orLead && $this->orLead->employee_id) {

@@ -183,6 +183,7 @@
 
 ._cc-list-wrapper ._cc-list-item._cc_active {
     background-color: #f5f8fe;
+    border: 1px solid #273f53;
 }
 
 ._cc-list-wrapper ._cc-list-item ._cc-item-icon-wrapper {
@@ -398,6 +399,8 @@
 }
 .x_panel .nav .create_case,
 .x_panel .nav .create_lead,
+.x_panel .nav .link_case,
+.x_panel .nav .link_lead,
 .x_panel .nav .btn_toggle_form {
     color: #0073ce;
 }

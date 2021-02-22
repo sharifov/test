@@ -2,6 +2,7 @@
 
 namespace common\components\purifier\filter;
 
+use sales\helpers\phone\MaskPhoneHelper;
 use yii\bootstrap4\Html;
 
 /**
@@ -74,11 +75,19 @@ class FilterShortCodeToLink implements Filter
         }, $this->content);
 
         $this->content = preg_replace_callback('/from(.*?)to/', function ($matches) {
-            return '<br><pre><code>from: ' . $matches[1] . '</pre></code>to';
+            return '<br><pre><code>from: ' . self::detectPhones($matches[1]) . '</pre></code>to';
         }, $this->content);
 
         $this->content = preg_replace_callback('/to(.*?)by/', function ($matches) {
             return '<br><pre><code>to: ' . $matches[1] . '</pre></code>by';
         }, $this->content);
+    }
+
+    private function detectPhones(string $phone): string
+    {
+        if (preg_match("/^\+[1-9]\d{6,13}$/", trim($phone))) {
+            return MaskPhoneHelper::masking($phone);
+        }
+        return $phone;
     }
 }

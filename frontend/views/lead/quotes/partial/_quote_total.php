@@ -22,8 +22,8 @@ $totalExtraMarkupOption = 0;
             class="<?=$productQuote->pq_profit_amount < 0 ? 'danger' : ''?>"
             title="Profit amount: <?=number_format($productQuote->pq_profit_amount, 2)?> $"
             data-toggle="tooltip">
-                Client Total: <b><?=number_format($productQuote->pq_client_price, 2)?> <?= Html::encode($productQuote->pq_client_currency)?></b>
-                (<?=number_format($productQuote->pq_price, 2)?> USD)
+                Client Total: <b><?=$productQuote->showClientTotalPriceSumWithOptionsPrice()?> <?= Html::encode($productQuote->pq_client_currency)?></b>
+                (<?=$productQuote->showTotalPriceSumWithOptionsPrice()?> USD)
         </span>
     </h4>
 </div>

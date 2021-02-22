@@ -7,6 +7,7 @@ use common\models\query\ClientQuery;
 use sales\behaviors\metric\MetricClientCounterBehavior;
 use sales\entities\cases\Cases;
 use sales\entities\EventTrait;
+use sales\helpers\phone\MaskPhoneHelper;
 use sales\model\client\entity\events\ClientChangeIpEvent;
 use sales\model\client\entity\events\ClientCreatedEvent;
 use sales\model\client\entity\events\ClientExcludedEvent;
@@ -415,7 +416,7 @@ class Client extends ActiveRecord
         $phones = $this->clientPhones;
         if ($phones) {
             foreach ($phones as $phone) {
-                $phoneList[$phone->phone] = $phone->phone . ($phone->is_sms ? ' (sms)' : '');
+                $phoneList[$phone->phone] = MaskPhoneHelper::masking($phone->phone) . ($phone->is_sms ? ' (sms)' : '');
             }
         }
         return $phoneList;

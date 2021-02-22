@@ -129,6 +129,7 @@ class ApiHotelService extends Component
         $data['checkIn'] = $checkIn;
         $data['checkOut'] = $checkOut;
         $data['destination'] = $destination;
+        $data['showMarkup'] = true;
 
         if ($rooms) {
             $data['rooms'] = $rooms;
@@ -147,6 +148,11 @@ class ApiHotelService extends Component
             } elseif (isset($response->data['error'])) {
                 $out['error'] = 'Not found in response array data key [hotels]';
                 \Yii::error(VarDumper::dumpAsString($response->data['error'], 10), 'Component:ApiHotelService::search');
+            } elseif (isset($response->data['errors']) && is_array($response->data['errors'])) {
+                foreach ($response->data['errors'] as $error) {
+                    $out['error'] = $error[0];
+                    break;
+                }
             } else {
                 $out['error'] = 'Error (' . $response->statusCode . '): ' . $response->content;
                 \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:ApiHotelService::search');

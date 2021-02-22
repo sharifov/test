@@ -81,8 +81,8 @@ class ProductController extends FController
             }
 
             try {
-                $this->productCreateService->create($form);
-                return ['message' => 'Successfully added a new product'];
+                $productId = $this->productCreateService->create($form);
+                return ['message' => 'Successfully added a new product', 'productId' => $productId];
             } catch (\DomainException $e) {
                 Yii::error($e, 'ProductController:actionCreateAjax:DomainException');
                 return ['errors' => $e->getMessage()];

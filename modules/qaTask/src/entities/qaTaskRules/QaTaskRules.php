@@ -35,8 +35,11 @@ class QaTaskRules extends \yii\db\ActiveRecord
     public function rules(): array
     {
         return [
-            ['tr_name', 'required'],
+            [['tr_key','tr_name'], 'required'],
             ['tr_name', 'string', 'max' => 50],
+
+            [['tr_key'], 'string', 'max' => 30],
+            [['tr_key'], 'unique'],
 
             ['tr_description', 'string', 'max' => 255],
 

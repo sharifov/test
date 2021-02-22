@@ -17,12 +17,14 @@ use yii\bootstrap4\Html;
     <div class="x_title">
 
         <small><span class="badge badge-white">OR<?=($order->or_id)?></span></small>
-        "<b><?=\yii\helpers\Html::encode($order->or_name)?></b>"
-        (<span title="UID"><?=\yii\helpers\Html::encode($order->or_uid)?></span>)
+        (<span title="GID: <?=\yii\helpers\Html::encode($order->or_gid)?>"><?=\yii\helpers\Html::encode($order->or_uid)?></span>)
         <?= OrderStatus::asFormat($order->or_status_id) ?>
         <?= OrderPayStatus::asFormat($order->or_pay_status_id) ?>
+        "<b><?=\yii\helpers\Html::encode($order->or_name)?></b>"
 
-        <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $order->or_profit_amount ?>
+        <?php if ($order->or_profit_amount > 0) : ?>
+            <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $order->or_profit_amount ?>
+        <?php endif; ?>
 
         <ul class="nav navbar-right panel_toolbox">
             <!--            <li>-->
@@ -90,10 +92,11 @@ use yii\bootstrap4\Html;
 
         <table class="table table-bordered">
             <?php if ($order->productQuotes) :
+                $nr = 1;
                 ?>
                 <tr>
-                    <th>Quote ID</th>
-                    <th>Type</th>
+                    <th>Nr</th>
+                    <th>Product</th>
                     <th>Name</th>
                     <th>Status</th>
                     <th>Created</th>
@@ -111,8 +114,9 @@ use yii\bootstrap4\Html;
                     $ordOptionTotalPrice += $quote->optionAmountSum;
                     ?>
                     <tr>
-                        <td title="Product Quote ID"><?=Html::encode($quote->pq_id)?></td>
+                        <td title="Product Quote ID: <?=Html::encode($quote->pq_id)?>"><?= $nr++ ?></td>
                         <td title="<?=Html::encode($quote->pq_product_id)?>">
+                            <?= $quote->pqProduct->prType->pt_icon_class ? Html::tag('i', '', ['class' => $quote->pqProduct->prType->pt_icon_class]) : '' ?>
                             <?=Html::encode($quote->pqProduct->prType->pt_name)?>
                             <?=$quote->pqProduct->pr_name ? ' - ' . Html::encode($quote->pqProduct->pr_name) : ''?>
                         </td>

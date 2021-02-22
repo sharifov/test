@@ -52,10 +52,10 @@ $user = Yii::$app->user->identity;
         'data-url' => Url::to(['lead/clone', 'id' => $leadModel->id])
     ]);
 
-    $buttonFollowUp = Html::a('<i class="fa fa-share-square fa-rotate-180"></i> Follow Up', '#', [
+    $buttonFollowUp = Html::a('<i class="fa fa-share-square fa-rotate-180"></i> To Bonus', '#', [
         'class' => 'add-reason btn btn-primary text-warning',
         'data-url' => Url::to(['lead-change-state/follow-up', 'gid' => $leadModel->gid]),
-        'title' => 'Follow Up'
+        'title' => 'To Bonus'
     ]);
 
     $buttonTrash = Html::a('<i class="fa fa-trash"></i> Trash', '#', [
@@ -160,15 +160,18 @@ $user = Yii::$app->user->identity;
     ?>
 <div class="panel-main__header" id="actions-header"<?= $projectStyles?>>
 
-    <?php $productTypes = (new EmployeeProductAccess(Yii::$app->user))->getProductList(); ?>
+    <?php $productTypes = (new EmployeeProductAccess(Yii::$app->user))->getProductItemList(); ?>
     <?php if (count($productTypes)) : ?>
         <div class="dropdown">
             <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-                <i class="fa fa-plus"></i> Product
+                <i class="fa fa-plus"></i> Add Product
             </button>
             <div class="dropdown-menu">
-                <?php foreach ($productTypes as $id => $name) :?>
-                    <a class="dropdown-item add-product" href="#" data-product-type-id="<?=Html::encode($id)?>">add <?=Html::encode($name)?></a>
+                <?php foreach ($productTypes as $item) :?>
+                    <a class="dropdown-item add-product" href="#" data-product-type-id="<?=Html::encode($item['pt_id'])?>">
+                        <?= $item['pt_icon_class'] ? '<i class="' . Html::encode($item['pt_icon_class']) . '"></i>' : '' ?>
+                        <?=Html::encode($item['pt_name'])?>
+                    </a>
                 <?php endforeach; ?>
             </div>
         </div> &nbsp;

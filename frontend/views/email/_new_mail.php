@@ -55,7 +55,11 @@ use yii\widgets\ActiveForm;
 
     <div class="view-mail">
 
-        <?php $form = ActiveForm::begin(); ?>
+        <?php $form = ActiveForm::begin([
+                'options' => [
+                    'onSubmit' => "submitForm()"
+                ]
+        ]); ?>
 
 
         <?php echo $form->errorSummary($model)?>
@@ -84,6 +88,11 @@ use yii\widgets\ActiveForm;
 
             </div>
             <div class="col-md-4">
+                <?php
+/*                $emailBeforeMasking = $model->e_email_to;
+                $model->e_email_to = \sales\helpers\email\MaskEmailHelper::masking($model->e_email_to)
+                */?>
+
                 <?= $form->field($model, 'e_email_to')->textInput(['maxlength' => true]) ?>
             </div>
         </div>
@@ -157,3 +166,15 @@ use yii\widgets\ActiveForm;
 
     </div>
 </div>
+
+<?php
+/*$js = <<< JS
+
+function submitForm(){
+    let originalEmail = '$emailBeforeMasking'
+    console.log(originalEmail)
+    document.getElementById("email-e_email_to").value = originalEmail;
+}
+JS;
+$this->registerJs($js, \yii\web\View::POS_HEAD);
+*/?>

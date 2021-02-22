@@ -59,73 +59,88 @@ class FlightQuoteSearchHelper
         self::getQuotePriceRange($quotes);
 
         foreach ($quotes['results'] as $key => $quote) {
-            $quotes['results'][$key]['price'] = self::getQuotePrice($quote);
-            $quotes['results'][$key]['originRate'] = self::getOriginRate($quote);
-
-            $preSegment = null;
-            $baggagePerSegment = [];
-            $freeBaggage = false;
-            $airportChange = false;
-            $technicalStopCnt = 0;
-            $time = [];
-            $stops = [];
-            $totalDuration = [];
-            $bagFilter = '';
-
-            foreach ($quote['trips'] as $trip) {
-                if (isset($trip['duration'])) {
-                    $totalDuration[] = $trip['duration'];
-                    $quotes['totalDuration'][] = $trip['duration'];
-//                  $totalDurationSum += $trip['duration'];
-                }
-                $stopCnt = count($trip['segments']) - 1;
-
-                foreach ($trip['segments'] as $segment) {
-                    if (isset($segment['stop']) && $segment['stop'] > 0) {
-                        $stopCnt += $segment['stop'];
-                        $technicalStopCnt += $segment['stop'];
-                    }
-
-                    if ($preSegment !== null && $segment['departureAirportCode'] != $preSegment['arrivalAirportCode']) {
-                        $airportChange = true;
-                    }
-
-                    if (isset($segment['baggage']) && $freeBaggage === false) {
-                        foreach ($segment['baggage'] as $baggage) {
-                            if (isset($baggage['allowPieces'])) {
-                                $baggagePerSegment[] = $baggage['allowPieces'];
-                            }
-                        }
-                    }
-                    $preSegment = $segment;
-                }
-
-                $firstSegment = $trip['segments'][0];
-                $lastSegment = end($trip['segments']);
-                $time[] = ['departure' => $firstSegment['departureTime'],'arrival' => $lastSegment['arrivalTime']];
-                $stops[] = $stopCnt;
-            }
-
-            if (!empty($baggagePerSegment)) {
-                if (min($baggagePerSegment) == 1) {
-                    $bagFilter = 1;
-                } elseif ((min($baggagePerSegment) == 2)) {
-                    $bagFilter = 2;
-                }
-            }
-
-            $quotes['results'][$key]['stops'] = $stops;
-            $quotes['results'][$key]['time'] = $time;
-            $quotes['results'][$key]['bagFilter'] = $bagFilter ?? '';
-            $quotes['results'][$key]['airportChange'] = $airportChange;
-            $quotes['results'][$key]['technicalStopCnt'] = $technicalStopCnt;
-            $quotes['results'][$key]['duration'] = $totalDuration;
-            $quotes['results'][$key]['totalDuration'] = array_sum($totalDuration);
-            $quotes['results'][$key]['topCriteria'] = self::getQuoteTopCriteria($quote);
-            $quotes['results'][$key]['rank'] = self::getQuoteRank($quote);
+            $quotes['results'][$key] = self::parseQuoteData($quote, $quotes);
         }
 
         return $quotes;
+    }
+
+    private static function parseQuoteData(array $quote, array &$originalData = []): array
+    {
+        $quote['price'] = self::getQuotePrice($quote);
+        $quote['originRate'] = self::getOriginRate($quote);
+
+        $preSegment = null;
+        $baggagePerSegment = [];
+        $freeBaggage = false;
+        $airportChange = false;
+        $technicalStopCnt = 0;
+        $time = [];
+        $stops = [];
+        $totalDuration = [];
+        $bagFilter = '';
+
+        foreach ($quote['trips'] as $trip) {
+            if (isset($trip['duration'])) {
+                $totalDuration[] = $trip['duration'];
+                if ($originalData) {
+                    $originalData['totalDuration'][] = $trip['duration'];
+                }
+//                  $totalDurationSum += $trip['duration'];
+            }
+            $stopCnt = count($trip['segments']) - 1;
+
+            foreach ($trip['segments'] as $segment) {
+                if (isset($segment['stop']) && $segment['stop'] > 0) {
+                    $stopCnt += $segment['stop'];
+                    $technicalStopCnt += $segment['stop'];
+                }
+
+                if ($preSegment !== null && $segment['departureAirportCode'] != $preSegment['arrivalAirportCode']) {
+                    $airportChange = true;
+                }
+
+                if (isset($segment['baggage']) && $freeBaggage === false) {
+                    foreach ($segment['baggage'] as $baggage) {
+                        if (isset($baggage['allowPieces'])) {
+                            $baggagePerSegment[] = $baggage['allowPieces'];
+                        }
+                    }
+                }
+                $preSegment = $segment;
+            }
+
+            $firstSegment = $trip['segments'][0];
+            $lastSegment = end($trip['segments']);
+            $time[] = ['departure' => $firstSegment['departureTime'],'arrival' => $lastSegment['arrivalTime']];
+            $stops[] = $stopCnt;
+        }
+
+        if (!empty($baggagePerSegment)) {
+            if (min($baggagePerSegment) == 1) {
+                $bagFilter = 1;
+            } elseif ((min($baggagePerSegment) == 2)) {
+                $bagFilter = 2;
+            }
+        }
+
+        $quote['stops'] = $stops;
+        $quote['time'] = $time;
+        $quote['bagFilter'] = $bagFilter ?? '';
+        $quote['airportChange'] = $airportChange;
+        $quote['technicalStopCnt'] = $technicalStopCnt;
+        $quote['duration'] = $totalDuration;
+        $quote['totalDuration'] = array_sum($totalDuration);
+        $quote['topCriteria'] = self::getQuoteTopCriteria($quote);
+        $quote['rank'] = self::getQuoteRank($quote);
+
+        if (isset($quote['ngsItineraries'])) {
+            foreach ($quote['ngsItineraries'] as $ngsKey => $ngsItinerary) {
+                $quote['ngsItineraries'][$ngsKey] = self::parseQuoteData($ngsItinerary);
+            }
+        }
+
+        return $quote;
     }
 
     private static function getQuoteRank(array $quote): float

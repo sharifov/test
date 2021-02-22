@@ -2,6 +2,8 @@
 
 namespace modules\flight\src\entities\flightQuoteSegment\serializer;
 
+use common\models\Airline;
+use common\models\Airports;
 use modules\flight\models\FlightQuoteSegment;
 use sales\entities\serializer\Serializer;
 
@@ -46,6 +48,25 @@ class FlightQuoteSegmentSerializer extends Serializer
     public function getData(): array
     {
         $data = $this->toArray();
+
+        $data['departureLocation'] = Airports::getCityByIata($this->model->fqs_departure_airport_iata);
+        $data['arrivalLocation'] = Airports::getCityByIata($this->model->fqs_arrival_airport_iata);
+
+        $data['operating_airline'] = '';
+        if ($data['fqs_operating_airline']) {
+            $airLine = Airline::find()->andWhere(['iata' => $data['fqs_operating_airline']])->asArray()->one();
+            if ($airLine) {
+                $data['operating_airline'] = $airLine['name'];
+            }
+        }
+
+        $data['marketing_airline'] = '';
+        if ($data['fqs_marketing_airline']) {
+            $airLine = Airline::find()->andWhere(['iata' => $data['fqs_marketing_airline']])->asArray()->one();
+            if ($airLine) {
+                $data['marketing_airline'] = $airLine['name'];
+            }
+        }
 
         if ($this->model->flightQuoteSegmentStops) {
             $data['stops'] = [];

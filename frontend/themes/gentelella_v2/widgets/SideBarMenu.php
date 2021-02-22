@@ -8,6 +8,7 @@ namespace frontend\themes\gentelella_v2\widgets;
 
 use common\models\Employee;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
+use sales\auth\Auth;
 use Yii;
 
 /**
@@ -62,7 +63,9 @@ class SideBarMenu extends \yii\bootstrap\Widget
 
         $menuLItems = [];
 
-        $menuLItems[] = ['label' => 'Create Lead', 'url' => ['/lead/create'], 'icon' => 'plus'];
+        if (Auth::can('createLead')) {
+            $menuLItems[] = ['label' => 'Create Lead', 'url' => ['/lead/create'], 'icon' => 'plus'];
+        }
         $menuLItems[] = ['label' => 'Create New Lead', 'url' => ['/lead/create2'], 'icon' => 'plus', 'attributes' => ['data-ajax-link' => true, 'data-modal-title' => 'Create New Lead']];
 
 
@@ -530,6 +533,15 @@ class SideBarMenu extends \yii\bootstrap\Widget
 
         $menuModuleItems = [];
 
+        if (class_exists('\modules\attraction\AttractionModule')) {
+            $menuModuleItems[] = [
+                'label' => 'Attraction module',
+                'url' => 'javascript:',
+                'icon' => 'plane',
+                'items' => \modules\attraction\AttractionModule::getListMenu()
+            ];
+        }
+
         if (class_exists('\modules\flight\FlightModule')) {
             $menuModuleItems[] = [
                 'label' => 'Flight module',
@@ -554,6 +566,24 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 'url' => 'javascript:',
                 'icon' => 'list',
                 'items' => \modules\fileStorage\FileStorageModule::getListMenu()
+            ];
+        }
+
+        if (class_exists('\modules\rentCar\RentCarModule')) {
+            $menuModuleItems[] = [
+                'label' => 'Rent Car module',
+                'url' => 'javascript:',
+                'icon' => 'car',
+                'items' => \modules\rentCar\RentCarModule::getListMenu()
+            ];
+        }
+
+        if (class_exists('\modules\cruise\CruiseModule')) {
+            $menuModuleItems[] = [
+                'label' => 'Cruise',
+                'url' => 'javascript:',
+                'icon' => 'ship',
+                'items' => \modules\cruise\CruiseModule::getListMenu()
             ];
         }
 

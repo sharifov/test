@@ -2,6 +2,7 @@
 
 namespace modules\flight\src\entities\flightQuotePaxPrice\serializer;
 
+use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuotePaxPrice;
 use sales\entities\serializer\Serializer;
 
@@ -35,6 +36,10 @@ class FlightQuotePaxPriceSerializer extends Serializer
 
     public function getData(): array
     {
-        return $this->toArray();
+        $data = $this->toArray();
+
+        $data['paxType'] = FlightPax::getPaxTypeById($this->model->qpp_flight_pax_code_id);
+
+        return $data;
     }
 }

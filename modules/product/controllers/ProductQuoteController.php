@@ -2,6 +2,7 @@
 
 namespace modules\product\controllers;
 
+use common\models\Notifications;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\services\productQuote\ProductQuoteCloneService;
@@ -107,6 +108,11 @@ class ProductQuoteController extends FController
             $model = $this->productQuoteRepository->find($id);
             $model->prepareRemove();
             $this->productQuoteRepository->remove($model);
+            Notifications::pub(
+                ['lead-' . $model->pqProduct->pr_lead_id],
+                'removedQuote',
+                ['data' => ['productId' => $model->pq_product_id]]
+            );
             $transaction->commit();
         } catch (\Throwable $throwable) {
             $transaction->rollBack();

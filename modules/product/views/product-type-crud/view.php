@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model \modules\product\src\entities\productType\ProductType */
 
-$this->title = $model->pt_id;
+$this->title = $model->pt_key . ' (' . $model->pt_id . ')';
 $this->params['breadcrumbs'][] = ['label' => 'Product Types', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
@@ -32,6 +32,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'pt_id',
             'pt_key',
             'pt_name',
+            'pt_sort_order',
+            'pt_icon_class',
             'pt_description:ntext',
             'pt_settings',
             'pt_enabled:booleanByLabel',

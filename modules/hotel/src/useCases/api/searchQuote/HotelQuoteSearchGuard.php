@@ -24,6 +24,10 @@ class HotelQuoteSearchGuard
             throw new \DomainException('Missing destination in Hotel data; Fill Hotel data;');
         }
 
+        if (empty($hotel->hotelRooms)) {
+            throw new \DomainException('Missing rooms in Hotel data; Add rooms;');
+        }
+
         return $hotel;
     }
 }

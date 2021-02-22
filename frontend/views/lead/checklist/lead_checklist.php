@@ -9,6 +9,7 @@
 
 
 use common\models\Employee;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -94,7 +95,7 @@ $user = Yii::$app->user->identity;
 
 
         <?php
-            $checkListTypes = \common\models\LeadChecklistType::getList(true);
+            $checkListTypes = \common\models\LeadChecklistType::getFullList(true);
 
             $currentCheckList = $dataProvider->getModels();
 
@@ -113,8 +114,8 @@ $user = Yii::$app->user->identity;
 
                         </td>
                         <td>
-                            <span class="fa fa-square-o warning"></span>
-                            <?=Html::encode($checkListType)?>
+                            <span class="fa  fa-question-circle " title="<?=Html::encode($checkListType['lct_description'])?>"></span>
+                            <?=Html::encode($checkListType['lct_name'])?>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -138,7 +139,7 @@ $user = Yii::$app->user->identity;
 
         <div class="row" id="div-checklist-form">
             <div class="col-md-5">
-                <?= $form->field($modelLeadChecklist, 'lc_type_id')->dropDownList($checkListTypes, ['prompt' => '--- select task ---']) ?>
+                <?= $form->field($modelLeadChecklist, 'lc_type_id')->dropDownList(ArrayHelper::map($checkListTypes, 'lct_id', 'lct_name'), ['prompt' => '--- select task ---']) ?>
             </div>
             <div class="col-md-7">
                 <?= $form->field($modelLeadChecklist, 'lc_notes')->textInput(['maxlength' => true]) ?>

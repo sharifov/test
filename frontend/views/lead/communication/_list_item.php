@@ -12,6 +12,8 @@ use common\models\Email;
 use common\models\Sms;
 use common\models\Call;
 use yii\helpers\VarDumper;
+use sales\helpers\phone\MaskPhoneHelper;
+use sales\helpers\email\MaskEmailHelper;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -60,13 +62,13 @@ $fromType = 'client';
 
             <?php if ($call->isIn()) :?>
                 <div class="chat__sender">
-                    <i class="fa fa-phone" title="<?=Html::encode($call->c_from)?>"></i> <?php //php $call->cClient ? Html::encode($call->cClient->full_name) : ''?>
+                    <i class="fa fa-phone" title="<?=Html::encode(MaskPhoneHelper::masking($call->c_from))?>"></i> <?php //php $call->cClient ? Html::encode($call->cClient->full_name) : ''?>
                     to <b><?=($call->cCreatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($call->cCreatedUser->username) : '-') ?></b>
                 </div>
             <?php else : ?>
                 <div class="chat__sender">
-                    from "<b title="<?=Html::encode($call->c_from)?>"><?=($call->cCreatedUser ? Html::encode($call->cCreatedUser->username) : '-') ?></b>" to <i class="fa fa-phone" title="<?=Html::encode($call->c_to)?>"></i>
-                    <?=Html::encode($call->c_to)?>
+                    from "<b title="<?=Html::encode($call->c_from)?>"><?=($call->cCreatedUser ? Html::encode($call->cCreatedUser->username) : '-') ?></b>" to <i class="fa fa-phone" title="<?=Html::encode(MaskPhoneHelper::masking($call->c_to))?>"></i>
+                    <?=Html::encode(MaskPhoneHelper::masking($call->c_to))?>
                 </div>
             <?php endif;?>
 
@@ -113,17 +115,17 @@ $fromType = 'client';
             <i class="chat__status chat__status--<?=$statusClass?> fa fa-circle" data-toggle="tooltip" title="<?=Html::encode($statusTitle)?>" data-placement="right" data-original-title="<?=Html::encode($statusTitle)?>"></i>
             <div class="chat__message-heading">
             <?php if ($mail->e_type_id == Email::TYPE_INBOX) :?>
-                    <div class="chat__sender">Email from (<?=Html::encode($mail->e_email_from_name)?> <<strong><?=Html::encode($mail->e_email_from)?>> )</strong>
+                    <div class="chat__sender">Email from (<?=Html::encode($mail->e_email_from_name)?> <<strong><?=Html::encode(MaskEmailHelper::masking($mail->e_email_from))?>> )</strong>
                             to (<?=Html::encode($mail->e_email_to_name)?> <<strong><?=Html::encode($mail->e_email_to)?></strong>>)</div>
             <?php else : ?>
                     <div class="chat__sender">Email from <?=($mail->eCreatedUser ? Html::encode($mail->eCreatedUser->username) : '-') ?>, (<?=Html::encode($mail->e_email_from_name)?> <<strong><?=Html::encode($mail->e_email_from)?></strong>>) to
-                        (<?=Html::encode($mail->e_email_to_name)?> <<strong><?=Html::encode($mail->e_email_to)?></strong>>)</div>
+                        (<?=Html::encode($mail->e_email_to_name)?> <<strong><?=Html::encode(MaskEmailHelper::masking($mail->e_email_to))?></strong>>)</div>
             <?php endif;?>
                 <div class="chat__date"><?=Yii::$app->formatter->asDatetime(strtotime($mail->e_created_dt))?> <?=$mail->e_language_id ? '(' . $mail->e_language_id . ')' : ''?></div> <?php //11:01AM | June 9?>
             </div>
             <div class="card-body">
                 <h5 class="chat__subtitle"><?= wordwrap(Html::encode($mail->e_email_subject), 60, '<br />', true)?></h5>
-                <div class="">
+                <div class="" style="word-wrap: break-word">
                 <?php echo \yii\helpers\StringHelper::truncate(Email::stripHtmlTags($mail->getEmailBodyHtml()), 300, '...', null, true)?>
                 </div>
             <?php if (Auth::can('email/view', ['email' => $mail])) : ?>
@@ -156,13 +158,13 @@ $fromType = 'client';
         <i class="chat__status chat__status--<?=$statusClass?> fa fa-circle" data-toggle="tooltip" title="<?=Html::encode($statusTitle)?>" data-placement="left" data-original-title="<?=Html::encode($statusTitle)?>"></i>
         <div class="chat__message-heading">
         <?php if ($sms->s_type_id == Sms::TYPE_INBOX) :?>
-                <div class="chat__sender">SMS from <strong><?=Html::encode($sms->s_phone_from)?></strong> to <strong><?=Html::encode($sms->s_phone_to)?></strong></div>
+                <div class="chat__sender">SMS from <strong><?=Html::encode(MaskPhoneHelper::masking($sms->s_phone_from))?></strong> to <strong><?=Html::encode($sms->s_phone_to)?></strong></div>
         <?php else : ?>
-                <div class="chat__sender">SMS from <strong><?=($sms->sCreatedUser ? Html::encode($sms->sCreatedUser->username) : '-') ?>, (<?=Html::encode($sms->s_phone_from)?>)</strong> to <strong><?=Html::encode($sms->s_phone_to)?></strong></div>
+                <div class="chat__sender">SMS from <strong><?=($sms->sCreatedUser ? Html::encode($sms->sCreatedUser->username) : '-') ?>, (<?=Html::encode($sms->s_phone_from)?>)</strong> to <strong><?=Html::encode(MaskPhoneHelper::masking($sms->s_phone_to))?></strong></div>
         <?php endif; ?>
             <div class="chat__date"><?=Yii::$app->formatter->asDatetime(strtotime($sms->s_created_dt))?> <?=$sms->s_language_id ? '(' . $sms->s_language_id . ')' : ''?></div> <?php //11:01AM | June 9?>
         </div>
-        <div class="card-body">
+        <div class="card-body" style="word-wrap: break-word">
         <?=nl2br(Html::encode($sms->s_sms_text))?>
         </div>
     </div>

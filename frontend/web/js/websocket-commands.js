@@ -460,6 +460,32 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                             addFileToFileStorageList(obj);
                         }
                     }
+
+                    if (obj.cmd === 'addedQuote') {
+                        let counter = $('.product-quote-counter-' + obj.data.productId);
+                        if (counter) {
+                            let count = parseInt(counter.data('value'));
+                            counter.data('value', (count + 1));
+                            counter.html('<sup title="Number of quotes">(' + (count + 1) + ')</sup>');
+                        }
+                    }
+
+                    if (obj.cmd === 'removedQuote') {
+                        let counter = $('.product-quote-counter-' + obj.data.productId);
+                        if (counter) {
+                            let count = parseInt(counter.data('value'));
+                            if (count > 0) {
+                                count--;
+                                if (count > 0) {
+                                    counter.data('value', count);
+                                    counter.html('<sup title="Number of quotes">(' + count + ')</sup>');
+                                } else {
+                                    counter.data('value', count);
+                                    counter.html('');
+                                }
+                            }
+                        }
+                    }
                 }
                 // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
             } catch (error) {

@@ -28,12 +28,12 @@ $pjaxRequest = $pjaxRequest ?? false;
 
 $chevronClass = $pjaxRequest ? 'fa fa-chevron-up' : 'fa fa-chevron-down'
 ?>
-<?php \yii\widgets\Pjax::begin(['id' => $pjaxId,  'enablePushState' => false, 'enableReplaceState' => false, 'timeout' => 2000])?>
+<?php \yii\widgets\Pjax::begin(['id' => $pjaxId,  'enablePushState' => false, 'enableReplaceState' => false, 'timeout' => 4000])?>
     <div class="x_panel">
         <div class="x_title">
             <h2>
                 <a class="collapse-link">
-                    <i class="fa fa-plane" title="ID: <?=$product->pr_id?>"></i> <?=Html::encode($product->prType->pt_name)?> <?=$product->pr_name ? ' - ' . Html::encode($product->pr_name) : ''?>
+                    <i class="<?= Html::encode($product->getIconClass()) ?>" title="ID: <?=$product->pr_id?>"></i> <?=Html::encode($product->prType->pt_name)?> <?=$product->pr_name ? ' - ' . Html::encode($product->pr_name) : ''?>
                     <?php if ($product->flight->flightQuotes) : ?>
                         <sup title="Number of quotes">(<?=count($product->flight->flightQuotes)?>)</sup>
                     <?php endif;?>
@@ -135,7 +135,8 @@ $chevronClass = $pjaxRequest ? 'fa fa-chevron-up' : 'fa fa-chevron-down'
                                 ]),
                                 'data-flight-id' => $product->flight->fl_id,
                                 'data-pjax-id' => $pjaxId,
-                                'class' => 'dropdown-item text-warning btn-update-flight-request'
+                                'class' => 'dropdown-item text-warning btn-update-flight-request btn-update-request',
+                                'data-product-id' => $product->pr_id
                             ]) ?>
 
                             <?= Html::a('<i class="fa fa-search"></i> Search Quotes', null, [

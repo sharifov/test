@@ -20,6 +20,10 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'pt_name')->textInput(['maxlength' => true]) ?>
 
+        <?= $form->field($model, 'pt_sort_order')->input('number', ['min' => 0, 'max' => 100]) ?>
+
+        <?= $form->field($model, 'pt_icon_class')->textInput(['maxlength' => true]) ?>
+
         <?= $form->field($model, 'pt_service_fee_percent')->input('number', ['step' => 0.01, 'min' => 0, 'max' => 100]) ?>
 
 

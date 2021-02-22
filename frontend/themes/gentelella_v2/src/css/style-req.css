@@ -3876,7 +3876,10 @@ input[disabled] + .radio-tab__text {
 .quote--selected .quote__heading {
   background-color: #e9f1eb;
 }
-
+.quote--selected .card-header {
+    background-color: #e9f1eb !important;
+    color: #468cab !important;
+}
 .quote--highlight {
   border-color: #82b9e2;
 }
@@ -6014,4 +6017,9 @@ td.selected-cell {
 .communication-block-scroll::-webkit-scrollbar-thumb {
     background: #909090;
     border-radius: 10px;
+}
+@media (min-width: 1368px) {
+  .dev-tile-adjust {
+    max-width: 10% !important;
+  }
 }
