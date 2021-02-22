@@ -223,7 +223,8 @@ use common\models\Language;
             <?php echo $form->field($model, 'locales')->widget(Select2::class, [
                         'data' => Language::getLocaleList(false),
                         'size' => Select2::SMALL,
-                        'options' => ['placeholder' => 'Client Locale', 'multiple' => true],
+                        'options' => ['id' => 'locales',
+                            'multiple' => true],
                         'pluginOptions' => ['allowClear' => true],
                     ]);
 ?>
