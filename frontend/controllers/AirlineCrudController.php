@@ -130,7 +130,9 @@ class AirlineCrudController extends FController
         try {
             $timeStart = microtime(true);
             set_time_limit(300);
-            Yii::$app->log->targets['debug']->enabled = false;
+            if (isset(Yii::$app->log->targets['debug']->enabled)) {
+                Yii::$app->log->targets['debug']->enabled = false;
+            }
 
             $data = AirlineService::synchronization();
 

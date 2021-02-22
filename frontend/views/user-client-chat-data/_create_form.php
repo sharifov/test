@@ -33,8 +33,6 @@ use dosamigos\datepicker\DatePicker;
 
             <?php echo $form->field($model, 'uccd_password')->passwordInput(['maxlength' => true]) ?>
 
-            <?php echo $form->field($model, 'uccd_active')->dropDownList([1 => 'Yes', 0 => 'No']) ?>
-
             <div class="form-group">
                 <?php echo Html::submitButton('<i class="fa fa-rocket"></i> Save and register to Rocket Chat', ['class' => 'btn btn-success']) ?>
             </div>

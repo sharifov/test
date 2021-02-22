@@ -40,6 +40,7 @@ $pjaxContainerIdForm = isset($isCommunicationLogEnabled) && $isCommunicationLogE
 $listItemView = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled ? '_list_item_log' : '_list_item';
 $unsubscribedEmails = @json_encode($unsubscribedEmails);
 $emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesList(false, \common\models\Department::DEPARTMENT_SALES);
+$emailTemplateTypes = @json_encode($emailTemplateTypes);
 ?>
 
     <div class="x_panel">
@@ -588,8 +589,9 @@ JS;
         initializeMessageType($c_type_id);
 
 var emails = '$unsubscribedEmails';
+var emailTemplateTypes = '{$emailTemplateTypes}';
 $('#email option').each(function() {             
-    if (emails.includes($(this).attr('value'))){                
+    if (JSON.parse(emails).includes($(this).attr('value'))){                
         //$(this).attr('disabled', 'disabled');
         $(this).html($(this).attr('value') + ' (unsubscribed)')
     }
@@ -597,8 +599,26 @@ $('#email option').each(function() {
         $(this).html('---')
         //$(this).removeAttr('disabled')
     }
-});    
-            
+}); 
+function initializeTemplateType(email, types) {
+    let etpOptions = '<option>---</option>';      
+        
+        if (JSON.parse(emails).includes(email)){ 
+            $.each(JSON.parse(emailTemplateTypes), function(key, item) {                 
+                if (item.etp_ignore_unsubscribe == 1) {                    
+                   etpOptions += '<option value="'+ item.etp_key+'">' + item.etp_name + '</option>';
+                }
+            }); 
+            document.getElementById("c_email_tpl_key").innerHTML = etpOptions;
+        } else {
+             $.each(JSON.parse(emailTemplateTypes), function(key, item) {
+                   etpOptions += '<option value="'+ item.etp_key+'">' + item.etp_name + '</option>';              
+            }); 
+            document.getElementById("c_email_tpl_key").innerHTML = etpOptions;
+        }
+}
+
+initializeTemplateType($('#email').val(), emailTemplateTypes)           
 
 JS;
 
@@ -651,15 +671,14 @@ $tpl_sms_blank_key = CommunicationForm::TPL_TYPE_SMS_BLANK_KEY;
 
 $projectId = $lead->project_id;
 $project = $lead->project->name ?? '';
-$emailTemplateTypes = @json_encode($emailTemplateTypes);
+
 
 $js = <<<JS
 
     const tpl_email_blank_key = '$tpl_email_blank_key';
     const tpl_sms_blank_key = '$tpl_sms_blank_key';
     let projectId = '{$projectId}';
-    let project = '{$project}';
-    let emailTemplateTypes = '{$emailTemplateTypes}';
+    let project = '{$project}';    
 
     $('body').on("change", '#c_type_id', function () {
         initializeMessageType($(this).val());

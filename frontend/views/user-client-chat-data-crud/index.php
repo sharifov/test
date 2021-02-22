@@ -54,7 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'uccd_token_expired',
                 'value' => static function (UserClientChatData $model) {
-                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->uccd_token_expired));
+                    return '<i class="fa fa-calendar"></i> ' . $model->uccd_token_expired;
                 },
                 'filter' => DatePicker::widget([
                     'model' => $searchModel,

@@ -21,6 +21,9 @@ nbproject
 # windows thumbnail cache
 Thumbs.db
 
+# IDE & OS files
+.*.swp
+
 # composer vendor dir
 /vendor
 /vendor2

@@ -2195,7 +2195,7 @@ class Quote extends \yii\db\ActiveRecord
             $prices[$price->passenger_type]['extra_mark_up'] += $price->extra_mark_up;
             $prices[$price->passenger_type]['selling'] = ($prices[$price->passenger_type]['net'] + $prices[$price->passenger_type]['mark_up'] + $prices[$price->passenger_type]['extra_mark_up']);
             if ($service_fee_percent > 0) {
-                $prices[$price->passenger_type]['service_fee'] = $prices[$price->passenger_type]['selling'] * $service_fee_percent / 100;
+                $prices[$price->passenger_type]['service_fee'] = QuotePrice::calculateProcessingFeeAmount((float)$prices[$price->passenger_type]['selling'], (float)$service_fee_percent);
                 $prices[$price->passenger_type]['selling'] += $prices[$price->passenger_type]['service_fee'];
             }
             $prices[$price->passenger_type]['selling'] = round($prices[$price->passenger_type]['selling'], 2);

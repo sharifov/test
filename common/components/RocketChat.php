@@ -9,6 +9,7 @@
 
 namespace common\components;
 
+use frontend\helpers\JsonHelper;
 use Yii;
 use yii\base\Component;
 use yii\helpers\ArrayHelper;
@@ -703,11 +704,15 @@ class RocketChat extends Component
     {
         $errorMessage = 'Unknown error message';
         if (!empty($result['error'])) {
-            $errorArr = @json_decode($result['error'], true, 512, JSON_THROW_ON_ERROR);
-            if (isset($errorArr['message'])) {
-                $errorMessage = $errorArr['message'];
-            } elseif (isset($errorArr['error'])) {
-                $errorMessage = $errorArr['error'];
+            if (JsonHelper::isValidJson($result['error'])) {
+                $errorArr = @json_decode($result['error'], true, 512, JSON_THROW_ON_ERROR);
+                if (isset($errorArr['message'])) {
+                    $errorMessage = $errorArr['message'];
+                } elseif (isset($errorArr['error'])) {
+                    $errorMessage = $errorArr['error'];
+                } else {
+                    $errorMessage = VarDumper::dumpAsString($result['error']);
+                }
             } else {
                 $errorMessage = VarDumper::dumpAsString($result['error']);
             }
@@ -718,7 +723,6 @@ class RocketChat extends Component
             if (isset($error['success']) && !$error['success']) {
                 $errorMessage = $error['message'] ?? 'Unknown error message';
             }
-
             if (isset($error['status']) && $error['status'] === 'error') {
                 $errorMessage = $error['message'] ?? 'Unknown error message';
             }

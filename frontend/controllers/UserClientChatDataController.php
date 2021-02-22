@@ -116,8 +116,7 @@ class UserClientChatDataController extends FController
                     $model->uccd_username,
                     $model->uccd_name,
                     $user->email,
-                    $model->uccd_password,
-                    $model->isActive()
+                    $model->uccd_password
                 );
 
                 $model->uccd_rc_user_id = $result['rcUserId'];
@@ -172,18 +171,31 @@ class UserClientChatDataController extends FController
                     'uccd_password' => 'password',
                 ];
                 foreach ($updateFields as $column => $rcField) {
-                    $updateRC[$rcField] = $model->{$column};
+                    if ($model->isAttributeChanged($column) && $model->validate([$column])) {
+                        $updateRC[$rcField] = $model->{$column};
+                    }
                 }
 
-                $rocketChat = \Yii::$app->rchat;
-                $result = $rocketChat->updateUser($rcUserId, $updateRC);
+                if (!empty($updateRC)) {
+                    $rocketChat = \Yii::$app->rchat;
+                    $result = $rocketChat->updateUser($rcUserId, $updateRC);
 
-                if (isset($result['error']) && !$result['error']) {
-                    $model->save(false);
-                } else {
-                    $errorMessage = $rocketChat::getErrorMessageFromResult($result);
-                    throw new \RuntimeException('Error from RocketChat. ' . $errorMessage);
+                    if (isset($result['error']) && !$result['error']) {
+                        $model->save(false);
+                    } else {
+                        $errorMessage = $rocketChat::getErrorMessageFromResult($result);
+                        throw new \RuntimeException('Error from RocketChat. ' . $errorMessage);
+                    }
+
+                    $authToken = ClientChatRequesterService::refreshToken($model->uccd_username, $model->uccd_password);
+                    $model->uccd_auth_token = $authToken;
+                    $model->uccd_token_expired = \Yii::$app->rchat::generateTokenExpired();
+
+                    if (!$model->save(false)) {
+                        throw new \RuntimeException($model->getErrorSummary(false)[0]);
+                    }
                 }
+
                 return $this->redirect(['view', 'id' => $model->uccd_id]);
             } catch (\Throwable $throwable) {
                 AppHelper::throwableLogger(
@@ -311,7 +323,7 @@ class UserClientChatDataController extends FController
             } catch (\Throwable $throwable) {
                 Yii::error(
                     AppHelper::throwableFormatter($throwable),
-                    'EmployeeController:actionActivateToRocketChat:Throwable'
+                    'UserClientChatDataController:actionActivateToRocketChat:Throwable'
                 );
                 $out['message'] = $throwable->getMessage();
             }
@@ -364,7 +376,7 @@ class UserClientChatDataController extends FController
             } catch (\Throwable $throwable) {
                 Yii::error(
                     AppHelper::throwableFormatter($throwable),
-                    'EmployeeController:actionDeactivateFromRocketChat:Throwable'
+                    'UserClientChatDataController:actionDeactivateFromRocketChat:Throwable'
                 );
                 $out['message'] = $throwable->getMessage();
             }
