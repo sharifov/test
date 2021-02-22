@@ -168,4 +168,17 @@ class QuoteSegmentBaggageCharge extends \yii\db\ActiveRecord
         $item->qsbc_currency = $form->currency;
         return $item;
     }
+
+    public static function createFromSearch(array $baggageEntryCharge, string $paxCode): QuoteSegmentBaggageCharge
+    {
+        $baggageCharge = new self();
+        $baggageCharge->qsbc_pax_code = $paxCode;
+        $baggageCharge->qsbc_price = $baggageEntryCharge['price'] ?? null;
+        $baggageCharge->qsbc_currency = $baggageEntryCharge['currency'] ?? null;
+        $baggageCharge->qsbc_first_piece = $baggageEntryCharge['firstPiece'] ?? null;
+        $baggageCharge->qsbc_last_piece = $baggageEntryCharge['lastPiece'] ?? null;
+        $baggageCharge->qsbc_max_weight = $baggageEntryCharge['maxWeight'] ?? null;
+        $baggageCharge->qsbc_max_size = $baggageEntryCharge['maxSize'] ?? null;
+        return $baggageCharge;
+    }
 }

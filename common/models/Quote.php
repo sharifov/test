@@ -389,6 +389,39 @@ class Quote extends \yii\db\ActiveRecord
         return $quote;
     }
 
+    public static function createQuoteFromSearch(array $quoteData, Lead $lead, Employee $employee): Quote
+    {
+        $quote = new self();
+        $quote->uid = uniqid();
+        $quote->lead_id = $lead->id;
+        $quote->cabin = $lead->cabin;
+        $quote->trip_type = $lead->trip_type;
+        $quote->check_payment = true;
+        $quote->fare_type = $quoteData['fareType'] ?? null;
+        $quote->gds = $quoteData['gds'] ?? null;
+        $quote->pcc = $quoteData['pcc'] ?? null;
+        $quote->main_airline_code = $quoteData['validatingCarrier'] ?? null;
+        $quote->last_ticket_date = $quoteData['prices']['lastTicketDate'] ?? null;
+        $quote->reservation_dump = str_replace('&nbsp;', ' ', SearchService::getItineraryDump($quoteData));
+        $quote->employee_id = $employee->id;
+        $quote->employee_name = $employee->username;
+        $quote->origin_search_data = json_encode($quoteData);
+        $quote->gds_offer_id = $quoteData['gdsOfferId'] ?? null;
+        $quote->setMetricLabels(['action' => 'created', 'type_creation' => 'search']);
+
+        if (isset($entry['tickets'])) {
+            $quote->tickets = json_encode($quoteData['tickets']);
+        }
+
+        if ($lead->originalQuoteExist()) {
+            $quote->alternative();
+        } else {
+            $quote->base();
+        }
+
+        return $quote;
+    }
+
     public function apply(): void
     {
         $this->setStatus(self::STATUS_APPLIED);

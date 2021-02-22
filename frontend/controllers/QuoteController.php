@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use _HumbugBoxd11d6e1365a3\Symfony\Component\Console\Exception\RuntimeException;
 use common\components\BackOffice;
 use common\models\GlobalLog;
 use common\models\Lead;
@@ -15,6 +16,7 @@ use PhpParser\Node\Expr\Empty_;
 use sales\auth\Auth;
 use sales\forms\api\searchQuote\FlightQuoteSearchForm;
 use sales\helpers\app\AppHelper;
+use sales\helpers\setting\SettingHelper;
 use sales\model\clientChat\socket\ClientChatSocketCommands;
 use sales\forms\quotePrice\AddQuotePriceForm;
 use sales\forms\segment\SegmentBaggageForm;
@@ -26,6 +28,8 @@ use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\services\parsingDump\BaggageService;
 use sales\services\parsingDump\lib\ParsingDump;
 use sales\services\parsingDump\ReservationService;
+use sales\services\quote\addQuote\AddQuoteService;
+use sales\services\quote\addQuote\guard\FlightQuoteGuard;
 use sales\services\quote\addQuote\guard\GdsByQuoteGuard;
 use sales\services\quote\addQuote\guard\LeadGuard;
 use sales\services\quote\addQuote\price\PreparePrices;
@@ -114,7 +118,7 @@ class QuoteController extends FController
 
                 if ($quotes === false) {
                     $quotes = SearchService::getOnlineQuotes($lead);
-                    if ($quotes && !empty($quotes['data']) && empty($quotes['error'])) {
+                    if ($quotes && !empty($quotes['data']['results']) && empty($quotes['error'])) {
                         \Yii::$app->cacheFile->set($keyCache, $quotes = QuoteHelper::formatQuoteData($quotes['data']), 600);
                     } else {
                         throw new \RuntimeException(!empty($quotes['error']) ? JsonHelper::decode($quotes['error'])['Message'] : 'No search results');
@@ -183,6 +187,8 @@ class QuoteController extends FController
             $keyCache = Yii::$app->request->post('keyCache', '');
             $createFromQuoteSearch = Yii::$app->request->post('createFromQuoteSearch', 0);
 
+            $addQuoteService = Yii::createObject(AddQuoteService::class);
+
             if ($key && $lead) {
                 $keyCache = empty($keyCache) ? sprintf('quick-search-new-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey()) : $keyCache;
                 $resultSearch = Yii::$app->cacheFile->get($keyCache);
@@ -191,257 +197,13 @@ class QuoteController extends FController
                     $result = $keyCache && $createFromQuoteSearch ? $resultSearch['results'] : $resultSearch['data']['results'];
                     foreach ($result as $entry) {
                         if ($entry['key'] == $key) {
-                            $transaction = Quote::getDb()->beginTransaction();
-
-                            $quote = new Quote();
-                            $quote->uid = uniqid();
-                            $quote->lead_id = $leadId;
-                            $quote->cabin = $lead->cabin;
-                            $quote->trip_type = $lead->trip_type;
-                            $quote->check_payment = true;
-                            $quote->fare_type = $entry['fareType'];
-                            $quote->gds = $entry['gds'];
-                            $quote->pcc = $entry['pcc'];
-                            $quote->main_airline_code = $entry['validatingCarrier'];
-                            $quote->last_ticket_date = $entry['prices']['lastTicketDate'];
-                            $quote->reservation_dump = str_replace('&nbsp;', ' ', SearchService::getItineraryDump($entry));
-                            $quote->employee_id = Yii::$app->user->id;
-                            $quote->employee_name = Yii::$app->user->identity->username;
-                            $quote->origin_search_data = json_encode($entry);
-                            $quote->gds_offer_id = $entry['gdsOfferId'] ?? null;
-                            $quote->setMetricLabels(['action' => 'created', 'type_creation' => 'search']);
-
-                            if (isset($entry['tickets'])) {
-                                $quote->tickets = json_encode($entry['tickets']);
-                            }
-
-                            if ($lead->originalQuoteExist()) {
-                                $quote->alternative();
-                            } else {
-                                $quote->base();
-                            }
-
-                            if (!$quote->save()) {
-                                $result['error'] = VarDumper::dumpAsString($quote->errors);
-                                Yii::error(VarDumper::dumpAsString($quote->getErrors()), 'QuoteController:create-quote-from-search:quote:save');
-                                $transaction->rollBack();
+                            try {
+                                $addQuoteService->createQuoteFromSearch($entry, $lead, Auth::user());
+                            } catch (\Throwable $e) {
+                                Yii::error(AppHelper::throwableFormatter($e), 'QuoteController::actionCreateQuoteFromSearch::Throwable');
+                                $result['error'] = 'Error adding quote';
                                 return $result;
-                            } else {
-                                if (isset($entry['trips']) && is_array($entry['trips'])) {
-                                    $ticketSegments = $quote->getTicketSegments();
-
-                                    foreach ($entry['trips'] as $tripKey => $tripEntry) {
-                                        $tripNr = $tripKey + 1;
-                                        $segmentNr = 1;
-
-                                        $trip = new QuoteTrip();
-                                        $trip->qt_duration = $tripEntry['duration'];
-
-                                        if (!$trip->validate()) {
-                                            $result['error'] = VarDumper::dumpAsString($trip->errors);
-                                            Yii::error(VarDumper::dumpAsString($entry) . "\n" . VarDumper::dumpAsString($trip->getErrors()), 'QuoteController:create-quote-from-search:trip:save');
-                                            $transaction->rollBack();
-                                            return $result;
-                                        }
-                                        $quote->link('quoteTrips', $trip);
-                                        $keys = [];
-
-                                        if (isset($tripEntry['segments']) && is_array($tripEntry['segments'])) {
-                                            foreach ($tripEntry['segments'] as $segmentEntry) {
-                                                $segment = new QuoteSegment();
-                                                $segment->qs_departure_airport_code = $segmentEntry['departureAirportCode'];
-                                                if (isset($segmentEntry['departureAirportTerminal']) && !empty($segmentEntry['departureAirportTerminal'])) {
-                                                    $segment->qs_departure_airport_terminal = $segmentEntry['departureAirportTerminal'];
-                                                }
-                                                $segment->qs_arrival_airport_code = $segmentEntry['arrivalAirportCode'];
-                                                if (isset($segmentEntry['arrivalAirportTerminal']) && !empty($segmentEntry['arrivalAirportTerminal'])) {
-                                                    $segment->qs_arrival_airport_terminal = $segmentEntry['arrivalAirportTerminal'];
-                                                }
-                                                $segment->qs_arrival_time = $segmentEntry['arrivalTime'];
-                                                $segment->qs_departure_time = $segmentEntry['departureTime'];
-                                                $segment->qs_air_equip_type = $segmentEntry['airEquipType'];
-                                                $segment->qs_booking_class = $segmentEntry['bookingClass'];
-                                                $segment->qs_flight_number = $segmentEntry['flightNumber'];
-                                                $segment->qs_fare_code = $segmentEntry['fareCode'];
-                                                $segment->qs_duration = $segmentEntry['duration'];
-                                                $segment->qs_operating_airline = $segmentEntry['operatingAirline'];
-                                                $segment->qs_marketing_airline = $segmentEntry['marketingAirline'];
-                                                $segment->qs_cabin = $segmentEntry['cabin'];
-
-                                                if ($ticketSegments && isset($ticketSegments[$tripNr][$segmentNr])) {
-                                                    $segment->qs_ticket_id = $ticketSegments[$tripNr][$segmentNr];
-                                                }
-
-                                                if (isset($segmentEntry['mileage'])) {
-                                                    $segment->qs_mileage = $segmentEntry['mileage'];
-                                                }
-                                                if (isset($segmentEntry['marriageGroup'])) {
-                                                    $segment->qs_marriage_group = $segmentEntry['marriageGroup'];
-                                                }
-                                                if (isset($segmentEntry['meal'])) {
-                                                    $segment->qs_meal = $segmentEntry['meal'];
-                                                }
-                                                if (isset($segmentEntry['recheckBaggage'])) {
-                                                    $segment->qs_recheck_baggage = $segmentEntry['recheckBaggage'];
-                                                }
-
-                                                $segment->qs_stop = $segmentEntry['stop'];
-                                                $segment->qs_air_equip_type = $segmentEntry['airEquipType'];
-                                                $segment->qs_key = '#' . $segmentEntry['flightNumber'] .
-                                                    ($segmentEntry['stop'] > 0 ? '(' . $segmentEntry['stop'] . ')' : '') .
-                                                    $segmentEntry['departureAirportCode'] . '-' . $segmentEntry['arrivalAirportCode'] . ' ' . $segmentEntry['departureTime'];
-                                                $keys[] = $segment->qs_key;
-
-                                                if (!$segment->validate()) {
-                                                    $result['error'] = VarDumper::dumpAsString($segment->errors);
-                                                    Yii::error(VarDumper::dumpAsString($entry) . "\n" . VarDumper::dumpAsString($segment->getErrors()), 'QuoteController:create-quote-from-search:segment:save');
-                                                    $transaction->rollBack();
-                                                    return $result;
-                                                }
-                                                $trip->link('quoteSegments', $segment);
-
-                                                if (isset($segmentEntry['stops']) && !empty($segmentEntry['stops'])) {
-                                                    foreach ($segmentEntry['stops'] as $stopEntry) {
-                                                        $stop = new QuoteSegmentStop();
-                                                        $stop->qss_location_code = $stopEntry['locationCode'];
-                                                        $stop->qss_departure_dt = $stopEntry['departureDateTime'];
-                                                        $stop->qss_arrival_dt = $stopEntry['arrivalDateTime'];
-                                                        if (isset($stopEntry['duration'])) {
-                                                            $stop->qss_duration = $stopEntry['duration'];
-                                                        }
-                                                        if (isset($stopEntry['elapsedTime'])) {
-                                                            $stop->qss_elapsed_time = $stopEntry['elapsedTime'];
-                                                        }
-                                                        if (isset($stopEntry['equipment'])) {
-                                                            $stop->qss_equipment = $stopEntry['equipment'];
-                                                        }
-                                                        if (!$stop->validate()) {
-                                                            $result['error'] = VarDumper::dumpAsString($stop->errors);
-                                                            Yii::error(VarDumper::dumpAsString($entry) . "\n" . VarDumper::dumpAsString($stop->getErrors()), 'QuoteController:create-quote-from-search:stop:save');
-                                                            $transaction->rollBack();
-                                                            return $result;
-                                                        }
-                                                        $segment->link('quoteSegmentStops', $stop);
-                                                    }
-                                                }
-
-                                                if (isset($segmentEntry['baggage'])) {
-                                                    foreach ($segmentEntry['baggage'] as $paxCode => $baggageEntry) {
-                                                        $baggage = new QuoteSegmentBaggage();
-                                                        $baggage->qsb_pax_code = $paxCode;
-                                                        if (isset($baggageEntry['airlineCode'])) {
-                                                            $baggage->qsb_airline_code = $baggageEntry['airlineCode'];
-                                                        }
-                                                        if (isset($baggageEntry['allowPieces'])) {
-                                                            $baggage->qsb_allow_pieces = $baggageEntry['allowPieces'];
-                                                        }
-                                                        if (isset($baggageEntry['allowWeight'])) {
-                                                            $baggage->qsb_allow_weight = $baggageEntry['allowWeight'];
-                                                        }
-                                                        if (isset($baggageEntry['allowUnit'])) {
-                                                            $baggage->qsb_allow_unit = $baggageEntry['allowUnit'];
-                                                        }
-                                                        if (isset($baggageEntry['allowMaxWeight'])) {
-                                                            $baggage->qsb_allow_max_weight = $baggageEntry['allowMaxWeight'];
-                                                        }
-                                                        if (isset($baggageEntry['allowMaxSize'])) {
-                                                            $baggage->qsb_allow_max_size = $baggageEntry['allowMaxSize'];
-                                                        }
-                                                        if (isset($baggageEntry['carryOn'])) {
-                                                            $baggage->qsb_carry_one = $baggageEntry['carryOn'];
-                                                        }
-                                                        if (!$baggage->validate()) {
-                                                            $result['error'] = VarDumper::dumpAsString($baggage->errors);
-                                                            Yii::error(VarDumper::dumpAsString($entry) . "\n" . VarDumper::dumpAsString($baggage->getErrors()), 'QuoteController:create-quote-from-search:baggage:save');
-
-                                                            $transaction->rollBack();
-                                                            return $result;
-                                                        }
-                                                        $segment->link('quoteSegmentBaggages', $baggage);
-
-                                                        if (isset($baggageEntry['charge']) && !empty($baggageEntry['charge'])) {
-                                                            foreach ($baggageEntry['charge'] as $baggageEntryCharge) {
-                                                                $baggageCharge = new QuoteSegmentBaggageCharge();
-                                                                $baggageCharge->qsbc_pax_code = $paxCode;
-                                                                if (isset($baggageEntryCharge['price'])) {
-                                                                    $baggageCharge->qsbc_price = $baggageEntryCharge['price'];
-                                                                }
-                                                                if (isset($baggageEntryCharge['currency'])) {
-                                                                    $baggageCharge->qsbc_currency = $baggageEntryCharge['currency'];
-                                                                }
-                                                                if (isset($baggageEntryCharge['firstPiece'])) {
-                                                                    $baggageCharge->qsbc_first_piece = $baggageEntryCharge['firstPiece'];
-                                                                }
-                                                                if (isset($baggageEntryCharge['lastPiece'])) {
-                                                                    $baggageCharge->qsbc_last_piece = $baggageEntryCharge['lastPiece'];
-                                                                }
-                                                                if (isset($baggageEntryCharge['maxWeight'])) {
-                                                                    $baggageCharge->qsbc_max_weight = $baggageEntryCharge['maxWeight'];
-                                                                }
-                                                                if (isset($baggageEntryCharge['maxSize'])) {
-                                                                    $baggageCharge->qsbc_max_size = $baggageEntryCharge['maxSize'];
-                                                                }
-                                                                if (!$baggageCharge->validate()) {
-                                                                    $result['error'] = VarDumper::dumpAsString($baggageCharge->errors);
-                                                                    Yii::error(VarDumper::dumpAsString($entry) . "\n" . VarDumper::dumpAsString($baggageCharge->getErrors()), 'QuoteController:create-quote-from-search:baggage_charge:save');
-                                                                    $transaction->rollBack();
-                                                                    return $result;
-                                                                }
-                                                                $segment->link('quoteSegmentBaggageCharges', $baggageCharge);
-                                                            }
-                                                        }
-                                                    }
-                                                }
-
-                                                $segmentNr++;
-                                            }
-                                        }
-
-                                        $trip->qt_key = implode('|', $keys);
-                                        if (!$trip->save()) {
-                                            $result['error'] = VarDumper::dumpAsString($trip->errors);
-                                            Yii::error(VarDumper::dumpAsString($entry) . "\n" . VarDumper::dumpAsString($trip->getErrors()), 'QuoteController:create-quote-from-search:trip:savekey');
-                                            $transaction->rollBack();
-                                            return $result;
-                                        }
-                                    }
-                                }
-
-                                foreach ($entry['passengers'] as $paxCode => $paxEntry) {
-                                    for ($i = 0; $i < $paxEntry['cnt']; $i++) {
-                                        $price = new QuotePrice();
-                                        $price->passenger_type = $paxCode;
-                                        $price->fare = $paxEntry['baseFare'];
-                                        $price->taxes = $paxEntry['baseTax'];
-                                        $price->net = $price->fare + $price->taxes;
-                                        $price->mark_up = $paxEntry['markup'];
-                                        $price->selling = $price->net + $price->mark_up + $price->extra_mark_up;
-                                        $price->service_fee = ($quote->check_payment) ? QuotePrice::calculateProcessingFeeAmount($price->selling, (new Quote())->serviceFeePercent) : 0;
-                                        $price->selling += $price->service_fee;
-
-                                        if (!$price->validate()) {
-                                            $result['error'] = VarDumper::dumpAsString($price->errors);
-                                            Yii::error(VarDumper::dumpAsString($entry) . "\n" . VarDumper::dumpAsString($price->getErrors()), 'QuoteController:create-quote-from-search:price:save');
-                                            $transaction->rollBack();
-                                            return $result;
-                                        }
-
-                                        $quote->link('quotePrices', $price);
-                                    }
-                                }
-
-                                if ($lead->called_expert) {
-                                    $quote->sendUpdateBO();
-                                }
-
-                                $chat = ClientChatLead::find()->andWhere(['ccl_lead_id' => $lead->id])->one();
-                                if ($chat) {
-                                    ClientChatSocketCommands::clientChatAddOfferButton($chat->chat, $lead->id);
-                                }
                             }
-
-                            $transaction->commit();
-
 
                             $result['status'] = true;
 
@@ -457,6 +219,63 @@ class QuoteController extends FController
         }
 
         return $result;
+    }
+
+    public function actionAutoAddQuotes(): Response
+    {
+        $leadId = Yii::$app->request->post('leadId', 0);
+        $response = [
+            'error' => true,
+            'message' => ''
+        ];
+        try {
+            $lead = Lead::findOne($leadId);
+            if (!$lead) {
+                throw new RuntimeException('Lead not found');
+            }
+            if (!FlightQuoteGuard::canAutoSelectQuotes(Auth::user(), $lead)) {
+                throw new \DomainException('You do not have access to perform this action');
+            }
+            $gds = Yii::$app->request->post('gds', '');
+
+            $keyCache = sprintf('quote-search-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey());
+            $quotes = \Yii::$app->cacheFile->get($keyCache);
+
+            if ($quotes === false) {
+                $quotes = SearchService::getOnlineQuotes($lead);
+                if ($quotes && !empty($quotes['data']['results']) && empty($quotes['error'])) {
+                    \Yii::$app->cacheFile->set($keyCache, $quotes = QuoteHelper::formatQuoteData($quotes['data']), 600);
+                } else {
+                    throw new \RuntimeException(!empty($quotes['error']) ? JsonHelper::decode($quotes['error'])['Message'] : 'Search result is empty!');
+                }
+            }
+            $form = new FlightQuoteSearchForm();
+
+            $dataProvider = new ArrayDataProvider([
+                'allModels' => $quotes['results'] ?? [],
+                'pagination' => [
+                    'pageSize' => SettingHelper::getFlightQuoteAutoSelectCount(),
+                    'params' => array_merge(Yii::$app->request->get(), $form->getFilters()),
+                ],
+                'sort' => [
+                    'attributes' => ['price', 'duration'],
+                    'defaultOrder' => [$form->getSortBy() => $form->getSortType()],
+                ],
+            ]);
+
+            $addQuoteService = Yii::createObject(AddQuoteService::class);
+            $addQuoteService->autoSelectQuotes($dataProvider->getModels(), $lead, Auth::user());
+
+            $response['error'] = false;
+            $response['message'] = 'Auto select quotes completed successfully';
+        } catch (\RuntimeException | \DomainException $e) {
+            $response['message'] = $e->getMessage();
+        } catch (\Throwable $e) {
+            Yii::error(AppHelper::throwableLog($e), 'QuoteController::actionAutoAddQuotes::Throwable');
+            $response['message'] = 'Internal Server Error';
+        }
+
+        return $this->asJson($response);
     }
 
 

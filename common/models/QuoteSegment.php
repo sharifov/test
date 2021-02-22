@@ -303,4 +303,34 @@ class QuoteSegment extends \yii\db\ActiveRecord
             ->andWhere(['qs_arrival_airport_code' => $arrival])
             ->one();
     }
+
+    public static function createFromSearch(array $segmentEntry, ?int $ticketId): QuoteSegment
+    {
+        $segment = new self();
+        $segment->qs_departure_airport_code = $segmentEntry['departureAirportCode'] ?? null;
+        $segment->qs_departure_airport_terminal = $segmentEntry['departureAirportTerminal'] ?? null;
+        $segment->qs_arrival_airport_code = $segmentEntry['arrivalAirportCode'] ?? null;
+        $segment->qs_arrival_airport_terminal = $segmentEntry['arrivalAirportTerminal'] ?? null;
+        $segment->qs_arrival_time = $segmentEntry['arrivalTime'] ?? null;
+        $segment->qs_departure_time = $segmentEntry['departureTime'] ?? null;
+        $segment->qs_air_equip_type = $segmentEntry['airEquipType'] ?? null;
+        $segment->qs_booking_class = $segmentEntry['bookingClass'] ?? null;
+        $segment->qs_flight_number = $segmentEntry['flightNumber'] ?? null;
+        $segment->qs_fare_code = $segmentEntry['fareCode'] ?? null;
+        $segment->qs_duration = $segmentEntry['duration'] ?? null;
+        $segment->qs_operating_airline = $segmentEntry['operatingAirline'] ?? null;
+        $segment->qs_marketing_airline = $segmentEntry['marketingAirline'] ?? null;
+        $segment->qs_cabin = $segmentEntry['cabin'] ?? null;
+        $segment->qs_ticket_id = $ticketId;
+        $segment->qs_mileage = $segmentEntry['mileage'] ?? null;
+        $segment->qs_marriage_group = $segmentEntry['marriageGroup'] ?? null;
+        $segment->qs_meal = $segmentEntry['meal'] ?? null;
+        $segment->qs_recheck_baggage = $segmentEntry['recheckBaggage'] ?? null;
+        $segment->qs_stop = $segmentEntry['stop'] ?? null;
+        $segment->qs_air_equip_type = $segmentEntry['airEquipType'] ?? null;
+        $segment->qs_key = '#' . $segment->qs_flight_number .
+            ($segment->qs_stop > 0 ? '(' . $segment->qs_stop . ')' : '') .
+            $segment->qs_departure_airport_code . '-' . $segment->qs_arrival_airport_code . ' ' . $segment->qs_departure_time;
+        return $segment;
+    }
 }
