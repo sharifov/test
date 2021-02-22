@@ -121,6 +121,8 @@ class CasesSearch extends Cases
     public $datetime_end;
     public $date_range;
 
+    public $locales = [];
+
     public $showFields = [];
 
     private $cacheSaleData = [];
@@ -175,7 +177,7 @@ class CasesSearch extends Cases
                 ],
                 'integer', 'min' => 0, 'max' => 1000
             ],
-            [['datetime_start', 'datetime_end'], 'safe'],
+            [['datetime_start', 'datetime_end', 'locales'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
 
             ['showFields', 'filter', 'filter' => static function ($value) {

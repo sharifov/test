@@ -15,6 +15,7 @@ use dosamigos\datepicker\DatePicker;
 use yii\grid\GridView;
 use sales\entities\cases\Cases;
 use yii\widgets\Pjax;
+use common\models\Language;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\entities\cases\CasesQSearch */
@@ -148,6 +149,11 @@ $lists = new ListsAccess($user->id);
                 'value' => function (CasesQSearch $model) {
                     return $model->getClientTime();
                 },
+            ],
+            [
+                'attribute' => 'client_locale',
+                'value' => 'client.cl_locale',
+                'filter' => Language::getLocaleList(false)
             ],
             /*[
                 'attribute' => 'cs_user_id',
