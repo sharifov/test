@@ -78,8 +78,8 @@ JS;
         <?= \yii\widgets\ListView::widget([
             'dataProvider' => $dataProvider,
             'emptyText' => '<div class="text-center">Not found quotes</div><br>',
-            'itemView' => function ($resultItem, $key, $index, $widget) use ($locations, $airlines, $flightQuotes) {
-                return $this->render('_quote_search_item', ['resultKey' => $key,'result' => $resultItem,'locations' => $locations,'airlines' => $airlines, 'flightQuotes' => $flightQuotes]);
+            'itemView' => function ($resultItem, $key, $index, $widget) use ($locations, $airlines, $flightQuotes, $keyCache) {
+                return $this->render('_quote_search_item', ['resultKey' => $key,'result' => $resultItem,'locations' => $locations,'airlines' => $airlines, 'flightQuotes' => $flightQuotes, 'keyCache' => $keyCache]);
             },
             'layout' => '{summary}{pager}{items}{pager}',
             'itemOptions' => [
@@ -108,60 +108,6 @@ JS;
         $('.search-results__wrapper').removeClass('loading');
     });
     
-    $('#modal-lg, .search-result__quote').off().on('click', '.search_create_quote__btn', function (e) {
-        e.preventDefault();
-        var key = $(this).data('key');
-        var gds = $(this).data('gds');
-        var searchResId = $(this).data('result');
-        $('#preloader').removeClass('d-none');
-        $.ajax({
-            url: '$urlCreateQuoteFromSearch',
-            type: 'post',
-            data: {'key': key, 'gds': gds, 'keyCache': '$keyCache', 'createFromQuoteSearch':1},
-            beforeSend: function () {
-              $('#'+searchResId).addClass('loading');
-            },
-            success: function (data) {
-                var error = '';
-                
-                $('#preloader').addClass('d-none');
-                if(data.status == true){
-                    $('#modal-lg').modal('hide');
-                    $('#'+searchResId).addClass('quote--selected').find('.flight_create_quote__btn').remove();
-
-                    $.pjax.reload({container: '#quotes_list', async: false});
-                    $('.popover-class[data-toggle="popover"]').popover({ sanitize: false });
-                    
-                    new PNotify({
-                        title: "Create quote - search",
-                        type: "success",
-                        text: 'Added new quote id: ' + searchResId,
-                        hide: true
-                    });
-                } else {
-                    if(data.error) {
-                        error = data.error;    
-                    } else {
-                        error = 'Some errors was happened during create quote. Please try again later';
-                    }
-                    
-                    new PNotify({
-                        title: "Error: Create quote - search",
-                        type: "error",
-                        text: error,
-                        hide: true
-                    });
-                }
-            },
-            error: function (error) {
-                console.log('Error: ' + error);
-            },
-            complete: function () {
-              $('#'+searchResId).removeClass('loading');
-              $('#preloader').addClass('d-none');
-            }
-        });
-    });
 JS;
     $this->registerJs($js);
     ?>
