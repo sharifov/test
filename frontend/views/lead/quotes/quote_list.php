@@ -17,13 +17,13 @@ use yii\widgets\Pjax;
 
 $addAutoQuoteBtn = '';
 if (FlightQuoteGuard::canAutoSelectQuotes(Auth::user(), $lead)) {
-    $addAutoQuoteBtn = Html::button('<i class="fa fa-plus"></i> Auto Select Quotes', ['class' => 'btn btn-info btn-sm auto_add_quotes_btn', 'data-lead-id' => $lead->id]);
+    $addAutoQuoteBtn = Html::a('<i class="fa fa-plus green"></i> Auto Select Quotes', null, ['class' => 'auto_add_quotes_btn', 'data-lead-id' => $lead->id]);
     $addAutoQuoteUrl = Url::toRoute('/quote/auto-add-quotes');
     $js = <<<JS
     $(document).on('click', '.auto_add_quotes_btn', function (e) {
         let btn = $(this);
         let btnIcon = $('.fa', btn);
-        let iconLoading = $('<i class="fa fa-spin fa-spinner"></i>'); 
+        let iconLoading = $('<i class="fa fa-spin fa-spinner yellow"></i>'); 
         let gds = btn.data('gds');
         let leadId = btn.data('lead-id');
         
