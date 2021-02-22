@@ -13,6 +13,7 @@ use yii\bootstrap\Html;
 use yii\helpers\Url;
 use yii\widgets\ListView;
 use yii\widgets\Pjax;
+use sales\auth\Auth;
 
 ?>
 <style>
@@ -29,12 +30,16 @@ use yii\widgets\Pjax;
         <ul class="nav navbar-right panel_toolbox">
             <?php if ($leadForm->mode !== $leadForm::VIEW_MODE || $is_manager) : ?>
                 <?php if ($lead->leadFlightSegmentsCount) :?>
-                <li>
-                    <?=Html::a('<i class="fa fa-search warning"></i> Quote Search', null, ['class' => '', 'id' => 'search-quotes-btn', 'data-url' => Url::to(['quote/ajax-search-quotes', 'leadId' => $leadForm->getLead()->id])])?>
-                </li>
-                <li>
-                    <?=Html::a('<i class="fa fa-search warning"></i> Quick Search', null, ['class' => '', 'id' => 'quick-search-quotes-btn', 'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id])])?>
-                </li>
+                    <?php if (Auth::can('/quote/ajax-search-quotes')) :?>
+                        <li>
+                            <?=Html::a('<i class="fa fa-search warning"></i> Quote Search', null, ['class' => '', 'id' => 'search-quotes-btn', 'data-url' => Url::to(['quote/ajax-search-quotes', 'leadId' => $leadForm->getLead()->id])])?>
+                        </li>
+                    <?php endif; ?>
+                    <?php if (Auth::can('/quote/get-online-quotes')) :?>
+                        <li>
+                            <?=Html::a('<i class="fa fa-search warning"></i> Quick Search', null, ['class' => '', 'id' => 'quick-search-quotes-btn', 'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id])])?>
+                        </li>
+                    <?php endif; ?>
                 <?php else : ?>
                 <li>
                     <span class="badge badge-warning"><i class="fa fa-warning"></i> Warning: Flight Segments is empty!</span>
