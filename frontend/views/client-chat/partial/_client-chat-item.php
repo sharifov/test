@@ -79,7 +79,7 @@ use yii\helpers\StringHelper;
                 <?php // Pjax::begin(['id' => 'chat-last-message-refresh-' . $clientChat['cch_id']])?>
                 <div id="chat-last-message-<?= $clientChat['cch_id'] ?>">
                     <?php if ($clientChat['last_message']) : ?>
-                        <p title="Last <?= $clientChat['last_message_type_id'] === ClientChatLastMessage::TYPE_CLIENT ? 'client' : 'agent' ?>  message"><small><i class="fa fa-comment-o"> </i> <?= StringHelper::truncate($clientChat['last_message'], 40, '...')?></small></p>
+                        <p title="Last <?= $clientChat['last_message_type_id'] === ClientChatLastMessage::TYPE_CLIENT ? 'client' : 'agent' ?>  message"><small><i class="fa fa-comment-o"> </i> <?= Html::encode(StringHelper::truncate($clientChat['last_message'], 40, '...'))?></small></p>
                     <?php endif; ?>
                 </div>
                 <?php // Pjax::end()?>

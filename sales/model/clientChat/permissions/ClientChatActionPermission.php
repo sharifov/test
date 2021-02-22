@@ -27,6 +27,8 @@ use sales\model\clientChat\entity\ClientChatQuery;
  * @property bool|null $canSendCannedResponse
  * @property bool|null $canCreateLead
  * @property bool|null $canCreateCase
+ * @property bool|null $canLinkCase
+ * @property bool|null $canLinkLead
  */
 class ClientChatActionPermission
 {
@@ -56,6 +58,9 @@ class ClientChatActionPermission
 
     private ?bool $canCreateLead = null;
     private ?bool $canCreateCase = null;
+
+    private ?bool $canLinkCase = null;
+    private ?bool $canLinkLead = null;
 
     public function canClose(ClientChat $chat): bool
     {
@@ -337,5 +342,25 @@ class ClientChatActionPermission
 
         $this->canCreateCase = Auth::can('/cases/create-by-chat') && Auth::can('client-chat/manage', ['chat' => $chat]);
         return $this->canCreateCase;
+    }
+
+    public function canLinkCase(ClientChat $chat): bool
+    {
+        if ($this->canLinkCase !== null) {
+            return $this->canLinkCase;
+        }
+
+        $this->canLinkCase = Auth::can('/cases/link-chat') && Auth::can('client-chat/manage', ['chat' => $chat]);
+        return $this->canLinkCase;
+    }
+
+    public function canLinkLead(ClientChat $chat): bool
+    {
+        if ($this->canLinkLead !== null) {
+            return $this->canLinkLead;
+        }
+
+        $this->canLinkLead = Auth::can('/lead/link-chat') && Auth::can('client-chat/manage', ['chat' => $chat]);
+        return $this->canLinkLead;
     }
 }

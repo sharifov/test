@@ -4,6 +4,7 @@ use common\models\Call;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use yii\widgets\DetailView;
+use sales\helpers\phone\MaskPhoneHelper;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\Call */
@@ -86,8 +87,26 @@ $this->params['breadcrumbs'][] = $this->title;
                         return $model->getCallTypeName();
                     },
                 ],
-                'c_from',
-                'c_to',
+                //'c_from',
+                [
+                    'attribute' => 'c_from',
+                    'value' => static function (Call $model) {
+                        if ($model->c_call_type_id == $model::CALL_TYPE_IN) {
+                            return MaskPhoneHelper::masking($model->c_from);
+                        }
+                        return $model->c_from;
+                    }
+                ],
+                //'c_to',
+                [
+                    'attribute' => 'c_to',
+                    'value' => static function (Call $model) {
+                        if ($model->c_call_type_id == $model::CALL_TYPE_OUT) {
+                            return MaskPhoneHelper::masking($model->c_to);
+                        }
+                        return $model->c_from;
+                    }
+                ],
                 'c_call_status',
                 [
                     'attribute' => 'c_status_id',

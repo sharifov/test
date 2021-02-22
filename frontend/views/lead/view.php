@@ -93,7 +93,7 @@ $unsubscribedEmails = array_column($lead->project->emailUnsubscribes, 'eu_email'
         </div>
 
         <div class="col-md-6">
-<?php if (Auth::can('lead-view/flight-default/view', ['lead' => $lead])) : ?>
+
         <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-products-wrap', 'enablePushState' => false, 'enableReplaceState' => false, 'timeout' => 5000]) ?>
 
             <?= $this->render('products/_products', [
@@ -120,7 +120,7 @@ $unsubscribedEmails = array_column($lead->project->emailUnsubscribes, 'eu_email'
                 ]) ?>
             <?php endif; ?>
         <?php \yii\widgets\Pjax::end(); ?>
-<?php endif; ?>
+
         </div>
         <div class="col-md-6">
             <?php /*if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && !$lead->isOwner($user->id)):*/?><!--
@@ -201,6 +201,14 @@ $unsubscribedEmails = array_column($lead->project->emailUnsubscribes, 'eu_email'
                 ]) ?>
             <?php endif; ?>
 
+            <?php if (Auth::can('lead-view/notes/view', ['lead' => $lead])) : ?>
+                <?= $this->render('notes/agent_notes', [
+                    'lead' => $lead,
+                    'dataProviderNotes'  => $dataProviderNotes,
+                    'modelNote'  => $modelNote,
+                ]) ?>
+            <?php endif;?>
+            
             <?php if (Yii::$app->user->can('lead-view/communication-block/view', ['lead' => $lead])) : ?>
                 <?= $this->render('communication/lead_communication', [
                     'leadForm'      => $leadForm,
@@ -290,13 +298,7 @@ $unsubscribedEmails = array_column($lead->project->emailUnsubscribes, 'eu_email'
 //                    'is_manager' => $is_manager,
 //                ]);?>
 
-            <?php if (Auth::can('lead-view/notes/view', ['lead' => $lead])) : ?>
-                <?= $this->render('notes/agent_notes', [
-                    'lead' => $lead,
-                    'dataProviderNotes'  => $dataProviderNotes,
-                    'modelNote'  => $modelNote,
-                ]) ?>
-            <?php endif;?>
+
         </div>
 
         <div class="clearfix"></div>

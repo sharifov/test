@@ -184,10 +184,11 @@ $emailTemplateTypes = @json_encode($emailTemplateTypes);
                             <?php if ($isAdmin) :?>
                                 <div class="row" style="display: none" id="email-data-content-div">
                         <pre><?php
-                            //VarDumper::dump($previewEmailForm->e_content_data, 10, true);
-                            echo json_encode($previewEmailForm->e_content_data);
+                            VarDumper::dump($previewEmailForm->e_content_data, 15, true);
                         ?>
                         </pre>
+                                    JSON:
+                                    <pre><?php echo Html::encode(json_encode($previewEmailForm->e_content_data)) ?></pre>
                                 </div>
                             <?php endif; ?>
 
@@ -288,6 +289,10 @@ $emailTemplateTypes = @json_encode($emailTemplateTypes);
 
                             $clientEmails = \yii\helpers\ArrayHelper::map($leadForm->getClientEmail(), 'email', 'email');
                             $clientEmails[Yii::$app->user->identity->email] = Yii::$app->user->identity->email;
+
+                            foreach ($clientEmails as $key => $element) {
+                                $clientEmails[$key] = \sales\helpers\email\MaskEmailHelper::masking($element);
+                            }
 
                             $clientPhones = $leadForm->getClient()->getPhoneNumbersSms(); //\yii\helpers\ArrayHelper::map($leadForm->getClientPhone(), 'phone', 'phone');
 
@@ -593,7 +598,7 @@ var emailTemplateTypes = '{$emailTemplateTypes}';
 $('#email option').each(function() {             
     if (JSON.parse(emails).includes($(this).attr('value'))){                
         //$(this).attr('disabled', 'disabled');
-        $(this).html($(this).attr('value') + ' (unsubscribed)')
+        $(this).html($(this).html() + ' (unsubscribed)')
     }
     if ($(this).attr('value') == ""){
         $(this).html('---')

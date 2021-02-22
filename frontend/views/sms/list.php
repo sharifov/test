@@ -5,6 +5,7 @@ use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use sales\helpers\phone\MaskPhoneHelper;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\SmsSearch */
@@ -41,11 +42,11 @@ $user = Yii::$app->user->identity;
     <?php endif;*/ ?>
 
     <h1><i class="fa fa-comments-o"></i> <?= Html::encode($this->title) ?></h1>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <p>
 
-        <?php //= Html::a('<i class="fa fa-plus"></i> Create Sms', ['create'], ['class' => 'btn btn-success']) ?>
+        <?php //= Html::a('<i class="fa fa-plus"></i> Create Sms', ['create'], ['class' => 'btn btn-success'])?>
 
         <?= Html::a('<i class="fa fa-check"></i> Make Read All', ['all-read'], [
             'class' => 'btn btn-info',
@@ -226,17 +227,40 @@ $user = Yii::$app->user->identity;
             [
                 'attribute' => 's_phone_from',
                 'value' => static function (\common\models\Sms $model) {
+                    if ($model->s_type_id == $model::TYPE_INBOX) {
+                        return MaskPhoneHelper::masking($model->s_phone_from);
+                    }
                     return $model->s_phone_from;
                 },
                 'filter' => $phoneList
             ],
+
+            /*[
+                'attribute' => 's_phone_from',
+                'value' => static function (\common\models\Sms $model) {
+                    return $model->s_phone_from;
+                },
+                'filter' => $phoneList
+            ],*/
+
             [
+                'attribute' => 's_phone_to',
+                'value' => static function (\common\models\Sms $model) {
+                    if ($model->s_type_id == $model::TYPE_OUTBOX) {
+                        return MaskPhoneHelper::masking($model->s_phone_to);
+                    }
+                    return $model->s_phone_to;
+                },
+                'filter' => $phoneList
+            ],
+
+            /*[
                 'attribute' => 's_phone_to',
                 'value' => static function (\common\models\Sms $model) {
                     return $model->s_phone_to;
                 },
                 'filter' => $phoneList
-            ],
+            ],*/
 
             's_sms_text:ntext',
             //'s_sms_data:ntext',

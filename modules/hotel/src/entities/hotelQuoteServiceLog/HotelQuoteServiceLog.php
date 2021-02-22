@@ -23,7 +23,7 @@ use yii\helpers\VarDumper;
  * @property string|null $hqsl_updated_dt
  *
  * @property ActiveQuery $hotelQuote
- * @property ActiveQuery $createdUser
+ * @property Employee $createdUser
  */
 class HotelQuoteServiceLog extends ActiveRecord
 {
@@ -90,10 +90,7 @@ class HotelQuoteServiceLog extends ActiveRecord
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
-    /**
-     * @return ActiveQuery
-     */
-    public function getCreatedUser(): ActiveQuery
+    public function getCreatedUser()
     {
         return $this->hasOne(Employee::class, ['id' => 'hqsl_created_user_id']);
     }

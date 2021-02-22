@@ -60,7 +60,7 @@ if ($firstSourceStarted = $chat->getFirstHumanSourceTypeStarted()) {
                     <i class="fa fa-comments-o"> </i> <?= $count ?>
                 </td>
                 <td>
-                    <span class="badge badge-warning" data-toggle="tooltip" title="Duration"><?= $duration ?></span>
+                   <?php /*  <span class="badge badge-warning" data-toggle="tooltip" title="Duration"><?= $duration ?></span> */ ?>
                 </td>
                 <td class="text-center">
                     <small data-toggle="tooltip" title="Last message"><?= $lastMessageDate ?></small>

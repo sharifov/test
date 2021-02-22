@@ -3,6 +3,7 @@
 namespace modules\qaTask\controllers;
 
 use frontend\controllers\FController;
+use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use sales\auth\Auth;
 use Yii;
 use modules\qaTask\src\entities\qaTaskRules\QaTaskRules;
@@ -52,6 +53,21 @@ class QaTaskRulesController extends FController
         }
 
         return $this->render('update', [
+            'model' => $model,
+        ]);
+    }
+
+    public function actionCreate()
+    {
+        $model = new QaTaskRules();
+
+        $model->tr_type = QaTaskObjectType::LEAD;
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            return $this->redirect(['view', 'id' => $model->tr_id]);
+        }
+
+        return $this->render('create', [
             'model' => $model,
         ]);
     }

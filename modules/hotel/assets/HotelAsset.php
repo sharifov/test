@@ -13,12 +13,14 @@ class HotelAsset extends AssetBundle
     /**
      * @var string
      */
-    public $sourcePath = '';
+    public $sourcePath = '@modules/hotel/assets/src/';
 
     /**
      * @var array
      */
-    public $css = [];
+    public $css = [
+        'css/search_quote.css'
+    ];
 
     /**
      * @var array
@@ -31,8 +33,8 @@ class HotelAsset extends AssetBundle
     public function init()
     {
         parent::init();
-        $this->sourcePath = __DIR__ . '/src';
-        $this->js = ['js/user.js'];
+//        $this->sourcePath = __DIR__ . '/src';
+//        $this->js = ['js/user.js'];
     }
 
     /**

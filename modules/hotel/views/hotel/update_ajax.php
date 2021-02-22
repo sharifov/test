@@ -111,10 +111,10 @@ $pjaxId = 'pjax-hotel-update'
                 </div>
 
                 <div class="col-md-6">
-                    <?= $form->field($model, 'ph_min_price_rate')->input('number', ['min' => 0]) ?>
+                    <?= $form->field($model, 'ph_min_price_rate')->input('number', ['min' => 0, 'step' => 0.01]) ?>
                 </div>
                 <div class="col-md-6">
-                    <?= $form->field($model, 'ph_max_price_rate')->input('number', ['min' => 0]) ?>
+                    <?= $form->field($model, 'ph_max_price_rate')->input('number', ['min' => 0, 'step' => 0.01]) ?>
                 </div>
 
             </div>

@@ -28,32 +28,47 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
-            'pt_id',
+            [
+                'attribute' => 'pt_id',
+                'options' => ['style' => 'width: 80px']
+            ],
             'pt_key',
             'pt_name',
-//            'pt_service_fee_percent',
-            'pt_description:ntext',
+
             [
+                'attribute' => 'pt_icon_class',
+                'value' => static function (ProductType $model) {
+                    return $model->pt_icon_class ? Html::tag('i', '', ['class' => $model->pt_icon_class]) . ' "' . Html::encode($model->pt_icon_class) . '"' : '-';
+                },
+                'format' => 'raw',
+                'options' => ['style' => 'width: 180px']
+            ],
+            'pt_sort_order',
+//            'pt_service_fee_percent',
+//            'pt_description:ntext',
+            [
+                    'label' => 'Count Payment Methods',
                 'class' => ProductTypeCountPaymentMethodsColumn::class,
             ],
             [
+                    'label' => 'Payment Fee percent',
                 'class' => ProductTypeDefaultPaymentMethodServiceFeeColumn::class,
             ],
             [
                 'class' => BooleanColumn::class,
                 'attribute' => 'pt_enabled',
             ],
-            [
-                'class' => DateTimeColumn::class,
-                'attribute' => 'pt_created_dt',
-            ],
+//            [
+//                'class' => DateTimeColumn::class,
+//                'attribute' => 'pt_created_dt',
+//            ],
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'pt_updated_dt',

@@ -22,6 +22,7 @@ use yii\widgets\ActiveForm;
 
     <?=
     $form->field($model, 'orderTipsUserProfits')->widget(\unclead\multipleinput\MultipleInput::class, [
+        'id' => 'order_tips_user_profit_multiple_input',
         'columns' => [
             [
                 'name' => 'otup_order_id',

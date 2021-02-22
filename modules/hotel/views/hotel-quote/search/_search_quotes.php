@@ -205,7 +205,7 @@ $js = <<<JS
               } else {
                   
                   pjaxReload({
-                      container: '#pjax-product-quote-list-' + data.product_id,
+                      container: '#pjax-product-' + data.product_id,
                       push: false, replace: false, timeout: 2000
                   });
                   
@@ -217,7 +217,7 @@ $js = <<<JS
                     });
                   
                   btnAdd.html('<i class="fa fa-check"></i> Added');//.find('i').text('Added').removeClass('fa-spin fa-spinner').addClass('fa-check');
-                  $('#tr-hotel-quote-' + quoteKey).addClass('bg-success');
+                  $('.tr-hotel-quote-' + quoteKey).addClass('bg-success');
               }
           })
         .fail(function( jqXHR, textStatus ) {

@@ -10,6 +10,7 @@ use modules\product\src\entities\productQuoteOption\events\ProductQuoteOptionClo
 use modules\product\src\entities\productQuoteOption\serializer\ProductQuoteOptionSerializer;
 use sales\entities\EventTrait;
 use sales\entities\serializer\Serializable;
+use sales\helpers\product\ProductQuoteHelper;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -69,7 +70,7 @@ class ProductQuoteOption extends ActiveRecord implements Serializable
     public function rules(): array
     {
         return [
-            [['pqo_product_quote_id', 'pqo_name'], 'required'],
+            [['pqo_product_quote_id'], 'required'],
             [['pqo_product_quote_id', 'pqo_product_option_id', 'pqo_status_id', 'pqo_created_user_id', 'pqo_updated_user_id'], 'integer'],
             [['pqo_description'], 'string'],
             [['pqo_price', 'pqo_client_price', 'pqo_extra_markup'], 'number'],
@@ -175,5 +176,13 @@ class ProductQuoteOption extends ActiveRecord implements Serializable
     public function serialize(): array
     {
         return (new ProductQuoteOptionSerializer($this))->getData();
+    }
+
+    public function calculateClientPrice(): void
+    {
+        $currencyRate = $this->pqoProductQuote->pq_client_currency_rate;
+        $clientPrice = is_numeric($this->pqo_price) ? $this->pqo_price : 0.00;
+        $clientPrice = is_numeric($this->pqo_extra_markup) ? $clientPrice + $this->pqo_extra_markup : $clientPrice;
+        $this->pqo_client_price = ProductQuoteHelper::roundPrice($clientPrice * $currencyRate);
     }
 }

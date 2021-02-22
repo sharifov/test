@@ -7,6 +7,8 @@ use sales\entities\cases\Cases;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use sales\auth\Auth;
+use sales\helpers\email\MaskEmailHelper;
+use sales\helpers\phone\MaskPhoneHelper;
 
 /* @var $this yii\web\View */
 /* @var $caseModel \sales\entities\cases\Cases */
@@ -149,7 +151,7 @@ use sales\auth\Auth;
                                             foreach ($phones as $k => $phone) {
                                                 $data[] = '<i class="fa fa-phone"></i> 
                                                            <code class="' . $phone::getPhoneTypeTextDecoration($phone->type) . '" 
-                                                                 title="' . $phone::getPhoneType($phone->type) . '">' . Html::encode($phone->phone) . '</code> ' . $phone::getPhoneTypeLabel($phone->type); //<code>'.Html::a($phone->phone, ['client-phone/view', 'id' => $phone->id], ['target' => '_blank', 'data-pjax' => 0]).'</code>';
+                                                                 title="' . $phone::getPhoneType($phone->type) . '">' . Html::encode(MaskPhoneHelper::masking($phone->phone)) . '</code> ' . $phone::getPhoneTypeLabel($phone->type); //<code>'.Html::a($phone->phone, ['client-phone/view', 'id' => $phone->id], ['target' => '_blank', 'data-pjax' => 0]).'</code>';
                                             }
                                         }
 

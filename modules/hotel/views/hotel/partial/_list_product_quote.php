@@ -162,14 +162,14 @@ JS;
             <li class="dropdown dropdown-offer-menu" data-product-quote-id="<?=($model->hq_product_quote_id)?>" data-lead-id="<?=($hotelProduct->phProduct->pr_lead_id)?>" data-url="<?= Url::to(['/offer/offer/list-menu-ajax'])?>">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="far fa-handshake"></i> Offers</a>
                 <div class="dropdown-menu" role="menu">
-                    <?php // ajax loaded content ?>
+                    <?php // ajax loaded content?>
                 </div>
             </li>
 
             <li class="dropdown dropdown-order-menu" data-product-quote-id="<?=($model->hq_product_quote_id)?>" data-lead-id="<?=($hotelProduct->phProduct->pr_lead_id)?>" data-url="<?= Url::to(['/order/order/list-menu-ajax'])?>">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fas fa-money-check-alt"></i> Orders</a>
                 <div class="dropdown-menu" role="menu">
-                    <?php // ajax loaded content ?>
+                    <?php // ajax loaded content?>
                 </div>
             </li>
 
@@ -249,7 +249,7 @@ JS;
                             'data-url' => Url::to(['/hotel/hotel-quote-service-log/hotel-quote-log', 'id' => $model->hq_id]),
                             'data-hotel-quote-id' => $model->hq_id,
                             'data-product-id' => $model->hqProductQuote->pq_product_id,
-                        ]
+                            ]
                     )?>
 
                     <?= Html::a('<i class="fa fa-list"></i> Status log', null, [
@@ -296,8 +296,7 @@ JS;
                         <th>ID</th>
                         <th>Room Name</th>
                         <th>Board Name</th>
-                        <th>Adult</th>
-                        <th>Children</th>
+                        <th>Pax</th>
                         <th>Cancel Amount</th>
                         <th>NP, $</th>
                         <th>Mkp, $</th>
@@ -328,8 +327,10 @@ JS;
                                 <i class="fa fa-info-circle green" title="Rate Comments: <?=Html::encode($room->hqr_rate_comments)?>"></i>
                             <?php endif;?>
                         </td>
-                        <td class="text-center"><?=$room->hqr_adults ? '<i class="fa fa-user"></i> ' . ($room->hqr_adults) : '-'?></td>
-                        <td class="text-center"><?=$room->hqr_children ? '<i class="fa fa-child"></i> ' . ($room->hqr_children) : '-'?></td>
+                        <td class="text-center">
+                            <?=$room->hqr_adults ? '<i class="fa fa-user"></i> ' . ($room->hqr_adults) : '-'?>
+                            <?=$room->hqr_children ? ', <i class="fa fa-child"></i> ' . ($room->hqr_children) : '-'?>
+                        </td>
                         <td>
                             <?php if ($room->hqr_cancel_amount) : ?>
                                 <?=Html::encode($room->hqr_cancel_amount)?>, <?=Html::encode($room->hqr_cancel_from_dt)?>
@@ -365,8 +366,10 @@ JS;
                     <?php endforeach; ?>
                     <tr>
                         <td colspan="3" class="text-right">Room Total: </td>
-                        <td class="text-center"><?=$adlTotalCount ? '<i class="fa fa-user"></i> ' . $adlTotalCount : '-'?></td>
-                        <td class="text-center"><?=$chdTotalCount ? '<i class="fa fa-child"></i> ' . $chdTotalCount : '-'?></td>
+                        <td class="text-center">
+                            <?=$adlTotalCount ? '<i class="fa fa-user"></i> ' . $adlTotalCount : '-'?>
+                            <?=$chdTotalCount ? ', <i class="fa fa-child"></i> ' . $chdTotalCount : '-'?>
+                        </td>
                         <td class="text-right"></td>
                         <td class="text-right"><?= number_format($totalNp, 2) ?></td>
                         <td class="text-right"><?= number_format($totalMkp, 2) ?></td>
@@ -379,7 +382,7 @@ JS;
                             $totalAmountRoom = round($totalAmountRoom, 2);
                         ?>
 
-                        <td class="text-right <?=( $totalAmountRoom !== $price) ? 'danger' : ''?>">
+                        <td class="text-right <?=($totalAmountRoom !== $price) ? 'danger' : ''?>">
                             <b title="<?=$totalAmountRoom?> & <?=$price?>"><?=number_format($price, 2)?> USD</b>
                         </td>
                     </tr>

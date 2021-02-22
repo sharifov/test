@@ -12,6 +12,7 @@
 
 use common\models\Lead;
 use frontend\models\LeadForm;
+use sales\auth\Auth;
 use sales\forms\lead\ItineraryEditForm;
 use yii\helpers\Html;
 
@@ -25,7 +26,7 @@ use yii\helpers\Html;
 ?>
 
 <?php \yii\widgets\Pjax::begin(['id' => 'product-accordion', 'enablePushState' => false, 'enableReplaceState' => false])?>
-
+<?php if (Auth::can('lead-view/flight-default/view', ['lead' => $lead])) : ?>
 <div class="x_panel">
         <div class="x_title">
             <h2><i class="fa fa-plane"></i> Flight - default</h2>
@@ -68,7 +69,7 @@ JS;
             ]) ?>
         </div>
     </div>
-
+<?php endif; ?>
 <?php foreach ($products as $product) :?>
     <?php if ((int) $product->isHotel() && $product->hotel) : ?>
         <?= $this->render('@modules/hotel/views/hotel/partial/_product_hotel', [
@@ -78,6 +79,24 @@ JS;
 
     <?php if ((int) $product->isFlight() && $product->flight) : ?>
         <?= $this->render('@modules/flight/views/flight/partial/_product_flight', [
+            'product' => $product,
+        ]) ?>
+    <?php endif; ?>
+
+    <?php if ((int) $product->isAttraction() && $product->attraction) : ?>
+        <?= $this->render('@modules/attraction/views/attraction/partial/_product_attraction', [
+            'product' => $product,
+        ]) ?>
+    <?php endif; ?>
+
+    <?php if ((int) $product->isRenTCar() && $product->rentCar) : ?>
+        <?= $this->render('@modules/rentCar/views/rent-car/partial/_product_rent_car', [
+            'product' => $product,
+        ]) ?>
+    <?php endif; ?>
+
+    <?php if ((int) $product->isCruise() && $product->cruise) : ?>
+        <?= $this->render('@modules/cruise/views/cruise/partial/_product_cruise', [
             'product' => $product,
         ]) ?>
     <?php endif; ?>
@@ -260,14 +279,14 @@ $js = <<<JS
         });
       // return false;
     });
-    
-    $('body').on('click', '.btn-delete-product-quote', function(e) {
+        
+    $('body').off('click', '.btn-delete-product-quote').on('click', '.btn-delete-product-quote', function (e) {
         
         let productQuoteId = $(this).data('product-quote-id');
         let productId = $(this).data('product-id');
         
       if(!confirm('Are you sure you want to delete quote ('+ productQuoteId +') ?')) {
-        return '';
+        return false;
       }
         
       e.preventDefault();
@@ -289,7 +308,7 @@ $js = <<<JS
   //        contentType: false,
   //        cache: false,
 //          processData: false,
-          dataType: 'json',
+          dataType: 'json'
       })
           .done(function(data) {
               if (data.error) {

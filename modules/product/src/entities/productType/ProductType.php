@@ -21,6 +21,8 @@ use sales\helpers\setting\SettingHelper;
  * @property bool $pt_enabled
  * @property string $pt_created_dt
  * @property string $pt_updated_dt
+ * @property int|null $pt_sort_order
+ * @property string|null $pt_icon_class
  *
  * @property ProductTypePaymentMethod[] $productTypePaymentMethod
  * @property Product[] $products
@@ -31,6 +33,9 @@ class ProductType extends \yii\db\ActiveRecord
 
     public const PRODUCT_FLIGHT = 1;
     public const PRODUCT_HOTEL  = 2;
+    public const PRODUCT_ATTRACTION  = 5;
+    public const PRODUCT_RENT_CAR  = 3;
+    public const PRODUCT_CRUISE = 4;
 
     public const ALLOW_CALL_EXPERT = [
         self::PRODUCT_FLIGHT,
@@ -45,13 +50,13 @@ class ProductType extends \yii\db\ActiveRecord
     {
         return [
             [['pt_id', 'pt_key', 'pt_name'], 'required'],
-            [['pt_id'], 'integer'],
+            [['pt_id', 'pt_sort_order'], 'integer'],
             [['pt_service_fee_percent'], 'number'],
             [['pt_enabled'], 'boolean'],
             [['pt_description'], 'string'],
             [['pt_settings', 'pt_created_dt', 'pt_updated_dt'], 'safe'],
             [['pt_key'], 'string', 'max' => 20],
-            [['pt_name'], 'string', 'max' => 50],
+            [['pt_name', 'pt_icon_class'], 'string', 'max' => 50],
             [['pt_id'], 'unique'],
             [['pt_key'], 'unique'],
         ];
@@ -69,6 +74,8 @@ class ProductType extends \yii\db\ActiveRecord
             'pt_enabled' => 'Enabled',
             'pt_created_dt' => 'Created Dt',
             'pt_updated_dt' => 'Updated Dt',
+            'pt_sort_order' => 'Sort Order',
+            'pt_icon_class' => 'Icon Class',
         ];
     }
 
@@ -108,7 +115,7 @@ class ProductType extends \yii\db\ActiveRecord
      */
     public static function getList(): array
     {
-        return self::find()->select(['pt_name', 'pt_id'])->orderBy(['pt_name' => SORT_ASC])->indexBy('pt_id')->asArray()->column();
+        return self::find()->select(['pt_name', 'pt_id'])->orderBy(['pt_sort_order' => SORT_ASC])->indexBy('pt_id')->asArray()->column();
     }
 
     /**
@@ -119,9 +126,24 @@ class ProductType extends \yii\db\ActiveRecord
         return self::find()
             ->select(['pt_name', 'pt_id'])
             ->where(['pt_enabled' => true])
-            ->orderBy(['pt_name' => SORT_ASC])
+            //->orderBy(['pt_name' => SORT_ASC])
+            ->orderBy(['pt_sort_order' => SORT_ASC])
             ->indexBy('pt_id')
             ->asArray()
             ->column();
+    }
+
+    /**
+     * @return array
+     */
+    public static function getEnabledItemList(): array
+    {
+        return self::find()
+            ->select(['pt_name', 'pt_id', 'pt_icon_class'])
+            ->where(['pt_enabled' => true])
+            ->orderBy(['pt_sort_order' => SORT_ASC])
+            //->indexBy('pt_id')
+            ->asArray()
+            ->all();
     }
 }

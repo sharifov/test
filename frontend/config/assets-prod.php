@@ -822,6 +822,17 @@ return [
         'depends' => [],
         'sourcePath' => null,
     ],
+    'HotelAsset' => [
+        'class' => 'modules\\hotel\\assets\\HotelAsset',
+        'basePath' => '@webroot/all_shared/build',
+        'baseUrl' => '@web/all_shared/build',
+        'js' => [],
+        'css' => [
+            'hotel-asset.min.css',
+        ],
+        'depends' => [],
+        'sourcePath' => null,
+    ],
     'yii\\web\\JqueryAsset' => [
         'sourcePath' => null,
         'js' => [],
@@ -1677,6 +1688,15 @@ return [
             'yii\\web\\YiiAsset',
             'frontend\\assets\\VueAsset',
             'CronExpressionAssets',
+        ],
+    ],
+    'modules\\hotel\\assets\\HotelAsset' => [
+        'sourcePath' => null,
+        'js' => [],
+        'css' => [],
+        'depends' => [
+            'yii\\web\\JqueryAsset',
+            'HotelAsset',
         ],
     ],
 ];

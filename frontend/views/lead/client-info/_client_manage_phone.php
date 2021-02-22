@@ -4,6 +4,7 @@ use common\models\ClientPhone;
 use common\models\Lead;
 use yii\helpers\Url;
 use yii\web\View;
+use sales\helpers\phone\MaskPhoneHelper;
 
 /**
  * @var $this View
@@ -19,7 +20,7 @@ use yii\web\View;
             <td title="<?= $phone::getPhoneType($phone->type) ?>" class="text-center" style="width:35px; background-color: #eef3f9">
                 <?= $phone::getPhoneTypeIcon($phone->type) ?>
             </td>
-            <td> <span style="line-height: 0;" class="<?= $phone::getPhoneTypeTextDecoration($phone->type) ?>"><?= \yii\helpers\Html::encode($phone->phone) ?></span></td>
+            <td> <span style="line-height: 0;" class="<?= $phone::getPhoneTypeTextDecoration($phone->type) ?>"><?= \yii\helpers\Html::encode(MaskPhoneHelper::masking($phone->phone)) ?></span></td>
 
             <td class="text-right" style="width: 70px">
                 <?php if ($count = $phone->countUsersSamePhone()) : ?>

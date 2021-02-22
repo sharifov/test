@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use sales\helpers\phone\MaskPhoneHelper;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\Sms */
@@ -32,8 +33,26 @@ $this->params['breadcrumbs'][] = $this->title;
             's_reply_id',
             's_lead_id',
             's_project_id',
-            's_phone_from',
-            's_phone_to',
+            //'s_phone_from',
+            [
+                'attribute' => 's_phone_from',
+                'value' => static function (\common\models\Sms $model) {
+                    if ($model->s_type_id == $model::TYPE_INBOX) {
+                        return MaskPhoneHelper::masking($model->s_phone_from);
+                    }
+                    return $model->s_phone_from;
+                }
+            ],
+            //'s_phone_to',
+            [
+                'attribute' => 's_phone_to',
+                'value' => static function (\common\models\Sms $model) {
+                    if ($model->s_type_id == $model::TYPE_OUTBOX) {
+                        return MaskPhoneHelper::masking($model->s_phone_to);
+                    }
+                    return $model->s_phone_to;
+                }
+            ],
             's_sms_text:ntext',
             's_sms_data:ntext',
             's_type_id',

@@ -240,6 +240,8 @@ class LeadSearch extends Lead
             'projectId' => 'Project',
             'quoteTypeId' => 'Quote Type',
             'includedFiles' => 'Included Files',
+            'origin_airport' => 'Origin Location Code',
+            'destination_airport' => 'Destination Location Code'
         ];
         return array_merge(parent::attributeLabels(), $labels2);
     }

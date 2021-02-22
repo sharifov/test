@@ -75,8 +75,26 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'case'
             ],
-            'cl_phone_from',
-            'cl_phone_to',
+            //'cl_phone_from',
+            [
+                'attribute' => 'cl_phone_from',
+                'value' => static function (CallLog $model) {
+                    if ($model->cl_type_id == \sales\model\callLog\entity\callLog\CallLogType::IN) {
+                        return MaskPhoneHelper::masking($model->cl_phone_from);
+                    }
+                    return $model->cl_phone_from;
+                }
+            ],
+            //'cl_phone_to',
+            [
+                'attribute' => 'cl_phone_to',
+                'value' => static function (CallLog $model) {
+                    if ($model->cl_type_id == \sales\model\callLog\entity\callLog\CallLogType::OUT) {
+                        return MaskPhoneHelper::masking($model->cl_phone_to);
+                    }
+                    return $model->cl_phone_to;
+                }
+            ],
             [
                 'class' => \common\components\grid\PhoneSelect2Column::class,
                 'attribute' => 'cl_phone_list_id',

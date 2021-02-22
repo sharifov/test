@@ -4,6 +4,8 @@ use yii\data\ActiveDataProvider;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
+use sales\helpers\email\MaskEmailHelper;
+use sales\helpers\phone\MaskPhoneHelper;
 
 /**
  * @var $dataProvider ActiveDataProvider
@@ -31,7 +33,7 @@ echo GridView::widget([
                 $data = [];
                 if ($phones) {
                     foreach ($phones as $k => $phone) {
-                        $data[] = '<i class="fa fa-phone"></i> <code>' . Html::encode($phone->phone) . '</code>';
+                        $data[] = '<i class="fa fa-phone"></i> <code>' . Html::encode(MaskPhoneHelper::masking($phone->phone)) . '</code>';
                     }
                 }
 
@@ -51,7 +53,7 @@ echo GridView::widget([
                 $data = [];
                 if ($emails) {
                     foreach ($emails as $k => $email) {
-                        $data[] = '<i class="fa fa-envelope"></i> <code>' . Html::encode($email->email) . '</code>';
+                        $data[] = '<i class="fa fa-envelope"></i> <code>' . Html::encode(MaskEmailHelper::masking($email->email)) . '</code>';
                     }
                 }
 

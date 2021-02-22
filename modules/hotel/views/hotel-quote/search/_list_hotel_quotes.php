@@ -6,9 +6,12 @@
 /* @var $key int */
 /* @var $hotelSearch Hotel */
 
+use modules\hotel\assets\HotelAsset;
 use modules\hotel\models\Hotel;
 use yii\data\ArrayDataProvider;
+use yii\helpers\Html;
 use yii\web\View;
+use yii\widgets\Pjax;
 
 /*
  *
@@ -59,8 +62,9 @@ $roomDataProvider = new ArrayDataProvider([
     ],*/
 ]);
 
-
+HotelAsset::register($this);
 ?>
+<?php /*
 <table class="table table-striped table-bordered">
     <tr>
         <td style="width: 70px">
@@ -108,3 +112,91 @@ $roomDataProvider = new ArrayDataProvider([
         </td>
     </tr>
 </table>
+ */ ?>
+
+<div class="quote">
+  <div class="quote__heading">
+    <div class="quote__heading-left">
+        <span class="quote__id">
+          <strong># <?= $key + 1 ?></strong>
+        </span>
+      <span class="quote__vc">
+        <?= Html::encode($dataHotel['accomodationType']['code'] ?? '') ?>
+        </span>
+    </div>
+    <?php if (!empty($dataHotel['rooms'])) : ?>
+    <div class="quote__heading-right">
+        <span class="quote__vc">
+          <span class="mr-1">
+            <strong>
+              From:
+            </strong>
+          </span>
+          <strong class="text-success">
+            $<?=number_format(Html::encode($dataHotel['rooms'][0]['totalAmount'] - ($dataHotel['rooms'][0]['totalMarkup'] ?? 0)), 2)?>
+          </strong>
+        </span>
+    </div>
+    <?php endif; ?>
+
+  </div>
+
+  <div class="quote__wrapper">
+    <div class="">
+      <div class="row">
+        <div class="col-3">
+          <?php if (isset($dataHotel['images'][0]['url'])) : ?>
+            <img src="https://www.gttglobal.com/hotel/img/<?= $dataHotel['images'][0]['url'] ?>" alt="<?= Html::encode($dataHotel['name']) ?>" class="img-thumbnail">
+          <?php endif; ?>
+        </div>
+        <div class="col-9">
+          <h5 class="mb-2">
+            <span class="mr-1"><?= Html::encode($dataHotel['name']) ?></span>
+            <?php if (isset($dataHotel['s2C'])) : ?>
+              <span class="text-warning">
+                <small>
+                  <?php for ($i = 0; $i < (int)$dataHotel['s2C']; $i++) : ?>
+                    <i class="fa fa-star"></i>
+                  <?php endfor; ?>
+                </small>
+              </span>
+            <?php endif; ?>
+          </h5>
+          <div class="mb-4">
+            <i class="fa fa-map-marker mr-1 text-info"></i>
+            <span><?= Html::encode($dataHotel['city'] ?? '') ?>, <?= Html::encode($dataHotel['address'] ?? '') ?></span>
+            <?php if (isset($dataHotel['email'])) : ?>
+            <br>
+            <i class="fa fa-envelope mr-1 text-info"></i> <?= Html::encode($dataHotel['email']) ?>
+            <?php endif; ?>
+          </div>
+          <div><p>
+              <?= Html::encode($dataHotel['description']) ?>
+            </p>
+          </div>
+          <div>
+          </div>
+        </div>
+      </div>
+        <?php Pjax::begin(['timeout' => 15000, 'enablePushState' => false, 'enableReplaceState' => false, 'scrollTo' => false]); ?>
+        <?= \yii\widgets\ListView::widget([
+            'dataProvider' => $roomDataProvider,
+            'options' => [
+                'tag' => 'table',
+                'class' => 'table table-bordered',
+            ],
+            'emptyText' => '<div class="text-center">Not found rooms</div><br>',
+            'itemView' => function ($modelRoom, $key, $index, $widget) use ($dataHotel, $hotelSearch) {
+                return $this->render('_list_hotel_room_quotes', ['dataRoom' => $modelRoom, 'dataHotel' => $dataHotel, 'index' => $index, 'key' => $key, 'hotelSearch' => $hotelSearch]);
+            },
+            //'layout' => "{items}<div class=\"text-center\" style='margin-top: -20px; margin-bottom: -25px'>{pager}</div>", // {summary}\n<div class="text-center">{pager}</div>
+            'itemOptions' => [
+                //'class' => 'item',
+                'tag' => false,
+            ],
+        ]) ?>
+        <?php Pjax::end(); ?>
+    </div>
+
+  </div>
+</div>

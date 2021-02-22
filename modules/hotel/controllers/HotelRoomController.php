@@ -6,6 +6,7 @@ use modules\hotel\models\forms\HotelRoomForm;
 use modules\hotel\models\forms\HotelRoomPaxForm;
 use modules\hotel\models\Hotel;
 use modules\hotel\models\HotelRoomPax;
+use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchService;
 use Yii;
 use modules\hotel\models\HotelRoom;
 use modules\hotel\models\search\HotelRoomSearch;
@@ -20,9 +21,19 @@ use yii\web\Response;
 
 /**
  * HotelRoomController implements the CRUD actions for HotelRoom model.
+ *
+ * @property HotelQuoteSearchService $hotelQuoteSearchService
  */
 class HotelRoomController extends FController
 {
+    private $hotelQuoteSearchService;
+
+    public function __construct($id, $module, HotelQuoteSearchService $hotelQuoteSearchService, $config = [])
+    {
+        $this->hotelQuoteSearchService = $hotelQuoteSearchService;
+        parent::__construct($id, $module, $config);
+    }
+
     /**
      * @return array
      */
@@ -137,6 +148,8 @@ class HotelRoomController extends FController
                         }
                     }
 
+                    $hotel = $modelRoom->hrHotel;
+                    $this->hotelQuoteSearchService->clearCache($hotel->ph_request_hash_key);
                     return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-product-search-' . $modelRoom->hrHotel->ph_product_id . '"});</script>';
                     //return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-hotel-rooms-' . $modelRoom->hr_hotel_id . '"});</script>';
                 }
@@ -242,6 +255,9 @@ class HotelRoomController extends FController
                         }
                     }
 
+                    $hotel = $modelRoom->hrHotel;
+                    $this->hotelQuoteSearchService->clearCache($hotel->ph_request_hash_key);
+
                     return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-product-search-' . $modelRoom->hrHotel->ph_product_id . '"});</script>';
                 }
 
@@ -295,9 +311,11 @@ class HotelRoomController extends FController
 
         try {
             $model = $this->findModel($id);
+            $hotel = $model->hrHotel;
             if (!$model->delete()) {
                 throw new Exception('Hotel Room (' . $id . ') not deleted', 2);
             }
+            $this->hotelQuoteSearchService->clearCache($hotel->ph_request_hash_key);
         } catch (\Throwable $throwable) {
             return ['error' => 'Error: ' . $throwable->getMessage()];
         }

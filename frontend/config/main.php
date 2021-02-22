@@ -4,9 +4,11 @@ use frontend\assets\groups\BootstrapGroupAsset;
 use kivork\rbacExportImport\src\rbac\DbManager;
 use kivork\rbacExportImport\RbacImportExportModule;
 use common\models\Employee;
+use modules\cruise\CruiseModule;
 use modules\email\EmailModule;
 use modules\fileStorage\FileStorageModule;
 use modules\flight\FlightModule;
+use modules\attraction\AttractionModule;
 use modules\hotel\HotelModule;
 use modules\invoice\InvoiceModule;
 use modules\offer\OfferModule;
@@ -271,6 +273,9 @@ return [
             'viewPath' => '@frontend/views/rbac',
         ],
 
+        'attraction' => [
+            'class' => AttractionModule::class,
+        ],
 
         'flight' => [
             'class' => FlightModule::class,
@@ -332,6 +337,12 @@ return [
         ],
         'file-storage' => [
             'class' => FileStorageModule::class,
+        ],
+        'rent-car' => [
+            'class' => \modules\rentCar\RentCarModule::class,
+        ],
+        'cruise' => [
+            'class' => CruiseModule::class,
         ],
     ],
     'as beforeRequest' => [

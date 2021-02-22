@@ -22,6 +22,7 @@ use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateProf
 use modules\product\src\entities\productQuote\serializer\ProductQuoteSerializer;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\product\Product;
+use modules\product\src\entities\productQuoteOption\ProductQuoteOptionsQuery;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
 use modules\product\src\interfaces\Quotable;
 use sales\dto\product\ProductQuoteDTO;
@@ -448,7 +449,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     /**
      * @return string
      */
-    private static function generateGid(): string
+    public static function generateGid(): string
     {
         return md5(uniqid('fq', true));
     }
@@ -673,5 +674,17 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function isTheSameOrder(int $orderId): bool
     {
         return $this->pq_order_id === $orderId;
+    }
+
+    public function showClientTotalPriceSumWithOptionsPrice()
+    {
+        $optionsTotalPrice = ProductQuoteOptionsQuery::getTotalSumClientPriceByQuote($this->pq_id);
+        return ProductQuoteHelper::roundPrice((float)$optionsTotalPrice['client_price'] + $this->pq_client_price);
+    }
+
+    public function showTotalPriceSumWithOptionsPrice()
+    {
+        $optionsTotalPrice = ProductQuoteOptionsQuery::getTotalSumPriceByQuote($this->pq_id);
+        return ProductQuoteHelper::roundPrice((float)$optionsTotalPrice['total_price'] + $this->pq_price);
     }
 }

@@ -21,15 +21,17 @@ $dataProviderQuotes = $searchModel->searchProduct($params);*/
 
 $pjaxId = 'pjax-product-' . $product->pr_id;
 ?>
-<?php \yii\widgets\Pjax::begin(['id' => $pjaxId, 'enablePushState' => false, 'enableReplaceState' => false, 'timeout' => 2000])?>
+<?php \yii\widgets\Pjax::begin(['id' => $pjaxId, 'enablePushState' => false, 'enableReplaceState' => false, 'timeout' => 4000])?>
     <div class="x_panel">
         <div class="x_title">
             <h2>
                 <a class="collapse-link">
-                    <i class="fas fa-hotel" title="ID: <?=$product->pr_id?>"></i> <?=Html::encode($product->prType->pt_name)?> <?=$product->pr_name ? ' - ' . Html::encode($product->pr_name) : ''?>
-                    <?php if ($product->productQuotes) :?>
-                        <sup title="Number of quotes">(<?=count($product->productQuotes)?>)</sup>
-                    <?php endif;?>
+                    <i class="<?= Html::encode($product->getIconClass()) ?>" title="ID: <?=$product->pr_id?>"></i> <?=Html::encode($product->prType->pt_name)?> <?=$product->pr_name ? ' - ' . Html::encode($product->pr_name) : ''?>
+                    <span style="color: #53a265" class="product-quote-counter-<?= $product->pr_id ?>" data-value="<?=count($product->productQuotes)?>">
+                        <?php if ($product->productQuotes) :?>
+                            <sup title="Number of quotes">(<?=count($product->productQuotes)?>)</sup>
+                        <?php endif;?>
+                    </span>
                 </a>
                 <?php if ($product->pr_description) :?>
                     <a  id="product_description_<?=$product->pr_id?>"
@@ -84,7 +86,8 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
                                 'id' => $product->hotel->ph_id
                             ]),
                             'data-hotel-id' => $product->hotel->ph_id,
-                            'class' => 'dropdown-item text-warning btn-update-hotel-request'
+                            'class' => 'dropdown-item text-warning btn-update-hotel-request btn-update-request',
+                            'data-product-id' => $product->pr_id
                         ]) ?>
 
                         <?= Html::a('<i class="fa fa-search"></i> Search Quotes', null, [

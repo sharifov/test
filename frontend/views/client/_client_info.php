@@ -5,6 +5,8 @@ use common\models\Employee;
 use sales\logger\formatter\ClientFormatter;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use sales\helpers\email\MaskEmailHelper;
+use sales\helpers\phone\MaskPhoneHelper;
 
 /** @var $model Client */
 
@@ -41,7 +43,7 @@ $unsubscribedEmails = array_column($model->project->emailUnsubscribes, 'eu_email
                     'value' => static function (Client $model) {
                         $data = [];
                         foreach ($model->clientPhones as $k => $phone) {
-                            $data[] = '<i class="fa fa-phone"></i> <code>' . Html::encode($phone->phone) . '</code> ' . $phone::getPhoneTypeLabel($phone->type);
+                            $data[] = '<i class="fa fa-phone"></i> <code>' . Html::encode(MaskPhoneHelper::masking($phone->phone)) . '</code> ' . $phone::getPhoneTypeLabel($phone->type);
                         }
                         return implode('<br>', $data);
                     },

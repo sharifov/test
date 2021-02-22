@@ -21,7 +21,7 @@ $isAgent = false;
 ?>
 
 <div class="x_panel">
-    <?php Pjax::begin(['id' => 'pjax-lead-info', 'timeout' => 7000, 'enablePushState' => true]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+    <?php Pjax::begin(['id' => 'pjax-lead-info', 'timeout' => 7000, 'enablePushState' => true]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]);?>
 
     <div class="x_title">
         <h2><i class="fa fa-cube"></i> Lead Info</h2>
@@ -67,7 +67,6 @@ $isAgent = false;
                             'label' => 'Client Name',
                             'format' => 'raw',
                             'value' => static function (\common\models\Lead $model) {
-
                                 if ($model->client) {
                                     $clientName = $model->client->first_name . ' ' . $model->client->last_name;
                                     if ($clientName === 'Client Name') {
@@ -87,8 +86,19 @@ $isAgent = false;
                             'label' => 'Client Emails / Phones',
                             'format' => 'raw',
                             'value' => static function (\common\models\Lead $model) {
-                                $str = $model->client && $model->client->clientEmails ? ' <i class="fa fa-envelope"></i> ' . implode(' <i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
-                                $str .= $model->client && $model->client->clientPhones ? ' <i class="fa fa-phone"></i> ' . implode(' <i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
+                                $clientEmails = $model->client ? $model->client->getEmailList() : [];
+                                foreach ($clientEmails as $key => $element) {
+                                    $clientEmails[$key] = \sales\helpers\email\MaskEmailHelper::masking($element);
+                                }
+
+                                $clientPhones = \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone');
+
+                                foreach ($clientPhones as $key => $element) {
+                                    $clientPhones[$key] = \sales\helpers\phone\MaskPhoneHelper::masking($element);
+                                }
+
+                                $str = $model->client && $model->client->clientEmails ? ' <i class="fa fa-envelope"></i> ' . implode(' <i class="fa fa-envelope"></i> ', $clientEmails) . '' : '';
+                                $str .= $model->client && $model->client->clientPhones ? ' <i class="fa fa-phone"></i> ' . implode(' <i class="fa fa-phone"></i> ', $clientPhones) . '' : '';
                                 return $str ?? '-';
                             },
                         ],
@@ -204,7 +214,6 @@ $isAgent = false;
                         [
                             'label' => 'Segments',
                             'value' => static function (\common\models\Lead $model) {
-
                                 $segments = $model->leadFlightSegments;
                                 $segmentData = [];
                                 if ($segments) {
@@ -222,7 +231,6 @@ $isAgent = false;
                         [
                             'label' => 'Depart',
                             'value' => static function (\common\models\Lead $model) {
-
                                 $segments = $model->leadFlightSegments;
 
                                 if ($segments) {
@@ -273,7 +281,7 @@ Modal::begin([
 ]);
 ?>
 
-<?php Pjax::begin(['id' => 'lead-pjax-list', 'timeout' => 7000, 'enablePushState' => true]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+<?php Pjax::begin(['id' => 'lead-pjax-list', 'timeout' => 7000, 'enablePushState' => true]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]);?>
 <?php
 echo $this->render('_search_lead_form', [
     'caseModel' => $caseModel,
@@ -332,7 +340,6 @@ echo $this->render('_search_lead_form', [
             'header' => 'Client / Emails / Phones',
             'format' => 'raw',
             'value' => static function (\common\models\Lead $model) {
-
                 if ($model->client) {
                     $clientName = $model->client->first_name . ' ' . $model->client->last_name;
                     if ($clientName === 'Client Name') {
@@ -453,7 +460,6 @@ echo $this->render('_search_lead_form', [
             [
             'header' => 'Segments',
             'value' => static function (\common\models\Lead $model) {
-
                 $segments = $model->leadFlightSegments;
                 $segmentData = [];
                 if ($segments) {
@@ -477,7 +483,6 @@ echo $this->render('_search_lead_form', [
             [
             'header' => 'Depart',
             'value' => static function (\common\models\Lead $model) {
-
                 $segments = $model->leadFlightSegments;
 
                 if ($segments) {

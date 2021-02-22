@@ -26,7 +26,7 @@ $user = Yii::$app->user->identity;
         'id' => 'emails',
         'timeout' => 5000
     ]); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <div class="row">
         <?php $form = ActiveForm::begin([
@@ -109,9 +109,26 @@ $user = Yii::$app->user->identity;
 //                'format' => 'raw',
 //                'filter' => $projectList
 //            ],
-            'e_email_from',
-            'e_email_to',
-
+            //'e_email_from',
+            [
+                'attribute' => 'e_email_from',
+                'value' => static function (\common\models\Email $model) {
+                    if ($model->e_type_id == $model::TYPE_INBOX) {
+                        return MaskEmailHelper::masking($model->e_email_from);
+                    }
+                    return $model->e_email_from;
+                },
+            ],
+            //'e_email_to',
+            [
+                'attribute' => 'e_email_to',
+                'value' => static function (\common\models\Email $model) {
+                    if ($model->e_type_id == $model::TYPE_OUTBOX) {
+                        return MaskEmailHelper::masking($model->e_email_to);
+                    }
+                    return $model->e_email_to;
+                },
+            ],
             'e_lead_id',
             'e_case_id',
             //'e_email_cc:email',
