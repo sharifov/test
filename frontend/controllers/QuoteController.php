@@ -45,6 +45,7 @@ use common\models\QuoteSegmentStop;
 use common\models\QuoteSegmentBaggage;
 use common\models\QuoteSegmentBaggageCharge;
 use yii\widgets\ActiveForm;
+use yii\helpers\ArrayHelper;
 
 /**
  * Quotes controller
@@ -198,7 +199,7 @@ class QuoteController extends FController
                             $quote->lead_id = $leadId;
                             $quote->cabin = $lead->cabin;
                             $quote->trip_type = $lead->trip_type;
-                            $quote->check_payment = true;
+                            $quote->check_payment = ArrayHelper::getValue($entry, 'prices.isCk', true);
                             $quote->fare_type = $entry['fareType'];
                             $quote->gds = $entry['gds'];
                             $quote->pcc = $entry['pcc'];
