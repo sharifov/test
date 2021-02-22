@@ -157,7 +157,10 @@ class CommunicationForm extends Model
                 'whenClient' => "function (attribute, value) { return $('#c_type_id').val() == " . self::TYPE_SMS . '; }'
             ],
 
-            [['c_email_tpl_key'], 'validateEmailTemplateKey'],
+            [['c_email_tpl_key'], 'validateEmailTemplateKey', 'when' => static function (CommunicationForm $model) {
+                return (int) $model->c_type_id === self::TYPE_EMAIL;
+            },
+                ],
             [['c_sms_tpl_key'], 'validateSmsTemplateKey'],
 
 
