@@ -10,6 +10,7 @@ use yii\bootstrap\Html;
  * @var $airlines []
  * @var $locations []
  * @var $flightQuotes array
+ * @var $keyCache string
  */
 
 $user = Yii::$app->user->identity;
@@ -262,6 +263,7 @@ $isQuoteAssignedToFlight = false;
                 'data-title' => implode(', ', $tripsInfo),
                 'data-key' => $result['key'],
                 'data-gds' => $result['gds'],
+                'data-key-cache' => $keyCache,
                 'data-result' => 'search-result__quote-' . $resultKey,
             ]) ?>
         </div>
@@ -420,6 +422,7 @@ $isQuoteAssignedToFlight = false;
                     'data-title' => implode(', ', $tripsInfo),
                     'data-key' => $result['key'],
                     'data-gds' => $result['gds'],
+                    'data-key-cache' => $keyCache,
                     'data-result' => 'search-result__quote-' . $resultKey,
                 ]) ?>
             <?php endif; ?>
