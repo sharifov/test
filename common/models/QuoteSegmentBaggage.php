@@ -166,4 +166,18 @@ class QuoteSegmentBaggage extends \yii\db\ActiveRecord
         $item->qsb_allow_max_size = $form->weight;
         return $item;
     }
+
+    public static function createFromSearch(array $baggageEntry, string $paxCode): QuoteSegmentBaggage
+    {
+        $baggage = new self();
+        $baggage->qsb_pax_code = $paxCode;
+        $baggage->qsb_airline_code = $baggageEntry['airlineCode'] ?? null;
+        $baggage->qsb_allow_pieces = $baggageEntry['allowPieces'] ?? null;
+        $baggage->qsb_allow_weight = $baggageEntry['allowWeight'] ?? null;
+        $baggage->qsb_allow_unit = $baggageEntry['allowUnit'] ?? null;
+        $baggage->qsb_allow_max_weight = $baggageEntry['allowMaxWeight'] ?? null;
+        $baggage->qsb_allow_max_size = $baggageEntry['allowMaxSize'] ?? null;
+        $baggage->qsb_carry_one = $baggageEntry['carryOn'] ?? null;
+        return $baggage;
+    }
 }

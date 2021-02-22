@@ -8,12 +8,57 @@
  * @var $is_manager boolean
  */
 
-use common\models\LeadCallExpert;
+use sales\auth\Auth;
+use sales\services\quote\addQuote\guard\FlightQuoteGuard;
 use yii\bootstrap\Html;
 use yii\helpers\Url;
 use yii\widgets\ListView;
 use yii\widgets\Pjax;
 
+$addAutoQuoteBtn = '';
+if (FlightQuoteGuard::canAutoSelectQuotes(Auth::user(), $lead)) {
+    $addAutoQuoteBtn = Html::button('<i class="fa fa-plus"></i> Auto Select Quotes', ['class' => 'btn btn-info btn-sm auto_add_quotes_btn', 'data-lead-id' => $lead->id]);
+    $addAutoQuoteUrl = Url::toRoute('/quote/auto-add-quotes');
+    $js = <<<JS
+    $(document).on('click', '.auto_add_quotes_btn', function (e) {
+        let btn = $(this);
+        let btnIcon = $('.fa', btn);
+        let iconLoading = $('<i class="fa fa-spin fa-spinner"></i>'); 
+        let gds = btn.data('gds');
+        let leadId = btn.data('lead-id');
+        
+        $.ajax({
+            url: '$addAutoQuoteUrl',
+            type: 'post',
+            data: {leadId: leadId, gds: gds},
+            dataType: 'json',
+            beforeSend: function () {
+                btn.find('i').replaceWith(iconLoading);
+                btn.addClass('disabled').attr('disabled', true);      
+                $('.search-results__wrapper').addClass('loading');
+            },
+            success: function (response) {
+                if (response.error) {
+                    createNotify('Error', response.message, 'error');
+                } else {
+                    $.pjax.reload({container: '#quotes_list', async: false});
+                    $('.popover-class[data-toggle="popover"]').popover({ sanitize: false });
+                    createNotify('Success', response.message, 'success');
+                }
+            },
+            error: function (xhr) {
+                createNotify('Error', xhr.responseText, 'error');
+            },
+            complete: function () {
+                btn.find('i').replaceWith(btnIcon)
+                btn.removeClass('disabled').attr('disabled', false);
+                $('.search-results__wrapper').removeClass('loading');
+            }
+        })
+    });
+JS;
+    $this->registerJs($js);
+}
 ?>
 <style>
 .select2-container--krajee {
@@ -30,27 +75,29 @@ use yii\widgets\Pjax;
             <?php if ($leadForm->mode !== $leadForm::VIEW_MODE || $is_manager) : ?>
                 <?php if ($lead->leadFlightSegmentsCount) :?>
                 <li>
-                    <?=Html::a('<i class="fa fa-search warning"></i> Quote Search', null, ['class' => '', 'id' => 'search-quotes-btn', 'data-url' => Url::to(['quote/ajax-search-quotes', 'leadId' => $leadForm->getLead()->id])])?>
+                    <?= $addAutoQuoteBtn ?>
                 </li>
                 <li>
-                    <?=Html::a('<i class="fa fa-search warning"></i> Quick Search', null, ['class' => '', 'id' => 'quick-search-quotes-btn', 'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id])])?>
+                    <?=Html::a('<i class="fa fa-search warning"></i> Quote Search', null, ['class' => '', 'id' => 'search-quotes-btn', 'data-url' => Url::to(['quote/ajax-search-quotes', 'leadId' => $leadForm->getLead()->id])])?>
                 </li>
                 <?php else : ?>
                 <li>
                     <span class="badge badge-warning"><i class="fa fa-warning"></i> Warning: Flight Segments is empty!</span>
                 </li>
                 <?php endif; ?>
-                <?php if (!$lead->client->isExcluded()) : ?>
-                <li>
-                    <?= Html::a('<i class="fa fa-plus-circle success"></i> Add Quote', null, ['class' => 'add-clone-alt-quote', 'data-uid' => 0, 'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0])])?>
-                </li>
-                <?php endif; ?>
-                <li>
-                    <?= $this->render('_quote_clone_by_id', ['lead' => $leadForm->getLead()])?>
-                </li>
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
                 <div class="dropdown-menu" role="menu">
+                    <?php if ($lead->leadFlightSegmentsCount) :?>
+                        <?=Html::a('<i class="fa fa-search warning"></i> Quick Search', null, ['class' => 'dropdown-item', 'id' => 'quick-search-quotes-btn', 'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id])])?>
+                    <?php endif; ?>
+                    <?php if (!$lead->client->isExcluded()) : ?>
+                        <?= Html::a('<i class="fa fa-plus-circle success"></i> Add Quote', null, ['class' => 'add-clone-alt-quote dropdown-item', 'data-uid' => 0, 'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0])])?>
+                    <?php endif; ?>
+                    <?= Html::a('<i class="fa fa-clone success"></i> Clone Quote', null, [
+                        'class' => 'clone-quote-by-uid dropdown-item',
+                        'title' => 'Clone Quote by UID'
+                    ]) ?>
                     <?= Html::a('<i class="fa fa-remove text-danger"></i> Decline Quotes', null, [
                             'class' => 'dropdown-item text-danger',
                             'id' => 'btn-declined-quotes',
@@ -86,6 +133,7 @@ use yii\widgets\Pjax;
             ],
         ]);?>
 
+        <?= $this->render('_quote_clone_by_id', ['lead' => $leadForm->getLead()])?>
     </div>
 </div>
 <?php Pjax::end() ?>
@@ -295,4 +343,3 @@ $js = <<<JS
     $('[data-toggle="tooltip"]').tooltip({html:true});
 JS;
 $this->registerJs($js);
-
