@@ -121,6 +121,9 @@ class CasesSearch extends Cases
     public $datetime_end;
     public $date_range;
 
+    public $locales = [];
+    public $client_locale;
+
     public $showFields = [];
 
     private $cacheSaleData = [];
@@ -175,12 +178,13 @@ class CasesSearch extends Cases
                 ],
                 'integer', 'min' => 0, 'max' => 1000
             ],
-            [['datetime_start', 'datetime_end'], 'safe'],
+            [['datetime_start', 'datetime_end', 'locales'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
 
             ['showFields', 'filter', 'filter' => static function ($value) {
                 return is_array($value) ? $value : [];
             }, 'skipOnEmpty' => true],
+            ['client_locale', 'safe']
         ];
     }
 
@@ -254,7 +258,7 @@ class CasesSearch extends Cases
     public function searchByAgent($params, $user): ActiveDataProvider
     {
         $query = self::find()->with(['project', 'department', 'category']);
-
+        $query->joinWith(['client']);
 //        $query->andWhere(['cs_dep_id' => array_keys(EmployeeDepartmentAccess::getDepartments())]);
         $query->andWhere(['cs_project_id' => array_keys(EmployeeProjectAccess::getProjects())]);
 
@@ -269,6 +273,11 @@ class CasesSearch extends Cases
                 'pageSize' => 20,
             ],
         ]);
+
+        $dataProvider->sort->attributes['client_locale'] = [
+            'asc' => ['cl_locale' => SORT_ASC],
+            'desc' => ['cl_locale' => SORT_DESC],
+        ];
 
         unset($dataProvider->sort->attributes['cs_lead_id']);
 
@@ -294,6 +303,10 @@ class CasesSearch extends Cases
         $query->andFilterWhere(['IN', 'cs_status', $this->csStatuses]);
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
         $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
+
+        if (!empty($this->locales)) {
+            $query->andWhere(['cl_locale' => $this->locales]);
+        }
 
         if ($user->isExSuper() || $user->isSupSuper()) {
             if ($this->cs_user_id) {
@@ -468,6 +481,7 @@ class CasesSearch extends Cases
     private function searchByAdmin($params): ActiveDataProvider
     {
         $query = self::find()->with(['project', 'department', 'category']);
+        $query->joinWith(['client']);
 
 //        $query->andWhere(['cs_dep_id' => array_keys(EmployeeDepartmentAccess::getDepartments())]);
         $query->andWhere(['cs_project_id' => array_keys(EmployeeProjectAccess::getProjects())]);
@@ -485,6 +499,11 @@ class CasesSearch extends Cases
         ]);
 
         unset($dataProvider->sort->attributes['cs_lead_id']);
+
+        $dataProvider->sort->attributes['client_locale'] = [
+            'asc' => ['cl_locale' => SORT_ASC],
+            'desc' => ['cl_locale' => SORT_DESC],
+        ];
 
         $this->load($params);
 
@@ -508,6 +527,10 @@ class CasesSearch extends Cases
         $query->andFilterWhere(['IN', 'cs_status', $this->csStatuses]);
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
         $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
+
+        if (!empty($this->locales)) {
+            $query->andWhere(['cl_locale' => $this->locales]);
+        }
 
         if ($this->cs_user_id) {
             $query->andWhere(['cs_user_id' => Employee::find()->select(Employee::tableName() . '.id')->andWhere([Employee::tableName() . '.id' => $this->cs_user_id])]);
@@ -1022,7 +1045,8 @@ class CasesSearch extends Cases
             'cs_subject' => 'Subject',
             'cs_lead_id' => 'Lead ID',
             'communication' => 'Communication',
-            'status_dt' => 'Status Dt'
+            'status_dt' => 'Status Dt',
+            'client_locale' => 'Client locale'
         ];
     }
 }

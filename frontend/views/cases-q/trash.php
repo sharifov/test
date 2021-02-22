@@ -14,6 +14,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use sales\entities\cases\Cases;
 use yii\widgets\Pjax;
+use common\models\Language;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\entities\cases\CasesQSearch */
@@ -130,6 +131,11 @@ $lists = new ListsAccess($user->id);
                 'contentOptions' => [
                     'class' => 'text-center'
                 ]
+            ],
+            [
+                'attribute' => 'client_locale',
+                'value' => 'client.cl_locale',
+                'filter' => Language::getLocaleList(false)
             ],
             [
                 'attribute' => 'cs_last_action_dt',

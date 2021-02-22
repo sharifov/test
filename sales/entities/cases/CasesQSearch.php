@@ -25,6 +25,7 @@ use yii\db\Query;
  * @property string|null $nextFlight
  * @property int|null $css_penalty_type
  * @property string|null $css_departure_dt
+ * @property string $client_locale
  *
  */
 class CasesQSearch extends Cases
@@ -41,6 +42,7 @@ class CasesQSearch extends Cases
     public $nextFlight;
     public $css_penalty_type;
     public $css_departure_dt;
+    public $client_locale;
 
     /**
      * CasesSearch constructor.
@@ -77,6 +79,7 @@ class CasesQSearch extends Cases
             [['last_in_date', 'last_out_date', 'css_departure_dt'], 'string'],
             [['saleExist', 'nextFlight'], 'safe'],
             [['cs_created_dt', 'css_departure_dt', 'trash_date'], 'date', 'format' => 'php:Y-m-d'],
+            ['client_locale', 'string']
         ];
     }
 
@@ -88,6 +91,7 @@ class CasesQSearch extends Cases
     public function searchPending($params, Employee $user): ActiveDataProvider
     {
         $query = $this->casesQRepository->getPendingQuery($user);
+        $query->joinWith(['client']);
 
         // add conditions that should always apply here
 
@@ -98,6 +102,11 @@ class CasesQSearch extends Cases
                 'pageSize' => 20,
             ],
         ]);
+
+        $dataProvider->sort->attributes['client_locale'] = [
+            'asc' => ['cl_locale' => SORT_ASC],
+            'desc' => ['cl_locale' => SORT_DESC],
+        ];
 
         $this->load($params);
 
@@ -128,6 +137,7 @@ class CasesQSearch extends Cases
 
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
         $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
+        $query->andFilterWhere(['like', 'cl_locale', $this->client_locale]);
 
         return $dataProvider;
     }
@@ -141,6 +151,7 @@ class CasesQSearch extends Cases
     {
         $query = $this->casesQRepository->getInboxQuery($user);
 
+        $query->joinWith(['client']);
         $query->joinWith('project', true, 'INNER JOIN');
 
         $query->addSelect('*');
@@ -237,6 +248,11 @@ class CasesQSearch extends Cases
                 'default' => SORT_ASC,
                 'label' => 'Penalty Type',
             ],
+
+            'client_locale' => [
+                'asc' => ['cl_locale' => SORT_ASC],
+                'desc' => ['cl_locale' => SORT_DESC],
+            ],
         ]);
         $dataProvider->setSort($sorting);
 
@@ -269,7 +285,7 @@ class CasesQSearch extends Cases
 
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
         $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
-
+        $query->andFilterWhere(['like', 'cl_locale', $this->client_locale]);
 
         return $dataProvider;
     }
@@ -286,8 +302,7 @@ class CasesQSearch extends Cases
         $query->addSelect('css_penalty_type');
         $query->addSelect('css_departure_dt');
 
-        // add conditions that should always apply here
-
+        $query->joinWith(['client']);
         $query->leftJoin([
             'penalty_departure' => CaseSale::find()
                 ->select([
@@ -325,6 +340,10 @@ class CasesQSearch extends Cases
                 'desc' => ['css_departure_dt' => SORT_DESC],
                 'default' => SORT_ASC,
                 'label' => 'Departure Date Time',
+            ],
+            'client_locale' => [
+                'asc' => ['cl_locale' => SORT_ASC],
+                'desc' => ['cl_locale' => SORT_DESC],
             ],
         ]);
         $dataProvider->setSort($sorting);
@@ -364,6 +383,7 @@ class CasesQSearch extends Cases
 
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
         $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
+        $query->andFilterWhere(['like', 'cl_locale', $this->client_locale]);
 
         return $dataProvider;
     }
@@ -383,6 +403,7 @@ class CasesQSearch extends Cases
         $query->addSelect(new Expression('
             DATE(if(last_out_date IS NULL, last_in_date, LEAST(last_in_date, last_out_date))) AS nextFlight'));
 
+        $query->joinWith(['client']);
         $query->leftJoin([
             'sale_out' => CaseSale::find()
             ->select([
@@ -449,6 +470,10 @@ class CasesQSearch extends Cases
                 'default' => SORT_ASC,
                 'label' => 'Next flight date',
             ],
+            'client_locale' => [
+                'asc' => ['cl_locale' => SORT_ASC],
+                'desc' => ['cl_locale' => SORT_DESC],
+            ],
         ]);
         $dataProvider->setSort($sorting);
 
@@ -481,6 +506,7 @@ class CasesQSearch extends Cases
 
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
         $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
+        $query->andFilterWhere(['like', 'cl_locale', $this->client_locale]);
 
         return $dataProvider;
     }
@@ -499,6 +525,7 @@ class CasesQSearch extends Cases
         // add conditions that should always apply here
         $query->addSelect('b.csl_start_dt as `solved_date`');
 
+        $query->joinWith(['client']);
         $query->join('JOIN', '(' . (new Query())->select(['csl_start_dt', 'csl_case_id'])
             ->from(CaseStatusLog::tableName())
             ->where(['csl_to_status' => CasesStatus::STATUS_SOLVED])
@@ -553,10 +580,15 @@ class CasesQSearch extends Cases
 
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
         $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
+        $query->andFilterWhere(['like', 'cl_locale', $this->client_locale]);
 
         $dataProvider->sort->attributes['solved_date'] = [
             'asc' => ['solved_date' => SORT_ASC],
             'desc' => ['solved_date' => SORT_DESC],
+        ];
+        $dataProvider->sort->attributes['client_locale'] = [
+            'asc' => ['cl_locale' => SORT_ASC],
+            'desc' => ['cl_locale' => SORT_DESC],
         ];
 
 //        echo $query->createCommand()->getRawSql();die;
@@ -578,6 +610,7 @@ class CasesQSearch extends Cases
         // add conditions that should always apply here
         $query->addSelect('b.csl_start_dt as `trash_date`');
 
+        $query->joinWith(['client']);
         $query->join('JOIN', '(' . (new Query())->select(['csl_start_dt', 'csl_case_id'])
                 ->from(CaseStatusLog::tableName())
                 ->where(['csl_to_status' => CasesStatus::STATUS_TRASH])
@@ -628,10 +661,15 @@ class CasesQSearch extends Cases
 
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
         $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
+        $query->andFilterWhere(['like', 'cl_locale', $this->client_locale]);
 
         $dataProvider->sort->attributes['trash_date'] = [
             'asc' => ['trash_date' => SORT_ASC],
             'desc' => ['trash_date' => SORT_DESC],
+        ];
+        $dataProvider->sort->attributes['client_locale'] = [
+            'asc' => ['cl_locale' => SORT_ASC],
+            'desc' => ['cl_locale' => SORT_DESC],
         ];
 
         return $dataProvider;
@@ -645,7 +683,7 @@ class CasesQSearch extends Cases
     public function searchNeedAction($params, Employee $user): ActiveDataProvider
     {
         $query = $this->casesQRepository->getNeedActionQuery($user)->addSelect(['*']);
-
+        $query->joinWith(['client']);
         $query->addSelect([
             'time_left' => new Expression('if ((cs_deadline_dt IS NOT NULL), cs_deadline_dt, \'2100-01-01 00:00:00\')')
         ]);
@@ -679,6 +717,11 @@ class CasesQSearch extends Cases
             ],
         ]);
 
+        $dataProvider->sort->attributes['client_locale'] = [
+            'asc' => ['cl_locale' => SORT_ASC],
+            'desc' => ['cl_locale' => SORT_DESC],
+        ];
+
         $this->load($params);
 
         if (!$this->validate()) {
@@ -708,6 +751,7 @@ class CasesQSearch extends Cases
 
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
         $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
+        $query->andFilterWhere(['like', 'cl_locale', $this->client_locale]);
 
         return $dataProvider;
     }
