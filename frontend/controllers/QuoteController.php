@@ -238,7 +238,7 @@ class QuoteController extends FController
         try {
             $lead = Lead::findOne($leadId);
             if (!$lead) {
-                throw new RuntimeException('Lead not found');
+                throw new \RuntimeException('Lead not found');
             }
             if (!FlightQuoteGuard::canAutoSelectQuotes(Auth::user(), $lead)) {
                 throw new \DomainException('You do not have access to perform this action');
