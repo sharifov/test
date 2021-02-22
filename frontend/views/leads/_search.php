@@ -345,12 +345,16 @@ use frontend\extensions\DatePicker;
         </div>
         <!--<div class="row">-->
             <div class="col-md-1">
-                <?= $form->field($model, 'l_is_test')->dropDownList([0 => 'False',1 => 'True'], ['prompt' => '-'])->label('Is Test') ?>
+                <?= $form->field($model, 'l_is_test')->dropDownList([0 => 'False', 1 => 'True'], ['prompt' => '-'])->label('Is Test') ?>
             </div>
       <!--  </div>-->
 
         <div class="col-md-1">
             <?= $form->field($model, 'quoteTypeId')->dropDownList(Quote::TYPE_LIST, ['prompt' => '-']) ?>
+        </div>
+
+        <div class="col-md-1">
+            <?= $form->field($model, 'includedFiles')->dropDownList([0 => 'No', 1 => 'Yes'], ['prompt' => '-']) ?>
         </div>
 
     </div>

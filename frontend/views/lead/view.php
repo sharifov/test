@@ -31,6 +31,7 @@ use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
 use modules\fileStorage\FileStorageSettings;
+use modules\fileStorage\src\services\access\FileStorageAccessService;
 use modules\fileStorage\src\widgets\FileStorageListWidget;
 use modules\fileStorage\src\widgets\FileStorageUploadWidget;
 use sales\auth\Auth;
@@ -225,11 +226,7 @@ $unsubscribedEmails = array_column($lead->project->emailUnsubscribes, 'eu_email'
             <?php if (FileStorageSettings::isEnabled() && Auth::can('lead-view/files/view', ['lead' => $lead])) : ?>
                 <?= FileStorageListWidget::byLead(
                     $lead->id,
-                    (
-                         FileStorageSettings::canUpload()
-                         && Auth::can('lead-view/files/upload')
-                         && Auth::can('lead/manage', ['lead' => $lead])
-                    )
+                    FileStorageAccessService::canLeadUploadWidget($lead)
                 ) ?>
             <?php endif; ?>
 

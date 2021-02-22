@@ -10,11 +10,16 @@ use modules\fileStorage\src\LeadUploader;
 use modules\fileStorage\src\useCase\uploadFile\UploadForm;
 use sales\auth\Auth;
 use sales\entities\cases\Cases;
+use sales\helpers\app\AppHelper;
+use sales\helpers\text\CleanTextHelper;
+use Yii;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Inflector;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
+use yii\web\Response;
 use yii\web\UploadedFile;
 
 /**
@@ -68,61 +73,64 @@ class UploadController extends FController
 
     public function actionByLead()
     {
-        $leadId = (int)\Yii::$app->request->get('id');
-        if (!$leadId) {
+        if (!$leadId = (int)\Yii::$app->request->get('id')) {
             throw new BadRequestHttpException('Lead id is empty.');
         }
-        $lead = Lead::findOne($leadId);
-        if (!$lead) {
+        if (!$lead = Lead::findOne($leadId)) {
             throw new NotFoundHttpException('Lead is not found.');
         }
-
         if (!Auth::can('lead-view/files/upload') || !Auth::can('lead/manage', ['lead' => $lead])) {
             throw new ForbiddenHttpException('Access denied.');
         }
 
         $form = new UploadForm();
         $form->load(\Yii::$app->request->post());
-        $form->file = UploadedFile::getInstance($form, 'file');
+        $form->files = UploadedFile::getInstances($form, 'files');
+
+        Yii::$app->response->format = Response::FORMAT_JSON;
 
         if (!$form->validate()) {
-            return $this->asJson([
+            return [
                 'error' => true,
                 'errors' => $form->getErrors(),
                 'message' => '',
-            ]);
+            ];
         }
 
-        try {
-            $this->leadUploader->upload(
-                $lead->id,
-                $lead->client_id,
-                $lead->project->project_key,
-                $form->fs_title,
-                $form->file
-            );
-        } catch (\DomainException $e) {
-            return $this->asJson([
-                'error' => true,
-                'errors' => [],
-                'message' => $e->getMessage(),
-            ]);
-        } catch (\Throwable $e) {
-            \Yii::error([
-                'message' => 'Upload FileStorage byLead',
-                'error' => $e->getMessage(),
-            ], 'FileStorageUploadController:actionUploadByLead');
-            return $this->asJson([
-                'error' => true,
-                'errors' => [],
-                'message' => 'Server error.',
-            ]);
+        if ($form->files) {
+            $errorMessages = [];
+            foreach ($form->files as $file) {
+                try {
+                    $this->leadUploader->upload(
+                        $lead->id,
+                        $lead->client_id,
+                        $lead->project->project_key,
+                        CleanTextHelper::nameFileToTitle($file->name),
+                        $file
+                    );
+                } catch (\DomainException $e) {
+                    $errorMessages[] = $e->getMessage();
+                } catch (\Throwable $throwable) {
+                    \Yii::error(
+                        AppHelper::throwableLog($throwable),
+                        'FileStorageUploadController:actionUploadByLead'
+                    );
+                    $errorMessages[] = 'Server error. Please try again later';
+                }
+            }
+            if ($errorMessages) {
+                return [
+                    'error' => true,
+                    'errors' => [],
+                    'message' => 'Errors: ' . implode(', ', array_unique($errorMessages)),
+                ];
+            }
         }
 
-        return $this->asJson([
+        return [
             'error' => false,
             'message' => 'OK',
-        ]);
+        ];
     }
 
     public function actionByCase()
@@ -142,45 +150,51 @@ class UploadController extends FController
 
         $form = new UploadForm();
         $form->load(\Yii::$app->request->post());
-        $form->file = UploadedFile::getInstance($form, 'file');
+        $form->files = UploadedFile::getInstances($form, 'files');
+
+        Yii::$app->response->format = Response::FORMAT_JSON;
 
         if (!$form->validate()) {
-            return $this->asJson([
+            return [
                 'error' => true,
                 'errors' => $form->getErrors(),
                 'message' => '',
-            ]);
+            ];
         }
 
-        try {
-            $this->caseUploader->upload(
-                $case->cs_id,
-                $case->cs_client_id,
-                $case->project->project_key,
-                $form->fs_title,
-                $form->file
-            );
-        } catch (\DomainException $e) {
-            return $this->asJson([
-                'error' => true,
-                'errors' => [],
-                'message' => $e->getMessage(),
-            ]);
-        } catch (\Throwable $e) {
-            \Yii::error([
-                'message' => 'Upload FileStorage byCase',
-                'error' => $e->getMessage(),
-            ], 'FileStorageUploadController:actionUploadByCase');
-            return $this->asJson([
-                'error' => true,
-                'errors' => [],
-                'message' => 'Server error.',
-            ]);
+        if ($form->files) {
+            $errorMessages = [];
+            foreach ($form->files as $file) {
+                try {
+                    $this->caseUploader->upload(
+                        $case->cs_id,
+                        $case->cs_client_id,
+                        $case->project->project_key,
+                        CleanTextHelper::nameFileToTitle($file->name),
+                        $file
+                    );
+                } catch (\DomainException $e) {
+                    $errorMessages[] = $e->getMessage();
+                } catch (\Throwable $throwable) {
+                    \Yii::error(
+                        AppHelper::throwableLog($throwable),
+                        'FileStorageUploadController:actionByCase'
+                    );
+                    $errorMessages[] = 'Server error. Please try again later';
+                }
+            }
+            if ($errorMessages) {
+                return [
+                    'error' => true,
+                    'errors' => [],
+                    'message' => 'Errors: ' . implode(', ', array_unique($errorMessages)),
+                ];
+            }
         }
 
-        return $this->asJson([
+        return [
             'error' => false,
             'message' => 'OK',
-        ]);
+        ];
     }
 }

@@ -18,6 +18,7 @@ use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use common\models\UserProfile;
 use Faker\Provider\DateTime;
+use modules\fileStorage\src\entity\fileLead\FileLead;
 use sales\access\EmployeeGroupAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\model\callLog\entity\callLog\CallLog;
@@ -42,6 +43,7 @@ use common\models\LeadFlow;
 use common\models\ProfitSplit;
 use common\models\TipsSplit;
 use common\components\ChartTools;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use sales\auth\Auth;
 
@@ -71,6 +73,7 @@ use sales\auth\Auth;
  * @property int|null $quoteTypeId
  *
  * @property $count_files
+ * @property int|null $includedFiles
  */
 class LeadSearch extends Lead
 {
@@ -148,6 +151,7 @@ class LeadSearch extends Lead
     public $chatsQtyFrom;
     public $chatsQtyTo;
     public $count_files;
+    public $includedFiles;
 
     public $show_fields = [];
 
@@ -221,6 +225,8 @@ class LeadSearch extends Lead
 
             ['quoteTypeId', 'integer'],
             ['quoteTypeId', 'in', 'range' => array_keys(Quote::TYPE_LIST)],
+
+            ['includedFiles', 'in', 'range' => [0, 1]],
         ];
     }
 
@@ -233,6 +239,7 @@ class LeadSearch extends Lead
             'chatsQtyFrom' => 'Chats From', 'chatsQtyTo' => 'Chats To',
             'projectId' => 'Project',
             'quoteTypeId' => 'Quote Type',
+            'includedFiles' => 'Included Files',
         ];
         return array_merge(parent::attributeLabels(), $labels2);
     }
@@ -576,6 +583,21 @@ class LeadSearch extends Lead
                     ->where(['type_id' => $this->quoteTypeId])
                     ->groupBy('lead_id')
              ]);
+        }
+
+        if (ArrayHelper::isIn($this->includedFiles, ['1', '0'], false)) {
+            $leadIds = FileLead::find()
+                ->select('fld_lead_id')
+                ->groupBy(['fld_lead_id'])
+                ->indexBy('fld_lead_id')
+                ->column();
+            $command = $this->includedFiles ? 'IN' : 'NOT IN';
+
+            $query->andWhere([
+                $command,
+                'leads.id',
+                $leadIds
+            ]);
         }
 
         if (!empty($this->emailsQtyFrom) || !empty($this->emailsQtyTo)) {

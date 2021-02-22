@@ -1,61 +1,61 @@
 <?php
 
+use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\useCase\uploadFile\UploadForm;
 use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
 use yii\web\View;
+use kartik\file\FileInput;
+use yii\bootstrap4\Modal;
 
-/** @var $form UploadForm */
-/** @var $this View */
-/** @var $url string */
+/** @var UploadForm $form */
+/** @var View $this */
+/** @var string $url */
 
 $idForm = 'file-storage-upload-form-id';
-
+$modalId = 'file-input-modal';
 ?>
 
-    <div class="x_panel">
-        <div class="x_title">
-            <h2>Upload file</h2>
-            <ul class="nav navbar-right panel_toolbox">
-                <li>
-                    <a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
-                </li>
-            </ul>
-            <div class="clearfix"></div>
-        </div>
-        <div class="x_content" style="display: none;">
-            <?php $activeForm = ActiveForm::begin([
-                'id' => $idForm,
-                'action' => $url,
-            ]) ?>
-                <?= $activeForm->field($form, 'fs_title')->textInput() ?>
-                <?= $activeForm->field($form, 'file')->fileInput() ?>
-                <?= Html::submitButton('Upload', ['class' => 'file-storage-upload-btn btn btn-success']) ?>
-            <?php ActiveForm::end() ?>
-        </div>
-    </div>
+<?php Modal::begin([
+    'id' => $modalId,
+    'title' => 'File Input inside Modal',
+    'toggleButton' => [
+        'label' => '<i class="fa fa-plus-circle success"></i> Upload files',
+        'class' => 'btn upload-modal-btn',
+    ],
+]); ?>
+    <?php $activeForm = ActiveForm::begin([
+        'id' => $idForm,
+        'action' => $url,
+        'options' => ['enctype' => 'multipart/form-data'],
+    ]) ?>
+        <?php echo $activeForm->field($form, 'files[]')->widget(FileInput::class, [
+            'options' => [
+                'multiple' => true,
+            ],
+            'pluginOptions' => [
+                'allowedFileExtensions' => array_keys(FileStorageSettings::getAllowExt()),
+                'allowedPreviewExtensions' => array_keys(FileStorageSettings::getAllowExt()),
+            ],
+        ]); ?>
+
+        <?= Html::submitButton('Upload', ['class' => 'file-storage-upload-btn btn btn-success']) ?>
+    <?php ActiveForm::end() ?>
+<?php Modal::end() ?>
 
 <?php
-
-$fileId = Html::getInputId($form, 'file');
-$fileName = Html::getInputName($form, 'file');
-$titleId = Html::getInputId($form, 'fs_title');
-$titleName = Html::getInputName($form, 'fs_title');
+$fileId = Html::getInputId($form, 'files');
 
 $js = <<<JS
 $('#{$idForm}').on('beforeSubmit', function (e) {
     e.preventDefault();
-    let yiiform = $(this);
-    let file = $('#{$fileId}').prop('files')[0];
-    let formData = new FormData();
-    let title = $('#{$titleId}').val();
-    formData.append('{$fileName}', file);
-    formData.append('{$titleName}', title);
+    let yiiform = $(this);    
     fileStorageUploadButtonDisable();
+    
     $.ajax({
         url: yiiform.attr('action'),
         type: yiiform.attr('method'),
-        data: formData,
+        data: new FormData($(this)[0]),
         cache: false,
         contentType: false,
         processData: false
@@ -65,13 +65,13 @@ $('#{$idForm}').on('beforeSubmit', function (e) {
             if (data.message) {
                 createNotify('Upload file', data.message, 'error');
             } else {
-                yiiform.yiiActiveForm('updateAttribute', '{$fileId}', data.errors.file);
-                yiiform.yiiActiveForm('updateAttribute', '{$titleId}', data.errors.fs_title);
+                yiiform.yiiActiveForm('updateAttribute', '{$fileId}', data.errors.files);
             }
-        } else {
+        } else {  
+            $('#{$modalId}').modal('hide');          
             createNotify('Upload file', 'Success', 'success');
-            $('#{$fileId}').val('');
-            $('#{$titleId}').val('');
+            $('#{$fileId}').fileinput('clear');
+            $('.file-caption').removeClass('is-valid').removeClass('is-invalid');
         }
         fileStorageUploadButtonEnable();
     })
@@ -98,5 +98,4 @@ function fileStorageUploadButtonEnable() {
         .html('Upload');
 }
 JS;
-
 $this->registerJs($js);

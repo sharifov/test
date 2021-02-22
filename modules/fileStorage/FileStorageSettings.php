@@ -60,4 +60,9 @@ class FileStorageSettings
     {
         return self::isEnabled() && self::isEmailAttachEnabled();
     }
+
+    public static function getAllowExt(): array
+    {
+        return ArrayHelper::index(\Yii::$app->params['settings']['file_upload_allow_ext'], fn ($value) => $value);
+    }
 }

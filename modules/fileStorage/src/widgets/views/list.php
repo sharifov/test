@@ -1,10 +1,16 @@
 <?php
 
+use common\models\Employee;
+use modules\fileStorage\src\services\access\FileStorageAccessService;
 use modules\fileStorage\src\services\url\FileInfo;
 use modules\fileStorage\src\services\url\QueryParams;
 use modules\fileStorage\src\services\url\UrlGenerator;
 use yii\helpers\Html;
+use yii\helpers\StringHelper;
 use yii\web\View;
+use kartik\editable\Editable;
+use yii\helpers\Url;
+use yii\widgets\Pjax;
 
 /** @var View $this */
 /** @var array $files */
@@ -14,51 +20,218 @@ use yii\web\View;
 /** @var bool $canView  */
 
 $countFiles = count($files);
+$i = 1;
 ?>
 
 <div class="x_panel">
     <div class="x_title">
-        <h2 class="file-storage-list-counter" data-count="<?= $countFiles ?>">Files (<?= $countFiles ?>)</h2>
+        <h2 class="file-storage-list-counter" data-count="<?php echo $countFiles ?>">
+            Files (<span id="file-count-value"><?php echo $countFiles ?></span>)
+        </h2>
         <ul class="nav navbar-right panel_toolbox">
+            <li>
+                <?php echo $uploadWidget ?>
+            </li>
             <li>
                 <a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
             </li>
         </ul>
         <div class="clearfix"></div>
     </div>
-    <div class="x_content" style="display: none;">
+    <div class="x_content" style="display: <?=Yii::$app->request->isPjax ? 'block' : 'none';?>">
+        <?php Pjax::begin(['id' => 'pjax-file-list']); ?>
         <table class="table table-bordered file-storage-list">
             <tr>
-                <td style="width: 40px"></td>
-                <td>Filename</td>
-                <td>Title</td>
+                <th>#</th>
+                <th>Filename</th>
+                <th>Title</th>
+                <th>Size</th>
+                <th>Upload by</th>
+                <th>Created</th>
+                <th>Actions</th>
             </tr>
             <?php foreach ($files as $file) : ?>
-                <tr>
-                    <td><?= !$canView ? '' : Html::a('<i class="fa fa-download"> </i>', $urlGenerator->generate(new FileInfo($file['name'], $file['path'], $file['uid'], $file['title'], $queryParams)), ['target' => 'blank']) ?></td>
-                    <td><?= Html::encode($file['name']) ?></td>
-                    <td><span style="word-break: break-all;"><?= Html::encode($file['title']) ?></span></td>
+                <?php $shortName = StringHelper::truncate(Html::encode($file['name']), 30) ?>
+                <?php $shortTitle = StringHelper::truncate(Html::encode($file['title']), 30) ?>
+                <?php $linkView = $urlGenerator->generate(new FileInfo($file['name'], $file['path'], $file['uid'], $file['title'], $queryParams)) ?>
+
+                <?php if (!empty($file['lead_id'])) : ?>
+                    <?php $queryParamsContext = (new QueryParams(['context' => QueryParams::CONTEXT_LEAD, 'as_file' => true])) ?>
+                <?php elseif (!empty($file['case_id'])) : ?>
+                    <?php $queryParamsContext = (new QueryParams(['context' => QueryParams::CONTEXT_CASE, 'as_file' => true])) ?>
+                <?php else : ?>
+                    <?php $queryParamsContext = $queryParams ?>
+                <?php endif ?>
+                <?php $linkDownload = $urlGenerator->generate(new FileInfo($file['name'], $file['path'], $file['uid'], $file['title'], $queryParamsContext)) ?>
+
+                <tr class="file-box" data-item="<?php echo $i ?>">
+                    <td><?php echo $i ?></td>
+                    <td>
+                        <?php if ($canView) : ?>
+                            <?php echo
+                                Html::a(
+                                    $shortName,
+                                    $linkDownload,
+                                    [
+                                        'target' => 'blank',
+                                        'data-pjax' => '0',
+                                        'data' => [
+                                            'confirm' => 'Are you sure you want to download the file?'
+                                        ],
+                                    ]
+                                )
+                            ?>
+                        <?php else : ?>
+                            <?php echo $shortName ?>
+                        <?php endif ?>
+                    </td>
+                    <td>
+                        <?php if (FileStorageAccessService::canEditTitleFile()) : ?>
+                            <?= Editable::widget([
+                                'name' => 'file_title[' . $file['id'] . ']',
+                                'asPopover' => false,
+                                'value' => $file['title'],
+                                'header' => 'File title',
+                                'size' => 'sm',
+                                'inputType' => Editable::INPUT_TEXT,
+                                'buttonsTemplate' => '{submit}',
+                                'pluginEvents' => [
+                                    'editableSuccess' => "function(event, val, form, data) {}",
+                                ],
+                                'inlineSettings' => [
+                                    'templateBefore' => '<div class="editable-pannel">{loading}',
+                                    'templateAfter' => '{buttons}{close}</div>'
+                                ],
+                                'options' => [
+                                    'class' => 'form-control',
+                                    'style' => 'width:150px;',
+                                    'placeholder' => 'File title',
+                                    'resetButton' => '<i class="fa fa-ban"></i>'
+                                ],
+                                'formOptions' => [
+                                    'action' => Url::toRoute(['/file-storage/file-storage/title-update'])
+                                ]
+                            ]) ?>
+                        <?php else : ?>
+                            <span title="<?php echo Html::encode($file['title']) ?>"><?php echo $shortTitle ?></span>
+                        <?php endif ?>
+                    </td>
+                    <td>
+                        <?php echo Yii::$app->formatter->asShortSize($file['size'], 2) ?>
+                    </td>
+                    <td>
+                        <?php if ($file['user_id']) : ?>
+                            <i class="fa fa-user-secret"></i> <?php echo ($user = Employee::findOne((int) $file['user_id'])) ? $user->username : '' ?>
+                        <?php else : ?>
+                            <i class="fa fa-user"></i> Client
+                        <?php endif ?>
+                    </td>
+                    <td>
+                        <?php echo Yii::$app->formatter->asByUserDateTime($file['created_dt']) ?>
+                    </td>
+                    <td>
+                        <ul class="nav navbar-right panel_toolbox" style="float: none;">
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-cog"></i></a>
+                                <div class="dropdown-menu dropdown-menu-right" role="menu">
+                                    <?php if ($canView) : ?>
+                                        <?= Html::a('<i class="fa fa-eye"></i> View', $linkView, [
+                                            'class' => 'dropdown-item js-vew-file-btn',
+                                            'target' => 'blank',
+                                            'data-pjax' => '0',
+                                        ]) ?>
+                                        <?= Html::a('<i class="fa fa-download"></i> Download', $linkDownload, [
+                                            'class' => 'dropdown-item text-success js-download-file-btn',
+                                            'target' => 'blank',
+                                            'data-pjax' => '0',
+                                            'data' => [
+                                                'confirm' => 'Are you sure you want to download the file?'
+                                            ],
+                                        ]) ?>
+                                    <?php endif ?>
+                                    <?php if (FileStorageAccessService::canDeleteFile()) : ?>
+                                        <div class="dropdown-divider"></div>
+                                        <?= Html::a('<i class="fa fa-times"></i> Delete', null, [
+                                            'class' => 'dropdown-item text-danger js-delete-file-btn',
+                                            'data-pjax' => '0',
+                                            'data-file_id' => $file['id'],
+                                            'data' => [
+                                                'confirm' => 'Are you sure you want to delete the file?'
+                                            ],
+                                        ]) ?>
+                                    <?php endif ?>
+                                </div>
+                            </li>
+                        </ul>
+                    </td>
                 </tr>
-            <?php endforeach; ?>
+                <?php $i++ ?>
+            <?php endforeach ?>
         </table>
-        <?= $uploadWidget ?>
+        <?php Pjax::end() ?>
+
     </div>
 </div>
 
 <?php
 $canView = $canView ? 'true' : 'false';
+$urlDeleteFile = Url::to(['/file-storage/file-storage/delete-ajax']);
 $js = <<<JS
+  
+$(document).on('click', '.js-delete-file-btn', function(e){    
+    e.preventDefault();
+    let btn = $(this);
+    
+    $.ajax({
+        url: '{$urlDeleteFile}',
+        type: 'POST',
+        data: {file_id: btn.data('file_id')},
+        dataType: 'json'   
+    })
+    .done(function(dataResponse) {
+        if (dataResponse.status === 1) {                
+            pjaxReload({container: '#pjax-file-list'});  
+            createNotify('Success', data.message, 'success');   
+            
+            let counter = $('#file-count-value');
+            let count = parseInt(counter.text());
+            count--;
+            counter.text(count);                         
+        } else if (dataResponse.message.length) {
+            createNotify('Error', dataResponse.message, 'error');
+        } else {
+            createNotify('Error', 'Error, please check logs', 'error');
+        }
+    })
+    .fail(function(jqXHR, textStatus, errorThrown) {
+        console.log({jqXHR : jqXHR, textStatus : textStatus, errorThrown : errorThrown}); 
+        createNotify('Error', 'Server error. Try again later.', 'error');      
+    })
+    .always(function(jqXHR, textStatus, errorThrown) {});
+});     
+
 function addFileToFileStorageList(data) {
-    let url = '';
-    if ({$canView}) {
-        url = '<a href="' + data.url + '" target="blank"><i class="fa fa-download"> </i></a>';
-    }
-    $('.file-storage-list tr:first').after('<tr><td>' + url + '</td><td>' + data.name + '</td><td>' + data.title + '</td></tr>');
-    let counter = $('.file-storage-list-counter');
-    let count = parseInt(counter.attr('data-count'));
+    pjaxReload({container: '#pjax-file-list'}); 
+    $(".modal-backdrop").remove();
+    
+    let counter = $('#file-count-value');
+    let count = parseInt(counter.text());
     count++;
-    counter.attr('data-count', count).html('Files (' +  count + ')');
+    counter.text(count);
 }
 JS;
-
 $this->registerJs($js, View::POS_END);
+
+$css = <<<CSS
+    .kv-editable-submit {
+        margin-left: 4px;
+    }
+    .kv-editable-close {
+        margin-right: 4px;
+    }
+    .upload-modal-btn {
+        font-size: 14px;
+        color: #596b7d;
+    }
+CSS;
+$this->registerCss($css);

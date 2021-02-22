@@ -46,7 +46,6 @@ use common\models\QuoteSegmentStop;
 use common\models\QuoteSegmentBaggage;
 use common\models\QuoteSegmentBaggageCharge;
 use yii\widgets\ActiveForm;
-use yii\helpers\ArrayHelper;
 
 /**
  * Quotes controller

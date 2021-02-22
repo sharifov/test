@@ -14,7 +14,7 @@ class QueryParams
 
     private array $params;
 
-    private function __construct(array $params)
+    public function __construct(array $params)
     {
         $this->params = $params;
     }
