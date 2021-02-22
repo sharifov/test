@@ -14,7 +14,6 @@ use yii\bootstrap\Html;
 use yii\helpers\Url;
 use yii\widgets\ListView;
 use yii\widgets\Pjax;
-use sales\auth\Auth;
 
 $addAutoQuoteBtn = '';
 if (FlightQuoteGuard::canAutoSelectQuotes(Auth::user(), $lead)) {
