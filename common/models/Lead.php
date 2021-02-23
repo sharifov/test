@@ -131,6 +131,7 @@ use yii\helpers\VarDumper;
  * @property string|null $hybrid_uid
  * @property int|null $l_visitor_log_id
  * @property string|null $l_status_dt
+ * @property string|null $l_expiration_dt
  *
  * @property float $finalProfit
  * @property int $quotesCount
@@ -548,7 +549,8 @@ class Lead extends ActiveRecord implements Objectable
 
             [['notes_for_experts', 'request_ip_detail', 'l_client_ua'], 'string'],
 
-            [['created', 'updated', 'snooze_for', 'called_expert', 'additional_information', 'l_pending_delay_dt', 'l_last_action_dt', 'l_status_dt'], 'safe'],
+            [['created', 'updated', 'snooze_for', 'called_expert', 'additional_information',
+              'l_pending_delay_dt', 'l_last_action_dt', 'l_status_dt'], 'safe'],
 
             [['final_profit', 'tips', 'agents_processing_fee', 'l_init_price'], 'number'],
             [['uid', 'request_ip', 'offset_gmt', 'discount_id', 'description'], 'string', 'max' => 255],
@@ -579,6 +581,8 @@ class Lead extends ActiveRecord implements Objectable
 
             [['l_client_lang'], 'string', 'max' => 5],
             ['l_client_lang', 'exist', 'skipOnError' => true, 'targetClass' => Language::class, 'targetAttribute' => ['l_client_lang' => 'language_id']],
+
+            [['l_expiration_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s', 'skipOnError' => true, 'skipOnEmpty' => true],
         ];
     }
 
@@ -798,6 +802,7 @@ class Lead extends ActiveRecord implements Objectable
         $lead->l_dep_id = Department::DEPARTMENT_SALES;
         $lead->l_type_create = self::TYPE_CREATE_API;
         $lead->l_client_lang = $form->user_language;
+        $lead->l_expiration_dt = $form->expire_at;
         return $lead;
     }
 
