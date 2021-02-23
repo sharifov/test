@@ -1245,24 +1245,4 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
         return $out;
     }
-
-    public function cruiseSearch($data): array
-    {
-        $out = ['error' => false, 'data' => []];
-
-        $response = $this->sendRequest('product/cruise-search', $data);
-
-        if ($response->isOk) {
-            if (isset($response->data['data']['cruises'])) {
-                $out['data'] = $response->data['data']['cruises'];
-            } else {
-                $out['error'] = 'Not found in response array data key [data][cruises]';
-            }
-        } else {
-            $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error']), 'Component:CommunicationService::cruiseSearch');
-        }
-
-        return $out;
-    }
 }

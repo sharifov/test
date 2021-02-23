@@ -4,10 +4,10 @@ namespace modules\cruise\controllers;
 
 use common\models\Notifications;
 use frontend\controllers\FController;
+use modules\cruise\CruiseModule;
 use modules\cruise\src\entity\cruise\Cruise;
 use modules\cruise\src\entity\cruiseQuote\search\CruiseQuoteSearch;
-use modules\cruise\src\services\search\CruiseQuoteSearch as SearchService;
-use modules\cruise\src\services\search\Params;
+use modules\cruise\components\Params;
 use modules\cruise\src\useCase\createQuote\CreateQuoteService;
 use modules\cruise\src\useCase\updateMarkup\CruiseMarkupService;
 use sales\auth\Auth;
@@ -25,20 +25,17 @@ use yii\db\StaleObjectException;
 
 class CruiseQuoteController extends FController
 {
-    private \modules\cruise\src\services\search\CruiseQuoteSearch $cruiseQuoteSearch;
     private CreateQuoteService $createQuoteService;
     private CruiseMarkupService $cruiseMarkupService;
 
     public function __construct(
         $id,
         $module,
-        SearchService $cruiseQuoteSearch,
         CreateQuoteService $createQuoteService,
         CruiseMarkupService $cruiseMarkupService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
-        $this->cruiseQuoteSearch = $cruiseQuoteSearch;
         $this->createQuoteService = $createQuoteService;
         $this->cruiseMarkupService = $cruiseMarkupService;
     }
@@ -174,7 +171,8 @@ class CruiseQuoteController extends FController
             if (!$params->validate()) {
                 throw new \DomainException('Invalid params. Errors: ' . VarDumper::dumpAsString($params->getErrors()));
             }
-            $cruises = $this->cruiseQuoteSearch->search($params);
+            $searchService = CruiseModule::getInstance()->apiService;
+            $cruises = $searchService->cruiseSearch($params);
         } catch (\DomainException $e) {
             $cruises = [];
             \Yii::$app->session->setFlash('error', $e->getMessage());
@@ -235,7 +233,8 @@ class CruiseQuoteController extends FController
                 throw new \DomainException('Invalid params. Errors: ' . VarDumper::dumpAsString($params->getErrors()));
             }
 
-            $cruises = $this->cruiseQuoteSearch->search($params);
+            $searchService = CruiseModule::getInstance()->apiService;
+            $cruises = $searchService->cruiseSearch($params);
 
             if (!$cruises) {
                 throw new \DomainException('Not found Cruises');

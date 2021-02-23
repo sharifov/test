@@ -2,8 +2,14 @@
 
 namespace modules\cruise;
 
+use modules\cruise\components\ApiCruiseService;
 use yii\helpers\ArrayHelper;
 
+/**
+ * Class CruiseModule
+ *
+ * @property ApiCruiseService $apiService
+ */
 class CruiseModule extends \yii\base\Module
 {
     /**
@@ -18,9 +24,14 @@ class CruiseModule extends \yii\base\Module
     {
         parent::init();
 
+        $localPath = __DIR__ . '/config/config-local.php';
+        $localFile = [];
+        if (is_file($localPath)) {
+            $localFile = require $localPath;
+        }
         $config = ArrayHelper::merge(
             require __DIR__ . '/config/config.php',
-            require __DIR__ . '/config/config-local.php'
+            $localFile
         );
 
         //\Yii::configure($this, require __DIR__ . '/config.php');
