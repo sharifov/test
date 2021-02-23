@@ -97,6 +97,8 @@ class LeadChecklistTypeController extends FController
             return $this->redirect(['view', 'id' => $model->lct_id]);
         }
 
+        Yii::info($model->getErrors(), 'info\DebugChecklist');
+
         return $this->render('update', [
             'model' => $model,
         ]);
