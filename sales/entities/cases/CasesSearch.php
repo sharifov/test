@@ -233,6 +233,7 @@ class CasesSearch extends Cases
             'callsQtyFrom' => 'Calls From', 'callsQtyTo' => 'Calls To',
             'chatsQtyFrom' => 'Chats From', 'chatsQtyTo' => 'Chats To',
             'caseUserGroup' => 'Case User Group',
+            'locales' => 'Client Locale',
         ];
     }
 
@@ -527,6 +528,7 @@ class CasesSearch extends Cases
         $query->andFilterWhere(['IN', 'cs_status', $this->csStatuses]);
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
         $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
+        $query->andFilterWhere(['like', 'cl_locale', $this->client_locale]);
 
         if (!empty($this->locales)) {
             $query->andWhere(['cl_locale' => $this->locales]);
