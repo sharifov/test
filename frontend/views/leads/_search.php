@@ -314,48 +314,64 @@ use frontend\extensions\DatePicker;
             </div>
         </div>
 
+        <div class="col-md-12 col-sm-12  profile_details">
+            <div class="well profile_view">
+                <div class="col-sm-12">
+                    <h4 class="brief"><i>Communication</i></h4>
+                    <div class="row">
+                        <div class="col-md-1">
+                            <?= $form->field($model, 'callsQtyFrom')->textInput() ?>
+                        </div>
+                        <div class="col-md-1">
+                            <?= $form->field($model, 'callsQtyTo')->textInput() ?>
+                        </div>
+                        <!--</div>
+                        <div class="row">-->
+                        <div class="col-md-1">
+                            <?= $form->field($model, 'smsQtyFrom')->textInput() ?>
+                        </div>
+                        <div class="col-md-1">
+                            <?= $form->field($model, 'smsQtyTo')->textInput() ?>
+                        </div>
+                        <!--</div>
+                        <div class="row">-->
+                        <div class="col-md-1">
+                            <?= $form->field($model, 'emailsQtyFrom')->textInput() ?>
+                        </div>
+                        <div class="col-md-1">
+                            <?= $form->field($model, 'emailsQtyTo')->textInput() ?>
+                        </div>
+                        <!--</div>
+                        <div class="row">-->
+                        <div class="col-md-1">
+                            <?= $form->field($model, 'chatsQtyFrom')->textInput() ?>
+                        </div>
+                        <div class="col-md-1">
+                            <?= $form->field($model, 'chatsQtyTo')->textInput() ?>
+                        </div>
+                        <div class="col-md-1">
+                            <?= $form->field($model, 'includedFiles')->dropDownList([0 => 'No', 1 => 'Yes'], ['prompt' => '-']) ?>
+                        </div>
+                    </div>
+                    <?php // echo $form->field($model, 'request_ip_detail')?>
+
+                    <?php // echo $form->field($model, 'offset_gmt')?>
+
+                    <?php //php  echo $form->field($model, 'snooze_for')?>
+
+                    <!--<div class="row">
+                        <?php //php  echo $form->field($model, 'called_expert')?>
+                    </div>-->
+                    <!--<div class="row">
+                        <div class="col-md-6"><?php /*echo $form->field($model, 'notes_for_experts') */?></div>
+                    </div>-->
+
+                    <?php //php  echo $form->field($model, 'bo_flight_id')?>
+                </div>
+                <div class=" profile-bottom text-center">
+                </div>
             </div>
         </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-1">
-            <?= $form->field($model, 'callsQtyFrom')->textInput() ?>
-        </div>
-        <div class="col-md-1">
-            <?= $form->field($model, 'callsQtyTo')->textInput() ?>
-        </div>
-        <div class="col-md-1">
-            <?= $form->field($model, 'smsQtyFrom')->textInput() ?>
-        </div>
-        <div class="col-md-1">
-            <?= $form->field($model, 'smsQtyTo')->textInput() ?>
-        </div>
-        <div class="col-md-1">
-            <?= $form->field($model, 'emailsQtyFrom')->textInput() ?>
-        </div>
-        <div class="col-md-1">
-            <?= $form->field($model, 'emailsQtyTo')->textInput() ?>
-        </div>
-        <div class="col-md-1">
-            <?= $form->field($model, 'chatsQtyFrom')->textInput() ?>
-        </div>
-        <div class="col-md-1">
-            <?= $form->field($model, 'chatsQtyTo')->textInput() ?>
-        </div>
-        <!--<div class="row">-->
-            <div class="col-md-1">
-                <?= $form->field($model, 'l_is_test')->dropDownList([0 => 'False', 1 => 'True'], ['prompt' => '-'])->label('Is Test') ?>
-            </div>
-      <!--  </div>-->
-
-            </div>
-        </div>
-
-        <div class="col-md-1">
-            <?= $form->field($model, 'includedFiles')->dropDownList([0 => 'No', 1 => 'Yes'], ['prompt' => '-']) ?>
-        </div>
-
     </div>
 
     <div class="row">
