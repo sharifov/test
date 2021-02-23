@@ -3822,7 +3822,7 @@
             "source": {
                 "type": "git",
                 "url": "git@bitbucket.org:techork/yii2-rbac-export-import.git",
-                "reference": "796c5525ce609ac80cb6d0074bcf917a917d0f15"
+                "reference": "40fd6d8a9146ed71c2ab73d9e934abd09122a1be"
             },
             "require": {
                 "kartik-v/yii2-widget-select2": "@dev",
@@ -3855,7 +3855,7 @@
                 "yii2 rbac export import module",
                 "yii2-rbac-export-import"
             ],
-            "time": "2020-03-25T16:04:34+00:00"
+            "time": "2021-02-23T10:29:59+00:00"
         },
         {
             "name": "kivork/yii2-virtual-cron",
