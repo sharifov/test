@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\cruise\src\services\search;
+namespace modules\cruise\components;
 
 use modules\cruise\src\entity\cruise\Cruise;
 use yii\base\Model;
