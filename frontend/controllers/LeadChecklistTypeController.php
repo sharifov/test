@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use sales\auth\Auth;
 use Yii;
 use common\models\LeadChecklistType;
 use common\models\search\LeadChecklistTypeSearch;
@@ -92,13 +93,12 @@ class LeadChecklistTypeController extends FController
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        $model->lct_updated_user_id = Auth::id();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->lct_id]);
         }
-
-        Yii::info($model->getErrors(), 'info\DebugChecklist');
-
+        
         return $this->render('update', [
             'model' => $model,
         ]);
