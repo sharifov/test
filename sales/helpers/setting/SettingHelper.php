@@ -120,4 +120,9 @@ class SettingHelper
     {
         return (int)(Yii::$app->params['settings']['flight_quote_auto_select_count'] ?? 3);
     }
+
+    public static function clientDataPrivacyEnable(): bool
+    {
+        return (bool)(\Yii::$app->params['settings']['client_data_privacy_enabled'] ?? false);
+    }
 }
