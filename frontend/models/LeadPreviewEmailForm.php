@@ -8,7 +8,9 @@ use common\models\Employee;
 use common\models\Language;
 use common\models\Lead;
 use modules\fileStorage\src\entity\fileLead\FileLeadQuery;
+use modules\fileStorage\src\entity\fileStorage\FileStorage;
 use yii\base\Model;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class LeadPreviewEmailForm
@@ -115,8 +117,8 @@ class LeadPreviewEmailForm extends Model
         if ($this->fileList !== null) {
             return $this->fileList;
         }
-        $this->fileList = FileLeadQuery::getListByLead($this->e_lead_id);
-        return $this->fileList;
+        $fileLeadQuery = FileLeadQuery::getListByLead($this->e_lead_id);
+        return $this->fileList = ArrayHelper::map($fileLeadQuery, 'id', 'name');
     }
 
     public function getFilesPath(): array
@@ -125,14 +127,13 @@ class LeadPreviewEmailForm extends Model
         if (!$this->files) {
             return $files;
         }
-        $availableFiles = $this->getFileList();
         foreach ($this->files as $fileId) {
-            if (array_key_exists($fileId, $availableFiles)) {
+            if ($fileStorage = FileStorage::findOne(['fs_id' => $fileId])) {
                 $files[] = new \modules\fileStorage\src\services\url\FileInfo(
-                    $availableFiles[$fileId]['name'],
-                    $availableFiles[$fileId]['path'],
-                    $availableFiles[$fileId]['uid'],
-                    $availableFiles[$fileId]['title'],
+                    $fileStorage->fs_name,
+                    $fileStorage->fs_path,
+                    $fileStorage->fs_uid,
+                    $fileStorage->fs_title,
                     null
                 );
             }
