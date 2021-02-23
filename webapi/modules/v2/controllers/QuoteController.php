@@ -92,13 +92,17 @@ class QuoteController extends ApiBaseController
      *               "cnt": 2,
      *               "price": 1028.49,
      *               "tax": 529.49,
-     *               "baseFare": 499
+     *               "baseFare": 499,
+     *               "mark_up": 20,
+     *               "extra_mark_up": 10
      *           },
      *           "INF": {
      *               "cnt": 1,
      *               "price": 0,
      *               "tax": 0,
-     *               "baseFare": 0
+     *               "baseFare": 0,
+     *               "mark_up": 0,
+     *               "extra_mark_up": 0
      *           }
      *       },
      *       "trips": [
@@ -323,6 +327,7 @@ class QuoteController extends ApiBaseController
      *   "uid": "5cb97d1c78486",
      *   "lead_id": 92322,
      *   "lead_uid": "5cb8735a502f5",
+     *   "lead_expiration_dt": "2021-02-23 20:12:12",
      *   "lead_delayed_charge": 0,
      *   "lead_status": null,
      *   "booked_quote_uid": null,
@@ -484,6 +489,7 @@ class QuoteController extends ApiBaseController
             $response['uid'] = $uid;
             $response['lead_id'] = $model->lead->id;
             $response['lead_uid'] = $model->lead->uid;
+            $response['lead_expiration_dt'] = $model->lead->l_expiration_dt;
             $response['lead_delayed_charge'] = $model->lead->l_delayed_charge;
             $response['lead_status'] = null;
             $response['booked_quote_uid'] = null;

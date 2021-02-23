@@ -29,6 +29,7 @@ use yii\base\Model;
  * @property array $client
  * @property int $flight_id
  * @property string|null $user_language
+ * @property string|null $expire_at
  *
  * @property FlightForm[] $flightsForm
  * @property ClientForm $clientForm
@@ -52,6 +53,7 @@ class LeadCreateForm extends Model
     public $client;
     public $flight_id;
     public ?string $user_language = null;
+    public $expire_at;
 
     public $flightsForm;
     public $clientForm;
@@ -122,6 +124,8 @@ class LeadCreateForm extends Model
             ['user_language', 'string', 'max' => 5],
             ['user_language', 'exist', 'skipOnError' => true, 'skipOnEmpty' => true,
                 'targetClass' => Language::class, 'targetAttribute' => ['user_language' => 'language_id']],
+
+            [['expire_at'], 'datetime', 'format' => 'php:Y-m-d H:i:s', 'skipOnEmpty' => true],
         ];
     }
 

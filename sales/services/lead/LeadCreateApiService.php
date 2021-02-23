@@ -82,15 +82,12 @@ class LeadCreateApiService
             if (!$lead->status) {
                 $lead->status = Lead::STATUS_PENDING;
             }
-
             if (!$lead->uid) {
                 $lead->uid = Lead::generateUid();
             }
-
             if (!$lead->cabin) {
                 $lead->cabin = Lead::CABIN_ECONOMY;
             }
-
             if (!$lead->children) {
                 $lead->children = 0;
             }
@@ -100,7 +97,6 @@ class LeadCreateApiService
             if (!$lead->request_ip) {
                 $lead->request_ip = Yii::$app->request->remoteIP;
             }
-
             if ($apiProject) {
                 $lead->project_id = $apiProject->id;
             }
@@ -108,17 +104,17 @@ class LeadCreateApiService
             if (!$lead->l_client_lang && $modelLead->user_language) {
                 $lead->l_client_lang = $modelLead->user_language;
             }
-
             if (!$lead->l_client_ua && $modelLead->user_agent) {
                 $lead->l_client_ua = $modelLead->user_agent;
             }
-
             if (!$lead->l_client_first_name && $modelLead->client_first_name) {
                 $lead->l_client_first_name = $modelLead->client_first_name;
             }
-
             if (!$lead->l_client_last_name && $modelLead->client_last_name) {
                 $lead->l_client_last_name = $modelLead->client_last_name;
+            }
+            if (!$lead->l_expiration_dt && $modelLead->expire_at) {
+                $lead->l_expiration_dt = $modelLead->expire_at;
             }
 
             $lead->l_call_status_id = Lead::CALL_STATUS_READY;
