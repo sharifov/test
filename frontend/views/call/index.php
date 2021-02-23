@@ -325,7 +325,7 @@ $pjaxListId = 'pjax-call-index';
                     if ($model->c_call_type_id == $model::CALL_TYPE_OUT) {
                         return MaskPhoneHelper::masking($model->c_to);
                     }
-                    return $model->c_from;
+                    return $model->c_to;
                 }
             ],
             //'c_call_status',
