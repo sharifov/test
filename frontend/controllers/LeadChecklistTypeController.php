@@ -98,7 +98,7 @@ class LeadChecklistTypeController extends FController
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->lct_id]);
         }
-        
+
         return $this->render('update', [
             'model' => $model,
         ]);
