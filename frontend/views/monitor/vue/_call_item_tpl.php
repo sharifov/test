@@ -53,6 +53,9 @@ use common\models\Call;
 
                 <td class="text-center" style="width:120px">
                     <b>{{ callStatusName }}</b>
+                  <br>
+                  <label class="label label-warning" v-show="this.showTransferLabelForQueuedCall">Transfer</label>
+                  {{ isCallAssignedToUserGroups }}
                 </td>
                 <td class="text-center" style="width:120px">
                     <timer :fromDt="callStatusTimerDateTime"></timer>
@@ -75,7 +78,7 @@ use common\models\Call;
         </table>
         <div v-if="item.userAccessList && item.userAccessList.length > 0" class="text-right" style="margin-bottom: 5px">
             <transition-group name="fade">
-                    <span class="label" :class="{ 'label-success': access.cua_status_id == 2, 'label-default': access.cua_status_id != 2 }"
+                    <span class="label" :class="getUserAccessStatusTypeLabel(access.cua_status_id)"
                           v-for="(access, index) in item.userAccessList" :key="access.cua_user_id"
                           style="margin-right: 4px" :title="getUserAccessStatusTypeName(access.cua_status_id)">
                         <i class="fa fa-user"></i> {{ getUserName(access.cua_user_id) }}

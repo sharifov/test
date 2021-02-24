@@ -1804,6 +1804,7 @@ class Lead extends ActiveRecord implements Objectable
 
             'l_visitor_log_id' => 'Visitor log ID',
             'l_status_dt' => 'Status Dt',
+            'l_expiration_dt' => 'Expiration',
         ];
     }
 
