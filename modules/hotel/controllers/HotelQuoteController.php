@@ -116,6 +116,8 @@ class HotelQuoteController extends FController
         $hotelId = (int) Yii::$app->request->get('id');
         $hotel = $this->hotelRepository->find($hotelId);
 
+        ini_set("memory_limit", "640M");
+
         $result = [];
 
         if ($hotel) {
