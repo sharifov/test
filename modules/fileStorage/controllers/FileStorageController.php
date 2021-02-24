@@ -7,6 +7,7 @@ use modules\fileStorage\src\services\FileStorageService;
 use modules\fileStorage\src\useCase\fileStorage\rename\RenameForm;
 use modules\fileStorage\src\useCase\fileStorage\update\EditForm;
 use sales\helpers\app\AppHelper;
+use sales\helpers\ErrorsToStringHelper;
 use Yii;
 use modules\fileStorage\src\entity\fileStorage\FileStorage;
 use modules\fileStorage\src\entity\fileStorage\search\FileStorageSearch;
@@ -197,14 +198,15 @@ class FileStorageController extends FController
                 $fileStorageId = array_key_first($titleData);
                 $value = $titleData[$fileStorageId];
 
-                if (is_int($fileStorageId) && $value !== null) {
-                    $model = $this->findModel($fileStorageId);
+                if (is_int($fileStorageId) && $value !== null && $model = $this->findModel($fileStorageId)) {
                     $model->fs_title = $value;
+                    if (!$model->validate('fs_title')) {
+                        throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($model), -1);
+                    }
                     $this->fileStorageRepository->save($model);
-
                     return $this->asJson(['output' => $value]);
                 }
-                throw new \RuntimeException('FileStorageId is required.', -1);
+                throw new \RuntimeException('FileStorageId and Value is required.', -2);
             } catch (\DomainException $e) {
                 return $this->asJson(['message' => $e->getMessage()]);
             } catch (\Throwable $throwable) {
