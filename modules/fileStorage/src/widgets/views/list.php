@@ -85,7 +85,7 @@ $i = 1;
                             <?php echo $shortName ?>
                         <?php endif ?>
                     </td>
-                    <td>
+                    <td style="max-width: 250px; overflow: hidden;" title="<?php echo Html::encode($file['title']) ?>">
                         <?php if (FileStorageAccessService::canEditTitleFile()) : ?>
                             <?= Editable::widget([
                                 'name' => 'file_title[' . $file['id'] . ']',
@@ -113,7 +113,7 @@ $i = 1;
                                 ]
                             ]) ?>
                         <?php else : ?>
-                            <span title="<?php echo Html::encode($file['title']) ?>"><?php echo $shortTitle ?></span>
+                            <span><?php echo $shortTitle ?></span>
                         <?php endif ?>
                     </td>
                     <td>
