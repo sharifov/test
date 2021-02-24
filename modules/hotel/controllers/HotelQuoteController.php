@@ -116,7 +116,7 @@ class HotelQuoteController extends FController
         $hotelId = (int) Yii::$app->request->get('id');
         $hotel = $this->hotelRepository->find($hotelId);
 
-        ini_set("memory_limit", "640M");
+        $this->increaseLimits();
 
         $result = [];
 
@@ -159,40 +159,35 @@ class HotelQuoteController extends FController
 
         Yii::$app->response->format = Response::FORMAT_JSON;
 
+        $this->increaseLimits();
+
         try {
             if (!$hotelId) {
                 throw new Exception('Hotel Request param not found', 2);
             }
-
             if (!$hotelCode) {
                 throw new Exception('Hotel Code param not found', 3);
             }
-
             if (!$quoteKey) {
                 throw new Exception('Quote key param not found', 4);
             }
 
             $hotel = $this->hotelRepository->find($hotelId);
-
             $productId = $hotel->ph_product_id;
 
             $result = $hotel->getSearchData();
-
             $hotelData = Hotel::getHotelDataByCode($result, $hotelCode);
             $quoteData = Hotel::getHotelQuoteDataByKey($result, $hotelCode, $quoteKey);
 
             if (!$hotelData) {
                 throw new Exception('Not found quote - hotel code (' . $hotelCode . ')', 6);
             }
-
             if (!$quoteData) {
                 throw new Exception('Not found quote - quote key (' . $quoteKey . ')', 7);
             }
 
             $hotelModel = HotelList::findOrCreateByData($hotelData);
-
             $currency = $hotelData['currency'] ?? 'USD';
-
             $hotelQuote = HotelQuote::findOrCreateByData($quoteData, $hotelModel, $hotel, $currency);
 
             if (!$hotelQuote) {
@@ -204,8 +199,6 @@ class HotelQuoteController extends FController
                 'addedQuote',
                 ['data' => ['productId' => $hotelQuote->hqProductQuote->pq_product_id]]
             );
-
-            //$hotelList = $result['hotels'] ?? [];
         } catch (\Throwable $throwable) {
             Yii::warning(VarDumper::dumpAsString($throwable->getTraceAsString()), 'app');
             return ['error' => 'Error: ' . $throwable->getMessage()];
@@ -396,5 +389,14 @@ class HotelQuoteController extends FController
         }
 
         throw new NotFoundHttpException('The requested HotelQuote does not exist.');
+    }
+
+    private function increaseLimits(string $memoryLimit = '640M', int $timeLimit = 300): void
+    {
+        ini_set('memory_limit', $memoryLimit);
+        set_time_limit($timeLimit);
+        if (isset(Yii::$app->log->targets['debug']->enabled)) {
+            Yii::$app->log->targets['debug']->enabled = false;
+        }
     }
 }
