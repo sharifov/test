@@ -105,11 +105,20 @@ class MonitorController extends FController
         $response['projectList'] = Project::getList();
         $response['depList'] = Department::DEPARTMENT_LIST;
         $response['userList'] = Employee::getList();
+        $response['showCallStatusList'] = [
+            Call::STATUS_IVR,
+            Call::STATUS_QUEUE,
+            Call::STATUS_HOLD,
+            Call::STATUS_DELAY,
+            Call::STATUS_RINGING,
+            Call::STATUS_IN_PROGRESS
+        ];
 
         $response['callStatusList'] = Call::STATUS_LIST;
         $response['callSourceList'] = Call::SHORT_SOURCE_LIST;
         $response['callTypeList'] = Call::TYPE_LIST;
         $response['callUserAccessStatusTypeList'] = CallUserAccess::STATUS_TYPE_LIST;
+        $response['callUserAccessStatusTypeListLabel'] = CallUserAccess::STATUS_TYPE_LIST_LABEL;
         $response['onlineUserList'] = $userOnlineSearch->searchUserByIncomingCall($params);
         $response['userStatusList'] = UserStatus::find()->all();
 
