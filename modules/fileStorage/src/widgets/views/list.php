@@ -157,9 +157,6 @@ $i = 1;
                                             'class' => 'dropdown-item text-danger js-delete-file-btn',
                                             'data-pjax' => '0',
                                             'data-file_id' => $file['id'],
-                                            'data' => [
-                                                'confirm' => 'Are you sure you want to delete the file?'
-                                            ],
                                         ]) ?>
                                     <?php endif ?>
                                 </div>
@@ -182,6 +179,11 @@ $js = <<<JS
   
 $(document).on('click', '.js-delete-file-btn', function(e){    
     e.preventDefault();
+    
+    if(!confirm('Are you sure you want to delete the file?')) {
+        return false;
+    }
+    
     let btn = $(this);
     
     $.ajax({
