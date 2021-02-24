@@ -97,12 +97,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 //'attribute' => 'pending',
                 'label' => 'Pending Time',
                 'value' => static function (\common\models\Lead $model) {
-                    $createdTS = strtotime($model->created);
-
-                    $diffTime = time() - $createdTS;
-                    $diffHours = (int)($diffTime / (60 * 60));
-
-                    return ($diffHours > 3 && $diffHours < 73) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+                    return Yii::$app->formatter->asRelativeDt($model->created);
                 },
                 'options' => [
                     'style' => 'width:180px'
@@ -110,7 +105,33 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'visible' => !$user->isAgent(),
             ],
-
+            [
+                'attribute' => 'l_expiration_dt',
+                'value' => static function (Lead $model) {
+                    return Yii::$app->formatter->asExpirationDt($model->l_expiration_dt);
+                },
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'l_expiration_dt',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                        'clearBtn' => true,
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' => 'Choose Date',
+                        'readonly' => '1',
+                    ],
+                    'clientEvents' => [
+                        'clearDate' => 'function (e) {$(e.target).find("input").change();}',
+                    ],
+                ]),
+                'options' => [
+                    'style' => 'width:180px'
+                ],
+                'format' => 'raw',
+            ],
             [
                 'attribute' => 'created',
                 'value' => static function (\common\models\Lead $model) {

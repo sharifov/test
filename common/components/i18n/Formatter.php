@@ -819,4 +819,29 @@ class Formatter extends \yii\i18n\Formatter
 
         return FileStorageStatus::asFormat($value);
     }
+
+    public function asRelativeDt($value, $minHours = 3, $maxHours = 73): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+        $createdTS = strtotime($value);
+        $diffTime = time() - $createdTS;
+        $diffHours = (int) ($diffTime / (60 * 60));
+
+        $result = ($diffHours > $minHours && $diffHours < $maxHours) ? $diffHours . ' hours' : $this->asRelativeTime($createdTS);
+        return $result . '<br /> <i class="fa fa-calendar"></i> ' . $this->asDatetime(strtotime($value));
+    }
+
+    public function asExpirationDt($value, $minHours = 3, $maxHours = 73): string
+    {
+        $relative = $this->asRelativeDt($value, $minHours, $maxHours);
+        if ($relative === $this->nullDisplay) {
+            return $relative;
+        }
+        if ((strtotime($value) < time())) {
+            return '<span class="label-warning label" title="' . strip_tags($relative) . '">expired</span>';
+        }
+        return $relative;
+    }
 }

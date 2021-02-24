@@ -71,6 +71,7 @@ use sales\auth\Auth;
  * @property int|null $chatsQtyTo
  * @property array $show_fields
  * @property int|null $quoteTypeId
+ * @property string|null $l_expiration_dt
  *
  * @property $count_files
  * @property int|null $includedFiles
@@ -152,10 +153,9 @@ class LeadSearch extends Lead
     public $chatsQtyTo;
     public $count_files;
     public $includedFiles;
-
     public $show_fields = [];
-
     public $quoteTypeId;
+    public $l_expiration_dt;
 
     private $leadBadgesRepository;
 
@@ -227,6 +227,8 @@ class LeadSearch extends Lead
             ['quoteTypeId', 'in', 'range' => array_keys(Quote::TYPE_LIST)],
 
             ['includedFiles', 'in', 'range' => [0, 1]],
+
+            [['l_expiration_dt'], 'date', 'format' => 'php:Y-m-d', 'skipOnEmpty' => true],
         ];
     }
 
@@ -2096,8 +2098,12 @@ class LeadSearch extends Lead
 
         $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'leadChecklists', 'leadChecklists.lcType', 'employee']);
 
-        /*  $sqlRaw = $query->createCommand()->getRawSql();
-         VarDumper::dump($sqlRaw, 10, true); exit; */
+        if ($this->l_expiration_dt) {
+            $query->andWhere(new Expression(
+                'DATE(l_expiration_dt) = :date',
+                [':date' => date('Y-m-d', strtotime($this->l_expiration_dt))]
+            ));
+        }
 
         return $dataProvider;
     }
@@ -2143,6 +2149,13 @@ class LeadSearch extends Lead
 
         if ($user->isAdmin()) {
             $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'project', 'leadFlightSegments']);
+        }
+
+        if ($this->l_expiration_dt) {
+            $query->andWhere(new Expression(
+                'DATE(l_expiration_dt) = :date',
+                [':date' => date('Y-m-d', strtotime($this->l_expiration_dt))]
+            ));
         }
 
         return $dataProvider;
@@ -2723,6 +2736,13 @@ class LeadSearch extends Lead
 
         if ($user->isAdmin()) {
             $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'project', 'leadFlightSegments']);
+        }
+
+        if ($this->l_expiration_dt) {
+            $query->andWhere(new Expression(
+                'DATE(l_expiration_dt) = :date',
+                [':date' => date('Y-m-d', strtotime($this->l_expiration_dt))]
+            ));
         }
 
         return $dataProvider;

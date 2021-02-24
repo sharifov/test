@@ -1636,7 +1636,6 @@ class LeadController extends FController
     public function actionAlternative(): string
     {
         $user = Auth::user();
-
         $checkShiftTime = true;
         $isAccessNewLead = true;
         $accessLeadByFrequency = [];
