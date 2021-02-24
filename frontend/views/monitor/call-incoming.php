@@ -154,7 +154,7 @@ centrifuge.on('connect', function(ctx){
                 callMapApp.addCallUserAccess(jsonData.data.callUserAccess);
             }
         } else if (jsonData.object === 'call') {
-            callMapApp.addCall(jsonData.data.call);
+            callMapApp.actionCall(jsonData.data.call);
         } 
     });
     
