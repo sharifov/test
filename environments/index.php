@@ -80,6 +80,7 @@ return [
             'webapi/config/params-local.php',
             'modules/flight/config/config-local.php',
             'modules/hotel/config/config-local.php',
+            'modules/attraction/config/config-local.php',
         ],
     ],
     'Stage' => [
@@ -109,6 +110,7 @@ return [
             'webapi/config/params-local.php',
             'modules/flight/config/config-local.php',
             'modules/hotel/config/config-local.php',
+            'modules/attraction/config/config-local.php',
         ],
     ],
     'Production' => [
@@ -138,6 +140,7 @@ return [
             'webapi/config/params-local.php',
             'modules/flight/config/config-local.php',
             'modules/hotel/config/config-local.php',
+            'modules/attraction/config/config-local.php',
         ],
     ],
 ];

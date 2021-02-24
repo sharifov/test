@@ -24,8 +24,6 @@ class AttractionModule extends \yii\base\Module
     {
         parent::init();
 
-
-
         $config = ArrayHelper::merge(
             require __DIR__ . '/config/config.php',
             require __DIR__ . '/config/config-local.php'
