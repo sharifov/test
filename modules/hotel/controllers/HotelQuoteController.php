@@ -393,10 +393,14 @@ class HotelQuoteController extends FController
 
     private function increaseLimits(string $memoryLimit = '640M', int $timeLimit = 300): void
     {
-        ini_set('memory_limit', $memoryLimit);
-        set_time_limit($timeLimit);
-        if (isset(Yii::$app->log->targets['debug']->enabled)) {
-            Yii::$app->log->targets['debug']->enabled = false;
+        try {
+            ini_set('memory_limit', $memoryLimit);
+            set_time_limit($timeLimit);
+            if (isset(Yii::$app->log->targets['debug']->enabled)) {
+                Yii::$app->log->targets['debug']->enabled = false;
+            }
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), 'HotelQuoteController:increaseLimits');
         }
     }
 }
