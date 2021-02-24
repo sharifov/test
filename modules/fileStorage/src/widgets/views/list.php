@@ -96,7 +96,9 @@ $i = 1;
                                 'inputType' => Editable::INPUT_TEXT,
                                 'buttonsTemplate' => '{submit}',
                                 'pluginEvents' => [
-                                    'editableSuccess' => "function(event, val, form, data) {}",
+                                    'editableSuccess' => "function(event, val, form, data) {                                        
+                                        $(this).parent('td').attr('title', val);                                        
+                                    }",
                                 ],
                                 'inlineSettings' => [
                                     'templateBefore' => '<div class="editable-pannel">{loading}',
