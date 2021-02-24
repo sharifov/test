@@ -146,36 +146,17 @@ class Attraction extends \yii\db\ActiveRecord implements Productable
 
         if ($result === false) {
             $params = [];
-            /** @var CommunicationService $communication */
-            $apiHotelService = Yii::$app->communication;
-            //$apiHotelService = Yii::$app->getModule('hotel')->apiService;
-            // $service = $hotel->apiService;
 
-            /*$rooms = [];
+            $apiAttractionService = Yii::$app->getModule('attraction')->apiService;
 
-            if ($this->hotelRooms) {
-                foreach ($this->hotelRooms as $room) {
-                    $rooms[] = $room->getDataSearch();
-                }
-            }
-
-            if ($this->ph_max_price_rate) {
-                $params['maxRate'] = $this->ph_max_price_rate;
-            }
-
-            if ($this->ph_min_price_rate) {
-                $params['minRate'] = $this->ph_min_price_rate;
-            }*/
-
-            //$response = $apiHotelService->search($this->ph_check_in_date, $this->ph_check_out_date, $this->ph_destination_code, $rooms, $params);
-            $response = $apiHotelService->getAttractionQuotes($this);
+            $response = $apiAttractionService->getAttractionQuotes($this);
 
             if (isset($response['data']['searchSummary'])) {
                 $result = $response['data'];
                 Yii::$app->cache->set($keyCache, $result, 100);
             } else {
                 $result = [];
-                Yii::error('Not found response[data][hotels]', 'Model:Hotel:getSearchData:apiService');
+                Yii::error('Not found response[data][attractions]', 'Model:Attraction:getSearchData:apiService');
             }
         }
 
@@ -188,7 +169,7 @@ class Attraction extends \yii\db\ActiveRecord implements Productable
      * @param int $quoteKey
      * @return array
      */
-    public static function getHotelQuoteDataByKey(array $result, int $quoteKey): array
+    public static function getAttractionQuoteDataByKey(array $result, int $quoteKey): array
     {
         $quoteList = [];
         //$hotelData = self::getHotelDataByCode($result, $hotelCode);

@@ -5,6 +5,7 @@ namespace modules\attraction\controllers;
 use common\components\CommunicationService;
 use common\models\Notifications;
 use frontend\controllers\FController;
+use modules\attraction\AttractionModule;
 use modules\attraction\models\Attraction;
 use modules\attraction\models\AttractionQuote;
 use modules\hotel\models\Hotel;
@@ -129,30 +130,23 @@ class AttractionQuoteController extends FController
 
         $result = [];
 
-        /** @var CommunicationService $communication */
-        $communication = Yii::$app->communication;
+        $apiAttractionService = AttractionModule::getInstance()->apiService;
 
         if ($attraction) {
             try {
-                $result = $communication->getAttractionQuotes(AttractionQuoteSearchGuard::guard($attraction));
-                //$result = $this->hotelQuoteSearchService->search(HotelQuoteSearchGuard::guard($hotel));
+                $result = $apiAttractionService->getAttractionQuotes(AttractionQuoteSearchGuard::guard($attraction));
             } catch (\DomainException $e) {
                 Yii::$app->session->setFlash('error', $e->getMessage());
             }
         }
 
-        $hotelList = $result['data']['activityGroups'][0] ?? [];
-//        echo '<pre>';
-//        VarDumper::dump($hotelList['activityTiles']);die;
+        $attractionsList = $result['data']['activityGroups'][0] ?? [];
+
         $dataProvider = new ArrayDataProvider([
-            //'allModels' => [[$hotelList]],
-            'allModels' => [$hotelList['activityTiles'] ?? []],
+            'allModels' => [$attractionsList['activityTiles'] ?? []],
             'pagination' => [
                 'pageSize' => 10,
             ],
-            /*'sort' => [
-                'attributes' => ['ranking', 'name', 's2C'],
-            ],*/
         ]);
 
         return $this->renderAjax('search/_search_quotes', [
@@ -190,18 +184,12 @@ class AttractionQuoteController extends FController
 
             $result = $attraction->getSearchData();
 
-            //$hotelData = Hotel::getHotelDataByCode($result, $hotelCode);
-            $quoteData = Attraction::getHotelQuoteDataByKey($result, $quoteKey);
-
-           /* if (!$hotelData) {
-                throw new Exception('Not found quote - hotel code (' . $hotelCode . ')', 6);
-            }*/
+            $quoteData = Attraction::getAttractionQuoteDataByKey($result, $quoteKey);
 
             if (!$quoteData) {
                 throw new Exception('Not found quote - quote key (' . $quoteKey . ')', 7);
             }
 
-            //$hotelModel = HotelList::findOrCreateByData($hotelData);
 
             //$currency = $hotelData['currency'] ?? 'USD';
 
