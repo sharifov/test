@@ -202,8 +202,8 @@ class AttractionController extends FController
         $result = Yii::$app->cache->get($keyCache);
 
         if ($result === false) {
-            $apiHotelService = Yii::$app->getModule('hotel')->apiService;
-            $result = $apiHotelService->searchDestination($term, '', '', '', $destType);
+            $apiAttractionService = Yii::$app->getModule('attraction')->apiService;
+            $result = $apiAttractionService->searchDestination($term, '', '', '', $destType);
             if ($result) {
                 Yii::$app->cache->set($keyCache, $result, 600);
             }

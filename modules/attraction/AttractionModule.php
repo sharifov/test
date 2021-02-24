@@ -2,13 +2,13 @@
 
 namespace modules\attraction;
 
-use modules\flight\components\api\ApiFlightService;
+use modules\attraction\components\ApiAttractionService;
 use yii\helpers\ArrayHelper;
 
 /**
- * hotel module definition class
+ * attraction module definition class
  *
- * @property ApiFlightService $apiService The Flight module.
+ * @property ApiAttractionService $apiService The Attraction module.
  */
 class AttractionModule extends \yii\base\Module
 {

@@ -3,8 +3,8 @@
 return [
     'components' => [
         'apiService' => [
-            'class' => \modules\flight\components\api\ApiFlightService::class,
-            'url' => 'https://dev-hotels.travel-dev.com/api/v1/',
+            'class' => \modules\attraction\components\ApiAttractionService::class,
+            'url' => 'https://stage-communication-api.travel-dev.com/v1/',
             'username' => '',
             'password' => '',
         ],

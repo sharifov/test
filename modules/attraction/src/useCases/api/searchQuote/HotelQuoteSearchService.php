@@ -2,19 +2,19 @@
 
 namespace modules\attraction\src\useCases\api\searchQuote;
 
-use modules\attraction\components\ApiHotelService;
+use modules\attraction\components\ApiAttractionService;
 use modules\hotel\models\Hotel;
 
 /**
  * Class HotelQuoteSearchService
  * @package modules\hotel\src\useCases\api\searchQuote
  *
- * @property  ApiHotelService $apiService
+ * @property  ApiAttractionService $apiService
  */
 class HotelQuoteSearchService
 {
     /**
-     * @var ApiHotelService
+     * @var ApiAttractionService
      */
     private $apiService;
 

@@ -103,8 +103,9 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable
                     'atnq_attraction_id' => $attractionRequest->atn_id,
                     'atnq_hash_key' => $hashKey
                 ])->one();
+
                 $totalAmount = substr($quoteData['leadTicket']['price']['lead']['formatted'], 1);
-                //var_dump($totalAmount); die();
+
                 if (!$aQuote) {
                     $prQuote = new ProductQuote();
                     $prQuote->pq_product_id = $attractionRequest->atn_product_id;

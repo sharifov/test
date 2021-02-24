@@ -9,7 +9,6 @@
 
 namespace common\components;
 
-use modules\attraction\models\Attraction;
 use sales\helpers\setting\SettingHelper;
 use sales\model\call\useCase\conference\create\CreateCallForm;
 use Yii;
@@ -1216,33 +1215,5 @@ class CommunicationService extends Component implements CommunicationServiceInte
     public function getConferenceRecordingCall(string $conferenceSid, string $recordingSid): string
     {
         return SettingHelper::isCallRecordingSecurityEnabled() ? (Url::toRoute([$this->securityConferenceRecordingUrl, 'conferenceSid' => $conferenceSid])) : ($this->recordingUrl . $recordingSid);
-    }
-
-    public function getAttractionQuotes(Attraction $attraction): array
-    {
-        $out = ['error' => false, 'data' => []];
-
-        $data = [
-            'date_from' => $attraction->atn_date_from,
-            'date_to' => $attraction->atn_date_to,
-            'destination' => $attraction->atn_destination,
-        ];
-
-//        VarDumper::dump($data);die;
-
-        $response = $this->sendRequest('product/attraction-search', $data);
-
-        if ($response->isOk) {
-            if (isset($response->data['data'])) {
-                $out['data'] = $response->data['data']['activitySearch'];
-            } else {
-                $out['error'] = 'Not found in response array data key [data]';
-            }
-        } else {
-            $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::attractionQuotes');
-        }
-
-        return $out;
     }
 }

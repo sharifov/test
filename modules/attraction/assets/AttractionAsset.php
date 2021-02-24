@@ -1,14 +1,14 @@
 <?php
 
-namespace modules\flight\assets;
+namespace modules\attraction\assets;
 
 use yii\web\AssetBundle;
 
 /**
- * Class FlightAsset
- * @package modules\flight\assets
+ * Class AttractionAsset
+ * @package modules\attraction\assets
  */
-class FlightAsset extends AssetBundle
+class AttractionAsset extends AssetBundle
 {
     /**
      * @var string

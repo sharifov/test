@@ -9,6 +9,7 @@
 
 namespace modules\attraction\components;
 
+use modules\attraction\models\Attraction;
 use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLog;
 use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus;
 use modules\hotel\src\helpers\HotelApiDataHelper;
@@ -22,8 +23,8 @@ use yii\httpclient\Request;
 use yii\httpclient\Response;
 
 /**
- * Class ApiHotelService
- * @package modules\hotel\components
+ * Class ApiAttractionService
+ * @package modules\attraction\components
  *
  * @property string $url
  * @property string $username
@@ -31,7 +32,7 @@ use yii\httpclient\Response;
  * @property Request $request
  */
 
-class ApiHotelService extends Component
+class ApiAttractionService extends Component
 {
     public $url;
     public $username;
@@ -70,7 +71,7 @@ class ApiHotelService extends Component
             $this->request->addHeaders(['Authorization' => 'Basic ' . $authStr]);
             return true;
         } catch (\Throwable $throwable) {
-            \Yii::error(VarDumper::dumpAsString($throwable, 10), 'ApiHotelService::initRequest:Throwable');
+            \Yii::error(VarDumper::dumpAsString($throwable, 10), 'ApiAttractionService::initRequest:Throwable');
         }
 
         return false;
@@ -88,6 +89,7 @@ class ApiHotelService extends Component
     protected function sendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []): Response
     {
         $url = $this->url . $action;
+
         /* @var $this->request Client */
         $this->request->setMethod($method)
             ->setUrl($url)
@@ -112,48 +114,27 @@ class ApiHotelService extends Component
         }
     }
 
-    /**
-     * @param string $checkIn
-     * @param string $checkOut
-     * @param string $destination
-     * @param array $rooms
-     * @param array $params
-     * @return array
-     */
-    public function search(string $checkIn, string $checkOut, string $destination, array $rooms = [], array $params = []): array
+    public function getAttractionQuotes(Attraction $attraction): array
     {
         $out = ['error' => false, 'data' => []];
 
-        $data = $params;
+        $data = [
+            'date_from' => $attraction->atn_date_from,
+            'date_to' => $attraction->atn_date_to,
+            'destination' => $attraction->atn_destination,
+        ];
 
-        $data['checkIn'] = $checkIn;
-        $data['checkOut'] = $checkOut;
-        $data['destination'] = $destination;
+        $response = $this->sendRequest('product/attraction-search', $data);
 
-        if ($rooms) {
-            $data['rooms'] = $rooms;
-        }
-
-        try {
-            $response = $this->sendRequest('booking/search', $data, 'post');
-            // VarDumper::dump($response->data, 10, true); exit;
-
-            if ($response->isOk && !isset($response->data['error'])) {
-                if (isset($response->data['hotels'])) {
-                    $out['data'] = $response->data;
-                } else {
-                    $out['error'] = 'Not found in response array data key [hotels]';
-                }
-            } elseif (isset($response->data['error'])) {
-                $out['error'] = 'Not found in response array data key [hotels]';
-                \Yii::error(VarDumper::dumpAsString($response->data['error'], 10), 'Component:ApiHotelService::search');
+        if ($response->isOk) {
+            if (isset($response->data['data'])) {
+                $out['data'] = $response->data['data']['activitySearch'];
             } else {
-                $out['error'] = 'Error (' . $response->statusCode . '): ' . $response->content;
-                \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:ApiHotelService::search');
+                $out['error'] = 'Not found in response array data key [data]';
             }
-        } catch (\Throwable $throwable) {
-            \Yii::error(VarDumper::dumpAsString($throwable, 10), 'Component:ApiHotelService::throwable');
-            $out['error'] = 'ApiHotelService error: ' . $throwable->getMessage();
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::attractionQuotes');
         }
 
         return $out;
