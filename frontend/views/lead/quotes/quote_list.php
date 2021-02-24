@@ -74,22 +74,18 @@ JS;
         <ul class="nav navbar-right panel_toolbox">
             <?php if ($leadForm->mode !== $leadForm::VIEW_MODE || $is_manager) : ?>
                 <?php if ($lead->leadFlightSegmentsCount) :?>
-                    <?php if (Auth::can('/quote/ajax-search-quotes')) :?>
-                        <li>
-                            <?=Html::a('<i class="fa fa-search warning"></i> Quote Search', null, ['class' => '', 'id' => 'search-quotes-btn', 'data-url' => Url::to(['quote/ajax-search-quotes', 'leadId' => $leadForm->getLead()->id])])?>
-                        </li>
-                    <?php endif; ?>
-                    <?php if (Auth::can('/quote/get-online-quotes')) :?>
-                        <li>
-                            <?=Html::a('<i class="fa fa-search warning"></i> Quick Search', null, ['class' => '', 'id' => 'quick-search-quotes-btn', 'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id])])?>
-                        </li>
-                    <?php endif; ?>
+                <li>
+                    <?= $addAutoQuoteBtn ?>
+                </li>
+                <li>
+                    <?=Html::a('<i class="fa fa-search warning"></i> Quote Search', null, ['class' => '', 'id' => 'search-quotes-btn', 'data-url' => Url::to(['quote/ajax-search-quotes', 'leadId' => $leadForm->getLead()->id])])?>
+                </li>
                 <?php else : ?>
                 <li>
-                    <span class="badge badge-warning"><i class="fa fa-warning"></i> Warning: Flight Segments is empty!</span>
+                  <span class="badge badge-warning"><i class="fa fa-warning"></i> Warning: Flight Segments is empty!</span>
                 </li>
                 <?php endif; ?>
-            <li class="dropdown">
+              <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
                 <div class="dropdown-menu" role="menu">
                     <?php if ($lead->leadFlightSegmentsCount) :?>
@@ -103,16 +99,16 @@ JS;
                         'title' => 'Clone Quote by UID'
                     ]) ?>
                     <?= Html::a('<i class="fa fa-remove text-danger"></i> Decline Quotes', null, [
-                            'class' => 'dropdown-item text-danger',
-                            'id' => 'btn-declined-quotes',
-                        ]) ?>
+                        'class' => 'dropdown-item text-danger',
+                        'id' => 'btn-declined-quotes',
+                    ]) ?>
                 </div>
-            </li>
+              </li>
             <?php endif; ?>
 
-            <li>
-                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-            </li>
+          <li>
+            <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+          </li>
 
 
         </ul>
