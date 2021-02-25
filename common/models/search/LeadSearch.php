@@ -2061,6 +2061,14 @@ class LeadSearch extends Lead
                 'pageSize' => 30,
             ],
         ]);
+        $sort = $dataProvider->getSort();
+        $sort->attributes = array_merge($sort->attributes, [
+            'expiration_dt' => [
+                'asc' => [Lead::tableName() . '.l_expiration_dt' => SORT_ASC],
+                'desc' => [Lead::tableName() . '.l_expiration_dt' => SORT_DESC]
+            ],
+        ]);
+        $dataProvider->setSort($sort);
 
         $this->load($params);
 
@@ -2143,6 +2151,15 @@ class LeadSearch extends Lead
             'sort' => ['defaultOrder' => ['created' => SORT_DESC]],
             'pagination' => $this->limit > 0 ? false : ['pageSize' => 20],
         ]);
+
+        $sort = $dataProvider->getSort();
+        $sort->attributes = array_merge($sort->attributes, [
+            'expiration_dt' => [
+                'asc' => [Lead::tableName() . '.l_expiration_dt' => SORT_ASC],
+                'desc' => [Lead::tableName() . '.l_expiration_dt' => SORT_DESC]
+            ],
+        ]);
+        $dataProvider->setSort($sort);
 
         if (!$this->validate()) {
             $query->where('0=1');
@@ -2727,6 +2744,15 @@ class LeadSearch extends Lead
             'sort' => ['defaultOrder' => ['created' => SORT_DESC]],
             'pagination' => $this->limit > 0 ? false : ['pageSize' => 20],
         ]);
+
+        $sort = $dataProvider->getSort();
+        $sort->attributes = array_merge($sort->attributes, [
+            'expiration_dt' => [
+                'asc' => [Lead::tableName() . '.l_expiration_dt' => SORT_ASC],
+                'desc' => [Lead::tableName() . '.l_expiration_dt' => SORT_DESC]
+            ],
+        ]);
+        $dataProvider->setSort($sort);
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
