@@ -81,13 +81,13 @@ $this->params['breadcrumbs'][] = $this->title;
             ]),
         ],
         [
-            'attribute' => 'l_expiration_dt',
+            'attribute' => 'expiration_dt',
             'value' => static function (Lead $model) {
                 return Yii::$app->formatter->asExpirationDt($model->l_expiration_dt);
             },
             'filter' => DatePicker::widget([
                 'model' => $searchModel,
-                'attribute' => 'l_expiration_dt',
+                'attribute' => 'expiration_dt',
                 'clientOptions' => [
                     'autoclose' => true,
                     'format' => 'yyyy-mm-dd',

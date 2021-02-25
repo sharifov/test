@@ -289,7 +289,14 @@ $this->registerJs($js);
             'visible' => !$isAgent,
             'format' => 'raw'
         ],
-
+        [
+            'attribute' => 'l_expiration_dt',
+            'value' => static function (Lead $model) {
+                return Yii::$app->formatter->asExpirationDt($model->l_expiration_dt);
+            },
+            'format' => 'raw',
+            'visible' => $searchModel->show_fields && in_array('expiration_dt', $searchModel->show_fields, true),
+        ],
         [
             'attribute' => 'cabin',
             'value' => static function (Lead $model) {

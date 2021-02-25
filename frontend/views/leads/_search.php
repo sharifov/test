@@ -222,6 +222,26 @@ use frontend\extensions\DatePicker;
                             ])->label('Last Action From / To');
 ?>
                         </div>
+                        <div class="col-md-2">
+                            <?php echo $form->field($model, 'expiration_dt', [
+                                'options' => ['class' => 'form-group']
+                            ])->widget(DatePicker::class, [
+                                'clientOptions' => [
+                                    'autoclose' => true,
+                                    'format' => 'yyyy-mm-dd',
+                                    'clearBtn' => true,
+                                ],
+                                'options' => [
+                                    'autocomplete' => 'off',
+                                    'placeholder' => 'Choose Date',
+                                    'readonly' => '1',
+                                ],
+                                'clientEvents' => [
+                                    'clearDate' => 'function (e) {$(e.target).find("input").change();}',
+                                ],
+                            ])->label('Expiration');
+                            ?>
+                        </div>
                     </div>
                 </div>
                 <div class=" profile-bottom text-center">
