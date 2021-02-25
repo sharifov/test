@@ -15,7 +15,7 @@ $server = Yii::$app->rchat->host;
 
 <?php if ($clientChat) : ?>
     <?php // (new ClientChatIframeHelper($clientChat))->setReadOnly(true)->generateIframe(); ?>
-    <?= $this->render('partial/_client_chat_dialog', [
+    <?= $this->render('_client_chat_dialog', [
         'agentToken' => $agentToken,
         'server' => $server,
         'rid' => $clientChat->cch_rid ?? null,
