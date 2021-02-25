@@ -91,6 +91,8 @@ $server = Yii::$app->rchat->host;
     <?php echo $this->render('partial/bridge_js/_client_chat_common', [
             'clientChat' => $clientChat,
             'filter' => $filter,
+            'agentToken' => $agentToken,
+            'server' => $server,
         ]);
     ?>
 <?php endif; ?>
