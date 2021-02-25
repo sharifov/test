@@ -4,6 +4,7 @@ namespace common\models;
 
 use lajax\translatemanager\models\LanguageSource;
 use lajax\translatemanager\models\LanguageTranslate;
+use sales\helpers\CountryHelper;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -206,16 +207,11 @@ class Language extends ActiveRecord
     public static function getCountryNames(string $lang = 'en'): array
     {
         $localeNames = [];
-        $fileName = Yii::getAlias('@root/vendor') . '/stefangabos/world_countries/data/' . $lang . '/countries.php';
-        if ($lang && file_exists($fileName)) {
-            require $fileName;
-            $countries = $countries ?? [];
-            if (is_array($countries)) {
-                foreach ($countries as $country) {
-                    $code = strtoupper($country['alpha2']);
-                    $localeNames[$code] = $code . ' - ' . ($country['name']);
-                }
-            }
+        $countries = CountryHelper::getCountries($lang);
+
+        foreach ($countries as $country) {
+            $code = strtoupper($country['alpha2']);
+            $localeNames[$code] = $code . ' - ' . ($country['name']);
         }
         return $localeNames;
     }
