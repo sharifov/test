@@ -2035,7 +2035,17 @@ class LeadSearch extends Lead
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort' => ['defaultOrder' => ['l_last_action_dt' => SORT_DESC],'attributes' => ['id','updated','created','status', 'l_last_action_dt']],
+            'sort' => [
+                'defaultOrder' => ['l_last_action_dt' => SORT_DESC],
+                'attributes' => [
+                    'id',
+                    'updated',
+                    'created',
+                    'status',
+                    'l_last_action_dt',
+                    'l_expiration_dt',
+                ]
+            ],
             'pagination' => [
                 'pageSize' => 30,
             ],
