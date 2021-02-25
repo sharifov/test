@@ -38,7 +38,6 @@ class CountryHelper
         if (is_array($countries)) {
             $result = $countries;
         }
-        
         if ($additional) {
             $result = ArrayHelper::merge($result, self::ADDITIONAL_COUNTRIES);
             ArrayHelper::multisort($result, ['alpha2'], [SORT_ASC]);
