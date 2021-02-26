@@ -10,6 +10,7 @@ use modules\order\src\entities\order\events\OrderUserProfitUpdateProfitAmountEve
 use modules\order\src\entities\orderTips\OrderTips;
 use modules\order\src\entities\orderTipsUserProfit\OrderTipsUserProfit;
 use modules\order\src\entities\orderUserProfit\OrderUserProfit;
+use modules\order\src\events\OrderProcessingEvent;
 use modules\order\src\services\CreateOrderDTO;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
@@ -337,6 +338,7 @@ class Order extends ActiveRecord
     public function processing(): void
     {
         $this->or_status_id = OrderStatus::PROCESSING;
+        $this->recordEvent(new OrderProcessingEvent($this));
 //        if (!$this->isProcessing()) {
 //            OrderStatus::guard($this->or_status_id, OrderStatus::PROCESSING);
 //            foreach ($this->productQuotes as $productQuote) {

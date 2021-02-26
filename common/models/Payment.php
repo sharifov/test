@@ -25,6 +25,7 @@ use yii\db\ActiveRecord;
  * @property int|null $pay_updated_user_id
  * @property string|null $pay_created_dt
  * @property string|null $pay_updated_dt
+ * @property string|null $pay_code
  *
  * @property Employee $payCreatedUser
  * @property Currency $payCurrency
@@ -54,6 +55,7 @@ class Payment extends \yii\db\ActiveRecord
             [['pay_date', 'pay_amount'], 'required'],
             [['pay_date', 'pay_created_dt', 'pay_updated_dt'], 'safe'],
             [['pay_amount'], 'number'],
+            [['pay_code'], 'string'],
             [['pay_currency'], 'string', 'max' => 3],
             [['pay_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pay_created_user_id' => 'id']],
             [['pay_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['pay_currency' => 'cur_code']],
@@ -83,6 +85,7 @@ class Payment extends \yii\db\ActiveRecord
             'pay_updated_user_id' => 'Updated User ID',
             'pay_created_dt' => 'Created Dt',
             'pay_updated_dt' => 'Updated Dt',
+            'pay_code' => 'Code',
         ];
     }
 

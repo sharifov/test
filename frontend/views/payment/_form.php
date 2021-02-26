@@ -18,6 +18,8 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'pay_status_id')->textInput() ?>
 
+    <?= $form->field($model, 'pay_code')->textInput() ?>
+
     <?= $form->field($model, 'pay_date')->textInput() ?>
 
     <?= $form->field($model, 'pay_amount')->textInput(['maxlength' => true]) ?>

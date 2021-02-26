@@ -34,6 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'pay_method_id',
             'pay_status_id',
             //'pay_date',
+            'pay_code',
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'pay_date'

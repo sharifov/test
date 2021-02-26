@@ -20,6 +20,7 @@ class PaymentSearch extends Payment
             [['pay_id', 'pay_type_id', 'pay_method_id', 'pay_status_id', 'pay_invoice_id', 'pay_order_id', 'pay_created_user_id', 'pay_updated_user_id'], 'integer'],
             [['pay_currency'], 'safe'],
             [['pay_amount'], 'number'],
+            [['pay_code'], 'string'],
             [['pay_created_dt', 'pay_updated_dt', 'pay_date'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
@@ -64,6 +65,7 @@ class PaymentSearch extends Payment
             'pay_type_id' => $this->pay_type_id,
             'pay_method_id' => $this->pay_method_id,
             'pay_status_id' => $this->pay_status_id,
+            'pay_code' => $this->pay_code,
             'DATE(pay_date)' => $this->pay_date,
             'pay_amount' => $this->pay_amount,
             'pay_invoice_id' => $this->pay_invoice_id,
