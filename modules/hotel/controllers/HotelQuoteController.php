@@ -288,8 +288,8 @@ class HotelQuoteController extends FController
         $result = ['status' => 0, 'message' => '', 'data' => []];
 
         try {
-            $model = $this->findModel($id);
-            HotelQuoteBookGuard::guard($model);
+            $hotelQuote = $this->findModel($id);
+            HotelQuoteBookGuard::guard($hotelQuote);
 
             /** @var HotelQuoteBookService $bookService */
             $bookService = Yii::$container->get(HotelQuoteBookService::class);
@@ -297,22 +297,22 @@ class HotelQuoteController extends FController
             if ($checkRate) {
                 /** @var HotelQuoteCheckRateService $checkRateService */
                 $checkRateService = Yii::$container->get(HotelQuoteCheckRateService::class);
-                $checkResult = $checkRateService->checkRate($model);
+                $checkResult = $checkRateService->checkRate($hotelQuote);
 
                 if ($checkResult->status) {
-                    $bookService->book($model);
+                    $bookService->book($hotelQuote);
                     $result['status'] = $bookService->status;
                     $result['message'] = $bookService->message;
 
                     if ($bookService->status) {
-                        HotelQuotePdfService::processingFile($model);
+                        HotelQuotePdfService::processingFile($hotelQuote);
                     }
                 } else {
                     $result['status'] = $checkResult->status;
                     $result['message'] = $checkResult->message;
                 }
             } else {
-                $bookService->book($model);
+                $bookService->book($hotelQuote);
                 $result['status'] = $bookService->status;
                 $result['message'] = $bookService->message;
             }
