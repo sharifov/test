@@ -4,6 +4,8 @@ namespace common\models;
 
 use modules\invoice\src\entities\invoice\Invoice;
 use modules\order\src\entities\order\Order;
+use modules\order\src\payment\events\PaymentCompletedEvent;
+use sales\entities\EventTrait;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -37,6 +39,24 @@ use yii\db\ActiveRecord;
  */
 class Payment extends \yii\db\ActiveRecord
 {
+    use EventTrait;
+
+    public const STATUS_COMPLETED = 10;
+
+    public function isCompleted(): bool
+    {
+        return $this->pay_status_id === self::STATUS_COMPLETED;
+    }
+
+    public function completed(): void
+    {
+        if ($this->isCompleted()) {
+            throw new \DomainException('Payment is already completed.');
+        }
+        $this->pay_status_id = self::STATUS_COMPLETED;
+        $this->recordEvent(new PaymentCompletedEvent($this->pay_id));
+    }
+
     /**
      * {@inheritdoc}
      */

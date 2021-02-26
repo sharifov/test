@@ -4,6 +4,7 @@ namespace modules\invoice\src\entities\invoice;
 
 use common\models\Currency;
 use common\models\Employee;
+use modules\invoice\src\entities\invoice\events\InvoicePaidEvent;
 use modules\order\src\entities\order\Order;
 use sales\entities\EventTrait;
 use yii\behaviors\BlameableBehavior;
@@ -37,6 +38,20 @@ use yii\db\ActiveRecord;
 class Invoice extends ActiveRecord
 {
     use EventTrait;
+
+    public function paid(): void
+    {
+        if ($this->isPaid()) {
+            throw new \DomainException('Invoice already paid. Id: ' . $this->inv_id);
+        }
+        $this->inv_status_id = InvoiceStatus::PAID;
+        $this->recordEvent(new InvoicePaidEvent($this->inv_id, $this->inv_order_id));
+    }
+
+    public function isPaid(): bool
+    {
+        return $this->inv_status_id === InvoiceStatus::PAID;
+    }
 
     public static function tableName(): string
     {

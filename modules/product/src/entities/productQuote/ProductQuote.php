@@ -692,4 +692,9 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $optionsTotalPrice = ProductQuoteOptionsQuery::getTotalSumPriceByQuote($this->pq_id);
         return ProductQuoteHelper::roundPrice((float)$optionsTotalPrice['total_price'] + $this->pq_price);
     }
+
+    public function isBooked(): bool
+    {
+        return $this->pq_status_id === ProductQuoteStatus::BOOKED;
+    }
 }

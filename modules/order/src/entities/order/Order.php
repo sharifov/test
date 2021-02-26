@@ -6,6 +6,9 @@ use common\models\Currency;
 use common\models\Employee;
 use modules\invoice\src\entities\invoice\Invoice;
 use common\models\Lead;
+use modules\order\src\entities\order\events\OrderCompleteEvent;
+use modules\order\src\entities\order\events\OrderPaymentPaidEvent;
+use modules\order\src\entities\order\events\OrderPreparedEvent;
 use modules\order\src\entities\order\events\OrderUserProfitUpdateProfitAmountEvent;
 use modules\order\src\entities\orderTips\OrderTips;
 use modules\order\src\entities\orderTipsUserProfit\OrderTipsUserProfit;
@@ -358,5 +361,39 @@ class Order extends ActiveRecord
         OrderStatus::guard($this->or_status_id, $status);
 
         $this->or_status_id = $status;
+    }
+
+    public function prepare(\DateTimeImmutable $date): void
+    {
+        $this->setStatus(OrderStatus::PREPARED);
+        $this->recordEvent(new OrderPreparedEvent($this->or_id, $date->format('Y-m-d H:i:s.u')));
+    }
+
+    public function paymentPaid(\DateTimeImmutable $date): void
+    {
+        if ($this->isPaymentPaid()) {
+            throw new \DomainException('Order payment is already paid. Id: ' . $this->or_id);
+        }
+        $this->or_pay_status_id = OrderPayStatus::PAID;
+        $this->recordEvent(new OrderPaymentPaidEvent($this->or_id, $date->format('Y-m-d H:i:s.u')));
+    }
+
+    public function isPaymentPaid(): bool
+    {
+        return $this->or_pay_status_id === OrderPayStatus::PAID;
+    }
+
+    public function complete(\DateTimeImmutable $date): void
+    {
+        if ($this->isComplete()) {
+            throw new \DomainException('Order is already complete.');
+        }
+        $this->setStatus(OrderStatus::COMPLETE);
+        $this->recordEvent(new OrderCompleteEvent($this->or_id, $date->format('Y-m-d H:i:s.u')));
+    }
+
+    public function isComplete(): bool
+    {
+        return $this->or_status_id === OrderStatus::COMPLETE;
     }
 }

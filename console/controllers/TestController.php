@@ -9,7 +9,13 @@ use common\models\Call;
 use common\models\Notifications;
 use common\models\UserOnline;
 use Faker\Factory;
+use modules\order\src\processManager\events\FlightQuoteBookedEvent;
+use modules\order\src\processManager\events\QuoteBookedEvent;
+use modules\order\src\processManager\jobs\StartBookingJob;
+use modules\order\src\processManager\OrderProcessManager;
+use modules\order\src\processManager\OrderProcessManagerRepository;
 use modules\twilio\src\entities\conferenceLog\ConferenceLog;
+use sales\dispatchers\EventDispatcher;
 use sales\model\client\useCase\excludeInfo\ClientExcludeIpChecker;
 use sales\model\clientChat\cannedResponse\entity\ClientChatCannedResponse;
 use sales\model\clientChat\cannedResponseCategory\entity\ClientChatCannedResponseCategory;
@@ -53,7 +59,21 @@ class TestController extends Controller
 
     public function actionTest()
     {
-        VarDumper::dump(Params::default());
+        $eventDispatcher = \Yii::createObject(EventDispatcher::class);
+//        $eventDispatcher->dispatch(new FlightQuoteBookedEvent(109));
+        $eventDispatcher->dispatch(new QuoteBookedEvent(110));
+//        \Yii::$app->queue_job->push(new StartBookingJob(9));
+        die;
+        $repo = \Yii::createObject(OrderProcessManagerRepository::class);
+
+
+        $process = OrderProcessManager::create(9, new \DateTimeImmutable());
+        $repo->save($process);
+        die;
+        $process = OrderProcessManager::findOne(9);
+        $process->bookingOtherProducts(new \DateTimeImmutable());
+        $repo->save($process);
+
         die;
         $data = [
             'id' => '5c23460e-6fc1-4ea6-a368-df52ca5b293e',
