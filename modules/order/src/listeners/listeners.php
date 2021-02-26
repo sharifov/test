@@ -23,7 +23,7 @@ use modules\order\src\processManager\listeners;
 return [
     OrderRecalculateProfitAmountEvent::class => [OrderRecalculateProfitAmountListener::class],
     OrderUserProfitUpdateProfitAmountEvent::class => [OrderUserProfitUpdateProfitAmountEventListener::class],
-    OrderProcessingEvent::class => []
+    OrderProcessingEvent::class => [],
 
     //OrderProcessManagerEvents
     events\CreatedEvent::class => [
@@ -61,5 +61,4 @@ return [
         SendConfirmationEmailListener::class,
         SendOrderDetailsAndReceiptListener::class,
     ],
->>>>>>> feat: added order processing flow (SL-4925)
 ];
