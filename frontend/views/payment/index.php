@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Payment;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -32,7 +33,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'pay_id',
             'pay_type_id',
             'pay_method_id',
-            'pay_status_id',
+            [
+                'attribute' => 'pay_status_id',
+                'value' => static function (Payment $model) {
+                    return Payment::getStatusName($model->pay_status_id);
+                },
+                'filter' => Payment::getStatusList()
+            ],
             //'pay_date',
             'pay_code',
             [

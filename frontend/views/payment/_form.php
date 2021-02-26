@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Payment;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -16,7 +17,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'pay_method_id')->textInput() ?>
 
-    <?= $form->field($model, 'pay_status_id')->textInput() ?>
+    <?= $form->field($model, 'pay_status_id')->dropDownList(Payment::getStatusList(), ['prompt' => '---']) ?>
 
     <?= $form->field($model, 'pay_code')->textInput() ?>
 

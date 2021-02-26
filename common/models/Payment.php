@@ -41,7 +41,29 @@ class Payment extends \yii\db\ActiveRecord
 {
     use EventTrait;
 
+    public const STATUS_NEW = 1;
+    public const STATUS_PENDING = 2;
+    public const STATUS_IN_PROGRESS = 3;
+    public const STATUS_AUTHORIZED = 4;
+    public const STATUS_CAPTURED = 5;
+    public const STATUS_REFUNDED = 6;
+    public const STATUS_CANCELED = 7;
+    public const STATUS_FAILED = 8;
+    public const STATUS_DECLINED = 9;
     public const STATUS_COMPLETED = 10;
+
+    public const STATUS_LIST = [
+        self::STATUS_NEW => 'New',
+        self::STATUS_PENDING => 'Pending',
+        self::STATUS_IN_PROGRESS => 'In Progress',
+        self::STATUS_AUTHORIZED => 'Authorized',
+        self::STATUS_CAPTURED => 'Captured',
+        self::STATUS_REFUNDED => 'Refunded',
+        self::STATUS_CANCELED => 'Canceled',
+        self::STATUS_FAILED => 'Failed',
+        self::STATUS_DECLINED => 'Declined',
+        self::STATUS_COMPLETED => 'Completed',
+    ];
 
     public function isCompleted(): bool
     {
@@ -194,5 +216,15 @@ class Payment extends \yii\db\ActiveRecord
     public static function find()
     {
         return new \common\models\query\PaymentQuery(static::class);
+    }
+
+    public static function getStatusList(): array
+    {
+        return self::STATUS_LIST;
+    }
+
+    public static function getStatusName(?int $status): ?string
+    {
+        return self::getStatusList()[$status] ?? null;
     }
 }
