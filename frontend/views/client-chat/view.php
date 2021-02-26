@@ -45,13 +45,13 @@ $server = Yii::$app->rchat->host;
     <div class="row">
         <div class="col-md-9">
             <div id="_rc-iframe-wrapper">
-                <?php // $iframe ?: ''?>
-                <?= $this->render('partial/_client_chat_dialog', [
+                <?= $iframe ?: ''?>
+                <?php /* $this->render('partial/_client_chat_dialog', [
                     'agentToken' => $agentToken,
                     'server' => $server,
                     'rid' => $clientChat->cch_rid ?? null,
                     'readonly' => $readonly
-                ]) ?>
+                ]) */ ?>
             </div>
             <?php if (!$isClosed && $actionPermissions->canSendCannedResponse()) : ?>
                 <?php echo $this->render('partial/_canned_response', ['clientChat' => $clientChat]) ?>
