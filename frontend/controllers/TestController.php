@@ -68,9 +68,14 @@ use frontend\widgets\newWebPhone\call\socket\MuteMessage;
 use frontend\widgets\newWebPhone\sms\socket\Message;
 use frontend\widgets\notification\NotificationMessage;
 use frontend\widgets\notification\NotificationWidget;
+use kartik\mpdf\Pdf;
 use modules\email\src\helpers\MailHelper;
 use modules\email\src\Notifier;
 use modules\hotel\HotelModule;
+use modules\hotel\models\HotelList;
+use modules\hotel\models\HotelQuote;
+use modules\hotel\src\services\hotelQuote\CommunicationDataService;
+use modules\hotel\src\services\hotelQuote\HotelQuotePdfService;
 use modules\lead\src\entities\lead\LeadQuery;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteClasses;
@@ -1884,6 +1889,22 @@ class TestController extends FController
             \yii\helpers\VarDumper::dump($throwable->getMessage(), 10, true);
         }
         exit('Done');
+    }
+
+    public function actionHotelQuotePdf(int $hotel_quote_id)
+    {
+        if ($hotelQuote = HotelQuote::findOne($hotel_quote_id)) {
+            return HotelQuotePdfService::generateForBrowserOutput($hotelQuote);
+        }
+        throw new NotFoundHttpException('HotelQuote not found');
+    }
+
+    public function actionHotelQuoteFile(int $hotel_quote_id)
+    {
+        if ($hotelQuote = HotelQuote::findOne($hotel_quote_id)) {
+            return HotelQuotePdfService::processingFile($hotelQuote);
+        }
+        throw new NotFoundHttpException('HotelQuote not found');
     }
 
     public function actionZ()

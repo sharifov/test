@@ -47,6 +47,11 @@ class HotelQuoteSearch extends HotelQuote
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => [
+                'defaultOrder' => [
+                    'hq_id' => SORT_DESC,
+                ],
+            ],
         ]);
 
         $this->load($params);

@@ -1,7 +1,10 @@
 <?php
 
+use modules\hotel\models\HotelQuote;
+use yii\grid\ActionColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
@@ -26,8 +29,6 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            //['class' => 'yii\grid\SerialColumn'],
-
             'hq_id',
             'hq_hotel_id',
             'hq_hash_key',
@@ -35,9 +36,29 @@ $this->params['breadcrumbs'][] = $this->title;
             'hq_destination_name',
             'hq_hotel_name',
             'hq_hotel_list_id',
+            [
+                'attribute' => 'hq_origin_search_data',
+                'value' => static function (HotelQuote $hotelQuote) {
+                    if (!$hotelQuote->hq_origin_search_data) {
+                        return Yii::$app->formatter->nullDisplay;
+                    }
+
+                    $out = '<button class="btn btn-secondary" type="button" data-toggle="collapse" data-target="#item_' . $hotelQuote->hq_id . '" aria-expanded="false" aria-controls="item_' . $hotelQuote->hq_id . '">
+                                <i class="fas fa-eye"></i>  ' . $hotelQuote->getAttributeLabel('hq_origin_search_data') . '
+                            </button>';
+                    $out .= '<div class="collapse" id="item_' . $hotelQuote->hq_id . '">';
+                    $out .= '<small>' . VarDumper::dumpAsString($hotelQuote->hq_origin_search_data, 20, true) . '</small>';
+                    $out .= '</div>';
+                    return $out;
+                },
+                'format' => 'raw',
+                'options' => [
+                    'style' => 'width:400px'
+                ],
+            ],
             'hq_request_hash',
 
-            ['class' => 'yii\grid\ActionColumn'],
+            ['class' => ActionColumn::class],
         ],
     ]); ?>
 

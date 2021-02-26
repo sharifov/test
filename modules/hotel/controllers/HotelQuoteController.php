@@ -10,6 +10,7 @@ use modules\hotel\models\HotelQuote;
 use modules\hotel\models\search\HotelQuoteSearch;
 use modules\hotel\src\entities\hotelQuoteRoom\HotelQuoteRoomRepository;
 use modules\hotel\src\repositories\hotel\HotelRepository;
+use modules\hotel\src\services\hotelQuote\HotelQuotePdfService;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookGuard;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCancelBookGuard;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCheckRateService;
@@ -188,7 +189,8 @@ class HotelQuoteController extends FController
 
             $hotelModel = HotelList::findOrCreateByData($hotelData);
             $currency = $hotelData['currency'] ?? 'USD';
-            $hotelQuote = HotelQuote::findOrCreateByData($quoteData, $hotelModel, $hotel, $currency);
+            $resultData = ArrayHelper::merge($hotelData, $quoteData);
+            $hotelQuote = HotelQuote::findOrCreateByData($resultData, $hotelModel, $hotel, $currency);
 
             if (!$hotelQuote) {
                 throw new Exception('Not added hotel quote - hotel code (' . $hotelCode . ') room key (' . $quoteKey . ')', 8);
@@ -301,6 +303,10 @@ class HotelQuoteController extends FController
                     $bookService->book($model);
                     $result['status'] = $bookService->status;
                     $result['message'] = $bookService->message;
+
+                    if ($bookService->status) {
+                        HotelQuotePdfService::processingFile($model);
+                    }
                 } else {
                     $result['status'] = $checkResult->status;
                     $result['message'] = $checkResult->message;
