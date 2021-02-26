@@ -268,23 +268,22 @@ class OrderController extends BaseController
      * @apiParam {string}       offerGid            Offer gid
      * @apiParam {object}       productQuotes         Product Quotes
      * @apiParam {string}       productQuotes.gid     Product Quotes
-     * @apiParam {object}       flight     Flight
-     * @apiParam {object}       hotel     Hotel
+     * @apiParam {object}       requestData     Request Data for BO
+     *
      *
      * @apiParamExample {json} Request-Example:
      *
      * {
-     *      "offerGid": "gid": "04d3fe3fc74d0514ee93e208a52bcf90",
-     *      "productQuotes": [{
-     *          "gid": "6fcfc43e977dabffe6a979ebda22a281"
-     *      }],
-     *      "flight": {
-     *          "additionalOptions": []
-     *      },
-     *      "hotel": {
-     *          "additionalOptions": []
-     *      },
-     * }
+     *      "offerGid": "04d3fe3fc74d0514ee93e208a52bcf90",
+     *      "productQuotes": [
+     *          {
+     *              "gid": "6fcfc43e977dabffe6a979ebda22a281"
+     *          },
+     *          {
+     *              "gid": "6fcfc43e977dabffe6a979ebdaddfvr2"
+     *          }
+     *      ],
+     *      "requestData": {}
      */
     public function actionCreate(): \webapi\src\response\Response
     {
