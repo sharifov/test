@@ -363,11 +363,11 @@ window.loadClientChatData = function (cch_id, data, ref) {
     let chatEl = $('#_rc-' + cch_id);
     let chatIsShowInput = parseInt(chatEl.data('isShowInput'), 10);
     
-    // if (!chatEl.length) {
-    //     $('#_rc-iframe-wrapper').append(data.iframe);
-    // } else if (chatEl.length && chatIsShowInput !== data.isShowInput) {
-    //     chatEl.attr('src', data.iframeSrc);
-    // }
+    if (!chatEl.length) {
+        $('#_rc-iframe-wrapper').append(data.iframe);
+    } else if (chatEl.length && chatIsShowInput !== data.isShowInput) {
+        chatEl.attr('src', data.iframeSrc);
+    }
     
     $('#couch_note_box').html('');
     if (!isClosed) {
@@ -389,7 +389,7 @@ window.loadClientChatData = function (cch_id, data, ref) {
     
     localStorage.setItem('activeChatId', cch_id);
     
-//    chatEl.show();
+   chatEl.show();
     window.removeCcLoadFromIframe();
     
     if(data.message.length) {
@@ -400,9 +400,9 @@ window.loadClientChatData = function (cch_id, data, ref) {
 }
 
 $(document).on('click', '._cc-list-item', function () {
-    if (typeof window.initChatDialog !== 'function') {
-        return false;
-    }
+    // if (typeof window.initChatDialog !== 'function') {
+    //     return false;
+    // }
     // $('#cc-dialogs-wrapper').append(loaderIframe); 
     let iframeWrapperEl = $("#_rc-iframe-wrapper");
     iframeWrapperEl.find('#_cc-load').remove();
@@ -431,17 +431,17 @@ $(document).on('click', '._cc-list-item', function () {
     $('._cc-list-item').removeClass('_cc_active');
     $(ref).addClass('_cc_active');
     
-    // let chatEl = $('#_rc-' + cch_id);
-    // if (chatEl.length) {
-    //     chatEl.show();
-    // }
+    let chatEl = $('#_rc-' + cch_id);
+    if (chatEl.length) {
+        chatEl.show();
+    }
     
-    initChatDialog({
-        token: '$agentToken',
-        server: '$server',
-        rid: rid,
-        readonly: Boolean(readonly)
-    });
+//    initChatDialog({
+//        token: '$agentToken',
+//        server: '$server',
+//        rid: rid,
+//        readonly: Boolean(readonly)
+//    });
     
     window.refreshChatInfo(cch_id, loadClientChatData, ref, window.socketConnectionId);
     
@@ -618,13 +618,13 @@ window.removeCcLoadFromIframe = function () {
 window.getChatHistory = function (cchId) {
     $("#_rc-iframe-wrapper").find('._rc-iframe').hide();
     $("#_rc-iframe-wrapper").find('#_cc-load').remove();
-    // $("#_rc-iframe-wrapper").append(loaderIframe);
+    $("#_rc-iframe-wrapper").append(loaderIframe);
         
     $.post('{$chatHistoryUrl}', {cchId: cchId}, function(data) {
         if (data.indexOf('iframe') !== -1) {
             $('#_rc-'+cchId).remove();
         }
-        // $("#_rc-iframe-wrapper").append(data);
+        $("#_rc-iframe-wrapper").append(data);
     });
 }
 
@@ -738,11 +738,11 @@ reloadCouchNote = function(chatData) {
 
 reloadChat = function(chatData) {
     return new Promise(function(resolve, reject) {
-        // $('#_rc-iframe-wrapper').append(chatData.iframe);  
-        window.initChatDialog({
-            rid: chatData.rid,
-            readonly: chatData.readonly
-        });
+        $('#_rc-iframe-wrapper').append(chatData.iframe);  
+        // window.initChatDialog({
+        //     rid: chatData.rid,
+        //     readonly: chatData.readonly
+        // });
         resolve(chatData);                  
     }); 
 }
@@ -760,7 +760,7 @@ preReloadChat = function(cchId) {
     let iframeWrapperEl = $("#_rc-iframe-wrapper");
     iframeWrapperEl.find('._rc-iframe').hide();
     iframeWrapperEl.find('#_cc-load').remove();
-    // iframeWrapperEl.append(loaderIframe);
+    iframeWrapperEl.append(loaderIframe);
 }
 
 postReloadChat = function() {
@@ -771,7 +771,7 @@ postReloadChat = function() {
 function showAllLoaders(){
     // $('#cc-dialogs-wrapper').append(loaderIframe);
     $('#_cc_additional_info_wrapper').append(loaderIframe);
-    // $("#_rc-iframe-wrapper").append(loaderIframe);    
+    $("#_rc-iframe-wrapper").append(loaderIframe);    
 }
 
 function hideAllLoaders() {

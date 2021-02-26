@@ -14,13 +14,13 @@ $server = Yii::$app->rchat->host;
 ?>
 
 <?php if ($clientChat) : ?>
-    <?php // (new ClientChatIframeHelper($clientChat))->setReadOnly(true)->generateIframe(); ?>
-    <?= $this->render('_client_chat_dialog', [
+    <?= (new ClientChatIframeHelper($clientChat))->setReadOnly(true)->generateIframe(); ?>
+    <?php /* $this->render('_client_chat_dialog', [
         'agentToken' => $agentToken,
         'server' => $server,
         'rid' => $clientChat->cch_rid ?? null,
         'readonly' => $readonly
-    ]) ?>
+    ]) */ ?>
 
     <?php
     $js = <<<JS
