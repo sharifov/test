@@ -131,11 +131,11 @@ class Order extends ActiveRecord
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
-            'user' => [
-                'class' => BlameableBehavior::class,
-                'createdByAttribute' => 'or_created_user_id',
-                'updatedByAttribute' => 'or_updated_user_id',
-            ],
+//            'user' => [
+//                'class' => BlameableBehavior::class,
+//                'createdByAttribute' => 'or_created_user_id',
+//                'updatedByAttribute' => 'or_updated_user_id',
+//            ],
         ];
     }
 
@@ -336,16 +336,16 @@ class Order extends ActiveRecord
 
     public function processing(): void
     {
-        // ToDo: need to log status
-        if (!$this->isProcessing()) {
-            OrderStatus::guard($this->or_status_id, OrderStatus::PROCESSING);
-            foreach ($this->productQuotes as $productQuote) {
-                if (OrderStatus::guardOrder(OrderStatus::PROCESSING, $productQuote->pq_status_id)) {
-                    $this->setStatus(OrderStatus::PROCESSING);
-                    break;
-                }
-            }
-        }
+        $this->or_status_id = OrderStatus::PROCESSING;
+//        if (!$this->isProcessing()) {
+//            OrderStatus::guard($this->or_status_id, OrderStatus::PROCESSING);
+//            foreach ($this->productQuotes as $productQuote) {
+//                if (OrderStatus::guardOrder(OrderStatus::PROCESSING, $productQuote->pq_status_id)) {
+//                    $this->setStatus(OrderStatus::PROCESSING);
+//                    break;
+//                }
+//            }
+//        }
     }
 
     private function setStatus(int $status): void
