@@ -208,6 +208,7 @@ use yii\helpers\Json;
 use yii\helpers\StringHelper;
 use yii\helpers\VarDumper;
 use common\components\ReceiveEmailsJob;
+use yii\httpclient\CurlTransport;
 use yii\queue\Queue;
 use yii\web\NotFoundHttpException;
 
@@ -265,6 +266,52 @@ class TestController extends FController
         ];
 
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
+
+    public function actionHolibob()
+    {
+        $graphqlEndpoint = 'https://api.sandbox.holibob.tech/graphql';
+        $apiKey = 'a22a880b-4b40-4023-b93d-49ea130c15d4';
+        $secret = 'f787e25040b65e205b7d57992a7d9d183784811b';
+
+        $dt = new DateTime();
+        $date = $dt->format('Y-m-d\TH:i:s.') . substr($dt->format('u'), 0, 3) . 'Z';
+        //$date = '2021-02-26T06:25:38.653Z';
+
+        $query = <<<'GQL'
+            query {welcome}
+        GQL;
+
+        //$query = '{"query":"query {welcome}"}';
+
+        $string = $date . $apiKey . 'POST/graphql' . $query;
+
+        $base64HashSignature = base64_encode(hash_hmac('sha1', $string, $secret, true));
+
+        /*$hexHash = hash_hmac('sha1', utf8_encode($string), utf8_encode($secret));
+        $base64HashSignature = base64_encode(hex2bin($hexHash));*/
+
+        //var_dump($base64HashSignature); die();
+
+        $client = new \GuzzleHttp\Client();
+
+        $response = $client->request('POST', $graphqlEndpoint, [
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'x-api-key' => $apiKey,
+                'x-holibob-date' => $date,
+                'x-holibob-signature' => $base64HashSignature,
+            ],
+            'json' => [
+                'query' => $query
+            ],
+        ]);
+
+        $json = $response->getBody()->getContents();
+        $body = json_decode($json);
+        $data = $body->data;
+        print_r($data);
     }
 
     public function actionTest()
