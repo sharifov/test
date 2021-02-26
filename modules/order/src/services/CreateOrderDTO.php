@@ -13,10 +13,13 @@ class CreateOrderDTO
 
     public $leadId;
 
-    public function __construct(int $leadId)
+    public $requestData;
+
+    public function __construct(int $leadId, array $requestData = [])
     {
         $this->payStatus = OrderPayStatus::NOT_PAID;
         $this->status = OrderStatus::PENDING;
         $this->leadId = $leadId;
+        $this->requestData = $requestData;
     }
 }

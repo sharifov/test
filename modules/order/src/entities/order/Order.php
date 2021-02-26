@@ -47,6 +47,7 @@ use yii\db\ActiveRecord;
  * @property string|null $or_created_dt
  * @property string|null $or_updated_dt
  * @property float|null $or_profit_amount
+ * @property string|null $or_request_data
  *
  * @property Currency $orClientCurrency
  * @property Invoice[] $invoices
@@ -117,6 +118,7 @@ class Order extends ActiveRecord
             'or_created_dt' => 'Created Dt',
             'or_updated_dt' => 'Updated Dt',
             'or_profit_amount' => 'Profit amount',
+            'ot_request_data' => 'Request Data'
         ];
     }
 
@@ -158,6 +160,7 @@ class Order extends ActiveRecord
             $this->or_name = $this->generateName();
         }
         $this->updateOrderTotalByCurrency();
+        $this->or_request_data = $dto->requestData;
 
         return $this;
     }

@@ -1,6 +1,9 @@
 <?php
 
+use kdn\yii2\JsonEditor;
 use yii\helpers\Html;
+use yii\helpers\Json;
+use yii\helpers\VarDumper;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
@@ -26,30 +29,58 @@ $this->params['breadcrumbs'][] = $this->title;
         ]) ?>
     </p>
 
-    <?= DetailView::widget([
-        'model' => $model,
-        'attributes' => [
-            'or_id',
-            'or_gid',
-            'or_uid',
-            'or_name',
-            'orLead:lead',
-            'or_description:ntext',
-            'or_status_id:orderStatus',
-            'or_pay_status_id:orderPayStatus',
-            'or_app_total',
-            'or_app_markup',
-            'or_agent_markup',
-            'or_client_total',
-            'or_client_currency',
-            'or_client_currency_rate',
-            'or_profit_amount',
-            'orOwnerUser:userName',
-            'orCreatedUser:userName',
-            'orUpdatedUser:userName',
-            'or_created_dt:byUserDateTime',
-            'or_updated_dt:byUserDateTime',
-        ],
-    ]) ?>
+    <div class="row">
+      <div class="col-md-6">
+        <?= DetailView::widget([
+            'model' => $model,
+            'attributes' => [
+                'or_id',
+                'or_gid',
+                'or_uid',
+                'or_name',
+                'orLead:lead',
+                'or_description:ntext',
+                'or_status_id:orderStatus',
+                'or_pay_status_id:orderPayStatus',
+                'or_app_total',
+                'or_app_markup',
+                'or_agent_markup',
+                'or_client_total',
+                'or_client_currency',
+                'or_client_currency_rate',
+                'or_profit_amount',
+                'orOwnerUser:userName',
+                'orCreatedUser:userName',
+                'orUpdatedUser:userName',
+                'or_created_dt:byUserDateTime',
+                'or_updated_dt:byUserDateTime',
+            ],
+        ]) ?>
+      </div>
+      <div class="col-md-6">
+        <h4><?=$model->getAttributeLabel('or_request_data')?></h4>
+        <pre>
+            <?php
+
+            try {
+                echo JsonEditor::widget(
+                    [
+                        'clientOptions' => [
+                            'modes' => ['code', 'view'], //'text',
+                            'mode' => 'view'
+                        ],
+                        //'collapseAll' => ['view'],
+                        'expandAll' => ['tree', 'form'],
+                        'value' => Json::encode($model->or_request_data)
+                    ]
+                );
+            } catch (Exception $exception) {
+                echo VarDumper::dumpAsString(($model->or_request_data), 10, true);
+            }
+
+            ?>
+                </pre>
+      </div>
+    </div>
 
 </div>

@@ -308,7 +308,7 @@ class OrderController extends BaseController
         try {
             $offer = $this->offerRepository->findByGid($form->offerGid);
 
-            $order = $this->orderManageService->createOrder((new CreateOrderDTO($offer->of_lead_id)), $form->productQuotes);
+            $order = $this->orderManageService->createOrder((new CreateOrderDTO($offer->of_lead_id, $request->post())), $form->productQuotes);
         } catch (\Throwable $e) {
             return new ErrorResponse(
                 new StatusFailedMessage(),
