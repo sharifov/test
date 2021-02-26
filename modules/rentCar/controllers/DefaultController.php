@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\hotel\controllers;
+namespace modules\rentCar\controllers;
 
 use frontend\controllers\FController;
 use modules\rentCar\RentCarModule;
