@@ -2,18 +2,18 @@
 
 namespace modules\order\src\processManager\listeners;
 
-use modules\order\src\processManager\events\QuoteBookedEvent;
 use modules\order\src\processManager\jobs\ProcessManagerBookedJob;
 use modules\order\src\processManager\OrderProcessManager;
 use modules\order\src\processManager\OrderProcessManagerRepository;
+use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
 use modules\product\src\entities\productQuote\ProductQuote;
 
 /**
- * Class AfterBookedQuoteListener
+ * Class AfterBookedQuoteOrderProcessListener
  *
  * @property OrderProcessManagerRepository $orderProcessManagerRepository
  */
-class AfterBookedQuoteListener
+class AfterBookedQuoteOrderProcessListener
 {
     private OrderProcessManagerRepository $orderProcessManagerRepository;
 
@@ -22,32 +22,36 @@ class AfterBookedQuoteListener
         $this->orderProcessManagerRepository = $orderProcessManagerRepository;
     }
 
-    public function handle(QuoteBookedEvent $event): void
+    public function handle(ProductQuoteBookedEvent $event): void
     {
-        $quote = ProductQuote::findOne($event->quoteId);
+        $quote = ProductQuote::findOne($event->productQuoteId);
 
         if (!$quote) {
             \Yii::error([
                 'message' => 'Not found Quote',
-                'quoteId' => $event->quoteId,
-            ], 'OrderProcessManager:AfterBookedQuoteListener');
+                'quoteId' => $event->productQuoteId,
+            ], 'OrderProcessManager:AfterBookedQuoteOrderProcessListener');
             return;
         }
 
         if (!$quote->pq_order_id) {
             \Yii::error([
                 'message' => 'Quote has not relation with Order',
-                'quoteId' => $event->quoteId,
-            ], 'OrderProcessManager:AfterBookedQuoteListener');
+                'quoteId' => $event->productQuoteId,
+            ], 'OrderProcessManager:AfterBookedQuoteOrderProcessListener');
+            return;
+        }
+
+        if ($quote->isFlight()) {
             return;
         }
 
         $process = OrderProcessManager::findOne($quote->pq_order_id);
         if (!$process) {
-            \Yii::error([
-                'message' => 'Not found Order Process Manager',
-                'orderId' => $quote->pq_order_id,
-            ], 'OrderProcessManager:AfterBookedQuoteListener');
+//            \Yii::info([
+//                'message' => 'Not found Order Process Manager',
+//                'orderId' => $quote->pq_order_id,
+//            ], 'info\OrderProcessManager:AfterBookedQuoteListener');
             return;
         }
 
@@ -56,7 +60,7 @@ class AfterBookedQuoteListener
                 'message' => 'Order Process Manager is not in Other Products Booking. Status Id: ' . $process->opm_status,
                 'quoteId' => $quote->pq_id,
                 'orderId' => $quote->pq_order_id,
-            ], 'OrderProcessManager:AfterBookedQuoteListener');
+            ], 'OrderProcessManager:AfterBookedQuoteOrderProcessListener');
             return;
         }
 
@@ -67,7 +71,7 @@ class AfterBookedQuoteListener
                 'message' => 'Not found Order',
                 'quoteId' => $quote->pq_id,
                 'orderId' => $quote->pq_order_id,
-            ], 'OrderProcessManager:AfterBookedQuoteListener');
+            ], 'OrderProcessManager:AfterBookedQuoteOrderProcessListener');
             return;
         }
 
@@ -76,9 +80,9 @@ class AfterBookedQuoteListener
         if (!$quotes) {
             \Yii::error([
                 'message' => 'Not found Quotes for Order',
-                'quoteId' => $event->quoteId,
+                'quoteId' => $event->productQuoteId,
                 'orderId' => $order->or_id,
-            ], 'OrderProcessManager:AfterBookedQuoteListener');
+            ], 'OrderProcessManager:AfterBookedQuoteOrderProcessListener');
             return;
         }
 

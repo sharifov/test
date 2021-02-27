@@ -1,5 +1,8 @@
 <?php
 
+use modules\order\src\listeners\order\OrderPrepareListener;
+use modules\order\src\processManager\listeners\AfterBookedFlightOrderProcessListener;
+use modules\order\src\processManager\listeners\AfterBookedQuoteOrderProcessListener;
 use modules\product\src\entities\product\events\ProductClientBudgetChangedEvent;
 use modules\product\src\entities\product\events\ProductMarketPriceChangedEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteCloneCreatedEvent;
@@ -28,7 +31,12 @@ return [
     ProductQuoteCloneCreatedEvent::class => [ProductQuoteChangeStatusLogListener::class],
     ProductQuoteOptionCloneCreatedEvent::class => [],
     ProductQuoteInProgressEvent::class => [ProductQuoteInProgressEventListener::class],
-    ProductQuoteBookedEvent::class => [ProductQuoteBookedEventListener::class],
+    ProductQuoteBookedEvent::class => [
+        ProductQuoteBookedEventListener::class,
+        AfterBookedFlightOrderProcessListener::class,
+        AfterBookedQuoteOrderProcessListener::class,
+        OrderPrepareListener::class,
+    ],
     ProductQuoteErrorEvent::class => [ProductQuoteErrorEventListener::class],
     ProductQuoteCanceledEvent::class => [ProductQuoteCanceledEventListener::class],
     ProductQuoteDeclinedEvent::class => [ProductQuoteDeclinedEventListener::class],

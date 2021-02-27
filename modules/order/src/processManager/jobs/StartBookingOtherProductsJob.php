@@ -43,8 +43,11 @@ class StartBookingOtherProductsJob implements JobInterface
 
         $createdAnyJob = false;
         foreach ($quotes as $quote) {
+            if ($quote->isBooked()) {
+                continue;
+            }
             if ($quote->pqProduct->isHotel()) {
-                \Yii::$app->queue_job->push(new BookingHotelJob($quote->pq_id));
+                \Yii::$app->queue_job->push(new BookingHotelJob($quote->childQuote->getId()));
                 $createdAnyJob = true;
             }
         }
