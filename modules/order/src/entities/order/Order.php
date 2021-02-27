@@ -372,7 +372,8 @@ class Order extends ActiveRecord
     {
         $startStatus = $this->or_status_id;
         $this->setStatus(OrderStatus::PREPARED);
-        $this->recordEvent(new OrderPreparedEvent(
+        $this->recordEvent(
+            new OrderPreparedEvent(
                 $this->or_id,
                 $startStatus,
                 $this->or_status_id,
@@ -405,7 +406,8 @@ class Order extends ActiveRecord
         }
         $startStatus = $this->or_status_id;
         $this->setStatus(OrderStatus::COMPLETE);
-        $this->recordEvent(new OrderCompletedEvent(
+        $this->recordEvent(
+            new OrderCompletedEvent(
                 $this->or_id,
                 $startStatus,
                 $this->or_status_id,
@@ -429,7 +431,8 @@ class Order extends ActiveRecord
         }
         $startStatus = $this->or_status_id;
         $this->setStatus(OrderStatus::CANCELED);
-        $this->recordEvent(new OrderCanceledEvent(
+        $this->recordEvent(
+            new OrderCanceledEvent(
                 $this->or_id,
                 $startStatus,
                 $this->or_status_id,

@@ -18,17 +18,19 @@ class OrderChangeStatusLogListener
     public function handle(OrderChangeStatusInterface $event): void
     {
         try {
-            $this->logger->log(new CreateDto(
-                $event->getId(),
-                $event->getStartStatus(),
-                $event->getEndStatus(),
-                $event->getDescription(),
-                $event->getActionId(),
-                $event->getOwnerId(),
-                $event->getCreatorId()
-            ));
+            $this->logger->log(
+                new CreateDto(
+                    $event->getId(),
+                    $event->getStartStatus(),
+                    $event->getEndStatus(),
+                    $event->getDescription(),
+                    $event->getActionId(),
+                    $event->getOwnerId(),
+                    $event->getCreatorId()
+                )
+            );
         } catch (\Throwable $e) {
-           \Yii::error($e, 'Listeners:OrderChangeStatusLogListener');
+            \Yii::error($e, 'Listeners:OrderChangeStatusLogListener');
         }
     }
 }
