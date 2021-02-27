@@ -17,7 +17,7 @@ use yii\widgets\Pjax;
 
 $addAutoQuoteBtn = '';
 if (FlightQuoteGuard::canAutoSelectQuotes(Auth::user(), $lead)) {
-    $addAutoQuoteBtn = Html::a('<i class="fa fa-plus green"></i> Auto Select Quotes', null, ['class' => 'auto_add_quotes_btn', 'data-lead-id' => $lead->id]);
+    $addAutoQuoteBtn = Html::a('<i class="fa fa-plus green"></i> Auto Select Quotes', null, ['class' => 'auto_add_quotes_btn', 'data-lead-id' => $lead->id, 'title' => 'Auto-select best options', 'data-toggle' => 'tooltip']);
     $addAutoQuoteUrl = Url::toRoute('/quote/auto-add-quotes');
     $js = <<<JS
     let leadQuoteAutoAddAjax = false;
