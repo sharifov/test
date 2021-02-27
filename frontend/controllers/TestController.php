@@ -291,7 +291,6 @@ class TestController extends FController
 
         /*$hexHash = hash_hmac('sha1', utf8_encode($string), utf8_encode($secret));
         $base64HashSignature = base64_encode(hex2bin($hexHash));*/
-
         //var_dump($base64HashSignature); die();
 
         $client = new \GuzzleHttp\Client();
@@ -312,6 +311,42 @@ class TestController extends FController
         $body = json_decode($json);
         $data = $body->data;
         print_r($data);
+    }
+
+    public function actionHolibob2()
+    {
+        $query = '{"query":"query {welcome}"}';
+
+        $graphqlEndpoint = 'https://api.sandbox.holibob.tech/graphql';
+        $apiKey = 'a22a880b-4b40-4023-b93d-49ea130c15d4';
+        $secret = 'f787e25040b65e205b7d57992a7d9d183784811b';
+
+        $dt = new DateTime();
+        $date = $dt->format('Y-m-d\TH:i:s.') . substr($dt->format('u'), 0, 3) . 'Z';
+
+        $string = $date . $apiKey . 'POST/graphql' . $query;
+        $base64HashSignature = base64_encode(hash_hmac('sha1', $string, $secret, true));
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, $graphqlEndpoint);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $query);
+        curl_setopt($ch, CURLOPT_POST, 1);
+
+        $headers = array();
+        //$headers[] = "Content-Type: application/json";
+        $headers[] = "x-api-key: $apiKey";
+        $headers[] = "x-holibob-date: $date";
+        $headers[] = "x-holibob-signature: $base64HashSignature";
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        $result = curl_exec($ch);
+        print_r($result);
+        if (curl_errno($ch)) {
+            echo 'Error:' . curl_error($ch);
+        }
+        curl_close($ch);
     }
 
     public function actionTest()
