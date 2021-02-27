@@ -205,4 +205,13 @@ class HotelQuoteRoom extends ActiveRecord implements Serializable
         }
         return $rateComments;
     }
+
+    /**
+     * @param int $hotelQuoteId
+     * @return HotelQuoteRoom[]
+     */
+    public static function getRoomsByQuoteId(int $hotelQuoteId): array
+    {
+        return self::find()->where(['hqr_hotel_quote_id' => $hotelQuoteId])->all();
+    }
 }
