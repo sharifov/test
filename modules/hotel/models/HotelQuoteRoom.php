@@ -106,7 +106,7 @@ class HotelQuoteRoom extends ActiveRecord implements Serializable
 
     public static function cleanRateComments(string $text): string
     {
-        return StringHelper::truncate(CleanTextHelper::cleanText($text), 999, '');
+        return StringHelper::truncate(stripslashes(strip_tags($text)), 999, '');
     }
 
     /**
