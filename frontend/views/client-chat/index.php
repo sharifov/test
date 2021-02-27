@@ -42,7 +42,7 @@ ClientChatAsset::register($this);
 
 $userRcAuthToken = UserClientChatDataService::getCurrentAuthToken() ?? '';
 
-$readonly = (int)ClientChatHelper::isDialogReadOnly($clientChat, Auth::user());
+$readonly = (int)!ClientChatHelper::isShowInput($clientChat, Auth::user());
 $agentToken = \sales\helpers\clientChat\ClientChatDialogHelper::getAgentToken(Auth::user());
 $server = Yii::$app->rchat->host;
 ?>
@@ -106,13 +106,13 @@ $server = Yii::$app->rchat->host;
 
     <div class="col-md-6">
         <div id="_rc-iframe-wrapper">
-            <?php // $iframeData ?: '' ?>
-            <?= $this->render('partial/_client_chat_dialog', [
+            <?= $iframeData ?: '' ?>
+            <?php /* $this->render('partial/_client_chat_dialog', [
                 'agentToken' => $agentToken,
                 'server' => $server,
                 'rid' => $clientChat->cch_rid ?? null,
                 'readonly' => $readonly
-            ]) ?>
+            ]) */ ?>
         </div>
         <?php if ($actionPermissions->canSendCannedResponse()) : ?>
             <?php echo $this->render('partial/_canned_response', ['clientChat' => $clientChat]) ?>

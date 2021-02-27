@@ -1,12 +1,14 @@
 <?php
 
 use common\models\Currency;
+use kdn\yii2\JsonEditor;
 use modules\order\src\entities\order\OrderPayStatus;
 use modules\order\src\entities\order\OrderStatus;
 use sales\access\ListsAccess;
 use sales\auth\Auth;
 use sales\widgets\DateTimePicker;
 use yii\helpers\Html;
+use yii\helpers\Json;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
@@ -62,6 +64,32 @@ $list = (new ListsAccess(Auth::id()));
         </div>
 
         <?php ActiveForm::end(); ?>
+    </div>
+
+    <div class="col-md-6">
+        <?php
+
+        try {
+            echo \kdn\yii2\JsonEditor::widget(
+                [
+                    'clientOptions' => [
+                        'modes' => ['view'], // all available modes 'code', 'form', 'preview', 'text', 'tree', 'view'
+                        'mode' => 'view', // default mode
+                    ],
+                    //'collapseAll' => ['view'], // collapse all fields in "view" mode
+                    'containerOptions' => ['class' => 'well'], // HTML options for JSON editor container tag
+                    'expandAll' => ['view'], // expand all fields in "tree" and "form" modes
+                    'name' => 'editor', // hidden input name
+                    'options' => ['id' => 'data'], // HTML options for hidden input
+                    //'value' => '{"foo": "bar"}', // JSON which should be shown in editor
+                    'decodedValue' => $model->or_request_data
+                ]
+            );
+        } catch (Exception $exception) {
+            echo Html::textarea($model->formName() . '[or_request_data]', Json::encode($model->or_request_data), ['class' => 'form-control']);
+        }
+
+        ?>
     </div>
 
 </div>

@@ -1,5 +1,7 @@
 <?php
 
+use modules\hotel\HotelModule;
+
 $params = array_merge(
     require __DIR__ . '/../../common/config/params.php',
     require __DIR__ . '/../../common/config/params-local.php',
@@ -156,6 +158,9 @@ return [
             'userIdColumn' => 'id',
             'userClass' => '\common\models\Employee',
             'userFieldDisplay' => 'username', // for gridview, detail vew
+        ],
+        'hotel' => [
+            'class' => HotelModule::class,
         ],
     ],
     'params' => $params,

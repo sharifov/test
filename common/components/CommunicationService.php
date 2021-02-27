@@ -1216,4 +1216,27 @@ class CommunicationService extends Component implements CommunicationServiceInte
     {
         return SettingHelper::isCallRecordingSecurityEnabled() ? (Url::toRoute([$this->securityConferenceRecordingUrl, 'conferenceSid' => $conferenceSid])) : ($this->recordingUrl . $recordingSid);
     }
+
+    public function getContent(string $key, array $contentData = [], string $languageId = 'en-US'): array
+    {
+        $out = ['error' => false, 'content' => ''];
+        $data = [
+            'key' => $key,
+            'content_data' => $contentData,
+            'language_id' => $languageId,
+        ];
+        $response = $this->sendRequest('content/get', $data);
+
+        if ($response->isOk) {
+            if (isset($response->data['data']['content'])) {
+                $out['content'] = $response->data['data']['content'];
+            } else {
+                $out['error'] = 'Not found in response array data key [data][content]';
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::mailPreview');
+        }
+        return $out;
+    }
 }

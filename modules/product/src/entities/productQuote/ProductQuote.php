@@ -173,11 +173,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
-            'user' => [
-                'class' => BlameableBehavior::class,
-                'createdByAttribute' => 'pq_created_user_id', //'pq_owner_user_id',
-                'updatedByAttribute' => 'pq_updated_user_id',
-            ],
+//            'user' => [
+//                'class' => BlameableBehavior::class,
+//                'createdByAttribute' => 'pq_created_user_id', //'pq_owner_user_id',
+//                'updatedByAttribute' => 'pq_updated_user_id',
+//            ],
         ];
     }
 
@@ -315,6 +315,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public static function find(): Scopes
     {
         return new Scopes(static::class);
+    }
+
+    public static function findByGid(string $gid)
+    {
+        return self::findOne(['pq_gid' => $gid]);
     }
 
     /**
@@ -686,5 +691,15 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     {
         $optionsTotalPrice = ProductQuoteOptionsQuery::getTotalSumPriceByQuote($this->pq_id);
         return ProductQuoteHelper::roundPrice((float)$optionsTotalPrice['total_price'] + $this->pq_price);
+    }
+
+    public function isBooked(): bool
+    {
+        return $this->pq_status_id === ProductQuoteStatus::BOOKED;
+    }
+
+    public function isDeletable(): bool
+    {
+        return ProductQuoteStatus::isDeletable($this->pq_status_id);
     }
 }

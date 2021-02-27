@@ -9,7 +9,18 @@ use common\models\Call;
 use common\models\Notifications;
 use common\models\UserOnline;
 use Faker\Factory;
+use modules\hotel\models\HotelQuote;
+use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookService;
+use modules\order\src\processManager\events\FlightQuoteBookedEvent;
+use modules\order\src\processManager\events\QuoteBookedEvent;
+use modules\order\src\processManager\jobs\BookingHotelJob;
+use modules\order\src\processManager\jobs\StartBookingJob;
+use modules\order\src\processManager\OrderProcessManager;
+use modules\order\src\processManager\OrderProcessManagerRepository;
+use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
+use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\twilio\src\entities\conferenceLog\ConferenceLog;
+use sales\dispatchers\EventDispatcher;
 use sales\model\client\useCase\excludeInfo\ClientExcludeIpChecker;
 use sales\model\clientChat\cannedResponse\entity\ClientChatCannedResponse;
 use sales\model\clientChat\cannedResponseCategory\entity\ClientChatCannedResponseCategory;
@@ -53,7 +64,37 @@ class TestController extends Controller
 
     public function actionTest()
     {
-        VarDumper::dump(Params::default());
+
+        die;
+//        $hotelQuote = HotelQuote::findOne(31);
+//        $bookService = \Yii::$container->get(HotelQuoteBookService::class);
+//        $bookService->book($hotelQuote);
+//        die;
+        \Yii::$app->queue_job->push(new BookingHotelJob(34));
+        die;
+        $productQuoteRepository = \Yii::createObject(ProductQuoteRepository::class);
+        $quote = $productQuoteRepository->find(109);
+        $quote->booked();
+        $productQuoteRepository->save($quote);
+        die;
+
+
+//        $eventDispatcher = \Yii::createObject(EventDispatcher::class);
+//        $eventDispatcher->dispatch(new ProductQuoteBookedEvent(109, null, null, null, null));
+//        $eventDispatcher->dispatch(new QuoteBookedEvent(110));
+//        \Yii::$app->queue_job->push(new StartBookingJob(9));
+//        die;
+        $repo = \Yii::createObject(OrderProcessManagerRepository::class);
+
+
+
+        $process = OrderProcessManager::create(10, new \DateTimeImmutable());
+        $repo->save($process);
+        die;
+        $process = OrderProcessManager::findOne(9);
+        $process->bookingOtherProducts(new \DateTimeImmutable());
+        $repo->save($process);
+
         die;
         $data = [
             'id' => '5c23460e-6fc1-4ea6-a368-df52ca5b293e',

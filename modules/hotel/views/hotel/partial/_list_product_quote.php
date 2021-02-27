@@ -228,7 +228,7 @@ JS;
                             ]
                         ) ?>
                     <?php endif; ?>
-                    <?php if ($model->isBooking()) : ?>
+                    <?php if ($model->isBooked()) : ?>
                         <?= Html::a(
                             '<i class="fa fa-share-square"></i> Cancel Book',
                             null,
@@ -258,13 +258,15 @@ JS;
                         'data-gid' => $model->hqProductQuote->pq_gid,
                     ]) ?>
 
-                    <div class="dropdown-divider"></div>
-                    <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [
-                        'class' => 'dropdown-item text-danger btn-delete-product-quote',
-                        'data-product-quote-id' => $model->hq_product_quote_id,
-                        'data-hotel-quote-id' => $model->hq_id,
-                        'data-product-id' => $model->hqProductQuote->pq_product_id,
-                    ]) ?>
+                    <?php if ($model->hqProductQuote->isDeletable()) : ?>
+                        <div class="dropdown-divider"></div>
+                        <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [
+                            'class' => 'dropdown-item text-danger btn-delete-product-quote',
+                            'data-product-quote-id' => $model->hq_product_quote_id,
+                            'data-hotel-quote-id' => $model->hq_id,
+                            'data-product-id' => $model->hqProductQuote->pq_product_id,
+                        ]) ?>
+                    <?php endif; ?>
                 </div>
             </li>
         </ul>

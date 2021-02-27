@@ -22,6 +22,10 @@ use yii\helpers\Html;
 /* @var bool $isClosed */
 
 ClientChatAsset::register($this);
+
+$readonly = (int)ClientChatHelper::isDialogReadOnly($clientChat, Auth::user());
+$agentToken = \sales\helpers\clientChat\ClientChatDialogHelper::getAgentToken(Auth::user());
+$server = Yii::$app->rchat->host;
 ?>
 
 <?php if (empty($userRcAuthToken)) : ?>
@@ -41,7 +45,13 @@ ClientChatAsset::register($this);
     <div class="row">
         <div class="col-md-9">
             <div id="_rc-iframe-wrapper">
-                <?= $iframe ?: '' ?>
+                <?= $iframe ?: ''?>
+                <?php /* $this->render('partial/_client_chat_dialog', [
+                    'agentToken' => $agentToken,
+                    'server' => $server,
+                    'rid' => $clientChat->cch_rid ?? null,
+                    'readonly' => $readonly
+                ]) */ ?>
             </div>
             <?php if (!$isClosed && $actionPermissions->canSendCannedResponse()) : ?>
                 <?php echo $this->render('partial/_canned_response', ['clientChat' => $clientChat]) ?>
@@ -81,6 +91,8 @@ ClientChatAsset::register($this);
     <?php echo $this->render('partial/bridge_js/_client_chat_common', [
             'clientChat' => $clientChat,
             'filter' => $filter,
+            'agentToken' => $agentToken,
+            'server' => $server,
         ]);
     ?>
 <?php endif; ?>

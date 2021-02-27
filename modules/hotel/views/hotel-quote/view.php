@@ -1,6 +1,8 @@
 <?php
 
+use modules\hotel\models\HotelQuote;
 use yii\helpers\Html;
+use yii\helpers\VarDumper;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
@@ -25,19 +27,59 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ]) ?>
     </p>
+    <div class="row">
+        <div class="col-lg-6">
+            <?= DetailView::widget([
+                'model' => $model,
+                'attributes' => [
+                    'hq_id',
+                    'hq_hotel_id',
+                    'hq_hash_key',
+                    'hq_product_quote_id',
+                    'hq_destination_name',
+                    'hq_hotel_name',
+                    'hq_hotel_list_id',
+                    'hq_request_hash',
+                    //hq_json_booking',
+                ],
+            ]) ?>
+        </div>
+        <div class="col-lg-6">
+             <?= DetailView::widget([
+                'model' => $model,
+                'attributes' => [
+                    [
+                        'attribute' => 'hq_origin_search_data',
+                        'value' => function (HotelQuote $hotelQuote) {
+                            if (!$hotelQuote->hq_origin_search_data) {
+                                return Yii::$app->formatter->nullDisplay;
+                            }
+                            return VarDumper::dumpAsString($hotelQuote->hq_origin_search_data, 20, true);
+                        },
+                        'format' => 'raw',
+                    ],
+                ],
+            ]) ?>
+        </div>
+    </div>
 
-    <?= DetailView::widget([
-        'model' => $model,
-        'attributes' => [
-            'hq_id',
-            'hq_hotel_id',
-            'hq_hash_key',
-            'hq_product_quote_id',
-            'hq_destination_name',
-            'hq_hotel_name',
-            'hq_hotel_list_id',
-            'hq_request_hash',
-        ],
-    ]) ?>
-
+    <div class="row">
+        <div class="col-lg-6">
+             <?= DetailView::widget([
+                'model' => $model,
+                'attributes' => [
+                    [
+                        'attribute' => 'hq_json_booking',
+                        'value' => function (HotelQuote $hotelQuote) {
+                            if (!$hotelQuote->hq_json_booking) {
+                                return Yii::$app->formatter->nullDisplay;
+                            }
+                            return VarDumper::dumpAsString($hotelQuote->hq_json_booking, 20, true);
+                        },
+                        'format' => 'raw',
+                    ],
+                ],
+            ]) ?>
+        </div>
+    </div>
 </div>

@@ -363,4 +363,31 @@ class Product extends \yii\db\ActiveRecord implements Serializable
     {
         return ($this->prType && $this->prType->pt_icon_class) ? $this->prType->pt_icon_class : '';
     }
+
+    public function isDeletable(): bool
+    {
+        if (!$this->productQuotes) {
+            return true;
+        }
+        foreach ($this->productQuotes as $productQuote) {
+            if (!$productQuote->isDeletable()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public function getNotDeletableProductQuotes(): array
+    {
+        $result = [];
+        if (!$this->productQuotes) {
+            return $result;
+        }
+        foreach ($this->productQuotes as $productQuote) {
+            if (!$productQuote->isDeletable()) {
+                $result[$productQuote->pq_id] = $productQuote->pq_gid;
+            }
+        }
+        return $result;
+    }
 }

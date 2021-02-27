@@ -286,7 +286,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                                 }
 
                                 $createByApiDto = new CreateByApiDto($path, $fileSystem);
-                                $fileStorage = FileStorage::createByApi($createByApiDto);
+                                $fileStorage = FileStorage::createByEmail($createByApiDto);
                                 $fileStorageRepository->save($fileStorage);
 
                                 $emailDataAttachments['files'][] = [

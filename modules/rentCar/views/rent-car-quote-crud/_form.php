@@ -20,7 +20,6 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'rcq_hash_key')->textInput(['maxlength' => true]) ?>
 
-        <?= $form->field($model, 'rcq_json_response')->textInput() ?>
 
         <?= $form->field($model, 'rcq_model_name')->textInput(['maxlength' => true]) ?>
 
@@ -38,7 +37,6 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'rcq_doors')->textInput(['maxlength' => true]) ?>
 
-        <?= $form->field($model, 'rcq_options')->textInput() ?>
 
         <?= $form->field($model, 'rcq_days')->textInput() ?>
 
@@ -46,7 +44,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'rcq_currency')->textInput(['maxlength' => true]) ?>
 
-        <?= $form->field($model, 'rcq_advantages')->textInput() ?>
+
 
         <?= $form->field($model, 'rcq_pick_up_location')->textInput(['maxlength' => true]) ?>
 

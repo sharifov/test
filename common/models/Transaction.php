@@ -24,6 +24,16 @@ use Yii;
  */
 class Transaction extends \yii\db\ActiveRecord
 {
+    public const TYPE_AUTHORIZATION = 1;
+    public const TYPE_CAPTURE = 2;
+    public const TYPE_REFUND = 3;
+
+    public const TYPE_LIST = [
+        self::TYPE_AUTHORIZATION => 'Authorized',
+        self::TYPE_CAPTURE => 'Capture',
+        self::TYPE_REFUND => 'Refund'
+    ];
+
     /**
      * {@inheritdoc}
      */
@@ -99,5 +109,15 @@ class Transaction extends \yii\db\ActiveRecord
     public static function find()
     {
         return new \common\models\query\TransactionQuery(static::class);
+    }
+
+    public static function getTypeList(): array
+    {
+        return self::TYPE_LIST;
+    }
+
+    public static function getTypeName(?int $type): ?string
+    {
+        return self::getTypeList()[$type] ?? null;
     }
 }

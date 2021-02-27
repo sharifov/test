@@ -16,7 +16,7 @@ class HotelQuoteCancelBookGuard
      */
     public static function guard(HotelQuote $model): HotelQuote
     {
-        if (!$model->isBooking()) {
+        if (!$model->isBooked()) {
             throw new \DomainException('Hotel Quote not booked;');
         }
         return $model;

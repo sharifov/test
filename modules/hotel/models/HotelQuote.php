@@ -28,8 +28,9 @@ use yii\helpers\VarDumper;
  * @property string $hq_hotel_name
  * @property int|null $hq_hotel_list_id
  * @property string|null $hq_request_hash
- * @property string|null $hq_json_booking
+ * @property array|null $hq_json_booking
  * @property string|null $hq_booking_id // field "reference" from api response
+ * @property array|null $hq_origin_search_data
  *
  * @property Hotel $hqHotel
  * @property HotelList $hqHotelList
@@ -79,6 +80,7 @@ class HotelQuote extends ActiveRecord implements Quotable
             [['hq_hotel_id'], 'exist', 'skipOnError' => true, 'targetClass' => Hotel::class, 'targetAttribute' => ['hq_hotel_id' => 'ph_id']],
             [['hq_hotel_list_id'], 'exist', 'skipOnError' => true, 'targetClass' => HotelList::class, 'targetAttribute' => ['hq_hotel_list_id' => 'hl_id']],
             [['hq_product_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['hq_product_quote_id' => 'pq_id']],
+            [['hq_json_booking', 'hq_origin_search_data'], 'safe'],
         ];
     }
 
@@ -96,6 +98,8 @@ class HotelQuote extends ActiveRecord implements Quotable
             'hq_hotel_name' => 'Hotel Name',
             'hq_hotel_list_id' => 'Hotel List ID',
             'hq_request_hash' => 'Request Hash',
+            'hq_json_booking' => 'Booking json',
+            'hq_origin_search_data' => 'Origin search data',
         ];
     }
 
@@ -196,6 +200,7 @@ class HotelQuote extends ActiveRecord implements Quotable
                         $hQuote->hq_hotel_name = $hotelModel->hl_name;
                         $hQuote->hq_destination_name = $hotelModel->hl_destination_name;
                         $hQuote->hq_request_hash = $hotelRequest->ph_request_hash_key;
+                        $hQuote->hq_origin_search_data = $quoteData;
 
                         if (!$hQuote->save()) {
                             Yii::error(
@@ -368,9 +373,9 @@ class HotelQuote extends ActiveRecord implements Quotable
     /**
      * @return bool
      */
-    public function isBooking(): bool
+    public function isBooked(): bool
     {
-        return (!empty($this->hq_booking_id));
+        return ($this->hqProductQuote->isBooked() && !empty($this->hq_booking_id));
     }
 
     /**
@@ -378,7 +383,7 @@ class HotelQuote extends ActiveRecord implements Quotable
      */
     public function isBookable(): bool
     {
-        return (ProductQuoteStatus::isBookable($this->hqProductQuote->pq_status_id) && !$this->isBooking());
+        return (ProductQuoteStatus::isBookable($this->hqProductQuote->pq_status_id) && !$this->isBooked());
     }
 
     public static function findByProductQuote(int $productQuoteId): ?Quotable
@@ -440,7 +445,10 @@ class HotelQuote extends ActiveRecord implements Quotable
      */
     public function saveChanges(): bool
     {
-        return $this->save();
+        if (!$result = $this->save()) {
+            throw new \RuntimeException($this->getErrorSummary(false)[0]);
+        }
+        return $result;
     }
 
     /**

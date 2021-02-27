@@ -2,6 +2,7 @@
 
 namespace modules\product\src\entities\product;
 
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\exceptions\ProductCodeException;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
@@ -39,6 +40,14 @@ class ProductRepository
 
     public function remove(Product $product): void
     {
+        if (!$product->isDeletable()) {
+            throw new \RuntimeException(
+                'The product cannot be removed. Exist quotes is not deletable statuses (' .
+                ProductQuoteStatus::getNotDeletableStatusGroupNames() . ')',
+                ProductCodeException::PRODUCT_REMOVE
+            );
+        }
+
         if (!$product->delete()) {
             throw new \RuntimeException('Removing error', ProductCodeException::PRODUCT_REMOVE);
         }

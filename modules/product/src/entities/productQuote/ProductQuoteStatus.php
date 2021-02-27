@@ -68,6 +68,7 @@ class ProductQuoteStatus
             self::EXPIRED,
             self::DECLINED,
             self::IN_PROGRESS,
+            self::ERROR,
         ],
         self::PENDING => [
             self::IN_PROGRESS,
@@ -175,6 +176,25 @@ class ProductQuoteStatus
             self::NEW,
             self::PENDING,
         ]);
+    }
+
+    public static function isDeletable(int $status): bool
+    {
+        return !array_key_exists($status, self::getNotDeletableStatusGroup());
+    }
+
+    public static function getNotDeletableStatusGroup(): array
+    {
+        return [
+            self::SOLD  => self::LIST[self::SOLD],
+            self::BOOKED => self::LIST[self::BOOKED],
+            self::DELIVERED => self::LIST[self::DELIVERED],
+        ];
+    }
+
+    public static function getNotDeletableStatusGroupNames(): string
+    {
+        return implode(',', array_values(self::getNotDeletableStatusGroup()));
     }
 
     /**

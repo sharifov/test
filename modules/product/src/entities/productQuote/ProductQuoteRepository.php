@@ -39,6 +39,13 @@ class ProductQuoteRepository
 
     public function remove(ProductQuote $productQuote): void
     {
+        if (!$productQuote->isDeletable()) {
+            throw new \RuntimeException(
+                'ProductQuote cannot be removed. Status is not deletable . (' . ProductQuoteStatus::getNotDeletableStatusGroupNames() . ')',
+                ProductCodeException::PRODUCT_QUOTE_REMOVE
+            );
+        }
+
         if (!$productQuote->delete()) {
             throw new \RuntimeException('Removing error', ProductCodeException::PRODUCT_QUOTE_REMOVE);
         }

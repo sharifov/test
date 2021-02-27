@@ -6,10 +6,14 @@ use common\models\Currency;
 use common\models\Employee;
 use modules\invoice\src\entities\invoice\Invoice;
 use common\models\Lead;
+use modules\order\src\entities\order\events\OrderCompleteEvent;
+use modules\order\src\entities\order\events\OrderPaymentPaidEvent;
+use modules\order\src\entities\order\events\OrderPreparedEvent;
 use modules\order\src\entities\order\events\OrderUserProfitUpdateProfitAmountEvent;
 use modules\order\src\entities\orderTips\OrderTips;
 use modules\order\src\entities\orderTipsUserProfit\OrderTipsUserProfit;
 use modules\order\src\entities\orderUserProfit\OrderUserProfit;
+use modules\order\src\events\OrderProcessingEvent;
 use modules\order\src\services\CreateOrderDTO;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
@@ -43,6 +47,7 @@ use yii\db\ActiveRecord;
  * @property string|null $or_created_dt
  * @property string|null $or_updated_dt
  * @property float|null $or_profit_amount
+ * @property string|null $or_request_data
  *
  * @property Currency $orClientCurrency
  * @property Invoice[] $invoices
@@ -113,6 +118,7 @@ class Order extends ActiveRecord
             'or_created_dt' => 'Created Dt',
             'or_updated_dt' => 'Updated Dt',
             'or_profit_amount' => 'Profit amount',
+            'ot_request_data' => 'Request Data'
         ];
     }
 
@@ -131,11 +137,11 @@ class Order extends ActiveRecord
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
-            'user' => [
-                'class' => BlameableBehavior::class,
-                'createdByAttribute' => 'or_created_user_id',
-                'updatedByAttribute' => 'or_updated_user_id',
-            ],
+//            'user' => [
+//                'class' => BlameableBehavior::class,
+//                'createdByAttribute' => 'or_created_user_id',
+//                'updatedByAttribute' => 'or_updated_user_id',
+//            ],
         ];
     }
 
@@ -154,6 +160,7 @@ class Order extends ActiveRecord
             $this->or_name = $this->generateName();
         }
         $this->updateOrderTotalByCurrency();
+        $this->or_request_data = $dto->requestData;
 
         return $this;
     }
@@ -336,16 +343,17 @@ class Order extends ActiveRecord
 
     public function processing(): void
     {
-        // ToDo: need to log status
-        if (!$this->isProcessing()) {
-            OrderStatus::guard($this->or_status_id, OrderStatus::PROCESSING);
-            foreach ($this->productQuotes as $productQuote) {
-                if (OrderStatus::guardOrder(OrderStatus::PROCESSING, $productQuote->pq_status_id)) {
-                    $this->setStatus(OrderStatus::PROCESSING);
-                    break;
-                }
-            }
-        }
+        $this->or_status_id = OrderStatus::PROCESSING;
+        $this->recordEvent(new OrderProcessingEvent($this));
+//        if (!$this->isProcessing()) {
+//            OrderStatus::guard($this->or_status_id, OrderStatus::PROCESSING);
+//            foreach ($this->productQuotes as $productQuote) {
+//                if (OrderStatus::guardOrder(OrderStatus::PROCESSING, $productQuote->pq_status_id)) {
+//                    $this->setStatus(OrderStatus::PROCESSING);
+//                    break;
+//                }
+//            }
+//        }
     }
 
     private function setStatus(int $status): void
@@ -356,5 +364,39 @@ class Order extends ActiveRecord
         OrderStatus::guard($this->or_status_id, $status);
 
         $this->or_status_id = $status;
+    }
+
+    public function prepare(\DateTimeImmutable $date): void
+    {
+        $this->setStatus(OrderStatus::PREPARED);
+        $this->recordEvent(new OrderPreparedEvent($this->or_id, $date->format('Y-m-d H:i:s.u')));
+    }
+
+    public function paymentPaid(\DateTimeImmutable $date): void
+    {
+        if ($this->isPaymentPaid()) {
+            throw new \DomainException('Order payment is already paid. Id: ' . $this->or_id);
+        }
+        $this->or_pay_status_id = OrderPayStatus::PAID;
+        $this->recordEvent(new OrderPaymentPaidEvent($this->or_id, $date->format('Y-m-d H:i:s.u')));
+    }
+
+    public function isPaymentPaid(): bool
+    {
+        return $this->or_pay_status_id === OrderPayStatus::PAID;
+    }
+
+    public function complete(\DateTimeImmutable $date): void
+    {
+        if ($this->isComplete()) {
+            throw new \DomainException('Order is already complete.');
+        }
+        $this->setStatus(OrderStatus::COMPLETE);
+        $this->recordEvent(new OrderCompleteEvent($this->or_id, $date->format('Y-m-d H:i:s.u')));
+    }
+
+    public function isComplete(): bool
+    {
+        return $this->or_status_id === OrderStatus::COMPLETE;
     }
 }

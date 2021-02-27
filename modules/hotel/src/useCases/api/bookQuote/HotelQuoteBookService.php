@@ -11,8 +11,11 @@ use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLog;
 use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus;
 use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus as LogStatus;
 use sales\auth\Auth;
+use sales\helpers\app\AppHelper;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
+use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class HotelQuoteBookService
@@ -86,16 +89,26 @@ class HotelQuoteBookService
         $apiResponse = $this->apiService->requestBookingHandler('booking/book', $params);
 
         if ($apiResponse['statusApi'] === HotelQuoteServiceLogStatus::STATUS_SUCCESS) {
-            $this->transactionManager->wrap(function () use ($model, $apiResponse, $productQuote, $userId) {
-                $model->setBookingId($apiResponse['data']['reference'])
-                    ->saveChanges();
+            try {
+                $this->transactionManager->wrap(function () use ($model, $apiResponse, $productQuote, $userId) {
+                    if (!$reference = ArrayHelper::getValue($apiResponse, 'data.reference')) {
+                        throw new \RuntimeException('In response from ApiHotelService is missing - data.reference');
+                    }
 
-                $productQuote->booked($userId);
-                $this->productQuoteRepository->save($productQuote);
+                    $model->hq_booking_id = $reference;
+                    $model->hq_json_booking = $apiResponse;
+                    $model->saveChanges();
 
-                $this->status = 1; // success
-                $this->message = 'Booking confirmed. (BookingId: ' . $model->hq_booking_id . ')';
-            });
+                    $productQuote->booked($userId);
+                    $this->productQuoteRepository->save($productQuote);
+
+                    $this->status = 1; // success
+                    $this->message = 'Booking confirmed. (BookingId: ' . $model->hq_booking_id . ')';
+                });
+            } catch (\Throwable $throwable) {
+                $this->message = 'Booking confirmed but not saved. Error: ' . $throwable->getMessage();
+                Yii::error(AppHelper::throwableLog($throwable), 'HotelQuoteBookService:response:book:success');
+            }
         } else {
             $this->message = $apiResponse['message'];
             $this->transactionManager->wrap(function () use ($model, $apiResponse, $userId) {

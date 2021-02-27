@@ -10,6 +10,7 @@ use modules\hotel\models\HotelQuote;
 use modules\hotel\models\search\HotelQuoteSearch;
 use modules\hotel\src\entities\hotelQuoteRoom\HotelQuoteRoomRepository;
 use modules\hotel\src\repositories\hotel\HotelRepository;
+use modules\hotel\src\services\hotelQuote\HotelQuotePdfService;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookGuard;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCancelBookGuard;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCheckRateService;
@@ -188,7 +189,8 @@ class HotelQuoteController extends FController
 
             $hotelModel = HotelList::findOrCreateByData($hotelData);
             $currency = $hotelData['currency'] ?? 'USD';
-            $hotelQuote = HotelQuote::findOrCreateByData($quoteData, $hotelModel, $hotel, $currency);
+            $resultData = ArrayHelper::merge($hotelData, $quoteData);
+            $hotelQuote = HotelQuote::findOrCreateByData($resultData, $hotelModel, $hotel, $currency);
 
             if (!$hotelQuote) {
                 throw new Exception('Not added hotel quote - hotel code (' . $hotelCode . ') room key (' . $quoteKey . ')', 8);
@@ -286,8 +288,8 @@ class HotelQuoteController extends FController
         $result = ['status' => 0, 'message' => '', 'data' => []];
 
         try {
-            $model = $this->findModel($id);
-            HotelQuoteBookGuard::guard($model);
+            $hotelQuote = $this->findModel($id);
+            HotelQuoteBookGuard::guard($hotelQuote);
 
             /** @var HotelQuoteBookService $bookService */
             $bookService = Yii::$container->get(HotelQuoteBookService::class);
@@ -295,18 +297,22 @@ class HotelQuoteController extends FController
             if ($checkRate) {
                 /** @var HotelQuoteCheckRateService $checkRateService */
                 $checkRateService = Yii::$container->get(HotelQuoteCheckRateService::class);
-                $checkResult = $checkRateService->checkRate($model);
+                $checkResult = $checkRateService->checkRate($hotelQuote);
 
                 if ($checkResult->status) {
-                    $bookService->book($model);
+                    $bookService->book($hotelQuote);
                     $result['status'] = $bookService->status;
                     $result['message'] = $bookService->message;
+
+                    if ($bookService->status) {
+                        HotelQuotePdfService::processingFile($hotelQuote);
+                    }
                 } else {
                     $result['status'] = $checkResult->status;
                     $result['message'] = $checkResult->message;
                 }
             } else {
-                $bookService->book($model);
+                $bookService->book($hotelQuote);
                 $result['status'] = $bookService->status;
                 $result['message'] = $bookService->message;
             }

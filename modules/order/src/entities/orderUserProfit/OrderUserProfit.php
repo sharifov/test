@@ -72,11 +72,11 @@ class OrderUserProfit extends \yii\db\ActiveRecord
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
-            'user' => [
-                'class' => BlameableBehavior::class,
-                'createdByAttribute' => 'oup_created_user_id',
-                'updatedByAttribute' => 'oup_updated_user_id',
-            ],
+//            'user' => [
+//                'class' => BlameableBehavior::class,
+//                'createdByAttribute' => 'oup_created_user_id',
+//                'updatedByAttribute' => 'oup_updated_user_id',
+//            ],
         ];
     }
 

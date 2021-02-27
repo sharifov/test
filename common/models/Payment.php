@@ -4,6 +4,8 @@ namespace common\models;
 
 use modules\invoice\src\entities\invoice\Invoice;
 use modules\order\src\entities\order\Order;
+use modules\order\src\payment\events\PaymentCompletedEvent;
+use sales\entities\EventTrait;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -25,6 +27,7 @@ use yii\db\ActiveRecord;
  * @property int|null $pay_updated_user_id
  * @property string|null $pay_created_dt
  * @property string|null $pay_updated_dt
+ * @property string|null $pay_code
  *
  * @property Employee $payCreatedUser
  * @property Currency $payCurrency
@@ -36,6 +39,51 @@ use yii\db\ActiveRecord;
  */
 class Payment extends \yii\db\ActiveRecord
 {
+    use EventTrait;
+
+    public const STATUS_NEW = 1;
+    public const STATUS_PENDING = 2;
+    public const STATUS_IN_PROGRESS = 3;
+    public const STATUS_AUTHORIZED = 4;
+    public const STATUS_CAPTURED = 5;
+    public const STATUS_REFUNDED = 6;
+    public const STATUS_CANCELED = 7;
+    public const STATUS_FAILED = 8;
+    public const STATUS_DECLINED = 9;
+    public const STATUS_COMPLETED = 10;
+
+    public const STATUS_LIST = [
+        self::STATUS_NEW => 'New',
+        self::STATUS_PENDING => 'Pending',
+        self::STATUS_IN_PROGRESS => 'In Progress',
+        self::STATUS_AUTHORIZED => 'Authorized',
+        self::STATUS_CAPTURED => 'Captured',
+        self::STATUS_REFUNDED => 'Refunded',
+        self::STATUS_CANCELED => 'Canceled',
+        self::STATUS_FAILED => 'Failed',
+        self::STATUS_DECLINED => 'Declined',
+        self::STATUS_COMPLETED => 'Completed',
+    ];
+
+    public function isCompleted(): bool
+    {
+        return $this->pay_status_id === self::STATUS_COMPLETED;
+    }
+
+    public function completed(): void
+    {
+        if ($this->isCompleted()) {
+            throw new \DomainException('Payment is already completed.');
+        }
+        $this->pay_status_id = self::STATUS_COMPLETED;
+        $this->recordEvent(new PaymentCompletedEvent($this->pay_id));
+    }
+
+    public function inProgress(): void
+    {
+        $this->pay_status_id = self::STATUS_IN_PROGRESS;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -54,6 +102,7 @@ class Payment extends \yii\db\ActiveRecord
             [['pay_date', 'pay_amount'], 'required'],
             [['pay_date', 'pay_created_dt', 'pay_updated_dt'], 'safe'],
             [['pay_amount'], 'number'],
+            [['pay_code'], 'string'],
             [['pay_currency'], 'string', 'max' => 3],
             [['pay_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pay_created_user_id' => 'id']],
             [['pay_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['pay_currency' => 'cur_code']],
@@ -83,6 +132,7 @@ class Payment extends \yii\db\ActiveRecord
             'pay_updated_user_id' => 'Updated User ID',
             'pay_created_dt' => 'Created Dt',
             'pay_updated_dt' => 'Updated Dt',
+            'pay_code' => 'Code',
         ];
     }
 
@@ -100,11 +150,11 @@ class Payment extends \yii\db\ActiveRecord
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
-            'user' => [
-                'class' => BlameableBehavior::class,
-                'createdByAttribute' => 'pay_created_user_id',
-                'updatedByAttribute' => 'pay_updated_user_id',
-            ],
+//            'user' => [
+//                'class' => BlameableBehavior::class,
+//                'createdByAttribute' => 'pay_created_user_id',
+//                'updatedByAttribute' => 'pay_updated_user_id',
+//            ],
         ];
     }
 
@@ -171,5 +221,35 @@ class Payment extends \yii\db\ActiveRecord
     public static function find()
     {
         return new \common\models\query\PaymentQuery(static::class);
+    }
+
+    public static function getStatusList(): array
+    {
+        return self::STATUS_LIST;
+    }
+
+    public static function getStatusName(?int $status): ?string
+    {
+        return self::getStatusList()[$status] ?? null;
+    }
+
+    public static function create(
+        int $methodId,
+        string $date,
+        float $amount,
+        string $currency,
+        int $invoiceId,
+        int $orderId,
+        string $code
+    ): self {
+        $payment = new self();
+        $payment->pay_method_id = $methodId;
+        $payment->pay_date = $date;
+        $payment->pay_amount = $amount;
+        $payment->pay_currency = $currency;
+        $payment->pay_invoice_id = $invoiceId;
+        $payment->pay_order_id = $orderId;
+        $payment->pay_code = $code;
+        return $payment;
     }
 }

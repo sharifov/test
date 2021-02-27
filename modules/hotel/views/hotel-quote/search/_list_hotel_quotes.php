@@ -171,7 +171,7 @@ HotelAsset::register($this);
             <?php endif; ?>
           </div>
           <div><p>
-              <?= Html::encode($dataHotel['description']) ?>
+              <?= Html::encode($dataHotel['description'] ?? '') ?>
             </p>
           </div>
           <div>

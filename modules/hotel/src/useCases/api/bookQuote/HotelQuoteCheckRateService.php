@@ -96,7 +96,7 @@ class HotelQuoteCheckRateService
                 }
             } elseif (!empty($apiResponse['data']['rateComments'])) {
                 HotelQuoteRoom::updateAll(
-                    ['hqr_rate_comments' => strip_tags($apiResponse['data']['rateComments'])],
+                    ['hqr_rate_comments' => HotelQuoteRoom::cleanRateComments($apiResponse['data']['rateComments'])],
                     ['hqr_hotel_quote_id' => $model->hq_id]
                 );
             }

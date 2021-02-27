@@ -54,6 +54,7 @@ class OrderStatus
             self::CANCELED
         ],
         self::PENDING => [
+            self::PREPARED,
             self::PROCESSING,
             self::CANCEL_PROCESSING,
             self::ERROR

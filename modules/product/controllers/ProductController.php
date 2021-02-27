@@ -154,9 +154,8 @@ class ProductController extends FController
 
         try {
             $model = $this->findModel($id);
-            if (!$model->delete()) {
-                throw new Exception('Product (' . $id . ') not deleted', 2);
-            }
+
+            $this->productRepository->remove($model);
 
             if ((int)$model->pr_type_id === ProductType::PRODUCT_HOTEL && class_exists('\modules\hotel\HotelModule')) {
                 $modelHotel = Hotel::findOne(['ph_product_id' => $model->pr_id]);
