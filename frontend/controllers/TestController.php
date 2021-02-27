@@ -279,11 +279,7 @@ class TestController extends FController
         $date = $dt->format('Y-m-d\TH:i:s.') . substr($dt->format('u'), 0, 3) . 'Z';
         //$date = '2021-02-26T06:25:38.653Z';
 
-        $query = <<<'GQL'
-            query {welcome}
-        GQL;
-
-        //$query = '{"query":"query {welcome}"}';
+        $query = '{"query":"query {welcome}"}';
 
         $string = $date . $apiKey . 'POST/graphql' . $query;
 
@@ -302,9 +298,7 @@ class TestController extends FController
                 'x-holibob-date' => $date,
                 'x-holibob-signature' => $base64HashSignature,
             ],
-            'json' => [
-                'query' => $query
-            ],
+            'json' => $query,
         ]);
 
         $json = $response->getBody()->getContents();
