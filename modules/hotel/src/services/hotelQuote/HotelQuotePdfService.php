@@ -46,7 +46,8 @@ class HotelQuotePdfService
         $fileLeadRepository = Yii::createObject(FileLeadRepository::class);
         $fileSystem = Yii::createObject(FileSystem::class);
 
-        $createDto = new CreateByLocalFileDto($patchToLocalFile, $clientId, $projectKey);
+        $title = 'BookingConfirmationQ' . $hotelQuote->hqProductQuote->pq_id . '.pdf';
+        $createDto = new CreateByLocalFileDto($patchToLocalFile, $clientId, $projectKey, $title);
         $fileStorage = FileStorage::createByLocalFile($createDto);
 
         $fileSystem->write($fileStorage->fs_path, file_get_contents($patchToLocalFile));
@@ -95,7 +96,7 @@ class HotelQuotePdfService
     public static function generateForBrowserOutput(HotelQuote $hotelQuote)
     {
         $content = self::getContent($hotelQuote);
-        $fileName = 'booking_confirmation_' . $hotelQuote->hq_id . '.pdf';
+        $fileName = 'booking_confirmation_Q' . $hotelQuote->hqProductQuote->pq_id . '.pdf';
 
         return GeneratorPdfService::generateForBrowserOutput($content, $fileName);
     }
@@ -112,7 +113,7 @@ class HotelQuotePdfService
     public static function generateAsFile(HotelQuote $hotelQuote): string
     {
         $content = self::getContent($hotelQuote);
-        $fileName = 'booking_confirmation_' . $hotelQuote->hq_id . '.pdf';
+        $fileName = 'booking_confirmation_Q' . $hotelQuote->hqProductQuote->pq_id . '.pdf';
 
         return GeneratorPdfService::generateAsFile($content, $fileName);
     }

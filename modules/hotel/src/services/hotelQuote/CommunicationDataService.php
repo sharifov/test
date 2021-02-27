@@ -124,8 +124,10 @@ class CommunicationDataService
 
     private static function getImgSrc(array $originSearchData): string
     {
-        return 'https://www.gttglobal.com/hotel/img/' .
-            ArrayHelper::getValue($originSearchData, 'images.0.url', '');
+        if ($img = ArrayHelper::getValue($originSearchData, 'images.0.url')) {
+            return 'https://www.gttglobal.com/hotel/img/' . $img;
+        }
+        return '';
     }
 
     private static function getDescription(array $originSearchData): string
