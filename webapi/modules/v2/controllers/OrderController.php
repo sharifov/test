@@ -19,11 +19,13 @@ use webapi\src\response\messages\DataMessage;
 use webapi\src\response\messages\ErrorsMessage;
 use webapi\src\response\messages\Message;
 use webapi\src\response\messages\MessageMessage;
+use webapi\src\response\messages\RequestMessage;
 use webapi\src\response\messages\SourceMessage;
 use webapi\src\response\messages\Sources;
 use webapi\src\response\messages\StatusCodeMessage;
 use webapi\src\response\messages\StatusFailedMessage;
 use webapi\src\response\ProxyResponse;
+use webapi\src\response\SimpleResponse;
 use webapi\src\response\SuccessResponse;
 use Yii;
 use yii\httpclient\Response;
@@ -84,9 +86,9 @@ class OrderController extends BaseController
     }
 
     /**
-     * @api {post} /v2/order/create-proxy Create Order
+     * @api {post} /v2/order/create-proxy Create Order Proxy
      * @apiVersion 0.2.0
-     * @apiName CreateOrder
+     * @apiName CreateOrderProxy
      * @apiGroup Orders
      * @apiPermission Authorized User
      *
@@ -252,10 +254,10 @@ class OrderController extends BaseController
 
     /**
      * @return \webapi\src\response\Response
-     * @api {post} /v2/order/create
+     * @api {post} /v2/order/create Create Order
      * @apiVersion 0.2.0
      * @apiName CreateOrder
-     * @apiGroup Order
+     * @apiGroup Orders
      * @apiPermission Authorized User
      *
      * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
@@ -268,8 +270,15 @@ class OrderController extends BaseController
      * @apiParam {String}       offerGid                Offer gid
      * @apiParam {Object[]}     productQuotes         Product Quotes
      * @apiParam {String}       productQuotes.gid       Product Quote Gid
-     * @apiParam {Object}       Request                 Request Data for BO
      *
+     * @apiParam {Object}       payment                 Payment
+     * @apiParam {String}       payment.type            Type
+     * @apiParam {Integer}      payment.transactionId   Transaction Id
+     * @apiParam {String}       payment.date            Date
+     * @apiParam {Decimal}      payment.amount          Amount
+     * @apiParam {String}       payment.currency        Currency
+     *
+     * @apiParam {Object}       Request                 Request Data for BO
      *
      * @apiParamExample {json} Request-Example:
      *
@@ -283,6 +292,13 @@ class OrderController extends BaseController
     "gid": "6fcfc43e977dabffe6a979ebdaddfvr2"
     }
     ],
+    "payment": {
+        "type": "card",
+        "transactionId": 1234567890,
+        "date": "2021-03-20",
+        "amount": 821.49,
+        "currency": "USD"
+    },
     "Request": {
     "offerGid": "85a06c376a083f47e56b286b1265c160",
     "offerUid": "of60264c1484090",
@@ -1067,10 +1083,51 @@ class OrderController extends BaseController
     }
     }
     }
+     * @apiSuccessExample {json} Success-Response:
+     *
+     * HTTP/1.1 200 OK
+     *   {
+            "status": 200,
+            "message": "OK",
+            "data": {
+                "order_gid": "ef75bfa7cc60af154c22c43e3732350f"
+            },
+            "technical": {
+                "action": "v2/order/create",
+                "response_id": 327,
+                "request_dt": "2021-02-27 08:49:46",
+                "response_dt": "2021-02-27 08:49:46",
+                "execution_time": 0.094,
+                "memory_usage": 1356920
+            }
+         }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+            "status": 422,
+            "message": "Validation error",
+            "errors": {
+                "payment.type": [
+                    "Type is invalid."
+                ]
+            },
+            "code": 0,
+            "technical": {
+                "action": "v2/order/create",
+                "response_id": 328,
+                "request_dt": "2021-02-27 08:52:06",
+                "response_dt": "2021-02-27 08:52:06",
+                "execution_time": 0.021,
+                "memory_usage": 437656
+            }
+        }
      *
      */
     public function actionCreate(): \webapi\src\response\Response
     {
+        $this->detachBehavior('request');
         $request = Yii::$app->request;
         $form = new OrderCreateForm(count($request->post('productQuotes', [])));
 
@@ -1092,7 +1149,7 @@ class OrderController extends BaseController
         try {
             $offer = $this->offerRepository->findByGid($form->offerGid);
 
-            $order = $this->orderManageService->createOrder((new CreateOrderDTO($offer->of_lead_id, $request->post())), $form->productQuotes);
+            $order = $this->orderManageService->createOrder((new CreateOrderDTO($offer->of_lead_id, $request->post())), $form->productQuotes, $form->payment);
         } catch (\Throwable $e) {
             return new ErrorResponse(
                 new StatusFailedMessage(),

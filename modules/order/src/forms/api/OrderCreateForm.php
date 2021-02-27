@@ -4,6 +4,7 @@ namespace modules\order\src\forms\api;
 
 use modules\offer\src\entities\offer\Offer;
 use sales\forms\CompositeForm;
+use sales\forms\CompositeRecursiveForm;
 
 /**
  * Class OrderCreateForm
@@ -11,8 +12,9 @@ use sales\forms\CompositeForm;
  *
  * @property string $offerGid
  * @property ProductQuotesForm[] $productQuotes
+ * @property PaymentForm $payment
  */
-class OrderCreateForm extends CompositeForm
+class OrderCreateForm extends CompositeRecursiveForm
 {
     public string $offerGid = '';
 
@@ -23,6 +25,7 @@ class OrderCreateForm extends CompositeForm
             $productQuotesForm[] = new ProductQuotesForm();
         }
         $this->productQuotes = $productQuotesForm;
+        $this->payment = new PaymentForm();
         parent::__construct($config);
     }
 
@@ -45,6 +48,6 @@ class OrderCreateForm extends CompositeForm
      */
     protected function internalForms(): array
     {
-        return ['productQuotes'];
+        return ['productQuotes', 'payment'];
     }
 }

@@ -20,7 +20,7 @@ use yii\db\ActiveRecord;
  * @property string $inv_uid
  * @property int $inv_order_id
  * @property int $inv_status_id
- * @property string $inv_sum
+ * @property float $inv_sum
  * @property string $inv_client_sum
  * @property string $inv_client_currency
  * @property string $inv_currency_rate
@@ -115,11 +115,11 @@ class Invoice extends ActiveRecord
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
-            'user' => [
-                'class' => BlameableBehavior::class,
-                'createdByAttribute' => 'inv_created_user_id',
-                'updatedByAttribute' => 'inv_updated_user_id',
-            ],
+//            'user' => [
+//                'class' => BlameableBehavior::class,
+//                'createdByAttribute' => 'inv_created_user_id',
+//                'updatedByAttribute' => 'inv_updated_user_id',
+//            ],
         ];
     }
 
@@ -131,6 +131,23 @@ class Invoice extends ActiveRecord
         $this->inv_gid = self::generateGid();
         $this->inv_uid = self::generateUid();
         $this->inv_status_id = InvoiceStatus::NOT_PAID;
+    }
+
+    public static function create(int $orderId, float $sum, ?string $clientCurrency, string $description): self
+    {
+        $invoice = new self();
+        $invoice->inv_gid = self::generateGid();
+        $invoice->inv_uid = self::generateUid();
+        $invoice->inv_status_id = InvoiceStatus::NOT_PAID;
+        $invoice->inv_order_id = $orderId;
+        $invoice->inv_sum = $sum;
+        $invoice->inv_client_currency = $clientCurrency;
+        $invoice->inv_description = $description;
+        $invoice->calculateClientAmount();
+        if (!$invoice->inv_description) {
+            $invoice->inv_description = $invoice->generateDescription();
+        }
+        return $invoice;
     }
 
     /**

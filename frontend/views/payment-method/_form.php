@@ -15,6 +15,8 @@ use yii\widgets\ActiveForm;
     <div class="col-md-4">
         <?= $form->field($model, 'pm_name')->textInput(['maxlength' => true]) ?>
 
+        <?= $form->field($model, 'pm_key')->textInput(['maxlength' => true]) ?>
+
         <?= $form->field($model, 'pm_short_name')->textInput(['maxlength' => true]) ?>
 
         <?= $form->field($model, 'pm_category_id')->dropDownList(\common\models\PaymentMethod::getCategoryList(), ['prompt' => '---']) ?>

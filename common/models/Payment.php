@@ -79,6 +79,11 @@ class Payment extends \yii\db\ActiveRecord
         $this->recordEvent(new PaymentCompletedEvent($this->pay_id));
     }
 
+    public function inProgress(): void
+    {
+        $this->pay_status_id = self::STATUS_IN_PROGRESS;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -145,11 +150,11 @@ class Payment extends \yii\db\ActiveRecord
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
-            'user' => [
-                'class' => BlameableBehavior::class,
-                'createdByAttribute' => 'pay_created_user_id',
-                'updatedByAttribute' => 'pay_updated_user_id',
-            ],
+//            'user' => [
+//                'class' => BlameableBehavior::class,
+//                'createdByAttribute' => 'pay_created_user_id',
+//                'updatedByAttribute' => 'pay_updated_user_id',
+//            ],
         ];
     }
 
@@ -226,5 +231,25 @@ class Payment extends \yii\db\ActiveRecord
     public static function getStatusName(?int $status): ?string
     {
         return self::getStatusList()[$status] ?? null;
+    }
+
+    public static function create(
+        int $methodId,
+        string $date,
+        float $amount,
+        string $currency,
+        int $invoiceId,
+        int $orderId,
+        string $code
+    ): self {
+        $payment = new self();
+        $payment->pay_method_id = $methodId;
+        $payment->pay_date = $date;
+        $payment->pay_amount = $amount;
+        $payment->pay_currency = $currency;
+        $payment->pay_invoice_id = $invoiceId;
+        $payment->pay_order_id = $orderId;
+        $payment->pay_code = $code;
+        return $payment;
     }
 }

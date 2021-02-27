@@ -54,7 +54,7 @@ class InvoiceController extends FController
 
                 $invoice->inv_order_id = $model->inv_order_id;
                 $invoice->inv_sum = $model->inv_sum;
-                $invoice->inv_client_currency = $order ? $order->or_client_currency : null;
+                $invoice->inv_client_currency = $order->or_client_currency ?? null;
                 $invoice->calculateClientAmount();
                 $invoice->inv_description = $model->inv_description;
 

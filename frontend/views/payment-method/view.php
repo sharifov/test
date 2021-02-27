@@ -31,6 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             'pm_id',
             'pm_name',
+            'pm_key',
             'pm_short_name',
             'pm_enabled:boolean',
             [
