@@ -299,6 +299,21 @@ class FlightQuote extends ActiveRecord implements Quotable
         return self::FARE_TYPE_LIST;
     }
 
+    public static function getFareTypeName(?string $fareType): string
+    {
+        return self::getFareTypeList()[$fareType] ?? '--';
+    }
+
+    public static function getFareTypeNameById(?int $id): string
+    {
+        return self::getFareTypeName((string)array_search($id, self::getFareTypeIdList(), false));
+    }
+
+    public static function getFareTypeIdList(): array
+    {
+        return self::FARE_TYPE_ID_LIST;
+    }
+
     /**
      * @return array
      */
@@ -439,7 +454,7 @@ class FlightQuote extends ActiveRecord implements Quotable
      * @param $type
      * @return mixed|string
      */
-    public static function getTypeName(int $type)
+    public static function getTypeName(?int $type)
     {
         return self::TYPE_LIST[$type] ?? '-';
     }

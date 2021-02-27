@@ -31,6 +31,9 @@ class FlightSerializer extends Serializer
 
     public function getData(): array
     {
-        return $this->toArray();
+        $data = $this->toArray();
+        $data['fl_trip_type_name'] = $this->model->getTripTypeName();
+        $data['fl_cabin_class_name'] = $this->model->getCabinClassName();
+        return $data;
     }
 }

@@ -3,6 +3,7 @@
 namespace modules\offer\src\entities\offer\serializer;
 
 use modules\offer\src\entities\offer\Offer;
+use modules\offer\src\entities\offer\OfferStatus;
 use sales\entities\serializer\Serializer;
 
 /**
@@ -41,6 +42,7 @@ class OfferSerializer extends Serializer
     public function getData(): array
     {
         $data = $this->toArray();
+        $data['of_status_name'] = OfferStatus::getName($this->model->of_status_id);
 
         if ($offerProducts = $this->model->offerProducts) {
             foreach ($offerProducts as $offerProduct) {
