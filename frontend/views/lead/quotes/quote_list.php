@@ -20,41 +20,46 @@ if (FlightQuoteGuard::canAutoSelectQuotes(Auth::user(), $lead)) {
     $addAutoQuoteBtn = Html::a('<i class="fa fa-plus green"></i> Auto Select Quotes', null, ['class' => 'auto_add_quotes_btn', 'data-lead-id' => $lead->id]);
     $addAutoQuoteUrl = Url::toRoute('/quote/auto-add-quotes');
     $js = <<<JS
+    let leadQuoteAutoAddAjax = false;
     $(document).on('click', '.auto_add_quotes_btn', function (e) {
+        e.preventDefault();
         let btn = $(this);
         let btnIcon = $('.fa', btn);
         let iconLoading = $('<i class="fa fa-spin fa-spinner yellow"></i>'); 
         let gds = btn.data('gds');
         let leadId = btn.data('lead-id');
         
-        $.ajax({
-            url: '$addAutoQuoteUrl',
-            type: 'post',
-            data: {leadId: leadId, gds: gds},
-            dataType: 'json',
-            beforeSend: function () {
-                btn.find('i').replaceWith(iconLoading);
-                btn.addClass('disabled').attr('disabled', true);      
-                $('.search-results__wrapper').addClass('loading');
-            },
-            success: function (response) {
-                if (response.error) {
-                    createNotify('Error', response.message, 'error');
-                } else {
-                    $.pjax.reload({container: '#quotes_list', async: false});
-                    $('.popover-class[data-toggle="popover"]').popover({ sanitize: false });
-                    createNotify('Success', response.message, 'success');
+        if (leadQuoteAutoAddAjax === false) {
+            leadQuoteAutoAddAjax = true;
+            btn.attr('data-ajax-send', 1);
+            $.ajax({
+                url: '$addAutoQuoteUrl',
+                type: 'post',
+                data: {leadId: leadId, gds: gds},
+                dataType: 'json',
+                beforeSend: function () {
+                    btn.find('i').replaceWith(iconLoading);
+                    $('.search-results__wrapper').addClass('loading');
+                },
+                success: function (response) {
+                    if (response.error) {
+                        createNotify('Error', response.message, 'error');
+                    } else {
+                        $.pjax.reload({container: '#quotes_list', async: false});
+                        $('.popover-class[data-toggle="popover"]').popover({ sanitize: false });
+                        createNotify('Success', response.message, 'success');
+                    }
+                },
+                error: function (xhr) {
+                    createNotify('Error', xhr.responseText, 'error');
+                },
+                complete: function () {
+                    btn.find('i').replaceWith(btnIcon)
+                    $('.search-results__wrapper').removeClass('loading');
+                    leadQuoteAutoAddAjax = false;
                 }
-            },
-            error: function (xhr) {
-                createNotify('Error', xhr.responseText, 'error');
-            },
-            complete: function () {
-                btn.find('i').replaceWith(btnIcon)
-                btn.removeClass('disabled').attr('disabled', false);
-                $('.search-results__wrapper').removeClass('loading');
-            }
-        })
+            })
+        }
     });
 JS;
     $this->registerJs($js);
