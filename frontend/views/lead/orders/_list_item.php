@@ -9,6 +9,7 @@ use modules\invoice\src\entities\invoice\InvoiceStatus;
 use modules\order\src\entities\order\OrderPayStatus;
 use modules\order\src\entities\order\OrderStatus;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use sales\auth\Auth;
 use yii\bootstrap4\Html;
 
 ?>
@@ -58,6 +59,20 @@ use yii\bootstrap4\Html;
                                 'data-product-id' => $product->pr_id
                             ])*/ ?>
 
+                    <?php if (Auth::can('/order/order-actions/cancel') && !$order->isCanceled()) : ?>
+                        <?= Html::a('Cancel Order', null, [
+                            'data-url' => \yii\helpers\Url::to(['/order/order-actions/cancel', 'orderId' => $order->or_id]),
+                            'class' => 'dropdown-item btn-cancel-order'
+                        ])?>
+                    <?php endif ?>
+
+                    <?php if (Auth::can('/order/order-actions/complete') && !$order->isComplete()) : ?>
+                        <?= Html::a('Complete Order', null, [
+                            'data-url' => \yii\helpers\Url::to(['/order/order-actions/complete', 'orderId' => $order->or_id]),
+                            'class' => 'dropdown-item btn-complete-order'
+                        ])?>
+                    <?php endif ?>
+
                     <?= Html::a('<i class="fa fa-edit"></i> Update order', null, [
                         'data-url' => \yii\helpers\Url::to(['/order/order/update-ajax', 'id' => $order->or_id]),
                         'class' => 'dropdown-item text-warning btn-update-order'
@@ -68,8 +83,6 @@ use yii\bootstrap4\Html;
                         'data-url' => \yii\helpers\Url::to(['/order/order-status-log/show', 'gid' => $order->or_gid]),
                         'data-gid' => $order->or_gid,
                     ]) ?>
-
-
 
                     <div class="dropdown-divider"></div>
                     <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete order', null, [

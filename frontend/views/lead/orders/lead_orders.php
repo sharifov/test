@@ -64,6 +64,48 @@ use yii\web\View;
 
 $js = <<<JS
 
+    $('body').off('click', '.btn-complete-order').on('click', '.btn-complete-order', function (e) {
+        e.preventDefault();
+        let url = $(this).data('url');
+        //$('#preloader').removeClass('d-none');
+        
+        let modal = $('#modal-df');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Complete Order');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                    backdrop: 'static',
+                    show: true
+                });
+            }
+        });
+    });
+
+    $('body').off('click', '.btn-cancel-order').on('click', '.btn-cancel-order', function (e) {
+        e.preventDefault();
+        let url = $(this).data('url');
+        //$('#preloader').removeClass('d-none');
+        
+        let modal = $('#modal-df');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Cancel Order');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                    backdrop: 'static',
+                    show: true
+                });
+            }
+        });
+    });
+
     $('body').off('click', '.btn-create-order').on('click', '.btn-create-order', function (e) {
         e.preventDefault();
         let url = $(this).data('url');

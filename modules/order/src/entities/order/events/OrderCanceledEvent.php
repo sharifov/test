@@ -3,7 +3,7 @@
 namespace modules\order\src\entities\order\events;
 
 /**
- * Class OrderPreparedEvent
+ * Class OrderCanceledEvent
  *
  * @property int $orderId
  * @property int|null $startStatus
@@ -13,7 +13,7 @@ namespace modules\order\src\entities\order\events;
  * @property int|null $ownerId
  * @property int|null $creatorId
  */
-class OrderPreparedEvent implements OrderChangeStatusInterface
+class OrderCanceledEvent implements OrderChangeStatusInterface
 {
     public int $orderId;
     public ?int $startStatus;

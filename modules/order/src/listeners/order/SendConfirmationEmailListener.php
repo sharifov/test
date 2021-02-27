@@ -2,11 +2,11 @@
 
 namespace modules\order\src\listeners\order;
 
-use modules\order\src\entities\order\events\OrderCompleteEvent;
+use modules\order\src\entities\order\events\OrderCompletedEvent;
 
 class SendConfirmationEmailListener
 {
-    public function handle(OrderCompleteEvent $event): void
+    public function handle(OrderCompletedEvent $event): void
     {
         \Yii::info([
             'message' => 'Send email',
