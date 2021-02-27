@@ -265,25 +265,25 @@ class OrderController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string}       offerGid                Offer gid
-     * @apiParam {object}       productQuotes           Product Quotes
-     * @apiParam {string}       productQuotes.gid       Product Quotes
-     * @apiParam {object}       Request                 Request Data for BO
+     * @apiParam {String}       offerGid                Offer gid
+     * @apiParam {Object[]}     productQuotes         Product Quotes
+     * @apiParam {String}       productQuotes.gid       Product Quote Gid
+     * @apiParam {Object}       Request                 Request Data for BO
      *
      *
      * @apiParamExample {json} Request-Example:
      *
      * {
-    *"offerGid": "73c8bf13111feff52794883446461740",
-    *"productQuotes": [
-    *{
-    *"gid": "aebf921f5a64a7ac98d4942ace67e498"
-    *},
-    *{
-    *"gid": "6fcfc43e977dabffe6a979ebdaddfvr2"
-    *}
-    *],
-    *"Request": {
+    "offerGid": "73c8bf13111feff52794883446461740",
+    "productQuotes": [
+    {
+    "gid": "aebf921f5a64a7ac98d4942ace67e498"
+    },
+    {
+    "gid": "6fcfc43e977dabffe6a979ebdaddfvr2"
+    }
+    ],
+    "Request": {
     "offerGid": "85a06c376a083f47e56b286b1265c160",
     "offerUid": "of60264c1484090",
     "apiKey": "038ce0121a1666678d4db57cb10e8667b98d8b08c408cdf7c9b04f1430071826",
