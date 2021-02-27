@@ -271,6 +271,26 @@ $js = <<<JS
             }
         });
     });
+    
+    $(document).on('click', '.btn-payment-status-log', function(e){        
+        e.preventDefault();
+        let url = $(this).data('url');
+        let modal = $('#modal-lg');
+          
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Payment status log');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
+        });
+    });
 JS;
 
 $this->registerJs($js, View::POS_READY, 'lead-order-js');

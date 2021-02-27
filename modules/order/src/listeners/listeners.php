@@ -43,6 +43,9 @@ return [
         listeners\LogStatusListener::class,
         OrderPrepareOrderProcessingListener::class,
     ],
+    events\CanceledEvent::class => [
+        listeners\LogStatusListener::class,
+    ],
     OrderPreparedEvent::class => [
         OrderProcessPaymentChargeListener::class,
         OrderChangeStatusLogListener::class,
