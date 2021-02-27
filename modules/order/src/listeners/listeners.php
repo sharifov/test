@@ -10,6 +10,7 @@ use modules\order\src\entities\order\events\UpdateOrderTipsUserProfitAmountEvent
 use modules\order\src\events\OrderProcessingEvent;
 use modules\order\src\listeners\order\OrderChangeStatusLogListener;
 use modules\order\src\listeners\order\OrderLogPaymentStatusListener;
+use modules\order\src\listeners\order\SendCanceledEmailListener;
 use modules\order\src\processManager\listeners\OrderPrepareOrderProcessingListener;
 use modules\order\src\listeners\order\OrderRecalculateProfitAmountListener;
 use modules\order\src\listeners\order\SendConfirmationEmailListener;
@@ -57,5 +58,6 @@ return [
     ],
     OrderCanceledEvent::class => [
         OrderChangeStatusLogListener::class,
+        SendCanceledEmailListener::class,
     ],
 ];
