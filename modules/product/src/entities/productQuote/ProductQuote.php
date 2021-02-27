@@ -697,4 +697,9 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     {
         return $this->pq_status_id === ProductQuoteStatus::BOOKED;
     }
+
+    public function isDeletable(): bool
+    {
+        return ProductQuoteStatus::isDeletable($this->pq_status_id);
+    }
 }

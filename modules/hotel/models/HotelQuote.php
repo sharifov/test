@@ -373,9 +373,9 @@ class HotelQuote extends ActiveRecord implements Quotable
     /**
      * @return bool
      */
-    public function isBooking(): bool
+    public function isBooked(): bool
     {
-        return (!empty($this->hq_booking_id));
+        return ($this->hqProductQuote->isBooked() && !empty($this->hq_booking_id));
     }
 
     /**
@@ -383,7 +383,7 @@ class HotelQuote extends ActiveRecord implements Quotable
      */
     public function isBookable(): bool
     {
-        return (ProductQuoteStatus::isBookable($this->hqProductQuote->pq_status_id) && !$this->isBooking());
+        return (ProductQuoteStatus::isBookable($this->hqProductQuote->pq_status_id) && !$this->isBooked());
     }
 
     public static function findByProductQuote(int $productQuoteId): ?Quotable
