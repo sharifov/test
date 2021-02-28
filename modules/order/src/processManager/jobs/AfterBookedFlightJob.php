@@ -42,10 +42,12 @@ class AfterBookedFlightJob implements RetryableJobInterface
         }
 
         $process = OrderProcessManager::findOne($quote->pq_order_id);
+
         if (!$process) {
             \Yii::error([
                 'message' => 'Not found Order Process Manager',
                 'orderId' => $quote->pq_order_id,
+                'quoteId' => $quote->pq_id,
             ], 'OrderProcessManager:AfterBookedFlightJob');
             return;
         }
@@ -54,6 +56,7 @@ class AfterBookedFlightJob implements RetryableJobInterface
             \Yii::error([
                 'message' => 'Order Process Manager is not in Booking Flight. Status Id: ' . $process->opm_status,
                 'orderId' => $quote->pq_order_id,
+                'quoteId' => $quote->pq_id,
             ], 'OrderProcessManager:AfterBookedFlightJob');
             return;
         }

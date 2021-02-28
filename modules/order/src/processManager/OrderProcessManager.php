@@ -102,4 +102,9 @@ class OrderProcessManager extends ActiveRecord
     {
         return $this->opm_status === self::STATUS_BOOKING_OTHER_PRODUCTS;
     }
+
+    public function isBooked(): bool
+    {
+        return $this->opm_status === self::STATUS_BOOKED;
+    }
 }

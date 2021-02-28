@@ -11,13 +11,18 @@ class OrderProcessPaymentChargeListener
 {
     public function handle(OrderPreparedEvent $event): void
     {
-        $process = OrderProcessManager::find()->andWhere(['opm_id' => $event->orderId, 'opm_status' => OrderProcessManager::STATUS_BOOKED])->one();
+        $process = OrderProcessManager::findOne($event->orderId);
 
         if (!$process) {
             return;
         }
 
+        if (!$process->isBooked()) {
+            return;
+        }
+
         $payment = Payment::find()->andWhere(['pay_order_id' => $event->orderId])->one();
+
         if (!$payment) {
             \Yii::error([
                 'message' => 'Payment charge error',
@@ -26,6 +31,7 @@ class OrderProcessPaymentChargeListener
             ], 'OrderProcessPaymentChargeListener');
             return;
         }
+
         \Yii::$app->queue_job->push(new ChargePaymentJob($payment->pay_id));
     }
 }
