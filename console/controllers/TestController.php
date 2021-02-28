@@ -11,6 +11,7 @@ use common\models\UserOnline;
 use Faker\Factory;
 use modules\hotel\models\HotelQuote;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookService;
+use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\processManager\events\FlightQuoteBookedEvent;
 use modules\order\src\processManager\events\QuoteBookedEvent;
 use modules\order\src\processManager\jobs\BookingHotelJob;
@@ -64,6 +65,11 @@ class TestController extends Controller
 
     public function actionTest()
     {
+        $repo = \Yii::createObject(OrderRepository::class);
+        $order = $repo->find(13);
+        $order->complete('', 1, 1);
+        $repo->save($order);
+
 
         die;
 //        $hotelQuote = HotelQuote::findOne(31);
