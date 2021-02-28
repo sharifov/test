@@ -4,17 +4,15 @@ namespace modules\order\controllers;
 
 use common\models\Payment;
 use common\models\search\TransactionSearch;
-use common\models\Transaction;
 use frontend\controllers\FController;
 use yii\helpers\ArrayHelper;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 
 /**
  * Class PaymentActionsController
  *
  */
-class PaymentActionsController extends Controller
+class PaymentActionsController extends FController
 {
     public function behaviors(): array
     {

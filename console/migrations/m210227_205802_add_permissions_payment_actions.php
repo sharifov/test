@@ -15,8 +15,8 @@ class m210227_205802_add_permissions_payment_actions extends Migration
     ];
 
     private array $routes = [
-        '/order/order-actions/start-process',
-        '/order/order-actions/cancel-process',
+        '/order/order-process-actions/start-process',
+        '/order/order-process-actions/cancel-process',
         '/order/payment-actions/void',
         '/order/payment-actions/capture',
         '/order/payment-actions/refund',

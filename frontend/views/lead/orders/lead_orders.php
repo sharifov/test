@@ -230,6 +230,88 @@ $js = <<<JS
       // return false;
     });
     
+    $('body').off('click', '.btn-cancel-process').on('click', '.btn-cancel-process', function(e) {
+      
+        e.preventDefault();
+        
+        if(!confirm('Are you sure you want to cancel this order process?')) {
+            return '';
+        }
+        
+      let orderId = $(this).data('order-id');
+      let url = $(this).data('url');
+
+      $.ajax({
+          url: url,
+          type: 'post',
+          data: {'id': orderId},
+          dataType: 'json',
+      })
+          .done(function(data) {
+              if (data.error) {
+                  new PNotify({
+                        title: 'Error: cancel order process',
+                        type: 'error',
+                        text: data.message,
+                        hide: true
+                    });
+              } else {
+                  $.pjax.reload({container: '#pjax-lead-orders', push: false, replace: false, async: false, timeout: 2000});
+                  new PNotify({
+                        title: 'The order process was successfully canceled',
+                        type: 'success',
+                        text: data.message,
+                        hide: true
+                    });
+              }
+          })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        });
+      // return false;
+    });
+    
+    $('body').off('click', '.btn-start-process').on('click', '.btn-start-process', function(e) {
+      
+        e.preventDefault();
+        
+        if(!confirm('Are you sure you want to start this order process?')) {
+            return '';
+        }
+        
+      let orderId = $(this).data('order-id');
+      let url = $(this).data('url');
+
+      $.ajax({
+          url: url,
+          type: 'post',
+          data: {'id': orderId},
+          dataType: 'json',
+      })
+          .done(function(data) {
+              if (data.error) {
+                  new PNotify({
+                        title: 'Error: start order process',
+                        type: 'error',
+                        text: data.message,
+                        hide: true
+                    });
+              } else {
+                  $.pjax.reload({container: '#pjax-lead-orders', push: false, replace: false, async: false, timeout: 2000});
+                  new PNotify({
+                        title: 'The order process was successfully started',
+                        type: 'success',
+                        text: data.message,
+                        hide: true
+                    });
+              }
+          })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        });
+      // return false;
+    });
+    
     $(document).on('click', '.btn-order-status-log', function(e){        
         e.preventDefault();
         let url = $(this).data('url');
