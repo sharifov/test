@@ -68,8 +68,9 @@ class FlightQuoteBookService
     {
         $transactionManager = Yii::createObject(TransactionManager::class);
         $flightQuoteRepository = Yii::createObject(FlightQuoteRepository::class);
+        $productQuoteRepository = Yii::createObject(ProductQuoteRepository::class);
 
-        $transactionManager->wrap(function () use ($flightQuote, $responseData, $flightQuoteRepository) {
+        $transactionManager->wrap(function () use ($flightQuote, $responseData, $flightQuoteRepository, $productQuoteRepository) {
             if (!$recordLocator = ArrayHelper::getValue($responseData, 'recordLocator')) {
                 throw new \RuntimeException('RecordLocator not found');
             }
@@ -77,6 +78,10 @@ class FlightQuoteBookService
             $flightQuote->fq_json_booking = $responseData;
             $flightQuote->fq_record_locator = $recordLocator;
             $flightQuoteRepository->save($flightQuote);
+
+            $productQuote = $flightQuote->fqProductQuote;
+            $productQuote->inProgress();
+            $productQuoteRepository->save($productQuote);
         });
         return true;
     }
