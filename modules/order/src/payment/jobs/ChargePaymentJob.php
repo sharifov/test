@@ -4,6 +4,7 @@ namespace modules\order\src\payment\jobs;
 
 use common\models\Payment;
 use modules\order\src\payment\PaymentRepository;
+use modules\order\src\payment\services\PaymentService;
 use yii\queue\RetryableJobInterface;
 
 /**
@@ -39,12 +40,22 @@ class ChargePaymentJob implements RetryableJobInterface
             return;
         }
 
-        // charge
-
-        // Charge OK
-        $repo = \Yii::createObject(PaymentRepository::class);
-        $payment->completed();
-        $repo->save($payment);
+        try {
+            $paymentService = \Yii::createObject(PaymentService::class);
+            $paymentService->capture([
+                'amount' => $payment->pay_amount,
+                'transaction_id' => $payment->pay_code,
+            ]);
+            $repo = \Yii::createObject(PaymentRepository::class);
+            $payment->completed();
+            $repo->save($payment);
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'message' => 'Payment Capture Error',
+                'error' => $e->getMessage(),
+                'paymentId' => $payment->pay_id,
+            ], 'ChargePaymentJob');
+        }
     }
 
     public function getTtr(): int

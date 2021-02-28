@@ -5,6 +5,7 @@ namespace modules\order\controllers;
 use common\models\Payment;
 use common\models\search\TransactionSearch;
 use frontend\controllers\FController;
+use modules\order\src\payment\PaymentRepository;
 use modules\order\src\payment\services\PaymentService;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
@@ -13,15 +14,18 @@ use yii\web\NotFoundHttpException;
  * Class PaymentActionsController
  *
  * @property PaymentService $paymentService
+ * @property PaymentRepository $paymentRepository
  */
 class PaymentActionsController extends FController
 {
     private PaymentService $paymentService;
+    private PaymentRepository $paymentRepository;
 
-    public function __construct($id, $module, PaymentService $paymentService, $config = [])
+    public function __construct($id, $module, PaymentService $paymentService, PaymentRepository $paymentRepository, $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->paymentService = $paymentService;
+        $this->paymentRepository = $paymentRepository;
     }
 
     public function behaviors(): array
@@ -64,7 +68,15 @@ class PaymentActionsController extends FController
         $payment = $this->findModel($paymentId);
 
         try {
-            $this->paymentService->capture([]);
+            if ($payment->isCompleted()) {
+                throw new \DomainException('Payment is already completed.');
+            }
+            $this->paymentService->capture([
+                'amount' => $payment->pay_amount,
+                'transaction_id' => $payment->pay_code,
+            ]);
+            $payment->completed();
+            $this->paymentRepository->save($payment);
             return $this->asJson([
                 'error' => false,
                 'message' => 'ok',
