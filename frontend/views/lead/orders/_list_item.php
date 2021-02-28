@@ -406,8 +406,8 @@ $process = OrderProcessManager::findOne($order->or_id);
                                                     'class' => 'dropdown-item btn-payment-void',
                                                     'data-url' => \yii\helpers\Url::to([
                                                         '/order/payment-actions/void',
-                                                        'id' => $payment->pay_id
-                                                    ])
+                                                    ]),
+                                                    'data-payment-id' => $payment->pay_id,
                                                 ]
                                             );
                                         }
@@ -422,8 +422,8 @@ $process = OrderProcessManager::findOne($order->or_id);
                                                         'class' => 'dropdown-item btn-payment-capture',
                                                         'data-url' => \yii\helpers\Url::to([
                                                             '/order/payment-actions/capture',
-                                                            'id' => $payment->pay_id
-                                                        ])
+                                                        ]),
+                                                        'data-payment-id' => $payment->pay_id,
                                                 ]
                                             );
                                         }
@@ -438,8 +438,8 @@ $process = OrderProcessManager::findOne($order->or_id);
                                                     'class' => 'dropdown-item btn-payment-refund',
                                                     'data-url' => \yii\helpers\Url::to([
                                                         '/order/payment-actions/refund',
-                                                        'id' => $payment->pay_id
-                                                    ])
+                                                    ]),
+                                                    'data-payment-id' => $payment->pay_id,
                                                 ]
                                             );
                                         }

@@ -5,15 +5,25 @@ namespace modules\order\controllers;
 use common\models\Payment;
 use common\models\search\TransactionSearch;
 use frontend\controllers\FController;
+use modules\order\src\payment\services\PaymentService;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 
 /**
  * Class PaymentActionsController
  *
+ * @property PaymentService $paymentService
  */
 class PaymentActionsController extends FController
 {
+    private PaymentService $paymentService;
+
+    public function __construct($id, $module, PaymentService $paymentService, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->paymentService = $paymentService;
+    }
+
     public function behaviors(): array
     {
         $behaviors = [
@@ -29,29 +39,62 @@ class PaymentActionsController extends FController
 
     public function actionVoid()
     {
-        $paymentId = (int) \Yii::$app->request->get('id');
+        $paymentId = (int) \Yii::$app->request->post('id');
 
         $payment = $this->findModel($paymentId);
 
-        //todo
+        try {
+            $this->paymentService->void([]);
+            return $this->asJson([
+                'error' => false,
+                'message' => 'ok',
+            ]);
+        } catch (\Throwable $e) {
+            return $this->asJson([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
     public function actionCapture()
     {
-        $paymentId = (int) \Yii::$app->request->get('id');
+        $paymentId = (int) \Yii::$app->request->post('id');
 
         $payment = $this->findModel($paymentId);
 
-        //todo
+        try {
+            $this->paymentService->capture([]);
+            return $this->asJson([
+                'error' => false,
+                'message' => 'ok',
+            ]);
+        } catch (\Throwable $e) {
+            return $this->asJson([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
     public function actionRefund()
     {
-        $paymentId = (int) \Yii::$app->request->get('id');
+        $paymentId = (int) \Yii::$app->request->post('id');
 
         $payment = $this->findModel($paymentId);
 
-        //todo
+        try {
+            $this->paymentService->refund([]);
+            return $this->asJson([
+                'error' => false,
+                'message' => 'ok',
+            ]);
+        } catch (\Throwable $e) {
+            return $this->asJson([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
     public function actionUpdate()
