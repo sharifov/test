@@ -1,6 +1,8 @@
 <?php
 
+use modules\flight\models\FlightQuote;
 use yii\helpers\Html;
+use yii\helpers\VarDumper;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
@@ -25,35 +27,55 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ]) ?>
     </p>
-
-    <?= DetailView::widget([
-        'model' => $model,
-        'attributes' => [
-            'fq_id',
-            'fq_flight_id',
-            'fq_source_id',
-            'fq_product_quote_id',
-            'fq_hash_key',
-            'fq_uid',
-            'fq_service_fee_percent',
-            'fq_record_locator',
-            'fq_gds',
-            'fq_gds_pcc',
-            'fq_gds_offer_id',
-            'fq_type_id',
-            'fq_cabin_class',
-            'fq_trip_type_id',
-            'fq_main_airline',
-            'fq_fare_type_id',
-            'fq_created_user_id',
-            'fq_created_expert_id',
-            'fq_created_expert_name',
-            'fq_reservation_dump:ntext',
-            'fq_pricing_info:ntext',
-            'fq_origin_search_data',
-            'fq_last_ticket_date',
-            'fq_request_hash'
-        ],
-    ]) ?>
+    <div class="row">
+        <div class="col-lg-6">
+            <?= DetailView::widget([
+                'model' => $model,
+                'attributes' => [
+                    'fq_id',
+                    'fq_flight_id',
+                    'fq_source_id',
+                    'fq_product_quote_id',
+                    'fq_hash_key',
+                    'fq_uid',
+                    'fq_service_fee_percent',
+                    'fq_record_locator',
+                    'fq_gds',
+                    'fq_gds_pcc',
+                    'fq_gds_offer_id',
+                    'fq_type_id',
+                    'fq_cabin_class',
+                    'fq_trip_type_id',
+                    'fq_main_airline',
+                    'fq_fare_type_id',
+                    'fq_created_user_id',
+                    'fq_created_expert_id',
+                    'fq_created_expert_name',
+                    'fq_reservation_dump:ntext',
+                    'fq_pricing_info:ntext',
+                    'fq_origin_search_data',
+                    'fq_last_ticket_date',
+                    'fq_request_hash'
+                ],
+            ]) ?>
+        </div>
+        <div class="col-lg-6">
+            <?= DetailView::widget([
+                'model' => $model,
+                'attributes' => [
+                    [
+                        'attribute' => 'fq_json_booking',
+                        'format' => 'raw',
+                        'value' => static function (FlightQuote $model) {
+                            if (!$model->fq_json_booking) {
+                                return Yii::$app->formatter->nullDisplay;
+                            }
+                            return VarDumper::dumpAsString($model->fq_json_booking, 20, true);
+                        }
+                    ],
+                ],
+            ]) ?>
+        </div>
+    </div>
 
 </div>

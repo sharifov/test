@@ -29,6 +29,11 @@ class OrderCrudSearch extends Order
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => [
+                'defaultOrder' => [
+                    'or_id' => SORT_DESC,
+                ]
+            ],
         ]);
 
         $this->load($params);

@@ -10,6 +10,7 @@ use modules\flight\src\entities\flightQuote\events\FlightQuoteCloneCreatedEvent;
 use modules\flight\src\entities\flightQuote\serializer\FlightQuoteSerializer;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteCreateDTO;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\interfaces\Quotable;
 use sales\entities\EventTrait;
 use yii\db\ActiveQuery;
@@ -44,6 +45,7 @@ use yii\helpers\ArrayHelper;
  * @property string|null $fq_last_ticket_date
  * @property string|null $fq_request_hash
  * @property string|null $fq_uid
+ * @property array|null $fq_json_booking
  *
  * @property Employee $fqCreatedUser
  * @property Flight $fqFlight
@@ -173,6 +175,7 @@ class FlightQuote extends ActiveRecord implements Quotable
             [['fq_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['fq_created_user_id' => 'id']],
             [['fq_flight_id'], 'exist', 'skipOnError' => true, 'targetClass' => Flight::class, 'targetAttribute' => ['fq_flight_id' => 'fl_id']],
             [['fq_product_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['fq_product_quote_id' => 'pq_id']],
+            [['fq_json_booking'], 'safe'],
         ];
     }
 
@@ -206,6 +209,7 @@ class FlightQuote extends ActiveRecord implements Quotable
             'fq_last_ticket_date' => 'Last Ticket Date',
             'fq_request_hash' => 'Request Hash',
             'fq_uid' => 'Uid',
+            'fq_json_booking' => 'Json booking',
         ];
     }
 
@@ -583,5 +587,15 @@ class FlightQuote extends ActiveRecord implements Quotable
     public static function getGdsList(): array
     {
         return SearchService::GDS_LIST;
+    }
+
+    public function isBooked(): bool
+    {
+        return $this->fqProductQuote->isBooked();
+    }
+
+    public function isBookable(): bool
+    {
+        return (ProductQuoteStatus::isBookable($this->fqProductQuote->pq_status_id) && !$this->isBooked());
     }
 }

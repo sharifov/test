@@ -2,9 +2,15 @@
 
 namespace modules\order\src\processManager\jobs;
 
+use modules\flight\components\api\FlightQuoteBookService;
+use modules\flight\models\FlightQuote;
+use modules\flight\src\services\flightQuote\FlightQuoteBookGuardService;
 use modules\order\src\processManager\OrderProcessManager;
 use modules\order\src\processManager\OrderProcessManagerRepository;
+use yii\helpers\ArrayHelper;
 use yii\queue\RetryableJobInterface;
+use common\models\Notifications;
+use frontend\widgets\notification\NotificationMessage;
 
 /**
  * Class BookingFlightJob
@@ -15,9 +21,9 @@ class BookingFlightJob implements RetryableJobInterface
 {
     public $quoteId;
 
-    public function __construct(int $quoteId)
+    public function __construct(int $flightQuoteId)
     {
-        $this->quoteId = $quoteId;
+        $this->quoteId = $flightQuoteId;
     }
 
     public function execute($queue)
@@ -26,6 +32,37 @@ class BookingFlightJob implements RetryableJobInterface
             'message' => 'Booking Flight Quote processing',
             'quoteId' => $this->quoteId,
         ], 'info\OrderProcessManager:BookingFlightJob');
+
+        if (!$flightQuote = FlightQuote::findOne($this->quoteId)) {
+            \Yii::error([
+                'message' => 'Not found Flight Quote',
+                'quoteId' => $this->quoteId,
+            ], 'OrderProcessManager:BookingFlightJob');
+            return;
+        }
+
+        try {
+            FlightQuoteBookGuardService::guard($flightQuote);
+            $requestData = ArrayHelper::getValue($flightQuote, 'fqProductQuote.pqOrder.or_request_data');
+            $responseData = FlightQuoteBookService::requestBook($requestData);
+            FlightQuoteBookService::createBook($flightQuote, $responseData);
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'message' => 'Booking Hotel error',
+                'error' => $e->getMessage(),
+                'quoteId' => $this->quoteId,
+            ], 'OrderProcessManager:BookingHotelJob');
+
+            if ($userId = $flightQuote->fqProductQuote->pqOrder->orLead->employee_id) {
+                Notifications::createAndPublish(
+                    $userId,
+                    'Booking Flight error.',
+                    'QuoteId: ' . $this->quoteId . ' Error: ' . $e->getMessage(),
+                    Notifications::TYPE_DANGER,
+                    true
+                );
+            }
+        }
     }
 
     public function getTtr(): int
