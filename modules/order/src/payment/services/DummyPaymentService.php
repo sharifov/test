@@ -2,15 +2,15 @@
 
 namespace modules\order\src\payment\services;
 
-class PaymentDummyService implements PaymentService
+class DummyPaymentService implements PaymentService
 {
-
     public function void(array $data): void
     {
     }
 
-    public function capture(array $data): void
+    public function capture(array $data): array
     {
+        return ['transaction_id' => 111111];
     }
 
     public function refund(array $data): void

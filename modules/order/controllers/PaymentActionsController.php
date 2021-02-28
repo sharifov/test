@@ -4,6 +4,7 @@ namespace modules\order\controllers;
 
 use common\models\Payment;
 use common\models\search\TransactionSearch;
+use common\models\Transaction;
 use frontend\controllers\FController;
 use modules\order\src\payment\PaymentRepository;
 use modules\order\src\payment\services\PaymentService;
@@ -71,10 +72,25 @@ class PaymentActionsController extends FController
             if ($payment->isCompleted()) {
                 throw new \DomainException('Payment is already completed.');
             }
-            $this->paymentService->capture([
+            $result = $this->paymentService->capture([
                 'amount' => $payment->pay_amount,
                 'transaction_id' => $payment->pay_code,
             ]);
+            $transaction = new Transaction([
+                'tr_amount' => $payment->pay_amount,
+                'tr_code' => $result['transaction_id'] ?? null,
+                'tr_date' => date('Y-m-d'),
+                'tr_type_id' => Transaction::TYPE_CAPTURE,
+                'tr_payment_id' => $payment->pay_id,
+                'tr_created_dt' => date('Y-m-d H:i:s'),
+            ]);
+            if (!$transaction->save()) {
+                \Yii::error([
+                    'message' => 'Transaction save error',
+                    'model' => $transaction->getAttributes(),
+                    'errors' => $transaction->getErrors()
+                ], 'PaymentController:Capture');
+            }
             $payment->completed();
             $this->paymentRepository->save($payment);
             return $this->asJson([
