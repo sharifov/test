@@ -61,6 +61,13 @@ class FlightQuoteBookService
             );
             throw new \RuntimeException('FlightQuoteBookService BO in response not found success or errors.');
         }
+        \Yii::error(
+            VarDumper::dumpAsString([
+            'data' => $data,
+            'responseContent' => $responseBO->content,
+            ]),
+            'FlightQuoteBookService:book:request'
+        );
         throw new \RuntimeException('FlightQuoteBookService BO request error. ' . VarDumper::dumpAsString($responseBO->content));
     }
 
