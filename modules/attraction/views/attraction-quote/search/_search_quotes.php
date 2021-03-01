@@ -79,7 +79,7 @@ The SPA service at Christmas is closed on December 25 and January 1.'
         'emptyText' => '<div class="text-center">Not found any hotels</div><br>',
         'itemView' => function ($dataHotel, $key, $index, $widget) use ($hotelSearch) {
             //\yii\helpers\VarDumper::dump($dataHotel, 10, true); exit;
-            return $this->render('_list_hotel_quotes', ['dataHotel' => $dataHotel, 'index' => $index, 'key' => $key, 'hotelSearch' => $hotelSearch]);
+            return $this->render('_list_attraction_quotes', ['dataHotel' => $dataHotel, 'index' => $index, 'key' => $key, 'hotelSearch' => $hotelSearch]);
         },
         //'layout' => "{items}<div class=\"text-center\" style='margin-top: -20px; margin-bottom: -25px'>{pager}</div>", // {summary}\n<div class="text-center">{pager}</div>
         'itemOptions' => [
