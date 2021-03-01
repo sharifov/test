@@ -252,8 +252,8 @@ JS;
             'is_manager' => $is_manager,
         ])*/ ?>
         <i class="fa fa-user"></i> <?=$model->atnqProductQuote->pqCreatedUser ? Html::encode($model->atnqProductQuote->pqCreatedUser->username) : '-'?>,
-        <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($model->atnqProductQuote->pq_created_dt)) ?>,
-        <i title="code: <?=\yii\helpers\Html::encode($model->atnq_hash_key)?>">Hash: <?=\yii\helpers\Html::encode($model->atnq_hash_key)?></i>
+        <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($model->atnqProductQuote->pq_created_dt)) ?>
+        <!--<i title="code: <?php /*=\yii\helpers\Html::encode($model->atnq_hash_key)*/?>">Hash: <?php /* =\yii\helpers\Html::encode($model->atnq_hash_key)*/?></i>-->
 
 
 
