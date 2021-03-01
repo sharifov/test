@@ -336,7 +336,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $options = $this->productQuoteOptions;
         if ($options) {
             foreach ($options as $option) {
-                $sum += $option->pqo_price;
+                $sum += $option->pqo_price + $option->pqo_extra_markup;
             }
             $sum = round($sum, 2);
         }
