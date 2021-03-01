@@ -9,13 +9,13 @@ use modules\order\src\entities\order\events\OrderUserProfitUpdateProfitAmountEve
 use modules\order\src\entities\order\events\UpdateOrderTipsUserProfitAmountEvent;
 use modules\order\src\events\OrderProcessingEvent;
 use modules\order\src\listeners\lead\LeadSoldListener;
+use modules\order\src\listeners\order\OrderCanceledConfirmationListener;
 use modules\order\src\listeners\order\OrderChangeStatusLogListener;
+use modules\order\src\listeners\order\OrderCompletedConfirmationListener;
 use modules\order\src\listeners\order\OrderLogPaymentStatusListener;
-use modules\order\src\listeners\order\SendCanceledEmailListener;
+use modules\order\src\listeners\order\OrderProcessingConfirmationListener;
 use modules\order\src\processManager\listeners\OrderPrepareOrderProcessingListener;
 use modules\order\src\listeners\order\OrderRecalculateProfitAmountListener;
-use modules\order\src\listeners\order\SendConfirmationEmailListener;
-use modules\order\src\listeners\order\SendOrderDetailsAndReceiptListener;
 use modules\order\src\listeners\orderTipsUserProfit\UpdateOrderTipsUserProfitAmountEventListener;
 use modules\order\src\listeners\orderUserProfit\OrderUserProfitUpdateProfitAmountEventListener;
 use modules\order\src\payment\listeners\OrderProcessPaymentChargeListener;
@@ -25,7 +25,9 @@ use modules\order\src\processManager\listeners;
 return [
     OrderRecalculateProfitAmountEvent::class => [OrderRecalculateProfitAmountListener::class],
     OrderUserProfitUpdateProfitAmountEvent::class => [OrderUserProfitUpdateProfitAmountEventListener::class],
-    OrderProcessingEvent::class => [],
+    OrderProcessingEvent::class => [
+        OrderProcessingConfirmationListener::class,
+    ],
 
     //OrderProcessManagerEvents
     events\CreatedEvent::class => [
@@ -57,12 +59,11 @@ return [
     ],
     OrderCompletedEvent::class => [
         LeadSoldListener::class,
-        SendConfirmationEmailListener::class,
-        SendOrderDetailsAndReceiptListener::class,
         OrderChangeStatusLogListener::class,
+        OrderCompletedConfirmationListener::class,
     ],
     OrderCanceledEvent::class => [
         OrderChangeStatusLogListener::class,
-        SendCanceledEmailListener::class,
+        OrderCanceledConfirmationListener::class,
     ],
 ];

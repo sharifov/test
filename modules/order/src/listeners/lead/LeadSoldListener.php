@@ -28,7 +28,8 @@ class LeadSoldListener
             $repo->save($lead);
         } catch (\Throwable $e) {
             \Yii::error([
-
+                'message' => 'Transfer Lead to Sold error',
+                'error' => $e->getMessage(),
             ], 'LeadSoldListener');
         }
     }

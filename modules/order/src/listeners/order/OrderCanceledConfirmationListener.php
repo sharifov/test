@@ -3,14 +3,12 @@
 namespace modules\order\src\listeners\order;
 
 use modules\order\src\entities\order\events\OrderCanceledEvent;
+use modules\order\src\jobs\OrderCanceledConfirmationJob;
 
-class SendCanceledEmailListener
+class OrderCanceledConfirmationListener
 {
     public function handle(OrderCanceledEvent $event): void
     {
-        \Yii::info([
-            'message' => 'Send canceled email',
-            'orderId' => $event->orderId,
-        ], 'info\SendCanceledEmail');
+        \Yii::$app->queue_job->push(new OrderCanceledConfirmationJob($event->orderId));
     }
 }
