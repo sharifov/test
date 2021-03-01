@@ -177,7 +177,7 @@ class FlightQuote extends ActiveRecord implements Quotable
             [['fq_flight_id'], 'exist', 'skipOnError' => true, 'targetClass' => Flight::class, 'targetAttribute' => ['fq_flight_id' => 'fl_id']],
             [['fq_product_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['fq_product_quote_id' => 'pq_id']],
             [['fq_json_booking'], 'safe'],
-            [['fq_flight_request_uid'], 'string', 'max' => 100] // flight_request_uid
+            [['fq_flight_request_uid'], 'string', 'max' => 100],
         ];
     }
 
