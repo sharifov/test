@@ -4,10 +4,9 @@ namespace webapi\modules\v1\controllers;
 
 use modules\flight\models\FlightQuote;
 use modules\flight\src\exceptions\FlightCodeException;
+use modules\flight\src\forms\TicketFlightsForm;
 use modules\flight\src\repositories\flightQuoteRepository\FlightQuoteRepository;
-use sales\model\client\ClientCodeException;
 use sales\repositories\product\ProductQuoteRepository;
-use TicketFlightsForm;
 use webapi\src\Messages;
 use webapi\src\response\ErrorResponse;
 use webapi\src\response\messages\CodeMessage;
@@ -57,15 +56,14 @@ class FlightController extends ApiBaseController
 
         $flightQuoteRepository = Yii::createObject(FlightQuoteRepository::class);
         $productQuoteRepository = Yii::createObject(ProductQuoteRepository::class);
+        $productQuote = $flightQuote->fqProductQuote;
 
         if ($form->status === $form::SUCCESS_STATUS) {
-            $productQuote = $flightQuote->fqProductQuote;
-            $productQuote->booked();
-            $productQuoteRepository->save($productQuote);
-        /* TODO:: generate pdf (in job) */
+            $productQuote->booked(); /* TODO:: generate pdf (in job) */
         } else {
-            /* TODO::  */
+            $productQuote->error();
         }
+        $productQuoteRepository->save($productQuote);
 
         $flightQuote->fq_ticket_json = $post;
         $flightQuoteRepository->save($flightQuote);
