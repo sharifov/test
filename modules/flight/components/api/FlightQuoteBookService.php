@@ -45,14 +45,6 @@ class FlightQuoteBookService
             }
 
             if (!empty($responseData['errors'])) {
-                $errors = '';
-                foreach ($responseData['errors'] as $error) {
-                    if (is_array($error)) {
-                        $errors .= implode('; ', $error);
-                    } else {
-                        $errors .= $error . '; ';
-                    }
-                }
                 \Yii::error(
                     VarDumper::dumpAsString([
                     'data' => $requestData,
@@ -60,7 +52,7 @@ class FlightQuoteBookService
                     ]),
                     'FlightQuoteBookService:book:errors'
                 );
-                throw new \RuntimeException('FlightQuoteBookService BO errors: ' . $errors);
+                throw new \RuntimeException('FlightQuoteBookService BO errors: ' . VarDumper::dumpAsString($responseData['errors']));
             }
             \Yii::error(
                 VarDumper::dumpAsString([
