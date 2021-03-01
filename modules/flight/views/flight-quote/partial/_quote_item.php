@@ -10,6 +10,7 @@ use modules\flight\models\FlightQuote;
 use modules\flight\src\helpers\FlightQuoteHelper;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use sales\auth\Auth;
 use yii\bootstrap4\Html;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
@@ -229,6 +230,32 @@ $totalAmountQuote = 0.0;
                         ) ?>
                     <?php endif ?>
 
+                    <?php if (Auth::can('/flight/flight-quote/cancel')) : ?>
+                        <?= Html::a(
+                            '<i class="fa fa-share-square"></i> Cancel book',
+                            null,
+                            [
+                                'class' => 'dropdown-item btn-flight-quote-cancel-book',
+                                'data-url' => Url::to('/flight/flight-quote/cancel'),
+                                'data-id' => $model->flightQuote->fq_id,
+                                'data-product-id' => $model->pq_product_id,
+                            ]
+                        ) ?>
+                    <?php endif;?>
+
+                    <?php if (Auth::can('/flight/flight-quote/void')) : ?>
+                        <?= Html::a(
+                            '<i class="fa fa-share-square"></i> Void book',
+                            null,
+                            [
+                                'class' => 'dropdown-item btn-flight-quote-void-book',
+                                'data-url' => Url::to('/flight/flight-quote/void'),
+                                'data-id' => $model->flightQuote->fq_id,
+                                'data-product-id' => $model->pq_product_id,
+                            ]
+                        ) ?>
+                    <?php endif;?>
+
                     <?php if ($model->isDeletable()) : ?>
                     <div class="dropdown-divider"></div>
                         <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [
@@ -238,6 +265,7 @@ $totalAmountQuote = 0.0;
                             'data-product-id' => $model->pq_product_id,
                         ]) ?>
                     <?php endif;?>
+
                 </div>
             </li>
         </ul>

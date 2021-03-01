@@ -9,6 +9,7 @@ use common\models\Call;
 use common\models\Notifications;
 use common\models\UserOnline;
 use Faker\Factory;
+use modules\flight\components\api\FlightQuoteBookService;
 use modules\hotel\models\HotelQuote;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookService;
 use modules\order\src\entities\order\OrderRepository;
@@ -65,6 +66,9 @@ class TestController extends Controller
 
     public function actionTest()
     {
+        FlightQuoteBookService::cancel('121212', 4);
+
+            die;
         $repo = \Yii::createObject(OrderRepository::class);
         $order = $repo->find(13);
         $order->complete('', 1, 1);

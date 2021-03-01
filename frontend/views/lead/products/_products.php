@@ -342,6 +342,93 @@ $js = <<<JS
       // return false;
     });
     
+            
+    $('body').off('click', '.btn-flight-quote-cancel-book').on('click', '.btn-flight-quote-cancel-book', function (e) {
+      
+        e.preventDefault();
+        
+        let quoteId = $(this).data('id');
+        let productId = $(this).data('product-id');
+        let url = $(this).data('url');
+        
+      if(!confirm('Are you sure you want to Cancel Book quote ('+ quoteId +') ?')) {
+        return false;
+      }
+        
+      $.ajax({
+          url: url,
+          type: 'post',
+          data: {'id': quoteId},
+          dataType: 'json'
+      })
+          .done(function(data) {
+              if (data.error) {
+                  new PNotify({
+                        title: 'Error: Cancel book',
+                        type: 'error',
+                        text: data.message,
+                        hide: true
+                    });
+              } else {
+                  pjaxReload({
+                      container: '#pjax-product-quote-list-' + productId
+                  });
+                  new PNotify({
+                        title: 'The flight quote was successfully canceled',
+                        type: 'success',
+                        text: 'Success',
+                        hide: true
+                    });
+              }
+          })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        });
+    });
+    
+    $('body').off('click', '.btn-flight-quote-void-book').on('click', '.btn-flight-quote-void-book', function (e) {
+      
+        e.preventDefault();
+        
+        let quoteId = $(this).data('id');
+        let productId = $(this).data('product-id');
+        let url = $(this).data('url');
+        
+      if(!confirm('Are you sure you want to Void Book quote ('+ quoteId +') ?')) {
+        return false;
+      }
+        
+      $.ajax({
+          url: url,
+          type: 'post',
+          data: {'id': quoteId},
+          dataType: 'json'
+      })
+          .done(function(data) {
+              if (data.error) {
+                  new PNotify({
+                        title: 'Error: Void book',
+                        type: 'error',
+                        text: data.message,
+                        hide: true
+                    });
+              } else {
+                  pjaxReload({
+                      container: '#pjax-product-quote-list-' + productId
+                  });
+                  new PNotify({
+                        title: 'The flight quote was successfully void',
+                        type: 'success',
+                        text: 'Success',
+                        hide: true
+                    });
+              }
+          })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        });
+    });
+    
     
     $('body').off('click', '.btn-add-product-quote-option').on('click', '.btn-add-product-quote-option', function (e) {
         e.preventDefault();

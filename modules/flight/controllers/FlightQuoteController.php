@@ -531,6 +531,62 @@ class FlightQuoteController extends FController
         return $result;
     }
 
+    public function actionCancel(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $flightQuoteId = (int) Yii::$app->request->post('id', 0);
+
+        try {
+            $flightQuote = $this->findModel($flightQuoteId);
+            $projectId = $flightQuote->fqProductQuote->pqProduct->prLead->project_id ?? null;
+            if (!$projectId) {
+                throw new \DomainException('Not found Project');
+            }
+            FlightQuoteBookService::cancel($flightQuote->fq_uid, $projectId);
+            $productQuote = $this->productQuoteRepository->find($flightQuote->fq_product_quote_id);
+            $productQuote->cancelled(Auth::id());
+            $this->productQuoteRepository->save($productQuote);
+            return [
+                'error' => false,
+                'message' => 'OK',
+            ];
+        } catch (\Throwable $throwable) {
+            return [
+                'error' => true,
+                'message' => $throwable->getMessage()
+            ];
+        }
+    }
+
+    public function actionVoid(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $flightQuoteId = (int) Yii::$app->request->post('id', 0);
+
+        try {
+            $flightQuote = $this->findModel($flightQuoteId);
+            $projectId = $flightQuote->fqProductQuote->pqProduct->prLead->project_id ?? null;
+            if (!$projectId) {
+                throw new \DomainException('Not found Project');
+            }
+            FlightQuoteBookService::void($flightQuote->fq_uid, $projectId);
+            $productQuote = $this->productQuoteRepository->find($flightQuote->fq_product_quote_id);
+            $productQuote->cancelled(Auth::id());
+            $this->productQuoteRepository->save($productQuote);
+            return [
+                'error' => false,
+                'message' => 'OK',
+            ];
+        } catch (\Throwable $throwable) {
+            return [
+                'error' => true,
+                'message' => $throwable->getMessage()
+            ];
+        }
+    }
+
     /**
      * Finds the FlightQuote model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
