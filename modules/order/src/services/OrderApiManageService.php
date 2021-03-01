@@ -14,6 +14,7 @@ use modules\order\src\forms\api\ProductQuotesForm;
 use modules\order\src\payment\method\PaymentMethodRepository;
 use modules\order\src\payment\PaymentRepository;
 use modules\product\src\entities\productQuote\ProductQuote;
+use sales\repositories\lead\LeadRepository;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\RecalculateProfitAmountService;
 use sales\services\TransactionManager;
@@ -30,6 +31,7 @@ use sales\services\TransactionManager;
  * @property InvoiceRepository $invoiceRepository
  * @property PaymentMethodRepository $paymentMethodRepository
  * @property PaymentRepository $paymentRepository
+ * @property LeadRepository $leadRepository
  */
 class OrderApiManageService
 {
@@ -65,6 +67,10 @@ class OrderApiManageService
      * @var PaymentRepository
      */
     private PaymentRepository $paymentRepository;
+    /**
+     * @var LeadRepository
+     */
+    private LeadRepository $leadRepository;
 
     public function __construct(
         OrderRepository $orderRepository,
@@ -74,7 +80,8 @@ class OrderApiManageService
         ProductQuoteRepository $productQuoteRepository,
         InvoiceRepository $invoiceRepository,
         PaymentMethodRepository $paymentMethodRepository,
-        PaymentRepository $paymentRepository
+        PaymentRepository $paymentRepository,
+        LeadRepository $leadRepository
     ) {
         $this->orderRepository = $orderRepository;
         $this->orderUserProfitRepository = $orderUserProfitRepository;
@@ -84,6 +91,7 @@ class OrderApiManageService
         $this->invoiceRepository = $invoiceRepository;
         $this->paymentMethodRepository = $paymentMethodRepository;
         $this->paymentRepository = $paymentRepository;
+        $this->leadRepository = $leadRepository;
     }
 
     /**
@@ -100,6 +108,11 @@ class OrderApiManageService
             $newOrder->processing();
             $orderId = $this->orderRepository->save($newOrder);
             $this->recalculateProfitAmountService->setOrders([$newOrder])->recalculateOrders();
+            $lead = $newOrder->orLead;
+            if ($lead) {
+                $lead->booked();
+                $this->leadRepository->save($lead);
+            }
 
             $newOrderUserProfit = (new OrderUserProfit())->create($orderId, $newOrder->or_owner_user_id, 100, $newOrder->or_profit_amount);
             $this->orderUserProfitRepository->save($newOrderUserProfit);
@@ -108,6 +121,7 @@ class OrderApiManageService
             foreach ($productQuotesForms as $productQuote) {
                 $quote = ProductQuote::findByGid($productQuote->gid);
                 $quote->setOrderRelation($newOrder->or_id);
+                $quote->applied();
                 $this->productQuoteRepository->save($quote);
                 $totalOrderPrice += $quote->pq_price;
 

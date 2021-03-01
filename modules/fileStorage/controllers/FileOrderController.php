@@ -1,26 +1,22 @@
 <?php
 
-namespace modules\order\controllers;
+namespace modules\fileStorage\controllers;
 
-use frontend\helpers\JsonHelper;
-use sales\auth\Auth;
-use Yii;
-use modules\order\src\entities\order\Order;
-use modules\order\src\entities\order\search\OrderCrudSearch;
 use frontend\controllers\FController;
+use Yii;
+use modules\fileStorage\src\entity\fileOrder\FileOrder;
+use modules\fileStorage\src\entity\fileOrder\search\FileOrderSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
+use yii\db\StaleObjectException;
 
-/**
- * OrderController implements the CRUD actions for Order model.
- */
-class OrderCrudController extends FController
+class FileOrderController extends FController
 {
     /**
-     * @return array
-     */
+    * @return array
+    */
     public function behaviors(): array
     {
         $behaviors = [
@@ -34,13 +30,19 @@ class OrderCrudController extends FController
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
+    public function init(): void
+    {
+        parent::init();
+        $this->layoutCrud();
+    }
+
     /**
      * @return string
      */
     public function actionIndex(): string
     {
-        $searchModel = new OrderCrudSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
+        $searchModel = new FileOrderSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
@@ -51,7 +53,7 @@ class OrderCrudController extends FController
     /**
      * @param $id
      * @return string
-     * @throws NotFoundHttpException
+     * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionView($id): string
     {
@@ -65,10 +67,10 @@ class OrderCrudController extends FController
      */
     public function actionCreate()
     {
-        $model = new Order();
+        $model = new FileOrder();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->or_id]);
+            return $this->redirect(['view', 'id' => $model->fo_id]);
         }
 
         return $this->render('create', [
@@ -85,11 +87,8 @@ class OrderCrudController extends FController
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post())) {
-            $model->or_request_data = JsonHelper::decode($model->or_request_data);
-            if ($model->save()) {
-                return $this->redirect(['view', 'id' => $model->or_id]);
-            }
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            return $this->redirect(['view', 'id' => $model->fo_id]);
         }
 
         return $this->render('update', [
@@ -98,11 +97,11 @@ class OrderCrudController extends FController
     }
 
     /**
-     * @param $id
+     * @param int $fo_id
      * @return Response
      * @throws NotFoundHttpException
      * @throws \Throwable
-     * @throws \yii\db\StaleObjectException
+     * @throws StaleObjectException
      */
     public function actionDelete($id): Response
     {
@@ -112,16 +111,16 @@ class OrderCrudController extends FController
     }
 
     /**
-     * @param $id
-     * @return Order
+     * @param int $fo_id
+     * @return FileOrder
      * @throws NotFoundHttpException
      */
-    protected function findModel($id): Order
+    protected function findModel($fo_id): FileOrder
     {
-        if (($model = Order::findOne($id)) !== null) {
+        if (($model = FileOrder::findOne(['fo_id' => $fo_id])) !== null) {
             return $model;
         }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+        throw new NotFoundHttpException('FileOrder not found');
     }
 }

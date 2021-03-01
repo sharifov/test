@@ -25,6 +25,7 @@ class FileStorageModule extends Module
             ['label' => 'Cases', 'url' => ['/' . $modulePath . '/file-case/index']],
             ['label' => 'Clients', 'url' => ['/' . $modulePath . '/file-client/index']],
             ['label' => 'Users', 'url' => ['/' . $modulePath . '/file-user/index']],
+            ['label' => 'Order', 'url' => ['/' . $modulePath . '/file-order/index']],
         ];
         return $items;
     }

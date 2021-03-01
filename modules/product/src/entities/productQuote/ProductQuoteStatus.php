@@ -175,6 +175,7 @@ class ProductQuoteStatus
         return in_array($status, [
             self::NEW,
             self::PENDING,
+            self::APPLIED,
         ]);
     }
 

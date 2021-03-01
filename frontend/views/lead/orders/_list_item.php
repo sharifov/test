@@ -67,7 +67,7 @@ $process = OrderProcessManager::findOne($order->or_id);
                     <?php if ($process) : ?>
                         <?php if ($process->isRunning()) : ?>
                             <?php if (Auth::can('/order/order-process-actions/cancel-process')) : ?>
-                                <?= Html::a('Cancel Process', null, [
+                                <?= Html::a('Cancel Auto Process', null, [
                                     'data-url' => \yii\helpers\Url::to(['/order/order-process-actions/cancel-process']),
                                     'class' => 'dropdown-item btn-cancel-process',
                                     'data-order-id' => $order->or_id,
@@ -76,7 +76,7 @@ $process = OrderProcessManager::findOne($order->or_id);
                         <?php endif;?>
                     <?php else : ?>
                         <?php if (Auth::can('/order/order-process-actions/start-process')) : ?>
-                            <?= Html::a('Start Process', null, [
+                            <?= Html::a('Start Auto Processing', null, [
                                 'data-url' => \yii\helpers\Url::to(['/order/order-process-actions/start-process']),
                                 'class' => 'dropdown-item btn-start-process',
                                 'data-order-id' => $order->or_id,

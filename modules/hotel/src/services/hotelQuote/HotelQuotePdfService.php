@@ -6,6 +6,8 @@ use modules\fileStorage\src\entity\fileClient\FileClient;
 use modules\fileStorage\src\entity\fileClient\FileClientRepository;
 use modules\fileStorage\src\entity\fileLead\FileLead;
 use modules\fileStorage\src\entity\fileLead\FileLeadRepository;
+use modules\fileStorage\src\entity\fileOrder\FileOrder;
+use modules\fileStorage\src\entity\fileOrder\FileOrderRepository;
 use modules\fileStorage\src\entity\fileStorage\FileStorage;
 use modules\fileStorage\src\entity\fileStorage\FileStorageRepository;
 use modules\fileStorage\src\FileSystem;
@@ -13,6 +15,7 @@ use modules\fileStorage\src\services\CreateByLocalFileDto;
 use modules\hotel\models\HotelQuote;
 use sales\services\pdf\GeneratorPdfService;
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\helpers\FileHelper;
 use yii\helpers\VarDumper;
 
@@ -44,6 +47,7 @@ class HotelQuotePdfService
         $fileStorageRepository = Yii::createObject(FileStorageRepository::class);
         $fileClientRepository = Yii::createObject(FileClientRepository::class);
         $fileLeadRepository = Yii::createObject(FileLeadRepository::class);
+        $fileOrderRepository = Yii::createObject(FileOrderRepository::class);
         $fileSystem = Yii::createObject(FileSystem::class);
 
         $title = 'BookingConfirmationQ' . $hotelQuote->hqProductQuote->pq_id . '.pdf';
@@ -61,6 +65,16 @@ class HotelQuotePdfService
         if ($leadId && $fileStorage->fs_id) {
             $fileLead = FileLead::create($fileStorage->fs_id, $leadId);
             $fileLeadRepository->save($fileLead);
+        }
+
+        if ($fileStorage->fs_id && $orderId = ArrayHelper::getValue($hotelQuote, 'hqProductQuote.pqOrder.or_id')) {
+            $fileOrder = FileOrder::create(
+                $fileStorage->fs_id,
+                $orderId,
+                $hotelQuote->hq_product_quote_id,
+                FileOrder::CATEGORY_CONFIRMATION
+            );
+            $fileOrderRepository->save($fileOrder);
         }
 
         if (file_exists($patchToLocalFile)) {

@@ -93,6 +93,8 @@ class Order extends ActiveRecord
             [['or_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['or_created_user_id' => 'id']],
             [['or_owner_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['or_owner_user_id' => 'id']],
             [['or_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['or_updated_user_id' => 'id']],
+
+            ['or_request_data', 'safe'],
         ];
     }
 
@@ -120,7 +122,7 @@ class Order extends ActiveRecord
             'or_created_dt' => 'Created Dt',
             'or_updated_dt' => 'Updated Dt',
             'or_profit_amount' => 'Profit amount',
-            'ot_request_data' => 'Request Data'
+            'or_request_data' => 'Request Data',
         ];
     }
 
@@ -301,7 +303,9 @@ class Order extends ActiveRecord
             $this->or_client_currency_rate = (float) $this->orClientCurrency->cur_app_rate;
         }
 
-        $this->or_client_total = round($this->or_app_total * $this->or_client_currency_rate, 2);
+        if ($this->or_app_total && $this->or_client_currency_rate) {
+            $this->or_client_total = round($this->or_app_total * $this->or_client_currency_rate, 2);
+        }
     }
 
     /**

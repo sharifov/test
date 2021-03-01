@@ -61,25 +61,9 @@ $this->params['breadcrumbs'][] = $this->title;
         <h4><?=$model->getAttributeLabel('or_request_data')?></h4>
         <pre>
             <?php
-
-            try {
-                echo JsonEditor::widget(
-                    [
-                        'clientOptions' => [
-                            'modes' => ['code', 'view'], //'text',
-                            'mode' => 'view'
-                        ],
-                        //'collapseAll' => ['view'],
-                        'expandAll' => ['tree', 'form'],
-                        'value' => Json::encode($model->or_request_data)
-                    ]
-                );
-            } catch (Exception $exception) {
                 echo VarDumper::dumpAsString(($model->or_request_data), 10, true);
-            }
-
             ?>
-                </pre>
+        </pre>
       </div>
     </div>
 
