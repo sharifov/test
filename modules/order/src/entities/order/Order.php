@@ -301,7 +301,9 @@ class Order extends ActiveRecord
             $this->or_client_currency_rate = (float) $this->orClientCurrency->cur_app_rate;
         }
 
-        $this->or_client_total = round($this->or_app_total * $this->or_client_currency_rate, 2);
+        if ($this->or_app_total && $this->or_client_currency_rate) {
+            $this->or_client_total = round($this->or_app_total * $this->or_client_currency_rate, 2);
+        }
     }
 
     /**
