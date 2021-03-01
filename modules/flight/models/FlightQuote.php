@@ -47,6 +47,7 @@ use yii\helpers\ArrayHelper;
  * @property string|null $fq_uid
  * @property array|null $fq_json_booking
  * @property string|null $fq_flight_request_uid
+ * @property array|null $fq_ticket_json
  *
  * @property Employee $fqCreatedUser
  * @property Flight $fqFlight
@@ -176,7 +177,7 @@ class FlightQuote extends ActiveRecord implements Quotable
             [['fq_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['fq_created_user_id' => 'id']],
             [['fq_flight_id'], 'exist', 'skipOnError' => true, 'targetClass' => Flight::class, 'targetAttribute' => ['fq_flight_id' => 'fl_id']],
             [['fq_product_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['fq_product_quote_id' => 'pq_id']],
-            [['fq_json_booking'], 'safe'],
+            [['fq_json_booking', 'fq_ticket_json'], 'safe'],
             [['fq_flight_request_uid'], 'string', 'max' => 100],
         ];
     }
@@ -211,8 +212,9 @@ class FlightQuote extends ActiveRecord implements Quotable
             'fq_last_ticket_date' => 'Last Ticket Date',
             'fq_request_hash' => 'Request Hash',
             'fq_uid' => 'Uid',
-            'fq_json_booking' => 'Json booking',
-            'fq_flight_request_uid' => 'Hybrid UID',
+            'fq_json_booking' => 'Booking Json',
+            'fq_flight_request_uid' => 'Flight request UID',
+            'fq_ticket_json' => 'Ticket json',
         ];
     }
 
