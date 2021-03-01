@@ -40,6 +40,11 @@ class FlightQuoteBookService
         if ($responseBO->isOk) {
             $responseData = $responseBO->data;
 
+            \Yii::info([
+                'requestData' => $requestData,
+                'responseData' => $responseData,
+            ], 'info\FlightQuoteBookService:responseData'); /* TODO: FOR DEBUG:: must by remove */
+
             if (!empty($responseData['success'])) {
                 return $responseData['success'];
             }
