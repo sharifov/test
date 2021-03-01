@@ -322,6 +322,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return self::findOne(['pq_gid' => $gid]);
     }
 
+    public function applied(): void
+    {
+        $this->pq_status_id = ProductQuoteStatus::APPLIED;
+    }
+
     /**
      * @return float
      */
