@@ -543,7 +543,10 @@ class FlightQuoteController extends FController
             if (!$projectId) {
                 throw new \DomainException('Not found Project');
             }
-            FlightQuoteBookService::cancel($flightQuote->fq_uid, $projectId);
+            if (!$flightQuote->fq_flight_request_uid) {
+                throw new \DomainException('Not found Request UID');
+            }
+            FlightQuoteBookService::cancel($flightQuote->fq_flight_request_uid, $projectId);
             $productQuote = $this->productQuoteRepository->find($flightQuote->fq_product_quote_id);
             $productQuote->cancelled(Auth::id());
             $this->productQuoteRepository->save($productQuote);
@@ -571,7 +574,10 @@ class FlightQuoteController extends FController
             if (!$projectId) {
                 throw new \DomainException('Not found Project');
             }
-            FlightQuoteBookService::void($flightQuote->fq_uid, $projectId);
+            if (!$flightQuote->fq_flight_request_uid) {
+                throw new \DomainException('Not found Request UID');
+            }
+            FlightQuoteBookService::void($flightQuote->fq_flight_request_uid, $projectId);
             $productQuote = $this->productQuoteRepository->find($flightQuote->fq_product_quote_id);
             $productQuote->cancelled(Auth::id());
             $this->productQuoteRepository->save($productQuote);
