@@ -43,6 +43,13 @@ class FlightQuoteBookService
                         $errors .= $error . '; ';
                     }
                 }
+                \Yii::error(
+                    VarDumper::dumpAsString([
+                    'data' => $data,
+                    'responseData' => $responseData,
+                    ]),
+                    'FlightQuoteBookService:book:errors'
+                );
                 throw new \RuntimeException('FlightQuoteBookService BO errors: ' . $errors);
             }
             \Yii::error(
