@@ -2,12 +2,14 @@
 
 namespace modules\flight\controllers;
 
+use modules\flight\components\api\FlightQuoteBookService;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightPax;
 use modules\flight\src\helpers\FlightQuoteHelper;
 use modules\flight\src\repositories\flight\FlightRepository;
 use modules\flight\src\repositories\flightQuotePaxPriceRepository\FlightQuotePaxPriceRepository;
 use modules\flight\src\services\flight\FlightManageService;
+use modules\flight\src\services\flightQuote\FlightQuoteBookGuardService;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchForm;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchService;
@@ -21,6 +23,7 @@ use modules\product\src\useCases\product\create\ProductCreateForm;
 use modules\product\src\useCases\product\create\ProductCreateService;
 use sales\auth\Auth;
 use sales\forms\CompositeFormHelper;
+use sales\helpers\app\AppHelper;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
 use Yii;
@@ -34,6 +37,7 @@ use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * FlightQuoteController implements the CRUD actions for FlightQuote model.
@@ -501,6 +505,32 @@ class FlightQuoteController extends FController
         ]);
     }
 
+    public function actionAjaxBook(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $flightQuoteId = (int) Yii::$app->request->post('id', 0);
+        $result = ['status' => 0, 'message' => '', 'data' => []];
+
+        try {
+            $flightQuote = $this->findModel($flightQuoteId);
+            FlightQuoteBookGuardService::guard($flightQuote);
+            $requestData = ArrayHelper::getValue($flightQuote, 'fqProductQuote.pqOrder.or_request_data');
+
+            if ($responseData = FlightQuoteBookService::requestBook($requestData)) {
+                if (FlightQuoteBookService::createBook($flightQuote, $responseData)) {
+                    $result['status'] = 1;
+                    $result['message'] = 'Booking request accepted. RecordLocator: ' . ArrayHelper::getValue($responseData, 'recordLocator');
+                    return $result;
+                }
+            }
+            throw new \DomainException('Create Book is failed.');
+        } catch (\Throwable $throwable) {
+            $result['message'] = $throwable->getMessage();
+            \Yii::error(AppHelper::throwableLog($throwable, true), 'FlightQuoteController:actionAjaxBook');
+        }
+        return $result;
+    }
+
     /**
      * Finds the FlightQuote model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
@@ -514,6 +544,6 @@ class FlightQuoteController extends FController
             return $model;
         }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+        throw new NotFoundHttpException('FlightQuote not found.');
     }
 }

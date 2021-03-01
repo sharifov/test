@@ -214,7 +214,7 @@ $(document).on('click', '.js-delete-file-btn', function(e){
     .always(function(jqXHR, textStatus, errorThrown) {});
 });     
 
-function addFileToFileStorageList(data) {
+function addFileToFileStorageList() {
     pjaxReload({container: '#pjax-file-list'}); 
     $(".modal-backdrop").remove();
     

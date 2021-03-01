@@ -216,13 +216,28 @@ $totalAmountQuote = 0.0;
                         ?>
                     <?php endif;?>
 
+                    <?php if ($model->isBookable()) : ?>
+                        <?= Html::a(
+                            '<i class="fa fa-share-square"></i> Create Book',
+                            null,
+                            [
+                                'class' => 'dropdown-item js-btn-book-flight-quote',
+                                'data-url' => Url::to('/flight/flight-quote/ajax-book'),
+                                'data-flight-quote-id' => $model->flightQuote->fq_id,
+                                'data-product-id' => $model->pq_product_id,
+                            ]
+                        ) ?>
+                    <?php endif ?>
+
+                    <?php if ($model->isDeletable()) : ?>
                     <div class="dropdown-divider"></div>
-                    <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [
-                        'class' => 'dropdown-item text-danger btn-delete-product-quote',
-                        'data-product-quote-id' => $model->pq_id,
-                        'data-flight-quote-id' => $model->flightQuote->fq_id,
-                        'data-product-id' => $model->pq_product_id,
-                    ]) ?>
+                        <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [
+                            'class' => 'dropdown-item text-danger btn-delete-product-quote',
+                            'data-product-quote-id' => $model->pq_id,
+                            'data-flight-quote-id' => $model->flightQuote->fq_id,
+                            'data-product-id' => $model->pq_product_id,
+                        ]) ?>
+                    <?php endif;?>
                 </div>
             </li>
         </ul>

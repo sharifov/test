@@ -5,6 +5,7 @@ namespace modules\hotel\src\services\hotelQuote;
 use common\models\Project;
 use frontend\helpers\JsonHelper;
 use modules\hotel\models\HotelQuote;
+use modules\hotel\models\HotelQuoteRoom;
 use sales\helpers\text\CleanTextHelper;
 use yii\helpers\ArrayHelper;
 
@@ -35,7 +36,7 @@ class CommunicationDataService
 
         $result['billing']['currencyCode'] = self::getCurrency($hotelQuote->hq_origin_search_data);
 
-        foreach ($hotelQuote->hotelQuoteRooms as $key => $room) {
+        foreach (HotelQuoteRoom::getRoomsByQuoteId($hotelQuote->hq_id) as $key => $room) {
             $cancellations[0] = [
                 'date' => $room->hqr_cancel_from_dt,
                 'cost' => $room->hqr_cancel_amount,
@@ -124,8 +125,10 @@ class CommunicationDataService
 
     private static function getImgSrc(array $originSearchData): string
     {
-        return 'https://www.gttglobal.com/hotel/img/' .
-            ArrayHelper::getValue($originSearchData, 'images.0.url', '');
+        if ($img = ArrayHelper::getValue($originSearchData, 'images.0.url')) {
+            return 'https://www.gttglobal.com/hotel/img/' . $img;
+        }
+        return '';
     }
 
     private static function getDescription(array $originSearchData): string

@@ -16,6 +16,10 @@ class OrderProcessOrderCompleteListener
             return;
         }
 
+        if (!$process->isBooked()) {
+            return;
+        }
+
         \Yii::$app->queue_job->push(new OrderCompleteJob($event->orderId));
     }
 }

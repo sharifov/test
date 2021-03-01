@@ -6,10 +6,12 @@ use yii\bootstrap4\Html;
 
 class OrderStatusAction
 {
-    public const TEST = 1;
+    public const JOB = 1;
+    public const MANUAL = 2;
 
     private const LIST = [
-        self::TEST => 'api/test/action',
+        self::JOB => 'job',
+        self::MANUAL => 'order/order-actions/cancel',
     ];
 
     public static function getList(): array

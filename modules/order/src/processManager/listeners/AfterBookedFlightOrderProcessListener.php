@@ -14,31 +14,40 @@ class AfterBookedFlightOrderProcessListener
         $quote = ProductQuote::findOne($event->productQuoteId);
 
         if (!$quote) {
-            \Yii::error([
-                'message' => 'Not found Quote',
-                'quoteId' => $event->productQuoteId,
-            ], 'OrderProcessManager:AfterBookedFlightOrderProcessListener');
+//            \Yii::info([
+//                'message' => 'Not found Quote',
+//                'quoteId' => $event->productQuoteId,
+//            ], 'info\OrderProcessManager:AfterBookedFlightOrderProcessListener');
             return;
         }
 
         if (!$quote->pq_order_id) {
-            \Yii::error([
-                'message' => 'Quote has not relation with Order',
-                'quoteId' => $event->productQuoteId,
-            ], 'OrderProcessManager:AfterBookedFlightOrderProcessListener');
+//            \Yii::info([
+//                'message' => 'Quote has not relation with Order',
+//                'quoteId' => $event->productQuoteId,
+//            ], 'info\OrderProcessManager:AfterBookedFlightOrderProcessListener');
             return;
         }
 
         if (!$quote->isFlight()) {
+//            \Yii::info([
+//                'message' => 'Quote is not flight type',
+//                'quoteId' => $event->productQuoteId,
+//            ], 'info\OrderProcessManager:AfterBookedFlightOrderProcessListener');
             return;
         }
 
         $process = OrderProcessManager::findOne($quote->pq_order_id);
+
         if (!$process) {
-//            \Yii::info([
-//                'message' => 'Not found Order Process Manager',
-//                'orderId' => $quote->pq_order_id,
-//            ], 'info\OrderProcessManager:AfterBookedQuoteListener');
+            return;
+        }
+
+        if (!$process->isRunning()) {
+            \Yii::info([
+                'message' => 'Order Process is not Running',
+                'orderId' => $quote->pq_order_id,
+            ], 'info\OrderProcessManager:AfterBookedQuoteListener');
             return;
         }
 

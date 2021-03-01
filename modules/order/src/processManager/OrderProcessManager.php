@@ -22,6 +22,16 @@ class OrderProcessManager extends ActiveRecord
     public const STATUS_BOOKING_OTHER_PRODUCTS = 3;
     public const STATUS_BOOKED = 10;
     public const STATUS_FAILED = 11;
+    public const STATUS_CANCELED = 12;
+
+    public const STATUS_LIST = [
+        self::STATUS_NEW => 'New',
+        self::STATUS_BOOKING_FLIGHT => 'Booking flight',
+        self::STATUS_BOOKING_OTHER_PRODUCTS => 'Booking other products',
+        self::STATUS_BOOKED => 'Booked',
+        self::STATUS_FAILED => 'Failed',
+        self::STATUS_CANCELED => 'Canceled',
+    ];
 
     public static function create(int $orderId, \DateTimeImmutable $date): self
     {
@@ -53,8 +63,8 @@ class OrderProcessManager extends ActiveRecord
 
     public function booked(\DateTimeImmutable $date): void
     {
-        if ($this->opm_status !== self::STATUS_BOOKING_FLIGHT && !$this->opm_status === self::STATUS_BOOKING_OTHER_PRODUCTS) {
-            throw new \DomainException('OrderProcessManager is Not Booking Flight and is Not Booking Other Flight. Id: ' . $this->opm_id . ' Status: ' . $this->opm_status);
+        if (!$this->isRunning()) {
+            throw new \DomainException('OrderProcessManager is Not Running. Id: ' . $this->opm_id . ' Status: ' . $this->opm_status);
         }
         $this->opm_status = self::STATUS_BOOKED;
         $this->recordEvent(new events\BookedEvent($this->opm_id, $date->format('Y-m-d H:i:s.u')));
@@ -62,11 +72,25 @@ class OrderProcessManager extends ActiveRecord
 
     public function failed(\DateTimeImmutable $date): void
     {
-        if ($this->opm_status === self::STATUS_FAILED) {
-            throw new \DomainException('OrderProcessManager is already Failed. Id: ' . $this->opm_id . ' Status: ' . $this->opm_status);
+        if (!$this->isRunning()) {
+            throw new \DomainException('OrderProcessManager is Not Running. Id: ' . $this->opm_id . ' Status: ' . $this->opm_status);
         }
         $this->opm_status = self::STATUS_FAILED;
         $this->recordEvent(new events\FailedEvent($this->opm_id, $date->format('Y-m-d H:i:s.u')));
+    }
+
+    public function cancel(\DateTimeImmutable $date): void
+    {
+        if (!$this->isRunning()) {
+            throw new \DomainException('OrderProcessManager is Not Running. Id: ' . $this->opm_id . ' Status: ' . $this->opm_status);
+        }
+        $this->opm_status = self::STATUS_CANCELED;
+        $this->recordEvent(new events\CanceledEvent($this->opm_id, $date->format('Y-m-d H:i:s.u')));
+    }
+
+    public function isRunning(): bool
+    {
+        return $this->isBookingFlight() || $this->isOtherProductsBooking();
     }
 
     public function isBookingFlight(): bool
@@ -77,5 +101,10 @@ class OrderProcessManager extends ActiveRecord
     public function isOtherProductsBooking(): bool
     {
         return $this->opm_status === self::STATUS_BOOKING_OTHER_PRODUCTS;
+    }
+
+    public function isBooked(): bool
+    {
+        return $this->opm_status === self::STATUS_BOOKED;
     }
 }

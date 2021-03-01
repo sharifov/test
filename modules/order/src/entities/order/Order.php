@@ -6,6 +6,8 @@ use common\models\Currency;
 use common\models\Employee;
 use modules\invoice\src\entities\invoice\Invoice;
 use common\models\Lead;
+use modules\order\src\entities\order\events\OrderCanceledEvent;
+use modules\order\src\entities\order\events\OrderCompletedEvent;
 use modules\order\src\entities\order\events\OrderCompleteEvent;
 use modules\order\src\entities\order\events\OrderPaymentPaidEvent;
 use modules\order\src\entities\order\events\OrderPreparedEvent;
@@ -366,10 +368,21 @@ class Order extends ActiveRecord
         $this->or_status_id = $status;
     }
 
-    public function prepare(\DateTimeImmutable $date): void
+    public function prepare(?string $description, ?int $actionId, ?int $creatorId): void
     {
+        $startStatus = $this->or_status_id;
         $this->setStatus(OrderStatus::PREPARED);
-        $this->recordEvent(new OrderPreparedEvent($this->or_id, $date->format('Y-m-d H:i:s.u')));
+        $this->recordEvent(
+            new OrderPreparedEvent(
+                $this->or_id,
+                $startStatus,
+                $this->or_status_id,
+                $description,
+                $actionId,
+                $this->or_owner_user_id,
+                $creatorId
+            )
+        );
     }
 
     public function paymentPaid(\DateTimeImmutable $date): void
@@ -386,17 +399,53 @@ class Order extends ActiveRecord
         return $this->or_pay_status_id === OrderPayStatus::PAID;
     }
 
-    public function complete(\DateTimeImmutable $date): void
+    public function complete(?string $description, ?int $actionId, ?int $creatorId): void
     {
         if ($this->isComplete()) {
             throw new \DomainException('Order is already complete.');
         }
+        $startStatus = $this->or_status_id;
         $this->setStatus(OrderStatus::COMPLETE);
-        $this->recordEvent(new OrderCompleteEvent($this->or_id, $date->format('Y-m-d H:i:s.u')));
+        $this->recordEvent(
+            new OrderCompletedEvent(
+                $this->or_id,
+                $startStatus,
+                $this->or_status_id,
+                $description,
+                $actionId,
+                $this->or_owner_user_id,
+                $creatorId
+            )
+        );
     }
 
     public function isComplete(): bool
     {
         return $this->or_status_id === OrderStatus::COMPLETE;
+    }
+
+    public function cancel(?string $description, ?int $actionId, ?int $creatorId): void
+    {
+        if ($this->isCanceled()) {
+            throw new \DomainException('Order is already canceled.');
+        }
+        $startStatus = $this->or_status_id;
+        $this->setStatus(OrderStatus::CANCELED);
+        $this->recordEvent(
+            new OrderCanceledEvent(
+                $this->or_id,
+                $startStatus,
+                $this->or_status_id,
+                $description,
+                $actionId,
+                $this->or_owner_user_id,
+                $creatorId
+            )
+        );
+    }
+
+    public function isCanceled(): bool
+    {
+        return $this->or_status_id === OrderStatus::CANCELED;
     }
 }

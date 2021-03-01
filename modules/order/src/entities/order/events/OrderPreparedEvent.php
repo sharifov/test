@@ -6,31 +6,73 @@ namespace modules\order\src\entities\order\events;
  * Class OrderPreparedEvent
  *
  * @property int $orderId
- * @property string $date
+ * @property int|null $startStatus
+ * @property int $endStatus
+ * @property string|null $description
+ * @property int|null $actionId
+ * @property int|null $ownerId
+ * @property int|null $creatorId
  */
-class OrderPreparedEvent implements OrderStatusable
+class OrderPreparedEvent implements OrderChangeStatusInterface
 {
     public int $orderId;
-    public string $date;
+    public ?int $startStatus;
+    public int $endStatus;
+    public ?string $description;
+    public ?int $actionId;
+    public ?int $ownerId;
+    public ?int $creatorId;
 
-    public function __construct(int $orderId, string $date)
-    {
+    public function __construct(
+        int $orderId,
+        ?int $startStatus,
+        int $endStatus,
+        ?string $description,
+        ?int $actionId,
+        ?int $ownerId,
+        ?int $creatorId
+    ) {
         $this->orderId = $orderId;
-        $this->date = $date;
+        $this->startStatus = $startStatus;
+        $this->endStatus = $endStatus;
+        $this->description = $description;
+        $this->actionId = $actionId;
+        $this->ownerId = $ownerId;
+        $this->creatorId = $creatorId;
     }
 
-    public function getStatusName(): string
-    {
-        return 'Prepare';
-    }
-
-    public function getOrderId(): int
+    public function getId(): int
     {
         return $this->orderId;
     }
 
-    public function getDate(): string
+    public function getStartStatus(): ?int
     {
-        return $this->date;
+        return $this->startStatus;
+    }
+
+    public function getEndStatus(): int
+    {
+        return $this->endStatus;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function getActionId(): ?int
+    {
+        return $this->actionId;
+    }
+
+    public function getOwnerId(): ?int
+    {
+        return $this->ownerId;
+    }
+
+    public function getCreatorId(): ?int
+    {
+        return $this->creatorId;
     }
 }

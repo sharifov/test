@@ -106,7 +106,7 @@ class HotelQuoteRoom extends ActiveRecord implements Serializable
 
     public static function cleanRateComments(string $text): string
     {
-        return StringHelper::truncate(CleanTextHelper::cleanText($text), 999, '');
+        return StringHelper::truncate(stripslashes(strip_tags($text)), 999, '');
     }
 
     /**
@@ -204,5 +204,14 @@ class HotelQuoteRoom extends ActiveRecord implements Serializable
             }
         }
         return $rateComments;
+    }
+
+    /**
+     * @param int $hotelQuoteId
+     * @return HotelQuoteRoom[]
+     */
+    public static function getRoomsByQuoteId(int $hotelQuoteId): array
+    {
+        return self::find()->where(['hqr_hotel_quote_id' => $hotelQuoteId])->all();
     }
 }

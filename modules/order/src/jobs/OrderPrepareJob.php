@@ -3,6 +3,7 @@
 namespace modules\order\src\jobs;
 
 use modules\order\src\entities\order\OrderRepository;
+use modules\order\src\entities\order\OrderStatusAction;
 use yii\queue\RetryableJobInterface;
 
 /**
@@ -23,7 +24,7 @@ class OrderPrepareJob implements RetryableJobInterface
     {
         $repo = \Yii::createObject(OrderRepository::class);
         $order = $repo->find($this->orderId);
-        $order->prepare(new \DateTimeImmutable());
+        $order->prepare('', OrderStatusAction::JOB, null);
         $repo->save($order);
     }
 

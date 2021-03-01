@@ -19,7 +19,7 @@ class CleanTextHelper
         return (string) $value;
     }
 
-    public static function cleanText(string $text, string $allowedCharacters = '.,:-_'): string
+    public static function cleanText(string $text, string $allowedCharacters = '.,:-_()\/'): string
     {
         $value = strip_tags($text);
         $value = preg_replace('/[^\w\s' . $allowedCharacters . ']/ui', '', $value);

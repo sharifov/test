@@ -690,6 +690,26 @@ $js = <<<JS
                 });
         });
         
+        
+        $('body').off('click', '.btn-payment-update').on('click', '.btn-payment-update', function (e) {
+            e.preventDefault();
+            let url = $(this).data('url');
+            
+            let modal = $('#modal-df');
+            modal.find('.modal-body').html('');
+            modal.find('.modal-title').html('Update Payment');
+            modal.find('.modal-body').load(url, function( response, status, xhr ) {
+                if (status == 'error') {
+                    alert(response);
+                } else {
+                    modal.modal({
+                      backdrop: 'static',
+                      show: true
+                    });
+                }
+            });
+        });
+        
         $('body').off('click', '.btn-create-invoice').on('click', '.btn-create-invoice', function (e) {
             e.preventDefault();
             let url = $(this).data('url');
@@ -774,6 +794,178 @@ $js = <<<JS
                     alert( "Request failed: " + textStatus );
                 }).always(function() {
                     $('#preloader').addClass('d-none');
+                });
+        });
+        
+        $('body').off('click', '.btn-payment-delete').on('click', '.btn-payment-delete', function (e) {
+            
+             e.preventDefault();
+             
+            if(!confirm('Are you sure you want to delete this Payment?')) {
+                return '';
+            }
+            
+           
+            
+            let url = $(this).data('url');
+            let paymentId = $(this).data('payment-id');
+            let orderId = $(this).data('order-id');
+                        
+            $.ajax({
+                  url: url,
+                  type: 'post',
+                  data: {id: paymentId},
+                  dataType: 'json',
+              })
+                  .done(function(data) {
+                      if (data.error) {
+                          new PNotify({
+                                title: 'Error: delete Payment',
+                                type: 'error',
+                                text: data.error,
+                                hide: true
+                            });
+                          return;
+                      }
+                      pjaxReload({container: '#pjax-order-payment-' + orderId, timout: 8000});
+                      new PNotify({
+                            title: 'Payment was successfully deleted',
+                            type: 'success',
+                            text: data.message,
+                            hide: true
+                        });
+                  })
+                .fail(function( jqXHR, textStatus ) {
+                    alert( "Request failed: " + textStatus );
+                }).always(function() {
+                    
+                });
+        });
+        
+        $('body').off('click', '.btn-payment-void').on('click', '.btn-payment-void', function (e) {
+            
+             e.preventDefault();
+             
+            if(!confirm('Are you sure you want to Void this Payment?')) {
+                return '';
+            }
+
+            let url = $(this).data('url');
+            let paymentId = $(this).data('payment-id');
+                        
+            $.ajax({
+                  url: url,
+                  type: 'post',
+                  data: {id: paymentId},
+                  dataType: 'json',
+              })
+                  .done(function(data) {
+                      if (data.error) {
+                          new PNotify({
+                                title: 'Error: Void Payment',
+                                type: 'error',
+                                text: data.message,
+                                hide: true
+                            });
+                          return;
+                      } 
+                      new PNotify({
+                            title: 'Payment was successfully Void',
+                            type: 'success',
+                            text: 'Success',
+                            hide: true
+                        });
+                      pjaxReload({container: '#pjax-order-payment-' + paymentId, timout: 8000});
+                     
+                  })
+                .fail(function( jqXHR, textStatus ) {
+                    alert( "Request failed: " + textStatus );
+                }).always(function() {
+                    
+                });
+        });
+        
+        $('body').off('click', '.btn-payment-capture').on('click', '.btn-payment-capture', function (e) {
+            
+             e.preventDefault();
+             
+            if(!confirm('Are you sure you want to Capture this Payment?')) {
+                return '';
+            }
+
+            let url = $(this).data('url');
+            let paymentId = $(this).data('payment-id');
+                        
+            $.ajax({
+                  url: url,
+                  type: 'post',
+                  data: {id: paymentId},
+                  dataType: 'json',
+              })
+                  .done(function(data) {
+                      if (data.error) {
+                          new PNotify({
+                                title: 'Error: Capture Payment',
+                                type: 'error',
+                                text: data.message,
+                                hide: true
+                            });
+                          return;
+                      }
+                      new PNotify({
+                            title: 'Payment was successfully Capture',
+                            type: 'success',
+                            text: 'Success',
+                            hide: true
+                        });
+                      pjaxReload({container: '#pjax-order-payment-' + paymentId, timout: 8000});
+                  })
+                .fail(function( jqXHR, textStatus ) {
+                    alert( "Request failed: " + textStatus );
+                }).always(function() {
+                    
+                });
+        });
+        
+        $('body').off('click', '.btn-payment-refund').on('click', '.btn-payment-refund', function (e) {
+            
+             e.preventDefault();
+             
+            if(!confirm('Are you sure you want to Refund this Payment?')) {
+                return '';
+            }
+
+            let url = $(this).data('url');
+            let paymentId = $(this).data('payment-id');
+                        
+            $.ajax({
+                  url: url,
+                  type: 'post',
+                  data: {id: paymentId},
+                  dataType: 'json',
+              })
+                  .done(function(data) {
+                      if (data.error) {
+                          new PNotify({
+                                title: 'Error: Refund Payment',
+                                type: 'error',
+                                text: data.message,
+                                hide: true
+                            });
+                          return;
+                      }
+                      new PNotify({
+                            title: 'Payment was successfully Refund',
+                            type: 'success',
+                            text: 'Success',
+                            hide: true
+                        });
+                      pjaxReload({container: '#pjax-order-payment-' + paymentId, timout: 8000});
+                  })
+                .fail(function( jqXHR, textStatus ) {
+                    alert( "Request failed: " + textStatus );
+                }).always(function() {
+                    
                 });
         });
     });

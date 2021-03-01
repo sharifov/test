@@ -47,9 +47,8 @@ use yii\widgets\Pjax;
                     text: data.message,
                     hide: true
                 });
-                pjaxReload({
-                    container: '#pjax-product-quote-list-' + productId
-                });
+                pjaxReload({container: '#pjax-product-quote-list-' + productId});
+                addFileToFileStorageList();                
             } else {
                 new PNotify({
                     title: 'Booking failed',

@@ -64,6 +64,48 @@ use yii\web\View;
 
 $js = <<<JS
 
+    $('body').off('click', '.btn-complete-order').on('click', '.btn-complete-order', function (e) {
+        e.preventDefault();
+        let url = $(this).data('url');
+        //$('#preloader').removeClass('d-none');
+        
+        let modal = $('#modal-df');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Complete Order');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                    backdrop: 'static',
+                    show: true
+                });
+            }
+        });
+    });
+
+    $('body').off('click', '.btn-cancel-order').on('click', '.btn-cancel-order', function (e) {
+        e.preventDefault();
+        let url = $(this).data('url');
+        //$('#preloader').removeClass('d-none');
+        
+        let modal = $('#modal-df');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Cancel Order');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                    backdrop: 'static',
+                    show: true
+                });
+            }
+        });
+    });
+
     $('body').off('click', '.btn-create-order').on('click', '.btn-create-order', function (e) {
         e.preventDefault();
         let url = $(this).data('url');
@@ -188,6 +230,88 @@ $js = <<<JS
       // return false;
     });
     
+    $('body').off('click', '.btn-cancel-process').on('click', '.btn-cancel-process', function(e) {
+      
+        e.preventDefault();
+        
+        if(!confirm('Are you sure you want to cancel this order process?')) {
+            return '';
+        }
+        
+      let orderId = $(this).data('order-id');
+      let url = $(this).data('url');
+
+      $.ajax({
+          url: url,
+          type: 'post',
+          data: {'id': orderId},
+          dataType: 'json',
+      })
+          .done(function(data) {
+              if (data.error) {
+                  new PNotify({
+                        title: 'Error: cancel order process',
+                        type: 'error',
+                        text: data.message,
+                        hide: true
+                    });
+              } else {
+                  $.pjax.reload({container: '#pjax-lead-orders', push: false, replace: false, async: false, timeout: 2000});
+                  new PNotify({
+                        title: 'The order process was successfully canceled',
+                        type: 'success',
+                        text: data.message,
+                        hide: true
+                    });
+              }
+          })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        });
+      // return false;
+    });
+    
+    $('body').off('click', '.btn-start-process').on('click', '.btn-start-process', function(e) {
+      
+        e.preventDefault();
+        
+        if(!confirm('Are you sure you want to start this order process?')) {
+            return '';
+        }
+        
+      let orderId = $(this).data('order-id');
+      let url = $(this).data('url');
+
+      $.ajax({
+          url: url,
+          type: 'post',
+          data: {'id': orderId},
+          dataType: 'json',
+      })
+          .done(function(data) {
+              if (data.error) {
+                  new PNotify({
+                        title: 'Error: start order process',
+                        type: 'error',
+                        text: data.message,
+                        hide: true
+                    });
+              } else {
+                  $.pjax.reload({container: '#pjax-lead-orders', push: false, replace: false, async: false, timeout: 2000});
+                  new PNotify({
+                        title: 'The order process was successfully started',
+                        type: 'success',
+                        text: data.message,
+                        hide: true
+                    });
+              }
+          })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        });
+      // return false;
+    });
+    
     $(document).on('click', '.btn-order-status-log', function(e){        
         e.preventDefault();
         let url = $(this).data('url');
@@ -217,6 +341,26 @@ $js = <<<JS
           
         modal.find('.modal-body').html('');
         modal.find('.modal-title').html('Invoice [' + gid + '] status history');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
+        });
+    });
+    
+    $(document).on('click', '.btn-payment-status-log', function(e){        
+        e.preventDefault();
+        let url = $(this).data('url');
+        let modal = $('#modal-lg');
+          
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Payment status log');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
             //$('#preloader').addClass('d-none');
             if (status == 'error') {

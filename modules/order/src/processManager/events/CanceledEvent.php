@@ -1,14 +1,14 @@
 <?php
 
-namespace modules\order\src\entities\order\events;
+namespace modules\order\src\processManager\events;
 
 /**
- * Class OrderPreparedEvent
+ * Class CanceledEvent
  *
  * @property int $orderId
  * @property string $date
  */
-class OrderCompleteEvent implements OrderStatusable
+class CanceledEvent implements StatusChangable
 {
     public int $orderId;
     public string $date;
@@ -19,14 +19,14 @@ class OrderCompleteEvent implements OrderStatusable
         $this->date = $date;
     }
 
-    public function getStatusName(): string
-    {
-        return 'Complete';
-    }
-
     public function getOrderId(): int
     {
         return $this->orderId;
+    }
+
+    public function getStatusName(): string
+    {
+        return 'Canceled';
     }
 
     public function getDate(): string

@@ -103,6 +103,7 @@ class Payment extends \yii\db\ActiveRecord
             [['pay_date', 'pay_created_dt', 'pay_updated_dt'], 'safe'],
             [['pay_amount'], 'number'],
             [['pay_code'], 'string'],
+            [['pay_currency'], 'default', 'value' => null],
             [['pay_currency'], 'string', 'max' => 3],
             [['pay_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pay_created_user_id' => 'id']],
             [['pay_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['pay_currency' => 'cur_code']],

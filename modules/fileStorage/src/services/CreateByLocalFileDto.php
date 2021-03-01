@@ -31,7 +31,7 @@ class CreateByLocalFileDto
     public string $projectKey;
 
     public ?string $name;
-    public ?string $title = 'BookingConfirmation';
+    public ?string $title;
     public ?string $path;
     public ?int $size;
     public ?string $uid;
@@ -45,12 +45,14 @@ class CreateByLocalFileDto
      * @param string $pathToLocalFile
      * @param int $clientId
      * @param string $projectKey
+     * @param string|null $title
      */
-    public function __construct(string $pathToLocalFile, int $clientId, string $projectKey)
+    public function __construct(string $pathToLocalFile, int $clientId, string $projectKey, string $title = 'BookingConfirmation')
     {
         $this->pathToLocalFile = $pathToLocalFile;
         $this->clientId = $clientId;
         $this->projectKey = $projectKey;
+        $this->title = $title;
         $this->setAll();
     }
 

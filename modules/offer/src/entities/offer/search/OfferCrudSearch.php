@@ -32,6 +32,11 @@ class OfferCrudSearch extends Offer
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => [
+                'defaultOrder' => [
+                    'of_id' => SORT_DESC,
+                ]
+            ],
         ]);
 
         $this->load($params);

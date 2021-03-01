@@ -2,6 +2,7 @@
 
 namespace modules\flight\models;
 
+use modules\flight\src\entities\flightQuoteTrip\serializer\FlightQuoteTripSerializer;
 use Yii;
 
 /**
@@ -101,5 +102,10 @@ class FlightQuoteTrip extends \yii\db\ActiveRecord
         $clone->fqt_flight_quote_id = $quoteId;
 
         return $clone;
+    }
+
+    public function serialize(): array
+    {
+        return (new FlightQuoteTripSerializer($this))->getData();
     }
 }

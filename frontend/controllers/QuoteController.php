@@ -16,6 +16,7 @@ use sales\auth\Auth;
 use sales\forms\api\searchQuote\FlightQuoteSearchForm;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
+use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\socket\ClientChatSocketCommands;
 use sales\forms\quotePrice\AddQuotePriceForm;
 use sales\forms\segment\SegmentBaggageForm;
@@ -56,6 +57,7 @@ use yii\widgets\ActiveForm;
 class QuoteController extends FController
 {
     private const RUNTIME_ERROR_QUOTES_NO_RESULTS = 100;
+    private const RUNTIME_ERROR_AUTO_ADD_QUOTES_ACTION_IN_PROGRESS = 101;
 
     /**
      * @param $leadId
@@ -478,11 +480,20 @@ class QuoteController extends FController
             'error' => true,
             'message' => ''
         ];
+        $redis = \Yii::$app->redis;
+        $key = 'lead-auto-add-quotes-' . $leadId;
         try {
             $lead = Lead::findOne($leadId);
             if (!$lead) {
                 throw new \RuntimeException('Lead not found');
             }
+
+            if (!$redis->get($key)) {
+                $redis->setnx($key, true);
+            } else {
+                throw new \RuntimeException('This action is currently in progress', self::RUNTIME_ERROR_AUTO_ADD_QUOTES_ACTION_IN_PROGRESS);
+            }
+
             if (!FlightQuoteGuard::canAutoSelectQuotes(Auth::user(), $lead)) {
                 throw new \DomainException('You do not have access to perform this action');
             }
@@ -518,11 +529,16 @@ class QuoteController extends FController
 
             $response['error'] = false;
             $response['message'] = 'Auto select quotes completed successfully';
+            $redis->del($key);
         } catch (\RuntimeException | \DomainException $e) {
             $response['message'] = $e->getMessage();
+            if ($e->getCode() !== self::RUNTIME_ERROR_AUTO_ADD_QUOTES_ACTION_IN_PROGRESS) {
+                $redis->del($key);
+            }
         } catch (\Throwable $e) {
             Yii::error(AppHelper::throwableLog($e), 'QuoteController::actionAutoAddQuotes::Throwable');
             $response['message'] = 'Internal Server Error';
+            $redis->del($key ?? '');
         }
 
         return $this->asJson($response);

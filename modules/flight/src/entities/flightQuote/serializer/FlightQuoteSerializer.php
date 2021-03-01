@@ -4,6 +4,7 @@ namespace modules\flight\src\entities\flightQuote\serializer;
 
 use modules\flight\models\FlightQuote;
 use sales\entities\serializer\Serializer;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class FlightQuoteSerializer
@@ -39,15 +40,21 @@ class FlightQuoteSerializer extends Serializer
     public function getData(): array
     {
         $data =  $this->toArray();
+        $data['fq_type_name'] = FlightQuote::getTypeName($this->model->fq_type_id);
+        $data['fq_fare_type_name'] = FlightQuote::getFareTypeNameById($this->model->fq_fare_type_id);
 
         if ($this->model->fqFlight) {
             $data['flight'] = $this->model->fqFlight->serialize();
         }
 
-        if ($this->model->flightQuoteSegments) {
-            $data['segments'] = [];
-            foreach ($this->model->flightQuoteSegments as $segment) {
-                $data['segments'][] = $segment->serialize();
+        if ($this->model->flightQuoteTrips) {
+            $data['trips'] = [];
+            foreach ($this->model->flightQuoteTrips as $flightQuoteTrip) {
+                $trip = $flightQuoteTrip->serialize();
+                foreach ($flightQuoteTrip->flightQuoteSegments as $flightQuoteSegment) {
+                    $trip['segments'][] = $flightQuoteSegment->serialize();
+                }
+                $data['trips'][] = $trip;
             }
         }
 
