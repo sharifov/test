@@ -20,10 +20,8 @@ $list = (new ListsAccess(Auth::id()));
 ?>
 
 <div class="order-form">
-
+    <?php $form = ActiveForm::begin(); ?>
     <div class="col-md-4">
-
-        <?php $form = ActiveForm::begin(); ?>
 
         <?= $form->field($model, 'or_gid')->textInput(['maxlength' => true]) ?>
 
@@ -62,34 +60,28 @@ $list = (new ListsAccess(Auth::id()));
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
         </div>
-
-        <?php ActiveForm::end(); ?>
     </div>
 
     <div class="col-md-6">
         <?php
 
+        $model->or_request_data = \frontend\helpers\JsonHelper::encode($model->or_request_data);
+
         try {
-            echo \kdn\yii2\JsonEditor::widget(
+            echo $form->field($model, 'or_request_data')->widget(
+                \kdn\yii2\JsonEditor::class,
                 [
                     'clientOptions' => [
-                        'modes' => ['view'], // all available modes 'code', 'form', 'preview', 'text', 'tree', 'view'
-                        'mode' => 'view', // default mode
+                        'modes' => ['code', 'form', 'tree', 'view'],
+                        'mode' => 'form'
                     ],
-                    //'collapseAll' => ['view'], // collapse all fields in "view" mode
-                    'containerOptions' => ['class' => 'well'], // HTML options for JSON editor container tag
-                    'expandAll' => ['view'], // expand all fields in "tree" and "form" modes
-                    'name' => 'editor', // hidden input name
-                    'options' => ['id' => 'data'], // HTML options for hidden input
-                    //'value' => '{"foo": "bar"}', // JSON which should be shown in editor
-                    'decodedValue' => $model->or_request_data
+                    'expandAll' => ['tree', 'form'],
                 ]
             );
         } catch (Exception $exception) {
             echo Html::textarea($model->formName() . '[or_request_data]', Json::encode($model->or_request_data), ['class' => 'form-control']);
         }
-
         ?>
     </div>
-
+    <?php ActiveForm::end(); ?>
 </div>

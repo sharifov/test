@@ -93,6 +93,8 @@ class Order extends ActiveRecord
             [['or_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['or_created_user_id' => 'id']],
             [['or_owner_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['or_owner_user_id' => 'id']],
             [['or_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['or_updated_user_id' => 'id']],
+
+            ['or_request_data', 'safe'],
         ];
     }
 
@@ -120,7 +122,7 @@ class Order extends ActiveRecord
             'or_created_dt' => 'Created Dt',
             'or_updated_dt' => 'Updated Dt',
             'or_profit_amount' => 'Profit amount',
-            'ot_request_data' => 'Request Data'
+            'or_request_data' => 'Request Data',
         ];
     }
 

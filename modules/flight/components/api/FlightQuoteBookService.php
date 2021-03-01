@@ -49,15 +49,12 @@ class FlightQuoteBookService
                 return $responseData['success'];
             }
 
-            if (!empty($responseData['errors'])) {
+            if ($error = self::detectResponseDataErrors($responseData)) {
                 \Yii::error(
-                    VarDumper::dumpAsString([
-                    'data' => $requestData,
-                    'responseData' => $responseData,
-                    ]),
+                    VarDumper::dumpAsString(['requestData' => $requestData, 'error' => $error]),
                     'FlightQuoteBookService:book:errors'
                 );
-                throw new \RuntimeException('FlightQuoteBookService BO errors: ' . VarDumper::dumpAsString($responseData['errors']));
+                throw new \RuntimeException('FlightQuoteBookService BO errors: ' . $error);
             }
             \Yii::error(
                 VarDumper::dumpAsString([
@@ -66,7 +63,7 @@ class FlightQuoteBookService
                 ]),
                 'FlightQuoteBookService:book:failResponse'
             );
-            throw new \RuntimeException('FlightQuoteBookService BO in response not found success or errors.');
+            throw new \RuntimeException('FlightQuoteBookService BO in response not found success||errors||warning.');
         }
         \Yii::error(
             VarDumper::dumpAsString([
@@ -76,6 +73,18 @@ class FlightQuoteBookService
             'FlightQuoteBookService:book:request'
         );
         throw new \RuntimeException('FlightQuoteBookService BO request error. ' . VarDumper::dumpAsString($responseBO->content));
+    }
+
+    public static function detectResponseDataErrors(array $responseData): string
+    {
+        $result = '';
+        if (!empty($responseData['errors'])) {
+            $result .= VarDumper::dumpAsString($responseData['errors']);
+        }
+        if (!empty($responseData['warning'])) {
+            $result .= VarDumper::dumpAsString($responseData['warning']);
+        }
+        return $result;
     }
 
     /**
