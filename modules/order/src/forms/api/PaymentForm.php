@@ -32,6 +32,7 @@ class PaymentForm extends \yii\base\Model
             ['transactionId', 'filter', 'filter' => 'intval'],
             ['date', 'date', 'format' => 'php:Y-m-d'],
             ['amount', 'filter', 'filter' => 'floatval'],
+            ['type', 'filter', 'filter' => 'mb_strtolower'],
             ['currency', 'string'],
             ['currency', 'exist', 'targetClass' => Currency::class, 'targetAttribute' => 'cur_code']
 

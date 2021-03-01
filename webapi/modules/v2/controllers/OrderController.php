@@ -6,6 +6,7 @@ use modules\offer\src\entities\offer\OfferRepository;
 use modules\order\src\forms\api\OrderCreateForm;
 use modules\order\src\services\CreateOrderDTO;
 use modules\order\src\services\OrderApiManageService;
+use sales\helpers\app\AppHelper;
 use sales\repositories\product\ProductQuoteRepository;
 use webapi\src\logger\ApiLogger;
 use webapi\src\logger\behaviors\filters\CreditCardFilter;
@@ -298,6 +299,25 @@ class OrderController extends BaseController
         "date": "2021-03-20",
         "amount": 821.49,
         "currency": "USD"
+    },
+    "billingInfo": {
+        "first_name": "Barbara Elmore",
+        "middle_name": "",
+        "last_name": "T",
+        "address": "1013 Weda Cir",
+        "country_id": "US",
+        "city": "Mayfield",
+        "state": "KY",
+        "zip": "99999",
+        "phone": "+19074861000",
+        "email": "mike.kane@techork.com"
+    },
+        "creditCard": {
+        "holder_name": "Barbara Elmore",
+        "number": "1111111111111111",
+        "type": "Visa",
+        "expiration": "07 / 23",
+        "cvv": "324"
     },
     "Request": {
     "offerGid": "85a06c376a083f47e56b286b1265c160",
@@ -1149,8 +1169,9 @@ class OrderController extends BaseController
         try {
             $offer = $this->offerRepository->findByGid($form->offerGid);
 
-            $order = $this->orderManageService->createOrder((new CreateOrderDTO($offer->of_lead_id, $request->post())), $form->productQuotes, $form->payment);
+            $order = $this->orderManageService->createOrder((new CreateOrderDTO($offer->of_lead_id, $request->post())), $form);
         } catch (\Throwable $e) {
+            Yii::error(AppHelper::throwableFormatter($e), 'API::OrderController::actionCreate::Throwable');
             return new ErrorResponse(
                 new StatusFailedMessage(),
                 new MessageMessage($e->getMessage()),

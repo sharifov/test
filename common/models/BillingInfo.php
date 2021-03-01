@@ -119,11 +119,6 @@ class BillingInfo extends \yii\db\ActiveRecord
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
-            'user' => [
-                'class' => BlameableBehavior::class,
-                'createdByAttribute' => 'bi_created_user_id',
-                'updatedByAttribute' => 'bi_updated_user_id',
-            ],
         ];
     }
 
@@ -166,5 +161,37 @@ class BillingInfo extends \yii\db\ActiveRecord
     public static function find()
     {
         return new \common\models\query\BillingInfoQuery(static::class);
+    }
+
+    public static function create(
+        string $firstName,
+        string $lastName,
+        string $middleName,
+        string $address,
+        string $city,
+        string $state,
+        string $country,
+        string $zip,
+        string $phone,
+        string $email,
+        int $paymentMethodId,
+        int $creditCardId,
+        int $orderId
+    ): self {
+        $billing = new self();
+        $billing->bi_first_name = $firstName;
+        $billing->bi_last_name = $lastName;
+        $billing->bi_middle_name = $middleName;
+        $billing->bi_address_line1 = $address;
+        $billing->bi_city = $city;
+        $billing->bi_state = $state;
+        $billing->bi_country = $country;
+        $billing->bi_zip = $zip;
+        $billing->bi_contact_phone = $phone;
+        $billing->bi_contact_email = $email;
+        $billing->bi_payment_method_id = $paymentMethodId;
+        $billing->bi_cc_id = $creditCardId;
+        $billing->bi_order_id = $orderId;
+        return $billing;
     }
 }
