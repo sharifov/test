@@ -217,7 +217,7 @@ $totalAmountQuote = 0.0;
                         ?>
                     <?php endif;?>
 
-                    <?php if ($model->isBookable()) : ?>
+                    <?php if (Auth::can('/flight/flight-quote/ajax-book') && $model->isBookable()) : ?>
                         <?= Html::a(
                             '<i class="fa fa-share-square"></i> Create Book',
                             null,
@@ -232,7 +232,7 @@ $totalAmountQuote = 0.0;
 
                     <?php if (Auth::can('/flight/flight-quote/cancel')) : ?>
                         <?= Html::a(
-                            '<i class="fa fa-share-square"></i> Cancel book',
+                            '<i class="fa fa-share-square"></i> Cancel Booking',
                             null,
                             [
                                 'class' => 'dropdown-item btn-flight-quote-cancel-book',
@@ -245,7 +245,7 @@ $totalAmountQuote = 0.0;
 
                     <?php if (Auth::can('/flight/flight-quote/void')) : ?>
                         <?= Html::a(
-                            '<i class="fa fa-share-square"></i> Void book',
+                            '<i class="fa fa-share-square"></i> Void Booking',
                             null,
                             [
                                 'class' => 'dropdown-item btn-flight-quote-void-book',
