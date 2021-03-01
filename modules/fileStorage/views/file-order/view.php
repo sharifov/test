@@ -1,5 +1,6 @@
 <?php
 
+use modules\fileStorage\src\entity\fileOrder\FileOrder;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
@@ -32,7 +33,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'attributes' => [
                 'fo_or_id',
                 'fo_pq_id',
-                'fo_category_id',
+                [
+                    'attribute' => 'fo_category_id',
+                    'value' => static function (FileOrder $model) {
+                        return FileOrder::getCategoryName($model->fo_category_id);
+                    },
+                ],
             ],
         ]) ?>
 

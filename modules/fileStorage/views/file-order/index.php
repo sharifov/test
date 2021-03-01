@@ -1,5 +1,6 @@
 <?php
 
+use modules\fileStorage\src\entity\fileOrder\FileOrder;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
@@ -30,6 +31,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'fo_or_id',
             'fo_pq_id',
             'fo_category_id',
+            [
+                'attribute' => 'fo_category_id',
+                'filter' => FileOrder::CATEGORY_LIST,
+                'value' => static function (FileOrder $model) {
+                    return FileOrder::getCategoryName($model->fo_category_id);
+                },
+            ],
             ['class' => ActionColumn::class],
         ],
     ]); ?>

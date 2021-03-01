@@ -1,5 +1,6 @@
 <?php
 
+use modules\fileStorage\src\entity\fileOrder\FileOrder;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
@@ -20,7 +21,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'fo_pq_id')->textInput() ?>
 
-        <?= $form->field($model, 'fo_category_id')->textInput() ?>
+        <?= $form->field($model, 'fo_category_id')->dropDownList(FileOrder::CATEGORY_LIST) ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

@@ -93,4 +93,9 @@ class FileOrder extends \yii\db\ActiveRecord
         $model->fo_created_dt = date('Y-m-d H:i:s');
         return $model;
     }
+
+    public static function getCategoryName(?int $fo_category_id): string
+    {
+        return self::CATEGORY_LIST[$fo_category_id] ?? '';
+    }
 }

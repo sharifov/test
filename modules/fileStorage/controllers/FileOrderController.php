@@ -51,14 +51,14 @@ class FileOrderController extends FController
     }
 
     /**
-     * @param int $fo_id
+     * @param $id
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($fo_id): string
+    public function actionView($id): string
     {
         return $this->render('view', [
-            'model' => $this->findModel($fo_id),
+            'model' => $this->findModel($id),
         ]);
     }
 
@@ -70,7 +70,7 @@ class FileOrderController extends FController
         $model = new FileOrder();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'fo_id' => $model->fo_id]);
+            return $this->redirect(['view', 'id' => $model->fo_id]);
         }
 
         return $this->render('create', [
@@ -79,16 +79,16 @@ class FileOrderController extends FController
     }
 
     /**
-     * @param int $fo_id
+     * @param $id
      * @return string|Response
      * @throws NotFoundHttpException
      */
-    public function actionUpdate($fo_id)
+    public function actionUpdate($id)
     {
-        $model = $this->findModel($fo_id);
+        $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'fo_id' => $model->fo_id]);
+            return $this->redirect(['view', 'id' => $model->fo_id]);
         }
 
         return $this->render('update', [
@@ -103,9 +103,9 @@ class FileOrderController extends FController
      * @throws \Throwable
      * @throws StaleObjectException
      */
-    public function actionDelete($fo_id): Response
+    public function actionDelete($id): Response
     {
-        $this->findModel($fo_id)->delete();
+        $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
     }

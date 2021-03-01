@@ -7,7 +7,7 @@ use yii\bootstrap4\Html;
 
 $this->title = 'Update File Order';
 $this->params['breadcrumbs'][] = ['label' => 'File Orders', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->fcl_fs_id, 'url' => ['view', 'fo_id' => $model->fo_id]];
+$this->params['breadcrumbs'][] = ['label' => $model->fo_id, 'url' => ['view', 'id' => $model->fo_id]];
 $this->params['breadcrumbs'][] = 'Update';
 ?>
 <div class="file-Order-update">
