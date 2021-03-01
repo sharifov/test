@@ -3426,6 +3426,84 @@ define({ "api": [
   },
   {
     "type": "post",
+    "url": "/v2/order/view",
+    "title": "View Order",
+    "version": "0.1.0",
+    "name": "ViewOrder",
+    "group": "Orders",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "gid",
+            "description": "<p>Order gid</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "\n{\n    \"gid\": \"04d3fe3fc74d0514ee93e208a52bcf90\",\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n  {\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"order\": {\n    \"or_id\": 62,\n    \"or_gid\": \"5287f7f7ff5a28789518db64e946ea67\",\n    \"or_uid\": \"or603cfcd04d542\",\n    \"or_name\": \"Order 1\",\n    \"or_description\": null,\n    \"or_status_id\": 3,\n    \"or_pay_status_id\": 1,\n    \"or_app_total\": null,\n    \"or_app_markup\": null,\n    \"or_agent_markup\": null,\n    \"or_client_total\": null,\n    \"or_client_currency\": null,\n    \"or_client_currency_rate\": null,\n    \"or_status_name\": \"Processing\",\n    \"or_pay_status_name\": \"Not paid\",\n    \"request_uid\": null,\n    \"quotes\": [\n    {\n    \"pq_gid\": \"f5d3d55c9cfcd7ddb3062743e4d65a25\",\n    \"pq_name\": \"\",\n    \"pq_order_id\": 62,\n    \"pq_description\": null,\n    \"pq_status_id\": 3,\n    \"pq_price\": 374.8,\n    \"pq_origin_price\": 374.8,\n    \"pq_client_price\": 374.8,\n    \"pq_service_fee_sum\": 0,\n    \"pq_origin_currency\": \"USD\",\n    \"pq_client_currency\": \"USD\",\n    \"pq_status_name\": \"Applied\",\n    \"data\": {\n    \"fq_flight_id\": 29,\n    \"fq_source_id\": null,\n    \"fq_product_quote_id\": 138,\n    \"fq_gds\": \"S\",\n    \"fq_gds_pcc\": \"6NVG\",\n    \"fq_gds_offer_id\": null,\n    \"fq_type_id\": 0,\n    \"fq_cabin_class\": \"E\",\n    \"fq_trip_type_id\": 1,\n    \"fq_main_airline\": \"9U\",\n    \"fq_fare_type_id\": 1,\n    \"fq_origin_search_data\": \"{\\\"key\\\":\\\"2_U0FMMTAxKlkyMjAwL0tJVkxPTjIwMjEtMDgtMTIqOVV+IzlVODMzfmxjOmVuX3Vz\\\",\\\"routingId\\\":1,\\\"prices\\\":{\\\"lastTicketDate\\\":\\\"2021-03-01\\\",\\\"totalPrice\\\":374.8,\\\"totalTax\\\":354.8,\\\"comm\\\":0,\\\"isCk\\\":false,\\\"markupId\\\":0,\\\"markupUid\\\":\\\"\\\",\\\"markup\\\":0},\\\"passengers\\\":{\\\"ADT\\\":{\\\"codeAs\\\":\\\"ADT\\\",\\\"cnt\\\":2,\\\"baseFare\\\":5,\\\"pubBaseFare\\\":5,\\\"baseTax\\\":88.7,\\\"markup\\\":0,\\\"comm\\\":0,\\\"price\\\":93.7,\\\"tax\\\":88.7,\\\"oBaseFare\\\":{\\\"amount\\\":5,\\\"currency\\\":\\\"USD\\\"},\\\"oBaseTax\\\":{\\\"amount\\\":88.7,\\\"currency\\\":\\\"USD\\\"}},\\\"CHD\\\":{\\\"codeAs\\\":\\\"CNN\\\",\\\"cnt\\\":2,\\\"baseFare\\\":5,\\\"pubBaseFare\\\":5,\\\"baseTax\\\":88.7,\\\"markup\\\":0,\\\"comm\\\":0,\\\"price\\\":93.7,\\\"tax\\\":88.7,\\\"oBaseFare\\\":{\\\"amount\\\":5,\\\"currency\\\":\\\"USD\\\"},\\\"oBaseTax\\\":{\\\"amount\\\":88.7,\\\"currency\\\":\\\"USD\\\"}}},\\\"trips\\\":[{\\\"tripId\\\":1,\\\"segments\\\":[{\\\"segmentId\\\":1,\\\"departureTime\\\":\\\"2021-08-12 12:30\\\",\\\"arrivalTime\\\":\\\"2021-08-12 13:40\\\",\\\"stop\\\":0,\\\"stops\\\":[],\\\"flightNumber\\\":\\\"833\\\",\\\"bookingClass\\\":\\\"X\\\",\\\"duration\\\":190,\\\"departureAirportCode\\\":\\\"KIV\\\",\\\"departureAirportTerminal\\\":\\\"\\\",\\\"arrivalAirportCode\\\":\\\"STN\\\",\\\"arrivalAirportTerminal\\\":\\\"\\\",\\\"operatingAirline\\\":\\\"9U\\\",\\\"airEquipType\\\":\\\"321\\\",\\\"marketingAirline\\\":\\\"9U\\\",\\\"marriageGroup\\\":\\\"O\\\",\\\"mileage\\\":1329,\\\"cabin\\\":\\\"Y\\\",\\\"meal\\\":\\\"R\\\",\\\"fareCode\\\":\\\"XOW\\\",\\\"baggage\\\":{\\\"ADT\\\":{\\\"carryOn\\\":true,\\\"airlineCode\\\":\\\"9U\\\",\\\"allowPieces\\\":0,\\\"charge\\\":[{\\\"firstPiece\\\":1,\\\"lastPiece\\\":1,\\\"price\\\":24,\\\"currency\\\":\\\"USD\\\",\\\"maxWeight\\\":\\\"UP TO 50 POUNDS\\/23 KILOGRAMS\\\",\\\"maxSize\\\":\\\"UP TO 62 LINEAR INCHES\\/158 LINEAR CENTIMETERS\\\"},{\\\"firstPiece\\\":2,\\\"price\\\":61,\\\"currency\\\":\\\"USD\\\",\\\"maxWeight\\\":\\\"UP TO 50 POUNDS\\/23 KILOGRAMS\\\",\\\"maxSize\\\":\\\"UP TO 62 LINEAR INCHES\\/158 LINEAR CENTIMETERS\\\"}]},\\\"CHD\\\":{\\\"carryOn\\\":true,\\\"airlineCode\\\":\\\"9U\\\",\\\"allowPieces\\\":0,\\\"charge\\\":[{\\\"firstPiece\\\":1,\\\"lastPiece\\\":1,\\\"price\\\":24,\\\"currency\\\":\\\"USD\\\",\\\"maxWeight\\\":\\\"UP TO 50 POUNDS\\/23 KILOGRAMS\\\",\\\"maxSize\\\":\\\"UP TO 62 LINEAR INCHES\\/158 LINEAR CENTIMETERS\\\"},{\\\"firstPiece\\\":2,\\\"price\\\":61,\\\"currency\\\":\\\"USD\\\",\\\"maxWeight\\\":\\\"UP TO 50 POUNDS\\/23 KILOGRAMS\\\",\\\"maxSize\\\":\\\"UP TO 62 LINEAR INCHES\\/158 LINEAR CENTIMETERS\\\"}]}},\\\"recheckBaggage\\\":false}],\\\"duration\\\":190}],\\\"maxSeats\\\":9,\\\"paxCnt\\\":4,\\\"validatingCarrier\\\":\\\"9U\\\",\\\"gds\\\":\\\"S\\\",\\\"pcc\\\":\\\"6NVG\\\",\\\"cons\\\":\\\"GTT\\\",\\\"fareType\\\":\\\"PUB\\\",\\\"tripType\\\":\\\"OW\\\",\\\"cabin\\\":\\\"Y\\\",\\\"currency\\\":\\\"USD\\\",\\\"currencies\\\":[\\\"USD\\\"],\\\"currencyRates\\\":{\\\"USDUSD\\\":{\\\"from\\\":\\\"USD\\\",\\\"to\\\":\\\"USD\\\",\\\"rate\\\":1}},\\\"ngsFeatures\\\":{\\\"stars\\\":1,\\\"name\\\":\\\"BASIC\\\",\\\"list\\\":null},\\\"meta\\\":{\\\"eip\\\":0,\\\"noavail\\\":false,\\\"searchId\\\":\\\"U0FMMTAxWTIyMDB8S0lWTE9OMjAyMS0wOC0xMg==\\\",\\\"lang\\\":\\\"en\\\",\\\"rank\\\":10,\\\"cheapest\\\":true,\\\"fastest\\\":true,\\\"best\\\":true,\\\"bags\\\":0,\\\"country\\\":\\\"us\\\"},\\\"price\\\":93.7,\\\"originRate\\\":1,\\\"stops\\\":[0],\\\"time\\\":[{\\\"departure\\\":\\\"2021-08-12 12:30\\\",\\\"arrival\\\":\\\"2021-08-12 13:40\\\"}],\\\"bagFilter\\\":\\\"\\\",\\\"airportChange\\\":false,\\\"technicalStopCnt\\\":0,\\\"duration\\\":[190],\\\"totalDuration\\\":190,\\\"topCriteria\\\":\\\"fastestbestcheapest\\\",\\\"rank\\\":10}\",\n    \"fq_last_ticket_date\": \"2021-03-01\",\n    \"fq_json_booking\": null,\n    \"fq_type_name\": \"Base\",\n    \"fq_fare_type_name\": \"Public\",\n    \"flight\": {\n    \"fl_product_id\": 49,\n    \"fl_trip_type_id\": 1,\n    \"fl_cabin_class\": \"E\",\n    \"fl_adults\": 2,\n    \"fl_children\": 2,\n    \"fl_infants\": 0,\n    \"fl_trip_type_name\": \"One Way\",\n    \"fl_cabin_class_name\": \"Economy\"\n    },\n    \"trips\": [\n    {\n    \"fqt_id\": 85,\n    \"fqt_key\": null,\n    \"fqt_duration\": 190,\n    \"segments\": [\n    {\n    \"fqs_departure_dt\": \"2021-08-12 12:30:00\",\n    \"fqs_arrival_dt\": \"2021-08-12 13:40:00\",\n    \"fqs_stop\": 0,\n    \"fqs_flight_number\": 833,\n    \"fqs_booking_class\": \"X\",\n    \"fqs_duration\": 190,\n    \"fqs_departure_airport_iata\": \"KIV\",\n    \"fqs_departure_airport_terminal\": \"\",\n    \"fqs_arrival_airport_iata\": \"STN\",\n    \"fqs_arrival_airport_terminal\": \"\",\n    \"fqs_operating_airline\": \"9U\",\n    \"fqs_marketing_airline\": \"9U\",\n    \"fqs_air_equip_type\": \"321\",\n    \"fqs_marriage_group\": \"O\",\n    \"fqs_cabin_class\": \"Y\",\n    \"fqs_meal\": \"R\",\n    \"fqs_fare_code\": \"XOW\",\n    \"fqs_ticket_id\": null,\n    \"fqs_recheck_baggage\": 0,\n    \"fqs_mileage\": 1329,\n    \"departureLocation\": \"Chisinau\",\n    \"arrivalLocation\": \"London\",\n    \"operating_airline\": \"Air Moldova\",\n    \"marketing_airline\": \"Air Moldova\",\n    \"baggages\": [\n    {\n    \"qsb_flight_pax_code_id\": 1,\n    \"qsb_flight_quote_segment_id\": 226,\n    \"qsb_airline_code\": \"9U\",\n    \"qsb_allow_pieces\": 0,\n    \"qsb_allow_weight\": null,\n    \"qsb_allow_unit\": null,\n    \"qsb_allow_max_weight\": null,\n    \"qsb_allow_max_size\": null\n    },\n    {\n    \"qsb_flight_pax_code_id\": 2,\n    \"qsb_flight_quote_segment_id\": 226,\n    \"qsb_airline_code\": \"9U\",\n    \"qsb_allow_pieces\": 0,\n    \"qsb_allow_weight\": null,\n    \"qsb_allow_unit\": null,\n    \"qsb_allow_max_weight\": null,\n    \"qsb_allow_max_size\": null\n    }\n    ],\n    \"baggage_charges\": [\n    {\n    \"qsbc_first_piece\": 1,\n    \"qsbc_last_piece\": 1,\n    \"qsbc_origin_price\": null,\n    \"qsbc_origin_currency\": null,\n    \"qsbc_price\": \"24.00\",\n    \"qsbc_client_price\": null,\n    \"qsbc_client_currency\": null,\n    \"qsbc_max_weight\": \"UP TO 50 POUNDS/23 KILOGRAMS\",\n    \"qsbc_max_size\": \"UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS\"\n    },\n    {\n    \"qsbc_first_piece\": 2,\n    \"qsbc_last_piece\": null,\n    \"qsbc_origin_price\": null,\n    \"qsbc_origin_currency\": null,\n    \"qsbc_price\": \"61.00\",\n    \"qsbc_client_price\": null,\n    \"qsbc_client_currency\": null,\n    \"qsbc_max_weight\": \"UP TO 50 POUNDS/23 KILOGRAMS\",\n    \"qsbc_max_size\": \"UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS\"\n    },\n    {\n    \"qsbc_first_piece\": 1,\n    \"qsbc_last_piece\": 1,\n    \"qsbc_origin_price\": null,\n    \"qsbc_origin_currency\": null,\n    \"qsbc_price\": \"24.00\",\n    \"qsbc_client_price\": null,\n    \"qsbc_client_currency\": null,\n    \"qsbc_max_weight\": \"UP TO 50 POUNDS/23 KILOGRAMS\",\n    \"qsbc_max_size\": \"UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS\"\n    },\n    {\n    \"qsbc_first_piece\": 2,\n    \"qsbc_last_piece\": null,\n    \"qsbc_origin_price\": null,\n    \"qsbc_origin_currency\": null,\n    \"qsbc_price\": \"61.00\",\n    \"qsbc_client_price\": null,\n    \"qsbc_client_currency\": null,\n    \"qsbc_max_weight\": \"UP TO 50 POUNDS/23 KILOGRAMS\",\n    \"qsbc_max_size\": \"UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS\"\n    }\n    ]\n    }\n    ]\n    }\n    ],\n    \"pax_prices\": [\n    {\n    \"qpp_fare\": \"5.00\",\n    \"qpp_tax\": \"88.70\",\n    \"qpp_system_mark_up\": \"0.00\",\n    \"qpp_agent_mark_up\": \"0.00\",\n    \"qpp_origin_fare\": \"5.00\",\n    \"qpp_origin_currency\": \"USD\",\n    \"qpp_origin_tax\": \"88.70\",\n    \"qpp_client_currency\": \"USD\",\n    \"qpp_client_fare\": \"5.00\",\n    \"qpp_client_tax\": \"88.70\",\n    \"paxType\": \"ADT\"\n    },\n    {\n    \"qpp_fare\": \"5.00\",\n    \"qpp_tax\": \"88.70\",\n    \"qpp_system_mark_up\": \"0.00\",\n    \"qpp_agent_mark_up\": \"0.00\",\n    \"qpp_origin_fare\": \"5.00\",\n    \"qpp_origin_currency\": \"USD\",\n    \"qpp_origin_tax\": \"88.70\",\n    \"qpp_client_currency\": \"USD\",\n    \"qpp_client_fare\": \"5.00\",\n    \"qpp_client_tax\": \"88.70\",\n    \"paxType\": \"CHD\"\n    }\n    ]\n    },\n    \"product\": {\n    \"pr_type_id\": 1,\n    \"pr_name\": \"\",\n    \"pr_lead_id\": 513099,\n    \"pr_description\": \"\",\n    \"pr_status_id\": null,\n    \"pr_service_fee_percent\": null\n    },\n    \"productQuoteOptions\": [\n    {\n    \"pqo_name\": \"test\",\n    \"pqo_description\": \"\",\n    \"pqo_status_id\": 1,\n    \"pqo_price\": 100,\n    \"pqo_client_price\": 120,\n    \"pqo_extra_markup\": 20\n    }\n    ]\n    }\n    ]\n    },\n    \"technical\": {\n    \"action\": \"v2/order/view\",\n    \"response_id\": 392,\n    \"request_dt\": \"2021-03-01 17:33:59\",\n    \"response_dt\": \"2021-03-01 17:33:59\",\n    \"execution_time\": 0.061,\n    \"memory_usage\": 1175376\n    },\n    \"request\": {\n    \"gid\": \"5287f7f7ff5a28789518db64e946ea67\"\n    }\n    }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n            \"status\": 422,\n            \"message\": \"Error\",\n            \"errors\": [\n                \"Order is not found\"\n            ],\n            \"code\": 12100,\n            \"technical\": {\n                \"action\": \"v2/order/view\",\n                \"response_id\": 397,\n                \"request_dt\": \"2021-03-01 17:40:41\",\n                \"response_dt\": \"2021-03-01 17:40:41\",\n                \"execution_time\": 0.017,\n                \"memory_usage\": 212976\n            },\n            \"request\": {\n                \"gid\": \"5287f7f7ff5a28789518db64e946ea67s\"\n            }\n        }",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n    \"status\": 400,\n    \"message\": \"Load data error\",\n    \"errors\": [\n        \"Not found Order data on POST request\"\n    ],\n    \"code\": \"18300\",\n    \"technical\": {\n        \"action\": \"v2/order/view\",\n        \"response_id\": 11933856,\n        \"request_dt\": \"2020-02-03 12:49:20\",\n        \"response_dt\": \"2020-02-03 12:49:20\",\n        \"execution_time\": 0.017,\n        \"memory_usage\": 114232\n    },\n    \"request\": []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/OrderController.php",
+    "groupTitle": "Orders"
+  },
+  {
+    "type": "post",
     "url": "/v1/quote/create",
     "title": "Create Quote",
     "version": "0.1.0",

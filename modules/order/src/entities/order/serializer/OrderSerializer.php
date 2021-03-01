@@ -44,12 +44,8 @@ class OrderSerializer extends Serializer
         $data['or_pay_status_name'] = OrderPayStatus::getName($this->model->or_pay_status_id);
 
         if ($this->model->or_request_data) {
-            $uid = $this->model->or_request_data['Request']['FlightRequest']['uid'] ?? null;
-            if ($uid) {
-                $data['or_request_data'] = [
-                    'request_uid' => $uid
-                ];
-            }
+            $uid = $this->model->or_request_data['uid'] ?? null;
+            $data['request_uid'] = $uid;
         }
 
         $data['quotes'] = [];
