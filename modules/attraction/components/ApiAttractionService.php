@@ -141,11 +141,11 @@ class ApiAttractionService extends Component
         return $data['data'] ?? [];
     }
 
-    public function getProductList()
+    public function getProductList(Attraction $attraction)
     {
         $query = [
-            'query' => 'query holibob {
-              productList(filter: {search: "London"}) {
+            'query' => 'query holibob ($term: String!){
+              productList(filter: {search: $term}) {
                 recordCount
                 pageCount 
                 nodes {
@@ -168,6 +168,7 @@ class ApiAttractionService extends Component
                 }
               }
             }',
+            'variables' => '{"term":"' . $attraction->atn_destination . '"}',
             'operationName' => 'holibob',
         ];
 

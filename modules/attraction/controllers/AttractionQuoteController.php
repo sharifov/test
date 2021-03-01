@@ -135,7 +135,7 @@ class AttractionQuoteController extends FController
         if ($attraction) {
             try {
                 //$result = $apiAttractionService->getAttractionQuotes(AttractionQuoteSearchGuard::guard($attraction));
-                $result = $apiAttractionService->getProductList();
+                $result = $apiAttractionService->getProductList(AttractionQuoteSearchGuard::guard($attraction));
             } catch (\DomainException $e) {
                 Yii::$app->session->setFlash('error', $e->getMessage());
             }
