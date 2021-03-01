@@ -139,9 +139,10 @@ class Attraction extends \yii\db\ActiveRecord implements Productable
     /**
      * @return array
      */
-    public function getSearchData(): array
+    public function getSearchData($quoteKey): array
     {
-        $keyCache = $this->atn_request_hash_key;
+        //$keyCache = $this->atn_request_hash_key;
+        $keyCache = $quoteKey;
         $result = Yii::$app->cache->get($keyCache);
 
         if ($result === false) {
@@ -149,10 +150,11 @@ class Attraction extends \yii\db\ActiveRecord implements Productable
 
             $apiAttractionService = Yii::$app->getModule('attraction')->apiService;
 
-            $response = $apiAttractionService->getAttractionQuotes($this);
+            //$response = $apiAttractionService->getAttractionQuotes($this);
+            $response = $apiAttractionService->getProductById($quoteKey);
 
-            if (isset($response['data']['searchSummary'])) {
-                $result = $response['data'];
+            if (isset($response['product'])) {
+                $result = $response;
                 Yii::$app->cache->set($keyCache, $result, 100);
             } else {
                 $result = [];
@@ -174,7 +176,7 @@ class Attraction extends \yii\db\ActiveRecord implements Productable
         $quoteList = [];
         //$hotelData = self::getHotelDataByCode($result, $hotelCode);
 
-        if ($quoteKey && isset($result['activityGroups']) && $result['activityGroups']) {
+        if ($quoteKey && isset($result['product']) && $result['product']) {
             foreach ($result['activityGroups'][0]['activityTiles'] as $quote) {
                 $groupKey = (int)($quote['id'] ?? '');
                 if (!$groupKey) {

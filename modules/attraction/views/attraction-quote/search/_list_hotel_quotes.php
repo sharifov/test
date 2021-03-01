@@ -25,7 +25,7 @@ $roomDataProvider = new ArrayDataProvider([
 ?>
 <table class="table table-striped table-bordered">
 
-            <?php //php \yii\helpers\VarDumper::dump($model, 3, true)?>
+            <?php //\yii\helpers\VarDumper::dump($dataHotel, 3, true); die();?>
 
             <?php //\yii\widgets\Pjax::begin(['timeout' => 15000, 'enablePushState' => false, 'enableReplaceState' => false, 'scrollTo' => false]); ?>
             <?= \yii\widgets\ListView::widget([

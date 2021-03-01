@@ -9,10 +9,9 @@
 
 //use modules\hotel\models\Hotel;
 
-//var_dump($hotelSearch); die();
 ?>
 
-<?php if ($dataHotel[$key]['__typename'] !== 'ActivityMessageTile') : ?>
+<?php if ($dataHotel) : ?>
 <tr>
   <div class="quote">
     <div class="quote__heading">
@@ -21,7 +20,7 @@
           <strong># <?= $key + 1?></strong>
         </span>
         <span class="quote__vc">
-            Attraction / <?= $dataHotel[$key]['__typename'] ?? '' ?>
+            Attraction / <?= $dataHotel[$key]['name'] ?? '' ?>
         </span>
       </div>
       <div class="quote__heading-right">
@@ -32,7 +31,7 @@
             </strong>
           </span>
           <strong class="text-success">
-            <?= $dataHotel[$key]['leadTicket']['price']['lead']['formatted'] ?? '' ?>
+            <?= $dataHotel[$key]['guidePriceFormattedText'] ?? '' ?>
           </strong>
         </span>
       </div>
@@ -43,8 +42,8 @@
       <div class="container-fluid">
         <div class="row">
           <div class="col-2">
-            <?php if (isset($dataHotel[$key]['image']['url'])) : ?>
-                <img src="<?= $dataHotel[$key]['image']['url'] ?>" alt="Attraction Name" class="img-thumbnail" style="max-width: 200px;">
+            <?php if (isset($dataHotel[$key]['previewImage']['url'])) : ?>
+                <img src="<?= $dataHotel[$key]['previewImage']['url'] ?>" alt="Attraction Name" class="img-thumbnail" style="max-width: 200px;">
             <?php else : ?>
               <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve"> <g transform="translate(1 1)"> <g>
                     <g>
@@ -72,11 +71,11 @@
             <h5 class="mb-8"><?= $dataHotel[$key]['name'] ?? '' ?></h5>
             <div class="mb-2"><small><?= $dataHotel[$key]['supplierName'] ?? '' ?></small></div>
             <?php if (isset($dataHotel[$key]['duration'], $dataHotel[$key]['formatted'])) : ?>
-            <div class="mb-3"><i class="fa fa-clock"></i> <span><?= $dataHotel[$key]['formatted'] ?></span></div>
+            <div class="mb-3"><i class="fa fa-clock"></i> <span><? //= $dataHotel[$key]['formatted'] ?></span></div>
             <?php endif; ?>
             <div style="font-size: 13px">
               <p>
-                <?= $dataHotel[$key]['description'] ?? '' ?>
+                <?= $dataHotel[$key]['abstract'] ?? '' ?>
               </p>
             </div>
           </div>
@@ -87,7 +86,7 @@
                   <?= \yii\bootstrap4\Html::a('<i class="fa fa-plus"></i> add Quote', null, [
                       'data-url' => \yii\helpers\Url::to(['/attraction/attraction-quote/add-ajax', 'atn_id' => $hotelSearch->atn_id]),
                       //'data-hotel-code' => $dataHotel['code'],
-                      'data-quote-key' => $dataRoom['id'] ?? '',
+                      'data-quote-key' => $dataHotel[$key]['id'] ?? '',
                       'class' => 'btn btn-success btn-sm btn-add-attraction-quote'
                   ]) ?>
               <?php endif; ?>

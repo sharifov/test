@@ -134,16 +134,19 @@ class AttractionQuoteController extends FController
 
         if ($attraction) {
             try {
-                $result = $apiAttractionService->getAttractionQuotes(AttractionQuoteSearchGuard::guard($attraction));
+                //$result = $apiAttractionService->getAttractionQuotes(AttractionQuoteSearchGuard::guard($attraction));
+                $result = $apiAttractionService->getProductList();
             } catch (\DomainException $e) {
                 Yii::$app->session->setFlash('error', $e->getMessage());
             }
         }
 
-        $attractionsList = $result['data']['activityGroups'][0] ?? [];
-
+        //$attractionsList = $result['data']['activityGroups'][0] ?? [];
+        $attractionsList = $result['productList']['nodes'] ?? [];
+//var_dump([$attractionsList]); die();
         $dataProvider = new ArrayDataProvider([
-            'allModels' => [$attractionsList['activityTiles'] ?? []],
+            //'allModels' => [$attractionsList['activityTiles'] ?? []],
+            'allModels' => [$attractionsList] ?? [],
             'pagination' => [
                 'pageSize' => 10,
             ],
@@ -160,7 +163,7 @@ class AttractionQuoteController extends FController
     {
         $attractionId = (int) Yii::$app->request->get('atn_id');
         //$hotelCode = (int) Yii::$app->request->post('hotel_code');
-        $quoteKey = (int) Yii::$app->request->post('quote_key');
+        $quoteKey = (string) Yii::$app->request->post('quote_key');
         $productId = 0;
 
         Yii::$app->response->format = Response::FORMAT_JSON;
@@ -179,17 +182,16 @@ class AttractionQuoteController extends FController
             }
 
             $attraction = $this->attractionRepository->find($attractionId);
-
             $productId = $attraction->atn_product_id;
 
-            $result = $attraction->getSearchData();
+            //$result = $attraction->getSearchData();
+            $quoteData = $attraction->getSearchData($quoteKey);
 
-            $quoteData = Attraction::getAttractionQuoteDataByKey($result, $quoteKey);
+            //$quoteData = Attraction::getAttractionQuoteDataByKey($result, $quoteKey);
 
             if (!$quoteData) {
                 throw new Exception('Not found quote - quote key (' . $quoteKey . ')', 7);
             }
-
 
             //$currency = $hotelData['currency'] ?? 'USD';
 

@@ -90,27 +90,28 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable
      * @param string $currency
      * @return array|AttractionQuote|\yii\db\ActiveRecord|null
      */
-    public static function findOrCreateByData(array $quoteData, Attraction $attractionRequest, string $currency = 'USD')
+    public static function findOrCreateByData(array $quoteData, Attraction $attractionProduct, string $currency = 'USD')
     {
         $aQuote = null;
 
-        if (isset($quoteData['id']) && $quoteId = $quoteData['id']) {
+        if (isset($quoteData['product']) && $quoteId = $quoteData['product']['id']) {
             $totalAmount = 0;
             if (isset($quoteId)) {
-                $hashKey = self::getHashKey($quoteData, $attractionRequest);
+                $hashKey = self::getHashKey($quoteData, $attractionProduct);
 
                 $aQuote = self::find()->where([
-                    'atnq_attraction_id' => $attractionRequest->atn_id,
+                    'atnq_attraction_id' => $attractionProduct->atn_id,
                     'atnq_hash_key' => $hashKey
                 ])->one();
 
-                $totalAmount = substr($quoteData['leadTicket']['price']['lead']['formatted'], 1);
+                //$totalAmount = substr($quoteData['leadTicket']['price']['lead']['formatted'], 1);
+                $totalAmount = $quoteData['product']['guidePrice'];
 
                 if (!$aQuote) {
                     $prQuote = new ProductQuote();
-                    $prQuote->pq_product_id = $attractionRequest->atn_product_id;
+                    $prQuote->pq_product_id = $attractionProduct->atn_product_id;
                     $prQuote->pq_origin_currency = $currency;
-                    $prQuote->pq_client_currency = ProductQuoteHelper::getClientCurrencyCode($attractionRequest->atnProduct);
+                    $prQuote->pq_client_currency = ProductQuoteHelper::getClientCurrencyCode($attractionProduct->atnProduct);
 
                     $prQuote->pq_owner_user_id = Yii::$app->user->id;
                     $prQuote->pq_price = (float)$totalAmount;
@@ -121,17 +122,17 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable
                     $prQuote->pq_service_fee_sum = 0;
                     //$prQuote->pq_client_currency_rate = ProductQuoteHelper::getClientCurrencyRate($hotelRequest->phProduct);
                     $prQuote->pq_origin_currency_rate = 1;
-                    $prQuote->pq_name = mb_substr($quoteData['name'], 0, 40);
+                    $prQuote->pq_name = mb_substr($quoteData['product']['name'], 0, 40);
 
                     if ($prQuote->save()) {
                         $aQuote = new self();
                         $aQuote->atnq_hash_key = $hashKey;
-                        $aQuote->atnq_attraction_id = $attractionRequest->atn_id;
+                        $aQuote->atnq_attraction_id = $attractionProduct->atn_id;
                         $aQuote->atnq_product_quote_id = $prQuote->pq_id;
-                        $aQuote->atnq_attraction_name = $quoteData['name'];
-                        $aQuote->atnq_supplier_name = $quoteData['supplierName'];
-                        $aQuote->atnq_type_name = $quoteData['__typename'];
-                        $aQuote->atnq_json_response = $quoteData;
+                        $aQuote->atnq_attraction_name = $quoteData['product']['name'];
+                        $aQuote->atnq_supplier_name = $quoteData['product']['supplierName'];
+                        $aQuote->atnq_type_name = $quoteData['product']['__typename'];
+                        $aQuote->atnq_json_response = @json_encode($quoteData);
                         //$aQuote->hq_request_hash = $hotelRequest->ph_request_hash_key;
 
                         if (!$aQuote->save()) {

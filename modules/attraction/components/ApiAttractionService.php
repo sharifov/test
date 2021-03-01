@@ -21,27 +21,28 @@ use yii\httpclient\Client;
 use yii\httpclient\CurlTransport;
 use yii\httpclient\Request;
 use yii\httpclient\Response;
+use Datetime;
 
 /**
  * Class ApiAttractionService
  * @package modules\attraction\components
  *
  * @property string $url
- * @property string $username
- * @property string $password
+ * @property string $apiKey
+ * @property string $secret
  * @property Request $request
  */
 
 class ApiAttractionService extends Component
 {
     public $url;
-    public $username;
-    public $password;
-    public $options = [CURLOPT_ENCODING => 'gzip'];
+    public $apiKey;
+    public $secret;
+    //public $options = [CURLOPT_ENCODING => 'gzip'];
 
-    private $request;
+    //private $request;
 
-    private const DESTINATION_LOCATIONS = 0;
+    /*private const DESTINATION_LOCATIONS = 0;
     private const DESTINATION_CITY_ZONE = 1;
     private const DESTINATION_HOTEL = 2;
 
@@ -49,18 +50,18 @@ class ApiAttractionService extends Component
         self::DESTINATION_LOCATIONS,
         self::DESTINATION_CITY_ZONE,
         self::DESTINATION_HOTEL
-    ];
+    ];*/
 
     public function init(): void
     {
         parent::init();
-        $this->initRequest();
+        //$this->initRequest();
     }
 
     /**
      * @return bool
      */
-    private function initRequest(): bool
+    /*private function initRequest(): bool
     {
         $authStr = base64_encode($this->username . ':' . $this->password);
 
@@ -75,6 +76,112 @@ class ApiAttractionService extends Component
         }
 
         return false;
+    }*/
+
+    private function execRequest($query)
+    {
+        $graphqlEndpoint = $this->url;
+        $apiKey = $this->apiKey;
+        $secret = $this->secret;
+
+        $dt = new DateTime();
+        $date = $dt->format('Y-m-d\TH:i:s.') . substr($dt->format('u'), 0, 3) . 'Z';
+
+        $string = $date . $apiKey . 'POST/graphql' . $query;
+        $base64HashSignature = base64_encode(hash_hmac('sha1', $string, $secret, true));
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $query);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_URL, $graphqlEndpoint);
+
+        $headers = [];
+        $headers[] = "x-api-key: $apiKey";
+        $headers[] = "x-holibob-date: $date";
+        $headers[] = "x-holibob-signature: $base64HashSignature";
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        $result = curl_exec($ch);
+
+        if (curl_errno($ch)) {
+            echo 'Error:' . curl_error($ch);
+        }
+        curl_close($ch);
+        return $result;
+    }
+
+    public function getProductById($productId)
+    {
+        $query = [
+            'query' => 'query holibob ($productId: String!){
+              product(id: $productId) {
+                id
+                code
+                name                
+                guidePriceCurrency
+                guidePrice
+                difficultyLevel
+                supplierName
+                __typename
+                contentList {nodes{
+                  name
+                  type
+                  description
+                }}
+              }
+            }',
+            'variables' => '{"productId":"' . $productId . '"}',
+            'operationName' => 'holibob',
+        ];
+
+        $result = self::execRequest(@json_encode($query));
+        $data = json_decode($result, true);
+        return $data['data'] ?? [];
+    }
+
+    public function getProductList()
+    {
+        $query = [
+            'query' => 'query holibob {
+              productList(filter: {search: "London"}) {
+                recordCount
+                pageCount 
+                nodes {
+                  id
+                  name  
+                  availabilityType
+                  guidePriceFormattedText
+                  guidePrice
+                  supplierName
+                  abstract
+                  previewImage {
+                     url
+                  }
+                   place {
+                     cityId
+                     cityName                    
+                     countryId
+                     countryName
+                   }
+                }
+              }
+            }',
+            'operationName' => 'holibob',
+        ];
+
+        $result = self::execRequest(@json_encode($query));
+        $data = json_decode($result, true);
+        return $data['data'];
+    }
+
+    public function checkApi()
+    {
+        //$query = '{"query":"query {welcome}"}';
+        //$query = ['query' => 'query {welcome}'];
+        //$result = self::execRequest(@json_encode($query));
+        //var_dump($result); die();
     }
 
     /**
