@@ -19,13 +19,23 @@ class FlightQuoteBookService
     /**
      * @param array $data
      * @return mixed
+     */
+    public static function prepareRequestData(array $data)
+    {
+        return $data['Request'] ?? [];
+    }
+
+    /**
+     * @param array $data
+     * @return mixed
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\httpclient\Exception
      */
     public static function requestBook(array $data)
     {
+        $requestData = self::prepareRequestData($data);
         $host = Yii::$app->params['backOffice']['serverUrlV2'];
-        $responseBO = BackOffice::sendRequest2('products/book-flight', $data, 'POST', 120, $host);
+        $responseBO = BackOffice::sendRequest2('products/book-flight', $requestData, 'POST', 120, $host);
 
         if ($responseBO->isOk) {
             $responseData = $responseBO->data;
@@ -45,7 +55,7 @@ class FlightQuoteBookService
                 }
                 \Yii::error(
                     VarDumper::dumpAsString([
-                    'data' => $data,
+                    'data' => $requestData,
                     'responseData' => $responseData,
                     ]),
                     'FlightQuoteBookService:book:errors'
@@ -54,7 +64,7 @@ class FlightQuoteBookService
             }
             \Yii::error(
                 VarDumper::dumpAsString([
-                'data' => $data,
+                'data' => $requestData,
                 'responseData' => $responseData,
                 ]),
                 'FlightQuoteBookService:book:failResponse'
@@ -63,7 +73,7 @@ class FlightQuoteBookService
         }
         \Yii::error(
             VarDumper::dumpAsString([
-            'data' => $data,
+            'data' => $requestData,
             'responseContent' => $responseBO->content,
             ]),
             'FlightQuoteBookService:book:request'
