@@ -28,6 +28,7 @@ class OrderCompletedConfirmationJob implements RetryableJobInterface
                 'message' => 'Not found Order',
                 'orderId' => $this->orderId,
             ], 'OrderCompletedConfirmationJob');
+            return;
         }
 
         \Yii::info([

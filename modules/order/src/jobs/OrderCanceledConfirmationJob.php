@@ -28,13 +28,49 @@ class OrderCanceledConfirmationJob implements RetryableJobInterface
                 'message' => 'Not found Order',
                 'orderId' => $this->orderId,
             ], 'OrderCanceledConfirmationJob');
+            return;
         }
 
-        \Yii::info([
-            'message' => 'Send canceled confirmation email',
-            'orderId' => $this->orderId,
-            'data' => $order->serialize(),
-        ], 'info\OrderCanceledConfirmationJob');
+        $projectId = $order->orLead->project_id ?? null;
+
+        if (!$projectId) {
+            \Yii::error([
+                'message' => 'Not found Project',
+                'orderId' => $this->orderId,
+            ], 'OrderCanceledConfirmationJob');
+            return;
+        }
+
+        $from = 'from.serge.murphy@techork.com';
+        $fromName = '';
+        $to = 'to.serge.murphy@techork.com';
+        $toName = '';
+        $templateKey = 'bwk_multi_product';
+        $languageId = null;
+
+        $mailPreview = \Yii::$app->communication->mailPreview(
+            $projectId,
+            $templateKey,
+            $from,
+            $to,
+            (new EmailConfirmationData())->generate($order),
+        );
+
+        if ($mailPreview['error'] !== false) {
+            throw new \DomainException($mailPreview['error']);
+        }
+
+        (new EmailConfirmationSender())->send(
+            $order,
+            $templateKey,
+            $from,
+            $fromName,
+            $to,
+            $toName,
+            $languageId,
+            $mailPreview['data']['email_subject'],
+            $mailPreview['data']['email_body_html']
+        );
     }
 
     public function getTtr(): int

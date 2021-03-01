@@ -67,7 +67,6 @@ class OrderSerializer extends Serializer
         if ($quotes = $this->model->productQuotes) {
             /** @var ProductQuote[] $quotes */
             foreach ($quotes as $quote) {
-                $quoteData['product'] = $quote->pqProduct->serialize();
                 $productQuoteOptionsData = [];
                 if ($productQuoteOptions = $quote->productQuoteOptions) {
                     foreach ($productQuoteOptions as $productQuoteOption) {
