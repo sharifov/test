@@ -297,7 +297,7 @@ JS;
                             <td title="<?=Html::encode($model->atnq_id)?>"><?=Html::encode($model->atnq_id)?></td>
                             <td ><?=Html::encode($model->atnq_type_name) ?></td>
                             <td ><?=Html::encode($model->atnq_supplier_name) ?></td>
-                            <td ><?=Html::encode($model->atnqProductQuote->pq_origin_price) ?></td>
+                            <td ><?=number_format($model->atnqProductQuote->pq_origin_price, 2) ?></td>
 
                             <!--<td title="code: <? /*=Html::encode('$room->hqr_board_code')*/?>">
                                 <? /*=Html::encode('$room->hqr_board_name')*/?>
@@ -334,7 +334,7 @@ JS;
                     <?php /*endforeach; */?>
                     <tr>
                         <td colspan="3" class="text-right">Position Total: </td>
-                        <td ><?=Html::encode($model->atnqProductQuote->pq_origin_price) ?></td>
+                        <td ><?= number_format($model->atnqProductQuote->pq_origin_price, 2) ?></td>
                         <!--<td class="text-center"><?/*='$adlTotalCount' ? '<i class="fa fa-user"></i> ' . '$adlTotalCount' : '-'*/?></td>
                         <td class="text-center"><?/*='$chdTotalCount' ? '<i class="fa fa-child"></i> ' . '$chdTotalCount' : '-'*/?></td>
                         <td class="text-right"></td>
