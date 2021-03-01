@@ -26,6 +26,9 @@ class FlightQuoteBookGuardService
         if (!$order->or_request_data) {
             throw new \DomainException('Request data not found in order');
         }
+        if (!$hybridUid = ArrayHelper::getValue($order->or_request_data, 'Request.FlightRequest.uid')) {
+            throw new \DomainException('HybridUid not found in order');
+        }
         return true;
     }
 }

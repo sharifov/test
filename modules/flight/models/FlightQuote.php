@@ -46,6 +46,7 @@ use yii\helpers\ArrayHelper;
  * @property string|null $fq_request_hash
  * @property string|null $fq_uid
  * @property array|null $fq_json_booking
+ * @property string|null $fq_flight_request_uid
  *
  * @property Employee $fqCreatedUser
  * @property Flight $fqFlight
@@ -176,6 +177,7 @@ class FlightQuote extends ActiveRecord implements Quotable
             [['fq_flight_id'], 'exist', 'skipOnError' => true, 'targetClass' => Flight::class, 'targetAttribute' => ['fq_flight_id' => 'fl_id']],
             [['fq_product_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['fq_product_quote_id' => 'pq_id']],
             [['fq_json_booking'], 'safe'],
+            [['fq_flight_request_uid'], 'string', 'max' => 100] // flight_request_uid
         ];
     }
 
@@ -210,6 +212,7 @@ class FlightQuote extends ActiveRecord implements Quotable
             'fq_request_hash' => 'Request Hash',
             'fq_uid' => 'Uid',
             'fq_json_booking' => 'Json booking',
+            'fq_flight_request_uid' => 'Hybrid UID',
         ];
     }
 

@@ -6,6 +6,8 @@ use common\components\BackOffice;
 use common\models\Project;
 use modules\flight\models\FlightQuote;
 use modules\flight\src\repositories\flightQuoteRepository\FlightQuoteRepository;
+use modules\flight\src\services\flightQuote\FlightQuoteBookGuardService;
+use modules\order\src\entities\order\Order;
 use sales\services\TransactionManager;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -85,7 +87,7 @@ class FlightQuoteBookService
 
     /**
      * @param FlightQuote $flightQuote
-     * @param array $data
+     * @param array $responseData
      * @return bool
      * @throws \Throwable
      * @throws \yii\base\InvalidConfigException
@@ -100,7 +102,15 @@ class FlightQuoteBookService
             if (!$recordLocator = ArrayHelper::getValue($responseData, 'recordLocator')) {
                 throw new \RuntimeException('RecordLocator not found');
             }
+            if (!$order = ArrayHelper::getValue($flightQuote, 'fqProductQuote.pqOrder')) {
+                throw new \RuntimeException('Order not found');
+            }
+            /** @var Order $order */
+            if (!$hybridUid = ArrayHelper::getValue($order->or_request_data, 'Request.FlightRequest.uid')) {
+                throw new \RuntimeException('HybridUid not found in order');
+            }
 
+            $flightQuote->fq_flight_request_uid = $hybridUid;
             $flightQuote->fq_json_booking = $responseData;
             $flightQuote->fq_record_locator = $recordLocator;
             $flightQuoteRepository->save($flightQuote);

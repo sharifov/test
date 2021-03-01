@@ -25,6 +25,7 @@ use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "order".
@@ -49,7 +50,7 @@ use yii\db\ActiveRecord;
  * @property string|null $or_created_dt
  * @property string|null $or_updated_dt
  * @property float|null $or_profit_amount
- * @property string|null $or_request_data
+ * @property array|null $or_request_data
  *
  * @property Currency $orClientCurrency
  * @property Invoice[] $invoices
