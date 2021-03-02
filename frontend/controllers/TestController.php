@@ -2006,6 +2006,7 @@ class TestController extends FController
         }
 
         $data = $order->serialize();
+        $data['project_key'] = $order->orLead->project->project_key;
         $content = \Yii::$app->communication->getContent($templateKey, $data);
 
         return GeneratorPdfService::generateForBrowserOutput($content['content'], 'test.pdf');
@@ -2017,7 +2018,9 @@ class TestController extends FController
             throw new NotFoundHttpException('Order not found');
         }
 
-        \yii\helpers\VarDumper::dump($order->serialize(), 20, true);
+        $data = $order->serialize();
+        $data['project_key'] = $order->orLead->project->project_key;
+        \yii\helpers\VarDumper::dump($data, 20, true);
         exit();
     }
 
