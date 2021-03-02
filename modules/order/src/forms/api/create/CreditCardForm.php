@@ -20,6 +20,11 @@ class CreditCardForm extends Model
     public $type;
     public $type_id;
 
+    private const FORMAT_YEAR = [
+        2 => 'y',
+        4 => 'Y'
+    ];
+
     /**
      * @return array
      */
@@ -43,8 +48,8 @@ class CreditCardForm extends Model
 
     public function validateDateFormat(): void
     {
-        $fPattern = '/^\d{2}\/\d{2}$/';
-        $sPattern = '/^\d{2} \/ \d{2}$/';
+        $fPattern = '/^\d{2}\/\d{2,4}$/';
+        $sPattern = '/^\d{2} \/ \d{2,4}$/';
         if (!preg_match($fPattern, trim($this->expiration)) && !preg_match($sPattern, trim($this->expiration))) {
             $this->addError('expiration', 'The format of Expiration is invalid');
         }
@@ -64,8 +69,11 @@ class CreditCardForm extends Model
             $this->addError('expiration', 'Incorrect expire month');
         }
 
-        if (isset($dateArr[1])) {
-            $this->expiration_year = (int) '20' . trim($dateArr[1]);
+        $year = trim($dateArr[1] ?? '');
+        $formatYear = self::FORMAT_YEAR[mb_strlen($year)] ?? null;
+        if ($formatYear) {
+            $date = \DateTime::createFromFormat($formatYear, $year);
+            $this->expiration_year = (int) $date->format('Y');
         } else {
             $this->addError('expiration', 'Incorrect expire year');
         }
