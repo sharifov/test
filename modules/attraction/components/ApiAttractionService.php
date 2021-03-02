@@ -112,6 +112,38 @@ class ApiAttractionService extends Component
         return $result;
     }
 
+    public function getAvailabilityList($productId, $startDate, $endDate)
+    {
+        $query = [
+            'query' => 'query holibob ($productId: String!, $startDate: Date, $endDate: Date) {
+              availabilityList(
+                productId: $productId, 
+                filter: {
+                  startDate: $startDate, 
+                  endDate:  $endDate
+                }
+              ) {
+                recordCount
+                pageCount
+                nodes {
+                  id      
+                  date
+                  soldOut
+                  guidePriceFormattedText
+                }
+              }
+            }',
+            'variables' => '{"productId":"' . $productId . '", "startDate":"' . $startDate . '", "endDate":"' . $endDate . '"}',
+            'operationName' => 'holibob'
+        ];
+
+
+
+        $result = self::execRequest(@json_encode($query));
+        $data = json_decode($result, true);
+        return $data['data'] ?? [];
+    }
+
     public function getProductById($productId)
     {
         $query = [
