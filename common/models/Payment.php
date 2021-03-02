@@ -5,6 +5,7 @@ namespace common\models;
 use modules\invoice\src\entities\invoice\Invoice;
 use modules\order\src\entities\order\Order;
 use modules\order\src\payment\events\PaymentCompletedEvent;
+use modules\order\src\payment\events\PaymentRefundedEvent;
 use sales\entities\EventTrait;
 use Yii;
 use yii\behaviors\BlameableBehavior;
@@ -77,6 +78,20 @@ class Payment extends \yii\db\ActiveRecord
         }
         $this->pay_status_id = self::STATUS_COMPLETED;
         $this->recordEvent(new PaymentCompletedEvent($this->pay_id));
+    }
+
+    public function isRefunded(): bool
+    {
+        return $this->pay_status_id === self::STATUS_REFUNDED;
+    }
+
+    public function refund(): void
+    {
+        if ($this->isRefunded()) {
+            throw new \DomainException('Payment is already refund.');
+        }
+        $this->pay_status_id = self::STATUS_REFUNDED;
+        $this->recordEvent(new PaymentRefundedEvent($this->pay_id));
     }
 
     public function inProgress(): void

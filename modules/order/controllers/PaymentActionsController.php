@@ -8,8 +8,10 @@ use common\models\Transaction;
 use frontend\controllers\FController;
 use modules\order\src\payment\PaymentRepository;
 use modules\order\src\payment\services\PaymentService;
+use modules\order\src\payment\useCase\refund\RefundForm;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
+use Yii;
 
 /**
  * Class PaymentActionsController
@@ -40,26 +42,6 @@ class PaymentActionsController extends FController
 //            ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
-    }
-
-    public function actionVoid()
-    {
-        $paymentId = (int) \Yii::$app->request->post('id');
-
-        $payment = $this->findModel($paymentId);
-
-        try {
-            $this->paymentService->void([]);
-            return $this->asJson([
-                'error' => false,
-                'message' => 'ok',
-            ]);
-        } catch (\Throwable $e) {
-            return $this->asJson([
-                'error' => true,
-                'message' => $e->getMessage(),
-            ]);
-        }
     }
 
     public function actionCapture()
@@ -107,22 +89,48 @@ class PaymentActionsController extends FController
 
     public function actionRefund()
     {
-        $paymentId = (int) \Yii::$app->request->post('id');
+        $paymentId = (int)Yii::$app->request->get('id');
 
         $payment = $this->findModel($paymentId);
 
-        try {
-            $this->paymentService->refund([]);
-            return $this->asJson([
-                'error' => false,
-                'message' => 'ok',
-            ]);
-        } catch (\Throwable $e) {
-            return $this->asJson([
-                'error' => true,
-                'message' => $e->getMessage(),
-            ]);
+        $model = new RefundForm($payment->pay_order_id, $payment->pay_id, $payment->pay_amount);
+
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            try {
+                if ($payment->isRefunded()) {
+                    throw new \DomainException('Payment is already refund.');
+                }
+                $result = $this->paymentService->refund([
+                    'amount' => $payment->pay_amount,
+                    'transaction_id' => $payment->pay_code,
+                ]);
+                $transaction = new Transaction([
+                    'tr_amount' => $payment->pay_amount,
+                    'tr_code' => $result['transaction_id'] ?? null,
+                    'tr_date' => date('Y-m-d'),
+                    'tr_type_id' => Transaction::TYPE_REFUND,
+                    'tr_payment_id' => $payment->pay_id,
+                    'tr_created_dt' => date('Y-m-d H:i:s'),
+                    'tr_comment' => $model->comment,
+                ]);
+                if (!$transaction->save()) {
+                    \Yii::error([
+                        'message' => 'Transaction save error',
+                        'model' => $transaction->getAttributes(),
+                        'errors' => $transaction->getErrors()
+                    ], 'PaymentController:Refund');
+                }
+                $payment->refund();
+                $this->paymentRepository->save($payment);
+                return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-orders", push: false, replace: false, async: false, timeout: 2000});</script>';
+            } catch (\Throwable $e) {
+                return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-orders", push: false, replace: false, async: false, timeout: 2000}); createNotify(\'Refund payment\', \'' . $e->getMessage() . '\', \'error\')</script>';
+            }
         }
+
+        return $this->renderAjax('refund', [
+            'model' => $model,
+        ]);
     }
 
     public function actionUpdate()
