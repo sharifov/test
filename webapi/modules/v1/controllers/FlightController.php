@@ -29,7 +29,7 @@ class FlightController extends ApiBaseController
         $form = new TicketFlightsForm();
         $post = Yii::$app->request->post();
 
-        if (!$form->load(Yii::$app->request->post())) {
+        if (!$form->load(Yii::$app->request->post($post['flights']))) {
             return new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage(Messages::LOAD_DATA_ERROR),
