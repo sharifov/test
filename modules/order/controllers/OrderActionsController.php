@@ -4,6 +4,7 @@ namespace modules\order\controllers;
 
 use frontend\controllers\FController;
 use modules\order\src\entities\order\OrderStatusAction;
+use modules\order\src\services\confirmation\EmailConfirmationSender;
 use modules\order\src\useCase\orderCancel\CancelForm;
 use modules\order\src\useCase\orderCancel\OrderCancelService;
 use modules\order\src\useCase\orderComplete\CompleteForm;
@@ -13,6 +14,7 @@ use Yii;
 use modules\order\src\entities\order\Order;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
+use yii\web\Response;
 
 /**
  * Class OrderActionsController
@@ -102,6 +104,32 @@ class OrderActionsController extends FController
         return $this->renderAjax('complete', [
             'model' => $model,
         ]);
+    }
+
+    public function actionSendEmailConfirmation()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $orderId = (int)Yii::$app->request->post('id');
+        $order = $this->findModel($orderId);
+
+        try {
+            (new EmailConfirmationSender())->sendWithAttachments($order);
+            return [
+                'error' => false,
+                'message' => 'OK',
+            ];
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'message' => 'Send Order Confirmation Email Error',
+                'error' => $e->getMessage(),
+                'orderId' => $order->or_id,
+            ], 'OrderActionsController:actionSendEmailConfirmation');
+            return [
+                'error' => true,
+                'message' => $e->getMessage(),
+            ];
+        }
     }
 
     /**

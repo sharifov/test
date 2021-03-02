@@ -98,6 +98,14 @@ $process = OrderProcessManager::findOne($order->or_id);
                         ])?>
                     <?php endif ?>
 
+                    <?php if (Auth::can('/order/order-actions/send-email-confirmation')) : ?>
+                        <?= Html::a('Send Email Confirmation', null, [
+                            'data-url' => \yii\helpers\Url::to(['/order/order-actions/send-email-confirmation']),
+                            'data-id' => $order->or_id,
+                            'class' => 'dropdown-item btn-order-send-email-confirmation'
+                        ])?>
+                    <?php endif ?>
+
                     <?= Html::a('<i class="fa fa-edit"></i> Update order', null, [
                         'data-url' => \yii\helpers\Url::to(['/order/order/update-ajax', 'id' => $order->or_id]),
                         'class' => 'dropdown-item text-warning btn-update-order'

@@ -2,7 +2,9 @@
 
 namespace modules\order\src\jobs;
 
+use common\models\Notifications;
 use modules\order\src\entities\order\Order;
+use modules\order\src\services\confirmation\EmailConfirmationSender;
 use yii\queue\RetryableJobInterface;
 
 /**
@@ -31,46 +33,24 @@ class OrderCanceledConfirmationJob implements RetryableJobInterface
             return;
         }
 
-        $projectId = $order->orLead->project_id ?? null;
-
-        if (!$projectId) {
+        try {
+            (new EmailConfirmationSender())->sendWithoutAttachments($order);
+        } catch (\Throwable $e) {
             \Yii::error([
-                'message' => 'Not found Project',
-                'orderId' => $this->orderId,
+                'message' => 'Send Order Canceled Confirmation Error',
+                'error' => $e->getMessage(),
+                'orderId' => $order->or_id,
             ], 'OrderCanceledConfirmationJob');
-            return;
+            if ($userId = ($order->orLead->employee_id ?? null)) {
+                Notifications::createAndPublish(
+                    $userId,
+                    'Send Order Canceled Confirmation Error',
+                    'OrderId: ' . $order->or_id . ' Error: ' . $e->getMessage(),
+                    Notifications::TYPE_DANGER,
+                    true
+                );
+            }
         }
-
-        $from = 'from.serge.murphy@techork.com';
-        $fromName = '';
-        $to = 'to.serge.murphy@techork.com';
-        $toName = '';
-        $templateKey = 'bwk_multi_product';
-        $languageId = null;
-
-        $mailPreview = \Yii::$app->communication->mailPreview(
-            $projectId,
-            $templateKey,
-            $from,
-            $to,
-            (new EmailConfirmationData())->generate($order),
-        );
-
-        if ($mailPreview['error'] !== false) {
-            throw new \DomainException($mailPreview['error']);
-        }
-
-        (new EmailConfirmationSender())->send(
-            $order,
-            $templateKey,
-            $from,
-            $fromName,
-            $to,
-            $toName,
-            $languageId,
-            $mailPreview['data']['email_subject'],
-            $mailPreview['data']['email_body_html']
-        );
     }
 
     public function getTtr(): int

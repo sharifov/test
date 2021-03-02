@@ -2,7 +2,9 @@
 
 namespace modules\order\src\jobs;
 
+use common\models\Notifications;
 use modules\order\src\entities\order\Order;
+use modules\order\src\services\confirmation\EmailConfirmationSender;
 use yii\queue\RetryableJobInterface;
 
 /**
@@ -31,11 +33,24 @@ class OrderCompletedConfirmationJob implements RetryableJobInterface
             return;
         }
 
-        \Yii::info([
-            'message' => 'Send completed confirmation email',
-            'orderId' => $this->orderId,
-            'data' => $order->serialize(),
-        ], 'info\OrderCompletedConfirmationJob');
+        try {
+            (new EmailConfirmationSender())->sendWithAttachments($order);
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'message' => 'Send Order Completed Confirmation Error',
+                'error' => $e->getMessage(),
+                'orderId' => $order->or_id,
+            ], 'OrderCompletedConfirmationJob');
+            if ($userId = ($order->orLead->employee_id ?? null)) {
+                Notifications::createAndPublish(
+                    $userId,
+                    'Send Order Completed Confirmation Error',
+                    'OrderId: ' . $order->or_id . ' Error: ' . $e->getMessage(),
+                    Notifications::TYPE_DANGER,
+                    true
+                );
+            }
+        }
     }
 
     public function getTtr(): int

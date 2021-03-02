@@ -22,6 +22,7 @@ use modules\order\src\processManager\jobs\BookingHotelJob;
 use modules\order\src\processManager\jobs\StartBookingJob;
 use modules\order\src\processManager\OrderProcessManager;
 use modules\order\src\processManager\OrderProcessManagerRepository;
+use modules\order\src\services\confirmation\EmailConfirmationSender;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\twilio\src\entities\conferenceLog\ConferenceLog;
@@ -76,6 +77,7 @@ class TestController extends Controller
 
         $repo = \Yii::createObject(OrderRepository::class);
         $order = $repo->find(13);
+        (new EmailConfirmationSender())->send($order);
 
         die;
 //        $order->processing();

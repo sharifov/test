@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\order\src\jobs;
+namespace modules\order\src\services\confirmation;
 
 use modules\order\src\entities\order\Order;
 
