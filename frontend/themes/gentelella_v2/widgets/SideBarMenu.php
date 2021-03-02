@@ -360,6 +360,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     ['label' => 'Orders User Profit', 'url' => ['/order/order-user-profit-crud/index']],
                     ['label' => 'Orders Tips', 'url' => ['/order/order-tips-crud/index']],
                     ['label' => 'Orders Tips User Profit', 'url' => ['/order/order-tips-user-profit-crud/index']],
+                    ['label' => 'Order Process Manager', 'url' => ['/order/order-process-manager/index']],
                 ], 'hasChild' => true],
                 ['label' => 'Offers', 'url' => ['/offer/offer-crud/index']],
                 ['label' => 'Offers Send Log', 'url' => ['/offer/offer-send-log-crud/index']],

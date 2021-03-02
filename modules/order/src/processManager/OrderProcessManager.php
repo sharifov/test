@@ -2,6 +2,7 @@
 
 namespace modules\order\src\processManager;
 
+use modules\order\src\entities\order\Order;
 use sales\entities\EventTrait;
 use modules\order\src\processManager\events;
 use yii\db\ActiveRecord;
@@ -106,5 +107,33 @@ class OrderProcessManager extends ActiveRecord
     public function isBooked(): bool
     {
         return $this->opm_status === self::STATUS_BOOKED;
+    }
+
+    public static function tableName(): string
+    {
+        return '{{%order_process_manager}}';
+    }
+
+    public function attributeLabels(): array
+    {
+        return [
+            'opm_id' => 'ID',
+            'opm_status' => 'Status',
+            'opm_created_dt' => 'Created',
+        ];
+    }
+
+    public function rules(): array
+    {
+        return [
+            ['opm_id', 'integer'],
+            ['opm_id', 'exist', 'skipOnEmpty' => true, 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['opm_id' => 'or_id']],
+
+            ['opm_status', 'required'],
+            ['opm_status', 'integer'],
+            ['opm_status', 'in', 'range' => array_keys(self::STATUS_LIST)],
+
+            ['opm_created_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+        ];
     }
 }
