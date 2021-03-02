@@ -32,7 +32,13 @@ class BookingFlightListener
 
         foreach ($quotes as $quote) {
             if ($quote->pqProduct->isFlight()) {
-                \Yii::$app->queue_job->push(new BookingFlightJob($quote->childQuote->getId()));
+                $jobId = \Yii::$app->queue_job->push(new BookingFlightJob($quote->childQuote->getId()));
+                \Yii::info([
+                    'message' => 'Added job BookingFlightJob',
+                    'productQuoteId' => $quote->pq_id,
+                    'flightQuoteId' => $quote->childQuote->getId(),
+                    'jobId' => $jobId,
+                ], 'info\BookingFlightListener');
                 return;
             }
         }

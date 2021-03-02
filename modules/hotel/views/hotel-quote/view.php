@@ -40,7 +40,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     'hq_hotel_name',
                     'hq_hotel_list_id',
                     'hq_request_hash',
-                    //hq_json_booking',
+                    'hq_check_in_date',
+                    'hq_check_out_date',
+                    'hq_json_booking',
                 ],
             ]) ?>
         </div>

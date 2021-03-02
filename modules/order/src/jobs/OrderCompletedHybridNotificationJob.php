@@ -3,14 +3,15 @@
 namespace modules\order\src\jobs;
 
 use modules\order\src\entities\order\Order;
+use modules\order\src\entities\order\OrderStatus;
 use yii\queue\RetryableJobInterface;
 
 /**
- * Class OrderCanceledConfirmationJob
+ * Class OrderCompletedHybridNotificationJob
  *
  * @property $orderId
  */
-class OrderCanceledConfirmationJob implements RetryableJobInterface
+class OrderCompletedHybridNotificationJob implements RetryableJobInterface
 {
     public $orderId;
 
@@ -27,14 +28,15 @@ class OrderCanceledConfirmationJob implements RetryableJobInterface
             \Yii::error([
                 'message' => 'Not found Order',
                 'orderId' => $this->orderId,
-            ], 'OrderCanceledConfirmationJob');
+            ], 'OrderCompletedHybridNotificationJob');
         }
 
         \Yii::info([
-            'message' => 'Send canceled confirmation email',
+            'message' => 'Send completed status to hybrid',
             'orderId' => $this->orderId,
-            'data' => $order->serialize(),
-        ], 'info\OrderCanceledConfirmationJob');
+            'status' => $order->or_status_id,
+            'statusName' => OrderStatus::getName($order->or_status_id),
+        ], 'info\OrderCompletedHybridNotificationJob');
     }
 
     public function getTtr(): int
@@ -46,10 +48,10 @@ class OrderCanceledConfirmationJob implements RetryableJobInterface
     {
         \Yii::error([
             'attempt' => $attempt,
-            'message' => 'Order canceled confirmation error',
+            'message' => 'Order completed hybrid notification error',
             'error' => $error->getMessage(),
             'orderId' => $this->orderId,
-        ], 'OrderCanceledConfirmationJob');
+        ], 'OrderCompletedHybridNotificationJob');
         return !($attempt > 5);
     }
 }

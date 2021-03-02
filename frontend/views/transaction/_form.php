@@ -27,6 +27,8 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'tr_currency')->textInput(['maxlength' => true]) ?>
 
+    <?= $form->field($model, 'tr_comment')->textInput(['maxlength' => true]) ?>
+
     <?= $form->field($model, 'tr_created_dt')->textInput() ?>
 
     <div class="form-group">

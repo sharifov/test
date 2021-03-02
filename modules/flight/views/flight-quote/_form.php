@@ -56,6 +56,8 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'fq_last_ticket_date')->textInput() ?>
 
+    <?= $form->field($model, 'fq_flight_request_uid')->textInput(['maxlength' => true]) ?>
+
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>

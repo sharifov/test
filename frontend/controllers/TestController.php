@@ -71,6 +71,8 @@ use frontend\widgets\notification\NotificationWidget;
 use kartik\mpdf\Pdf;
 use modules\email\src\helpers\MailHelper;
 use modules\email\src\Notifier;
+use modules\flight\models\FlightQuote;
+use modules\flight\src\services\flightQuote\FlightQuotePdfService;
 use modules\hotel\HotelModule;
 use modules\hotel\models\HotelList;
 use modules\hotel\models\HotelQuote;
@@ -1981,6 +1983,16 @@ class TestController extends FController
             return HotelQuotePdfService::processingFile($hotelQuote);
         }
         throw new NotFoundHttpException('HotelQuote not found');
+    }
+
+    public function actionFlightQuoteFile(int $id)
+    {
+        $flightQuote = FlightQuote::findOne(['fq_id' => $id]);
+        FlightQuotePdfService::processingFile($flightQuote); // O787EB0
+
+        $lead = $flightQuote->fqProductQuote->pqOrder->orLead;
+
+        return $this->redirect(['lead/view', 'gid' => $lead->gid]);
     }
 
     public function actionZ()
