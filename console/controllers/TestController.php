@@ -16,6 +16,7 @@ use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\payment\services\PaymentService;
 use modules\order\src\processManager\events\FlightQuoteBookedEvent;
 use modules\order\src\processManager\events\QuoteBookedEvent;
+use modules\order\src\processManager\jobs\BookingFlightJob;
 use modules\order\src\processManager\jobs\BookingHotelJob;
 use modules\order\src\processManager\jobs\StartBookingJob;
 use modules\order\src\processManager\OrderProcessManager;
@@ -411,5 +412,9 @@ class TestController extends Controller
         }
 
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    }
+    public function actionTestJob()
+    {
+        \Yii::$app->queue_job->push(new BookingFlightJob(2));
     }
 }

@@ -5,7 +5,7 @@ namespace webapi\modules\v2\controllers;
 use modules\offer\src\entities\offer\OfferRepository;
 use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\exceptions\OrderCodeException;
-use modules\order\src\forms\api\OrderCreateForm;
+use modules\order\src\forms\api\create\OrderCreateForm;
 use modules\order\src\forms\api\view\OrderViewForm;
 use modules\order\src\services\CreateOrderDTO;
 use modules\order\src\services\OrderApiManageService;
@@ -32,6 +32,7 @@ use webapi\src\response\ProxyResponse;
 use webapi\src\response\SimpleResponse;
 use webapi\src\response\SuccessResponse;
 use Yii;
+use yii\helpers\VarDumper;
 use yii\httpclient\Response;
 
 /**
@@ -278,9 +279,14 @@ class OrderController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {String}       offerGid                Offer gid
-     * @apiParam {Object[]}     productQuotes         Product Quotes
-     * @apiParam {String}       productQuotes.gid       Product Quote Gid
+     * @apiParam {String}       offerGid                                            Offer gid
+     * @apiParam {Object[]}     productQuotes                                       Product Quotes
+     * @apiParam {String}       productQuotes.gid                                   Product Quote Gid
+     * @apiParam {Object[]}     productQuotes.quoteOptions                          Quote Options
+     * @apiParam {String}       productQuotes.quoteOptions.productOptionKey         Product option key
+     * @apiParam {String}       productQuotes.quoteOptions.name                     Name
+     * @apiParam {String}       productQuotes.quoteOptions.description              Description
+     * @apiParam {Decimal}      productQuotes.quoteOptions.price                    Price
      *
      * @apiParam {Object}       payment                 Payment
      * @apiParam {String}       payment.type            Type
@@ -289,6 +295,25 @@ class OrderController extends BaseController
      * @apiParam {Decimal}      payment.amount          Amount
      * @apiParam {String}       payment.currency        Currency
      *
+     * @apiParam {Object}       billingInfo                 BillingInfo
+     * @apiParam {string}       billingInfo.first_name      First Name
+     * @apiParam {string}       billingInfo.last_name       Last Name
+     * @apiParam {string}       billingInfo.middle_name     Middle Name
+     * @apiParam {string}       billingInfo.address         Address
+     * @apiParam {string}       billingInfo.country_id      Country Id
+     * @apiParam {string}       billingInfo.city            City
+     * @apiParam {string}       billingInfo.state           State
+     * @apiParam {string}       billingInfo.zip             Zip
+     * @apiParam {string}       billingInfo.phone           Phone
+     * @apiParam {string}       billingInfo.email           Email
+     *
+     * @apiParam {Object}       creditCard                  Credit Card
+     * @apiParam {String}       creditCard.holder_name      Holder Name
+     * @apiParam {String}       creditCard.number           Credit Card Number
+     * @apiParam {String}       creditCard.type             Credit Card type
+     * @apiParam {String}       creditCard.expiration       Credit Card expiration
+     * @apiParam {String}       creditCard.cvv              Credit Card cvv
+     *
      * @apiParam {Object}       Request                 Request Data for BO
      *
      * @apiParamExample {json} Request-Example:
@@ -296,12 +321,20 @@ class OrderController extends BaseController
      * {
     "offerGid": "73c8bf13111feff52794883446461740",
     "productQuotes": [
-    {
-    "gid": "aebf921f5a64a7ac98d4942ace67e498"
-    },
-    {
-    "gid": "6fcfc43e977dabffe6a979ebdaddfvr2"
-    }
+        {
+            "gid": "aebf921f5a64a7ac98d4942ace67e498",
+            "productOptions": [
+                {
+                    "productOptionKey": "travelGuard",
+                    "name": "Travel Guard",
+                    "description": "",
+                    "price": 20.00
+                }
+            ]
+        },
+        {
+            "gid": "6fcfc43e977dabffe6a979ebdaddfvr2"
+        }
     ],
     "payment": {
         "type": "card",
@@ -322,7 +355,7 @@ class OrderController extends BaseController
         "phone": "+19074861000",
         "email": "mike.kane@techork.com"
     },
-        "creditCard": {
+    "creditCard": {
         "holder_name": "Barbara Elmore",
         "number": "1111111111111111",
         "type": "Visa",

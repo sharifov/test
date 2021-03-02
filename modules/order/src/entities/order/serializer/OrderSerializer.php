@@ -8,6 +8,12 @@ use modules\order\src\entities\order\OrderStatus;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\entities\serializer\Serializer;
 
+/**
+ * Class OrderSerializer
+ * @package modules\order\src\entities\order\serializer
+ *
+ * @property Order $model
+ */
 class OrderSerializer extends Serializer
 {
     public function __construct(Order $model)
@@ -42,10 +48,17 @@ class OrderSerializer extends Serializer
 
         $data['or_status_name'] = OrderStatus::getName($this->model->or_status_id);
         $data['or_pay_status_name'] = OrderPayStatus::getName($this->model->or_pay_status_id);
+        $data['or_client_currency_symbol'] = $this->model->orClientCurrency->cur_symbol ?? null;
 
         if ($this->model->or_request_data) {
             $uid = $this->model->or_request_data['uid'] ?? null;
-            $data['request_uid'] = $uid;
+            $data['or_request_uid'] = $uid;
+        }
+
+        $data['billing_info'] = [];
+
+        foreach ($this->model->billingInfo as $billingInfo) {
+            $data['billing_info'][] = $billingInfo->serialize();
         }
 
         $data['quotes'] = [];

@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\order\src\forms\api;
+namespace modules\order\src\forms\api\create;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
 use yii\validators\EmailValidator;
