@@ -28,9 +28,6 @@ class BookingFlightJob implements RetryableJobInterface
 
     public function execute($queue)
     {
-        sleep(5);
-        \Yii::error("test");
-        die;
         \Yii::info([
             'message' => 'Booking Flight Quote processing',
             'quoteId' => $this->quoteId,
