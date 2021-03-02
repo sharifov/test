@@ -46,7 +46,6 @@ use yii\helpers\StringHelper;
  */
 class CreditCard extends ActiveRecord
 {
-
     public const TYPE_VISA              =   1;
     public const TYPE_MASTER_CARD       =   2;
     public const TYPE_AMERICAN_EXPRESS  =   3;
@@ -153,11 +152,6 @@ class CreditCard extends ActiveRecord
                     ActiveRecord::EVENT_BEFORE_UPDATE => ['cc_updated_dt'],
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
-            ],
-            'user' => [
-                'class' => BlameableBehavior::class,
-                'createdByAttribute' => 'cc_created_user_id',
-                'updatedByAttribute' => 'cc_updated_user_id',
             ],
         ];
     }
@@ -342,5 +336,23 @@ class CreditCard extends ActiveRecord
 
         $str = openssl_decrypt($data, $cryptMethod, $cryptPassword, 0, $cryptIv);
         return $str ?: '';
+    }
+
+    public static function create(
+        string $number,
+        string $holder,
+        int $expirationMonth,
+        int $expirationYear,
+        string $cvv,
+        int $typeId
+    ): CreditCard {
+        $card = new self();
+        $card->cc_number = $number;
+        $card->cc_holder_name = $holder;
+        $card->cc_expiration_month = $expirationMonth;
+        $card->cc_expiration_year = $expirationYear;
+        $card->cc_cvv = $cvv;
+        $card->cc_type_id = $typeId;
+        return $card;
     }
 }

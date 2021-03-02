@@ -3,14 +3,12 @@
 namespace modules\order\src\listeners\order;
 
 use modules\order\src\entities\order\events\OrderCompletedEvent;
+use modules\order\src\jobs\OrderCompletedConfirmationJob;
 
-class SendConfirmationEmailListener
+class OrderCompletedConfirmationListener
 {
     public function handle(OrderCompletedEvent $event): void
     {
-        \Yii::info([
-            'message' => 'Send email',
-            'orderId' => $event->orderId,
-        ], 'info\SendConfirmationEmail');
+        \Yii::$app->queue_job->push(new OrderCompletedConfirmationJob($event->orderId));
     }
 }

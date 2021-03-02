@@ -2,6 +2,8 @@
 
 namespace modules\order\src\entities\order;
 
+use modules\offer\src\entities\offer\Offer;
+use modules\offer\src\exceptions\OfferCodeException;
 use modules\order\src\exceptions\OrderCodeException;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
@@ -43,5 +45,13 @@ class OrderRepository
             throw new \RuntimeException('Removing error', OrderCodeException::ORDER_REMOVE);
         }
         $this->eventDispatcher->dispatchAll($order->releaseEvents());
+    }
+
+    public function findByGid(string $gid)
+    {
+        if ($order = Order::find()->byGid($gid)->one()) {
+            return $order;
+        }
+        throw new NotFoundException('Order is not found', OrderCodeException::ORDER_NOT_FOUND);
     }
 }

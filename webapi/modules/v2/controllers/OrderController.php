@@ -3,9 +3,13 @@
 namespace webapi\modules\v2\controllers;
 
 use modules\offer\src\entities\offer\OfferRepository;
+use modules\order\src\entities\order\OrderRepository;
+use modules\order\src\exceptions\OrderCodeException;
 use modules\order\src\forms\api\OrderCreateForm;
+use modules\order\src\forms\api\view\OrderViewForm;
 use modules\order\src\services\CreateOrderDTO;
 use modules\order\src\services\OrderApiManageService;
+use sales\helpers\app\AppHelper;
 use sales\repositories\product\ProductQuoteRepository;
 use webapi\src\logger\ApiLogger;
 use webapi\src\logger\behaviors\filters\CreditCardFilter;
@@ -37,6 +41,7 @@ use yii\httpclient\Response;
  * @property OfferRepository $offerRepository
  * @property OrderApiManageService $orderManageService
  * @property ProductQuoteRepository $productQuoteRepository
+ * @property OrderRepository $orderRepository
  */
 class OrderController extends BaseController
 {
@@ -53,6 +58,10 @@ class OrderController extends BaseController
      * @var ProductQuoteRepository
      */
     private ProductQuoteRepository $productQuoteRepository;
+    /**
+     * @var OrderRepository
+     */
+    private OrderRepository $orderRepository;
 
     public function __construct(
         $id,
@@ -62,6 +71,7 @@ class OrderController extends BaseController
         OfferRepository $offerRepository,
         OrderApiManageService $orderManageService,
         ProductQuoteRepository $productQuoteRepository,
+        OrderRepository $orderRepository,
         $config = []
     ) {
         parent::__construct($id, $module, $logger, $config);
@@ -69,6 +79,7 @@ class OrderController extends BaseController
         $this->offerRepository = $offerRepository;
         $this->orderManageService = $orderManageService;
         $this->productQuoteRepository = $productQuoteRepository;
+        $this->orderRepository = $orderRepository;
     }
 
     public function behaviors(): array
@@ -298,6 +309,25 @@ class OrderController extends BaseController
         "date": "2021-03-20",
         "amount": 821.49,
         "currency": "USD"
+    },
+    "billingInfo": {
+        "first_name": "Barbara Elmore",
+        "middle_name": "",
+        "last_name": "T",
+        "address": "1013 Weda Cir",
+        "country_id": "US",
+        "city": "Mayfield",
+        "state": "KY",
+        "zip": "99999",
+        "phone": "+19074861000",
+        "email": "mike.kane@techork.com"
+    },
+        "creditCard": {
+        "holder_name": "Barbara Elmore",
+        "number": "1111111111111111",
+        "type": "Visa",
+        "expiration": "07 / 23",
+        "cvv": "324"
     },
     "Request": {
     "offerGid": "85a06c376a083f47e56b286b1265c160",
@@ -1149,8 +1179,9 @@ class OrderController extends BaseController
         try {
             $offer = $this->offerRepository->findByGid($form->offerGid);
 
-            $order = $this->orderManageService->createOrder((new CreateOrderDTO($offer->of_lead_id, $request->post())), $form->productQuotes, $form->payment);
+            $order = $this->orderManageService->createOrder((new CreateOrderDTO($offer->of_lead_id, $request->post())), $form);
         } catch (\Throwable $e) {
+            Yii::error(AppHelper::throwableFormatter($e), 'API::OrderController::actionCreate::Throwable');
             return new ErrorResponse(
                 new StatusFailedMessage(),
                 new MessageMessage($e->getMessage()),
@@ -1164,6 +1195,337 @@ class OrderController extends BaseController
                 new Message('order_gid', $order->or_gid),
             )
         );
+    }
+
+    /**
+     * @api {post} /v2/order/view View Order
+     * @apiVersion 0.1.0
+     * @apiName ViewOrder
+     * @apiGroup Orders
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string}       gid            Order gid
+     *
+     * @apiParamExample {json} Request-Example:
+     *
+     * {
+     *     "gid": "04d3fe3fc74d0514ee93e208a52bcf90",
+     * }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *
+     * HTTP/1.1 200 OK
+     *   {
+    "status": 200,
+    "message": "OK",
+    "order": {
+    "or_id": 62,
+    "or_gid": "5287f7f7ff5a28789518db64e946ea67",
+    "or_uid": "or603cfcd04d542",
+    "or_name": "Order 1",
+    "or_description": null,
+    "or_status_id": 3,
+    "or_pay_status_id": 1,
+    "or_app_total": null,
+    "or_app_markup": null,
+    "or_agent_markup": null,
+    "or_client_total": null,
+    "or_client_currency": null,
+    "or_client_currency_rate": null,
+    "or_status_name": "Processing",
+    "or_pay_status_name": "Not paid",
+    "request_uid": null,
+    "quotes": [
+    {
+    "pq_gid": "f5d3d55c9cfcd7ddb3062743e4d65a25",
+    "pq_name": "",
+    "pq_order_id": 62,
+    "pq_description": null,
+    "pq_status_id": 3,
+    "pq_price": 374.8,
+    "pq_origin_price": 374.8,
+    "pq_client_price": 374.8,
+    "pq_service_fee_sum": 0,
+    "pq_origin_currency": "USD",
+    "pq_client_currency": "USD",
+    "pq_status_name": "Applied",
+    "data": {
+    "fq_flight_id": 29,
+    "fq_source_id": null,
+    "fq_product_quote_id": 138,
+    "fq_gds": "S",
+    "fq_gds_pcc": "6NVG",
+    "fq_gds_offer_id": null,
+    "fq_type_id": 0,
+    "fq_cabin_class": "E",
+    "fq_trip_type_id": 1,
+    "fq_main_airline": "9U",
+    "fq_fare_type_id": 1,
+    "fq_origin_search_data": "{\"key\":\"2_U0FMMTAxKlkyMjAwL0tJVkxPTjIwMjEtMDgtMTIqOVV+IzlVODMzfmxjOmVuX3Vz\",\"routingId\":1,\"prices\":{\"lastTicketDate\":\"2021-03-01\",\"totalPrice\":374.8,\"totalTax\":354.8,\"comm\":0,\"isCk\":false,\"markupId\":0,\"markupUid\":\"\",\"markup\":0},\"passengers\":{\"ADT\":{\"codeAs\":\"ADT\",\"cnt\":2,\"baseFare\":5,\"pubBaseFare\":5,\"baseTax\":88.7,\"markup\":0,\"comm\":0,\"price\":93.7,\"tax\":88.7,\"oBaseFare\":{\"amount\":5,\"currency\":\"USD\"},\"oBaseTax\":{\"amount\":88.7,\"currency\":\"USD\"}},\"CHD\":{\"codeAs\":\"CNN\",\"cnt\":2,\"baseFare\":5,\"pubBaseFare\":5,\"baseTax\":88.7,\"markup\":0,\"comm\":0,\"price\":93.7,\"tax\":88.7,\"oBaseFare\":{\"amount\":5,\"currency\":\"USD\"},\"oBaseTax\":{\"amount\":88.7,\"currency\":\"USD\"}}},\"trips\":[{\"tripId\":1,\"segments\":[{\"segmentId\":1,\"departureTime\":\"2021-08-12 12:30\",\"arrivalTime\":\"2021-08-12 13:40\",\"stop\":0,\"stops\":[],\"flightNumber\":\"833\",\"bookingClass\":\"X\",\"duration\":190,\"departureAirportCode\":\"KIV\",\"departureAirportTerminal\":\"\",\"arrivalAirportCode\":\"STN\",\"arrivalAirportTerminal\":\"\",\"operatingAirline\":\"9U\",\"airEquipType\":\"321\",\"marketingAirline\":\"9U\",\"marriageGroup\":\"O\",\"mileage\":1329,\"cabin\":\"Y\",\"meal\":\"R\",\"fareCode\":\"XOW\",\"baggage\":{\"ADT\":{\"carryOn\":true,\"airlineCode\":\"9U\",\"allowPieces\":0,\"charge\":[{\"firstPiece\":1,\"lastPiece\":1,\"price\":24,\"currency\":\"USD\",\"maxWeight\":\"UP TO 50 POUNDS\/23 KILOGRAMS\",\"maxSize\":\"UP TO 62 LINEAR INCHES\/158 LINEAR CENTIMETERS\"},{\"firstPiece\":2,\"price\":61,\"currency\":\"USD\",\"maxWeight\":\"UP TO 50 POUNDS\/23 KILOGRAMS\",\"maxSize\":\"UP TO 62 LINEAR INCHES\/158 LINEAR CENTIMETERS\"}]},\"CHD\":{\"carryOn\":true,\"airlineCode\":\"9U\",\"allowPieces\":0,\"charge\":[{\"firstPiece\":1,\"lastPiece\":1,\"price\":24,\"currency\":\"USD\",\"maxWeight\":\"UP TO 50 POUNDS\/23 KILOGRAMS\",\"maxSize\":\"UP TO 62 LINEAR INCHES\/158 LINEAR CENTIMETERS\"},{\"firstPiece\":2,\"price\":61,\"currency\":\"USD\",\"maxWeight\":\"UP TO 50 POUNDS\/23 KILOGRAMS\",\"maxSize\":\"UP TO 62 LINEAR INCHES\/158 LINEAR CENTIMETERS\"}]}},\"recheckBaggage\":false}],\"duration\":190}],\"maxSeats\":9,\"paxCnt\":4,\"validatingCarrier\":\"9U\",\"gds\":\"S\",\"pcc\":\"6NVG\",\"cons\":\"GTT\",\"fareType\":\"PUB\",\"tripType\":\"OW\",\"cabin\":\"Y\",\"currency\":\"USD\",\"currencies\":[\"USD\"],\"currencyRates\":{\"USDUSD\":{\"from\":\"USD\",\"to\":\"USD\",\"rate\":1}},\"ngsFeatures\":{\"stars\":1,\"name\":\"BASIC\",\"list\":null},\"meta\":{\"eip\":0,\"noavail\":false,\"searchId\":\"U0FMMTAxWTIyMDB8S0lWTE9OMjAyMS0wOC0xMg==\",\"lang\":\"en\",\"rank\":10,\"cheapest\":true,\"fastest\":true,\"best\":true,\"bags\":0,\"country\":\"us\"},\"price\":93.7,\"originRate\":1,\"stops\":[0],\"time\":[{\"departure\":\"2021-08-12 12:30\",\"arrival\":\"2021-08-12 13:40\"}],\"bagFilter\":\"\",\"airportChange\":false,\"technicalStopCnt\":0,\"duration\":[190],\"totalDuration\":190,\"topCriteria\":\"fastestbestcheapest\",\"rank\":10}",
+    "fq_last_ticket_date": "2021-03-01",
+    "fq_json_booking": null,
+    "fq_type_name": "Base",
+    "fq_fare_type_name": "Public",
+    "flight": {
+    "fl_product_id": 49,
+    "fl_trip_type_id": 1,
+    "fl_cabin_class": "E",
+    "fl_adults": 2,
+    "fl_children": 2,
+    "fl_infants": 0,
+    "fl_trip_type_name": "One Way",
+    "fl_cabin_class_name": "Economy"
+    },
+    "trips": [
+    {
+    "fqt_id": 85,
+    "fqt_key": null,
+    "fqt_duration": 190,
+    "segments": [
+    {
+    "fqs_departure_dt": "2021-08-12 12:30:00",
+    "fqs_arrival_dt": "2021-08-12 13:40:00",
+    "fqs_stop": 0,
+    "fqs_flight_number": 833,
+    "fqs_booking_class": "X",
+    "fqs_duration": 190,
+    "fqs_departure_airport_iata": "KIV",
+    "fqs_departure_airport_terminal": "",
+    "fqs_arrival_airport_iata": "STN",
+    "fqs_arrival_airport_terminal": "",
+    "fqs_operating_airline": "9U",
+    "fqs_marketing_airline": "9U",
+    "fqs_air_equip_type": "321",
+    "fqs_marriage_group": "O",
+    "fqs_cabin_class": "Y",
+    "fqs_meal": "R",
+    "fqs_fare_code": "XOW",
+    "fqs_ticket_id": null,
+    "fqs_recheck_baggage": 0,
+    "fqs_mileage": 1329,
+    "departureLocation": "Chisinau",
+    "arrivalLocation": "London",
+    "operating_airline": "Air Moldova",
+    "marketing_airline": "Air Moldova",
+    "baggages": [
+    {
+    "qsb_flight_pax_code_id": 1,
+    "qsb_flight_quote_segment_id": 226,
+    "qsb_airline_code": "9U",
+    "qsb_allow_pieces": 0,
+    "qsb_allow_weight": null,
+    "qsb_allow_unit": null,
+    "qsb_allow_max_weight": null,
+    "qsb_allow_max_size": null
+    },
+    {
+    "qsb_flight_pax_code_id": 2,
+    "qsb_flight_quote_segment_id": 226,
+    "qsb_airline_code": "9U",
+    "qsb_allow_pieces": 0,
+    "qsb_allow_weight": null,
+    "qsb_allow_unit": null,
+    "qsb_allow_max_weight": null,
+    "qsb_allow_max_size": null
+    }
+    ],
+    "baggage_charges": [
+    {
+    "qsbc_first_piece": 1,
+    "qsbc_last_piece": 1,
+    "qsbc_origin_price": null,
+    "qsbc_origin_currency": null,
+    "qsbc_price": "24.00",
+    "qsbc_client_price": null,
+    "qsbc_client_currency": null,
+    "qsbc_max_weight": "UP TO 50 POUNDS/23 KILOGRAMS",
+    "qsbc_max_size": "UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS"
+    },
+    {
+    "qsbc_first_piece": 2,
+    "qsbc_last_piece": null,
+    "qsbc_origin_price": null,
+    "qsbc_origin_currency": null,
+    "qsbc_price": "61.00",
+    "qsbc_client_price": null,
+    "qsbc_client_currency": null,
+    "qsbc_max_weight": "UP TO 50 POUNDS/23 KILOGRAMS",
+    "qsbc_max_size": "UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS"
+    },
+    {
+    "qsbc_first_piece": 1,
+    "qsbc_last_piece": 1,
+    "qsbc_origin_price": null,
+    "qsbc_origin_currency": null,
+    "qsbc_price": "24.00",
+    "qsbc_client_price": null,
+    "qsbc_client_currency": null,
+    "qsbc_max_weight": "UP TO 50 POUNDS/23 KILOGRAMS",
+    "qsbc_max_size": "UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS"
+    },
+    {
+    "qsbc_first_piece": 2,
+    "qsbc_last_piece": null,
+    "qsbc_origin_price": null,
+    "qsbc_origin_currency": null,
+    "qsbc_price": "61.00",
+    "qsbc_client_price": null,
+    "qsbc_client_currency": null,
+    "qsbc_max_weight": "UP TO 50 POUNDS/23 KILOGRAMS",
+    "qsbc_max_size": "UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS"
+    }
+    ]
+    }
+    ]
+    }
+    ],
+    "pax_prices": [
+    {
+    "qpp_fare": "5.00",
+    "qpp_tax": "88.70",
+    "qpp_system_mark_up": "0.00",
+    "qpp_agent_mark_up": "0.00",
+    "qpp_origin_fare": "5.00",
+    "qpp_origin_currency": "USD",
+    "qpp_origin_tax": "88.70",
+    "qpp_client_currency": "USD",
+    "qpp_client_fare": "5.00",
+    "qpp_client_tax": "88.70",
+    "paxType": "ADT"
+    },
+    {
+    "qpp_fare": "5.00",
+    "qpp_tax": "88.70",
+    "qpp_system_mark_up": "0.00",
+    "qpp_agent_mark_up": "0.00",
+    "qpp_origin_fare": "5.00",
+    "qpp_origin_currency": "USD",
+    "qpp_origin_tax": "88.70",
+    "qpp_client_currency": "USD",
+    "qpp_client_fare": "5.00",
+    "qpp_client_tax": "88.70",
+    "paxType": "CHD"
+    }
+    ]
+    },
+    "product": {
+    "pr_type_id": 1,
+    "pr_name": "",
+    "pr_lead_id": 513099,
+    "pr_description": "",
+    "pr_status_id": null,
+    "pr_service_fee_percent": null
+    },
+    "productQuoteOptions": [
+    {
+    "pqo_name": "test",
+    "pqo_description": "",
+    "pqo_status_id": 1,
+    "pqo_price": 100,
+    "pqo_client_price": 120,
+    "pqo_extra_markup": 20
+    }
+    ]
+    }
+    ]
+    },
+    "technical": {
+    "action": "v2/order/view",
+    "response_id": 392,
+    "request_dt": "2021-03-01 17:33:59",
+    "response_dt": "2021-03-01 17:33:59",
+    "execution_time": 0.061,
+    "memory_usage": 1175376
+    },
+    "request": {
+    "gid": "5287f7f7ff5a28789518db64e946ea67"
+    }
+    }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+            "status": 422,
+            "message": "Error",
+            "errors": [
+                "Order is not found"
+            ],
+            "code": 12100,
+            "technical": {
+                "action": "v2/order/view",
+                "response_id": 397,
+                "request_dt": "2021-03-01 17:40:41",
+                "response_dt": "2021-03-01 17:40:41",
+                "execution_time": 0.017,
+                "memory_usage": 212976
+            },
+            "request": {
+                "gid": "5287f7f7ff5a28789518db64e946ea67s"
+            }
+        }
+     *
+     * @apiErrorExample {json} Error-Response (400):
+     *
+     * HTTP/1.1 400 Bad Request
+     * {
+     *     "status": 400,
+     *     "message": "Load data error",
+     *     "errors": [
+     *         "Not found Order data on POST request"
+     *     ],
+     *     "code": "18300",
+     *     "technical": {
+     *         "action": "v2/order/view",
+     *         "response_id": 11933856,
+     *         "request_dt": "2020-02-03 12:49:20",
+     *         "response_dt": "2020-02-03 12:49:20",
+     *         "execution_time": 0.017,
+     *         "memory_usage": 114232
+     *     },
+     *     "request": []
+     * }
+     */
+    public function actionView()
+    {
+        $form = new OrderViewForm();
+
+        if (!$form->load(\Yii::$app->request->post())) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new ErrorsMessage('Not found Order data on POST request'),
+                new CodeMessage(OrderCodeException::API_ORDER_VIEW_NOT_FOUND_DATA_ON_REQUEST)
+            );
+        }
+
+        if (!$form->validate()) {
+            return new ErrorResponse(
+                new MessageMessage(Messages::VALIDATION_ERROR),
+                new ErrorsMessage($form->getErrors()),
+                new CodeMessage(OrderCodeException::API_ORDER_VIEW_VALIDATE)
+            );
+        }
+
+        try {
+            $order = $this->orderRepository->findByGid($form->gid);
+
+            return new SuccessResponse(
+                new Message('order', $order->serialize())
+            );
+        } catch (\Throwable $e) {
+            return new ErrorResponse(
+                new ErrorsMessage($e->getMessage()),
+                new CodeMessage($e->getCode())
+            );
+        }
     }
 
     private function isClickToBook($data): bool

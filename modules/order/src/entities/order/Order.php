@@ -8,10 +8,10 @@ use modules\invoice\src\entities\invoice\Invoice;
 use common\models\Lead;
 use modules\order\src\entities\order\events\OrderCanceledEvent;
 use modules\order\src\entities\order\events\OrderCompletedEvent;
-use modules\order\src\entities\order\events\OrderCompleteEvent;
 use modules\order\src\entities\order\events\OrderPaymentPaidEvent;
 use modules\order\src\entities\order\events\OrderPreparedEvent;
 use modules\order\src\entities\order\events\OrderUserProfitUpdateProfitAmountEvent;
+use modules\order\src\entities\order\serializer\OrderSerializer;
 use modules\order\src\entities\orderTips\OrderTips;
 use modules\order\src\entities\orderTipsUserProfit\OrderTipsUserProfit;
 use modules\order\src\entities\orderUserProfit\OrderUserProfit;
@@ -20,6 +20,7 @@ use modules\order\src\services\CreateOrderDTO;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use sales\entities\EventTrait;
+use sales\entities\serializer\Serializable;
 use sales\helpers\product\ProductQuoteHelper;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -65,7 +66,7 @@ use yii\helpers\ArrayHelper;
  * @property OrderTips $orderTips
  * @property OrderTipsUserProfit[] $orderTipsUserProfit
  */
-class Order extends ActiveRecord
+class Order extends ActiveRecord implements Serializable
 {
     use EventTrait;
 
@@ -452,5 +453,10 @@ class Order extends ActiveRecord
     public function isCanceled(): bool
     {
         return $this->or_status_id === OrderStatus::CANCELED;
+    }
+
+    public function serialize(): array
+    {
+        return (new OrderSerializer($this))->getData();
     }
 }

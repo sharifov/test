@@ -13,6 +13,8 @@ use sales\forms\CompositeRecursiveForm;
  * @property string $offerGid
  * @property ProductQuotesForm[] $productQuotes
  * @property PaymentForm $payment
+ * @property BillingInfoForm $billingInfo
+ * @property CreditCardForm $creditCard
  */
 class OrderCreateForm extends CompositeRecursiveForm
 {
@@ -26,6 +28,8 @@ class OrderCreateForm extends CompositeRecursiveForm
         }
         $this->productQuotes = $productQuotesForm;
         $this->payment = new PaymentForm();
+        $this->billingInfo = new BillingInfoForm();
+        $this->creditCard = new CreditCardForm();
         parent::__construct($config);
     }
 
@@ -48,6 +52,6 @@ class OrderCreateForm extends CompositeRecursiveForm
      */
     protected function internalForms(): array
     {
-        return ['productQuotes', 'payment'];
+        return ['productQuotes', 'payment', 'billingInfo', 'creditCard'];
     }
 }

@@ -180,7 +180,7 @@ class OrderUserProfit extends \yii\db\ActiveRecord
         }
     }
 
-    public function create(int $orderId, int $userId, int $percent = null, float $amount = null): self
+    public function create(int $orderId, ?int $userId, int $percent = null, float $amount = null): self
     {
         $this->oup_order_id = $orderId;
         $this->oup_user_id = $userId;
