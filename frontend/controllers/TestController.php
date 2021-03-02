@@ -1985,9 +1985,9 @@ class TestController extends FController
         throw new NotFoundHttpException('HotelQuote not found');
     }
 
-    public function actionFlightQuoteFile(string $uid)
+    public function actionFlightQuoteFile(int $id)
     {
-        $flightQuote = FlightQuote::findOne(['fq_flight_request_uid' => $uid]);
+        $flightQuote = FlightQuote::findOne(['fq_id' => $id]);
         FlightQuotePdfService::processingFile($flightQuote); // O787EB0
 
         $lead = $flightQuote->fqProductQuote->pqOrder->orLead;
