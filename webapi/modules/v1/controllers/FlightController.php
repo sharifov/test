@@ -6,6 +6,8 @@ use modules\flight\models\FlightQuote;
 use modules\flight\src\exceptions\FlightCodeException;
 use modules\flight\src\forms\TicketFlightsForm;
 use modules\flight\src\repositories\flightQuoteRepository\FlightQuoteRepository;
+use modules\flight\src\services\flightQuote\FlightQuotePdfService;
+use sales\helpers\app\AppHelper;
 use sales\repositories\product\ProductQuoteRepository;
 use webapi\src\Messages;
 use webapi\src\response\ErrorResponse;
@@ -16,8 +18,6 @@ use webapi\src\response\messages\MessageMessage;
 use webapi\src\response\messages\StatusCodeMessage;
 use webapi\src\response\SuccessResponse;
 use Yii;
-
-use function Amp\Promise\timeoutWithDefault;
 
 /**
  * Class FlightController
@@ -59,7 +59,12 @@ class FlightController extends ApiBaseController
         $productQuote = $flightQuote->fqProductQuote;
 
         if ($form->status === $form::SUCCESS_STATUS) {
-            $productQuote->booked(); /* TODO:: generate pdf (in job) */
+            $productQuote->booked();
+            try {
+                FlightQuotePdfService::processingFile($flightQuote);
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableLog($throwable), 'FlightController:processingFile:failed');
+            }
         } else {
             $productQuote->error();
         }
