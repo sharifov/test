@@ -61,7 +61,7 @@ class FlightController extends ApiBaseController
             ));
         }
 
-        if (!$form->load($flights)) {
+        if (!$form->load($flights[0])) {
             return $this->endApiLog($apiLog, new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage(Messages::LOAD_DATA_ERROR),
@@ -92,11 +92,12 @@ class FlightController extends ApiBaseController
 
         if ($form->status === $form::SUCCESS_STATUS) {
             $productQuote->booked();
-            try {
-                FlightQuotePdfService::processingFile($flightQuote); /* TODO:: to job */
+            /* TODO:: to job */
+            /*try {
+                FlightQuotePdfService::processingFile($flightQuote);
             } catch (\Throwable $throwable) {
                 Yii::error(AppHelper::throwableLog($throwable), 'FlightController:processingFile:failed');
-            }
+            }*/
         } else {
             $productQuote->error();
         }
