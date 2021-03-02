@@ -48,6 +48,7 @@ class OrderSerializer extends Serializer
 
         $data['or_status_name'] = OrderStatus::getName($this->model->or_status_id);
         $data['or_pay_status_name'] = OrderPayStatus::getName($this->model->or_pay_status_id);
+        $data['or_client_currency_symbol'] = $this->model->orClientCurrency->cur_symbol ?? null;
 
         if ($this->model->or_request_data) {
             $uid = $this->model->or_request_data['uid'] ?? null;
