@@ -30,7 +30,7 @@ use yii\widgets\Pjax;
 
         e.preventDefault();
         $('#preloader').removeClass('d-none');
-        let quoteId = $(this).data('hotel-quote-id');
+        let quoteId = $(this).data('attraction-quote-id');
         let productId = $(this).data('product-id');
         
         $.ajax({
@@ -77,7 +77,7 @@ use yii\widgets\Pjax;
 
         e.preventDefault();
         $('#preloader').removeClass('d-none');
-        let quoteId = $(this).data('hotel-quote-id');
+        let quoteId = $(this).data('attraction-quote-id');
         let productId = $(this).data('product-id');
         
         $.ajax({
@@ -119,7 +119,7 @@ use yii\widgets\Pjax;
     $(document).on('click', '.btn-product-api-service-log', function(e){        
         e.preventDefault();
         let url = $(this).data('url');
-        let quoteId = $(this).data('hotel-quote-id');
+        let quoteId = $(this).data('attraction-quote-id');
         let modal = $('#modal-lg');
           
         modal.find('.modal-body').html('');
@@ -180,21 +180,21 @@ JS;
                     <!--<?/*= Html::a('<i class="glyphicon glyphicon-remove-circle text-warning"></i> Clone quote', null, [
                         'class' => 'dropdown-item text-warning btn-clone-product-quote',
                         'data-product-quote-id' => $model->atnq_product_quote_id,
-                        'data-hotel-quote-id' => $model->atnq_id,
+                        'data-attraction-quote-id' => $model->atnq_id,
                         'data-product-id' => $model->atnqProductQuote->pq_product_id,
                     ]) */?> -->
 
                     <?php if ($model->isBookable()) : ?>
-                    <!-- <? /*= Html::a(
+                        <?= Html::a(
                             '<i class="fa fa-share-square"></i> Book',
                             null,
                             [
                                 'class' => 'dropdown-item btn-book-quote',
-                                'data-url' => Url::to('/attraction/hotel-quote/ajax-book'),
-                                'data-hotel-quote-id' => $model->atnq_id,
+                                'data-url' => Url::to('/attraction/attraction-quote/ajax-book'),
+                                'data-attraction-quote-id' => $model->atnq_id,
                                 'data-product-id' => $model->atnqProductQuote->pq_product_id,
                             ]
-                        ) */?> -->
+                        )?>
                     <?php endif; ?>
                     <?php if ($model->isBooking()) : ?>
                     <!-- <? /*= Html::a(
@@ -203,7 +203,7 @@ JS;
                             [
                                 'class' => 'dropdown-item text-danger btn-cancel-book-quote',
                                 'data-url' => Url::to('/attraction/hotel-quote/ajax-cancel-book'),
-                                'data-hotel-quote-id' => $model->atnq_id,
+                                'data-attraction-quote-id' => $model->atnq_id,
                                 'data-product-id' => $model->atnqProductQuote->pq_product_id,
                             ]
                         ) */?> -->
@@ -220,7 +220,7 @@ JS;
                         [
                             'class' => 'dropdown-item text-secondary btn-product-api-service-log',
                             'data-url' => Url::to(['/attraction/hotel-quote-service-log/hotel-quote-log', 'id' => $model->atnq_id]),
-                            'data-hotel-quote-id' => $model->atnq_id,
+                            'data-attraction-quote-id' => $model->atnq_id,
                             'data-product-id' => $model->atnqProductQuote->pq_product_id,
                         ]
                     )?>
@@ -235,7 +235,7 @@ JS;
                     <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [
                         'class' => 'dropdown-item text-danger btn-delete-product-quote',
                         'data-product-quote-id' => $model->atnq_product_quote_id,
-                        'data-hotel-quote-id' => $model->atnq_id,
+                        'data-attraction-quote-id' => $model->atnq_id,
                         'data-product-id' => $model->atnqProductQuote->pq_product_id,
                     ]) ?>
                 </div>
