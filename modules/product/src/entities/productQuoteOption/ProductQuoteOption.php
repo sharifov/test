@@ -128,11 +128,11 @@ class ProductQuoteOption extends ActiveRecord implements Serializable
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
-            'user' => [
-                'class' => BlameableBehavior::class,
-                'createdByAttribute' => 'pqo_created_user_id',
-                'updatedByAttribute' => 'pqo_updated_user_id',
-            ],
+//            'user' => [
+//                'class' => BlameableBehavior::class,
+//                'createdByAttribute' => 'pqo_created_user_id',
+//                'updatedByAttribute' => 'pqo_updated_user_id',
+//            ],
         ];
     }
 
@@ -184,5 +184,25 @@ class ProductQuoteOption extends ActiveRecord implements Serializable
         $clientPrice = is_numeric($this->pqo_price) ? $this->pqo_price : 0.00;
         $clientPrice = is_numeric($this->pqo_extra_markup) ? $clientPrice + $this->pqo_extra_markup : $clientPrice;
         $this->pqo_client_price = ProductQuoteHelper::roundPrice($clientPrice * $currencyRate);
+    }
+
+    public static function create(
+        int $productQuoteId,
+        int $productOptionId,
+        string $name,
+        string $description,
+        float $price,
+        float $clientPrice,
+        ?float $extraMarkup
+    ): self {
+        $option = new self();
+        $option->pqo_product_quote_id = $productQuoteId;
+        $option->pqo_product_option_id = $productOptionId;
+        $option->pqo_name = $name;
+        $option->pqo_description = $description;
+        $option->pqo_price = $price;
+        $option->pqo_client_price = $clientPrice;
+        $option->pqo_extra_markup = $extraMarkup;
+        return $option;
     }
 }

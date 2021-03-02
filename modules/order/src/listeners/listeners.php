@@ -10,10 +10,13 @@ use modules\order\src\entities\order\events\UpdateOrderTipsUserProfitAmountEvent
 use modules\order\src\events\OrderProcessingEvent;
 use modules\order\src\listeners\lead\LeadSoldListener;
 use modules\order\src\listeners\order\OrderCanceledConfirmationListener;
+use modules\order\src\listeners\order\OrderCanceledHybridNotificationListener;
 use modules\order\src\listeners\order\OrderChangeStatusLogListener;
 use modules\order\src\listeners\order\OrderCompletedConfirmationListener;
+use modules\order\src\listeners\order\OrderCompletedHybridNotificationListener;
 use modules\order\src\listeners\order\OrderLogPaymentStatusListener;
 use modules\order\src\listeners\order\OrderProcessingConfirmationListener;
+use modules\order\src\listeners\order\OrderProcessingHybridNotificationListener;
 use modules\order\src\processManager\listeners\OrderPrepareOrderProcessingListener;
 use modules\order\src\listeners\order\OrderRecalculateProfitAmountListener;
 use modules\order\src\listeners\orderTipsUserProfit\UpdateOrderTipsUserProfitAmountEventListener;
@@ -27,6 +30,7 @@ return [
     OrderUserProfitUpdateProfitAmountEvent::class => [OrderUserProfitUpdateProfitAmountEventListener::class],
     OrderProcessingEvent::class => [
         OrderProcessingConfirmationListener::class,
+        OrderProcessingHybridNotificationListener::class,
     ],
 
     //OrderProcessManagerEvents
@@ -61,9 +65,11 @@ return [
         LeadSoldListener::class,
         OrderChangeStatusLogListener::class,
         OrderCompletedConfirmationListener::class,
+        OrderCompletedHybridNotificationListener::class,
     ],
     OrderCanceledEvent::class => [
         OrderChangeStatusLogListener::class,
         OrderCanceledConfirmationListener::class,
+        OrderCanceledHybridNotificationListener::class,
     ],
 ];

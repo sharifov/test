@@ -2,6 +2,7 @@
 
 namespace modules\product\src\entities\productOption;
 
+use _HumbugBoxa5be08ba8ddb\Symfony\Component\Console\Exception\RuntimeException;
 use modules\product\src\exceptions\ProductCodeException;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
@@ -43,5 +44,13 @@ class ProductOptionRepository
             throw new \RuntimeException('Removing error', ProductCodeException::PRODUCT_OPTION_REMOVE);
         }
         $this->eventDispatcher->dispatchAll($productOption->releaseEvents());
+    }
+
+    public function findByKey(string $key): ProductOption
+    {
+        if ($option = ProductOption::findOne(['po_key' => $key])) {
+            return $option;
+        }
+        throw new RuntimeException('Product Option not found by key: ' . $key, ProductCodeException::PRODUCT_OPTION_NOT_FOUND);
     }
 }

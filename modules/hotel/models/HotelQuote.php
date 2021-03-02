@@ -31,6 +31,8 @@ use yii\helpers\VarDumper;
  * @property array|null $hq_json_booking
  * @property string|null $hq_booking_id // field "reference" from api response
  * @property array|null $hq_origin_search_data
+ * @property string|null $hq_check_in_date
+ * @property string|null $hq_check_out_date
  *
  * @property Hotel $hqHotel
  * @property HotelList $hqHotelList
@@ -81,6 +83,8 @@ class HotelQuote extends ActiveRecord implements Quotable
             [['hq_hotel_list_id'], 'exist', 'skipOnError' => true, 'targetClass' => HotelList::class, 'targetAttribute' => ['hq_hotel_list_id' => 'hl_id']],
             [['hq_product_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['hq_product_quote_id' => 'pq_id']],
             [['hq_json_booking', 'hq_origin_search_data'], 'safe'],
+
+            [['hq_check_in_date', 'hq_check_out_date'], 'date', 'format' => 'php:Y-m-d', 'skipOnError' => true, 'skipOnEmpty' => true],
         ];
     }
 
@@ -100,6 +104,8 @@ class HotelQuote extends ActiveRecord implements Quotable
             'hq_request_hash' => 'Request Hash',
             'hq_json_booking' => 'Booking json',
             'hq_origin_search_data' => 'Origin search data',
+            'hq_check_in_date' => 'Check in date',
+            'hq_check_out_date' => 'Check out date',
         ];
     }
 
@@ -201,6 +207,8 @@ class HotelQuote extends ActiveRecord implements Quotable
                         $hQuote->hq_destination_name = $hotelModel->hl_destination_name;
                         $hQuote->hq_request_hash = $hotelRequest->ph_request_hash_key;
                         $hQuote->hq_origin_search_data = $quoteData;
+                        $hQuote->hq_check_in_date = $hotelRequest->ph_check_in_date;
+                        $hQuote->hq_check_out_date = $hotelRequest->ph_check_out_date;
 
                         if (!$hQuote->save()) {
                             Yii::error(

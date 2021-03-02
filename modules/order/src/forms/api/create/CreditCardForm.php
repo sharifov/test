@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\order\src\forms\api;
+namespace modules\order\src\forms\api\create;
 
 use common\models\CreditCard;
 use yii\base\Model;

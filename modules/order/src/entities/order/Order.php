@@ -2,6 +2,7 @@
 
 namespace modules\order\src\entities\order;
 
+use common\models\BillingInfo;
 use common\models\Currency;
 use common\models\Employee;
 use modules\invoice\src\entities\invoice\Invoice;
@@ -65,6 +66,7 @@ use yii\helpers\ArrayHelper;
  * @property OrderUserProfit[] $orderUserProfit
  * @property OrderTips $orderTips
  * @property OrderTipsUserProfit[] $orderTipsUserProfit
+ * @property BillingInfo[] $billingInfo
  */
 class Order extends ActiveRecord implements Serializable
 {
@@ -222,6 +224,11 @@ class Order extends ActiveRecord implements Serializable
     public function getOrderUserProfit(): ActiveQuery
     {
         return $this->hasMany(OrderUserProfit::class, ['oup_order_id' => 'or_id']);
+    }
+
+    public function getBillingInfo(): ActiveQuery
+    {
+        return $this->hasMany(BillingInfo::class, ['bi_order_id' => 'or_id']);
     }
 
     /**

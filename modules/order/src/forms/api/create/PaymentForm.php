@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\order\src\forms\api;
+namespace modules\order\src\forms\api\create;
 
 use common\models\Currency;
 use common\models\PaymentMethod;
@@ -29,7 +29,7 @@ class PaymentForm extends \yii\base\Model
         return [
             [['type', 'transactionId', 'date', 'amount', 'currency'], 'required'],
             ['type', 'exist', 'targetClass' => PaymentMethod::class, 'targetAttribute' => 'pm_key'],
-            ['transactionId', 'filter', 'filter' => 'intval'],
+            ['transactionId', 'string'],
             ['date', 'date', 'format' => 'php:Y-m-d'],
             ['amount', 'filter', 'filter' => 'floatval'],
             ['type', 'filter', 'filter' => 'mb_strtolower'],

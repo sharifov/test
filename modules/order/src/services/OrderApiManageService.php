@@ -9,14 +9,17 @@ use modules\invoice\src\entities\invoice\Invoice;
 use modules\invoice\src\entities\invoice\InvoiceRepository;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderRepository;
+use modules\order\src\entities\orderTips\OrderTips;
+use modules\order\src\entities\orderTips\OrderTipsRepository;
 use modules\order\src\entities\orderUserProfit\OrderUserProfit;
 use modules\order\src\entities\orderUserProfit\OrderUserProfitRepository;
-use modules\order\src\forms\api\OrderCreateForm;
-use modules\order\src\forms\api\PaymentForm;
-use modules\order\src\forms\api\ProductQuotesForm;
+use modules\order\src\forms\api\create\OrderCreateForm;
 use modules\order\src\payment\method\PaymentMethodRepository;
 use modules\order\src\payment\PaymentRepository;
+use modules\product\src\entities\productOption\ProductOptionRepository;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
+use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository;
 use sales\repositories\billingInfo\BillingInfoRepository;
 use sales\repositories\creditCard\CreditCardRepository;
 use sales\repositories\lead\LeadRepository;
@@ -39,6 +42,9 @@ use sales\services\TransactionManager;
  * @property LeadRepository $leadRepository
  * @property CreditCardRepository $creditCardRepository
  * @property BillingInfoRepository $billingInfoRepository
+ * @property OrderTipsRepository $orderTipsRepository
+ * @property ProductOptionRepository $productOptionRepository
+ * @property ProductQuoteOptionRepository $productQuoteOptionRepository
  */
 class OrderApiManageService
 {
@@ -86,6 +92,18 @@ class OrderApiManageService
      * @var BillingInfoRepository
      */
     private BillingInfoRepository $billingInfoRepository;
+    /**
+     * @var OrderTipsRepository
+     */
+    private OrderTipsRepository $orderTipsRepository;
+    /**
+     * @var ProductOptionRepository
+     */
+    private ProductOptionRepository $productOptionRepository;
+    /**
+     * @var ProductQuoteOptionRepository
+     */
+    private ProductQuoteOptionRepository $productQuoteOptionRepository;
 
     public function __construct(
         OrderRepository $orderRepository,
@@ -98,7 +116,10 @@ class OrderApiManageService
         PaymentRepository $paymentRepository,
         LeadRepository $leadRepository,
         CreditCardRepository $creditCardRepository,
-        BillingInfoRepository $billingInfoRepository
+        BillingInfoRepository $billingInfoRepository,
+        OrderTipsRepository $orderTipsRepository,
+        ProductOptionRepository $productOptionRepository,
+        ProductQuoteOptionRepository $productQuoteOptionRepository
     ) {
         $this->orderRepository = $orderRepository;
         $this->orderUserProfitRepository = $orderUserProfitRepository;
@@ -111,6 +132,9 @@ class OrderApiManageService
         $this->leadRepository = $leadRepository;
         $this->creditCardRepository = $creditCardRepository;
         $this->billingInfoRepository = $billingInfoRepository;
+        $this->orderTipsRepository = $orderTipsRepository;
+        $this->productOptionRepository = $productOptionRepository;
+        $this->productQuoteOptionRepository = $productQuoteOptionRepository;
     }
 
     /**
@@ -138,14 +162,32 @@ class OrderApiManageService
             }
 
             $totalOrderPrice = 0;
-            foreach ($form->productQuotes as $productQuote) {
-                $quote = ProductQuote::findByGid($productQuote->gid);
+            foreach ($form->productQuotes as $productQuotesForm) {
+                $quote = ProductQuote::findByGid($productQuotesForm->gid);
                 $quote->setOrderRelation($newOrder->or_id);
                 $quote->applied();
                 $this->productQuoteRepository->save($quote);
-                $totalOrderPrice += $quote->pq_price;
 
-                foreach ($quote->productQuoteOptionsActive as $productQuoteOption) {
+                foreach ($productQuotesForm->quoteOptions as $quoteOptionsForm) {
+                    $productOption = $this->productOptionRepository->findByKey($quoteOptionsForm->productOptionKey);
+
+                    $productQuoteOption = ProductQuoteOption::create(
+                        $quote->pq_id,
+                        $productOption->po_id,
+                        $quoteOptionsForm->name,
+                        $quoteOptionsForm->description,
+                        $quoteOptionsForm->price,
+                        $quoteOptionsForm->price,
+                        null
+                    );
+                    $productQuoteOption->calculateClientPrice();
+                    $this->productQuoteOptionRepository->save($productQuoteOption);
+                }
+
+                $quote->recalculateProfitAmount();
+
+                $totalOrderPrice += $quote->pq_price;
+                foreach ($quote->productQuoteOptions as $productQuoteOption) {
                     $totalOrderPrice += $productQuoteOption->pqo_price + $productQuoteOption->pqo_extra_markup;
                 }
             }
@@ -200,6 +242,14 @@ class OrderApiManageService
                 $newOrder->or_id
             );
             $this->billingInfoRepository->save($billingInfo);
+
+            if ($form->tips->total_amount) {
+                $orderTips = new OrderTips();
+                $orderTips->ot_order_id = $newOrder->or_id;
+                $orderTips->ot_client_amount = $form->tips->total_amount;
+                $orderTips->ot_amount = $form->tips->total_amount;
+                $this->orderTipsRepository->save($orderTips);
+            }
 
             return $newOrder;
         });

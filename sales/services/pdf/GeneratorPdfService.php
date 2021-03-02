@@ -26,6 +26,7 @@ class GeneratorPdfService
             'destination' => Pdf::DEST_BROWSER,
             'content' => $content,
             'filename' => $fileName,
+            'cssInline' => self::getSectionFromContent($content, 'style', true),
         ]);
         return $pdf->render();
     }
@@ -56,6 +57,7 @@ class GeneratorPdfService
             'destination' => Pdf::DEST_FILE,
             'content' => $content,
             'filename' => $patchToFile,
+            'cssInline' => self::getSectionFromContent($content, 'style', true),
         ]);
         $pdf->render();
 
@@ -76,7 +78,28 @@ class GeneratorPdfService
         $pdf = new Pdf(['mode' => Pdf::MODE_CORE,
             'destination' => Pdf::DEST_STRING,
             'content' => $content,
+            'cssInline' => self::getSectionFromContent($content, 'style', true),
         ]);
         return $pdf->render();
+    }
+
+    /**
+     * @param $content
+     * @param $target
+     * @param bool $removeTarget
+     * @return string
+     */
+    public static function getSectionFromContent($content, string $target, $removeTarget = false): string
+    {
+        $closeTag = '</' . $target . '>';
+        $startTag = strpos($content, '<' . $target, 0);
+        $endTag = strpos($content, $closeTag, 0);
+
+        $content = substr($content, $startTag, ($endTag + strlen($closeTag) - $startTag));
+
+        if ($removeTarget) {
+            $content = str_replace([$closeTag, '<' . $target . '>'], '', $content);
+        }
+        return $content;
     }
 }

@@ -1015,46 +1015,26 @@ $js = <<<JS
         });
         
         $('body').off('click', '.btn-payment-refund').on('click', '.btn-payment-refund', function (e) {
-            
-             e.preventDefault();
-             
-            if(!confirm('Are you sure you want to Refund this Payment?')) {
-                return '';
-            }
-
+            e.preventDefault();
             let url = $(this).data('url');
-            let paymentId = $(this).data('payment-id');
-                        
-            $.ajax({
-                  url: url,
-                  type: 'post',
-                  data: {id: paymentId},
-                  dataType: 'json',
-              })
-                  .done(function(data) {
-                      if (data.error) {
-                          new PNotify({
-                                title: 'Error: Refund Payment',
-                                type: 'error',
-                                text: data.message,
-                                hide: true
-                            });
-                          return;
-                      }
-                      new PNotify({
-                            title: 'Payment was successfully Refund',
-                            type: 'success',
-                            text: 'Success',
-                            hide: true
-                        });
-                      pjaxReload({container: '#pjax-order-payment-' + paymentId, timout: 8000});
-                  })
-                .fail(function( jqXHR, textStatus ) {
-                    alert( "Request failed: " + textStatus );
-                }).always(function() {
-                    
-                });
+            //$('#preloader').removeClass('d-none');
+            
+            let modal = $('#modal-df');
+            modal.find('.modal-body').html('');
+            modal.find('.modal-title').html('Payment Refund');
+            modal.find('.modal-body').load(url, function( response, status, xhr ) {
+                //$('#preloader').addClass('d-none');
+                if (status == 'error') {
+                    alert(response);
+                } else {
+                    modal.modal({
+                        backdrop: 'static',
+                        show: true
+                    });
+                }
+            });
         });
+        
     });
     
 JS;

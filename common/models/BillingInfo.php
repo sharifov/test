@@ -3,9 +3,12 @@
 namespace common\models;
 
 use modules\order\src\entities\order\Order;
+use sales\entities\serializer\Serializable;
+use sales\model\billingInfo\entity\serializer\BillingInfoSerializer;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
 /**
@@ -38,8 +41,9 @@ use yii\db\ActiveRecord;
  * @property Employee $biCreatedUser
  * @property Order $biOrder
  * @property Employee $biUpdatedUser
+ * @property PaymentMethod $paymentMethod
  */
-class BillingInfo extends \yii\db\ActiveRecord
+class BillingInfo extends \yii\db\ActiveRecord implements Serializable
 {
     /**
      * {@inheritdoc}
@@ -70,6 +74,7 @@ class BillingInfo extends \yii\db\ActiveRecord
             [['bi_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['bi_created_user_id' => 'id']],
             [['bi_order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['bi_order_id' => 'or_id']],
             [['bi_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['bi_updated_user_id' => 'id']],
+            [['bi_payment_method_id'], 'exist', 'skipOnError' => true, 'targetClass' => PaymentMethod::class, 'targetAttribute' => ['bi_payment_method_id' => 'pm_id']],
         ];
     }
 
@@ -123,15 +128,20 @@ class BillingInfo extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getBiCc()
     {
         return $this->hasOne(CreditCard::class, ['cc_id' => 'bi_cc_id']);
     }
 
+    public function getPaymentMethod(): ActiveQuery
+    {
+        return $this->hasOne(PaymentMethod::class, ['pm_id' => 'bi_payment_method_id']);
+    }
+
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getBiCreatedUser()
     {
@@ -139,7 +149,7 @@ class BillingInfo extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getBiOrder()
     {
@@ -147,7 +157,7 @@ class BillingInfo extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getBiUpdatedUser()
     {
@@ -193,5 +203,10 @@ class BillingInfo extends \yii\db\ActiveRecord
         $billing->bi_cc_id = $creditCardId;
         $billing->bi_order_id = $orderId;
         return $billing;
+    }
+
+    public function serialize(): array
+    {
+        return (new BillingInfoSerializer($this))->getData();
     }
 }

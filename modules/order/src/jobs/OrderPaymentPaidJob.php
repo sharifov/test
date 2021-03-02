@@ -29,7 +29,7 @@ class OrderPaymentPaidJob implements RetryableJobInterface
 
     public function getTtr(): int
     {
-        return 5;
+        return 1 * 60;
     }
 
     public function canRetry($attempt, $error): bool

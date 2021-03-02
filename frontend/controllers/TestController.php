@@ -71,12 +71,15 @@ use frontend\widgets\notification\NotificationWidget;
 use kartik\mpdf\Pdf;
 use modules\email\src\helpers\MailHelper;
 use modules\email\src\Notifier;
+use modules\flight\models\FlightQuote;
+use modules\flight\src\services\flightQuote\FlightQuotePdfService;
 use modules\hotel\HotelModule;
 use modules\hotel\models\HotelList;
 use modules\hotel\models\HotelQuote;
 use modules\hotel\src\services\hotelQuote\CommunicationDataService;
 use modules\hotel\src\services\hotelQuote\HotelQuotePdfService;
 use modules\lead\src\entities\lead\LeadQuery;
+use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteClasses;
 use modules\product\src\entities\productQuoteStatusLog\CreateDto;
@@ -125,6 +128,7 @@ use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use sales\model\project\entity\projectLocale\ProjectLocale;
 use sales\model\project\entity\projectLocale\ProjectLocaleScopes;
 use sales\repositories\client\ClientsQuery;
+use sales\repositories\NotFoundException;
 use sales\services\cases\CasesCommunicationService;
 use sales\services\client\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;
@@ -188,6 +192,7 @@ use sales\services\lead\qcall\Config;
 use sales\services\lead\qcall\DayTimeHours;
 use sales\services\lead\qcall\FindPhoneParams;
 use sales\services\lead\qcall\QCallService;
+use sales\services\pdf\GeneratorPdfService;
 use sales\services\sms\incoming\SmsIncomingForm;
 use sales\services\sms\incoming\SmsIncomingService;
 use sales\services\TransactionManager;
@@ -1981,6 +1986,42 @@ class TestController extends FController
             return HotelQuotePdfService::processingFile($hotelQuote);
         }
         throw new NotFoundHttpException('HotelQuote not found');
+    }
+
+    public function actionFlightQuoteFile(int $id)
+    {
+        $flightQuote = FlightQuote::findOne(['fq_id' => $id]);
+        FlightQuotePdfService::processingFile($flightQuote); // O787EB0
+
+        $lead = $flightQuote->fqProductQuote->pqOrder->orLead;
+
+        return $this->redirect(['lead/view', 'gid' => $lead->gid]);
+    }
+
+    public function actionReceiptPdf(int $order_id)
+    {
+        $templateKey = 'products_receipt_pdf';
+        if (!$order = Order::findOne(['or_id' => $order_id])) {
+            throw new NotFoundHttpException('Order not found');
+        }
+
+        $data = $order->serialize();
+        $data['project_key'] = $order->orLead->project->project_key;
+        $content = \Yii::$app->communication->getContent($templateKey, $data);
+
+        return GeneratorPdfService::generateForBrowserOutput($content['content'], 'test.pdf');
+    }
+
+    public function actionOrderData(int $order_id)
+    {
+        if (!$order = Order::findOne(['or_id' => $order_id])) {
+            throw new NotFoundHttpException('Order not found');
+        }
+
+        $data = $order->serialize();
+        $data['project_key'] = $order->orLead->project->project_key;
+        \yii\helpers\VarDumper::dump($data, 20, true);
+        exit();
     }
 
     public function actionZ()

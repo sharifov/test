@@ -52,7 +52,7 @@ $totalAmountQuote = 0.0;
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-bars text-warning"></i></a>
                 <div class="dropdown-menu" role="menu">
-                    <h6 class="dropdown-header">Quote Q<?=($model->pq_id)?></h6>
+                    <h6 class="dropdown-header" title="FlightQuoteId: <?php echo $model->flightQuote->fq_id ?>">Quote Q<?=($model->pq_id)?></h6>
                     <?php /*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Update Request', null, [
                                 'class' => 'dropdown-item text-danger btn-update-product',
                                 'data-product-id' => $product->pr_id

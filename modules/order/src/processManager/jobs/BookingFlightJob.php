@@ -48,12 +48,12 @@ class BookingFlightJob implements RetryableJobInterface
             FlightQuoteBookService::createBook($flightQuote, $responseData);
         } catch (\Throwable $e) {
             \Yii::error([
-                'message' => 'Booking Hotel error',
+                'message' => 'Booking Flight error',
                 'error' => $e->getMessage(),
                 'quoteId' => $this->quoteId,
-            ], 'OrderProcessManager:BookingHotelJob');
+            ], 'OrderProcessManager:BookingFlightJob');
 
-            if ($userId = $flightQuote->fqProductQuote->pqOrder->orLead->employee_id) {
+            if ($userId = ($flightQuote->fqProductQuote->pqOrder->orLead->employee_id ?? null)) {
                 Notifications::createAndPublish(
                     $userId,
                     'Booking Flight error.',
@@ -67,7 +67,7 @@ class BookingFlightJob implements RetryableJobInterface
 
     public function getTtr(): int
     {
-        return 5;
+        return 1 * 60;
     }
 
     public function canRetry($attempt, $error): bool
