@@ -1,9 +1,8 @@
 <?php
 
-namespace modules\order\src\forms\api;
+namespace modules\order\src\forms\api\create;
 
 use modules\offer\src\entities\offer\Offer;
-use sales\forms\CompositeForm;
 use sales\forms\CompositeRecursiveForm;
 
 /**
@@ -15,6 +14,7 @@ use sales\forms\CompositeRecursiveForm;
  * @property PaymentForm $payment
  * @property BillingInfoForm $billingInfo
  * @property CreditCardForm $creditCard
+ * @property TipsForm $tips
  */
 class OrderCreateForm extends CompositeRecursiveForm
 {
@@ -30,6 +30,7 @@ class OrderCreateForm extends CompositeRecursiveForm
         $this->payment = new PaymentForm();
         $this->billingInfo = new BillingInfoForm();
         $this->creditCard = new CreditCardForm();
+        $this->tips = new TipsForm();
         parent::__construct($config);
     }
 
@@ -52,6 +53,6 @@ class OrderCreateForm extends CompositeRecursiveForm
      */
     protected function internalForms(): array
     {
-        return ['productQuotes', 'payment', 'billingInfo', 'creditCard'];
+        return ['productQuotes', 'payment', 'billingInfo', 'creditCard', 'tips'];
     }
 }
