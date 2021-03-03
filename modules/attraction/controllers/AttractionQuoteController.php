@@ -22,6 +22,7 @@ use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCancelBookService;
 use modules\attraction\src\useCases\api\searchQuote\AttractionQuoteSearchGuard;
 use modules\attraction\src\useCases\api\searchQuote\HotelQuoteSearchService;
 use modules\hotel\src\useCases\quote\HotelQuoteManageService;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use sales\helpers\app\AppHelper;
 use Yii;
 use yii\base\Exception;
@@ -317,7 +318,7 @@ class AttractionQuoteController extends FController
     /**
      * @return array
      */
-    public function actionAjaxBook(): array
+    public function actionAjaxBookOld(): array
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         $id = (int) Yii::$app->request->post('id', 0);
@@ -356,10 +357,48 @@ class AttractionQuoteController extends FController
         return $result;
     }
 
+    public function actionAjaxBook(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $id = (int) Yii::$app->request->post('id', 0);
+
+        $model = $this->findModel($id);
+        $model->atnq_booking_id = 1111;
+        $model->save();
+        $prductQuote = $model->atnqProductQuote;
+        $prductQuote->pq_status_id = ProductQuoteStatus::BOOKED;
+        $prductQuote->save();
+
+        $result = [
+            'message' => 'Attraction quote booked successful',
+            'status' => 1,
+        ];
+
+        return $result;
+    }
+
+    public function actionAjaxCancelBook(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $id = (int) Yii::$app->request->post('id', 0);
+
+        $model = $this->findModel($id);
+        $prductQuote = $model->atnqProductQuote;
+        $prductQuote->pq_status_id = ProductQuoteStatus::CANCELED;
+        $prductQuote->save();
+
+        $result = [
+            'message' => 'Attraction quote canceled successful',
+            'status' => 1,
+        ];
+
+        return $result;
+    }
+
     /**
      * @return array
      */
-    public function actionAjaxCancelBook(): array
+    public function actionAjaxCancelBookOld(): array
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         $id = (int) Yii::$app->request->post('id', 0);
@@ -418,15 +457,15 @@ class AttractionQuoteController extends FController
      * Finds the HotelQuote model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return HotelQuote the loaded model
+     * @return AttractionQuote the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id): HotelQuote
+    protected function findModel($id): AttractionQuote
     {
-        if (($model = HotelQuote::findOne($id)) !== null) {
+        if (($model = AttractionQuote::findOne($id)) !== null) {
             return $model;
         }
 
-        throw new NotFoundHttpException('The requested HotelQuote does not exist.');
+        throw new NotFoundHttpException('The requested Attraction does not exist.');
     }
 }
