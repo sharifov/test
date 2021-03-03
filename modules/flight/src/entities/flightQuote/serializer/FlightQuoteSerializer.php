@@ -34,7 +34,8 @@ class FlightQuoteSerializer extends Serializer
             'fq_fare_type_id',
             'fq_last_ticket_date',
             'fq_origin_search_data',
-            'fq_json_booking'
+            'fq_json_booking',
+            'fq_ticket_json'
         ];
     }
 
