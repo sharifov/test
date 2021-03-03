@@ -1673,7 +1673,7 @@
     "groupTitle": "DepartmentPhoneProject"
   },
   {
-    "type": "get",
+    "type": "post",
     "url": "/v1/flight/ticket",
     "title": "Flight Ticket",
     "version": "0.1.0",

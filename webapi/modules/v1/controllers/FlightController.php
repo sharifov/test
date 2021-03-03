@@ -31,7 +31,7 @@ use yii\helpers\ArrayHelper;
 class FlightController extends ApiBaseController
 {
     /**
-     * @api {get} /v1/flight/ticket Flight Ticket
+     * @api {post} /v1/flight/ticket Flight Ticket
      * @apiVersion 0.1.0
      * @apiName Flight Ticket
      * @apiGroup Flight
