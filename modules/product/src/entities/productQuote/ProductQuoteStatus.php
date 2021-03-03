@@ -176,6 +176,7 @@ class ProductQuoteStatus
             self::NEW,
             self::PENDING,
             self::APPLIED,
+            self::ERROR,
         ]);
     }
 
