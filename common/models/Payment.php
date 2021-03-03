@@ -115,7 +115,8 @@ class Payment extends \yii\db\ActiveRecord
         return [
             [['pay_type_id', 'pay_method_id', 'pay_status_id', 'pay_invoice_id', 'pay_order_id', 'pay_created_user_id', 'pay_updated_user_id'], 'integer'],
             [['pay_date', 'pay_amount'], 'required'],
-            [['pay_date', 'pay_created_dt', 'pay_updated_dt'], 'safe'],
+            ['pay_date', 'date', 'format' => 'php:Y-m-d'],
+            [['pay_created_dt', 'pay_updated_dt'], 'safe'],
             [['pay_amount'], 'number'],
             [['pay_code'], 'string'],
             [['pay_currency'], 'default', 'value' => null],
