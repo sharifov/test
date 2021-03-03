@@ -114,7 +114,7 @@ class OrderActionsController extends FController
         $order = $this->findModel($orderId);
 
         try {
-            (new EmailConfirmationSender())->sendWithAttachments($order);
+            (new EmailConfirmationSender())->sendWithAnyAttachments($order);
             return [
                 'error' => false,
                 'message' => 'OK',

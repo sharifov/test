@@ -8,37 +8,106 @@ use common\models\EmailTemplateType;
 use common\models\Lead;
 use modules\fileStorage\src\entity\fileOrder\FileOrder;
 use modules\order\src\entities\order\Order;
+use modules\product\src\entities\productQuote\ProductQuote;
 use sales\model\project\entity\projectLocale\ProjectLocale;
 use yii\helpers\VarDumper;
 
 class EmailConfirmationSender
 {
+    private const TEMPLATE = 'order_update';
+
     public function sendWithoutAttachments(Order $order): void
     {
         $this->send($order, []);
     }
 
-    public function sendWithAttachments(Order $order): void
+    public function sendWithAllAttachments(Order $order): void
     {
-        $invoice = FileOrder::find()->andWhere([
-            'fo_category_id' => FileOrder::CATEGORY_INVOICE,
+        $receipt = FileOrder::find()->andWhere([
+            'fo_category_id' => FileOrder::CATEGORY_RECEIPT,
             'fo_or_id' => $order->or_id
         ])->one();
-        if (!$invoice) {
-            throw new \DomainException('Not found Invoice File. OrderId: ' . $order->or_id);
+        if (!$receipt) {
+            throw new \DomainException('Not found Receipt File. OrderId: ' . $order->or_id);
         }
 
-        $countQuotes = count($order->productQuotes);
-        $confirmations = FileOrder::find()->andWhere([
-            'fo_category_id' => FileOrder::CATEGORY_CONFIRMATION,
-            'fo_or_id' => $order->or_id
-        ])->with(['file'])->all();
+        /** @var FileOrder[] $confirmations */
+        $confirmations = [];
 
-        if ($countQuotes !== count($confirmations)) {
-            throw new \DomainException('Count Quotes(' . $countQuotes . ') and count Confirmation files(' . count($confirmations) . ') is not equal. OrderId: ' . $order->or_id);
+        $quotes = ProductQuote::find()->select(['pq_id'])->andWhere(['pq_order_id' => $order->or_id])->column();
+        foreach ($quotes as $quote) {
+            $confirm = FileOrder::find()->andWhere([
+                'fo_category_id' => FileOrder::CATEGORY_CONFIRMATION,
+                'fo_or_id' => $order->or_id,
+                'fo_pq_id' => $quote
+            ])->with(['file'])->one();
+
+            if (!$confirm) {
+                throw new \DomainException('Not found File Confirmation. QuoteId: ' . $quote . ' OrderId: ' . $order->or_id);
+            }
+            $confirmations[] = $confirm;
         }
 
+        $files[] = new \modules\fileStorage\src\services\url\FileInfo(
+            $receipt->file->fs_name,
+            $receipt->file->fs_path,
+            $receipt->file->fs_uid,
+            $receipt->file->fs_title,
+            null
+        );
+
+        foreach ($confirmations as $confirmation) {
+            $files[] = new \modules\fileStorage\src\services\url\FileInfo(
+                $confirmation->file->fs_name,
+                $confirmation->file->fs_path,
+                $confirmation->file->fs_uid,
+                $confirmation->file->fs_title,
+                null
+            );
+        }
+
+        $fileStorageUrlGenerator = \Yii::createObject(\modules\fileStorage\src\services\url\UrlGenerator::class);
+        $attachments['files'] = $fileStorageUrlGenerator->generateForExternal($files);
+
+        $this->send($order, $attachments);
+    }
+
+    public function sendWithAnyAttachments(Order $order): void
+    {
         $files = [];
+
+        $receipt = FileOrder::find()->andWhere([
+            'fo_category_id' => FileOrder::CATEGORY_RECEIPT,
+            'fo_or_id' => $order->or_id
+        ])->one();
+
+        if ($receipt) {
+            $files[] = new \modules\fileStorage\src\services\url\FileInfo(
+                $receipt->file->fs_name,
+                $receipt->file->fs_path,
+                $receipt->file->fs_uid,
+                $receipt->file->fs_title,
+                null
+            );
+        }
+
+        /** @var FileOrder[] $confirmations */
+        $confirmations = [];
+
+        $quotes = ProductQuote::find()->select(['pq_id'])->andWhere(['pq_order_id' => $order->or_id])->column();
+        foreach ($quotes as $quote) {
+            $confirm = FileOrder::find()->andWhere([
+                'fo_category_id' => FileOrder::CATEGORY_CONFIRMATION,
+                'fo_or_id' => $order->or_id,
+                'fo_pq_id' => $quote
+            ])->with(['file'])->one();
+
+            if (!$confirm) {
+                continue;
+            }
+            $confirmations[] = $confirm;
+        }
+
         foreach ($confirmations as $confirmation) {
             $files[] = new \modules\fileStorage\src\services\url\FileInfo(
                 $confirmation->file->fs_name,
@@ -72,7 +141,10 @@ class EmailConfirmationSender
         $from = $project->getContactInfo()->email;
         $fromName = $project->name;
 
-        $billingInfo = BillingInfo::find()->select(['bi_id', 'bi_contact_email'])->andWhere(['bi_order_id' => $order->or_id])->orderBy(['bi_id' => SORT_DESC])->asArray()->one();
+        $billingInfo = BillingInfo::find()->select([
+            'bi_id',
+            'bi_contact_email'
+        ])->andWhere(['bi_order_id' => $order->or_id])->orderBy(['bi_id' => SORT_DESC])->asArray()->one();
         if (!$billingInfo) {
             throw new \DomainException('Not found Billing Info. OrderId: ' . $order->or_id);
         }
@@ -81,12 +153,11 @@ class EmailConfirmationSender
         }
         $to = $billingInfo['bi_contact_email'];
 
-        $templateKey = 'bwk_multi_product';
         $languageId = $this->getLanguage($order->orLead);
 
         $mailPreview = \Yii::$app->communication->mailPreview(
             $projectId,
-            $templateKey,
+            self::TEMPLATE,
             $from,
             $to,
             (new EmailConfirmationData())->generate($order),
@@ -98,7 +169,7 @@ class EmailConfirmationSender
 
         $this->sendEmail(
             $order,
-            $templateKey,
+            self::TEMPLATE,
             $from,
             $fromName,
             $to,
@@ -111,11 +182,14 @@ class EmailConfirmationSender
 
     private function getLanguage(Lead $lead): string
     {
+        if ($lead->l_client_lang) {
+            return $lead->l_client_lang;
+        }
         $locale = ProjectLocale::find()->select(['pl_language_id'])->andWhere([
             'pl_project_id' => $lead->project_id,
             'pl_default' => true
         ])->orderBy(['pl_id' => SORT_ASC])->asArray()->one();
-        if ($locale) {
+        if ($locale && $locale['pl_language_id']) {
             return $locale['pl_language_id'];
         }
         return 'en-US';

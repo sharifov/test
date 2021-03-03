@@ -8,11 +8,11 @@ use modules\order\src\services\confirmation\EmailConfirmationSender;
 use yii\queue\RetryableJobInterface;
 
 /**
- * Class OrderCompletedConfirmationJob
+ * Class OrderSendCompletedConfirmationJob
  *
  * @property $orderId
  */
-class OrderCompletedConfirmationJob implements RetryableJobInterface
+class OrderSendCompletedConfirmationJob implements RetryableJobInterface
 {
     public $orderId;
 
@@ -29,12 +29,12 @@ class OrderCompletedConfirmationJob implements RetryableJobInterface
             \Yii::error([
                 'message' => 'Not found Order',
                 'orderId' => $this->orderId,
-            ], 'OrderCompletedConfirmationJob');
+            ], 'OrderSendCompletedConfirmationJob');
             return;
         }
 
         try {
-            (new EmailConfirmationSender())->sendWithAttachments($order);
+            (new EmailConfirmationSender())->sendWithAllAttachments($order);
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => 'Send Order Completed Confirmation Error',
@@ -62,10 +62,10 @@ class OrderCompletedConfirmationJob implements RetryableJobInterface
     {
         \Yii::error([
             'attempt' => $attempt,
-            'message' => 'Order completed confirmation error',
+            'message' => 'Order send completed confirmation error',
             'error' => $error->getMessage(),
             'orderId' => $this->orderId,
-        ], 'OrderCompletedConfirmationJob');
+        ], 'OrderSendCompletedConfirmationJob');
         return !($attempt > 5);
     }
 }

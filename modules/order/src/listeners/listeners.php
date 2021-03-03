@@ -12,7 +12,6 @@ use modules\order\src\listeners\lead\LeadSoldListener;
 use modules\order\src\listeners\order\OrderCanceledConfirmationListener;
 use modules\order\src\listeners\order\OrderCanceledHybridNotificationListener;
 use modules\order\src\listeners\order\OrderChangeStatusLogListener;
-use modules\order\src\listeners\order\OrderCompletedConfirmationListener;
 use modules\order\src\listeners\order\OrderCompletedHybridNotificationListener;
 use modules\order\src\listeners\order\OrderFileGeneratorListener;
 use modules\order\src\listeners\order\OrderLogPaymentStatusListener;
@@ -65,7 +64,6 @@ return [
     OrderCompletedEvent::class => [
         LeadSoldListener::class,
         OrderChangeStatusLogListener::class,
-        OrderCompletedConfirmationListener::class,
         OrderCompletedHybridNotificationListener::class,
         OrderFileGeneratorListener::class,
     ],
