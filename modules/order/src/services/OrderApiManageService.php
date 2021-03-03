@@ -164,6 +164,9 @@ class OrderApiManageService
             $totalOrderPrice = 0;
             foreach ($form->productQuotes as $productQuotesForm) {
                 $quote = ProductQuote::findByGid($productQuotesForm->gid);
+                if (!$quote->isNew() && !$quote->isPending()) {
+                    throw new \DomainException('One of Quote(' . $productQuotesForm->gid . ') is not available status.');
+                }
                 $quote->setOrderRelation($newOrder->or_id);
                 $quote->applied();
                 $this->productQuoteRepository->save($quote);

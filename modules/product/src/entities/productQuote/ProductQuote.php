@@ -498,6 +498,14 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return $this->pq_status_id === ProductQuoteStatus::NEW;
     }
 
+    /**
+     * @return bool
+     */
+    public function isPending(): bool
+    {
+        return $this->pq_status_id === ProductQuoteStatus::PENDING;
+    }
+
     public function isDeclined(): bool
     {
         return $this->pq_status_id === ProductQuoteStatus::DECLINED;
