@@ -3,12 +3,13 @@
 namespace modules\order\src\listeners\order;
 
 use modules\fileStorage\src\entity\fileOrder\FileOrder;
+use modules\order\src\events\OrderFileGeneratedEvent;
 use modules\order\src\jobs\OrderSendCompletedConfirmationJob;
 use modules\product\src\entities\productQuote\ProductQuote;
 
 class OrderAllFilesGeneratedListener
 {
-    public function handle($event): void
+    public function handle(OrderFileGeneratedEvent $event): void
     {
         $receipt = FileOrder::find()->andWhere([
             'fo_category_id' => FileOrder::CATEGORY_RECEIPT,
