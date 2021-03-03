@@ -2,6 +2,7 @@
 
 namespace modules\offer\controllers;
 
+use common\models\Currency;
 use modules\offer\src\entities\offer\events\OfferRecalculateProfitAmountEvent;
 use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offerProduct\OfferProduct;
@@ -115,6 +116,16 @@ class OfferProductController extends FController
                 $offer->of_lead_id = $productQuote->pqProduct->pr_lead_id;
                 $offer->of_name = $offer->generateName();
                 // $offer->of_status_id = Offer::STATUS_NEW;
+                $leadPreferences = $productQuote->pqProduct->prLead->leadPreferences;
+                if ($leadPreferences && $leadPreferences->pref_currency) {
+                    $offer->of_client_currency = $leadPreferences->pref_currency;
+                } else {
+                    $defaultCurrency = Currency::find()->select(['cur_code'])->andWhere(['cur_default' => true, 'cur_enabled' => true])->one();
+                    if ($defaultCurrency && $defaultCurrency['cur_code']) {
+                        $offer->of_client_currency = $defaultCurrency['cur_code'];
+                    }
+                }
+                $offer->updateOfferTotalByCurrency();
 
                 if (!$offer->save()) {
                     throw new Exception('Product Quote ID (' . $productQuoteId . '), Offer ID (' . $offerId . '): ' . VarDumper::dumpAsString($offer->errors), 17);
