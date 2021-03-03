@@ -30,9 +30,9 @@ $chatHistoryUrl = Url::toRoute('/client-chat/ajax-history');
 $chatTransferUrl = Url::toRoute('/client-chat/ajax-transfer-view');
 $chatReopenUrl = Url::toRoute('/client-chat/ajax-reopen-chat');
 $chatCancelTransferUrl = Url::toRoute('/client-chat/ajax-cancel-transfer');
-$chatSendOfferListUrl = Url::toRoute('/client-chat/send-offer-list');
-$chatSendOfferPreviewUrl = Url::toRoute('/client-chat/send-offer-preview');
-$chatSendOfferGenerateUrl = Url::toRoute('/client-chat/send-offer-generate');
+//$chatSendOfferPreviewUrl = Url::toRoute('/client-chat/send-offer-preview');
+$chatSendQuoteGenerateUrl = Url::toRoute('/client-chat/send-quote-generate');
+$chatSendQuoteUrl = Url::toRoute('/client-chat/send-quote');
 $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
 $chatHoldUrl = Url::toRoute('/client-chat/ajax-hold-view');
 $chatUnHoldUrl = Url::toRoute('/client-chat/ajax-un-hold');
@@ -806,6 +806,7 @@ $(document).on('click', '.chat-offer', function(e) {
     let chatId = $(this).attr('data-chat-id');
     let leadId = $(this).attr('data-lead-id');
     let modal = $('#modal-lg');
+    let url = $(this).attr('data-url');
     
     modal.find('.modal-body').html(spinnerContent);
     modal.find('.modal-title').html('Send Offer');
@@ -813,7 +814,7 @@ $(document).on('click', '.chat-offer', function(e) {
 
     $.ajax({
         type: 'post',
-        url: '{$chatSendOfferListUrl}',
+        url: url,
         data: {chat_id: chatId, lead_id: leadId},
         dataType: 'html'
     })
@@ -830,11 +831,11 @@ $(document).on('click', '.quotes-uid-chat-generate', function(e) {
      let chatId = $(this).attr('data-chat-id');
      let leadId = $(this).attr('data-lead-id');
      if (!chatId) {
-         createNotify('Send Offer', 'Not found Chat Id', 'error');
+         createNotify('Send Quotes', 'Not found Chat Id', 'error');
          return;
      }
      if (!leadId) {
-         createNotify('Send Offer', 'Not found Lead Id', 'error');
+         createNotify('Send Quotes', 'Not found Lead Id', 'error');
          return;
      }
     
@@ -845,7 +846,7 @@ $(document).on('click', '.quotes-uid-chat-generate', function(e) {
     });
     
     if (quotes.length < 1) {
-        createNotify('Send Offer', 'Not found selected quotes', 'error');
+        createNotify('Send Quotes', 'Not found selected quotes', 'error');
         return false;
     }
     
@@ -854,7 +855,7 @@ $(document).on('click', '.quotes-uid-chat-generate', function(e) {
     
      $.ajax({
         type: 'post',
-        url: '{$chatSendOfferGenerateUrl}',
+        url: '{$chatSendQuoteGenerateUrl}',
         data: {chatId: chatId, leadId: leadId, quotesIds: quotes},
         dataType: 'html'
     })
@@ -863,6 +864,65 @@ $(document).on('click', '.quotes-uid-chat-generate', function(e) {
     })
     .fail(function () {
             createNotify('Error', 'Server error', 'error');
+    });    
+        
+});
+
+$(document).on('click', '.send-offer', function(e) {
+    e.preventDefault();
+     let chatId = $(this).attr('data-chat-id');
+     let leadId = $(this).attr('data-lead-id');
+     let btn = $(this);
+     btn.prop('disabled', true).addClass('disabled').append(' <i class="fa fa-spin fa-spinner"></i>');
+     if (!chatId) {
+         createNotify('Send Offer', 'Not found Chat Id', 'error');
+         btn.prop('disabled', false).removeClass('disabled').find('i').remove();
+         return;
+     }
+     if (!leadId) {
+         createNotify('Send Offer', 'Not found Lead Id', 'error');
+         btn.prop('disabled', false).removeClass('disabled').find('i').remove();
+         return;
+     }
+    
+    let offers = [];
+       
+    $('input[type=checkbox].offer-checkbox:checked').each(function() {
+        offers.push($(this).data('id'));
+    });
+    
+    if (offers.length < 1) {
+        createNotify('Send Offer', 'Not found selected offers', 'error');
+        btn.prop('disabled', false).removeClass('disabled').find('i').remove();
+        return false;
+    }
+    
+    let modal = $('#modal-lg');
+    
+     $.ajax({
+        type: 'post',
+        url: '{$chatSendOfferUrl}',
+        data: {chatId: chatId, leadId: leadId, offersIds: offers},
+        dataType: 'json'
+    })
+    .done(function(data) { 
+        if (data.error) {
+            createNotify('Send Offer Error', data.message, 'error');
+            return false;
+        } else {
+            createNotify('Send Offer Success', data.message, 'success');
+        }
+        
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('');
+        modal.modal('hide');
+
+    })
+    .fail(function () {
+        createNotify('Error', 'Server error', 'error');
+    })
+    .always( function () {
+         btn.prop('disabled', false).removeClass('disabled').find('i').remove();
     });    
         
 });
@@ -885,7 +945,7 @@ $(document).on('click', '.client-chat-send-offer', function(e) {
     
      $.ajax({
         type: 'post',
-        url: '{$chatSendOfferUrl}',
+        url: '{$chatSendQuoteUrl}',
         data: {chatId: chatId, leadId: leadId},
         dataType: 'json'
     })

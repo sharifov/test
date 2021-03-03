@@ -20,6 +20,8 @@ use frontend\widgets\clientChat\ClientChatAccessWidget;
 use frontend\widgets\notification\NotificationSocketWidget;
 use frontend\widgets\notification\NotificationWidget;
 use http\Exception\RuntimeException;
+use modules\offer\src\entities\offer\OfferQuery;
+use modules\offer\src\entities\offer\search\OfferSearch;
 use sales\auth\Auth;
 use sales\entities\cases\CasesSearch;
 use sales\entities\chat\ChatExtendedGraphsSearch;
@@ -49,6 +51,7 @@ use sales\model\clientChat\useCase\close\ClientChatCloseForm;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChat\useCase\hold\ClientChatHoldForm;
 use sales\model\clientChat\useCase\sendOffer\GenerateImagesForm;
+use sales\model\clientChat\useCase\sendOffer\SendOfferForm;
 use sales\model\clientChat\useCase\transfer\ClientChatTransferForm;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatCouchNote\ClientChatCouchNoteRepository;
@@ -1245,7 +1248,48 @@ class ClientChatController extends FController
         }
     }
 
-    public function actionSendOfferList(): string
+    public function actionSendOfferList()
+    {
+        $chatId = (int)\Yii::$app->request->post('chat_id');
+        $leadId = (int)\Yii::$app->request->post('lead_id');
+
+        $errorMessage = '';
+        $dataProvider = null;
+
+        try {
+            $clientChat = $this->clientChatRepository->findById($chatId);
+            if (!Auth::can('client-chat/manage', ['chat' => $clientChat])) {
+                throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+            }
+            $lead = $this->leadRepository->find($leadId);
+
+            if (!$clientChat->isAssignedLead($lead->id)) {
+                throw new \DomainException('Lead is not assigned to Client Chat');
+            }
+
+            if (!OfferQuery::existsOffersByLeadId($lead->id)) {
+                throw new \DomainException('Not found Offers for Send');
+            }
+
+            $searchOffer = new OfferSearch();
+            $dataProvider = $searchOffer->searchByLead([
+                $searchOffer->formName() => [
+                    'of_lead_id' => $lead->id
+                ],
+            ], Auth::user());
+        } catch (\DomainException $e) {
+            $errorMessage = $e->getMessage();
+        }
+
+        return $this->renderAjax('partial/_send_offer_list', [
+            'dataProvider' => $dataProvider,
+            'errorMessage' => $errorMessage,
+            'chatId' => $chatId,
+            'leadId' => $leadId,
+        ]);
+    }
+
+    public function actionSendQuoteList(): string
     {
         $chatId = (int)\Yii::$app->request->post('chat_id');
         $leadId = (int)\Yii::$app->request->post('lead_id');
@@ -1259,7 +1303,7 @@ class ClientChatController extends FController
             }
             $lead = $this->leadRepository->find($leadId);
 
-            if (!$this->sendOfferCheckAccess($clientChat, Auth::user())) {
+            if (!$this->sendQuoteCheckAccess($clientChat, Auth::user())) {
                 throw new \DomainException('Access denied.');
             }
 
@@ -1271,12 +1315,12 @@ class ClientChatController extends FController
                 throw new \DomainException('Not found Quote for Send');
             }
 
-            $dataProvider = $this->getSendOfferProvider($lead);
+            $dataProvider = $this->getSendQuoteProvider($lead);
         } catch (\DomainException $e) {
             $errorMessage = $e->getMessage();
         }
 
-        return $this->renderAjax('partial/_send_offer_list', [
+        return $this->renderAjax('partial/_send_quote_list', [
             'dataProvider' => $dataProvider,
             'errorMessage' => $errorMessage,
             'chatId' => $chatId,
@@ -1284,7 +1328,7 @@ class ClientChatController extends FController
         ]);
     }
 
-    public function actionSendOfferGenerate(): string
+    public function actionSendQuoteGenerate(): string
     {
         $errorMessage = '';
         $captures = [];
@@ -1292,7 +1336,7 @@ class ClientChatController extends FController
         $form = new GenerateImagesForm();
 
         if (!$form->load(Yii::$app->request->post())) {
-            return $this->renderAjax('partial/_send_offer_generate', [
+            return $this->renderAjax('partial/_send_quote_generate', [
                 'errorMessage' => 'Cant load Data',
                 'form' => $form,
                 'captures' => $captures,
@@ -1300,7 +1344,7 @@ class ClientChatController extends FController
         }
 
         if (!$form->validate()) {
-            return $this->renderAjax('partial/_send_offer_generate', [
+            return $this->renderAjax('partial/_send_quote_generate', [
                 'errorMessage' => '',
                 'form' => $form,
                 'captures' => $captures,
@@ -1308,7 +1352,7 @@ class ClientChatController extends FController
         }
 
         try {
-            if (!$this->sendOfferCheckAccess($form->chat, Auth::user())) {
+            if (!$this->sendQuoteCheckAccess($form->chat, Auth::user())) {
                 throw new \DomainException('Access denied.');
             }
             foreach ($form->quotes as $quote) {
@@ -1353,14 +1397,14 @@ class ClientChatController extends FController
             $errorMessage = $e->getMessage();
         }
 
-        return $this->renderAjax('partial/_send_offer_generate', [
+        return $this->renderAjax('partial/_send_quote_generate', [
             'errorMessage' => $errorMessage,
             'form' => $form,
             'captures' => ArrayHelper::getColumn($captures, 'data'),
         ]);
     }
 
-    public function actionSendOffer(): Response
+    public function actionSendQuote(): Response
     {
         $out = ['error' => false, 'message' => '', 'warning' => ''];
         $chatId = (int)\Yii::$app->request->post('chatId');
@@ -1374,7 +1418,7 @@ class ClientChatController extends FController
                 throw new \DomainException('Not found saved quote captures. Please try again.');
             }
 
-            $message = $this->createOfferMessage($clientChat, ArrayHelper::getColumn($captures, 'data'));
+            $message = $this->createQuoteMessage($clientChat, ArrayHelper::getColumn($captures, 'data'));
 
             if (($rocketUserId = UserClientChatDataService::getCurrentRcUserId()) && ($rocketToken = UserClientChatDataService::getCurrentAuthToken())) {
                 $headers = [
@@ -1394,10 +1438,56 @@ class ClientChatController extends FController
                 if ($quote) {
                     $quote->setStatusSend();
                     if (!$this->quoteRepository->save($quote)) {
-                        Yii::error($quote->errors, 'ClientChatController::sendOffer:Quote:save');
+                        Yii::error($quote->errors, 'ClientChatController::sendQuote:Quote:save');
                         $out['warning'] = 'Update status of Quote(' . $quoteId . ') failed';
                     }
                 }
+            }
+        } catch (\DomainException $e) {
+            $out['error'] = true;
+            $out['message'] = $e->getMessage();
+        }
+
+        return $this->asJson($out);
+    }
+
+    public function actionSendOffer(): Response
+    {
+        $out = ['error' => false, 'message' => '', 'warning' => ''];
+        try {
+            $form = new SendOfferForm();
+
+            if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+                $clientChat = $this->clientChatRepository->findById($form->chatId);
+                $lead = $this->leadRepository->find($form->leadId);
+
+                $message = $this->renderPartial('partial/_send_offer_message', [
+                    'offers' => $form->offers
+                ]);
+
+                $data = [
+                    'message' => [
+                        'rid' => $clientChat->cch_rid,
+                        'msg' => trim($message)
+                    ],
+                ];
+
+                if (($rocketUserId = UserClientChatDataService::getCurrentRcUserId()) && ($rocketToken = UserClientChatDataService::getCurrentAuthToken())) {
+                    $headers = [
+                        'X-User-Id' => $rocketUserId,
+                        'X-Auth-Token' => $rocketToken,
+                    ];
+                } else {
+                    $headers = Yii::$app->rchat->getSystemAuthDataHeader();
+                }
+
+                $response = Yii::$app->chatBot->sendMessage($data, $headers);
+
+                if ($response['error']) {
+                    throw new \DomainException($response['error']['error'] ?? 'Unknown error from chat bot');
+                }
+            } else {
+                throw new \DomainException($form->getErrorSummary(true)[0]);
             }
         } catch (\DomainException $e) {
             $out['error'] = true;
@@ -1456,7 +1546,7 @@ class ClientChatController extends FController
 
         if (!$this->saveQuoteCaptures($captures, Auth::id(), $chatId, $leadId)) {
             return $this->asJson([
-                'view' => $this->renderAjax('partial/_send_offer_generate', [
+                'view' => $this->renderAjax('partial/_send_quote_generate', [
                     'errorMessage' => '',
                     'form' => $form,
                     'captures' => ArrayHelper::getColumn($originalCaptures, 'data'),
@@ -1466,7 +1556,7 @@ class ClientChatController extends FController
         }
 
         return $this->asJson([
-            'view' => $this->renderAjax('partial/_send_offer_generate', [
+            'view' => $this->renderAjax('partial/_send_quote_generate', [
                 'errorMessage' => '',
                 'form' => $form,
                 'captures' => ArrayHelper::getColumn($captures, 'data'),
@@ -1667,7 +1757,7 @@ class ClientChatController extends FController
         ]);
     }
 
-    private function createOfferMessage(ClientChat $chat, array $captures): array
+    private function createQuoteMessage(ClientChat $chat, array $captures): array
     {
         $attachments = [];
 
@@ -1706,12 +1796,12 @@ class ClientChatController extends FController
     }
 
     //todo
-    private function sendOfferCheckAccess($chat, $user): bool
+    private function sendQuoteCheckAccess($chat, $user): bool
     {
         return true;
     }
 
-    private function getSendOfferProvider(Lead $lead): ActiveDataProvider
+    private function getSendQuoteProvider(Lead $lead): ActiveDataProvider
     {
         return $lead->getQuotesProvider([], [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED]);
     }
