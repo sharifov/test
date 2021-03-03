@@ -80,6 +80,7 @@ use modules\hotel\src\services\hotelQuote\CommunicationDataService;
 use modules\hotel\src\services\hotelQuote\HotelQuotePdfService;
 use modules\lead\src\entities\lead\LeadQuery;
 use modules\order\src\entities\order\Order;
+use modules\order\src\services\OrderPdfService;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteClasses;
 use modules\product\src\entities\productQuoteStatusLog\CreateDto;
@@ -2000,26 +2001,35 @@ class TestController extends FController
 
     public function actionReceiptPdf(int $order_id)
     {
-        $templateKey = 'products_receipt_pdf';
+        $templateKey = OrderPdfService::TEMPLATE_KEY;
         if (!$order = Order::findOne(['or_id' => $order_id])) {
             throw new NotFoundHttpException('Order not found');
         }
 
-        $data = $order->serialize();
+        $data['order'] = $order->serialize();
         $data['project_key'] = $order->orLead->project->project_key;
         $content = \Yii::$app->communication->getContent($templateKey, $data);
+
+        if ($error = ArrayHelper::getValue($content, 'error')) {
+            \yii\helpers\VarDumper::dump(json_decode($error), 10, true);
+            exit();
+        }
 
         return GeneratorPdfService::generateForBrowserOutput($content['content'], 'test.pdf');
     }
 
-    public function actionOrderData(int $order_id)
+    public function actionOrderData(int $order_id, int $json = 0)
     {
         if (!$order = Order::findOne(['or_id' => $order_id])) {
             throw new NotFoundHttpException('Order not found');
         }
 
-        $data = $order->serialize();
+        $data['order'] = $order->serialize();
         $data['project_key'] = $order->orLead->project->project_key;
+
+        if ($json) {
+            return $this->asJson($data);
+        }
         \yii\helpers\VarDumper::dump($data, 20, true);
         exit();
     }
