@@ -21,7 +21,7 @@ class AttractionQuoteSearchGuard
         }
 
         if (!$attraction->atn_destination) {
-            throw new \DomainException('Missing destination in Hotel Attraction; Fill Attraction data;');
+            throw new \DomainException('Missing destination in Attraction; Fill Attraction data;');
         }
 
         return $attraction;

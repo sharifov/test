@@ -134,18 +134,15 @@ class AttractionQuoteController extends FController
 
         if ($attraction) {
             try {
-                //$result = $apiAttractionService->getAttractionQuotes(AttractionQuoteSearchGuard::guard($attraction));
                 $result = $apiAttractionService->getProductList(AttractionQuoteSearchGuard::guard($attraction));
             } catch (\DomainException $e) {
                 Yii::$app->session->setFlash('error', $e->getMessage());
             }
         }
 
-        //$attractionsList = $result['data']['activityGroups'][0] ?? [];
         $attractionsList = $result['productList']['nodes'] ?? [];
-//var_dump([$attractionsList]); die();
+
         $dataProvider = new ArrayDataProvider([
-            //'allModels' => [$attractionsList['activityTiles'] ?? []],
             'allModels' => [$attractionsList] ?? [],
             'pagination' => [
                 'pageSize' => 10,
@@ -158,11 +155,42 @@ class AttractionQuoteController extends FController
         ]);
     }
 
+    public function actionAvailabilityAjax()
+    {
+        $attractionId = (int) Yii::$app->request->post('atn_id');
+        $attractionKey = (string) Yii::$app->request->post('attraction_key');
+        $result = [];
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $attraction = $this->attractionRepository->find($attractionId);
+
+        $apiAttractionService = AttractionModule::getInstance()->apiService;
+        if ($attraction) {
+            try {
+                $result = $apiAttractionService->getAvailabilityList($attractionKey, AttractionQuoteSearchGuard::guard($attraction));
+            } catch (\DomainException $e) {
+                Yii::$app->session->setFlash('error', $e->getMessage());
+            }
+        }
+
+        $availabilityList = $result['availabilityList']['nodes'] ?? [];
+
+        $dataProvider = new ArrayDataProvider([
+            'allModels' => [$availabilityList] ?? [],
+            'pagination' => [
+                'pageSize' => 10,
+            ],
+        ]);
+
+        return $this->renderAjax('search/_list_availabilities', [
+            'dataProvider' => $dataProvider,
+            'attractionSearch'   => $attraction
+        ]);
+    }
+
 
     public function actionAddAjax(): array
     {
         $attractionId = (int) Yii::$app->request->get('atn_id');
-        //$hotelCode = (int) Yii::$app->request->post('hotel_code');
         $quoteKey = (string) Yii::$app->request->post('quote_key');
         $productId = 0;
 
@@ -206,8 +234,6 @@ class AttractionQuoteController extends FController
                 'addedQuote',
                 ['data' => ['productId' => $attractionQuote->atnqProductQuote->pq_product_id]]
             );
-
-            //$hotelList = $result['hotels'] ?? [];
         } catch (\Throwable $throwable) {
             Yii::warning(VarDumper::dumpAsString($throwable->getTraceAsString()), 'app');
             return ['error' => 'Error: ' . $throwable->getMessage()];

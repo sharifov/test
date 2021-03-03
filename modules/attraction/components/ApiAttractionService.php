@@ -112,7 +112,7 @@ class ApiAttractionService extends Component
         return $result;
     }
 
-    public function getAvailabilityList($productId, $startDate, $endDate)
+    public function getAvailabilityList($productId, Attraction $attraction)
     {
         $query = [
             'query' => 'query holibob ($productId: String!, $startDate: Date, $endDate: Date) {
@@ -133,7 +133,7 @@ class ApiAttractionService extends Component
                 }
               }
             }',
-            'variables' => '{"productId":"' . $productId . '", "startDate":"' . $startDate . '", "endDate":"' . $endDate . '"}',
+            'variables' => '{"productId":"' . $productId . '", "startDate":"' . $attraction->atn_date_from . '", "endDate":"' . $attraction->atn_date_to . '"}',
             'operationName' => 'holibob'
         ];
 

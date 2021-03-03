@@ -19,7 +19,7 @@
         <span class="quote__id">
           <strong># <?= $key + 1?></strong>
         </span>
-        <span class="quote__vc">
+        <span class="quote__vc" title="<?= $dataHotel[$key]['id'] ?>">
             Attraction / <?= $dataHotel[$key]['name'] ?? '' ?>
         </span>
       </div>
@@ -27,7 +27,7 @@
         <span class="quote__vc">
           <span class="mr-1">
             <strong>
-              Price:
+              Guide price:
             </strong>
           </span>
           <strong class="text-success">
@@ -83,16 +83,20 @@
               <?php if (false) : ?>
                 <span class="badge badge-white">Added</span>
               <?php else : ?>
-                  <?= \yii\bootstrap4\Html::a('<i class="fa fa-plus"></i> add Quote', null, [
-                      'data-url' => \yii\helpers\Url::to(['/attraction/attraction-quote/add-ajax', 'atn_id' => $hotelSearch->atn_id]),
-                      //'data-hotel-code' => $dataHotel['code'],
-                      'data-quote-key' => $dataHotel[$key]['id'] ?? '',
-                      'class' => 'btn btn-success btn-sm btn-add-attraction-quote'
+                  <?= \yii\bootstrap4\Html::a('<i class="fa fa-plus"></i> Check Availability', null, [
+                      'data-url' => \yii\helpers\Url::to(['/attraction/attraction-quote/availability-ajax']),
+                      'data-atn-id' => $hotelSearch->atn_id,
+                      'data-attraction-key' => $dataHotel[$key]['id'] ?? '',
+                      'class' => 'btn btn-success btn-sm btn-availability-quote'
                   ]) ?>
               <?php endif; ?>
-<!--            <button class="btn btn-success">Add</button>-->
           </div>
         </div>
+          <div class="row">
+              <div id="<?= $dataHotel[$key]['id'] ?>" class="col-12">
+
+              </div>
+          </div>
       </div>
 
     </div>
