@@ -3,6 +3,7 @@
 namespace modules\order\src\entities\order\serializer;
 
 use modules\order\src\entities\order\Order;
+use modules\order\src\entities\order\OrderFiles;
 use modules\order\src\entities\order\OrderPayStatus;
 use modules\order\src\entities\order\OrderStatus;
 use modules\product\src\entities\productQuote\ProductQuote;
@@ -49,6 +50,7 @@ class OrderSerializer extends Serializer
         $data['or_status_name'] = OrderStatus::getName($this->model->or_status_id);
         $data['or_pay_status_name'] = OrderPayStatus::getName($this->model->or_pay_status_id);
         $data['or_client_currency_symbol'] = $this->model->orClientCurrency->cur_symbol ?? null;
+        $data['or_files'] = (new OrderFiles())->getList($this->model);
 
         if ($this->model->or_request_data) {
             $uid = $this->model->or_request_data['uid'] ?? null;
