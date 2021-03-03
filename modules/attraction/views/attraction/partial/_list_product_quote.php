@@ -185,7 +185,7 @@ JS;
                     ]) */?> -->
 
                     <?php if ($model->isBookable()) : ?>
-                        <?= Html::a(
+                    <!--<? /*= Html::a(
                             '<i class="fa fa-share-square"></i> Book',
                             null,
                             [
@@ -194,7 +194,7 @@ JS;
                                 'data-attraction-quote-id' => $model->atnq_id,
                                 'data-product-id' => $model->atnqProductQuote->pq_product_id,
                             ]
-                        )?>
+                        )*/ ?> -->
                     <?php endif; ?>
                     <?php if ($model->isBooking()) : ?>
                     <!-- <? /*= Html::a(
