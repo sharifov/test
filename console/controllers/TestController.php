@@ -75,9 +75,7 @@ class TestController extends Controller
 //        VarDumper::dump( $t['Request']['FlightRequest']['uid']);
 //        die;
 
-        $repo = \Yii::createObject(OrderRepository::class);
-        $order = $repo->find(13);
-        (new EmailConfirmationSender())->send($order);
+
 
         die;
 //        $order->processing();

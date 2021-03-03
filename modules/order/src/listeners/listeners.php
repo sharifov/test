@@ -33,6 +33,7 @@ return [
     OrderProcessingEvent::class => [
         OrderProcessingConfirmationListener::class,
         OrderProcessingHybridNotificationListener::class,
+        listeners\StartAutoProcessingListener::class,
     ],
 
     //OrderProcessManagerEvents
