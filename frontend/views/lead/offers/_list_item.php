@@ -70,6 +70,20 @@ use yii\bootstrap4\Html;
                         'data-url' => \yii\helpers\Url::to(['/offer/offer-view-log/show', 'gid' => $offer->of_gid]),
                         'data-gid' => $offer->of_gid,
                     ]) ?>
+
+                    <?php  echo Html::a('<i class="fa fa-eye"></i> Checkout Page', $offer->getCheckoutUrlPage(), [
+                        'class' => 'dropdown-item',
+                        'target'    => '_blank',
+                        'title'     => 'View checkout',
+                        'data-pjax' => 0
+                    ]) ?>
+
+                    <?= Html::a('<i class="fa fa-camera"></i> Copy Checkout Link', null, [
+                        'class' => 'btn-offer-copy-checkout-link dropdown-item',
+                        'data-url' => $offer->getCheckoutUrlPage(),
+                        'title' => 'Copy To Clipboard'
+                    ]) ?>
+
                 </div>
             </li>
         </ul>

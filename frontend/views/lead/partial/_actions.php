@@ -857,6 +857,12 @@ $js = <<<JS
          }
     });
     
+    $('body').on('click', '.btn-offer-copy-checkout-link', function (e) {
+         if(e.target.getAttribute('data-url')) {
+            copyToClipboard(e.target.getAttribute('data-url'))
+         }
+    });
+    
     function copyToClipboard(text) {
         let temp = $("<input>");
         $("body").append(temp);
