@@ -2018,14 +2018,18 @@ class TestController extends FController
         return GeneratorPdfService::generateForBrowserOutput($content['content'], 'test.pdf');
     }
 
-    public function actionOrderData(int $order_id)
+    public function actionOrderData(int $order_id, int $json = 0)
     {
         if (!$order = Order::findOne(['or_id' => $order_id])) {
             throw new NotFoundHttpException('Order not found');
         }
 
-        $data = $order->serialize();
+        $data['order'] = $order->serialize();
         $data['project_key'] = $order->orLead->project->project_key;
+
+        if ($json) {
+            return $this->asJson($data);
+        }
         \yii\helpers\VarDumper::dump($data, 20, true);
         exit();
     }
