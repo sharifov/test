@@ -2010,6 +2010,11 @@ class TestController extends FController
         $data['project_key'] = $order->orLead->project->project_key;
         $content = \Yii::$app->communication->getContent($templateKey, $data);
 
+        if ($error = ArrayHelper::getValue($content, 'error')) {
+            \yii\helpers\VarDumper::dump(json_decode($error), 10, true);
+            exit();
+        }
+
         return GeneratorPdfService::generateForBrowserOutput($content['content'], 'test.pdf');
     }
 
