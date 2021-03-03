@@ -2004,7 +2004,7 @@ class TestController extends FController
         if (!$order = Order::findOne(['or_id' => $order_id])) {
             throw new NotFoundHttpException('Order not found');
         }
-
+        OrderPdfService::processingFile($order);
         return OrderPdfService::generateForBrowserOutput($order);
     }
 
