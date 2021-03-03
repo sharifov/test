@@ -32,7 +32,12 @@ class FlightQuotePdfJob implements RetryableJobInterface
             if (!$flightQuote = FlightQuote::findOne(['fq_id' => $this->flightQuoteId])) {
                 throw new NotFoundException('FlightQuote not found. Id (' . $this->flightQuoteId . ')');
             }
-            FlightQuotePdfService::processingFile($flightQuote);
+            if (FlightQuotePdfService::processingFile($flightQuote)) {
+                \Yii::info([
+                    'message' => 'FlightQuotePdfJob - file is generated',
+                    'quoteId' => $this->flightQuoteId,
+                ], 'info\FlightQuotePdfJob:success');
+            }
         } catch (NotFoundException $throwable) {
             AppHelper::throwableLogger(
                 $throwable,
