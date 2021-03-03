@@ -42,7 +42,22 @@ $this->params['breadcrumbs'][] = $this->title;
                     'hq_request_hash',
                     'hq_check_in_date',
                     'hq_check_out_date',
-                    'hq_json_booking',
+                ],
+            ]) ?>
+            <br clear="all" />
+            <?= DetailView::widget([
+                'model' => $model,
+                'attributes' => [
+                    [
+                        'attribute' => 'hq_json_booking',
+                        'value' => function (HotelQuote $hotelQuote) {
+                            if (!$hotelQuote->hq_json_booking) {
+                                return Yii::$app->formatter->nullDisplay;
+                            }
+                            return VarDumper::dumpAsString($hotelQuote->hq_json_booking, 20, true);
+                        },
+                        'format' => 'raw',
+                    ],
                 ],
             ]) ?>
         </div>
@@ -65,23 +80,4 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-lg-6">
-             <?= DetailView::widget([
-                'model' => $model,
-                'attributes' => [
-                    [
-                        'attribute' => 'hq_json_booking',
-                        'value' => function (HotelQuote $hotelQuote) {
-                            if (!$hotelQuote->hq_json_booking) {
-                                return Yii::$app->formatter->nullDisplay;
-                            }
-                            return VarDumper::dumpAsString($hotelQuote->hq_json_booking, 20, true);
-                        },
-                        'format' => 'raw',
-                    ],
-                ],
-            ]) ?>
-        </div>
-    </div>
 </div>
