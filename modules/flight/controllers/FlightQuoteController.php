@@ -511,8 +511,8 @@ class FlightQuoteController extends FController
         $flightQuoteId = (int) Yii::$app->request->post('id', 0);
         $result = ['status' => 0, 'message' => '', 'data' => []];
 
+        $flightQuote = $this->findModel($flightQuoteId);
         try {
-            $flightQuote = $this->findModel($flightQuoteId);
             FlightQuoteBookGuardService::guard($flightQuote);
             $requestData = ArrayHelper::getValue($flightQuote, 'fqProductQuote.pqOrder.or_request_data');
 
@@ -525,10 +525,26 @@ class FlightQuoteController extends FController
             }
             throw new \DomainException('Create Book is failed.');
         } catch (\Throwable $throwable) {
+            $this->errorBook($flightQuote);
             $result['message'] = $throwable->getMessage();
             \Yii::error(AppHelper::throwableLog($throwable, true), 'FlightQuoteController:actionAjaxBook');
         }
         return $result;
+    }
+
+    private function errorBook(FlightQuote $flightQuote): void
+    {
+        try {
+            $productQuoteRepository = \Yii::createObject(ProductQuoteRepository::class);
+            $productQuote = $flightQuote->fqProductQuote;
+            $productQuote->error(null, 'Auto booking error');
+            $productQuoteRepository->save($productQuote);
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'message' => 'Flight Quote Transfer to "Error" error',
+                'flightQuoteId' => $flightQuote->fq_id,
+            ], 'FlightQuoteController:errorBook');
+        }
     }
 
     public function actionCancel(): array

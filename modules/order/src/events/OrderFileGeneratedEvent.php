@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\events\quote;
+namespace modules\order\src\events;
 
 /**
  * Class OrderFileGeneratedEvent
@@ -15,10 +15,14 @@ class OrderFileGeneratedEvent
     public $fileId;
     public $type;
 
+    public const TYPE_HOTEL_CONFIRMATION = 'hotelConfirmation';
+    public const TYPE_FLIGHT_CONFIRMATION = 'flightConfirmation';
+    public const TYPE_ORDER_RECEIPT = 'orderReceipt';
+
     /**
      * @param int $orderId
      * @param int $fileId
-     * @param string $type // hotelConfirmation|flightTicket|orderReceipt
+     * @param string $type
      */
     public function __construct(int $orderId, int $fileId, string $type)
     {

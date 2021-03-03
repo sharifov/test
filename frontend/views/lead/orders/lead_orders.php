@@ -229,6 +229,46 @@ $js = <<<JS
         });
       // return false;
     });
+     
+    $('body').off('click', '.btn-order-send-email-confirmation').on('click', '.btn-order-send-email-confirmation', function(e) {
+      
+        e.preventDefault();
+        
+        if(!confirm('Are you sure you want to send email confirmation?')) {
+            return '';
+        }
+        
+      let orderId = $(this).data('id');
+      let url = $(this).data('url');
+      
+      $.ajax({
+          url: url,
+          type: 'post',
+          data: {'id': orderId},
+          dataType: 'json'
+      })
+          .done(function(data) {
+              if (data.error) {
+                  new PNotify({
+                        title: 'Error: send email confirmation',
+                        type: 'error',
+                        text: data.message,
+                        hide: true
+                    });
+              } else {
+                  new PNotify({
+                        title: 'The email was successfully sent',
+                        type: 'success',
+                        text: 'Success',
+                        hide: true
+                    });
+              }
+          })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        }).always(function() {
+        });
+    });
     
     $('body').off('click', '.btn-cancel-process').on('click', '.btn-cancel-process', function(e) {
       

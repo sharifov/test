@@ -43,9 +43,9 @@ class FileOrder extends \yii\db\ActiveRecord
             ['fo_or_id', 'integer', 'min' => 1, 'max' => 2147483647, 'tooBig' => '{attribute} is out of range for type integer'],
             ['fo_or_id', 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['fo_or_id' => 'or_id']],
 
-            ['fo_pq_id', 'required'],
-            ['fo_pq_id', 'integer', 'min' => 1, 'max' => 2147483647, 'tooBig' => '{attribute} is out of range for type integer'],
-            ['fo_pq_id', 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['fo_pq_id' => 'pq_id']],
+
+            ['fo_pq_id', 'integer'],
+            ['fo_pq_id', 'exist', 'skipOnError' => true, 'skipOnEmpty' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['fo_pq_id' => 'pq_id']],
 
             ['fo_category_id', 'required'],
             ['fo_category_id', 'integer'],
@@ -83,7 +83,7 @@ class FileOrder extends \yii\db\ActiveRecord
         return Yii::$app->get('db_postgres');
     }
 
-    public static function create(int $fileId, int $orderId, int $productQuoteId, int $fo_category_id): self
+    public static function create(int $fileId, int $orderId, ?int $productQuoteId, int $fo_category_id): self
     {
         $model = new static();
         $model->fo_fs_id = $fileId;

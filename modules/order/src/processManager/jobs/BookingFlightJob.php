@@ -7,6 +7,7 @@ use modules\flight\models\FlightQuote;
 use modules\flight\src\services\flightQuote\FlightQuoteBookGuardService;
 use modules\order\src\processManager\OrderProcessManager;
 use modules\order\src\processManager\OrderProcessManagerRepository;
+use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use yii\helpers\ArrayHelper;
 use yii\queue\RetryableJobInterface;
 use common\models\Notifications;
@@ -47,6 +48,7 @@ class BookingFlightJob implements RetryableJobInterface
             $responseData = FlightQuoteBookService::requestBook($requestData);
             FlightQuoteBookService::createBook($flightQuote, $responseData);
         } catch (\Throwable $e) {
+            $this->errorBook($flightQuote);
             \Yii::error([
                 'message' => 'Booking Flight error',
                 'error' => $e->getMessage(),
@@ -62,6 +64,21 @@ class BookingFlightJob implements RetryableJobInterface
                     true
                 );
             }
+        }
+    }
+
+    private function errorBook(FlightQuote $flightQuote): void
+    {
+        try {
+            $productQuoteRepository = \Yii::createObject(ProductQuoteRepository::class);
+            $productQuote = $flightQuote->fqProductQuote;
+            $productQuote->error(null, 'Auto booking error');
+            $productQuoteRepository->save($productQuote);
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'message' => 'Flight Quote Transfer to "Error" error',
+                'flightQuoteId' => $flightQuote->fq_id,
+            ], 'OrderProcessManager:BookingFlightJob');
         }
     }
 

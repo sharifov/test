@@ -125,4 +125,9 @@ class SettingHelper
     {
         return (bool)(\Yii::$app->params['settings']['client_data_privacy_enabled'] ?? false);
     }
+
+    public static function orderAutoProcessingEnable(): bool
+    {
+        return (bool)(\Yii::$app->params['settings']['order_auto_processing_enable'] ?? false);
+    }
 }

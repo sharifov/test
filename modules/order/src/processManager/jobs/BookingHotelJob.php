@@ -5,6 +5,7 @@ namespace modules\order\src\processManager\jobs;
 use common\models\Notifications;
 use frontend\widgets\notification\NotificationMessage;
 use modules\hotel\models\HotelQuote;
+use modules\hotel\src\jobs\HotelQuotePdfJob;
 use modules\hotel\src\services\hotelQuote\HotelQuotePdfService;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookGuard;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookService;
@@ -56,7 +57,9 @@ class BookingHotelJob implements RetryableJobInterface
             if ($checkResult->status) {
                 $bookService->book($quote);
                 if ($bookService->status) {
-                    HotelQuotePdfService::processingFile($quote);
+                    $hotelQuotePdfJob = new HotelQuotePdfJob();
+                    $hotelQuotePdfJob->hotelQuoteId = $quote->hq_id;
+                    Yii::$app->queue_job->priority(10)->push($hotelQuotePdfJob);
                     return;
                 }
                 throw new \DomainException($bookService->message);

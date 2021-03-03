@@ -7,13 +7,15 @@ use modules\order\src\entities\order\events\OrderPreparedEvent;
 use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
 use modules\order\src\entities\order\events\OrderUserProfitUpdateProfitAmountEvent;
 use modules\order\src\entities\order\events\UpdateOrderTipsUserProfitAmountEvent;
+use modules\order\src\events\OrderFileGeneratedEvent;
 use modules\order\src\events\OrderProcessingEvent;
 use modules\order\src\listeners\lead\LeadSoldListener;
+use modules\order\src\listeners\order\OrderAllFilesGeneratedListener;
 use modules\order\src\listeners\order\OrderCanceledConfirmationListener;
 use modules\order\src\listeners\order\OrderCanceledHybridNotificationListener;
 use modules\order\src\listeners\order\OrderChangeStatusLogListener;
-use modules\order\src\listeners\order\OrderCompletedConfirmationListener;
 use modules\order\src\listeners\order\OrderCompletedHybridNotificationListener;
+use modules\order\src\listeners\order\OrderFileGeneratorListener;
 use modules\order\src\listeners\order\OrderLogPaymentStatusListener;
 use modules\order\src\listeners\order\OrderProcessingConfirmationListener;
 use modules\order\src\listeners\order\OrderProcessingHybridNotificationListener;
@@ -31,6 +33,7 @@ return [
     OrderProcessingEvent::class => [
         OrderProcessingConfirmationListener::class,
         OrderProcessingHybridNotificationListener::class,
+        listeners\StartAutoProcessingListener::class,
     ],
 
     //OrderProcessManagerEvents
@@ -64,12 +67,15 @@ return [
     OrderCompletedEvent::class => [
         LeadSoldListener::class,
         OrderChangeStatusLogListener::class,
-        OrderCompletedConfirmationListener::class,
         OrderCompletedHybridNotificationListener::class,
+        OrderFileGeneratorListener::class,
     ],
     OrderCanceledEvent::class => [
         OrderChangeStatusLogListener::class,
         OrderCanceledConfirmationListener::class,
         OrderCanceledHybridNotificationListener::class,
+    ],
+    OrderFileGeneratedEvent::class => [
+        OrderAllFilesGeneratedListener::class,
     ],
 ];

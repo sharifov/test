@@ -8,11 +8,11 @@ use modules\order\src\services\confirmation\EmailConfirmationSender;
 use yii\queue\RetryableJobInterface;
 
 /**
- * Class OrderProcessingConfirmationJob
+ * Class OrderSendCompletedConfirmationJob
  *
  * @property $orderId
  */
-class OrderProcessingConfirmationJob implements RetryableJobInterface
+class OrderSendCompletedConfirmationJob implements RetryableJobInterface
 {
     public $orderId;
 
@@ -29,22 +29,22 @@ class OrderProcessingConfirmationJob implements RetryableJobInterface
             \Yii::error([
                 'message' => 'Not found Order',
                 'orderId' => $this->orderId,
-            ], 'OrderProcessingConfirmationJob');
+            ], 'OrderSendCompletedConfirmationJob');
             return;
         }
 
         try {
-            (new EmailConfirmationSender())->sendWithoutAttachments($order);
+            (new EmailConfirmationSender())->sendWithAllAttachments($order);
         } catch (\Throwable $e) {
             \Yii::error([
-                'message' => 'Send Order Processing Confirmation Error',
+                'message' => 'Send Order Completed Confirmation Error',
                 'error' => $e->getMessage(),
                 'orderId' => $order->or_id,
-            ], 'OrderProcessingConfirmationJob');
+            ], 'OrderCompletedConfirmationJob');
             if ($userId = ($order->orLead->employee_id ?? null)) {
                 Notifications::createAndPublish(
                     $userId,
-                    'Send Order Processing Confirmation Error',
+                    'Send Order Completed Confirmation Error',
                     'OrderId: ' . $order->or_id . ' Error: ' . $e->getMessage(),
                     Notifications::TYPE_DANGER,
                     true
@@ -62,10 +62,10 @@ class OrderProcessingConfirmationJob implements RetryableJobInterface
     {
         \Yii::error([
             'attempt' => $attempt,
-            'message' => 'Order processing confirmation error',
+            'message' => 'Order send completed confirmation error',
             'error' => $error->getMessage(),
             'orderId' => $this->orderId,
-        ], 'OrderProcessingConfirmationJob');
+        ], 'OrderSendCompletedConfirmationJob');
         return !($attempt > 5);
     }
 }

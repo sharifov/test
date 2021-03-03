@@ -2,7 +2,9 @@
 
 namespace modules\order\src\jobs;
 
+use common\models\Notifications;
 use modules\order\src\entities\order\Order;
+use modules\order\src\services\confirmation\EmailConfirmationSender;
 use yii\queue\RetryableJobInterface;
 
 /**
@@ -28,13 +30,27 @@ class OrderCanceledConfirmationJob implements RetryableJobInterface
                 'message' => 'Not found Order',
                 'orderId' => $this->orderId,
             ], 'OrderCanceledConfirmationJob');
+            return;
         }
 
-        \Yii::info([
-            'message' => 'Send canceled confirmation email',
-            'orderId' => $this->orderId,
-            'data' => $order->serialize(),
-        ], 'info\OrderCanceledConfirmationJob');
+        try {
+            (new EmailConfirmationSender())->sendWithoutAttachments($order);
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'message' => 'Send Order Canceled Confirmation Error',
+                'error' => $e->getMessage(),
+                'orderId' => $order->or_id,
+            ], 'OrderCanceledConfirmationJob');
+            if ($userId = ($order->orLead->employee_id ?? null)) {
+                Notifications::createAndPublish(
+                    $userId,
+                    'Send Order Canceled Confirmation Error',
+                    'OrderId: ' . $order->or_id . ' Error: ' . $e->getMessage(),
+                    Notifications::TYPE_DANGER,
+                    true
+                );
+            }
+        }
     }
 
     public function getTtr(): int

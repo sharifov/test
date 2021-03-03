@@ -9,6 +9,7 @@ use modules\hotel\models\HotelList;
 use modules\hotel\models\HotelQuote;
 use modules\hotel\models\search\HotelQuoteSearch;
 use modules\hotel\src\entities\hotelQuoteRoom\HotelQuoteRoomRepository;
+use modules\hotel\src\jobs\HotelQuotePdfJob;
 use modules\hotel\src\repositories\hotel\HotelRepository;
 use modules\hotel\src\services\hotelQuote\HotelQuotePdfService;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookGuard;
@@ -305,7 +306,9 @@ class HotelQuoteController extends FController
                     $result['message'] = $bookService->message;
 
                     if ($bookService->status) {
-                        HotelQuotePdfService::processingFile($hotelQuote);
+                        $hotelQuotePdfJob = new HotelQuotePdfJob();
+                        $hotelQuotePdfJob->hotelQuoteId = $hotelQuote->hq_id;
+                        Yii::$app->queue_job->priority(10)->push($hotelQuotePdfJob);
                     }
                 } else {
                     $result['status'] = $checkResult->status;

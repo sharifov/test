@@ -57,6 +57,8 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
 {
     use EventTrait;
 
+    public const CHECKOUT_URL_PAGE = 'offer';
+
     public function isSent(): bool
     {
         return $this->lastSendLog ? true : false;
@@ -341,5 +343,14 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
             $changed = true;
         }
         return $changed;
+    }
+    public function getCheckoutUrlPage(): string
+    {
+        $url = '#';
+        if ($this->ofLead && $this->ofLead->project && $this->ofLead->project->link) {
+            $url = $this->ofLead->project->link . '/' . self::CHECKOUT_URL_PAGE . '/' . $this->of_gid;
+        }
+
+        return $url;
     }
 }

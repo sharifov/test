@@ -2,6 +2,8 @@
 
 namespace modules\offer\controllers;
 
+use common\models\Currency;
+use common\models\LeadPreferences;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 use Yii;
 use common\models\Lead;
@@ -92,6 +94,16 @@ class OfferController extends FController
             }
 
             $model->of_lead_id = $leadId;
+
+            $leadPreferences = $lead->leadPreferences;
+            if ($leadPreferences && $leadPreferences->pref_currency) {
+                $model->of_client_currency = $leadPreferences->pref_currency;
+            } else {
+                $defaultCurrency = Currency::find()->select(['cur_code'])->andWhere(['cur_default' => true, 'cur_enabled' => true])->one();
+                if ($defaultCurrency && $defaultCurrency['cur_code']) {
+                    $model->of_client_currency = $defaultCurrency['cur_code'];
+                }
+            }
         }
 
         return $this->renderAjax('forms/create_ajax_form', [
