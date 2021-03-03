@@ -105,16 +105,4 @@ class OrderPdfService
         }
         return $content['content'];
     }
-
-    public static function getContent(Order $order): string
-    {
-        $data = $order->serialize();
-        $data['project_key'] = $order->orLead->project->project_key;
-        $content = \Yii::$app->communication->getContent(self::TEMPLATE_KEY, $data);
-
-        if ($content['error'] !== false) {
-            throw new \RuntimeException(VarDumper::dumpAsString($content['error']));
-        }
-        return $content['content'];
-    }
 }
