@@ -22,7 +22,7 @@ use yii\widgets\Pjax;
 <?php if ($model->atnqProductQuote) : ?>
     <?php
     $js = <<<JS
-    $('body').off('click', '.btn-book-quote').on('click', '.btn-book-quote', function (e) {
+    $('body').off('click', '.btn-attraction-book-quote').on('click', '.btn-attraction-book-quote', function (e) {
 
         if(!confirm('Are you sure you want to book this quote?')) {
             return '';
@@ -50,6 +50,9 @@ use yii\widgets\Pjax;
                 pjaxReload({
                     container: '#pjax-product-quote-list-' + productId
                 });
+                 pjaxReload({container: "#pjax-lead-offers"});
+                 pjaxReload({container: "#pjax-lead-orders"});
+                 /*pjaxReload({container: "#pjax-lead-products-wrap"});*/
             } else {
                 new PNotify({
                     title: 'Booking failed',
@@ -69,7 +72,7 @@ use yii\widgets\Pjax;
         });
     });
     
-    $('body').off('click', '.btn-cancel-book-quote').on('click', '.btn-cancel-book-quote', function (e) {
+    $('body').off('click', '.btn-attraction-cancel-book-quote').on('click', '.btn-attraction-cancel-book-quote', function (e) {
 
         if(!confirm('Are you sure you want to cancel book this quote?')) {
             return '';
@@ -97,6 +100,8 @@ use yii\widgets\Pjax;
                 pjaxReload({
                     container: '#pjax-product-quote-list-' + productId
                 });
+                pjaxReload({container: "#pjax-lead-offers"});
+                pjaxReload({container: "#pjax-lead-orders"});
             } else {
                 new PNotify({
                     title: 'Process failed',
@@ -185,28 +190,28 @@ JS;
                     ]) */?> -->
 
                     <?php if ($model->isBookable()) : ?>
-                    <!--<? /*= Html::a(
+                        <?= Html::a(
                             '<i class="fa fa-share-square"></i> Book',
                             null,
                             [
-                                'class' => 'dropdown-item btn-book-quote',
+                                'class' => 'dropdown-item btn-attraction-book-quote',
                                 'data-url' => Url::to('/attraction/attraction-quote/ajax-book'),
                                 'data-attraction-quote-id' => $model->atnq_id,
                                 'data-product-id' => $model->atnqProductQuote->pq_product_id,
                             ]
-                        )*/ ?> -->
+                        ) ?>
                     <?php endif; ?>
                     <?php if ($model->isBooking()) : ?>
-                    <!-- <? /*= Html::a(
+                        <?= Html::a(
                             '<i class="fa fa-share-square"></i> Cancel Book',
                             null,
                             [
-                                'class' => 'dropdown-item text-danger btn-cancel-book-quote',
-                                'data-url' => Url::to('/attraction/hotel-quote/ajax-cancel-book'),
+                                'class' => 'dropdown-item text-danger btn-attraction-cancel-book-quote',
+                                'data-url' => Url::to('/attraction/attraction-quote/ajax-cancel-book'),
                                 'data-attraction-quote-id' => $model->atnq_id,
                                 'data-product-id' => $model->atnqProductQuote->pq_product_id,
                             ]
-                        ) */?> -->
+                        ) ?>
                     <?php endif; ?>
 
                     <?= Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
