@@ -2006,7 +2006,7 @@ class TestController extends FController
             throw new NotFoundHttpException('Order not found');
         }
 
-        $data = $order->serialize();
+        $data['order'] = $order->serialize();
         $data['project_key'] = $order->orLead->project->project_key;
         $content = \Yii::$app->communication->getContent($templateKey, $data);
 
