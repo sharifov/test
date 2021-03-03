@@ -13,6 +13,8 @@ use modules\fileStorage\src\entity\fileStorage\FileStorageRepository;
 use modules\fileStorage\src\FileSystem;
 use modules\fileStorage\src\services\CreateByLocalFileDto;
 use modules\order\src\entities\order\Order;
+use modules\order\src\events\OrderFileGeneratedEvent;
+use sales\dispatchers\EventDispatcher;
 use sales\services\pdf\GeneratorPdfService;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -37,6 +39,7 @@ class OrderPdfService
         $fileClientRepository = Yii::createObject(FileClientRepository::class);
         $fileOrderRepository = Yii::createObject(FileOrderRepository::class);
         $fileLeadRepository = Yii::createObject(FileLeadRepository::class);
+        $eventDispatcher = Yii::createObject(EventDispatcher::class);
         $fileSystem = Yii::createObject(FileSystem::class);
 
         $patchToLocalFile = self::generateAsFile($order);
@@ -70,6 +73,14 @@ class OrderPdfService
                 FileOrder::CATEGORY_RECEIPT
             );
             $fileOrderRepository->save($fileOrder);
+
+            $eventDispatcher->dispatch(
+                new OrderFileGeneratedEvent(
+                    $order->or_id,
+                    $fileStorage->fs_id,
+                    OrderFileGeneratedEvent::TYPE_ORDER_RECEIPT
+                )
+            );
         }
 
         if (file_exists($patchToLocalFile)) {

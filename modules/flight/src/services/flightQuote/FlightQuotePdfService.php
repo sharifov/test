@@ -15,11 +15,15 @@ use modules\fileStorage\src\entity\fileStorage\FileStorageRepository;
 use modules\fileStorage\src\FileSystem;
 use modules\fileStorage\src\services\CreateByLocalFileDto;
 use modules\flight\models\FlightQuote;
+use modules\order\src\events\OrderFileGeneratedEvent;
 use sales\services\pdf\GeneratorPdfService;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\FileHelper;
 use yii\helpers\VarDumper;
+use sales\dispatchers\EventDispatcher;
+
+use function Amp\Promise\timeoutWithDefault;
 
 /**
  * Class FlightQuotePdfService
@@ -39,6 +43,7 @@ class FlightQuotePdfService
         $fileClientRepository = Yii::createObject(FileClientRepository::class);
         $fileOrderRepository = Yii::createObject(FileOrderRepository::class);
         $fileLeadRepository = Yii::createObject(FileLeadRepository::class);
+        $eventDispatcher = Yii::createObject(EventDispatcher::class);
         $fileSystem = Yii::createObject(FileSystem::class);
 
         $content = self::generateContentFromBO($flightQuote);
@@ -73,6 +78,14 @@ class FlightQuotePdfService
                 FileOrder::CATEGORY_CONFIRMATION
             );
             $fileOrderRepository->save($fileOrder);
+
+            $eventDispatcher->dispatch(
+                new OrderFileGeneratedEvent(
+                    $orderId,
+                    $fileStorage->fs_id,
+                    OrderFileGeneratedEvent::TYPE_FLIGHT_CONFIRMATION
+                )
+            );
         }
 
         if (file_exists($patchToLocalFile)) {

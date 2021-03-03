@@ -14,6 +14,7 @@ use modules\order\src\listeners\order\OrderCanceledHybridNotificationListener;
 use modules\order\src\listeners\order\OrderChangeStatusLogListener;
 use modules\order\src\listeners\order\OrderCompletedConfirmationListener;
 use modules\order\src\listeners\order\OrderCompletedHybridNotificationListener;
+use modules\order\src\listeners\order\OrderFileGeneratorListener;
 use modules\order\src\listeners\order\OrderLogPaymentStatusListener;
 use modules\order\src\listeners\order\OrderProcessingConfirmationListener;
 use modules\order\src\listeners\order\OrderProcessingHybridNotificationListener;
@@ -66,6 +67,7 @@ return [
         OrderChangeStatusLogListener::class,
         OrderCompletedConfirmationListener::class,
         OrderCompletedHybridNotificationListener::class,
+        OrderFileGeneratorListener::class,
     ],
     OrderCanceledEvent::class => [
         OrderChangeStatusLogListener::class,
