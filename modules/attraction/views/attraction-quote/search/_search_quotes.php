@@ -178,7 +178,7 @@ $js = <<<JS
                   });
                   
                   new PNotify({
-                        title: 'Quote was successfully added',
+                        title: 'Quote successfully added',
                         type: 'success',
                         text: data.message,
                         hide: true

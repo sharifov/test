@@ -174,6 +174,10 @@ class AttractionQuoteController extends FController
 
         $availabilityList = $result['availabilityList']['nodes'] ?? [];
 
+        foreach ($availabilityList as $key => $element) {
+            $availabilityList[$key]['presentation_product_id'] = $attractionKey; //for presentation only is temp
+        }
+
         $dataProvider = new ArrayDataProvider([
             'allModels' => [$availabilityList] ?? [],
             'pagination' => [
@@ -241,7 +245,7 @@ class AttractionQuoteController extends FController
 
         return [
             'product_id' => $productId,
-            'message' => 'Successfully added quote. Hotel "' . Html::encode($attraction->atnProduct->pr_name) . '", Attraction Quote Id: (' . $attractionQuote->atnq_id . ')'
+            'message' => 'Product "' . Html::encode($attraction->atnProduct->pr_name) . '", Attraction Quote Id: (' . $attractionQuote->atnq_id . ')'
         ];
     }
 

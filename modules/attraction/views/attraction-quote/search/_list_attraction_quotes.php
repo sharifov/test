@@ -34,7 +34,7 @@ $roomDataProvider = new ArrayDataProvider([
                     'tag' => 'table',
                     'class' => 'table table-bordered',
                 ],
-                'emptyText' => '<div class="text-center">Not found rooms</div><br>',
+                'emptyText' => '<div class="text-center">No availabilities at this moment</div><br>',
                 'itemView' => function ($modelRoom, $key, $index, $widget) use ($dataHotel, $hotelSearch) {
                     return $this->render('_list_attraction_item', ['dataRoom' => $modelRoom, 'dataHotel' => $dataHotel, 'index' => $index, 'key' => $key, 'hotelSearch' => $hotelSearch]);
                 },

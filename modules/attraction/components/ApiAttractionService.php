@@ -101,6 +101,7 @@ class ApiAttractionService extends Component
         $headers[] = "x-api-key: $apiKey";
         $headers[] = "x-holibob-date: $date";
         $headers[] = "x-holibob-signature: $base64HashSignature";
+        $headers[] = "x-holibob-currency: USD";
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
         $result = curl_exec($ch);
