@@ -6,6 +6,7 @@ use common\models\ApiLog;
 use modules\flight\models\FlightQuote;
 use modules\flight\src\exceptions\FlightCodeException;
 use modules\flight\src\forms\TicketFlightsForm;
+use modules\flight\src\jobs\FlightQuotePdfJob;
 use modules\flight\src\repositories\flightQuoteRepository\FlightQuoteRepository;
 use modules\flight\src\services\flightQuote\FlightQuotePdfService;
 use sales\helpers\app\AppHelper;
@@ -92,12 +93,11 @@ class FlightController extends ApiBaseController
 
         if ($form->status === $form::SUCCESS_STATUS) {
             $productQuote->booked();
-            /* TODO:: to job */
-            /*try {
-                FlightQuotePdfService::processingFile($flightQuote);
-            } catch (\Throwable $throwable) {
-                Yii::error(AppHelper::throwableLog($throwable), 'FlightController:processingFile:failed');
-            }*/
+
+            $flightQuotePdfJob = new FlightQuotePdfJob();
+            $flightQuotePdfJob->flightQuoteId = $flightQuote->fq_id;
+
+            Yii::$app->queue_job->priority(10)->push($flightQuotePdfJob);
         } else {
             $productQuote->error();
         }
