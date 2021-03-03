@@ -158,6 +158,9 @@ class ApiAttractionService extends Component
                 difficultyLevel
                 supplierName
                 __typename
+                previewImage {
+                  url
+                }
                 contentList {nodes{
                   name
                   type
