@@ -24,7 +24,7 @@ $availabilitiesDataProvider = new ArrayDataProvider([
             'tag' => 'table',
             'class' => 'table table-striped table-bordered',
         ],
-        'emptyText' => '<div class="text-center">Not found rooms</div><br>',
+        'emptyText' => '<div class="text-center">No availabilities at this moment</div><br>',
         'itemView' => function ($availabilityItem, $key, $index, $widget) use ($attractionSearch) {
             //\yii\helpers\VarDumper::dump($availabilityItem, 10, true); exit;
             return $this->render('_list_availabilities_item', ['availabilityItem' => $availabilityItem, 'index' => $index, 'key' => $key, 'attractionSearch' => $attractionSearch]);
