@@ -132,7 +132,7 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable
                         $aQuote->atnq_attraction_name = $quoteData['product']['name'];
                         $aQuote->atnq_supplier_name = $quoteData['product']['supplierName'];
                         $aQuote->atnq_type_name = $quoteData['product']['__typename'];
-                        $aQuote->atnq_json_response = @json_encode($quoteData);
+                        $aQuote->atnq_json_response = $quoteData;
                         //$aQuote->hq_request_hash = $hotelRequest->ph_request_hash_key;
 
                         if (!$aQuote->save()) {

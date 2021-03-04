@@ -363,7 +363,8 @@ class AttractionQuoteController extends FController
         $id = (int) Yii::$app->request->post('id', 0);
 
         $model = $this->findModel($id);
-        $model->atnq_booking_id = 1111;
+        $model->atnq_booking_id = strtoupper(substr(md5(mt_rand()), 0, 7));
+        ;
         $model->save();
         $prductQuote = $model->atnqProductQuote;
         $prductQuote->pq_status_id = ProductQuoteStatus::BOOKED;

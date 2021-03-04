@@ -9,7 +9,7 @@ use modules\product\src\entities\productType\ProductType;
 use modules\hotel\src\helpers\HotelFormatHelper;
 use Yii;
 use modules\hotel\models\Hotel;
-use modules\hotel\models\search\HotelSearch;
+use modules\attraction\models\search\AttractionSearch;
 use frontend\controllers\FController;
 use yii\base\Exception;
 use yii\db\StaleObjectException;
@@ -55,7 +55,7 @@ class AttractionController extends FController
      */
     public function actionIndex()
     {
-        $searchModel = new HotelSearch();
+        $searchModel = new AttractionSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
