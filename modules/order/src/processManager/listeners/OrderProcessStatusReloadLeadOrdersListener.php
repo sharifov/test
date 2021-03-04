@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\order\src\listeners\lead;
+namespace modules\order\src\processManager\listeners;
 
 use common\models\Notifications;
 use modules\order\src\entities\order\Order;
