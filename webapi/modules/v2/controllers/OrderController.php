@@ -98,14 +98,17 @@ class OrderController extends BaseController
     public function behaviors(): array
     {
         $behaviors = parent::behaviors();
-        $behaviors['logger'] = [
-            'class' => SimpleLoggerBehavior::class,
-            'filter' => CreditCardFilter::class,
-        ];
+//        $behaviors['logger'] = [
+//            'class' => SimpleLoggerBehavior::class,
+//            'filter' => CreditCardFilter::class,
+//        ];
         $behaviors['request'] = [
             'class' => RequestBehavior::class,
             'filter' => CreditCardFilter::class,
         ];
+        if (isset($behaviors['logger'])) {
+            unset($behaviors['logger']);
+        }
         return $behaviors;
     }
 
