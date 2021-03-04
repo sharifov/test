@@ -236,6 +236,8 @@ class FlightQuoteController extends FController
         $flight = $this->flightRepository->find($flightId);
         $form = new FlightQuoteSearchForm();
 
+        $this->increaseLimits();
+
         try {
             if (empty($flight->flightSegments)) {
                 throw new \DomainException('Flight Segment data is not found; Create a new flight request;');
@@ -650,5 +652,18 @@ class FlightQuoteController extends FController
         }
 
         throw new NotFoundHttpException('FlightQuote not found.');
+    }
+
+    private function increaseLimits(string $memoryLimit = '640M', int $timeLimit = 300): void
+    {
+        try {
+            ini_set('memory_limit', $memoryLimit);
+            set_time_limit($timeLimit);
+            if (isset(Yii::$app->log->targets['debug']->enabled)) {
+                Yii::$app->log->targets['debug']->enabled = false;
+            }
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), 'HotelQuoteController:increaseLimits');
+        }
     }
 }
