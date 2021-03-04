@@ -170,9 +170,9 @@ class Order extends ActiveRecord implements Serializable
             $this->or_name = $this->generateName();
         }
 
-        if (isset($dto->requestData['Request']['Card'])) {
-            unset($dto->requestData['Request']['Card']);
-        }
+//        if (isset($dto->requestData['Request']['Card'])) {
+//            unset($dto->requestData['Request']['Card']);
+//        }
         $this->or_request_data = $dto->requestData;
 
         return $this;
