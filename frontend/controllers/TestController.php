@@ -2029,7 +2029,7 @@ class TestController extends FController
     public function actionAPdf(int $id)
     {
         if (!$quote = AttractionQuote::findOne(['atnq_id' => $id])) {
-            throw new NotFoundException('AttractionQuote not found. Id (' . $id. ')');
+            throw new NotFoundException('AttractionQuote not found. Id (' . $id . ')');
         }
         try {
             AttractionQuotePdfService::processingFile($quote);
