@@ -44,6 +44,10 @@ class OrderGeneratorPdfJob implements RetryableJobInterface
                 'OrderGeneratorPdfJob:Execute:Throwable'
             );
         } catch (\Throwable $throwable) {
+            AppHelper::throwableLogger(
+                $throwable,
+                'OrderGeneratorPdfJob:Execute:Throwable'
+            );
             throw new \Exception($throwable->getMessage());
         }
     }

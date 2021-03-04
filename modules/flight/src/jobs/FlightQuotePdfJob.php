@@ -44,6 +44,10 @@ class FlightQuotePdfJob implements RetryableJobInterface
                 'FlightQuotePdfJob:Execute:Throwable'
             );
         } catch (\Throwable $throwable) {
+            AppHelper::throwableLogger(
+                $throwable,
+                'FlightQuotePdfJob:Execute:Throwable'
+            );
             throw new \Exception($throwable->getMessage());
         }
     }
