@@ -11,6 +11,7 @@ use modules\hotel\models\Hotel;
 use modules\hotel\models\HotelQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
+use sales\auth\Auth;
 use yii\data\ArrayDataProvider;
 use yii\helpers\Url;
 use yii\web\View;
@@ -137,6 +138,47 @@ use yii\widgets\Pjax;
             });
         });
      });
+    
+    $('body').off('click', '.js-btn-generate-pdf-attraction-quote').on('click', '.js-btn-generate-pdf-attraction-quote', function (e) {
+
+        e.preventDefault();
+        
+        if(!confirm('Are you sure you want to generate documents?')) {
+            return '';
+        }
+        
+        let quoteId = $(this).data('quote-id');
+                
+        $.ajax({
+          url: $(this).data('url'),
+          type: 'post',
+          data: {'id': quoteId},
+          cache: false,
+          dataType: 'json',
+        }).done(function(data) {
+            if (parseInt(data.status) === 1) {
+                new PNotify({
+                    title: 'Document have been successfully generated',
+                    type: 'success',
+                    text: data.message,
+                    hide: true
+                });                
+                addFileToFileStorageList();                
+            } else {
+                new PNotify({
+                    title: 'File generated failed',
+                    type: 'error',
+                    text: data.message,
+                    hide: true
+                });                
+            }
+        })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        }).always(function() {
+            $('#preloader').addClass('d-none');
+        });
+    });
 JS;
 
     $this->registerJs($js, \yii\web\View::POS_READY);
@@ -235,6 +277,18 @@ JS;
                         'data-url' => Url::to(['/product/product-quote-status-log/show', 'gid' => $model->atnqProductQuote->pq_gid]),
                         'data-gid' => $model->atnqProductQuote->pq_gid,
                     ]) ?>
+
+                    <?php if (Auth::can('/attraction/attraction-quote/ajax-file-generate') && $model->isBooking()) : ?>
+                        <?= Html::a(
+                            '<i class="fa fa-file-pdf-o"></i> Generate PDF',
+                            null,
+                            [
+                                'class' => 'dropdown-item js-btn-generate-pdf-attraction-quote',
+                                'data-url' => Url::to('/attraction/attraction-quote/ajax-file-generate'),
+                                'data-quote-id' => $model->atnq_id,
+                            ]
+                        ) ?>
+                    <?php endif; ?>
 
                     <div class="dropdown-divider"></div>
                     <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [
@@ -372,3 +426,4 @@ JS;
     <?php Pjax::end(); ?>
 
 <?php endif; ?>
+

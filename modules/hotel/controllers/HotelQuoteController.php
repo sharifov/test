@@ -320,11 +320,11 @@ class HotelQuoteController extends FController
                     $result['status'] = $bookService->status;
                     $result['message'] = $bookService->message;
 
-                    if ($bookService->status) {
-                        $hotelQuotePdfJob = new HotelQuotePdfJob();
-                        $hotelQuotePdfJob->hotelQuoteId = $hotelQuote->hq_id;
-                        Yii::$app->queue_job->priority(10)->push($hotelQuotePdfJob);
-                    }
+//                    if ($bookService->status) {
+//                        $hotelQuotePdfJob = new HotelQuotePdfJob();
+//                        $hotelQuotePdfJob->hotelQuoteId = $hotelQuote->hq_id;
+//                        Yii::$app->queue_job->priority(10)->push($hotelQuotePdfJob);
+//                    }
                 } else {
                     $result['status'] = $checkResult->status;
                     $result['message'] = $checkResult->message;

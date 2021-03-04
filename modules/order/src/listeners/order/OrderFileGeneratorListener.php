@@ -2,6 +2,7 @@
 
 namespace modules\order\src\listeners\order;
 
+use modules\attraction\src\jobs\AttractionQuotePdfJob;
 use modules\flight\src\jobs\FlightQuotePdfJob;
 use modules\hotel\src\jobs\HotelQuotePdfJob;
 use modules\order\src\entities\order\events\OrderCompletedEvent;
@@ -36,6 +37,10 @@ class OrderFileGeneratorListener
                         $flightQuotePdfJob = new FlightQuotePdfJob();
                         $flightQuotePdfJob->flightQuoteId = $quote->getId();
                         Yii::$app->queue_job->priority(10)->push($flightQuotePdfJob);
+                    } elseif ($productQuote->isAttraction()) {
+                        $attractionQuotePdfJob = new AttractionQuotePdfJob();
+                        $attractionQuotePdfJob->quoteId = $quote->getId();
+                        Yii::$app->queue_job->priority(10)->push($attractionQuotePdfJob);
                     }
                 }
             }

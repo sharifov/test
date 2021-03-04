@@ -8,6 +8,9 @@ use modules\attraction\AttractionModule;
 use modules\attraction\models\Attraction;
 use modules\attraction\models\AttractionQuote;
 use modules\attraction\models\search\AttractionQuoteSearch;
+use modules\attraction\src\services\AttractionQuotePdfService;
+use modules\hotel\models\Hotel;
+use modules\hotel\models\HotelList;
 use modules\hotel\models\HotelQuote;
 use modules\hotel\src\entities\hotelQuoteRoom\HotelQuoteRoomRepository;
 use modules\hotel\src\repositories\hotel\HotelRepository;
@@ -468,6 +471,31 @@ class AttractionQuoteController extends FController
         }
 
         throw new BadRequestHttpException();
+    }
+
+    public function actionAjaxFileGenerate(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $id = (int) Yii::$app->request->post('id', 0);
+
+        $result = ['status' => 0, 'message' => ''];
+
+        try {
+            $attractionQuote = $this->findModel($id);
+
+            if (!$attractionQuote->isBooking()) {
+                throw new \DomainException('Quote should have Booked status.');
+            }
+
+            if (AttractionQuotePdfService::processingFile($attractionQuote)) {
+                $result['status'] = 1;
+                $result['message'] = 'Document have been successfully generated';
+            }
+        } catch (\Throwable $throwable) {
+            $result['message'] = $throwable->getMessage();
+            \Yii::error(AppHelper::throwableFormatter($throwable), 'AttractionQuoteController:actionAjaxFileGenerate');
+        }
+        return $result;
     }
 
     /**

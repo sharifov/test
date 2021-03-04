@@ -16,6 +16,7 @@ class OrderFileGeneratedEvent
     public $type;
 
     public const TYPE_HOTEL_CONFIRMATION = 'hotelConfirmation';
+    public const TYPE_ATTRACTION_CONFIRMATION = 'attractionConfirmation';
     public const TYPE_FLIGHT_CONFIRMATION = 'flightConfirmation';
     public const TYPE_ORDER_RECEIPT = 'orderReceipt';
 
