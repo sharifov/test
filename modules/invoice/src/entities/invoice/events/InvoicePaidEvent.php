@@ -8,7 +8,7 @@ namespace modules\invoice\src\entities\invoice\events;
  * @property int $invoiceId
  * @property $orderId
  */
-class InvoicePaidEvent
+class InvoicePaidEvent implements Invoiceable
 {
     public int $invoiceId;
     public $orderId;
@@ -17,5 +17,10 @@ class InvoicePaidEvent
     {
         $this->invoiceId = $invoiceId;
         $this->orderId = $orderId;
+    }
+
+    public function getInvoiceId(): int
+    {
+        return $this->invoiceId;
     }
 }

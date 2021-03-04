@@ -10,7 +10,10 @@ use modules\order\src\entities\order\events\OrderUserProfitUpdateProfitAmountEve
 use modules\order\src\entities\order\events\UpdateOrderTipsUserProfitAmountEvent;
 use modules\order\src\events\OrderFileGeneratedEvent;
 use modules\order\src\events\OrderProcessingEvent;
+use modules\order\src\listeners\lead\LeadPaymentStatusReloadOrdersListener;
 use modules\order\src\listeners\lead\LeadSoldListener;
+use modules\order\src\listeners\lead\LeadStatusReloadOrdersListener;
+use modules\order\src\listeners\lead\OrderProcessStatusReloadLeadOrdersListener;
 use modules\order\src\listeners\order\OrderAllFilesGeneratedListener;
 use modules\order\src\listeners\order\OrderCanceledConfirmationListener;
 use modules\order\src\listeners\order\OrderCanceledHybridNotificationListener;
@@ -46,40 +49,49 @@ return [
     events\CreatedEvent::class => [
         listeners\StartBookingListener::class,
         listeners\LogCreatedListener::class,
+        OrderProcessStatusReloadLeadOrdersListener::class,
     ],
     events\BookingFlightEvent::class => [
         listeners\BookingFlightListener::class,
         listeners\LogStatusListener::class,
+        OrderProcessStatusReloadLeadOrdersListener::class,
     ],
     events\BookingOtherProductsEvent::class => [
         listeners\StartBookingOtherProductsListener::class,
         listeners\LogStatusListener::class,
+        OrderProcessStatusReloadLeadOrdersListener::class,
     ],
     events\BookedEvent::class => [
         listeners\LogStatusListener::class,
         OrderPrepareOrderProcessingListener::class,
+        OrderProcessStatusReloadLeadOrdersListener::class,
     ],
     events\CanceledEvent::class => [
         listeners\LogStatusListener::class,
+        OrderProcessStatusReloadLeadOrdersListener::class,
     ],
     OrderPreparedEvent::class => [
         OrderProcessPaymentChargeListener::class,
         OrderChangeStatusLogListener::class,
+        LeadStatusReloadOrdersListener::class,
     ],
     OrderPaymentPaidEvent::class => [
         listeners\OrderProcessOrderCompleteListener::class,
         OrderLogPaymentStatusListener::class,
+        LeadPaymentStatusReloadOrdersListener::class,
     ],
     OrderCompletedEvent::class => [
         LeadSoldListener::class,
         OrderChangeStatusLogListener::class,
         OrderCompletedHybridNotificationListener::class,
         OrderFileGeneratorListener::class,
+        LeadStatusReloadOrdersListener::class,
     ],
     OrderCanceledEvent::class => [
         OrderChangeStatusLogListener::class,
 //        OrderCanceledConfirmationListener::class,
         OrderCanceledHybridNotificationListener::class,
+        LeadStatusReloadOrdersListener::class,
     ],
     OrderFileGeneratedEvent::class => [
         OrderAllFilesGeneratedListener::class,
