@@ -140,6 +140,7 @@ $js = <<<JS
       //$('#preloader').removeClass('d-none');
       let quoteKey = $(this).data('quote-key');
       //let hotelCode = $(this).data('hotel-code');
+      let date = $(this).data('date');
       let url = $(this).data('url');
       //let productId = $(this).data('product-id');
      
@@ -155,7 +156,7 @@ $js = <<<JS
           url: url,
           type: 'post',
           //data: {'hotel_code': hotelCode, 'quote_key': quoteKey},
-          data: {'quote_key': quoteKey},
+          data: {'quote_key': quoteKey, 'date': date},
           dataType: 'json',
       })
           .done(function(data) {

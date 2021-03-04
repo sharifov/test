@@ -29,6 +29,7 @@ use yii\bootstrap\Html;
                 'data-url' => \yii\helpers\Url::to(['/attraction/attraction-quote/add-ajax', 'atn_id' => $attractionSearch->atn_id]),
                 //'data-quote-key' => $availabilityItem['id'] ?? '',
                 'data-quote-key' => $availabilityItem['presentation_product_id'] ?? '', //for presentation only
+                'data-date' => $availabilityItem['date'], //for presentation only
                 'class' => 'btn btn-success btn-sm btn-add-attraction-quote'
             ]) ?>
         <?php endif; ?>

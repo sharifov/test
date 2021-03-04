@@ -25,6 +25,7 @@ class AttractionQuoteSerializer extends Serializer
             'atnq_supplier_name',
             'atnq_type',
             'atnq_json_response',
+            'atnq_date'
         ];
     }
 
