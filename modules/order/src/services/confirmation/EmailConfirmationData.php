@@ -27,7 +27,8 @@ class EmailConfirmationData
         }
 
         return [
-            'project_key' => $project ? $project->project_key : '',
+            'project' => $projectData,
+            'project_key' => $project->project_key ?? '',
             'order' => $order->serialize(),
             'content' => '',
             'subject' => '',
