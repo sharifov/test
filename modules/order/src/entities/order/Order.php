@@ -28,6 +28,7 @@ use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "order".
@@ -167,6 +168,10 @@ class Order extends ActiveRecord implements Serializable
         }
         if (!$this->or_name && $this->or_lead_id) {
             $this->or_name = $this->generateName();
+        }
+
+        if (isset($dto->requestData['Request']['Card'])) {
+            unset($dto->requestData['Request']['Card']);
         }
         $this->or_request_data = $dto->requestData;
 

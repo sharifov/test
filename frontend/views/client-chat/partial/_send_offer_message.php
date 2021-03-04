@@ -22,4 +22,6 @@ use modules\offer\src\entities\offer\Offer;
 Offer: **<?= $offer->of_name ?>**
 Total Price: **<?= trim(number_format($offer->offerTotalCalcSum * $offer->of_client_currency_rate, 2) . ' ' . ($offer->ofClientCurrency->cur_symbol ?? '')) ?>**
 [View Offer](<?= $offer->getCheckoutUrlPage() ?>)
+
+
 <?php endforeach; ?>
