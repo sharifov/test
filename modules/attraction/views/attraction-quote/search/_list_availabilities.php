@@ -13,7 +13,7 @@
             'class' => 'table table-bordered',
         ],*/
     'summary' => false,
-    'emptyText' => '<div class="text-center">Not found any hotels</div><br>',
+    'emptyText' => '<div class="text-center">Not found any attractions</div><br>',
     'itemView' => function ($dataAvailabilities, $key, $index, $widget) use ($attractionSearch) {
         //\yii\helpers\VarDumper::dump($dataAvailabilities, 10, true); exit;
         return $this->render('_list_availabilities_grid', ['dataAvailabilities' => $dataAvailabilities, 'index' => $index, 'key' => $key, 'attractionSearch' => $attractionSearch]);

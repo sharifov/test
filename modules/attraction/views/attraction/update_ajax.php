@@ -12,12 +12,13 @@ use yii\web\JsExpression;
 /* @var $this yii\web\View */
 /* @var $model HotelUpdateRequestForm */
 
-$pjaxId = 'pjax-hotel-update'
+$pjaxId = 'pjax-attraction-update-form'
 ?>
-<div class="hotel-update-ajax">
-    <div class="hotel-form">
+<div class="attraction-update-ajax">
+    <div class="attraction-form">
         <script>
             pjaxOffFormSubmit('#<?=$pjaxId?>');
+            console.log('#<?=$pjaxId?>')
         </script>
         <?php \yii\widgets\Pjax::begin(['id' => $pjaxId, 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
         <?php
@@ -35,6 +36,9 @@ $pjaxId = 'pjax-hotel-update'
                 DatePicker::class,
                 [
                     'inline' => false,
+                    'options' => [
+                        'autocomplete' => 'off'
+                    ],
                     'clientOptions' => [
                         'autoclose' => true,
                         'format' => 'yyyy-mm-dd',
@@ -47,12 +51,15 @@ $pjaxId = 'pjax-hotel-update'
             <?= $form->field($model, 'atn_date_to')->widget(
                 DatePicker::class,
                 [
-                'inline' => false,
-                'clientOptions' => [
-                    'autoclose' => true,
-                    'format' => 'yyyy-mm-dd',
-                    'todayBtn' => true
-                ]
+                    'inline' => false,
+                    'options' => [
+                        'autocomplete' => 'off'
+                    ],
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                        'todayBtn' => true
+                    ]
                 ]
             )?>
 

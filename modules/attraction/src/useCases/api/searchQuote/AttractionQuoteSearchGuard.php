@@ -13,15 +13,15 @@ class AttractionQuoteSearchGuard
     public static function guard(Attraction $attraction): Attraction
     {
         if (!$attraction->atn_date_from) {
-            throw new \DomainException('Missing check in date in Attraction data; Fill Attraction data;');
+            throw new \DomainException('Missing date from in Attraction request; Please update Attraction request;');
         }
 
         if (!$attraction->atn_date_to) {
-            throw  new \DomainException('Missing check out date in Attraction data; Fill Attraction data;');
+            throw  new \DomainException('Missing date to in Attraction request; Please update Attraction request;');
         }
 
         if (!$attraction->atn_destination) {
-            throw new \DomainException('Missing destination in Attraction; Fill Attraction data;');
+            throw new \DomainException('Missing destination in Attraction request; Please update Attraction request;');
         }
 
         return $attraction;
