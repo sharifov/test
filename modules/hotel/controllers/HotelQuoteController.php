@@ -9,6 +9,7 @@ use modules\hotel\models\HotelList;
 use modules\hotel\models\HotelQuote;
 use modules\hotel\models\search\HotelQuoteSearch;
 use modules\hotel\src\entities\hotelQuoteRoom\HotelQuoteRoomRepository;
+use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus;
 use modules\hotel\src\jobs\HotelQuotePdfJob;
 use modules\hotel\src\repositories\hotel\HotelRepository;
 use modules\hotel\src\services\hotelQuote\HotelQuotePdfService;
@@ -135,7 +136,7 @@ class HotelQuoteController extends FController
         }
         $hotelList = $result['hotels'] ?? [];
 
-        foreach ($hotelList as $key => $value) {
+        /*foreach ($hotelList as $key => $value) {
             foreach ($value['rooms'] as $keyRoom => $room) {
                 if ($room['rates'][0]['type'] !== 'BOOKABLE') {
                     unset($hotelList[$key]['rooms'][$keyRoom]);
@@ -147,8 +148,7 @@ class HotelQuoteController extends FController
                 $hotelList[$key]['rooms'] = array_values($hotelList[$key]['rooms']);
             }
         }
-
-        $hotelList = array_values($hotelList);
+        $hotelList = array_values($hotelList);*/
 
         $dataProvider = new ArrayDataProvider([
             'allModels' => $hotelList,
@@ -166,6 +166,42 @@ class HotelQuoteController extends FController
         ]);
     }
 
+    public function actionCheckRate(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $result = ['message' => '', 'status' => 0];
+
+        $hotelId = (int) Yii::$app->request->post('hotel_id');
+        $roomKey = Yii::$app->request->post('room_key');
+        $type = Yii::$app->request->post('type', 'RECHECK');
+
+        try {
+            if (!$hotel = Hotel::findOne(['ph_id' => $hotelId])) {
+                throw new Exception('Hotel request not found. (' . $hotelId . ')');
+            }
+            if (!$roomKey) {
+                throw new Exception('Room key param not found');
+            }
+            /** @var HotelQuoteCheckRateService $checkRateService */
+            $checkRateService = Yii::$container->get(HotelQuoteCheckRateService::class);
+
+            $room = [
+                'key' => $roomKey,
+                'type' => $type,
+            ];
+            $apiResponse = $checkRateService->checkRateRoom($hotel->ph_check_in_date, $room);
+
+            if ($apiResponse['statusApi'] === HotelQuoteServiceLogStatus::STATUS_SUCCESS) {
+                $result['status'] = 1;
+                $result['message'] = 'Check Rate completed successfully';
+            } else {
+                $result['message'] = $apiResponse['message'];
+            }
+        } catch (\Throwable $throwable) {
+            $result['message'] = 'Error: ' . $throwable->getMessage();
+        }
+        return $result;
+    }
 
     public function actionAddAjax(): array
     {
@@ -201,6 +237,17 @@ class HotelQuoteController extends FController
             }
             if (!$quoteData) {
                 throw new Exception('Not found quote - quote key (' . $quoteKey . ')', 7);
+            }
+
+            $checkRateService = Yii::$container->get(HotelQuoteCheckRateService::class);
+            $room = [
+                'key' => ArrayHelper::getValue($quoteData, 'rates.0.key'),
+                'type' => ArrayHelper::getValue($quoteData, 'rates.0.type'),
+            ];
+            $apiResponse = $checkRateService->checkRateRoom($hotel->ph_check_in_date, $room);
+
+            if ($apiResponse['statusApi'] !== HotelQuoteServiceLogStatus::STATUS_SUCCESS) {
+                throw new Exception('Quote - not created (' . $apiResponse['message'] . ')', 7);
             }
 
             $hotelModel = HotelList::findOrCreateByData($hotelData);

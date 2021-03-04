@@ -140,32 +140,6 @@ The SPA service at Christmas is closed on December 25 and January 1.'
 //$deleteRoomUrl = \yii\helpers\Url::to(['/hotel/hotel-room/delete-ajax']);
 
 $js = <<<JS
-
-
-
-    
-    
-     /*$('body').off('click', '.btn-add-hotel-quote').on('click', '.btn-add-hotel-quote', function (e) {
-        e.preventDefault();
-        //$('#preloader').removeClass('d-none');          
-        let url = $(this).data('url');
-        let modal = $('#modal-lg');
-        modal.find('.modal-body').html('');
-        modal.find('.modal-title').html('Search Hotel Quotes');
-        modal.find('.modal-body').load(url, function( response, status, xhr ) {
-            $('#preloader').addClass('d-none');
-            modal.modal({
-              backdrop: 'static',
-              show: true
-            });
-        });
-        return false;
-    });*/
-    
-    
-    
-    
-    
     
     $('body').off('click', '.btn-add-hotel-quote').on('click', '.btn-add-hotel-quote', function (e) {
         
@@ -234,6 +208,49 @@ $js = <<<JS
       // return false;
     });
     
+    $('body').off('click', '.js-btn-check-rate-hotel').on('click', '.js-btn-check-rate-hotel', function (e) {        
+      e.preventDefault();      
+      let roomKey = $(this).data('roomKey');
+      let hotelId = $(this).data('hotelId');
+      let url = $(this).data('url');
+      let btnAdd = $(this);
+      
+      btnAdd.addClass('disabled').prop('disabled', true);
+      btnAdd.find('i').removeClass('fa-angle-double-right').addClass('fa-spin fa-spinner');
+
+        $.ajax({
+          url: url,
+          type: 'post',
+          data: {'hotel_id': hotelId, 'room_key': roomKey},
+          dataType: 'json',
+        })
+        .done(function(data) {
+          if (data.status == 0) {              
+              new PNotify({
+                title: 'Error: Check Rate',
+                type: 'error',
+                text: data.message,
+                hide: true
+              });
+              btnAdd.find('i').removeClass('fa-spin fa-spinner').addClass('fa-ban');
+              btnAdd.removeClass('disabled').prop('disabled', false);                  
+          } else {                  
+              new PNotify({
+                title: 'Check Rate',
+                type: 'success',
+                text: data.message,
+                hide: true
+              });
+              btnAdd.find('i').removeClass('fa-spin fa-spinner').addClass('fa-angle-double-right');                 
+          }
+        })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );    
+            btnAdd.find('i').removeClass('fa-spin fa-spinner').addClass('fa-angle-double-right');
+            btnAdd.removeClass('disabled').prop('disabled', false);        
+        }).always(function() {            
+        });
+    });    
 JS;
 
 $this->registerJs($js, \yii\web\View::POS_READY, 'search-quotes-js');

@@ -10,6 +10,7 @@
 use modules\hotel\models\Hotel;
 use yii\data\ArrayDataProvider;
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\web\View;
 
 $quoteRooms = $dataRoom['rates'];
@@ -50,7 +51,17 @@ $quoteExist = $hotelSearch->quoteExist($dataRoom['groupKey']);
         <span class="ml-2"><i class="fa fa-child"></i> <?=(Html::encode($quoteRoom['children'] ?? 0))?></span>
       </td>
       <td>$<?=number_format(Html::encode($quoteRoom['amount'] - ($quoteRoom['markup'] ?? 0)), 2)?></td>
-      <td class="text-right"><?php echo $quoteRoom['type'] ?></td>
+      <td class="text-right">
+        <?php echo $quoteRoom['type'] ?>
+        <?php if ($quoteRoom['type'] === 'RECHECK') : ?>
+            <br />
+            <?= Html::a('<i class="fa fa-angle-double-right"></i> Check Rate', null, [
+              'data-url' => Url::to(['/hotel/hotel-quote/check-rate']),
+              'data-hotel-id' => $hotelSearch->ph_id,
+              'data-room-key' => $quoteRoom['key'],
+              'class' => 'btn js-btn-check-rate-hotel']) ?>
+        <?php endif ?>
+      </td>
     </tr>
     <?php endforeach; ?>
   </tbody>

@@ -118,13 +118,18 @@ class HotelQuoteCheckRateService
         return $this;
     }
 
-    public function checkRateByParams(string $checkIn, array $rooms)
+    /**
+     * @param string $checkIn
+     * @param array $roomData
+     * @return array
+     */
+    public function checkRateRoom(string $checkIn, array $roomData): array
     {
+        $room[] = $roomData;
         $params = [
             'checkIn' => $checkIn,
-            'rooms' => $rooms,
+            'rooms' => $room,
         ];
-        $apiResponse = $this->apiService->requestBookingHandler('booking/checkrate', $params);
-        return false;
+        return $this->apiService->requestBookingHandler('booking/checkrate', $params);
     }
 }
