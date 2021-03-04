@@ -19,12 +19,19 @@ class HotelQuoteSerializer extends Serializer
 
     public static function fields(): array
     {
-        return [];
+        return [
+            'hq_hash_key',
+            'hq_destination_name',
+            'hq_hotel_name',
+            'hq_request_hash',
+            'hq_booking_id',
+            'hq_json_booking',
+        ];
     }
 
     public function getData(): array
     {
-        $data = [];
+        $data = $this->toArray();
 
         $data['hotel_request'] = $this->model->hqHotel ? $this->model->hqHotel->serialize() : [];
 

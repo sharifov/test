@@ -192,6 +192,7 @@ class OfferController extends FController
                 $modelOffer->of_client_currency_rate = $model->of_client_currency_rate;
                 $modelOffer->of_app_total = $model->of_app_total;
 
+                $modelOffer->calculateTotalPrice();
                 $modelOffer->updateOfferTotalByCurrency();
 
                 if ($modelOffer->save()) {

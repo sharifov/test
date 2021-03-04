@@ -38,6 +38,8 @@ class ProductQuoteOptionSerializer extends Serializer
 
     public function getData(): array
     {
-        return $this->toArray();
+        $data = $this->toArray();
+        $data['productOption'] = $this->model->pqoProductOption->serialize();
+        return $data;
     }
 }

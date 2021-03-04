@@ -296,7 +296,7 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
         if ($offerProducts) {
             foreach ($offerProducts as $offerProduct) {
                 if ($quote = $offerProduct->opProductQuote) {
-                    $sum += $quote->totalCalcSum + $quote->pq_service_fee_sum;
+                    $sum += $quote->totalCalcSum;
                 }
             }
             $sum = round($sum, 2);

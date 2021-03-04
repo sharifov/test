@@ -58,8 +58,7 @@ use yii\bootstrap4\Html;
                     <?php foreach ($offer->offerProducts as $product) :
                         $quote = $product->opProductQuote;
                         $originTotalPrice += $quote->pq_price;
-                        $clientTotalPrice += $quote->pq_client_price;
-                //$clientTotalPrice += ProductQuoteHelper::calcClientPrice($quote->pq_client_price, $quote->pqProduct);
+                        $clientTotalPrice += ProductQuoteHelper::calcClientPrice($quote->pq_client_price * $offer->of_client_currency_rate, $quote->pqProduct);
                         $optionTotalPrice += $quote->optionAmountSum;
                         $totalFee += $quote->pq_service_fee_sum;
                         ?>
@@ -80,7 +79,7 @@ use yii\bootstrap4\Html;
                     <td class="text-right"><?=number_format($quote->optionAmountSum, 2)?></td>
                     <td class="text-right"><?=number_format($quote->pq_service_fee_sum, 2)?></td>
                     <td class="text-right"><?=number_format($quote->pq_price, 2)?></td>
-                    <td class="text-right"><?=number_format($quote->pq_client_price, 2)?> <?=Html::encode($quote->pq_client_currency)?></td>
+                    <td class="text-right"><?=number_format($quote->pq_price * $offer->of_client_currency_rate, 2)?> <?=Html::encode($offer->of_client_currency)?></td>
                 </tr>
                     <?php endforeach; ?>
                 <tr>
@@ -94,7 +93,7 @@ use yii\bootstrap4\Html;
                     <th class="text-right" colspan="5">Total: </th>
                     <td class="text-right" colspan="2">(price + opt)</td>
                     <th class="text-right"><?=number_format($originTotalPrice + $optionTotalPrice, 2)?></th>
-                    <th class="text-right"><?=number_format($clientTotalPrice + $optionTotalPrice, 2)?> <?=Html::encode($offer->of_client_currency)?></th>
+                    <th class="text-right"><?=number_format($offer->of_client_total, 2)?> <?=Html::encode($offer->of_client_currency)?></th>
                 </tr>
                 <?php endif; ?>
             <?php endif; ?>
@@ -108,7 +107,7 @@ use yii\bootstrap4\Html;
             <?php $clientTotal = '' ?>
             <?php if (isset($clientTotalPrice) && !empty($offer->of_client_currency)) : ?>
                 <?php $clientCurrency = $offer->of_client_currency ?: 'USD' ?>
-                <?php $clientTotal = ', Client Total: <b>' . number_format($clientTotalPrice, 2) . ' ' . Html::encode($clientCurrency) . '</b>' ?>
+                <?php $clientTotal = ', Client Total: <b>' . number_format($offer->of_client_total, 2) . ' ' . Html::encode($clientCurrency) . '</b>' ?>
             <?php endif ?>
             <h4>Total: <b><?=number_format($offer->offerTotalCalcSum, 2)?> USD</b><?php echo $clientTotal ?></h4>
         </div>

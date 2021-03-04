@@ -75,362 +75,296 @@ class OfferController extends BaseController
      * @apiSuccessExample {json} Success-Response:
      *
      * HTTP/1.1 200 OK
-     *   {
-     *       "status": 200,
-     *       "message": "OK",
-     *       "offer": {
-     *           "of_gid": "04d3fe3fc74d0514ee93e208a52bcf90",
-     *           "of_uid": "of5e2c5ea22b0f1",
-     *           "of_name": "Offer 2",
-     *           "of_lead_id": 371096,
-     *           "of_status_id": 1,
-     *           "of_client_currency": "EUR",
-     *           "of_client_currency_rate": 1,
-     *           "of_app_total": 0,
-     *           "of_client_total": 0,
-     *           "quotes": [
-     *               {
-     *                   "pq_gid": "6fcfc43e977dabffe6a979ebda22a281",
-     *                   "pq_name": "",
-     *                   "pq_order_id": 10,
-     *                   "pq_description": null,
-     *                   "pq_status_id": 1,
-     *                   "pq_price": 92.3,
-     *                   "pq_origin_price": 92.3,
-     *                   "pq_client_price": 92.3,
-     *                   "pq_service_fee_sum": null,
-     *                   "pq_origin_currency": "USD",
-     *                   "pq_client_currency": "USD",
-     *                   "data": {
-     *                       "fq_flight_id": 21,
-     *                       "fq_source_id": null,
-     *                       "fq_product_quote_id": 6,
-     *                       "fq_gds": "A",
-     *                       "fq_gds_pcc": "DFWG32100",
-     *                       "fq_gds_offer_id": null,
-     *                       "fq_type_id": 0,
-     *                       "fq_cabin_class": "E",
-     *                       "fq_trip_type_id": 1,
-     *                       "fq_main_airline": "SU",
-     *                       "fq_fare_type_id": 1,
-     *                       "fq_last_ticket_date": "2020-01-25",
-     *                       "fq_origin_search_data": "description field: json encoded origin data from search api",
-     *                       "flight": {
-     *                           "fl_product_id": 33,
-     *                           "fl_trip_type_id": 1,
-     *                           "fl_cabin_class": "E",
-     *                           "fl_adults": 2,
-     *                           "fl_children": 0,
-     *                           "fl_infants": 0
-     *                       },
-     *                       "segments": [
-     *                           {
-     *                               "fqs_departure_dt": "2020-01-30 01:35:00",
-     *                               "fqs_arrival_dt": "2020-01-30 05:45:00",
-     *                               "fqs_stop": 0,
-     *                               "fqs_flight_number": 1845,
-     *                               "fqs_booking_class": "R",
-     *                               "fqs_duration": 190,
-     *                               "fqs_departure_airport_iata": "KIV",
-     *                               "fqs_departure_airport_terminal": "",
-     *                               "fqs_arrival_airport_iata": "SVO",
-     *                               "fqs_arrival_airport_terminal": "D",
-     *                               "fqs_operating_airline": "SU",
-     *                               "fqs_marketing_airline": "SU",
-     *                               "fqs_air_equip_type": "32A",
-     *                               "fqs_marriage_group": "",
-     *                               "fqs_cabin_class": "Y",
-     *                               "fqs_meal": "",
-     *                               "fqs_fare_code": "RNO",
-     *                               "fqs_ticket_id": null,
-     *                               "fqs_recheck_baggage": 0,
-     *                               "fqs_mileage": null,
-     *                               "departureLocation": "Chisinau",
-     *                               "arrivalLocation": "Bucharest",
-     *                               "baggages": [
-     *                                   {
-     *                                       "qsb_flight_pax_code_id": 1,
-     *                                       "qsb_flight_quote_segment_id": 2,
-     *                                       "qsb_airline_code": null,
-     *                                       "qsb_allow_pieces": 0,
-     *                                       "qsb_allow_weight": null,
-     *                                       "qsb_allow_unit": null,
-     *                                       "qsb_allow_max_weight": null,
-     *                                       "qsb_allow_max_size": null
-     *                                   }
-     *                               ]
-     *                           }
-     *                       ],
-     *                       "pax_prices": [
-     *                          {
-     *                               "qpp_fare": "43.00",
-     *                               "qpp_tax": "49.30",
-     *                               "qpp_system_mark_up": "0.00",
-     *                               "qpp_agent_mark_up": "0.00",
-     *                               "qpp_origin_fare": "43.00",
-     *                               "qpp_origin_currency": "USD",
-     *                               "qpp_origin_tax": "49.30",
-     *                               "qpp_client_currency": "USD",
-     *                               "qpp_client_fare": null,
-     *                               "qpp_client_tax": null,
-     *                               "paxType":"ADT"
-     *                           }
-     *                       ]
-     *                   },
-     *                   "product": {
-     *                       "pr_type_id": 1,
-     *                       "pr_name": "",
-     *                       "pr_lead_id": 371096,
-     *                       "pr_description": "",
-     *                       "pr_status_id": null,
-     *                       "pr_service_fee_percent": null
-     *                   },
-     *                   "productQuoteOptions": []
-     *               },
-     *               {
-     *                   "pq_gid": "16fb0f9565b9cb87280a348c75c05128",
-     *                   "pq_name": "DBL.ST",
-     *                   "pq_order_id": null,
-     *                   "pq_description": null,
-     *                   "pq_status_id": 1,
-     *                   "pq_price": 349.99,
-     *                   "pq_origin_price": 349.99,
-     *                   "pq_client_price": 349.99,
-     *                   "pq_service_fee_sum": 0,
-     *                   "pq_origin_currency": "USD",
-     *                   "pq_client_currency": "USD",
-     *                   "data": {
-     *                      "hotel_request": {
-                                "ph_check_in_date": "2021-06-10",
-                                "ph_check_out_date": "2021-06-18",
-                                "ph_destination_code": "LON",
-                                "ph_destination_label": "United Kingdom, London",
-                                "destination_city": "London"
+     *{
+    "status": 200,
+    "message": "OK",
+    "offer": {
+        "of_gid": "da722b84598b5559c5485617e67f3dd9",
+        "of_uid": "of60409f7d83ef7",
+        "of_name": "Offer 1",
+        "of_lead_id": 513107,
+        "of_status_id": 1,
+        "of_client_currency": "EUR",
+        "of_client_currency_rate": 0.92008,
+        "of_app_total": 599.72,
+        "of_client_total": 551.79,
+        "of_status_name": "New",
+        "quotes": [
+            {
+                "pq_gid": "260175221b9ef393f9462e20ff341699",
+                "pq_name": "",
+                "pq_order_id": 94,
+                "pq_description": null,
+                "pq_status_id": 3,
+                "pq_price": 104.8,
+                "pq_origin_price": 104.8,
+                "pq_client_price": 104.8,
+                "pq_service_fee_sum": 0,
+                "pq_origin_currency": "USD",
+                "pq_client_currency": "USD",
+                "pq_status_name": "Applied",
+                "pq_files": [],
+                "data": {
+                    "fq_flight_id": 38,
+                    "fq_source_id": null,
+                    "fq_product_quote_id": 147,
+                    "fq_gds": "T",
+                    "fq_gds_pcc": "E9V",
+                    "fq_gds_offer_id": null,
+                    "fq_type_id": 0,
+                    "fq_cabin_class": "E",
+                    "fq_trip_type_id": 1,
+                    "fq_main_airline": "LO",
+                    "fq_fare_type_id": 1,
+                    "fq_origin_search_data": "{\"key\":\"2_U0FMMTAxKlkxMDAwL0tJVkxPTjIwMjEtMDctMTUqTE9+I0xPNTE2I0xPMjgxfmxjOmVuX3Vz\",\"routingId\":1,\"prices\":{\"lastTicketDate\":\"2021-03-06\",\"totalPrice\":104.8,\"totalTax\":61.8,\"comm\":0,\"isCk\":false,\"markupId\":0,\"markupUid\":\"\",\"markup\":0},\"passengers\":{\"ADT\":{\"codeAs\":\"JWZ\",\"cnt\":1,\"baseFare\":43,\"pubBaseFare\":43,\"baseTax\":61.8,\"markup\":0,\"comm\":0,\"price\":104.8,\"tax\":61.8,\"oBaseFare\":{\"amount\":43,\"currency\":\"USD\"},\"oBaseTax\":{\"amount\":61.8,\"currency\":\"USD\"}}},\"penalties\":{\"exchange\":true,\"refund\":false,\"list\":[{\"type\":\"ex\",\"applicability\":\"before\",\"permitted\":true,\"amount\":0},{\"type\":\"ex\",\"applicability\":\"after\",\"permitted\":true,\"amount\":0},{\"type\":\"re\",\"applicability\":\"before\",\"permitted\":false},{\"type\":\"re\",\"applicability\":\"after\",\"permitted\":false}]},\"trips\":[{\"tripId\":1,\"segments\":[{\"segmentId\":1,\"departureTime\":\"2021-07-15 18:25\",\"arrivalTime\":\"2021-07-15 19:15\",\"stop\":0,\"stops\":[],\"flightNumber\":\"516\",\"bookingClass\":\"V\",\"duration\":110,\"departureAirportCode\":\"KIV\",\"departureAirportTerminal\":\"\",\"arrivalAirportCode\":\"WAW\",\"arrivalAirportTerminal\":\"\",\"operatingAirline\":\"LO\",\"airEquipType\":\"DH4\",\"marketingAirline\":\"LO\",\"marriageGroup\":\"I\",\"mileage\":508,\"cabin\":\"Y\",\"cabinIsBasic\":true,\"brandId\":\"685421\",\"brandName\":\"ECONOMY SAVER\",\"meal\":\"\",\"fareCode\":\"V1SAV28\",\"baggage\":{\"ADT\":{\"carryOn\":true,\"allowPieces\":0}},\"recheckBaggage\":false},{\"segmentId\":2,\"departureTime\":\"2021-07-16 07:30\",\"arrivalTime\":\"2021-07-16 09:25\",\"stop\":0,\"stops\":[],\"flightNumber\":\"281\",\"bookingClass\":\"V\",\"duration\":175,\"departureAirportCode\":\"WAW\",\"departureAirportTerminal\":\"\",\"arrivalAirportCode\":\"LHR\",\"arrivalAirportTerminal\":\"2\",\"operatingAirline\":\"LO\",\"airEquipType\":\"738\",\"marketingAirline\":\"LO\",\"marriageGroup\":\"O\",\"mileage\":893,\"cabin\":\"Y\",\"cabinIsBasic\":true,\"brandId\":\"685421\",\"brandName\":\"ECONOMY SAVER\",\"meal\":\"\",\"fareCode\":\"V1SAV28\",\"baggage\":{\"ADT\":{\"carryOn\":true,\"allowPieces\":0}},\"recheckBaggage\":false}],\"duration\":1020}],\"maxSeats\":9,\"paxCnt\":1,\"validatingCarrier\":\"LO\",\"gds\":\"T\",\"pcc\":\"E9V\",\"cons\":\"GTT\",\"fareType\":\"PUB\",\"tripType\":\"OW\",\"cabin\":\"Y\",\"currency\":\"USD\",\"currencies\":[\"USD\"],\"currencyRates\":{\"USDUSD\":{\"from\":\"USD\",\"to\":\"USD\",\"rate\":1}},\"keys\":{\"travelport\":{\"traceId\":\"28633fd6-f575-407f-97f1-050835c4bfb5\",\"availabilitySources\":\"P,P\",\"type\":\"T\"},\"seatHoldSeg\":{\"trip\":0,\"segment\":0,\"seats\":9}},\"ngsFeatures\":{\"stars\":1,\"name\":\"ECONOMY SAVER\",\"list\":[]},\"meta\":{\"eip\":0,\"noavail\":false,\"searchId\":\"U0FMMTAxWTEwMDB8S0lWTE9OMjAyMS0wNy0xNQ==\",\"lang\":\"en\",\"rank\":7,\"cheapest\":true,\"fastest\":false,\"best\":false,\"bags\":0,\"country\":\"us\"},\"price\":104.8,\"originRate\":1,\"stops\":[1],\"time\":[{\"departure\":\"2021-07-15 18:25\",\"arrival\":\"2021-07-16 09:25\"}],\"bagFilter\":\"\",\"airportChange\":false,\"technicalStopCnt\":0,\"duration\":[1020],\"totalDuration\":1020,\"topCriteria\":\"cheapest\",\"rank\":7}",
+                    "fq_last_ticket_date": "2021-03-06",
+                    "fq_json_booking": null,
+                    "fq_ticket_json": null,
+                    "fq_type_name": "Base",
+                    "fq_fare_type_name": "Public",
+                    "flight": {
+                        "fl_product_id": 62,
+                        "fl_trip_type_id": 1,
+                        "fl_cabin_class": "E",
+                        "fl_adults": 1,
+                        "fl_children": 0,
+                        "fl_infants": 0,
+                        "fl_trip_type_name": "One Way",
+                        "fl_cabin_class_name": "Economy"
+                    },
+                    "trips": [
+                        {
+                            "fqt_id": 93,
+                            "fqt_key": null,
+                            "fqt_duration": 1020,
+                            "segments": [
+                                {
+                                    "fqs_departure_dt": "2021-07-15 18:25:00",
+                                    "fqs_arrival_dt": "2021-07-15 19:15:00",
+                                    "fqs_stop": 0,
+                                    "fqs_flight_number": 516,
+                                    "fqs_booking_class": "V",
+                                    "fqs_duration": 110,
+                                    "fqs_departure_airport_iata": "KIV",
+                                    "fqs_departure_airport_terminal": "",
+                                    "fqs_arrival_airport_iata": "WAW",
+                                    "fqs_arrival_airport_terminal": "",
+                                    "fqs_operating_airline": "LO",
+                                    "fqs_marketing_airline": "LO",
+                                    "fqs_air_equip_type": "DH4",
+                                    "fqs_marriage_group": "I",
+                                    "fqs_cabin_class": "Y",
+                                    "fqs_meal": "",
+                                    "fqs_fare_code": "V1SAV28",
+                                    "fqs_ticket_id": null,
+                                    "fqs_recheck_baggage": 0,
+                                    "fqs_mileage": 508,
+                                    "departureLocation": "Chisinau",
+                                    "arrivalLocation": "Warsaw",
+                                    "operating_airline": "LOT Polish Airlines",
+                                    "marketing_airline": "LOT Polish Airlines",
+                                    "baggages": [
+                                        {
+                                            "qsb_flight_pax_code_id": 1,
+                                            "qsb_flight_quote_segment_id": 241,
+                                            "qsb_airline_code": null,
+                                            "qsb_allow_pieces": 0,
+                                            "qsb_allow_weight": null,
+                                            "qsb_allow_unit": null,
+                                            "qsb_allow_max_weight": null,
+                                            "qsb_allow_max_size": null
+                                        }
+                                    ]
+                                },
+                                {
+                                    "fqs_departure_dt": "2021-07-16 07:30:00",
+                                    "fqs_arrival_dt": "2021-07-16 09:25:00",
+                                    "fqs_stop": 0,
+                                    "fqs_flight_number": 281,
+                                    "fqs_booking_class": "V",
+                                    "fqs_duration": 175,
+                                    "fqs_departure_airport_iata": "WAW",
+                                    "fqs_departure_airport_terminal": "",
+                                    "fqs_arrival_airport_iata": "LHR",
+                                    "fqs_arrival_airport_terminal": "2",
+                                    "fqs_operating_airline": "LO",
+                                    "fqs_marketing_airline": "LO",
+                                    "fqs_air_equip_type": "738",
+                                    "fqs_marriage_group": "O",
+                                    "fqs_cabin_class": "Y",
+                                    "fqs_meal": "",
+                                    "fqs_fare_code": "V1SAV28",
+                                    "fqs_ticket_id": null,
+                                    "fqs_recheck_baggage": 0,
+                                    "fqs_mileage": 893,
+                                    "departureLocation": "Warsaw",
+                                    "arrivalLocation": "London",
+                                    "operating_airline": "LOT Polish Airlines",
+                                    "marketing_airline": "LOT Polish Airlines",
+                                    "baggages": [
+                                        {
+                                            "qsb_flight_pax_code_id": 1,
+                                            "qsb_flight_quote_segment_id": 242,
+                                            "qsb_airline_code": null,
+                                            "qsb_allow_pieces": 0,
+                                            "qsb_allow_weight": null,
+                                            "qsb_allow_unit": null,
+                                            "qsb_allow_max_weight": null,
+                                            "qsb_allow_max_size": null
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "pax_prices": [
+                        {
+                            "qpp_fare": "43.00",
+                            "qpp_tax": "61.80",
+                            "qpp_system_mark_up": "0.00",
+                            "qpp_agent_mark_up": "0.00",
+                            "qpp_origin_fare": "43.00",
+                            "qpp_origin_currency": "USD",
+                            "qpp_origin_tax": "61.80",
+                            "qpp_client_currency": "USD",
+                            "qpp_client_fare": "43.00",
+                            "qpp_client_tax": "61.80",
+                            "paxType": "ADT"
+                        }
+                    ]
+                },
+                "product": {
+                    "pr_type_id": 1,
+                    "pr_name": "",
+                    "pr_lead_id": 513107,
+                    "pr_description": "",
+                    "pr_status_id": null,
+                    "pr_service_fee_percent": null
+                },
+                "productQuoteOptions": [
+                    {
+                        "pqo_name": "",
+                        "pqo_description": "",
+                        "pqo_status_id": 1,
+                        "pqo_price": 100,
+                        "pqo_client_price": 120,
+                        "pqo_extra_markup": 20,
+                        "productOption": {
+                            "po_key": "travelGuard",
+                            "po_name": "Travel Guard",
+                            "po_description": ""
+                        }
+                    }
+                ]
+            },
+            {
+                "pq_gid": "4d140ea75cb0561ea8629ab3989c0fc5",
+                "pq_name": "SGL.ST",
+                "pq_order_id": null,
+                "pq_description": null,
+                "pq_status_id": 1,
+                "pq_price": 374.92,
+                "pq_origin_price": 362.24,
+                "pq_client_price": 374.92,
+                "pq_service_fee_sum": 12.68,
+                "pq_origin_currency": "USD",
+                "pq_client_currency": "USD",
+                "pq_status_name": "New",
+                "pq_files": [],
+                "data": {
+                    "hq_hash_key": "60316ad5c24b4feaee8f9e2264cbe699",
+                    "hq_destination_name": "Rome",
+                    "hq_hotel_name": "Patria",
+                    "hq_request_hash": "163f5375651606c67cca80552e642914",
+                    "hq_booking_id": null,
+                    "hq_json_booking": null,
+                    "hotel_request": {
+                        "ph_check_in_date": "2021-06-17",
+                        "ph_check_out_date": "2021-06-24",
+                        "ph_destination_code": "ROE",
+                        "ph_destination_label": "Italy, Rome",
+                        "destination_city": null
+                    },
+                    "hotel": {
+                        "hl_name": "Patria",
+                        "hl_star": "",
+                        "hl_category_name": "3 STARS",
+                        "hl_destination_name": "Rome",
+                        "hl_zone_name": "Via Nazionale",
+                        "hl_country_code": "IT",
+                        "hl_state_code": "07",
+                        "hl_description": "This hotel, of unparalleled beauty, offers comfortable and elegant rooms, fully equipped for a pleasant stay. Travelers looking to have a cultural adventure, learn about art, architecture, ruins and Roman history, are the favorites. With a privileged location just 14 kilometers from the Rome - Ciampino Airport, a few minutes from the Repubblica Metro Station and the Teatro dell'Opera, this hotel is surrounded by restaurants, markets, squares, museums and popular theaters, as well as It provides easy access to other important sites in the city, so it invites visitors to take out their spirit of adventure and curiosity in the Roman streets. The service staff is exceptional, distinguished by its excellent service and warm friendliness. Nobody misses the gastronomic delights of Rome in this hotel, from the cafeteria and the hotel menus, to the variety of restaurants that are just around the corner. The ideal place to vacation in the heart of Rome.",
+                        "hl_address": "Via Torino, 36-37",
+                        "hl_postal_code": "00184",
+                        "hl_city": "ROME",
+                        "hl_email": "INFO@HOTELPATRIA.IT",
+                        "hl_web": null,
+                        "hl_phone_list": [
+                            {
+                                "type": "PHONEBOOKING",
+                                "number": "0039064880756"
                             },
-     *                       "hotel": {
-     *                           "hl_name": "Manzil Hotel",
-     *                           "hl_star": "2*",
-     *                           "hl_category_name": "2 STARS",
-     *                           "hl_destination_name": "Casablanca",
-     *                           "hl_zone_name": "Casablanca",
-     *                           "hl_country_code": "MA",
-     *                           "hl_state_code": "07",
-     *                           "hl_description": "The Hotel is ideally located in the neighborhood of Roches Noires district and close to the activity area of ​​Ain Sebaa...",
-     *                           "hl_address": "RUE DES FRANCAIS, ROCHES NOIRES,38  ",
-     *                           "hl_postal_code": "20000",
-     *                           "hl_city": "CASABLANCA",
-     *                           "hl_email": "resa@manzilhotels.com",
-     *                           "hl_web": "",
-     *                           "hl_phone_list": [
-     *                              {
-     *                                   "type": "PHONEBOOKING",
-     *                                   "number": "00212522242020"
-     *                               },
-     *                               {
-     *                                   "type": "PHONEHOTEL",
-     *                                   "number": "00212522242020"
-     *                               },
-     *                               {
-     *                                   "type": "FAXNUMBER",
-     *                                   "number": "00212522242020"
-     *                               }
-     *                           ],
-     *                           "hl_image_list": [
-     *                               {
-     *                                   "url": "59/590133/590133a_hb_a_001.jpg",
-     *                                   "type": "GEN"
-     *                               }
-     *                           ],
-     *                           "hl_image_base_url": ""
-     *                       },
-     *                       "rooms": [
-     *                           {
-     *                               "hqr_room_name": "DOUBLE STANDARD",
-     *                               "hqr_class": "NOR",
-     *                               "hqr_amount": 349.99,
-     *                               "hqr_currency": "USD",
-     *                               "hqr_cancel_amount": 293.58,
-     *                               "hqr_cancel_from_dt": "2020-05-14 20:59:00",
-     *                               "hqr_board_name": "ROOM ONLY",
-     *                               "hqr_rooms": 1,
-     *                               "hqr_adults": 1,
-     *                               "hqr_children": 1
-     *                           }
-     *                       ]
-     *                   },
-     *                   "product": {
-     *                       "pr_type_id": 2,
-     *                       "pr_name": "ee",
-     *                       "pr_lead_id": 371096,
-     *                       "pr_description": "rrr",
-     *                       "pr_status_id": 1,
-     *                       "pr_service_fee_percent": 3.50
-     *                   },
-     *                   "productQuoteOptions": [
-     *                       {
-     *                           "pqo_name": "1323",
-     *                           "pqo_description": "",
-     *                           "pqo_status_id": 1,
-     *                           "pqo_price": 10.00,
-     *                           "pqo_client_price": 15.00,
-     *                           "pqo_extra_markup": 10.00
-     *                       },
-     *                       {
-     *                           "pqo_name": "tests",
-     *                           "pqo_description": "swe we ",
-     *                           "pqo_status_id": 1,
-     *                           "pqo_price": 12,
-     *                           "pqo_client_price": null,
-     *                           "pqo_extra_markup": 1
-     *                       }
-     *                   ]
-     *               },
-     *               {
-     *                   "pq_gid": "1576705c738f49538f9335ae89528c75",
-     *                   "pq_name": "4A",
-     *                   "pq_order_id": null,
-     *                   "pq_description": null,
-     *                   "pq_status_id": 2,
-     *                   "pq_price": 557.87,
-     *                   "pq_origin_price": 539,
-     *                   "pq_client_price": 513.29,
-     *                   "pq_service_fee_sum": 18.87,
-     *                   "pq_origin_currency": "USD",
-     *                   "pq_client_currency": "EUR",
-     *                   "data": {
-     *                       "cruiseLine": {
-     *                           "code": "CV",
-     *                           "name": "Carnival Cruise Lines"
-     *                       },
-     *                       "departureDate": "2021-07-01",
-     *                       "returnDate": "2021-07-05",
-     *                       "destination": "Caribbean",
-     *                       "subDestination": "Western Caribbean",
-     *                       "ship": {
-     *                           "code": "BR",
-     *                           "name": "Carnival Breeze"
-     *                       },
-     *                       "cabin": {
-     *                           "code": "4A",
-     *                           "name": "Interior",
-     *                           "price": 539,
-     *                           "imgUrl": "https://mediaim.expedia.com/cruise/cv-br-2020-02-01/a7f6f5bd-aef2-417e-87d2-fb3fce2baeba.jpg?impolicy=resizecrop&ra=fit&rw=500",
-     *                           "experience": "INSIDE"
-     *                       },
-     *                       "departureName": "Galveston",
-     *                       "crq_data_json": "description field: json origin data from search api"
-     *                   },
-     *                   "product": {
-     *                       "pr_type_id": 4,
-     *                       "pr_name": "Cruise test 1",
-     *                       "pr_lead_id": 513177,
-     *                       "pr_description": "",
-     *                       "pr_status_id": null,
-     *                       "pr_service_fee_percent": null
-     *                   },
-     *                   "productQuoteOptions": []
-     *               },
-     *               {
-     *                  "pq_gid":"1f2a619ee37af592dfd6c927ef00b795",
-     *                  "pq_name":"Boat Tour in Miami with a Free Drink",
-     *                  "pq_order_id":null,
-     *                  "pq_description":null,
-     *                  "pq_status_id":2,
-     *                  "pq_price":28,
-     *                  "pq_origin_price":28,
-     *                  "pq_client_price":28,
-     *                  "pq_service_fee_sum":0,
-     *                  "pq_origin_currency":"USD",
-     *                  "pq_client_currency":"USD",
-     *                  "data": {
-     *                      "atnq_booking_id":null,
-     *                      "atnq_attraction_name":"Boat Tour in Miami with a Free Drink",
-     *                      "atnq_supplier_name":"Miami Tour Company",
-     *                      "atnq_json_response": "description field: json origin data from search api",
-     *                      "search_request": {
-     *                          "atn_product_id":234,
-     *                          "atn_date_from":"2021-06-17",
-     *                          "atn_date_to":"2021-06-24",
-     *                          "atn_destination":"Italy, Rome",
-     *                          "atn_destination_code":"ROE"
-     *                       }
-     *                    },
-     *                   "product": {
-     *                          "pr_type_id":5,
-     *                          "pr_name":"",
-     *                          "pr_lead_id":15356,
-     *                          "pr_description":"",
-     *                          "pr_status_id":null,
-     *                          "pr_service_fee_percent":null
-     *                    },
-     *                    "productQuoteOptions":[]
-     *                  },
-     *              {
-     *                  "pq_gid":"1f2a619ee37af592dfd6c927ef00b795",
-     *                  "pq_name":"Boat Tour in Miami with a Free Drink",
-     *                  "pq_order_id":null,
-     *                  "pq_description":"example",
-     *                  "pq_status_id":2,
-     *                  "pq_price":28,
-     *                  "pq_origin_price":28,
-     *                  "pq_client_price":28,
-     *                  "pq_service_fee_sum":0,
-     *                  "pq_origin_currency":"USD",
-     *                  "pq_client_currency":"USD",
-     *                  "data": {
-     *                      "rcq_model_name":"Nissan Rogue or similar",
-     *                      "rcq_category":"Midsize SUV",
-     *                      "rcq_image_url":"https://example.com/inmage.jpg",
-     *                      "rcq_vendor_name":"Hertz Rental Company",
-     *                      "rcq_vendor_logo_url":"https://example.com/logo.jpg",
-     *                      "rcq_options": {
-     *                          "doors":4,
-     *                          "person":5,
-     *                          "ac_unit":"Air Conditioning",
-     *                          "mileage":"Unlimited mileage",
-     *                          "cleanliness":"Enhanced cleaning",
-     *                          "transmission":"Automatic"
-     *                       },
-     *                      "search_request": {
-     *                          "prc_product_id":234,
-     *                          "prc_pick_up_date":"2021-06-17",
-     *                          "prc_drop_off_date":"2021-06-24",
-     *                          "prc_pick_up_code":"KIV",
-     *                          "prc_drop_off_code":"KIV",
-     *                          "prc_pick_up_time":"01:45:00",
-     *                          "prc_drop_off_time":"04:00:00"
-     *                       }
-     *                    },
-     *                   "product": {
-     *                          "pr_type_id":5,
-     *                          "pr_name":"offer for my best client",
-     *                          "pr_lead_id":15356,
-     *                          "pr_description":"",
-     *                          "pr_status_id":null,
-     *                          "pr_service_fee_percent":null
-     *                    },
-     *                    "productQuoteOptions":[]
-     *                  }
-     *
-     *           ]
-     *       },
-     *       "technical": {
-     *           "action": "v2/offer/view",
-     *           "response_id": 11933859,
-     *           "request_dt": "2020-02-03 12:53:50",
-     *           "response_dt": "2020-02-03 12:53:50",
-     *           "execution_time": 0.034,
-     *           "memory_usage": 1255920
-     *       },
-     *       "request": {
-     *           "offerGid": "04d3fe3fc74d0514ee93e208a52bcf90",
-     *           "visitor": {
-     *               "id": "hdsjfghsd5489tertwhf289hfgkewr",
-     *               "ipAddress": "12.12.12.12",
-     *               "userAgent": "mozilea/asdfsdf/ as/dfgsdf gsdf gsdgf/ds"
-     *           }
-     *       }
-     *   }
+                            {
+                                "type": "PHONEHOTEL",
+                                "number": "0039064880756"
+                            },
+                            {
+                                "type": "PHONEMANAGEMENT",
+                                "number": "0039064818254"
+                            },
+                            {
+                                "type": "FAXNUMBER",
+                                "number": "0039 064814872"
+                            }
+                        ],
+                        "hl_image_list": [
+                            {
+                                "url": "01/017317/017317a_hb_a_007.jpg",
+                                "type": "GEN"
+                            }
+                        ],
+                        "hl_image_base_url": null,
+                        "json_booking": null
+                    },
+                    "rooms": [
+                        {
+                            "hqr_room_name": "Single Standard",
+                            "hqr_class": "NRF",
+                            "hqr_amount": 335.41,
+                            "hqr_currency": "USD",
+                            "hqr_cancel_amount": "362.24",
+                            "hqr_cancel_from_dt": "2021-03-03 22:59:00",
+                            "hqr_board_name": "ROOM ONLY",
+                            "hqr_rooms": 1,
+                            "hqr_adults": 1,
+                            "hqr_children": null
+                        }
+                    ]
+                },
+                "product": {
+                    "pr_type_id": 2,
+                    "pr_name": "",
+                    "pr_lead_id": 513107,
+                    "pr_description": "",
+                    "pr_status_id": null,
+                    "pr_service_fee_percent": null
+                },
+                "productQuoteOptions": []
+            }
+        ]
+    },
+    "technical": {
+        "action": "v2/offer/view",
+        "response_id": 476,
+        "request_dt": "2021-03-04 13:02:14",
+        "response_dt": "2021-03-04 13:02:14",
+        "execution_time": 0.121,
+        "memory_usage": 1761344
+    },
+    "request": {
+        "offerGid": "da722b84598b5559c5485617e67f3dd9"
+    }
+}
      *
      * @apiErrorExample {json} Error-Response (422):
      *

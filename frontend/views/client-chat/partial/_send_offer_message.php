@@ -20,6 +20,6 @@ use modules\offer\src\entities\offer\Offer;
 
 <?php foreach ($offers as $offer) : ?>
 Offer: **<?= $offer->of_name ?>**
-Total Price: **<?= trim($offer->of_client_total . ' ' . ($offer->ofClientCurrency->cur_symbol ?? '')) ?>**
+Total Price: **<?= trim(number_format($offer->offerTotalCalcSum * $offer->of_client_currency_rate, 2) . ' ' . ($offer->ofClientCurrency->cur_symbol ?? '')) ?>**
 [View Offer](<?= $offer->getCheckoutUrlPage() ?>)
 <?php endforeach; ?>
