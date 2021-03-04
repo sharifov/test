@@ -49,6 +49,9 @@ class StartBookingOtherProductsJob implements JobInterface
             if ($quote->pqProduct->isHotel()) {
                 \Yii::$app->queue_job->push(new BookingHotelJob($quote->childQuote->getId()));
                 $createdAnyJob = true;
+            } elseif ($quote->pqProduct->isAttraction()) {
+                \Yii::$app->queue_job->push(new BookingAttractionJob($quote->childQuote->getId()));
+                $createdAnyJob = true;
             }
         }
 

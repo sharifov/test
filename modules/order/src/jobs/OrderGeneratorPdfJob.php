@@ -29,7 +29,7 @@ class OrderGeneratorPdfJob implements RetryableJobInterface
         ], 'info\OrderGeneratorPdfJob:run');
 
         try {
-            if (!$order = Order::findOne(['hq_id' => $this->orderId])) {
+            if (!$order = Order::findOne(['or_id' => $this->orderId])) {
                 throw new NotFoundException('Order not found. Id (' . $this->orderId . ')');
             }
             if (OrderPdfService::processingFile($order)) {
