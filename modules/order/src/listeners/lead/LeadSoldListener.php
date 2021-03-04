@@ -23,7 +23,7 @@ class LeadSoldListener
 
             $lead = $order->orLead;
 
-            $lead->sold();
+            $lead->sold($lead->employee_id);
             $repo = \Yii::createObject(LeadRepository::class);
             $repo->save($lead);
         } catch (\Throwable $e) {
