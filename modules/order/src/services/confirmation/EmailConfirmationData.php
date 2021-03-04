@@ -16,7 +16,7 @@ class EmailConfirmationData
                 if ($project->contact_info) {
                     $projectContactInfo = @json_decode($project->contact_info, true);
                 }
-                $content_data['project'] = [
+                $projectData = [
                     'name'      => $project->name,
                     'url'       => $project->link,
                     'address'   => $projectContactInfo['address'] ?? '',
@@ -28,6 +28,7 @@ class EmailConfirmationData
 
         return [
             'project' => $projectData,
+            'project_key' => $project->project_key ?? '',
             'order' => $order->serialize(),
             'content' => '',
             'subject' => '',

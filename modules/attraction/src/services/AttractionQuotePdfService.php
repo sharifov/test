@@ -15,7 +15,6 @@ use modules\fileStorage\src\entity\fileStorage\FileStorageRepository;
 use modules\fileStorage\src\FileSystem;
 use modules\fileStorage\src\services\CreateByLocalFileDto;
 use modules\order\src\events\OrderFileGeneratedEvent;
-use modules\order\src\services\confirmation\EmailConfirmationData;
 use sales\dispatchers\EventDispatcher;
 use sales\services\pdf\GeneratorPdfService;
 use Yii;
@@ -89,11 +88,7 @@ class AttractionQuotePdfService
 
     public static function getContent(AttractionQuote $quote): string
     {
-        $order = $quote->atnqProductQuote->pqOrder ?? null;
-        if (!$order) {
-            throw new \DomainException('Not found relation Order. AttractionQuoteId: ' . $quote->atnq_id);
-        }
-        $data = (new EmailConfirmationData())->generate($order);
+        $data = (new RequestPdfDataGenerator())->generate($quote);
         $content = \Yii::$app->communication->getContent(self::TEMPLATE_KEY, $data);
 
         if ($content['error'] !== false) {

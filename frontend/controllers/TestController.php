@@ -69,6 +69,8 @@ use frontend\widgets\newWebPhone\sms\socket\Message;
 use frontend\widgets\notification\NotificationMessage;
 use frontend\widgets\notification\NotificationWidget;
 use kartik\mpdf\Pdf;
+use modules\attraction\models\AttractionQuote;
+use modules\attraction\src\services\AttractionQuotePdfService;
 use modules\email\src\helpers\MailHelper;
 use modules\email\src\Notifier;
 use modules\flight\models\FlightQuote;
@@ -2022,6 +2024,21 @@ class TestController extends FController
         }
         \yii\helpers\VarDumper::dump($data, 20, true);
         exit();
+    }
+
+    public function actionAPdf(int $id)
+    {
+        if (!$quote = AttractionQuote::findOne(['atnq_id' => $id])) {
+            throw new NotFoundException('AttractionQuote not found. Id (' . $id . ')');
+        }
+        try {
+            AttractionQuotePdfService::processingFile($quote);
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), 'actionAPdf');
+            \yii\helpers\VarDumper::dump($throwable->getMessage(), 10, true);
+            exit();
+        }
+        return AttractionQuotePdfService::generateForBrowserOutput($quote);
     }
 
     public function actionZ()
