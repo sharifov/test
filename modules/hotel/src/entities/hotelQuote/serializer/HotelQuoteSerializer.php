@@ -26,6 +26,8 @@ class HotelQuoteSerializer extends Serializer
             'hq_request_hash',
             'hq_booking_id',
             'hq_json_booking',
+            'hq_check_in_date',
+            'hq_check_out_date'
         ];
     }
 
