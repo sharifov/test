@@ -106,6 +106,14 @@ $process = OrderProcessManager::findOne($order->or_id);
                         ])?>
                     <?php endif ?>
 
+                    <?php if (Auth::can('/order/order-actions/generate-files')) : ?>
+                        <?= Html::a('<i class="fa fa-file-pdf-o"></i> Generate PDF', null, [
+                            'data-url' => \yii\helpers\Url::to(['/order/order-actions/generate-files']),
+                            'data-id' => $order->or_id,
+                            'class' => 'dropdown-item btn-order-generate-files'
+                        ])?>
+                    <?php endif ?>
+
                     <?= Html::a('<i class="fa fa-edit"></i> Update order', null, [
                         'data-url' => \yii\helpers\Url::to(['/order/order/update-ajax', 'id' => $order->or_id]),
                         'class' => 'dropdown-item text-warning btn-update-order'

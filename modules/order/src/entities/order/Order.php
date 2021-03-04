@@ -161,16 +161,22 @@ class Order extends ActiveRecord implements Serializable
         $this->or_pay_status_id = $dto->payStatus;
         $this->or_lead_id = $dto->leadId;
         $this->or_name = $this->generateName();
+        $this->or_client_currency = $dto->clientCurrency;
         if ($this->orLead && $this->orLead->employee_id) {
             $this->or_owner_user_id = $this->orLead->employee_id;
         }
         if (!$this->or_name && $this->or_lead_id) {
             $this->or_name = $this->generateName();
         }
-        $this->updateOrderTotalByCurrency();
         $this->or_request_data = $dto->requestData;
 
         return $this;
+    }
+
+    public function calculateTotalPrice(): void
+    {
+        $this->or_app_total = $this->orderTotalCalcSum;
+        $this->updateOrderTotalByCurrency();
     }
 
     /**

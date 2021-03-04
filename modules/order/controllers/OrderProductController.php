@@ -105,7 +105,7 @@ class OrderProductController extends FController
                     return ['message' => 'Successfully deleted Product Quote ID (' . $productQuoteId . ') from order: "' . Html::encode($order->or_name) . '" (' . $order->or_id . ')'];
                 }
             } else {
-                $order = $this->orderManageService->createOrder((new CreateOrderDTO($productQuote->pqProduct->pr_lead_id)));
+                $order = $this->orderManageService->createOrder((new CreateOrderDTO($productQuote->pqProduct->pr_lead_id, $productQuote->pq_client_currency)));
             }
 
             $productQuote->setOrderRelation($order->or_id);

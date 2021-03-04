@@ -11,6 +11,7 @@ use modules\hotel\models\Hotel;
 use modules\hotel\models\HotelQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
+use sales\auth\Auth;
 use yii\data\ArrayDataProvider;
 use yii\helpers\Url;
 use yii\web\View;
@@ -59,6 +60,47 @@ use yii\widgets\Pjax;
                 pjaxReload({
                     container: '#pjax-product-quote-list-' + productId
                 });
+            }
+        })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        }).always(function() {
+            $('#preloader').addClass('d-none');
+        });
+    });
+    
+    $('body').off('click', '.js-btn-generate-pdf-quote').on('click', '.js-btn-generate-pdf-quote', function (e) {
+
+        if(!confirm('Are you sure you want to generate documents?')) {
+            return '';
+        }
+
+        e.preventDefault();
+        $('#preloader').removeClass('d-none');
+        let quoteId = $(this).data('hotel-quote-id');
+                
+        $.ajax({
+          url: $(this).data('url'),
+          type: 'post',
+          data: {'id': quoteId},
+          cache: false,
+          dataType: 'json',
+        }).done(function(data) {
+            if (parseInt(data.status) === 1) {
+                new PNotify({
+                    title: 'Document have been successfully generated',
+                    type: 'success',
+                    text: data.message,
+                    hide: true
+                });                
+                addFileToFileStorageList();                
+            } else {
+                new PNotify({
+                    title: 'File generated failed',
+                    type: 'error',
+                    text: data.message,
+                    hide: true
+                });                
             }
         })
         .fail(function( jqXHR, textStatus ) {
@@ -224,6 +266,17 @@ JS;
                                 'data-url' => Url::to('/hotel/hotel-quote/ajax-book'),
                                 'data-hotel-quote-id' => $model->hq_id,
                                 'data-product-id' => $model->hqProductQuote->pq_product_id,
+                            ]
+                        ) ?>
+                    <?php endif; ?>
+                    <?php if (Auth::can('/hotel/hotel-quote/ajax-file-generate') && $model->isBooked()) : ?>
+                        <?= Html::a(
+                            '<i class="fa fa-file-pdf-o"></i> Generate PDF',
+                            null,
+                            [
+                                'class' => 'dropdown-item js-btn-generate-pdf-quote',
+                                'data-url' => Url::to('/hotel/hotel-quote/ajax-file-generate'),
+                                'data-hotel-quote-id' => $model->hq_id,
                             ]
                         ) ?>
                     <?php endif; ?>

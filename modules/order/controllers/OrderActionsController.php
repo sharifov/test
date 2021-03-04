@@ -5,6 +5,7 @@ namespace modules\order\controllers;
 use frontend\controllers\FController;
 use modules\order\src\entities\order\OrderStatusAction;
 use modules\order\src\services\confirmation\EmailConfirmationSender;
+use modules\order\src\services\OrderPdfService;
 use modules\order\src\useCase\orderCancel\CancelForm;
 use modules\order\src\useCase\orderCancel\OrderCancelService;
 use modules\order\src\useCase\orderComplete\CompleteForm;
@@ -125,6 +126,32 @@ class OrderActionsController extends FController
                 'error' => $e->getMessage(),
                 'orderId' => $order->or_id,
             ], 'OrderActionsController:actionSendEmailConfirmation');
+            return [
+                'error' => true,
+                'message' => $e->getMessage(),
+            ];
+        }
+    }
+
+    public function actionGenerateFiles()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $orderId = (int)Yii::$app->request->post('id');
+        $order = $this->findModel($orderId);
+
+        try {
+            OrderPdfService::processingFile($order);
+            return [
+                'error' => false,
+                'message' => 'OK',
+            ];
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'message' => 'Send Order Confirmation Email Error',
+                'error' => $e->getMessage(),
+                'orderId' => $order->or_id,
+            ], 'OrderActionsController:actionGenerateFiles');
             return [
                 'error' => true,
                 'message' => $e->getMessage(),

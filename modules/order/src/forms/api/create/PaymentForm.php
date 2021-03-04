@@ -11,6 +11,7 @@ use common\models\PaymentMethod;
  *
  * @property string $type
  * @property string $transactionId
+ * @property string $currency
  */
 class PaymentForm extends \yii\base\Model
 {

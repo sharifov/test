@@ -5,6 +5,7 @@ use modules\order\src\entities\order\events\OrderCompletedEvent;
 use modules\order\src\entities\order\events\OrderPaymentPaidEvent;
 use modules\order\src\entities\order\events\OrderPreparedEvent;
 use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
+use modules\order\src\entities\order\events\OrderRecalculateTotalPriceEvent;
 use modules\order\src\entities\order\events\OrderUserProfitUpdateProfitAmountEvent;
 use modules\order\src\entities\order\events\UpdateOrderTipsUserProfitAmountEvent;
 use modules\order\src\events\OrderFileGeneratedEvent;
@@ -19,6 +20,7 @@ use modules\order\src\listeners\order\OrderFileGeneratorListener;
 use modules\order\src\listeners\order\OrderLogPaymentStatusListener;
 use modules\order\src\listeners\order\OrderProcessingConfirmationListener;
 use modules\order\src\listeners\order\OrderProcessingHybridNotificationListener;
+use modules\order\src\listeners\order\OrderRecalculateTotalPriceListener;
 use modules\order\src\processManager\listeners\OrderPrepareOrderProcessingListener;
 use modules\order\src\listeners\order\OrderRecalculateProfitAmountListener;
 use modules\order\src\listeners\orderTipsUserProfit\UpdateOrderTipsUserProfitAmountEventListener;
@@ -34,6 +36,10 @@ return [
         OrderProcessingConfirmationListener::class,
         OrderProcessingHybridNotificationListener::class,
         listeners\StartAutoProcessingListener::class,
+    ],
+
+    OrderRecalculateTotalPriceEvent::class => [
+        OrderRecalculateTotalPriceListener::class
     ],
 
     //OrderProcessManagerEvents

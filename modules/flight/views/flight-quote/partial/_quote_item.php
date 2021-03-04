@@ -230,6 +230,18 @@ $totalAmountQuote = 0.0;
                         ) ?>
                     <?php endif ?>
 
+                    <?php if (Auth::can('/flight/flight-quote/ajax-file-generate') && $model->isBooked()) : ?>
+                        <?= Html::a(
+                            '<i class="fa fa-file-pdf-o"></i> Generate PDF',
+                            null,
+                            [
+                                'class' => 'dropdown-item js-btn-generate-pdf-flight-quote',
+                                'data-url' => Url::to('/flight/flight-quote/ajax-file-generate'),
+                                'data-flight-quote-id' => $model->flightQuote->fq_id,
+                            ]
+                        ) ?>
+                    <?php endif ?>
+
                     <?php if (Auth::can('/flight/flight-quote/cancel')) : ?>
                         <?= Html::a(
                             '<i class="fa fa-share-square"></i> Cancel Booking',

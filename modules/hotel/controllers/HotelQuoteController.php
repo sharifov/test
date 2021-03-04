@@ -326,6 +326,31 @@ class HotelQuoteController extends FController
         return $result;
     }
 
+    public function actionAjaxFileGenerate(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $id = (int) Yii::$app->request->post('id', 0);
+
+        $result = ['status' => 0, 'message' => ''];
+
+        try {
+            $hotelQuote = $this->findModel($id);
+
+            if (!$hotelQuote->isBooked()) {
+                throw new \DomainException('Quote should have Booked status.');
+            }
+
+            if (HotelQuotePdfService::processingFile($hotelQuote)) {
+                $result['status'] = 1;
+                $result['message'] = 'Document have been successfully generated';
+            }
+        } catch (\Throwable $throwable) {
+            $result['message'] = $throwable->getMessage();
+            \Yii::error(AppHelper::throwableFormatter($throwable), 'HotelQuoteController:actionAjaxFileGenerate');
+        }
+        return $result;
+    }
+
     /**
      * @return array
      */
