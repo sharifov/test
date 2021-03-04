@@ -162,6 +162,12 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
         $this->of_status_id = OfferStatus::NEW;
     }
 
+    public function calculateTotalPrice(): void
+    {
+        $this->of_app_total = $this->offerTotalCalcSum;
+        $this->updateOfferTotalByCurrency();
+    }
+
     /**
      * @return ActiveQuery
      */

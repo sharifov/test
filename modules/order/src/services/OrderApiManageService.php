@@ -251,7 +251,7 @@ class OrderApiManageService
 
             $lead = $newOrder->orLead;
             if ($lead) {
-                $lead->booked();
+                $lead->booked($newOrder->or_owner_user_id);
                 $this->leadRepository->save($lead);
             }
 

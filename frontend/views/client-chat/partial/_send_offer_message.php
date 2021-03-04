@@ -20,7 +20,6 @@ use modules\offer\src\entities\offer\Offer;
 
 <?php foreach ($offers as $offer) : ?>
 Offer: **<?= $offer->of_name ?>**
-Total Price: **<?= trim(($offer->ofClientCurrency->cur_symbol ?? '') . $offer->of_client_total) ?>**
-[Checkout Page](<?= $offer->getCheckoutUrlPage() ?>)
-    ---
+Total Price: **<?= trim($offer->of_client_total . ' ' . ($offer->ofClientCurrency->cur_symbol ?? '')) ?>**
+[View Offer](<?= $offer->getCheckoutUrlPage() ?>)
 <?php endforeach; ?>

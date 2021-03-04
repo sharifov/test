@@ -106,6 +106,9 @@ class OfferProductController extends FController
                         );
                     }
 
+                    $offer->calculateTotalPrice();
+                    $offer->save();
+
                     return ['message' => 'Successfully deleted Product Quote ID (' . $productQuoteId . ') from offer: "' . Html::encode($offer->of_name) . '" (' . $offer->of_id . ')'];
                 }
             } else {
@@ -134,6 +137,9 @@ class OfferProductController extends FController
 
             $offerProduct = OfferProduct::create($offer->of_id, $productQuoteId);
             $this->offerProductRepository->save($offerProduct);
+
+            $offer->calculateTotalPrice();
+            $offer->save();
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableFormatter($throwable), 'OfferProductController:' . __FUNCTION__);
             return ['error' => 'Error: ' . $throwable->getMessage()];
