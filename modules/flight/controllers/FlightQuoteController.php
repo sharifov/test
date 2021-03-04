@@ -10,6 +10,7 @@ use modules\flight\src\repositories\flight\FlightRepository;
 use modules\flight\src\repositories\flightQuotePaxPriceRepository\FlightQuotePaxPriceRepository;
 use modules\flight\src\services\flight\FlightManageService;
 use modules\flight\src\services\flightQuote\FlightQuoteBookGuardService;
+use modules\flight\src\services\flightQuote\FlightQuotePdfService;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchForm;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchService;
@@ -528,6 +529,27 @@ class FlightQuoteController extends FController
             $this->errorBook($flightQuote);
             $result['message'] = $throwable->getMessage();
             \Yii::error(AppHelper::throwableLog($throwable, true), 'FlightQuoteController:actionAjaxBook');
+        }
+        return $result;
+    }
+
+    public function actionAjaxFileGenerate(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $flightQuoteId = (int) Yii::$app->request->post('id', 0);
+        $result = ['status' => 0, 'message' => ''];
+
+        try {
+            $flightQuote = $this->findModel($flightQuoteId);
+            if (FlightQuotePdfService::processingFile($flightQuote)) {
+                $result['status'] = 1;
+                $result['message'] = 'Document have been successfully generated';
+                return $result;
+            }
+            throw new \DomainException('Document generate failed.');
+        } catch (\Throwable $throwable) {
+            $result['message'] = $throwable->getMessage();
+            \Yii::error(AppHelper::throwableLog($throwable, true), 'FlightQuoteController:actionAjaxFileGenerate');
         }
         return $result;
     }

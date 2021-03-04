@@ -116,7 +116,47 @@ $js = <<<JS
             $('#preloader').addClass('d-none');
         });
     });
+    
+    $('body').off('click', '.js-btn-generate-pdf-flight-quote').on('click', '.js-btn-generate-pdf-flight-quote', function (e) {
 
+        if(!confirm('Are you sure you want to generate documents?')) {
+            return false;
+        }
+
+        e.preventDefault();
+        $('#preloader').removeClass('d-none');
+        let quoteId = $(this).data('flight-quote-id');
+                
+        $.ajax({
+          url: $(this).data('url'),
+          type: 'post',
+          data: {id: quoteId},
+          cache: false,
+          dataType: 'json',
+        }).done(function(data) {
+            if (parseInt(data.status) === 1) {
+                new PNotify({
+                    title: 'Document have been successfully generated',
+                    type: 'success',
+                    text: data.message,
+                    hide: true
+                });                
+                addFileToFileStorageList();                
+            } else {
+                new PNotify({
+                    title: 'File generated failed',
+                    type: 'error',
+                    text: data.message,
+                    hide: true
+                });                
+            }
+        })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        }).always(function() {
+            $('#preloader').addClass('d-none');
+        });
+    });
 
     $('body').on('click','.btn-flight-quote-details', function (e) {
         e.preventDefault();

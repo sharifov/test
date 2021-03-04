@@ -270,6 +270,46 @@ $js = <<<JS
         });
     });
     
+    $('body').off('click', '.btn-order-generate-files').on('click', '.btn-order-generate-files', function(e) {
+      
+        e.preventDefault();        
+        if(!confirm('Are you sure you want to generate file?')) {
+            return false;
+        }
+        
+      let orderId = $(this).data('id');
+      let url = $(this).data('url');
+      
+      $.ajax({
+          url: url,
+          type: 'post',
+          data: {'id': orderId},
+          dataType: 'json'
+      })
+          .done(function(data) {
+              if (data.error) {
+                  new PNotify({
+                        title: 'Error: file generating',
+                        type: 'error',
+                        text: data.message,
+                        hide: true
+                    });
+              } else {
+                  addFileToFileStorageList();        
+                  new PNotify({
+                        title: 'File generated',
+                        type: 'success',
+                        text: 'Success',
+                        hide: true
+                    });
+              }
+          })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        }).always(function() {
+        });
+    });
+    
     $('body').off('click', '.btn-cancel-process').on('click', '.btn-cancel-process', function(e) {
       
         e.preventDefault();
