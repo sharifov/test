@@ -181,6 +181,14 @@ class HotelQuote extends ActiveRecord implements Quotable
                         $nameArray[] = $room['code'] ?? '';
                     }
 
+                    $countDays = 1;
+                    if ($hotelRequest->ph_check_out_date && $hotelRequest->ph_check_in_date) {
+                        $date1 = date_create(date('Y-m-d', strtotime($hotelRequest->ph_check_in_date)));
+                        $date2 = date_create(date('Y-m-d', strtotime($hotelRequest->ph_check_out_date)));
+                        $diff = date_diff($date1, $date2);
+                        $countDays = $diff->days;
+                    }
+
                     $prQuote = new ProductQuote();
                     $prQuote->pq_product_id = $hotelRequest->ph_product_id;
                     $prQuote->pq_origin_currency = $currency;
@@ -188,7 +196,7 @@ class HotelQuote extends ActiveRecord implements Quotable
 
                     $prQuote->pq_owner_user_id = Yii::$app->user->id;
                     $prQuote->pq_price = (float)$totalAmount;
-                    $prQuote->pq_origin_price = (float)$totalAmount;
+                    $prQuote->pq_origin_price = (float)$totalAmount * $countDays;
                     $prQuote->pq_client_price = (float)$totalAmount;
                     $prQuote->pq_status_id = ProductQuoteStatus::NEW;
                     $prQuote->pq_gid = self::generateGid();
