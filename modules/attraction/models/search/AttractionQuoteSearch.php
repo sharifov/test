@@ -21,6 +21,7 @@ class AttractionQuoteSearch extends AttractionQuote
             [['atnq_json_response'], 'safe'],
             [['atnq_hash_key'], 'string', 'max' => 32],
             [['atnq_hash_key'], 'safe'],
+            [['atnq_date'], 'safe'],
         ];
     }
 
@@ -63,6 +64,7 @@ class AttractionQuoteSearch extends AttractionQuote
             'atnq_id' => $this->atnq_id,
             'atnq_attraction_id' => $this->atnq_attraction_id,
             'atnq_product_quote_id' => $this->atnq_product_quote_id,
+            'atnq_date' => $this->atnq_date,
             //'atnq_request_hash' => $this->atnq_request_hash,
         ]);
 

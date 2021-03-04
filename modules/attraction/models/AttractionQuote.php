@@ -23,6 +23,7 @@ use yii\helpers\VarDumper;
  * @property string|null $atnq_attraction_name
  * @property string|null $atnq_supplier_name
  * @property string|null $atnq_type_name
+ * @property string|null $atnq_date
  *
  * @property Attraction $atnqAttraction
  * @property ProductQuote $atnqProductQuote
@@ -53,6 +54,7 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable
             [['atnq_booking_id'], 'string', 'max' => 100],
             [['atnq_type_name'], 'string', 'max' => 100],
             [['atnq_attraction_name', 'atnq_supplier_name'], 'string', 'max' => 255],
+            [['atnq_date'], 'string']
         ];
     }
 
@@ -70,7 +72,8 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable
             'atnq_booking_id' => 'Booking ID',
             'atnq_attraction_name' => 'Attraction Name',
             'atnq_supplier_name' => 'Supplier Name',
-            'atnq_type_name' => 'Type Name'
+            'atnq_type_name' => 'Type Name',
+            'atnq_date' => 'Date'
         ];
     }
 
@@ -90,7 +93,7 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable
      * @param string $currency
      * @return array|AttractionQuote|\yii\db\ActiveRecord|null
      */
-    public static function findOrCreateByData(array $quoteData, Attraction $attractionProduct, string $currency = 'USD')
+    public static function findOrCreateByData(array $quoteData, Attraction $attractionProduct, string $date, string $currency = 'USD')
     {
         $aQuote = null;
 
@@ -133,6 +136,7 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable
                         $aQuote->atnq_supplier_name = $quoteData['product']['supplierName'];
                         $aQuote->atnq_type_name = $quoteData['product']['__typename'];
                         $aQuote->atnq_json_response = $quoteData;
+                        $aQuote->atnq_date = $date;
                         //$aQuote->hq_request_hash = $hotelRequest->ph_request_hash_key;
 
                         if (!$aQuote->save()) {

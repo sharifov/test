@@ -168,6 +168,7 @@ class AttractionQuoteController extends FController
     {
         $attractionId = (int) Yii::$app->request->post('atn_id');
         $attractionKey = (string) Yii::$app->request->post('attraction_key');
+
         $result = [];
         Yii::$app->response->format = Response::FORMAT_JSON;
         $attraction = $this->attractionRepository->find($attractionId);
@@ -205,6 +206,8 @@ class AttractionQuoteController extends FController
     {
         $attractionId = (int) Yii::$app->request->get('atn_id');
         $quoteKey = (string) Yii::$app->request->post('quote_key');
+        $date = (string) Yii::$app->request->post('date'); // only for presentation
+
         $productId = 0;
 
         Yii::$app->response->format = Response::FORMAT_JSON;
@@ -236,7 +239,7 @@ class AttractionQuoteController extends FController
 
             //$currency = $hotelData['currency'] ?? 'USD';
 
-            $attractionQuote = AttractionQuote::findOrCreateByData($quoteData, $attraction, $currency = 'USD');
+            $attractionQuote = AttractionQuote::findOrCreateByData($quoteData, $attraction, $currency = 'USD', $date);
 
             if (!$attractionQuote) {
                 throw new Exception('Not added attraction quote - id:  (' . $quoteKey . ')', 8);

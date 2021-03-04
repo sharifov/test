@@ -39,6 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'atnq_attraction_name',
             'atnq_supplier_name',
             'atnq_type_name',
+            'atnq_date',
             //'atnq_json_response',
             [
                 'attribute' => 'atnq_json_response',
