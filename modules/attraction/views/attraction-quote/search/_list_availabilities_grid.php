@@ -30,7 +30,7 @@ $availabilitiesDataProvider = new ArrayDataProvider([
             return $this->render('_list_availabilities_item', ['availabilityItem' => $availabilityItem, 'index' => $index, 'key' => $key, 'attractionSearch' => $attractionSearch]);
         },
         //'layout' => "{items}<div class=\"text-center\" style='margin-top: -20px; margin-bottom: -25px'>{pager}</div>", // {summary}\n<div class="text-center">{pager}</div>
-        'layout' => '{summary}<thead class="thead-light"> <tr> <th>#</th> <th>ID</th>  <th>Date</th> <th>Guests</th> <th>Price</th> <th></th>  </tr> </thead>{items}',
+        'layout' => '{summary}<thead class="thead-light"> <tr> <th>#</th> <th>ID</th>  <th>Date</th> <th>Travellers</th> <th>Price</th> <th></th>  </tr> </thead>{items}',
         'itemOptions' => [
             //'class' => 'item',
             'tag' => false,

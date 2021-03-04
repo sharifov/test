@@ -18,7 +18,6 @@ $pjaxId = 'pjax-attraction-update-form'
     <div class="attraction-form">
         <script>
             pjaxOffFormSubmit('#<?=$pjaxId?>');
-            console.log('#<?=$pjaxId?>')
         </script>
         <?php \yii\widgets\Pjax::begin(['id' => $pjaxId, 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
         <?php
