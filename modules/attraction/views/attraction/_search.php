@@ -8,7 +8,7 @@ use yii\widgets\ActiveForm;
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="hotel-search">
+<div class="attraction-search">
 
     <?php $form = ActiveForm::begin([
         'action' => ['index'],
@@ -18,23 +18,15 @@ use yii\widgets\ActiveForm;
         ],
     ]); ?>
 
-    <?= $form->field($model, 'ph_id') ?>
+    <?= $form->field($model, 'atn_id') ?>
 
-    <?= $form->field($model, 'ph_product_id') ?>
+    <?= $form->field($model, 'atn_product_id') ?>
 
-    <?= $form->field($model, 'ph_check_in_date') ?>
+    <?= $form->field($model, 'atn_date_from') ?>
 
-    <?= $form->field($model, 'ph_check_out_date') ?>
+    <?= $form->field($model, 'atn_date_to') ?>
 
-    <?= $form->field($model, 'ph_destination_code') ?>
-
-    <?php // echo $form->field($model, 'ph_min_star_rate') ?>
-
-    <?php // echo $form->field($model, 'ph_max_star_rate') ?>
-
-    <?php // echo $form->field($model, 'ph_max_price_rate') ?>
-
-    <?php // echo $form->field($model, 'ph_min_price_rate') ?>
+    <?= $form->field($model, 'atn_destination_code') ?>
 
     <div class="form-group">
         <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>

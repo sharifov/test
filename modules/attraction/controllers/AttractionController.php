@@ -84,10 +84,10 @@ class AttractionController extends FController
      */
     public function actionCreate()
     {
-        $model = new Hotel();
+        $model = new Attraction();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->ph_id]);
+            return $this->redirect(['view', 'id' => $model->atn_id]);
         }
 
         return $this->render('create', [
@@ -107,7 +107,7 @@ class AttractionController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->ph_id]);
+            return $this->redirect(['view', 'id' => $model->atn_id]);
         }
 
         return $this->render('update', [
