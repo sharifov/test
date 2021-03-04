@@ -53,7 +53,7 @@ class BookingHotelJob implements RetryableJobInterface
 
             /** @var HotelQuoteCheckRateService $checkRateService */
             $checkRateService = Yii::$container->get(HotelQuoteCheckRateService::class);
-            $checkResult = $checkRateService->checkRate($quote);
+            $checkResult = $checkRateService->checkRateByHotelQuote($quote);
             if ($checkResult->status) {
                 $bookService->book($quote);
                 if ($bookService->status) {

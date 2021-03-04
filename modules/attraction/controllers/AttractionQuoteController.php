@@ -335,7 +335,7 @@ class AttractionQuoteController extends FController
             if ($checkRate) {
                 /** @var HotelQuoteCheckRateService $checkRateService */
                 $checkRateService = Yii::$container->get(HotelQuoteCheckRateService::class);
-                $checkResult = $checkRateService->checkRate($model);
+                $checkResult = $checkRateService->checkRateByHotelQuote($model);
 
                 if ($checkResult->status) {
                     $bookService->book($model);

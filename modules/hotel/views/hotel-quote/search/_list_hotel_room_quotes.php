@@ -40,7 +40,7 @@ $quoteExist = $hotelSearch->quoteExist($dataRoom['groupKey']);
   <tbody>
     <?php foreach ($quoteRooms as $quoteRoomKey => $quoteRoom) : ?>
     <tr id="tr-hotel-quote-<?=($dataRoom['groupKey'])?>" class="tr-hotel-quote-<?=($dataRoom['groupKey'])?> <?= $quoteExist ? 'bg-success' : '' ?>">
-      <th><?= $quoteRoomKey + 1 ?></th>
+      <th><?php echo $quoteRoomKey + 1 ?></th>
       <td>
         <div><?= Html::encode($quoteRoom['name']) ?></div>
       </td>
