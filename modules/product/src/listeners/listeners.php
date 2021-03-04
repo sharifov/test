@@ -15,6 +15,7 @@ use modules\product\src\listeners\productQuote\ProductQuoteDeclinedEventListener
 use modules\product\src\listeners\productQuote\ProductQuoteExpiredEventListener;
 use modules\product\src\listeners\productQuote\ProductQuoteRecalculateChildrenProfitAmountListener;
 use modules\product\src\listeners\productQuote\ProductQuoteRecalculateProfitAmountListener;
+use modules\product\src\listeners\productQuote\ProductQuoteUpdateLeadOrderListener;
 use modules\product\src\listeners\ProductQuoteChangeStatusLogListener;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteCanceledEvent;
@@ -30,17 +31,33 @@ use sales\model\user\entity\profit\listener\UserProfitCalculateByOrderUserProfit
 return [
     ProductQuoteCloneCreatedEvent::class => [ProductQuoteChangeStatusLogListener::class],
     ProductQuoteOptionCloneCreatedEvent::class => [],
-    ProductQuoteInProgressEvent::class => [ProductQuoteInProgressEventListener::class],
+    ProductQuoteInProgressEvent::class => [
+        ProductQuoteInProgressEventListener::class,
+        ProductQuoteUpdateLeadOrderListener::class,
+    ],
     ProductQuoteBookedEvent::class => [
         ProductQuoteBookedEventListener::class,
         AfterBookedFlightOrderProcessListener::class,
         AfterBookedQuoteOrderProcessListener::class,
         OrderPrepareListener::class,
+        ProductQuoteUpdateLeadOrderListener::class,
     ],
-    ProductQuoteErrorEvent::class => [ProductQuoteErrorEventListener::class],
-    ProductQuoteCanceledEvent::class => [ProductQuoteCanceledEventListener::class],
-    ProductQuoteDeclinedEvent::class => [ProductQuoteDeclinedEventListener::class],
-    ProductQuoteExpiredEvent::class => [ProductQuoteExpiredEventListener::class],
+    ProductQuoteErrorEvent::class => [
+        ProductQuoteErrorEventListener::class,
+        ProductQuoteUpdateLeadOrderListener::class,
+    ],
+    ProductQuoteCanceledEvent::class => [
+        ProductQuoteCanceledEventListener::class,
+        ProductQuoteUpdateLeadOrderListener::class,
+    ],
+    ProductQuoteDeclinedEvent::class => [
+        ProductQuoteDeclinedEventListener::class,
+        ProductQuoteUpdateLeadOrderListener::class,
+    ],
+    ProductQuoteExpiredEvent::class => [
+        ProductQuoteExpiredEventListener::class,
+        ProductQuoteUpdateLeadOrderListener::class,
+    ],
     ProductQuoteRecalculateProfitAmountEvent::class => [ProductQuoteRecalculateProfitAmountListener::class],
     ProductQuoteRecalculateChildrenProfitAmountEvent::class => [ProductQuoteRecalculateChildrenProfitAmountListener::class],
     UserProfitCalculateByOrderUserProfitEvent::class => [UserProfitCalculateByOrderUserProfitEventListener::class],
