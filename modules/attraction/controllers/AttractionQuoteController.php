@@ -22,7 +22,9 @@ use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCancelBookService;
 use modules\attraction\src\useCases\api\searchQuote\AttractionQuoteSearchGuard;
 use modules\attraction\src\useCases\api\searchQuote\HotelQuoteSearchService;
 use modules\hotel\src\useCases\quote\HotelQuoteManageService;
+use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
 use Yii;
 use yii\base\Exception;
@@ -45,6 +47,7 @@ use modules\attraction\src\repositories\attraction\AttractionRepository;
  * @property HotelQuoteSearchService $hotelQuoteSearchService
  * @property HotelQuoteRoomRepository $hotelQuoteRoomRepository
  * @property HotelQuoteManageService $hotelQuoteManageService
+ * @property ProductQuoteRepository $productQuoteRepository
  */
 class AttractionQuoteController extends FController
 {
@@ -68,6 +71,10 @@ class AttractionQuoteController extends FController
      * @var HotelQuoteManageService
      */
     private $hotelQuoteManageService;
+    /**
+     * @var ProductQuoteRepository
+     */
+    private ProductQuoteRepository $productQuoteRepository;
 
     public function __construct(
         $id,
@@ -77,6 +84,7 @@ class AttractionQuoteController extends FController
         AttractionRepository $attractionRepository,
         HotelQuoteManageService $hotelQuoteManageService,
         HotelQuoteRoomRepository $hotelQuoteRoomRepository,
+        ProductQuoteRepository $productQuoteRepository,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -86,6 +94,7 @@ class AttractionQuoteController extends FController
         $this->attractionRepository = $attractionRepository;
         $this->hotelQuoteRoomRepository = $hotelQuoteRoomRepository;
         $this->hotelQuoteManageService = $hotelQuoteManageService;
+        $this->productQuoteRepository = $productQuoteRepository;
     }
 
     /**
@@ -335,7 +344,7 @@ class AttractionQuoteController extends FController
             if ($checkRate) {
                 /** @var HotelQuoteCheckRateService $checkRateService */
                 $checkRateService = Yii::$container->get(HotelQuoteCheckRateService::class);
-                $checkResult = $checkRateService->checkRate($model);
+                $checkResult = $checkRateService->checkRateByHotelQuote($model);
 
                 if ($checkResult->status) {
                     $bookService->book($model);
@@ -362,18 +371,23 @@ class AttractionQuoteController extends FController
         Yii::$app->response->format = Response::FORMAT_JSON;
         $id = (int) Yii::$app->request->post('id', 0);
 
-        $model = $this->findModel($id);
-        $model->atnq_booking_id = strtoupper(substr(md5(mt_rand()), 0, 7));
-        ;
-        $model->save();
-        $prductQuote = $model->atnqProductQuote;
-        $prductQuote->pq_status_id = ProductQuoteStatus::BOOKED;
-        $prductQuote->save();
-
-        $result = [
-            'message' => 'Attraction quote booked successful',
-            'status' => 1,
-        ];
+        try {
+            $model = $this->findModel($id);
+            $model->atnq_booking_id = strtoupper(substr(md5(mt_rand()), 0, 7));
+            $model->save();
+            $productQuote = $model->atnqProductQuote;
+            $productQuote->booked(Auth::id());
+            $this->productQuoteRepository->save($productQuote);
+            $result = [
+                'message' => 'Attraction quote booked successful',
+                'status' => 1,
+            ];
+        } catch (\Throwable $e) {
+            $result = [
+                'message' => 'Error. ' . $e->getMessage(),
+                'status' => 0,
+            ];
+        }
 
         return $result;
     }
@@ -383,15 +397,21 @@ class AttractionQuoteController extends FController
         Yii::$app->response->format = Response::FORMAT_JSON;
         $id = (int) Yii::$app->request->post('id', 0);
 
-        $model = $this->findModel($id);
-        $prductQuote = $model->atnqProductQuote;
-        $prductQuote->pq_status_id = ProductQuoteStatus::CANCELED;
-        $prductQuote->save();
-
-        $result = [
-            'message' => 'Attraction quote canceled successful',
-            'status' => 1,
-        ];
+        try {
+            $model = $this->findModel($id);
+            $productQuote = $model->atnqProductQuote;
+            $productQuote->cancelled(Auth::id());
+            $this->productQuoteRepository->save($productQuote);
+            $result = [
+                'message' => 'Attraction quote canceled successful',
+                'status' => 1,
+            ];
+        } catch (\Throwable $e) {
+            $result = [
+                'message' => 'Error. ' . $e->getMessage(),
+                'status' => 0,
+            ];
+        }
 
         return $result;
     }

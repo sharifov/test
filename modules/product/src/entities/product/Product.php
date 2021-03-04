@@ -109,11 +109,11 @@ class Product extends \yii\db\ActiveRecord implements Serializable
         return $this->pr_type_id === ProductType::PRODUCT_HOTEL;
     }
 
-
     public function isAttraction(): bool
     {
         return $this->pr_type_id === ProductType::PRODUCT_ATTRACTION;
     }
+
     public function isRenTCar(): bool
     {
         return $this->pr_type_id === ProductType::PRODUCT_RENT_CAR;

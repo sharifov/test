@@ -135,6 +135,21 @@ class HotelQuoteController extends FController
         }
         $hotelList = $result['hotels'] ?? [];
 
+        foreach ($hotelList as $key => $value) {
+            foreach ($value['rooms'] as $keyRoom => $room) {
+                if ($room['rates'][0]['type'] !== 'BOOKABLE') {
+                    unset($hotelList[$key]['rooms'][$keyRoom]);
+                }
+            }
+            if (empty($hotelList[$key]['rooms'])) {
+                unset($hotelList[$key]);
+            } else {
+                $hotelList[$key]['rooms'] = array_values($hotelList[$key]['rooms']);
+            }
+        }
+
+        $hotelList = array_values($hotelList);
+
         $dataProvider = new ArrayDataProvider([
             'allModels' => $hotelList,
             'pagination' => [
@@ -298,7 +313,7 @@ class HotelQuoteController extends FController
             if ($checkRate) {
                 /** @var HotelQuoteCheckRateService $checkRateService */
                 $checkRateService = Yii::$container->get(HotelQuoteCheckRateService::class);
-                $checkResult = $checkRateService->checkRate($hotelQuote);
+                $checkResult = $checkRateService->checkRateByHotelQuote($hotelQuote);
 
                 if ($checkResult->status) {
                     $bookService->book($hotelQuote);

@@ -55,7 +55,7 @@ class HotelQuoteCheckRateService
      * @throws \Throwable
      * @throws \yii\base\InvalidConfigException
      */
-    public function checkRate(HotelQuote $model): self
+    public function checkRateByHotelQuote(HotelQuote $model): self
     {
         $hotel = HotelQuoteCheckRateGuard::hotel($model);
         $hotelQuoteRooms = HotelQuoteCheckRateGuard::hotelQuoteRooms($model);
@@ -116,5 +116,15 @@ class HotelQuoteCheckRateService
             ->saveChanges();
 
         return $this;
+    }
+
+    public function checkRateByParams(string $checkIn, array $rooms)
+    {
+        $params = [
+            'checkIn' => $checkIn,
+            'rooms' => $rooms,
+        ];
+        $apiResponse = $this->apiService->requestBookingHandler('booking/checkrate', $params);
+        return false;
     }
 }

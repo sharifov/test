@@ -129,11 +129,12 @@ HotelAsset::register($this);
         <span class="quote__vc">
           <span class="mr-1">
             <strong>
-              From:
+              <!--From:-->
             </strong>
           </span>
           <strong class="text-success">
-            $<?=number_format(Html::encode($dataHotel['rooms'][0]['totalAmount'] - ($dataHotel['rooms'][0]['totalMarkup'] ?? 0)), 2)?>
+            $<?php echo number_format(Html::encode($dataHotel['rooms'][0]['totalAmount'] - ($dataHotel['rooms'][0]['totalMarkup'] ?? 0)), 2)?>
+
           </strong>
         </span>
     </div>

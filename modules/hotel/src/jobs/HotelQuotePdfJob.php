@@ -44,6 +44,10 @@ class HotelQuotePdfJob implements RetryableJobInterface
                 'HotelQuotePdfJob:Execute:Throwable'
             );
         } catch (\Throwable $throwable) {
+            AppHelper::throwableLogger(
+                $throwable,
+                'HotelQuotePdfJob:Execute:Throwable'
+            );
             throw new \Exception($throwable->getMessage());
         }
     }

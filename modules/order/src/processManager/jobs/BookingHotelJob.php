@@ -53,13 +53,13 @@ class BookingHotelJob implements RetryableJobInterface
 
             /** @var HotelQuoteCheckRateService $checkRateService */
             $checkRateService = Yii::$container->get(HotelQuoteCheckRateService::class);
-            $checkResult = $checkRateService->checkRate($quote);
+            $checkResult = $checkRateService->checkRateByHotelQuote($quote);
             if ($checkResult->status) {
                 $bookService->book($quote);
                 if ($bookService->status) {
-                    $hotelQuotePdfJob = new HotelQuotePdfJob();
-                    $hotelQuotePdfJob->hotelQuoteId = $quote->hq_id;
-                    Yii::$app->queue_job->priority(10)->push($hotelQuotePdfJob);
+//                    $hotelQuotePdfJob = new HotelQuotePdfJob();
+//                    $hotelQuotePdfJob->hotelQuoteId = $quote->hq_id;
+//                    Yii::$app->queue_job->priority(10)->push($hotelQuotePdfJob);
                     return;
                 }
                 throw new \DomainException($bookService->message);
