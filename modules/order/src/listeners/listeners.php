@@ -78,7 +78,7 @@ return [
     ],
     OrderCanceledEvent::class => [
         OrderChangeStatusLogListener::class,
-        OrderCanceledConfirmationListener::class,
+//        OrderCanceledConfirmationListener::class,
         OrderCanceledHybridNotificationListener::class,
     ],
     OrderFileGeneratedEvent::class => [
