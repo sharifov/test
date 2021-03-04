@@ -541,6 +541,11 @@ class FlightQuoteController extends FController
 
         try {
             $flightQuote = $this->findModel($flightQuoteId);
+
+            if (!$flightQuote->isBooked()) {
+                throw new \DomainException('Quote should have Booked status.');
+            }
+
             if (FlightQuotePdfService::processingFile($flightQuote)) {
                 $result['status'] = 1;
                 $result['message'] = 'Document have been successfully generated';

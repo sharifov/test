@@ -336,6 +336,10 @@ class HotelQuoteController extends FController
         try {
             $hotelQuote = $this->findModel($id);
 
+            if (!$hotelQuote->isBooked()) {
+                throw new \DomainException('Quote should have Booked status.');
+            }
+
             if (HotelQuotePdfService::processingFile($hotelQuote)) {
                 $result['status'] = 1;
                 $result['message'] = 'Document have been successfully generated';
