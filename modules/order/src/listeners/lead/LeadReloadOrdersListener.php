@@ -8,10 +8,14 @@ class LeadReloadOrdersListener
 {
     public function handle($event): void
     {
-        Notifications::pub(
-            ['lead-' . $event->chatId],
-            'reloadOrders',
-            ['data' => []]
-        );
+        try {
+            Notifications::pub(
+                ['lead-' . $event->chatId],
+                'reloadOrders',
+                ['data' => []]
+            );
+        } catch (\Throwable $e) {
+            \Yii::error($e->getMessage(), 'LeadReloadOrdersListener');
+        }
     }
 }
