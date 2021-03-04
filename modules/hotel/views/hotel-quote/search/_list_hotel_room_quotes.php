@@ -43,14 +43,14 @@ $quoteExist = $hotelSearch->quoteExist($dataRoom['groupKey']);
       <th><?= $quoteRoomKey + 1 ?></th>
       <td>
         <div><?= Html::encode($quoteRoom['name']) ?></div>
-<!--        <div><small class="text-secondary">Non-Smoking, High Speed Internet Access, Coffee Maker, Hairdryer, Iron And Ironing Boa</small></div>-->
       </td>
       <td><span class="badge badge-secondary"><?= Html::encode($quoteRoom['boardName']) ?></span></td>
       <td>
         <span class="ml-2"><i class="fa fa-user"></i> <?=(Html::encode($quoteRoom['adults'] ?? 0))?></span>
         <span class="ml-2"><i class="fa fa-child"></i> <?=(Html::encode($quoteRoom['children'] ?? 0))?></span>
       </td>
-      <td colspan="2">$<?=number_format(Html::encode($quoteRoom['amount'] - ($quoteRoom['markup'] ?? 0)), 2)?></td>
+      <td>$<?=number_format(Html::encode($quoteRoom['amount'] - ($quoteRoom['markup'] ?? 0)), 2)?></td>
+      <td class="text-right"><?php echo $quoteRoom['type'] ?></td>
     </tr>
     <?php endforeach; ?>
   </tbody>
