@@ -7,7 +7,7 @@ use yii\data\ActiveDataProvider;
 use modules\attraction\models\AttractionQuote;
 
 /**
- * AttractionQuoteSearch represents the model behind the search form of `modules\hotel\models\HotelQuote`.
+ * AttractionQuoteSearch represents the model behind the search form of `modules\attraction\models\AttractionQuote`.
  */
 class AttractionQuoteSearch extends AttractionQuote
 {

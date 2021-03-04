@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model modules\hotel\models\HotelQuote */
+/* @var $model modules\attraction\models\AttractionQuote */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
@@ -12,17 +12,17 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'hq_hotel_id')->textInput() ?>
+    <?= $form->field($model, 'atnq_attraction_id')->textInput() ?>
 
-    <?= $form->field($model, 'hq_hash_key')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'atnq_hash_key')->textInput() ?>
 
-    <?= $form->field($model, 'hq_product_quote_id')->textInput() ?>
+    <?= $form->field($model, 'atnq_product_quote_id')->textInput() ?>
 
-    <?= $form->field($model, 'hq_destination_name')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'atnq_attraction_name')->textInput() ?>
 
-    <?= $form->field($model, 'hq_hotel_name')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'atnq_supplier_name')->textInput() ?>
 
-    <?= $form->field($model, 'hq_hotel_list_id')->textInput() ?>
+    <?= $form->field($model, 'atnq_type_name')->textInput() ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
