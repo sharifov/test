@@ -2,16 +2,13 @@
 
 namespace modules\attraction\controllers;
 
-use common\components\CommunicationService;
 use common\models\Notifications;
 use frontend\controllers\FController;
 use modules\attraction\AttractionModule;
 use modules\attraction\models\Attraction;
 use modules\attraction\models\AttractionQuote;
-use modules\hotel\models\Hotel;
-use modules\hotel\models\HotelList;
+use modules\attraction\models\search\AttractionQuoteSearch;
 use modules\hotel\models\HotelQuote;
-use modules\hotel\models\search\HotelQuoteSearch;
 use modules\hotel\src\entities\hotelQuoteRoom\HotelQuoteRoomRepository;
 use modules\hotel\src\repositories\hotel\HotelRepository;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookGuard;
@@ -23,7 +20,6 @@ use modules\attraction\src\useCases\api\searchQuote\AttractionQuoteSearchGuard;
 use modules\attraction\src\useCases\api\searchQuote\HotelQuoteSearchService;
 use modules\hotel\src\useCases\quote\HotelQuoteManageService;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
-use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
 use Yii;
@@ -40,7 +36,7 @@ use yii\web\Response;
 use modules\attraction\src\repositories\attraction\AttractionRepository;
 
 /**
- * HotelQuoteController implements the CRUD actions for HotelQuote model.
+ * AttractionQuoteController implements the CRUD actions for AttractionQuote model.
  *
  * @property HotelRepository $hotelRepository
  * @property AttractionRepository $attractionRepository
@@ -114,12 +110,12 @@ class AttractionQuoteController extends FController
     }
 
     /**
-     * Lists all HotelQuote models.
+     * Lists all AttractionQuote models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new HotelQuoteSearch();
+        $searchModel = new AttractionQuoteSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -130,7 +126,7 @@ class AttractionQuoteController extends FController
 
 
     /**
-     * Lists all HotelQuote models.
+     * Lists all AttractionQuote models.
      * @return mixed
      */
     public function actionSearchAjax()
@@ -260,7 +256,7 @@ class AttractionQuoteController extends FController
     }
 
     /**
-     * Displays a single HotelQuote model.
+     * Displays a single AttractionQuote model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -273,16 +269,16 @@ class AttractionQuoteController extends FController
     }
 
     /**
-     * Creates a new HotelQuote model.
+     * Creates a new AttractionQuote model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new HotelQuote();
+        $model = new AttractionQuote();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->hq_id]);
+            return $this->redirect(['view', 'id' => $model->atnq_id]);
         }
 
         return $this->render('create', [
@@ -291,7 +287,7 @@ class AttractionQuoteController extends FController
     }
 
     /**
-     * Updates an existing HotelQuote model.
+     * Updates an existing AttractionQuote model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -302,7 +298,7 @@ class AttractionQuoteController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->hq_id]);
+            return $this->redirect(['view', 'id' => $model->atnq_id]);
         }
 
         return $this->render('update', [
@@ -311,7 +307,7 @@ class AttractionQuoteController extends FController
     }
 
     /**
-     * Deletes an existing HotelQuote model.
+     * Deletes an existing AttractionQuote model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed

@@ -60,8 +60,8 @@ class AttractionModule extends \yii\base\Module
         $items = [
             ['label' => 'Main', 'url' => ['/' . $modulePath . '/default/index']],
             ['label' => 'Attraction Request', 'url' => ['/' . $modulePath . '/attraction/index']],
+            ['label' => 'Quotes', 'url' => ['/' . $modulePath . '/attraction-quote/index']],
             /*['label' => 'Flight Segments', 'url' => ['/' . $modulePath . '/flight-segment/index']],
-            ['label' => 'Quotes', 'url' => ['/' . $modulePath . '/flight-quote/index']],
             ['label' => 'Quote Trip', 'url' => ['/' . $modulePath . '/flight-quote-trip/index']],
             ['label' => 'Quote Segments', 'url' => ['/' . $modulePath . '/flight-quote-segment/index']],
             ['label' => 'Pax', 'url' => ['/' . $modulePath . '/flight-pax/index']],
