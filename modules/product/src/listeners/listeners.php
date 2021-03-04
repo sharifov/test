@@ -15,6 +15,7 @@ use modules\product\src\listeners\productQuote\ProductQuoteDeclinedEventListener
 use modules\product\src\listeners\productQuote\ProductQuoteExpiredEventListener;
 use modules\product\src\listeners\productQuote\ProductQuoteRecalculateChildrenProfitAmountListener;
 use modules\product\src\listeners\productQuote\ProductQuoteRecalculateProfitAmountListener;
+use modules\product\src\listeners\productQuote\ProductQuoteUpdateLeadOfferListener;
 use modules\product\src\listeners\productQuote\ProductQuoteUpdateLeadOrderListener;
 use modules\product\src\listeners\ProductQuoteChangeStatusLogListener;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
@@ -34,6 +35,7 @@ return [
     ProductQuoteInProgressEvent::class => [
         ProductQuoteInProgressEventListener::class,
         ProductQuoteUpdateLeadOrderListener::class,
+        ProductQuoteUpdateLeadOfferListener::class,
     ],
     ProductQuoteBookedEvent::class => [
         ProductQuoteBookedEventListener::class,
@@ -41,22 +43,27 @@ return [
         AfterBookedQuoteOrderProcessListener::class,
         OrderPrepareListener::class,
         ProductQuoteUpdateLeadOrderListener::class,
+        ProductQuoteUpdateLeadOfferListener::class,
     ],
     ProductQuoteErrorEvent::class => [
         ProductQuoteErrorEventListener::class,
         ProductQuoteUpdateLeadOrderListener::class,
+        ProductQuoteUpdateLeadOfferListener::class,
     ],
     ProductQuoteCanceledEvent::class => [
         ProductQuoteCanceledEventListener::class,
         ProductQuoteUpdateLeadOrderListener::class,
+        ProductQuoteUpdateLeadOfferListener::class,
     ],
     ProductQuoteDeclinedEvent::class => [
         ProductQuoteDeclinedEventListener::class,
         ProductQuoteUpdateLeadOrderListener::class,
+        ProductQuoteUpdateLeadOfferListener::class,
     ],
     ProductQuoteExpiredEvent::class => [
         ProductQuoteExpiredEventListener::class,
         ProductQuoteUpdateLeadOrderListener::class,
+        ProductQuoteUpdateLeadOfferListener::class,
     ],
     ProductQuoteRecalculateProfitAmountEvent::class => [ProductQuoteRecalculateProfitAmountListener::class],
     ProductQuoteRecalculateChildrenProfitAmountEvent::class => [ProductQuoteRecalculateChildrenProfitAmountListener::class],
