@@ -215,7 +215,6 @@ $js = <<<JS
       let url = $(this).data('url');
       let btnAdd = $(this);
       
-      btnAdd.addClass('disabled').prop('disabled', true);
       btnAdd.find('i').removeClass('fa-angle-double-right').addClass('fa-spin fa-spinner');
 
         $.ajax({
