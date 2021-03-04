@@ -1231,7 +1231,7 @@ class OrderController extends BaseController
         try {
             $offer = $this->offerRepository->findByGid($form->offerGid);
 
-            $order = $this->orderManageService->createOrder((new CreateOrderDTO($offer->of_lead_id, $request->post())), $form);
+            $order = $this->orderManageService->createOrder((new CreateOrderDTO($offer->of_lead_id, $form->payment->currency, $request->post())), $form);
         } catch (\Throwable $e) {
             Yii::error(AppHelper::throwableFormatter($e), 'API::OrderController::actionCreate::Throwable');
             return new ErrorResponse(

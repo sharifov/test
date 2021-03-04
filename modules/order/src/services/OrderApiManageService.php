@@ -149,12 +149,7 @@ class OrderApiManageService
             $newOrder = (new Order())->create($dto);
             $newOrder->processing();
             $orderId = $this->orderRepository->save($newOrder);
-            $this->recalculateProfitAmountService->setOrders([$newOrder])->recalculateOrders();
-            $lead = $newOrder->orLead;
-            if ($lead) {
-                $lead->booked();
-                $this->leadRepository->save($lead);
-            }
+//            $this->recalculateProfitAmountService->setOrders([$newOrder])->recalculateOrders();
 
             if ($newOrder->or_owner_user_id) {
                 $newOrderUserProfit = (new OrderUserProfit())->create($orderId, $newOrder->or_owner_user_id, 100, $newOrder->or_profit_amount);
@@ -252,6 +247,12 @@ class OrderApiManageService
                 $orderTips->ot_client_amount = $form->tips->total_amount;
                 $orderTips->ot_amount = $form->tips->total_amount;
                 $this->orderTipsRepository->save($orderTips);
+            }
+
+            $lead = $newOrder->orLead;
+            if ($lead) {
+                $lead->booked();
+                $this->leadRepository->save($lead);
             }
 
             return $newOrder;

@@ -8,6 +8,7 @@ use modules\flight\models\FlightQuote;
 use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
+use modules\order\src\entities\order\events\OrderRecalculateTotalPriceEvent;
 use modules\order\src\entities\order\events\OrderUserProfitUpdateProfitAmountEvent;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
@@ -681,7 +682,9 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function setOrderRelation(int $orderId): void
     {
         $this->pq_order_id = $orderId;
-        $this->recordEvent((new OrderRecalculateProfitAmountEvent([$this->pqOrder])));
+        $order = $this->pqOrder;
+        $this->recordEvent(new OrderRecalculateProfitAmountEvent([$order]));
+        $this->recordEvent(new OrderRecalculateTotalPriceEvent($order));
     }
 
     public function isRelatedWithOrder(): bool
