@@ -20,6 +20,8 @@ use frontend\widgets\clientChat\ClientChatAccessWidget;
 use frontend\widgets\notification\NotificationSocketWidget;
 use frontend\widgets\notification\NotificationWidget;
 use http\Exception\RuntimeException;
+use Markdownify\Converter;
+use Markdownify\ConverterExtra;
 use modules\offer\src\entities\offer\OfferQuery;
 use modules\offer\src\entities\offer\search\OfferSearch;
 use sales\auth\Auth;
@@ -1465,10 +1467,11 @@ class ClientChatController extends FController
                     'offers' => $form->offers
                 ]);
 
+                $converter = new ConverterExtra(Converter::LINK_IN_PARAGRAPH);
                 $data = [
                     'message' => [
                         'rid' => $clientChat->cch_rid,
-                        'msg' => trim($message)
+                        'msg' => trim($converter->parseString($message))
                     ],
                 ];
 

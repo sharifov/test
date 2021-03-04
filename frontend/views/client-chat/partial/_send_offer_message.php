@@ -1,27 +1,17 @@
 <?php
 
 use modules\offer\src\entities\offer\Offer;
+use yii\helpers\Html;
 
 /**
  * @var Offer[] $offers
  */
 ?>
-
-<?php /* foreach ($offers as $offer): ?>
-<template>
-    <p>Offer: <b><?= $offer->of_name ?></b></p>
-    <p>Total Price: <b><?= $offer->ofClientCurrency->cur_symbol ?? '' ?> <?= $offer->of_client_total ?></b></p>
-    <p><a href="<?= $offer->getCheckoutUrlPage() ?>" target="_blank">Checkout Page</a></p>
-</template>
-
-<br>
-<br>
-<?php endforeach; */ ?>
-
 <?php foreach ($offers as $offer) : ?>
-Offer: **<?= $offer->of_name ?>**
-Total Price: **<?= trim(number_format($offer->offerTotalCalcSum * $offer->of_client_currency_rate, 2) . ' ' . ($offer->ofClientCurrency->cur_symbol ?? '')) ?>**
-[View Offer](<?= $offer->getCheckoutUrlPage() ?>)
-
-
+<p>Offer: <b><?= $offer->of_name ?></b></p>
+<p>Total Price: <b><?= trim(number_format($offer->offerTotalCalcSum * $offer->of_client_currency_rate, 2) . ' ' . ($offer->ofClientCurrency->cur_symbol ?? '')) ?></b></p>
+<p>
+<a href="<?= $offer->getCheckoutUrlPage() ?>">View Offer</a>
+</p>
+<br>
 <?php endforeach; ?>
