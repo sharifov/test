@@ -8,6 +8,7 @@ use modules\order\src\entities\order\OrderPayStatus;
 use modules\order\src\entities\order\OrderStatus;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\entities\serializer\Serializer;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class OrderSerializer
@@ -53,8 +54,8 @@ class OrderSerializer extends Serializer
         $data['or_files'] = (new OrderFiles())->getList($this->model);
 
         if ($this->model->or_request_data) {
-            $uid = $this->model->or_request_data['uid'] ?? null;
-            $data['or_request_uid'] = $uid;
+            $data['or_request_uid'] = ArrayHelper::getValue($this->model->or_request_data, 'Request.request_uid') ??
+                ArrayHelper::getValue($this->model->or_request_data, 'Request.FlightRequest.uid');
         }
 
         $data['billing_info'] = [];
