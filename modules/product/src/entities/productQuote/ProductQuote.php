@@ -551,6 +551,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return $this->pqProduct->isAttraction();
     }
 
+    public function isRentCar(): bool
+    {
+        return $this->pqProduct->isRenTCar();
+    }
+
     /**
      * @param int|null $creatorId
      * @param string|null $description
