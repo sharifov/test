@@ -15,7 +15,7 @@ use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
 use sales\repositories\product\ProductQuoteRepository;
 use webapi\src\logger\ApiLogger;
-use webapi\src\logger\behaviors\filters\CreditCardFilter;
+use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
 use webapi\src\logger\behaviors\SimpleLoggerBehavior;
 use webapi\src\Messages;
 use webapi\src\request\RequestBo;
@@ -98,17 +98,15 @@ class OrderController extends BaseController
     public function behaviors(): array
     {
         $behaviors = parent::behaviors();
-//        $behaviors['logger'] = [
-//            'class' => SimpleLoggerBehavior::class,
-//            'filter' => CreditCardFilter::class,
-//        ];
+        $behaviors['logger'] = [
+            'class' => SimpleLoggerBehavior::class,
+            'filter' => CreditCardFilter::class,
+        ];
         $behaviors['request'] = [
             'class' => RequestBehavior::class,
             'filter' => CreditCardFilter::class,
+            'except' => ['create']
         ];
-        if (isset($behaviors['logger'])) {
-            unset($behaviors['logger']);
-        }
         return $behaviors;
     }
 
@@ -1212,7 +1210,6 @@ class OrderController extends BaseController
      */
     public function actionCreate(): \webapi\src\response\Response
     {
-        $this->detachBehavior('request');
         $request = Yii::$app->request;
         $form = new OrderCreateForm(count($request->post('productQuotes', [])));
 
