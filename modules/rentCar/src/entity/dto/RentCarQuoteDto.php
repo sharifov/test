@@ -40,6 +40,7 @@ class RentCarQuoteDto
         $model->rcq_vendor_logo_url = RentCarDataParser::getVendorLogo($data);
         $model->rcq_vendor_name = RentCarDataParser::getVendorName($data);
         $model->rcq_request_hash_key = $rentCar->prc_request_hash_key;
+        $model->rcq_car_reference_id = RentCarDataParser::getCarReferenceId($data);
 
         $model->rcq_price_per_day = RentCarDataParser::getPricePerDay($data);
         $model->rcq_days = $rentCar->calculateDays();

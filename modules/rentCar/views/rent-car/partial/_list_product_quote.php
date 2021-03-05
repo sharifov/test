@@ -5,7 +5,9 @@ use kartik\editable\Editable;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
+use sales\auth\Auth;
 use yii\data\ArrayDataProvider;
+use yii\helpers\Inflector;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\helpers\Html;
@@ -91,6 +93,16 @@ JS;
                         'data-gid' => $modelQuote->rcqProductQuote->pq_gid,
                     ]) ?>
 
+                    <?php if ($modelQuote->isBookable()) : ?>
+                        <?php /* TODO:: add check route perm. */ ?>
+                        <?php echo Html::a('<i class="fa fa-share-square"></i> Book', null, [
+                            'class' => 'dropdown-item js-btn-book-rent-car',
+                            'data-url' => Url::to('/rent-car/rent-car-quote/book'),
+                            'data-rent-car-quote-id' => $modelQuote->rcq_id,
+                            'data-product-id' => $modelQuote->rcqProductQuote->pq_product_id,
+                        ]) ?>
+                    <?php endif ?>
+
                     <div class="dropdown-divider"></div>
                     <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [
                         'class' => 'dropdown-item text-danger btn-delete-product-quote',
@@ -160,23 +172,9 @@ JS;
                                 }
                                 $resultOption = '';
                                 foreach ($model->rcq_options as $key => $option) {
-                                    $resultOption .= ucfirst($key) . ' : <b>' . $option . '</b><br />';
+                                    $resultOption .= Inflector::humanize($key) . ' : <b>' . $option . '</b><br />';
                                 }
                                 return $resultOption;
-                            },
-                            'format' => 'raw',
-                        ],
-                        [
-                            'attribute' => 'rcq_advantages',
-                            'value' => static function (RentCarQuote $model) {
-                                if (!$model->rcq_advantages) {
-                                    return Yii::$app->formatter->nullDisplay;
-                                }
-                                $result = '';
-                                foreach ($model->rcq_advantages as $key => $advantage) {
-                                    $result .= '<span class="text-success">' . $advantage . '</span><br />';
-                                }
-                                return $result;
                             },
                             'format' => 'raw',
                         ],

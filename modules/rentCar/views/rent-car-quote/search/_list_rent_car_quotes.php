@@ -4,6 +4,7 @@ use modules\rentCar\src\entity\rentCar\RentCar;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use modules\rentCar\src\helpers\RentCarDataParser;
 use yii\data\ArrayDataProvider;
+use yii\helpers\Inflector;
 use yii\web\View;
 
 /* @var yii\web\View $this */
@@ -14,6 +15,7 @@ use yii\web\View;
 
 $token = RentCarDataParser::getOfferToken($dataRentCar, $rentCar->prc_request_hash_key);
 $exist = RentCarQuote::find()->where(['rcq_offer_token' => $token])->exists();
+
 ?>
 
 <div class="quote <?php echo $exist ? 'quote-added' : '' ?>" id="box-quote-<?php echo $token ?>">
@@ -62,7 +64,7 @@ $exist = RentCarQuote::find()->where(['rcq_offer_token' => $token])->exists();
           </span>
           <strong class="text-success">
             <?php
-                $total = (int) $perDay * $days;
+                $total = round($perDay * $days, 2);
             ?>
             <?php echo RentCarDataParser::getPriceCurrencySymbol($dataRentCar) ?><?php echo $total ?>
           </strong>
@@ -77,9 +79,11 @@ $exist = RentCarQuote::find()->where(['rcq_offer_token' => $token])->exists();
           <div class="col col-6">
             <div class="d-flex">
             <div class="offer__preview px-3">
-              <img
-                src="<?php echo RentCarDataParser::getModelImg($dataRentCar) ?>"
-                alt="car-model" class="img-thumbnail">
+                <?php if ($modelImg = RentCarDataParser::getModelImg($dataRentCar)) : ?>
+                    <img
+                        src="<?php echo $modelImg ?>"
+                        alt="car-model" class="img-thumbnail">
+                <?php endif ?>
             </div>
             <div class="offer__description">
               <div class="offer__item-brand d-flex flex-column mb-2">
@@ -91,9 +95,12 @@ $exist = RentCarQuote::find()->where(['rcq_offer_token' => $token])->exists();
                 <span class="text-md text-secondary"><?php echo RentCarDataParser::getModelName($dataRentCar) ?></span>
               </div>
               <ul class="offer__option-list list-unstyled">
-                <?php foreach (RentCarDataParser::getOptions($dataRentCar) as $name => $value) : ?>
+                <?php foreach (RentCarDataParser::getActionable($dataRentCar) as $name => $value) : ?>
+                    <?php if (empty($value)) : ?>
+                        <?php continue; ?>
+                    <?php endif ?>
                     <li class="offer__option">
-                      <b class="offer-option__key"><?php echo ucfirst($name) ?></b>:
+                      <b class="offer-option__key"><?php echo Inflector::humanize($name) ?></b>:
                       <span class="offer-option__value"><?php echo $value ?></span>
                     </li>
                 <?php endforeach; ?>
@@ -105,13 +112,6 @@ $exist = RentCarQuote::find()->where(['rcq_offer_token' => $token])->exists();
           <div class="col col-6">
             <div class="row align-items-center h-100">
               <div class="col col-4">
-                <ul class="offer__perks-list list-unstyled mb-0">
-                  <?php foreach (RentCarDataParser::getActionable($dataRentCar) as $value) : ?>
-                  <li>
-                    <span class="text-success"><?php echo $value ?></span>
-                  </li>
-                  <?php endforeach; ?>
-                </ul>
               </div>
               <div class="col col-8">
                 <div class="alert alert-info mb-0" role="alert" style="background-color: #fafafb; border: 1px solid #c2cad8;">
@@ -156,6 +156,14 @@ $exist = RentCarQuote::find()->where(['rcq_offer_token' => $token])->exists();
                 <i class="fa fa-check"></i> Added
         </button>
         <?php else : ?>
+        <button
+            type="button"
+            class="btn btn-default quote__footer-btn js-contract-request"
+            data-request-id="<?php echo $rentCar->prc_id ?>"
+            data-token="<?php echo $token ?>"
+            data-ref-id="<?php echo RentCarDataParser::getCarReferenceId($dataRentCar) ?>">
+                <i class="fa fa-angle-double-right"></i>&nbsp; <span>Contract Request</span>
+        </button>
         <button
             type="button"
             class="btn btn-success quote__footer-btn js-add-rent-car-quote"

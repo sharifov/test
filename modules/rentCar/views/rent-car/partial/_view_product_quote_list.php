@@ -56,3 +56,139 @@ $pjaxId = 'pjax-product-quote-list-' . $rentCar->prc_product_id;
 
     <?php \yii\widgets\Pjax::end(); ?>
 </div>
+
+<?php
+$js = <<<JS
+    $('body').off('click', '.js-btn-book-rent-car').on('click', '.js-btn-book-rent-car', function (e) {
+        e.preventDefault();
+        if(!confirm('Are you sure you want to book this quote?')) {
+            return false;
+        }
+        
+        $('#preloader').removeClass('d-none');
+        let quoteId = $(this).data('rent-car-quote-id');
+        let productId = $(this).data('product-id');
+        
+        $.ajax({
+          url: $(this).data('url'),
+          type: 'post',
+          data: {'id': quoteId},
+          cache: false,
+          dataType: 'json',
+        }).done(function(data) {
+            if (parseInt(data.status) === 1) {
+                new PNotify({
+                    title: 'The quote was successfully booking',
+                    type: 'success',
+                    text: data.message,
+                    hide: true
+                });
+                pjaxReload({container: '#pjax-product-quote-list-' + productId});
+                //addFileToFileStorageList();                
+            } else {
+                new PNotify({
+                    title: 'Booking failed',
+                    type: 'error',
+                    text: data.message,
+                    hide: true
+                });
+                pjaxReload({
+                    container: '#pjax-product-quote-list-' + productId
+                });
+            }
+        })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        }).always(function() {
+            $('#preloader').addClass('d-none');
+        });
+    });
+    
+    $('body').off('click', '.js-btn-generate-pdf-rent-car').on('click', '.js-btn-generate-pdf-rent-car', function (e) {
+        e.preventDefault();
+        if(!confirm('Are you sure you want to generate documents?')) {
+            return false;
+        }
+        // TODO::        
+        $('#preloader').removeClass('d-none');
+        let quoteId = $(this).data('hotel-quote-id');
+                
+        $.ajax({
+          url: $(this).data('url'),
+          type: 'post',
+          data: {'id': quoteId},
+          cache: false,
+          dataType: 'json',
+        }).done(function(data) {
+            if (parseInt(data.status) === 1) {
+                new PNotify({
+                    title: 'Document have been successfully generated',
+                    type: 'success',
+                    text: data.message,
+                    hide: true
+                });                
+                addFileToFileStorageList();                
+            } else {
+                new PNotify({
+                    title: 'File generated failed',
+                    type: 'error',
+                    text: data.message,
+                    hide: true
+                });                
+            }
+        })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        }).always(function() {
+            $('#preloader').addClass('d-none');
+        });
+    });
+    
+    $('body').off('click', '.js-btn-cancel-book-rent-car').on('click', '.js-btn-cancel-book-rent-car', function (e) {
+        e.preventDefault();
+        if(!confirm('Are you sure you want to cancel book this quote?')) {
+            return false;
+        }
+        // TODO::   
+        $('#preloader').removeClass('d-none');
+        let quoteId = $(this).data('hotel-quote-id');
+        let productId = $(this).data('product-id');
+        
+        $.ajax({
+          url: $(this).data('url'),
+          type: 'post',
+          data: {'id': quoteId},
+          cache: false,
+          dataType: 'json',
+        }).done(function(data) {
+            if (parseInt(data.status) === 1) {
+                new PNotify({
+                    title: 'Booking is canceled',
+                    type: 'success',
+                    text: data.message,
+                    hide: true
+                });
+                pjaxReload({
+                    container: '#pjax-product-quote-list-' + productId
+                });
+            } else {
+                new PNotify({
+                    title: 'Process failed',
+                    type: 'error',
+                    text: data.message,
+                    hide: true
+                });
+                pjaxReload({
+                    container: '#pjax-product-quote-list-' + productId
+                });
+            }
+        })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        }).always(function() {
+            $('#preloader').addClass('d-none');
+        });
+    });
+JS;
+
+$this->registerJs($js, \yii\web\View::POS_READY);

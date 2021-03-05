@@ -6,6 +6,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\interfaces\Quotable;
 use modules\rentCar\src\entity\rentCar\RentCar;
 use modules\rentCar\src\serializer\RentCarQuoteSerializer;
+use sales\entities\EventTrait;
 use sales\helpers\product\ProductQuoteHelper;
 use Yii;
 
@@ -41,12 +42,17 @@ use Yii;
  * @property float|null $rcq_system_mark_up
  * @property float|null $rcq_agent_mark_up
  * @property float|null $rcq_service_fee_percent
+ * @property string $rcq_car_reference_id
+ * @property array|null $rcq_booking_json
+ * @property string|null $rcq_booking_id
  *
  * @property ProductQuote $rcqProductQuote
  * @property RentCar $rcqRentCar
  */
 class RentCarQuote extends \yii\db\ActiveRecord implements Quotable
 {
+    use EventTrait;
+
     public function rules(): array
     {
         return [
@@ -107,6 +113,13 @@ class RentCarQuote extends \yii\db\ActiveRecord implements Quotable
 
             [['rcq_system_mark_up', 'rcq_agent_mark_up', 'rcq_service_fee_percent'], 'default', 'value' => 0.00],
             [['rcq_system_mark_up', 'rcq_agent_mark_up', 'rcq_service_fee_percent'], 'number'],
+
+            ['rcq_car_reference_id', 'required'],
+            ['rcq_car_reference_id', 'string'],
+
+            ['rcq_booking_json', 'safe'],
+
+            ['rcq_booking_id', 'integer'],
         ];
     }
 
@@ -151,6 +164,9 @@ class RentCarQuote extends \yii\db\ActiveRecord implements Quotable
             'rcq_request_hash_key' => 'Request hash key',
             'rcq_system_mark_up' => 'System mark up',
             'rcq_agent_mark_up' => 'Agent mark up',
+            'rcq_car_reference_id' => 'Car reference ID',
+            'rcq_booking_json' => 'Booking json',
+            'rcq_booking_id' => 'Booking ID',
         ];
     }
 
@@ -166,7 +182,7 @@ class RentCarQuote extends \yii\db\ActiveRecord implements Quotable
 
     public function isBookable(): bool
     {
-        return !$this->rcqProductQuote->isDeclined();
+        return !$this->rcqProductQuote->isBooked();
     }
 
     public static function findByProductQuote(int $productQuoteId): ?Quotable

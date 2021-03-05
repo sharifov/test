@@ -1,6 +1,8 @@
 <?php
 
+use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use yii\bootstrap4\Html;
+use yii\helpers\VarDumper;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
@@ -15,8 +17,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <div class="col-md-4">
-
         <p>
             <?= Html::a('Update', ['update', 'id' => $model->rcq_id], ['class' => 'btn btn-primary']) ?>
             <?= Html::a('Delete', ['delete', 'id' => $model->rcq_id], [
@@ -27,39 +27,81 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
             ]) ?>
         </p>
-
-        <?= DetailView::widget([
-            'model' => $model,
-            'attributes' => [
-                'rcq_id',
-                'rcq_rent_car_id',
-                'rcq_product_quote_id',
-                'rcq_hash_key',
-                'rcq_request_hash_key',
-                'rcq_offer_token',
-                //'rcq_json_response',
-                'rcq_model_name',
-                'rcq_category',
-                'rcq_image_url:url',
-                'rcq_vendor_name',
-                'rcq_vendor_logo_url:url',
-                'rcq_transmission',
-                'rcq_seats',
-                'rcq_doors',
-                //'rcq_options',
-                'rcq_days',
-                'rcq_price_per_day',
-                'rcq_currency',
-                //'rcq_advantages',
-                'rcq_pick_up_location',
-                'rcq_drop_of_location',
-                'rcq_created_dt',
-                'rcq_updated_dt',
-                'rcq_created_user_id',
-                'rcq_updated_user_id',
-            ],
-        ]) ?>
-
+    <div class="row">
+        <div class="col-md-6">
+            <?= DetailView::widget([
+                'model' => $model,
+                'attributes' => [
+                    'rcq_id',
+                    'rcq_rent_car_id',
+                    'rcq_product_quote_id',
+                    'rcq_hash_key',
+                    'rcq_request_hash_key',
+                    'rcq_offer_token',
+                    //'rcq_json_response',
+                    'rcq_model_name',
+                    'rcq_category',
+                    'rcq_image_url:url',
+                    'rcq_vendor_name',
+                    'rcq_vendor_logo_url:url',
+                    'rcq_transmission',
+                    'rcq_seats',
+                    'rcq_doors',
+                    //'rcq_options',
+                    'rcq_days',
+                    'rcq_price_per_day',
+                    'rcq_currency',
+                    //'rcq_advantages',
+                    'rcq_pick_up_location',
+                    'rcq_drop_of_location',
+                    'rcq_created_dt',
+                    'rcq_updated_dt',
+                    'rcq_created_user_id',
+                    'rcq_updated_user_id',
+                ],
+            ]) ?>
+            <?= DetailView::widget([
+                'model' => $model,
+                'attributes' => [
+                    [
+                        'attribute' => 'rcq_options',
+                        'value' => function (RentCarQuote $rentCarQuote) {
+                            if (!$rentCarQuote->rcq_options) {
+                                return Yii::$app->formatter->nullDisplay;
+                            }
+                            return VarDumper::dumpAsString($rentCarQuote->rcq_options, 20, true);
+                        },
+                        'format' => 'raw',
+                    ],
+                    [
+                        'attribute' => 'rcq_booking_json',
+                        'value' => function (RentCarQuote $rentCarQuote) {
+                            if (!$rentCarQuote->rcq_booking_json) {
+                                return Yii::$app->formatter->nullDisplay;
+                            }
+                            return VarDumper::dumpAsString($rentCarQuote->rcq_booking_json, 20, true);
+                        },
+                        'format' => 'raw',
+                    ],
+                ],
+            ]) ?>
+        </div>
+        <div class="col-md-6">
+            <?= DetailView::widget([
+                'model' => $model,
+                'attributes' => [
+                    [
+                        'attribute' => 'hq_json_booking',
+                        'value' => function (RentCarQuote $rentCarQuote) {
+                            if (!$rentCarQuote->rcq_json_response) {
+                                return Yii::$app->formatter->nullDisplay;
+                            }
+                            return VarDumper::dumpAsString($rentCarQuote->rcq_json_response, 20, true);
+                        },
+                        'format' => 'raw',
+                    ],
+                ],
+            ]) ?>
+        </div>
     </div>
-
 </div>
