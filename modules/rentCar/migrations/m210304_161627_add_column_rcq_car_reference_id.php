@@ -1,5 +1,7 @@
 <?php
 
+namespace modules\rentCar\migrations;
+
 use yii\db\Migration;
 
 /**
