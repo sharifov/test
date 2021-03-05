@@ -26,9 +26,8 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-
-            //'rcq_id',
+            'rcq_id',
+            'rcq_created_dt',
             'rcq_rent_car_id',
             'rcq_product_quote_id',
             'rcq_hash_key',
@@ -49,7 +48,6 @@ $this->params['breadcrumbs'][] = $this->title;
             //'rcq_advantages',
             'rcq_pick_up_location',
             'rcq_drop_of_location',
-            //'rcq_created_dt',
             //'rcq_updated_dt',
             //'rcq_created_user_id',
             //'rcq_updated_user_id',
