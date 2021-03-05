@@ -100,6 +100,8 @@ use modules\qaTask\src\useCases\qaTask\multiple\create\QaTaskMultipleCreateForm;
 use modules\qaTask\src\useCases\qaTask\multiple\create\QaTaskMultipleCreateService;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use modules\qaTask\src\useCases\qaTask\takeOver\QaTaskTakeOverForm;
+use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
+use modules\rentCar\src\services\RentCarQuotePdfService;
 use Mpdf\Tag\P;
 use PhpOffice\PhpSpreadsheet\Shared\TimeZone;
 use sales\access\CallAccess;
@@ -2031,6 +2033,7 @@ class TestController extends FController
         if (!$quote = AttractionQuote::findOne(['atnq_id' => $id])) {
             throw new NotFoundException('AttractionQuote not found. Id (' . $id . ')');
         }
+
         try {
             AttractionQuotePdfService::processingFile($quote);
         } catch (\Throwable $throwable) {
@@ -2039,6 +2042,26 @@ class TestController extends FController
             exit();
         }
         return AttractionQuotePdfService::generateForBrowserOutput($quote);
+    }
+
+    public function actionCarPdf(int $id, int $data = 0)
+    {
+        if (!$quote = RentCarQuote::findOne(['rcq_id' => $id])) {
+            throw new NotFoundException('RentCarQuote not found. Id (' . $id . ')');
+        }
+
+        if ($data === 1) {
+            return $this->asJson($quote->serialize());
+        }
+
+        try {
+            RentCarQuotePdfService::processingFile($quote);
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), 'TestController:actionCarPdf');
+            \yii\helpers\VarDumper::dump($throwable->getMessage(), 10, true);
+            exit();
+        }
+        return RentCarQuotePdfService::generateForBrowserOutput($quote);
     }
 
     public function actionZ()

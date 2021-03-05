@@ -91,12 +91,22 @@ $this->params['breadcrumbs'][] = $this->title;
                 'model' => $model,
                 'attributes' => [
                     [
-                        'attribute' => 'hq_json_booking',
+                        'attribute' => 'rcq_json_response',
                         'value' => function (RentCarQuote $rentCarQuote) {
                             if (!$rentCarQuote->rcq_json_response) {
                                 return Yii::$app->formatter->nullDisplay;
                             }
                             return VarDumper::dumpAsString($rentCarQuote->rcq_json_response, 20, true);
+                        },
+                        'format' => 'raw',
+                    ],
+                    [
+                        'attribute' => 'rcq_contract_request_json',
+                        'value' => function (RentCarQuote $rentCarQuote) {
+                            if (!$rentCarQuote->rcq_contract_request_json) {
+                                return Yii::$app->formatter->nullDisplay;
+                            }
+                            return VarDumper::dumpAsString($rentCarQuote->rcq_contract_request_json, 20, true);
                         },
                         'format' => 'raw',
                     ],

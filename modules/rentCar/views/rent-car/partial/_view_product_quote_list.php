@@ -109,9 +109,9 @@ $js = <<<JS
         if(!confirm('Are you sure you want to generate documents?')) {
             return false;
         }
-        // TODO::        
+                
         $('#preloader').removeClass('d-none');
-        let quoteId = $(this).data('hotel-quote-id');
+        let quoteId = $(this).data('rent-car-quote-id');
                 
         $.ajax({
           url: $(this).data('url'),

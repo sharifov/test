@@ -102,6 +102,15 @@ JS;
                             'data-product-id' => $modelQuote->rcqProductQuote->pq_product_id,
                         ]) ?>
                     <?php endif ?>
+                    <?php if ($modelQuote->rcqProductQuote->isBooked()) : ?>
+                        <?php /* TODO:: add check route perm. */ ?>
+                        <?php echo Html::a('<i class="fa fa-file-pdf-o"></i> Generate PDF', null, [
+                            'class' => 'dropdown-item js-btn-generate-pdf-rent-car',
+                            'data-url' => Url::to('/rent-car/rent-car-quote/file-generate'), /* TODO:: add permission */
+                            'data-rent-car-quote-id' => $modelQuote->rcq_id,
+                            'data-product-id' => $modelQuote->rcqProductQuote->pq_product_id,
+                        ]) ?>
+                    <?php endif ?>
 
                     <div class="dropdown-divider"></div>
                     <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [

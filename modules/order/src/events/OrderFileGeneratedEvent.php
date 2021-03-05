@@ -18,6 +18,7 @@ class OrderFileGeneratedEvent
     public const TYPE_HOTEL_CONFIRMATION = 'hotelConfirmation';
     public const TYPE_ATTRACTION_CONFIRMATION = 'attractionConfirmation';
     public const TYPE_FLIGHT_CONFIRMATION = 'flightConfirmation';
+    public const TYPE_RENT_CAR_CONFIRMATION = 'rentCarConfirmation';
     public const TYPE_ORDER_RECEIPT = 'orderReceipt';
 
     /**

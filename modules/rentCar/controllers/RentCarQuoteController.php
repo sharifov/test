@@ -14,6 +14,7 @@ use modules\rentCar\src\forms\RentCarSearchForm;
 use modules\rentCar\src\helpers\RentCarDataParser;
 use modules\rentCar\src\helpers\RentCarQuoteHelper;
 use modules\rentCar\src\repositories\rentCar\RentCarQuoteRepository;
+use modules\rentCar\src\services\RentCarQuotePdfService;
 use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
@@ -203,6 +204,33 @@ class RentCarQuoteController extends FController
         return $result;
     }
 
+    public function actionFileGenerate(): array
+    {
+        if (!Yii::$app->request->isAjax) {
+            throw new BadRequestHttpException();
+        }
+
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $rentCarQuoteId = Yii::$app->request->post('id');
+        $result = ['status' => 0, 'message' => ''];
+
+        try {
+            $rentCarQuote = $this->findRentCarQuote($rentCarQuoteId);
+            if (!$rentCarQuote->rcqProductQuote->isBooked()) {
+                throw new \DomainException('Quote should have Booked status.');
+            }
+
+            if (RentCarQuotePdfService::processingFile($rentCarQuote)) {
+                $result['status'] = 1;
+                $result['message'] = 'Document have been successfully generated';
+            }
+        } catch (\Throwable $throwable) {
+            Yii::warning(AppHelper::throwableLog($throwable, true), 'RentCarQuoteController:actionFileGenerate');
+            $result['message'] = $throwable->getMessage();
+        }
+        return $result;
+    }
+
     public function actionBook()
     {
         if (!Yii::$app->request->isAjax) {
@@ -218,6 +246,12 @@ class RentCarQuoteController extends FController
                 throw new \RuntimeException('RentCarQuoteId param not found');
             }
             $rentCarQuote = $this->findRentCarQuote($rentCarQuoteId);
+
+            /* TODO:: RentCarQuoteBookService::book($rentCarQuote) */
+
+            if (!$order = ArrayHelper::getValue($rentCarQuote, 'rcqProductQuote.pqOrder')) {
+                throw new \DomainException('Not found Order');
+            }
             $rentCar = $rentCarQuote->rcqRentCar;
             $productQuote = $rentCarQuote->rcqProductQuote;
             $apiRentCarService = RentCarModule::getInstance()->apiService;
@@ -237,19 +271,30 @@ class RentCarQuoteController extends FController
                 throw new \DomainException('Contract request is fail. ' . $dataResult['error']);
             }
 
+            if (isset($dataResult['data']['html'])) {
+                unset($dataResult['data']['html']);
+            }
+            if (isset($dataResult['data']['cdw']['html'])) { /* TODO:: to prepare service */
+                unset($dataResult['data']['cdw']['html']);
+            }
+            $rentCarQuote->rcq_contract_request_json = $dataResult['data'];
+
             $client = $rentCarQuote->rcqRentCar->prcProduct->prLead->client;
             $firstName = $client->first_name;
             $lastName = $client->last_name;
 
             $bookResult = $apiRentCarService->book($referenceId, $firstName, $lastName, $rentCar->prc_request_hash_key);
 
-            if ($bookResult['error'] === false) {
+            /*if ($bookResult['error'] === false) {
                 if (!$bookingId = ArrayHelper::getValue($dataResult, 'data.results.booking_id')) {
                     throw new \DomainException('Book request is error. BookingId not found in response.');
                 }
             } else {
                 throw new \DomainException('Book request is fail. ' . $dataResult['error']);
-            }
+            }*/
+
+            $bookingId = $productQuote->pq_gid; /* TODO:: FOR DEBUG:: must by remove  */
+
             $rentCarQuoteRepository = Yii::createObject(RentCarQuoteRepository::class);
             $productQuoteRepository = Yii::createObject(ProductQuoteRepository::class);
 

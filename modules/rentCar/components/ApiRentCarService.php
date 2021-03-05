@@ -81,6 +81,8 @@ class ApiRentCarService extends Component
         if ($headers) {
             $this->request->addHeaders($headers);
         }
+        \Yii::info($data, 'info\ApiRentCarService:sendRequestData'); /* TODO:: FOR DEBUG:: must by remove  */
+        \Yii::info($this->request->toString(), 'info\ApiRentCarService:Request'); /* TODO:: FOR DEBUG:: must by remove  */
         return $this->request->send();
     }
 
@@ -161,6 +163,11 @@ class ApiRentCarService extends Component
         try {
             $response = $this->sendRequest('getContractRequest', $data, 'get');
 
+            \Yii::info([
+                'requestData' => $data,
+                'responseData' => $response->data ?? [],
+            ], 'info\ApiRentCarService::contractRequest:log'); /* TODO:: FOR DEBUG:: must by remove  */
+
             if ($response->isOk) {
                 if (isset($response->data['getCarContractRequest']['results']['status'])) {
                     $out['data'] = $response->data['getCarContractRequest']['results'];
@@ -186,7 +193,6 @@ class ApiRentCarService extends Component
     {
         $out = ['error' => false, 'data' => []];
 
-        $data['refid'] = $referenceId;
         $data['ppn_bundle'] = $referenceId;
         $data['driver_first_name'] = $firstName;
         $data['driver_last_name'] = $lastName;
