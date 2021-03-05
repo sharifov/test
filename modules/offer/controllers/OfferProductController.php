@@ -10,6 +10,8 @@ use modules\offer\src\entities\offerProduct\OfferProductRepository;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\dispatchers\EventDispatcher;
 use sales\helpers\app\AppHelper;
+use sales\model\clientChat\socket\ClientChatSocketCommands;
+use sales\model\clientChatLead\entity\ClientChatLead;
 use Yii;
 use frontend\controllers\FController;
 use yii\db\Exception;
@@ -140,6 +142,11 @@ class OfferProductController extends FController
 
             $offer->calculateTotalPrice();
             $offer->save();
+
+            $chat = ClientChatLead::find()->andWhere(['ccl_lead_id' => $offer->of_lead_id])->one();
+            if ($chat) {
+                ClientChatSocketCommands::clientChatAddOfferButton($chat->chat, $offer->of_lead_id);
+            }
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableFormatter($throwable), 'OfferProductController:' . __FUNCTION__);
             return ['error' => 'Error: ' . $throwable->getMessage()];

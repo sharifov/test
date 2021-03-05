@@ -347,11 +347,12 @@ $chatSendOfferListUrl = Url::toRoute('/client-chat/send-offer-list');
                                 <?= Yii::$app->formatter->format($lead, 'lead'); ?>
                             </span>
                             <span>
-                                <span data-cc-lead-info-offer="<?= $lead->id?>">
+                                <span data-cc-lead-info-quote="<?= $lead->id?>">
                                 <?php if (!$clientChat->isClosed() && $lead->isExistQuotesForSend()) : ?>
                                     <?= Html::tag('span', '<i class="fa fa-plane"> </i> Quotes', ['class' => 'chat-offer', 'data-chat-id' => $clientChat->cch_id, 'data-lead-id' => $lead->id, 'data-url' => $chatSendQuoteListUrl]); ?>
                                 <?php endif; ?>
-
+                                </span>
+                                <span data-cc-lead-info-offer="<?= $lead->id?>">
                                 <?php if (!$clientChat->isClosed() && OfferQuery::existsOffersByLeadId($lead->id)) : ?>
                                     <?= Html::tag('span', '<i class="fa fa-plane"> </i> Offer', ['class' => 'chat-offer', 'data-chat-id' => $clientChat->cch_id, 'data-lead-id' => $lead->id, 'data-url' => $chatSendOfferListUrl]); ?>
                                 <?php endif; ?>

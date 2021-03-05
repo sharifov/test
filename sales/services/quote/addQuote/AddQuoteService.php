@@ -113,7 +113,7 @@ class AddQuoteService
 
             $chat = ClientChatLead::find()->andWhere(['ccl_lead_id' => $lead->id])->one();
             if ($chat) {
-                ClientChatSocketCommands::clientChatAddOfferButton($chat->chat, $lead->id);
+                ClientChatSocketCommands::clientChatAddQuotesButton($chat->chat, $lead->id);
             }
         });
     }

@@ -426,10 +426,23 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                         }
                     }
 
+                    if (obj.cmd === 'clientChatAddQuoteButton') {
+                        let chatId = parseInt(obj.data.chatId, 10);
+                        let leadId = parseInt(obj.data.leadId, 10);
+                        let content = '<span class="chat-offer" data-chat-id="' + chatId + '" data-lead-id="' + leadId + '" data-url="'+obj.data.url+'"><i class="fa fa-plane"> </i> Quotes</span>';
+                        $(document).find('span[data-cc-lead-info-quote="' + leadId + '"]').html(content);
+                    }
+
+                    if (obj.cmd === 'clientChatRemoveQuoteButton') {
+                        let chatId = parseInt(obj.data.chatId, 10);
+                        let leadId = parseInt(obj.data.leadId, 10);
+                        $(document).find('span[data-cc-lead-info-quote="' + leadId + '"]').html("");
+                    }
+
                     if (obj.cmd === 'clientChatAddOfferButton') {
                         let chatId = parseInt(obj.data.chatId, 10);
                         let leadId = parseInt(obj.data.leadId, 10);
-                        let content = '<span class="chat-offer" data-chat-id="' + chatId + '" data-lead-id="' + leadId + '"><i class="fa fa-plane"> </i> Offer</span>';
+                        let content = '<span class="chat-offer" data-chat-id="' + chatId + '" data-lead-id="' + leadId + '" data-url="'+obj.data.url+'"><i class="fa fa-plane"> </i> Offer</span>';
                         $(document).find('span[data-cc-lead-info-offer="' + leadId + '"]').html(content);
                     }
 

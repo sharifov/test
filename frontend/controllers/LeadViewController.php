@@ -675,7 +675,7 @@ class LeadViewController extends FController
                 $this->leadCloneQuoteService->cloneByUid($form->uid, $form->leadGid, Auth::id());
                 $chat = ClientChatLead::find()->andWhere(['ccl_lead_id' => $form->getLeadId()])->one();
                 if ($chat) {
-                    ClientChatSocketCommands::clientChatAddOfferButton($chat->chat, $form->getLeadId());
+                    ClientChatSocketCommands::clientChatAddQuotesButton($chat->chat, $form->getLeadId());
                 }
             } catch (\DomainException $e) {
                 Yii::warning($e->getMessage());
