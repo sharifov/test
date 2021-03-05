@@ -60,6 +60,9 @@ use yii\db\ActiveRecord;
  * @property string|null $pq_updated_dt
  * @property float|null $pq_profit_amount
  * @property int|null $pq_clone_id
+ * @property float|null $pq_app_markup
+ * @property float|null $pq_agent_markup
+ * @property float|null $pq_service_fee_percent
  *
  * @property OfferProduct[] $offerProducts
  * @property Offer[] $opOffers
@@ -121,6 +124,10 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
             ['pq_status_id', 'required'],
             ['pq_status_id', 'integer'],
             ['pq_status_id', 'in', 'range' => array_keys(ProductQuoteStatus::getList())],
+
+            ['pq_app_markup', 'number', 'min' => 0, 'max' => 99999999],
+            ['pq_agent_markup', 'number', 'min' => 0, 'max' => 99999999],
+            ['pq_service_fee_percent', 'number', 'min' => 0, 'max' => 9999],
         ];
     }
 
@@ -157,6 +164,9 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
             'pq_clone_id' => 'Clone Id',
             'clone' => 'Clone Id',
             'pq_profit_amount' => 'Profit amount',
+            'pq_app_markup' => 'App markup',
+            'pq_agent_markup' => 'Agent markup',
+            'pq_service_fee_percent' => 'Service fee percent',
         ];
     }
 
@@ -397,11 +407,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return $isChanged;
     }
 
-    /**
-     * @param ProductQuoteDTO $dto
-     * @return ProductQuote
-     */
-    public static function create(ProductQuoteDTO $dto): ProductQuote
+    public static function create(ProductQuoteDTO $dto, $serviceFeePercent): ProductQuote
     {
         $quote = new self();
 
@@ -422,6 +428,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $quote->pq_owner_user_id = $dto->ownerUserId;
         $quote->pq_created_user_id = $dto->createdUserId;
         $quote->pq_updated_user_id = $dto->updatedUserId;
+        $quote->pq_service_fee_percent = $serviceFeePercent;
 
         return $quote;
     }

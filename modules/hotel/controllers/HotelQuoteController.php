@@ -21,6 +21,7 @@ use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCancelBookService;
 use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchGuard;
 use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchService;
 use modules\hotel\src\useCases\quote\HotelQuoteManageService;
+use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
 use Yii;
 use yii\base\Exception;
@@ -253,7 +254,7 @@ class HotelQuoteController extends FController
             $hotelModel = HotelList::findOrCreateByData($hotelData);
             $currency = $hotelData['currency'] ?? 'USD';
             $resultData = ArrayHelper::merge($hotelData, $quoteData);
-            $hotelQuote = HotelQuote::findOrCreateByData($resultData, $hotelModel, $hotel, $currency);
+            $hotelQuote = HotelQuote::findOrCreateByData($resultData, $hotelModel, $hotel, Auth::id(), $currency);
 
             if (!$hotelQuote) {
                 throw new Exception('Not added hotel quote - hotel code (' . $hotelCode . ') room key (' . $quoteKey . ')', 8);

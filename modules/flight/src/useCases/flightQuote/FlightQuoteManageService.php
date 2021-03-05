@@ -161,8 +161,14 @@ class FlightQuoteManageService
      */
     public function create(Flight $flight, array $quote, int $userId): void
     {
-        $this->transactionManager->wrap(function () use ($flight, $quote, $userId) {
-            $productQuote = ProductQuote::create((new ProductQuoteCreateDTO($flight, $quote, $userId)));
+        $productTypeServiceFee = null;
+        $productType = ProductType::find()->select(['pt_service_fee_percent'])->byFlight()->asArray()->one();
+        if ($productType && $productType['pt_service_fee_percent']) {
+            $productTypeServiceFee = $productType['pt_service_fee_percent'];
+        }
+
+        $this->transactionManager->wrap(function () use ($flight, $quote, $userId, $productTypeServiceFee) {
+            $productQuote = ProductQuote::create(new ProductQuoteCreateDTO($flight, $quote, $userId), $productTypeServiceFee);
             $this->productQuoteRepository->save($productQuote);
 
             $flightQuote = FlightQuote::create((new FlightQuoteCreateDTO($flight, $productQuote, $quote, $userId)));

@@ -145,6 +145,9 @@ $this->params['breadcrumbs'][] = $this->title;
                         'pq_origin_currency_rate',
                         'pq_client_currency_rate',
                         'pq_profit_amount',
+                        'pq_app_markup',
+                        'pq_agent_markup',
+                        'pq_service_fee_percent',
                     ],
                 ]) ?>
             </div>

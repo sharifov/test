@@ -73,6 +73,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'relation' => 'pqOwnerUser',
                 'placeholder' => 'Select User',
             ],
+            'pq_app_markup',
+            'pq_agent_markup',
+            'pq_service_fee_percent',
 
 //            [
 //                'class' => UserColumn::class,
@@ -80,20 +83,20 @@ $this->params['breadcrumbs'][] = $this->title;
 //                'relation' => 'pqCreatedUser',
 //            ],
 
-            [
-                'class' => UserSelect2Column::class,
-                'attribute' => 'pq_updated_user_id',
-                'relation' => 'pqUpdatedUser',
-                'placeholder' => 'Select User',
-            ],
+//            [
+//                'class' => UserSelect2Column::class,
+//                'attribute' => 'pq_updated_user_id',
+//                'relation' => 'pqUpdatedUser',
+//                'placeholder' => 'Select User',
+//            ],
 //            [
 //                'class' => DateTimeColumn::class,
 //                'attribute' => 'pq_created_dt',
 //            ],
-            [
-                'class' => DateTimeColumn::class,
-                'attribute' => 'pq_updated_dt',
-            ],
+//            [
+//                'class' => DateTimeColumn::class,
+//                'attribute' => 'pq_updated_dt',
+//            ],
             ['class' => ActionColumn::class],
         ],
     ]) ?>

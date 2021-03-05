@@ -116,7 +116,7 @@ class RentCarQuoteController extends FController
             if (!$quoteData = RentCarDataParser::findQuoteByToken($dataList, $token, $rentCar->prc_request_hash_key)) {
                 throw new \RuntimeException('RentCar quote by token: (' . $token . ') not found', 3);
             }
-            $productQuote = RentCarProductQuoteDto::create($rentCar, $quoteData);
+            $productQuote = RentCarProductQuoteDto::create($rentCar, $quoteData, Auth::id());
             if (!$productQuote->save()) {
                 throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($productQuote));
             }

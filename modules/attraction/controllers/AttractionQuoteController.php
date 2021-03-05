@@ -239,7 +239,7 @@ class AttractionQuoteController extends FController
 
             //$currency = $hotelData['currency'] ?? 'USD';
 
-            $attractionQuote = AttractionQuote::findOrCreateByData($quoteData, $attraction, $date, $currency = 'USD');
+            $attractionQuote = AttractionQuote::findOrCreateByData($quoteData, $attraction, $date, Auth::id(), $currency = 'USD');
 
             if (!$attractionQuote) {
                 throw new Exception('Not added attraction quote - id:  (' . $quoteKey . ')', 8);

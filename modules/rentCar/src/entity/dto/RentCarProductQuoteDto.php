@@ -4,6 +4,7 @@ namespace modules\rentCar\src\entity\dto;
 
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\entities\productType\ProductType;
 use modules\rentCar\src\entity\rentCar\RentCar;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use modules\rentCar\src\helpers\RentCarDataParser;
@@ -19,29 +20,35 @@ class RentCarProductQuoteDto
     /**
      * @param RentCar $rentCar
      * @param array $data
+     * @param int|null $ownerId
      * @return ProductQuote
      */
-    public static function create(RentCar $rentCar, array $data): ProductQuote
+    public static function create(RentCar $rentCar, array $data, ?int $ownerId): ProductQuote
     {
         $totalPrice = $rentCar->calculateDays() * RentCarDataParser::getPricePerDay($data);
 
-        $model = new ProductQuote();
-        $model->pq_product_id = $rentCar->prc_product_id;
+        $productQuoteDto = new RentCarProductQuoteCreateDto();
+        $productQuoteDto->productId = $rentCar->prc_product_id;
 
-        $model->pq_owner_user_id = Yii::$app->user->id;
-        $model->pq_status_id = ProductQuoteStatus::NEW;
-        $model->pq_gid = ProductQuote::generateGid();
-        $model->pq_name = RentCarQuoteHelper::nameGenerator($rentCar, $data);
+        $productQuoteDto->ownerUserId = $ownerId;
+        $productQuoteDto->name = RentCarQuoteHelper::nameGenerator($rentCar, $data);
 
-        $model->pq_origin_price = $totalPrice;
-        $model->pq_origin_currency = RentCarDataParser::getPriceCurrencyCode($data);
-        $model->pq_origin_currency_rate = 1;
+        $productQuoteDto->originPrice = $totalPrice;
+        $productQuoteDto->originCurrency = RentCarDataParser::getPriceCurrencyCode($data);
+        $productQuoteDto->originCurrencyRate = 1;
 
-        $model->pq_client_currency_rate = ProductQuoteHelper::getClientCurrencyRate($rentCar->prcProduct);
-        $model->pq_client_currency = ProductQuoteHelper::getClientCurrencyCode($rentCar->prcProduct);
-        $model->pq_origin_currency_rate = 1;
+        $productQuoteDto->clientCurrencyRate = ProductQuoteHelper::getClientCurrencyRate($rentCar->prcProduct);
+        $productQuoteDto->clientCurrency = ProductQuoteHelper::getClientCurrencyCode($rentCar->prcProduct);
+        //todo
+        $productQuoteDto->clientCurrencyRate = 1;
 
-        return $model;
+        $productTypeServiceFee = null;
+        $productType = ProductType::find()->select(['pt_service_fee_percent'])->byRentCar()->asArray()->one();
+        if ($productType && $productType['pt_service_fee_percent']) {
+            $productTypeServiceFee = $productType['pt_service_fee_percent'];
+        }
+
+        return ProductQuote::create($productQuoteDto, $productTypeServiceFee);
     }
 
     /**

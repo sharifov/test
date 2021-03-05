@@ -6,6 +6,7 @@ use modules\cruise\src\entity\cruise\Cruise;
 use modules\cruise\src\entity\cruiseQuote\CruiseQuote;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\entities\productType\ProductType;
 use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMethodQuery;
 use sales\helpers\product\ProductQuoteHelper;
 use yii\helpers\VarDumper;
@@ -30,20 +31,27 @@ class CreateQuoteService
         $totalAmount = $quote['cabin']['price'];
         $transaction = \Yii::$app->db->beginTransaction();
         try {
-            $prQuote = new ProductQuote();
-            $prQuote->pq_product_id = $cruise->crs_product_id;
-            $prQuote->pq_origin_currency = $currency;
-            $prQuote->pq_client_currency = ProductQuoteHelper::getClientCurrencyCode($cruise->product);
-            $prQuote->pq_owner_user_id = $userId;
-            $prQuote->pq_price = (float)$totalAmount;
-            $prQuote->pq_origin_price = (float)$totalAmount;
-            $prQuote->pq_client_price = (float)$totalAmount;
-            $prQuote->pq_status_id = ProductQuoteStatus::NEW;
-            $prQuote->pq_gid = self::generateGid();
-            $prQuote->pq_service_fee_sum = 0;
-            $prQuote->pq_client_currency_rate = ProductQuoteHelper::getClientCurrencyRate($cruise->product);
-            $prQuote->pq_origin_currency_rate = 1;
-            $prQuote->pq_name = $quote['cabin']['code'];
+            $productQuoteDto = new CruiseProductQuoteCreateDto();
+            $productQuoteDto->productId = $cruise->crs_product_id;
+            $productQuoteDto->originCurrency = $currency;
+            $productQuoteDto->clientCurrency = ProductQuoteHelper::getClientCurrencyCode($cruise->product);
+            $productQuoteDto->ownerUserId = $userId;
+            $productQuoteDto->price = (float)$totalAmount;
+            $productQuoteDto->originPrice = (float)$totalAmount;
+            $productQuoteDto->clientPrice = (float)$totalAmount;
+            $productQuoteDto->serviceFeeSum = 0;
+            $productQuoteDto->clientCurrencyRate = ProductQuoteHelper::getClientCurrencyRate($cruise->product);
+            $productQuoteDto->originCurrencyRate = 1;
+            $productQuoteDto->name = $quote['cabin']['code'];
+
+            $productTypeServiceFee = null;
+            $productType = ProductType::find()->select(['pt_service_fee_percent'])->byCruise()->asArray()->one();
+            if ($productType && $productType['pt_service_fee_percent']) {
+                $productTypeServiceFee = $productType['pt_service_fee_percent'];
+            }
+
+            $prQuote = ProductQuote::create($productQuoteDto, $productTypeServiceFee);
+
             if (!$prQuote->save()) {
                 throw new \DomainException('Save quote error. Errors: ' . VarDumper::dumpAsString($prQuote->getErrors()));
             }

@@ -4,9 +4,11 @@ namespace modules\hotel\models;
 
 use modules\hotel\src\entities\hotelQuote\events\HotelQuoteCloneCreatedEvent;
 use modules\hotel\src\entities\hotelQuote\serializer\HotelQuoteSerializer;
+use modules\hotel\src\useCases\quote\HotelProductQuoteCreateDto;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\hotel\src\entities\hotelQuote\Scopes;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\entities\productType\ProductType;
 use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMethodQuery;
 use modules\product\src\interfaces\Quotable;
 use sales\entities\EventTrait;
@@ -155,12 +157,18 @@ class HotelQuote extends ActiveRecord implements Quotable
      * @param array $quoteData
      * @param HotelList $hotelModel
      * @param Hotel $hotelRequest
+     * @param int|null $ownerId
      * @param string $currency
      * @return array|HotelQuote|null
      * @throws \yii\base\InvalidConfigException
      */
-    public static function findOrCreateByData(array $quoteData, HotelList $hotelModel, Hotel $hotelRequest, string $currency = 'USD')
-    {
+    public static function findOrCreateByData(
+        array $quoteData,
+        HotelList $hotelModel,
+        Hotel $hotelRequest,
+        ?int $ownerId,
+        string $currency = 'USD'
+    ) {
         $hQuote = null;
 
         if (isset($quoteData['rates']) && $rooms = $quoteData['rates']) {
@@ -189,21 +197,27 @@ class HotelQuote extends ActiveRecord implements Quotable
                         $countDays = $diff->days;
                     }
 
-                    $prQuote = new ProductQuote();
-                    $prQuote->pq_product_id = $hotelRequest->ph_product_id;
-                    $prQuote->pq_origin_currency = $currency;
-                    $prQuote->pq_client_currency = ProductQuoteHelper::getClientCurrencyCode($hotelRequest->phProduct);
+                    $productQuoteDto = new HotelProductQuoteCreateDto();
+                    $productQuoteDto->productId = $hotelRequest->ph_product_id;
+                    $productQuoteDto->originCurrency = $currency;
+                    $productQuoteDto->clientCurrency = ProductQuoteHelper::getClientCurrencyCode($hotelRequest->phProduct);
+                    $productQuoteDto->ownerUserId = $ownerId;
+                    $productQuoteDto->serviceFeeSum = 0;
+                    $productQuoteDto->clientCurrencyRate = ProductQuoteHelper::getClientCurrencyRate($hotelRequest->phProduct);
+                    $productQuoteDto->originCurrencyRate = 1;
+                    $productQuoteDto->name = mb_substr(implode(' & ', $nameArray), 0, 40);
 
-                    $prQuote->pq_owner_user_id = Yii::$app->user->id;
-                    $prQuote->pq_price = (float)$totalAmount;
-                    $prQuote->pq_origin_price = (float)$totalAmount * $countDays;
-                    $prQuote->pq_client_price = (float)$totalAmount;
-                    $prQuote->pq_status_id = ProductQuoteStatus::NEW;
-                    $prQuote->pq_gid = self::generateGid();
-                    $prQuote->pq_service_fee_sum = 0;
-                    $prQuote->pq_client_currency_rate = ProductQuoteHelper::getClientCurrencyRate($hotelRequest->phProduct);
-                    $prQuote->pq_origin_currency_rate = 1;
-                    $prQuote->pq_name = mb_substr(implode(' & ', $nameArray), 0, 40);
+                    $productQuoteDto->price = (float)$totalAmount;
+                    $productQuoteDto->originPrice = (float)$totalAmount * $countDays;
+                    $productQuoteDto->clientPrice = (float)$totalAmount;
+
+                    $productTypeServiceFee = null;
+                    $productType = ProductType::find()->select(['pt_service_fee_percent'])->byHotel()->asArray()->one();
+                    if ($productType && $productType['pt_service_fee_percent']) {
+                        $productTypeServiceFee = $productType['pt_service_fee_percent'];
+                    }
+
+                    $prQuote = ProductQuote::create($productQuoteDto, $productTypeServiceFee);
 
                     if ($prQuote->save()) {
                         $hQuote = new self();

@@ -3,8 +3,10 @@
 namespace modules\attraction\models;
 
 use modules\attraction\src\serializer\AttractionQuoteSerializer;
+use modules\attraction\src\useCases\quote\create\AttractionProductQuoteCreateDto;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\entities\productType\ProductType;
 use modules\product\src\interfaces\Quotable;
 use sales\helpers\product\ProductQuoteHelper;
 use yii\db\ActiveQuery;
@@ -87,14 +89,13 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable
         return md5(uniqid('aq', true));
     }
 
-    /**
-     * @param array $quoteData
-     * @param \modules\attraction\models\Attraction $attractinRequest
-     * @param string $currency
-     * @return array|AttractionQuote|\yii\db\ActiveRecord|null
-     */
-    public static function findOrCreateByData(array $quoteData, Attraction $attractionProduct, string $date, string $currency = 'USD')
-    {
+    public static function findOrCreateByData(
+        array $quoteData,
+        Attraction $attractionProduct,
+        string $date,
+        ?int $ownerId,
+        string $currency = 'USD'
+    ) {
         $aQuote = null;
 
         if (isset($quoteData['product']) && $quoteId = $quoteData['product']['id']) {
@@ -111,21 +112,26 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable
                 $totalAmount = $quoteData['product']['guidePrice'];
 
                 if (!$aQuote) {
-                    $prQuote = new ProductQuote();
-                    $prQuote->pq_product_id = $attractionProduct->atn_product_id;
-                    $prQuote->pq_origin_currency = $currency;
-                    $prQuote->pq_client_currency = ProductQuoteHelper::getClientCurrencyCode($attractionProduct->atnProduct);
+                    $productQuoteDto = new AttractionProductQuoteCreateDto();
+                    $productQuoteDto->productId = $attractionProduct->atn_product_id;
+                    $productQuoteDto->originCurrency = $currency;
+                    $productQuoteDto->clientCurrency = ProductQuoteHelper::getClientCurrencyCode($attractionProduct->atnProduct);
+                    $productQuoteDto->ownerUserId = $ownerId;
+                    $productQuoteDto->price = (float)$totalAmount;
+                    $productQuoteDto->originPrice = (float)$totalAmount;
+                    $productQuoteDto->clientPrice = (float)$totalAmount;
+                    $productQuoteDto->serviceFeeSum = 0;
+//                    $productQuoteDto->clientCurrencyRate = ProductQuoteHelper::getClientCurrencyRate($hotelRequest->phProduct);
+                    $productQuoteDto->originCurrencyRate = 1;
+                    $productQuoteDto->name = mb_substr($quoteData['product']['name'], 0, 40);
 
-                    $prQuote->pq_owner_user_id = Yii::$app->user->id;
-                    $prQuote->pq_price = (float)$totalAmount;
-                    $prQuote->pq_origin_price = (float)$totalAmount;
-                    $prQuote->pq_client_price = (float)$totalAmount;
-                    $prQuote->pq_status_id = ProductQuoteStatus::NEW;
-                    $prQuote->pq_gid = self::generateGid();
-                    $prQuote->pq_service_fee_sum = 0;
-                    //$prQuote->pq_client_currency_rate = ProductQuoteHelper::getClientCurrencyRate($hotelRequest->phProduct);
-                    $prQuote->pq_origin_currency_rate = 1;
-                    $prQuote->pq_name = mb_substr($quoteData['product']['name'], 0, 40);
+                    $productTypeServiceFee = null;
+                    $productType = ProductType::find()->select(['pt_service_fee_percent'])->byAttraction()->asArray()->one();
+                    if ($productType && $productType['pt_service_fee_percent']) {
+                        $productTypeServiceFee = $productType['pt_service_fee_percent'];
+                    }
+
+                    $prQuote = ProductQuote::create($productQuoteDto, $productTypeServiceFee);
 
                     if ($prQuote->save()) {
                         $aQuote = new self();
