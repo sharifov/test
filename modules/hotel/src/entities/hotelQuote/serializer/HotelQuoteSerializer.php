@@ -4,6 +4,7 @@ namespace modules\hotel\src\entities\hotelQuote\serializer;
 
 use modules\hotel\models\HotelQuote;
 use sales\entities\serializer\Serializer;
+use yii\helpers\VarDumper;
 
 /**
  * Class HotelQuoteExtraData
@@ -34,6 +35,14 @@ class HotelQuoteSerializer extends Serializer
     public function getData(): array
     {
         $data = $this->toArray();
+
+        $data['hq_nights'] = null;
+        if ($this->model->hq_check_in_date && $this->model->hq_check_out_date) {
+            $checkInDate = new \DateTimeImmutable($this->model->hq_check_in_date);
+            $checkOutDate = new \DateTimeImmutable($this->model->hq_check_out_date);
+            $diff = $checkInDate->diff($checkOutDate);
+            $data['hq_nights'] = $diff->d;
+        }
 
         $data['hotel_request'] = $this->model->hqHotel ? $this->model->hqHotel->serialize() : [];
 

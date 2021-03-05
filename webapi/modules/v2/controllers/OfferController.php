@@ -280,6 +280,7 @@ class OfferController extends BaseController
                     "hq_json_booking": null,
                     "hq_check_in_date": "2021-06-17",
                     "hq_check_out_date": "2021-06-24",
+                    "hq_nights": 7,
                     "hotel_request": {
                         "ph_check_in_date": "2021-06-17",
                         "ph_check_out_date": "2021-06-24",
