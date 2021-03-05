@@ -49,6 +49,7 @@ class RentCarQuoteDto
         $model->rcq_service_fee_percent =
             ProductTypePaymentMethodQuery::getDefaultPercentFeeByProductType(ProductType::PRODUCT_RENT_CAR) ??
             Yii::$app->params['settings']['quote_service_fee_percent'];
+        $model->rcq_created_dt = date('Y-m-d H:i:s');
 
         return $model;
     }
