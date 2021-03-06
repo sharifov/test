@@ -95,14 +95,14 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
                         ]) ?>
 
 
-                       <!-- <?php /*= Html::a('<i class="fa fa-plus"></i> Add Room', null, [
+                       <?= Html::a('<i class="fa fa-plus"></i> Add Travelers', null, [
                             'data-url' => \yii\helpers\Url::to([
-                                '/hotel/hotel-room/create-ajax',
+                                '/attraction/attraction-pax/create-ajax',
                                 'id' => $product->attraction->atn_id,
                             ]),
                             'data-hotel-id' => $product->attraction->atn_id,
-                            'class' => 'dropdown-item btn-add-hotel-room'
-                        ]) */?> -->
+                            'class' => 'dropdown-item btn-add-attraction-travelers'
+                        ])?>
 
                         <div class="dropdown-divider"></div>
                         <?= Html::a('<i class="fa fa-edit"></i> Update Product', null, [
@@ -167,14 +167,14 @@ $js = <<<JS
         });
     });
 
-    /*$('body').off('click', '.btn-add-hotel-room').on('click', '.btn-add-hotel-room', function (e) {
+    $('body').off('click', '.btn-add-attraction-travelers').on('click', '.btn-add-attraction-travelers', function (e) {
         e.preventDefault();
         let url = $(this).data('url');
         //$('#preloader').removeClass('d-none');
         
         let modal = $('#modal-df');
         modal.find('.modal-body').html('');
-        modal.find('.modal-title').html('Add Room request');
+        modal.find('.modal-title').html('Add Travelers request');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
             //$('#preloader').addClass('d-none');
             if (status == 'error') {
@@ -186,7 +186,7 @@ $js = <<<JS
                 });
             }
         });
-    });*/
+    });
     
     /*$('body').off('click', '.btn-update-hotel-room').on('click', '.btn-update-hotel-room', function (e) {
         e.preventDefault();

@@ -35,6 +35,16 @@ class AttractionPax extends \yii\db\ActiveRecord
         self::PAX_LIST_ID[self::PAX_INFANT] => self::PAX_INFANT,
     ];
 
+    public const PAX_AGE_RANGE = [
+        self::PAX_LIST_ID[self::PAX_CHILD] => [
+            'min' => 1,
+            'max' => 12
+        ],
+        self::PAX_LIST_ID[self::PAX_ADULT] => [
+            'min' => 13
+        ]
+    ];
+
     /**
      * {@inheritdoc}
      */
@@ -71,6 +81,36 @@ class AttractionPax extends \yii\db\ActiveRecord
             'atnp_last_name' => 'Last Name',
             'atnp_dob' => 'Date of Birth',
         ];
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAdult(): bool
+    {
+        return (int) $this->atnp_type_id === self::PAX_LIST_ID[self::PAX_ADULT];
+    }
+
+    /**
+     * @return bool
+     */
+    public function isChild(): bool
+    {
+        return (int) $this->atnp_type_id === self::PAX_LIST_ID[self::PAX_CHILD];
+    }
+
+    public function getPaxTypeName(): string
+    {
+        return self::PAX_LIST[$this->atnp_type_id] ?? '';
+    }
+
+    /**
+     * @param int $paxId
+     * @return array|null
+     */
+    public function getPaxAgeRangeByPaxId(int $paxId): ?array
+    {
+        return self::PAX_AGE_RANGE[$paxId] ?? null;
     }
 
     /**

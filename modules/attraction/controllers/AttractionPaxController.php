@@ -2,12 +2,17 @@
 
 namespace modules\attraction\controllers;
 
+use modules\attraction\models\Attraction;
+use modules\attraction\models\forms\PaxForm;
+use modules\attraction\models\forms\AttractionPaxForm;
 use Yii;
 use modules\attraction\models\AttractionPax;
 use modules\attraction\models\search\AttractionPaxSearch;
+use yii\helpers\VarDumper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\BadRequestHttpException;
 
 /**
  * AttractionPaxController implements the CRUD actions for AttractionPax model.
@@ -21,12 +26,80 @@ class AttractionPaxController extends Controller
     {
         return [
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
                 ],
             ],
         ];
+    }
+
+    public function actionCreateAjax()
+    {
+        $model = new PaxForm();
+
+        if ($model->load(Yii::$app->request->post())) {
+            //Yii::$app->response->format = Response::FORMAT_JSON;
+
+            if ($model->validate()) {
+                if ($model->atn_pax_list) {
+                    $paxIDs = [];
+                    foreach ($model->atn_pax_list as $paxData) {
+                        $paxForm = new AttractionPaxForm();
+                        $paxForm->attributes = $paxData;
+                        $paxForm->atnp_atn_id = $model->atn_attraction_id;
+
+                        $paxModel = null;
+                        if ($paxForm->atnp_id) {
+                            $paxModel = AttractionPax::findOne($paxForm->atnp_id);
+                        }
+
+                        if (!$paxModel) {
+                            $paxModel = new AttractionPax();
+                            $paxModel->atnp_atn_id = $model->atn_attraction_id;
+                        }
+
+                        $paxModel->attributes = $paxForm->attributes;
+                        if (!$paxModel->save()) {
+                            Yii::error('attr: '  . VarDumper::dumpAsString($paxModel->attributes) . ', errors:' . VarDumper::dumpAsString($paxModel->errors), 'AttractionPaxController:actionCreateAjax:AttractionPaxPax:save');
+                        } else {
+                            $paxIDs[] = $paxModel->atnp_id;
+                        }
+                    }
+
+                    $paxForDelete = AttractionPax::find()->where(['NOT IN', 'atnp_id', $paxIDs])->andWhere(['atnp_atn_id' => $model->atn_attraction_id])->all();
+                    if ($paxForDelete) {
+                        foreach ($paxForDelete as $paxDeleteItem) {
+                            $paxDeleteItem->delete();
+                        }
+                    }
+                }
+
+                /*$hotel = $modelRoom->hrHotel;
+                $this->hotelQuoteSearchService->clearCache($hotel->ph_request_hash_key);*/
+                return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-product-search-' . $model->product_id . '"});</script>';
+                //return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-hotel-rooms-' . $modelRoom->atn_attraction_id . '"});</script>';
+            }
+            //return ['errors' => \yii\widgets\ActiveForm::validate($model)];
+        } else {
+            $attractionId = (int) Yii::$app->request->get('id');
+
+            if (!$attractionId) {
+                throw new BadRequestHttpException('Not found Attraction identity.');
+            }
+
+            $attraction = Attraction::findOne($attractionId);
+            if (!$attraction) {
+                throw new BadRequestHttpException('Not found this Attraction');
+            }
+
+            $model->atn_attraction_id = $attractionId;
+            $model->product_id = $attraction->atn_product_id;
+        }
+
+        return $this->renderAjax('create_ajax_form', [
+            'model' => $model,
+        ]);
     }
 
     /**
