@@ -202,13 +202,9 @@ class HotelQuote extends ActiveRecord implements Quotable
                     $productQuoteDto->originCurrency = $currency;
                     $productQuoteDto->clientCurrency = ProductQuoteHelper::getClientCurrencyCode($hotelRequest->phProduct);
                     $productQuoteDto->ownerUserId = $ownerId;
-                    $productQuoteDto->serviceFeeSum = 0;
                     $productQuoteDto->clientCurrencyRate = ProductQuoteHelper::getClientCurrencyRate($hotelRequest->phProduct);
                     $productQuoteDto->originCurrencyRate = 1;
                     $productQuoteDto->name = mb_substr(implode(' & ', $nameArray), 0, 40);
-
-                    $productQuoteDto->price = (float)$totalAmount;
-                    $productQuoteDto->originPrice = (float)$totalAmount * $countDays;
                     $productQuoteDto->clientPrice = (float)$totalAmount;
 
                     $productTypeServiceFee = null;
@@ -371,6 +367,11 @@ class HotelQuote extends ActiveRecord implements Quotable
                 }
 
                 if (isset($prQuote)) {
+                    $productQuoteDto->originPrice = (float)$totalAmount * $countDays;
+                    $productQuoteDto->serviceFeeSum = 0;
+                    $productQuoteDto->price = (float)$totalAmount;
+
+
                     $systemPrice = ProductQuoteHelper::calcSystemPrice((float)$totalSystemPrice, $prQuote->pq_origin_currency);
                     $prQuote->setQuotePrice(
                         (float)$totalAmount,
