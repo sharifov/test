@@ -375,15 +375,15 @@ class HotelQuote extends ActiveRecord implements Quotable
                     $prQuote->pq_origin_price = (float)$hotelQuoteRoomAmount * $hQuote->getCountDays();
                     $prQuote->pq_app_markup = (float)$hotelQuoteRoomSystemMarkup * $hQuote->getCountDays();
                     $prQuote->pq_agent_markup = (float)$hotelQuoteRoomAgentMarkup * $hQuote->getCountDays();
-                    $prQuote->pq_service_fee_sum =
+                    $prQuote->pq_price =
                         ProductQuoteHelper::roundPrice(
                             (
                                 ($prQuote->pq_origin_price + $prQuote->pq_app_markup + $prQuote->pq_agent_markup)
                                 / ((100 - $prQuote->pq_service_fee_percent) / 100)
-                                * $prQuote->pq_origin_currency_rate
+                                / $prQuote->pq_origin_currency_rate
                             )
                         );
-                    $prQuote->pq_price = $prQuote->pq_origin_price * $prQuote->pq_origin_currency_rate + $prQuote->pq_service_fee_sum;
+                    $prQuote->pq_service_fee_sum = $prQuote->pq_price - $prQuote->pq_origin_price / $prQuote->pq_origin_currency_rate;
 
 //                    $systemPrice = ProductQuoteHelper::calcSystemPrice((float)$totalSystemPrice, $prQuote->pq_origin_currency);
 //                    $prQuote->setQuotePrice(
