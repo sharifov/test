@@ -85,7 +85,7 @@ class AfterBookedFlightJob implements RetryableJobInterface
 
         $hasDifferentFlightQuote = false;
         foreach ($quotes as $quote) {
-            if ($quote->pqProduct->isHotel()) {
+            if ($quote->pqProduct->isHotel() || $quote->pqProduct->isAttraction() || $quote->pqProduct->isRenTCar()) {
                 $hasDifferentFlightQuote = true;
                 break;
             }

@@ -52,6 +52,9 @@ class StartBookingOtherProductsJob implements JobInterface
             } elseif ($quote->pqProduct->isAttraction()) {
                 \Yii::$app->queue_job->push(new BookingAttractionJob($quote->childQuote->getId()));
                 $createdAnyJob = true;
+            } elseif ($quote->pqProduct->isRenTCar()) {
+                \Yii::$app->queue_job->push(new BookingRentCarJob($quote->childQuote->getId()));
+                $createdAnyJob = true;
             }
         }
 
