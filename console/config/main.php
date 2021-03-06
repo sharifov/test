@@ -1,6 +1,7 @@
 <?php
 
 use modules\hotel\HotelModule;
+use modules\rentCar\RentCarModule;
 
 $params = array_merge(
     require __DIR__ . '/../../common/config/params.php',
@@ -161,6 +162,9 @@ return [
         ],
         'hotel' => [
             'class' => HotelModule::class,
+        ],
+        'rent-car' => [
+            'class' => RentCarModule::class,
         ],
     ],
     'params' => $params,
