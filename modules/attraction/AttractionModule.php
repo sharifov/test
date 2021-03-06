@@ -57,21 +57,19 @@ class AttractionModule extends \yii\base\Module
      */
     public static function getListMenu(string $modulePath = 'attraction'): array
     {
-        $items = [
+        return [
             ['label' => 'Main', 'url' => ['/' . $modulePath . '/default/index']],
             ['label' => 'Attraction Request', 'url' => ['/' . $modulePath . '/attraction/index']],
             ['label' => 'Quotes', 'url' => ['/' . $modulePath . '/attraction-quote/index']],
+            ['label' => 'Pax', 'url' => ['/' . $modulePath . '/attraction-pax/index']],
             /*['label' => 'Flight Segments', 'url' => ['/' . $modulePath . '/flight-segment/index']],
             ['label' => 'Quote Trip', 'url' => ['/' . $modulePath . '/flight-quote-trip/index']],
             ['label' => 'Quote Segments', 'url' => ['/' . $modulePath . '/flight-quote-segment/index']],
-            ['label' => 'Pax', 'url' => ['/' . $modulePath . '/flight-pax/index']],
             ['label' => 'Pax Price', 'url' => ['/' . $modulePath . '/flight-quote-pax-price/index']],
             ['label' => 'Stops', 'url' => ['/' . $modulePath . '/flight-quote-segment-stop/index']],
             ['label' => 'Baggage', 'url' => ['/' . $modulePath . '/flight-quote-segment-pax-baggage/index']],
             ['label' => 'Baggage charge', 'url' => ['/' . $modulePath . '/flight-quote-segment-pax-baggage-charge/index']],
             ['label' => 'Status Log', 'url' => ['/' . $modulePath . '/flight-quote-status-log/index']],*/
         ];
-
-        return $items;
     }
 }
