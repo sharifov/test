@@ -248,7 +248,7 @@ class RentCarQuoteController extends FController
             }
             $rentCarQuote = $this->findRentCarQuote($rentCarQuoteId);
 
-            if (RentCarQuoteBookService::book($rentCarQuote)) {
+            if (RentCarQuoteBookService::book($rentCarQuote, Auth::id())) {
                 $result['message'] = 'Success';
                 $result['status'] = 1;
             }

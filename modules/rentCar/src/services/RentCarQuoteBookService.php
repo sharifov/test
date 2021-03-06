@@ -6,7 +6,6 @@ use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\rentCar\RentCarModule;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use modules\rentCar\src\repositories\rentCar\RentCarQuoteRepository;
-use sales\auth\Auth;
 use Yii;
 use yii\helpers\ArrayHelper;
 
@@ -15,7 +14,7 @@ use yii\helpers\ArrayHelper;
  */
 class RentCarQuoteBookService
 {
-    public static function book(RentCarQuote $rentCarQuote, bool $preBookingCheck = true): bool
+    public static function book(RentCarQuote $rentCarQuote, ?int $creatorId, bool $preBookingCheck = true): bool
     {
         $rentCar = $rentCarQuote->rcqRentCar;
         $productQuote = $rentCarQuote->rcqProductQuote;
@@ -63,7 +62,7 @@ class RentCarQuoteBookService
         $rentCarQuote->rcq_booking_id = $bookingId;
         $rentCarQuoteRepository->save($rentCarQuote);
 
-        $productQuote->booked(Auth::id());
+        $productQuote->booked($creatorId);
         $productQuoteRepository->save($productQuote);
 
         return true;
