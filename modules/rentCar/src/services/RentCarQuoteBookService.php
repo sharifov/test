@@ -3,7 +3,6 @@
 namespace modules\rentCar\src\services;
 
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
-use modules\rentCar\RentCarModule;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use modules\rentCar\src\repositories\rentCar\RentCarQuoteRepository;
 use Yii;
@@ -18,7 +17,7 @@ class RentCarQuoteBookService
     {
         $rentCar = $rentCarQuote->rcqRentCar;
         $productQuote = $rentCarQuote->rcqProductQuote;
-        $apiRentCarService = RentCarModule::getInstance()->apiService;
+        $apiRentCarService = Yii::$app->getModule('rent-car')->apiService;
         $referenceId = $rentCarQuote->rcq_car_reference_id;
 
         $dataResult = \Yii::$app->cacheFile->get($referenceId);
