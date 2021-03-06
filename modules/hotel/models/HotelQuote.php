@@ -189,14 +189,6 @@ class HotelQuote extends ActiveRecord implements Quotable
                         $nameArray[] = $room['code'] ?? '';
                     }
 
-                    $countDays = 1;
-                    if ($hotelRequest->ph_check_out_date && $hotelRequest->ph_check_in_date) {
-                        $date1 = date_create(date('Y-m-d', strtotime($hotelRequest->ph_check_in_date)));
-                        $date2 = date_create(date('Y-m-d', strtotime($hotelRequest->ph_check_out_date)));
-                        $diff = date_diff($date1, $date2);
-                        $countDays = $diff->days;
-                    }
-
                     $productQuoteDto = new HotelProductQuoteCreateDto();
                     $productQuoteDto->productId = $hotelRequest->ph_product_id;
                     $productQuoteDto->originCurrency = $currency;
@@ -238,6 +230,9 @@ class HotelQuote extends ActiveRecord implements Quotable
                 }
             }
 
+            $hotelQuoteRoomAmount = 0;
+            $hotelQuoteRoomSystemMarkup = 0;
+            $hotelQuoteRoomAgentMarkup = 0;
             if ($hQuote && !$hQuote->hotelQuoteRooms) {
                 $totalSystemPrice = 0;
                 $totalServiceFeeSum = 0;
@@ -288,6 +283,16 @@ class HotelQuote extends ActiveRecord implements Quotable
                         $qRoom->hqr_cancel_from_dt = date("Y-m-d H:i:s", strtotime($room['cancellationPolicies'][0]['from']));
                     } else {
                         $qRoom->hqr_cancel_from_dt = $room['cancellationPolicies']['from'] ?? null;
+                    }
+
+                    if ($qRoom->hqr_amount) {
+                        $hotelQuoteRoomAmount += $qRoom->hqr_amount;
+                    }
+                    if ($qRoom->hqr_system_mark_up) {
+                        $hotelQuoteRoomSystemMarkup += $qRoom->hqr_system_mark_up;
+                    }
+                    if ($qRoom->hqr_agent_mark_up) {
+                        $hotelQuoteRoomAgentMarkup += $qRoom->hqr_agent_mark_up;
                     }
 
                     if (!$qRoom->save()) {
@@ -367,20 +372,33 @@ class HotelQuote extends ActiveRecord implements Quotable
                 }
 
                 if (isset($prQuote)) {
-                    $productQuoteDto->originPrice = (float)$totalAmount * $countDays;
-                    $productQuoteDto->serviceFeeSum = 0;
-                    $productQuoteDto->price = (float)$totalAmount;
+                    $prQuote->pq_origin_price = (float)$hotelQuoteRoomAmount * $hQuote->getCountDays();
+                    $prQuote->pq_app_markup = (float)$hotelQuoteRoomSystemMarkup * $hQuote->getCountDays();
+                    $prQuote->pq_agent_markup = (float)$hotelQuoteRoomAgentMarkup * $hQuote->getCountDays();
+                    $prQuote->pq_service_fee_sum =
+                        ProductQuoteHelper::roundPrice(
+                            (
+                                ($prQuote->pq_origin_price + $prQuote->pq_app_markup + $prQuote->pq_agent_markup)
+                                / ((100 - $prQuote->pq_service_fee_percent) / 100)
+                                * $prQuote->pq_origin_currency_rate
+                            )
+                        );
+                    $prQuote->pq_price = $prQuote->pq_origin_price * $prQuote->pq_origin_currency_rate + $prQuote->pq_service_fee_sum;
 
-
-                    $systemPrice = ProductQuoteHelper::calcSystemPrice((float)$totalSystemPrice, $prQuote->pq_origin_currency);
-                    $prQuote->setQuotePrice(
-                        (float)$totalAmount,
-                        (float)$systemPrice,
-                        ProductQuoteHelper::roundPrice($systemPrice * $prQuote->pq_client_currency_rate),
-                        ProductQuoteHelper::roundPrice((float)$totalServiceFeeSum)
-                    );
-                    $prQuote->recalculateProfitAmount();
-                    $prQuote->save();
+//                    $systemPrice = ProductQuoteHelper::calcSystemPrice((float)$totalSystemPrice, $prQuote->pq_origin_currency);
+//                    $prQuote->setQuotePrice(
+//                        (float)$totalAmount,
+//                        (float)$systemPrice,
+//                        ProductQuoteHelper::roundPrice($systemPrice * $prQuote->pq_client_currency_rate),
+//                        ProductQuoteHelper::roundPrice((float)$totalServiceFeeSum)
+//                    );
+//                    $prQuote->recalculateProfitAmount();
+                    if (!$prQuote->save()) {
+                        Yii::error([
+                            'message' => 'ProductQuote save after calculate prices error',
+                            'errors' => $prQuote->getErrors(),
+                        ], 'HotelQuoteAdd');
+                    }
                 }
             }
         }
@@ -504,5 +522,17 @@ class HotelQuote extends ActiveRecord implements Quotable
             $result += $room->hqr_agent_mark_up;
         }
         return $result;
+    }
+
+    public function getCountDays()
+    {
+        $countDays = 1;
+        if ($this->hq_check_out_date && $this->hq_check_in_date) {
+            $date1 = date_create(date('Y-m-d', strtotime($this->hq_check_in_date)));
+            $date2 = date_create(date('Y-m-d', strtotime($this->hq_check_out_date)));
+            $diff = date_diff($date1, $date2);
+            $countDays = $diff->days;
+        }
+        return $countDays;
     }
 }
