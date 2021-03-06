@@ -29,7 +29,7 @@ class RentCarQuotePdfJob implements RetryableJobInterface
         ], 'info\RentCarQuotePdfJob:run');
 
         try {
-            if (!$rentCarQuote = RentCarQuote::findOne(['hq_id' => $this->rentCarQuoteId])) {
+            if (!$rentCarQuote = RentCarQuote::findOne(['rcq_id' => $this->rentCarQuoteId])) {
                 throw new NotFoundException('RentCarQuote not found. Id (' . $this->rentCarQuoteId . ')');
             }
             if (RentCarQuotePdfService::processingFile($rentCarQuote)) {
