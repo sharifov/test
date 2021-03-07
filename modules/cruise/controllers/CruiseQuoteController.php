@@ -288,6 +288,21 @@ class CruiseQuoteController extends FController
         if ($cruiseQuoteId && $value !== null) {
             try {
                 $this->cruiseMarkupService->updateAgentMarkup($cruiseQuoteId, $value);
+                if ($cruiseQuote = CruiseQuote::findOne($cruiseQuoteId)) {
+                    $leadId = $cruiseQuote->productQuote->pqProduct->pr_lead_id ?? null;
+                    if ($leadId) {
+                        Notifications::pub(
+                            ['lead-' . $leadId],
+                            'reloadOrders',
+                            ['data' => []]
+                        );
+                        Notifications::pub(
+                            ['lead-' . $leadId],
+                            'reloadOffers',
+                            ['data' => []]
+                        );
+                    }
+                }
             } catch (\RuntimeException $e) {
                 return $this->asJson(['message' => $e->getMessage()]);
             } catch (\Throwable $e) {

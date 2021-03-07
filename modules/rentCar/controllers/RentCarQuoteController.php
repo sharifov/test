@@ -311,6 +311,19 @@ class RentCarQuoteController extends FController
                     throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($productQuote));
                 }
                 $transaction->commit();
+                $leadId = $productQuote->pqProduct->pr_lead_id ?? null;
+                if ($leadId) {
+                    Notifications::pub(
+                        ['lead-' . $leadId],
+                        'reloadOrders',
+                        ['data' => []]
+                    );
+                    Notifications::pub(
+                        ['lead-' . $leadId],
+                        'reloadOffers',
+                        ['data' => []]
+                    );
+                }
             } catch (\RuntimeException $e) {
                 $transaction->rollBack();
                 return $this->asJson(['message' => $e->getMessage()]);

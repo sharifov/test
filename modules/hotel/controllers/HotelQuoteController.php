@@ -460,6 +460,19 @@ class HotelQuoteController extends FController
                 $hotelQuoteRoom = $this->hotelQuoteRoomRepository->find($hotelQuoteRoomId);
 
                 $this->hotelQuoteManageService->updateAgentMarkup($hotelQuoteRoom, $value);
+                $leadId = $hotelQuoteRoom->hqrHotelQuote->hqProductQuote->pqProduct->pr_lead_id ?? null;
+                if ($leadId) {
+                    Notifications::pub(
+                        ['lead-' . $leadId],
+                        'reloadOrders',
+                        ['data' => []]
+                    );
+                    Notifications::pub(
+                        ['lead-' . $leadId],
+                        'reloadOffers',
+                        ['data' => []]
+                    );
+                }
             } catch (\RuntimeException $e) {
                 return $this->asJson(['message' => $e->getMessage()]);
             } catch (\Throwable $e) {

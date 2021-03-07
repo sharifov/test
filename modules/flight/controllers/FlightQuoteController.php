@@ -2,6 +2,7 @@
 
 namespace modules\flight\controllers;
 
+use common\models\Notifications;
 use modules\flight\components\api\FlightQuoteBookService;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightPax;
@@ -402,6 +403,19 @@ class FlightQuoteController extends FController
                 $flightQuotePaxPrice = $this->flightQuotePaxPriceRepository->findByIdAndCode($fqId, $paxCodeId);
 
                 $this->flightQuoteManageService->updateAgentMarkup($flightQuotePaxPrice, $value);
+                $leadId = $flightQuotePaxPrice->qppFlightQuote->fqProductQuote->pqProduct->pr_lead_id ?? null;
+                if ($leadId) {
+                    Notifications::pub(
+                        ['lead-' . $leadId],
+                        'reloadOrders',
+                        ['data' => []]
+                    );
+                    Notifications::pub(
+                        ['lead-' . $leadId],
+                        'reloadOffers',
+                        ['data' => []]
+                    );
+                }
             } catch (\RuntimeException $e) {
                 return $this->asJson(['message' => $e->getMessage()]);
             }
