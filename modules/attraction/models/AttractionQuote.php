@@ -2,7 +2,7 @@
 
 namespace modules\attraction\models;
 
-use modules\attraction\src\serializer\AttractionQuoteSerializer;
+use modules\attraction\src\entities\attractionQuote\serializer\AttractionQuoteSerializer;
 use modules\attraction\src\useCases\quote\create\AttractionProductQuoteCreateDto;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;

@@ -1,12 +1,12 @@
 <?php
 
-namespace modules\attraction\src\serializer;
+namespace modules\attraction\src\entities\attractionQuote\serializer;
 
 use modules\attraction\models\AttractionQuote;
 use sales\entities\serializer\Serializer;
 
 /**
- * Class RentCarQuoteSerializer
+ * Class AttractionQuoteSerializer
  *
  * @property AttractionQuote $model
  */
