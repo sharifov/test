@@ -29,13 +29,15 @@ $dataProviderQuotes = $searchModel->searchProduct($params);
                     <div class="x_title">
                         <b>Travelers</b>
                         <ul class="nav navbar-right panel_toolbox">
+                            <?php if ($model->attractionPaxes) : ?>
                             <li>
                                 <?= \yii\bootstrap4\Html::a('<i class="fa fa-edit warning"></i> Update', null, [
-                                    'data-url' => \yii\helpers\Url::to(['/hotel/hotel-room/update-ajax', 'id' => 18 /*$room->hr_id*/]),
-                                    'class' => 'btn-update-hotel-room'
+                                    'data-url' => \yii\helpers\Url::to(['/attraction/attraction-pax/update-ajax', 'id' => $model->atn_id]),
+                                    'class' => 'btn-update-attraction-travelers'
                                 ])?>
                                 <?php //=\yii\bootstrap4\Html::a('<i class="fa fa-remove"></i>', ['hotel-room/delete-ajax', 'id' => $room->hr_id], ['class' => 'btn btn-danger btn-sm'])?>
                             </li>
+                            <?php endif; ?>
                             <li>
                                 <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                             </li>
