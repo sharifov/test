@@ -2044,14 +2044,20 @@ class TestController extends FController
         return AttractionQuotePdfService::generateForBrowserOutput($quote);
     }
 
-    public function actionCarPdf(int $id, int $data = 0)
+    public function actionCarPdf(int $id, int $data = 0, int $json = 1)
     {
         if (!$quote = RentCarQuote::findOne(['rcq_id' => $id])) {
             throw new NotFoundException('RentCarQuote not found. Id (' . $id . ')');
         }
 
         if ($data === 1) {
-            return $this->asJson($quote->serialize());
+            $data = RentCarQuotePdfService::getData($quote);
+
+            if ($json === 1) {
+                return $this->asJson($data);
+            }
+            \yii\helpers\VarDumper::dump($data, 10, true);
+            exit();
         }
 
         try {

@@ -10,6 +10,7 @@ use modules\fileStorage\src\entity\fileOrder\FileOrder;
 use modules\fileStorage\src\entity\fileOrder\FileOrderRepository;
 use modules\fileStorage\src\entity\fileStorage\FileStorageRepository;
 use modules\fileStorage\src\services\CreateByLocalFileDto;
+use modules\order\src\entities\order\Order;
 use modules\order\src\events\OrderFileGeneratedEvent;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use sales\services\pdf\GeneratorPdfService;
@@ -116,15 +117,36 @@ class RentCarQuotePdfService
         return GeneratorPdfService::generateAsFile($content, $fileName);
     }
 
+    /**
+     * @param RentCarQuote $quote
+     * @return array
+     */
+    public static function getData(RentCarQuote $quote): array
+    {
+        $data['rent_car_quote'] = $quote->serialize();
+        $data['project_key'] = self::getProjectKey($quote);
+        $data['order'] = self::getOrderData($quote);
+        return $data;
+    }
+
     public static function getContent(RentCarQuote $quote): string
     {
-        $data = $quote->serialize();
+        $data = self::getData($quote);
         $content = \Yii::$app->communication->getContent(self::TEMPLATE_KEY, $data);
 
         if ($content['error'] !== false) {
             throw new \RuntimeException(VarDumper::dumpAsString($content['error']));
         }
         return $content['content'];
+    }
+
+    private static function getOrderData(RentCarQuote $quote): ?array
+    {
+        if ($order = ArrayHelper::getValue($quote, 'rcqProductQuote.pqOrder')) {
+            /** @var Order $order */
+            return $order->serialize();
+        }
+        return null;
     }
 
     private static function getProductQuoteId(RentCarQuote $quote): string

@@ -52,7 +52,7 @@ class RentCarQuoteBookService
             throw new \DomainException('Book request is fail. ' . $dataResult['error']);
         }*/
 
-        $bookingId = $productQuote->pq_gid; /* TODO:: FOR DEBUG:: must by remove  */
+        $bookingId = null; /* TODO:: FOR DEBUG:: must by remove  */
 
         $rentCarQuoteRepository = Yii::createObject(RentCarQuoteRepository::class);
         $productQuoteRepository = Yii::createObject(ProductQuoteRepository::class);

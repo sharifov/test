@@ -80,7 +80,7 @@ JS;
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-bars text-warning"></i></a>
                 <div class="dropdown-menu" role="menu">
-                    <h6 class="dropdown-header">Quote Q<?=($modelQuote->rcq_product_quote_id)?></h6>
+                    <h6 title="RCQuoteID: <?php echo $modelQuote->rcq_id ?>" class="dropdown-header">Quote Q<?=($modelQuote->rcq_product_quote_id)?></h6>
 
                     <?= Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
                         'class' => 'dropdown-item text-success btn-add-product-quote-option',
@@ -93,8 +93,7 @@ JS;
                         'data-gid' => $modelQuote->rcqProductQuote->pq_gid,
                     ]) ?>
 
-                    <?php if ($modelQuote->isBookable()) : ?>
-                        <?php /* TODO:: add check route perm. */ ?>
+                    <?php if ($modelQuote->isBookable() && Auth::can('/rent-car/rent-car-quote/book')) : ?>
                         <?php echo Html::a('<i class="fa fa-share-square"></i> Book', null, [
                             'class' => 'dropdown-item js-btn-book-rent-car',
                             'data-url' => Url::to('/rent-car/rent-car-quote/book'),
@@ -102,11 +101,18 @@ JS;
                             'data-product-id' => $modelQuote->rcqProductQuote->pq_product_id,
                         ]) ?>
                     <?php endif ?>
-                    <?php if ($modelQuote->rcqProductQuote->isBooked()) : ?>
-                        <?php /* TODO:: add check route perm. */ ?>
+                    <?php if ($modelQuote->rcqProductQuote->isBooked() && Auth::can('/rent-car/rent-car-quote/file-generate')) : ?>
                         <?php echo Html::a('<i class="fa fa-file-pdf-o"></i> Generate PDF', null, [
                             'class' => 'dropdown-item js-btn-generate-pdf-rent-car',
-                            'data-url' => Url::to('/rent-car/rent-car-quote/file-generate'), /* TODO:: add permission */
+                            'data-url' => Url::to('/rent-car/rent-car-quote/file-generate'),
+                            'data-rent-car-quote-id' => $modelQuote->rcq_id,
+                            'data-product-id' => $modelQuote->rcqProductQuote->pq_product_id,
+                        ]) ?>
+                    <?php endif ?>
+                    <?php if ($modelQuote->rcqProductQuote->isBooked() && Auth::can('/rent-car/rent-car-quote/cancel-book')) : ?>
+                        <?php echo Html::a('<i class="fa fa-file-pdf-o"></i> Cancel Book', null, [
+                            'class' => 'dropdown-item js-btn-cancel-book-rent-car',
+                            'data-url' => Url::to('/rent-car/rent-car-quote/cancel-book'),
                             'data-rent-car-quote-id' => $modelQuote->rcq_id,
                             'data-product-id' => $modelQuote->rcqProductQuote->pq_product_id,
                         ]) ?>

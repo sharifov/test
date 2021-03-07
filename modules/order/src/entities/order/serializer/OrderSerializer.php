@@ -56,6 +56,8 @@ class OrderSerializer extends Serializer
         if ($this->model->or_request_data) {
             $data['or_request_uid'] = ArrayHelper::getValue($this->model->or_request_data, 'Request.request_uid') ??
                 ArrayHelper::getValue($this->model->or_request_data, 'Request.FlightRequest.uid');
+        } else {
+            $data['or_request_uid'] = null;
         }
 
         $data['billing_info'] = [];

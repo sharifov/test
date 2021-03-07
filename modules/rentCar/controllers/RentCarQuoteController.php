@@ -259,6 +259,33 @@ class RentCarQuoteController extends FController
         return $result;
     }
 
+    public function actionAjaxCancelBook(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $id = (int) Yii::$app->request->post('id', 0);
+
+        try {
+            $model = $this->findRentCarQuote($id);
+            HotelQuoteCancelBookGuard::guard($model);
+
+            /** @var HotelQuoteCancelBookService $cancelBookService */
+            $cancelBookService = Yii::$container->get(HotelQuoteCancelBookService::class);
+            $resultCancel = $cancelBookService->cancelBook($model);
+
+            $result = [
+                'message' => $resultCancel->message,
+                'status' => $resultCancel->status,
+            ];
+        } catch (\Throwable $throwable) {
+            $result = [
+                'message' => $throwable->getMessage(),
+                'status' => 0,
+            ];
+            \Yii::error(AppHelper::throwableFormatter($throwable), 'Controller:HotelQuoteController:AjaxCancelBook:Throwable');
+        }
+        return $result;
+    }
+
     public function actionAjaxUpdateAgentMarkup(): Response
     {
         $extraMarkup = Yii::$app->request->post('extra_markup');
