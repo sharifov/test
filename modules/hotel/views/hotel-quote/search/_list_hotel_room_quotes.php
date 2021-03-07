@@ -50,7 +50,7 @@ $quoteExist = $hotelSearch->quoteExist($dataRoom['groupKey']);
         <span class="ml-2"><i class="fa fa-user"></i> <?=(Html::encode($quoteRoom['adults'] ?? 0))?></span>
         <span class="ml-2"><i class="fa fa-child"></i> <?=(Html::encode($quoteRoom['children'] ?? 0))?></span>
       </td>
-      <td>$<?=number_format(Html::encode($quoteRoom['amount'] - ($quoteRoom['markup'] ?? 0)), 2)?></td>
+      <td>$<?=number_format(Html::encode($quoteRoom['amount']), 2)?></td>
       <td class="text-right">
         <?php echo $quoteRoom['type'] ?>
         <?php if ($quoteRoom['type'] === 'RECHECK') : ?>
