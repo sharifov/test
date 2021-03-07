@@ -2,6 +2,7 @@
 
 namespace modules\hotel\models;
 
+use common\models\Currency;
 use modules\hotel\src\entities\hotelQuote\events\HotelQuoteCloneCreatedEvent;
 use modules\hotel\src\entities\hotelQuote\serializer\HotelQuoteSerializer;
 use modules\hotel\src\useCases\quote\HotelProductQuoteCreateDto;
@@ -13,6 +14,7 @@ use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMeth
 use modules\product\src\interfaces\Quotable;
 use sales\entities\EventTrait;
 use sales\helpers\product\ProductQuoteHelper;
+use sales\services\CurrencyHelper;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -192,12 +194,11 @@ class HotelQuote extends ActiveRecord implements Quotable
                     $productQuoteDto = new HotelProductQuoteCreateDto();
                     $productQuoteDto->productId = $hotelRequest->ph_product_id;
                     $productQuoteDto->originCurrency = $currency;
-                    $productQuoteDto->clientCurrency = ProductQuoteHelper::getClientCurrencyCode($hotelRequest->phProduct);
                     $productQuoteDto->ownerUserId = $ownerId;
+                    $productQuoteDto->clientCurrency = ProductQuoteHelper::getClientCurrencyCode($hotelRequest->phProduct);
                     $productQuoteDto->clientCurrencyRate = ProductQuoteHelper::getClientCurrencyRate($hotelRequest->phProduct);
-                    $productQuoteDto->originCurrencyRate = 1;
+                    $productQuoteDto->originCurrencyRate = Currency::getBaseRateByCurrencyCode($currency);
                     $productQuoteDto->name = mb_substr(implode(' & ', $nameArray), 0, 40);
-                    $productQuoteDto->clientPrice = (float)$totalAmount;
 
                     $productTypeServiceFee = null;
                     $productType = ProductType::find()->select(['pt_service_fee_percent'])->byHotel()->asArray()->one();
@@ -372,18 +373,13 @@ class HotelQuote extends ActiveRecord implements Quotable
                 }
 
                 if (isset($prQuote)) {
-                    $prQuote->pq_origin_price = (float)$hotelQuoteRoomAmount * $hQuote->getCountDays();
-                    $prQuote->pq_app_markup = (float)$hotelQuoteRoomSystemMarkup * $hQuote->getCountDays();
+                    $prQuote->pq_origin_price = CurrencyHelper::convertToBaseCurrency((float)$hotelQuoteRoomAmount * $hQuote->getCountDays(), $prQuote->pq_origin_currency_rate);
+                    $prQuote->pq_app_markup = CurrencyHelper::convertToBaseCurrency((float)$hotelQuoteRoomSystemMarkup * $hQuote->getCountDays(), $prQuote->pq_origin_currency_rate);
+                    // pq_agent_markup - already in base currency
                     $prQuote->pq_agent_markup = (float)$hotelQuoteRoomAgentMarkup * $hQuote->getCountDays();
-                    $prQuote->pq_price =
-                        ProductQuoteHelper::roundPrice(
-                            (
-                                ($prQuote->pq_origin_price + $prQuote->pq_app_markup + $prQuote->pq_agent_markup)
-                                / ((100 - $prQuote->pq_service_fee_percent) / 100)
-                                / $prQuote->pq_origin_currency_rate
-                            )
-                        );
-                    $prQuote->pq_service_fee_sum = $prQuote->pq_price - $prQuote->pq_origin_price / $prQuote->pq_origin_currency_rate;
+                    $prQuote->calculateServiceFeeSum();
+                    $prQuote->calculatePrice();
+                    $prQuote->calculateClientPrice();
 
 //                    $systemPrice = ProductQuoteHelper::calcSystemPrice((float)$totalSystemPrice, $prQuote->pq_origin_currency);
 //                    $prQuote->setQuotePrice(

@@ -6,6 +6,7 @@ use common\models\Currency;
 use common\models\CurrencyHistory;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMethodQuery;
+use sales\services\CurrencyHelper;
 
 class ProductQuoteHelper
 {
@@ -42,7 +43,7 @@ class ProductQuoteHelper
      */
     public static function roundPrice(float $price, int $precision = 2)
     {
-        return round($price, $precision);
+        return CurrencyHelper::roundUp($price, $precision);
     }
 
     /**

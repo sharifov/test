@@ -30,6 +30,7 @@ use sales\dto\product\ProductQuoteDTO;
 use sales\entities\EventTrait;
 use sales\helpers\product\ProductQuoteHelper;
 use sales\entities\serializer\Serializable;
+use sales\services\CurrencyHelper;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -739,5 +740,20 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function isBookable(): bool
     {
         return (ProductQuoteStatus::isBookable($this->pq_status_id) && !$this->isBooked());
+    }
+
+    public function calculateServiceFeeSum(): void
+    {
+        $this->pq_service_fee_sum = CurrencyHelper::roundUp(($this->pq_origin_price + $this->pq_app_markup + $this->pq_agent_markup) * ((100 - $this->pq_service_fee_percent) / 100));
+    }
+
+    public function calculatePrice(): void
+    {
+        $this->pq_price = $this->pq_origin_price + $this->pq_app_markup + $this->pq_agent_markup + $this->pq_service_fee_sum;
+    }
+
+    public function calculateClientPrice(): void
+    {
+        $this->pq_client_price = CurrencyHelper::convertFromBaseCurrency($this->pq_price, $this->pq_client_currency_rate);
     }
 }
