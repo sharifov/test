@@ -744,7 +744,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 
     public function calculateServiceFeeSum(): void
     {
-        $this->pq_service_fee_sum = CurrencyHelper::roundUp(($this->pq_origin_price + $this->pq_app_markup + $this->pq_agent_markup) * ((100 - $this->pq_service_fee_percent) / 100));
+        $this->pq_service_fee_sum = CurrencyHelper::roundUp(($this->pq_origin_price + $this->pq_app_markup + $this->pq_agent_markup) * ($this->pq_service_fee_percent / 100));
     }
 
     public function calculatePrice(): void
