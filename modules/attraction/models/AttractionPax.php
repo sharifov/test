@@ -3,6 +3,7 @@
 namespace modules\attraction\models;
 
 use Yii;
+use modules\attraction\src\entities\attractionPax\serializer\AttractionPaxSerializer;
 
 /**
  * This is the model class for table "attraction_pax".
@@ -111,6 +112,11 @@ class AttractionPax extends \yii\db\ActiveRecord
     public function getPaxAgeRangeByPaxId(int $paxId): ?array
     {
         return self::PAX_AGE_RANGE[$paxId] ?? null;
+    }
+
+    public function serialize(): array
+    {
+        return (new AttractionPaxSerializer($this))->getData();
     }
 
     /**
