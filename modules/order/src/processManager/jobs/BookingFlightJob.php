@@ -9,6 +9,7 @@ use modules\order\src\processManager\OrderProcessManager;
 use modules\order\src\processManager\OrderProcessManagerRepository;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use yii\helpers\ArrayHelper;
+use yii\queue\JobInterface;
 use yii\queue\RetryableJobInterface;
 use common\models\Notifications;
 use frontend\widgets\notification\NotificationMessage;
@@ -18,7 +19,7 @@ use frontend\widgets\notification\NotificationMessage;
  *
  * @property $quoteId
  */
-class BookingFlightJob implements RetryableJobInterface
+class BookingFlightJob implements JobInterface
 {
     public $quoteId;
 
@@ -82,19 +83,19 @@ class BookingFlightJob implements RetryableJobInterface
         }
     }
 
-    public function getTtr(): int
-    {
-        return 1 * 60;
-    }
-
-    public function canRetry($attempt, $error): bool
-    {
-        \Yii::error([
-            'attempt' => $attempt,
-            'message' => 'Booking Flight error',
-            'error' => $error->getMessage(),
-        ], 'OrderProcessManager:BookingFlightJob');
-        return false;
-        return !($attempt > 5);
-    }
+//    public function getTtr(): int
+//    {
+//        return 1 * 60;
+//    }
+//
+//    public function canRetry($attempt, $error): bool
+//    {
+//        \Yii::error([
+//            'attempt' => $attempt,
+//            'message' => 'Booking Flight error',
+//            'error' => $error->getMessage(),
+//        ], 'OrderProcessManager:BookingFlightJob');
+//        return false;
+//        return !($attempt > 5);
+//    }
 }

@@ -6,6 +6,7 @@ use common\models\Payment;
 use common\models\Transaction;
 use modules\order\src\payment\PaymentRepository;
 use modules\order\src\payment\services\PaymentService;
+use yii\queue\JobInterface;
 use yii\queue\RetryableJobInterface;
 
 /**
@@ -13,7 +14,7 @@ use yii\queue\RetryableJobInterface;
  *
  * @property int $paymentId
  */
-class ChargePaymentJob implements RetryableJobInterface
+class ChargePaymentJob implements JobInterface
 {
     public $paymentId;
 
@@ -74,19 +75,19 @@ class ChargePaymentJob implements RetryableJobInterface
         }
     }
 
-    public function getTtr(): int
-    {
-        return 1 * 60;
-    }
-
-    public function canRetry($attempt, $error): bool
-    {
-        \Yii::error([
-            'attempt' => $attempt,
-            'message' => 'Charge Payment error',
-            'error' => $error->getMessage(),
-        ], 'ChargePaymentJob');
-        return false;
-        return !($attempt > 5);
-    }
+//    public function getTtr(): int
+//    {
+//        return 1 * 60;
+//    }
+//
+//    public function canRetry($attempt, $error): bool
+//    {
+//        \Yii::error([
+//            'attempt' => $attempt,
+//            'message' => 'Charge Payment error',
+//            'error' => $error->getMessage(),
+//        ], 'ChargePaymentJob');
+//        return false;
+//        return !($attempt > 5);
+//    }
 }

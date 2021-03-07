@@ -3,6 +3,7 @@
 namespace modules\order\src\jobs;
 
 use modules\order\src\entities\order\OrderRepository;
+use yii\queue\JobInterface;
 use yii\queue\RetryableJobInterface;
 
 /**
@@ -10,7 +11,7 @@ use yii\queue\RetryableJobInterface;
  *
  * @property int $orderId
  */
-class OrderPaymentPaidJob implements RetryableJobInterface
+class OrderPaymentPaidJob implements JobInterface
 {
     public $orderId;
 
@@ -21,25 +22,33 @@ class OrderPaymentPaidJob implements RetryableJobInterface
 
     public function execute($queue)
     {
-        $repo = \Yii::createObject(OrderRepository::class);
-        $order = $repo->find($this->orderId);
-        $order->paymentPaid(new \DateTimeImmutable());
-        $repo->save($order);
+        try {
+            $repo = \Yii::createObject(OrderRepository::class);
+            $order = $repo->find($this->orderId);
+            $order->paymentPaid(new \DateTimeImmutable());
+            $repo->save($order);
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'message' => 'Cant transfer order to payment paid',
+                'error' => $e->getMessage(),
+                'orderId' => $this->orderId,
+            ], 'OrderPaymentPaidJob');
+        }
     }
 
-    public function getTtr(): int
-    {
-        return 1 * 60;
-    }
-
-    public function canRetry($attempt, $error): bool
-    {
-        \Yii::error([
-            'attempt' => $attempt,
-            'message' => 'Order payment Paid error',
-            'error' => $error->getMessage(),
-            'orderId' => $this->orderId,
-        ], 'OrderPaymentPaidJob');
-        return !($attempt > 5);
-    }
+//    public function getTtr(): int
+//    {
+//        return 1 * 60;
+//    }
+//
+//    public function canRetry($attempt, $error): bool
+//    {
+//        \Yii::error([
+//            'attempt' => $attempt,
+//            'message' => 'Order payment Paid error',
+//            'error' => $error->getMessage(),
+//            'orderId' => $this->orderId,
+//        ], 'OrderPaymentPaidJob');
+//        return !($attempt > 5);
+//    }
 }

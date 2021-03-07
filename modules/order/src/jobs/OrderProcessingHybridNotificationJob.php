@@ -4,6 +4,7 @@ namespace modules\order\src\jobs;
 
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderStatus;
+use yii\queue\JobInterface;
 use yii\queue\RetryableJobInterface;
 
 /**
@@ -11,7 +12,7 @@ use yii\queue\RetryableJobInterface;
  *
  * @property $orderId
  */
-class OrderProcessingHybridNotificationJob implements RetryableJobInterface
+class OrderProcessingHybridNotificationJob implements JobInterface
 {
     public $orderId;
 
@@ -38,20 +39,20 @@ class OrderProcessingHybridNotificationJob implements RetryableJobInterface
             'statusName' => OrderStatus::getName($order->or_status_id),
         ], 'info\OrderProcessingHybridNotificationJob');
     }
-
-    public function getTtr(): int
-    {
-        return 1 * 60;
-    }
-
-    public function canRetry($attempt, $error): bool
-    {
-        \Yii::error([
-            'attempt' => $attempt,
-            'message' => 'Order processing hybrid notification error',
-            'error' => $error->getMessage(),
-            'orderId' => $this->orderId,
-        ], 'OrderProcessingHybridNotificationJob');
-        return !($attempt > 5);
-    }
+//
+//    public function getTtr(): int
+//    {
+//        return 1 * 60;
+//    }
+//
+//    public function canRetry($attempt, $error): bool
+//    {
+//        \Yii::error([
+//            'attempt' => $attempt,
+//            'message' => 'Order processing hybrid notification error',
+//            'error' => $error->getMessage(),
+//            'orderId' => $this->orderId,
+//        ], 'OrderProcessingHybridNotificationJob');
+//        return !($attempt > 5);
+//    }
 }

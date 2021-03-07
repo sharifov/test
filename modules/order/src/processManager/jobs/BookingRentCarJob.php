@@ -6,6 +6,7 @@ use common\models\Notifications;
 use frontend\widgets\notification\NotificationMessage;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use modules\rentCar\src\services\RentCarQuoteBookService;
+use yii\queue\JobInterface;
 use yii\queue\RetryableJobInterface;
 
 /**
@@ -13,7 +14,7 @@ use yii\queue\RetryableJobInterface;
  *
  * @property $quoteId
  */
-class BookingRentCarJob implements RetryableJobInterface
+class BookingRentCarJob implements JobInterface
 {
     public $quoteId;
 
@@ -56,20 +57,20 @@ class BookingRentCarJob implements RetryableJobInterface
         }
     }
 
-    public function getTtr(): int
-    {
-        return 1 * 60;
-    }
-
-    public function canRetry($attempt, $error): bool
-    {
-        \Yii::error([
-            'attempt' => $attempt,
-            'message' => 'Booking RentCar error',
-            'error' => $error->getMessage(),
-            'quoteId' => $this->quoteId,
-        ], 'OrderProcessManager:BookingRentCarJob');
-        return false;
-        return !($attempt > 5);
-    }
+//    public function getTtr(): int
+//    {
+//        return 1 * 60;
+//    }
+//
+//    public function canRetry($attempt, $error): bool
+//    {
+//        \Yii::error([
+//            'attempt' => $attempt,
+//            'message' => 'Booking RentCar error',
+//            'error' => $error->getMessage(),
+//            'quoteId' => $this->quoteId,
+//        ], 'OrderProcessManager:BookingRentCarJob');
+//        return false;
+//        return !($attempt > 5);
+//    }
 }

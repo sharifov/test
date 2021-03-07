@@ -5,6 +5,7 @@ namespace modules\order\src\processManager\jobs;
 use modules\order\src\processManager\OrderProcessManager;
 use modules\order\src\processManager\OrderProcessManagerRepository;
 use modules\product\src\entities\productQuote\ProductQuote;
+use yii\queue\JobInterface;
 use yii\queue\RetryableJobInterface;
 
 /**
@@ -12,7 +13,7 @@ use yii\queue\RetryableJobInterface;
  *
  * @property int $quoteId
  */
-class AfterBookedFlightJob implements RetryableJobInterface
+class AfterBookedFlightJob implements JobInterface
 {
     public $quoteId;
 
@@ -100,22 +101,27 @@ class AfterBookedFlightJob implements RetryableJobInterface
             }
             $repo->save($process);
         } catch (\Throwable $e) {
-            throw new \DomainException($e->getMessage() . ' QuoteId: ' . $this->quoteId . ' OrderId: ' . $order->or_id);
+            \Yii::error([
+                'message' => 'Process to Booker or BookerOtherProducts error',
+                'error' => $e->getMessage(),
+                'orderId' => $order->or_id,
+                'quoteId' => $this->quoteId,
+            ], 'AfterBookedFlightJob');
         }
     }
 
-    public function getTtr(): int
-    {
-        return 1 * 60;
-    }
-
-    public function canRetry($attempt, $error): bool
-    {
-        \Yii::error([
-            'attempt' => $attempt,
-            'message' => 'Order process manager save error.',
-            'error' => $error->getMessage(),
-        ], 'OrderProcessManager:AfterBookedFlightJob');
-        return !($attempt > 5);
-    }
+//    public function getTtr(): int
+//    {
+//        return 1 * 60;
+//    }
+//
+//    public function canRetry($attempt, $error): bool
+//    {
+//        \Yii::error([
+//            'attempt' => $attempt,
+//            'message' => 'Order process manager save error.',
+//            'error' => $error->getMessage(),
+//        ], 'OrderProcessManager:AfterBookedFlightJob');
+//        return !($attempt > 5);
+//    }
 }

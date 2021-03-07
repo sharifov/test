@@ -10,6 +10,7 @@ use modules\hotel\src\services\hotelQuote\HotelQuotePdfService;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookGuard;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookService;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCheckRateService;
+use yii\queue\JobInterface;
 use yii\queue\RetryableJobInterface;
 use Yii;
 
@@ -18,7 +19,7 @@ use Yii;
  *
  * @property $quoteId
  */
-class BookingHotelJob implements RetryableJobInterface
+class BookingHotelJob implements JobInterface
 {
     public $quoteId;
 
@@ -80,20 +81,20 @@ class BookingHotelJob implements RetryableJobInterface
         }
     }
 
-    public function getTtr(): int
-    {
-        return 1 * 60;
-    }
-
-    public function canRetry($attempt, $error): bool
-    {
-        \Yii::error([
-            'attempt' => $attempt,
-            'message' => 'Booking Hotel error',
-            'error' => $error->getMessage(),
-            'quoteId' => $this->quoteId,
-        ], 'OrderProcessManager:BookingHotelJob');
-        return false;
-        return !($attempt > 5);
-    }
+//    public function getTtr(): int
+//    {
+//        return 1 * 60;
+//    }
+//
+//    public function canRetry($attempt, $error): bool
+//    {
+//        \Yii::error([
+//            'attempt' => $attempt,
+//            'message' => 'Booking Hotel error',
+//            'error' => $error->getMessage(),
+//            'quoteId' => $this->quoteId,
+//        ], 'OrderProcessManager:BookingHotelJob');
+//        return false;
+//        return !($attempt > 5);
+//    }
 }

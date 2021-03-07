@@ -4,6 +4,7 @@ namespace modules\order\src\processManager\jobs;
 
 use modules\order\src\processManager\OrderProcessManager;
 use modules\order\src\processManager\OrderProcessManagerRepository;
+use yii\queue\JobInterface;
 use yii\queue\RetryableJobInterface;
 
 /**
@@ -11,7 +12,7 @@ use yii\queue\RetryableJobInterface;
  *
  * @property $orderId
  */
-class StartBookingJob implements RetryableJobInterface
+class StartBookingJob implements JobInterface
 {
     public $orderId;
 
@@ -32,23 +33,31 @@ class StartBookingJob implements RetryableJobInterface
             return;
         }
 
-        $repo = \Yii::createObject(OrderProcessManagerRepository::class);
-        $process->bookingFlight(new \DateTimeImmutable());
-        $repo->save($process);
+        try {
+            $repo = \Yii::createObject(OrderProcessManagerRepository::class);
+            $process->bookingFlight(new \DateTimeImmutable());
+            $repo->save($process);
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'message' => 'Transfer OrderProcess to booking flight error',
+                'error' => $e->getMessage(),
+                'orderId' => $this->orderId,
+            ], 'StartBookingJob');
+        }
     }
 
-    public function getTtr(): int
-    {
-        return 1 * 60;
-    }
-
-    public function canRetry($attempt, $error): bool
-    {
-        \Yii::error([
-            'attempt' => $attempt,
-            'message' => 'Order Process manager cant to BookingFlight',
-            'error' => $error->getMessage(),
-        ], 'OrderProcessManager:StartBookingJob');
-        return !($attempt > 5);
-    }
+//    public function getTtr(): int
+//    {
+//        return 1 * 60;
+//    }
+//
+//    public function canRetry($attempt, $error): bool
+//    {
+//        \Yii::error([
+//            'attempt' => $attempt,
+//            'message' => 'Order Process manager cant to BookingFlight',
+//            'error' => $error->getMessage(),
+//        ], 'OrderProcessManager:StartBookingJob');
+//        return !($attempt > 5);
+//    }
 }

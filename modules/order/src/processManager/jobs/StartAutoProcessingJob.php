@@ -4,6 +4,7 @@ namespace modules\order\src\processManager\jobs;
 
 use modules\order\src\processManager\OrderProcessManager;
 use modules\order\src\processManager\OrderProcessManagerRepository;
+use yii\queue\JobInterface;
 use yii\queue\RetryableJobInterface;
 
 /**
@@ -11,7 +12,7 @@ use yii\queue\RetryableJobInterface;
  *
  * @property $orderId
  */
-class StartAutoProcessingJob implements RetryableJobInterface
+class StartAutoProcessingJob implements JobInterface
 {
     public $orderId;
 
@@ -29,23 +30,31 @@ class StartAutoProcessingJob implements RetryableJobInterface
             ], 'OrderProcessManager:StartAutoProcessingJob');
             return;
         }
-        $repo = \Yii::createObject(OrderProcessManagerRepository::class);
-        $process = OrderProcessManager::create($this->orderId, new \DateTimeImmutable());
-        $repo->save($process);
+        try {
+            $repo = \Yii::createObject(OrderProcessManagerRepository::class);
+            $process = OrderProcessManager::create($this->orderId, new \DateTimeImmutable());
+            $repo->save($process);
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'message' => 'OrderProcess manager create error',
+                'error' => $e->getMessage(),
+                'orderId' => $this->orderId,
+            ], 'StartAutoProcessingJob');
+        }
     }
 
-    public function getTtr(): int
-    {
-        return 1 * 60;
-    }
-
-    public function canRetry($attempt, $error): bool
-    {
-        \Yii::error([
-            'attempt' => $attempt,
-            'message' => 'Order Process Manager Start error',
-            'error' => $error->getMessage(),
-        ], 'OrderProcessManager:StartAutoProcessingJob');
-        return !($attempt > 5);
-    }
+//    public function getTtr(): int
+//    {
+//        return 1 * 60;
+//    }
+//
+//    public function canRetry($attempt, $error): bool
+//    {
+//        \Yii::error([
+//            'attempt' => $attempt,
+//            'message' => 'Order Process Manager Start error',
+//            'error' => $error->getMessage(),
+//        ], 'OrderProcessManager:StartAutoProcessingJob');
+//        return !($attempt > 5);
+//    }
 }

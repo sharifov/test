@@ -4,6 +4,7 @@ namespace modules\invoice\src\jobs;
 
 use modules\invoice\src\entities\invoice\Invoice;
 use modules\invoice\src\entities\invoice\InvoiceRepository;
+use yii\queue\JobInterface;
 use yii\queue\RetryableJobInterface;
 
 /**
@@ -11,7 +12,7 @@ use yii\queue\RetryableJobInterface;
  *
  * @property int $invoiceId
  */
-class PaidInvoiceJob implements RetryableJobInterface
+class PaidInvoiceJob implements JobInterface
 {
     public $invoiceId;
 
@@ -42,24 +43,32 @@ class PaidInvoiceJob implements RetryableJobInterface
             return;
         }
 
-        $repo = \Yii::createObject(InvoiceRepository::class);
-        $invoice->paid();
-        $repo->save($invoice);
+        try {
+            $repo = \Yii::createObject(InvoiceRepository::class);
+            $invoice->paid();
+            $repo->save($invoice);
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'message' => 'Transfer Invoice to job paid error',
+                'error' => $e->getMessage(),
+                'invoiceId' => $this->invoiceId,
+            ], 'PaidInvoiceJob');
+        }
     }
 
-    public function getTtr(): int
-    {
-        return 1 * 60;
-    }
-
-    public function canRetry($attempt, $error): bool
-    {
-        \Yii::error([
-            'attempt' => $attempt,
-            'message' => 'Invoice Paid error',
-            'error' => $error->getMessage(),
-            'invoiceId' => $this->invoiceId,
-        ], 'PaidInvoiceJob');
-        return !($attempt > 5);
-    }
+//    public function getTtr(): int
+//    {
+//        return 1 * 60;
+//    }
+//
+//    public function canRetry($attempt, $error): bool
+//    {
+//        \Yii::error([
+//            'attempt' => $attempt,
+//            'message' => 'Invoice Paid error',
+//            'error' => $error->getMessage(),
+//            'invoiceId' => $this->invoiceId,
+//        ], 'PaidInvoiceJob');
+//        return !($attempt > 5);
+//    }
 }

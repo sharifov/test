@@ -4,6 +4,7 @@ namespace modules\order\src\jobs;
 
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderStatus;
+use yii\queue\JobInterface;
 use yii\queue\RetryableJobInterface;
 
 /**
@@ -11,7 +12,7 @@ use yii\queue\RetryableJobInterface;
  *
  * @property $orderId
  */
-class OrderCompletedHybridNotificationJob implements RetryableJobInterface
+class OrderCompletedHybridNotificationJob implements JobInterface
 {
     public $orderId;
 
@@ -39,19 +40,19 @@ class OrderCompletedHybridNotificationJob implements RetryableJobInterface
         ], 'info\OrderCompletedHybridNotificationJob');
     }
 
-    public function getTtr(): int
-    {
-        return 1 * 60;
-    }
-
-    public function canRetry($attempt, $error): bool
-    {
-        \Yii::error([
-            'attempt' => $attempt,
-            'message' => 'Order completed hybrid notification error',
-            'error' => $error->getMessage(),
-            'orderId' => $this->orderId,
-        ], 'OrderCompletedHybridNotificationJob');
-        return !($attempt > 5);
-    }
+//    public function getTtr(): int
+//    {
+//        return 1 * 60;
+//    }
+//
+//    public function canRetry($attempt, $error): bool
+//    {
+//        \Yii::error([
+//            'attempt' => $attempt,
+//            'message' => 'Order completed hybrid notification error',
+//            'error' => $error->getMessage(),
+//            'orderId' => $this->orderId,
+//        ], 'OrderCompletedHybridNotificationJob');
+//        return !($attempt > 5);
+//    }
 }

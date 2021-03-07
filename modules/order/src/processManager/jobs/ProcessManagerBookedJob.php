@@ -3,6 +3,7 @@
 namespace modules\order\src\processManager\jobs;
 
 use modules\order\src\processManager\OrderProcessManagerRepository;
+use yii\queue\JobInterface;
 use yii\queue\RetryableJobInterface;
 
 /**
@@ -10,7 +11,7 @@ use yii\queue\RetryableJobInterface;
  *
  * @property int $orderId
  */
-class ProcessManagerBookedJob implements RetryableJobInterface
+class ProcessManagerBookedJob implements JobInterface
 {
     public $orderId;
 
@@ -21,25 +22,33 @@ class ProcessManagerBookedJob implements RetryableJobInterface
 
     public function execute($queue)
     {
-        $repo = \Yii::createObject(OrderProcessManagerRepository::class);
-        $process = $repo->find($this->orderId);
-        $process->booked(new \DateTimeImmutable());
-        $repo->save($process);
+        try {
+            $repo = \Yii::createObject(OrderProcessManagerRepository::class);
+            $process = $repo->find($this->orderId);
+            $process->booked(new \DateTimeImmutable());
+            $repo->save($process);
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'message' => 'Transfer ProcessManager to booked',
+                'error' => $e->getMessage(),
+                'orderId' => $this->orderId,
+            ], 'ProcessManagerBookedJob');
+        }
     }
 
-    public function getTtr(): int
-    {
-        return 1 * 60;
-    }
-
-    public function canRetry($attempt, $error): bool
-    {
-        \Yii::error([
-            'attempt' => $attempt,
-            'message' => 'Order Process manager booked error',
-            'orderId' => $this->orderId,
-            'error' => $error->getMessage(),
-        ], 'OrderProcessManager:ProcessManagerBookedJob');
-        return !($attempt > 5);
-    }
+//    public function getTtr(): int
+//    {
+//        return 1 * 60;
+//    }
+//
+//    public function canRetry($attempt, $error): bool
+//    {
+//        \Yii::error([
+//            'attempt' => $attempt,
+//            'message' => 'Order Process manager booked error',
+//            'orderId' => $this->orderId,
+//            'error' => $error->getMessage(),
+//        ], 'OrderProcessManager:ProcessManagerBookedJob');
+//        return !($attempt > 5);
+//    }
 }

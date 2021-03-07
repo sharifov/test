@@ -5,6 +5,7 @@ namespace modules\order\src\jobs;
 use common\models\Notifications;
 use modules\order\src\entities\order\Order;
 use modules\order\src\services\confirmation\EmailConfirmationSender;
+use yii\queue\JobInterface;
 use yii\queue\RetryableJobInterface;
 
 /**
@@ -12,7 +13,7 @@ use yii\queue\RetryableJobInterface;
  *
  * @property $orderId
  */
-class OrderSendCompletedConfirmationJob implements RetryableJobInterface
+class OrderSendCompletedConfirmationJob implements JobInterface
 {
     public $orderId;
 
@@ -40,7 +41,7 @@ class OrderSendCompletedConfirmationJob implements RetryableJobInterface
                 'message' => 'Send Order Completed Confirmation Error',
                 'error' => $e->getMessage(),
                 'orderId' => $order->or_id,
-            ], 'OrderCompletedConfirmationJob');
+            ], 'OrderSendCompletedConfirmationJob');
             if ($userId = ($order->orLead->employee_id ?? null)) {
                 Notifications::createAndPublish(
                     $userId,
@@ -53,19 +54,19 @@ class OrderSendCompletedConfirmationJob implements RetryableJobInterface
         }
     }
 
-    public function getTtr(): int
-    {
-        return 1 * 60;
-    }
-
-    public function canRetry($attempt, $error): bool
-    {
-        \Yii::error([
-            'attempt' => $attempt,
-            'message' => 'Order send completed confirmation error',
-            'error' => $error->getMessage(),
-            'orderId' => $this->orderId,
-        ], 'OrderSendCompletedConfirmationJob');
-        return !($attempt > 5);
-    }
+//    public function getTtr(): int
+//    {
+//        return 1 * 60;
+//    }
+//
+//    public function canRetry($attempt, $error): bool
+//    {
+//        \Yii::error([
+//            'attempt' => $attempt,
+//            'message' => 'Order send completed confirmation error',
+//            'error' => $error->getMessage(),
+//            'orderId' => $this->orderId,
+//        ], 'OrderSendCompletedConfirmationJob');
+//        return !($attempt > 5);
+//    }
 }
