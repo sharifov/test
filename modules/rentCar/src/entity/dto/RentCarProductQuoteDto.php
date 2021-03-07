@@ -39,7 +39,9 @@ class RentCarProductQuoteDto
 
         $productQuoteDto->clientCurrencyRate = ProductQuoteHelper::getClientCurrencyRate($rentCar->prcProduct);
         $productQuoteDto->clientCurrency = ProductQuoteHelper::getClientCurrencyCode($rentCar->prcProduct);
-        
+        //todo
+        $productQuoteDto->clientCurrencyRate = 1;
+
         $productTypeServiceFee = null;
         $productType = ProductType::find()->select(['pt_service_fee_percent'])->byRentCar()->asArray()->one();
         if ($productType && $productType['pt_service_fee_percent']) {
