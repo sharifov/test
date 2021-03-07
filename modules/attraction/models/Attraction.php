@@ -24,6 +24,8 @@ use Yii;
  * @property string|null $atn_request_hash_key
  *
  * @property Product $atnProduct
+ * @property AttractionPax[] $attractionPaxes
+ * @property AttractionQuote[] $attractionQuotes
  */
 class Attraction extends \yii\db\ActiveRecord implements Productable
 {
@@ -198,5 +200,25 @@ class Attraction extends \yii\db\ActiveRecord implements Productable
     public function getAtnProduct(): ActiveQuery
     {
         return $this->hasOne(Product::class, ['pr_id' => 'atn_product_id']);
+    }
+
+    /**
+     * Gets query for [[AttractionPaxes]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAttractionPaxes()
+    {
+        return $this->hasMany(AttractionPax::class, ['atnp_atn_id' => 'atn_id']);
+    }
+
+    /**
+     * Gets query for [[AttractionQuotes]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAttractionQuotes()
+    {
+        return $this->hasMany(AttractionQuote::class, ['atnq_attraction_id' => 'atn_id']);
     }
 }
