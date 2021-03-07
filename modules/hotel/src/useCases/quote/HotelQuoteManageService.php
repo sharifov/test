@@ -9,6 +9,7 @@ use modules\hotel\src\helpers\HotelQuoteHelper;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\helpers\product\ProductQuoteHelper;
 use sales\repositories\product\ProductQuoteRepository;
+use sales\services\CurrencyHelper;
 use sales\services\TransactionManager;
 
 /**
@@ -66,12 +67,15 @@ class HotelQuoteManageService
         $priceData = HotelQuoteHelper::getPricesData($hotelQuote);
 
         $systemPrice = ProductQuoteHelper::calcSystemPrice($priceData->total->sellingPrice, $productQuote->pq_origin_currency);
-        $productQuote->setQuotePrice(
-            ProductQuoteHelper::roundPrice($priceData->total->net),
-            $systemPrice,
-            ProductQuoteHelper::roundPrice($systemPrice * $productQuote->pq_client_currency_rate),
-            ProductQuoteHelper::roundPrice($priceData->total->serviceFeeSum)
-        );
+
+        $productQuote->pq_origin_price = CurrencyHelper::convertToBaseCurrency(($priceData->total->net * $hotelQuote->getCountDays()), $productQuote->pq_origin_currency_rate);
+        $productQuote->pq_app_markup = CurrencyHelper::convertToBaseCurrency($priceData->total->systemMarkup * $hotelQuote->getCountDays(), $productQuote->pq_origin_currency_rate);
+        // pq_agent_markup - already in base currency
+        $productQuote->pq_agent_markup = $priceData->total->agentMarkup * $hotelQuote->getCountDays();
+        $productQuote->calculateServiceFeeSum();
+        $productQuote->calculatePrice();
+        $productQuote->calculateClientPrice();
+
         $productQuote->recalculateProfitAmount();
         $this->productQuoteRepository->save($productQuote);
     }
