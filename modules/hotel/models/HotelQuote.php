@@ -377,6 +377,7 @@ class HotelQuote extends ActiveRecord implements Quotable
                     $prQuote->pq_app_markup = CurrencyHelper::convertToBaseCurrency((float)$hotelQuoteRoomSystemMarkup * $hQuote->getCountDays(), $prQuote->pq_origin_currency_rate);
                     // pq_agent_markup - already in base currency
                     $prQuote->pq_agent_markup = (float)$hotelQuoteRoomAgentMarkup * $hQuote->getCountDays();
+
                     $prQuote->calculateServiceFeeSum();
                     $prQuote->calculatePrice();
                     $prQuote->calculateClientPrice();

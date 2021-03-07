@@ -66,12 +66,11 @@ class HotelQuoteManageService
     {
         $priceData = HotelQuoteHelper::getPricesData($hotelQuote);
 
-        $systemPrice = ProductQuoteHelper::calcSystemPrice($priceData->total->sellingPrice, $productQuote->pq_origin_currency);
-
         $productQuote->pq_origin_price = CurrencyHelper::convertToBaseCurrency(($priceData->total->net * $hotelQuote->getCountDays()), $productQuote->pq_origin_currency_rate);
         $productQuote->pq_app_markup = CurrencyHelper::convertToBaseCurrency($priceData->total->systemMarkup * $hotelQuote->getCountDays(), $productQuote->pq_origin_currency_rate);
         // pq_agent_markup - already in base currency
         $productQuote->pq_agent_markup = $priceData->total->agentMarkup * $hotelQuote->getCountDays();
+
         $productQuote->calculateServiceFeeSum();
         $productQuote->calculatePrice();
         $productQuote->calculateClientPrice();

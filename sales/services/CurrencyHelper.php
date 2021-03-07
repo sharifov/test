@@ -13,7 +13,7 @@ class CurrencyHelper
             throw new \InvalidArgumentException('Invalid price rate.');
         }
         //round 2 number
-        return ceil(($price / $rate) * (10 ** 2)) / 100;
+        return self::roundUp(($price / $rate));
     }
 
     public static function convertFromBaseCurrency($price, $rate)
@@ -24,7 +24,7 @@ class CurrencyHelper
         if (!$rate) {
             throw new \InvalidArgumentException('Invalid price rate.');
         }
-        return ceil(($price * $rate) * (10 ** 2)) / 100;
+        return self::roundUp(($price * $rate));
     }
 
     public static function roundUp(float $price, int $precision = 2)
