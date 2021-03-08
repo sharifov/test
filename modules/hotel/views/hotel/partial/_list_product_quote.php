@@ -373,7 +373,7 @@ JS;
                         $sfs = round(($room->hqr_amount + $room->hqr_system_mark_up + $room->hqr_agent_mark_up) * $room->hqr_service_fee_percent / 100, 2);
                         $totalSfs += $sfs;
 
-                        $sp = CurrencyHelper::roundUp(number_format($room->hqr_amount + $room->hqr_system_mark_up + $room->hqr_agent_mark_up + $sfs, 2));
+                        $sp = CurrencyHelper::roundUp($room->hqr_amount + $room->hqr_system_mark_up + $room->hqr_agent_mark_up + $sfs);
                         $totalSp += $sp;
                         ?>
 
