@@ -2,7 +2,9 @@
 
 namespace modules\flight\models;
 
+use modules\flight\src\entities\flightPax\serializer\FlightPaxSerializer;
 use modules\flight\src\useCases\flightQuote\create\FlightPaxDTO;
+use sales\entities\serializer\Serializable;
 use Yii;
 
 /**
@@ -21,7 +23,7 @@ use Yii;
  * @property Flight $fpFlight
  * @property FlightQuoteSegmentPaxBaggageCharge[] $flightQuoteSegmentPaxBaggageCharges
  */
-class FlightPax extends \yii\db\ActiveRecord
+class FlightPax extends \yii\db\ActiveRecord implements Serializable
 {
     public const PAX_ADULT = 'ADT';
     public const PAX_CHILD = 'CHD';
@@ -171,5 +173,10 @@ class FlightPax extends \yii\db\ActiveRecord
     public function generateUid(): string
     {
         return uniqid('fp');
+    }
+
+    public function serialize(): array
+    {
+        return (new FlightPaxSerializer($this))->getData();
     }
 }
