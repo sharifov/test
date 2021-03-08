@@ -29,6 +29,7 @@ use frontend\models\CaseCommunicationForm;
 use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
 use modules\fileStorage\FileStorageSettings;
+use modules\fileStorage\src\entity\fileCase\FileCase;
 use modules\fileStorage\src\services\url\UrlGenerator;
 use sales\auth\Auth;
 use sales\entities\cases\CasesSourceType;
@@ -201,18 +202,43 @@ class CasesController extends FController
 
         $dataProvider = $searchModel->search($params, $user);
 
+        if (
+            FileStorageSettings::isEnabled()
+            && is_array($searchModel->showFields)
+            && in_array('count_files', $searchModel->showFields, false)
+        ) {
+            $models = $dataProvider->getModels();
+            $ids = ArrayHelper::getColumn($models, 'cs_id');
+            $files = FileCase::find()
+                ->select('count(*), fc_case_id')
+                ->andWhere(['fc_case_id' => $ids])
+                ->groupBy(['fc_case_id'])
+                ->asArray()
+                ->indexBy('fc_case_id')
+                ->all();
+
+            /** @var CasesSearch $model */
+            foreach ($models as $model) {
+                if (array_key_exists($model->cs_id, $files)) {
+                    $model->count_files = $files[$model->cs_id]['count'];
+                } else {
+                    $model->count_files = 0;
+                }
+            }
+            $dataProvider->setModels($models);
+        }
+
         if ($params['export_type']) {
             return $this->render('_search', [
                 'model' => $searchModel,
                 'dataProvider' => $dataProvider,
             ]);
-        } else {
-            return $this->render('index', [
-                'searchModel' => $searchModel,
-                'dataProvider' => $dataProvider,
-                'user' => $user,
-            ]);
         }
+        return $this->render('index', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'user' => $user,
+        ]);
     }
 
     /**

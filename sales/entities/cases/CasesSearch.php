@@ -14,6 +14,7 @@ use common\models\Sms;
 use common\models\UserGroup;
 use common\models\UserGroupAssign;
 use frontend\helpers\JsonHelper;
+use modules\fileStorage\src\entity\fileCase\FileCase;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\helpers\setting\SettingHelper;
@@ -28,6 +29,7 @@ use yii\data\ActiveDataProvider;
 use yii\data\SqlDataProvider;
 use yii\db\Expression;
 use yii\db\Query;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class CasesSearch
@@ -73,6 +75,8 @@ use yii\db\Query;
  * @property int|null $chatsQtyTo
  * @property int|null $caseUserGroup
  * @property array $showFields
+ * @property int|null $includedFiles
+ * @property $count_files
  */
 class CasesSearch extends Cases
 {
@@ -129,6 +133,8 @@ class CasesSearch extends Cases
     private $cacheSaleData = [];
 
     public int $cacheDuration = 60 * 1;
+    public $includedFiles;
+    public $count_files;
 
     /**
      * @return array
@@ -184,7 +190,8 @@ class CasesSearch extends Cases
             ['showFields', 'filter', 'filter' => static function ($value) {
                 return is_array($value) ? $value : [];
             }, 'skipOnEmpty' => true],
-            ['client_locale', 'safe']
+            ['client_locale', 'safe'],
+            ['includedFiles', 'in', 'range' => [0, 1]],
         ];
     }
 
@@ -234,6 +241,7 @@ class CasesSearch extends Cases
             'chatsQtyFrom' => 'Chats From', 'chatsQtyTo' => 'Chats To',
             'caseUserGroup' => 'Case User Group',
             'locales' => 'Client Locale',
+            'includedFiles' => 'Included Files',
         ];
     }
 
@@ -467,6 +475,20 @@ class CasesSearch extends Cases
                     'cs_id' => SaleTicket::find()->select('st_case_id')
                         ->andWhere(['st_penalty_type' => $this->airlinePenalty])
                 ]);
+        }
+        if (ArrayHelper::isIn($this->includedFiles, ['1', '0'], false)) {
+            $caseIds = FileCase::find()
+                ->select('fc_case_id')
+                ->groupBy(['fc_case_id'])
+                ->indexBy('fc_case_id')
+                ->column();
+            $command = $this->includedFiles ? 'IN' : 'NOT IN';
+
+            $query->andWhere([
+                $command,
+                'cs_id',
+                $caseIds
+            ]);
         }
 
         $query = $this->prepareCommunicationQuery($query);
@@ -709,6 +731,20 @@ class CasesSearch extends Cases
                         ->andWhere(['user_group_assign.ugs_group_id' => $this->caseUserGroup])
                         ->groupBy('employees.id')
                 ]);
+        }
+        if (ArrayHelper::isIn($this->includedFiles, ['1', '0'], false)) {
+            $caseIds = FileCase::find()
+                ->select('fc_case_id')
+                ->groupBy(['fc_case_id'])
+                ->indexBy('fc_case_id')
+                ->column();
+            $command = $this->includedFiles ? 'IN' : 'NOT IN';
+
+            $query->andWhere([
+                $command,
+                'cs_id',
+                $caseIds
+            ]);
         }
 
         $query = $this->prepareCommunicationQuery($query);
@@ -1048,7 +1084,8 @@ class CasesSearch extends Cases
             'cs_lead_id' => 'Lead ID',
             'communication' => 'Communication',
             'status_dt' => 'Status Dt',
-            'client_locale' => 'Client locale'
+            'client_locale' => 'Client locale',
+            'count_files' => 'Files',
         ];
     }
 }
