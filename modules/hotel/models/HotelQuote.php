@@ -5,6 +5,7 @@ namespace modules\hotel\models;
 use common\models\Currency;
 use modules\hotel\src\entities\hotelQuote\events\HotelQuoteCloneCreatedEvent;
 use modules\hotel\src\entities\hotelQuote\serializer\HotelQuoteSerializer;
+use modules\hotel\src\services\hotelQuote\HotelQuotePriceCalculator;
 use modules\hotel\src\useCases\quote\HotelProductQuoteCreateDto;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\hotel\src\entities\hotelQuote\Scopes;
@@ -373,14 +374,14 @@ class HotelQuote extends ActiveRecord implements Quotable
                 }
 
                 if (isset($prQuote)) {
-                    $prQuote->pq_origin_price = CurrencyHelper::convertToBaseCurrency((float)$hotelQuoteRoomAmount * $hQuote->getCountDays(), $prQuote->pq_origin_currency_rate);
-                    $prQuote->pq_app_markup = CurrencyHelper::convertToBaseCurrency((float)$hotelQuoteRoomSystemMarkup * $hQuote->getCountDays(), $prQuote->pq_origin_currency_rate);
-                    // pq_agent_markup - already in base currency
-                    $prQuote->pq_agent_markup = (float)$hotelQuoteRoomAgentMarkup * $hQuote->getCountDays();
+//                    $prQuote->pq_origin_price = CurrencyHelper::convertToBaseCurrency((float)$hotelQuoteRoomAmount * $hQuote->getCountDays(), $prQuote->pq_origin_currency_rate);
+//                    $prQuote->pq_app_markup = CurrencyHelper::convertToBaseCurrency((float)$hotelQuoteRoomSystemMarkup * $hQuote->getCountDays(), $prQuote->pq_origin_currency_rate);
+//                     pq_agent_markup - already in base currency
+//                    $prQuote->pq_agent_markup = (float)$hotelQuoteRoomAgentMarkup * $hQuote->getCountDays();
 
-                    $prQuote->calculateServiceFeeSum();
-                    $prQuote->calculatePrice();
-                    $prQuote->calculateClientPrice();
+//                    $prQuote->calculateServiceFeeSum();
+//                    $prQuote->calculatePrice();
+//                    $prQuote->calculateClientPrice();
 
 //                    $systemPrice = ProductQuoteHelper::calcSystemPrice((float)$totalSystemPrice, $prQuote->pq_origin_currency);
 //                    $prQuote->setQuotePrice(
@@ -390,6 +391,8 @@ class HotelQuote extends ActiveRecord implements Quotable
 //                        ProductQuoteHelper::roundPrice((float)$totalServiceFeeSum)
 //                    );
 //                    $prQuote->recalculateProfitAmount();
+
+                    (new HotelQuotePriceCalculator())->calculate($prQuote, $hQuote);
                     if (!$prQuote->save()) {
                         Yii::error([
                             'message' => 'ProductQuote save after calculate prices error',

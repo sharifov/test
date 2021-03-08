@@ -3,6 +3,7 @@
 namespace modules\hotel\src\helpers;
 
 use modules\hotel\models\HotelQuote;
+use modules\hotel\models\HotelQuoteRoom;
 
 class HotelQuoteHelper
 {
@@ -16,7 +17,8 @@ class HotelQuoteHelper
         $prices = [];
 
         $dtoTotal = new HotelQuoteRoomTotalPriceDTO();
-        foreach ($hotelQuote->hotelQuoteRooms as $room) {
+        $rooms = HotelQuoteRoom::find()->andWhere(['hqr_hotel_quote_id' => $hotelQuote->hq_id])->all();
+        foreach ($rooms as $room) {
             $dtoRoom = new HotelQuoteRoomPriceDTO(
                 $room->hqr_amount,
                 $room->hqr_cancel_amount,
