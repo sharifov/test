@@ -164,7 +164,7 @@ class AttractionQuoteController extends FController
         ]);
     }
 
-    public function actionAvailabilityAjax()
+    public function actionAvailabilityListAjax()
     {
         $attractionId = (int) Yii::$app->request->post('atn_id');
         $attractionKey = (string) Yii::$app->request->post('attraction_key');

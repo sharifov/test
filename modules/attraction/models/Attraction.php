@@ -176,7 +176,6 @@ class Attraction extends \yii\db\ActiveRecord implements Productable
     public static function getAttractionQuoteDataByKey(array $result, int $quoteKey): array
     {
         $quoteList = [];
-        //$hotelData = self::getHotelDataByCode($result, $hotelCode);
 
         if ($quoteKey && isset($result['product']) && $result['product']) {
             foreach ($result['activityGroups'][0]['activityTiles'] as $quote) {
@@ -190,6 +189,45 @@ class Attraction extends \yii\db\ActiveRecord implements Productable
             }
         }
         return $quoteList[$quoteKey] ?? [];
+    }
+
+    public function getAdultsCount(): int
+    {
+        $count = 0;
+        if ($this->attractionPaxes) {
+            foreach ($this->attractionPaxes as $pax) {
+                if ($pax->atnp_type_id == AttractionPax::PAX_LIST_ID[AttractionPax::PAX_ADULT]) {
+                    $count++;
+                }
+            }
+        }
+        return $count;
+    }
+
+    public function getChildCount(): int
+    {
+        $count = 0;
+        if ($this->attractionPaxes) {
+            foreach ($this->attractionPaxes as $pax) {
+                if ($pax->atnp_type_id == AttractionPax::PAX_LIST_ID[AttractionPax::PAX_CHILD]) {
+                    $count++;
+                }
+            }
+        }
+        return $count;
+    }
+
+    public function getInfantsCount(): int
+    {
+        $count = 0;
+        if ($this->attractionPaxes) {
+            foreach ($this->attractionPaxes as $pax) {
+                if ($pax->atnp_type_id == AttractionPax::PAX_LIST_ID[AttractionPax::PAX_INFANT]) {
+                    $count++;
+                }
+            }
+        }
+        return $count;
     }
 
     /**

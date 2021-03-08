@@ -27,7 +27,11 @@ $dataProviderQuotes = $searchModel->searchProduct($params);
             <div class="col-md-6">
                 <div class="x_panel">
                     <div class="x_title">
-                        <b>Travelers</b>
+                        <b>Travelers
+                            <?= $model->getAdultsCount() ? '<i class="fa fa-user"></i> ' . $model->getAdultsCount() : ''?>
+                            <?= $model->getAdultsCount() ? ', <i class="fa fa-child"></i> ' . $model->getAdultsCount() : ''?>
+                            <?= $model->getInfantsCount() ? ', <i class="fas fa-baby"></i> ' . $model->getInfantsCount() : ''?>
+                        </b>
                         <ul class="nav navbar-right panel_toolbox">
                             <?php if ($model->attractionPaxes) : ?>
                             <li>

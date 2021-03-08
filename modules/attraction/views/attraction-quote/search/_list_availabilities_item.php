@@ -5,7 +5,9 @@ use yii\bootstrap\Html;
 /**
  * @var $availabilityItem array
  * @var $key int
+ * @var $attractionSearch \modules\attraction\models\Attraction
  */
+
 ?>
 
 <tr id="tr-atraction-quote-<?= ($availabilityItem['id']) ?>" class="tr-hotel-quote-<?= ($availabilityItem['id']) ?> <?= $quoteExist = false ? 'bg-success' : '' ?>">
@@ -15,8 +17,9 @@ use yii\bootstrap\Html;
     </td>
     <td><span class="badge badge-secondary"><?= Html::encode($availabilityItem['date']) ?></span></td>
     <td>
-        <span class="ml-2"><i class="fa fa-user"></i> <?= (Html::encode(rand(1, 3) ?? 0)) ?></span>
-        <span class="ml-2"><i class="fa fa-child"></i> <?= (Html::encode(rand(0, 4) ?? 0)) ?></span>
+        <span class="ml-2"><i class="fa fa-user"></i> <?= (Html::encode($attractionSearch->getAdultsCount())) ?></span>
+        <span class="ml-2"><i class="fa fa-child"></i> <?= (Html::encode($attractionSearch->getChildCount())) ?></span>
+        <span class="ml-2"><i class="fas fa-baby"></i> <?= (Html::encode($attractionSearch->getInfantsCount())) ?></span>
     </td>
     <!--<td colspan="2">$<?php /*=number_format(Html::encode($test = 100 ?? 0), 2)*/ ?></td>-->
     <!--<td><?/*= Html::encode($availabilityItem['guidePriceFormattedText']) */?></td>-->
