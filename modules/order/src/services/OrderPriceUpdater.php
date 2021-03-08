@@ -63,7 +63,9 @@ class OrderPriceUpdater
         $order->or_agent_markup = $agentMarkup;
         $order->or_profit_amount = $profitAmount;
         if ($order->or_client_currency_rate) {
-            $order->or_client_total = CurrencyHelper::convertFromBaseCurrency($order->or_app_total, $order->or_client_currency_rate);
+            if ($order->or_app_total) {
+                $order->or_client_total = CurrencyHelper::convertFromBaseCurrency($order->or_app_total, $order->or_client_currency_rate);
+            }
         } else {
             $order->or_client_total = $order->or_app_total;
         }
