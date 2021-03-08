@@ -25,8 +25,9 @@ class OfferPriceUpdater
     {
         $offer = $this->offerRepository->find($offerId);
 
-        $quotesIds = OfferProduct::find()->select(['op_product_quote_id'])->andWhere(['op_offer_id' => $offer->of_id])->column();
-        $quotes = ProductQuote::find()->andWhere(['pq_order_id' => $quotesIds])->all();
+        $quotes = ProductQuote::find()->andWhere([
+            'pq_id' => OfferProduct::find()->select(['op_product_quote_id'])->andWhere(['op_offer_id' => $offer->of_id])
+        ])->all();
 
         $appTotal = 0;
         $profitAmount = 0;
