@@ -7,6 +7,7 @@ use common\models\Airports;
 use modules\flight\src\entities\flightQuoteSegment\serializer\FlightQuoteSegmentSerializer;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentDTO;
 use Yii;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "flight_quote_segment".
@@ -14,6 +15,7 @@ use Yii;
  * @property int $fqs_id
  * @property int $fqs_flight_quote_id
  * @property int|null $fqs_flight_quote_trip_id
+ * @property string $fqs_uid [varchar(15)]
  * @property string $fqs_departure_dt
  * @property string $fqs_arrival_dt
  * @property int|null $fqs_stop
@@ -113,6 +115,14 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
             'fqs_recheck_baggage' => 'Fqs Recheck Baggage',
             'fqs_mileage' => 'Fqs Mileage',
         ];
+    }
+
+    public function beforeSave($insert): bool
+    {
+        if ($insert) {
+            $this->fqs_uid = $this->generateUid();
+        }
+        return parent::beforeSave($insert);
     }
 
     /**
@@ -247,5 +257,13 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
     public function serialize(): array
     {
         return (new FlightQuoteSegmentSerializer($this))->getData();
+    }
+
+    /**
+     * @return string
+     */
+    public function generateUid(): string
+    {
+        return uniqid('fqs');
     }
 }

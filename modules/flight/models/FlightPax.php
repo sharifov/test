@@ -170,6 +170,6 @@ class FlightPax extends \yii\db\ActiveRecord
      */
     public function generateUid(): string
     {
-        return uniqid('op');
+        return uniqid('fp');
     }
 }
