@@ -35,9 +35,9 @@ use Datetime;
 
 class ApiAttractionService extends Component
 {
-    public $url;
-    public $apiKey;
-    public $secret;
+    public string $url;
+    public string $apiKey;
+    public string $secret;
     //public $options = [CURLOPT_ENCODING => 'gzip'];
 
     //private $request;
@@ -113,7 +113,50 @@ class ApiAttractionService extends Component
         return $result;
     }
 
-    public function getAvailabilityList($productId, Attraction $attraction)
+    public function getAvailability(string $availabilityId): array
+    {
+        $query = [
+            'query' => 'query holibob($availabilityId: String!) {
+                availability(id: $availabilityId) {
+                    id
+                    isValid
+                    durationFormattedText
+                    durationMinutes
+                    optionList {
+                        nodes {
+                            id
+                            label
+                            dataType
+                            dataFormat
+                            availableOptions {
+                                label
+                                value
+                            }
+                            answerValue
+                            answerFormattedText
+                        }
+                    }
+                    pricingCategoryList {
+                        nodes{
+                            id
+                            label
+                            price
+                            priceTotal
+                            priceFormattedText
+                        }
+                    }
+                }
+            }',
+            'variables' => '{"availabilityId":"' . $availabilityId . '"}',
+            'operationName' => 'holibob',
+        ];
+
+        $result = self::execRequest(@json_encode($query));
+        $data = json_decode($result, true);
+        return $data['data'] ?? [];
+    }
+
+    public function getAvailabilityList(string $productId, Attraction $attraction): array
     {
         $query = [
             'query' => 'query holibob ($productId: String!, $startDate: Date, $endDate: Date) {
@@ -138,14 +181,12 @@ class ApiAttractionService extends Component
             'operationName' => 'holibob'
         ];
 
-
-
         $result = self::execRequest(@json_encode($query));
         $data = json_decode($result, true);
         return $data['data'] ?? [];
     }
 
-    public function getProductById($productId)
+    public function getProductById(string $productId): array
     {
         $query = [
             'query' => 'query holibob ($productId: String!){
@@ -177,7 +218,7 @@ class ApiAttractionService extends Component
         return $data['data'] ?? [];
     }
 
-    public function getProductList(Attraction $attraction)
+    public function getProductList(Attraction $attraction): array
     {
         $query = [
             'query' => 'query holibob ($term: String!){
@@ -210,7 +251,7 @@ class ApiAttractionService extends Component
 
         $result = self::execRequest(@json_encode($query));
         $data = json_decode($result, true);
-        return $data['data'];
+        return $data['data'] ?? [];
     }
 
     public function checkApi()
@@ -230,11 +271,10 @@ class ApiAttractionService extends Component
      * @return Response
      * @throws \yii\httpclient\Exception
      */
-    protected function sendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []): Response
+    /*protected function sendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []): Response
     {
         $url = $this->url . $action;
 
-        /* @var $this->request Client */
         $this->request->setMethod($method)
             ->setUrl($url)
             ->setData($data);
@@ -245,20 +285,20 @@ class ApiAttractionService extends Component
             $this->request->addHeaders($headers);
         }
         return $this->request->send();
-    }
+    }*/
 
     /**
      * @param string $method
      */
-    protected function setFormatJson(string $method): void
+    /*protected function setFormatJson(string $method): void
     {
         $method = strtolower($method);
         if ($method === 'post' || $method === 'delete') {
             $this->request->setFormat(Client::FORMAT_JSON);
         }
-    }
+    }*/
 
-    public function getAttractionQuotes(Attraction $attraction): array
+    /*public function getAttractionQuotes(Attraction $attraction): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -282,7 +322,7 @@ class ApiAttractionService extends Component
         }
 
         return $out;
-    }
+    }*/
 
     /**
      * @param string $term
@@ -292,7 +332,7 @@ class ApiAttractionService extends Component
      * @param array $type
      * @return array
      */
-    public function searchDestination(string $term, string $lang = '', string $hc = '', string $zc = '', array $type = null): array
+    /*public function searchDestination(string $term, string $lang = '', string $hc = '', string $zc = '', array $type = null): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -322,15 +362,15 @@ class ApiAttractionService extends Component
         }
 
         return $out;
-    }
+    }*/
 
     /**
      * @return array
      */
-    public static function getDestinationAvailableTypeList(): array
+    /*public static function getDestinationAvailableTypeList(): array
     {
         return self::DESTINATION_AVAILABLE_TYPE;
-    }
+    }*/
 
     /**
      * @param string $urlAction
@@ -338,7 +378,7 @@ class ApiAttractionService extends Component
      * @param string $method
      * @return array
      */
-    public function requestBookingHandler(string $urlAction, array $params, string $method = 'post'): array
+    /*public function requestBookingHandler(string $urlAction, array $params, string $method = 'post'): array
     {
         $result = ['statusApi' => HotelQuoteServiceLogStatus::STATUS_ERROR, 'message' => '', 'data' => []];
         $urlMethod = $urlAction . '_' . $method;
@@ -384,5 +424,5 @@ class ApiAttractionService extends Component
         $result['message'] = $resultMessage->prepareMessage()->forHuman;
 
         return $result;
-    }
+    }*/
 }
