@@ -227,15 +227,12 @@ JS;
 $this->registerJs($js, View::POS_END);
 
 $css = <<<CSS
-    .kv-editable-submit {
-        margin-left: 4px;
+    .fileinput-remove span {
+        margin-right: 3px;
+        line-height: 21px;
     }
-    .kv-editable-close {
-        margin-right: 4px;
-    }
-    .upload-modal-btn {
-        font-size: 14px;
-        color: #596b7d;
+    .file-footer-buttons .kv-file-upload{
+        display: none;
     }
 CSS;
 $this->registerCss($css);

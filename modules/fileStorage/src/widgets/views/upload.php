@@ -4,6 +4,7 @@ use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\useCase\uploadFile\UploadForm;
 use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\web\View;
 use kartik\file\FileInput;
 use yii\bootstrap4\Modal;
@@ -40,6 +41,15 @@ $modalId = 'file-input-modal';
         ]); ?>
 
         <?= Html::submitButton('Upload', ['class' => 'file-storage-upload-btn btn btn-success']) ?>
+
+        <div class="alert alert-secondary alert-dismissible fade show info-upload-block" role="alert">
+          Maximum upload files - 3. <br />
+          Allowed extensions - <?php echo implode(', ', array_keys(FileStorageSettings::getAllowExt())) ?>.
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+
     <?php ActiveForm::end() ?>
 <?php Modal::end() ?>
 
@@ -99,3 +109,15 @@ function fileStorageUploadButtonEnable() {
 }
 JS;
 $this->registerJs($js);
+
+$css = <<<CSS
+    .hand {
+        margin-left: 8px;
+        display: block;
+    }
+    .info-upload-block {
+        color: #7890a2;
+        margin-top: 12px;
+    }
+CSS;
+$this->registerCss($css);
