@@ -743,18 +743,35 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return (ProductQuoteStatus::isBookable($this->pq_status_id) && !$this->isBooked());
     }
 
-    public function calculateServiceFeeSum(): void
+    private function calculateServiceFeeSum(): void
     {
         $this->pq_service_fee_sum = CurrencyHelper::roundUp(($this->pq_origin_price + $this->pq_app_markup + $this->pq_agent_markup) * ($this->pq_service_fee_percent / 100));
     }
 
-    public function calculatePrice(): void
+    private function calculatePrice(): void
     {
         $this->pq_price = $this->pq_origin_price + $this->pq_app_markup + $this->pq_agent_markup + $this->pq_service_fee_sum;
     }
 
-    public function calculateClientPrice(): void
+    private function calculateClientPrice(): void
     {
         $this->pq_client_price = CurrencyHelper::convertFromBaseCurrency($this->pq_price, $this->pq_client_currency_rate);
+    }
+
+    private function updateProfitAmount(): void
+    {
+        $this->pq_profit_amount = $this->pq_app_markup + $this->pq_agent_markup;
+    }
+
+    public function updatePrices($originPrice, $appMarkup, $agentMarkup): void
+    {
+        $this->pq_origin_price = $originPrice;
+        $this->pq_app_markup = $appMarkup;
+        $this->pq_agent_markup = $agentMarkup;
+
+        $this->calculateServiceFeeSum();
+        $this->calculatePrice();
+        $this->calculateClientPrice();
+        $this->updateProfitAmount();
     }
 }

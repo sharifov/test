@@ -391,9 +391,12 @@ class HotelQuote extends ActiveRecord implements Quotable
 //                        ProductQuoteHelper::roundPrice((float)$totalServiceFeeSum)
 //                    );
 
-
-                    (new HotelQuotePriceCalculator())->calculate($prQuote, $hQuote);
-                    $prQuote->recalculateProfitAmount();
+                    $prices = (new HotelQuotePriceCalculator())->calculate($hQuote, $prQuote->pq_origin_currency_rate);
+                    $prQuote->updatePrices(
+                        $prices['originPrice'],
+                        $prices['appMarkup'],
+                        $prices['agentMarkup']
+                    );
                     if (!$prQuote->save()) {
                         Yii::error([
                             'message' => 'ProductQuote save after calculate prices error',
