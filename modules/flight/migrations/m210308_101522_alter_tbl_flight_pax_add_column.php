@@ -4,6 +4,7 @@ namespace modules\flight\migrations;
 
 use modules\flight\models\FlightPax;
 use yii\db\Migration;
+use yii\db\Query;
 
 /**
  * Class m210308_101522_alter_tbl_flight_pax_add_column
@@ -17,10 +18,11 @@ class m210308_101522_alter_tbl_flight_pax_add_column extends Migration
     {
         $this->addColumn('{{%flight_pax}}', 'fp_uid', $this->string(15)->unique()->after('fp_flight_id'));
 
-        $flightPax = FlightPax::find()->all();
+        $flightPax = FlightPax::find()->select(['fp_id'])->asArray()->all();
+        $fp = new FlightPax();
         foreach ($flightPax as $pax) {
-            $pax->fp_uid = $pax->generateUid();
-            $pax->save();
+            $query = (new Query())->createCommand()->update(FlightPax::tableName(), ['fp_uid' => $fp->generateUid()], ['fp_id' => $pax['fp_id']]);
+            $query->execute();
         }
     }
 
