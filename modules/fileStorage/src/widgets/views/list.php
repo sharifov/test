@@ -195,7 +195,7 @@ $(document).on('click', '.js-delete-file-btn', function(e){
     .done(function(dataResponse) {
         if (dataResponse.status === 1) {                
             pjaxReload({container: '#pjax-file-list'});  
-            createNotify('Success', data.message, 'success');   
+            createNotify('Success', dataResponse.message, 'success');   
             
             let counter = $('#file-count-value');
             let count = parseInt(counter.text());
