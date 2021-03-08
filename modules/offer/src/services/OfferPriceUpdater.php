@@ -49,7 +49,9 @@ class OfferPriceUpdater
         $offer->of_app_total = $appTotal;
         $offer->of_profit_amount = $profitAmount;
         if ($offer->of_client_currency_rate) {
-            $offer->of_client_total = CurrencyHelper::convertFromBaseCurrency($offer->of_app_total, $offer->of_client_currency_rate);
+            if ($offer->of_app_total) {
+                $offer->of_client_total = CurrencyHelper::convertFromBaseCurrency($offer->of_app_total, $offer->of_client_currency_rate);
+            }
         } else {
             $offer->of_client_total = $offer->of_app_total;
         }
