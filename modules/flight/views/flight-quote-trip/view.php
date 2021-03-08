@@ -30,6 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'fqt_id',
+            'fqt_uid',
             'fqt_key',
             'fqt_flight_quote_id',
             'fqt_duration',

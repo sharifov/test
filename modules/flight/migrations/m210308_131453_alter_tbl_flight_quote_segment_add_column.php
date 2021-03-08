@@ -4,7 +4,6 @@ namespace modules\flight\migrations;
 
 use modules\flight\models\FlightQuoteSegment;
 use yii\db\Migration;
-use yii\helpers\VarDumper;
 
 /**
  * Class m210308_131453_alter_tbl_flight_quote_segment_add_column

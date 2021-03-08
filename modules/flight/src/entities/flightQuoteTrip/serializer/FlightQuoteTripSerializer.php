@@ -14,6 +14,7 @@ class FlightQuoteTripSerializer extends Serializer
     {
         return [
             'fqt_id',
+            'fqt_uid',
             'fqt_key',
             'fqt_duration'
         ];
