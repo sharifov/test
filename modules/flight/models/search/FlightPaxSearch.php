@@ -18,7 +18,7 @@ class FlightPaxSearch extends FlightPax
     {
         return [
             [['fp_id', 'fp_flight_id', 'fp_pax_id'], 'integer'],
-            [['fp_pax_type', 'fp_first_name', 'fp_last_name', 'fp_middle_name', 'fp_dob'], 'safe'],
+            [['fp_pax_type', 'fp_first_name', 'fp_last_name', 'fp_middle_name', 'fp_dob', 'fp_uid'], 'safe'],
         ];
     }
 
@@ -71,6 +71,7 @@ class FlightPaxSearch extends FlightPax
         $query->andFilterWhere(['like', 'fp_pax_type', $this->fp_pax_type])
             ->andFilterWhere(['like', 'fp_first_name', $this->fp_first_name])
             ->andFilterWhere(['like', 'fp_last_name', $this->fp_last_name])
+            ->andFilterWhere(['like', 'fp_uid', $this->fp_uid])
             ->andFilterWhere(['like', 'fp_middle_name', $this->fp_middle_name]);
 
         return $dataProvider;

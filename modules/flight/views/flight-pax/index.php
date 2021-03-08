@@ -29,6 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
 //            ['class' => 'yii\grid\SerialColumn'],
 
             'fp_id',
+            'fp_uid',
             'fp_flight_id',
             'fp_pax_id',
             'fp_pax_type',
