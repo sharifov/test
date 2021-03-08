@@ -56,7 +56,7 @@ use yii\widgets\Pjax;
 
 $js = <<<JS
 
-    $('body').off('click', '.btn-availability-quote').on('click', '.btn-availability-quote', function (e) {        
+    $('body').off('click', '.btn-availability-list-quote').on('click', '.btn-availability-list-quote', function (e) {        
       e.preventDefault();
       //$('#preloader').removeClass('d-none');
       let url = $(this).data('url');
@@ -79,7 +79,7 @@ $js = <<<JS
               if (data.error) {
                   alert(data.error);
                   new PNotify({
-                        title: 'Error: fail availability check',
+                        title: 'Error: fail to get Quotes',
                         type: 'error',
                         text: data.error,
                         hide: true
@@ -100,8 +100,8 @@ $js = <<<JS
                         hide: true
                     });
                   
-                  btnAdd.html('<i class="fa fa-check"></i>  Checked Availability');;
-                  $('#tr-hotel-quote-' + quoteKey).addClass('bg-success');
+                  btnAdd.html('<i class="fa fa-check"></i>  Quotes Obtained');
+                  //$('#tr-hotel-quote-' + quoteKey).addClass('bg-success');
               }
           })
         .fail(function( jqXHR, textStatus ) {

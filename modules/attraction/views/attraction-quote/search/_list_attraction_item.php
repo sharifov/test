@@ -83,11 +83,11 @@
               <?php if (false) : ?>
                 <span class="badge badge-white">Added</span>
               <?php else : ?>
-                  <?= \yii\bootstrap4\Html::a('<i class="fa fa-plus"></i> Check Availability', null, [
-                      'data-url' => \yii\helpers\Url::to(['/attraction/attraction-quote/availability-ajax']),
+                  <?= \yii\bootstrap4\Html::a('<i class="fa fa-plus"></i> Get Quotes List', null, [
+                      'data-url' => \yii\helpers\Url::to(['/attraction/attraction-quote/availability-list-ajax']),
                       'data-atn-id' => $hotelSearch->atn_id,
                       'data-attraction-key' => $dataHotel[$key]['id'] ?? '',
-                      'class' => 'btn btn-success btn-sm btn-availability-quote'
+                      'class' => 'btn btn-success btn-sm btn-availability-list-quote'
                   ]) ?>
               <?php endif; ?>
           </div>
