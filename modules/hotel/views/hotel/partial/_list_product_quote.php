@@ -468,7 +468,7 @@ JS;
                         </td>
 
                         <?php
-                            $totalPrice = round($totalSp * 2, 2);
+                            $totalPrice = round($totalSp * $model->getCountDays(), 2);
                             $price = round((float) $model->hqProductQuote->pq_price, 2);
                         ?>
 
