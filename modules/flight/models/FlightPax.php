@@ -2,6 +2,7 @@
 
 namespace modules\flight\models;
 
+use common\models\Language;
 use modules\flight\src\entities\flightPax\serializer\FlightPaxSerializer;
 use modules\flight\src\useCases\flightQuote\create\FlightPaxDTO;
 use sales\entities\serializer\Serializable;
@@ -22,6 +23,11 @@ use Yii;
  *
  * @property Flight $fpFlight
  * @property FlightQuoteSegmentPaxBaggageCharge[] $flightQuoteSegmentPaxBaggageCharges
+ * @property string $fp_nationality [varchar(5)]
+ * @property string $fp_gender [varchar(1)]
+ * @property string $fp_email [varchar(100)]
+ * @property string $fp_language [varchar(5)]
+ * @property string $fp_citizenship [varchar(5)]
  */
 class FlightPax extends \yii\db\ActiveRecord implements Serializable
 {
@@ -75,11 +81,20 @@ class FlightPax extends \yii\db\ActiveRecord implements Serializable
         return [
             [['fp_flight_id'], 'required'],
             [['fp_flight_id', 'fp_pax_id'], 'integer'],
-            [['fp_dob', 'fp_uid'], 'safe'],
+            [['fp_dob', 'fp_uid', 'fp_nationality', 'fp_gender', 'fp_email', 'fp_language', 'fp_citizenship'], 'safe'],
             [['fp_pax_type'], 'string', 'max' => 3],
             [['fp_uid'], 'string', 'max' => 15],
             [['fp_first_name', 'fp_last_name', 'fp_middle_name'], 'string', 'max' => 40],
             [['fp_flight_id'], 'exist', 'skipOnError' => true, 'targetClass' => Flight::class, 'targetAttribute' => ['fp_flight_id' => 'fl_id']],
+
+            [['fp_nationality', 'fp_language', 'fp_citizenship'], 'string', 'max' => 5],
+
+            [['fp_email'], 'string', 'max' => 100],
+            [['fp_email'], 'email'],
+
+            [['fp_gender'], 'string', 'max' => 1],
+
+            [['fp_language'], 'exist', 'skipOnError' => true, 'skipOnEmpty' => true, 'targetClass' => Language::class, 'targetAttribute' => 'language_id'],
         ];
     }
 
