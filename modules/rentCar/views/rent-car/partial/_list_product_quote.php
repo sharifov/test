@@ -109,8 +109,9 @@ JS;
                             'data-product-id' => $modelQuote->rcqProductQuote->pq_product_id,
                         ]) ?>
                     <?php endif ?>
+
                     <?php if ($modelQuote->rcqProductQuote->isBooked() && Auth::can('/rent-car/rent-car-quote/cancel-book')) : ?>
-                        <?php echo Html::a('<i class="fa fa-file-pdf-o"></i> Cancel Book', null, [
+                        <?php echo Html::a('<i class="fa fa-share-square"></i> Cancel Book', null, [
                             'class' => 'dropdown-item js-btn-cancel-book-rent-car',
                             'data-url' => Url::to('/rent-car/rent-car-quote/cancel-book'),
                             'data-rent-car-quote-id' => $modelQuote->rcq_id,

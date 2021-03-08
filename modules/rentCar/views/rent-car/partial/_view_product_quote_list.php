@@ -149,9 +149,9 @@ $js = <<<JS
         if(!confirm('Are you sure you want to cancel book this quote?')) {
             return false;
         }
-        // TODO::   
+           
         $('#preloader').removeClass('d-none');
-        let quoteId = $(this).data('hotel-quote-id');
+        let quoteId = $(this).data('rent-car-quote-id');
         let productId = $(this).data('product-id');
         
         $.ajax({

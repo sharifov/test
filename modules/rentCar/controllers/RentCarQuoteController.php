@@ -15,6 +15,7 @@ use modules\rentCar\src\helpers\RentCarDataParser;
 use modules\rentCar\src\helpers\RentCarQuoteHelper;
 use modules\rentCar\src\repositories\rentCar\RentCarQuoteRepository;
 use modules\rentCar\src\services\RentCarQuoteBookService;
+use modules\rentCar\src\services\RentCarQuoteCancelBookService;
 use modules\rentCar\src\services\RentCarQuotePdfService;
 use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
@@ -259,29 +260,26 @@ class RentCarQuoteController extends FController
         return $result;
     }
 
-    public function actionAjaxCancelBook(): array
+    public function actionCancelBook(): array
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         $id = (int) Yii::$app->request->post('id', 0);
 
         try {
             $model = $this->findRentCarQuote($id);
-            HotelQuoteCancelBookGuard::guard($model);
-
-            /** @var HotelQuoteCancelBookService $cancelBookService */
-            $cancelBookService = Yii::$container->get(HotelQuoteCancelBookService::class);
-            $resultCancel = $cancelBookService->cancelBook($model);
+            $cancelBookService = Yii::createObject(RentCarQuoteCancelBookService::class);
+            $cancelBookService::cancelBook($model, Auth::id());
 
             $result = [
-                'message' => $resultCancel->message,
-                'status' => $resultCancel->status,
+                'message' => 'Booking canceled successfully',
+                'status' => 1,
             ];
         } catch (\Throwable $throwable) {
             $result = [
                 'message' => $throwable->getMessage(),
                 'status' => 0,
             ];
-            \Yii::error(AppHelper::throwableFormatter($throwable), 'Controller:HotelQuoteController:AjaxCancelBook:Throwable');
+            \Yii::error(AppHelper::throwableLog($throwable), 'RentCarQuoteController:actionCancelBook');
         }
         return $result;
     }

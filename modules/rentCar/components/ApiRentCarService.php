@@ -162,12 +162,6 @@ class ApiRentCarService extends Component
 
         try {
             $response = $this->sendRequest('getContractRequest', $data, 'get');
-
-            \Yii::info([
-                'requestData' => $data,
-                'responseData' => $response->data ?? [],
-            ], 'info\ApiRentCarService::contractRequest:log'); /* TODO:: FOR DEBUG:: must by remove  */
-
             if ($response->isOk) {
                 if (isset($response->data['getCarContractRequest']['results']['status'])) {
                     $out['data'] = $response->data['getCarContractRequest']['results'];
@@ -226,6 +220,45 @@ class ApiRentCarService extends Component
             }
         } catch (\Throwable $throwable) {
             \Yii::error(VarDumper::dumpAsString($throwable, 10), 'ApiRentCarService:book:throwable');
+            $out['error'] = 'ApiRentCarService error: ' . $throwable->getMessage();
+        }
+        return $out;
+    }
+
+    /**
+     * @param $bookingId
+     * @param string $email
+     * @param string|null $sid
+     * @return array
+     */
+    public function cancel($bookingId, string $email, ?string $sid = null): array
+    {
+        $out = ['error' => false, 'data' => []];
+
+        $data['booking_id'] = $bookingId;
+        $data['email'] = $email;
+        if ($sid) {
+            $data['sid'] = $sid;
+        }
+
+        try {
+            $response = $this->sendRequest('getCancelRequest', $data, 'get');
+            if ($response->isOk) {
+                if (isset($response->data['getCarCancel']['results']['status'])) {
+                    $out['data'] = $response->data['getCarContractRequest']['results'];
+                } else {
+                    $out['error'] = 'In response not found getCancelRequest.results.status';
+                    \Yii::error([
+                        'error' => $out['error'],
+                        'data' => $response->data ?? [],
+                    ], 'ApiRentCarService:cancel');
+                }
+            } else {
+                $out['error'] = 'Error (' . $response->statusCode . '): ' . $response->content;
+                \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ApiRentCarService:cancel:error');
+            }
+        } catch (\Throwable $throwable) {
+            \Yii::error(VarDumper::dumpAsString($throwable, 10), 'ApiRentCarService:cancel:throwable');
             $out['error'] = 'ApiRentCarService error: ' . $throwable->getMessage();
         }
         return $out;

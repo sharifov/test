@@ -3,6 +3,7 @@
 namespace modules\rentCar\src\services;
 
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
+use modules\rentCar\components\ApiRentCarService;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use modules\rentCar\src\repositories\rentCar\RentCarQuoteRepository;
 use Yii;
@@ -17,6 +18,7 @@ class RentCarQuoteBookService
     {
         $rentCar = $rentCarQuote->rcqRentCar;
         $productQuote = $rentCarQuote->rcqProductQuote;
+        /** @var ApiRentCarService $apiRentCarService */
         $apiRentCarService = Yii::$app->getModule('rent-car')->apiService;
         $referenceId = $rentCarQuote->rcq_car_reference_id;
 
@@ -44,6 +46,7 @@ class RentCarQuoteBookService
 
         $bookResult = $apiRentCarService->book($referenceId, $firstName, $lastName, $rentCar->prc_request_hash_key);
 
+        /* TODO:: uncomment after book success */
         /*if ($bookResult['error'] === false) {
             if (!$bookingId = ArrayHelper::getValue($dataResult, 'data.results.booking_id')) {
                 throw new \DomainException('Book request is error. BookingId not found in response.');
