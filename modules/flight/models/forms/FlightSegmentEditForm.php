@@ -20,11 +20,10 @@ class FlightSegmentEditForm extends FlightSegmentForm
             $this->fs_flight_id = $flightSegment->fs_flight_id;
             $this->fs_origin_iata = $flightSegment->fs_origin_iata;
             $this->fs_destination_iata = $flightSegment->fs_destination_iata;
-            $this->fs_origin_iata_label = $this->loadAirportLabel($this->fs_origin_iata);
-            $this->fs_destination_iata_label = $this->loadAirportLabel($this->fs_destination_iata);
             $this->fs_departure_date = $flightSegment->fs_departure_date;
             $this->fs_flex_days = $flightSegment->fs_flex_days;
             $this->fs_flex_type_id = $flightSegment->fs_flex_type_id;
+            $this->updateAirportLabels();
         }
         parent::__construct($config);
     }
@@ -40,6 +39,23 @@ class FlightSegmentEditForm extends FlightSegmentForm
         } catch (\Exception $e) {
             Yii::$app->errorHandler->logException($e);
             return '';
+        }
+    }
+
+    public function load($data, $formName = null)
+    {
+        parent::load($data, $formName);
+        $this->updateAirportLabels();
+    }
+
+    public function updateAirportLabels(): void
+    {
+        if ($this->fs_origin_iata) {
+            $this->fs_origin_iata_label = $this->loadAirportLabel($this->fs_origin_iata);
+        }
+
+        if ($this->fs_destination_iata) {
+            $this->fs_destination_iata_label = $this->loadAirportLabel($this->fs_destination_iata);
         }
     }
 }
