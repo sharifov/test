@@ -55,7 +55,7 @@ class RentCarQuoteBookService
             throw new \DomainException('Book request is fail. ' . $dataResult['error']);
         }*/
 
-        $bookingId = null; /* TODO:: FOR DEBUG:: must by remove  */
+        $bookingId = random_int(1000, 9999); /* TODO:: FOR DEBUG:: must by remove  */
 
         $rentCarQuoteRepository = Yii::createObject(RentCarQuoteRepository::class);
         $productQuoteRepository = Yii::createObject(ProductQuoteRepository::class);
