@@ -17,6 +17,8 @@ use modules\order\src\entities\orderUserProfit\OrderUserProfitRepository;
 use modules\order\src\forms\api\create\OrderCreateForm;
 use modules\order\src\payment\method\PaymentMethodRepository;
 use modules\order\src\payment\PaymentRepository;
+use modules\product\src\entities\productHolder\ProductHolder;
+use modules\product\src\entities\productHolder\ProductHolderRepository;
 use modules\product\src\entities\productOption\ProductOptionRepository;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
@@ -47,6 +49,7 @@ use sales\services\TransactionManager;
  * @property ProductOptionRepository $productOptionRepository
  * @property ProductQuoteOptionRepository $productQuoteOptionRepository
  * @property FlightPaxRepository $flightPaxRepository
+ * @property ProductHolderRepository $productHolderRepository
  */
 class OrderApiManageService
 {
@@ -110,6 +113,10 @@ class OrderApiManageService
      * @var FlightPaxRepository
      */
     private FlightPaxRepository $flightPaxRepository;
+    /**
+     * @var ProductHolderRepository
+     */
+    private ProductHolderRepository $productHolderRepository;
 
     public function __construct(
         OrderRepository $orderRepository,
@@ -126,7 +133,8 @@ class OrderApiManageService
         OrderTipsRepository $orderTipsRepository,
         ProductOptionRepository $productOptionRepository,
         ProductQuoteOptionRepository $productQuoteOptionRepository,
-        FlightPaxRepository $flightPaxRepository
+        FlightPaxRepository $flightPaxRepository,
+        ProductHolderRepository $productHolderRepository
     ) {
         $this->orderRepository = $orderRepository;
         $this->orderUserProfitRepository = $orderUserProfitRepository;
@@ -143,6 +151,7 @@ class OrderApiManageService
         $this->productOptionRepository = $productOptionRepository;
         $this->productQuoteOptionRepository = $productQuoteOptionRepository;
         $this->flightPaxRepository = $flightPaxRepository;
+        $this->productHolderRepository = $productHolderRepository;
     }
 
     /**
@@ -197,6 +206,15 @@ class OrderApiManageService
                 foreach ($quote->productQuoteOptions as $productQuoteOption) {
                     $totalOrderPrice += $productQuoteOption->pqo_price + $productQuoteOption->pqo_extra_markup;
                 }
+
+                $productHolder = ProductHolder::create(
+                    $quote->pq_product_id,
+                    $productQuotesForm->productHolder->firstName,
+                    $productQuotesForm->productHolder->lastName,
+                    $productQuotesForm->productHolder->email,
+                    $productQuotesForm->productHolder->phone,
+                );
+                $this->productHolderRepository->save($productHolder);
             }
 
             $invoice = Invoice::create(

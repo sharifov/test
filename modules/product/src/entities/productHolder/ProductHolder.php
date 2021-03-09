@@ -86,4 +86,20 @@ class ProductHolder extends \yii\db\ActiveRecord
     {
         return 'product_holder';
     }
+
+    public static function create(
+        int $productId,
+        string $firstName,
+        string $lastName,
+        string $email,
+        string $phone
+    ): self {
+        $holder = new self();
+        $holder->ph_product_id = $productId;
+        $holder->ph_first_name = $firstName;
+        $holder->ph_last_name = $lastName;
+        $holder->ph_email = $email;
+        $holder->ph_phone_number = $phone;
+        return $holder;
+    }
 }

@@ -308,6 +308,12 @@ class OrderController extends BaseController
      * @apiParam {String}       productQuotes.productOptions.description            Description
      * @apiParam {Decimal}      productQuotes.productOptions.price                  Price
      *
+     * @apiParam {Object}      productQuotes.productHolder                         Holder first name
+     * @apiParam {String}      productQuotes.productHolder.firstName               Holder first name
+     * @apiParam {String}      productQuotes.productHolder.lastName                Holder last name
+     * @apiParam {String}      productQuotes.productHolder.email                   Holder email
+     * @apiParam {String}      productQuotes.productHolder.phone                   Holder phone
+     *
      * @apiParam {Object}       payment                 Payment
      * @apiParam {String}       payment.type            Type
      * @apiParam {Integer}      payment.transactionId   Transaction Id
@@ -366,10 +372,22 @@ class OrderController extends BaseController
                     ]
 
                 }
-            ]
+            ],
+            "productHolder": {
+                "firstName": "Test",
+                "lastName": "Test",
+                "email": "test@test.test",
+                "phone": "+19074861000"
+            }
         },
         {
-            "gid": "6fcfc43e977dabffe6a979ebdaddfvr2"
+            "gid": "6fcfc43e977dabffe6a979ebdaddfvr2",
+            "productHolder": {
+                "firstName": "Test 2",
+                "lastName": "Test 2",
+                "email": "test2@test.test",
+                "phone": "+19074861002"
+            }
         }
     ],
     "payment": {

@@ -12,6 +12,7 @@ use yii\base\Model;
  *
  * @property string $gid
  * @property ProductQuoteOptionsForm[] $productOptions
+ * @property ProductHolderForm $productHolder
  */
 class ProductQuotesForm extends CompositeRecursiveForm
 {
@@ -26,6 +27,7 @@ class ProductQuotesForm extends CompositeRecursiveForm
             }
         }
         $this->productOptions = $productOptionsForm;
+        $this->productHolder = new ProductHolderForm();
         return parent::load($data, $formName, $forms);
     }
 
@@ -48,6 +50,6 @@ class ProductQuotesForm extends CompositeRecursiveForm
      */
     protected function internalForms(): array
     {
-        return ['productOptions'];
+        return ['productOptions', 'productHolder'];
     }
 }
