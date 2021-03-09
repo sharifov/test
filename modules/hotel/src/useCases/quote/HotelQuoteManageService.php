@@ -84,8 +84,8 @@ class HotelQuoteManageService
             }
 
             $offers = OfferProduct::find()->select(['op_offer_id'])->andWhere(['op_product_quote_id' => $productQuote->pq_id])->column();
-            foreach ($offers as $offer) {
-                $this->offerPriceUpdater->update($offer);
+            foreach ($offers as $offerId) {
+                $this->offerPriceUpdater->update($offerId);
             }
         });
     }

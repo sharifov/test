@@ -7,6 +7,7 @@ use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
 use modules\order\src\entities\order\Order;
 use modules\order\src\services\CreateOrderDTO;
 use modules\order\src\services\OrderManageService;
+use modules\order\src\services\OrderPriceUpdater;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use sales\dispatchers\EventDispatcher;
@@ -22,6 +23,7 @@ use yii\web\Response;
  * @property ProductQuoteRepository $productQuoteRepository
  * @property EventDispatcher $eventDispatcher
  * @property OrderManageService $orderManageService
+ * @property OrderPriceUpdater $orderPriceUpdater
  */
 class OrderProductController extends FController
 {
@@ -35,21 +37,22 @@ class OrderProductController extends FController
      */
     private $productQuoteRepository;
 
-    /**
-     * OrderProductController constructor.
-     * @param $id
-     * @param $module
-     * @param ProductQuoteRepository $productQuoteRepository
-     * @param OrderManageService $orderManageService
-     * @param EventDispatcher $eventDispatcher
-     * @param array $config
-     */
-    public function __construct($id, $module, ProductQuoteRepository $productQuoteRepository, OrderManageService $orderManageService, EventDispatcher $eventDispatcher, $config = [])
-    {
+    private OrderPriceUpdater $orderPriceUpdater;
+
+    public function __construct(
+        $id,
+        $module,
+        ProductQuoteRepository $productQuoteRepository,
+        OrderManageService $orderManageService,
+        EventDispatcher $eventDispatcher,
+        OrderPriceUpdater $orderPriceUpdater,
+        $config = []
+    ) {
         parent::__construct($id, $module, $config);
         $this->eventDispatcher = $eventDispatcher;
         $this->orderManageService = $orderManageService;
         $this->productQuoteRepository = $productQuoteRepository;
+        $this->orderPriceUpdater = $orderPriceUpdater;
     }
 
 
@@ -102,6 +105,7 @@ class OrderProductController extends FController
                 if ($productQuote->isRelatedWithOrder() && $productQuote->isTheSameOrder($orderId)) {
                     $productQuote->removeOrderRelation();
                     $this->productQuoteRepository->save($productQuote);
+                    $this->orderPriceUpdater->update($orderId);
                     return ['message' => 'Successfully deleted Product Quote ID (' . $productQuoteId . ') from order: "' . Html::encode($order->or_name) . '" (' . $order->or_id . ')'];
                 }
             } else {
@@ -110,6 +114,7 @@ class OrderProductController extends FController
 
             $productQuote->setOrderRelation($order->or_id);
             $this->productQuoteRepository->save($productQuote);
+            $this->orderPriceUpdater->update($order->or_id);
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableFormatter($throwable), 'OrderProductController:' . __FUNCTION__);
             return ['error' => 'Error: ' . $throwable->getMessage()];
@@ -137,6 +142,7 @@ class OrderProductController extends FController
                 $this->eventDispatcher->dispatchAll([new OrderRecalculateProfitAmountEvent([$order])]);
             }
             $transaction->commit();
+            $this->orderPriceUpdater->update($order->or_id);
         } catch (\Throwable $throwable) {
             $transaction->rollBack();
             Yii::error(AppHelper::throwableFormatter($throwable), 'OrderProductController:' . __FUNCTION__);

@@ -476,7 +476,7 @@ class HotelQuoteController extends FController
             } catch (\RuntimeException $e) {
                 return $this->asJson(['message' => $e->getMessage()]);
             } catch (\Throwable $e) {
-                Yii::error($e->getTraceAsString(), 'HotelQuoteController::actionAjaxUpdateAgentMarkup::Throwable');
+                Yii::error(VarDumper::dumpAsString($e), 'HotelQuoteController::actionAjaxUpdateAgentMarkup::Throwable');
             }
 
             return $this->asJson(['output' => $value]);

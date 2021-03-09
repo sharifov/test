@@ -41,6 +41,7 @@ class OfferPriceUpdater
                 }
                 if ($option->pqo_extra_markup) {
                     $appTotal += $option->pqo_extra_markup;
+                    $profitAmount += $option->pqo_extra_markup;
                 }
             }
             if ($quote->pq_profit_amount) {
