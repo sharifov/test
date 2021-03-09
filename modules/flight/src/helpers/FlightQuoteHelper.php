@@ -12,6 +12,7 @@ use frontend\helpers\QuoteHelper;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuote;
+use modules\flight\models\FlightQuotePaxPrice;
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
 use modules\flight\src\dto\ngs\QuoteNgsDataDto;
 use modules\flight\src\useCases\flightQuote\create\FlightQuotePaxPriceDTO;
@@ -62,7 +63,8 @@ class FlightQuoteHelper
         $dtoPax = new FlightQuotePaxPriceDataDTO();
         $paxCodeId = null;
         $dtoTotal = new FlightQuoteTotalPriceDTO();
-        foreach ($flightQuote->flightQuotePaxPrices as $price) {
+        $paxPrices = FlightQuotePaxPrice::find()->andWhere(['qpp_flight_quote_id' => $flightQuote->fq_id])->orderBy(['qpp_flight_pax_code_id' => SORT_ASC])->all();
+        foreach ($paxPrices as $price) {
             $paxCode = FlightPax::getPaxTypeById($price->qpp_flight_pax_code_id);
             if ($dtoPax->paxCodeId !== $price->qpp_flight_pax_code_id) {
                 $dtoPax = new FlightQuotePaxPriceDataDTO();
