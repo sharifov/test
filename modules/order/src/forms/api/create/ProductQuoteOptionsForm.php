@@ -31,6 +31,6 @@ class ProductQuoteOptionsForm extends Model
 
     public function formName(): string
     {
-        return 'quoteOptions';
+        return 'productOptions';
     }
 }

@@ -5,6 +5,7 @@ namespace modules\order\src\services;
 use common\models\BillingInfo;
 use common\models\CreditCard;
 use common\models\Payment;
+use modules\flight\src\repositories\flightPaxRepository\FlightPaxRepository;
 use modules\invoice\src\entities\invoice\Invoice;
 use modules\invoice\src\entities\invoice\InvoiceRepository;
 use modules\order\src\entities\order\Order;
@@ -45,6 +46,7 @@ use sales\services\TransactionManager;
  * @property OrderTipsRepository $orderTipsRepository
  * @property ProductOptionRepository $productOptionRepository
  * @property ProductQuoteOptionRepository $productQuoteOptionRepository
+ * @property FlightPaxRepository $flightPaxRepository
  */
 class OrderApiManageService
 {
@@ -104,6 +106,10 @@ class OrderApiManageService
      * @var ProductQuoteOptionRepository
      */
     private ProductQuoteOptionRepository $productQuoteOptionRepository;
+    /**
+     * @var FlightPaxRepository
+     */
+    private FlightPaxRepository $flightPaxRepository;
 
     public function __construct(
         OrderRepository $orderRepository,
@@ -119,7 +125,8 @@ class OrderApiManageService
         BillingInfoRepository $billingInfoRepository,
         OrderTipsRepository $orderTipsRepository,
         ProductOptionRepository $productOptionRepository,
-        ProductQuoteOptionRepository $productQuoteOptionRepository
+        ProductQuoteOptionRepository $productQuoteOptionRepository,
+        FlightPaxRepository $flightPaxRepository
     ) {
         $this->orderRepository = $orderRepository;
         $this->orderUserProfitRepository = $orderUserProfitRepository;
@@ -135,6 +142,7 @@ class OrderApiManageService
         $this->orderTipsRepository = $orderTipsRepository;
         $this->productOptionRepository = $productOptionRepository;
         $this->productQuoteOptionRepository = $productQuoteOptionRepository;
+        $this->flightPaxRepository = $flightPaxRepository;
     }
 
     /**
@@ -166,7 +174,7 @@ class OrderApiManageService
                 $quote->applied();
                 $this->productQuoteRepository->save($quote);
 
-                foreach ($productQuotesForm->quoteOptions as $quoteOptionsForm) {
+                foreach ($productQuotesForm->productOptions as $quoteOptionsForm) {
                     $productOption = $this->productOptionRepository->findByKey($quoteOptionsForm->productOptionKey);
 
                     $productQuoteOption = ProductQuoteOption::create(
@@ -253,6 +261,22 @@ class OrderApiManageService
             if ($lead) {
                 $lead->booked($newOrder->or_owner_user_id);
                 $this->leadRepository->save($lead);
+            }
+
+            foreach ($form->paxes as $paxForm) {
+                $pax = $this->flightPaxRepository->findByUid($paxForm->uid);
+                $pax->updateByOrderApiCreation(
+                    $paxForm->first_name,
+                    $paxForm->last_name,
+                    $paxForm->middle_name,
+                    $paxForm->nationality,
+                    $paxForm->gender,
+                    $paxForm->birth_date,
+                    $paxForm->email,
+                    $paxForm->language,
+                    $paxForm->citizenship
+                );
+                $this->flightPaxRepository->save($pax);
             }
 
             return $newOrder;

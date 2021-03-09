@@ -1244,7 +1244,7 @@ class OrderController extends BaseController
     public function actionCreate(): \webapi\src\response\Response
     {
         $request = Yii::$app->request;
-        $form = new OrderCreateForm(count($request->post('productQuotes', [])));
+        $form = new OrderCreateForm(count($request->post('productQuotes', [])), count($request->post('paxes', [])));
 
         if (!$form->load($request->post())) {
             return new ErrorResponse(

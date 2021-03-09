@@ -194,4 +194,26 @@ class FlightPax extends \yii\db\ActiveRecord implements Serializable
     {
         return (new FlightPaxSerializer($this))->getData();
     }
+
+    public function updateByOrderApiCreation(
+        ?string $firstName,
+        ?string $lastName,
+        ?string $middleName,
+        ?string $nationality,
+        ?string $gender,
+        ?string $birthDate,
+        ?string $email,
+        ?string $language,
+        ?string $citizenship
+    ): void {
+        $this->fp_first_name = $firstName;
+        $this->fp_last_name = $lastName;
+        $this->fp_middle_name = $middleName;
+        $this->fp_nationality = $nationality;
+        $this->fp_gender = $gender;
+        $this->fp_dob = $birthDate;
+        $this->fp_email = $email;
+        $this->fp_language = $language;
+        $this->fp_citizenship = $citizenship;
+    }
 }
