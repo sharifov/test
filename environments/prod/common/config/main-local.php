@@ -87,6 +87,11 @@ return [
             'xAccelRedirectUrl' => '{{ common.config.main.components.communication.xAccelRedirectUrl:str }}',
             'recordingUrl' => '{{ common.config.main.components.communication.recordingUrl:str }}'
         ],
+        'hybrid' => [
+            'class' => \common\components\HybridService::class,
+            'username' => '{{ common.config.main.components.hybrid.username:str }}',
+            'password' => '{{ common.config.main.components.hybrid.password:str }}',
+        ],
         'airsearch' => [
             'class' => \common\components\AirSearchService::class,
             'url' => '{{ common.config.main.components.airsearch.url:str }}',
