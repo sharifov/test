@@ -107,7 +107,7 @@ class ProductQuoteOptionController extends FController
                     $transaction->rollBack();
                     Yii::error(AppHelper::throwableFormatter($throwable), 'ProductQuoteOptionController:' . __FUNCTION__);
                 }
-                return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-product-quote-list-' . $model->pqoProductQuote->pq_product_id . '"});</script>';
+                return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-product-quote-list-' . $model->pqoProductQuote->pq_product_id . '"});pjaxReload({container: "#pjax-lead-orders", async: false, timeout: 5000});pjaxReload({container: "#pjax-lead-offers", async: false, timeout: 5000});</script>';
             }
         } else {
             $productQuoteId = (int) Yii::$app->request->get('id');
@@ -187,7 +187,7 @@ class ProductQuoteOptionController extends FController
                     $transaction->rollBack();
                     Yii::error(AppHelper::throwableFormatter($throwable), 'ProductQuoteOptionController:' . __FUNCTION__);
                 }
-                return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-product-quote-list-' . $model->pqoProductQuote->pq_product_id . '"});</script>';
+                return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-product-quote-list-' . $model->pqoProductQuote->pq_product_id . '"});pjaxReload({container: "#pjax-lead-orders", async: false, timeout: 5000});pjaxReload({container: "#pjax-lead-offers", async: false, timeout: 5000});</script>';
             }
         } else {
             $form->attributes = $model->attributes;
