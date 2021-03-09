@@ -2028,10 +2028,19 @@ class TestController extends FController
         exit();
     }
 
-    public function actionAPdf(int $id)
+    public function actionAPdf(int $id, int $data = 0, int $json = 1)
     {
         if (!$quote = AttractionQuote::findOne(['atnq_id' => $id])) {
             throw new NotFoundException('AttractionQuote not found. Id (' . $id . ')');
+        }
+
+        if ($data === 1) {
+            $data = AttractionQuotePdfService::getData($quote);
+            if ($json === 1) {
+                return $this->asJson($data);
+            }
+            \yii\helpers\VarDumper::dump($data, 10, true);
+            exit();
         }
 
         try {
