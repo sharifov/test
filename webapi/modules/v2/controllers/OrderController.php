@@ -302,11 +302,11 @@ class OrderController extends BaseController
      * @apiParam {String}       offerGid                                            Offer gid
      * @apiParam {Object[]}     productQuotes                                       Product Quotes
      * @apiParam {String}       productQuotes.gid                                   Product Quote Gid
-     * @apiParam {Object[]}     productQuotes.quoteOptions                          Quote Options
-     * @apiParam {String}       productQuotes.quoteOptions.productOptionKey         Product option key
-     * @apiParam {String}       productQuotes.quoteOptions.name                     Name
-     * @apiParam {String}       productQuotes.quoteOptions.description              Description
-     * @apiParam {Decimal}      productQuotes.quoteOptions.price                    Price
+     * @apiParam {Object[]}     productQuotes.productOptions                        Quote Options
+     * @apiParam {String}       productQuotes.productOptions.productOptionKey       Product option key
+     * @apiParam {String}       productQuotes.productOptions.name                   Name
+     * @apiParam {String}       productQuotes.productOptions.description            Description
+     * @apiParam {Decimal}      productQuotes.productOptions.price                  Price
      *
      * @apiParam {Object}       payment                 Payment
      * @apiParam {String}       payment.type            Type

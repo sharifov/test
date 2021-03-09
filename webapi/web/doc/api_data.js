@@ -3354,35 +3354,35 @@ define({ "api": [
             "group": "Parameter",
             "type": "Object[]",
             "optional": false,
-            "field": "productQuotes.quoteOptions",
+            "field": "productQuotes.productOptions",
             "description": "<p>Quote Options</p>"
           },
           {
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "productQuotes.quoteOptions.productOptionKey",
+            "field": "productQuotes.productOptions.productOptionKey",
             "description": "<p>Product option key</p>"
           },
           {
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "productQuotes.quoteOptions.name",
+            "field": "productQuotes.productOptions.name",
             "description": "<p>Name</p>"
           },
           {
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "productQuotes.quoteOptions.description",
+            "field": "productQuotes.productOptions.description",
             "description": "<p>Description</p>"
           },
           {
             "group": "Parameter",
             "type": "Decimal",
             "optional": false,
-            "field": "productQuotes.quoteOptions.price",
+            "field": "productQuotes.productOptions.price",
             "description": "<p>Price</p>"
           },
           {
