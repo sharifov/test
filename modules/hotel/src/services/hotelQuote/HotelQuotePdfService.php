@@ -101,13 +101,18 @@ class HotelQuotePdfService
      */
     public static function getContent(HotelQuote $hotelQuote): string
     {
-        $data = CommunicationDataService::hotelConfirmationData($hotelQuote);
+        $data = self::getData($hotelQuote);
         $content = \Yii::$app->communication->getContent(self::TEMPLATE_KEY, $data);
 
         if ($content['error'] !== false) {
             throw new \RuntimeException(VarDumper::dumpAsString($content['error']));
         }
         return $content['content'];
+    }
+
+    public static function getData(HotelQuote $hotelQuote)
+    {
+        return CommunicationDataService::hotelConfirmationData($hotelQuote);
     }
 
     /**
