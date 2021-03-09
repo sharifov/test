@@ -4,6 +4,9 @@ namespace modules\rentCar\controllers;
 
 use common\models\Notifications;
 use frontend\controllers\FController;
+use modules\offer\src\entities\offerProduct\OfferProduct;
+use modules\offer\src\services\OfferPriceUpdater;
+use modules\order\src\services\OrderPriceUpdater;
 use modules\rentCar\components\ApiRentCarService;
 use modules\rentCar\RentCarModule;
 use modules\rentCar\src\entity\dto\RentCarProductQuoteDto;
@@ -17,6 +20,7 @@ use modules\rentCar\src\repositories\rentCar\RentCarQuoteRepository;
 use modules\rentCar\src\services\RentCarQuoteBookService;
 use modules\rentCar\src\services\RentCarQuoteCancelBookService;
 use modules\rentCar\src\services\RentCarQuotePdfService;
+use modules\rentCar\src\services\RentCarQuotePriceCalculator;
 use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
@@ -34,9 +38,23 @@ use const http\Client\Curl\AUTH_ANY;
 
 /**
  * Class RentCarQuoteController
+ *
+ * @property OrderPriceUpdater $orderPriceUpdater
+ * @property OfferPriceUpdater $offerPriceUpdater
  */
 class RentCarQuoteController extends FController
 {
+    private OrderPriceUpdater $orderPriceUpdater;
+
+    private OfferPriceUpdater $offerPriceUpdater;
+
+    public function __construct($id, $module, OrderPriceUpdater $orderPriceUpdater, OfferPriceUpdater $offerPriceUpdater, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->orderPriceUpdater = $orderPriceUpdater;
+        $this->offerPriceUpdater = $offerPriceUpdater;
+    }
+
     public function init(): void
     {
         parent::init();
@@ -131,7 +149,12 @@ class RentCarQuoteController extends FController
                 throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($rentCarQuote));
             }
 
-            $productQuote = RentCarProductQuoteDto::priceUpdate($productQuote, $rentCarQuote);
+            $prices = (new RentCarQuotePriceCalculator())->calculate($rentCarQuote, $productQuote->pq_origin_currency_rate);
+            $productQuote->updatePrices(
+                $prices['originPrice'],
+                $prices['appMarkup'],
+                $prices['agentMarkup']
+            );
             if (!$productQuote->save()) {
                 throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($productQuote));
             }
@@ -303,12 +326,26 @@ class RentCarQuoteController extends FController
                 }
 
                 $productQuote = $rentCarQuote->rcqProductQuote;
-                $productQuote = RentCarProductQuoteDto::priceUpdate($productQuote, $rentCarQuote);
-                $productQuote->recalculateProfitAmount();
+                $prices = (new RentCarQuotePriceCalculator())->calculate($rentCarQuote, $productQuote->pq_origin_currency_rate);
+                $productQuote->updatePrices(
+                    $prices['originPrice'],
+                    $prices['appMarkup'],
+                    $prices['agentMarkup']
+                );
+
                 if (!$productQuote->save()) {
                     throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($productQuote));
                 }
                 $transaction->commit();
+
+                if ($productQuote->pq_order_id) {
+                    $this->orderPriceUpdater->update($productQuote->pq_order_id);
+                }
+
+                $offers = OfferProduct::find()->select(['op_offer_id'])->andWhere(['op_product_quote_id' => $productQuote->pq_id])->column();
+                foreach ($offers as $offerId) {
+                    $this->offerPriceUpdater->update($offerId);
+                }
                 $leadId = $productQuote->pqProduct->pr_lead_id ?? null;
                 if ($leadId) {
                     Notifications::pub(
