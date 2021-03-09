@@ -765,9 +765,9 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 
     public function updatePrices($originPrice, $appMarkup, $agentMarkup): void
     {
-        $this->pq_origin_price = $originPrice;
-        $this->pq_app_markup = $appMarkup;
-        $this->pq_agent_markup = $agentMarkup;
+        $this->pq_origin_price = $originPrice ?? 0;
+        $this->pq_app_markup = $appMarkup ?? 0;
+        $this->pq_agent_markup = $agentMarkup ?? 0;
 
         $this->calculateServiceFeeSum();
         $this->calculatePrice();
