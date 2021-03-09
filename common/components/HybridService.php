@@ -101,7 +101,7 @@ class HybridService extends Component
         $response = $this->sendRequest($projectId, '/offer/v1/order-update-status', $data);
 
         if ($response->isOk) {
-            if (array_keys($response->data['status'])) {
+            if (array_key_exists('status', $response->data)) {
                 if ($response->data['status']) {
                     return;
                 }
