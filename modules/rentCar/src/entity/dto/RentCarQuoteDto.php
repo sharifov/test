@@ -46,9 +46,19 @@ class RentCarQuoteDto
         $model->rcq_days = $rentCar->calculateDays();
         $model->rcq_system_mark_up = 0; // not data
         $model->rcq_agent_mark_up = 0; // not data
-        $model->rcq_service_fee_percent =
-            ProductTypePaymentMethodQuery::getDefaultPercentFeeByProductType(ProductType::PRODUCT_RENT_CAR) ??
-            Yii::$app->params['settings']['quote_service_fee_percent'];
+
+        $paymentFee = ProductTypePaymentMethodQuery::getDefaultPercentFeeByProductType(ProductType::PRODUCT_RENT_CAR);
+        if ($paymentFee) {
+            $model->rcq_service_fee_percent = $paymentFee;
+        } else {
+            $productTypeServiceFee = 0;
+            $productType = ProductType::find()->select(['pt_service_fee_percent'])->byRentCar()->asArray()->one();
+            if ($productType && $productType['pt_service_fee_percent']) {
+                $productTypeServiceFee = $productType['pt_service_fee_percent'];
+            }
+            $model->rcq_service_fee_percent = $productTypeServiceFee;
+        }
+
         $model->rcq_created_dt = date('Y-m-d H:i:s');
 
         return $model;

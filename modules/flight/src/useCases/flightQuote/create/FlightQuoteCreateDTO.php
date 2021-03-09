@@ -56,7 +56,7 @@ class FlightQuoteCreateDTO
 
         $paymentFee = ProductTypePaymentMethodQuery::getDefaultPercentFeeByProductType($productQuote->pqProduct->pr_type_id);
         if ($paymentFee) {
-            $this->serviceFeePercent = ProductTypePaymentMethodQuery::getDefaultPercentFeeByProductType($productQuote->pqProduct->pr_type_id);
+            $this->serviceFeePercent = $paymentFee;
         } else {
             $productTypeServiceFee = 0;
             $productType = ProductType::find()->select(['pt_service_fee_percent'])->byFlight()->asArray()->one();

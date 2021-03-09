@@ -430,7 +430,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $quote->pq_owner_user_id = $dto->ownerUserId;
         $quote->pq_created_user_id = $dto->createdUserId;
         $quote->pq_updated_user_id = $dto->updatedUserId;
-        $quote->pq_service_fee_percent = $serviceFeePercent;
+        $quote->pq_service_fee_percent = $serviceFeePercent ?? 0;
 
         return $quote;
     }
