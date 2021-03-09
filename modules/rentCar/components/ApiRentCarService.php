@@ -81,7 +81,6 @@ class ApiRentCarService extends Component
         if ($headers) {
             $this->request->addHeaders($headers);
         }
-        \Yii::info($data, 'info\ApiRentCarService:sendRequestData'); /* TODO:: FOR DEBUG:: must by remove  */
         \Yii::info($this->request->toString(), 'info\ApiRentCarService:Request'); /* TODO:: FOR DEBUG:: must by remove  */
         return $this->request->send();
     }
@@ -129,6 +128,8 @@ class ApiRentCarService extends Component
         try {
             $response = $this->sendRequest('getResultsV3', $data, 'get');
 
+            \Yii::info($response->toString(), 'info\ApiRentCarService:Response:getResultsV3'); /* TODO:: FOR DEBUG:: must by remove  */
+
             if ($response->isOk) {
                 if (isset($response->data['getCarResultsV3']['results']['result_list'])) {
                     $out['data'] = $response->data['getCarResultsV3']['results'];
@@ -162,6 +163,9 @@ class ApiRentCarService extends Component
 
         try {
             $response = $this->sendRequest('getContractRequest', $data, 'get');
+
+            \Yii::info($response->toString(), 'info\ApiRentCarService:Response:getContractRequest'); /* TODO:: FOR DEBUG:: must by remove  */
+
             if ($response->isOk) {
                 if (isset($response->data['getCarContractRequest']['results']['status'])) {
                     $out['data'] = $response->data['getCarContractRequest']['results'];
@@ -197,10 +201,7 @@ class ApiRentCarService extends Component
         try {
             $response = $this->sendRequest('getBookRequest', $data, 'post');
 
-            \Yii::info([
-                'requestData' => $data,
-                'responseData' => $response->data ?? [],
-            ], 'info\ApiRentCarService::book:log'); /* TODO:: FOR DEBUG:: must by remove  */
+            \Yii::info($response->toString(), 'info\ApiRentCarService:Response:getBookRequest'); /* TODO:: FOR DEBUG:: must by remove  */
 
             if ($response->isOk) {
                 if (isset($response->data['getCarBookRequest']['results'])) {
