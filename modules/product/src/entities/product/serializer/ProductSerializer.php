@@ -21,6 +21,7 @@ class ProductSerializer extends Serializer
     {
         return [
             //'pr_id',
+            'pr_gid',
             'pr_type_id',
             'pr_name',
             'pr_lead_id',

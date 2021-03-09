@@ -299,6 +299,7 @@ class OfferController extends BaseController
                     ]
                 },
                 "product": {
+                    "pr_gid": "",
                     "pr_type_id": 1,
                     "pr_name": "",
                     "pr_lead_id": 513111,

@@ -29,6 +29,7 @@ use yii\db\ActiveRecord;
  * This is the model class for table "product".
  *
  * @property int $pr_id
+ * @property string $pr_gid [varchar(32)]
  * @property int $pr_type_id
  * @property string|null $pr_name
  * @property int $pr_lead_id
@@ -69,6 +70,7 @@ class Product extends \yii\db\ActiveRecord implements Serializable
     public static function create(CreateDto $dto): self
     {
         $product = new static();
+        $product->pr_gid = self::generateGid();
         $product->pr_lead_id = $dto->pr_lead_id;
         $product->pr_type_id = $dto->pr_type_id;
         $product->pr_name = $dto->pr_name;
@@ -143,6 +145,10 @@ class Product extends \yii\db\ActiveRecord implements Serializable
     public function rules(): array
     {
         return [
+            ['pr_gid', 'required'],
+            ['pr_gid', 'string', 'max' => 32],
+            ['pr_gid', 'unique'],
+
             ['pr_type_id', 'required'],
             ['pr_type_id', 'integer'],
             ['pr_type_id', 'exist', 'skipOnError' => true, 'targetClass' => ProductType::class, 'targetAttribute' => ['pr_type_id' => 'pt_id']],
@@ -389,5 +395,10 @@ class Product extends \yii\db\ActiveRecord implements Serializable
             }
         }
         return $result;
+    }
+
+    public static function generateGid(): string
+    {
+        return md5(uniqid('fq', true));
     }
 }

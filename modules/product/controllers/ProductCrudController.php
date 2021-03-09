@@ -66,8 +66,11 @@ class ProductCrudController extends FController
     {
         $model = new Product();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->pr_id]);
+        if ($model->load(Yii::$app->request->post())) {
+            $model->pr_gid = Product::generateGid();
+            if ($model->save()) {
+                return $this->redirect(['view', 'id' => $model->pr_id]);
+            }
         }
 
         return $this->render('create', [
