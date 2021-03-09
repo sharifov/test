@@ -501,11 +501,11 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                     }
 
                     if (obj.cmd === 'reloadOrders') {
-                        pjaxReload({container: '#pjax-lead-orders', async: false, timeout: 5000});
+                        setTimeout(function(){ pjaxReload({container: '#pjax-lead-orders', async: false, timeout: 5000}); }, 4000);
                     }
 
                     if (obj.cmd === 'reloadOffers') {
-                        pjaxReload({container: '#pjax-lead-offers', async: false, timeout: 5000});
+                        setTimeout(function(){ pjaxReload({container: '#pjax-lead-offers', async: false, timeout: 5000}); }, 4000);
                     }
                 }
                 // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
