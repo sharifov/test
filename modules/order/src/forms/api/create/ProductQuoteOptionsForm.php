@@ -2,6 +2,7 @@
 
 namespace modules\order\src\forms\api\create;
 
+use common\components\validators\CheckJsonValidator;
 use modules\product\src\entities\productOption\ProductOption;
 use yii\base\Model;
 
@@ -15,6 +16,8 @@ class ProductQuoteOptionsForm extends Model
 
     public $price;
 
+    public $json_data;
+
     public function rules()
     {
         return [
@@ -26,6 +29,7 @@ class ProductQuoteOptionsForm extends Model
             ['price', 'required'],
             ['price', 'number'],
             ['price', 'filter', 'filter' => 'floatval', 'skipOnEmpty' => true],
+            ['json_data', CheckJsonValidator::class, 'skipOnEmpty' => true]
         ];
     }
 

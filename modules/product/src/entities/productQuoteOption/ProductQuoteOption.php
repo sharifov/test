@@ -2,6 +2,7 @@
 
 namespace modules\product\src\entities\productQuoteOption;
 
+use common\components\validators\CheckJsonValidator;
 use common\models\Employee;
 use modules\product\src\entities\productOption\ProductOption;
 use modules\product\src\entities\productQuote\ProductQuote;
@@ -32,6 +33,7 @@ use yii\db\ActiveRecord;
  * @property int|null $pqo_updated_user_id
  * @property string|null $pqo_created_dt
  * @property string|null $pqo_updated_dt
+ * @property string $pqo_request_data [json]
  *
  * @property Employee $pqoCreatedUser
  * @property ProductOption $pqoProductOption
@@ -80,6 +82,7 @@ class ProductQuoteOption extends ActiveRecord implements Serializable
             [['pqo_product_option_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductOption::class, 'targetAttribute' => ['pqo_product_option_id' => 'po_id']],
             [['pqo_product_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['pqo_product_quote_id' => 'pq_id']],
             [['pqo_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pqo_updated_user_id' => 'id']],
+            [['pqo_request_data'], CheckJsonValidator::class],
         ];
     }
 
@@ -193,7 +196,8 @@ class ProductQuoteOption extends ActiveRecord implements Serializable
         string $description,
         float $price,
         float $clientPrice,
-        ?float $extraMarkup
+        ?float $extraMarkup,
+        ?string $requestData
     ): self {
         $option = new self();
         $option->pqo_product_quote_id = $productQuoteId;
@@ -203,6 +207,7 @@ class ProductQuoteOption extends ActiveRecord implements Serializable
         $option->pqo_price = $price;
         $option->pqo_client_price = $clientPrice;
         $option->pqo_extra_markup = $extraMarkup;
+        $option->pqo_request_data = $requestData;
         return $option;
     }
 }
