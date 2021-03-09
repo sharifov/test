@@ -42,6 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'hq_request_hash',
                     'hq_check_in_date',
                     'hq_check_out_date',
+                    'hq_booking_id',
                 ],
             ]) ?>
             <br clear="all" />
