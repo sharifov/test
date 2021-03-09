@@ -1569,6 +1569,7 @@ class OrderController extends BaseController
                         "pqo_price": 20,
                         "pqo_client_price": 20,
                         "pqo_extra_markup": null,
+                        "pqo_request_data": null,
                         "productOption": {
                             "po_key": "travelGuard",
                             "po_name": "Travel Guard",
