@@ -348,7 +348,6 @@ class OrderController extends BaseController
                     "name": "Travel Guard",
                     "description": "",
                     "price": 20,
-                    "currency": "USD",
                     "json_data": "",
                     "data": [
                         {
