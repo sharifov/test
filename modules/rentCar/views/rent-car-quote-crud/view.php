@@ -33,6 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'model' => $model,
                 'attributes' => [
                     'rcq_id',
+                    'rcq_booking_id',
                     'rcq_rent_car_id',
                     'rcq_product_quote_id',
                     'rcq_hash_key',

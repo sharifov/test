@@ -6,6 +6,7 @@ use sales\entities\EventTrait;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\db\Expression;
 use yii\db\Query;
 
 /**
@@ -244,5 +245,24 @@ class ClientEmail extends \yii\db\ActiveRecord
     public static function find()
     {
         return new ClientEmailQuery(static::class);
+    }
+
+    public static function getGeneralEmail(int $clientId): ?string
+    {
+        $result = self::find()->select(['email'])
+            ->andWhere(['client_id' => $clientId])
+            ->andWhere([
+                'OR',
+                ['IS', 'type', null],
+                ['<>', 'type', self::EMAIL_INVALID],
+            ])
+            ->orderBy(new Expression('FIELD (type, ' . self::EMAIL_FAVORITE . ', ' . self::EMAIL_VALID . ', ' . self::EMAIL_NOT_SET . ', null)'))
+            ->asArray()
+            ->one();
+
+        if ($result) {
+            return $result['email'];
+        }
+        return null;
     }
 }

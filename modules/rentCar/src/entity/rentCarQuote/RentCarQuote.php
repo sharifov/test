@@ -119,7 +119,7 @@ class RentCarQuote extends \yii\db\ActiveRecord implements Quotable
 
             ['rcq_booking_json', 'safe'],
 
-            ['rcq_booking_id', 'integer'],
+            ['rcq_booking_id', 'string', 'max' => 255],
 
             ['rcq_contract_request_json', 'safe'],
         ];

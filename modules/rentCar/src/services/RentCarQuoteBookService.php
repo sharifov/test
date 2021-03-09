@@ -2,6 +2,8 @@
 
 namespace modules\rentCar\src\services;
 
+use common\models\ClientEmail;
+use common\models\ClientPhone;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\rentCar\components\ApiRentCarService;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
@@ -14,7 +16,7 @@ use yii\helpers\ArrayHelper;
  */
 class RentCarQuoteBookService
 {
-    public static function book(RentCarQuote $rentCarQuote, ?int $creatorId, bool $preBookingCheck = true): bool
+    public static function book(RentCarQuote $rentCarQuote, ?int $creatorId, bool $preBookingCheck = true)
     {
         $rentCar = $rentCarQuote->rcqRentCar;
         $productQuote = $rentCarQuote->rcqProductQuote;
@@ -38,24 +40,33 @@ class RentCarQuoteBookService
         }
 
         $dataResult = self::prepareContractRequestJson($dataResult);
+
+        if (!$carBookBundle = ArrayHelper::getValue($dataResult, 'data.car_book_bundle')) {
+            throw new \DomainException('Contract request is error. car_book_bundle not found in response');
+        }
+
         $rentCarQuote->rcq_contract_request_json = $dataResult['data'];
 
-        $client = $rentCarQuote->rcqRentCar->prcProduct->prLead->client;
-        $firstName = $client->first_name;
-        $lastName = $client->last_name;
+        $firstName = self::getFirstName($rentCarQuote);
+        $lastName = self::getLastName($rentCarQuote);
+        $email = self::getEmail($rentCarQuote);
+        $phone = self::getPhone($rentCarQuote);
 
-        $bookResult = $apiRentCarService->book($referenceId, $firstName, $lastName, $rentCar->prc_request_hash_key);
+        $bookResult = $apiRentCarService->book($carBookBundle, $firstName, $lastName, $phone, $email, $rentCar->prc_request_hash_key);
 
-        /* TODO:: uncomment after book success */
-        /*if ($bookResult['error'] === false) {
-            if (!$bookingId = ArrayHelper::getValue($dataResult, 'data.results.booking_id')) {
-                throw new \DomainException('Book request is error. BookingId not found in response.');
+        if ($bookResult['error'] === false) {
+            if (!$bookingStatus = ArrayHelper::getValue($bookResult, 'data.booking_status')) {
+                throw new \DomainException('Book request is failed. Booking status not found in response.');
+            }
+            if ($bookingStatus !== strtoupper('SUCCESS')) {
+                throw new \DomainException('Book request is failed. Booking status is ' . $bookingStatus);
+            }
+            if (!$bookingId = ArrayHelper::getValue($bookResult, 'data.booking_id')) {
+                throw new \DomainException('Book request is failed. BookingId not found in response.');
             }
         } else {
-            throw new \DomainException('Book request is fail. ' . $dataResult['error']);
-        }*/
-
-        $bookingId = random_int(1000, 9999); /* TODO:: FOR DEBUG:: must by remove  */
+            throw new \DomainException('Book request is fail. ' . $bookResult['error']);
+        }
 
         $rentCarQuoteRepository = Yii::createObject(RentCarQuoteRepository::class);
         $productQuoteRepository = Yii::createObject(ProductQuoteRepository::class);
@@ -67,7 +78,7 @@ class RentCarQuoteBookService
         $productQuote->booked($creatorId);
         $productQuoteRepository->save($productQuote);
 
-        return true;
+        return $bookingId;
     }
 
     public static function guard(RentCarQuote $rentCarQuote)
@@ -91,5 +102,55 @@ class RentCarQuoteBookService
             unset($dataResult['data']['cdw']['html']);
         }
         return $dataResult;
+    }
+
+    private static function getFirstName(RentCarQuote $rentCarQuote): string
+    {
+        if ($biFirstName = ArrayHelper::getValue($rentCarQuote, 'rcqProductQuote.pqOrder.billingInfo.0.bi_first_name')) {
+            return $biFirstName;
+        }
+        if ($clientFirstName = ArrayHelper::getValue($rentCarQuote, 'rcqRentCar.prcProduct.prLead.client.first_name')) {
+            return $clientFirstName;
+        }
+        throw new \DomainException('FirstName not found');
+    }
+
+    private static function getLastName(RentCarQuote $rentCarQuote): string
+    {
+        if ($biLastName = ArrayHelper::getValue($rentCarQuote, 'rcqProductQuote.pqOrder.billingInfo.0.bi_last_name')) {
+            return $biLastName;
+        }
+        if ($clientLastName = ArrayHelper::getValue($rentCarQuote, 'rcqRentCar.prcProduct.prLead.client.last_name')) {
+            return $clientLastName;
+        }
+        throw new \DomainException('LastName not found');
+    }
+
+    private static function getEmail(RentCarQuote $rentCarQuote): string
+    {
+        if ($biEmail = ArrayHelper::getValue($rentCarQuote, 'rcqProductQuote.pqOrder.billingInfo.0.bi_contact_email')) {
+            return $biEmail;
+        }
+        if (
+            ($clientId = ArrayHelper::getValue($rentCarQuote, 'rcqRentCar.prcProduct.prLead.client_id')) &&
+            $clientEmail = ClientEmail::getGeneralEmail($clientId)
+        ) {
+            return $clientEmail;
+        }
+        throw new \DomainException('ClientEmail not found');
+    }
+
+    private static function getPhone(RentCarQuote $rentCarQuote)
+    {
+        if ($biPhone = ArrayHelper::getValue($rentCarQuote, 'rcqProductQuote.pqOrder.billingInfo.0.bi_contact_phone')) {
+            return $biPhone;
+        }
+        if (
+            ($clientId = ArrayHelper::getValue($rentCarQuote, 'rcqRentCar.prcProduct.prLead.client_id')) &&
+            $clientEmail = ClientPhone::getGeneralPhone($clientId)
+        ) {
+            return $clientEmail;
+        }
+        throw new \DomainException('ClientPhone not found');
     }
 }
