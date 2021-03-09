@@ -6,6 +6,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightQuote;
 use modules\flight\src\helpers\FlightQuoteHelper;
+use modules\product\src\entities\productType\ProductType;
 use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMethodQuery;
 use sales\auth\Auth;
 use sales\helpers\product\ProductQuoteHelper;
@@ -52,7 +53,19 @@ class FlightQuoteCreateDTO
         $this->sourceId = null;
         $this->productQuoteId = $productQuote->pq_id;
         $this->hashKey = FlightQuoteHelper::generateHashQuoteKey($quote['key']);
-        $this->serviceFeePercent = ProductTypePaymentMethodQuery::getDefaultPercentFeeByProductType($productQuote->pqProduct->pr_type_id) ?? (FlightQuote::SERVICE_FEE * 100);
+
+        $paymentFee = ProductTypePaymentMethodQuery::getDefaultPercentFeeByProductType($productQuote->pqProduct->pr_type_id);
+        if ($paymentFee) {
+            $this->serviceFeePercent = ProductTypePaymentMethodQuery::getDefaultPercentFeeByProductType($productQuote->pqProduct->pr_type_id);
+        } else {
+            $productTypeServiceFee = 0;
+            $productType = ProductType::find()->select(['pt_service_fee_percent'])->byFlight()->asArray()->one();
+            if ($productType && $productType['pt_service_fee_percent']) {
+                $productTypeServiceFee = $productType['pt_service_fee_percent'];
+            }
+            $this->serviceFeePercent = $productTypeServiceFee;
+        }
+
         $this->recordLocator = $quote['recordLocator'] ?? null;
         $this->gds = $quote['gds'];
         $this->gdsPcc = $quote['pcc'];
