@@ -32,12 +32,16 @@ class OrderCompletedHybridNotificationJob implements JobInterface
             ], 'OrderCompletedHybridNotificationJob');
         }
 
-        \Yii::info([
-            'message' => 'Send completed status to hybrid',
-            'orderId' => $this->orderId,
-            'status' => $order->or_status_id,
-            'statusName' => OrderStatus::getName($order->or_status_id),
-        ], 'info\OrderCompletedHybridNotificationJob');
+        try {
+            \Yii::$app->hybrid->updateStatus($order->orLead->project_id, $order->or_gid, OrderStatus::COMPLETE);
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'message' => 'Send completed status to hybrid',
+                'orderId' => $this->orderId,
+                'status' => OrderStatus::COMPLETE,
+                'error' => $e->getMessage(),
+            ], 'OrderCompletedHybridNotificationJob');
+        }
     }
 
 //    public function getTtr(): int
