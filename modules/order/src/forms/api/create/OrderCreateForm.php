@@ -49,6 +49,15 @@ class OrderCreateForm extends CompositeRecursiveForm
         ];
     }
 
+    public function validate($attributeNames = null, $clearErrors = true): bool
+    {
+        if (empty($this->productQuotes)) {
+            $this->addError('productQuotes', 'Product quotes not provided');
+            return false;
+        }
+        return parent::validate($attributeNames, $clearErrors);
+    }
+
     public function formName(): string
     {
         return '';
