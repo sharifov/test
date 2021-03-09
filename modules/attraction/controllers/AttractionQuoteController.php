@@ -7,6 +7,7 @@ use frontend\controllers\FController;
 use modules\attraction\AttractionModule;
 use modules\attraction\models\Attraction;
 use modules\attraction\models\AttractionQuote;
+use modules\attraction\models\forms\AttractionOptionsFrom;
 use modules\attraction\models\search\AttractionQuoteSearch;
 use modules\attraction\src\services\AttractionQuotePdfService;
 use modules\hotel\models\Hotel;
@@ -201,6 +202,43 @@ class AttractionQuoteController extends FController
         ]);
     }
 
+    public function actionCheckAvailabilityAjax()
+    {
+        //VarDumper::dump(Yii::$app->request->post('AttractionOptionsFrom'), 10, true); die();
+        $result = [];
+        $optionsForm = new AttractionOptionsFrom();
+
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $availabilityKey = (string) Yii::$app->request->post('availability_key', 0);
+
+        $apiAttractionService = AttractionModule::getInstance()->apiService;
+        if ($availabilityKey) {
+            try {
+                $result = $apiAttractionService->getAvailability($availabilityKey);
+            } catch (\DomainException $e) {
+                Yii::$app->session->setFlash('error', $e->getMessage());
+            }
+        }
+
+        $availability = $result['availability'];
+
+        //VarDumper::dump($availability, 10, true);
+
+        return $this->renderAjax('options', [
+            'model' => $optionsForm,
+            'availability' => $availability
+        ]);
+    }
+
+    public function actionInputAvailabilityOptions()
+    {
+        $optionsModel = new AttractionOptionsFrom();
+
+        $optionsModel->load(Yii::$app->request->post());
+
+        VarDumper::dump($optionsModel, 10, true);
+        die();
+    }
 
     public function actionAddAjax(): array
     {

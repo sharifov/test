@@ -117,6 +117,69 @@ $js = <<<JS
         });      
     });
 
+
+$('body').off('click', '.btn-availability-quote').on('click', '.btn-availability-quote', function (e) {        
+      e.preventDefault();
+      //$('#preloader').removeClass('d-none');
+      let url = $(this).data('url');
+      let atnId = $(this).data('atn-id');
+      let availabilityKey = $(this).data('availability-key');       
+      let btnAdd = $(this);
+      
+      btnAdd.addClass('disabled').prop('disabled', true);
+      btnAdd.find('i').removeClass('fa-plus').addClass('fa-spin fa-spinner');
+
+     // $('#preloader').removeClass('d-none');
+
+      $.ajax({
+          url: url,
+          type: 'post',          
+          data: {'availability_key': availabilityKey, 'atn_id': atnId},
+          dataType: 'json',
+      })
+          .done(function(data) {
+              if (data.error) {
+                  alert(data.error);
+                  new PNotify({
+                        title: 'Error: fail to get Quotes',
+                        type: 'error',
+                        text: data.error,
+                        hide: true
+                    });
+                  btnAdd.find('i').removeClass('fa-spin fa-spinner').addClass('fa-stop');
+                  btnAdd.removeClass('disabled').prop('disabled', false);
+                  $('#tr-hotel-quote-' + quoteKey).addClass('bg-warning');
+              } else {                  
+                  /*pjaxReload({
+                      container: '#pjax-product-quote-list-' + data.product_id,
+                      push: false, replace: false, timeout: 2000
+                  });*/
+                  $('#' + availabilityKey).html(data);
+                  new PNotify({
+                        title: 'Availability was successfully checked',
+                        type: 'success',
+                        text: 'Attraction ID ' + atnId,
+                        hide: true
+                    });
+                  
+                  btnAdd.html('<i class="fa fa-check"></i>  Options Obtained');
+                  //$('#tr-hotel-quote-' + quoteKey).addClass('bg-success');
+              }
+          })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+            btnAdd.find('i').removeClass('fa-spin fa-spinner').addClass('fa-plus');
+            btnAdd.removeClass('disabled').prop('disabled', false);
+            //$('#tr-hotel-quote-' + quoteKey).addClass('bg-danger');
+        }).always(function() {
+            //btnAdd.prop('disabled', false);
+            //btnAdd.find('i').removeClass('fa-spin fa-spinner').addClass('fa-check');
+            //alert( "complete" );
+            //$('#preloader').addClass('d-none');
+        });      
+    });
+
+
      /*$('body').off('click', '.btn-add-hotel-quote').on('click', '.btn-add-hotel-quote', function (e) {
         e.preventDefault();
         //$('#preloader').removeClass('d-none');          

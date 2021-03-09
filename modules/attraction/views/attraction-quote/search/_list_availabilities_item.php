@@ -28,15 +28,28 @@ use yii\bootstrap\Html;
         <?php if ($quoteExist = false) : ?>
             <span class="badge badge-white">Added</span>
         <?php else : ?>
-            <?= \yii\bootstrap4\Html::a('<i class="fa fa-plus"></i> add Quote', null, [
+            <?= \yii\bootstrap4\Html::a('<i class="fa fa-plus"></i> Get Options', null, [
+                'data-url' => \yii\helpers\Url::to(['/attraction/attraction-quote/check-availability-ajax', 'atn_id' => $attractionSearch->atn_id]),
+                'data-availability-key' => $availabilityItem['id'] ?? '',
+                'class' => 'btn btn-success btn-sm btn-availability-quote'
+            ]) ?>
+        <?php endif; ?>
+
+        <?php if ($quoteExist = false) : ?>
+            <span class="badge badge-white">Added</span>
+        <?php else : ?>
+            <?php /*= \yii\bootstrap4\Html::a('<i class="fa fa-plus"></i> add Quote', null, [
                 'data-url' => \yii\helpers\Url::to(['/attraction/attraction-quote/add-ajax', 'atn_id' => $attractionSearch->atn_id]),
                 //'data-quote-key' => $availabilityItem['id'] ?? '',
                 'data-quote-key' => $availabilityItem['presentation_product_id'] ?? '', //for presentation only
                 'data-date' => $availabilityItem['date'], //for presentation only
                 'class' => 'btn btn-success btn-sm btn-add-attraction-quote'
-            ]) ?>
+            ]) */?>
         <?php endif; ?>
     </td>
+</tr>
+<tr>
+    <td id="<?= $availabilityItem['id'] ?>" colspan="6"></td>
 </tr>
 
 
