@@ -404,6 +404,7 @@ class OrderController extends BaseController
     },
     "paxes": [
         {
+            "uid": "fp6047195e67b7a",
             "first_name": "Test name",
             "last_name": "Test last name",
             "middle_name": "Test middle name",
