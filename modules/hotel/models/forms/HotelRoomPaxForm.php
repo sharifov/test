@@ -87,7 +87,7 @@ class HotelRoomPaxForm extends HotelRoomPax
      */
     public function checkDateOfBirth(): void
     {
-        $ageRange = $this->getPaxAgeRangeByPaxId($this->hrp_type_id);
+        $ageRange = $this->getPaxAgeRangeByPaxId((int) $this->hrp_type_id);
         if ($this->hrp_age !== null && $ageRange && ($this->hrp_age < $ageRange['min'] || (isset($ageRange['max']) && $this->hrp_age > $ageRange['max']))) {
             $message = 'The age of the ' . $this->getPaxTypeName() . ', should be from ' . $ageRange['min'] . ' ' . (isset($ageRange['max']) ? ' to ' . $ageRange['max'] : '') . ' years old';
             $this->addError('hrp_age', $message);
