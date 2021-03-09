@@ -233,11 +233,17 @@ class AttractionQuoteController extends FController
     public function actionInputAvailabilityOptions()
     {
         $optionsModel = new AttractionOptionsFrom();
-
         $optionsModel->load(Yii::$app->request->post());
+        $result = [];
+        $apiAttractionService = AttractionModule::getInstance()->apiService;
 
-        VarDumper::dump($optionsModel, 10, true);
-        die();
+        //VarDumper::dump($optionsModel, 10, true); die();
+
+        try {
+            $result = $apiAttractionService->inputOptionsToAvailability($optionsModel);
+        } catch (\DomainException $e) {
+            Yii::$app->session->setFlash('error', $e->getMessage());
+        }
     }
 
     public function actionAddAjax(): array

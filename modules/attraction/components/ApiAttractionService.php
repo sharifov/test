@@ -113,6 +113,76 @@ class ApiAttractionService extends Component
         return $result;
     }
 
+    public function inputOptionsToAvailability($optionsModel)
+    {
+        $query = [
+            'query' => 'query holibob(
+                    $availabilityId: String!
+                    $optionId1: String!
+                    $optionValue1: String!
+                ){
+                    availability(
+                        id: $availabilityId
+                        input: {
+                            optionList: [
+                                {
+                                    id: $optionId1
+                                    value: $optionValue1
+                                }
+                            ]
+                        }
+                    ){
+                        id
+                        productId
+                        isValid
+                        optionList {
+                            nodes {
+                                id
+                                label
+                                dataType
+                                dataFormat
+                                availableOptions {
+                                    label
+                                    value
+                                }
+                                answerValue
+                                answerFormattedText
+                            }
+                        }
+                        pricingCategoryList {
+                            priceTotalFormattedText
+                            nodes {
+                                id
+                                label
+                                value
+                                isValid
+                                minParticipants
+                                maxParticipants
+                                maxParticipantsDepends {
+                                    pricingCategoryId
+                                    multiplier
+                                    explanation
+                                }
+                                minAge
+                                maxAge
+                                price
+                                currency
+                                priceFormattedText
+                                priceTotal
+                                priceTotalFormattedText
+                            }
+                        }
+                    }
+                }',
+            'variables' => '{"availabilityId":"' . $availabilityId . '", "optionId1":"' . $optionId1 . '", "optionValue1":"' . $optionValue1 . '"}',
+            'operationName' => 'holibob'
+        ];
+
+        $result = self::execRequest(@json_encode($query));
+        $data = json_decode($result, true);
+        return $data['data'] ?? [];
+    }
+
     public function getAvailability(string $availabilityId): array
     {
         $query = [
