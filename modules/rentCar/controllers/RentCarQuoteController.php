@@ -99,7 +99,7 @@ class RentCarQuoteController extends FController
                 ],
             ]);
         } catch (\Throwable $throwable) {
-            Yii::warning(AppHelper::throwableLog($throwable), 'RentCarQuoteController:actionAddQuote');
+            Yii::warning(AppHelper::throwableLog($throwable), 'RentCarQuoteController:actionSearchAjax');
             $error  = $throwable->getMessage();
         }
 
