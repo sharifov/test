@@ -273,6 +273,11 @@ class RentCarQuoteController extends FController
             $rentCarQuote = $this->findRentCarQuote($rentCarQuoteId);
 
             if ($bookingId = RentCarQuoteBookService::book($rentCarQuote, Auth::id())) {
+                Notifications::pub(
+                    ['lead-' . ArrayHelper::getValue($rentCarQuote, 'rcqProductQuote.pqProduct.pr_lead_id')],
+                    'quoteBooked',
+                    ['data' => ['productId' => ArrayHelper::getValue($rentCarQuote, 'rcqProductQuote.pq_product_id')]]
+                );
                 $result['message'] = 'Success. BookingId (' . $bookingId . ')';
                 $result['status'] = 1;
             }

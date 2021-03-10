@@ -535,6 +535,11 @@ class FlightQuoteController extends FController
 
             if ($responseData = FlightQuoteBookService::requestBook($requestData)) {
                 if (FlightQuoteBookService::createBook($flightQuote, $responseData)) {
+                    Notifications::pub(
+                        ['lead-' . ArrayHelper::getValue($flightQuote, 'fqProductQuote.pqProduct.pr_lead_id')],
+                        'quoteBooked',
+                        ['data' => ['productId' => ArrayHelper::getValue($flightQuote, 'fqProductQuote.pq_product_id')]]
+                    );
                     $result['status'] = 1;
                     $result['message'] = 'Booking request accepted. RecordLocator: ' . ArrayHelper::getValue($responseData, 'recordLocator');
                     return $result;
