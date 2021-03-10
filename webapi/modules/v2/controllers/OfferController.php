@@ -305,7 +305,13 @@ class OfferController extends BaseController
                     "pr_lead_id": 513111,
                     "pr_description": "",
                     "pr_status_id": null,
-                    "pr_service_fee_percent": null
+                    "pr_service_fee_percent": null,
+                    "holder": {
+                        "ph_first_name": "test",
+                        "ph_last_name": "test",
+                        "ph_email": "test@test.test",
+                        "ph_phone_number": "+19074861000"
+                    }
                 },
                 "productQuoteOptions": []
             }

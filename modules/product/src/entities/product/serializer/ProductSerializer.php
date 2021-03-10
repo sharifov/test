@@ -37,6 +37,11 @@ class ProductSerializer extends Serializer
 
     public function getData(): array
     {
-        return $this->toArray();
+        $data = $this->toArray();
+        $data['holder'] = [];
+        if ($holder = $this->model->holder) {
+            $data['holder'] = $holder->serialize();
+        }
+        return $data;
     }
 }

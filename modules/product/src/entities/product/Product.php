@@ -9,6 +9,7 @@ use modules\product\src\entities\product\dto\CreateDto;
 use modules\product\src\entities\product\events\ProductClientBudgetChangedEvent;
 use modules\product\src\entities\product\events\ProductMarketPriceChangedEvent;
 use modules\product\src\entities\product\serializer\ProductSerializer;
+use modules\product\src\entities\productHolder\ProductHolder;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productType\ProductType;
 use modules\flight\models\Flight;
@@ -58,6 +59,7 @@ use yii\db\ActiveRecord;
  * @property ProductQuote[] $productQuotes
  * @property RentCar $rentCar
  * @property RentCar[] $rentCars
+ * @property ProductHolder $holder
  *
  * @property Productable|null $childProduct
  */
@@ -252,6 +254,11 @@ class Product extends \yii\db\ActiveRecord implements Serializable
     public function getHotels(): ActiveQuery
     {
         return $this->hasMany(Hotel::class, ['ph_product_id' => 'pr_id']);
+    }
+
+    public function getHolder(): ActiveQuery
+    {
+        return $this->hasOne(ProductHolder::class, ['ph_product_id' => 'pr_id']);
     }
 
     /**

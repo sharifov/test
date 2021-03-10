@@ -4,6 +4,8 @@ namespace modules\product\src\entities\productHolder;
 
 use modules\product\src\entities\product\Product;
 use common\components\validators\PhoneValidator;
+use modules\product\src\entities\productHolder\serializer\ProductHolderSerializer;
+use sales\entities\serializer\Serializable;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 
@@ -20,7 +22,7 @@ use yii\db\ActiveRecord;
  *
  * @property Product $phProduct
  */
-class ProductHolder extends \yii\db\ActiveRecord
+class ProductHolder extends \yii\db\ActiveRecord implements Serializable
 {
     /**
      * @return array
@@ -101,5 +103,10 @@ class ProductHolder extends \yii\db\ActiveRecord
         $holder->ph_email = $email;
         $holder->ph_phone_number = $phone;
         return $holder;
+    }
+
+    public function serialize(): array
+    {
+        return (new ProductHolderSerializer($this))->getData();
     }
 }
