@@ -15,7 +15,9 @@ use yii\web\View;
 
 $token = RentCarDataParser::getOfferToken($dataRentCar, $rentCar->prc_request_hash_key);
 $exist = RentCarQuote::find()->where(['rcq_offer_token' => $token])->exists();
-
+$days = RentCarDataParser::getNumRentalDays($dataRentCar);
+$totalPrice = RentCarDataParser::getTotalPrice($dataRentCar);
+$pricePerDay = $totalPrice / $days;
 ?>
 
 <div class="quote <?php echo $exist ? 'quote-added' : '' ?>" id="box-quote-<?php echo $token ?>">
@@ -39,10 +41,7 @@ $exist = RentCarQuote::find()->where(['rcq_offer_token' => $token])->exists();
             Price per day:
           </span>
           <strong class="text-dark">
-            <?php
-               $perDay = RentCarDataParser::getPricePerDay($dataRentCar);
-            ?>
-            <?php echo RentCarDataParser::getPriceCurrencySymbol($dataRentCar) ?><?php echo $perDay ?>
+            <?php echo RentCarDataParser::getPriceCurrencySymbol($dataRentCar) ?><?php echo round($pricePerDay, 2) ?>
           </strong>
         </span>
         <span class="quote__vc">
@@ -50,9 +49,6 @@ $exist = RentCarQuote::find()->where(['rcq_offer_token' => $token])->exists();
             Days:
           </span>
           <strong class="text-dark">
-            <?php
-               $days = $rentCar->calculateDays();
-            ?>
             <?php echo $days ?>
           </strong>
         </span>
@@ -63,10 +59,7 @@ $exist = RentCarQuote::find()->where(['rcq_offer_token' => $token])->exists();
             </strong>
           </span>
           <strong class="text-success">
-            <?php
-                $total = round($perDay * $days, 2);
-            ?>
-            <?php echo RentCarDataParser::getPriceCurrencySymbol($dataRentCar) ?><?php echo $total ?>
+            <?php echo RentCarDataParser::getPriceCurrencySymbol($dataRentCar) ?><?php echo $totalPrice ?>
           </strong>
         </span>
       </div>

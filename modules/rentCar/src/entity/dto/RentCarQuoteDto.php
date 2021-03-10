@@ -42,8 +42,12 @@ class RentCarQuoteDto
         $model->rcq_request_hash_key = $rentCar->prc_request_hash_key;
         $model->rcq_car_reference_id = RentCarDataParser::getCarReferenceId($data);
 
-        $model->rcq_price_per_day = RentCarDataParser::getPricePerDay($data);
-        $model->rcq_days = $rentCar->calculateDays();
+        $days = RentCarDataParser::getNumRentalDays($data);
+        $totalPrice = RentCarDataParser::getTotalPrice($data);
+        $pricePerDay = $totalPrice / $days;
+
+        $model->rcq_price_per_day = round($pricePerDay, 2);
+        $model->rcq_days = $days;
         $model->rcq_system_mark_up = 0; // not data
         $model->rcq_agent_mark_up = 0; // not data
 
