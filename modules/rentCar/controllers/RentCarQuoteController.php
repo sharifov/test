@@ -99,7 +99,7 @@ class RentCarQuoteController extends FController
                 ],
             ]);
         } catch (\Throwable $throwable) {
-            Yii::warning(AppHelper::throwableLog($throwable, true), 'RentCarQuoteController:actionAddQuote');
+            Yii::warning(AppHelper::throwableLog($throwable), 'RentCarQuoteController:actionAddQuote');
             $error  = $throwable->getMessage();
         }
 
@@ -168,7 +168,7 @@ class RentCarQuoteController extends FController
             $transaction->commit();
         } catch (\Throwable $throwable) {
             $transaction->rollBack();
-            Yii::warning(AppHelper::throwableLog($throwable, true), 'RentCarQuoteController:actionAddQuote');
+            Yii::warning(AppHelper::throwableLog($throwable), 'RentCarQuoteController:actionAddQuote');
             return ['error' => 'Error: ' . $throwable->getMessage()];
         }
 
@@ -223,7 +223,7 @@ class RentCarQuoteController extends FController
                 $result['message'] = $dataResult['error'];
             }
         } catch (\Throwable $throwable) {
-            Yii::warning(AppHelper::throwableLog($throwable, true), 'RentCarQuoteController:actionContractRequest');
+            Yii::warning(AppHelper::throwableLog($throwable), 'RentCarQuoteController:actionContractRequest');
             $result['message'] = $throwable->getMessage();
         }
         return $result;
@@ -250,7 +250,7 @@ class RentCarQuoteController extends FController
                 $result['message'] = 'Document have been successfully generated';
             }
         } catch (\Throwable $throwable) {
-            Yii::warning(AppHelper::throwableLog($throwable, true), 'RentCarQuoteController:actionFileGenerate');
+            Yii::warning(AppHelper::throwableLog($throwable), 'RentCarQuoteController:actionFileGenerate');
             $result['message'] = $throwable->getMessage();
         }
         return $result;
@@ -277,7 +277,7 @@ class RentCarQuoteController extends FController
                 $result['status'] = 1;
             }
         } catch (\Throwable $throwable) {
-            Yii::warning(AppHelper::throwableLog($throwable, true), 'RentCarQuoteController:actionContractRequest');
+            Yii::warning(AppHelper::throwableLog($throwable), 'RentCarQuoteController:actionContractRequest');
             $result['message'] = $throwable->getMessage();
         }
         return $result;
