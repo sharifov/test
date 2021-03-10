@@ -16,8 +16,6 @@ class CommunicationDataService
 {
     public static function hotelConfirmationData(HotelQuote $hotelQuote): array
     {
-        self::guard($hotelQuote);
-
         $hotel = $hotelQuote->hqHotel;
         $hotelList = $hotelQuote->hqHotelList;
 
@@ -58,27 +56,6 @@ class CommunicationDataService
         return $result;
     }
 
-    public static function guard(HotelQuote $hotelQuote): void
-    {
-        if (!$hotelQuote->hq_booking_id) {
-            throw new \RuntimeException('HotelQuote: booking_id is empty');
-        }
-        if (!$hotelQuote->hq_json_booking) {
-            throw new \RuntimeException('HotelQuote: json_booking is empty');
-        }
-        if (!$hotelQuote->hq_origin_search_data) {
-            throw new \RuntimeException('HotelQuote: origin_search_data is empty');
-        }
-        if (!$hotelQuote->hqHotel) {
-            throw new \RuntimeException('Hotel Quote: Hotel not found');
-        }
-        if (!$hotelQuote->hqHotelList) {
-            throw new \RuntimeException('Hotel Quote: HotelList not found');
-        }
-        if (!$hotelQuote->hotelQuoteRooms) {
-            throw new \RuntimeException('Hotel Quote: hotelQuoteRooms is empty');
-        }
-    }
 
     public static function getHotelPhone(?string $phoneList): string
     {
