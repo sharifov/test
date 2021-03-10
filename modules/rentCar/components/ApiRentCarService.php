@@ -254,9 +254,12 @@ class ApiRentCarService extends Component
 
         try {
             $response = $this->sendRequest('getCancelRequest', $data, 'get');
+
             if ($response->isOk) {
-                if (isset($response->data['getCarCancel']['results']['status'])) {
-                    $out['data'] = $response->data['getCarContractRequest']['results'];
+                if ($results = ArrayHelper::getValue($response->data, 'getCarCancelRequest.results')) {
+                    $out['data'] = $results;
+                } elseif ($error = ArrayHelper::getValue($response->data, 'getCarCancelRequest.error.status')) {
+                    $out['error'] = $error;
                 } else {
                     $out['error'] = 'In response not found getCancelRequest.results.status';
                     \Yii::error([
