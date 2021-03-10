@@ -33,6 +33,20 @@ class OrderAllFilesGeneratedListener
             }
         }
 
-        \Yii::$app->queue_job->push(new OrderSendCompletedConfirmationJob($event->orderId));
+        if (!$this->isSent($event->orderId)) {
+            \Yii::$app->queue_job->push(new OrderSendCompletedConfirmationJob($event->orderId));
+        }
+    }
+
+    private function isSent(int $orderId): bool
+    {
+        $key = 'OrderSendCompletedConfirmation_' . $orderId;
+        $result = (bool)\Yii::$app->redis->setnx($key, date('Y-m-d H:i:s'));
+        if (!$result) {
+            return true;
+        }
+        $expireSeconds = 600;
+        \Yii::$app->redis->expire($key, $expireSeconds);
+        return false;
     }
 }
