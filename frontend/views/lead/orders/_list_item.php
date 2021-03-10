@@ -142,6 +142,7 @@ $process = OrderProcessManager::findOne($order->or_id);
             $ordClientTotalPrice = 0;
             $ordOptionTotalPrice = 0;
             $ordTotalFee = 0;
+            $calcTotalPrice = 0;
         ?>
 
         <table class="table table-bordered">
@@ -346,15 +347,15 @@ $process = OrderProcessManager::findOne($order->or_id);
         <?php endif; ?>
 
 
-            <?php if ($invTotalPrice !== $ordTotalPrice) :
-                $newInvoiceAmount = round($ordTotalPrice - $invTotalPrice, 2);
+            <?php if ($invTotalPrice !== $calcTotalPrice) :
+                $newInvoiceAmount = round($calcTotalPrice - $invTotalPrice, 2);
                 ?>
                 <table class="table table-bordered">
                     <tbody>
                         <tr>
                             <th class="text-warning"><i class="fa fa-warning"></i> New Invoice</th>
                             <th class="text-right">
-                                <?=number_format($ordTotalPrice, 2)?> - <?=number_format($invTotalPrice, 2)?> =
+                                <?=number_format($calcTotalPrice, 2)?> - <?=number_format($invTotalPrice, 2)?> =
                                 <span class="<?=$newInvoiceAmount > 0 ? 'text-success' : 'text-danger' ?>">
                                     <?=number_format($newInvoiceAmount, 2)?> USD
                                 </span>
