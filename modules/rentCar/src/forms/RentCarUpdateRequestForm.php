@@ -4,6 +4,7 @@ namespace modules\rentCar\src\forms;
 
 use DateTime;
 use modules\rentCar\src\entity\rentCar\RentCar;
+use modules\rentCar\src\helpers\RentCarHelper;
 use yii\base\Model;
 
 /**
@@ -33,8 +34,8 @@ class RentCarUpdateRequestForm extends Model
         $this->pick_up_date = $rentCar->prc_pick_up_date;
         $this->drop_off_code = $rentCar->prc_drop_off_code;
         $this->drop_off_date = $rentCar->prc_drop_off_date;
-        $this->pick_up_time = (string) date('H:i', strtotime($rentCar->prc_pick_up_time));
-        $this->drop_off_time = (string) date('H:i', strtotime($rentCar->prc_drop_off_time));
+        $this->pick_up_time = $rentCar->prc_pick_up_time ? (string) date('H:i', strtotime($rentCar->prc_pick_up_time)) : RentCarHelper::DEFAULT_TIME;
+        $this->drop_off_time = $rentCar->prc_drop_off_time ? (string) date('H:i', strtotime($rentCar->prc_drop_off_time)) : RentCarHelper::DEFAULT_TIME;
     }
 
     public function rules(): array

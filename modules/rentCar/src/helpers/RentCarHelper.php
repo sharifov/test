@@ -12,6 +12,8 @@ use DateTime;
  */
 class RentCarHelper
 {
+    public const DEFAULT_TIME = '11:00';
+
     /**
      * @param string $timeFormat
      * @param string $duration
