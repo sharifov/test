@@ -1748,8 +1748,6 @@ class OrderController extends BaseController
             \Yii::$app->response->headers->add('Content-Type', 'text/html');
             return $this->asJson(['message' => 'Server error.']);
         }
-
-        return $this->response;
     }
 
     private function isClickToBook($data): bool

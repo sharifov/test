@@ -126,8 +126,8 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
             ['pq_status_id', 'integer'],
             ['pq_status_id', 'in', 'range' => array_keys(ProductQuoteStatus::getList())],
 
-            ['pq_app_markup', 'number', 'min' => 0, 'max' => 99999999],
-            ['pq_agent_markup', 'number', 'min' => 0, 'max' => 99999999],
+            ['pq_app_markup', 'number', /*'min' => 0,*/ 'max' => 99999999],
+            ['pq_agent_markup', 'number', /*'min' => 0,*/ 'max' => 99999999],
             ['pq_service_fee_percent', 'number', 'min' => 0, 'max' => 9999],
         ];
     }
