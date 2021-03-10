@@ -216,4 +216,24 @@ class ProductQuoteOption extends ActiveRecord implements Serializable
     {
         $this->pqo_status_id = ProductQuoteOptionStatus::PENDING;
     }
+
+    public function inProgress(): void
+    {
+        $this->pqo_status_id = ProductQuoteOptionStatus::IN_PROGRESS;
+    }
+
+    public function error(): void
+    {
+        $this->pqo_status_id = ProductQuoteOptionStatus::ERROR;
+    }
+
+    public function done(): void
+    {
+        $this->pqo_status_id = ProductQuoteOptionStatus::DONE;
+    }
+
+    public function canceled(): void
+    {
+        $this->pqo_status_id = ProductQuoteOptionStatus::CANCELED;
+    }
 }
