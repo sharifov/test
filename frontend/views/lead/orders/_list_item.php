@@ -205,7 +205,7 @@ $process = OrderProcessManager::findOne($order->or_id);
 
 
                     $calcTotalPrice = round($ordTotalPrice + $ordOptionTotalPrice, 2);
-                    $calcClientTotalPrice = round(($calcTotalPrice + $ordOptionTotalPrice) * $order->or_client_currency_rate, 2);
+                    $calcClientTotalPrice = round(($calcTotalPrice) * $order->or_client_currency_rate, 2);
 
                 ?>
                 <tr>
