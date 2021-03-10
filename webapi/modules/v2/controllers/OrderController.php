@@ -101,11 +101,12 @@ class OrderController extends BaseController
         $behaviors['logger'] = [
             'class' => SimpleLoggerBehavior::class,
             'filter' => CreditCardFilter::class,
+            'except' => ['get-file']
         ];
         $behaviors['request'] = [
             'class' => RequestBehavior::class,
             'filter' => CreditCardFilter::class,
-            'except' => ['create']
+            'except' => ['create', 'get-file']
         ];
         return $behaviors;
     }
