@@ -131,7 +131,7 @@ class ApiRentCarService extends Component
                     $out['data'] = $response->data['getCarResultsV3']['results'];
                 } else {
                     $out['error'] = 'In response not found getCarResultsV3.results.result_list';
-                    \Yii::error([
+                    \Yii::warning([
                         'error' => $out['error'],
                         'data' => $response->data ?? [],
                     ], 'ApiRentCarService:search');
@@ -165,7 +165,7 @@ class ApiRentCarService extends Component
                     $out['data'] = $response->data['getCarContractRequest']['results'];
                 } else {
                     $out['error'] = 'In response not found getCarContractRequest.results.status';
-                    \Yii::error([
+                    \Yii::warning([
                         'error' => $out['error'],
                         'data' => $response->data ?? [],
                     ], 'ApiRentCarService:contractRequest');
@@ -220,7 +220,7 @@ class ApiRentCarService extends Component
                     $out['error'] = $error;
                 } else {
                     $out['error'] = 'In response not found results|error';
-                    \Yii::error([
+                    \Yii::warning([
                         'requestData' => $out['error'],
                         'responseData' => $response->data ?? [],
                     ], 'ApiRentCarService::book');
@@ -262,7 +262,7 @@ class ApiRentCarService extends Component
                     $out['error'] = $error;
                 } else {
                     $out['error'] = 'In response not found getCancelRequest.results.status';
-                    \Yii::error([
+                    \Yii::warning([
                         'error' => $out['error'],
                         'data' => $response->data ?? [],
                     ], 'ApiRentCarService:cancel');
