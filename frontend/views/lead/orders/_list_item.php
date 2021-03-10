@@ -219,7 +219,7 @@ $process = OrderProcessManager::findOne($order->or_id);
                     <th class="text-right" colspan="5">Calc Total: </th>
                     <td class="text-center" colspan="2">(price + opt)</td>
                     <th class="text-right"><?=number_format($calcTotalPrice, 2)?></th>
-                    <th class="text-right"><?=number_format($ordClientTotalPrice, 2)?> <?=Html::encode($order->or_client_currency)?></th>
+                    <th class="text-right"><?=number_format($calcClientTotalPrice, 2)?> <?=Html::encode($order->or_client_currency)?></th>
                     <th></th>
                 </tr>
                 <tr>
