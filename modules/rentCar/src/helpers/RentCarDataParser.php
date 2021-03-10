@@ -31,11 +31,6 @@ class RentCarDataParser
         return ArrayHelper::getValue($data, 'partner.logo');
     }
 
-    public static function getPricePerDay(array $data): ?string /* TODO:: remove */
-    {
-        return ArrayHelper::getValue($data, 'price_details.base_price');
-    }
-
     public static function getBasePrice(array $data): ?string
     {
         return ArrayHelper::getValue($data, 'price_details.base_price');
