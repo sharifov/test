@@ -109,6 +109,7 @@ class RentCarDataParser
             'doors' => ArrayHelper::getValue($data, 'car.doors'),
             'bags' => ArrayHelper::getValue($data, 'car.bags'),
             'automatic_transmission' => (bool) ArrayHelper::getValue($data, 'car.automatic_transmission') ? 'Yes' : 'No',
+            'air_conditioning' => (bool) ArrayHelper::getValue($data, 'car.air_conditioning') ? 'Yes' : 'No',
         ];
     }
 
