@@ -6,6 +6,7 @@ use common\components\validators\CheckJsonValidator;
 use common\models\Employee;
 use modules\product\src\entities\productOption\ProductOption;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuote\serializer\ProductQuoteSerializer;
 use modules\product\src\entities\productQuoteOption\events\ProductQuoteOptionCloneCreatedEvent;
 use modules\product\src\entities\productQuoteOption\serializer\ProductQuoteOptionSerializer;
@@ -209,5 +210,10 @@ class ProductQuoteOption extends ActiveRecord implements Serializable
         $option->pqo_extra_markup = $extraMarkup;
         $option->pqo_request_data = $requestData;
         return $option;
+    }
+
+    public function pending(): void
+    {
+        $this->pqo_status_id = ProductQuoteOptionStatus::PENDING;
     }
 }

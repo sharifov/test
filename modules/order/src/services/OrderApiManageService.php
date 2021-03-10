@@ -197,6 +197,7 @@ class OrderApiManageService
                         $quoteOptionsForm->json_data
                     );
                     $productQuoteOption->calculateClientPrice();
+                    $productQuoteOption->pending();
                     $this->productQuoteOptionRepository->save($productQuoteOption);
                 }
 
