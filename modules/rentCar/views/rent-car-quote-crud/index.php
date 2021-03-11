@@ -29,6 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             'rcq_id',
+            'rcq_booking_id',
             'rcq_created_dt',
             'rcq_rent_car_id',
             'rcq_product_quote_id',
