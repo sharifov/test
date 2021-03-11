@@ -10,6 +10,8 @@
 namespace modules\attraction\components;
 
 use modules\attraction\models\Attraction;
+use modules\attraction\models\forms\AttractionOptionsFrom;
+use modules\attraction\models\forms\AvailabilityPaxFrom;
 use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLog;
 use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus;
 use modules\hotel\src\helpers\HotelApiDataHelper;
@@ -113,22 +115,98 @@ class ApiAttractionService extends Component
         return $result;
     }
 
-    public function inputOptionsToAvailability($optionsModel)
+    public function inputPriceCategoryToAvailability(AvailabilityPaxFrom $priceCategoryModel)
     {
+        $queryParamsDefinition = '$availabilityId: String!';
+        $queryInputParamsDefinition = '';
+        $queryVariables = '{"availabilityId":"' . $priceCategoryModel->availability_id . '"';
+
+        $pax = $priceCategoryModel->pax_quantity;
+
+        foreach ($pax as $key => $paxCategory) {
+            $queryParamsDefinition .= ' $pricingCategoryId' . $key . ': String! $paxQuantity' . $key . ': Int!';
+            $queryInputParamsDefinition .= '{id: $pricingCategoryId' . $key . ' value: $paxQuantity' . $key . '} ';
+            $queryVariables .= ', "pricingCategoryId' . $key . '":"' . key($paxCategory) . '", "paxQuantity' . $key . '":' . $paxCategory[key($paxCategory)] . '';
+        }
+        $queryVariables .= '}';
+
         $query = [
             'query' => 'query holibob(
-                    $availabilityId: String!
-                    $optionId1: String!
-                    $optionValue1: String!
+                    ' . $queryParamsDefinition . '
+                ){
+                    availability(
+                        id: $availabilityId
+                        input: {
+                            pricingCategoryList: [
+                                ' . $queryInputParamsDefinition . '
+                            ]
+                        } 
+                    ){
+                        id
+                        productId
+                        isValid
+                        durationMinutes
+                        optionList {
+                            nodes {
+                                id
+                                label
+                                dataType
+                                dataFormat
+                                availableOptions {
+                                    label
+                                    value
+                                }
+                                answerValue
+                                answerFormattedText
+                            }
+                        }
+                        pricingCategoryList {
+                            priceTotalFormattedText
+                            priceTotal
+                            currency
+                            nodes {
+                                id
+                                label
+                                value
+                                priceFormattedText
+                                priceTotalFormattedText
+                            }
+                        }
+                    }
+                }',
+            'variables' => $queryVariables,
+            'operationName' => 'holibob'
+        ];
+
+        $result = self::execRequest(@json_encode($query));
+        $data = json_decode($result, true);
+        return $data['data'] ?? [];
+    }
+
+    public function inputOptionsToAvailability(AttractionOptionsFrom $optionsModel)
+    {
+        $queryParamsDefinition = '$availabilityId: String!';
+        $queryInputParamsDefinition = '';
+        $queryVariables = '{"availabilityId":"' . $optionsModel->availability_id . '"';
+
+        $options = $optionsModel->selected_options;
+
+        foreach ($options as $key => $option) {
+            $queryParamsDefinition .= ' $optionId' . $key . ': String! $optionValue' . $key . ': String!';
+            $queryInputParamsDefinition .=  '{id: $optionId' . $key . ' value: $optionValue' . $key . '} ';
+            $queryVariables .= ', "optionId' . $key . '":"' . key($option) . '", "optionValue' . $key . '":"' . $option[key($option)] . '"';
+        }
+        $queryVariables .= '}';
+
+        $query = [
+            'query' => 'query holibob(
+                    ' . $queryParamsDefinition . '
                 ){
                     availability(
                         id: $availabilityId
                         input: {
                             optionList: [
-                                {
-                                    id: $optionId1
-                                    value: $optionValue1
-                                }
+                                ' . $queryInputParamsDefinition . '
                             ]
                         }
                     ){
@@ -174,12 +252,13 @@ class ApiAttractionService extends Component
                         }
                     }
                 }',
-            'variables' => '{"availabilityId":"' . $availabilityId . '", "optionId1":"' . $optionId1 . '", "optionValue1":"' . $optionValue1 . '"}',
+            'variables' => $queryVariables,
             'operationName' => 'holibob'
         ];
 
         $result = self::execRequest(@json_encode($query));
         $data = json_decode($result, true);
+        //VarDumper::dump($result, 10, true);
         return $data['data'] ?? [];
     }
 
@@ -210,9 +289,22 @@ class ApiAttractionService extends Component
                         nodes{
                             id
                             label
+                            value
+                            isValid
+                            minParticipants
+                            maxParticipants
+                            maxParticipantsDepends {
+                              pricingCategoryId
+                              multiplier
+                              explanation
+                            }
+                            minAge
+                            maxAge
                             price
-                            priceTotal
+                            currency
                             priceFormattedText
+                            priceTotal
+                            priceTotalFormattedText
                         }
                     }
                 }
@@ -222,6 +314,7 @@ class ApiAttractionService extends Component
         ];
 
         $result = self::execRequest(@json_encode($query));
+        //VarDumper::dump($result, 10, true); die();
         $data = json_decode($result, true);
         return $data['data'] ?? [];
     }

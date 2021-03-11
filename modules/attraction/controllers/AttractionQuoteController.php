@@ -8,6 +8,7 @@ use modules\attraction\AttractionModule;
 use modules\attraction\models\Attraction;
 use modules\attraction\models\AttractionQuote;
 use modules\attraction\models\forms\AttractionOptionsFrom;
+use modules\attraction\models\forms\AvailabilityPaxFrom;
 use modules\attraction\models\search\AttractionQuoteSearch;
 use modules\attraction\src\services\AttractionQuotePdfService;
 use modules\hotel\models\Hotel;
@@ -222,7 +223,7 @@ class AttractionQuoteController extends FController
 
         $availability = $result['availability'];
 
-        //VarDumper::dump($availability, 10, true);
+        //VarDumper::dump($result, 10, true);
 
         return $this->renderAjax('options', [
             'model' => $optionsForm,
@@ -233,17 +234,42 @@ class AttractionQuoteController extends FController
     public function actionInputAvailabilityOptions()
     {
         $optionsModel = new AttractionOptionsFrom();
+        $availabilityPaxForm = new AvailabilityPaxFrom();
+
         $optionsModel->load(Yii::$app->request->post());
         $result = [];
         $apiAttractionService = AttractionModule::getInstance()->apiService;
-
-        //VarDumper::dump($optionsModel, 10, true); die();
 
         try {
             $result = $apiAttractionService->inputOptionsToAvailability($optionsModel);
         } catch (\DomainException $e) {
             Yii::$app->session->setFlash('error', $e->getMessage());
         }
+
+        //VarDumper::dump($result, 10, true); die();
+        $availability = $result['availability'];
+
+        return $this->renderAjax('availability_details', [
+            'availability' => $availability,
+            'paxForm' => $availabilityPaxForm
+        ]);
+    }
+
+    public function actionInputPriceCategory()
+    {
+        $availabilityPaxModel = new AvailabilityPaxFrom();
+        $availabilityPaxModel->load(Yii::$app->request->post());
+
+        $result = [];
+        $apiAttractionService = AttractionModule::getInstance()->apiService;
+
+        try {
+            $result = $apiAttractionService->inputPriceCategoryToAvailability($availabilityPaxModel);
+        } catch (\DomainException $e) {
+            Yii::$app->session->setFlash('error', $e->getMessage());
+        }
+
+        VarDumper::dump($result, 10, true);
     }
 
     public function actionAddAjax(): array
