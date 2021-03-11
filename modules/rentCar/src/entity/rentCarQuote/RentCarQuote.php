@@ -46,6 +46,8 @@ use Yii;
  * @property array|null $rcq_booking_json
  * @property string|null $rcq_booking_id
  * @property array|null $rcq_contract_request_json
+ * @property string|null $rcq_pick_up_dt
+ * @property string|null $rcq_drop_off_dt
  *
  * @property ProductQuote $rcqProductQuote
  * @property RentCar $rcqRentCar
@@ -122,6 +124,8 @@ class RentCarQuote extends \yii\db\ActiveRecord implements Quotable
             ['rcq_booking_id', 'string', 'max' => 255],
 
             ['rcq_contract_request_json', 'safe'],
+
+            [['rcq_pick_up_dt', 'rcq_drop_off_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s', 'skipOnError' => true, 'skipOnEmpty' => true],
         ];
     }
 
@@ -158,7 +162,7 @@ class RentCarQuote extends \yii\db\ActiveRecord implements Quotable
             'rcq_currency' => 'Currency',
             'rcq_advantages' => 'Advantages',
             'rcq_pick_up_location' => 'Pick Up Location',
-            'rcq_drop_of_location' => 'Drop Of Location',
+            'rcq_drop_of_location' => 'Drop Off Location',
             'rcq_created_dt' => 'Created Dt',
             'rcq_updated_dt' => 'Updated Dt',
             'rcq_created_user_id' => 'Created User ID',
@@ -170,6 +174,8 @@ class RentCarQuote extends \yii\db\ActiveRecord implements Quotable
             'rcq_booking_json' => 'Booking json',
             'rcq_booking_id' => 'Booking ID',
             'rcq_contract_request_json' => 'Contract request json',
+            'rcq_pick_up_dt' => 'Pick Up DT',
+            'rcq_drop_off_dt' => 'Drop Off DT',
         ];
     }
 

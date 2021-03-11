@@ -1,5 +1,7 @@
 <?php
 
+use common\components\grid\DateColumn;
+use common\components\grid\DateTimeColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -30,22 +32,14 @@ $this->params['breadcrumbs'][] = $this->title;
             'rcq_created_dt',
             'rcq_rent_car_id',
             'rcq_product_quote_id',
-            'rcq_hash_key',
-            'rcq_request_hash_key',
-            //'rcq_json_response',
             'rcq_model_name',
             'rcq_category',
-            //'rcq_image_url:url',
             'rcq_vendor_name',
-            //'rcq_vendor_logo_url:url',
-            'rcq_transmission',
-            'rcq_seats',
-            'rcq_doors',
-            //'rcq_options',
             'rcq_days',
             'rcq_price_per_day',
             'rcq_currency',
-            //'rcq_advantages',
+            ['class' => DateColumn::class, 'attribute' => 'rcq_pick_up_dt'],
+            ['class' => DateColumn::class, 'attribute' => 'rcq_drop_off_dt'],
             'rcq_pick_up_location',
             'rcq_drop_of_location',
             //'rcq_updated_dt',

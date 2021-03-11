@@ -53,6 +53,9 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'rcq_request_hash_key')->textInput() ?>
 
+        <?= $form->field($model, 'rcq_pick_up_dt')->textInput() ?>
+        <?= $form->field($model, 'rcq_drop_off_dt')->textInput() ?>
+
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
         </div>

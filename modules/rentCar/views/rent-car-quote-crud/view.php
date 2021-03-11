@@ -55,6 +55,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     //'rcq_advantages',
                     'rcq_pick_up_location',
                     'rcq_drop_of_location',
+                    'rcq_pick_up_dt',
+                    'rcq_drop_off_dt',
                     'rcq_created_dt',
                     'rcq_updated_dt',
                     'rcq_created_user_id',
