@@ -6,9 +6,9 @@ class CurrencyHelper
 {
     public static function convertToBaseCurrency($price, $rate)
     {
-        if (!$price) {
-            throw new \InvalidArgumentException('Invalid price arg.');
-        }
+//        if (!$price) {
+//            throw new \InvalidArgumentException('Invalid price arg.');
+//        }
         if (!$rate) {
             throw new \InvalidArgumentException('Invalid price rate.');
         }
@@ -18,12 +18,12 @@ class CurrencyHelper
 
     public static function convertFromBaseCurrency($price, $rate)
     {
-        if (!$price) {
-            throw new \InvalidArgumentException('Invalid price arg.');
-        }
-        if (!$rate) {
-            throw new \InvalidArgumentException('Invalid price rate.');
-        }
+//        if (!$price) {
+//            throw new \InvalidArgumentException('Invalid price arg.');
+//        }
+//        if (!$rate) {
+//            throw new \InvalidArgumentException('Invalid price rate.');
+//        }
         return self::roundUp(($price * $rate));
     }
 

@@ -17,9 +17,11 @@ use sales\repositories\product\ProductQuoteRepository;
 use webapi\src\logger\ApiLogger;
 use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
 use webapi\src\logger\behaviors\SimpleLoggerBehavior;
+use webapi\src\logger\behaviors\TechnicalInfoBehavior;
 use webapi\src\Messages;
 use webapi\src\request\RequestBo;
 use webapi\src\response\behaviors\RequestBehavior;
+use webapi\src\response\behaviors\ResponseStatusCodeBehavior;
 use webapi\src\response\ErrorResponse;
 use webapi\src\response\messages\CodeMessage;
 use webapi\src\response\messages\DataMessage;
@@ -101,11 +103,20 @@ class OrderController extends BaseController
         $behaviors['logger'] = [
             'class' => SimpleLoggerBehavior::class,
             'filter' => CreditCardFilter::class,
+            'except' => ['get-file'],
         ];
         $behaviors['request'] = [
             'class' => RequestBehavior::class,
             'filter' => CreditCardFilter::class,
-            'except' => ['create']
+            'except' => ['create', 'get-file'],
+        ];
+        $behaviors['responseStatusCode'] = [
+            'class' => ResponseStatusCodeBehavior::class,
+            'except' => ['get-file'],
+        ];
+        $behaviors['technical'] = [
+            'class' => TechnicalInfoBehavior::class,
+            'except' => ['get-file'],
         ];
         return $behaviors;
     }
@@ -302,11 +313,17 @@ class OrderController extends BaseController
      * @apiParam {String}       offerGid                                            Offer gid
      * @apiParam {Object[]}     productQuotes                                       Product Quotes
      * @apiParam {String}       productQuotes.gid                                   Product Quote Gid
-     * @apiParam {Object[]}     productQuotes.quoteOptions                          Quote Options
-     * @apiParam {String}       productQuotes.quoteOptions.productOptionKey         Product option key
-     * @apiParam {String}       productQuotes.quoteOptions.name                     Name
-     * @apiParam {String}       productQuotes.quoteOptions.description              Description
-     * @apiParam {Decimal}      productQuotes.quoteOptions.price                    Price
+     * @apiParam {Object[]}     productQuotes.productOptions                        Quote Options
+     * @apiParam {String}       productQuotes.productOptions.productOptionKey       Product option key
+     * @apiParam {String}       productQuotes.productOptions.name                   Name
+     * @apiParam {String}       productQuotes.productOptions.description            Description
+     * @apiParam {Decimal}      productQuotes.productOptions.price                  Price
+     *
+     * @apiParam {Object}      productQuotes.productHolder                         Holder first name
+     * @apiParam {String}      productQuotes.productHolder.firstName               Holder first name
+     * @apiParam {String}      productQuotes.productHolder.lastName                Holder last name
+     * @apiParam {String}      productQuotes.productHolder.email                   Holder email
+     * @apiParam {String}      productQuotes.productHolder.phone                   Holder phone
      *
      * @apiParam {Object}       payment                 Payment
      * @apiParam {String}       payment.type            Type
@@ -337,835 +354,880 @@ class OrderController extends BaseController
      * @apiParam {Object}       Request                 Request Data for BO
      *
      * @apiParamExample {json} Request-Example:
-     *
      * {
-     * "offerGid": "73c8bf13111feff52794883446461740",
-     * "productQuotes": [
-     * {
-     * "gid": "aebf921f5a64a7ac98d4942ace67e498",
-     * "productOptions": [
-     * {
-     * "productOptionKey": "travelGuard",
-     * "name": "Travel Guard",
-     * "description": "",
-     * "price": 20.00
-     * }
-     * ]
-     * },
-     * {
-     * "gid": "6fcfc43e977dabffe6a979ebdaddfvr2"
-     * }
-     * ],
-     * "payment": {
-     * "type": "card",
-     * "transactionId": 1234567890,
-     * "date": "2021-03-20",
-     * "amount": 821.49,
-     * "currency": "USD"
-     * },
-     * "billingInfo": {
-     * "first_name": "Barbara Elmore",
-     * "middle_name": "",
-     * "last_name": "T",
-     * "address": "1013 Weda Cir",
-     * "country_id": "US",
-     * "city": "Mayfield",
-     * "state": "KY",
-     * "zip": "99999",
-     * "phone": "+19074861000",
-     * "email": "mike.kane@techork.com"
-     * },
-     * "creditCard": {
-     * "holder_name": "Barbara Elmore",
-     * "number": "1111111111111111",
-     * "type": "Visa",
-     * "expiration": "07 / 23",
-     * "cvv": "324"
-     * },
-     * "Request": {
-     * "offerGid": "85a06c376a083f47e56b286b1265c160",
-     * "offerUid": "of60264c1484090",
-     * "apiKey": "038ce0121a1666678d4db57cb10e8667b98d8b08c408cdf7c9b04f1430071826",
-     * "source": "I1B1L1",
-     * "subSource": "-",
-     * "totalOrderAmount": 821.49,
-     * "FlightRequest": {
-     * "productGid": "c6ae37ae73380c773cadf28fc0af9db2",
-     * "uid": "OE96040",
-     * "email": "mike.kane@techork.com",
-     * "marker": null,
-     * "client_ip_address": "92.115.180.30",
-     * "trip_protection_amount": "0",
-     * "insurance_code": "P7",
-     * "is_facilitate": 0,
-     * "delay_change": false,
-     * "is_b2b": false,
-     * "uplift": false,
-     * "alipay": false,
-     * "user_country": "us",
-     * "user_language": "en-US",
-     * "user_time_format": "h:mm a",
-     * "user_month_date_format": {
-     * "long": "EEE MMM d",
-     * "short": "MMM d",
-     * "fullDateLong": "EEE MMM d",
-     * "fullDateShort": "MMM d, YYYY"
-     * },
-     * "currency_symbol": "$",
-     * "pnr": null
-     * },
-     * "HotelRequest": {
-     * "productGid": "cdd82f2616f600f71a68e9399c51276e"
-     * },
-     * "DriverRequest": {
-     * "productGid": "cdd82f2616f600f71a68e9399c51276e"
-     * },
-     * "AttractionRequest": {
-     * "productGid": "cdd82f2616f600f71a68e9399c51276e"
-     * },
-     * "CruiseRequest": {
-     * "productGid": "cdd82f2616f600f71a68e9399c51276e"
-     * },
-     * "Card": {
-     * "user_id": null,
-     * "nickname": "B****** E***** T",
-     * "number": "************6444",
-     * "type": "Visa",
-     * "expiration_date": "07 \/ 2023",
-     * "first_name": "Barbara Elmore",
-     * "middle_name": "",
-     * "last_name": "T",
-     * "address": "1013 Weda Cir",
-     * "country_id": "US",
-     * "city": "Mayfield",
-     * "state": "KY",
-     * "zip": "99999",
-     * "phone": "+19074861000",
-     * "deleted": null,
-     * "cvv": "***",
-     * "auth_attempts": null,
-     * "country": "United States",
-     * "calling": "",
-     * "client_ip_address": "92.115.180.30",
-     * "email": "mike.kane@techork.com",
-     * "document": null
-     * },
-     * "AirRouting": {
-     * "results": [
-     * {
-     * "gds": "S",
-     * "key": "2_T1ZBMTAxKlkxMDAwL0xBWFRQRTIwMjEtMDUtMTMvVFBFTEFYMjAyMS0wNi0yMCpQUn4jUFIxMDMjUFI4OTAjUFI4OTEjUFIxMDJ+bGM6ZW5fdXM=",
-     * "pcc": "8KI0",
-     * "cons": "GTT",
-     * "keys": {
-     * "services": {
-     * "support": {
-     * "amount": 75
-     * }
-     * },
-     * "seatHoldSeg": {
-     * "trip": 0,
-     * "seats": 9,
-     * "segment": 0
-     * },
-     * "verification": {
-     * "headers": {
-     * "X-Client-Ip": "92.115.180.30",
-     * "X-Kiv-Cust-Ip": "92.115.180.30",
-     * "X-Kiv-Cust-ipv": "0",
-     * "X-Kiv-Cust-ssid": "ovago-dev-0484692",
-     * "X-Kiv-Cust-direct": "true",
-     * "X-Kiv-Cust-browser": "desktop"
-     * }
-     * }
-     * },
-     * "meta": {
-     * "eip": 0,
-     * "bags": 2,
-     * "best": false,
-     * "lang": "en",
-     * "rank": 6,
-     * "group1": "LAXTPE:PRPR:0:TPELAX:PRPR:0:767.75",
-     * "country": "us",
-     * "fastest": false,
-     * "noavail": false,
-     * "cheapest": true,
-     * "searchId": "T1ZBMTAxWTEwMDB8TEFYVFBFMjAyMS0wNS0xM3xUUEVMQVgyMDIxLTA2LTIw"
-     * },
-     * "cabin": "Y",
-     * "trips": [
-     * {
-     * "tripId": 1,
-     * "duration": 1150,
-     * "segments": [
-     * {
-     * "meal": "D",
-     * "stop": 0,
-     * "cabin": "Y",
-     * "stops": [],
-     * "baggage": {
-     * "ADT": {
-     * "carryOn": true,
-     * "airlineCode": "PR",
-     * "allowPieces": 2,
-     * "allowMaxSize": "UP TO 62 LINEAR INCHES\/158 LINEAR CENTIMETERS",
-     * "allowMaxWeight": "UP TO 50 POUNDS\/23 KILOGRAMS"
-     * }
-     * },
-     * "mileage": 7305,
-     * "duration": 870,
-     * "fareCode": "U9XBUS",
-     * "segmentId": 1,
-     * "arrivalTime": "2021-05-15 04:00",
-     * "airEquipType": "773",
-     * "bookingClass": "U",
-     * "flightNumber": "103",
-     * "departureTime": "2021-05-13 22:30",
-     * "marriageGroup": "O",
-     * "recheckBaggage": false,
-     * "marketingAirline": "PR",
-     * "operatingAirline": "PR",
-     * "arrivalAirportCode": "MNL",
-     * "departureAirportCode": "LAX",
-     * "arrivalAirportTerminal": "2",
-     * "departureAirportTerminal": "B"
-     * },
-     * {
-     * "meal": "B",
-     * "stop": 0,
-     * "cabin": "Y",
-     * "stops": [],
-     * "baggage": {
-     * "ADT": {
-     * "carryOn": true,
-     * "airlineCode": "PR",
-     * "allowPieces": 2,
-     * "allowMaxSize": "UP TO 62 LINEAR INCHES\/158 LINEAR CENTIMETERS",
-     * "allowMaxWeight": "UP TO 50 POUNDS\/23 KILOGRAMS"
-     * }
-     * },
-     * "mileage": 728,
-     * "duration": 130,
-     * "fareCode": "U9XBUS",
-     * "segmentId": 2,
-     * "arrivalTime": "2021-05-15 08:40",
-     * "airEquipType": "321",
-     * "bookingClass": "U",
-     * "flightNumber": "890",
-     * "departureTime": "2021-05-15 06:30",
-     * "marriageGroup": "I",
-     * "recheckBaggage": false,
-     * "marketingAirline": "PR",
-     * "operatingAirline": "PR",
-     * "arrivalAirportCode": "TPE",
-     * "departureAirportCode": "MNL",
-     * "arrivalAirportTerminal": "1",
-     * "departureAirportTerminal": "1"
-     * }
-     * ]
-     * },
-     * {
-     * "tripId": 2,
-     * "duration": 1490,
-     * "segments": [
-     * {
-     * "meal": "H",
-     * "stop": 0,
-     * "cabin": "Y",
-     * "stops": [],
-     * "baggage": {
-     * "ADT": {
-     * "carryOn": true,
-     * "airlineCode": "PR",
-     * "allowPieces": 2,
-     * "allowMaxSize": "UP TO 62 LINEAR INCHES\/158 LINEAR CENTIMETERS",
-     * "allowMaxWeight": "UP TO 50 POUNDS\/23 KILOGRAMS"
-     * }
-     * },
-     * "mileage": 728,
-     * "duration": 145,
-     * "fareCode": "U9XBUS",
-     * "segmentId": 1,
-     * "arrivalTime": "2021-06-20 12:05",
-     * "airEquipType": "321",
-     * "bookingClass": "U",
-     * "flightNumber": "891",
-     * "departureTime": "2021-06-20 09:40",
-     * "marriageGroup": "O",
-     * "recheckBaggage": false,
-     * "marketingAirline": "PR",
-     * "operatingAirline": "PR",
-     * "arrivalAirportCode": "MNL",
-     * "departureAirportCode": "TPE",
-     * "arrivalAirportTerminal": "2",
-     * "departureAirportTerminal": "1"
-     * },
-     * {
-     * "meal": "D",
-     * "stop": 0,
-     * "cabin": "Y",
-     * "stops": [],
-     * "baggage": {
-     * "ADT": {
-     * "carryOn": true,
-     * "airlineCode": "PR",
-     * "allowPieces": 2,
-     * "allowMaxSize": "UP TO 62 LINEAR INCHES\/158 LINEAR CENTIMETERS",
-     * "allowMaxWeight": "UP TO 50 POUNDS\/23 KILOGRAMS"
-     * }
-     * },
-     * "mileage": 7305,
-     * "duration": 805,
-     * "fareCode": "U9XBUS",
-     * "segmentId": 2,
-     * "arrivalTime": "2021-06-20 19:30",
-     * "airEquipType": "773",
-     * "bookingClass": "U",
-     * "flightNumber": "102",
-     * "departureTime": "2021-06-20 21:05",
-     * "marriageGroup": "I",
-     * "recheckBaggage": false,
-     * "marketingAirline": "PR",
-     * "operatingAirline": "PR",
-     * "arrivalAirportCode": "LAX",
-     * "departureAirportCode": "MNL",
-     * "arrivalAirportTerminal": "B",
-     * "departureAirportTerminal": "1"
-     * }
-     * ]
-     * }
-     * ],
-     * "paxCnt": 1,
-     * "prices": {
-     * "comm": 0,
-     * "isCk": false,
-     * "ccCap": 16.900002,
-     * "markup": 50,
-     * "oMarkup": {
-     * "amount": 50,
-     * "currency": "USD"
-     * },
-     * "markupId": 8833,
-     * "totalTax": 321.75,
-     * "markupUid": "1c7afe8c-a34f-434e-8fa3-87b9b7b1ff4e",
-     * "totalPrice": 767.75,
-     * "lastTicketDate": "2021-03-31"
-     * },
-     * "currency": "USD",
-     * "fareType": "SR",
-     * "maxSeats": 9,
-     * "tripType": "RT",
-     * "penalties": {
-     * "list": [
-     * {
-     * "type": "re",
-     * "permitted": false,
-     * "applicability": "before"
-     * },
-     * {
-     * "type": "re",
-     * "permitted": false,
-     * "applicability": "after"
-     * },
-     * {
-     * "type": "ex",
-     * "amount": 425,
-     * "oAmount": {
-     * "amount": 425,
-     * "currency": "USD"
-     * },
-     * "permitted": true,
-     * "applicability": "before"
-     * },
-     * {
-     * "type": "ex",
-     * "amount": 425,
-     * "oAmount": {
-     * "amount": 425,
-     * "currency": "USD"
-     * },
-     * "permitted": true,
-     * "applicability": "after"
-     * }
-     * ],
-     * "refund": false,
-     * "exchange": true
-     * },
-     * "routingId": 1,
-     * "currencies": [
-     * "USD"
-     * ],
-     * "founded_dt": "2021-02-25 13:44:54.570",
-     * "passengers": {
-     * "ADT": {
-     * "cnt": 1,
-     * "tax": 321.75,
-     * "comm": 0,
-     * "ccCap": 16.900002,
-     * "price": 767.75,
-     * "codeAs": "JCB",
-     * "markup": 50,
-     * "occCap": {
-     * "amount": 16.900002,
-     * "currency": "USD"
-     * },
-     * "baseTax": 271.75,
-     * "oMarkup": {
-     * "amount": 50,
-     * "currency": "USD"
-     * },
-     * "baseFare": 446,
-     * "oBaseTax": {
-     * "amount": 271.75,
-     * "currency": "USD"
-     * },
-     * "oBaseFare": {
-     * "amount": 446,
-     * "currency": "USD"
-     * },
-     * "pubBaseFare": 446
-     * }
-     * },
-     * "ngsFeatures": {
-     * "list": null,
-     * "name": "",
-     * "stars": 3
-     * },
-     * "currencyRates": {
-     * "CADUSD": {
-     * "to": "USD",
-     * "from": "CAD",
-     * "rate": 0.78417
-     * },
-     * "DKKUSD": {
-     * "to": "USD",
-     * "from": "DKK",
-     * "rate": 0.16459
-     * },
-     * "EURUSD": {
-     * "to": "USD",
-     * "from": "EUR",
-     * "rate": 1.23967
-     * },
-     * "GBPUSD": {
-     * "to": "USD",
-     * "from": "GBP",
-     * "rate": 1.37643
-     * },
-     * "KRWUSD": {
-     * "to": "USD",
-     * "from": "KRW",
-     * "rate": 0.00091
-     * },
-     * "MYRUSD": {
-     * "to": "USD",
-     * "from": "MYR",
-     * "rate": 0.25006
-     * },
-     * "SEKUSD": {
-     * "to": "USD",
-     * "from": "SEK",
-     * "rate": 0.12221
-     * },
-     * "TWDUSD": {
-     * "to": "USD",
-     * "from": "TWD",
-     * "rate": 0.03592
-     * },
-     * "USDCAD": {
-     * "to": "CAD",
-     * "from": "USD",
-     * "rate": 1.30086
-     * },
-     * "USDDKK": {
-     * "to": "DKK",
-     * "from": "USD",
-     * "rate": 6.19797
-     * },
-     * "USDEUR": {
-     * "to": "EUR",
-     * "from": "USD",
-     * "rate": 0.83926
-     * },
-     * "USDGBP": {
-     * "to": "GBP",
-     * "from": "USD",
-     * "rate": 0.75587
-     * },
-     * "USDKRW": {
-     * "to": "KRW",
-     * "from": "USD",
-     * "rate": 1117.1008
-     * },
-     * "USDMYR": {
-     * "to": "MYR",
-     * "from": "USD",
-     * "rate": 4.07943
-     * },
-     * "USDSEK": {
-     * "to": "SEK",
-     * "from": "USD",
-     * "rate": 8.34736
-     * },
-     * "USDTWD": {
-     * "to": "TWD",
-     * "from": "USD",
-     * "rate": 28.96525
-     * },
-     * "USDUSD": {
-     * "to": "USD",
-     * "from": "USD",
-     * "rate": 1
-     * }
-     * },
-     * "validatingCarrier": "PR"
-     * }
-     * ],
-     * "additionalInfo": {
-     * "cabin": {
-     * "C": "Business",
-     * "F": "First",
-     * "J": "Premium Business",
-     * "P": "Premium First",
-     * "S": "Premium Economy",
-     * "Y": "Economy"
-     * },
-     * "airline": {
-     * "PR": {
-     * "name": "Philippine Airlines"
-     * }
-     * },
-     * "airport": {
-     * "LAX": {
-     * "city": "Los Angeles",
-     * "name": "Los Angeles International Airport",
-     * "country": "United States"
-     * },
-     * "MNL": {
-     * "city": "Manila",
-     * "name": "Ninoy Aquino International Airport",
-     * "country": "Philippines"
-     * },
-     * "TPE": {
-     * "city": "Taipei",
-     * "name": "Taiwan Taoyuan International Airport",
-     * "country": "Taiwan"
-     * }
-     * },
-     * "general": {
-     * "tripType": "rt"
-     * }
-     * }
-     * },
-     * "Passengers": {
-     * "Flight": [
-     * {
-     * "id": null,
-     * "user_id": null,
-     * "first_name": "Arthur",
-     * "middle_name": "",
-     * "last_name": "Davis",
-     * "birth_date": "1963-04-07",
-     * "gender": "M",
-     * "seats": null,
-     * "assistance": null,
-     * "nationality": "US",
-     * "passport_id": null,
-     * "passport_valid_date": null,
-     * "email": null,
-     * "codeAs": null
-     * }
-     * ],
-     * "Hotel": [
-     * {
-     * "first_name": "mike",
-     * "last_name": "kane"
-     * }
-     * ],
-     * "Driver": [
-     * {
-     * "first_name": "mike",
-     * "last_name": "kane",
-     * "age": "30-69",
-     * "birth_date": "1973-04-07"
-     * }
-     * ],
-     * "Attraction": [
-     * {
-     * "first_name": "mike",
-     * "last_name": "kane",
-     * "language_service": "US"
-     * }
-     * ],
-     * "Cruise": [
-     * {
-     * "first_name": "Arthur",
-     * "last_name": "Davis",
-     * "citizenship": "US",
-     * "birth_date": "1963-04-07",
-     * "gender": "M"
-     * }
-     * ]
-     * },
-     * "Insurance": {
-     * "total_amount": "20",
-     * "record_id": "396393",
-     * "passengers": [
-     * {
-     * "nameRef": "0",
-     * "amount": 20
-     * }
-     * ]
-     * },
-     * "Tip": {
-     * "total_amount": 20
-     * },
-     * "AuxiliarProducts": {
-     * "Flight": {
-     * "basket": {
-     * "1c3df555-a2dc-4813-a055-2a8bf56fd8f1": {
-     * "basket_item_id": "1c3df555-a2dc-4813-a055-2a8bf56fd8f1",
-     * "benefits": [],
-     * "display_name": "10kg Bag",
-     * "price": {
-     * "base": {
-     * "amount": 2000,
-     * "currency": "USD",
-     * "decimal_places": 2,
-     * "in_original_currency": {
-     * "amount": 1820,
-     * "currency": "USD",
-     * "decimal_places": 2
-     * }
-     * },
-     * "fees": [],
-     * "markups": [
-     * {
-     * "amount": 600,
-     * "currency": "USD",
-     * "decimal_places": 2,
-     * "in_original_currency": {
-     * "amount": 546,
-     * "currency": "USD",
-     * "decimal_places": 2
-     * },
-     * "markup_type": "markup"
-     * }
-     * ],
-     * "taxes": [
-     * {
-     * "amount": 200,
-     * "currency": "USD",
-     * "decimal_places": 2,
-     * "in_original_currency": {
-     * "amount": 182,
-     * "currency": "USD",
-     * "decimal_places": 2
-     * },
-     * "tax_type": "tax"
-     * }
-     * ],
-     * "total": {
-     * "amount": 2400,
-     * "currency": "USD",
-     * "decimal_places": 2,
-     * "in_original_currency": {
-     * "amount": 2184,
-     * "currency": "USD",
-     * "decimal_places": 2
-     * }
-     * }
-     * },
-     * "product_details": {
-     * "journey_id": "1770bf8f-0c1c-4ba5-99f5-56e446fe79ba",
-     * "passenger_id": "p1",
-     * "size": 150,
-     * "size_unit": "cm",
-     * "weight": 10,
-     * "weight_unit": "kg"
-     * },
-     * "product_id": "741bcc97-c2fe-4820-b14d-f11f32e6fadb",
-     * "product_type": "bag",
-     * "quantity": 1,
-     * "ticket_id": "e8558737-2ec0-436f-89ec-00e7a20b3252",
-     * "validity": {
-     * "state": "valid",
-     * "valid_from": "2020-05-22T16:34:08Z",
-     * "valid_to": "2020-05-22T16:49:08Z"
-     * }
-     * },
-     * "2654f3f9-8990-4d2e-bdea-3b341ad5d1de": {
-     * "basket_item_id": "2654f3f9-8990-4d2e-bdea-3b341ad5d1de",
-     * "benefits": [],
-     * "display_name": "Seat 15C",
-     * "price": {
-     * "base": {
-     * "amount": 2000,
-     * "currency": "USD",
-     * "decimal_places": 2,
-     * "in_original_currency": {
-     * "amount": 1820,
-     * "currency": "USD",
-     * "decimal_places": 2
-     * }
-     * },
-     * "fees": [],
-     * "markups": [
-     * {
-     * "amount": 400,
-     * "currency": "USD",
-     * "decimal_places": 2,
-     * "in_original_currency": {
-     * "amount": 364,
-     * "currency": "USD",
-     * "decimal_places": 2
-     * },
-     * "markup_type": "markup"
-     * }
-     * ],
-     * "taxes": [
-     * {
-     * "amount": 200,
-     * "currency": "USD",
-     * "decimal_places": 2,
-     * "in_original_currency": [],
-     * "tax_type": "tax"
-     * }
-     * ],
-     * "total": {
-     * "amount": 2600,
-     * "currency": "USD",
-     * "decimal_places": 2,
-     * "in_original_currency": {
-     * "amount": 2366,
-     * "currency": "USD",
-     * "decimal_places": 2
-     * }
-     * }
-     * },
-     * "product_details": {
-     * "column": "C",
-     * "passenger_id": "p1",
-     * "row": 15,
-     * "segment_id": "1770bf8f-0c1c-4ba5-99f5-56e446fe79ba"
-     * },
-     * "product_id": "a17e10ca-0c9a-4691-9922-d664a3b52382",
-     * "product_type": "seat",
-     * "quantity": 1,
-     * "ticket_id": "e8558737-2ec0-436f-89ec-00e7a20b3252",
-     * "validity": {
-     * "state": "valid",
-     * "valid_from": "2020-05-22T16:34:08Z",
-     * "valid_to": "2020-05-22T16:49:08Z"
-     * }
-     * },
-     * "5d5e1bce-4577-4118-abcb-155823d8b4a3": [],
-     * "6acd57ba-ccb7-4e86-85e7-b3e586caeae2": [],
-     * "dffac4ba-73b9-4b1b-9334-001817fff0cf": [],
-     * "e960eff9-7628-4645-99d8-20a6e22f6419": []
-     * },
-     * "country": "US",
-     * "currency": "USD",
-     * "journeys": [
-     * {
-     * "journey_id": "aab8980e-b263-4624-ad40-d6e5e364b4e9",
-     * "segments": [
-     * {
-     * "arrival_airport": "LHR",
-     * "arrival_time": "2020-07-07T22:30:00Z",
-     * "departure_airport": "EDI",
-     * "departure_time": "2020-07-07T21:10:00Z",
-     * "fare_basis": "OTZ0RO\/Y",
-     * "fare_class": "O",
-     * "fare_family": "Basic Economy",
-     * "marketing_airline": "BA",
-     * "marketing_flight_number": "1465",
-     * "number_of_stops": 0,
-     * "operating_airline": "BA",
-     * "operating_flight_number": "1465",
-     * "segment_id": "938d8e82-dd7c-4d85-8ab4-38fea8753f6f"
-     * }
-     * ]
-     * },
-     * {
-     * "journey_id": "1770bf8f-0c1c-4ba5-99f5-56e446fe79ba",
-     * "segments": [
-     * {
-     * "arrival_airport": "EDI",
-     * "arrival_time": "2020-07-14T08:35:00Z",
-     * "departure_airport": "LGW",
-     * "departure_time": "2020-07-14T07:05:00Z",
-     * "fare_basis": "NALZ0KO\/Y",
-     * "fare_class": "N",
-     * "fare_family": "Basic Economy",
-     * "marketing_airline": "BA",
-     * "marketing_flight_number": "2500",
-     * "number_of_stops": 0,
-     * "operating_airline": "BA",
-     * "operating_flight_number": "2500",
-     * "segment_id": "7d693cb0-d6d8-49f0-9489-866b3d789215"
-     * }
-     * ]
-     * }
-     * ],
-     * "language": "en-US",
-     * "orders": [],
-     * "passengers": [
-     * {
-     * "first_names": "Vincent Willem",
-     * "passenger_id": "ee850c82-e150-4f35-b0c7-228064c2964b",
-     * "surname": "Van Gogh"
-     * }
-     * ],
-     * "tickets": [
-     * {
-     * "basket_item_ids": [
-     * "dffac4ba-73b9-4b1b-9334-001817fff0cf",
-     * "e960eff9-7628-4645-99d8-20a6e22f6419",
-     * "6acd57ba-ccb7-4e86-85e7-b3e586caeae2",
-     * "5d5e1bce-4577-4118-abcb-155823d8b4a3"
-     * ],
-     * "journey_ids": [
-     * "aab8980e-b263-4624-ad40-d6e5e364b4e9"
-     * ],
-     * "state": "in_basket",
-     * "ticket_basket_item_id": "dffac4ba-73b9-4b1b-9334-001817fff0cf",
-     * "ticket_id": "8c1c9fc8-d968-4733-93a8-6067bac2543f"
-     * },
-     * {
-     * "basket_item_ids": [
-     * "2654f3f9-8990-4d2e-bdea-3b341ad5d1de",
-     * "1c3df555-a2dc-4813-a055-2a8bf56fd8f1"
-     * ],
-     * "journey_ids": [
-     * "1770bf8f-0c1c-4ba5-99f5-56e446fe79ba"
-     * ],
-     * "offered_price": {
-     * "currency": "USD",
-     * "decimal_places": 2,
-     * "total": 20000
-     * },
-     * "state": "offered",
-     * "ticket_id": "e8558737-2ec0-436f-89ec-00e7a20b3252"
-     * }
-     * ],
-     * "trip_access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
-     * "trip_id": "23259b86-3208-44c9-85cc-4b116a822bff",
-     * "trip_state_hash": "69abcc117863186292bdf5f1c0d94db1e5227210935e6abe039cfb017cbefbee"
-     * },
-     * "Hotel": [],
-     * "Driver": [],
-     * "Attraction": [],
-     * "Cruise": []
-     * },
-     * "Payment": {
-     * "type": "CARD",
-     * "transaction_id": "1234567890",
-     * "card_id": 234567,
-     * "auth_id": 123456
-     * }
-     * }
-     * }
+    "offerGid": "73c8bf13111feff52794883446461740",
+    "productQuotes": [
+        {
+            "gid": "aebf921f5a64a7ac98d4942ace67e498",
+            "productOptions": [
+                {
+                    "productOptionKey": "travelGuard",
+                    "name": "Travel Guard",
+                    "description": "",
+                    "price": 20,
+                    "json_data": "",
+                    "data": [
+                        {
+                            "segment_uid": "fqs604635abf02ae",
+                            "pax_uid": "fp604635abe9c6a",
+                            "trip_uid": "fqt604635abed0e0",
+                            "total": 2.00,
+                            "currency": "USD",
+                            "usd_total": 2.00,
+                            "base_price": 2.00,
+                            "markup_amount": 0,
+                            "usd_base_price": 2.00,
+                            "usd_markup_amount": 0,
+                            "display_name": "Seat: 18E, CQ 7602"
+                        }
+                    ]
+
+                }
+            ],
+            "productHolder": {
+                "firstName": "Test",
+                "lastName": "Test",
+                "email": "test@test.test",
+                "phone": "+19074861000"
+            }
+        },
+        {
+            "gid": "6fcfc43e977dabffe6a979ebdaddfvr2",
+            "productHolder": {
+                "firstName": "Test 2",
+                "lastName": "Test 2",
+                "email": "test2@test.test",
+                "phone": "+19074861002"
+            }
+        }
+    ],
+    "payment": {
+        "type": "card",
+        "transactionId": 1234567890,
+        "date": "2021-03-20",
+        "amount": 821.49,
+        "currency": "USD"
+    },
+    "billingInfo": {
+        "first_name": "Barbara Elmore",
+        "middle_name": "",
+        "last_name": "T",
+        "address": "1013 Weda Cir",
+        "country_id": "US",
+        "city": "Mayfield",
+        "state": "KY",
+        "zip": "99999",
+        "phone": "+19074861000",
+        "email": "mike.kane@techork.com"
+    },
+    "creditCard": {
+        "holder_name": "Barbara Elmore",
+        "number": "1111111111111111",
+        "type": "Visa",
+        "expiration": "07 / 23",
+        "cvv": "324"
+    },
+    "tips": {
+        "total_amount": 20
+    },
+    "paxes": [
+        {
+            "uid": "fp6047195e67b7a",
+            "first_name": "Test name",
+            "last_name": "Test last name",
+            "middle_name": "Test middle name",
+            "nationality": "US",
+            "gender": "M",
+            "birth_date": "1963-04-07",
+            "email": "mike.kane@techork.com",
+            "language": "en-US",
+            "citizenship": "US"
+        }
+    ],
+    "Request": {
+        "offerGid": "85a06c376a083f47e56b286b1265c160",
+        "offerUid": "of60264c1484090",
+        "apiKey": "038ce0121a1666678d4db57cb10e8667b98d8b08c408cdf7c9b04f1430071826",
+        "source": "I1B1L1",
+        "subSource": "-",
+        "totalOrderAmount": 821.49,
+        "FlightRequest": {
+            "productGid": "c6ae37ae73380c773cadf28fc0af9db2",
+            "uid": "OE96040",
+            "email": "mike.kane@techork.com",
+            "marker": null,
+            "client_ip_address": "92.115.180.30",
+            "trip_protection_amount": "0",
+            "insurance_code": "P7",
+            "is_facilitate": 0,
+            "delay_change": false,
+            "is_b2b": false,
+            "uplift": false,
+            "alipay": false,
+            "user_country": "us",
+            "user_language": "en-US",
+            "user_time_format": "h:mm a",
+            "user_month_date_format": {
+                "long": "EEE MMM d",
+                "short": "MMM d",
+                "fullDateLong": "EEE MMM d",
+                "fullDateShort": "MMM d, YYYY"
+            },
+            "currency_symbol": "$",
+            "pnr": null
+        },
+        "HotelRequest": {
+            "productGid": "cdd82f2616f600f71a68e9399c51276e"
+        },
+        "DriverRequest": {
+            "productGid": "cdd82f2616f600f71a68e9399c51276e"
+        },
+        "AttractionRequest": {
+            "productGid": "cdd82f2616f600f71a68e9399c51276e"
+        },
+        "CruiseRequest": {
+            "productGid": "cdd82f2616f600f71a68e9399c51276e"
+        },
+        "Card": {
+            "user_id": null,
+            "nickname": "B****** E***** T",
+            "number": "************6444",
+            "type": "Visa",
+            "expiration_date": "07 / 2023",
+            "first_name": "Barbara Elmore",
+            "middle_name": "",
+            "last_name": "T",
+            "address": "1013 Weda Cir",
+            "country_id": "US",
+            "city": "Mayfield",
+            "state": "KY",
+            "zip": "99999",
+            "phone": "+19074861000",
+            "deleted": null,
+            "cvv": "***",
+            "auth_attempts": null,
+            "country": "United States",
+            "calling": "",
+            "client_ip_address": "92.115.180.30",
+            "email": "mike.kane@techork.com",
+            "document": null
+        },
+        "AirRouting": {
+            "results": [
+                {
+                    "gds": "S",
+                    "key": "2_T1ZBMTAxKlkxMDAwL0xBWFRQRTIwMjEtMDUtMTMvVFBFTEFYMjAyMS0wNi0yMCpQUn4jUFIxMDMjUFI4OTAjUFI4OTEjUFIxMDJ+bGM6ZW5fdXM=",
+                    "pcc": "8KI0",
+                    "cons": "GTT",
+                    "keys": {
+                        "services": {
+                            "support": {
+                                "amount": 75
+                            }
+                        },
+                        "seatHoldSeg": {
+                            "trip": 0,
+                            "seats": 9,
+                            "segment": 0
+                        },
+                        "verification": {
+                            "headers": {
+                                "X-Client-Ip": "92.115.180.30",
+                                "X-Kiv-Cust-Ip": "92.115.180.30",
+                                "X-Kiv-Cust-ipv": "0",
+                                "X-Kiv-Cust-ssid": "ovago-dev-0484692",
+                                "X-Kiv-Cust-direct": "true",
+                                "X-Kiv-Cust-browser": "desktop"
+                            }
+                        }
+                    },
+                    "meta": {
+                        "eip": 0,
+                        "bags": 2,
+                        "best": false,
+                        "lang": "en",
+                        "rank": 6,
+                        "group1": "LAXTPE:PRPR:0:TPELAX:PRPR:0:767.75",
+                        "country": "us",
+                        "fastest": false,
+                        "noavail": false,
+                        "cheapest": true,
+                        "searchId": "T1ZBMTAxWTEwMDB8TEFYVFBFMjAyMS0wNS0xM3xUUEVMQVgyMDIxLTA2LTIw"
+                    },
+                    "cabin": "Y",
+                    "trips": [
+                        {
+                            "tripId": 1,
+                            "duration": 1150,
+                            "segments": [
+                                {
+                                    "meal": "D",
+                                    "stop": 0,
+                                    "cabin": "Y",
+                                    "stops": [],
+                                    "baggage": {
+                                        "ADT": {
+                                            "carryOn": true,
+                                            "airlineCode": "PR",
+                                            "allowPieces": 2,
+                                            "allowMaxSize": "UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS",
+                                            "allowMaxWeight": "UP TO 50 POUNDS/23 KILOGRAMS"
+                                        }
+                                    },
+                                    "mileage": 7305,
+                                    "duration": 870,
+                                    "fareCode": "U9XBUS",
+                                    "segmentId": 1,
+                                    "arrivalTime": "2021-05-15 04:00",
+                                    "airEquipType": "773",
+                                    "bookingClass": "U",
+                                    "flightNumber": "103",
+                                    "departureTime": "2021-05-13 22:30",
+                                    "marriageGroup": "O",
+                                    "recheckBaggage": false,
+                                    "marketingAirline": "PR",
+                                    "operatingAirline": "PR",
+                                    "arrivalAirportCode": "MNL",
+                                    "departureAirportCode": "LAX",
+                                    "arrivalAirportTerminal": "2",
+                                    "departureAirportTerminal": "B"
+                                },
+                                {
+                                    "meal": "B",
+                                    "stop": 0,
+                                    "cabin": "Y",
+                                    "stops": [],
+                                    "baggage": {
+                                        "ADT": {
+                                            "carryOn": true,
+                                            "airlineCode": "PR",
+                                            "allowPieces": 2,
+                                            "allowMaxSize": "UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS",
+                                            "allowMaxWeight": "UP TO 50 POUNDS/23 KILOGRAMS"
+                                        }
+                                    },
+                                    "mileage": 728,
+                                    "duration": 130,
+                                    "fareCode": "U9XBUS",
+                                    "segmentId": 2,
+                                    "arrivalTime": "2021-05-15 08:40",
+                                    "airEquipType": "321",
+                                    "bookingClass": "U",
+                                    "flightNumber": "890",
+                                    "departureTime": "2021-05-15 06:30",
+                                    "marriageGroup": "I",
+                                    "recheckBaggage": false,
+                                    "marketingAirline": "PR",
+                                    "operatingAirline": "PR",
+                                    "arrivalAirportCode": "TPE",
+                                    "departureAirportCode": "MNL",
+                                    "arrivalAirportTerminal": "1",
+                                    "departureAirportTerminal": "1"
+                                }
+                            ]
+                        },
+                        {
+                            "tripId": 2,
+                            "duration": 1490,
+                            "segments": [
+                                {
+                                    "meal": "H",
+                                    "stop": 0,
+                                    "cabin": "Y",
+                                    "stops": [],
+                                    "baggage": {
+                                        "ADT": {
+                                            "carryOn": true,
+                                            "airlineCode": "PR",
+                                            "allowPieces": 2,
+                                            "allowMaxSize": "UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS",
+                                            "allowMaxWeight": "UP TO 50 POUNDS/23 KILOGRAMS"
+                                        }
+                                    },
+                                    "mileage": 728,
+                                    "duration": 145,
+                                    "fareCode": "U9XBUS",
+                                    "segmentId": 1,
+                                    "arrivalTime": "2021-06-20 12:05",
+                                    "airEquipType": "321",
+                                    "bookingClass": "U",
+                                    "flightNumber": "891",
+                                    "departureTime": "2021-06-20 09:40",
+                                    "marriageGroup": "O",
+                                    "recheckBaggage": false,
+                                    "marketingAirline": "PR",
+                                    "operatingAirline": "PR",
+                                    "arrivalAirportCode": "MNL",
+                                    "departureAirportCode": "TPE",
+                                    "arrivalAirportTerminal": "2",
+                                    "departureAirportTerminal": "1"
+                                },
+                                {
+                                    "meal": "D",
+                                    "stop": 0,
+                                    "cabin": "Y",
+                                    "stops": [],
+                                    "baggage": {
+                                        "ADT": {
+                                            "carryOn": true,
+                                            "airlineCode": "PR",
+                                            "allowPieces": 2,
+                                            "allowMaxSize": "UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS",
+                                            "allowMaxWeight": "UP TO 50 POUNDS/23 KILOGRAMS"
+                                        }
+                                    },
+                                    "mileage": 7305,
+                                    "duration": 805,
+                                    "fareCode": "U9XBUS",
+                                    "segmentId": 2,
+                                    "arrivalTime": "2021-06-20 19:30",
+                                    "airEquipType": "773",
+                                    "bookingClass": "U",
+                                    "flightNumber": "102",
+                                    "departureTime": "2021-06-20 21:05",
+                                    "marriageGroup": "I",
+                                    "recheckBaggage": false,
+                                    "marketingAirline": "PR",
+                                    "operatingAirline": "PR",
+                                    "arrivalAirportCode": "LAX",
+                                    "departureAirportCode": "MNL",
+                                    "arrivalAirportTerminal": "B",
+                                    "departureAirportTerminal": "1"
+                                }
+                            ]
+                        }
+                    ],
+                    "paxCnt": 1,
+                    "prices": {
+                        "comm": 0,
+                        "isCk": false,
+                        "ccCap": 16.900002,
+                        "markup": 50,
+                        "oMarkup": {
+                            "amount": 50,
+                            "currency": "USD"
+                        },
+                        "markupId": 8833,
+                        "totalTax": 321.75,
+                        "markupUid": "1c7afe8c-a34f-434e-8fa3-87b9b7b1ff4e",
+                        "totalPrice": 767.75,
+                        "lastTicketDate": "2021-03-31"
+                    },
+                    "currency": "USD",
+                    "fareType": "SR",
+                    "maxSeats": 9,
+                    "tripType": "RT",
+                    "penalties": {
+                        "list": [
+                            {
+                                "type": "re",
+                                "permitted": false,
+                                "applicability": "before"
+                            },
+                            {
+                                "type": "re",
+                                "permitted": false,
+                                "applicability": "after"
+                            },
+                            {
+                                "type": "ex",
+                                "amount": 425,
+                                "oAmount": {
+                                    "amount": 425,
+                                    "currency": "USD"
+                                },
+                                "permitted": true,
+                                "applicability": "before"
+                            },
+                            {
+                                "type": "ex",
+                                "amount": 425,
+                                "oAmount": {
+                                    "amount": 425,
+                                    "currency": "USD"
+                                },
+                                "permitted": true,
+                                "applicability": "after"
+                            }
+                        ],
+                        "refund": false,
+                        "exchange": true
+                    },
+                    "routingId": 1,
+                    "currencies": [
+                        "USD"
+                    ],
+                    "founded_dt": "2021-02-25 13:44:54.570",
+                    "passengers": {
+                        "ADT": {
+                            "cnt": 1,
+                            "tax": 321.75,
+                            "comm": 0,
+                            "ccCap": 16.900002,
+                            "price": 767.75,
+                            "codeAs": "JCB",
+                            "markup": 50,
+                            "occCap": {
+                                "amount": 16.900002,
+                                "currency": "USD"
+                            },
+                            "baseTax": 271.75,
+                            "oMarkup": {
+                                "amount": 50,
+                                "currency": "USD"
+                            },
+                            "baseFare": 446,
+                            "oBaseTax": {
+                                "amount": 271.75,
+                                "currency": "USD"
+                            },
+                            "oBaseFare": {
+                                "amount": 446,
+                                "currency": "USD"
+                            },
+                            "pubBaseFare": 446
+                        }
+                    },
+                    "ngsFeatures": {
+                        "list": null,
+                        "name": "",
+                        "stars": 3
+                    },
+                    "currencyRates": {
+                        "CADUSD": {
+                            "to": "USD",
+                            "from": "CAD",
+                            "rate": 0.78417
+                        },
+                        "DKKUSD": {
+                            "to": "USD",
+                            "from": "DKK",
+                            "rate": 0.16459
+                        },
+                        "EURUSD": {
+                            "to": "USD",
+                            "from": "EUR",
+                            "rate": 1.23967
+                        },
+                        "GBPUSD": {
+                            "to": "USD",
+                            "from": "GBP",
+                            "rate": 1.37643
+                        },
+                        "KRWUSD": {
+                            "to": "USD",
+                            "from": "KRW",
+                            "rate": 0.00091
+                        },
+                        "MYRUSD": {
+                            "to": "USD",
+                            "from": "MYR",
+                            "rate": 0.25006
+                        },
+                        "SEKUSD": {
+                            "to": "USD",
+                            "from": "SEK",
+                            "rate": 0.12221
+                        },
+                        "TWDUSD": {
+                            "to": "USD",
+                            "from": "TWD",
+                            "rate": 0.03592
+                        },
+                        "USDCAD": {
+                            "to": "CAD",
+                            "from": "USD",
+                            "rate": 1.30086
+                        },
+                        "USDDKK": {
+                            "to": "DKK",
+                            "from": "USD",
+                            "rate": 6.19797
+                        },
+                        "USDEUR": {
+                            "to": "EUR",
+                            "from": "USD",
+                            "rate": 0.83926
+                        },
+                        "USDGBP": {
+                            "to": "GBP",
+                            "from": "USD",
+                            "rate": 0.75587
+                        },
+                        "USDKRW": {
+                            "to": "KRW",
+                            "from": "USD",
+                            "rate": 1117.1008
+                        },
+                        "USDMYR": {
+                            "to": "MYR",
+                            "from": "USD",
+                            "rate": 4.07943
+                        },
+                        "USDSEK": {
+                            "to": "SEK",
+                            "from": "USD",
+                            "rate": 8.34736
+                        },
+                        "USDTWD": {
+                            "to": "TWD",
+                            "from": "USD",
+                            "rate": 28.96525
+                        },
+                        "USDUSD": {
+                            "to": "USD",
+                            "from": "USD",
+                            "rate": 1
+                        }
+                    },
+                    "validatingCarrier": "PR"
+                }
+            ],
+            "additionalInfo": {
+                "cabin": {
+                    "C": "Business",
+                    "F": "First",
+                    "J": "Premium Business",
+                    "P": "Premium First",
+                    "S": "Premium Economy",
+                    "Y": "Economy"
+                },
+                "airline": {
+                    "PR": {
+                        "name": "Philippine Airlines"
+                    }
+                },
+                "airport": {
+                    "LAX": {
+                        "city": "Los Angeles",
+                        "name": "Los Angeles International Airport",
+                        "country": "United States"
+                    },
+                    "MNL": {
+                        "city": "Manila",
+                        "name": "Ninoy Aquino International Airport",
+                        "country": "Philippines"
+                    },
+                    "TPE": {
+                        "city": "Taipei",
+                        "name": "Taiwan Taoyuan International Airport",
+                        "country": "Taiwan"
+                    }
+                },
+                "general": {
+                    "tripType": "rt"
+                }
+            }
+        },
+        "Passengers": {
+            "Flight": [
+                {
+                    "id": null,
+                    "user_id": null,
+                    "first_name": "Arthur",
+                    "middle_name": "",
+                    "last_name": "Davis",
+                    "birth_date": "1963-04-07",
+                    "gender": "M",
+                    "seats": null,
+                    "assistance": null,
+                    "nationality": "US",
+                    "passport_id": null,
+                    "passport_valid_date": null,
+                    "email": null,
+                    "codeAs": null
+                }
+            ],
+            "Hotel": [
+                {
+                    "first_name": "mike",
+                    "last_name": "kane"
+                }
+            ],
+            "Driver": [
+                {
+                    "first_name": "mike",
+                    "last_name": "kane",
+                    "age": "30-69",
+                    "birth_date": "1973-04-07"
+                }
+            ],
+            "Attraction": [
+                {
+                    "first_name": "mike",
+                    "last_name": "kane",
+                    "language_service": "US"
+                }
+            ],
+            "Cruise": [
+                {
+                    "first_name": "Arthur",
+                    "last_name": "Davis",
+                    "citizenship": "US",
+                    "birth_date": "1963-04-07",
+                    "gender": "M"
+                }
+            ]
+        },
+        "Insurance": {
+            "total_amount": "20",
+            "record_id": "396393",
+            "passengers": [
+                {
+                    "nameRef": "0",
+                    "amount": 20
+                }
+            ]
+        },
+        "Tip": {
+            "total_amount": 20
+        },
+        "AuxiliarProducts": {
+            "Flight": {
+                "basket": {
+                    "1c3df555-a2dc-4813-a055-2a8bf56fd8f1": {
+                        "basket_item_id": "1c3df555-a2dc-4813-a055-2a8bf56fd8f1",
+                        "benefits": [],
+                        "display_name": "10kg Bag",
+                        "price": {
+                            "base": {
+                                "amount": 2000,
+                                "currency": "USD",
+                                "decimal_places": 2,
+                                "in_original_currency": {
+                                    "amount": 1820,
+                                    "currency": "USD",
+                                    "decimal_places": 2
+                                }
+                            },
+                            "fees": [],
+                            "markups": [
+                                {
+                                    "amount": 600,
+                                    "currency": "USD",
+                                    "decimal_places": 2,
+                                    "in_original_currency": {
+                                        "amount": 546,
+                                        "currency": "USD",
+                                        "decimal_places": 2
+                                    },
+                                    "markup_type": "markup"
+                                }
+                            ],
+                            "taxes": [
+                                {
+                                    "amount": 200,
+                                    "currency": "USD",
+                                    "decimal_places": 2,
+                                    "in_original_currency": {
+                                        "amount": 182,
+                                        "currency": "USD",
+                                        "decimal_places": 2
+                                    },
+                                    "tax_type": "tax"
+                                }
+                            ],
+                            "total": {
+                                "amount": 2400,
+                                "currency": "USD",
+                                "decimal_places": 2,
+                                "in_original_currency": {
+                                    "amount": 2184,
+                                    "currency": "USD",
+                                    "decimal_places": 2
+                                }
+                            }
+                        },
+                        "product_details": {
+                            "journey_id": "1770bf8f-0c1c-4ba5-99f5-56e446fe79ba",
+                            "passenger_id": "p1",
+                            "size": 150,
+                            "size_unit": "cm",
+                            "weight": 10,
+                            "weight_unit": "kg"
+                        },
+                        "product_id": "741bcc97-c2fe-4820-b14d-f11f32e6fadb",
+                        "product_type": "bag",
+                        "quantity": 1,
+                        "ticket_id": "e8558737-2ec0-436f-89ec-00e7a20b3252",
+                        "validity": {
+                            "state": "valid",
+                            "valid_from": "2020-05-22T16:34:08Z",
+                            "valid_to": "2020-05-22T16:49:08Z"
+                        }
+                    },
+                    "2654f3f9-8990-4d2e-bdea-3b341ad5d1de": {
+                        "basket_item_id": "2654f3f9-8990-4d2e-bdea-3b341ad5d1de",
+                        "benefits": [],
+                        "display_name": "Seat 15C",
+                        "price": {
+                            "base": {
+                                "amount": 2000,
+                                "currency": "USD",
+                                "decimal_places": 2,
+                                "in_original_currency": {
+                                    "amount": 1820,
+                                    "currency": "USD",
+                                    "decimal_places": 2
+                                }
+                            },
+                            "fees": [],
+                            "markups": [
+                                {
+                                    "amount": 400,
+                                    "currency": "USD",
+                                    "decimal_places": 2,
+                                    "in_original_currency": {
+                                        "amount": 364,
+                                        "currency": "USD",
+                                        "decimal_places": 2
+                                    },
+                                    "markup_type": "markup"
+                                }
+                            ],
+                            "taxes": [
+                                {
+                                    "amount": 200,
+                                    "currency": "USD",
+                                    "decimal_places": 2,
+                                    "in_original_currency": [],
+                                    "tax_type": "tax"
+                                }
+                            ],
+                            "total": {
+                                "amount": 2600,
+                                "currency": "USD",
+                                "decimal_places": 2,
+                                "in_original_currency": {
+                                    "amount": 2366,
+                                    "currency": "USD",
+                                    "decimal_places": 2
+                                }
+                            }
+                        },
+                        "product_details": {
+                            "column": "C",
+                            "passenger_id": "p1",
+                            "row": 15,
+                            "segment_id": "1770bf8f-0c1c-4ba5-99f5-56e446fe79ba"
+                        },
+                        "product_id": "a17e10ca-0c9a-4691-9922-d664a3b52382",
+                        "product_type": "seat",
+                        "quantity": 1,
+                        "ticket_id": "e8558737-2ec0-436f-89ec-00e7a20b3252",
+                        "validity": {
+                            "state": "valid",
+                            "valid_from": "2020-05-22T16:34:08Z",
+                            "valid_to": "2020-05-22T16:49:08Z"
+                        }
+                    },
+                    "5d5e1bce-4577-4118-abcb-155823d8b4a3": [],
+                    "6acd57ba-ccb7-4e86-85e7-b3e586caeae2": [],
+                    "dffac4ba-73b9-4b1b-9334-001817fff0cf": [],
+                    "e960eff9-7628-4645-99d8-20a6e22f6419": []
+                },
+                "country": "US",
+                "currency": "USD",
+                "journeys": [
+                    {
+                        "journey_id": "aab8980e-b263-4624-ad40-d6e5e364b4e9",
+                        "segments": [
+                            {
+                                "arrival_airport": "LHR",
+                                "arrival_time": "2020-07-07T22:30:00Z",
+                                "departure_airport": "EDI",
+                                "departure_time": "2020-07-07T21:10:00Z",
+                                "fare_basis": "OTZ0RO/Y",
+                                "fare_class": "O",
+                                "fare_family": "Basic Economy",
+                                "marketing_airline": "BA",
+                                "marketing_flight_number": "1465",
+                                "number_of_stops": 0,
+                                "operating_airline": "BA",
+                                "operating_flight_number": "1465",
+                                "segment_id": "938d8e82-dd7c-4d85-8ab4-38fea8753f6f"
+                            }
+                        ]
+                    },
+                    {
+                        "journey_id": "1770bf8f-0c1c-4ba5-99f5-56e446fe79ba",
+                        "segments": [
+                            {
+                                "arrival_airport": "EDI",
+                                "arrival_time": "2020-07-14T08:35:00Z",
+                                "departure_airport": "LGW",
+                                "departure_time": "2020-07-14T07:05:00Z",
+                                "fare_basis": "NALZ0KO/Y",
+                                "fare_class": "N",
+                                "fare_family": "Basic Economy",
+                                "marketing_airline": "BA",
+                                "marketing_flight_number": "2500",
+                                "number_of_stops": 0,
+                                "operating_airline": "BA",
+                                "operating_flight_number": "2500",
+                                "segment_id": "7d693cb0-d6d8-49f0-9489-866b3d789215"
+                            }
+                        ]
+                    }
+                ],
+                "language": "en-US",
+                "orders": [],
+                "passengers": [
+                    {
+                        "first_names": "Vincent Willem",
+                        "passenger_id": "ee850c82-e150-4f35-b0c7-228064c2964b",
+                        "surname": "Van Gogh"
+                    }
+                ],
+                "tickets": [
+                    {
+                        "basket_item_ids": [
+                            "dffac4ba-73b9-4b1b-9334-001817fff0cf",
+                            "e960eff9-7628-4645-99d8-20a6e22f6419",
+                            "6acd57ba-ccb7-4e86-85e7-b3e586caeae2",
+                            "5d5e1bce-4577-4118-abcb-155823d8b4a3"
+                        ],
+                        "journey_ids": [
+                            "aab8980e-b263-4624-ad40-d6e5e364b4e9"
+                        ],
+                        "state": "in_basket",
+                        "ticket_basket_item_id": "dffac4ba-73b9-4b1b-9334-001817fff0cf",
+                        "ticket_id": "8c1c9fc8-d968-4733-93a8-6067bac2543f"
+                    },
+                    {
+                        "basket_item_ids": [
+                            "2654f3f9-8990-4d2e-bdea-3b341ad5d1de",
+                            "1c3df555-a2dc-4813-a055-2a8bf56fd8f1"
+                        ],
+                        "journey_ids": [
+                            "1770bf8f-0c1c-4ba5-99f5-56e446fe79ba"
+                        ],
+                        "offered_price": {
+                            "currency": "USD",
+                            "decimal_places": 2,
+                            "total": 20000
+                        },
+                        "state": "offered",
+                        "ticket_id": "e8558737-2ec0-436f-89ec-00e7a20b3252"
+                    }
+                ],
+                "trip_access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+                "trip_id": "23259b86-3208-44c9-85cc-4b116a822bff",
+                "trip_state_hash": "69abcc117863186292bdf5f1c0d94db1e5227210935e6abe039cfb017cbefbee"
+            },
+            "Hotel": [],
+            "Driver": [],
+            "Attraction": [],
+            "Cruise": []
+        },
+        "Payment": {
+            "type": "CARD",
+            "transaction_id": "1234567890",
+            "card_id": 234567,
+            "auth_id": 123456
+        }
+    }
+}
      * @apiSuccessExample {json} Success-Response:
      *
      * HTTP/1.1 200 OK
@@ -1211,7 +1273,7 @@ class OrderController extends BaseController
     public function actionCreate(): \webapi\src\response\Response
     {
         $request = Yii::$app->request;
-        $form = new OrderCreateForm(count($request->post('productQuotes', [])));
+        $form = new OrderCreateForm(count($request->post('productQuotes', [])), count($request->post('paxes', [])));
 
         if (!$form->load($request->post())) {
             return new ErrorResponse(
@@ -1274,22 +1336,21 @@ class OrderController extends BaseController
      * @apiSuccessExample {json} Success-Response:
      *
      * HTTP/1.1 200 OK
-     *
-     * {
+     *{
     "status": 200,
     "message": "OK",
     "order": {
-        "or_id": 105,
-        "or_gid": "f8951ff018b0c1a86548fb08bdddc2e6",
-        "or_uid": "or60425669ddbb8",
+        "or_id": 110,
+        "or_gid": "a0758d1d8ded3efe62c465ad36987200",
+        "or_uid": "or6047198783406",
         "or_name": "Order 1",
         "or_description": null,
         "or_status_id": 3,
         "or_pay_status_id": 1,
-        "or_app_total": "4427.46",
+        "or_app_total": "229.00",
         "or_app_markup": null,
         "or_agent_markup": null,
-        "or_client_total": "4427.46",
+        "or_client_total": "229.00",
         "or_client_currency": "USD",
         "or_client_currency_rate": "1.00000",
         "or_status_name": "Processing",
@@ -1319,191 +1380,42 @@ class OrderController extends BaseController
         ],
         "quotes": [
             {
-                "pq_gid": "62abd30f7547b898f872db7645174ef8",
-                "pq_name": "BCN | Opel Mokka or similar",
-                "pq_order_id": 105,
-                "pq_description": null,
-                "pq_status_id": 3,
-                "pq_price": 4213.03,
-                "pq_origin_price": 4070.56,
-                "pq_client_price": 4213.03,
-                "pq_service_fee_sum": 142.47,
-                "pq_origin_currency": "USD",
-                "pq_client_currency": "USD",
-                "pq_status_name": "Applied",
-                "pq_files": [],
-                "data": {
-                    "rcq_json_response": {
-                        "car": {
-                            "bags": "4",
-                            "type": "mid-size-monospace",
-                            "doors": "5",
-                            "images": {
-                                "SIZE67X36": "https://s1.pclncdn.com/rc-static/vehicles/partner/hz/size67x36/zeesimmr999.jpg",
-                                "SIZE134X72": "https://s1.pclncdn.com/rc-static/vehicles/partner/hz/size134x72/zeesimmr999.jpg",
-                                "SIZE268X144": "https://s1.pclncdn.com/rc-static/vehicles/partner/hz/size268x144/zeesimmr999.jpg"
-                            },
-                            "example": "Opel Mokka or similar",
-                            "imageurl": "https://s1.pclncdn.com/rc-static/vehicles/partner/hz/size134x72/zeesimmr999.jpg",
-                            "type_name": "Mid-Size Monospace",
-                            "passengers": "5",
-                            "description": "Mid-Size Monospace",
-                            "vehicle_code": "IMMR",
-                            "air_conditioning": "true",
-                            "partner_discounts": null,
-                            "automatic_transmission": "false"
-                        },
-                        "pickup": {
-                            "latitude": "41.2996",
-                            "location": "Terminal 1 And 2, Barcelona, 08820, ES",
-                            "longitude": "2.0824",
-                            "neighborhood": "",
-                            "location_code": "BCN",
-                            "city_center_distance": 1.4,
-                            "location_information": "In-Terminal"
-                        },
-                        "dropoff": {
-                            "latitude": "41.2996",
-                            "location": "Terminal 1 And 2, Barcelona, 08820, ES",
-                            "longitude": "2.0824",
-                            "neighborhood": "",
-                            "location_code": "BCN",
-                            "city_center_distance": 1.4,
-                            "location_information": "In-Terminal"
-                        },
-                        "partner": {
-                            "code": "HZ",
-                            "logo": "https://s1.pclncdn.com/rc-static/logos/106x27/HZ.png?v=2.0",
-                            "name": "Hertz Corporation"
-                        },
-                        "priority": {
-                            "company": null
-                        },
-                        "inventory": "PCLN_RC",
-                        "price_details": {
-                            "rate": "postpaid",
-                            "mileage": "true",
-                            "savings": null,
-                            "currency": "USD",
-                            "net_rate": "false",
-                            "base_type": "week",
-                            "sub_total": "580.05",
-                            "base_price": "508.82",
-                            "member_rate": null,
-                            "total_price": "701.86",
-                            "source_price": "422.57",
-                            "source_total": "582.89",
-                            "campaign_rate": null,
-                            "display_price": "508.82",
-                            "display_total": "701.86",
-                            "source_symbol": "&#8364;",
-                            "baseline_price": "508.82",
-                            "baseline_total": "701.86",
-                            "display_symbol": "$",
-                            "pay_at_booking": "false",
-                            "baseline_symbol": "$",
-                            "num_rental_days": 8,
-                            "source_currency": "EUR",
-                            "display_currency": "USD",
-                            "source_sub_total": "481.73",
-                            "baseline_currency": "USD",
-                            "display_sub_total": "580.05",
-                            "free_cancellation": "true",
-                            "total_price_float": 701.86,
-                            "baseline_sub_total": "580.05",
-                            "source_total_float": 582.89,
-                            "display_total_float": 701.86,
-                            "base_strikeout_price": "0.00",
-                            "baseline_total_float": 701.86,
-                            "total_strikeout_price": "0.00",
-                            "source_price_strikeout": "0.00",
-                            "source_total_strikeout": "0.00",
-                            "display_price_strikeout": "0.00",
-                            "display_total_strikeout": "0.00",
-                            "baseline_price_strikeout": "0.00",
-                            "baseline_total_strikeout": "0.00"
-                        },
-                        "car_reference_id": "LV2--_mykWePf-0tzOK2C4jt4gNjESmkUnYPJkll58GfHgTNNPo6QInGLVLLw2DJN4ELaXzsq8DlXsBXPckB8IxfPj2HhOhKVji2ZDm67Az77BrcuZAE1N3Vk1ly_WWiLuUbtKkEtbt5zOTq3_PZMKiv2QhLF-WhhOBGT8l3ICZapw5EPaMCmVj0Cyl-ZJhqU9pEXxA8uRQqBsCrN8g5FUJ52XhW9-zKO5vHU9DM2bqJxm1XpWriCiyAzTDywE7tQxxZUaUBI1DF5qpA7j-cTT5dzoTKttRJdMe2A3bcn6G0z6aW2mnCxfMJqhQaTgV51NesqNkht16sfJ6BPPunLilN7E5EjhIwfBJUhF7OitVm3Cz-Q9V7VlNLFAWBO_SUnmT0gFECRdezAdt28Ey0FEEMO8p4tc0TzPHgxTgnq5LLILhR2J4i_1Jzg_62m6t93k_K2WAz8j_3XEB0a7rOB_n6uA_PtlMl63Selb_SBek9VoECuYaLogZGxT-72I8olm8vgAXrO6hE4fZE3YHNXdm9VGRVFAFXpdHdTSDmPdGA4g5MYWdSEzucSwsopmhC8IvdRR3xcUG37U1RvTWyyG_wwD819yL_KU-1UpN5zIUI8hhxJ67LhV8G5ZjvkzEiVuF8e310x7x6a8xgqd5TU1t33udlnghE9TzMKFNxovt9QzhP8",
-                        "contract_page_url": "https%3A%2F%2Fsecure.rezserver.com%2Fcar_rentals%2Fbook%2F%3Frefid%3D8965%26car_reference_id%3DLV2--_qJ6XceU5pl0xOjo066q7l_IWPm3BGc0VBir2HITrowrpY9SaWXiUEAhMGk_w343wNza4xNday7D67xxGf366wEn_XfMKufpE7OpMlr__6gM1RdXlewi-X3-o2iqHdTZK4mM6lC6BgaZwKv9HRJ0SlmWiDdoQwxIi9ncFLZWB-9T0U7oStZ0NrYTqYaKZ_rG7WMHYA2epY7AfwKCSREdHDCoNyduV48cf-5Vw5SVrBCbdOzu_-YyWykLNtoJWO1Ya9ybf2RP2DPwYjnQZrtqkLwiuq-rXDMYP91mvqInCVcXmH3AVATTsWcd2WKdcLuc5A3ATFiXroaH_qJC6yRas2yniU7aZKXtSX2Wywx2O58hqKVSV9u3vmfvemfgV9gyPNILF0_M77l8JSukHpDa_bkISgAuXs7PubZmmFCPEn7TAq9mSyljrg4vrB_h6jgDyVbKx3Z5DpnM3MV6vNyuZOR1iF9MspTRtgKFWnwjK5iLYuyKbVIvCuLI3Vlbx5zVQPr8gu4WXBMED7LSwxkkteVh7SWM1GUwZOfIgCNGm_u_MDvcfgpBtc8BdgwgJ1233TVHB2uquxEQZrw5t63SnmYSDO5aowqpb2NHm7woq6cY9k3g6DzeH3BTpEytpAzvL",
-                        "creditCardRequired": 0,
-                        "disclosure_required": false,
-                        "driver_age_required": false
-                    },
-                    "rcq_model_name": "Opel Mokka or similar",
-                    "rcq_category": "Mid-Size Monospace",
-                    "rcq_image_url": "https://s1.pclncdn.com/rc-static/vehicles/partner/hz/size268x144/zeesimmr999.jpg",
-                    "rcq_vendor_name": "Hertz Corporation",
-                    "rcq_vendor_logo_url": "https://s1.pclncdn.com/rc-static/logos/106x27/HZ.png?v=2.0",
-                    "rcq_options": {
-                        "bags": "4",
-                        "doors": "5",
-                        "passengers": "5",
-                        "automatic_transmission": "Yes"
-                    },
-                    "rcq_advantages": {
-                        "bags": "4",
-                        "doors": "5",
-                        "passengers": "5",
-                        "automatic_transmission": "Yes"
-                    },
-                    "search_request": {
-                        "prc_product_id": 72,
-                        "prc_pick_up_code": "BCN",
-                        "prc_drop_off_code": "BCN",
-                        "prc_pick_up_date": "2021-10-14",
-                        "prc_drop_off_date": "2021-10-21",
-                        "prc_pick_up_time": "11:00:00",
-                        "prc_drop_off_time": "18:00:00"
-                    },
-                    "project_key": "ovago"
-                },
-                "product": {
-                    "pr_type_id": 3,
-                    "pr_name": "",
-                    "pr_lead_id": 513112,
-                    "pr_description": "",
-                    "pr_status_id": null,
-                    "pr_service_fee_percent": null
-                },
-                "productQuoteOptions": []
-            },
-            {
-                "pq_gid": "915c0caf84ad4fd749adf311c401bb88",
+                "pq_gid": "80e1ebef3057d60ff3870fe0a1eb83ee",
                 "pq_name": "",
-                "pq_order_id": 105,
+                "pq_order_id": 110,
                 "pq_description": null,
                 "pq_status_id": 3,
-                "pq_price": 104.8,
-                "pq_origin_price": 104.8,
-                "pq_client_price": 104.8,
+                "pq_price": 209,
+                "pq_origin_price": 209,
+                "pq_client_price": 209,
                 "pq_service_fee_sum": 0,
                 "pq_origin_currency": "USD",
                 "pq_client_currency": "USD",
                 "pq_status_name": "Applied",
                 "pq_files": [],
                 "data": {
-                    "fq_flight_id": 43,
+                    "fq_flight_id": 49,
                     "fq_source_id": null,
-                    "fq_product_quote_id": 156,
+                    "fq_product_quote_id": 162,
                     "fq_gds": "T",
-                    "fq_gds_pcc": "DVI",
+                    "fq_gds_pcc": "E9V",
                     "fq_gds_offer_id": null,
                     "fq_type_id": 0,
                     "fq_cabin_class": "E",
                     "fq_trip_type_id": 1,
                     "fq_main_airline": "LO",
                     "fq_fare_type_id": 1,
-                    "fq_origin_search_data": "{\"key\":\"2_U0FMMTAxKlkxMDAwL0tJVkxPTjIwMjEtMDgtMTIqTE9+I0xPNTE2I0xPMjgxfmxjOmVuX3Vz\",\"routingId\":1,\"prices\":{\"lastTicketDate\":\"2021-03-08\",\"totalPrice\":104.8,\"totalTax\":61.8,\"comm\":0,\"isCk\":false,\"markupId\":0,\"markupUid\":\"\",\"markup\":0},\"passengers\":{\"ADT\":{\"codeAs\":\"JWZ\",\"cnt\":1,\"baseFare\":43,\"pubBaseFare\":43,\"baseTax\":61.8,\"markup\":0,\"comm\":0,\"price\":104.8,\"tax\":61.8,\"oBaseFare\":{\"amount\":43,\"currency\":\"USD\"},\"oBaseTax\":{\"amount\":61.8,\"currency\":\"USD\"}}},\"penalties\":{\"exchange\":true,\"refund\":false,\"list\":[{\"type\":\"ex\",\"applicability\":\"before\",\"permitted\":true,\"amount\":0},{\"type\":\"ex\",\"applicability\":\"after\",\"permitted\":true,\"amount\":0},{\"type\":\"re\",\"applicability\":\"before\",\"permitted\":false},{\"type\":\"re\",\"applicability\":\"after\",\"permitted\":false}]},\"trips\":[{\"tripId\":1,\"segments\":[{\"segmentId\":1,\"departureTime\":\"2021-08-12 18:25\",\"arrivalTime\":\"2021-08-12 19:15\",\"stop\":0,\"stops\":[],\"flightNumber\":\"516\",\"bookingClass\":\"V\",\"duration\":110,\"departureAirportCode\":\"KIV\",\"departureAirportTerminal\":\"\",\"arrivalAirportCode\":\"WAW\",\"arrivalAirportTerminal\":\"\",\"operatingAirline\":\"LO\",\"airEquipType\":\"DH4\",\"marketingAirline\":\"LO\",\"marriageGroup\":\"I\",\"mileage\":508,\"cabin\":\"Y\",\"cabinIsBasic\":true,\"brandId\":\"685421\",\"brandName\":\"ECONOMY SAVER\",\"meal\":\"\",\"fareCode\":\"V1SAV28\",\"baggage\":{\"ADT\":{\"carryOn\":true,\"allowPieces\":0}},\"recheckBaggage\":false},{\"segmentId\":2,\"departureTime\":\"2021-08-13 07:30\",\"arrivalTime\":\"2021-08-13 09:25\",\"stop\":0,\"stops\":[],\"flightNumber\":\"281\",\"bookingClass\":\"V\",\"duration\":175,\"departureAirportCode\":\"WAW\",\"departureAirportTerminal\":\"\",\"arrivalAirportCode\":\"LHR\",\"arrivalAirportTerminal\":\"2\",\"operatingAirline\":\"LO\",\"airEquipType\":\"738\",\"marketingAirline\":\"LO\",\"marriageGroup\":\"O\",\"mileage\":893,\"cabin\":\"Y\",\"cabinIsBasic\":true,\"brandId\":\"685421\",\"brandName\":\"ECONOMY SAVER\",\"meal\":\"\",\"fareCode\":\"V1SAV28\",\"baggage\":{\"ADT\":{\"carryOn\":true,\"allowPieces\":0}},\"recheckBaggage\":false}],\"duration\":1020}],\"maxSeats\":9,\"paxCnt\":1,\"validatingCarrier\":\"LO\",\"gds\":\"T\",\"pcc\":\"DVI\",\"cons\":\"GTT\",\"fareType\":\"PUB\",\"tripType\":\"OW\",\"cabin\":\"Y\",\"currency\":\"USD\",\"currencies\":[\"USD\"],\"currencyRates\":{\"USDUSD\":{\"from\":\"USD\",\"to\":\"USD\",\"rate\":1}},\"keys\":{\"travelport\":{\"traceId\":\"0bed8fa4-77b2-418e-a1f0-bb821efd16a7\",\"availabilitySources\":\"S,S\",\"type\":\"T\"},\"seatHoldSeg\":{\"trip\":0,\"segment\":0,\"seats\":9}},\"ngsFeatures\":{\"stars\":1,\"name\":\"ECONOMY SAVER\",\"list\":[]},\"meta\":{\"eip\":0,\"noavail\":false,\"searchId\":\"U0FMMTAxWTEwMDB8S0lWTE9OMjAyMS0wOC0xMg==\",\"lang\":\"en\",\"rank\":7,\"cheapest\":true,\"fastest\":false,\"best\":false,\"bags\":0,\"country\":\"us\"},\"price\":104.8,\"originRate\":1,\"stops\":[1],\"time\":[{\"departure\":\"2021-08-12 18:25\",\"arrival\":\"2021-08-13 09:25\"}],\"bagFilter\":\"\",\"airportChange\":false,\"technicalStopCnt\":0,\"duration\":[1020],\"totalDuration\":1020,\"topCriteria\":\"cheapest\",\"rank\":7}",
-                    "fq_last_ticket_date": "2021-03-08",
+                    "fq_origin_search_data": "{\"key\":\"2_U0FMMTAxKlkyMDAwL0tJVkxPTjIwMjEtMDktMTcqTE9+I0xPNTE0I0xPMjgxfmxjOmVuX3Vz\",\"routingId\":1,\"prices\":{\"lastTicketDate\":\"2021-03-11\",\"totalPrice\":209,\"totalTax\":123,\"comm\":0,\"isCk\":false,\"markupId\":0,\"markupUid\":\"\",\"markup\":0},\"passengers\":{\"ADT\":{\"codeAs\":\"ADT\",\"cnt\":2,\"baseFare\":43,\"pubBaseFare\":43,\"baseTax\":61.5,\"markup\":0,\"comm\":0,\"price\":104.5,\"tax\":61.5,\"oBaseFare\":{\"amount\":43,\"currency\":\"USD\"},\"oBaseTax\":{\"amount\":61.5,\"currency\":\"USD\"}}},\"penalties\":{\"exchange\":true,\"refund\":false,\"list\":[{\"type\":\"ex\",\"applicability\":\"before\",\"permitted\":true,\"amount\":0},{\"type\":\"ex\",\"applicability\":\"after\",\"permitted\":true,\"amount\":0},{\"type\":\"re\",\"applicability\":\"before\",\"permitted\":false},{\"type\":\"re\",\"applicability\":\"after\",\"permitted\":false}]},\"trips\":[{\"tripId\":1,\"segments\":[{\"segmentId\":1,\"departureTime\":\"2021-09-17 14:30\",\"arrivalTime\":\"2021-09-17 15:20\",\"stop\":0,\"stops\":[],\"flightNumber\":\"514\",\"bookingClass\":\"V\",\"duration\":110,\"departureAirportCode\":\"KIV\",\"departureAirportTerminal\":\"\",\"arrivalAirportCode\":\"WAW\",\"arrivalAirportTerminal\":\"\",\"operatingAirline\":\"LO\",\"airEquipType\":\"DH4\",\"marketingAirline\":\"LO\",\"marriageGroup\":\"I\",\"mileage\":508,\"cabin\":\"Y\",\"cabinIsBasic\":true,\"brandId\":\"685421\",\"brandName\":\"ECONOMY SAVER\",\"meal\":\"\",\"fareCode\":\"V1SAV28\",\"baggage\":{\"ADT\":{\"carryOn\":true,\"allowPieces\":0}},\"recheckBaggage\":false},{\"segmentId\":2,\"departureTime\":\"2021-09-18 07:30\",\"arrivalTime\":\"2021-09-18 09:25\",\"stop\":0,\"stops\":[],\"flightNumber\":\"281\",\"bookingClass\":\"V\",\"duration\":175,\"departureAirportCode\":\"WAW\",\"departureAirportTerminal\":\"\",\"arrivalAirportCode\":\"LHR\",\"arrivalAirportTerminal\":\"2\",\"operatingAirline\":\"LO\",\"airEquipType\":\"738\",\"marketingAirline\":\"LO\",\"marriageGroup\":\"O\",\"mileage\":893,\"cabin\":\"Y\",\"cabinIsBasic\":true,\"brandId\":\"685421\",\"brandName\":\"ECONOMY SAVER\",\"meal\":\"\",\"fareCode\":\"V1SAV28\",\"baggage\":{\"ADT\":{\"carryOn\":true,\"allowPieces\":0}},\"recheckBaggage\":false}],\"duration\":1255}],\"maxSeats\":5,\"paxCnt\":2,\"validatingCarrier\":\"LO\",\"gds\":\"T\",\"pcc\":\"E9V\",\"cons\":\"GTT\",\"fareType\":\"PUB\",\"tripType\":\"OW\",\"cabin\":\"Y\",\"currency\":\"USD\",\"currencies\":[\"USD\"],\"currencyRates\":{\"USDUSD\":{\"from\":\"USD\",\"to\":\"USD\",\"rate\":1}},\"keys\":{\"travelport\":{\"traceId\":\"b3355dee-c859-4617-bca4-50046effc830\",\"availabilitySources\":\"S,S\",\"type\":\"T\"},\"seatHoldSeg\":{\"trip\":0,\"segment\":0,\"seats\":5}},\"ngsFeatures\":{\"stars\":1,\"name\":\"ECONOMY SAVER\",\"list\":[]},\"meta\":{\"eip\":0,\"noavail\":false,\"searchId\":\"U0FMMTAxWTIwMDB8S0lWTE9OMjAyMS0wOS0xNw==\",\"lang\":\"en\",\"rank\":6,\"cheapest\":true,\"fastest\":false,\"best\":false,\"bags\":0,\"country\":\"us\"},\"price\":104.5,\"originRate\":1,\"stops\":[1],\"time\":[{\"departure\":\"2021-09-17 14:30\",\"arrival\":\"2021-09-18 09:25\"}],\"bagFilter\":\"\",\"airportChange\":false,\"technicalStopCnt\":0,\"duration\":[1255],\"totalDuration\":1255,\"topCriteria\":\"cheapest\",\"rank\":6}",
+                    "fq_last_ticket_date": "2021-03-11",
                     "fq_json_booking": null,
                     "fq_ticket_json": null,
                     "fq_type_name": "Base",
                     "fq_fare_type_name": "Public",
                     "flight": {
-                        "fl_product_id": 70,
+                        "fl_product_id": 78,
                         "fl_trip_type_id": 1,
                         "fl_cabin_class": "E",
-                        "fl_adults": 1,
+                        "fl_adults": 2,
                         "fl_children": 0,
                         "fl_infants": 0,
                         "fl_trip_type_name": "One Way",
@@ -1511,15 +1423,17 @@ class OrderController extends BaseController
                     },
                     "trips": [
                         {
-                            "fqt_id": 98,
+                            "fqt_id": 103,
+                            "fqt_uid": "fqt6047195e6a882",
                             "fqt_key": null,
-                            "fqt_duration": 1020,
+                            "fqt_duration": 1255,
                             "segments": [
                                 {
-                                    "fqs_departure_dt": "2021-08-12 18:25:00",
-                                    "fqs_arrival_dt": "2021-08-12 19:15:00",
+                                    "fqs_uid": "fqs6047195e6be4b",
+                                    "fqs_departure_dt": "2021-09-17 14:30:00",
+                                    "fqs_arrival_dt": "2021-09-17 15:20:00",
                                     "fqs_stop": 0,
-                                    "fqs_flight_number": 516,
+                                    "fqs_flight_number": 514,
                                     "fqs_booking_class": "V",
                                     "fqs_duration": 110,
                                     "fqs_departure_airport_iata": "KIV",
@@ -1543,7 +1457,7 @@ class OrderController extends BaseController
                                     "baggages": [
                                         {
                                             "qsb_flight_pax_code_id": 1,
-                                            "qsb_flight_quote_segment_id": 251,
+                                            "qsb_flight_quote_segment_id": 261,
                                             "qsb_airline_code": null,
                                             "qsb_allow_pieces": 0,
                                             "qsb_allow_weight": null,
@@ -1554,8 +1468,9 @@ class OrderController extends BaseController
                                     ]
                                 },
                                 {
-                                    "fqs_departure_dt": "2021-08-13 07:30:00",
-                                    "fqs_arrival_dt": "2021-08-13 09:25:00",
+                                    "fqs_uid": "fqs6047195e6d5a0",
+                                    "fqs_departure_dt": "2021-09-18 07:30:00",
+                                    "fqs_arrival_dt": "2021-09-18 09:25:00",
                                     "fqs_stop": 0,
                                     "fqs_flight_number": 281,
                                     "fqs_booking_class": "V",
@@ -1581,7 +1496,7 @@ class OrderController extends BaseController
                                     "baggages": [
                                         {
                                             "qsb_flight_pax_code_id": 1,
-                                            "qsb_flight_quote_segment_id": 252,
+                                            "qsb_flight_quote_segment_id": 262,
                                             "qsb_airline_code": null,
                                             "qsb_allow_pieces": 0,
                                             "qsb_allow_weight": null,
@@ -1597,127 +1512,119 @@ class OrderController extends BaseController
                     "pax_prices": [
                         {
                             "qpp_fare": "43.00",
-                            "qpp_tax": "61.80",
+                            "qpp_tax": "61.50",
                             "qpp_system_mark_up": "0.00",
                             "qpp_agent_mark_up": "0.00",
                             "qpp_origin_fare": "43.00",
                             "qpp_origin_currency": "USD",
-                            "qpp_origin_tax": "61.80",
+                            "qpp_origin_tax": "61.50",
                             "qpp_client_currency": "USD",
                             "qpp_client_fare": "43.00",
-                            "qpp_client_tax": "61.80",
+                            "qpp_client_tax": "61.50",
                             "paxType": "ADT"
                         }
-                    ]
-                },
-                "product": {
-                    "pr_type_id": 1,
-                    "pr_name": "",
-                    "pr_lead_id": 513112,
-                    "pr_description": "",
-                    "pr_status_id": null,
-                    "pr_service_fee_percent": null
-                },
-                "productQuoteOptions": []
-            },
-            {
-                "pq_gid": "b1d227705f81bb914a8809deb7f985aa",
-                "pq_name": "BED.ST",
-                "pq_order_id": 105,
-                "pq_description": null,
-                "pq_status_id": 3,
-                "pq_price": 109.63,
-                "pq_origin_price": 105.92,
-                "pq_client_price": 109.63,
-                "pq_service_fee_sum": 3.71,
-                "pq_origin_currency": "USD",
-                "pq_client_currency": "USD",
-                "pq_status_name": "Applied",
-                "pq_files": [],
-                "data": {
-                    "hq_hash_key": "bee2e5c5bba6321808142d05f08f5c19",
-                    "hq_destination_name": "Barcelona",
-                    "hq_hotel_name": "Mellow Youth Hostel",
-                    "hq_request_hash": "3d5016fd7cc683dc450d302829fbffff",
-                    "hq_booking_id": null,
-                    "hq_json_booking": null,
-                    "hq_check_in_date": "2021-09-16",
-                    "hq_check_out_date": "2021-09-23",
-                    "hq_nights": 7,
-                    "hotel_request": {
-                        "ph_check_in_date": "2021-09-16",
-                        "ph_check_out_date": "2021-09-23",
-                        "ph_destination_code": "BCN",
-                        "ph_destination_label": "Spain, Barcelona",
-                        "destination_city": "Barcelona"
-                    },
-                    "hotel": {
-                        "hl_name": "Mellow Youth Hostel",
-                        "hl_star": null,
-                        "hl_category_name": "HOSTEL",
-                        "hl_destination_name": "Barcelona",
-                        "hl_zone_name": "Gracia Area",
-                        "hl_country_code": "ES",
-                        "hl_state_code": "08",
-                        "hl_description": "If the customer is looking for a neat, modern and new hostel which is safe and peaceful, this is the host in Barcelona. It has great panoramic views over the city, the sea and Tibitabo Mountain. All the city´s tourist attractions are just 15-20 min away, situated in a quiet suburb of Barcelona just 15 to 20 minutes' walk from Parc Güell. The building is new and comfortable, all the rooms are bright and exterior with large windows and most of them have balconies. The common areas are beautiful and spacious, which includes a chill out place. There is a communal area with a dining room and free Wi-Fi. The bright, spacious dormitories are heated and have tiled floors, each has a shared bathroom with a hairdryer. Solar panels are used to heat the water at Hillview.",
-                        "hl_address": "AGUILAR, 54",
-                        "hl_postal_code": "08032",
-                        "hl_city": "BARCELONA",
-                        "hl_email": "admin@mellowbarcelona.com",
-                        "hl_web": null,
-                        "hl_phone_list": [
-                            {
-                                "type": "PHONEBOOKING",
-                                "number": "0034933010037"
-                            },
-                            {
-                                "type": "PHONEHOTEL",
-                                "number": "0034934294533"
-                            },
-                            {
-                                "type": "PHONEMANAGEMENT",
-                                "number": "645707626"
-                            }
-                        ],
-                        "hl_image_list": [
-                            {
-                                "url": "38/388839/388839a_hb_a_001.jpg",
-                                "type": "GEN"
-                            }
-                        ],
-                        "hl_image_base_url": null,
-                        "json_booking": null
-                    },
-                    "rooms": [
+                    ],
+                    "paxes": [
                         {
-                            "hqr_room_name": "Bed In Dormitory Standard",
-                            "hqr_class": "NOR",
-                            "hqr_amount": 98.07,
-                            "hqr_currency": "USD",
-                            "hqr_cancel_amount": "98.07",
-                            "hqr_cancel_from_dt": "2021-06-17 21:59:00",
-                            "hqr_board_name": "ROOM ONLY",
-                            "hqr_rooms": 1,
-                            "hqr_adults": 1,
-                            "hqr_children": null
+                            "fp_uid": "fp6047195e6767d",
+                            "fp_pax_id": null,
+                            "fp_pax_type": "ADT",
+                            "fp_first_name": "Alex",
+                            "fp_last_name": "Grub",
+                            "fp_middle_name": "",
+                            "fp_dob": "1963-04-07"
+                        },
+                        {
+                            "fp_uid": "fp6047195e67b7a",
+                            "fp_pax_id": null,
+                            "fp_pax_type": "ADT",
+                            "fp_first_name": "Test name",
+                            "fp_last_name": "Test last name",
+                            "fp_middle_name": "Test middle name",
+                            "fp_dob": "1963-04-07"
+                        },
+                        {
+                            "fp_uid": "fp6047302b6966f",
+                            "fp_pax_id": null,
+                            "fp_pax_type": "ADT",
+                            "fp_first_name": null,
+                            "fp_last_name": null,
+                            "fp_middle_name": null,
+                            "fp_dob": null
+                        },
+                        {
+                            "fp_uid": "fp6047302b69a86",
+                            "fp_pax_id": null,
+                            "fp_pax_type": "ADT",
+                            "fp_first_name": null,
+                            "fp_last_name": null,
+                            "fp_middle_name": null,
+                            "fp_dob": null
+                        },
+                        {
+                            "fp_uid": "fp60473031c44c4",
+                            "fp_pax_id": null,
+                            "fp_pax_type": "ADT",
+                            "fp_first_name": null,
+                            "fp_last_name": null,
+                            "fp_middle_name": null,
+                            "fp_dob": null
+                        },
+                        {
+                            "fp_uid": "fp60473031c47b9",
+                            "fp_pax_id": null,
+                            "fp_pax_type": "ADT",
+                            "fp_first_name": null,
+                            "fp_last_name": null,
+                            "fp_middle_name": null,
+                            "fp_dob": null
                         }
                     ]
                 },
                 "product": {
-                    "pr_type_id": 2,
+                    "pr_gid": null,
+                    "pr_type_id": 1,
                     "pr_name": "",
-                    "pr_lead_id": 513112,
+                    "pr_lead_id": 513110,
                     "pr_description": "",
                     "pr_status_id": null,
-                    "pr_service_fee_percent": null
+                    "pr_service_fee_percent": null,
+                    "holder": {
+                        "ph_first_name": "test",
+                        "ph_last_name": "test",
+                        "ph_email": "test@test.test",
+                        "ph_phone_number": "+19074861000"
+                    }
                 },
-                "productQuoteOptions": []
+                "productQuoteOptions": [
+                    {
+                        "pqo_name": "Travel Guard",
+                        "pqo_description": "",
+                        "pqo_status_id": null,
+                        "pqo_price": 20,
+                        "pqo_client_price": 20,
+                        "pqo_extra_markup": null,
+                        "pqo_request_data": null,
+                        "productOption": {
+                            "po_key": "travelGuard",
+                            "po_name": "Travel Guard",
+                            "po_description": ""
+                        }
+                    }
+                ]
             }
         ]
     },
-    "technical": [],
+    "technical": {
+        "action": "v2/order/view",
+        "response_id": 507,
+        "request_dt": "2021-03-09 12:10:22",
+        "response_dt": "2021-03-09 12:10:23",
+        "execution_time": 0.122,
+        "memory_usage": 1563368
+    },
     "request": {
-        "gid": "f8951ff018b0c1a86548fb08bdddc2e6"
+        "gid": "a0758d1d8ded3efe62c465ad36987200"
     }
 }
      *

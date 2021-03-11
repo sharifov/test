@@ -512,9 +512,9 @@ $js = <<<JS
                         hide: true
                   });
                   
-                  pjaxReload({
-                      container: '#pjax-product-quote-list-' + productId
-                  });
+                  pjaxReload({container: '#pjax-product-quote-list-' + productId});
+                  pjaxReload({container: "#pjax-lead-orders", async: false, timeout: 5000});
+                  pjaxReload({container: "#pjax-lead-offers", async: false, timeout: 5000});
               }
           })
         .fail(function( jqXHR, textStatus ) {

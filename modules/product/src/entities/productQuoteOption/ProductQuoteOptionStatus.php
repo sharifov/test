@@ -12,6 +12,7 @@ class ProductQuoteOptionStatus
     public const MODIFIED = 4;
     public const DECLINED = 5;
     public const CANCELED = 6;
+    public const ERROR = 7;
 
     public const LIST = [
         self::PENDING => 'Pending',
@@ -20,6 +21,7 @@ class ProductQuoteOptionStatus
         self::MODIFIED => 'Modified',
         self::DECLINED => 'Declined',
         self::CANCELED => 'Canceled',
+        self::ERROR => 'Error',
     ];
 
     public const CLASS_LIST = [
@@ -29,6 +31,7 @@ class ProductQuoteOptionStatus
         self::MODIFIED => 'warning',
         self::DECLINED => 'danger',
         self::CANCELED => 'danger',
+        self::ERROR => 'danger',
     ];
 
     public const CANCEL_GROUP = [

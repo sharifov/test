@@ -31,28 +31,41 @@ $pjaxId = 'pjax-hotel-update'
 
             <?= $form->errorSummary($model) ?>
 
-            <?= $form->field($model, 'ph_check_in_date')->widget(
+            <?php echo $form->field($model, 'ph_check_in_date')->widget(
                 DatePicker::class,
                 [
                     'inline' => false,
                     'clientOptions' => [
                         'autoclose' => true,
                         'format' => 'yyyy-mm-dd',
-                        'todayBtn' => true
-                    ]
+                        'clearBtn' => true,
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'readonly' => '1',
+                    ],
+                    'clientEvents' => [
+                        'clearDate' => 'function (e) {$(e.target).find("input").change();}',
+                    ],
                 ]
             )?>
 
-
-            <?= $form->field($model, 'ph_check_out_date')->widget(
+            <?php echo $form->field($model, 'ph_check_out_date')->widget(
                 DatePicker::class,
                 [
-                'inline' => false,
-                'clientOptions' => [
-                    'autoclose' => true,
-                    'format' => 'yyyy-mm-dd',
-                    'todayBtn' => true
-                ]
+                    'inline' => false,
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                        'clearBtn' => true,
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'readonly' => '1',
+                    ],
+                    'clientEvents' => [
+                        'clearDate' => 'function (e) {$(e.target).find("input").change();}',
+                    ],
                 ]
             )?>
 

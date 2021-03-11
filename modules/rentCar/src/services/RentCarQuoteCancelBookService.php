@@ -34,7 +34,9 @@ class RentCarQuoteCancelBookService
         $cancelResult = $apiRentCarService->cancel($rentCarQuote->rcq_booking_id, $email, $rentCar->prc_request_hash_key);
 
         if ($cancelResult['error'] === false) {
-            $cancelStatus = ArrayHelper::getValue($cancelResult, 'status');
+            if (!$cancelStatus = ArrayHelper::getValue($cancelResult, 'data.status')) {
+                throw new \DomainException('Cancel book is failed. Status not found in response');
+            }
             if (strtoupper((string) $cancelStatus) !== 'SUCCESS') {
                 throw new \DomainException('Cancel book is failed. Status in response (' . $cancelStatus . ')');
             }

@@ -3,13 +3,13 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model modules\fileStorage\src\entity\fileStorage\FileStorage */
+/* @var $model modules\product\src\entities\productHolder\ProductHolder */
 
-$this->title = 'Create File Storage';
-$this->params['breadcrumbs'][] = ['label' => 'File Storages', 'url' => ['index']];
+$this->title = 'Create Product Holder';
+$this->params['breadcrumbs'][] = ['label' => 'Product Holders', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="file-storage-create">
+<div class="product-holder-create">
 
     <h1><?= Html::encode($this->title) ?></h1>
 

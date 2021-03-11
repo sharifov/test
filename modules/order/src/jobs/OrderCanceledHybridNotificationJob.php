@@ -31,13 +31,16 @@ class OrderCanceledHybridNotificationJob implements JobInterface
                 'orderId' => $this->orderId,
             ], 'OrderCanceledHybridNotificationJob');
         }
-
-        \Yii::info([
-            'message' => 'Send canceled status to hybrid',
-            'orderId' => $this->orderId,
-            'status' => $order->or_status_id,
-            'statusName' => OrderStatus::getName($order->or_status_id),
-        ], 'info\OrderCanceledHybridNotificationJob');
+        try {
+            \Yii::$app->hybrid->updateStatus($order->orLead->project_id, $order->or_gid, OrderStatus::CANCELED);
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'message' => 'Send canceled status to hybrid',
+                'orderId' => $this->orderId,
+                'status' => OrderStatus::CANCELED,
+                'error' => $e->getMessage(),
+            ], 'OrderCanceledHybridNotificationJob');
+        }
     }
 
 //    public function getTtr(): int

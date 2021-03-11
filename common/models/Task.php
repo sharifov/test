@@ -21,7 +21,6 @@ use yii\helpers\ArrayHelper;
  */
 class Task extends \yii\db\ActiveRecord
 {
-
     public const CAT_NOT_ANSWERED_PROCESS = 1;
     public const CAT_ANSWERED_PROCESS = 2;
 

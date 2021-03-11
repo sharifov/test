@@ -269,7 +269,14 @@ $gridId = 'cases-grid-id';
                 ],
                 'visible' => $searchModel->showFields && in_array('communication', $searchModel->showFields, true),
             ],
-
+            [
+                'label' => 'Files',
+                'attribute' => 'count_files',
+                'contentOptions' => [
+                    'class' => 'text-center'
+                ],
+                'visible' => $searchModel->showFields && in_array('count_files', $searchModel->showFields, true),
+            ],
             [
                 'class' => \common\components\grid\UserSelect2Column::class,
                 'attribute' => 'cs_user_id',

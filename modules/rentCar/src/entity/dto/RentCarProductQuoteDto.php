@@ -25,7 +25,7 @@ class RentCarProductQuoteDto
      */
     public static function create(RentCar $rentCar, array $data, ?int $ownerId): ProductQuote
     {
-        $totalPrice = $rentCar->calculateDays() * RentCarDataParser::getPricePerDay($data);
+        $totalPrice = RentCarDataParser::getTotalPrice($data);
 
         $productQuoteDto = new RentCarProductQuoteCreateDto();
         $productQuoteDto->productId = $rentCar->prc_product_id;

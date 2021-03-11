@@ -41,7 +41,9 @@ $this->params['breadcrumbs'][] = $this->title;
             'ph_max_star_rate',
             'ph_max_price_rate',
             'ph_min_price_rate',
-            'ph_request_hash_key'
+            'ph_request_hash_key',
+            'ph_holder_name',
+            'ph_holder_surname',
         ],
     ]) ?>
 

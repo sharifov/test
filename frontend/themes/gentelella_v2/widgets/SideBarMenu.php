@@ -350,6 +350,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Product Types', 'url' => ['/product/product-type-crud/index']],
                 ['label' => 'Product Type Payment Method', 'url' => ['/product/product-type-payment-method/index']],
                 ['label' => 'Products', 'url' => ['/product/product-crud/index']],
+                ['label' => 'Product Holder', 'url' => ['/product/product-holder-crud/index']],
                 ['label' => 'Product Options', 'url' => ['/product/product-option-crud/index']],
                 ['label' => 'Product Quotes', 'url' => ['/product/product-quote-crud/index']],
                 ['label' => 'Product Quotes Status Log', 'url' => ['/product/product-quote-status-log-crud/index']],

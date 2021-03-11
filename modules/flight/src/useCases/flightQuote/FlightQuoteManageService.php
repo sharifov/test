@@ -12,9 +12,13 @@ use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
 use modules\flight\src\repositories\flight\FlightRepository;
 use modules\flight\src\repositories\flightQuoteStatusLogRepository\FlightQuoteStatusLogRepository;
 use modules\flight\src\repositories\flightSegment\FlightSegmentRepository;
+use modules\flight\src\services\flightQuote\FlightQuotePriceCalculator;
 use modules\flight\src\useCases\flightQuote\create\FlightPaxDTO;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuoteCreateForm;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuotePaxPriceForm;
+use modules\offer\src\entities\offerProduct\OfferProduct;
+use modules\offer\src\services\OfferPriceUpdater;
+use modules\order\src\services\OrderPriceUpdater;
 use modules\product\src\entities\product\ProductRepository;
 use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateProfitAmountEvent;
 use modules\product\src\entities\productQuote\ProductQuote;
@@ -65,6 +69,8 @@ use yii\helpers\ArrayHelper;
  * @property FlightQuoteSegmentPaxBaggageChargeRepository $baggageChargeRepository
  * @property FlightQuotePaxPriceRepository $flightQuotePaxPriceRepository
  * @property FlightQuoteStatusLogRepository $flightQuoteStatusLogRepository
+ * @property OfferPriceUpdater $offerPriceUpdater
+ * @property OrderPriceUpdater $orderPriceUpdater
  */
 class FlightQuoteManageService
 {
@@ -112,6 +118,14 @@ class FlightQuoteManageService
      * @var FlightQuoteStatusLogRepository
      */
     private $flightQuoteStatusLogRepository;
+    /**
+     * @var OrderPriceUpdater
+     */
+    private OrderPriceUpdater $orderPriceUpdater;
+    /**
+     * @var OfferPriceUpdater
+     */
+    private OfferPriceUpdater $offerPriceUpdater;
 
     /**
      * FlightQuoteService constructor.
@@ -138,7 +152,9 @@ class FlightQuoteManageService
         FlightQuoteSegmentPaxBaggageChargeRepository $baggageChargeRepository,
         FlightQuotePaxPriceRepository $flightQuotePaxPriceRepository,
         FlightQuoteStatusLogRepository $flightQuoteStatusLogRepository,
-        TransactionManager $transactionManager
+        TransactionManager $transactionManager,
+        OrderPriceUpdater $orderPriceUpdater,
+        OfferPriceUpdater $offerPriceUpdater
     ) {
         $this->flightQuoteRepository = $flightQuoteRepository;
         $this->productQuoteRepository = $productQuoteRepository;
@@ -151,6 +167,8 @@ class FlightQuoteManageService
         $this->flightQuotePaxPriceRepository = $flightQuotePaxPriceRepository;
         $this->flightQuoteStatusLogRepository = $flightQuoteStatusLogRepository;
         $this->transactionManager = $transactionManager;
+        $this->orderPriceUpdater = $orderPriceUpdater;
+        $this->offerPriceUpdater = $offerPriceUpdater;
     }
 
     /**
@@ -200,6 +218,15 @@ class FlightQuoteManageService
             $productQuote = $flightQuote->fqProductQuote;
 
             $this->calcProductQuotePrice($productQuote, $flightQuote);
+
+            if ($productQuote->pq_order_id) {
+                $this->orderPriceUpdater->update($productQuote->pq_order_id);
+            }
+
+            $offers = OfferProduct::find()->select(['op_offer_id'])->andWhere(['op_product_quote_id' => $productQuote->pq_id])->column();
+            foreach ($offers as $offerId) {
+                $this->offerPriceUpdater->update($offerId);
+            }
         });
     }
 
@@ -245,18 +272,26 @@ class FlightQuoteManageService
      */
     private function calcProductQuotePrice(ProductQuote $productQuote, FlightQuote $flightQuote): void
     {
-        $priceData = FlightQuoteHelper::getPricesData($flightQuote);
-
-        $systemPrice = ProductQuoteHelper::calcSystemPrice($priceData->total->selling, $productQuote->pq_origin_currency);
-        $productQuote->setQuotePrice(
-            ProductQuoteHelper::roundPrice((float)$priceData->total->net),
-            $systemPrice,
-            ProductQuoteHelper::roundPrice($systemPrice * $productQuote->pq_client_currency_rate),
-            ProductQuoteHelper::roundPrice((float)$priceData->total->serviceFeeSum)
+        $prices = (new FlightQuotePriceCalculator())->calculate($flightQuote, $productQuote->pq_origin_currency_rate);
+        $productQuote->updatePrices(
+            $prices['originPrice'],
+            $prices['appMarkup'],
+            $prices['agentMarkup']
         );
-        $productQuote->recalculateProfitAmount();
-
         $this->productQuoteRepository->save($productQuote);
+
+//        $priceData = FlightQuoteHelper::getPricesData($flightQuote);
+//
+//        $systemPrice = ProductQuoteHelper::calcSystemPrice($priceData->total->selling, $productQuote->pq_origin_currency);
+//        $productQuote->setQuotePrice(
+//            ProductQuoteHelper::roundPrice((float)$priceData->total->net),
+//            $systemPrice,
+//            ProductQuoteHelper::roundPrice($systemPrice * $productQuote->pq_client_currency_rate),
+//            ProductQuoteHelper::roundPrice((float)$priceData->total->serviceFeeSum)
+//        );
+//        $productQuote->recalculateProfitAmount();
+//
+//        $this->productQuoteRepository->save($productQuote);
     }
 
     /**

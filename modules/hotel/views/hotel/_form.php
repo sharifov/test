@@ -36,6 +36,10 @@ use yii\widgets\ActiveForm;
             <?= $form->field($model, 'ph_max_price_rate')->textInput() ?>
 
             <?= $form->field($model, 'ph_min_price_rate')->textInput() ?>
+
+            <?= $form->field($model, 'ph_holder_name')->textInput(['maxlength' => true]) ?>
+
+            <?= $form->field($model, 'ph_holder_surname')->textInput(['maxlength' => true]) ?>
         </div>
     </div>
 

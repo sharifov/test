@@ -126,8 +126,8 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
             ['pq_status_id', 'integer'],
             ['pq_status_id', 'in', 'range' => array_keys(ProductQuoteStatus::getList())],
 
-            ['pq_app_markup', 'number', 'min' => 0, 'max' => 99999999],
-            ['pq_agent_markup', 'number', 'min' => 0, 'max' => 99999999],
+            ['pq_app_markup', 'number', /*'min' => 0,*/ 'max' => 99999999],
+            ['pq_agent_markup', 'number', /*'min' => 0,*/ 'max' => 99999999],
             ['pq_service_fee_percent', 'number', 'min' => 0, 'max' => 9999],
         ];
     }
@@ -430,7 +430,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $quote->pq_owner_user_id = $dto->ownerUserId;
         $quote->pq_created_user_id = $dto->createdUserId;
         $quote->pq_updated_user_id = $dto->updatedUserId;
-        $quote->pq_service_fee_percent = $serviceFeePercent;
+        $quote->pq_service_fee_percent = $serviceFeePercent ?? 0;
 
         return $quote;
     }
@@ -743,18 +743,35 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return (ProductQuoteStatus::isBookable($this->pq_status_id) && !$this->isBooked());
     }
 
-    public function calculateServiceFeeSum(): void
+    private function calculateServiceFeeSum(): void
     {
         $this->pq_service_fee_sum = CurrencyHelper::roundUp(($this->pq_origin_price + $this->pq_app_markup + $this->pq_agent_markup) * ($this->pq_service_fee_percent / 100));
     }
 
-    public function calculatePrice(): void
+    private function calculatePrice(): void
     {
         $this->pq_price = $this->pq_origin_price + $this->pq_app_markup + $this->pq_agent_markup + $this->pq_service_fee_sum;
     }
 
-    public function calculateClientPrice(): void
+    private function calculateClientPrice(): void
     {
         $this->pq_client_price = CurrencyHelper::convertFromBaseCurrency($this->pq_price, $this->pq_client_currency_rate);
+    }
+
+    private function updateProfitAmount(): void
+    {
+        $this->pq_profit_amount = $this->pq_app_markup + $this->pq_agent_markup;
+    }
+
+    public function updatePrices($originPrice, $appMarkup, $agentMarkup): void
+    {
+        $this->pq_origin_price = $originPrice ?? 0;
+        $this->pq_app_markup = $appMarkup ?? 0;
+        $this->pq_agent_markup = $agentMarkup ?? 0;
+
+        $this->calculateServiceFeeSum();
+        $this->calculatePrice();
+        $this->calculateClientPrice();
+        $this->updateProfitAmount();
     }
 }

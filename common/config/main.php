@@ -95,6 +95,11 @@ return [
             'xAccelRedirectUrl' => '',
             'voipApiUsername' => 'sales'
         ],
+        'hybrid' => [
+            'class' => \common\components\HybridService::class,
+            'username' => '',
+            'password' => '',
+        ],
         'airsearch' => [
             'class' => \common\components\AirSearchService::class,
             'url' => 'https://airsearch.api.travelinsides.com/',

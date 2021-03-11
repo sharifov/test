@@ -229,6 +229,9 @@ use common\models\Language;
                     ]);
 ?>
         </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'includedFiles')->dropDownList([0 => 'No', 1 => 'Yes'], ['prompt' => '-']) ?>
+        </div>
     </div>
 
     <div class="row">

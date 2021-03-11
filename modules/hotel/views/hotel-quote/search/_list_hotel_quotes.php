@@ -9,6 +9,7 @@
 use modules\hotel\assets\HotelAsset;
 use modules\hotel\models\Hotel;
 use yii\data\ArrayDataProvider;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\web\View;
 use yii\widgets\Pjax;
@@ -133,8 +134,9 @@ HotelAsset::register($this);
             </strong>
           </span>
           <strong class="text-success">
-            $<?php echo number_format(Html::encode($dataHotel['rooms'][0]['totalAmount'] - ($dataHotel['rooms'][0]['totalMarkup'] ?? 0)), 2)?>
-
+            <?php if ($amount = ArrayHelper::getValue($dataHotel, 'rooms.0.totalAmount')) : ?>
+                $<?php echo number_format($amount, 2)?>
+            <?php endif ?>
           </strong>
         </span>
     </div>

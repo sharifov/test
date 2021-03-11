@@ -88,13 +88,18 @@ class AttractionQuotePdfService
 
     public static function getContent(AttractionQuote $quote): string
     {
-        $data = (new RequestPdfDataGenerator())->generate($quote);
+        $data = self::getData($quote);
         $content = \Yii::$app->communication->getContent(self::TEMPLATE_KEY, $data);
 
         if ($content['error'] !== false) {
             throw new \RuntimeException(VarDumper::dumpAsString($content['error']));
         }
         return $content['content'];
+    }
+
+    public static function getData(AttractionQuote $quote)
+    {
+        return (new RequestPdfDataGenerator())->generate($quote);
     }
 
     public static function generateForBrowserOutput(AttractionQuote $quote)

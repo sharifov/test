@@ -1977,20 +1977,28 @@ class TestController extends FController
         exit('Done');
     }
 
-    public function actionHotelQuotePdf(int $hotel_quote_id)
+    public function actionHotelQuotePdf(int $id, int $data = 0, int $json = 1)
     {
-        if ($hotelQuote = HotelQuote::findOne($hotel_quote_id)) {
-            return HotelQuotePdfService::generateForBrowserOutput($hotelQuote);
+        if (!$quote = HotelQuote::findOne(['hq_id' => $id])) {
+            throw new NotFoundException('HotelQuote not found. Id (' . $id . ')');
         }
-        throw new NotFoundHttpException('HotelQuote not found');
-    }
 
-    public function actionHotelQuoteFile(int $hotel_quote_id)
-    {
-        if ($hotelQuote = HotelQuote::findOne($hotel_quote_id)) {
-            return HotelQuotePdfService::processingFile($hotelQuote);
+        if ($data === 1) {
+            $data = HotelQuotePdfService::getData($quote);
+            if ($json === 1) {
+                return $this->asJson($data);
+            }
+            \yii\helpers\VarDumper::dump($data, 10, true);
+            exit();
         }
-        throw new NotFoundHttpException('HotelQuote not found');
+
+        try {
+            return HotelQuotePdfService::generateForBrowserOutput($quote);
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), 'Test:actionHotelQuoteFile');
+            \yii\helpers\VarDumper::dump($throwable->getMessage(), 10, true);
+            exit();
+        }
     }
 
     public function actionFlightQuoteFile(int $id)
@@ -2028,10 +2036,19 @@ class TestController extends FController
         exit();
     }
 
-    public function actionAPdf(int $id)
+    public function actionAPdf(int $id, int $data = 0, int $json = 1)
     {
         if (!$quote = AttractionQuote::findOne(['atnq_id' => $id])) {
             throw new NotFoundException('AttractionQuote not found. Id (' . $id . ')');
+        }
+
+        if ($data === 1) {
+            $data = AttractionQuotePdfService::getData($quote);
+            if ($json === 1) {
+                return $this->asJson($data);
+            }
+            \yii\helpers\VarDumper::dump($data, 10, true);
+            exit();
         }
 
         try {

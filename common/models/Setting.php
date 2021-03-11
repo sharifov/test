@@ -65,14 +65,13 @@ class Setting extends \yii\db\ActiveRecord
             [['s_key', 's_type', 's_value'], 'required'],
             [['s_updated_dt'], 'safe'],
             [['s_updated_user_id', 's_category_id'], 'integer'],
-            [['s_key', 's_name', 's_value'], 'string', 'max' => 255],
+            [['s_key', 's_name', 's_value'], 'string', 'max' => 700],
             [['s_type'], 'string', 'max' => 10],
             [['s_key'], 'unique'],
             [['s_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['s_updated_user_id' => 'id']],
             [['s_category_id'], 'exist', 'skipOnError' => true, 'targetClass' => SettingCategory::class, 'targetAttribute' => ['s_category_id' => 'sc_id']],
         ];
     }
-
 
     public function behaviors(): array
     {

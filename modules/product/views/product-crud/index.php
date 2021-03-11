@@ -33,6 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //['class' => 'yii\grid\SerialColumn'],
 
             'pr_id',
+            'pr_gid',
             [
                 'attribute' => 'pr_type_id',
                 'class' => ProductTypeColumn::class,

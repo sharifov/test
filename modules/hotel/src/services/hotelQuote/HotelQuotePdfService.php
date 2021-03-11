@@ -40,6 +40,8 @@ class HotelQuotePdfService
      */
     public static function processingFile(HotelQuote $hotelQuote): bool
     {
+        self::guard($hotelQuote);
+
         $patchToLocalFile = self::generateAsFile($hotelQuote);
 
         $projectKey = CommunicationDataService::getProjectKey($hotelQuote);
@@ -91,7 +93,6 @@ class HotelQuotePdfService
         if (file_exists($patchToLocalFile)) {
             FileHelper::unlink($patchToLocalFile);
         }
-
         return true;
     }
 
@@ -101,13 +102,40 @@ class HotelQuotePdfService
      */
     public static function getContent(HotelQuote $hotelQuote): string
     {
-        $data = CommunicationDataService::hotelConfirmationData($hotelQuote);
+        $data = self::getData($hotelQuote);
         $content = \Yii::$app->communication->getContent(self::TEMPLATE_KEY, $data);
 
         if ($content['error'] !== false) {
             throw new \RuntimeException(VarDumper::dumpAsString($content['error']));
         }
         return $content['content'];
+    }
+
+    public static function getData(HotelQuote $hotelQuote)
+    {
+        $data['hotel_quote'] = $hotelQuote->serialize();
+        $data['project_key'] = CommunicationDataService::getProjectKey($hotelQuote);
+        $data['order'] = $hotelQuote->hqProductQuote->pqOrder->serialize();
+        return $data;
+    }
+
+    public static function guard(HotelQuote $hotelQuote): void
+    {
+        if (!$hotelQuote->hq_booking_id) {
+            throw new \RuntimeException('HotelQuote: booking_id is empty');
+        }
+        if (!$hotelQuote->hq_json_booking) {
+            throw new \RuntimeException('HotelQuote: json_booking is empty');
+        }
+        if (!$hotelQuote->hq_origin_search_data) {
+            throw new \RuntimeException('HotelQuote: origin_search_data is empty');
+        }
+        if (!$hotelQuote->hqHotel) {
+            throw new \RuntimeException('Hotel Quote: Hotel not found');
+        }
+        if (!$hotelQuote->hqProductQuote->pqOrder) {
+            throw new \RuntimeException('Hotel Quote: Order not found');
+        }
     }
 
     /**

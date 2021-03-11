@@ -29,7 +29,7 @@ class TechnicalInfoBehavior extends LoggerBehavior
         }
 
         if (!$result instanceof \webapi\src\response\Response) {
-            Yii::error('Response must be instanceof ' . \webapi\src\response\Response::class, 'SimpleLoggerBehavior');
+            Yii::error('Response must be instanceof ' . \webapi\src\response\Response::class, 'TechnicalInfoBehavior');
             return $result;
         }
 

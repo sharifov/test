@@ -2,6 +2,7 @@
 
 use modules\hotel\models\HotelQuote;
 use yii\grid\ActionColumn;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\VarDumper;
@@ -23,13 +24,26 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
             'hq_id',
+            [
+                'attribute' => 'hq_booking_id',
+                'value' => static function (HotelQuote $hotelQuote) {
+                    if (!$hotelQuote->hq_booking_id) {
+                        return Yii::$app->formatter->nullDisplay;
+                    }
+                    $out = $hotelQuote->hq_booking_id;
+                    if ($orderId = ArrayHelper::getValue($hotelQuote, 'hqProductQuote.pqOrder.or_id')) {
+                        $out .= '<br />(OrderId :' . $orderId . ')';
+                    }
+                    return $out;
+                },
+                'format' => 'raw',
+            ],
             'hq_hotel_id',
             'hq_hash_key',
             'hq_product_quote_id',

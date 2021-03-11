@@ -33,6 +33,8 @@ use yii\helpers\VarDumper;
  * @property int|null $ph_max_price_rate
  * @property int|null $ph_min_price_rate
  * @property string|null $ph_request_hash_key
+ * @property string|null $ph_holder_name
+ * @property string|null $ph_holder_surname
  *
  * @property Product $phProduct
  * @property HotelQuote[] $hotelQuotes
@@ -87,7 +89,10 @@ class Hotel extends ActiveRecord implements Productable
             [['ph_destination_label'], 'string', 'max' => 100],
             [['ph_product_id'], 'exist', 'skipOnError' => true, 'targetClass' => Product::class, 'targetAttribute' => ['ph_product_id' => 'pr_id']],
             [['ph_check_in_date', 'ph_check_out_date'], 'date', 'format' => 'php:Y-m-d'],
-            ['ph_check_out_date', 'compare', 'compareAttribute' => 'ph_check_in_date', 'operator' => '>=', 'enableClientValidation' => true]
+            ['ph_check_out_date', 'compare', 'compareAttribute' => 'ph_check_in_date', 'operator' => '>=', 'enableClientValidation' => true],
+
+            ['ph_holder_name', 'string', 'max' => 50],
+            ['ph_holder_surname', 'string', 'max' => 50],
         ];
     }
 
@@ -110,6 +115,8 @@ class Hotel extends ActiveRecord implements Productable
             'ph_max_price_rate' => 'Max Price Rate',
             'ph_min_price_rate' => 'Min Price Rate',
             'ph_request_hash_key' => 'Request Hash Key',
+            'ph_holder_name' => 'Holder Name',
+            'ph_holder_surname' => 'Holder Surname',
         ];
     }
 

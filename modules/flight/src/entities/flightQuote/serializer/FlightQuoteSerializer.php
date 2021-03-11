@@ -67,6 +67,13 @@ class FlightQuoteSerializer extends Serializer
             }
         }
 
+        if ($this->model->fqFlight->flightPaxes) {
+            $data['paxes'] = [];
+            foreach ($this->model->fqFlight->flightPaxes as $flightPax) {
+                $data['paxes'][] = $flightPax->serialize();
+            }
+        }
+
         return $data;
     }
 }

@@ -65,24 +65,21 @@ class ApiRentCarService extends Component
      */
     protected function sendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []): Response
     {
-        $url = $this->url . $action;
+        $dataParams['api_key'] = $this->api_key;
+        $dataParams['refid'] = $this->refid;
+        $dataParams['format'] = $this->format;
 
-        $data['api_key'] = $this->api_key;
-        $data['refid'] = $this->refid;
-        $data['format'] = $this->format;
+        $url = $this->url . $action . '?' . http_build_query($dataParams);
 
         /* @var $this->request Client */
         $this->request->setMethod($method)
             ->setUrl($url)
             ->setData($data);
 
-        $this->setFormatJson($method);
         $this->request->setOptions(ArrayHelper::merge($this->options, $options));
         if ($headers) {
             $this->request->addHeaders($headers);
         }
-        \Yii::info($data, 'info\ApiRentCarService:sendRequestData'); /* TODO:: FOR DEBUG:: must by remove  */
-        \Yii::info($this->request->toString(), 'info\ApiRentCarService:Request'); /* TODO:: FOR DEBUG:: must by remove  */
         return $this->request->send();
     }
 
@@ -134,7 +131,7 @@ class ApiRentCarService extends Component
                     $out['data'] = $response->data['getCarResultsV3']['results'];
                 } else {
                     $out['error'] = 'In response not found getCarResultsV3.results.result_list';
-                    \Yii::error([
+                    \Yii::warning([
                         'error' => $out['error'],
                         'data' => $response->data ?? [],
                     ], 'ApiRentCarService:search');
@@ -162,12 +159,13 @@ class ApiRentCarService extends Component
 
         try {
             $response = $this->sendRequest('getContractRequest', $data, 'get');
+
             if ($response->isOk) {
                 if (isset($response->data['getCarContractRequest']['results']['status'])) {
                     $out['data'] = $response->data['getCarContractRequest']['results'];
                 } else {
                     $out['error'] = 'In response not found getCarContractRequest.results.status';
-                    \Yii::error([
+                    \Yii::warning([
                         'error' => $out['error'],
                         'data' => $response->data ?? [],
                     ], 'ApiRentCarService:contractRequest');
@@ -183,13 +181,31 @@ class ApiRentCarService extends Component
         return $out;
     }
 
-    public function book(string $referenceId, string $firstName, string $lastName, ?string $sid = null)
-    {
+    /**
+     * @param string $referenceId
+     * @param string $firstName
+     * @param string $lastName
+     * @param string $phone
+     * @param string $email
+     * @param string|null $sid
+     * @return array
+     */
+    public function book(
+        string $referenceId,
+        string $firstName,
+        string $lastName,
+        string $phone,
+        string $email,
+        ?string $sid = null
+    ) {
         $out = ['error' => false, 'data' => []];
 
         $data['ppn_bundle'] = $referenceId;
+        $data['car_book_bundle'] = $referenceId;
         $data['driver_first_name'] = $firstName;
         $data['driver_last_name'] = $lastName;
+        $data['cust_phone'] = $phone;
+        $data['cust_email'] = $email;
         if ($sid) {
             $data['sid'] = $sid;
         }
@@ -197,19 +213,14 @@ class ApiRentCarService extends Component
         try {
             $response = $this->sendRequest('getBookRequest', $data, 'post');
 
-            \Yii::info([
-                'requestData' => $data,
-                'responseData' => $response->data ?? [],
-            ], 'info\ApiRentCarService::book:log'); /* TODO:: FOR DEBUG:: must by remove  */
-
             if ($response->isOk) {
-                if (isset($response->data['getCarBookRequest']['results'])) {
-                    $out['data'] = $response->data['getCarContractRequest']['results'];
-                } elseif (ArrayHelper::getValue($response->data, 'error')) {
-                    $out['error'] = $response->data['error'];
+                if ($results = ArrayHelper::getValue($response->data, 'getCarBookRequest.results')) {
+                    $out['data'] = $results;
+                } elseif ($error = ArrayHelper::getValue($response->data, 'getCarBookRequest.error.status')) {
+                    $out['error'] = $error;
                 } else {
-                    $out['error'] = 'In response not found results||error';
-                    \Yii::error([
+                    $out['error'] = 'In response not found results|error';
+                    \Yii::warning([
                         'requestData' => $out['error'],
                         'responseData' => $response->data ?? [],
                     ], 'ApiRentCarService::book');
@@ -243,12 +254,15 @@ class ApiRentCarService extends Component
 
         try {
             $response = $this->sendRequest('getCancelRequest', $data, 'get');
+
             if ($response->isOk) {
-                if (isset($response->data['getCarCancel']['results']['status'])) {
-                    $out['data'] = $response->data['getCarContractRequest']['results'];
+                if ($results = ArrayHelper::getValue($response->data, 'getCarCancelRequest.results')) {
+                    $out['data'] = $results;
+                } elseif ($error = ArrayHelper::getValue($response->data, 'getCarCancelRequest.error.status')) {
+                    $out['error'] = $error;
                 } else {
                     $out['error'] = 'In response not found getCancelRequest.results.status';
-                    \Yii::error([
+                    \Yii::warning([
                         'error' => $out['error'],
                         'data' => $response->data ?? [],
                     ], 'ApiRentCarService:cancel');

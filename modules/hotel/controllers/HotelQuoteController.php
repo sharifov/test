@@ -367,12 +367,11 @@ class HotelQuoteController extends FController
                     $bookService->book($hotelQuote);
                     $result['status'] = $bookService->status;
                     $result['message'] = $bookService->message;
-
-//                    if ($bookService->status) {
-//                        $hotelQuotePdfJob = new HotelQuotePdfJob();
-//                        $hotelQuotePdfJob->hotelQuoteId = $hotelQuote->hq_id;
-//                        Yii::$app->queue_job->priority(10)->push($hotelQuotePdfJob);
-//                    }
+                    Notifications::pub(
+                        ['lead-' . ArrayHelper::getValue($hotelQuote, 'hqProductQuote.pqProduct.pr_lead_id')],
+                        'quoteBooked',
+                        ['data' => ['productId' => ArrayHelper::getValue($hotelQuote, 'hqProductQuote.pq_product_id')]]
+                    );
                 } else {
                     $result['status'] = $checkResult->status;
                     $result['message'] = $checkResult->message;
@@ -476,7 +475,7 @@ class HotelQuoteController extends FController
             } catch (\RuntimeException $e) {
                 return $this->asJson(['message' => $e->getMessage()]);
             } catch (\Throwable $e) {
-                Yii::error($e->getTraceAsString(), 'HotelQuoteController::actionAjaxUpdateAgentMarkup::Throwable');
+                Yii::error(VarDumper::dumpAsString($e), 'HotelQuoteController::actionAjaxUpdateAgentMarkup::Throwable');
             }
 
             return $this->asJson(['output' => $value]);

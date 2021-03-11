@@ -49,15 +49,16 @@ class FlightQuoteBookService
 
             if ($error = self::detectResponseDataErrors($responseData)) {
                 \Yii::error(
-                    VarDumper::dumpAsString(['requestData' => $requestData, 'error' => $error]),
+                    VarDumper::dumpAsString([
+                        'error' => $error
+                    ]),
                     'FlightQuoteBookService:book:errors'
                 );
                 throw new \RuntimeException('FlightQuoteBookService BO errors: ' . $error);
             }
             \Yii::error(
                 VarDumper::dumpAsString([
-                'data' => $requestData,
-                'responseData' => $responseData,
+                    'responseData' => $responseData,
                 ]),
                 'FlightQuoteBookService:book:failResponse'
             );
@@ -65,8 +66,7 @@ class FlightQuoteBookService
         }
         \Yii::error(
             VarDumper::dumpAsString([
-            'data' => $requestData,
-            'responseContent' => $responseBO->content,
+                'responseContent' => $responseBO->content,
             ]),
             'FlightQuoteBookService:book:request'
         );

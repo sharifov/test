@@ -7,6 +7,7 @@ use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\interfaces\Productable;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
+use modules\rentCar\src\helpers\RentCarHelper;
 use modules\rentCar\src\serializer\RentCarSerializer;
 use sales\auth\Auth;
 use sales\entities\EventTrait;
@@ -59,6 +60,8 @@ class RentCar extends ActiveRecord implements Productable
             [['prc_created_dt', 'prc_updated_dt'], 'safe'],
 
             [['prc_created_user_id', 'prc_updated_user_id'], 'integer'],
+
+            [['prc_pick_up_time', 'prc_drop_off_time'], 'default', 'value' => RentCarHelper::DEFAULT_TIME],
         ];
     }
 

@@ -32,12 +32,16 @@ class OrderProcessingHybridNotificationJob implements JobInterface
             ], 'OrderProcessingHybridNotificationJob');
         }
 
-        \Yii::info([
-            'message' => 'Send processing status to hybrid',
-            'orderId' => $this->orderId,
-            'status' => $order->or_status_id,
-            'statusName' => OrderStatus::getName($order->or_status_id),
-        ], 'info\OrderProcessingHybridNotificationJob');
+        try {
+            \Yii::$app->hybrid->updateStatus($order->orLead->project_id, $order->or_gid, OrderStatus::PROCESSING);
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'message' => 'Send processing status to hybrid',
+                'orderId' => $this->orderId,
+                'status' => OrderStatus::PROCESSING,
+                'error' => $e->getMessage(),
+            ], 'OrderProcessingHybridNotificationJob');
+        }
     }
 //
 //    public function getTtr(): int
