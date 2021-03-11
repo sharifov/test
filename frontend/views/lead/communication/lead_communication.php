@@ -152,6 +152,7 @@ $emailTemplateTypes = @json_encode($emailTemplateTypes);
                                     <?= $form2->field($previewEmailForm, 'e_language_id')->hiddenInput()->label(false); ?>
                                     <?= $form2->field($previewEmailForm, 'e_email_tpl_id')->hiddenInput()->label(false); ?>
                                     <?= $form2->field($previewEmailForm, 'e_quote_list')->hiddenInput()->label(false); ?>
+                                    <?= $form2->field($previewEmailForm, 'e_offer_list')->hiddenInput()->label(false); ?>
                                 </div>
                                 <div class="col-sm-4 form-group">
                                     <?= $form2->field($previewEmailForm, 'e_email_to')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
