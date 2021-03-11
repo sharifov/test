@@ -36,15 +36,19 @@ $productQuote = $rentCarQuote->rcqProductQuote;
         <tr>
             <td width="145">
                 <?php echo $rentCarQuote->rcq_pick_up_location ?><br />
-                <?php $pickUpdDate = DateTime::createFromFormat('Y-m-d H:i:s', $rentCarQuote->rcq_pick_up_dt); ?>
-                <?php echo Html::tag('i', '', ['class' => 'fa fa-calendar']) ?>
-                <?php echo $pickUpdDate->format('d-M-Y') ?> <?php echo $pickUpdDate->format('H:i') ?>
+                <?php if ($rentCarQuote->rcq_pick_up_dt) : ?>
+                    <?php $pickUpdDate = DateTime::createFromFormat('Y-m-d H:i:s', $rentCarQuote->rcq_pick_up_dt); ?>
+                    <?php echo Html::tag('i', '', ['class' => 'fa fa-calendar']) ?>
+                    <?php echo $pickUpdDate->format('d-M-Y') ?> <?php echo $pickUpdDate->format('H:i') ?>
+                <?php endif ?>
             </td>
             <td width="145">
                 <?php echo $rentCarQuote->rcq_drop_of_location ?><br />
-                <?php $dropOffDate = DateTime::createFromFormat('Y-m-d H:i:s', $rentCarQuote->rcq_drop_off_dt); ?>
-                <?php echo Html::tag('i', '', ['class' => 'fa fa-calendar']) ?>
-                <?php echo $dropOffDate->format('d-M-Y') ?> <?php echo $dropOffDate->format('H:i') ?>
+                <?php if ($rentCarQuote->rcq_drop_off_dt) : ?>
+                    <?php $dropOffDate = DateTime::createFromFormat('Y-m-d H:i:s', $rentCarQuote->rcq_drop_off_dt); ?>
+                    <?php echo Html::tag('i', '', ['class' => 'fa fa-calendar']) ?>
+                    <?php echo $dropOffDate->format('d-M-Y') ?> <?php echo $dropOffDate->format('H:i') ?>
+                <?php endif ?>
             </td>
             <td>
                 <?php echo number_format($productQuote->pq_origin_price, 2) ?>
