@@ -17,6 +17,7 @@ use sales\repositories\product\ProductQuoteRepository;
 use webapi\src\logger\ApiLogger;
 use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
 use webapi\src\logger\behaviors\SimpleLoggerBehavior;
+use webapi\src\logger\behaviors\TechnicalInfoBehavior;
 use webapi\src\Messages;
 use webapi\src\request\RequestBo;
 use webapi\src\response\behaviors\RequestBehavior;
@@ -102,15 +103,19 @@ class OrderController extends BaseController
         $behaviors['logger'] = [
             'class' => SimpleLoggerBehavior::class,
             'filter' => CreditCardFilter::class,
-            'except' => ['get-file']
+            'except' => ['get-file'],
         ];
         $behaviors['request'] = [
             'class' => RequestBehavior::class,
             'filter' => CreditCardFilter::class,
-            'except' => ['create', 'get-file']
+            'except' => ['create', 'get-file'],
         ];
         $behaviors['responseStatusCode'] = [
             'class' => ResponseStatusCodeBehavior::class,
+            'except' => ['get-file'],
+        ];
+        $behaviors['technical'] = [
+            'class' => TechnicalInfoBehavior::class,
             'except' => ['get-file'],
         ];
         return $behaviors;
