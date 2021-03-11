@@ -45,6 +45,7 @@ $userRcAuthToken = UserClientChatDataService::getCurrentAuthToken() ?? '';
 $readonly = (int)ClientChatHelper::isDialogReadOnly($clientChat, Auth::user());
 $agentToken = \sales\helpers\clientChat\ClientChatDialogHelper::getAgentToken(Auth::user());
 $server = Yii::$app->rchat->host;
+$apiServer = Yii::$app->rchat->apiServer;
 ?>
 
 <?php if ($filter->isEmptyChannels()) : ?>
@@ -111,7 +112,8 @@ $server = Yii::$app->rchat->host;
                 'agentToken' => $agentToken,
                 'server' => $server,
                 'rid' => $clientChat->cch_rid ?? null,
-                'readonly' => $readonly
+                'readonly' => $readonly,
+                'apiServer' => $apiServer
             ]) ?>
             </div>
             <?php if ($actionPermissions->canSendCannedResponse()) : ?>

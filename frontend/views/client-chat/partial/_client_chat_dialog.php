@@ -2,6 +2,7 @@
 /**
  * @var string $agentToken
  * @var string $server
+ * @var string $apiServer
  * @var string $rid
  * @var int $readonly
  * @var \yii\web\View $this
@@ -54,7 +55,8 @@ var t = setInterval(function() {
         token: '$agentToken',
         server: '$server',
         rid: '$rid',
-        readonly: Boolean($readonly)
+        readonly: Boolean($readonly),
+        apiServer: '$apiServer'
       });
     }
   }, 50);
