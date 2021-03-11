@@ -20,6 +20,7 @@ use webapi\src\logger\behaviors\SimpleLoggerBehavior;
 use webapi\src\Messages;
 use webapi\src\request\RequestBo;
 use webapi\src\response\behaviors\RequestBehavior;
+use webapi\src\response\behaviors\ResponseStatusCodeBehavior;
 use webapi\src\response\ErrorResponse;
 use webapi\src\response\messages\CodeMessage;
 use webapi\src\response\messages\DataMessage;
@@ -107,6 +108,10 @@ class OrderController extends BaseController
             'class' => RequestBehavior::class,
             'filter' => CreditCardFilter::class,
             'except' => ['create', 'get-file']
+        ];
+        $behaviors['responseStatusCode'] = [
+            'class' => ResponseStatusCodeBehavior::class,
+            'except' => ['get-file'],
         ];
         return $behaviors;
     }
