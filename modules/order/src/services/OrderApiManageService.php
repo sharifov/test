@@ -218,9 +218,19 @@ class OrderApiManageService
                 $this->productHolderRepository->save($productHolder);
             }
 
+            $orderAmount = 0;
+            if ($form->tips->total_amount) {
+                $orderTips = new OrderTips();
+                $orderTips->ot_order_id = $newOrder->or_id;
+                $orderTips->ot_client_amount = $form->tips->total_amount;
+                $orderTips->ot_amount = $form->tips->total_amount;
+                $this->orderTipsRepository->save($orderTips);
+                $orderAmount = $orderTips->ot_amount;
+            }
+
             $invoice = Invoice::create(
                 $newOrder->or_id,
-                (float)$totalOrderPrice,
+                (float)$totalOrderPrice + $orderAmount,
                 $newOrder->or_client_currency,
                 ''
             );
@@ -268,14 +278,6 @@ class OrderApiManageService
                 $newOrder->or_id
             );
             $this->billingInfoRepository->save($billingInfo);
-
-            if ($form->tips->total_amount) {
-                $orderTips = new OrderTips();
-                $orderTips->ot_order_id = $newOrder->or_id;
-                $orderTips->ot_client_amount = $form->tips->total_amount;
-                $orderTips->ot_amount = $form->tips->total_amount;
-                $this->orderTipsRepository->save($orderTips);
-            }
 
             $lead = $newOrder->orLead;
             if ($lead) {

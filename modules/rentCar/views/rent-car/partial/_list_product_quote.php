@@ -201,7 +201,6 @@ JS;
 
         <div class="row box-rc-prices">
             <div class="col-md-12">
-
                 <?php Pjax::begin(['id' => 'pjax-quote_prices-' . $modelQuote->getId(), 'enablePushState' => false, 'enableReplaceState' => false]); ?>
                     <?= $this->render('_quote_prices', [
                         'rentCarQuote' => $modelQuote,
@@ -210,15 +209,12 @@ JS;
 
                     <?= $this->render('@frontend/views/lead/quotes/partial/_quote_option_list', ['productQuote' => $modelQuote->rcqProductQuote]) ?>
                     <?= $this->render('@frontend/views/lead/quotes/partial/_quote_total', ['productQuote' => $modelQuote->rcqProductQuote]) ?>
-
                 <?php Pjax::end(); ?>
-
             </div>
         </div>
 
-        <i class="fa fa-user"></i> <?=$modelQuote->rcqProductQuote->pqCreatedUser ? Html::encode($modelQuote->rcqProductQuote->pqCreatedUser->username) : '-'?>,
+        <i class="fa fa-user"></i> <?=$modelQuote->rcqProductQuote->pqOwnerUser ? Html::encode($modelQuote->rcqProductQuote->pqOwnerUser->username) : '-'?>,
         <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($modelQuote->rcqProductQuote->pq_created_dt)) ?>
-
     </div>
 </div>
     <?php Pjax::end(); ?>

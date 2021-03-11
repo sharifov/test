@@ -64,6 +64,16 @@ class RentCarQuoteDto
         }
 
         $model->rcq_created_dt = date('Y-m-d H:i:s');
+        if ($rentCar->prc_pick_up_date && $rentCar->prc_pick_up_time) {
+            $model->rcq_pick_up_dt =
+                date('Y-m-d H:i:s', strtotime($rentCar->prc_pick_up_date . ' ' . $rentCar->prc_pick_up_time));
+        }
+        if ($rentCar->prc_drop_off_date && $rentCar->prc_drop_off_time) {
+            $model->rcq_drop_off_dt =
+                date('Y-m-d H:i:s', strtotime($rentCar->prc_drop_off_date . ' ' . $rentCar->prc_drop_off_time));
+        }
+        $model->rcq_pick_up_location = RentCarDataParser::getPickUpLocation($data);
+        $model->rcq_drop_of_location = RentCarDataParser::getDropOffLocation($data);
 
         return $model;
     }

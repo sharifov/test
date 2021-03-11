@@ -6,6 +6,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\rentCar\src\entity\rentCar\RentCar;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use sales\helpers\product\ProductQuoteHelper;
+use yii\bootstrap4\Html;
 use yii\helpers\Url;
 use yii\web\View;
 
@@ -33,14 +34,21 @@ $productQuote = $rentCarQuote->rcqProductQuote;
     </thead>
     <tbody>
         <tr>
-            <td>
-                <?php echo Airports::getCityByIata($rentCar->prc_pick_up_code) ?> (<?php echo $rentCar->prc_pick_up_code ?>)<br />
-                Date: <?php echo $rentCar->prc_pick_up_date ?>
+            <td width="145">
+                <?php echo $rentCarQuote->rcq_pick_up_location ?><br />
+                <?php if ($rentCarQuote->rcq_pick_up_dt) : ?>
+                    <?php $pickUpdDate = DateTime::createFromFormat('Y-m-d H:i:s', $rentCarQuote->rcq_pick_up_dt); ?>
+                    <?php echo Html::tag('i', '', ['class' => 'fa fa-calendar']) ?>
+                    <?php echo $pickUpdDate->format('d-M-Y') ?> <?php echo $pickUpdDate->format('H:i') ?>
+                <?php endif ?>
             </td>
-            <td>
-                <?php $dropOffCode = $rentCar->prc_drop_off_code ?: $rentCar->prc_pick_up_code ?>
-                <?php echo Airports::getCityByIata($dropOffCode) ?> (<?php echo $dropOffCode ?>)<br />
-                Date: <?php echo $rentCar->prc_drop_off_date ?>
+            <td width="145">
+                <?php echo $rentCarQuote->rcq_drop_of_location ?><br />
+                <?php if ($rentCarQuote->rcq_drop_off_dt) : ?>
+                    <?php $dropOffDate = DateTime::createFromFormat('Y-m-d H:i:s', $rentCarQuote->rcq_drop_off_dt); ?>
+                    <?php echo Html::tag('i', '', ['class' => 'fa fa-calendar']) ?>
+                    <?php echo $dropOffDate->format('d-M-Y') ?> <?php echo $dropOffDate->format('H:i') ?>
+                <?php endif ?>
             </td>
             <td>
                 <?php echo number_format($productQuote->pq_origin_price, 2) ?>

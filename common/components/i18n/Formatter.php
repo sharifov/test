@@ -501,6 +501,14 @@ class Formatter extends \yii\i18n\Formatter
         return Html::tag('i', '', ['class' => 'fa fa-calendar']) . ' ' . $this->asDatetime(strtotime($dateTime), $format);
     }
 
+    public function asByUserDate($dateTime, $format = 'php:d-M-Y'): string
+    {
+        if (!$dateTime) {
+            return $this->nullDisplay;
+        }
+        return Html::tag('i', '', ['class' => 'fa fa-calendar']) . ' ' . $this->asDate(strtotime($dateTime), $format);
+    }
+
     /**
      * @param $dateTime
      * @return string
