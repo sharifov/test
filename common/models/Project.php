@@ -4,6 +4,7 @@ namespace common\models;
 
 use common\models\local\ContactInfo;
 use common\models\query\ProjectQuery;
+use frontend\helpers\JsonHelper;
 use modules\qaTask\src\entities\qaTask\QaTask;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\projectConfig\ClientChatProjectConfig;
@@ -92,7 +93,6 @@ class Project extends \yii\db\ActiveRecord
             [['sort_order'], 'integer', 'min' => 0, 'max' => 100],
             [['p_update_user_id'], 'integer'],
             [['closed'], 'boolean'],
-            [['contact_info'], 'string'],
             [['last_update'], 'safe'],
             [['name', 'link', 'api_key', 'ga_tracking_id'], 'string', 'max' => 255],
             [['email_postfix'], 'string', 'max' => 100],
@@ -100,6 +100,11 @@ class Project extends \yii\db\ActiveRecord
             [['project_key'], 'unique'],
             [['p_update_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['p_update_user_id' => 'id']],
             ['p_params_json', IsArrayValidator::class],
+
+            [['contact_info'], 'filter', 'filter' => static function ($value) {
+                return JsonHelper::encode($value);
+            }],
+            [['contact_info'], 'string'],
         ];
     }
 
