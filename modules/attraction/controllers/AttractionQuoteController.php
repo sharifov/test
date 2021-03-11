@@ -269,7 +269,12 @@ class AttractionQuoteController extends FController
             Yii::$app->session->setFlash('error', $e->getMessage());
         }
 
-        VarDumper::dump($result, 10, true);
+        $quoteDetails = $result['availability'];
+        //VarDumper::dump($result, 10, true);
+
+        return $this->renderAjax('quote_details', [
+            'quoteDetails' => $quoteDetails,
+        ]);
     }
 
     public function actionAddAjax(): array

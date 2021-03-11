@@ -56,7 +56,7 @@ $form = ActiveForm::begin([
                 <th>Max Participants</th>
                 <th>Min Age</th>
                 <th>Max Age</th>
-                <th>Price per Pax</th>
+                <th>Price per Unit</th>
                 <th>Quantity</th>
             </tr>
             </thead>

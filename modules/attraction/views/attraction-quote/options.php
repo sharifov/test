@@ -21,7 +21,7 @@ $model->availability_id = $availability['id'];
 <?php
 $form = ActiveForm::begin([
     'validateOnSubmit' => false,
-    'options' => ['data-pjax' => true],
+    'options' => ['data-pjax' => 1],
     'action' => ['/attraction/attraction-quote/input-availability-options'],
     'method' => 'post'
 ]);
@@ -50,7 +50,7 @@ $form = ActiveForm::begin([
                     <th>Max Participants</th>
                     <th>Min Age</th>
                     <th>Max Age</th>
-                    <th>Price per Pax</th>
+                    <th>Price per Unit</th>
                 </tr>
                 </thead>
                 <tbody>

@@ -162,13 +162,24 @@ class ApiAttractionService extends Component
                         }
                         pricingCategoryList {
                             priceTotalFormattedText
-                            priceTotal
-                            currency
                             nodes {
                                 id
                                 label
                                 value
+                                isValid
+                                minParticipants
+                                maxParticipants
+                                maxParticipantsDepends {
+                                    pricingCategoryId
+                                    multiplier
+                                    explanation
+                                }
+                                minAge
+                                maxAge
+                                price
+                                currency
                                 priceFormattedText
+                                priceTotal
                                 priceTotalFormattedText
                             }
                         }
