@@ -203,8 +203,10 @@ $process = OrderProcessManager::findOne($order->or_id);
                     $ordOptionTotalPrice = round($ordOptionTotalPrice, 2);
                     $ordTotalFee = round($ordTotalFee, 2);
 
+                    $orderTipsAmount = $order->orderTips ? $order->orderTips->ot_amount : 0.00;
+                    $orderTipsAmountClient = $order->orderTips ? $order->orderTips->ot_client_amount : 0.00;
 
-                    $calcTotalPrice = round($ordTotalPrice + $ordOptionTotalPrice, 2);
+                    $calcTotalPrice = round($ordTotalPrice + $ordOptionTotalPrice + $orderTipsAmount, 2);
                     $calcClientTotalPrice = round(($calcTotalPrice) * $order->or_client_currency_rate, 2);
 
                 ?>
@@ -217,17 +219,24 @@ $process = OrderProcessManager::findOne($order->or_id);
                     <th></th>
                 </tr>
                 <tr>
+                    <th class="text-right" colspan="5">Tips: </th>
+                    <td class="text-center" colspan="2">(DB)</td>
+                    <th class="text-right"><?=number_format($orderTipsAmount, 2)?></th>
+                    <th class="text-right"><?=number_format($orderTipsAmountClient, 2)?> <?=Html::encode($order->or_client_currency)?></th>
+                    <th></th>
+                </tr>
+                <tr>
                     <th class="text-right" colspan="5">Calc Total: </th>
-                    <td class="text-center" colspan="2">(price + opt)</td>
+                    <td class="text-center" colspan="2">(price + opt + tips)</td>
                     <th class="text-right"><?=number_format($calcTotalPrice, 2)?></th>
                     <th class="text-right"><?=number_format($calcClientTotalPrice, 2)?> <?=Html::encode($order->or_client_currency)?></th>
                     <th></th>
                 </tr>
                 <tr>
                     <th class="text-right" colspan="5">Total: </th>
-                    <td class="text-center" colspan="2">(DB)</td>
-                    <th class="text-right"><?=number_format($order->or_app_total, 2)?></th>
-                    <th class="text-right"><?=number_format($order->or_client_total, 2)?> <?=Html::encode($order->or_client_currency)?></th>
+                    <td class="text-center" colspan="2">(DB + Tips)</td>
+                    <th class="text-right"><?=number_format($order->or_app_total + $orderTipsAmount, 2)?></th>
+                    <th class="text-right"><?=number_format($order->or_client_total + $orderTipsAmountClient, 2)?> <?=Html::encode($order->or_client_currency)?></th>
                     <th></th>
                 </tr>
             <?php endif; ?>
@@ -326,6 +335,7 @@ $process = OrderProcessManager::findOne($order->or_id);
             </table>
 
         <?php if ($order->orderTips) : ?>
+            <h4><i class="fas fa-file-invoice-dollar"></i> Order Tips</h4>
             <table class="table table-bordered">
                 <thead>
                     <tr>
@@ -355,7 +365,7 @@ $process = OrderProcessManager::findOne($order->or_id);
                         <tr>
                             <th class="text-warning"><i class="fa fa-warning"></i> New Invoice</th>
                             <th class="text-right">
-                                <?=number_format($calcTotalPrice, 2)?> - <?=number_format($invTotalPrice, 2)?> =
+                                <?=number_format($calcTotalPrice + $orderTipsAmount, 2)?> - <?=number_format($invTotalPrice, 2)?> =
                                 <span class="<?=$newInvoiceAmount > 0 ? 'text-success' : 'text-danger' ?>">
                                     <?=number_format($newInvoiceAmount, 2)?> USD
                                 </span>
