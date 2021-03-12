@@ -164,7 +164,8 @@ use yii\bootstrap4\Html;
                 <tr>
                     <th class="text-right" colspan="5">Total: </th>
                     <td class="text-right" colspan="2">(price + opt)</td>
-                    <th class="text-right"><?=number_format($originTotalPrice + $optionTotalPrice, 2)?></th>
+                    <?php /* <th class="text-right"><?=number_format($originTotalPrice + $optionTotalPrice, 2)?></th> */ ?>
+                    <th class="text-right"><?=number_format($offer->of_app_total, 2)?></th>
                     <th class="text-right"><?=number_format($offer->of_client_total, 2)?> <?=Html::encode($offer->of_client_currency)?></th>
                     <th></th>
                 </tr>
