@@ -79,7 +79,7 @@ class FlightQuoteHelper
             $dtoPax->markUp += $price->qpp_system_mark_up * $price->qpp_cnt;
             $dtoPax->extraMarkUp += $price->qpp_agent_mark_up * $price->qpp_cnt;
             $dtoPax->selling = $dtoPax->net + $dtoPax->markUp + $dtoPax->extraMarkUp;
-            $dtoPax->serviceFee = $dtoPax->selling * $service_fee_percent / 100;
+            $dtoPax->serviceFee = ProductQuoteHelper::roundPrice($dtoPax->selling * $service_fee_percent / 100);
             $dtoPax->selling = ProductQuoteHelper::roundPrice($dtoPax->serviceFee + $dtoPax->selling);
             $dtoPax->clientSelling = ProductQuoteHelper::roundPrice($dtoPax->selling * $flightQuote->fqProductQuote->pq_client_currency_rate);
 
@@ -90,7 +90,7 @@ class FlightQuoteHelper
             $dtoTotal->markUp += $dtoPax->markUp;
             $dtoTotal->extraMarkUp += $dtoPax->extraMarkUp;
             $dtoTotal->selling += $dtoPax->selling;
-            $dtoTotal->serviceFeeSum += ProductQuoteHelper::roundPrice($dtoPax->serviceFee);
+            $dtoTotal->serviceFeeSum += $dtoPax->serviceFee;
             $dtoTotal->clientSelling += $dtoPax->clientSelling;
         }
 
