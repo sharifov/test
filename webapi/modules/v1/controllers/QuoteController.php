@@ -317,7 +317,6 @@ class QuoteController extends ApiBaseController
 
     public function actionGetInfo(): array
     {
-
         $this->checkPost();
         $apiLog = $this->startApiLog($this->action->uniqueId);
 
@@ -588,7 +587,17 @@ class QuoteController extends ApiBaseController
         if (isset($quoteAttributes['needSync']) && $quoteAttributes['needSync'] == true) {
             $data = $model->lead->getLeadInformationForExpert();
             $result = BackOffice::sendRequest('lead/update-lead', 'POST', json_encode($data));
-            if ($result['status'] == 'Success' && empty($result['errors'])) {
+
+            if (!array_key_exists('status', $result)) {
+                $response['errors'] = 'Not found status key from response (BackOffice - lead/update-lead)';
+                Yii::error(
+                    [
+                        'result' => VarDumper::dumpAsString($result),
+                        'data' => $data,
+                    ],
+                    'QuoteController:actionUpdate:update-lead'
+                );
+            } elseif ($result['status'] === 'Success' && empty($result['errors'])) {
                 $response['status'] = 'Success';
             } else {
                 $response['errors'] = $result['errors'];
