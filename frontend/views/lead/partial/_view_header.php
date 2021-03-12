@@ -44,8 +44,8 @@ use yii\helpers\Html;
                         <?php $typeCreate = Lead::TYPE_CREATE_LIST[$lead->l_type_create] ?? '-' ?>
                         <strong title="<?php echo $typeCreate?>">Market:</strong>
                         <span>
-                            <?= Html::encode(($lead->project ? $lead->project->name : '') .
-                                ($lead->source ? ' - <span title="' . $lead->source->id . '/' . $lead->source->cid . '">' . $lead->source->name . '</span>' : ''))
+                            <?= ($lead->project ? $lead->project->name : '') .
+                                ($lead->source ? ' - <span title="' . $lead->source->id . '/' . $lead->source->cid . '">' . $lead->source->name . '</span>' : '')
                             ?>
                         </span>
                     </div>
