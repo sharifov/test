@@ -188,10 +188,6 @@ class ClientChatRequestController extends ApiBaseController
      */
     public function actionCreate()
     {
-        $metrics = \Yii::$container->get(Metrics::class);
-        $metrics->serviceCounter('client_chat_request', ['type' => 'success', 'action' => 'create_message']);
-        unset($metrics);
-
         $apiLog = $this->startApiLog($this->action->uniqueId);
 
         if (!\Yii::$app->request->isPost) {
@@ -222,6 +218,7 @@ class ClientChatRequestController extends ApiBaseController
         }
 
         $form = (new ClientChatRequestApiForm())->fillIn($event, $data);
+        $metrics = \Yii::$container->get(Metrics::class);
 
         if ($form->validate()) {
             try {
@@ -253,13 +250,14 @@ class ClientChatRequestController extends ApiBaseController
                     new CodeMessage(ApiCodeException::INTERNAL_SERVER_ERROR)
                 ));
             }
-
+            $metrics->serviceCounter('client_chat_request', ['type' => 'success', 'action' => 'create']);
             return $this->endApiLog($apiLog, new SuccessResponse(
                 new StatusCodeMessage(200),
                 new MessageMessage('Ok'),
             ));
         }
 
+        $metrics->serviceCounter('client_chat_request', ['type' => 'error', 'action' => 'create']);
         return $this->endApiLog($apiLog, new ErrorResponse(
             new StatusCodeMessage(400),
             new MessageMessage('Some errors occurred while creating client chat request'),
@@ -404,6 +402,7 @@ class ClientChatRequestController extends ApiBaseController
         }
 
         $form = (new ClientChatRequestApiForm())->fillIn($event, $data);
+        $metrics = \Yii::$container->get(Metrics::class);
 
         if ($form->validate()) {
             try {
@@ -424,11 +423,15 @@ class ClientChatRequestController extends ApiBaseController
                 ));
             }
 
+            $metrics->serviceCounter('client_chat_request', ['type' => 'success', 'action' => 'create_message']);
+
             return $this->endApiLog($apiLog, new SuccessResponse(
                 new StatusCodeMessage(200),
                 new MessageMessage('Ok'),
             ));
         }
+
+        $metrics->serviceCounter('client_chat_request', ['type' => 'error', 'action' => 'create_message']);
 
         return $this->endApiLog($apiLog, new ErrorResponse(
             new StatusCodeMessage(400),
