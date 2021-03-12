@@ -182,7 +182,7 @@ use yii\bootstrap4\Html;
                 <?php $clientCurrency = $offer->of_client_currency ?: 'USD' ?>
                 <?php $clientTotal = ', Client Total: <b>' . number_format($offer->of_client_total, 2) . ' ' . Html::encode($clientCurrency) . '</b>' ?>
             <?php endif ?>
-            <h4>Total: <b><?=number_format($offer->offerTotalCalcSum, 2)?> USD</b><?php echo $clientTotal ?></h4>
+            <h4>Total: <b><?=number_format($offer->of_app_total, 2)?> USD</b><?php echo $clientTotal ?></h4>
         </div>
 
 
