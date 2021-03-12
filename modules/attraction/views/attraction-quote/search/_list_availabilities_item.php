@@ -21,9 +21,7 @@ use yii\bootstrap\Html;
         <span class="ml-2"><i class="fa fa-child"></i> <?= (Html::encode($attractionSearch->getChildCount())) ?></span>
         <span class="ml-2"><i class="fas fa-baby"></i> <?= (Html::encode($attractionSearch->getInfantsCount())) ?></span>
     </td>
-    <!--<td colspan="2">$<?php /*=number_format(Html::encode($test = 100 ?? 0), 2)*/ ?></td>-->
-    <!--<td><?/*= Html::encode($availabilityItem['guidePriceFormattedText']) */?></td>-->
-    <td><?= Html::encode(empty($availabilityItem['guidePriceFormattedText'])) ? /*rand(20, 350)*/  ' - ' : $availabilityItem['guidePriceFormattedText'] ?></td> <!--this line is for presetation only-->
+    <td><?= Html::encode(empty($availabilityItem['guidePriceFormattedText'])) ? ' - ' : $availabilityItem['guidePriceFormattedText'] ?></td> <!--this line is for presetation only-->
     <td class="text-right">
         <?php if ($quoteExist = false) : ?>
             <span class="badge badge-white">Added</span>
