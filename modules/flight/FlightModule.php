@@ -72,6 +72,7 @@ class FlightModule extends \yii\base\Module
             ['label' => 'Baggage', 'url' => ['/' . $modulePath . '/flight-quote-segment-pax-baggage/index']],
             ['label' => 'Baggage charge', 'url' => ['/' . $modulePath . '/flight-quote-segment-pax-baggage-charge/index']],
             ['label' => 'Status Log', 'url' => ['/' . $modulePath . '/flight-quote-status-log/index']],
+            ['label' => 'Flight Quote Option', 'url' => ['/' . $modulePath . '/flight-quote-option-crud/index']],
         ];
 
         return $items;
