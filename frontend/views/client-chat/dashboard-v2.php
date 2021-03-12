@@ -143,7 +143,8 @@ $apiServer = Yii::$app->rchat->apiServer;
         'filter' => $filter,
         'agentToken' => $agentToken,
         'server' => $server,
-        'loadChannelsUrl' => \yii\helpers\Url::to('/client-chat/dashboard-v2')
+        'loadChannelsUrl' => \yii\helpers\Url::to('/client-chat/dashboard-v2'),
+        'apiServer' => $apiServer
     ]);
     ?>
 

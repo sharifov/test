@@ -14,6 +14,7 @@ use sales\model\clientChat\entity\ClientChat;
 /* @var FilterForm $filter */
 /* @var string $agentToken */
 /* @var string $server */
+/* @var string $apiServer */
 /* @var string $loadChannelsUrl */
 
 $userRcAuthToken = UserClientChatDataService::getCurrentAuthToken() ?? '';
@@ -441,7 +442,8 @@ $(document).on('click', '._cc-list-item', function () {
         token: '$agentToken',
         server: '$server',
         rid: rid,
-        readonly: Boolean(readonly)
+        readonly: Boolean(readonly),
+        'apiServer': '$apiServer'
     });
     
     window.refreshChatInfo(cch_id, loadClientChatData, ref, window.socketConnectionId);
