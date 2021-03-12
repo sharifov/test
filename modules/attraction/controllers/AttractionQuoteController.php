@@ -183,10 +183,6 @@ class AttractionQuoteController extends FController
 
         $availabilityList = $result['availabilityList']['nodes'] ?? [];
 
-        foreach ($availabilityList as $key => $element) {
-            $availabilityList[$key]['presentation_product_id'] = $attractionKey; //for presentation only is temp
-        }
-
         $dataProvider = new ArrayDataProvider([
             'allModels' => [$availabilityList] ?? [],
             'pagination' => [
@@ -196,7 +192,7 @@ class AttractionQuoteController extends FController
 
         return $this->renderAjax('search/_list_availabilities', [
             'dataProvider' => $dataProvider,
-            'attractionSearch'   => $attraction
+            'attraction'   => $attraction
         ]);
     }
 
