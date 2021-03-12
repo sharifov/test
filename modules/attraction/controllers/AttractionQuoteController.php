@@ -166,7 +166,7 @@ class AttractionQuoteController extends FController
     public function actionAvailabilityListAjax()
     {
         $attractionId = (int) Yii::$app->request->post('atn_id');
-        $attractionKey = (string) Yii::$app->request->post('attraction_key');
+        $productKey = (string) Yii::$app->request->post('product_key');
 
         $result = [];
         Yii::$app->response->format = Response::FORMAT_JSON;
@@ -175,7 +175,7 @@ class AttractionQuoteController extends FController
         $apiAttractionService = AttractionModule::getInstance()->apiService;
         if ($attraction) {
             try {
-                $result = $apiAttractionService->getAvailabilityList($attractionKey, AttractionQuoteSearchGuard::guard($attraction));
+                $result = $apiAttractionService->getAvailabilityList($productKey, AttractionQuoteSearchGuard::guard($attraction));
             } catch (\DomainException $e) {
                 Yii::$app->session->setFlash('error', $e->getMessage());
             }
@@ -198,11 +198,11 @@ class AttractionQuoteController extends FController
 
     public function actionCheckAvailabilityAjax()
     {
-        //VarDumper::dump(Yii::$app->request->post('AttractionOptionsFrom'), 10, true); die();
         $result = [];
         $optionsForm = new AttractionOptionsFrom();
 
         Yii::$app->response->format = Response::FORMAT_JSON;
+        $attractionId = (string) Yii::$app->request->get('atn_id', 0);
         $availabilityKey = (string) Yii::$app->request->post('availability_key', 0);
 
         $apiAttractionService = AttractionModule::getInstance()->apiService;
@@ -220,7 +220,8 @@ class AttractionQuoteController extends FController
 
         return $this->renderAjax('options', [
             'model' => $optionsForm,
-            'availability' => $availability
+            'availability' => $availability,
+            'attractionId' => $attractionId
         ]);
     }
 
@@ -228,6 +229,7 @@ class AttractionQuoteController extends FController
     {
         $optionsModel = new AttractionOptionsFrom();
         $availabilityPaxForm = new AvailabilityPaxFrom();
+        $attractionId = (string) Yii::$app->request->get('id', 0);
 
         $optionsModel->load(Yii::$app->request->post());
         $result = [];
@@ -239,12 +241,13 @@ class AttractionQuoteController extends FController
             Yii::$app->session->setFlash('error', $e->getMessage());
         }
 
-        //VarDumper::dump($result, 10, true); die();
+        //VarDumper::dump($attractionId, 10, true); die();
         $availability = $result['availability'];
 
         return $this->renderAjax('availability_details', [
             'availability' => $availability,
-            'paxForm' => $availabilityPaxForm
+            'paxForm' => $availabilityPaxForm,
+            'attractionId' => $attractionId
         ]);
     }
 
@@ -252,6 +255,7 @@ class AttractionQuoteController extends FController
     {
         $availabilityPaxModel = new AvailabilityPaxFrom();
         $availabilityPaxModel->load(Yii::$app->request->post());
+        $attractionId = (string) Yii::$app->request->get('id', 0);
 
         $result = [];
         $apiAttractionService = AttractionModule::getInstance()->apiService;
@@ -263,7 +267,7 @@ class AttractionQuoteController extends FController
         }
 
         $quoteDetails = $result['availability'];
-        //VarDumper::dump($result, 10, true);
+        //VarDumper::dump($attractionId, 10, true); exit;
 
         return $this->renderAjax('quote_details', [
             'quoteDetails' => $quoteDetails,

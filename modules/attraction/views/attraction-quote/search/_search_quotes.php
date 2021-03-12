@@ -61,7 +61,7 @@ $js = <<<JS
       //$('#preloader').removeClass('d-none');
       let url = $(this).data('url');
       let atnId = $(this).data('atn-id');
-      let attractionKey = $(this).data('attraction-key');       
+      let productKey = $(this).data('attraction-key');       
       let btnAdd = $(this);
       
       btnAdd.addClass('disabled').prop('disabled', true);
@@ -72,7 +72,7 @@ $js = <<<JS
       $.ajax({
           url: url,
           type: 'post',          
-          data: {'attraction_key': attractionKey, 'atn_id': atnId},
+          data: {'product_key': productKey, 'atn_id': atnId},
           dataType: 'json',
       })
           .done(function(data) {
@@ -92,7 +92,7 @@ $js = <<<JS
                       container: '#pjax-product-quote-list-' + data.product_id,
                       push: false, replace: false, timeout: 2000
                   });*/
-                  $('#' + attractionKey).html(data);
+                  $('#' + productKey).html(data);
                   new PNotify({
                         title: 'Availability was successfully checked',
                         type: 'success',

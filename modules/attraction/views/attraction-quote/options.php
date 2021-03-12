@@ -8,6 +8,7 @@ use yii\widgets\Pjax;
 /**
  * @var $model \modules\attraction\models\forms\AttractionOptionsFrom
  * @var $availability array
+ * @var $attractionId int
  */
 
 $pjaxId = 'pjax-options-form-' . $availability['id'];
@@ -22,7 +23,7 @@ $model->availability_id = $availability['id'];
 $form = ActiveForm::begin([
     'validateOnSubmit' => false,
     'options' => ['data-pjax' => 1],
-    'action' => ['/attraction/attraction-quote/input-availability-options'],
+    'action' => ['/attraction/attraction-quote/input-availability-options', 'id' => $attractionId],
     'method' => 'post'
 ]);
 ?>

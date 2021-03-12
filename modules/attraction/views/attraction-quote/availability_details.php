@@ -6,6 +6,7 @@ use yii\bootstrap\ActiveForm;
 /**
  * @var $availability array
  * @var $paxForm \modules\attraction\models\forms\AvailabilityPaxFrom
+ * @var $attractionId int
  */
 $paxForm->availability_id = $availability['id'];
 ?>
@@ -38,7 +39,7 @@ $paxForm->availability_id = $availability['id'];
 $form = ActiveForm::begin([
     'validateOnSubmit' => false,
     'options' => ['data-pjax' => true],
-    'action' => ['/attraction/attraction-quote/input-price-category'],
+    'action' => ['/attraction/attraction-quote/input-price-category', 'id' => $attractionId],
     'method' => 'post'
 ]);
 ?>
