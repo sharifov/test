@@ -5,7 +5,7 @@
 /* @var $index int */
 /* @var $key int */
 
-/* @var $hotelSearch \modules\attraction\models\Attraction */
+/* @var $attraction \modules\attraction\models\Attraction */
 
 //use modules\hotel\models\Hotel;
 
@@ -85,7 +85,7 @@
               <?php else : ?>
                   <?= \yii\bootstrap4\Html::a('<i class="fa fa-plus"></i> Get Quotes List', null, [
                       'data-url' => \yii\helpers\Url::to(['/attraction/attraction-quote/availability-list-ajax']),
-                      'data-atn-id' => $hotelSearch->atn_id,
+                      'data-atn-id' => $attraction->atn_id,
                       'data-attraction-key' => $dataHotel[$key]['id'] ?? '',
                       'class' => 'btn btn-success btn-sm btn-availability-list-quote'
                   ]) ?>

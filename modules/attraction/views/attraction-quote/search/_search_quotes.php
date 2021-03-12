@@ -6,7 +6,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $hotelSearch \modules\hotel\models\Hotel */
+/* @var $attraction \modules\attraction\models\Attraction */
 /* @var $dataProvider yii\data\ArrayDataProvider */
 
 //var_dump($dataProvider->getModels()); die();
@@ -37,9 +37,9 @@ use yii\widgets\Pjax;
         ],*/
         'summary' => false,
         'emptyText' => '<div class="text-center">Not found any hotels</div><br>',
-        'itemView' => function ($dataHotel, $key, $index, $widget) use ($hotelSearch) {
+        'itemView' => function ($dataHotel, $key, $index, $widget) use ($attraction) {
             //\yii\helpers\VarDumper::dump($dataHotel, 10, true); exit;
-            return $this->render('_list_attraction_quotes', ['dataHotel' => $dataHotel, 'index' => $index, 'key' => $key, 'hotelSearch' => $hotelSearch]);
+            return $this->render('_list_attraction_quotes', ['dataHotel' => $dataHotel, 'index' => $index, 'key' => $key, 'attraction' => $attraction]);
         },
         //'layout' => "{items}<div class=\"text-center\" style='margin-top: -20px; margin-bottom: -25px'>{pager}</div>", // {summary}\n<div class="text-center">{pager}</div>
         'itemOptions' => [

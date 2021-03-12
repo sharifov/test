@@ -1,15 +1,14 @@
 <?php
 
+use yii\data\ArrayDataProvider;
+use yii\web\View;
+
 /* @var $this yii\web\View */
 /* @var $dataHotel array */
 /* @var $index int */
 /* @var $key int */
 
-/* @var $hotelSearch Hotel */
-
-use modules\hotel\models\Hotel;
-use yii\data\ArrayDataProvider;
-use yii\web\View;
+/* @var $attraction \modules\attraction\models\Attraction */
 
 $roomDataProvider = new ArrayDataProvider([
     'allModels' => $dataHotel ?? [],
@@ -35,13 +34,13 @@ $roomDataProvider = new ArrayDataProvider([
             'class' => 'table table-bordered',
         ],
         'emptyText' => '<div class="text-center">No any search results at this moment</div><br>',
-        'itemView' => function ($modelRoom, $key, $index, $widget) use ($dataHotel, $hotelSearch) {
+        'itemView' => function ($modelRoom, $key, $index, $widget) use ($dataHotel, $attraction) {
             return $this->render('_list_attraction_item', [
                 'dataRoom' => $modelRoom,
                 'dataHotel' => $dataHotel,
                 'index' => $index,
                 'key' => $key,
-                'hotelSearch' => $hotelSearch
+                'attraction' => $attraction
             ]);
         },
         //'layout' => "{items}<div class=\"text-center\" style='margin-top: -20px; margin-bottom: -25px'>{pager}</div>", // {summary}\n<div class="text-center">{pager}</div>

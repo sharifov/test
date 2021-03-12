@@ -11,9 +11,6 @@ use modules\attraction\models\forms\AttractionOptionsFrom;
 use modules\attraction\models\forms\AvailabilityPaxFrom;
 use modules\attraction\models\search\AttractionQuoteSearch;
 use modules\attraction\src\services\AttractionQuotePdfService;
-use modules\hotel\models\Hotel;
-use modules\hotel\models\HotelList;
-use modules\hotel\models\HotelQuote;
 use modules\hotel\src\entities\hotelQuoteRoom\HotelQuoteRoomRepository;
 use modules\hotel\src\repositories\hotel\HotelRepository;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookGuard;
@@ -162,7 +159,7 @@ class AttractionQuoteController extends FController
 
         return $this->renderAjax('search/_search_quotes', [
             'dataProvider' => $dataProvider,
-            'hotelSearch'   => $attraction
+            'attraction'   => $attraction
         ]);
     }
 
