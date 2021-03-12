@@ -4,6 +4,7 @@ namespace webapi\modules\v1\controllers;
 
 use common\components\jobs\clientChat\ClientChatFeedbackJob;
 use common\components\jobs\clientChat\ClientChatRequestCreateJob;
+use common\components\Metrics;
 use common\models\ApiLog;
 use common\models\Project;
 use sales\entities\cases\CaseCategory;
@@ -187,6 +188,10 @@ class ClientChatRequestController extends ApiBaseController
      */
     public function actionCreate()
     {
+        $metrics = \Yii::$container->get(Metrics::class);
+        $metrics->serviceCounter('client_chat_request', ['type' => 'success', 'action' => 'create_message']);
+        unset($metrics);
+
         $apiLog = $this->startApiLog($this->action->uniqueId);
 
         if (!\Yii::$app->request->isPost) {
