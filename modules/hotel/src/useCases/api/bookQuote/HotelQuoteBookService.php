@@ -78,8 +78,8 @@ class HotelQuoteBookService
         }
 
         $params = [
-            'name' => $client->first_name,
-            'surname' => $client->last_name ?: $client->full_name,
+            'name' => self::getClientName($model),
+            'surname' => self::getClientLastName($model),
             'rooms' => $rooms,
         ];
 
@@ -123,6 +123,31 @@ class HotelQuoteBookService
             ->saveChanges();
 
         return $this;
+    }
+
+    private static function getClientName(HotelQuote $hotelQuote): string
+    {
+        if ($name = ArrayHelper::getValue($hotelQuote, 'hqProductQuote.pqProduct.holder.ph_first_name')) {
+            return $name;
+        }
+        if ($name = ArrayHelper::getValue($hotelQuote, 'hqProductQuote.pqProduct.prLead.client.first_name')) {
+            return $name;
+        }
+        throw new \DomainException('Client first name not found.');
+    }
+
+    private static function getClientLastName(HotelQuote $hotelQuote): string
+    {
+        if ($surname = ArrayHelper::getValue($hotelQuote, 'hqProductQuote.pqProduct.holder.ph_last_name')) {
+            return $surname;
+        }
+        if ($surname = ArrayHelper::getValue($hotelQuote, 'hqProductQuote.pqProduct.prLead.client.last_name')) {
+            return $surname;
+        }
+        if ($surname = ArrayHelper::getValue($hotelQuote, 'hqProductQuote.pqProduct.prLead.client.full_name')) {
+            return $surname;
+        }
+        throw new \DomainException('Client last name not found.');
     }
 
     /**
