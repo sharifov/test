@@ -9,6 +9,7 @@ use sales\helpers\email\MaskEmailHelper;
 use sales\model\saleTicket\entity\SaleTicket;
 use sales\model\saleTicket\useCase\sendEmail\SaleTicketHelper;
 use yii\grid\GridView;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
@@ -265,6 +266,46 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                     </div>
                 </div>
             <?php endif; ?>
+
+            <?php if ($caseSaleModel && $package = ArrayHelper::getValue($caseSaleModel->getSaleDataDecoded(), 'package')) : ?>
+                <div class="row">
+                    <div class="col-md-2">
+                        <h2>Package</h2>
+                        <table class="table table-bordered table-hover table-striped">
+                            <tr>
+                                <th>Type</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($package, 'type')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Amount</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($package, 'amount')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Is Activated</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($package, 'isActivated')) ?></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-5">
+                        <h2>Package options</h2>
+                        <table class="table table-bordered table-hover">
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Value</th>
+                            </tr>
+                            <?php foreach (ArrayHelper::getValue($package, 'options') as $option) : ?>
+                                <tr>
+                                    <td><?=Html::encode($option['name'])?></td>
+                                    <td><?=Html::encode($option['type'])?></td>
+                                    <td><?=Html::encode($option['value'])?></td>
+                                </tr>
+                            <?php endforeach;?>
+                        </table>
+                    </div>
+                </div>
+            <?php endif ?>
+
             <div class="row">
                 <div class="col-md-5">
 
