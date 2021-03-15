@@ -140,8 +140,9 @@ $server = Yii::$app->rchat->host;
             'clientChat' => $clientChat,
             'filter' => $filter,
             'agentToken' => $agentToken,
-            'server' => $server
-        ]);
+            'server' => $server,
+            'loadChannelsUrl' => \yii\helpers\Url::to('/client-chat/index')
+    ]);
     ?>
 
 <?php endif ?>

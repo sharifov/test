@@ -118,6 +118,7 @@ return [
             'username' => '',
             'password' => '',
             'host' => 'https://rocketchat.travel-dev.com',
+            'apiServer' => 'https://chatbot.travel-dev.com',
         ],
         'chatBot' => [
             'class' => \common\components\ChatBot::class,
