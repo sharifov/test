@@ -3,6 +3,7 @@
 namespace modules\rentCar\src\entity\rentCarQuote;
 
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\interfaces\Quotable;
 use modules\rentCar\src\entity\rentCar\RentCar;
 use modules\rentCar\src\serializer\RentCarQuoteSerializer;
@@ -191,7 +192,7 @@ class RentCarQuote extends \yii\db\ActiveRecord implements Quotable
 
     public function isBookable(): bool
     {
-        return !$this->rcqProductQuote->isBooked();
+        return (ProductQuoteStatus::isBookable($this->rcqProductQuote->pq_status_id));
     }
 
     public static function findByProductQuote(int $productQuoteId): ?Quotable

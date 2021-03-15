@@ -1,10 +1,10 @@
 <?php
 
-use common\models\Sources;
-use yii\helpers\Html;
-use yii\grid\GridView;
-use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
+use common\models\Sources;
+use yii\grid\GridView;
+use yii\helpers\Html;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\SourcesSearch */
@@ -17,18 +17,27 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
     <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
-    <p>
-        <?php //= Html::a('Create Sources', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
+    <?php if ($searchModel->only_duplicate) : ?>
+        <?php echo Html::a(
+            'Show all',
+            ['index', $searchModel->formName() . '[only_duplicate]' => 0],
+            ['class' => 'btn btn-primary']
+        ) ?>
+    <?php else : ?>
+        <?php echo Html::a(
+            'Show only duplicate',
+            ['index', $searchModel->formName() . '[only_duplicate]' => 1],
+            ['class' => 'btn btn-success', 'title' => 'Identical Cid and Project']
+        ) ?>
+    <?php endif ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'tableOptions' => ['class' => 'table table-bordered table-hover'],
         'rowOptions' => function (\common\models\Sources $model) {
-
             if ($model->hidden) {
                 return [
                     'class' => 'danger'
