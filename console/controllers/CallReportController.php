@@ -2,8 +2,10 @@
 
 namespace console\controllers;
 
-use sales\model\call\useCase\reports\CallReport;
+use sales\model\call\useCase\reports\CallReportSender;
 use sales\model\call\useCase\reports\Credential;
+use sales\model\call\useCase\reports\DailyReportGenerator;
+use sales\model\call\useCase\reports\WeeklyReportGenerator;
 use yii\console\Controller;
 use yii\console\ExitCode;
 use yii\console\widgets\Table;
@@ -48,7 +50,7 @@ class CallReportController extends Controller
             $params['port'],
             $params['path']
         );
-        $report = new CallReport($credential);
+        $reportSender = new CallReportSender($credential);
 
         $phones = [
             '+18559404266',
@@ -58,14 +60,15 @@ class CallReportController extends Controller
         ];
         $fileName = 'Call_Priceline_report_' . $this->date . '.csv';
 
-        $results = $report->generate($phones, $fileName, $this->date);
+        $report = (new DailyReportGenerator())->generate($phones, $this->date);
+        $reportSender->send($report, $fileName);
 
-        if ($results) {
-            unset($results[0]);
+        if ($report) {
+            unset($report[0]);
         }
 
         $rows = [];
-        foreach ($results as $result) {
+        foreach ($report as $result) {
             $rows[] = [
                 $result['Time Stamp (UTC)'],
                 $result['Call ID'],
@@ -78,6 +81,61 @@ class CallReportController extends Controller
 
         echo Table::widget([
             'headers' => ['Time Stamp (UTC)', 'Call ID', 'Call Length', 'Phone number'],
+            'rows' => $rows,
+        ]);
+
+        printf("\n --- End %s ---\n\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+        return ExitCode::OK;
+    }
+
+    public function actionPricelineWeekly()
+    {
+        printf(
+            "\n --- Start %s ---\n\n",
+            $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW)
+        );
+
+        $params = \Yii::$app->params['price_line_ftp_credential'];
+        $credential = new Credential(
+            $params['user'],
+            $params['pass'],
+            $params['url'],
+            $params['port'],
+            $params['path']
+        );
+        $reportSender = new CallReportSender($credential);
+
+        $now = strtotime(date('Y-m-d'));
+        $fromDate = date('Y-m-d', strtotime('-7 day', $now));
+        $toDate = date('Y-m-d', strtotime('-1 day', $now));
+
+        $fileName = 'Weekly Call Report_' . $fromDate . '->' . $toDate . $this->date . '.csv';
+
+        $report = (new WeeklyReportGenerator())->generate();
+        $reportSender->send($report, $fileName);
+
+        if ($report) {
+            unset($report[0]);
+        }
+
+        $rows = [];
+        foreach ($report as $result) {
+            $rows[] = [
+                $result['Date'],
+                $result['Queued'],
+                $result['Handled'],
+                $result['Abandoned'],
+                $result['Service Level 30 Sec'],
+                $result['Avg Handle Time'],
+                $result['Avg Queue Answer Time'],
+                $result['Avg Abandon Time'],
+            ];
+        }
+
+        echo 'Saved in file: ' . $fileName . PHP_EOL;
+
+        echo Table::widget([
+            'headers' => ['Date', 'Queued', 'Handled', 'Abandoned', 'Service Level 30 Sec', 'Avg Handle Time', 'Avg Queue Answer Time', 'Avg Abandon Time'],
             'rows' => $rows,
         ]);
 
