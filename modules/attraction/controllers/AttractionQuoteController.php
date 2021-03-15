@@ -202,7 +202,7 @@ class AttractionQuoteController extends FController
         $optionsForm = new AttractionOptionsFrom();
 
         Yii::$app->response->format = Response::FORMAT_JSON;
-        $attractionId = (string) Yii::$app->request->get('atn_id', 0);
+        $attractionId = (int) Yii::$app->request->get('atn_id', 0);
         $availabilityKey = (string) Yii::$app->request->post('availability_key', 0);
 
         $apiAttractionService = AttractionModule::getInstance()->apiService;
@@ -229,7 +229,7 @@ class AttractionQuoteController extends FController
     {
         $optionsModel = new AttractionOptionsFrom();
         $availabilityPaxForm = new AvailabilityPaxFrom();
-        $attractionId = (string) Yii::$app->request->get('id', 0);
+        $attractionId = (int) Yii::$app->request->get('id', 0);
 
         $optionsModel->load(Yii::$app->request->post());
         $result = [];
@@ -255,19 +255,42 @@ class AttractionQuoteController extends FController
     {
         $availabilityPaxModel = new AvailabilityPaxFrom();
         $availabilityPaxModel->load(Yii::$app->request->post());
-        $attractionId = (string) Yii::$app->request->get('id', 0);
+        $attractionId = (int) Yii::$app->request->get('id', 0);
 
-        $result = [];
+        //Yii::$app->response->format = Response::FORMAT_JSON;
         $apiAttractionService = AttractionModule::getInstance()->apiService;
 
         try {
+            if (!$attractionId) {
+                throw new Exception('Attraction Request param not found', 2);
+            }
+            $attraction = $this->attractionRepository->find($attractionId);
+            $productId = $attraction->atn_product_id;
+
             $result = $apiAttractionService->inputPriceCategoryToAvailability($availabilityPaxModel);
-        } catch (\DomainException $e) {
-            Yii::$app->session->setFlash('error', $e->getMessage());
+            $quoteDetails = $result['availability'];
+
+            if (!$quoteDetails) {
+                throw new Exception('Not found quote - quote key (' . $availabilityPaxModel->availability_id . ')', 7);
+            }
+
+            $attractionQuote = AttractionQuote::findOrCreateByDataNew($quoteDetails, $attraction, Auth::id());
+
+            if (!$attractionQuote) {
+                throw new Exception('Not added attraction quote - id:  (' . $availabilityPaxModel->availability_id  . ')', 8);
+            }
+
+            Notifications::pub(
+                ['lead-' . $attractionQuote->atnqProductQuote->pqProduct->pr_lead_id],
+                'addedQuote',
+                ['data' => ['productId' => $attractionQuote->atnqProductQuote->pq_product_id]]
+            );
+        } catch (\Throwable $throwable) {
+            Yii::warning(AppHelper::throwableLog($throwable), 'AttractionQuoteController:actionInputPriceCategory');
+            return ['error' => 'Error: ' . $throwable->getMessage()];
         }
 
-        $quoteDetails = $result['availability'];
-        //VarDumper::dump($attractionId, 10, true); exit;
+        //VarDumper::dump($attraction, 10, true); exit;
 
         return $this->renderAjax('quote_details', [
             'quoteDetails' => $quoteDetails,
@@ -281,7 +304,6 @@ class AttractionQuoteController extends FController
         $date = (string) Yii::$app->request->post('date'); // only for presentation
 
         $productId = 0;
-
         Yii::$app->response->format = Response::FORMAT_JSON;
 
         try {

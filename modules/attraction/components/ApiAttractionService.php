@@ -124,6 +124,7 @@ class ApiAttractionService extends Component
                     ){
                         id
                         productId
+                        date
                         isValid
                         durationMinutes
                         optionList {
@@ -131,6 +132,7 @@ class ApiAttractionService extends Component
                                 id
                                 label
                                 dataType
+                                isAnswered
                                 dataFormat
                                 availableOptions {
                                     label
@@ -143,6 +145,7 @@ class ApiAttractionService extends Component
                         pricingCategoryList {
                             priceTotalFormattedText
                             priceTotal
+                            currency
                             nodes {
                                 id
                                 label
@@ -158,7 +161,7 @@ class ApiAttractionService extends Component
                                 minAge
                                 maxAge
                                 price
-                                currency
+                                currency                                
                                 priceFormattedText
                                 priceTotal
                                 priceTotalFormattedText

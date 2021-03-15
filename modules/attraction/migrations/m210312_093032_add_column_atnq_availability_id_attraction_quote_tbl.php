@@ -14,6 +14,7 @@ class m210312_093032_add_column_atnq_availability_id_attraction_quote_tbl extend
      */
     public function safeUp()
     {
+        $this->dropColumn('{{%attraction_quote}}', 'atnq_date');
         $this->addColumn('{{%attraction_quote}}', 'atnq_availability_id', $this->string(40));
         $this->addColumn('{{%attraction_quote}}', 'atnq_availability_product_id', $this->string(40));
         $this->addColumn('{{%attraction_quote}}', 'atnq_availability_date', $this->date());
@@ -29,5 +30,6 @@ class m210312_093032_add_column_atnq_availability_id_attraction_quote_tbl extend
         $this->dropColumn('{{%attraction_quote}}', 'atnq_availability_product_id');
         $this->dropColumn('{{%attraction_quote}}', 'atnq_availability_date');
         $this->dropColumn('{{%attraction_quote}}', 'atnq_availability_is_valid');
+        $this->addColumn('{{%attraction_quote}}', 'atnq_date', $this->date());
     }
 }
