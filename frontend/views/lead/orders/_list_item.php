@@ -359,6 +359,7 @@ $process = OrderProcessManager::findOne($order->or_id);
 
             <?php if ($invTotalPrice !== $calcTotalPrice) :
                 $newInvoiceAmount = round($calcTotalPrice - $invTotalPrice, 2);
+                $orderTipsAmount = $orderTipsAmount ?: 0.00;
                 ?>
                 <table class="table table-bordered">
                     <tbody>
