@@ -474,7 +474,11 @@ var callMapApp = Vue.createApp({
             return index
         },
         removeCall(index) {
-            this.callList = this.callList.splice(index, 1);
+            if (this.callList.length === 1) {
+                this.callList = [];
+            } else {
+                this.callList = this.callList.splice(index, 1);
+            }
         },
         actionCall(callData) {
             if (this.callList.find(x => parseInt(x.c_id) === parseInt(callData.c_id))) {
