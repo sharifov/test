@@ -3,12 +3,21 @@
 namespace frontend\widgets;
 
 use common\models\Call;
+use common\models\DepartmentEmailProjectUserGroup;
+use common\models\DepartmentPhoneProject;
+use common\models\DepartmentPhoneProjectUserGroup;
 use common\models\Employee;
+use common\models\ProjectEmployeeAccess;
 use common\models\UserCallStatus;
+use common\models\UserDepartment;
+use common\models\UserGroupAssign;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
 use sales\auth\Auth;
+use sales\model\phoneList\entity\PhoneList;
 use yii\bootstrap\Widget;
+use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  * Class NewWebPhoneWidget
@@ -26,7 +35,7 @@ class NewWebPhoneWidget extends Widget
             return '';
         }
 
-        $userPhoneProject = $this->getUserProjectParams($this->userId);
+        $userPhoneProject = $this->getAvailablePhones($this->userId);
 
         return $this->render('web_phone_new', [
             'formattedPhoneProject' => json_encode($this->formatDataForSelectList($userPhoneProject)),
@@ -47,14 +56,52 @@ class NewWebPhoneWidget extends Widget
         return Employee::getEmailList($this->userId);
     }
 
-    private function getUserProjectParams(int $userId)
+    private function getAvailablePhones(int $userId): array
+    {
+        $departmentPhones = $this->getDepartmentPhones($userId);
+        $userPhones = $this->getUserProjectParams($userId);
+        $phones = array_merge($userPhones, $departmentPhones);
+        $unique_array = [];
+        foreach ($phones as $phone) {
+            $hash = $phone['phone_number'];
+            $unique_array[$hash] = $phone;
+        }
+        return array_values($unique_array);
+    }
+
+    private function getUserProjectParams(int $userId): array
     {
         return UserProjectParams::find()
-            ->select(['upp_project_id', 'pl_phone_number', 'p.name as project_name'])
+            ->select(['upp_project_id as project_id', 'pl_phone_number as phone_number', 'p.name as title'])
             ->byUserId($userId)
             ->withExistingPhoneInPhoneList()
             ->withProject()
-            ->asArray()->all();
+            ->asArray()
+            ->all();
+    }
+
+    private function getDepartmentPhones(int $userId): array
+    {
+        return DepartmentPhoneProject::find()
+            ->select(['min(dpp_project_id) as project_id', 'pl_phone_number as phone_number', 'min(pl_title) as title'])
+            ->leftJoin(PhoneList::tableName(), 'pl_id = dpp_phone_list_id and pl_enabled = :pl_enabled', ['pl_enabled' => true])
+            ->leftJoin(DepartmentPhoneProjectUserGroup::tableName(), 'dug_dpp_id = dpp_id')
+            ->andWhere([
+                'dpp_project_id' => ProjectEmployeeAccess::find()->select(['project_id'])->andWhere(['employee_id' => $userId])
+            ])
+            ->andWhere([
+                'OR',
+                ['IS', 'dpp_dep_id', null],
+                ['dpp_dep_id' => UserDepartment::find()->select(['ud_dep_id'])->andWhere(['ud_user_id' => $userId])],
+            ])
+            ->andWhere([
+                'OR',
+                ['IS', 'dug_ug_id', null],
+                ['dug_ug_id' => UserGroupAssign::find()->select(['ugs_group_id'])->andWhere(['ugs_user_id' => $userId])]
+            ])
+            ->groupBy('pl_phone_number')
+            ->asArray()
+            ->all();
     }
 
     private function formatDataForSelectList(array $userProjectPhones): array
@@ -70,9 +117,9 @@ class NewWebPhoneWidget extends Widget
 
         foreach ($userProjectPhones as $phone) {
             $result['options'][] = [
-                'value' => $phone['pl_phone_number'],
-                'project' => $phone['project_name'],
-                'projectId' => $phone['upp_project_id']
+                'value' => $phone['phone_number'],
+                'project' => $phone['title'],
+                'projectId' => $phone['project_id']
             ];
         }
 
@@ -81,9 +128,9 @@ class NewWebPhoneWidget extends Widget
             $result['selected']['project'] = 'no number';
             $result['selected']['projectId'] = '';
         } else {
-            $result['selected']['value'] = $userProjectPhones[0]['pl_phone_number'];
-            $result['selected']['project'] = $userProjectPhones[0]['project_name'];
-            $result['selected']['projectId'] = $userProjectPhones[0]['upp_project_id'];
+            $result['selected']['value'] = $userProjectPhones[0]['phone_number'];
+            $result['selected']['project'] = $userProjectPhones[0]['title'];
+            $result['selected']['projectId'] = $userProjectPhones[0]['project_id'];
         }
 
         return $result;
