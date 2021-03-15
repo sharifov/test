@@ -5,7 +5,9 @@ namespace modules\order\src\services;
 use common\models\BillingInfo;
 use common\models\CreditCard;
 use common\models\Payment;
+use modules\flight\src\entities\flightQuoteOption\FlightQuoteOption;
 use modules\flight\src\repositories\flightPaxRepository\FlightPaxRepository;
+use modules\flight\src\repositories\flightQuoteOption\FlightQuoteOptionRepository;
 use modules\invoice\src\entities\invoice\Invoice;
 use modules\invoice\src\entities\invoice\InvoiceRepository;
 use modules\order\src\entities\order\Order;
@@ -50,6 +52,7 @@ use sales\services\TransactionManager;
  * @property ProductQuoteOptionRepository $productQuoteOptionRepository
  * @property FlightPaxRepository $flightPaxRepository
  * @property ProductHolderRepository $productHolderRepository
+ * @property FlightQuoteOptionRepository $flightQuoteOptionRepository
  */
 class OrderApiManageService
 {
@@ -117,6 +120,10 @@ class OrderApiManageService
      * @var ProductHolderRepository
      */
     private ProductHolderRepository $productHolderRepository;
+    /**
+     * @var FlightQuoteOptionRepository
+     */
+    private FlightQuoteOptionRepository $flightQuoteOptionRepository;
 
     public function __construct(
         OrderRepository $orderRepository,
@@ -134,7 +141,8 @@ class OrderApiManageService
         ProductOptionRepository $productOptionRepository,
         ProductQuoteOptionRepository $productQuoteOptionRepository,
         FlightPaxRepository $flightPaxRepository,
-        ProductHolderRepository $productHolderRepository
+        ProductHolderRepository $productHolderRepository,
+        FlightQuoteOptionRepository $flightQuoteOptionRepository
     ) {
         $this->orderRepository = $orderRepository;
         $this->orderUserProfitRepository = $orderUserProfitRepository;
@@ -152,6 +160,7 @@ class OrderApiManageService
         $this->productQuoteOptionRepository = $productQuoteOptionRepository;
         $this->flightPaxRepository = $flightPaxRepository;
         $this->productHolderRepository = $productHolderRepository;
+        $this->flightQuoteOptionRepository = $flightQuoteOptionRepository;
     }
 
     /**
@@ -199,6 +208,24 @@ class OrderApiManageService
                     $productQuoteOption->calculateClientPrice();
                     $productQuoteOption->pending();
                     $this->productQuoteOptionRepository->save($productQuoteOption);
+
+                    foreach ($quoteOptionsForm->data as $flightQuoteOptionForm) {
+                        $flightQuoteOption = FlightQuoteOption::create(
+                            $productQuoteOption->pqo_id,
+                            $flightQuoteOptionForm->paxId,
+                            $flightQuoteOptionForm->segmentId,
+                            $flightQuoteOptionForm->tripId,
+                            $flightQuoteOptionForm->display_name,
+                            $flightQuoteOptionForm->markup_amount,
+                            $flightQuoteOptionForm->usd_markup_amount,
+                            $flightQuoteOptionForm->base_price,
+                            $flightQuoteOptionForm->usd_base_price,
+                            $flightQuoteOptionForm->total,
+                            $flightQuoteOptionForm->usd_total,
+                            $flightQuoteOptionForm->currency
+                        );
+                        $this->flightQuoteOptionRepository->save($flightQuoteOption);
+                    }
                 }
 
                 $quote->recalculateProfitAmount();
