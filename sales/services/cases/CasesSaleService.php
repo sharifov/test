@@ -375,6 +375,16 @@ class CasesSaleService
             throw new \InvalidArgumentException('SaleData is broken. Index "itinerary" not found in sale data');
         }
 
+        $this->prepareSegmentsData($caseSale, $saleData);
+
+        if (isset($saleData['chargeType'])) {
+            $caseSale->css_charge_type = $saleData['chargeType'];
+        }
+        return $caseSale;
+    }
+
+    public function prepareSegmentsData(CaseSale $caseSale, array $saleData): void
+    {
         $itineraryFirstKey = array_key_first($saleData['itinerary']);
 
         if (isset($saleData['itinerary'][$itineraryFirstKey]['segments'][0]['departureAirport'])) {
@@ -389,22 +399,22 @@ class CasesSaleService
         if (isset($saleData['itinerary'][$itineraryFirstKey]['segments'][0]['departureTime'])) {
             $caseSale->css_out_date = $saleData['itinerary'][$itineraryFirstKey]['segments'][0]['departureTime'];
         }
-        if (isset($saleData['itinerary'][$itineraryFirstKey])) {
-            if (isset($saleData['itinerary'][$itineraryFirstKey]['segments'][0]['departureAirport'])) {
-                $caseSale->css_in_departure_airport = $saleData['itinerary'][$itineraryFirstKey]['segments'][0]['departureAirport'];
-            }
-            $idxLastInLastSegments = count($saleData['itinerary'][$itineraryFirstKey]['segments']) - 1;
-            if (isset($saleData['itinerary'][$itineraryFirstKey]['segments'][$idxLastInLastSegments]['arrivalAirport'])) {
-                $caseSale->css_out_arrival_airport = $saleData['itinerary'][$itineraryFirstKey]['segments'][$idxLastInLastSegments]['arrivalAirport'];
-            }
-            if (isset($saleData['itinerary'][$itineraryFirstKey]['segments'][0]['departureTime'])) {
-                $caseSale->css_in_date = $saleData['itinerary'][$itineraryFirstKey]['segments'][0]['departureTime'];
+
+        if (count($saleData['itinerary']) > 1) {
+            $itineraryLastKey = array_key_last($saleData['itinerary']);
+            if (isset($saleData['itinerary'][$itineraryLastKey])) {
+                if (isset($saleData['itinerary'][$itineraryLastKey]['segments'][0]['departureAirport'])) {
+                    $caseSale->css_in_departure_airport = $saleData['itinerary'][$itineraryLastKey]['segments'][0]['departureAirport'];
+                }
+                $idxLastInLastSegments = count($saleData['itinerary'][$itineraryLastKey]['segments']) - 1;
+                if (isset($saleData['itinerary'][$itineraryLastKey]['segments'][$idxLastInLastSegments]['arrivalAirport'])) {
+                    $caseSale->css_in_arrival_airport = $saleData['itinerary'][$itineraryLastKey]['segments'][$idxLastInLastSegments]['arrivalAirport'];
+                }
+                if (isset($saleData['itinerary'][$itineraryLastKey]['segments'][0]['departureTime'])) {
+                    $caseSale->css_in_date = $saleData['itinerary'][$itineraryLastKey]['segments'][0]['departureTime'];
+                }
             }
         }
-        if (isset($saleData['chargeType'])) {
-            $caseSale->css_charge_type = $saleData['chargeType'];
-        }
-        return $caseSale;
     }
 
     /**

@@ -93,6 +93,7 @@ $server = Yii::$app->rchat->host;
             'filter' => $filter,
             'agentToken' => $agentToken,
             'server' => $server,
+            'loadChannelsUrl' => \yii\helpers\Url::to('/client-chat/index')
         ]);
     ?>
 <?php endif; ?>
