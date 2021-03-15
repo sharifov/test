@@ -203,6 +203,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
             'icon' => 'comments',
             'items' => [
                 ['label' => 'My Client Chat', 'url' => ['/client-chat/index']],
+                ['label' => 'My Client Chat v2', 'url' => ['/client-chat/dashboard-v2']],
                 ['label' => 'Real Time Visitors', 'url' => ['/client-chat/real-time']],
             ]
         ];
