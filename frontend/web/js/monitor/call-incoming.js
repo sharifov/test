@@ -343,6 +343,7 @@ var callMapApp = Vue.createApp({
             userList: [],
             callStatusList: [],
             callTypeList: [],
+            availableCallTypeList: [],
             callSourceList: [],
             callUserAccessStatusTypeList: [],
             callUserAccessStatusTypeListLabel: [],
@@ -369,29 +370,29 @@ var callMapApp = Vue.createApp({
     },
     computed: {
         ivrCounter: function () {
-            return this.getCallListByStatusId([1]).length;
+            return this.getCallListByStatusId([1], this.availableCallTypeList).length;
         },
         queueCounter: function () {
-            return this.getCallListByStatusId([2]).length;
+            return this.getCallListByStatusId([2], this.availableCallTypeList).length;
         },
         delayCounter: function () {
-            return this.getCallListByStatusId([10]).length;
+            return this.getCallListByStatusId([10], this.availableCallTypeList).length;
         },
         inProgressCounter: function () {
-            return this.getCallListByStatusId([4]).length;
+            return this.getCallListByStatusId([4], this.availableCallTypeList).length;
         },
         ringingCounter: function () {
-            return this.getCallListByStatusId([3]).length;
+            return this.getCallListByStatusId([3], this.availableCallTypeList).length;
         },
         holdCounter: function () {
-            return this.getCallListByStatusId([12]).length;
+            return this.getCallListByStatusId([12], this.availableCallTypeList).length;
         },
 
         callListQueued: function () {
-            return this.getCallListByStatusId([12, 2, 1, 10]);
+            return this.getCallListByStatusId([12, 2, 1, 10], this.availableCallTypeList);
         },
         callListInProgress: function () {
-            return this.getCallListByStatusId([3, 4]);
+            return this.getCallListByStatusId([3, 4], this.availableCallTypeList);
         },
         onlineUserCounter: function () {
             return this.onlineUserList.length;
@@ -461,7 +462,14 @@ var callMapApp = Vue.createApp({
         userOnlineList() {
             return this.onlineUserList.slice(0).sort((a, b) => this.getUserName(a.uo_user_id).toUpperCase() < this.getUserName(b.uo_user_id).toUpperCase() ? this.sortingOnline : -this.sortingOnline)
         },
-
+        findCallIndexById(id) {
+            let index = -1
+            id = parseInt(id)
+            if (this.callList) {
+                index = this.callList.findIndex(item => parseInt(item.c_id) === id)
+            }
+            return index
+        },
         removeCall(index) {
             this.callList = this.callList.splice(index, 1);
         },
@@ -509,6 +517,7 @@ var callMapApp = Vue.createApp({
                     this.userList = response.data.userList;
                     this.callStatusList = response.data.callStatusList;
                     this.callTypeList = response.data.callTypeList;
+                    this.availableCallTypeList = response.data.availableCallTypeList;
                     this.callSourceList = response.data.callSourceList;
                     this.callUserAccessStatusTypeList = response.data.callUserAccessStatusTypeList;
                     this.callUserAccessStatusTypeListLabel = response.data.callUserAccessStatusTypeListLabel;
