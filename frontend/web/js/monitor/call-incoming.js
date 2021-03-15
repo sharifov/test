@@ -465,23 +465,17 @@ var callMapApp = Vue.createApp({
         findCallIndexById(id) {
             let index = -1;
             id = parseInt(id)
-            console.log('callId:' + id);
-            console.log('index before: ' + index);
             if (this.callList) {
                 index = this.callList.findIndex(item => parseInt(item.c_id) === id)
             }
-            console.log('index after' + index);
             return index
         },
         removeCall(index) {
-            console.log('remove index '+index);
-            console.log(this.callList.length === 1);
             if (this.callList.length === 1) {
                 this.callList = [];
             } else {
                 this.callList = this.callList.splice(index, 1);
             }
-            console.log(this.callList);
         },
         actionCall(callData) {
             if (this.callList.find(x => parseInt(x.c_id) === parseInt(callData.c_id))) {
