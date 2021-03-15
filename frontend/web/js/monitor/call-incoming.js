@@ -463,11 +463,14 @@ var callMapApp = Vue.createApp({
             return this.onlineUserList.slice(0).sort((a, b) => this.getUserName(a.uo_user_id).toUpperCase() < this.getUserName(b.uo_user_id).toUpperCase() ? this.sortingOnline : -this.sortingOnline)
         },
         findCallIndexById(id) {
-            let index = -1
+            let index = -1;
             id = parseInt(id)
+            console.log('callId:' + id);
+            console.log('index before: ' + index);
             if (this.callList) {
                 index = this.callList.findIndex(item => parseInt(item.c_id) === id)
             }
+            console.log('index after' + index);
             return index
         },
         removeCall(index) {
