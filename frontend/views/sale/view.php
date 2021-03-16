@@ -267,7 +267,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                 </div>
             <?php endif; ?>
 
-            <?php if ($caseSaleModel && $package = ArrayHelper::getValue($caseSaleModel->getSaleDataDecoded(), 'package')) : ?>
+            <?php if (!empty($caseSaleModel) && $package = ArrayHelper::getValue($caseSaleModel->getSaleDataDecoded(), 'package')) : ?>
                 <div class="row">
                     <div class="col-md-2">
                         <h2>Package</h2>
