@@ -106,9 +106,8 @@ if ($lead->l_expiration_dt && !LeadHelper::expiredLead($lead)) :
                 format: '%Hh %Mm %Ss', 
                 duration: leftTime, 
                 countdown: true,
-                 callback: function() {
-                    $('#clock-expiration').timer('remove');
-                    $('#clock-expiration').remove();
+                callback: function() {
+                    $('#clock-expiration').timer('remove').remove();
                     $('.box-clock-expiration').removeClass('bg-orange').addClass('bg-red').html('<i class="fa fa-clock-o"></i> Expired</span>');
                 }
             }).timer('start');
