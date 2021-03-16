@@ -21,6 +21,7 @@ use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCancelBookService;
 use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchGuard;
 use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchService;
 use modules\hotel\src\useCases\quote\HotelQuoteManageService;
+use modules\order\src\events\OrderFileGeneratedEvent;
 use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
 use Yii;
@@ -397,12 +398,13 @@ class HotelQuoteController extends FController
 
         try {
             $hotelQuote = $this->findModel($id);
-
             if (!$hotelQuote->isBooked()) {
                 throw new \DomainException('Quote should have Booked status.');
             }
-
-            if (HotelQuotePdfService::processingFile($hotelQuote)) {
+            HotelQuotePdfService::guard($hotelQuote);
+            $hotelQuotePdfService = new HotelQuotePdfService($hotelQuote);
+            $hotelQuotePdfService->setProductQuoteId($hotelQuote->hq_product_quote_id);
+            if ($hotelQuotePdfService->processingFile()) {
                 $result['status'] = 1;
                 $result['message'] = 'Document have been successfully generated';
             }

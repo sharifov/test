@@ -141,14 +141,14 @@ class OrderActionsController extends FController
         $order = $this->findModel($orderId);
 
         try {
-            OrderPdfService::processingFile($order);
+            (new OrderPdfService($order))->processingFile();
             return [
                 'error' => false,
                 'message' => 'OK',
             ];
         } catch (\Throwable $e) {
             \Yii::error([
-                'message' => 'Send Order Confirmation Email Error',
+                'message' => 'Order generate pdf error',
                 'error' => $e->getMessage(),
                 'orderId' => $order->or_id,
             ], 'OrderActionsController:actionGenerateFiles');

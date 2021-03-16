@@ -18,6 +18,7 @@ use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchService;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuoteCreateForm;
 use modules\flight\src\useCases\flightQuote\createManually\helpers\FlightQuotePaxPriceHelper;
 use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
+use modules\order\src\events\OrderFileGeneratedEvent;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\entities\productType\ProductType;
@@ -567,7 +568,9 @@ class FlightQuoteController extends FController
                 throw new \DomainException('Quote should have Booked status.');
             }
 
-            if (FlightQuotePdfService::processingFile($flightQuote)) {
+            $flightQuotePdfService = new FlightQuotePdfService($flightQuote);
+            $flightQuotePdfService->setProductQuoteId($flightQuote->fq_product_quote_id);
+            if ($flightQuotePdfService->processingFile()) {
                 $result['status'] = 1;
                 $result['message'] = 'Document have been successfully generated';
                 return $result;

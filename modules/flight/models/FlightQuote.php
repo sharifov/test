@@ -4,13 +4,18 @@ namespace modules\flight\models;
 
 use common\components\SearchService;
 use common\models\Airline;
+use common\models\Client;
 use common\models\Employee;
+use common\models\Lead;
+use common\models\Project;
 use modules\flight\models\behaviors\FlightQuoteFqUid;
 use modules\flight\src\entities\flightQuote\events\FlightQuoteCloneCreatedEvent;
 use modules\flight\src\entities\flightQuote\serializer\FlightQuoteSerializer;
+use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteCreateDTO;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\interfaces\ProductDataInterface;
 use modules\product\src\interfaces\Quotable;
 use sales\entities\EventTrait;
 use yii\db\ActiveQuery;
@@ -58,7 +63,7 @@ use yii\helpers\ArrayHelper;
  * @property FlightQuoteTrip[] $flightQuoteTrips
  * @property Airline $mainAirline
  */
-class FlightQuote extends ActiveRecord implements Quotable
+class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
 {
     use EventTrait;
 
@@ -602,5 +607,29 @@ class FlightQuote extends ActiveRecord implements Quotable
     public function isBookable(): bool
     {
         return (ProductQuoteStatus::isBookable($this->fqProductQuote->pq_status_id) && !$this->isBooked());
+    }
+
+    public function getProject(): Project
+    {
+        return $this->fqProductQuote->pqProduct->prLead->project;
+    }
+
+    public function getLead(): Lead
+    {
+        return $this->fqProductQuote->pqProduct->prLead;
+    }
+
+    public function getClient(): Client
+    {
+        return $this->fqProductQuote->pqProduct->prLead->client;
+    }
+
+    public function getOrder(): ?Order
+    {
+        if ($order = ArrayHelper::getValue($this, 'fqProductQuote.pqOrder')) {
+            /** @var Order $order */
+            return $order;
+        }
+        return null;
     }
 }

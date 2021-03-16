@@ -32,7 +32,7 @@ class OrderGeneratorPdfJob implements RetryableJobInterface
             if (!$order = Order::findOne(['or_id' => $this->orderId])) {
                 throw new NotFoundException('Order not found. Id (' . $this->orderId . ')');
             }
-            if (OrderPdfService::processingFile($order)) {
+            if ((new OrderPdfService($order))->processingFile()) {
                 \Yii::info([
                     'message' => 'OrderGeneratorPdfJob - file is generated',
                     'orderId' => $this->orderId,

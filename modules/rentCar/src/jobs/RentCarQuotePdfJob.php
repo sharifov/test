@@ -2,6 +2,7 @@
 
 namespace modules\rentCar\src\jobs;
 
+use modules\order\src\events\OrderFileGeneratedEvent;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use modules\rentCar\src\services\RentCarQuotePdfService;
 use yii\queue\Queue;
@@ -32,7 +33,9 @@ class RentCarQuotePdfJob implements RetryableJobInterface
             if (!$rentCarQuote = RentCarQuote::findOne(['rcq_id' => $this->rentCarQuoteId])) {
                 throw new NotFoundException('RentCarQuote not found. Id (' . $this->rentCarQuoteId . ')');
             }
-            if (RentCarQuotePdfService::processingFile($rentCarQuote)) {
+            $rentCarQuotePdfService = new RentCarQuotePdfService($rentCarQuote);
+            $rentCarQuotePdfService->setProductQuoteId($rentCarQuote->rcqProductQuote->pq_id);
+            if ($rentCarQuotePdfService->processingFile()) {
                 \Yii::info([
                     'message' => 'RentCarQuotePdfJob - file is generated',
                     'quoteId' => $this->rentCarQuoteId,
