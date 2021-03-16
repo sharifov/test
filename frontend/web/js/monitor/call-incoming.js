@@ -345,6 +345,7 @@ var callMapApp = Vue.createApp({
             callTypeList: [],
             availableCallTypeList: [],
             callSourceList: [],
+            availableCallSourceList: [],
             callUserAccessStatusTypeList: [],
             callUserAccessStatusTypeListLabel: [],
             callList: [],
@@ -411,7 +412,8 @@ var callMapApp = Vue.createApp({
                 if (item.c_status_id) {
                     let statusId = parseInt(item.c_status_id);
                     let callTypeId = parseInt(item.c_call_type_id);
-                    if (statusList.includes(statusId)) {
+                    let callSourceId = parseInt(item.c_source_type_id);
+                    if (statusList.includes(statusId) && this.availableCallSourceList.includes(callSourceId)) {
                         if (typeList) {
                             if (typeList.includes(callTypeId)) {
                                 return item;
@@ -526,6 +528,7 @@ var callMapApp = Vue.createApp({
                     this.callTypeList = response.data.callTypeList;
                     this.availableCallTypeList = response.data.availableCallTypeList;
                     this.callSourceList = response.data.callSourceList;
+                    this.availableCallSourceList = response.data.availableCallSourceList;
                     this.callUserAccessStatusTypeList = response.data.callUserAccessStatusTypeList;
                     this.callUserAccessStatusTypeListLabel = response.data.callUserAccessStatusTypeListLabel;
                     this.onlineUserList = response.data.onlineUserList;
