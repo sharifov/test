@@ -1,10 +1,10 @@
 <?php
 
-namespace modules\flight\src\helpers;
+namespace modules\attraction\src\helpers;
 
 /**
- * Class FlightQuoteTotalPriceDTO
- * @package modules\flight\src\helperss
+ * Class AttractionQuoteTotalPriceDTO
+ * @package modules\attraction\src\helperss
  *
  * @property $tickets
  * @property $net
@@ -14,7 +14,7 @@ namespace modules\flight\src\helpers;
  * @property $serviceFeeSum
  * @property $clientSelling
  */
-class FlightQuoteTotalPriceDTO
+class AttractionQuoteTotalPriceDTO
 {
     public $tickets = 0;
     public $net = 0;

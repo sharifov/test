@@ -1,26 +1,26 @@
 <?php
 
-namespace modules\flight\src\helpers;
+namespace modules\attraction\src\helpers;
 
 /**
- * Class FlightQuotePriceDataDTO
- * @package modules\flight\src\helpers
+ * Class AttractionQuotePriceDataDTO
+ * @package modules\attraction\src\helpers
  *
- * @property FlightQuotePaxPriceDataDTO[] $prices
- * @property FlightQuoteTotalPriceDTO $total
+ * @property AttractionQuotePaxPriceDataDTO[] $prices
+ * @property AttractionQuoteTotalPriceDTO $total
  * @property $serviceFeePercent float
  * @property $serviceFee float;
  * @property $processingFee float
  */
-class FlightQuotePriceDataDTO
+class AttractionQuotePriceDataDTO
 {
     /**
-     * @var $prices FlightQuotePaxPriceDataDTO[]
+     * @var $prices AttractionQuotePaxPriceDataDTO[]
      */
     public $prices;
 
     /**
-     * @var FlightQuoteTotalPriceDTO
+     * @var AttractionQuoteTotalPriceDTO
      */
     public $total;
 

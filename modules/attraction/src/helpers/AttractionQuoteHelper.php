@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\flight\src\helpers;
+namespace modules\attraction\src\helpers;
 
 use common\components\SearchService;
 use common\models\Airline;
@@ -25,7 +25,7 @@ use yii\base\ErrorException;
 use yii\data\ActiveDataProvider;
 use yii\helpers\ArrayHelper;
 
-class FlightQuoteHelper
+class AttractionQuoteHelper
 {
     /**
      * @param $key
@@ -48,21 +48,21 @@ class FlightQuoteHelper
 
     /**
      * @param FlightQuote $flightQuote
-     * @return FlightQuotePriceDataDTO
+     * @return AttractionQuotePriceDataDTO
      */
-    public static function getPricesData(FlightQuote $flightQuote): FlightQuotePriceDataDTO
+    public static function getPricesData(FlightQuote $flightQuote): AttractionQuotePriceDataDTO
     {
         /** @var $prices FlightQuotePaxPriceDTO[] */
         $prices = [];
         $service_fee_percent = $flightQuote->getServiceFeePercent();
 
-        $dtoPax = new FlightQuotePaxPriceDataDTO();
+        $dtoPax = new AttractionQuotePaxPriceDataDTO();
         $paxCodeId = null;
-        $dtoTotal = new FlightQuoteTotalPriceDTO();
+        $dtoTotal = new AttractionQuoteTotalPriceDTO();
         foreach ($flightQuote->flightQuotePaxPrices as $price) {
             $paxCode = FlightPax::getPaxTypeById($price->qpp_flight_pax_code_id);
             if ($dtoPax->paxCodeId !== $price->qpp_flight_pax_code_id) {
-                $dtoPax = new FlightQuotePaxPriceDataDTO();
+                $dtoPax = new AttractionQuotePaxPriceDataDTO();
                 $dtoPax->paxCodeId = $price->qpp_flight_pax_code_id;
                 $dtoPax->paxCode = $paxCode;
             }
@@ -89,7 +89,7 @@ class FlightQuoteHelper
             $dtoTotal->clientSelling += $dtoPax->clientSelling;
         }
 
-        $priceDto = new FlightQuotePriceDataDTO();
+        $priceDto = new AttractionQuotePriceDataDTO();
         $priceDto->prices = $prices;
         $priceDto->total = $dtoTotal;
         $priceDto->serviceFeePercent = $service_fee_percent;
@@ -103,7 +103,7 @@ class FlightQuoteHelper
      * @param array $priceData
      * @return string
      */
-    public static function getEstimationProfitText(FlightQuotePriceDataDTO $priceData): string
+    public static function getEstimationProfitText(AttractionQuotePriceDataDTO $priceData): string
     {
         $data = [];
         /* if(isset($priceData['service_fee']) && $priceData['service_fee'] > 0){
@@ -120,7 +120,7 @@ class FlightQuoteHelper
      * @param array $priceData
      * @return false|float
      */
-    public static function getEstimationProfit(FlightQuotePriceDataDTO $priceData)
+    public static function getEstimationProfit(AttractionQuotePriceDataDTO $priceData)
     {
         $profit = 0;
         $markUp = $priceData->total->markUp + $priceData->total->extraMarkUp;
