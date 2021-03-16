@@ -17,6 +17,7 @@ use yii\helpers\Url;
 use yii\web\View;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
+use modules\attraction\src\helpers\AttractionQuoteHelper;
 
 ?>
 
@@ -316,107 +317,15 @@ JS;
 
 
 
-        <?php if ($model->atnqProductQuote) :
-            $totalAmountRoom = 0;
-            $adlTotalCount = 0;
-            $chdTotalCount = 0;
-            $totalNp = 0;
-            $totalMkp = 0;
-            $totalExMkp = 0;
-            ?>
-            <div class="overflow_auto" style="overflow: auto">
-                <table class="table table-striped table-bordered">
-                    <tr>
-                        <th>ID</th>
-                        <th>Type Name</th>
-                        <th>Supplier Name</th>
-                        <th>NP, $</th>
-                        <!-- <th>Adult</th>
-                        <th>Children</th>
-                        <th>Cancel Amount</th>
-
-                        <th>Mkp, $</th>
-                        <th>Ex Mkp, $</th>
-                        <th>SFP, %</th>
-                        <th>SFS, $</th>
-                        <th>SP, $</th>-->
-                    </tr>
-                    <?php /*foreach ($model->hotelQuoteRooms as $room) :
-                        $totalAmountRoom += (float) $room->hqr_amount;
-                        $adlTotalCount += $room->hqr_adults;
-                        $chdTotalCount += $room->hqr_children;
-                        $totalNp += $room->hqr_amount;
-                        $totalMkp += $room->hqr_system_mark_up;
-                        $totalExMkp += $room->hqr_agent_mark_up;
-
-                        $sfs = round(($room->hqr_amount + $room->hqr_system_mark_up + $room->hqr_agent_mark_up) * $room->hqr_service_fee_percent / 100, 2);
-                        */?>
-
-                        <tr>
-                            <td title="<?=Html::encode($model->atnq_id)?>"><?=Html::encode($model->atnq_id)?></td>
-                            <td ><?=Html::encode($model->atnq_type_name) ?></td>
-                            <td ><?=Html::encode($model->atnq_supplier_name) ?></td>
-                            <td ><?=number_format($model->atnqProductQuote->pq_origin_price, 2) ?></td>
-
-                            <!--<td title="code: <? /*=Html::encode('$room->hqr_board_code')*/?>">
-                                <? /*=Html::encode('$room->hqr_board_name')*/?>
-                                <?php /*if ('$room->hqr_rate_comments') :*/?>
-                                    <i class="fa fa-info-circle green" title="Rate Comments: <? /*=Html::encode('$room->hqr_rate_comments')*/?>"></i>
-                                <?php /*endif;*/?>
-                            </td> -->
-
-
-                            <!-- <td>
-                                 <? /*= Editable::widget([
-                                    'name' => 'extra_markup[' . $room->hqr_id . ']',
-                                    'asPopover' => false,
-                                    'pjaxContainerId' => 'pjax-product-quote-' . $model->hqProductQuote->pq_id,
-                                    'value' => number_format($room->hqr_agent_mark_up, 2),
-                                    'header' => 'Extra markup',
-                                    'size' => 'sm',
-                                    'inputType' => Editable::INPUT_TEXT,
-                                    'buttonsTemplate' => '{submit}',
-                                    'pluginEvents' => ['editableSuccess' => "function(event, val, form, data) { pjaxReload({container: '#pjax-product-quote-{$model->hqProductQuote->pq_id}'}); }",],
-                                    'inlineSettings' => [
-                                        'templateBefore' => '<div class="editable-pannel">{loading}',
-                                        'templateAfter' => '{buttons}{close}</div>'],
-                                    'options' => ['class' => 'form-control','style' => 'width:50px;', 'placeholder' => 'Enter extra markup','resetButton' => '<i class="fa fa-ban"></i>'],
-                                    'formOptions' => [
-                                        'action' => Url::toRoute(['/hotel/hotel-quote/ajax-update-agent-markup'])
-                                    ]
-                                ]) */?>
-                            </td>-->
-                           <!-- <td><?/*= Html::encode('$room->hqr_service_fee_percent') */?>%</td>-->
-                            <!--<td><?/*= '$sfs' */?></td>-->
-                            <!--<td class="text-right"><?/*='number_format($room->hqr_amount + $room->hqr_system_mark_up + $room->hqr_agent_mark_up + $sfs, 2)'*/?> <?/*=Html::encode('$room->hqr_currency')*/?></td>-->
-                        </tr>
-                    <?php /*endforeach; */?>
-                    <tr>
-                        <td colspan="3" class="text-right">Position Total: </td>
-                        <td ><?= number_format($model->atnqProductQuote->pq_origin_price, 2) ?></td>
-                        <!--<td class="text-center"><?/*='$adlTotalCount' ? '<i class="fa fa-user"></i> ' . '$adlTotalCount' : '-'*/?></td>
-                        <td class="text-center"><?/*='$chdTotalCount' ? '<i class="fa fa-child"></i> ' . '$chdTotalCount' : '-'*/?></td>
-                        <td class="text-right"></td>
-                        <td class="text-right"><?/*= 'number_format($totalNp, 2)' */?></td>
-                        <td class="text-right"><?/*= 'number_format($totalMkp, 2)' */?></td>
-                        <td class="text-right"><?/*= 'number_format($totalExMkp, 2)' */?></td>
-                        <td class="text-right"></td>
-                        <td class="text-right"><?/*= 'number_format($model->hqProductQuote->pq_service_fee_sum, 2)' */?></td>-->
-
-                        <?php
-/*                        $price = round((float) $model->hqProductQuote->pq_price, 2);
-                        $totalAmountRoom = round($totalAmountRoom, 2);
-                        */?>
-
-                        <!-- <td class="text-right <?='( $totalAmountRoom !== $price)' ? 'danger' : ''?>">
-                           <b title="<?/*=$totalAmountRoom*/?> & <?/*=$price*/?>"><?/*=number_format($price, 2)*/?> USD</b>
-                        </td>-->
-                    </tr>
-                </table>
-            </div>
+        <?php if ($model->atnqProductQuote) : ?>
+            <?php Pjax::begin(['id' => 'pjax-quote_prices-' . $model->atnq_id, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
+            <?= $this->render('_quote_prices', [
+                'attractionQuote' => $model,
+                'quote' => $model->atnqProductQuote,
+                'priceData' => AttractionQuoteHelper::getPricesData($model)
+            ]); ?>
+            <?php Pjax::end(); ?>
         <?php endif; ?>
-
-
 
         <?= $this->render('@frontend/views/lead/quotes/partial/_quote_option_list', ['productQuote' => $model->atnqProductQuote]) ?>
         <?= $this->render('@frontend/views/lead/quotes/partial/_quote_total', ['productQuote' => $model->atnqProductQuote]) ?>

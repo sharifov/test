@@ -4,7 +4,7 @@ namespace modules\attraction\src\helpers;
 
 /**
  * Class AttractionQuoteTotalPriceDTO
- * @package modules\attraction\src\helperss
+ * @package modules\attraction\src\helpers
  *
  * @property $tickets
  * @property $net

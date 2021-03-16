@@ -18,6 +18,7 @@ namespace modules\attraction\src\helpers;
  * @property $clientSelling
  * @property $paxCode
  * @property $paxCodeId
+ * @property $label
  */
 class AttractionQuotePaxPriceDataDTO
 {
@@ -33,4 +34,5 @@ class AttractionQuotePaxPriceDataDTO
     public $clientSelling = 0;
     public $paxCodeId;
     public $paxCode;
+    public $label;
 }

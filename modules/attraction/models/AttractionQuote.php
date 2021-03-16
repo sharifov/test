@@ -3,6 +3,8 @@
 namespace modules\attraction\models;
 
 use modules\attraction\src\entities\attractionQuote\serializer\AttractionQuoteSerializer;
+use modules\attraction\src\helpers\AttractionQuoteHelper;
+use modules\attraction\src\services\attractionQuote\AttractionQuotePriceCalculator;
 use modules\attraction\src\useCases\quote\create\AttractionProductQuoteCreateDto;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
@@ -192,6 +194,7 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable
                 $productQuoteDto->originPrice = $quoteData['pricingCategoryList']['priceTotal'];
                 $productQuoteDto->clientPrice =  0;
                 $productQuoteDto->serviceFeeSum = 0;
+                $productQuoteDto->clientCurrencyRate = ProductQuoteHelper::getClientCurrencyRate($attraction->atnProduct);
                 $productQuoteDto->originCurrencyRate = 1;
                 //$productQuoteDto->name = mb_substr($quoteData['product']['name'], 0, 40);
 
@@ -215,6 +218,7 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable
                     $aQuote->atnq_availability_date = $quoteData['date'];
                     $aQuote->atnq_availability_id = $quoteData['id'];
                     $aQuote->atnq_availability_product_id = $quoteData['productId'];
+                    $aQuote->atnq_service_fee_percent = $productTypeServiceFee;
 
                     if (!$aQuote->save()) {
                         Yii::error(
@@ -269,10 +273,24 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable
                         }
                     }
                 }
+                $prices = (new AttractionQuotePriceCalculator())->calculate($aQuote, $prQuote->pq_origin_currency_rate);
+                $prQuote->updatePrices(
+                    $prices['originPrice'],
+                    $prices['appMarkup'],
+                    $prices['agentMarkup']
+                );
+                $prQuote->save();
             }
         }
 
+        //$test = AttractionQuoteHelper::getPricesData($aQuote);
+
         return $aQuote;
+    }
+
+    public function getServiceFeePercent(): float
+    {
+        return $this->atnq_service_fee_percent ?? 0.00;
     }
 
     /**
