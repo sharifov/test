@@ -61,6 +61,7 @@ $js = <<<JS
 
 $('#{$modalId}').on('hidden.bs.modal', function (e) {
     cleanErrors();
+    $('#{$fileId}').fileinput('clear');
 });
 
 $('#{$modalId} .input-group-btn .btn').on('click', function (e) {
