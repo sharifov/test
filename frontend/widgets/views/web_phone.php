@@ -35,6 +35,7 @@ use yii\bootstrap4\Modal;
     $ajaxHangupUrl = Url::to(['/phone/ajax-hangup']);
     $ajaxCreateCallUrl = Url::to(['/phone/ajax-create-call']);
     $ajaxGetPhoneListIdUrl = Url::to(['/phone/ajax-get-phone-list-id']);
+    $ajaxWarmTransferDirectUrl = Url::to(['phone/ajax-warm-transfer-direct']);
 
     $conferenceBase = 0;
 if (isset(Yii::$app->params['settings']['voip_conference_base'])) {
@@ -56,6 +57,7 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
     const ajaxSaveCallUrl = '<?=$ajaxSaveCallUrl?>';
     const ajaxCallRedirectUrl = '<?=$ajaxRedirectCallUrl?>';
     const ajaxCallTransferUrl = '<?=$ajaxCallTransferUrl?>';
+    const ajaxWarmTransferDirectUrl = '<?=$ajaxWarmTransferDirectUrl?>';
     const ajaxCallRedirectGetAgents = '<?=$ajaxCallRedirectGetAgents?>';
     const ajaxPhoneDialUrl = '<?=$ajaxPhoneDialUrl?>';
     const ajaxBlackList = '<?=$ajaxBlackList?>';
@@ -915,8 +917,44 @@ $js = <<<JS
             }
         });
     });
+
+    $(document).on('click', '.btn-warm-transfer-direct', function(e) {
+        e.preventDefault();
         
+        let obj = $(e.target);
+        let userId  = obj.data('user-id');
+        let callSid = obj.data('call-sid');
         
+        obj.attr('disabled', true);
+        
+        let modal = $('#web-phone-redirect-agents-modal');
+        modal.find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+
+        if (!callSid) {
+            new PNotify({title: "Transfer call", type: "error", text: "Not found Call SID!", hide: true});
+            return false;
+        }
+
+        $.ajax({
+            type: 'post',
+            data: {
+                'callSid': callSid,
+                'userId': userId
+            },
+            url: ajaxWarmTransferDirectUrl,
+            success: function (data) {
+                if (data.error) {
+                    alert(data.message);
+                }
+                modal.modal('hide').find('.modal-body').html('');
+            },
+            error: function (error) {
+                console.error(error);
+                modal.modal('hide').find('.modal-body').html('');
+            }
+        });
+    });
+
     $(document).on('click',  '.btn-transfer-number',  function (e) {
         e.preventDefault();
         let obj = $(e.target);

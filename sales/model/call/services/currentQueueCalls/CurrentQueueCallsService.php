@@ -367,11 +367,16 @@ class CurrentQueueCallsService
         $query = CallUserAccess::find()
             ->with(['cuaCall', 'cuaCall.cProject', 'cuaCall', 'cuaCall.cClient'])
             ->joinWith(['cuaCall'])
-            ->where(['cua_user_id' => $this->userId, 'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING])
+            ->where(['cua_user_id' => $this->userId, 'cua_status_id' => [CallUserAccess::STATUS_TYPE_PENDING, CallUserAccess::STATUS_TYPE_WARM_TRANSFER]])
             ->andWhere(['<>', 'c_status_id', Call::STATUS_HOLD]);
 
         if ($generalLinePriorityIsEnabled) {
-            $query = $query->andWhere(['NOT IN', 'c_source_type_id', [Call::SOURCE_GENERAL_LINE, Call::SOURCE_REDIRECT_CALL]]);
+            $query = $query
+                ->andWhere([
+                    'OR',
+                    ['cua_status_id' => [CallUserAccess::STATUS_TYPE_WARM_TRANSFER]],
+                    ['NOT IN', 'c_source_type_id', [Call::SOURCE_GENERAL_LINE, Call::SOURCE_REDIRECT_CALL]],
+                ]);
         }
 
         if ($excludeCallSid) {

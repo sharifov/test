@@ -980,6 +980,86 @@ class PhoneController extends FController
         return $result;
     }
 
+    public function actionAjaxWarmTransferDirect()
+    {
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $result = [
+            'error' => false,
+            'message' => '',
+        ];
+
+        try {
+            $callSid = Yii::$app->request->post('callSid');
+            $userId = (int)Yii::$app->request->post('userId');
+
+            if (!$callSid) {
+                throw new BadRequestHttpException('Not found Call SID in request');
+            }
+
+            if (!$userId) {
+                throw new BadRequestHttpException('Not found User Id in request');
+            }
+
+            $originCall = Call::find()
+                ->bySid($callSid)
+                ->byCreatedUser(Auth::id())
+                //todo status
+//                ->andWhere(['c_status_id' => [Call::STATUS_IN_PROGRESS]])
+                ->limit(1)->one();
+
+            if (!$originCall) {
+                throw new BadRequestHttpException('Not found Call');
+            }
+
+            if ($originCall->isJoin()) {
+                throw new Exception('Error: Cant redirect Join Call');
+            }
+
+            if (!$originCall->isOwner(Auth::id())) {
+                throw new BadRequestHttpException('Is not your Call');
+            }
+
+            $user = Employee::findOne($userId);
+
+            if (!$user) {
+                throw new BadRequestHttpException('Invalid User Id: ' . $userId);
+            }
+
+            if (!$user->isOnline()) {  // || !$userRedirect->isCallFree()
+                throw new NotAcceptableHttpException('This agent is not online (Id: ' . $userId . ')');
+            }
+
+            if ($originCall->cParent) {
+                if ($originCall->isOut() || ($originCall->isReturn() && $originCall->cParent->isOut())) {
+                    $parent = Call::find()->firstChild($originCall->c_parent_id)->one();
+                } else {
+                    $parent = $originCall->cParent;
+                }
+                if (!$parent) {
+                    throw new \DomainException('Not found originCall->cParent->firstChild, Origin CallSid: ' . $originCall->c_call_sid);
+                }
+                $callSid = $parent->c_call_sid;
+                Call::applyCallToAgentAccessWarmTransfer($parent, $userId);
+            } else {
+                $childCall = Call::find()
+                    ->andWhere(['c_parent_id' => $originCall->c_id])
+                    ->andWhere(['<>', 'c_call_type_id', Call::CALL_TYPE_JOIN])
+                    ->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+                if (!$childCall) {
+                    throw new \DomainException('Not found originCall->cParent, Origin CallSid: ' . $originCall->c_call_sid);
+                }
+                $callSid = $childCall->c_call_sid;
+                Call::applyCallToAgentAccessWarmTransfer($childCall, $userId);
+            }
+        } catch (\Throwable $e) {
+            $result = [
+                'error' => true,
+                'message' => $e->getMessage() . '   File/Line: ' . $e->getFile() . ':' . $e->getLine(),
+            ];
+        }
+        return $result;
+    }
+
     public function actionAjaxHangup(): Response
     {
         try {

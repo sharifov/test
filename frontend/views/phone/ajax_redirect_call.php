@@ -140,6 +140,12 @@ use yii\helpers\Html;
                                     // 'data-dep_id' => $call->c_dep_id
                                 'data-call-sid' => $call->c_call_sid
                             ])?>
+
+                            <?=Html::button('<i class="fa fa-forward"></i> Warm transfer', [
+                                    'class' => 'btn btn-xs ' . $btnClass . ' btn-warm-transfer-direct',
+                                    'data-user-id' => $userModel->id,
+                                    'data-call-sid' => $call->c_call_sid
+                            ])?>
                         </td>
                     </tr>
                 <?php endforeach;?>

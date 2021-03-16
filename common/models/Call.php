@@ -1565,6 +1565,33 @@ class Call extends \yii\db\ActiveRecord
         return false;
     }
 
+    public static function applyCallToAgentAccessWarmTransfer(Call $call, int $user_id): bool
+    {
+        try {
+            $callUserAccess = CallUserAccess::find()->where(['cua_user_id' => $user_id, 'cua_call_id' => $call->c_id])->one();
+            if (!$callUserAccess) {
+                $callUserAccess = new CallUserAccess();
+                $callUserAccess->cua_call_id = $call->c_id;
+                $callUserAccess->cua_user_id = $user_id;
+                $callUserAccess->warmTransfer();
+                $callUserAccess->cua_priority = $call->getDataPriority();
+            } else {
+                $callUserAccess->warmTransfer();
+                $callUserAccess->cua_created_dt = date("Y-m-d H:i:s");
+                $callUserAccess->cua_priority = $call->getDataPriority();
+            }
+
+            if (!$callUserAccess->save()) {
+                Yii::error(VarDumper::dumpAsString($callUserAccess->errors), 'Call:applyCallToAgentAccessWarmTransfer');
+            } else {
+                return true;
+            }
+        } catch (\Throwable $e) {
+            \Yii::error($e, 'Call:applyCallToAgentAccessWarmTransfer');
+        }
+        return false;
+    }
+
 
 
     /**
