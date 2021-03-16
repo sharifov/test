@@ -19,6 +19,7 @@ class m210312_093032_add_column_atnq_availability_id_attraction_quote_tbl extend
         $this->addColumn('{{%attraction_quote}}', 'atnq_availability_product_id', $this->string(40));
         $this->addColumn('{{%attraction_quote}}', 'atnq_availability_date', $this->date());
         $this->addColumn('{{%attraction_quote}}', 'atnq_availability_is_valid', $this->tinyInteger()->defaultValue(0));
+        $this->addColumn('{{%attraction_quote}}', 'atnq_service_fee_percent', $this->decimal(5, 2)->defaultValue(0));
     }
 
     /**
@@ -30,6 +31,7 @@ class m210312_093032_add_column_atnq_availability_id_attraction_quote_tbl extend
         $this->dropColumn('{{%attraction_quote}}', 'atnq_availability_product_id');
         $this->dropColumn('{{%attraction_quote}}', 'atnq_availability_date');
         $this->dropColumn('{{%attraction_quote}}', 'atnq_availability_is_valid');
+        $this->dropColumn('{{%attraction_quote}}', 'atnq_service_fee_percent');
         $this->addColumn('{{%attraction_quote}}', 'atnq_date', $this->date());
     }
 }

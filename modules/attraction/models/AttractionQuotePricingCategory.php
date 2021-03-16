@@ -16,6 +16,8 @@ namespace modules\attraction\models;
  * @property int|null $atqpc_quantity
  * @property float|null $atqpc_price
  * @property string|null $atqpc_currency
+ * @property float|null $atqpc_system_mark_up
+ * @property float|null $atqpc_agent_mark_up
  *
  * @property AttractionQuote $atqpcAttractionQuote
  */
@@ -37,7 +39,7 @@ class AttractionQuotePricingCategory extends \yii\db\ActiveRecord
         return [
             [['atqpc_attraction_quote_id'], 'required'],
             [['atqpc_attraction_quote_id', 'atqpc_min_age', 'atqpc_max_age', 'atqpc_min_participants', 'atqpc_max_participants', 'atqpc_quantity'], 'integer'],
-            [['atqpc_price'], 'number'],
+            [['atqpc_price', 'atqpc_system_mark_up', 'atqpc_agent_mark_up'], 'number'],
             [['atqpc_category_id', 'atqpc_label'], 'string', 'max' => 40],
             [['atqpc_currency'], 'string', 'max' => 3],
             [['atqpc_attraction_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => AttractionQuote::class, 'targetAttribute' => ['atqpc_attraction_quote_id' => 'atnq_id']],
@@ -61,6 +63,8 @@ class AttractionQuotePricingCategory extends \yii\db\ActiveRecord
             'atqpc_quantity' => 'Quantity',
             'atqpc_price' => 'Price',
             'atqpc_currency' => 'Currency',
+            'atqpc_system_mark_up' => 'System Mark Up',
+            'atqpc_agent_mark_up' => 'Agent Mark Up',
         ];
     }
 

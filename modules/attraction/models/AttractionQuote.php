@@ -29,6 +29,7 @@ use yii\helpers\VarDumper;
  * @property string|null $atnq_availability_product_id
  * @property string|null $atnq_availability_date
  * @property int|null $atnq_availability_is_valid
+ * @property float|null $atnq_service_fee_percent
  *
  * @property Attraction $atnqAttraction
  * @property ProductQuote $atnqProductQuote
@@ -62,6 +63,7 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable
             [['atnq_type_name'], 'string', 'max' => 100],
             [['atnq_attraction_name', 'atnq_supplier_name'], 'string', 'max' => 255],
             [['atnq_availability_id', 'atnq_availability_product_id'], 'string', 'max' => 40],
+            [['atnq_service_fee_percent'], 'number'],
         ];
     }
 
@@ -84,6 +86,7 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable
             'atnq_availability_product_id' => 'Availability Product ID',
             'atnq_availability_date' => 'Availability Date',
             'atnq_availability_is_valid' => 'Availability Is Valid',
+            'atnq_service_fee_percent' => 'Service Fee Percent',
         ];
     }
 

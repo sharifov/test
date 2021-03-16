@@ -41,7 +41,9 @@ class m210312_072210_create_tbl_attraction_quote_pricing_category extends Migrat
             'atqpc_max_participants' => $this->integer(),
             'atqpc_quantity' => $this->integer(),
             'atqpc_price' => $this->decimal(10, 2)->defaultValue(0),
-            'atqpc_currency' => $this->string(3)
+            'atqpc_currency' => $this->string(3),
+            'atqpc_system_mark_up' => $this->decimal(10, 2)->defaultValue(0),
+            'atqpc_agent_mark_up' => $this->decimal(10, 2)->defaultValue(0)
         ], $tableOptions);
 
         $this->addForeignKey('FK-attraction_quote_pricing_category_atqpc_attraction_quote_id', '{{%attraction_quote_pricing_category}}', ['atqpc_attraction_quote_id'], '{{%attraction_quote}}', ['atnq_id'], 'CASCADE', 'CASCADE');
