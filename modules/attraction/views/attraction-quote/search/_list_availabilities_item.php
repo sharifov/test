@@ -29,6 +29,7 @@ use yii\bootstrap\Html;
             <?= \yii\bootstrap4\Html::a('<i class="fa fa-plus"></i> Get Options', null, [
                 'data-url' => \yii\helpers\Url::to(['/attraction/attraction-quote/check-availability-ajax', 'atn_id' => $attraction->atn_id]),
                 'data-availability-key' => $availabilityItem['id'] ?? '',
+                'data-atn-id' => $attraction->atn_id,
                 'class' => 'btn btn-success btn-sm btn-availability-quote'
             ]) ?>
         <?php endif; ?>
