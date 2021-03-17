@@ -395,7 +395,7 @@ class CurrentQueueCallsService
                 'leadId' => $call->c_lead_id,
                 'typeId' => $call->c_call_type_id,
                 'type' => CallHelper::getTypeDescription($call),
-                'source_type_id' => $call->c_source_type_id,
+                'source_type_id' => $item->isWarmTransfer() ? Call::SOURCE_DIRECT_CALL : $call->c_source_type_id,
                 'fromInternal' => false,
                 'isInternal' => $call->isInternal(),
                 'isHold' => false,

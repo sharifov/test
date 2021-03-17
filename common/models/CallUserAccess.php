@@ -306,7 +306,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
                         'leadId' => $call->c_lead_id,
                         'typeId' => $call->c_call_type_id,
                         'type' => CallHelper::getTypeDescription($this->cuaCall),
-                        'source_type_id' => $call->c_source_type_id,
+                        'source_type_id' => $this->isWarmTransfer() ? Call::SOURCE_DIRECT_CALL : $call->c_source_type_id,
                         'fromInternal' => PhoneList::find()->byPhone($this->cuaCall->c_from)->enabled()->exists(),
                         'isHold' => false,
                         'holdDuration' => 0,
