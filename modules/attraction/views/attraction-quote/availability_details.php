@@ -39,7 +39,7 @@ $paxForm->availability_id = $availability['id'];
 $form = ActiveForm::begin([
     'validateOnSubmit' => false,
     'options' => ['data-pjax' => true],
-    'action' => ['/attraction/attraction-quote/input-price-category', 'id' => $attractionId],
+    'action' => ['/attraction/attraction-quote/add-quote-ajax', 'id' => $attractionId],
     'method' => 'post'
 ]);
 ?>

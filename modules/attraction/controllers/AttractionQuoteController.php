@@ -229,7 +229,7 @@ class AttractionQuoteController extends FController
         ]);
     }
 
-    public function actionInputPriceCategory()
+    public function actionAddQuoteAjax()
     {
         $availabilityPaxModel = new AvailabilityPaxFrom();
         $availabilityPaxModel->load(Yii::$app->request->post());
@@ -261,7 +261,7 @@ class AttractionQuoteController extends FController
             Notifications::pub(
                 ['lead-' . $attractionQuote->atnqProductQuote->pqProduct->pr_lead_id],
                 'addedQuote',
-                ['data' => ['productId' => $attractionQuote->atnqProductQuote->pq_product_id]]
+                ['data' => ['productId' => $productId]]
             );
         } catch (\Throwable $throwable) {
             Yii::warning(AppHelper::throwableLog($throwable), 'AttractionQuoteController:actionInputPriceCategory');
@@ -272,65 +272,8 @@ class AttractionQuoteController extends FController
 
         return $this->renderAjax('quote_details', [
             'quoteDetails' => $quoteDetails,
+            'productId' => $productId
         ]);
-    }
-
-    public function actionAddAjax(): array
-    {
-        $attractionId = (int) Yii::$app->request->get('atn_id');
-        $quoteKey = (string) Yii::$app->request->post('quote_key');
-        $date = (string) Yii::$app->request->post('date'); // only for presentation
-
-        $productId = 0;
-        Yii::$app->response->format = Response::FORMAT_JSON;
-
-        try {
-            if (!$attractionId) {
-                throw new Exception('Attraction Request param not found', 2);
-            }
-
-            /*if (!$hotelCode) {
-                throw new Exception('Hotel Code param not found', 3);
-            }*/
-
-            if (!$quoteKey) {
-                throw new Exception('Quote key param not found', 4);
-            }
-
-            $attraction = $this->attractionRepository->find($attractionId);
-            $productId = $attraction->atn_product_id;
-
-            //$result = $attraction->getSearchData();
-            $quoteData = $attraction->getSearchData($quoteKey);
-
-            //$quoteData = Attraction::getAttractionQuoteDataByKey($result, $quoteKey);
-
-            if (!$quoteData) {
-                throw new Exception('Not found quote - quote key (' . $quoteKey . ')', 7);
-            }
-
-            //$currency = $hotelData['currency'] ?? 'USD';
-
-            $attractionQuote = AttractionQuote::findOrCreateByData($quoteData, $attraction, $date, Auth::id(), $currency = 'USD');
-
-            if (!$attractionQuote) {
-                throw new Exception('Not added attraction quote - id:  (' . $quoteKey . ')', 8);
-            }
-
-            Notifications::pub(
-                ['lead-' . $attractionQuote->atnqProductQuote->pqProduct->pr_lead_id],
-                'addedQuote',
-                ['data' => ['productId' => $attractionQuote->atnqProductQuote->pq_product_id]]
-            );
-        } catch (\Throwable $throwable) {
-            Yii::warning(VarDumper::dumpAsString($throwable->getTraceAsString()), 'app');
-            return ['error' => 'Error: ' . $throwable->getMessage()];
-        }
-
-        return [
-            'product_id' => $productId,
-            'message' => 'Product "' . Html::encode($attraction->atnProduct->pr_name) . '", Attraction Quote Id: (' . $attractionQuote->atnq_id . ')'
-        ];
     }
 
     /**

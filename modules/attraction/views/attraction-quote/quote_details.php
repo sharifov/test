@@ -5,10 +5,13 @@ use yii\helpers\Html;
 
 /**
  * @var $quoteDetails array
+ * @var $productId int
  */
 //VarDumper::dump($quoteDetails, 10, true); die();
 ?>
-
+<script>
+    pjaxReload({container: '#pjax-product-quote-list-' + '<?= $productId ?>'});
+</script>
 <?php if (!empty($quoteDetails['optionList']['nodes'])) : ?>
     <div class="row">
         <div class="col-md-4">
