@@ -3,10 +3,10 @@
 return [
     'components' => [
         'apiService' => [
-            'class' => \modules\flight\components\api\ApiFlightService::class,
+            'class' => \modules\attraction\components\ApiAttractionService::class,
             'url' => '{{ modules.attraction.config.components.apiService.url:str }}',
-            'username' => '{{ modules.attraction.config.components.apiService.username:str }}',
-            'password' => '{{ modules.attraction.config.components.apiService.password:str }}',
+            'apiKey' => '{{ modules.attraction.config.components.apiService.apiKey:str }}',
+            'secret' => '{{ modules.attraction.config.components.apiService.secret:str }}',
         ],
     ],
 ];
