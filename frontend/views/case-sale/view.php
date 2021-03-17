@@ -45,6 +45,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'css_updated_user_id',
             'css_created_dt',
             'css_updated_dt',
+            'css_in_departure_airport',
+            'css_in_arrival_airport',
+            'css_in_date',
+            'css_out_departure_airport',
+            'css_out_arrival_airport',
+            'css_out_date',
         ],
     ]) ?>
 

@@ -16,6 +16,7 @@ use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatHold\entity\ClientChatHold;
 use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
+use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\model\userClientChatData\entity\UserClientChatData;
 use sales\model\userClientChatData\service\UserClientChatDataService;
@@ -24,6 +25,7 @@ use sales\services\clientChatChannel\ClientChatChannelService;
 use sales\services\clientChatService\ClientChatService;
 use Yii;
 use yii\console\Controller;
+use yii\db\Connection;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
@@ -483,5 +485,21 @@ class ClientChatController extends Controller
             Yii::error(VarDumper::dumpAsString($error), 'Console::refreshRocketChatUserToken');
         }
         Console::endProgress(false);
+    }
+
+    /**
+     *  !!NOTE: this script truncate table client_chat_request and alter sequence of table
+     */
+    public function actionTruncateClientChatRequestTable()
+    {
+        /** @var Connection $dbConnection */
+        $dbConnection = ClientChatRequest::getDb();
+
+        $truncateSql = $dbConnection->queryBuilder->truncateTable(ClientChatRequest::tableName());
+        $dbConnection->createCommand($truncateSql)->execute();
+
+
+        $resetSequenceSql = 'ALTER SEQUENCE client_chat_request_ccr_id_seq RESTART WITH 1 INCREMENT BY 1;';
+        $dbConnection->createCommand($resetSequenceSql)->execute();
     }
 }
