@@ -54,7 +54,7 @@ use common\models\Call;
                 <td class="text-center" style="width:120px">
                     <b>{{ callStatusName }}</b>
                   <br>
-                  <label class="label label-warning" v-show="this.showTransferLabelForQueuedCall">Transfer</label>
+                  <label class="label label-warning" v-show="this.showTransferLabelForCall">Transfer</label>
                   {{ isCallAssignedToUserGroups }}
                 </td>
                 <td class="text-center" style="width:120px">
