@@ -162,7 +162,7 @@ class CasesQSearch extends Cases
                 ELSE 0
             END AS saleExist'));
         $query->addSelect(new Expression('
-            DATE(if(last_out_date IS NULL, last_in_date, LEAST(last_in_date, last_out_date))) AS nextFlight'));
+             DATE(if(last_out_date IS NULL, last_in_date, IF(last_in_date is NULL, last_out_date, LEAST(last_in_date, last_out_date)))) AS nextFlight'));
 
         $query->addSelect('css_penalty_type');
 
