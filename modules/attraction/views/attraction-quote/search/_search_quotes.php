@@ -124,8 +124,7 @@ $('body').off('click', '.btn-availability-quote').on('click', '.btn-availability
       let url = $(this).data('url');
       let atnId = $(this).data('atn-id');
       let availabilityKey = $(this).data('availability-key');       
-      let btnAdd = $(this);
-      console.log(atnId)
+      let btnAdd = $(this);      
       btnAdd.addClass('disabled').prop('disabled', true);
       btnAdd.find('i').removeClass('fa-plus').addClass('fa-spin fa-spinner');
 
