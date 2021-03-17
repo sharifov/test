@@ -4,6 +4,7 @@ namespace modules\hotel\src\jobs;
 
 use modules\hotel\models\HotelQuote;
 use modules\hotel\src\services\hotelQuote\HotelQuotePdfService;
+use modules\order\src\events\OrderFileGeneratedEvent;
 use yii\queue\Queue;
 use yii\queue\RetryableJobInterface;
 use sales\helpers\app\AppHelper;
@@ -32,7 +33,10 @@ class HotelQuotePdfJob implements RetryableJobInterface
             if (!$hotelQuote = HotelQuote::findOne(['hq_id' => $this->hotelQuoteId])) {
                 throw new NotFoundException('HotelQuote not found. Id (' . $this->hotelQuoteId . ')');
             }
-            if (HotelQuotePdfService::processingFile($hotelQuote)) {
+            HotelQuotePdfService::guard($hotelQuote);
+            $hotelQuotePdfService = new HotelQuotePdfService($hotelQuote);
+            $hotelQuotePdfService->setProductQuoteId($hotelQuote->hq_product_quote_id);
+            if ($hotelQuotePdfService->processingFile()) {
                 \Yii::info([
                     'message' => 'HotelQuotePdfJob - file is generated',
                     'quoteId' => $this->hotelQuoteId,

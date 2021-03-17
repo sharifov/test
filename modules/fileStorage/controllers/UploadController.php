@@ -93,7 +93,7 @@ class UploadController extends FController
             return [
                 'error' => true,
                 'errors' => $form->getErrors(),
-                'message' => '',
+                'message' => $form->getErrorSummary(false)[0],
             ];
         }
 

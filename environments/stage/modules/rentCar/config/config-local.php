@@ -5,8 +5,8 @@ return [
         'apiService' => [
             'class' => \modules\rentCar\components\ApiRentCarService::class,
             'url' => '{{ modules.rentCar.config.components.apiService.url:str }}',
-            'username' => '{{ modules.rentCar.config.components.apiService.username:str }}',
-            'password' => '{{ modules.rentCar.config.components.apiService.password:str }}',
+            'refid' => '{{ modules.rentCar.config.components.apiService.refid:str }}',
+            'api_key' => '{{ modules.rentCar.config.components.apiService.api_key:str }}',
         ],
     ],
 ];

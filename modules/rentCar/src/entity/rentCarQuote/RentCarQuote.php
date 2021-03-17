@@ -2,14 +2,20 @@
 
 namespace modules\rentCar\src\entity\rentCarQuote;
 
+use common\models\Client;
+use common\models\Lead;
+use common\models\Project;
+use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\interfaces\ProductDataInterface;
 use modules\product\src\interfaces\Quotable;
 use modules\rentCar\src\entity\rentCar\RentCar;
 use modules\rentCar\src\serializer\RentCarQuoteSerializer;
 use sales\entities\EventTrait;
 use sales\helpers\product\ProductQuoteHelper;
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "rent_car_quote".
@@ -53,7 +59,7 @@ use Yii;
  * @property ProductQuote $rcqProductQuote
  * @property RentCar $rcqRentCar
  */
-class RentCarQuote extends \yii\db\ActiveRecord implements Quotable
+class RentCarQuote extends \yii\db\ActiveRecord implements Quotable, ProductDataInterface
 {
     use EventTrait;
 
@@ -224,5 +230,29 @@ class RentCarQuote extends \yii\db\ActiveRecord implements Quotable
     public function getAgentMarkUp(): float
     {
         return $this->rcq_agent_mark_up;
+    }
+
+    public function getProject(): Project
+    {
+        return $this->rcqProductQuote->pqProduct->prLead->project;
+    }
+
+    public function getLead(): Lead
+    {
+        return $this->rcqProductQuote->pqProduct->prLead;
+    }
+
+    public function getClient(): Client
+    {
+        return $this->rcqProductQuote->pqProduct->prLead->client;
+    }
+
+    public function getOrder(): ?Order
+    {
+        if ($order = ArrayHelper::getValue($this, 'rcqProductQuote.pqOrder')) {
+            /** @var Order $order */
+            return $order;
+        }
+        return null;
     }
 }

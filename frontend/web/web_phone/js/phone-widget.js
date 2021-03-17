@@ -886,7 +886,7 @@ function toSelect(elem, obj, cb) {
         return (
             '<button value="' + value + '" data-info-project="' + project + '" data-info-project-id="'+ projectId +'" class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+
             '<small class="current-number__phone current-number__selected-nr">' + formatPhoneNumber(value) + '</small>'+
-            '<span class="current-number__identifier current-number__selected-project">' + project + '</span>'+
+            '<span class="current-number__identifier current-number__selected-project" title="' + project + '">' + project + '</span>'+
             chevronDown +
             '</button>'
         );
@@ -898,7 +898,7 @@ function toSelect(elem, obj, cb) {
             optionList.forEach(function (el) {
                 arr.push('<button class="dropdown-item" type="button" value="' + el.value + '" data-info-project="' + el.project + '" data-info-project-id="' + el.projectId + '">' +
                     '<small class="current-number__phone">' + formatPhoneNumber(el.value) + '</small>' +
-                    '<span class="current-number__identifier">' + el.project + '</span>' +
+                    '<span class="current-number__identifier" title="' + el.project + '">' + el.project + '</span>' +
                     '</button>')
             })
         }
@@ -979,6 +979,7 @@ function toSelect(elem, obj, cb) {
         $(elem).find($toggle).val(this.data.value);
         $selectedNumber.text(this.data.value);
         $selectedText.text(this.data.project);
+        $selectedText.attr('title', this.data.project);
 
         if (typeof cb === 'function') {
             cb.call(this);
