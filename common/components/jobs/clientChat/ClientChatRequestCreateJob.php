@@ -20,7 +20,6 @@ class ClientChatRequestCreateJob implements JobInterface
     public function execute($queue): void
     {
         try {
-            Yii::error(ArrayHelper::toArray($this), 'ClientChatRequestCreateJob:Execute:debug');
             if (!$request = ClientChatRequest::find()->andWhere(['ccr_id' => $this->requestId])->one()) {
                 throw new NotFoundException('Not found ClientChatRequest ID: ' . $this->requestId);
             }

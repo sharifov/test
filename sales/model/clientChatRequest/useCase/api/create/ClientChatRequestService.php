@@ -163,7 +163,6 @@ class ClientChatRequestService
 
     public function processRequest(ClientChatRequest $clientChatRequest): void
     {
-        Yii::info('Start process request', 'ClientChatRequestService:processRequest');
         $this->transactionManager->wrap(function () use ($clientChatRequest) {
             if ($clientChatRequest->isRoomConnected()) {
                 $this->roomConnected($clientChatRequest);
