@@ -13,6 +13,7 @@ class GeneratorPdfService
     /**
      * @param string $content
      * @param string $fileName
+     * @param bool $cutStyle
      * @return mixed
      * @throws \Mpdf\MpdfException
      * @throws \setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException
@@ -20,11 +21,11 @@ class GeneratorPdfService
      * @throws \setasign\Fpdi\PdfParser\Type\PdfTypeException
      * @throws \yii\base\InvalidConfigException
      */
-    public static function generateForBrowserOutput(string $content, string $fileName = 'filename.pdf')
+    public static function generateForBrowserOutput(string $content, string $fileName = 'filename.pdf', bool $cutStyle = false)
     {
         $pdf = new Pdf(['mode' => Pdf::MODE_CORE,
             'destination' => Pdf::DEST_BROWSER,
-            'content' => $content,
+            'content' => $cutStyle ? self::cutStyle($content) : $content,
             'filename' => $fileName,
             'cssInline' => self::getSectionFromContent($content, 'style', true),
         ]);
@@ -34,14 +35,16 @@ class GeneratorPdfService
     /**
      * @param string $content
      * @param string $fileName
+     * @param bool $cutStyle
      * @return string
      * @throws \Mpdf\MpdfException
      * @throws \setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException
      * @throws \setasign\Fpdi\PdfParser\PdfParserException
      * @throws \setasign\Fpdi\PdfParser\Type\PdfTypeException
+     * @throws \yii\base\Exception
      * @throws \yii\base\InvalidConfigException
      */
-    public static function generateAsFile(string $content, string $fileName): string
+    public static function generateAsFile(string $content, string $fileName, bool $cutStyle = false): string
     {
         $patchToDir =  \Yii::getAlias('@frontend/runtime/pdf/');
         $patchToFile = $patchToDir . $fileName;
@@ -55,7 +58,7 @@ class GeneratorPdfService
 
         $pdf = new Pdf(['mode' => Pdf::MODE_CORE,
             'destination' => Pdf::DEST_FILE,
-            'content' => $content,
+            'content' => $cutStyle ? self::cutStyle($content) : $content,
             'filename' => $patchToFile,
             'cssInline' => self::getSectionFromContent($content, 'style', true),
         ]);
@@ -101,5 +104,15 @@ class GeneratorPdfService
             $content = str_replace([$closeTag, '<' . $target . '>'], '', $content);
         }
         return $content;
+    }
+
+    /**
+     * @param string $content
+     * @return string
+     */
+    public static function cutStyle(string $content): ?string
+    {
+        $style = self::getSectionFromContent($content, 'style');
+        return str_replace($style, '', $content);
     }
 }
