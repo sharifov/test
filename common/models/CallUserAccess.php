@@ -328,7 +328,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
                             'callSid' => $call->c_call_sid,
                         ],
                         'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
-                        'queue' => Call::getQueueName($call),
+                        'queue' => $this->isWarmTransfer() ? Call::QUEUE_DIRECT : Call::getQueueName($call),
                     ];
                 }
                 Notifications::publish(
@@ -340,6 +340,9 @@ class CallUserAccess extends \yii\db\ActiveRecord
         }
 
         if (isset($changedAttributes['cua_status_id']) && $call && ($call->isIn() || $call->isHold()) && $this->cua_status_id === self::STATUS_TYPE_NO_ANSWERED) {
+            Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $this->cua_user_id], RemoveIncomingRequestMessage::create($call->c_call_sid));
+        }
+        if (isset($changedAttributes['cua_status_id']) && $changedAttributes['cua_status_id'] == self::STATUS_TYPE_WARM_TRANSFER && $this->cua_status_id === self::STATUS_TYPE_NO_ANSWERED) {
             Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $this->cua_user_id], RemoveIncomingRequestMessage::create($call->c_call_sid));
         }
 

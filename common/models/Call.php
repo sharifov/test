@@ -914,7 +914,7 @@ class Call extends \yii\db\ActiveRecord
         if (!$insert) {
             if ($isChangedStatus && ($this->isStatusInProgress() || $this->isEnded())) {
                 $callUserAccessAny = CallUserAccess::find()->where([
-                    'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING,
+                    'cua_status_id' => [CallUserAccess::STATUS_TYPE_PENDING, CallUserAccess::STATUS_TYPE_WARM_TRANSFER],
                     'cua_call_id' => $this->c_id
                 ])->all();
                 if ($callUserAccessAny) {
@@ -1420,7 +1420,7 @@ class Call extends \yii\db\ActiveRecord
 
                 $call->c_created_user_id = $user_id;
 
-                $callUserAccessAny = CallUserAccess::find()->where(['cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING, 'cua_call_id' => $call->c_id])->andWhere(['!=', 'cua_user_id', $call->c_created_user_id])->all();
+                $callUserAccessAny = CallUserAccess::find()->where(['cua_status_id' => [CallUserAccess::STATUS_TYPE_PENDING, CallUserAccess::STATUS_TYPE_WARM_TRANSFER], 'cua_call_id' => $call->c_id])->andWhere(['!=', 'cua_user_id', $call->c_created_user_id])->all();
                 if ($callUserAccessAny) {
                     foreach ($callUserAccessAny as $callAccess) {
                         $callAccess->noAnsweredCall();

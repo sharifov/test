@@ -411,7 +411,7 @@ class CurrentQueueCallsService
                 'name' => $call->cClient ? $call->cClient->getShortName() : '------',
                 'company' => '',
                 'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
-                'queue' => Call::getQueueName($call),
+                'queue' => $item->isWarmTransfer() ? Call::QUEUE_DIRECT : Call::getQueueName($call),
                 'canContactDetails' => $this->canContactDetails,
                 'canCallInfo' => $this->canCallInfo,
                 'isClient' => $call->c_client_id ? $call->cClient->isClient() : false,

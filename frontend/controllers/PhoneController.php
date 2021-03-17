@@ -1038,7 +1038,17 @@ class PhoneController extends FController
                 if (!$parent) {
                     throw new \DomainException('Not found originCall->cParent->firstChild, Origin CallSid: ' . $originCall->c_call_sid);
                 }
-                $callSid = $parent->c_call_sid;
+                //$callSid = $parent->c_call_sid;
+                $data = $this->getDataForHoldConferenceCall($callSid, Auth::id());
+                /** @var Call $call */
+                $call = $data['call'];
+                if (!$call->currentParticipant->isJoin()) {
+                    throw new \Exception('Invalid type of Participant');
+                }
+                $result = Yii::$app->communication->holdConferenceCall($data['conferenceSid'], $data['keeperSid']);
+                if ($result['error']) {
+                    throw new \DomainException($result['message']);
+                }
                 Call::applyCallToAgentAccessWarmTransfer($parent, $userId);
             } else {
                 $childCall = Call::find()
@@ -1048,7 +1058,17 @@ class PhoneController extends FController
                 if (!$childCall) {
                     throw new \DomainException('Not found originCall->cParent, Origin CallSid: ' . $originCall->c_call_sid);
                 }
-                $callSid = $childCall->c_call_sid;
+//                $callSid = $childCall->c_call_sid;
+                $data = $this->getDataForHoldConferenceCall($callSid, Auth::id());
+                /** @var Call $call */
+                $call = $data['call'];
+                if (!$call->currentParticipant->isJoin()) {
+                    throw new \Exception('Invalid type of Participant');
+                }
+                $result = Yii::$app->communication->holdConferenceCall($data['conferenceSid'], $data['keeperSid']);
+                if ($result['error']) {
+                    throw new \DomainException($result['message']);
+                }
                 Call::applyCallToAgentAccessWarmTransfer($childCall, $userId);
             }
         } catch (\Throwable $e) {
@@ -1306,6 +1326,30 @@ class PhoneController extends FController
             if (!$call->currentParticipant->isHold()) {
                 throw new \Exception('Invalid type of Participant');
             }
+
+            //
+            if (!$conference = Conference::findOne(['cf_id' => $call->c_conference_id])) {
+                throw new BadRequestHttpException('Not found conference. SID: ' . $call->c_conference_sid);
+            }
+
+            if (!$participants = $conference->conferenceParticipants) {
+                throw new BadRequestHttpException('Not found participants on Conference Sid: ' . $call->c_conference_sid);
+            }
+
+            foreach ($participants as $participant) {
+                $callUserAccess = CallUserAccess::find()
+                    ->andWhere([
+                        'cua_call_id' => $participant->cp_call_id,
+                        'cua_status_id' => CallUserAccess::STATUS_TYPE_WARM_TRANSFER
+                    ])
+                    ->one();
+                if ($callUserAccess) {
+                    $callUserAccess->noAnsweredCall();
+                    $callUserAccess->save();
+                }
+            }
+            //
+
             $result = Yii::$app->communication->unholdConferenceCall(
                 $data['conferenceSid'],
                 $data['keeperSid'],
