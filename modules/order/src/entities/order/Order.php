@@ -3,8 +3,10 @@
 namespace modules\order\src\entities\order;
 
 use common\models\BillingInfo;
+use common\models\Client;
 use common\models\Currency;
 use common\models\Employee;
+use common\models\Project;
 use modules\invoice\src\entities\invoice\Invoice;
 use common\models\Lead;
 use modules\order\src\entities\order\events\OrderCanceledEvent;
@@ -20,6 +22,7 @@ use modules\order\src\events\OrderProcessingEvent;
 use modules\order\src\services\CreateOrderDTO;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\interfaces\ProductDataInterface;
 use sales\entities\EventTrait;
 use sales\entities\serializer\Serializable;
 use sales\helpers\product\ProductQuoteHelper;
@@ -69,7 +72,7 @@ use yii\helpers\VarDumper;
  * @property OrderTipsUserProfit[] $orderTipsUserProfit
  * @property BillingInfo[] $billingInfo
  */
-class Order extends ActiveRecord implements Serializable
+class Order extends ActiveRecord implements Serializable, ProductDataInterface
 {
     use EventTrait;
 
@@ -476,5 +479,31 @@ class Order extends ActiveRecord implements Serializable
     public function serialize(): array
     {
         return (new OrderSerializer($this))->getData();
+    }
+
+
+    public function getProject(): Project
+    {
+        return $this->orLead->project;
+    }
+
+    public function getLead(): Lead
+    {
+        return $this->orLead;
+    }
+
+    public function getClient(): Client
+    {
+        return $this->orLead->client;
+    }
+
+    public function getOrder(): ?Order
+    {
+        return $this;
+    }
+
+    public function getId(): int
+    {
+        return $this->or_id;
     }
 }

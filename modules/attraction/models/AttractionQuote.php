@@ -2,15 +2,21 @@
 
 namespace modules\attraction\models;
 
+use common\models\Client;
+use common\models\Lead;
+use common\models\Project;
 use modules\attraction\src\entities\attractionQuote\serializer\AttractionQuoteSerializer;
 use modules\attraction\src\useCases\quote\create\AttractionProductQuoteCreateDto;
+use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productType\ProductType;
+use modules\product\src\interfaces\ProductDataInterface;
 use modules\product\src\interfaces\Quotable;
 use sales\helpers\product\ProductQuoteHelper;
 use yii\db\ActiveQuery;
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 
 /**
@@ -35,7 +41,7 @@ use yii\helpers\VarDumper;
  * @property AttractionQuoteOptions[] $attractionQuoteOptions
  * @property AttractionQuotePricingCategory[] $attractionQuotePricingCategories
  */
-class AttractionQuote extends \yii\db\ActiveRecord implements Quotable
+class AttractionQuote extends \yii\db\ActiveRecord implements Quotable, ProductDataInterface
 {
     /**
      * {@inheritdoc}
@@ -357,5 +363,29 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable
     public function getAgentMarkUp(): float
     {
         return 0.00;
+    }
+
+    public function getProject(): Project
+    {
+        return $this->atnqProductQuote->pqProduct->prLead->project;
+    }
+
+    public function getLead(): Lead
+    {
+        return $this->atnqProductQuote->pqProduct->prLead;
+    }
+
+    public function getClient(): Client
+    {
+        return $this->atnqProductQuote->pqProduct->prLead->client;
+    }
+
+    public function getOrder(): ?Order
+    {
+        if ($order = ArrayHelper::getValue($this, 'atnqProductQuote.pqOrder')) {
+            /** @var Order $order */
+            return $order;
+        }
+        return null;
     }
 }

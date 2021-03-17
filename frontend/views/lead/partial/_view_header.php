@@ -7,9 +7,12 @@
  */
 
 use common\models\Lead;
+use sales\helpers\lead\LeadHelper;
 use yii\helpers\Html;
 
+$bundle = \frontend\assets\TimerAsset::register($this);
 ?>
+
 <div class="page-header">
     <div class="container-fluid">
         <div class="page-header__wrapper">
@@ -21,6 +24,22 @@ use yii\helpers\Html;
                 }
                 ?>
                 <?= $lead->getStatusLabel() ?>
+
+                <?php if ($lead->l_expiration_dt) : ?>
+                    <?php if (LeadHelper::expiredLead($lead)) : ?>
+                        <span
+                            class="label status-label bg-red"
+                            data-toggle="tooltip"
+                            data-original-title="Expiration date: <?php echo Yii::$app->formatter->asDatetime(strtotime($lead->l_expiration_dt)) ?>">
+                                <i class="fa fa-clock-o"></i> Expired</span>
+                    <?php else : ?>
+                        <span
+                            class="label status-label bg-orange box-clock-expiration"
+                            data-toggle="tooltip"
+                            data-original-title="Expiration date: <?php echo Yii::$app->formatter->asDatetime(strtotime($lead->l_expiration_dt)) ?>">
+                                <i class="fa fa-clock-o"></i> <span id="clock-expiration"><i class="fa fa-spinner fa-spin"></i></span></span>
+                    <?php endif ?>
+                <?php endif ?>
             </h2>
             <div class="page-header__general">
                 <?php if (!$lead->isNewRecord) : ?>
@@ -74,3 +93,24 @@ use yii\helpers\Html;
         </div>
     </div>
 </div>
+
+<?php
+
+if ($lead->l_expiration_dt && !LeadHelper::expiredLead($lead)) :
+    $leftTime = LeadHelper::expirationNowDiffInSeconds($lead);
+    $js = <<<JS
+        let leftTime = '{$leftTime}';
+        $('#clock-expiration')
+            .timer('remove')
+            .timer({
+                format: '%Hh %Mm %Ss', 
+                duration: leftTime, 
+                countdown: true,
+                callback: function() {
+                    $('#clock-expiration').timer('remove').remove();
+                    $('.box-clock-expiration').removeClass('bg-orange').addClass('bg-red').html('<i class="fa fa-clock-o"></i> Expired</span>');
+                }
+            }).timer('start');
+JS;
+    $this->registerJs($js);
+endif;

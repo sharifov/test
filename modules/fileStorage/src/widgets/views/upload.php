@@ -29,6 +29,7 @@ $modalId = 'file-input-modal';
         'id' => $idForm,
         'action' => $url,
         'options' => ['enctype' => 'multipart/form-data'],
+        'enableClientValidation' => false,
     ]) ?>
         <?php echo $activeForm->field($form, 'files[]')->widget(FileInput::class, [
             'options' => [
@@ -57,10 +58,21 @@ $modalId = 'file-input-modal';
 $fileId = Html::getInputId($form, 'files');
 
 $js = <<<JS
+
+$('#{$modalId}').on('hidden.bs.modal', function (e) {
+    cleanErrors();
+    $('#{$fileId}').fileinput('clear');
+});
+
+$('#{$modalId} .input-group-btn .btn').on('click', function (e) {
+    cleanErrors();
+});
+
 $('#{$idForm}').on('beforeSubmit', function (e) {
     e.preventDefault();
-    let yiiform = $(this);    
+    let yiiform = $(this);
     fileStorageUploadButtonDisable();
+    cleanErrors();
     
     $.ajax({
         url: yiiform.attr('action'),
@@ -73,12 +85,14 @@ $('#{$idForm}').on('beforeSubmit', function (e) {
     .done(function(data) {
         if (data.error) {
             if (data.message) {
-                createNotify('Upload file', data.message, 'error');
+                $('.file-caption').addClass('is-valid').addClass('is-invalid');
+                $('#{$idForm} .field-uploadform-files').addClass('has-error');
+                $('#{$idForm} .help-block-error').text(data.message);
             } else {
                 yiiform.yiiActiveForm('updateAttribute', '{$fileId}', data.errors.files);
             }
         } else {  
-            $('#{$modalId}').modal('hide');          
+            $('#{$modalId}').modal('hide');
             createNotify('Upload file', 'Success', 'success');
             $('#{$fileId}').fileinput('clear');
             $('.file-caption').removeClass('is-valid').removeClass('is-invalid');
@@ -91,6 +105,12 @@ $('#{$idForm}').on('beforeSubmit', function (e) {
     });
     return false;
 });
+
+function cleanErrors() {
+    $('#{$idForm} .file-caption').removeClass('is-valid').removeClass('is-invalid');
+    $('#{$idForm} .field-uploadform-files').removeClass('has-error');
+    $('#{$idForm} .help-block-error').text('');
+}
 
 function fileStorageUploadButtonDisable() {
     $('.file-storage-upload-btn')
