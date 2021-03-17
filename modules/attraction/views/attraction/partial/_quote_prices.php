@@ -34,13 +34,13 @@ use yii\web\View;
     <?php foreach ($priceData->prices as $paxCode => $price) :?>
         <?php $count = $price->tickets ?: 1; ?>
         <tr>
-            <th><?= /*$paxCode*/ $price->label ?></th>
+            <th><?= $price->label ?></th>
             <td>x <?= $count ?></td>
             <td><?= number_format($price->net / $count, 2) ?></td>
             <td><?= number_format($price->markUp / $count, 2) ?></td>
             <td><?php if ($quote->isNew()) :?>
                     <?= Editable::widget([
-                        'name' => 'extra_markup[' . strtoupper($paxCode) . '][' . $attractionQuote->atnq_id . ']',
+                        'name' => 'extra_markup[' . $attractionQuote->atnq_id  . '][' . $paxCode . ']',
                         'asPopover' => false,
                         'pjaxContainerId' => 'pjax-quote_prices-' . $quote->pq_id,
                         'value' => number_format($price->extraMarkUp / $count, 2),
@@ -55,7 +55,7 @@ use yii\web\View;
                             'templateAfter' => '{buttons}{close}</div>'],
                         'options' => ['class' => 'form-control','style' => 'width:50px;', 'placeholder' => 'Enter extra markup','resetButton' => '<i class="fa fa-ban"></i>'],
                         'formOptions' => [
-                                'action' => Url::toRoute(['/flight/flight-quote/ajax-update-agent-markup'])
+                                'action' => Url::toRoute(['/attraction/attraction-quote/ajax-update-agent-markup'])
                         ]
                     ]) ?>
                 <?php else :?>

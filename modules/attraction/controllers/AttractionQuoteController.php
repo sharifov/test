@@ -7,20 +7,13 @@ use frontend\controllers\FController;
 use modules\attraction\AttractionModule;
 use modules\attraction\models\Attraction;
 use modules\attraction\models\AttractionQuote;
+use modules\attraction\models\AttractionQuotePricingCategory;
 use modules\attraction\models\forms\AttractionOptionsFrom;
 use modules\attraction\models\forms\AvailabilityPaxFrom;
 use modules\attraction\models\search\AttractionQuoteSearch;
+use modules\attraction\src\services\attractionQuote\AttractionQuotePriceCalculator;
 use modules\attraction\src\services\AttractionQuotePdfService;
-use modules\hotel\src\entities\hotelQuoteRoom\HotelQuoteRoomRepository;
-use modules\hotel\src\repositories\hotel\HotelRepository;
-use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookGuard;
-use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCancelBookGuard;
-use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCheckRateService;
-use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookService;
-use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCancelBookService;
 use modules\attraction\src\useCases\api\searchQuote\AttractionQuoteSearchGuard;
-use modules\attraction\src\useCases\api\searchQuote\HotelQuoteSearchService;
-use modules\hotel\src\useCases\quote\HotelQuoteManageService;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
@@ -36,63 +29,48 @@ use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use modules\attraction\src\repositories\attraction\AttractionRepository;
+use sales\helpers\ErrorsToStringHelper;
+use modules\offer\src\entities\offerProduct\OfferProduct;
+use modules\offer\src\services\OfferPriceUpdater;
+use modules\order\src\services\OrderPriceUpdater;
 
 /**
  * AttractionQuoteController implements the CRUD actions for AttractionQuote model.
  *
- * @property HotelRepository $hotelRepository
  * @property AttractionRepository $attractionRepository
- * @property HotelQuoteSearchService $hotelQuoteSearchService
- * @property HotelQuoteRoomRepository $hotelQuoteRoomRepository
- * @property HotelQuoteManageService $hotelQuoteManageService
  * @property ProductQuoteRepository $productQuoteRepository
+ * @property OrderPriceUpdater $orderPriceUpdater
+ * @property OfferPriceUpdater $offerPriceUpdater
  */
 class AttractionQuoteController extends FController
 {
-    /**
-     * @var HotelRepository
-     */
-    private $hotelRepository;
     /**
      * @var AttractionRepository
      */
     private $attractionRepository;
     /**
-     * @var HotelQuoteSearchService
-     */
-    private $hotelQuoteSearchService;
-    /**
-     * @var HotelQuoteRoomRepository
-     */
-    private $hotelQuoteRoomRepository;
-    /**
-     * @var HotelQuoteManageService
-     */
-    private $hotelQuoteManageService;
-    /**
      * @var ProductQuoteRepository
      */
     private ProductQuoteRepository $productQuoteRepository;
 
+    private OrderPriceUpdater $orderPriceUpdater;
+
+    private OfferPriceUpdater $offerPriceUpdater;
+
     public function __construct(
         $id,
         $module,
-        HotelQuoteSearchService $hotelQuoteSearchService,
-        HotelRepository $hotelRepository,
         AttractionRepository $attractionRepository,
-        HotelQuoteManageService $hotelQuoteManageService,
-        HotelQuoteRoomRepository $hotelQuoteRoomRepository,
         ProductQuoteRepository $productQuoteRepository,
+        OrderPriceUpdater $orderPriceUpdater,
+        OfferPriceUpdater $offerPriceUpdater,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
-
-        $this->hotelQuoteSearchService = $hotelQuoteSearchService;
-        $this->hotelRepository = $hotelRepository;
         $this->attractionRepository = $attractionRepository;
-        $this->hotelQuoteRoomRepository = $hotelQuoteRoomRepository;
-        $this->hotelQuoteManageService = $hotelQuoteManageService;
         $this->productQuoteRepository = $productQuoteRepository;
+        $this->orderPriceUpdater = $orderPriceUpdater;
+        $this->offerPriceUpdater = $offerPriceUpdater;
     }
 
     /**
@@ -542,23 +520,52 @@ class AttractionQuoteController extends FController
         return $result;
     }
 
-    /**
-     * @return Response
-     * @throws BadRequestHttpException
-     */
     public function actionAjaxUpdateAgentMarkup(): Response
     {
         $extraMarkup = Yii::$app->request->post('extra_markup');
+        $quoteId = array_key_first($extraMarkup);
+        $pricingCategoryKey = key($extraMarkup[$quoteId]);
+        $value = $extraMarkup[$quoteId][$pricingCategoryKey];
 
-        $hotelQuoteRoomId = array_key_first($extraMarkup);
-        $value = $extraMarkup[$hotelQuoteRoomId];
-
-        if ($hotelQuoteRoomId && $value !== null) {
+        if ($quoteId && is_int($quoteId) && $pricingCategoryKey && $value !== null) {
             try {
-                $hotelQuoteRoom = $this->hotelQuoteRoomRepository->find($hotelQuoteRoomId);
+                if (!$attractionQuote = AttractionQuote::findOne(['atnq_id' => $quoteId])) {
+                    throw new \RuntimeException('AttractionQuote not found by id (' . $quoteId . ')');
+                }
 
-                $this->hotelQuoteManageService->updateAgentMarkup($hotelQuoteRoom, $value);
-                $leadId = $hotelQuoteRoom->hqrHotelQuote->hqProductQuote->pqProduct->pr_lead_id ?? null;
+                if (!$pricingCategory = AttractionQuotePricingCategory::findOne(['atqpc_category_id' => $pricingCategoryKey])) {
+                    throw new \RuntimeException('AttractionQuote not found by id (' . $pricingCategoryKey . ')');
+                }
+
+                $transaction = \Yii::$app->db->beginTransaction();
+                $pricingCategory->atqpc_agent_mark_up = $value;
+
+                if (!$pricingCategory->save()) {
+                    throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($pricingCategory));
+                }
+
+                $productQuote = $attractionQuote->atnqProductQuote;
+                $prices = (new AttractionQuotePriceCalculator())->calculate($attractionQuote, $productQuote->pq_origin_currency_rate);
+                $productQuote->updatePrices(
+                    $prices['originPrice'],
+                    $prices['appMarkup'],
+                    $prices['agentMarkup']
+                );
+
+                if (!$productQuote->save()) {
+                    throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($productQuote));
+                }
+                $transaction->commit();
+
+                if ($productQuote->pq_order_id) {
+                    $this->orderPriceUpdater->update($productQuote->pq_order_id);
+                }
+
+                $offers = OfferProduct::find()->select(['op_offer_id'])->andWhere(['op_product_quote_id' => $productQuote->pq_id])->column();
+                foreach ($offers as $offerId) {
+                    $this->offerPriceUpdater->update($offerId);
+                }
+                $leadId = $productQuote->pqProduct->pr_lead_id ?? null;
                 if ($leadId) {
                     Notifications::pub(
                         ['lead-' . $leadId],
@@ -572,9 +579,11 @@ class AttractionQuoteController extends FController
                     );
                 }
             } catch (\RuntimeException $e) {
+                $transaction->rollBack();
                 return $this->asJson(['message' => $e->getMessage()]);
             } catch (\Throwable $e) {
-                Yii::error($e->getTraceAsString(), 'HotelQuoteController::actionAjaxUpdateAgentMarkup::Throwable');
+                $transaction->rollBack();
+                Yii::error($e->getTraceAsString(), 'AttractionQuoteController::actionAjaxUpdateAgentMarkup');
             }
 
             return $this->asJson(['output' => $value]);

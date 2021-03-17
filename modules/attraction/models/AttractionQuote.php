@@ -181,7 +181,7 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable, ProductD
     public static function findOrCreateByDataNew(array $quoteData, Attraction $attraction, ?int $ownerId)
     {
         $aQuote = null;
-//VarDumper::dump($quoteData, 10, true); exit;
+
         if (!empty($quoteData['id'])) {
             $hashKey = self::getHashKey($quoteData['id']);
 
@@ -288,8 +288,6 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable, ProductD
                 $prQuote->save();
             }
         }
-
-        //$test = AttractionQuoteHelper::getPricesData($aQuote);
 
         return $aQuote;
     }
