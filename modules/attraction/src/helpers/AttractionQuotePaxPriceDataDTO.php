@@ -1,10 +1,10 @@
 <?php
 
-namespace modules\flight\src\helpers;
+namespace modules\attraction\src\helpers;
 
 /**
- * Class FlightQuotePaxPriceDataDTO
- * @package modules\flight\src\helpers
+ * Class AttractionQuotePaxPriceDataDTO
+ * @package modules\attraction\src\helpers
  *
  * @property $fare
  * @property $taxes
@@ -18,8 +18,9 @@ namespace modules\flight\src\helpers;
  * @property $clientSelling
  * @property $paxCode
  * @property $paxCodeId
+ * @property $label
  */
-class FlightQuotePaxPriceDataDTO
+class AttractionQuotePaxPriceDataDTO
 {
     public $fare = 0;
     public $taxes = 0;
@@ -33,4 +34,5 @@ class FlightQuotePaxPriceDataDTO
     public $clientSelling = 0;
     public $paxCodeId;
     public $paxCode;
+    public $label;
 }
