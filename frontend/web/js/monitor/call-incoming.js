@@ -413,14 +413,8 @@ var callMapApp = Vue.createApp({
                     let statusId = parseInt(item.c_status_id);
                     let callTypeId = parseInt(item.c_call_type_id);
                     let callSourceId = parseInt(item.c_source_type_id);
-                    if (statusList.includes(statusId) && sourceList.includes(callSourceId)) {
-                        if (typeList) {
-                            if (typeList.includes(callTypeId)) {
-                                return item;
-                            }
-                        } else {
-                            return item;
-                        }
+                    if (statusList.includes(statusId) && sourceList.includes(callSourceId) && typeList.includes(callTypeId)) {
+                        return item;
                     }
                 }
             });
@@ -492,12 +486,20 @@ var callMapApp = Vue.createApp({
                 }
             }
 
-            if (this.showStatusList.includes(callData.c_status_id)) {
+            if (this.validateCall(callData)) {
                 this.addCall(callData);
             }
         },
         addCall(callData) {
             this.callList = [...this.callList, callData];
+        },
+        validateCall(callData) {
+            let statusId = parseInt(callData.c_status_id);
+            let callTypeId = parseInt(callData.c_call_type_id);
+            let callSourceId = parseInt(callData.c_source_type_id);
+            return this.showStatusList.includes(statusId) &&
+                this.availableCallTypeList.includes(callTypeId) &&
+                this.availableCallSourceList.includes(callSourceId);
         },
         updateCall(callData) {
             this.callList = this.callList.map((x) => {
