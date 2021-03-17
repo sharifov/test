@@ -10,7 +10,7 @@ use sales\repositories\NotFoundException;
  */
 class ClientChatEndConversationService
 {
-    public static function endConversation(int $chatId, bool $shallowClose = true): ?ClientChat
+    public static function endConversation(int $chatId, bool $shallowClose = true): void
     {
         if (!$clientChat = ClientChat::findOne($chatId)) {
             throw new NotFoundException('ClientChat not found. clientChatId (' . $chatId . ')');
@@ -22,6 +22,10 @@ class ClientChatEndConversationService
         $shallowCloseParam = $shallowClose;
         if (!$shallowClose && ClientChat::find()->byRid($clientChat->cch_rid)->notById($chatId)->notArchived()->exists()) {
             $shallowCloseParam = true;
+        }
+
+        if (!$shallowCloseParam && !$clientChat->cchChannel->isAutoCloseRoomEnabled()) {
+            return;
         }
 
         $botCloseChatResult = \Yii::$app->chatBot->endConversation(
@@ -47,7 +51,5 @@ class ClientChatEndConversationService
             'Chat Bot request successfully processed. ' . PHP_EOL . $info,
             'info\ClientChatEndConversationService:successfully'
         );
-
-        return $clientChat;
     }
 }

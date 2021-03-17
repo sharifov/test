@@ -75,7 +75,7 @@ class ProductQuoteStatusLog extends \yii\db\ActiveRecord
 
             ['pqsl_duration', 'integer'],
 
-            ['pqsl_description', 'string', 'max' => 255],
+            ['pqsl_description', 'string', 'max' => 700],
 
             ['pqsl_action_id', 'integer'],
             ['pqsl_action_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],

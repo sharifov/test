@@ -82,6 +82,7 @@ use modules\hotel\src\services\hotelQuote\CommunicationDataService;
 use modules\hotel\src\services\hotelQuote\HotelQuotePdfService;
 use modules\lead\src\entities\lead\LeadQuery;
 use modules\order\src\entities\order\Order;
+use modules\order\src\events\OrderFileGeneratedEvent;
 use modules\order\src\services\OrderPdfService;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteClasses;
@@ -1977,47 +1978,44 @@ class TestController extends FController
         exit('Done');
     }
 
-    public function actionHotelQuotePdf(int $id, int $data = 0, int $json = 1)
+    public function actionFlightQuotePdf(int $id, int $data = 0, int $json = 1)
     {
-        if (!$quote = HotelQuote::findOne(['hq_id' => $id])) {
-            throw new NotFoundException('HotelQuote not found. Id (' . $id . ')');
+        if (!$flightQuote = FlightQuote::findOne(['fq_id' => $id])) {
+            throw new NotFoundHttpException('FlightQuote not found');
         }
-
-        if ($data === 1) {
-            $data = HotelQuotePdfService::getData($quote);
-            if ($json === 1) {
-                return $this->asJson($data);
-            }
-            \yii\helpers\VarDumper::dump($data, 10, true);
-            exit();
-        }
-
+        //FlightQuotePdfService::processingFile($flightQuote); // O787EB0
+        $pdfService = new FlightQuotePdfService($flightQuote);
         try {
-            return HotelQuotePdfService::generateForBrowserOutput($quote);
+            $pdfService->processingFile();
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableLog($throwable), 'Test:actionHotelQuoteFile');
+            Yii::error(AppHelper::throwableLog($throwable), 'Test:actionFlightQuotePdf');
             \yii\helpers\VarDumper::dump($throwable->getMessage(), 10, true);
             exit();
         }
+        return $pdfService->generateForBrowserOutput();
     }
 
-    public function actionFlightQuoteFile(int $id)
-    {
-        $flightQuote = FlightQuote::findOne(['fq_id' => $id]);
-        FlightQuotePdfService::processingFile($flightQuote); // O787EB0
-
-        $lead = $flightQuote->fqProductQuote->pqOrder->orLead;
-
-        return $this->redirect(['lead/view', 'gid' => $lead->gid]);
-    }
-
-    public function actionReceiptPdf(int $order_id)
+    public function actionReceiptPdf(int $order_id, int $data = 0, int $json = 1)
     {
         if (!$order = Order::findOne(['or_id' => $order_id])) {
             throw new NotFoundHttpException('Order not found');
         }
-        OrderPdfService::processingFile($order);
-        return OrderPdfService::generateForBrowserOutput($order);
+        $orderPdfService = new OrderPdfService($order);
+        if ($data === 1) {
+            if ($json === 1) {
+                return $this->asJson($orderPdfService->getCommunicationData());
+            }
+            VarDumper::dump($orderPdfService->getCommunicationData(), 20, true);
+            exit();
+        }
+        try {
+            $orderPdfService->processingFile();
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), 'Test:actionHotelQuoteFile');
+            VarDumper::dump($throwable->getMessage(), 10, true);
+            exit();
+        }
+        return $orderPdfService->generateForBrowserOutput();
     }
 
     public function actionOrderData(int $order_id, int $json = 0)
@@ -2036,29 +2034,51 @@ class TestController extends FController
         exit();
     }
 
+    public function actionHotelQuotePdf(int $id, int $data = 0, int $json = 1)
+    {
+        if (!$quote = HotelQuote::findOne(['hq_id' => $id])) {
+            throw new NotFoundException('HotelQuote not found. Id (' . $id . ')');
+        }
+        HotelQuotePdfService::guard($quote);
+        $pdfService = new HotelQuotePdfService($quote);
+        if ($data === 1) {
+            if ($json === 1) {
+                return $this->asJson($pdfService->getCommunicationData());
+            }
+            \yii\helpers\VarDumper::dump($pdfService->getCommunicationData(), 20, true);
+            exit();
+        }
+        try {
+            $pdfService->processingFile();
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), 'Test:actionHotelQuoteFile');
+            \yii\helpers\VarDumper::dump($throwable->getMessage(), 10, true);
+            exit();
+        }
+        return $pdfService->generateForBrowserOutput();
+    }
+
     public function actionAPdf(int $id, int $data = 0, int $json = 1)
     {
         if (!$quote = AttractionQuote::findOne(['atnq_id' => $id])) {
             throw new NotFoundException('AttractionQuote not found. Id (' . $id . ')');
         }
-
+        $pdfService = new AttractionQuotePdfService($quote);
         if ($data === 1) {
-            $data = AttractionQuotePdfService::getData($quote);
             if ($json === 1) {
-                return $this->asJson($data);
+                return $this->asJson($pdfService->getCommunicationData());
             }
-            \yii\helpers\VarDumper::dump($data, 10, true);
+            VarDumper::dump($pdfService->getCommunicationData(), 20, true);
             exit();
         }
-
         try {
-            AttractionQuotePdfService::processingFile($quote);
+            $pdfService->processingFile();
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableLog($throwable), 'actionAPdf');
-            \yii\helpers\VarDumper::dump($throwable->getMessage(), 10, true);
+            VarDumper::dump($throwable->getMessage(), 20, true);
             exit();
         }
-        return AttractionQuotePdfService::generateForBrowserOutput($quote);
+        return $pdfService->generateForBrowserOutput();
     }
 
     public function actionCarPdf(int $id, int $data = 0, int $json = 1)
@@ -2066,25 +2086,22 @@ class TestController extends FController
         if (!$quote = RentCarQuote::findOne(['rcq_id' => $id])) {
             throw new NotFoundException('RentCarQuote not found. Id (' . $id . ')');
         }
-
+        $pdfRC = new RentCarQuotePdfService($quote);
         if ($data === 1) {
-            $data = RentCarQuotePdfService::getData($quote);
-
             if ($json === 1) {
-                return $this->asJson($data);
+                return $this->asJson($pdfRC->getCommunicationData());
             }
-            \yii\helpers\VarDumper::dump($data, 10, true);
+            VarDumper::dump($pdfRC->getCommunicationData(), 20, true);
             exit();
         }
-
         try {
-            RentCarQuotePdfService::processingFile($quote);
+            $pdfRC->processingFile();
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableLog($throwable), 'TestController:actionCarPdf');
-            \yii\helpers\VarDumper::dump($throwable->getMessage(), 10, true);
+            VarDumper::dump($throwable->getMessage(), 20, true);
             exit();
         }
-        return RentCarQuotePdfService::generateForBrowserOutput($quote);
+        return $pdfRC->generateForBrowserOutput();
     }
 
     public function actionZ()

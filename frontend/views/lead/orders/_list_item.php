@@ -247,7 +247,7 @@ $process = OrderProcessManager::findOne($order->or_id);
         <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($order->or_created_dt)) ?>,
         <i class="fa fa-money" title="currency"></i> <?=Html::encode($order->or_client_currency)?> <span title="Rate: <?=$order->or_client_currency_rate?>">(<?=round($order->or_client_currency_rate, 3)?>)</span>
 
-        <div class="text-right"><h4>Calc Total: <?=number_format($order->orderTotalCalcSum, 2)?> USD, Total: <?=number_format($order->or_app_total, 2)?> USD</h4></div>
+        <div class="text-right"><h4>Calc Total: <?=number_format($order->orderTotalCalcSum  + $orderTipsAmount, 2)?> USD, Total: <?=number_format($order->or_app_total + $orderTipsAmount, 2)?> USD</h4></div>
 
         <hr>
         <?php \yii\widgets\Pjax::begin(['id' => 'pjax-order-invoice-' . $order->or_id, 'enablePushState' => false, 'timeout' => 10000])?>

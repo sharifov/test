@@ -4,9 +4,15 @@ namespace modules\order\src\forms\api\create;
 
 use common\components\validators\CheckJsonValidator;
 use modules\product\src\entities\productOption\ProductOption;
-use yii\base\Model;
+use sales\forms\CompositeRecursiveForm;
 
-class ProductQuoteOptionsForm extends Model
+/**
+ * Class ProductQuoteOptionsForm
+ * @package modules\order\src\forms\api\create
+ *
+ * @property FlightQuoteOptionForm[] $data
+ */
+class ProductQuoteOptionsForm extends CompositeRecursiveForm
 {
     public $productOptionKey;
 
@@ -33,8 +39,28 @@ class ProductQuoteOptionsForm extends Model
         ];
     }
 
+    public function load($data, $formName = null, $forms = []): bool
+    {
+        $flightQuoteOptions = [];
+        if (isset($data['data']) && $flightQuoteOptionsCount = count($data['data'])) {
+            for ($i = 1; $i <= $flightQuoteOptionsCount; $i++) {
+                $flightQuoteOptions[] = new FlightQuoteOptionForm();
+            }
+        }
+        $this->data = $flightQuoteOptions;
+        return parent::load($data, $formName, $forms);
+    }
+
     public function formName(): string
     {
         return 'productOptions';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function internalForms(): array
+    {
+        return ['data'];
     }
 }

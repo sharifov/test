@@ -414,6 +414,10 @@ class CasesSaleService
                     $caseSale->css_in_date = $saleData['itinerary'][$itineraryLastKey]['segments'][0]['departureTime'];
                 }
             }
+        } else {
+            $caseSale->css_in_departure_airport = null;
+            $caseSale->css_in_arrival_airport = null;
+            $caseSale->css_in_date = null;
         }
     }
 

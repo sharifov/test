@@ -23,7 +23,9 @@ class AttractionQuotePdfJob implements RetryableJobInterface
             if (!$quote = AttractionQuote::findOne(['atnq_id' => $this->quoteId])) {
                 throw new NotFoundException('AttractionQuote not found. Id (' . $this->quoteId . ')');
             }
-            if (AttractionQuotePdfService::processingFile($quote)) {
+            $attractionQuotePdfService = new AttractionQuotePdfService($quote);
+            $attractionQuotePdfService->setProductQuoteId($quote->atnq_product_quote_id);
+            if ($attractionQuotePdfService->processingFile()) {
                 \Yii::info([
                     'message' => 'AttractionQuotePdfJob - file is generated',
                     'quoteId' => $this->quoteId,

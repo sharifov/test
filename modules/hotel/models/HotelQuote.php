@@ -2,16 +2,21 @@
 
 namespace modules\hotel\models;
 
+use common\models\Client;
 use common\models\Currency;
+use common\models\Lead;
+use common\models\Project;
 use modules\hotel\src\entities\hotelQuote\events\HotelQuoteCloneCreatedEvent;
 use modules\hotel\src\entities\hotelQuote\serializer\HotelQuoteSerializer;
 use modules\hotel\src\services\hotelQuote\HotelQuotePriceCalculator;
 use modules\hotel\src\useCases\quote\HotelProductQuoteCreateDto;
+use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\hotel\src\entities\hotelQuote\Scopes;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productType\ProductType;
 use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMethodQuery;
+use modules\product\src\interfaces\ProductDataInterface;
 use modules\product\src\interfaces\Quotable;
 use sales\entities\EventTrait;
 use sales\helpers\product\ProductQuoteHelper;
@@ -20,6 +25,7 @@ use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\Query;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 
 /**
@@ -44,7 +50,7 @@ use yii\helpers\VarDumper;
  * @property ProductQuote $hqProductQuote
  * @property HotelQuoteRoom[] $hotelQuoteRooms
  */
-class HotelQuote extends ActiveRecord implements Quotable
+class HotelQuote extends ActiveRecord implements Quotable, ProductDataInterface
 {
     use EventTrait;
 
@@ -538,5 +544,29 @@ class HotelQuote extends ActiveRecord implements Quotable
             $countDays = $diff->days;
         }
         return $countDays;
+    }
+
+    public function getProject(): Project
+    {
+        return $this->hqProductQuote->pqProduct->prLead->project;
+    }
+
+    public function getLead(): Lead
+    {
+        return $this->hqProductQuote->pqProduct->prLead;
+    }
+
+    public function getClient(): Client
+    {
+        return $this->hqProductQuote->pqProduct->prLead->client;
+    }
+
+    public function getOrder(): ?Order
+    {
+        if ($order = ArrayHelper::getValue($this, 'hqProductQuote.pqOrder')) {
+            /** @var Order $order */
+            return $order;
+        }
+        return null;
     }
 }

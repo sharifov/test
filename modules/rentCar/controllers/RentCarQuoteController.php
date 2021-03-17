@@ -6,6 +6,7 @@ use common\models\Notifications;
 use frontend\controllers\FController;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\offer\src\services\OfferPriceUpdater;
+use modules\order\src\events\OrderFileGeneratedEvent;
 use modules\order\src\services\OrderPriceUpdater;
 use modules\rentCar\components\ApiRentCarService;
 use modules\rentCar\RentCarModule;
@@ -33,8 +34,6 @@ use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
-
-use const http\Client\Curl\AUTH_ANY;
 
 /**
  * Class RentCarQuoteController
@@ -244,8 +243,9 @@ class RentCarQuoteController extends FController
             if (!$rentCarQuote->rcqProductQuote->isBooked()) {
                 throw new \DomainException('Quote should have Booked status.');
             }
-
-            if (RentCarQuotePdfService::processingFile($rentCarQuote)) {
+            $rentCarQuotePdfService = new RentCarQuotePdfService($rentCarQuote);
+            $rentCarQuotePdfService->setProductQuoteId($rentCarQuote->rcqProductQuote->pq_id);
+            if ($rentCarQuotePdfService->processingFile()) {
                 $result['status'] = 1;
                 $result['message'] = 'Document have been successfully generated';
             }

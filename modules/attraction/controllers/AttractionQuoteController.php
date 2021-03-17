@@ -596,8 +596,9 @@ class AttractionQuoteController extends FController
             if (!$attractionQuote->isBooking()) {
                 throw new \DomainException('Quote should have Booked status.');
             }
-
-            if (AttractionQuotePdfService::processingFile($attractionQuote)) {
+            $attractionQuotePdfService = new AttractionQuotePdfService($attractionQuote);
+            $attractionQuotePdfService->setProductQuoteId($attractionQuote->atnq_product_quote_id);
+            if ($attractionQuotePdfService->processingFile()) {
                 $result['status'] = 1;
                 $result['message'] = 'Document have been successfully generated';
             }
