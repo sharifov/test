@@ -178,7 +178,10 @@ class ClientChat extends \yii\db\ActiveRecord
     {
         return [
             ['cch_ccr_id', 'integer'],
-//            ['cch_ccr_id', 'exist', 'skipOnError' => true, 'targetClass' => ClientChatRequest::class, 'targetAttribute' => ['cch_ccr_id' => 'ccr_id']],
+            ['cch_ccr_id', 'exist', 'skipOnError' => true, 'targetClass' => ClientChatRequest::class, 'targetAttribute' => ['cch_ccr_id' => 'ccr_id'], 'when' => static function ($model) {
+                /** @var self $model */
+                return !$model->isNewRecord && $model->oldAttributes['cch_ccr_id'] !== $model->attributes['cch_ccr_id'];
+            }],
 
             ['cch_channel_id', 'integer'],
             ['cch_channel_id', 'exist', 'skipOnError' => true, 'targetClass' => ClientChatChannel::class, 'targetAttribute' => ['cch_channel_id' => 'ccc_id']],
