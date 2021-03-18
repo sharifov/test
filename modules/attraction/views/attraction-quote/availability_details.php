@@ -2,14 +2,49 @@
 
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
+use yii\widgets\Pjax;
+use yii\helpers\ArrayHelper;
 
 /**
  * @var $availability array
  * @var $paxForm \modules\attraction\models\forms\AvailabilityPaxFrom
  * @var $attractionId int
+ * @var $model \modules\attraction\models\forms\AttractionOptionsFrom
  */
+
 $paxForm->availability_id = $availability['id'];
+$model->availability_id = $availability['id'];
+
 ?>
+
+<?php if (!$availability['optionList']['isComplete']) : ?>
+    <?php
+    $form = ActiveForm::begin([
+        'validateOnSubmit' => false,
+        'options' => ['data-pjax' => 1],
+        'action' => ['/attraction/attraction-quote/input-availability-options', 'id' => $attractionId],
+        'method' => 'post'
+    ]);
+    ?>
+
+    <?= $form->field($model, 'availability_id')->hiddenInput()->label(false) ?>
+
+    <div class="row">
+        <?php foreach ($availability['optionList']['nodes'] as $optionKey => $option) :
+            $mappedOptions = ArrayHelper::map($option['availableOptions'], 'value', 'label');
+            ?>
+            <div class="col-3">
+                <?= $form->field($model, 'selected_options[' . $optionKey . '][' . $option['id'] . ']')->dropdownList($mappedOptions)->label($option['label']) ?>
+            </div>
+        <?php endforeach; ?>
+    </div>
+
+    <div class="form-group text-center">
+        <?= Html::submitButton('<i class="fa fa-save"></i> Answer ', ['class' => 'btn btn-success']) ?>
+    </div>
+
+    <?php ActiveForm::end() ?>
+<?php endif; ?>
 
 <?php if (!empty($availability['optionList']['nodes'])) : ?>
     <div class="row">
@@ -24,9 +59,10 @@ $paxForm->availability_id = $availability['id'];
                 </thead>
                 <tbody>
                 <?php foreach ($availability['optionList']['nodes'] as $index => $option) : ?>
-                <tr>
-                    <td> <?= $option['label'] ?> </td> <td> <?= $option['answerFormattedText'] ?> </td>
-                </tr>
+                    <tr>
+                        <td> <?= $option['label'] ?> </td>
+                        <td> <?= $option['answerFormattedText'] ?> </td>
+                    </tr>
                 <?php endforeach; ?>
                 </tbody>
             </table>
@@ -45,46 +81,50 @@ $form = ActiveForm::begin([
 ?>
 <?= $form->field($paxForm, 'availability_id')->hiddenInput()->label(false) ?>
 
-<div class="row">
-    <div class="col-md-12">
-        <h2>Pricing Category List</h2>
-        <table class="table table-bordered">
-            <thead>
-            <tr class=" bg-info">
-                <th>Nr.</th>
-                <th>Label</th>
-                <th>Min Participants</th>
-                <th>Max Participants</th>
-                <th>Min Age</th>
-                <th>Max Age</th>
-                <th>Price per Unit</th>
-                <th>Quantity</th>
-            </tr>
-            </thead>
-            <tbody>
-            <?php if (!empty($availability['pricingCategoryList']['nodes'])) : ?>
-                <?php foreach ($availability['pricingCategoryList']['nodes'] as $key => $pax) : ?>
-                    <tr>
-                        <td title="Pax category Id: <?= Html::encode($pax['id']) ?>"><?= ($key + 1) ?>. Pricing Category </td>
-                        <td><b><?= Html::encode($pax['label']) ?></b></td>
-                        <td><?= Html::encode($pax['minParticipants']) ?></td>
-                        <td><?= Html::encode($pax['maxParticipants']) ?></td>
-                        <td><?= Html::encode($pax['minAge']) ?></td>
-                        <td><?= Html::encode($pax['maxAge']) ?></td>
-                        <td><?= Html::encode($pax['priceFormattedText']) ?></td>
-                        <td style="width: 40px">
-                            <?= $form->field($paxForm, 'pax_quantity[' . $key . '][' . $pax['id'] . ']')->textInput(['type' => 'number', 'value' => 0, 'min' => 0])->label(false) ?>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            <?php endif; ?>
-            </tbody>
-        </table>
+<?php if (!empty($availability['pricingCategoryList']['nodes'])) : ?>
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Pricing Category List</h2>
+            <table class="table table-bordered">
+                <thead>
+                <tr class=" bg-info">
+                    <th>Nr.</th>
+                    <th>Label</th>
+                    <th>Min Participants</th>
+                    <th>Max Participants</th>
+                    <th>Min Age</th>
+                    <th>Max Age</th>
+                    <th>Price per Unit</th>
+                    <th>Quantity</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                    <?php foreach ($availability['pricingCategoryList']['nodes'] as $key => $pax) : ?>
+                        <tr>
+                            <td title="Pax category Id: <?= Html::encode($pax['id']) ?>"><?= ($key + 1) ?>. Pricing Category</td>
+                            <td><b><?= Html::encode($pax['label']) ?></b></td>
+                            <td><?= Html::encode($pax['minParticipants']) ?></td>
+                            <td><?= Html::encode($pax['maxParticipants']) ?></td>
+                            <td><?= Html::encode($pax['minAge']) ?></td>
+                            <td><?= Html::encode($pax['maxAge']) ?></td>
+                            <td><?= Html::encode($pax['priceFormattedText']) ?></td>
+                            <td style="width: 40px">
+                                <?= $form->field($paxForm, 'pax_quantity[' . $key . '][' . $pax['id'] . ']')->textInput([                               'type' => 'number',
+                                    'value' => 0,
+                                    'min' => 0
+                                ])->label(false) ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
 
     <div class="form-group text-center">
         <?= Html::submitButton('<i class="fa fa-save"></i> Add Quote', ['class' => 'btn btn-success']) ?>
     </div>
+<?php endif; ?>
 
 <?php ActiveForm::end() ?>

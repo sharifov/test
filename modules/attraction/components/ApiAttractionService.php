@@ -208,6 +208,7 @@ class ApiAttractionService extends Component
                         id                        
                         isValid
                         optionList {
+                            isComplete
                             nodes {
                                 id
                                 label
