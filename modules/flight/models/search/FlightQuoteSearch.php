@@ -11,6 +11,8 @@ use modules\flight\models\FlightQuote;
  */
 class FlightQuoteSearch extends FlightQuote
 {
+    public $ticketExist;
+
     /**
      * {@inheritdoc}
      */
@@ -21,6 +23,7 @@ class FlightQuoteSearch extends FlightQuote
             [['fq_hash_key', 'fq_record_locator', 'fq_gds_offer_id', 'fq_gds', 'fq_gds_pcc', 'fq_cabin_class', 'fq_main_airline', 'fq_created_expert_name', 'fq_reservation_dump', 'fq_pricing_info', 'fq_origin_search_data', 'fq_request_hash'], 'safe'],
             [['fq_service_fee_percent'], 'number'],
             [['fq_last_ticket_date'], 'date', 'format' => 'php:Y-m-d'],
+            ['ticketExist', 'boolean']
         ];
     }
 
@@ -44,8 +47,6 @@ class FlightQuoteSearch extends FlightQuote
     {
         $query = FlightQuote::find();
 
-        // add conditions that should always apply here
-
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => ['defaultOrder' => ['fq_id' => SORT_DESC]],
@@ -57,8 +58,7 @@ class FlightQuoteSearch extends FlightQuote
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
@@ -78,6 +78,10 @@ class FlightQuoteSearch extends FlightQuote
             'DATE(fq_last_ticket_date)' => $this->fq_last_ticket_date,
             'fq_request_hash' => $this->fq_request_hash,
         ]);
+
+        if (!empty($this->ticketExist)) {
+            $query->andWhere(['IS NOT', 'fq_ticket_json', null]);
+        }
 
         $query->andFilterWhere(['like', 'fq_hash_key', $this->fq_hash_key])
             ->andFilterWhere(['like', 'fq_record_locator', $this->fq_record_locator])
