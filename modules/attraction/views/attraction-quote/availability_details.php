@@ -34,7 +34,13 @@ $model->availability_id = $availability['id'];
             $mappedOptions = ArrayHelper::map($option['availableOptions'], 'value', 'label');
             ?>
             <div class="col-3">
-                <?= $form->field($model, 'selected_options[' . $optionKey . '][' . $option['id'] . ']')->dropdownList($mappedOptions)->label($option['label']) ?>
+                <?php if ($option['dataType'] === 'BOOLEAN') : ?>
+                    <?= $form->field($model, 'selected_options[' . $optionKey . '][' . $option['id'] . ']')->checkbox()->label($option['label']) ?>
+                <?php elseif ($option['dataType'] === 'TEXT') : ?>
+                    <?= $form->field($model, 'selected_options[' . $optionKey . '][' . $option['id'] . ']')->textInput()->label($option['label']) ?>
+                <?php else : ?>
+                    <?= $form->field($model, 'selected_options[' . $optionKey . '][' . $option['id'] . ']')->dropdownList($mappedOptions)->label($option['label']) ?>
+                <?php endif;?>
             </div>
         <?php endforeach; ?>
     </div>
