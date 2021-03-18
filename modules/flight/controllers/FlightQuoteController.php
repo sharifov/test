@@ -3,6 +3,7 @@
 namespace modules\flight\controllers;
 
 use common\models\Notifications;
+use frontend\helpers\JsonHelper;
 use modules\flight\components\api\FlightQuoteBookService;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightPax;
@@ -200,8 +201,11 @@ class FlightQuoteController extends FController
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->fq_id]);
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $model->fq_ticket_json = JsonHelper::decode($model->fq_ticket_json);
+            if ($model->save()) {
+                return $this->redirect(['view', 'id' => $model->fq_id]);
+            }
         }
 
         return $this->render('update', [

@@ -294,11 +294,6 @@ class FlightController extends ApiBaseController
 
         if ($form->status === $form::SUCCESS_STATUS) {
             $productQuote->booked();
-
-//            $flightQuotePdfJob = new FlightQuotePdfJob();
-//            $flightQuotePdfJob->flightQuoteId = $flightQuote->fq_id;
-
-//            Yii::$app->queue_job->priority(10)->push($flightQuotePdfJob);
         } else {
             $productQuote->error();
         }

@@ -27,8 +27,9 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ]) ?>
     </p>
+
     <div class="row">
-        <div class="col-lg-6">
+        <div class="col-md-6">
             <?= DetailView::widget([
                 'model' => $model,
                 'attributes' => [
@@ -60,26 +61,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
             ]) ?>
         </div>
-        <div class="col-lg-6">
-            <?= DetailView::widget([
-                'model' => $model,
-                'attributes' => [
-                    [
-                        'attribute' => 'fq_json_booking',
-                        'format' => 'raw',
-                        'value' => static function (FlightQuote $model) {
-                            if (!$model->fq_json_booking) {
-                                return Yii::$app->formatter->nullDisplay;
-                            }
-                            return VarDumper::dumpAsString($model->fq_json_booking, 20, true);
-                        }
-                    ],
-                ],
-            ]) ?>
-        </div>
     </div>
     <div class="row">
-        <div class="col-lg-6">
+        <div class="col-md-6">
             <?= DetailView::widget([
                 'model' => $model,
                 'attributes' => [
@@ -97,6 +81,23 @@ $this->params['breadcrumbs'][] = $this->title;
             ]) ?>
         </div>
     </div>
-
-
+    <div class="row">
+        <div class="col-md-6">
+            <?= DetailView::widget([
+                'model' => $model,
+                'attributes' => [
+                    [
+                        'attribute' => 'fq_json_booking',
+                        'format' => 'raw',
+                        'value' => static function (FlightQuote $model) {
+                            if (!$model->fq_json_booking) {
+                                return Yii::$app->formatter->nullDisplay;
+                            }
+                            return VarDumper::dumpAsString($model->fq_json_booking, 20, true);
+                        }
+                    ],
+                ],
+            ]) ?>
+        </div>
+    </div>
 </div>

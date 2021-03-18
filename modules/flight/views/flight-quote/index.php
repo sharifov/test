@@ -1,5 +1,6 @@
 <?php
 
+use modules\flight\models\FlightQuote;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -45,8 +46,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'fq_trip_type_id',
             'fq_main_airline',
             'fq_fare_type_id',
-            //'fq_created_user_id',
-
+            [
+                'label' => 'Ticket exist',
+                'value' => static function (FlightQuote $model) {
+                    return Yii::$app->formatter->asBooleanByLabel(!empty($model->fq_ticket_json));
+                },
+                'format' => 'raw',
+            ],
             [
                 'class' => \common\components\grid\UserSelect2Column::class,
                 'attribute' => 'fq_created_user_id',
