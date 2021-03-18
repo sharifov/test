@@ -93,6 +93,7 @@ function IncomingActions(props) {
         <div className="actions-container">
             <div className="call-pane__call-btns">
                 <button className="call-pane__start-call calling-state-block" id="btn-accept-call"
+                        data-type-action={call.data.isWarmTransfer ? 'acceptWarmTransfer' : 'accept'}
                         data-from-internal={call.data.fromInternal} data-call-sid={call.data.callSid}
                         disabled={call.isSentAcceptCallRequestState()}>
                     {call.isSentAcceptCallRequestState()

@@ -315,7 +315,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
                         'isBarge' => false,
                         'isMute' => false,
                         'project' => $call->c_project_id ? $call->cProject->name : '',
-                        'source' => $call->c_source_type_id ? $call->getSourceName() : '',
+                        'source' => $this->isWarmTransfer() ? Call::SOURCE_LIST[Call::SOURCE_DIRECT_CALL] : ($call->c_source_type_id ? $call->getSourceName() : ''),
                         'isEnded' => false,
                         'contact' => [
                             'id' => $call->c_client_id,
@@ -329,6 +329,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
                         ],
                         'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
                         'queue' => $this->isWarmTransfer() ? Call::QUEUE_DIRECT : Call::getQueueName($call),
+                        'isWarmTransfer' => $this->isWarmTransfer()
                     ];
                 }
                 Notifications::publish(

@@ -36,6 +36,7 @@ class IncomingQueueCall extends Model
     public $isClient;
     public $clientId;
     public $recordingDisabled;
+    public $isWarmTransfer;
 
     public function getData(): array
     {

@@ -1142,6 +1142,59 @@ class CallController extends FController
         return $this->asJson($response);
     }
 
+    public function actionAjaxAcceptWarmTransferCall(): Response
+    {
+        $call_sid = (string)\Yii::$app->request->post('call_sid');
+
+        $response = [
+            'error' => true,
+            'message' => 'Internal Server Error'
+        ];
+        try {
+            $call = $this->callRepository->findBySid($call_sid);
+
+            $callUserAccess = CallUserAccess::find()->where([
+                'cua_user_id' => Auth::id(),
+                'cua_call_id' => $call->c_id,
+                'cua_status_id' => CallUserAccess::STATUS_TYPE_WARM_TRANSFER
+            ])->one();
+
+//            $reserver = Yii::createObject(CallReserver::class);
+
+            if ($callUserAccess) {
+//                $userId = Auth::id();
+//                $key = new Key($callUserAccess->cua_call_id);
+//                $isReserved = $reserver->reserve($key, $userId);
+//                if ($isReserved) {
+//                    $prepare = new PrepareCurrentCallsForNewCall($userId);
+//                    if ($prepare->prepare()) {
+//                        $this->callService->acceptCall($callUserAccess, $userId);
+//                    }
+//                } else {
+//                    Notifications::publish('callAlreadyTaken', ['user_id' => $userId], ['callSid' => $call->c_call_sid]);
+//                    Yii::info(VarDumper::dumpAsString([
+//                        'callId' => $callUserAccess->cua_call_id,
+//                        'userId' => $userId,
+//                        'acceptedUserId' => $reserver->getReservedUser($key),
+//                    ]), 'info\NewPhoneWidgetAcceptRedisReservation');
+//                }
+
+                $response['error'] = false;
+                $response['message'] = 'success';
+            } else {
+                Notifications::publish('callAlreadyTaken', ['user_id' => Auth::id()], ['callSid' => $call->c_call_sid]);
+                $response = [
+                    'error' => false,
+                    'message' => '',
+                ];
+            }
+        } catch (\RuntimeException | NotFoundException $e) {
+            $response['message'] = $e->getMessage();
+        }
+
+        return $this->asJson($response);
+    }
+
     public function actionAjaxAcceptPriorityCall(): Response
     {
         if (!SettingHelper::isGeneralLinePriorityEnable()) {

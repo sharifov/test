@@ -406,7 +406,7 @@ class CurrentQueueCallsService
                 'isBarge' => false,
                 'isJoin' => $call->isJoin(),
                 'project' => $call->c_project_id ? $call->cProject->name : '',
-                'source' => $call->c_source_type_id ? $call->getSourceName() : '',
+                'source' => $item->isWarmTransfer() ? Call::SOURCE_LIST[Call::SOURCE_DIRECT_CALL] : ($call->c_source_type_id ? $call->getSourceName() : ''),
                 'phone' => $call->c_from,
                 'name' => $call->cClient ? $call->cClient->getShortName() : '------',
                 'company' => '',
@@ -417,6 +417,7 @@ class CurrentQueueCallsService
                 'isClient' => $call->c_client_id ? $call->cClient->isClient() : false,
                 'clientId' => $call->c_client_id,
                 'recordingDisabled' => $call->c_recording_disabled ? true : false,
+                'isWarmTransfer' => $item->isWarmTransfer(),
             ]);
             $last_time = strtotime($item->cua_updated_dt);
         }

@@ -16,6 +16,7 @@ class m210316_125225_add_permission_transfer_warm extends Migration
 
     private array $routes = [
         '/phone/ajax-warm-transfer-direct',
+        '/call/ajax-accept-warm-transfer-call',
     ];
 
     /**
