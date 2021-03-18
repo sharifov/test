@@ -6,13 +6,13 @@ use yii\helpers\Url;
 
 class IndexApiCest
 {
-    public function _before(NoGuy $I)
-    {
-    }
-
-    public function _after(NoGuy $I)
-    {
-    }
+//    public function _before(NoGuy $I)
+//    {
+//    }
+//
+//    public function _after(NoGuy $I)
+//    {
+//    }
 
     public function checkIndex(NoGuy $I)
     {
@@ -84,12 +84,4 @@ class IndexApiCest
 //
 //        //$I->see('API');
 //    }
-
-
-
-
-
-
-
-
 }

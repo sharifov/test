@@ -9,19 +9,19 @@ class IndexApiCest
     public const API_USERNAME = 'test';
     public const API_PASSWORD = 'test123';
 
-    /**
-     * @param \webapi\tests\ApiTester $I
-     */
-    public function _before(ApiTester $I): void
-    {
-    }
-
-    /**
-     * @param \webapi\tests\ApiTester $I
-     */
-    public function _after(ApiTester $I): void
-    {
-    }
+//    /**
+//     * @param \webapi\tests\ApiTester $I
+//     */
+//    public function _before(ApiTester $I): void
+//    {
+//    }
+//
+//    /**
+//     * @param \webapi\tests\ApiTester $I
+//     */
+//    public function _after(ApiTester $I): void
+//    {
+//    }
 
 //    public function checkIndex(NoGuy $I)
 //    {
