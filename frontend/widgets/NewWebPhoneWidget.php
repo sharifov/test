@@ -14,6 +14,7 @@ use common\models\UserGroupAssign;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
 use sales\auth\Auth;
+use sales\helpers\setting\SettingHelper;
 use sales\model\phoneList\entity\PhoneList;
 use yii\bootstrap\Widget;
 use yii\helpers\ArrayHelper;
@@ -58,8 +59,11 @@ class NewWebPhoneWidget extends Widget
 
     private function getAvailablePhones(int $userId): array
     {
-        $departmentPhones = $this->getDepartmentPhones($userId);
         $userPhones = $this->getUserProjectParams($userId);
+        if (!SettingHelper::isAllowToUseGeneralLinePhones()) {
+            return $userPhones;
+        }
+        $departmentPhones = $this->getDepartmentPhones($userId);
         $phones = array_merge($userPhones, $departmentPhones);
         $unique_array = [];
         foreach ($phones as $phone) {

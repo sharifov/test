@@ -130,4 +130,9 @@ class SettingHelper
     {
         return (bool)(\Yii::$app->params['settings']['order_auto_processing_enable'] ?? false);
     }
+
+    public static function isAllowToUseGeneralLinePhones(): bool
+    {
+        return (bool)(\Yii::$app->params['settings']['allow_to_use_general_line_phones'] ?? false);
+    }
 }
