@@ -572,6 +572,7 @@ class FlightQuoteController extends FController
                 throw new \DomainException('Quote should have Booked status.');
             }
 
+            FlightQuotePdfService::guard($flightQuote);
             $flightQuotePdfService = new FlightQuotePdfService($flightQuote);
             $flightQuotePdfService->setProductQuoteId($flightQuote->fq_product_quote_id);
             if ($flightQuotePdfService->processingFile()) {

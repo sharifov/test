@@ -21,7 +21,7 @@ class GeneratorPdfService
      * @throws \setasign\Fpdi\PdfParser\Type\PdfTypeException
      * @throws \yii\base\InvalidConfigException
      */
-    public static function generateForBrowserOutput(string $content, string $fileName = 'filename.pdf', bool $cutStyle = false)
+    public static function generateForBrowserOutput(string $content, string $fileName = 'filename.pdf', bool $cutStyle = true)
     {
         $pdf = new Pdf(['mode' => Pdf::MODE_CORE,
             'destination' => Pdf::DEST_BROWSER,
@@ -44,7 +44,7 @@ class GeneratorPdfService
      * @throws \yii\base\Exception
      * @throws \yii\base\InvalidConfigException
      */
-    public static function generateAsFile(string $content, string $fileName, bool $cutStyle = false): string
+    public static function generateAsFile(string $content, string $fileName, bool $cutStyle = true): string
     {
         $patchToDir =  \Yii::getAlias('@frontend/runtime/pdf/');
         $patchToFile = $patchToDir . $fileName;
