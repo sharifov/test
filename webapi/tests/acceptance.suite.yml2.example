@@ -1,0 +1,41 @@
+suite_namespace: webapi\tests\acceptance
+actor: AcceptanceTester
+modules:
+    enabled:
+        - WebDriver:
+            #url: 'https://sales.zeit.test'
+            browser: 'chrome'
+        #- Asserts
+        - Yii2:
+            # part: init
+            part: [ orm, fixtures ] # allow to use AR methods
+            cleanup: false # don't wrap test in transaction
+            #part: [orm, email, fixtures]
+    config:
+        PhpBrowser:
+            url: 'https://sales.zeit.test'
+        WebDriver:
+            url: 'https://api.sales.zeit.test'
+            browser: chrome
+            delay: 1000
+            wait: 5
+            connection_timeout: 100
+            request_timeout: 100
+            windows_size: 1024x768
+
+env:
+    local:
+        modules:
+            config:
+                WebDriver:
+                    #url: 'https://sales.zeit.test'
+                    #host: '25.99.239.1'
+                    browser: 'chrome'
+                    #port: '4444'
+                    delay: 1000
+                    wait: 5
+                    connection_timeout: 100
+                    request_timeout: 100
+                    window_size: 1024x768
+                    #capabilities:
+                        #args: ["--headless",  "--disable-gpu"]

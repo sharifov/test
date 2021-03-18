@@ -1,6 +1,6 @@
 <?php
 
-namespace webapi\modules\v1\controllers;
+namespace webapi\modules\v2\controllers;
 
 use Yii;
 use yii\filters\ContentNegotiator;
@@ -39,7 +39,7 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        echo  '<h1>API v1 - ' . Yii::$app->request->serverName . '</h1> ' . date('Y-m-d H:i:s');
+        echo  '<h1>API v2 - ' . Yii::$app->request->serverName . '</h1> ' . date('Y-m-d H:i:s');
         exit;
     }
 
@@ -67,7 +67,7 @@ class SiteController extends Controller
             'headers'   => $headers
         ];
 
-        Yii::info(VarDumper::dumpAsString($out), 'info\API:v1:AppController:Test');
+        Yii::info(VarDumper::dumpAsString($out), 'info\API:v2:AppController:Test');
         //VarDumper::dump($out);
         return $out;
     }
