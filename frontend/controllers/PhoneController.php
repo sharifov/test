@@ -1030,6 +1030,79 @@ class PhoneController extends FController
                 throw new NotAcceptableHttpException('This agent is not online (Id: ' . $userId . ')');
             }
 
+            //
+            $groupId = $originCall->c_group_id ?: $originCall->c_id;
+
+            if ($originCall->cParent) {
+                if ($originCall->isOut() || ($originCall->isReturn() && $originCall->cParent->isOut())) {
+                    $parent = Call::find()->firstChild($originCall->c_parent_id)->one();
+                } else {
+                    $parent = $originCall->cParent;
+                }
+
+                if ($parent) {
+                    $originCall->c_is_transfer = true;
+                    $parent->c_is_transfer = true;
+
+                    if (!$originCall->c_group_id) {
+                        $originCall->c_group_id = $groupId;
+                        $parent->c_group_id = $groupId;
+                    }
+
+                    if (!$parent->c_group_id) {
+                        $parent->c_group_id = $groupId;
+                    }
+
+                    if ($parent->isOut()) {
+                        $parent->c_from = $parent->c_to;
+                    }
+                    $parent->c_to = null;
+
+                    if (!$originCall->save()) {
+                        Yii::error('Cant save original call', 'PhoneController:AjaxCallTransfer');
+                    }
+                    if (!$parent->save()) {
+                        Yii::error('Cant save original->parent call', 'PhoneController:AjaxCallTransfer');
+                    }
+                } else {
+                    throw new \DomainException('Not found originCall->cParent->firstChild, Origin CallSid: ' . $originCall->c_call_sid);
+                }
+            } else {
+                $childCall = Call::find()
+                    ->andWhere(['c_parent_id' => $originCall->c_id])
+                    ->andWhere(['<>', 'c_call_type_id', Call::CALL_TYPE_JOIN])
+                    ->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+
+                if ($childCall) {
+                    $originCall->c_is_transfer = true;
+                    $childCall->c_is_transfer = true;
+
+                    if (!$originCall->c_group_id) {
+                        $originCall->c_group_id = $groupId;
+                        $childCall->c_group_id = $groupId;
+                    }
+
+                    if (!$childCall->c_group_id) {
+                        $childCall->c_group_id = $groupId;
+                    }
+
+                    if ($childCall->isOut()) {
+                        $childCall->c_from = $childCall->c_to;
+                    }
+                    $childCall->c_to = null;
+
+                    if (!$originCall->save()) {
+                        Yii::error('Cant save original call. Point 2', 'PhoneController:AjaxCallTransfer');
+                    }
+                    if (!$childCall->save()) {
+                        Yii::error('Cant save child call. Point 2', 'PhoneController:AjaxCallTransfer');
+                    }
+                } else {
+                    throw new \DomainException('Not found originCall->cParent, Origin CallSid: ' . $originCall->c_call_sid);
+                }
+            }
+            //
+
             if ($originCall->cParent) {
                 if ($originCall->isOut() || ($originCall->isReturn() && $originCall->cParent->isOut())) {
                     $parent = Call::find()->firstChild($originCall->c_parent_id)->one();

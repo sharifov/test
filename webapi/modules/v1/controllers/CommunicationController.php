@@ -2642,6 +2642,19 @@ class CommunicationController extends ApiBaseController
             }
         }
 
+        if (
+            ($form->StatusCallbackEvent === Conference::EVENT_PARTICIPANT_JOIN || $form->StatusCallbackEvent === Conference::EVENT_PARTICIPANT_LEAVE)
+            && $form->is_warm_transfer
+        ) {
+            $call = Call::find()->andWhere(['c_call_sid' => $form->CallSid])->one();
+            if ($call && !$call->isStatusQueue()) {
+                $call->c_created_user_id = $form->accepted_user_id;
+                $call->setTypeIn();
+                $call->direct();
+                $call->save();
+            }
+        }
+
         if (!$conference) {
             Yii::error(VarDumper::dumpAsString([
                 'post' => $post,

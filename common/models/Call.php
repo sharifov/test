@@ -2036,6 +2036,16 @@ class Call extends \yii\db\ActiveRecord
         return (int) $this->c_call_type_id === self::CALL_TYPE_RETURN;
     }
 
+    public function direct(): void
+    {
+        $this->c_source_type_id = self::SOURCE_DIRECT_CALL;
+    }
+
+    public function isDirect(): bool
+    {
+        return $this->c_source_type_id === self::SOURCE_DIRECT_CALL;
+    }
+
 
     /**
      * @param string $statusName
