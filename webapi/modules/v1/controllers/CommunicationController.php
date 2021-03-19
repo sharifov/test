@@ -1306,6 +1306,11 @@ class CommunicationController extends ApiBaseController
         if ($customParameters->phone_list_id) {
             $call->setDataPhoneListId($customParameters->phone_list_id);
         }
+
+        if ($customParameters->is_warm_transfer) {
+            $call->setTypeIn();
+            $call->c_source_type_id = Call::SOURCE_DIRECT_CALL;
+        }
     }
 
     private static function copyUpdatedData(Call $from, Call $to): void

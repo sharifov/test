@@ -20,6 +20,7 @@ use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
 use sales\helpers\UserCallIdentity;
+use sales\model\call\services\FriendlyName;
 use sales\model\call\services\RecordManager;
 use sales\model\call\useCase\checkRecording\CheckRecordingForm;
 use sales\model\call\useCase\conference\create\CreateCallForm;
@@ -1921,7 +1922,7 @@ class PhoneController extends FController
                     'isConferenceCreator' => 'false',
                     'recordingDisabled' => $recordingManager->isDisabledRecord(),
                 ],
-                str_replace('-', '', UuidHelper::uuid()),
+                FriendlyName::next(),
                 $recordingManager->isDisabledRecord()
             );
         } catch (\Throwable $e) {

@@ -21,6 +21,7 @@ use yii\base\Model;
  * @property string $to
  * @property bool $call_recording_disabled
  * @property int $phone_list_id
+ * @property bool $is_warm_transfer
  */
 class CallCustomParameters extends Model
 {
@@ -37,6 +38,7 @@ class CallCustomParameters extends Model
     public $to;
     public $call_recording_disabled;
     public $phone_list_id;
+    public $is_warm_transfer;
 
     public function rules(): array
     {
@@ -74,6 +76,9 @@ class CallCustomParameters extends Model
             ['phone_list_id', 'default', 'value' => null],
             ['phone_list_id', 'integer'],
             ['phone_list_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+
+            ['is_warm_transfer', 'default', 'value' => false],
+            ['is_warm_transfer', 'boolean'],
         ];
     }
 

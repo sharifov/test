@@ -11,6 +11,7 @@ namespace common\components;
 
 use sales\helpers\setting\SettingHelper;
 use sales\model\call\useCase\conference\create\CreateCallForm;
+use thamtech\uuid\helpers\UuidHelper;
 use Yii;
 use yii\base\Component;
 use yii\helpers\Url;
@@ -803,7 +804,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $this->processConferenceResponse($response);
     }
 
-    public function acceptConferenceCall($id, $sid, $to, $from, $userId, $callRecordingDisabled, $phoneListId, $toNumber): array
+    public function acceptConferenceCall($id, $sid, $to, $from, $userId, $callRecordingDisabled, $phoneListId, $toNumber, $friendlyName, $isWarmTransfer): array
     {
         $data = [
             'call_id' => $id,
@@ -814,6 +815,8 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'call_recording_disabled' => $callRecordingDisabled,
             'phone_list_id' => $phoneListId,
             'to_number' => $toNumber,
+            'friendly_name' => $friendlyName,
+            'is_warm_transfer' => $isWarmTransfer
         ];
 
         $response = $this->sendRequest('twilio-conference/accept-call', $data);

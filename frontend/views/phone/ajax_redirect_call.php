@@ -141,7 +141,7 @@ use yii\helpers\Html;
                                 'data-call-sid' => $call->c_call_sid
                             ])?>
 
-                            <?=Html::button('<i class="fa fa-forward"></i> Warm transfer', [
+                            <?=Html::button('<i class="fa fa-feed"></i> Warm transfer', [
                                     'class' => 'btn btn-xs ' . $btnClass . ' btn-warm-transfer-direct',
                                     'data-user-id' => $userModel->id,
                                     'data-call-sid' => $call->c_call_sid
