@@ -225,7 +225,8 @@ class AttractionQuoteController extends FController
         return $this->renderAjax('availability_details', [
             'availability' => $availability,
             'paxForm' => $availabilityPaxForm,
-            'attractionId' => $attractionId
+            'attractionId' => $attractionId,
+            'model' => $optionsModel,
         ]);
     }
 
