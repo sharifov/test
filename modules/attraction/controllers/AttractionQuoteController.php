@@ -248,6 +248,7 @@ class AttractionQuoteController extends FController
 
             $result = $apiAttractionService->inputPriceCategoryToAvailability($availabilityPaxModel);
             $quoteDetails = $result['availability'];
+            $productDetails = $apiAttractionService->getProductById($quoteDetails['productId']);
 
             if (!$quoteDetails) {
                 throw new Exception('Not found quote - quote key (' . $availabilityPaxModel->availability_id . ')', 7);
@@ -259,6 +260,9 @@ class AttractionQuoteController extends FController
                 throw new Exception('Not added attraction quote - id:  (' . $availabilityPaxModel->availability_id  . ')', 8);
             }
 
+            $attractionQuote->atnq_product_details_json = $productDetails;
+            $attractionQuote->save();
+
             Notifications::pub(
                 ['lead-' . $attractionQuote->atnqProductQuote->pqProduct->pr_lead_id],
                 'addedQuote',
@@ -269,7 +273,7 @@ class AttractionQuoteController extends FController
             return ['error' => 'Error: ' . $throwable->getMessage()];
         }
 
-        //VarDumper::dump($attraction, 10, true); exit;
+        //VarDumper::dump($productDetails, 10, true); exit;
 
         return $this->renderAjax('quote_details', [
             'quoteDetails' => $quoteDetails,

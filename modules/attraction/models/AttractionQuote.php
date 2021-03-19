@@ -38,6 +38,7 @@ use yii\helpers\VarDumper;
  * @property string|null $atnq_availability_date
  * @property int|null $atnq_availability_is_valid
  * @property float|null $atnq_service_fee_percent
+ * @property string|null $atnq_product_details_json
  *
  * @property Attraction $atnqAttraction
  * @property ProductQuote $atnqProductQuote
@@ -62,7 +63,7 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable, ProductD
         return [
             [['atnq_attraction_id'], 'required'],
             [['atnq_attraction_id', 'atnq_product_quote_id', 'atnq_availability_is_valid'], 'integer'],
-            [['atnq_json_response', 'atnq_availability_date'], 'safe'],
+            [['atnq_json_response', 'atnq_availability_date', 'atnq_product_details_json'], 'safe'],
             [['atnq_hash_key'], 'string', 'max' => 32],
             [['atnq_hash_key'], 'unique'],
             [['atnq_attraction_id'], 'exist', 'skipOnError' => true, 'targetClass' => Attraction::class, 'targetAttribute' => ['atnq_attraction_id' => 'atn_id']],
@@ -95,6 +96,7 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable, ProductD
             'atnq_availability_date' => 'Availability Date',
             'atnq_availability_is_valid' => 'Availability Is Valid',
             'atnq_service_fee_percent' => 'Service Fee Percent',
+            'atnq_product_details_json' => 'Product Details Json',
         ];
     }
 
