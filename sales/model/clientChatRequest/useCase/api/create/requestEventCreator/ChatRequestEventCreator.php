@@ -52,7 +52,7 @@ abstract class ChatRequestEventCreator
                 $this->clientChatRequest->ccr_job_id = $jobId;
                 $this->clientChatRequest->save();
             } else {
-                throw new \Exception('ClientChatRequest not added to queue. ClientChatRequest RID : ' .
+                throw new \RuntimeException('ClientChatRequest not added to queue. ClientChatRequest RID : ' .
                     $this->clientChatRequest->ccr_rid);
             }
         } else {

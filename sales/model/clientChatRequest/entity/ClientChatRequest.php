@@ -5,6 +5,7 @@ namespace sales\model\clientChatRequest\entity;
 use DateTime;
 use sales\forms\clientChat\RealTimeStartChatForm;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
+use sales\model\clientChatRequest\useCase\api\create\requestEvent\AgentUtteredEvent;
 use sales\model\clientChatRequest\useCase\api\create\requestEventCreator\ChatRequestEventCreator;
 use sales\model\clientChatRequest\useCase\api\create\requestEventCreator\GuestDisconnectedEventCreator;
 use sales\model\clientChatRequest\useCase\api\create\requestEventCreator\GuestUtteredEventCreator;
@@ -62,6 +63,7 @@ class ClientChatRequest extends \yii\db\ActiveRecord
         self::EVENT_GUEST_DISCONNECTED => GuestDisconnectedEventCreator::class,
         self::EVENT_TRACK => TrackEventCreator::class,
         self::EVENT_GUEST_UTTERED => GuestUtteredEventCreator::class,
+        self::EVENT_AGENT_UTTERED => AgentUtteredEvent::class,
     ];
 
     private array $decodedJsonData = [];

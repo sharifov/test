@@ -40,19 +40,8 @@ use yii\helpers\VarDumper;
  * Class ClientChatRequestService
  * @package sales\model\clientChatRequest\useCase\api\create
  *
- * @property ClientChatRequestRepository $clientChatRequestRepository
  * @property ClientChatRepository $clientChatRepository
- * @property ClientManageService $clientManageService
- * @property ClientChatMessageRepository $clientChatMessageRepository
- * @property ClientChatMessageService $clientChatMessageService
- * @property ClientChatService $clientChatService
- * @property VisitorLogRepository $visitorLogRepository
- * @property TransactionManager $transactionManager
- * @property ClientChatVisitorRepository $clientChatVisitorRepository
- * @property ClientChatVisitorDataRepository $clientChatVisitorDataRepository
- * @property ClientChatChannelRepository $clientChatChannelRepository
  * @property ClientChatFeedbackRepository $clientChatFeedbackRepository
- * @property CacheInterface $cache
  */
 class ClientChatRequestService
 {
