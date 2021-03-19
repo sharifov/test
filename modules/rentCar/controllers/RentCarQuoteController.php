@@ -18,6 +18,7 @@ use modules\rentCar\src\forms\RentCarSearchForm;
 use modules\rentCar\src\helpers\RentCarDataParser;
 use modules\rentCar\src\helpers\RentCarQuoteHelper;
 use modules\rentCar\src\repositories\rentCar\RentCarQuoteRepository;
+use modules\rentCar\src\services\RentCarQuoteBookGuard;
 use modules\rentCar\src\services\RentCarQuoteBookService;
 use modules\rentCar\src\services\RentCarQuoteCancelBookService;
 use modules\rentCar\src\services\RentCarQuotePdfService;
@@ -271,6 +272,7 @@ class RentCarQuoteController extends FController
                 throw new \RuntimeException('RentCarQuoteId param not found');
             }
             $rentCarQuote = $this->findRentCarQuote($rentCarQuoteId);
+            RentCarQuoteBookGuard::guard($rentCarQuote);
 
             if ($bookingId = RentCarQuoteBookService::book($rentCarQuote, Auth::id())) {
                 Notifications::pub(
