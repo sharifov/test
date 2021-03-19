@@ -5,10 +5,17 @@ namespace sales\services\clientChatMessage;
 use common\models\Notifications;
 use sales\helpers\setting\SettingHelper;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatLastMessage\ClientChatLastMessageRepository;
+use sales\model\clientChatMessage\ClientChatMessageRepository;
+use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatUnread\entity\ClientChatUnread;
 use sales\model\clientChatUnread\entity\ClientChatUnreadRepository;
+use sales\model\user\entity\userConnectionActiveChat\UserConnectionActiveChat;
 use sales\repositories\call\CallRepository;
+use Yii;
 use yii\db\ActiveQuery;
+use yii\helpers\StringHelper;
+use yii\helpers\VarDumper;
 
 /**
  * Class ClientChatMessageService
@@ -16,6 +23,7 @@ use yii\db\ActiveQuery;
  *
  * @property CallRepository $callRepository
  * @property ClientChatUnreadRepository $unreadRepository
+ * @property ClientChatMessageRepository $clientChatMessageRepository
  */
 class ClientChatMessageService
 {
@@ -27,16 +35,19 @@ class ClientChatMessageService
      * @var ClientChatUnreadRepository
      */
     private ClientChatUnreadRepository $unreadRepository;
-
     /**
-     * ClientChatMessageService constructor.
-     * @param CallRepository $callRepository
-     * @param ClientChatUnreadRepository $unreadRepository
+     * @var ClientChatMessageRepository
      */
-    public function __construct(CallRepository $callRepository, ClientChatUnreadRepository $unreadRepository)
-    {
+    private ClientChatMessageRepository $clientChatMessageRepository;
+
+    public function __construct(
+        CallRepository $callRepository,
+        ClientChatUnreadRepository $unreadRepository,
+        ClientChatMessageRepository $clientChatMessageRepository
+    ) {
         $this->callRepository = $callRepository;
         $this->unreadRepository = $unreadRepository;
+        $this->clientChatMessageRepository = $clientChatMessageRepository;
     }
 
     public function increaseUnreadMessages(int $chatId): int
@@ -143,5 +154,106 @@ class ClientChatMessageService
     public function soundNotification(int $userId): bool
     {
         return SettingHelper::isCcSoundNotificationEnabled() && !$this->callRepository->isUserHasActiveCalls($userId);
+    }
+
+    /**
+     * @param string $rid
+     * @return ClientChatMessage[]
+     */
+    public function getFreeMessages(string $rid): array
+    {
+        return ClientChatMessage::find()->andWhere(['ccm_rid' => $rid])->andWhere(['is', 'ccm_cch_id', null])->all();
+    }
+
+    public function assignMessagesToChat(ClientChat $chat): void
+    {
+        $messages = $this->getFreeMessages($chat->cch_rid);
+        foreach ($messages as $message) {
+            $this->assignMessageToChat($message, $chat);
+        }
+    }
+
+    public function assignMessageToChat(ClientChatMessage $message, ClientChat $clientChat): void
+    {
+        $ownerUserId = null;
+        if ($message->isAgentUttered()) {
+            $ownerUserId = $clientChat->cch_owner_user_id;
+        }
+        $message->assignToChat($clientChat->cch_id, $clientChat->cch_client_id, $ownerUserId);
+        $this->clientChatMessageRepository->save($message, 0);
+
+        $this->sendLastChatMessageToMonitor($message);
+
+        if ($message->isGuestUttered()) {
+            if ($clientChat->hasOwner() && $clientChat->cchOwnerUser->userProfile && $clientChat->cchOwnerUser->userClientChatData->isRegisteredInRc()) {
+                if (!UserConnectionActiveChat::find()->andWhere(['ucac_chat_id' => $clientChat->cch_id])->exists()) {
+                    $countUnreadByChatMessages = $this->increaseUnreadMessages($clientChat->cch_id);
+                    $this->updateMessageInfoNotification($countUnreadByChatMessages, $clientChat, $message);
+                } else {
+                    $this->touchUnreadMessage($clientChat->cch_id);
+                    Notifications::publish('clientChatUpdateItemInfo', ['user_id' => $clientChat->cch_owner_user_id], [
+                        'data' => [
+                            'cchId' => $clientChat->cch_id,
+                            'shortMessage' => StringHelper::truncate($message->getMessage(), 40, '...'),
+                            'messageOwner' => $message->isMessageFromClient() ? 'client' : 'agent',
+                            'moment' => round((time() - strtotime($message->ccm_sent_dt))),
+                        ]
+                    ]);
+                }
+            } else {
+                $this->increaseUnreadMessages($clientChat->cch_id);
+            }
+            (Yii::createObject(ClientChatLastMessageRepository::class))->createOrUpdateByMessage($message);
+        } elseif ($message->isAgentUttered()) {
+            $this->touchUnreadMessage($clientChat->cch_id);
+            if ($clientChat->hasOwner() && $clientChat->cchOwnerUser->userProfile && $clientChat->cchOwnerUser->userClientChatData->isRegisteredInRc()) {
+                Notifications::publish('clientChatUpdateItemInfo', ['user_id' => $clientChat->cch_owner_user_id], [
+                    'data' => [
+                        'cchId' => $clientChat->cch_id,
+                        'shortMessage' => StringHelper::truncate($message->getMessage(), 40, '...'),
+                        'messageOwner' => $message->isMessageFromClient() ? 'client' : 'agent',
+                        'moment' => round((time() - strtotime($message->ccm_sent_dt))),
+                    ]
+                ]);
+            }
+            (Yii::createObject(ClientChatLastMessageRepository::class))->createOrUpdateByMessage($message);
+        }
+    }
+
+    public function sendLastChatMessageToMonitor(ClientChatMessage $message): void
+    {
+        $data = [];
+        $data['chat_id'] = $message->ccm_cch_id;
+        $data['client_id'] = $message->ccm_client_id;
+        $data['user_id'] = $message->ccm_user_id;
+        $data['sent_dt'] = Yii::$app->formatter->asDatetime(strtotime($message->ccm_sent_dt), 'php: Y-m-d H:i:s');
+        $data['period'] = Yii::$app->formatter->asRelativeTime(strtotime($message->ccm_sent_dt));
+        $data['msg'] = $message->message;
+
+        try {
+            Yii::$app->centrifugo->setSafety(false)->publish('realtimeClientChatChannel', ['message' => json_encode([
+                'chatMessageData' => $data,
+            ])]);
+        } catch (\Throwable $throwable) {
+            Yii::error(
+                VarDumper::dumpAsString($throwable),
+                'ClientChatRequestService:sendLastChatMessageToMonitor'
+            );
+        }
+    }
+
+    private function updateMessageInfoNotification($countUnreadByChatMessages, ClientChat $clientChat, ClientChatMessage $message): void
+    {
+        Notifications::publish('clientChatUnreadMessage', ['user_id' => $clientChat->cch_owner_user_id], [
+            'data' => [
+                'cchId' => $clientChat->cch_id,
+                'totalUnreadMessages' => $this->getCountOfTotalUnreadMessagesByUser($clientChat->cch_owner_user_id) ?: '',
+                'cchUnreadMessages' => $countUnreadByChatMessages,
+                'soundNotification' => $this->soundNotification($clientChat->cch_owner_user_id),
+                'shortMessage' => StringHelper::truncate($message->getMessage(), 40, '...'),
+                'messageOwner' => $message->isMessageFromClient() ? 'client' : 'agent',
+                'moment' =>  round((time() - strtotime($message->ccm_sent_dt))),
+            ]
+        ]);
     }
 }
