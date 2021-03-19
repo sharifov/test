@@ -4,6 +4,7 @@ modules:
     - REST:
         depends: PhpBrowser
         url: 'https://api.sales.zeit.test'
+        configFile: 'config/test.php'
        # part: [json]
     - Yii2:
         part: [orm, fixtures]
