@@ -135,4 +135,9 @@ class SettingHelper
     {
         return (bool)(\Yii::$app->params['settings']['allow_to_use_general_line_phones'] ?? false);
     }
+
+    public static function isEnabledClientChatJob(): bool
+    {
+        return (bool)(Yii::$app->params['settings']['enable_client_chat_job'] ?? false);
+    }
 }

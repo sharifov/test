@@ -60,13 +60,11 @@ use sales\model\clientChatCouchNote\ClientChatCouchNoteRepository;
 use sales\model\clientChatCouchNote\entity\ClientChatCouchNote;
 use sales\model\clientChatHold\ClientChatHoldRepository;
 use sales\model\clientChatHold\entity\ClientChatHold;
-use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatNote\ClientChatNoteRepository;
 use sales\model\clientChatNote\entity\ClientChatNote;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatRequest\entity\search\ClientChatRequestSearch;
 use sales\model\clientChatRequest\repository\ClientChatRequestRepository;
-use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\model\clientChatUnread\entity\ClientChatUnread;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
@@ -119,7 +117,6 @@ use yii\widgets\ActiveForm;
  * @property TransactionManager $transactionManager
  * @property ClientChatChannelRepository $clientChatChannelRepository
  * @property ProjectRepository $projectRepository
- * @property ClientChatRequestService $clientChatRequestService
  * @property ClientChatRequestRepository $clientChatRequestRepository
  * @property ClientChatStatusLogService $clientChatStatusLogService
  * @property ClientChatStatusLogRepository $clientChatStatusLogRepository
@@ -173,10 +170,6 @@ class ClientChatController extends FController
      */
     private ProjectRepository $projectRepository;
     /**
-     * @var ClientChatRequestService
-     */
-    private ClientChatRequestService $clientChatRequestService;
-    /**
      * @var ClientChatRequestRepository
      */
     private ClientChatRequestRepository $clientChatRequestRepository;
@@ -208,7 +201,6 @@ class ClientChatController extends FController
         TransactionManager $transactionManager,
         ClientChatChannelRepository $clientChatChannelRepository,
         ProjectRepository $projectRepository,
-        ClientChatRequestService $clientChatRequestService,
         ClientChatRequestRepository $clientChatRequestRepository,
         ClientChatStatusLogService $clientChatStatusLogService,
         ClientChatStatusLogRepository $clientChatStatusLogRepository,
@@ -230,7 +222,6 @@ class ClientChatController extends FController
         $this->transactionManager = $transactionManager;
         $this->clientChatChannelRepository = $clientChatChannelRepository;
         $this->projectRepository = $projectRepository;
-        $this->clientChatRequestService = $clientChatRequestService;
         $this->clientChatRequestRepository = $clientChatRequestRepository;
         $this->clientChatStatusLogService = $clientChatStatusLogService;
         $this->clientChatStatusLogRepository = $clientChatStatusLogRepository;
