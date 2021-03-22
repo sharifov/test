@@ -420,7 +420,7 @@ class ClientChatService
             $clientChat->assignOwner($ownerId)->inProgress($ownerId, ClientChatStatusLog::ACTION_CHAT_ACCEPT);
             $_self->clientChatRepository->save($clientChat);
             $_self->clientChatMessageService->touchUnreadMessage($clientChat->cch_id);
-//            $_self->assignAgentToRcChannel($clientChat->cch_rid, $clientChat->cchOwnerUser->userClientChatData->getRcUserId() ?? '');
+            $_self->assignAgentToRcChannel($clientChat->cch_rid, $clientChat->cchOwnerUser->userClientChatData->getRcUserId() ?? '');
         });
     }
 
