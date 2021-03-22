@@ -5,6 +5,7 @@ namespace modules\hotel\src\jobs;
 use modules\hotel\models\HotelQuote;
 use modules\hotel\src\services\hotelQuote\HotelQuotePdfService;
 use modules\order\src\events\OrderFileGeneratedEvent;
+use Yii;
 use yii\queue\Queue;
 use yii\queue\RetryableJobInterface;
 use sales\helpers\app\AppHelper;
@@ -43,15 +44,13 @@ class HotelQuotePdfJob implements RetryableJobInterface
                 ], 'info\HotelQuotePdfJob:success');
             }
         } catch (NotFoundException $throwable) {
-            AppHelper::throwableLogger(
-                $throwable,
-                'HotelQuotePdfJob:Execute:Throwable'
-            );
+            $log = AppHelper::throwableLog($throwable);
+            $log['quoteId'] = $this->hotelQuoteId;
+            Yii::error($log, 'HotelQuotePdfJob:Execute:NotFoundException');
         } catch (\Throwable $throwable) {
-            AppHelper::throwableLogger(
-                $throwable,
-                'HotelQuotePdfJob:Execute:Throwable'
-            );
+            $log = AppHelper::throwableLog($throwable);
+            $log['quoteId'] = $this->hotelQuoteId;
+            Yii::error($log, 'HotelQuotePdfJob:Execute:Throwable');
             throw new \Exception($throwable->getMessage());
         }
     }
