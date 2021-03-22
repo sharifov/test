@@ -22,9 +22,10 @@ class CallLogCategoryColumn extends DataColumn
     {
         parent::init();
 
-        if ($this->filter === null) {
+        /*if ($this->filter === null) {
             $this->filter = Call::SOURCE_LIST;
-        }
+        }*/
+        $this->filter = Call::SOURCE_LIST;
 
         if (!$this->attribute) {
             $this->attribute = 'cl_category_id';
