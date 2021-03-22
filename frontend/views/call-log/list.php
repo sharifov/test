@@ -50,7 +50,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'relation' => 'department',
             ],
             [
-                'class' => \sales\model\callLog\grid\columns\CallLogTypeColumn::class,
+                'attribute' =>  'cl_type_id',
+                'value' => static function (CallLogSearch $model) {
+                    if (!$model->cl_type_id) {
+                        return Yii::$app->formatter->nullDisplay;
+                    }
+                    return CallLogType::asFormat($model->cl_type_id);
+                },
                 'filter' => CallLogType::getList(),
             ],
             [
