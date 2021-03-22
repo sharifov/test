@@ -84,18 +84,13 @@ class GuestUtteredEvent implements ChatRequestEvent
                         $clientChat->archive(null, ClientChatStatusLog::ACTION_AUTO_CLOSE, null, null);
                         $dto = ClientChatCloneDto::feelInOnClone($clientChat);
                         $this->clientChatRepository->save($clientChat);
-
-                        $newClientChat = ClientChat::clone($dto);
-                        $newClientChat->cch_source_type_id = ClientChat::SOURCE_TYPE_GUEST_UTTERED;
-                        $newClientChat->pending(null, ClientChatStatusLog::ACTION_OPEN);
-                        $this->clientChatRepository->save($newClientChat);
-
-                        $this->clientChatService->cloneLead($clientChat, $newClientChat)
-                            ->cloneCase($clientChat, $newClientChat)
-                            ->cloneNotes($clientChat, $newClientChat);
-
-                        $this->clientChatService->sendRequestToUsers($newClientChat);
+                        $dto->sourceTypeId = ClientChat::SOURCE_TYPE_GUEST_UTTERED;
+                        $this->clientChatService->createChatBasedOnOld($dto, $clientChat);
                     }
+                } elseif ($clientChat->isArchive()) {
+                    $dto = ClientChatCloneDto::feelInOnClone($clientChat);
+                    $dto->sourceTypeId = ClientChat::SOURCE_TYPE_GUEST_UTTERED;
+                    $this->clientChatService->createChatBasedOnOld($dto, $clientChat);
                 }
             }
         });

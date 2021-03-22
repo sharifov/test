@@ -420,7 +420,7 @@ class ClientChatService
             $clientChat->assignOwner($ownerId)->inProgress($ownerId, ClientChatStatusLog::ACTION_CHAT_ACCEPT);
             $_self->clientChatRepository->save($clientChat);
             $_self->clientChatMessageService->touchUnreadMessage($clientChat->cch_id);
-            $_self->assignAgentToRcChannel($clientChat->cch_rid, $clientChat->cchOwnerUser->userClientChatData->getRcUserId() ?? '');
+//            $_self->assignAgentToRcChannel($clientChat->cch_rid, $clientChat->cchOwnerUser->userClientChatData->getRcUserId() ?? '');
         });
     }
 
@@ -779,5 +779,20 @@ class ClientChatService
             return false;
         }
         return true;
+    }
+
+    public function createChatBasedOnOld(ClientChatCloneDto $dto, ClientChat $oldChat): ClientChat
+    {
+        $newClientChat = ClientChat::clone($dto);
+        $newClientChat->pending(null, ClientChatStatusLog::ACTION_OPEN);
+        $this->clientChatRepository->save($newClientChat);
+
+        $this->cloneLead($oldChat, $newClientChat)
+            ->cloneCase($oldChat, $newClientChat)
+            ->cloneNotes($oldChat, $newClientChat);
+
+        $this->sendRequestToUsers($newClientChat);
+
+        return $newClientChat;
     }
 }
