@@ -61,10 +61,12 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'class' => \sales\model\callLog\grid\columns\CallLogCategoryColumn::class,
+                'attribute' => 'cl_category_id',
                 'filter' => Call::SOURCE_LIST,
             ],
             [
                 'class' => \sales\model\callLog\grid\columns\CallLogStatusColumn::class,
+                'attribute' => 'cl_status_id',
                 'filter' => CallLogStatus::getList(),
             ],
             [
