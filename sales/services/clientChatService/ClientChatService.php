@@ -791,6 +791,18 @@ class ClientChatService
             ->cloneCase($oldChat, $newClientChat)
             ->cloneNotes($oldChat, $newClientChat);
 
+
+        $oldVisitor = $oldChat->ccv->ccvCvd ?? null;
+        if ($oldVisitor) {
+            $this->clientChatVisitorRepository->create($newClientChat->cch_id, $oldVisitor->cvd_id, $newClientChat->cch_client_id);
+        }
+
+        $lastMessage = $this->clientChatLastMessageRepository->getByChatId($oldChat->cch_id);
+        if ($lastMessage) {
+            $lastMessageNew = $this->clientChatLastMessageRepository->cloneToNewChat($lastMessage, $newClientChat->cch_id);
+            $this->clientChatLastMessageRepository->save($lastMessageNew);
+        }
+
         $this->sendRequestToUsers($newClientChat);
 
         return $newClientChat;
