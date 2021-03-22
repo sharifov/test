@@ -33,6 +33,9 @@ use yii\base\Model;
  * @property $call_recording_disabled
  * @property $is_warm_transfer
  * @property int|null $accepted_user_id
+ * @property int|null $dep_id
+ * @property int|null $old_call_owner_id
+ * @property int|null $call_group_id
  *
  * @property $conferenceId
  */
@@ -82,6 +85,9 @@ class ConferenceStatusCallbackForm extends Model
     public $call_recording_disabled;
     public $is_warm_transfer;
     public $accepted_user_id;
+    public $dep_id;
+    public $old_call_owner_id;
+    public $call_group_id;
 
     public $conferenceId;
 
@@ -157,6 +163,14 @@ class ConferenceStatusCallbackForm extends Model
             ['is_warm_transfer', 'boolean'],
 
             ['accepted_user_id', 'integer'],
+
+            ['dep_id', 'default', 'value' => null],
+            ['dep_id', 'integer'],
+
+            ['old_call_owner_id', 'default', 'value' => null],
+            ['old_call_owner_id', 'integer'],
+
+            ['call_group_id', 'integer'],
         ];
     }
 

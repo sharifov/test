@@ -43,6 +43,7 @@ use sales\model\department\departmentPhoneProject\entity\params\QueueLongTimeNot
 use sales\model\emailList\entity\EmailList;
 use sales\model\phoneList\entity\PhoneList;
 use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
+use sales\model\user\entity\userStatus\UserStatus;
 use sales\model\userVoiceMail\entity\UserVoiceMail;
 use sales\model\voiceMailRecord\entity\VoiceMailRecord;
 use sales\repositories\lead\LeadRepository;
@@ -1310,6 +1311,10 @@ class CommunicationController extends ApiBaseController
         if ($customParameters->is_warm_transfer) {
             $call->setTypeIn();
             $call->c_source_type_id = Call::SOURCE_DIRECT_CALL;
+        }
+
+        if ($customParameters->dep_id) {
+            $call->c_dep_id = $customParameters->dep_id;
         }
     }
 
@@ -2648,9 +2653,15 @@ class CommunicationController extends ApiBaseController
         ) {
             $call = Call::find()->andWhere(['c_call_sid' => $form->CallSid])->one();
             if ($call && !$call->isStatusQueue()) {
+                if ($form->old_call_owner_id && $form->call_group_id) {
+                    UserStatus::updateIsOnnCall($form->old_call_owner_id, $form->call_group_id);
+                }
                 $call->c_created_user_id = $form->accepted_user_id;
                 $call->setTypeIn();
                 $call->direct();
+                if ($form->dep_id) {
+                    $call->c_dep_id = $form->dep_id;
+                }
                 $call->save();
             }
         }

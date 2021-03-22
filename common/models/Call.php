@@ -1475,8 +1475,7 @@ class Call extends \yii\db\ActiveRecord
                         $call->isRecordingDisable(),
                         $call->getDataPhoneListId(),
                         $call->c_to,
-                        FriendlyName::nextWithSid($call->c_call_sid),
-                        false
+                        FriendlyName::nextWithSid($call->c_call_sid)
                     );
 
                     if ($res) {
@@ -1551,7 +1550,7 @@ class Call extends \yii\db\ActiveRecord
 
             if ($call->c_created_user_id) {
                 $user = Employee::findOne($user_id);
-                $message = 'Warm transfer try accepted successfully. From ' . $call->c_from . ' to ' . $call->c_to . '. Accepted by Agent: ' . ($user ? Html::encode($user->username) : '-');
+                $message = 'Warm transfer try accepted successfully.';
                 if (
                     $ntf = Notifications::create(
                         $call->c_created_user_id,
@@ -1604,16 +1603,22 @@ class Call extends \yii\db\ActiveRecord
             if ($call->update() === false) {
                 Yii::error(VarDumper::dumpAsString(['call' => $call->getAttributes(), 'error' => $call->getErrors()]), 'Call:applyWarmTransferCallToAgent:call:update');
             } else {
-                $delay = abs((int)(Yii::$app->params['settings']['call_accept_check_conference_status_seconds'] ?? 0));
-                if ($delay) {
-                    $checkJob = new CheckClientCallJoinToConferenceJob();
-                    $checkJob->callId = $call->c_id;
-                    $checkJob->dateTime = date('Y-m-d H:i:s');
-                    Yii::$app->queue_job->delay($delay)->push($checkJob);
-                }
+//                $delay = abs((int)(Yii::$app->params['settings']['call_accept_check_conference_status_seconds'] ?? 0));
+//                if ($delay) {
+//                    $checkJob = new CheckClientCallJoinToConferenceJob();
+//                    $checkJob->callId = $call->c_id;
+//                    $checkJob->dateTime = date('Y-m-d H:i:s');
+//                    Yii::$app->queue_job->delay($delay)->push($checkJob);
+//                }
             }
 
-            $res = \Yii::$app->communication->acceptConferenceCall(
+            $departmentId = null;
+            $userDepartment = UserProjectParams::find()->select(['upp_dep_id'])->andWhere(['IS NOT', 'upp_dep_id', null])->byUserId($user_id)->byProject($call->c_project_id)->asArray()->one();
+            if ($userDepartment) {
+                $departmentId = $userDepartment['upp_dep_id'];
+            }
+
+            $res = \Yii::$app->communication->acceptWarmTransferCall(
                 $call->c_id,
                 $call->c_call_sid,
                 UserCallIdentity::getClientId($user_id),
@@ -1623,7 +1628,9 @@ class Call extends \yii\db\ActiveRecord
                 $call->getDataPhoneListId(),
                 $call->c_to,
                 FriendlyName::nextWithSid($call->c_call_sid),
-                true
+                $departmentId,
+                $call->c_created_user_id,
+                $call->c_group_id
             );
 
             $isError = (bool)($res['error'] ?? true);
@@ -2357,10 +2364,14 @@ class Call extends \yii\db\ActiveRecord
         $this->c_is_conference = true;
     }
 
-    public function getCallerName(string $fromNumber)
+    public function getCallerName(?string $fromNumber)
     {
         if ($this->cClient) {
             return $this->cClient->getShortName();
+        }
+
+        if (!$fromNumber) {
+            return 'ClientName';
         }
 
         $phone = PhoneList::find()->byPhone($fromNumber)->enabled()->one();

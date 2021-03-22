@@ -291,7 +291,11 @@ class CallUserAccess extends \yii\db\ActiveRecord
                         if ($call->isIn()) {
                             $phone = $call->c_from;
                         } elseif ($call->isOut()) {
-                            $phone = $call->c_to;
+                            if ($this->isWarmTransfer()) {
+                                $phone = $call->c_from;
+                            } else {
+                                $phone = $call->c_to;
+                            }
                         }
                     }
 
