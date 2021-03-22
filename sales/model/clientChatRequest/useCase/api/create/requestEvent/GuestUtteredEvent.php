@@ -2,11 +2,14 @@
 
 namespace sales\model\clientChatRequest\useCase\api\create\requestEvent;
 
+use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatMessage\ClientChatMessageRepository;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
+use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatService\ClientChatService;
 use sales\services\TransactionManager;
@@ -74,8 +77,25 @@ class GuestUtteredEvent implements ChatRequestEvent
             if ($clientChat) {
                 $this->clientChatMessageService->assignMessageToChat($message, $clientChat);
 
-                if ($clientChat->isClosed()) {
-                    $this->clientChatService->autoReopen($clientChat);
+                if ($clientChat->isClosed() && $owner = $clientChat->cchOwnerUser) {
+                    if ($owner->isOnline()) {
+                        $this->clientChatService->autoReopen($clientChat);
+                    } else {
+                        $clientChat->archive(null, ClientChatStatusLog::ACTION_AUTO_CLOSE, null, null);
+                        $dto = ClientChatCloneDto::feelInOnClone($clientChat);
+                        $this->clientChatRepository->save($clientChat);
+
+                        $newClientChat = ClientChat::clone($dto);
+                        $newClientChat->cch_source_type_id = ClientChat::SOURCE_TYPE_GUEST_UTTERED;
+                        $newClientChat->pending(null, ClientChatStatusLog::ACTION_OPEN);
+                        $this->clientChatRepository->save($newClientChat);
+
+                        $this->clientChatService->cloneLead($clientChat, $newClientChat)
+                            ->cloneCase($clientChat, $newClientChat)
+                            ->cloneNotes($clientChat, $newClientChat);
+
+                        $this->clientChatService->sendRequestToUsers($newClientChat);
+                    }
                 }
             }
         });

@@ -146,12 +146,14 @@ class ClientChat extends \yii\db\ActiveRecord
     public const SOURCE_TYPE_AGENT = 2;
     public const SOURCE_TYPE_TRANSFER = 3;
     public const SOURCE_TYPE_TAKE = 4;
+    public const SOURCE_TYPE_GUEST_UTTERED = 5;
 
     private const SOURCE_TYPE_LIST = [
         self::SOURCE_TYPE_CLIENT => 'Client',
         self::SOURCE_TYPE_AGENT => 'Agent',
         self::SOURCE_TYPE_TRANSFER => 'Transfer',
         self::SOURCE_TYPE_TAKE => 'Take',
+        self::SOURCE_TYPE_GUEST_UTTERED => 'Message from client'
     ];
 
     // for query only
