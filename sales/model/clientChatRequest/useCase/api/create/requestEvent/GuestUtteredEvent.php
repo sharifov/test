@@ -2,9 +2,12 @@
 
 namespace sales\model\clientChatRequest\useCase\api\create\requestEvent;
 
+use common\models\Notifications;
+use frontend\widgets\clientChat\ClientChatAccessMessage;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
+use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatMessage\ClientChatMessageRepository;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
@@ -86,6 +89,16 @@ class GuestUtteredEvent implements ChatRequestEvent
                         $this->clientChatRepository->save($clientChat);
                         $dto->sourceTypeId = ClientChat::SOURCE_TYPE_GUEST_UTTERED;
                         $this->clientChatService->createChatBasedOnOld($dto, $clientChat);
+
+                        Notifications::pub(
+                            [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],
+                            'refreshChatPage',
+                            ['data' => ClientChatAccessMessage::chatArchive($clientChat->cch_id)]
+                        );
+                        Notifications::pub(
+                            [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],
+                            'reloadClientChatList'
+                        );
                     }
                 } elseif ($clientChat->isArchive()) {
                     $dto = ClientChatCloneDto::feelInOnClone($clientChat);
