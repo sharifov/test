@@ -13,34 +13,12 @@ use yii\helpers\Console;
 
 class CallReportController extends Controller
 {
-    public $date;
-
-    public function options($actionID)
-    {
-        return ['date'];
-    }
-
     public function actionPriceline()
     {
         printf(
             "\n --- Start %s ---\n\n",
             $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW)
         );
-
-        if ($this->date === null) {
-            $this->date = date('Y-m-d', strtotime('-1 day'));
-        } else {
-            $this->date = (string)$this->date;
-        }
-
-        if (!$this->validateDate($this->date)) {
-            echo 'Date is invalid: ' . $this->date . PHP_EOL;
-            printf(
-                "\n --- End %s ---\n\n",
-                $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW)
-            );
-            return ExitCode::UNSPECIFIED_ERROR;
-        }
 
         $params = \Yii::$app->params['price_line_ftp_credential'];
         $credential = new Credential(
@@ -52,15 +30,9 @@ class CallReportController extends Controller
         );
         $reportSender = new CallReportSender($credential);
 
-        $phones = [
-            '+18559404266',
-            '+18559404246',
-            '+18559404224',
-            '+18559404288',
-        ];
-        $fileName = 'Call_Priceline_report_' . $this->date . '.csv';
+        $fileName = 'Call_Priceline_report_' . date('Y-m-d', strtotime('-1 day')) . '.csv';
 
-        $report = (new DailyReportGenerator())->generate($phones, $this->date);
+        $report = (new DailyReportGenerator())->generate();
         $reportSender->send($report, $fileName);
 
         if ($report) {
@@ -72,15 +44,32 @@ class CallReportController extends Controller
             $rows[] = [
                 $result['Time Stamp (UTC)'],
                 $result['Call ID'],
-                $result['Call Length'],
+                $result['Department'],
+                $result['Status'],
+                $result['Queue Time'],
+                $result['Talk Time'],
                 $result['Phone number'],
+                $result['Lead'],
+                $result['Client id'],
+                $result['Trip id'],
             ];
         }
 
         echo 'Saved in file: ' . $fileName . PHP_EOL;
 
         echo Table::widget([
-            'headers' => ['Time Stamp (UTC)', 'Call ID', 'Call Length', 'Phone number'],
+            'headers' => [
+                'Time Stamp (UTC)',
+                'Call ID',
+                'Department',
+                'Status',
+                'Queue Time',
+                'Talk Time',
+                'Phone number',
+                'Lead',
+                'Client id',
+                'Trip id',
+            ],
             'rows' => $rows,
         ]);
 
