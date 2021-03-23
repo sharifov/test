@@ -1,11 +1,13 @@
 class_name: ApiTester
 modules:
   enabled:
+    - PhpBrowser:
+        url: 'https://api.sales.zeit.test/index-test.php'
     - REST:
         depends: PhpBrowser
-        url: 'https://api.sales.zeit.test'
+        url: 'https://api.sales.zeit.test/index-test.php'
         configFile: 'config/test.php'
-       # part: [json]
+        part: [json]
     - Yii2:
         part: [orm, fixtures]
         entryScript: index-test.php
@@ -16,7 +18,7 @@ env:
     modules:
       config:
         WebDriver:
-          #url: 'https://api.sales.zeit.test2'
+          #url: 'https://api.sales.zeit.test'
           #host: '25.99.239.1'
           browser: 'chrome'
           #port: '4444'

@@ -2,6 +2,7 @@
 
 namespace webapi\tests;
 
+use webapi\fixtures\UserFixture;
 use yii\helpers\Url;
 
 class IndexApiCest
@@ -42,33 +43,46 @@ class IndexApiCest
 //    }
 
 
-    /**
-     * @param \webapi\tests\ApiTester $I
-     * @param \Codeception\Example $example
-     * @example ["/v1/site/test", 200]
-     * @example ["/v2/site/test", 200]
-     * @example ["/v1/site/index", 200]
-     * @example ["/v2/site/index", 200]
-     */
-    public function checkEndpoints(ApiTester $I, \Codeception\Example $example): void
+    public function _before(ApiTester $I)
     {
-        $I->wantTo('[GET] Check Endpoint and Response Code');
-        $I->sendGet($example[0]);
-        $I->seeResponseCodeIs($example[1]);
+        $I->haveFixtures([
+            'user' => [
+                'class' => UserFixture::class,
+                'dataFile' => codecept_data_dir() . 'user.php'
+            ]
+        ]);
     }
+
+
+//    /**
+//     * @param \webapi\tests\ApiTester $I
+//     * @param \Codeception\Example $example
+//     * @example ["/v1/site/test", 200]
+//     * @example ["/v2/site/test", 200]
+//     * @example ["/v1/site/index", 200]
+//     * @example ["/v2/site/index", 200]
+//     */
+//    public function checkEndpoints(ApiTester $I, \Codeception\Example $example): void
+//    {
+//        $I->wantTo('[GET] Check Endpoint and Response Code');
+//        $I->sendGet($example[0]);
+//        $I->seeResponseCodeIs($example[1]);
+//    }
 
     /**
      * @param \webapi\tests\ApiTester $I
      * @param \Codeception\Example $example
      * @example ["Sales"]
-     * @example ["Exchange"]
-     * @example ["Support"]
+
      */
     public function getDepartmentPhoneProject(ApiTester $I, \Codeception\Example $example): void
     {
         $I->wantTo('[POST] Get Department Phone Project');
         $I->amHttpAuthenticated(self::API_USERNAME, self::API_PASSWORD);
         $I->haveHttpHeader('Accept-Encoding', 'Accept-Encoding: gzip, deflate');
+
+        echo Url::toRoute('/v2/department-phone-project/get'); exit;
+
         $I->sendPost(
             Url::toRoute('/v2/department-phone-project/get'),
             [
