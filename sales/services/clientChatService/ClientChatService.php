@@ -780,4 +780,31 @@ class ClientChatService
         }
         return true;
     }
+
+    public function createChatBasedOnOld(ClientChatCloneDto $dto, ClientChat $oldChat): ClientChat
+    {
+        $newClientChat = ClientChat::clone($dto);
+        $newClientChat->pending(null, ClientChatStatusLog::ACTION_OPEN);
+        $this->clientChatRepository->save($newClientChat);
+
+        $this->cloneLead($oldChat, $newClientChat)
+            ->cloneCase($oldChat, $newClientChat)
+            ->cloneNotes($oldChat, $newClientChat);
+
+
+        $oldVisitor = $oldChat->ccv->ccvCvd ?? null;
+        if ($oldVisitor) {
+            $this->clientChatVisitorRepository->create($newClientChat->cch_id, $oldVisitor->cvd_id, $newClientChat->cch_client_id);
+        }
+
+        $lastMessage = $this->clientChatLastMessageRepository->getByChatId($oldChat->cch_id);
+        if ($lastMessage) {
+            $lastMessageNew = $this->clientChatLastMessageRepository->cloneToNewChat($lastMessage, $newClientChat->cch_id);
+            $this->clientChatLastMessageRepository->save($lastMessageNew);
+        }
+
+        $this->sendRequestToUsers($newClientChat);
+
+        return $newClientChat;
+    }
 }

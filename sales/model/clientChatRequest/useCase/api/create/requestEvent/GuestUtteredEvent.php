@@ -2,11 +2,17 @@
 
 namespace sales\model\clientChatRequest\useCase\api\create\requestEvent;
 
+use common\models\Notifications;
+use frontend\widgets\clientChat\ClientChatAccessMessage;
+use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
+use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatMessage\ClientChatMessageRepository;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
+use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatService\ClientChatService;
 use sales\services\TransactionManager;
@@ -74,8 +80,30 @@ class GuestUtteredEvent implements ChatRequestEvent
             if ($clientChat) {
                 $this->clientChatMessageService->assignMessageToChat($message, $clientChat);
 
-                if ($clientChat->isClosed()) {
-                    $this->clientChatService->autoReopen($clientChat);
+                if ($clientChat->isClosed() && $owner = $clientChat->cchOwnerUser) {
+                    if ($owner->isOnline()) {
+                        $this->clientChatService->autoReopen($clientChat);
+                    } else {
+                        $clientChat->archive(null, ClientChatStatusLog::ACTION_AUTO_CLOSE, null, null);
+                        $dto = ClientChatCloneDto::feelInOnClone($clientChat);
+                        $this->clientChatRepository->save($clientChat);
+                        $dto->sourceTypeId = ClientChat::SOURCE_TYPE_GUEST_UTTERED;
+                        $this->clientChatService->createChatBasedOnOld($dto, $clientChat);
+
+                        Notifications::pub(
+                            [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],
+                            'refreshChatPage',
+                            ['data' => ClientChatAccessMessage::chatArchive($clientChat->cch_id)]
+                        );
+                        Notifications::pub(
+                            [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],
+                            'reloadClientChatList'
+                        );
+                    }
+                } elseif ($clientChat->isArchive()) {
+                    $dto = ClientChatCloneDto::feelInOnClone($clientChat);
+                    $dto->sourceTypeId = ClientChat::SOURCE_TYPE_GUEST_UTTERED;
+                    $this->clientChatService->createChatBasedOnOld($dto, $clientChat);
                 }
             }
         });

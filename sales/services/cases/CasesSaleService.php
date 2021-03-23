@@ -385,6 +385,10 @@ class CasesSaleService
 
     public function prepareSegmentsData(CaseSale $caseSale, array $saleData): void
     {
+        if (!isset($saleData['itinerary'])) {
+            return;
+        }
+
         $itineraryFirstKey = array_key_first($saleData['itinerary']);
 
         if (isset($saleData['itinerary'][$itineraryFirstKey]['segments'][0]['departureAirport'])) {
