@@ -236,5 +236,15 @@ class SettingHelper
             }
         }
         return null;
+	}
+
+    public static function warmTransferTimeout(): int
+    {
+        return (int)(\Yii::$app->params['settings']['warm_transfer_timeout'] ?? 30);
+    }
+
+    public static function warmTransferAutoUnholdEnabled(): bool
+    {
+        return (bool)(\Yii::$app->params['settings']['warm_transfer_auto_unhold_enabled'] ?? false);
     }
 }

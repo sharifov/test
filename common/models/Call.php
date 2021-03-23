@@ -1542,28 +1542,28 @@ class Call extends \yii\db\ActiveRecord
     public static function applyWarmTransferCallToAgent(Call $call, int $user_id): bool
     {
         try {
-            if (!$call->isStatusDelay() && !$call->isStatusInProgress()) {
-                throw new \DomainException('Call is Not in status Delay or In-progress');
+            if (!$call->isStatusDelay() && !$call->isStatusInProgress() && !$call->isHold()) {
+                throw new \DomainException('Call is Not in status Delay or In-progress or Hold');
             }
 
 //                $call->c_source_type_id = self::SOURCE_REDIRECT_CALL;
 
-            if ($call->c_created_user_id) {
-                $user = Employee::findOne($user_id);
-                $message = 'Warm transfer try accepted successfully.';
-                if (
-                    $ntf = Notifications::create(
-                        $call->c_created_user_id,
-                        'Warm transfer',
-                        $message,
-                        Notifications::TYPE_SUCCESS,
-                        true
-                    )
-                ) {
-                    $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                    Notifications::publish('getNewNotification', ['user_id' => $call->c_created_user_id], $dataNotification);
-                }
-            }
+//            if ($call->c_created_user_id) {
+//                $user = Employee::findOne($user_id);
+//                $message = 'Warm transfer accepted successfully.';
+//                if (
+//                    $ntf = Notifications::create(
+//                        $call->c_created_user_id,
+//                        'Warm transfer',
+//                        $message,
+//                        Notifications::TYPE_SUCCESS,
+//                        true
+//                    )
+//                ) {
+//                    $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+//                    Notifications::publish('getNewNotification', ['user_id' => $call->c_created_user_id], $dataNotification);
+//                }
+//            }
 
 //                $call->c_created_user_id = $user_id;
 

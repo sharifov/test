@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\components\CommunicationService;
+use common\components\jobs\CheckWarmTransferTimeExpiredJob;
 use common\models\Call;
 use common\models\CallUserAccess;
 use common\models\ClientPhone;
@@ -1123,7 +1124,10 @@ class PhoneController extends FController
                 if ($result['error']) {
                     throw new \DomainException($result['message']);
                 }
-                Call::applyCallToAgentAccessWarmTransfer($parent, $userId);
+                if (Call::applyCallToAgentAccessWarmTransfer($parent, $userId)) {
+                    $checkJob = new CheckWarmTransferTimeExpiredJob($parent->c_id, $userId, $data['conferenceSid'], $data['keeperSid'], $data['recordingDisabled']);
+                    Yii::$app->queue_job->delay(50)->push($checkJob);
+                }
             } else {
                 $childCall = Call::find()
                     ->andWhere(['c_parent_id' => $originCall->c_id])
@@ -1143,7 +1147,10 @@ class PhoneController extends FController
                 if ($result['error']) {
                     throw new \DomainException($result['message']);
                 }
-                Call::applyCallToAgentAccessWarmTransfer($childCall, $userId);
+                if (Call::applyCallToAgentAccessWarmTransfer($childCall, $userId)) {
+                    $checkJob = new CheckWarmTransferTimeExpiredJob($childCall->c_id, $userId, $data['conferenceSid'], $data['keeperSid'], $data['recordingDisabled']);
+                    Yii::$app->queue_job->delay(50)->push($checkJob);
+                }
             }
         } catch (\Throwable $e) {
             $result = [
@@ -1420,6 +1427,13 @@ class PhoneController extends FController
                 if ($callUserAccess) {
                     $callUserAccess->noAnsweredCall();
                     $callUserAccess->save();
+                    Notifications::createAndPublish(
+                        $callUserAccess->cua_user_id,
+                        'Warm transfer canceled',
+                        'Warm transfer canceled. Call Id: ' . $callUserAccess->cua_call_id,
+                        Notifications::TYPE_WARNING,
+                        true
+                    );
                 }
             }
             //
