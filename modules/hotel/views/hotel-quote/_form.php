@@ -24,6 +24,10 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'hq_hotel_list_id')->textInput() ?>
 
+    <?= $form->field($model, 'hq_check_in_date')->textInput() ?>
+
+    <?= $form->field($model, 'hq_check_out_date')->textInput() ?>
+
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>

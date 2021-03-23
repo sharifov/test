@@ -15,6 +15,7 @@ use dosamigos\datepicker\DatePicker;
 use sales\entities\cases\Cases;
 use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
+use common\models\Language;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\entities\cases\CasesQSearch */
@@ -162,6 +163,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => static function (CasesQSearch $model) {
                     return $model->getClientTime();
                 },
+            ],
+            [
+                'attribute' => 'client_locale',
+                'value' => 'client.cl_locale',
+                'filter' => Language::getLocaleList(false)
             ],
             [
                 'header' => 'Agent',

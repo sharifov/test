@@ -80,9 +80,13 @@ class GetController extends FController
         }
 
         try {
-            \Yii::$app->response->format = Response::FORMAT_RAW;
-            \Yii::$app->response->headers->add('Content-Type', $file->fs_mime_type);
-            \Yii::$app->response->stream = $this->fileSystem->readStream($file->fs_path);
+            if ((bool) \Yii::$app->request->get('as_file', false)) {
+                \Yii::$app->response->sendContentAsFile($this->fileSystem->read($file->fs_path), $file->fs_name);
+            } else {
+                \Yii::$app->response->format = Response::FORMAT_RAW;
+                \Yii::$app->response->headers->add('Content-Type', $file->fs_mime_type);
+                \Yii::$app->response->stream = $this->fileSystem->readStream($file->fs_path);
+            }
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => 'View File storage error.',

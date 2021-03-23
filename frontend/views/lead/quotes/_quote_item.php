@@ -161,6 +161,12 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                             ]);
                             ?>
 
+                                <?= Html::a('<i class="fa fa-camera"></i> Copy Checkout Link', null, [
+                                    'class' => 'btn-copy-checkout-link dropdown-item',
+                                    'data-url' => $model->getCheckoutUrlPage(),
+                                    'title' => 'Copy To Clipboard'
+                                ]) ?>
+
                         <?php endif; ?>
                     </div>
                 </div>

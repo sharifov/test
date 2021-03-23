@@ -58,17 +58,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'attribute' => 'created',
             'label' => 'Pending Time',
             'value' => static function (\common\models\Lead $model) {
-
-                $createdTS = strtotime($model->created);
-
-                $diffTime = time() - $createdTS;
-                $diffHours = (int) ($diffTime / (60 * 60));
-
-
-                $str = ($diffHours > 3 && $diffHours < 73 ) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
-                $str .= '<br><i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
-
-                return $str;
+                return Yii::$app->formatter->asRelativeDt($model->created);
             },
             'options' => [
                 'style' => 'width:160px'
@@ -90,26 +80,33 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
             ]),
         ],
-
-        /*[
-            'attribute' => 'created',
-            'label' => 'Pending Time',
-            'value' => static function (\common\models\Lead $model) {
-                return Yii::$app->formatter->asRelativeTime(strtotime($model->created)); //Lead::getPendingAfterCreate($model->created);
-            },
-            'format' => 'raw'
-        ],
-
         [
-            'attribute' => 'created',
-            'value' => static function (\common\models\Lead $model) {
-                return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
+            'attribute' => 'expiration_dt',
+            'value' => static function (Lead $model) {
+                return Yii::$app->formatter->asExpirationDt($model->l_expiration_dt);
             },
+            'filter' => DatePicker::widget([
+                'model' => $searchModel,
+                'attribute' => 'expiration_dt',
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'yyyy-mm-dd',
+                    'clearBtn' => true,
+                ],
+                'options' => [
+                    'autocomplete' => 'off',
+                    'placeholder' => 'Choose Date',
+                    'readonly' => '1',
+                ],
+                'clientEvents' => [
+                    'clearDate' => 'function (e) {$(e.target).find("input").change();}',
+                ],
+            ]),
+            'options' => [
+                'style' => 'width:180px'
+            ],
             'format' => 'raw',
-            'filter' => false
-
-        ],*/
-
+        ],
         [
             // 'attribute' => 'client_id',
             'header' => 'Client',
@@ -127,12 +124,12 @@ $this->params['breadcrumbs'][] = $this->title;
                     if ($model->client->isExcluded()) {
                         $clientName = ClientFormatter::formatExclude($model->client)  . $clientName;
                     }
+                    $str = '';
+                    //$str = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
+                    //$str .= $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
 
-                    $str = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
-                    $str .= $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
 
-
-                    $clientName .= '<br>' . $str;
+                    $clientName .= /*'<br>' .*/ $str;
                 } else {
                     $clientName = '-';
                 }

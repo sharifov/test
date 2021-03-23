@@ -252,6 +252,7 @@ class QuoteController extends ApiBaseController
      *   "lead_status": "sold",
      *   "booked_quote_uid": "5b8ddfc56a15c",
      *   "source_code": "38T556",
+     *   "check_payment": true,
      *   "agentName": "admin",
      *   "agentEmail": "assistant@wowfare.com",
      *   "agentDirectLine": "+1 888 946 3882",
@@ -316,7 +317,6 @@ class QuoteController extends ApiBaseController
 
     public function actionGetInfo(): array
     {
-
         $this->checkPost();
         $apiLog = $this->startApiLog($this->action->uniqueId);
 
@@ -373,6 +373,7 @@ class QuoteController extends ApiBaseController
             $response['booked_quote_uid'] = null;
             $response['source_code'] = ($model->lead && isset($model->lead->source)) ? $model->lead->source->cid : null;
             $response['gdsOfferId'] = $model->gds_offer_id;
+            $response['check_payment'] = (bool) $model->check_payment;
 
             if (in_array($model->lead->status, [10,12])) {
                 $response['lead_status'] = ($model->lead->status == 10) ? 'sold' : 'booked';
@@ -586,7 +587,17 @@ class QuoteController extends ApiBaseController
         if (isset($quoteAttributes['needSync']) && $quoteAttributes['needSync'] == true) {
             $data = $model->lead->getLeadInformationForExpert();
             $result = BackOffice::sendRequest('lead/update-lead', 'POST', json_encode($data));
-            if ($result['status'] == 'Success' && empty($result['errors'])) {
+
+            if (!array_key_exists('status', $result)) {
+                $response['errors'] = 'Not found status key from response (BackOffice - lead/update-lead)';
+                Yii::error(
+                    [
+                        'result' => VarDumper::dumpAsString($result),
+                        'data' => $data,
+                    ],
+                    'QuoteController:actionUpdate:update-lead'
+                );
+            } elseif ($result['status'] === 'Success' && empty($result['errors'])) {
                 $response['status'] = 'Success';
             } else {
                 $response['errors'] = $result['errors'];

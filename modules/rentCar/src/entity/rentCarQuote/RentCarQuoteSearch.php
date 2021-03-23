@@ -52,7 +52,7 @@ class RentCarQuoteSearch extends RentCarQuote
 
             ['rcq_vendor_name', 'string', 'max' => 255],
 
-            [['rcq_created_dt', 'rcq_created_dt'], 'date', 'format' => 'php:Y-m-d'],
+            [['rcq_created_dt', 'rcq_created_dt', 'rcq_pick_up_dt', 'rcq_drop_off_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -109,6 +109,18 @@ class RentCarQuoteSearch extends RentCarQuote
             $query->andWhere(new Expression(
                 'DATE(rcq_updated_dt) = :search_date',
                 [':search_date' => date('Y-m-d', strtotime($this->rcq_updated_dt))]
+            ));
+        }
+        if ($this->rcq_pick_up_dt) {
+            $query->andWhere(new Expression(
+                'DATE(rcq_pick_up_dt) = :search_date',
+                [':search_date' => date('Y-m-d', strtotime($this->rcq_pick_up_dt))]
+            ));
+        }
+        if ($this->rcq_drop_off_dt) {
+            $query->andWhere(new Expression(
+                'DATE(rcq_drop_off_dt) = :search_date',
+                [':search_date' => date('Y-m-d', strtotime($this->rcq_drop_off_dt))]
             ));
         }
 

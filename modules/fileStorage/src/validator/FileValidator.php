@@ -10,6 +10,8 @@ class FileValidator extends \yii\validators\FileValidator
     {
         $this->maxSize = FileStorageSettings::getUploadMaxSize();
         $this->mimeTypes = array_keys(FileStorageSettings::getMimeTypes());
+        $this->extensions = array_keys(FileStorageSettings::getAllowExt());
+        $this->checkExtensionByMimeType = false;
         parent::init();
     }
 }

@@ -9,7 +9,7 @@ use modules\product\src\entities\productType\ProductType;
 use modules\hotel\src\helpers\HotelFormatHelper;
 use Yii;
 use modules\hotel\models\Hotel;
-use modules\hotel\models\search\HotelSearch;
+use modules\attraction\models\search\AttractionSearch;
 use frontend\controllers\FController;
 use yii\base\Exception;
 use yii\db\StaleObjectException;
@@ -55,7 +55,7 @@ class AttractionController extends FController
      */
     public function actionIndex()
     {
-        $searchModel = new HotelSearch();
+        $searchModel = new AttractionSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -84,10 +84,10 @@ class AttractionController extends FController
      */
     public function actionCreate()
     {
-        $model = new Hotel();
+        $model = new Attraction();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->ph_id]);
+            return $this->redirect(['view', 'id' => $model->atn_id]);
         }
 
         return $this->render('create', [
@@ -107,7 +107,7 @@ class AttractionController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->ph_id]);
+            return $this->redirect(['view', 'id' => $model->atn_id]);
         }
 
         return $this->render('update', [
@@ -202,8 +202,8 @@ class AttractionController extends FController
         $result = Yii::$app->cache->get($keyCache);
 
         if ($result === false) {
-            $apiHotelService = Yii::$app->getModule('hotel')->apiService;
-            $result = $apiHotelService->searchDestination($term, '', '', '', $destType);
+            $apiAttractionService = Yii::$app->getModule('attraction')->apiService;
+            $result = $apiAttractionService->searchDestination($term, '', '', '', $destType);
             if ($result) {
                 Yii::$app->cache->set($keyCache, $result, 600);
             }

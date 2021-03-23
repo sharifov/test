@@ -2,18 +2,24 @@
 
 namespace modules\flight\controllers;
 
+use common\models\Notifications;
+use frontend\helpers\JsonHelper;
+use modules\flight\components\api\FlightQuoteBookService;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightPax;
 use modules\flight\src\helpers\FlightQuoteHelper;
 use modules\flight\src\repositories\flight\FlightRepository;
 use modules\flight\src\repositories\flightQuotePaxPriceRepository\FlightQuotePaxPriceRepository;
 use modules\flight\src\services\flight\FlightManageService;
+use modules\flight\src\services\flightQuote\FlightQuoteBookGuardService;
+use modules\flight\src\services\flightQuote\FlightQuotePdfService;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchForm;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchService;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuoteCreateForm;
 use modules\flight\src\useCases\flightQuote\createManually\helpers\FlightQuotePaxPriceHelper;
 use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
+use modules\order\src\events\OrderFileGeneratedEvent;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\entities\productType\ProductType;
@@ -21,6 +27,7 @@ use modules\product\src\useCases\product\create\ProductCreateForm;
 use modules\product\src\useCases\product\create\ProductCreateService;
 use sales\auth\Auth;
 use sales\forms\CompositeFormHelper;
+use sales\helpers\app\AppHelper;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
 use Yii;
@@ -34,6 +41,7 @@ use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * FlightQuoteController implements the CRUD actions for FlightQuote model.
@@ -193,8 +201,11 @@ class FlightQuoteController extends FController
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->fq_id]);
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $model->fq_ticket_json = JsonHelper::decode($model->fq_ticket_json);
+            if ($model->save()) {
+                return $this->redirect(['view', 'id' => $model->fq_id]);
+            }
         }
 
         return $this->render('update', [
@@ -230,6 +241,8 @@ class FlightQuoteController extends FController
 
         $flight = $this->flightRepository->find($flightId);
         $form = new FlightQuoteSearchForm();
+
+        $this->increaseLimits();
 
         try {
             if (empty($flight->flightSegments)) {
@@ -395,6 +408,19 @@ class FlightQuoteController extends FController
                 $flightQuotePaxPrice = $this->flightQuotePaxPriceRepository->findByIdAndCode($fqId, $paxCodeId);
 
                 $this->flightQuoteManageService->updateAgentMarkup($flightQuotePaxPrice, $value);
+                $leadId = $flightQuotePaxPrice->qppFlightQuote->fqProductQuote->pqProduct->pr_lead_id ?? null;
+                if ($leadId) {
+                    Notifications::pub(
+                        ['lead-' . $leadId],
+                        'reloadOrders',
+                        ['data' => []]
+                    );
+                    Notifications::pub(
+                        ['lead-' . $leadId],
+                        'reloadOffers',
+                        ['data' => []]
+                    );
+                }
             } catch (\RuntimeException $e) {
                 return $this->asJson(['message' => $e->getMessage()]);
             }
@@ -501,6 +527,143 @@ class FlightQuoteController extends FController
         ]);
     }
 
+    public function actionAjaxBook(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $flightQuoteId = (int) Yii::$app->request->post('id', 0);
+        $result = ['status' => 0, 'message' => '', 'data' => []];
+
+        $flightQuote = $this->findModel($flightQuoteId);
+        try {
+            FlightQuoteBookGuardService::guard($flightQuote);
+            $requestData = ArrayHelper::getValue($flightQuote, 'fqProductQuote.pqOrder.or_request_data');
+
+            if ($responseData = FlightQuoteBookService::requestBook($requestData)) {
+                if (FlightQuoteBookService::createBook($flightQuote, $responseData)) {
+                    Notifications::pub(
+                        ['lead-' . ArrayHelper::getValue($flightQuote, 'fqProductQuote.pqProduct.pr_lead_id')],
+                        'quoteBooked',
+                        ['data' => ['productId' => ArrayHelper::getValue($flightQuote, 'fqProductQuote.pq_product_id')]]
+                    );
+                    $result['status'] = 1;
+                    $result['message'] = 'Booking request accepted. RecordLocator: ' . ArrayHelper::getValue($responseData, 'recordLocator');
+                    return $result;
+                }
+            }
+            throw new \DomainException('Create Book is failed.');
+        } catch (\Throwable $throwable) {
+            $this->errorBook($flightQuote);
+            $result['message'] = $throwable->getMessage();
+            \Yii::error(AppHelper::throwableLog($throwable, true), 'FlightQuoteController:actionAjaxBook');
+        }
+        return $result;
+    }
+
+    public function actionAjaxFileGenerate(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $flightQuoteId = (int) Yii::$app->request->post('id', 0);
+        $result = ['status' => 0, 'message' => ''];
+
+        try {
+            $flightQuote = $this->findModel($flightQuoteId);
+
+            if (!$flightQuote->isBooked()) {
+                throw new \DomainException('Quote should have Booked status.');
+            }
+
+            $flightQuotePdfService = new FlightQuotePdfService($flightQuote);
+            $flightQuotePdfService->setProductQuoteId($flightQuote->fq_product_quote_id);
+            if ($flightQuotePdfService->processingFile()) {
+                $result['status'] = 1;
+                $result['message'] = 'Document have been successfully generated';
+                return $result;
+            }
+            throw new \DomainException('Document generate failed.');
+        } catch (\Throwable $throwable) {
+            $result['message'] = $throwable->getMessage();
+            \Yii::error(AppHelper::throwableLog($throwable, true), 'FlightQuoteController:actionAjaxFileGenerate');
+        }
+        return $result;
+    }
+
+    private function errorBook(FlightQuote $flightQuote): void
+    {
+        try {
+            $productQuoteRepository = \Yii::createObject(ProductQuoteRepository::class);
+            $productQuote = $flightQuote->fqProductQuote;
+            $productQuote->error(null, 'Auto booking error');
+            $productQuoteRepository->save($productQuote);
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'message' => 'Flight Quote Transfer to "Error" error',
+                'flightQuoteId' => $flightQuote->fq_id,
+            ], 'FlightQuoteController:errorBook');
+        }
+    }
+
+    public function actionCancel(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $flightQuoteId = (int) Yii::$app->request->post('id', 0);
+
+        try {
+            $flightQuote = $this->findModel($flightQuoteId);
+            $projectId = $flightQuote->fqProductQuote->pqProduct->prLead->project_id ?? null;
+            if (!$projectId) {
+                throw new \DomainException('Not found Project');
+            }
+            if (!$flightQuote->fq_flight_request_uid) {
+                throw new \DomainException('Not found Request UID');
+            }
+            FlightQuoteBookService::cancel($flightQuote->fq_flight_request_uid, $projectId);
+            $productQuote = $this->productQuoteRepository->find($flightQuote->fq_product_quote_id);
+            $productQuote->cancelled(Auth::id());
+            $this->productQuoteRepository->save($productQuote);
+            return [
+                'error' => false,
+                'message' => 'OK',
+            ];
+        } catch (\Throwable $throwable) {
+            return [
+                'error' => true,
+                'message' => $throwable->getMessage()
+            ];
+        }
+    }
+
+    public function actionVoid(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $flightQuoteId = (int) Yii::$app->request->post('id', 0);
+
+        try {
+            $flightQuote = $this->findModel($flightQuoteId);
+            $projectId = $flightQuote->fqProductQuote->pqProduct->prLead->project_id ?? null;
+            if (!$projectId) {
+                throw new \DomainException('Not found Project');
+            }
+            if (!$flightQuote->fq_flight_request_uid) {
+                throw new \DomainException('Not found Request UID');
+            }
+            FlightQuoteBookService::void($flightQuote->fq_flight_request_uid, $projectId);
+            $productQuote = $this->productQuoteRepository->find($flightQuote->fq_product_quote_id);
+            $productQuote->cancelled(Auth::id());
+            $this->productQuoteRepository->save($productQuote);
+            return [
+                'error' => false,
+                'message' => 'OK',
+            ];
+        } catch (\Throwable $throwable) {
+            return [
+                'error' => true,
+                'message' => $throwable->getMessage()
+            ];
+        }
+    }
+
     /**
      * Finds the FlightQuote model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
@@ -514,6 +677,19 @@ class FlightQuoteController extends FController
             return $model;
         }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+        throw new NotFoundHttpException('FlightQuote not found.');
+    }
+
+    private function increaseLimits(string $memoryLimit = '640M', int $timeLimit = 300): void
+    {
+        try {
+            ini_set('memory_limit', $memoryLimit);
+            set_time_limit($timeLimit);
+            if (isset(Yii::$app->log->targets['debug']->enabled)) {
+                Yii::$app->log->targets['debug']->enabled = false;
+            }
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), 'HotelQuoteController:increaseLimits');
+        }
     }
 }

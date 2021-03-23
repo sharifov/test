@@ -10,7 +10,6 @@ use yii\widgets\Pjax;
 /* @var $product Product */
 
 
-
 /*\yii\web\YiiAsset::register($this);
 
 
@@ -21,24 +20,31 @@ $dataProviderQuotes = $searchModel->searchProduct($params);*/
 
 $pjaxId = 'pjax-product-' . $product->pr_id;
 ?>
-<?php \yii\widgets\Pjax::begin(['id' => $pjaxId, 'enablePushState' => false, 'enableReplaceState' => false, 'timeout' => 4000])?>
+<?php \yii\widgets\Pjax::begin([
+    'id' => $pjaxId,
+    'enablePushState' => false,
+    'enableReplaceState' => false,
+    'timeout' => 5000
+]) ?>
     <div class="x_panel">
         <div class="x_title">
             <h2>
                 <a class="collapse-link">
-                    <i class="<?= Html::encode($product->getIconClass()) ?>" title="ID: <?=$product->pr_id?>"></i> <?=Html::encode($product->prType->pt_name)?> <?=$product->pr_name ? ' - ' . Html::encode($product->pr_name) : ''?>
-                    <span style="color: #53a265" class="product-quote-counter-<?= $product->pr_id ?>" data-value="<?=count($product->productQuotes)?>">
-                        <?php if ($product->productQuotes) :?>
-                            <sup title="Number of quotes">(<?=count($product->productQuotes)?>)</sup>
-                        <?php endif;?>
+                    <i class="<?= Html::encode($product->getIconClass()) ?>"
+                       title="ID: <?= $product->pr_id ?>"></i> <?= Html::encode($product->prType->pt_name) ?> <?= $product->pr_name ? ' - ' . Html::encode($product->pr_name) : '' ?>
+                    <span style="color: #53a265" class="product-quote-counter-<?= $product->pr_id ?>"
+                          data-value="<?= count($product->productQuotes) ?>">
+                        <?php if ($product->productQuotes) : ?>
+                            <sup title="Number of quotes">(<?= count($product->productQuotes) ?>)</sup>
+                        <?php endif; ?>
                     </span>
                 </a>
-                <?php if ($product->pr_description) :?>
-                    <a  id="product_description_<?=$product->pr_id?>"
-                        class="popover-class fa fa-info-circle text-info"
-                        data-toggle="popover" data-html="true" data-trigger="hover" data-placement="top"
-                        data-container="body" title="<?=Html::encode($product->pr_name)?>"
-                        data-content='<?=Html::encode($product->pr_description)?>'
+                <?php if ($product->pr_description) : ?>
+                    <a id="product_description_<?= $product->pr_id ?>"
+                       class="popover-class fa fa-info-circle text-info"
+                       data-toggle="popover" data-html="true" data-trigger="hover" data-placement="top"
+                       data-container="body" title="<?= Html::encode($product->pr_name) ?>"
+                       data-content='<?= Html::encode($product->pr_description) ?>'
                     ></a>
                 <?php endif; ?>
             </h2>
@@ -48,7 +54,7 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
 
                 <li title="Destination">
                         <span style="font-size: 13px; padding: 5px; display: flex; align-items: center;color: #596b7d;">
-                            <?php if ($product->attraction->atn_destination_code) :?>
+                            <?php if ($product->attraction->atn_destination_code) : ?>
                                 (<b><?= Html::encode($product->attraction->atn_destination_code) ?></b>)
                                 <?= Html::encode($product->attraction->atn_destination) ?>
                             <?php endif; ?>
@@ -56,7 +62,7 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
                 </li>
                 <li>
                         <span style="font-size: 13px; padding: 5px; display: flex; align-items: center;color: #596b7d;">
-                             <?php if ($product->attraction->atn_date_from) :?>
+                             <?php if ($product->attraction->atn_date_from) : ?>
                                  <b><?= Yii::$app->formatter->asDate(strtotime($product->attraction->atn_date_from)) ?></b>
                              <?php endif; ?>
                         </span>
@@ -66,14 +72,15 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
                 </li>
 
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-bars warning"></i> <span class="text-warning">Actions</span></a>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i
+                                class="fa fa-bars warning"></i> <span class="text-warning">Actions</span></a>
                     <div class="dropdown-menu" role="menu">
                         <?php /*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Update Request', null, [
                             'class' => 'dropdown-item text-danger btn-update-product',
                             'data-product-id' => $product->pr_id
                         ])*/ ?>
 
-                        <h6 class="dropdown-header">P<?=$product->pr_id?> - A<?=$product->attraction->atn_id?></h6>
+                        <h6 class="dropdown-header">P<?= $product->pr_id ?> - A<?= $product->attraction->atn_id ?></h6>
 
                         <?= Html::a('<i class="fa fa-edit"></i> Update Request', null, [
                             'data-url' => \yii\helpers\Url::to([
@@ -94,29 +101,32 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
                             'class' => 'dropdown-item text-success btn-search-attraction-quotes'
                         ]) ?>
 
-
-                       <!-- <?php /*= Html::a('<i class="fa fa-plus"></i> Add Room', null, [
-                            'data-url' => \yii\helpers\Url::to([
-                                '/hotel/hotel-room/create-ajax',
-                                'id' => $product->attraction->atn_id,
-                            ]),
-                            'data-hotel-id' => $product->attraction->atn_id,
-                            'class' => 'dropdown-item btn-add-hotel-room'
-                        ]) */?> -->
+                        <?php if (!$product->attraction->attractionPaxes) : ?>
+                            <?= Html::a('<i class="fa fa-plus"></i> Add Travelers', null, [
+                                'data-url' => \yii\helpers\Url::to([
+                                    '/attraction/attraction-pax/create-ajax',
+                                    'id' => $product->attraction->atn_id,
+                                ]),
+                                'data-hotel-id' => $product->attraction->atn_id,
+                                'class' => 'dropdown-item btn-add-attraction-travelers'
+                            ]) ?>
+                        <?php endif; ?>
 
                         <div class="dropdown-divider"></div>
                         <?= Html::a('<i class="fa fa-edit"></i> Update Product', null, [
                             'class' => 'dropdown-item text-warning btn-update-product',
                             'data-product-id' => $product->pr_id,
                         ]) ?>
-                        <?= Html::a(
-                            '<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete Attraction',
-                            null,
-                            [
-                                'class' => 'dropdown-item text-danger btn-delete-product',
-                                'data-product-id' => $product->pr_id
-                            ]
-                        ) ?>
+                        <?php if ($product->isDeletable()) : ?>
+                            <?= Html::a(
+                                '<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete Attraction',
+                                null,
+                                [
+                                    'class' => 'dropdown-item text-danger btn-delete-product',
+                                    'data-product-id' => $product->pr_id
+                                ]
+                            ) ?>
+                        <?php endif ?>
 
                     </div>
                 </li>
@@ -130,18 +140,21 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
         </div>
         <div class="x_content" style="display: none">
             <?php //php if ((int) $product->pr_type_id === \common\models\ProductType::PRODUCT_HOTEL && $product->hotel):?>
-            <?php \yii\widgets\Pjax::begin(['id' => 'pjax-product-search-' . $product->pr_id, 'enablePushState' => false, 'timeout' => 5000])?>
+            <?php \yii\widgets\Pjax::begin([
+                'id' => 'pjax-product-search-' . $product->pr_id,
+                'enablePushState' => false,
+                'timeout' => 5000
+            ]) ?>
             <?= $this->render('_view_search', [
                 'model' => $product->attraction,
                 //'dataProviderQuotes' => $dataProviderQuotes
                 //'dataProviderRooms'
             ]) ?>
-            <?php \yii\widgets\Pjax::end();?>
+            <?php \yii\widgets\Pjax::end(); ?>
             <?php //php endif;?>
         </div>
     </div>
-<?php \yii\widgets\Pjax::end()?>
-
+<?php \yii\widgets\Pjax::end() ?>
 
 
 <?php
@@ -165,14 +178,14 @@ $js = <<<JS
         });
     });
 
-    /*$('body').off('click', '.btn-add-hotel-room').on('click', '.btn-add-hotel-room', function (e) {
+    $('body').off('click', '.btn-add-attraction-travelers').on('click', '.btn-add-attraction-travelers', function (e) {
         e.preventDefault();
         let url = $(this).data('url');
         //$('#preloader').removeClass('d-none');
         
         let modal = $('#modal-df');
         modal.find('.modal-body').html('');
-        modal.find('.modal-title').html('Add Room request');
+        modal.find('.modal-title').html('Add Travelers');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
             //$('#preloader').addClass('d-none');
             if (status == 'error') {
@@ -184,15 +197,15 @@ $js = <<<JS
                 });
             }
         });
-    });*/
+    });
     
-    /*$('body').off('click', '.btn-update-hotel-room').on('click', '.btn-update-hotel-room', function (e) {
+    $('body').off('click', '.btn-update-attraction-travelers').on('click', '.btn-update-attraction-travelers', function (e) {
         e.preventDefault();
         let url = $(this).data('url');
                 
         let modal = $('#modal-df');
         modal.find('.modal-body').html('');
-        modal.find('.modal-title').html('Update Room request');
+        modal.find('.modal-title').html('Update Travelers');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
             //$('#preloader').addClass('d-none');
             if (status == 'error') {
@@ -204,7 +217,7 @@ $js = <<<JS
                 });
             }
         });
-    });*/
+    });
     
     
      $('body').off('click', '.btn-search-attraction-quotes').on('click', '.btn-search-attraction-quotes', function (e) {

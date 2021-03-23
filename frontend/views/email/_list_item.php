@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use sales\helpers\email\MaskEmailHelper;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\Email */
@@ -39,7 +40,7 @@ use yii\widgets\ActiveForm;
         </div>
         <div class="right">
             <h3>
-                <?=Html::encode($model->e_email_from)?> - <?=Html::encode($model->e_email_to)?>
+                <?=Html::encode($model->e_email_from)?> - <?=Html::encode(MaskEmailHelper::masking($model->e_email_to))?>
                 <small>
                     <?php if ($model->e_type_id == \common\models\Email::TYPE_INBOX) :?>
                         <?=$model->e_inbox_email_id ? 'cid: ' . $model->e_inbox_email_id : ''?><br/>

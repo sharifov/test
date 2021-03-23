@@ -380,6 +380,7 @@ CRONs
 */1 * * * *   run-this-one php /var/www/sale/yii client-chat/hold-to-progress
 30 4 * * * php /var/www/sale/yii call-report/priceline
 * * * * *   php /var/www/sale/yii user/update-online-status
+0 0 1 * *   php /var/www/sale/yii client-chat/refresh-rocket-chat-user-token
 ```
   
 ```

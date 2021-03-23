@@ -2,7 +2,7 @@
 
 namespace modules\product\src\entities\productQuote\events;
 
-class ProductQuoteInProgressEvent
+class ProductQuoteInProgressEvent implements ProductQuotable
 {
     public $productQuoteId;
     public $startStatusId;
@@ -30,5 +30,10 @@ class ProductQuoteInProgressEvent
         $this->description = $description;
         $this->ownerId = $ownerId;
         $this->creatorId = $creatorId;
+    }
+
+    public function getProductQuoteId()
+    {
+        return $this->productQuoteId;
     }
 }

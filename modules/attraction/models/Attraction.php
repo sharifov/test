@@ -24,6 +24,8 @@ use Yii;
  * @property string|null $atn_request_hash_key
  *
  * @property Product $atnProduct
+ * @property AttractionPax[] $attractionPaxes
+ * @property AttractionQuote[] $attractionQuotes
  */
 class Attraction extends \yii\db\ActiveRecord implements Productable
 {
@@ -139,43 +141,26 @@ class Attraction extends \yii\db\ActiveRecord implements Productable
     /**
      * @return array
      */
-    public function getSearchData(): array
+    public function getSearchData($quoteKey): array
     {
-        $keyCache = $this->atn_request_hash_key;
+        //$keyCache = $this->atn_request_hash_key;
+        $keyCache = $quoteKey;
         $result = Yii::$app->cache->get($keyCache);
 
         if ($result === false) {
             $params = [];
-            /** @var CommunicationService $communication */
-            $apiHotelService = Yii::$app->communication;
-            //$apiHotelService = Yii::$app->getModule('hotel')->apiService;
-            // $service = $hotel->apiService;
 
-            /*$rooms = [];
+            $apiAttractionService = Yii::$app->getModule('attraction')->apiService;
 
-            if ($this->hotelRooms) {
-                foreach ($this->hotelRooms as $room) {
-                    $rooms[] = $room->getDataSearch();
-                }
-            }
+            //$response = $apiAttractionService->getAttractionQuotes($this);
+            $response = $apiAttractionService->getProductById($quoteKey);
 
-            if ($this->ph_max_price_rate) {
-                $params['maxRate'] = $this->ph_max_price_rate;
-            }
-
-            if ($this->ph_min_price_rate) {
-                $params['minRate'] = $this->ph_min_price_rate;
-            }*/
-
-            //$response = $apiHotelService->search($this->ph_check_in_date, $this->ph_check_out_date, $this->ph_destination_code, $rooms, $params);
-            $response = $apiHotelService->getAttractionQuotes($this);
-
-            if (isset($response['data']['searchSummary'])) {
-                $result = $response['data'];
+            if (isset($response['product'])) {
+                $result = $response;
                 Yii::$app->cache->set($keyCache, $result, 100);
             } else {
                 $result = [];
-                Yii::error('Not found response[data][hotels]', 'Model:Hotel:getSearchData:apiService');
+                Yii::error('Not found response[data][attractions]', 'Model:Attraction:getSearchData:apiService');
             }
         }
 
@@ -188,12 +173,11 @@ class Attraction extends \yii\db\ActiveRecord implements Productable
      * @param int $quoteKey
      * @return array
      */
-    public static function getHotelQuoteDataByKey(array $result, int $quoteKey): array
+    public static function getAttractionQuoteDataByKey(array $result, int $quoteKey): array
     {
         $quoteList = [];
-        //$hotelData = self::getHotelDataByCode($result, $hotelCode);
 
-        if ($quoteKey && isset($result['activityGroups']) && $result['activityGroups']) {
+        if ($quoteKey && isset($result['product']) && $result['product']) {
             foreach ($result['activityGroups'][0]['activityTiles'] as $quote) {
                 $groupKey = (int)($quote['id'] ?? '');
                 if (!$groupKey) {
@@ -207,6 +191,45 @@ class Attraction extends \yii\db\ActiveRecord implements Productable
         return $quoteList[$quoteKey] ?? [];
     }
 
+    public function getAdultsCount(): int
+    {
+        $count = 0;
+        if ($this->attractionPaxes) {
+            foreach ($this->attractionPaxes as $pax) {
+                if ($pax->atnp_type_id == AttractionPax::PAX_LIST_ID[AttractionPax::PAX_ADULT]) {
+                    $count++;
+                }
+            }
+        }
+        return $count;
+    }
+
+    public function getChildCount(): int
+    {
+        $count = 0;
+        if ($this->attractionPaxes) {
+            foreach ($this->attractionPaxes as $pax) {
+                if ($pax->atnp_type_id == AttractionPax::PAX_LIST_ID[AttractionPax::PAX_CHILD]) {
+                    $count++;
+                }
+            }
+        }
+        return $count;
+    }
+
+    public function getInfantsCount(): int
+    {
+        $count = 0;
+        if ($this->attractionPaxes) {
+            foreach ($this->attractionPaxes as $pax) {
+                if ($pax->atnp_type_id == AttractionPax::PAX_LIST_ID[AttractionPax::PAX_INFANT]) {
+                    $count++;
+                }
+            }
+        }
+        return $count;
+    }
+
     /**
      * Gets query for [[AtnProduct]].
      *
@@ -215,5 +238,25 @@ class Attraction extends \yii\db\ActiveRecord implements Productable
     public function getAtnProduct(): ActiveQuery
     {
         return $this->hasOne(Product::class, ['pr_id' => 'atn_product_id']);
+    }
+
+    /**
+     * Gets query for [[AttractionPaxes]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAttractionPaxes()
+    {
+        return $this->hasMany(AttractionPax::class, ['atnp_atn_id' => 'atn_id']);
+    }
+
+    /**
+     * Gets query for [[AttractionQuotes]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAttractionQuotes()
+    {
+        return $this->hasMany(AttractionQuote::class, ['atnq_attraction_id' => 'atn_id']);
     }
 }

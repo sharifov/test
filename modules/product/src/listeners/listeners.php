@@ -1,5 +1,8 @@
 <?php
 
+use modules\order\src\listeners\order\OrderPrepareListener;
+use modules\order\src\processManager\listeners\AfterBookedFlightOrderProcessListener;
+use modules\order\src\processManager\listeners\AfterBookedQuoteOrderProcessListener;
 use modules\product\src\entities\product\events\ProductClientBudgetChangedEvent;
 use modules\product\src\entities\product\events\ProductMarketPriceChangedEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteCloneCreatedEvent;
@@ -12,6 +15,8 @@ use modules\product\src\listeners\productQuote\ProductQuoteDeclinedEventListener
 use modules\product\src\listeners\productQuote\ProductQuoteExpiredEventListener;
 use modules\product\src\listeners\productQuote\ProductQuoteRecalculateChildrenProfitAmountListener;
 use modules\product\src\listeners\productQuote\ProductQuoteRecalculateProfitAmountListener;
+use modules\product\src\listeners\productQuote\ProductQuoteUpdateLeadOfferListener;
+use modules\product\src\listeners\productQuote\ProductQuoteUpdateLeadOrderListener;
 use modules\product\src\listeners\ProductQuoteChangeStatusLogListener;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteCanceledEvent;
@@ -27,12 +32,39 @@ use sales\model\user\entity\profit\listener\UserProfitCalculateByOrderUserProfit
 return [
     ProductQuoteCloneCreatedEvent::class => [ProductQuoteChangeStatusLogListener::class],
     ProductQuoteOptionCloneCreatedEvent::class => [],
-    ProductQuoteInProgressEvent::class => [ProductQuoteInProgressEventListener::class],
-    ProductQuoteBookedEvent::class => [ProductQuoteBookedEventListener::class],
-    ProductQuoteErrorEvent::class => [ProductQuoteErrorEventListener::class],
-    ProductQuoteCanceledEvent::class => [ProductQuoteCanceledEventListener::class],
-    ProductQuoteDeclinedEvent::class => [ProductQuoteDeclinedEventListener::class],
-    ProductQuoteExpiredEvent::class => [ProductQuoteExpiredEventListener::class],
+    ProductQuoteInProgressEvent::class => [
+        ProductQuoteInProgressEventListener::class,
+        ProductQuoteUpdateLeadOrderListener::class,
+        ProductQuoteUpdateLeadOfferListener::class,
+    ],
+    ProductQuoteBookedEvent::class => [
+        ProductQuoteBookedEventListener::class,
+        AfterBookedFlightOrderProcessListener::class,
+        AfterBookedQuoteOrderProcessListener::class,
+        OrderPrepareListener::class,
+        ProductQuoteUpdateLeadOrderListener::class,
+        ProductQuoteUpdateLeadOfferListener::class,
+    ],
+    ProductQuoteErrorEvent::class => [
+        ProductQuoteErrorEventListener::class,
+        ProductQuoteUpdateLeadOrderListener::class,
+        ProductQuoteUpdateLeadOfferListener::class,
+    ],
+    ProductQuoteCanceledEvent::class => [
+        ProductQuoteCanceledEventListener::class,
+        ProductQuoteUpdateLeadOrderListener::class,
+        ProductQuoteUpdateLeadOfferListener::class,
+    ],
+    ProductQuoteDeclinedEvent::class => [
+        ProductQuoteDeclinedEventListener::class,
+        ProductQuoteUpdateLeadOrderListener::class,
+        ProductQuoteUpdateLeadOfferListener::class,
+    ],
+    ProductQuoteExpiredEvent::class => [
+        ProductQuoteExpiredEventListener::class,
+        ProductQuoteUpdateLeadOrderListener::class,
+        ProductQuoteUpdateLeadOfferListener::class,
+    ],
     ProductQuoteRecalculateProfitAmountEvent::class => [ProductQuoteRecalculateProfitAmountListener::class],
     ProductQuoteRecalculateChildrenProfitAmountEvent::class => [ProductQuoteRecalculateChildrenProfitAmountListener::class],
     UserProfitCalculateByOrderUserProfitEvent::class => [UserProfitCalculateByOrderUserProfitEventListener::class],

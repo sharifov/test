@@ -15,6 +15,8 @@ use PhpParser\Node\Expr\Empty_;
 use sales\auth\Auth;
 use sales\forms\api\searchQuote\FlightQuoteSearchForm;
 use sales\helpers\app\AppHelper;
+use sales\helpers\setting\SettingHelper;
+use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\socket\ClientChatSocketCommands;
 use sales\forms\quotePrice\AddQuotePriceForm;
 use sales\forms\segment\SegmentBaggageForm;
@@ -26,6 +28,8 @@ use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\services\parsingDump\BaggageService;
 use sales\services\parsingDump\lib\ParsingDump;
 use sales\services\parsingDump\ReservationService;
+use sales\services\quote\addQuote\AddQuoteService;
+use sales\services\quote\addQuote\guard\FlightQuoteGuard;
 use sales\services\quote\addQuote\guard\GdsByQuoteGuard;
 use sales\services\quote\addQuote\guard\LeadGuard;
 use sales\services\quote\addQuote\price\PreparePrices;
@@ -53,6 +57,7 @@ use yii\widgets\ActiveForm;
 class QuoteController extends FController
 {
     private const RUNTIME_ERROR_QUOTES_NO_RESULTS = 100;
+    private const RUNTIME_ERROR_AUTO_ADD_QUOTES_ACTION_IN_PROGRESS = 101;
 
     /**
      * @param $leadId
@@ -128,7 +133,6 @@ class QuoteController extends FController
                 $form = new FlightQuoteSearchForm();
                 $form->load(Yii::$app->request->post() ?: Yii::$app->request->get());
 
-
                 if (Yii::$app->request->isPost) {
                     $params = ['page' => 1];
                 }
@@ -191,6 +195,8 @@ class QuoteController extends FController
             $key = Yii::$app->request->post('key');
             $keyCache = Yii::$app->request->post('keyCache', '');
             $createFromQuoteSearch = Yii::$app->request->post('createFromQuoteSearch', 0);
+
+            $addQuoteService = Yii::createObject(AddQuoteService::class);
 
             if ($key && $lead) {
                 $keyCache = empty($keyCache) ? sprintf('quick-search-new-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey()) : $keyCache;
@@ -445,12 +451,11 @@ class QuoteController extends FController
 
                                 $chat = ClientChatLead::find()->andWhere(['ccl_lead_id' => $lead->id])->one();
                                 if ($chat) {
-                                    ClientChatSocketCommands::clientChatAddOfferButton($chat->chat, $lead->id);
+                                    ClientChatSocketCommands::clientChatAddQuotesButton($chat->chat, $lead->id);
                                 }
                             }
 
                             $transaction->commit();
-
 
                             $result['status'] = true;
 
@@ -466,6 +471,77 @@ class QuoteController extends FController
         }
 
         return $result;
+    }
+
+    public function actionAutoAddQuotes(): Response
+    {
+        $leadId = Yii::$app->request->post('leadId', 0);
+        $response = [
+            'error' => true,
+            'message' => ''
+        ];
+        $redis = \Yii::$app->redis;
+        $key = 'lead-auto-add-quotes-' . $leadId;
+        try {
+            $lead = Lead::findOne($leadId);
+            if (!$lead) {
+                throw new \RuntimeException('Lead not found');
+            }
+
+            if (!$redis->get($key)) {
+                $redis->setnx($key, true);
+            } else {
+                throw new \RuntimeException('This action is currently in progress', self::RUNTIME_ERROR_AUTO_ADD_QUOTES_ACTION_IN_PROGRESS);
+            }
+
+            if (!FlightQuoteGuard::canAutoSelectQuotes(Auth::user(), $lead)) {
+                throw new \DomainException('You do not have access to perform this action');
+            }
+            $gds = Yii::$app->request->post('gds', '');
+
+            $keyCache = sprintf('quote-search-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey());
+            $quotes = \Yii::$app->cacheFile->get($keyCache);
+
+            if ($quotes === false) {
+                $quotes = SearchService::getOnlineQuotes($lead);
+                if ($quotes && !empty($quotes['data']['results']) && empty($quotes['error'])) {
+                    \Yii::$app->cacheFile->set($keyCache, $quotes = QuoteHelper::formatQuoteData($quotes['data']), 600);
+                } else {
+                    throw new \RuntimeException(!empty($quotes['error']) ? JsonHelper::decode($quotes['error'])['Message'] : 'Search result is empty!');
+                }
+            }
+            $form = new FlightQuoteSearchForm();
+
+            $dataProvider = new ArrayDataProvider([
+                'allModels' => $quotes['results'] ?? [],
+                'pagination' => [
+                    'pageSize' => SettingHelper::getFlightQuoteAutoSelectCount(),
+                    'params' => array_merge(Yii::$app->request->get(), $form->getFilters()),
+                ],
+                'sort' => [
+                    'attributes' => ['price', 'duration'],
+                    'defaultOrder' => [$form->getSortBy() => $form->getSortType()],
+                ],
+            ]);
+
+            $addQuoteService = Yii::createObject(AddQuoteService::class);
+            $addQuoteService->autoSelectQuotes($dataProvider->getModels(), $lead, Auth::user());
+
+            $response['error'] = false;
+            $response['message'] = 'Auto select quotes completed successfully';
+            $redis->del($key);
+        } catch (\RuntimeException | \DomainException $e) {
+            $response['message'] = $e->getMessage();
+            if ($e->getCode() !== self::RUNTIME_ERROR_AUTO_ADD_QUOTES_ACTION_IN_PROGRESS) {
+                $redis->del($key);
+            }
+        } catch (\Throwable $e) {
+            Yii::error(AppHelper::throwableLog($e), 'QuoteController::actionAutoAddQuotes::Throwable');
+            $response['message'] = 'Internal Server Error';
+            $redis->del($key ?? '');
+        }
+
+        return $this->asJson($response);
     }
 
 
@@ -494,7 +570,7 @@ class QuoteController extends FController
                 $chat = ClientChatLead::find()->andWhere(['ccl_lead_id' => $leadId])->one();
                 if ($lead && $chat) {
                     if (!(!$chat->chat->isClosed() && $lead->isExistQuotesForSend())) {
-                        ClientChatSocketCommands::clientChatRemoveOfferButton($chat->chat, $leadId);
+                        ClientChatSocketCommands::clientChatRemoveQuotesButton($chat->chat, $leadId);
                     }
                 }
             }
@@ -889,7 +965,7 @@ class QuoteController extends FController
                                 }
                                 $chat = ClientChatLead::find()->andWhere(['ccl_lead_id' => $lead->id])->one();
                                 if ($chat) {
-                                    ClientChatSocketCommands::clientChatAddOfferButton($chat->chat, $lead->id);
+                                    ClientChatSocketCommands::clientChatAddQuotesButton($chat->chat, $lead->id);
                                 }
                             }
 

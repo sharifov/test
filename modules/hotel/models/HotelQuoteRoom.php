@@ -9,8 +9,10 @@ use modules\hotel\src\entities\hotelQuoteRoom\events\HotelQuoteRoomCloneCreatedE
 use modules\hotel\src\entities\hotelQuoteRoom\serializer\HotelQuoteRoomSerializer;
 use sales\entities\EventTrait;
 use sales\entities\serializer\Serializable;
+use sales\helpers\text\CleanTextHelper;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\StringHelper;
 
 /**
  * This is the model class for table "hotel_quote_room".
@@ -92,10 +94,19 @@ class HotelQuoteRoom extends ActiveRecord implements Serializable
             [['hqr_board_code'], 'string', 'max' => 2],
             [['hqr_board_name'], 'string', 'max' => 100],
             [['hqr_children_ages', 'hqr_rate_comments_id'], 'string', 'max' => 50],
-            [['hqr_rate_comments'], 'string', 'max' => 255],
             [['hqr_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['hqr_currency' => 'cur_code']],
             [['hqr_hotel_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => HotelQuote::class, 'targetAttribute' => ['hqr_hotel_quote_id' => 'hq_id']],
+            [['hqr_rate_comments'], 'trim'],
+            [['hqr_rate_comments'], 'filter', 'filter' => static function ($value) {
+                return self::cleanRateComments($value);
+            }],
+            [['hqr_rate_comments'], 'string', 'max' => 1000],
         ];
+    }
+
+    public static function cleanRateComments(string $text): string
+    {
+        return StringHelper::truncate(stripslashes(strip_tags($text)), 999, '');
     }
 
     /**
@@ -193,5 +204,14 @@ class HotelQuoteRoom extends ActiveRecord implements Serializable
             }
         }
         return $rateComments;
+    }
+
+    /**
+     * @param int $hotelQuoteId
+     * @return HotelQuoteRoom[]
+     */
+    public static function getRoomsByQuoteId(int $hotelQuoteId): array
+    {
+        return self::find()->where(['hqr_hotel_quote_id' => $hotelQuoteId])->all();
     }
 }

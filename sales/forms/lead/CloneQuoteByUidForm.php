@@ -91,12 +91,12 @@ class CloneQuoteByUidForm extends Model
             return;
         }
 
-        try {
-            LeadCloneQuoteService::guardCountPassengers($quote, $this->lead);
-        } catch (\DomainException $e) {
-            $this->addError('uid', $e->getMessage());
-            return;
-        }
+//        try {
+//            LeadCloneQuoteService::guardCountPassengers($quote, $this->lead);
+//        } catch (\DomainException $e) {
+//            $this->addError('uid', $e->getMessage());
+//            return;
+//        }
 
         try {
             $this->checkCount($quote, $this->lead);

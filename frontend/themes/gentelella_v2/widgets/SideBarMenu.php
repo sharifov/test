@@ -203,6 +203,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
             'icon' => 'comments',
             'items' => [
                 ['label' => 'My Client Chat', 'url' => ['/client-chat/index']],
+                ['label' => 'My Client Chat v2', 'url' => ['/client-chat/dashboard-v2']],
                 ['label' => 'Real Time Visitors', 'url' => ['/client-chat/real-time']],
             ]
         ];
@@ -350,6 +351,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Product Types', 'url' => ['/product/product-type-crud/index']],
                 ['label' => 'Product Type Payment Method', 'url' => ['/product/product-type-payment-method/index']],
                 ['label' => 'Products', 'url' => ['/product/product-crud/index']],
+                ['label' => 'Product Holder', 'url' => ['/product/product-holder-crud/index']],
                 ['label' => 'Product Options', 'url' => ['/product/product-option-crud/index']],
                 ['label' => 'Product Quotes', 'url' => ['/product/product-quote-crud/index']],
                 ['label' => 'Product Quotes Status Log', 'url' => ['/product/product-quote-status-log-crud/index']],
@@ -360,6 +362,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     ['label' => 'Orders User Profit', 'url' => ['/order/order-user-profit-crud/index']],
                     ['label' => 'Orders Tips', 'url' => ['/order/order-tips-crud/index']],
                     ['label' => 'Orders Tips User Profit', 'url' => ['/order/order-tips-user-profit-crud/index']],
+                    ['label' => 'Order Process Manager', 'url' => ['/order/order-process-manager/index']],
                 ], 'hasChild' => true],
                 ['label' => 'Offers', 'url' => ['/offer/offer-crud/index']],
                 ['label' => 'Offers Send Log', 'url' => ['/offer/offer-send-log-crud/index']],

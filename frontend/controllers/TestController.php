@@ -68,10 +68,22 @@ use frontend\widgets\newWebPhone\call\socket\MuteMessage;
 use frontend\widgets\newWebPhone\sms\socket\Message;
 use frontend\widgets\notification\NotificationMessage;
 use frontend\widgets\notification\NotificationWidget;
+use kartik\mpdf\Pdf;
+use modules\attraction\models\AttractionQuote;
+use modules\attraction\src\services\AttractionQuotePdfService;
 use modules\email\src\helpers\MailHelper;
 use modules\email\src\Notifier;
+use modules\flight\models\FlightQuote;
+use modules\flight\src\services\flightQuote\FlightQuotePdfService;
 use modules\hotel\HotelModule;
+use modules\hotel\models\HotelList;
+use modules\hotel\models\HotelQuote;
+use modules\hotel\src\services\hotelQuote\CommunicationDataService;
+use modules\hotel\src\services\hotelQuote\HotelQuotePdfService;
 use modules\lead\src\entities\lead\LeadQuery;
+use modules\order\src\entities\order\Order;
+use modules\order\src\events\OrderFileGeneratedEvent;
+use modules\order\src\services\OrderPdfService;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteClasses;
 use modules\product\src\entities\productQuoteStatusLog\CreateDto;
@@ -89,6 +101,8 @@ use modules\qaTask\src\useCases\qaTask\multiple\create\QaTaskMultipleCreateForm;
 use modules\qaTask\src\useCases\qaTask\multiple\create\QaTaskMultipleCreateService;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use modules\qaTask\src\useCases\qaTask\takeOver\QaTaskTakeOverForm;
+use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
+use modules\rentCar\src\services\RentCarQuotePdfService;
 use Mpdf\Tag\P;
 use PhpOffice\PhpSpreadsheet\Shared\TimeZone;
 use sales\access\CallAccess;
@@ -120,6 +134,7 @@ use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use sales\model\project\entity\projectLocale\ProjectLocale;
 use sales\model\project\entity\projectLocale\ProjectLocaleScopes;
 use sales\repositories\client\ClientsQuery;
+use sales\repositories\NotFoundException;
 use sales\services\cases\CasesCommunicationService;
 use sales\services\client\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;
@@ -183,6 +198,7 @@ use sales\services\lead\qcall\Config;
 use sales\services\lead\qcall\DayTimeHours;
 use sales\services\lead\qcall\FindPhoneParams;
 use sales\services\lead\qcall\QCallService;
+use sales\services\pdf\GeneratorPdfService;
 use sales\services\sms\incoming\SmsIncomingForm;
 use sales\services\sms\incoming\SmsIncomingService;
 use sales\services\TransactionManager;
@@ -208,6 +224,7 @@ use yii\helpers\Json;
 use yii\helpers\StringHelper;
 use yii\helpers\VarDumper;
 use common\components\ReceiveEmailsJob;
+use yii\httpclient\CurlTransport;
 use yii\queue\Queue;
 use yii\web\NotFoundHttpException;
 
@@ -265,6 +282,81 @@ class TestController extends FController
         ];
 
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
+
+    public function actionHolibob()
+    {
+        $graphqlEndpoint = 'https://api.sandbox.holibob.tech/graphql';
+        $apiKey = 'a22a880b-4b40-4023-b93d-49ea130c15d4';
+        $secret = 'f787e25040b65e205b7d57992a7d9d183784811b';
+
+        $dt = new DateTime();
+        $date = $dt->format('Y-m-d\TH:i:s.') . substr($dt->format('u'), 0, 3) . 'Z';
+        //$date = '2021-02-26T06:25:38.653Z';
+
+        $query = '{"query":"query {welcome}"}';
+
+        $string = $date . $apiKey . 'POST/graphql' . $query;
+
+        $base64HashSignature = base64_encode(hash_hmac('sha1', $string, $secret, true));
+
+        /*$hexHash = hash_hmac('sha1', utf8_encode($string), utf8_encode($secret));
+        $base64HashSignature = base64_encode(hex2bin($hexHash));*/
+        //var_dump($base64HashSignature); die();
+
+        $client = new \GuzzleHttp\Client();
+
+        $response = $client->request('POST', $graphqlEndpoint, [
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'x-api-key' => $apiKey,
+                'x-holibob-date' => $date,
+                'x-holibob-signature' => $base64HashSignature,
+            ],
+            'json' => $query,
+        ]);
+
+        $json = $response->getBody()->getContents();
+        $body = json_decode($json);
+        $data = $body->data;
+        print_r($data);
+    }
+
+    public function actionHolibob2()
+    {
+        $query = '{"query":"query {welcome}"}';
+
+        $graphqlEndpoint = 'https://api.sandbox.holibob.tech/graphql';
+        $apiKey = 'a22a880b-4b40-4023-b93d-49ea130c15d4';
+        $secret = 'f787e25040b65e205b7d57992a7d9d183784811b';
+
+        $dt = new DateTime();
+        $date = $dt->format('Y-m-d\TH:i:s.') . substr($dt->format('u'), 0, 3) . 'Z';
+
+        $string = $date . $apiKey . 'POST/graphql' . $query;
+        $base64HashSignature = base64_encode(hash_hmac('sha1', $string, $secret, true));
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, $graphqlEndpoint);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $query);
+        curl_setopt($ch, CURLOPT_POST, 1);
+
+        $headers = array();
+        //$headers[] = "Content-Type: application/json";
+        $headers[] = "x-api-key: $apiKey";
+        $headers[] = "x-holibob-date: $date";
+        $headers[] = "x-holibob-signature: $base64HashSignature";
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        $result = curl_exec($ch);
+        print_r($result);
+        if (curl_errno($ch)) {
+            echo 'Error:' . curl_error($ch);
+        }
+        curl_close($ch);
     }
 
     public function actionTest()
@@ -1884,6 +1976,132 @@ class TestController extends FController
             \yii\helpers\VarDumper::dump($throwable->getMessage(), 10, true);
         }
         exit('Done');
+    }
+
+    public function actionFlightQuotePdf(int $id, int $data = 0, int $json = 1)
+    {
+        if (!$flightQuote = FlightQuote::findOne(['fq_id' => $id])) {
+            throw new NotFoundHttpException('FlightQuote not found');
+        }
+        //FlightQuotePdfService::processingFile($flightQuote); // O787EB0
+        $pdfService = new FlightQuotePdfService($flightQuote);
+        try {
+            $pdfService->processingFile();
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), 'Test:actionFlightQuotePdf');
+            \yii\helpers\VarDumper::dump($throwable->getMessage(), 10, true);
+            exit();
+        }
+        return $pdfService->generateForBrowserOutput();
+    }
+
+    public function actionReceiptPdf(int $order_id, int $data = 0, int $json = 1)
+    {
+        if (!$order = Order::findOne(['or_id' => $order_id])) {
+            throw new NotFoundHttpException('Order not found');
+        }
+        $orderPdfService = new OrderPdfService($order);
+        if ($data === 1) {
+            if ($json === 1) {
+                return $this->asJson($orderPdfService->getCommunicationData());
+            }
+            VarDumper::dump($orderPdfService->getCommunicationData(), 20, true);
+            exit();
+        }
+        try {
+            $orderPdfService->processingFile();
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), 'Test:actionHotelQuoteFile');
+            VarDumper::dump($throwable->getMessage(), 10, true);
+            exit();
+        }
+        return $orderPdfService->generateForBrowserOutput();
+    }
+
+    public function actionOrderData(int $order_id, int $json = 0)
+    {
+        if (!$order = Order::findOne(['or_id' => $order_id])) {
+            throw new NotFoundHttpException('Order not found');
+        }
+
+        $data['order'] = $order->serialize();
+        $data['project_key'] = $order->orLead->project->project_key;
+
+        if ($json) {
+            return $this->asJson($data);
+        }
+        \yii\helpers\VarDumper::dump($data, 20, true);
+        exit();
+    }
+
+    public function actionHotelQuotePdf(int $id, int $data = 0, int $json = 1)
+    {
+        if (!$quote = HotelQuote::findOne(['hq_id' => $id])) {
+            throw new NotFoundException('HotelQuote not found. Id (' . $id . ')');
+        }
+        HotelQuotePdfService::guard($quote);
+        $pdfService = new HotelQuotePdfService($quote);
+        if ($data === 1) {
+            if ($json === 1) {
+                return $this->asJson($pdfService->getCommunicationData());
+            }
+            \yii\helpers\VarDumper::dump($pdfService->getCommunicationData(), 20, true);
+            exit();
+        }
+        try {
+            $pdfService->processingFile();
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), 'Test:actionHotelQuoteFile');
+            \yii\helpers\VarDumper::dump($throwable->getMessage(), 10, true);
+            exit();
+        }
+        return $pdfService->generateForBrowserOutput();
+    }
+
+    public function actionAPdf(int $id, int $data = 0, int $json = 1)
+    {
+        if (!$quote = AttractionQuote::findOne(['atnq_id' => $id])) {
+            throw new NotFoundException('AttractionQuote not found. Id (' . $id . ')');
+        }
+        $pdfService = new AttractionQuotePdfService($quote);
+        if ($data === 1) {
+            if ($json === 1) {
+                return $this->asJson($pdfService->getCommunicationData());
+            }
+            VarDumper::dump($pdfService->getCommunicationData(), 20, true);
+            exit();
+        }
+        try {
+            $pdfService->processingFile();
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), 'actionAPdf');
+            VarDumper::dump($throwable->getMessage(), 20, true);
+            exit();
+        }
+        return $pdfService->generateForBrowserOutput();
+    }
+
+    public function actionCarPdf(int $id, int $data = 0, int $json = 1)
+    {
+        if (!$quote = RentCarQuote::findOne(['rcq_id' => $id])) {
+            throw new NotFoundException('RentCarQuote not found. Id (' . $id . ')');
+        }
+        $pdfRC = new RentCarQuotePdfService($quote);
+        if ($data === 1) {
+            if ($json === 1) {
+                return $this->asJson($pdfRC->getCommunicationData());
+            }
+            VarDumper::dump($pdfRC->getCommunicationData(), 20, true);
+            exit();
+        }
+        try {
+            $pdfRC->processingFile();
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), 'TestController:actionCarPdf');
+            VarDumper::dump($throwable->getMessage(), 20, true);
+            exit();
+        }
+        return $pdfRC->generateForBrowserOutput();
     }
 
     public function actionZ()

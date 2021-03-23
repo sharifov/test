@@ -2,6 +2,7 @@
 
 namespace modules\order\controllers;
 
+use frontend\helpers\JsonHelper;
 use sales\auth\Auth;
 use Yii;
 use modules\order\src\entities\order\Order;
@@ -84,8 +85,11 @@ class OrderCrudController extends FController
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->or_id]);
+        if ($model->load(Yii::$app->request->post())) {
+            $model->or_request_data = JsonHelper::decode($model->or_request_data);
+            if ($model->save()) {
+                return $this->redirect(['view', 'id' => $model->or_id]);
+            }
         }
 
         return $this->render('update', [

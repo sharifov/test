@@ -6,7 +6,7 @@ namespace modules\product\src\entities\productQuote\events;
  * Class ProductQuoteExpiredEvent
  * @package modules\product\src\entities\productQuote\events
  */
-class ProductQuoteExpiredEvent
+class ProductQuoteExpiredEvent implements ProductQuotable
 {
     public $productQuoteId;
     public $startStatusId;
@@ -34,5 +34,10 @@ class ProductQuoteExpiredEvent
         $this->description = $description;
         $this->ownerId = $ownerId;
         $this->creatorId = $creatorId;
+    }
+
+    public function getProductQuoteId()
+    {
+        return $this->productQuoteId;
     }
 }

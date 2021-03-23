@@ -4,13 +4,11 @@ namespace sales\helpers\lead;
 
 use common\models\Lead;
 use common\models\LeadFlightSegment;
+use DateTime;
 use yii\helpers\ArrayHelper;
 
 class LeadHelper
 {
-
-
-
     /**
      * @return array
      */
@@ -22,7 +20,6 @@ class LeadHelper
             Lead::TRIP_TYPE_MULTI_DESTINATION => 'Multi destination'
         ];
     }
-
 
     /**
      * @param string|null $type
@@ -73,7 +70,6 @@ class LeadHelper
             Lead::STATUS_SNOOZE         => 'Snooze',
         ];
     }
-
 
     /**
      * @param string|null $status
@@ -135,5 +131,17 @@ class LeadHelper
             $result[] = $segment->destination;
         }
         return $result;
+    }
+
+    public static function expirationNowDiffInSeconds(Lead $lead)
+    {
+        $deadLineTsp = (new DateTime($lead->l_expiration_dt))->getTimestamp();
+        $nowTsp = (new DateTime('now'))->getTimestamp();
+        return $deadLineTsp - $nowTsp;
+    }
+
+    public static function expiredLead(Lead $lead)
+    {
+        return (self::expirationNowDiffInSeconds($lead) <= 0);
     }
 }

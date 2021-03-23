@@ -19,6 +19,7 @@ use yii\db\ActiveRecord;
  * @property int|null $pm_category_id
  * @property int|null $pm_updated_user_id
  * @property string|null $pm_updated_dt
+ * @property string|null $pm_key
  *
  * @property Payment[] $payments
  * @property string $categoryName
@@ -63,7 +64,7 @@ class PaymentMethod extends \yii\db\ActiveRecord
             [['pm_name'], 'required'],
             [['pm_enabled', 'pm_category_id', 'pm_updated_user_id'], 'integer'],
             [['pm_updated_dt'], 'safe'],
-            [['pm_name'], 'string', 'max' => 50],
+            [['pm_name', 'pm_key'], 'string', 'max' => 50],
             [['pm_short_name'], 'string', 'max' => 20],
             [['pm_name'], 'unique'],
             [['pm_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pm_updated_user_id' => 'id']],
@@ -83,6 +84,7 @@ class PaymentMethod extends \yii\db\ActiveRecord
             'pm_category_id' => 'Category ID',
             'pm_updated_user_id' => 'Updated User ID',
             'pm_updated_dt' => 'Updated Dt',
+            'pm_key' => 'Key',
         ];
     }
 

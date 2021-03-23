@@ -152,6 +152,7 @@ $emailTemplateTypes = @json_encode($emailTemplateTypes);
                                     <?= $form2->field($previewEmailForm, 'e_language_id')->hiddenInput()->label(false); ?>
                                     <?= $form2->field($previewEmailForm, 'e_email_tpl_id')->hiddenInput()->label(false); ?>
                                     <?= $form2->field($previewEmailForm, 'e_quote_list')->hiddenInput()->label(false); ?>
+                                    <?= $form2->field($previewEmailForm, 'e_offer_list')->hiddenInput()->label(false); ?>
                                 </div>
                                 <div class="col-sm-4 form-group">
                                     <?= $form2->field($previewEmailForm, 'e_email_to')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
@@ -604,7 +605,26 @@ $('#email option').each(function() {
         $(this).html('---')
         //$(this).removeAttr('disabled')
     }
-});          
+}); 
+function initializeTemplateType(email, types) {
+    let etpOptions = '<option>---</option>';      
+        
+        if (JSON.parse(emails).includes(email)){ 
+            $.each(JSON.parse(emailTemplateTypes), function(key, item) {                 
+                if (item.etp_ignore_unsubscribe == 1) {                    
+                   etpOptions += '<option value="'+ item.etp_key+'">' + item.etp_name + '</option>';
+                }
+            }); 
+            document.getElementById("c_email_tpl_key").innerHTML = etpOptions;
+        } else {
+             $.each(JSON.parse(emailTemplateTypes), function(key, item) {
+                   etpOptions += '<option value="'+ item.etp_key+'">' + item.etp_name + '</option>';              
+            }); 
+            document.getElementById("c_email_tpl_key").innerHTML = etpOptions;
+        }
+}
+
+initializeTemplateType($('#email').val(), emailTemplateTypes)           
 
 JS;
 

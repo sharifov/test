@@ -2,6 +2,7 @@
 
 use common\models\Client;
 use frontend\widgets\clientChat\ClientChatClientInfoWidget;
+use modules\offer\src\entities\offer\OfferQuery;
 use sales\auth\Auth;
 use sales\entities\cases\CasesStatus;
 use sales\helpers\clientChat\ClientChatHelper;
@@ -32,6 +33,8 @@ $_self = $this;
 $counter = new ClientLeadCaseCounter($client->id, Auth::id());
 $chatCounter = new ClientChatCounter($client->id);
 
+$chatSendQuoteListUrl = Url::toRoute('/client-chat/send-quote-list');
+$chatSendOfferListUrl = Url::toRoute('/client-chat/send-offer-list');
 ?>
 
 <div class="_rc-client-chat-info-wrapper">
@@ -199,7 +202,7 @@ $chatCounter = new ClientChatCounter($client->id);
                                 'id' => 'btn-client-chats',
                                 'data-chat-id' => $clientChat->cch_id,
                                 'data-client-id' => $clientChat->cch_client_id
-                            ]
+                                ]
                         ) ?>
                     </div>
                 </div>
@@ -344,9 +347,14 @@ $chatCounter = new ClientChatCounter($client->id);
                                 <?= Yii::$app->formatter->format($lead, 'lead'); ?>
                             </span>
                             <span>
-                                <span data-cc-lead-info-offer="<?= $lead->id?>">
+                                <span data-cc-lead-info-quote="<?= $lead->id?>">
                                 <?php if (!$clientChat->isClosed() && $lead->isExistQuotesForSend()) : ?>
-                                    <?= \yii\helpers\Html::tag('span', '<i class="fa fa-plane"> </i> Offer', ['class' => 'chat-offer', 'data-chat-id' => $clientChat->cch_id, 'data-lead-id' => $lead->id]); ?>
+                                    <?= Html::tag('span', '<i class="fa fa-plane"> </i> Quotes', ['class' => 'chat-offer', 'data-chat-id' => $clientChat->cch_id, 'data-lead-id' => $lead->id, 'data-url' => $chatSendQuoteListUrl]); ?>
+                                <?php endif; ?>
+                                </span>
+                                <span data-cc-lead-info-offer="<?= $lead->id?>">
+                                <?php if (!$clientChat->isClosed() && OfferQuery::existsOffersByLeadId($lead->id)) : ?>
+                                    <?= Html::tag('span', '<i class="fa fa-plane"> </i> Offer', ['class' => 'chat-offer', 'data-chat-id' => $clientChat->cch_id, 'data-lead-id' => $lead->id, 'data-url' => $chatSendOfferListUrl]); ?>
                                 <?php endif; ?>
                                 </span>
                                 <?= $lead->getStatusLabel($lead->status); ?>

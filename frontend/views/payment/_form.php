@@ -1,5 +1,7 @@
 <?php
 
+use common\models\Payment;
+use frontend\extensions\DatePicker;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -16,9 +18,15 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'pay_method_id')->textInput() ?>
 
-    <?= $form->field($model, 'pay_status_id')->textInput() ?>
+    <?= $form->field($model, 'pay_status_id')->dropDownList(Payment::getStatusList(), ['prompt' => '---']) ?>
 
-    <?= $form->field($model, 'pay_date')->textInput() ?>
+    <?= $form->field($model, 'pay_code')->textInput() ?>
+
+    <?= $form->field($model, 'pay_date')->widget(DatePicker::class, [
+        'clientOptions' => [
+            'format' => 'yyyy-mm-dd',
+        ]
+    ]) ?>
 
     <?= $form->field($model, 'pay_amount')->textInput(['maxlength' => true]) ?>
 
@@ -27,14 +35,6 @@ use yii\widgets\ActiveForm;
     <?= $form->field($model, 'pay_invoice_id')->textInput() ?>
 
     <?= $form->field($model, 'pay_order_id')->textInput() ?>
-
-    <?= $form->field($model, 'pay_created_user_id')->textInput() ?>
-
-    <?= $form->field($model, 'pay_updated_user_id')->textInput() ?>
-
-    <?= $form->field($model, 'pay_created_dt')->textInput() ?>
-
-    <?= $form->field($model, 'pay_updated_dt')->textInput() ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

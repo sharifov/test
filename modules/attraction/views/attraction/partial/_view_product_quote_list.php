@@ -8,14 +8,13 @@ use yii\widgets\Pjax;
 /* @var $attractionProduct modules\attraction\models\Attraction*/
 /* @var $dataProviderQuotes \yii\data\ActiveDataProvider */
 
-
 //\yii\web\YiiAsset::register($this);
 
 //$searchModel = new HotelRoomSearch();
 //$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 $pjaxId = 'pjax-product-quote-list-' . $attractionProduct->atn_product_id;
 ?>
-<div class="hotel-view-product-quotes">
+<div class="attraction-view-product-quotes">
     <?php \yii\widgets\Pjax::begin(['id' => $pjaxId, 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
 
     <div class="x_panel">

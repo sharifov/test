@@ -222,6 +222,26 @@ use frontend\extensions\DatePicker;
                             ])->label('Last Action From / To');
 ?>
                         </div>
+                        <div class="col-md-2">
+                            <?php echo $form->field($model, 'expiration_dt', [
+                                'options' => ['class' => 'form-group']
+                            ])->widget(DatePicker::class, [
+                                'clientOptions' => [
+                                    'autoclose' => true,
+                                    'format' => 'yyyy-mm-dd',
+                                    'clearBtn' => true,
+                                ],
+                                'options' => [
+                                    'autocomplete' => 'off',
+                                    'placeholder' => 'Choose Date',
+                                    'readonly' => '1',
+                                ],
+                                'clientEvents' => [
+                                    'clearDate' => 'function (e) {$(e.target).find("input").change();}',
+                                ],
+                            ])->label('Expiration');
+                            ?>
+                        </div>
                     </div>
                 </div>
                 <div class=" profile-bottom text-center">
@@ -325,29 +345,32 @@ use frontend\extensions\DatePicker;
                         <div class="col-md-1">
                             <?= $form->field($model, 'callsQtyTo')->textInput() ?>
                         </div>
-                    <!--</div>
-                    <div class="row">-->
+                        <!--</div>
+                        <div class="row">-->
                         <div class="col-md-1">
                             <?= $form->field($model, 'smsQtyFrom')->textInput() ?>
                         </div>
                         <div class="col-md-1">
                             <?= $form->field($model, 'smsQtyTo')->textInput() ?>
                         </div>
-                    <!--</div>
-                    <div class="row">-->
+                        <!--</div>
+                        <div class="row">-->
                         <div class="col-md-1">
                             <?= $form->field($model, 'emailsQtyFrom')->textInput() ?>
                         </div>
                         <div class="col-md-1">
                             <?= $form->field($model, 'emailsQtyTo')->textInput() ?>
                         </div>
-                    <!--</div>
-                    <div class="row">-->
+                        <!--</div>
+                        <div class="row">-->
                         <div class="col-md-1">
                             <?= $form->field($model, 'chatsQtyFrom')->textInput() ?>
                         </div>
                         <div class="col-md-1">
                             <?= $form->field($model, 'chatsQtyTo')->textInput() ?>
+                        </div>
+                        <div class="col-md-1">
+                            <?= $form->field($model, 'includedFiles')->dropDownList([0 => 'No', 1 => 'Yes'], ['prompt' => '-']) ?>
                         </div>
                     </div>
                     <?php // echo $form->field($model, 'request_ip_detail')?>

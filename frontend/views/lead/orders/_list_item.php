@@ -5,12 +5,16 @@
 /* @var $index integer */
 
 use common\models\Currency;
+use common\models\Payment;
 use modules\invoice\src\entities\invoice\InvoiceStatus;
 use modules\order\src\entities\order\OrderPayStatus;
 use modules\order\src\entities\order\OrderStatus;
+use modules\order\src\processManager\OrderProcessManager;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use sales\auth\Auth;
 use yii\bootstrap4\Html;
 
+$process = OrderProcessManager::findOne($order->or_id);
 ?>
 
 <div class="x_panel">
@@ -25,7 +29,9 @@ use yii\bootstrap4\Html;
         <?php if ($order->or_profit_amount > 0) : ?>
             <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $order->or_profit_amount ?>
         <?php endif; ?>
-
+        <?php if ($process) : ?>
+            &nbsp;&nbsp;&nbsp;&nbsp;Auto Process: (<?= OrderProcessManager::STATUS_LIST[$process->opm_status] ?? 'undefined'?>)
+        <?php endif; ?>
         <ul class="nav navbar-right panel_toolbox">
             <!--            <li>-->
             <!--                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>-->
@@ -58,6 +64,56 @@ use yii\bootstrap4\Html;
                                 'data-product-id' => $product->pr_id
                             ])*/ ?>
 
+                    <?php if ($process) : ?>
+                        <?php if ($process->isRunning()) : ?>
+                            <?php if (Auth::can('/order/order-process-actions/cancel-process')) : ?>
+                                <?= Html::a('Cancel Auto Process', null, [
+                                    'data-url' => \yii\helpers\Url::to(['/order/order-process-actions/cancel-process']),
+                                    'class' => 'dropdown-item btn-cancel-process',
+                                    'data-order-id' => $order->or_id,
+                                ])?>
+                            <?php endif;?>
+                        <?php endif;?>
+                    <?php else : ?>
+                        <?php if (Auth::can('/order/order-process-actions/start-process')) : ?>
+                            <?= Html::a('Start Auto Processing', null, [
+                                'data-url' => \yii\helpers\Url::to(['/order/order-process-actions/start-process']),
+                                'class' => 'dropdown-item btn-start-process',
+                                'data-order-id' => $order->or_id,
+                            ])?>
+                        <?php endif;?>
+                    <?php endif;?>
+
+                    <?php if (Auth::can('/order/order-actions/cancel') && !$order->isCanceled()) : ?>
+                        <?= Html::a('Cancel Order', null, [
+                            'data-url' => \yii\helpers\Url::to(['/order/order-actions/cancel', 'orderId' => $order->or_id]),
+                            'class' => 'dropdown-item btn-cancel-order'
+                        ])?>
+                    <?php endif ?>
+
+                    <?php if (Auth::can('/order/order-actions/complete') && !$order->isComplete()) : ?>
+                        <?= Html::a('Complete Order', null, [
+                            'data-url' => \yii\helpers\Url::to(['/order/order-actions/complete', 'orderId' => $order->or_id]),
+                            'class' => 'dropdown-item btn-complete-order'
+                        ])?>
+                    <?php endif ?>
+
+                    <?php if (Auth::can('/order/order-actions/send-email-confirmation')) : ?>
+                        <?= Html::a('Send Email Confirmation', null, [
+                            'data-url' => \yii\helpers\Url::to(['/order/order-actions/send-email-confirmation']),
+                            'data-id' => $order->or_id,
+                            'class' => 'dropdown-item btn-order-send-email-confirmation'
+                        ])?>
+                    <?php endif ?>
+
+                    <?php if (Auth::can('/order/order-actions/generate-files')) : ?>
+                        <?= Html::a('<i class="fa fa-file-pdf-o"></i> Generate PDF', null, [
+                            'data-url' => \yii\helpers\Url::to(['/order/order-actions/generate-files']),
+                            'data-id' => $order->or_id,
+                            'class' => 'dropdown-item btn-order-generate-files'
+                        ])?>
+                    <?php endif ?>
+
                     <?= Html::a('<i class="fa fa-edit"></i> Update order', null, [
                         'data-url' => \yii\helpers\Url::to(['/order/order/update-ajax', 'id' => $order->or_id]),
                         'class' => 'dropdown-item text-warning btn-update-order'
@@ -68,8 +124,6 @@ use yii\bootstrap4\Html;
                         'data-url' => \yii\helpers\Url::to(['/order/order-status-log/show', 'gid' => $order->or_gid]),
                         'data-gid' => $order->or_gid,
                     ]) ?>
-
-
 
                     <div class="dropdown-divider"></div>
                     <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete order', null, [
@@ -88,6 +142,8 @@ use yii\bootstrap4\Html;
             $ordClientTotalPrice = 0;
             $ordOptionTotalPrice = 0;
             $ordTotalFee = 0;
+            $calcTotalPrice = 0;
+            $orderTipsAmount = 0.00;
         ?>
 
         <table class="table table-bordered">
@@ -148,9 +204,11 @@ use yii\bootstrap4\Html;
                     $ordOptionTotalPrice = round($ordOptionTotalPrice, 2);
                     $ordTotalFee = round($ordTotalFee, 2);
 
+                    $orderTipsAmount = $order->orderTips ? $order->orderTips->ot_amount : 0.00;
+                    $orderTipsAmountClient = $order->orderTips ? $order->orderTips->ot_client_amount : 0.00;
 
-                    $calcTotalPrice = round($ordTotalPrice + $ordOptionTotalPrice, 2);
-                    $calcClientTotalPrice = round($calcTotalPrice * $order->or_client_currency_rate, 2);
+                    $calcTotalPrice = round($ordTotalPrice + $ordOptionTotalPrice + $orderTipsAmount, 2);
+                    $calcClientTotalPrice = round(($calcTotalPrice) * $order->or_client_currency_rate, 2);
 
                 ?>
                 <tr>
@@ -162,17 +220,24 @@ use yii\bootstrap4\Html;
                     <th></th>
                 </tr>
                 <tr>
+                    <th class="text-right" colspan="5">Tips: </th>
+                    <td class="text-center" colspan="2">(DB)</td>
+                    <th class="text-right"><?=number_format($orderTipsAmount, 2)?></th>
+                    <th class="text-right"><?=number_format($orderTipsAmountClient, 2)?> <?=Html::encode($order->or_client_currency)?></th>
+                    <th></th>
+                </tr>
+                <tr>
                     <th class="text-right" colspan="5">Calc Total: </th>
-                    <td class="text-center" colspan="2">(price + opt)</td>
+                    <td class="text-center" colspan="2">(price + opt + tips)</td>
                     <th class="text-right"><?=number_format($calcTotalPrice, 2)?></th>
-                    <th class="text-right"><?=number_format($ordClientTotalPrice, 2)?> <?=Html::encode($order->or_client_currency)?></th>
+                    <th class="text-right"><?=number_format($calcClientTotalPrice, 2)?> <?=Html::encode($order->or_client_currency)?></th>
                     <th></th>
                 </tr>
                 <tr>
                     <th class="text-right" colspan="5">Total: </th>
-                    <td class="text-center" colspan="2">(DB)</td>
-                    <th class="text-right"><?=number_format($order->or_app_total, 2)?></th>
-                    <th class="text-right"><?=number_format($order->or_client_total, 2)?> <?=Html::encode($order->or_client_currency)?></th>
+                    <td class="text-center" colspan="2">(DB + Tips)</td>
+                    <th class="text-right"><?=number_format($order->or_app_total + $orderTipsAmount, 2)?></th>
+                    <th class="text-right"><?=number_format($order->or_client_total + $orderTipsAmountClient, 2)?> <?=Html::encode($order->or_client_currency)?></th>
                     <th></th>
                 </tr>
             <?php endif; ?>
@@ -182,7 +247,7 @@ use yii\bootstrap4\Html;
         <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($order->or_created_dt)) ?>,
         <i class="fa fa-money" title="currency"></i> <?=Html::encode($order->or_client_currency)?> <span title="Rate: <?=$order->or_client_currency_rate?>">(<?=round($order->or_client_currency_rate, 3)?>)</span>
 
-        <div class="text-right"><h4>Calc Total: <?=number_format($order->orderTotalCalcSum, 2)?> USD, Total: <?=number_format($order->or_app_total, 2)?> USD</h4></div>
+        <div class="text-right"><h4>Calc Total: <?=number_format($order->orderTotalCalcSum  + $orderTipsAmount, 2)?> USD, Total: <?=number_format($order->or_app_total + $orderTipsAmount, 2)?> USD</h4></div>
 
         <hr>
         <?php \yii\widgets\Pjax::begin(['id' => 'pjax-order-invoice-' . $order->or_id, 'enablePushState' => false, 'timeout' => 10000])?>
@@ -271,6 +336,7 @@ use yii\bootstrap4\Html;
             </table>
 
         <?php if ($order->orderTips) : ?>
+            <h4><i class="fas fa-file-invoice-dollar"></i> Order Tips</h4>
             <table class="table table-bordered">
                 <thead>
                     <tr>
@@ -292,15 +358,15 @@ use yii\bootstrap4\Html;
         <?php endif; ?>
 
 
-            <?php if ($invTotalPrice !== $ordTotalPrice) :
-                $newInvoiceAmount = round($ordTotalPrice - $invTotalPrice, 2);
+            <?php if ($invTotalPrice !== $calcTotalPrice) :
+                $newInvoiceAmount = round($calcTotalPrice - $invTotalPrice, 2);
                 ?>
                 <table class="table table-bordered">
                     <tbody>
                         <tr>
                             <th class="text-warning"><i class="fa fa-warning"></i> New Invoice</th>
                             <th class="text-right">
-                                <?=number_format($ordTotalPrice, 2)?> - <?=number_format($invTotalPrice, 2)?> =
+                                <?=number_format($calcTotalPrice + $orderTipsAmount, 2)?> - <?=number_format($invTotalPrice, 2)?> =
                                 <span class="<?=$newInvoiceAmount > 0 ? 'text-success' : 'text-danger' ?>">
                                     <?=number_format($newInvoiceAmount, 2)?> USD
                                 </span>
@@ -318,6 +384,145 @@ use yii\bootstrap4\Html;
                     </tbody>
                 </table>
             <?php endif; ?>
+        <?php \yii\widgets\Pjax::end() ?>
+
+        <hr>
+        <?php \yii\widgets\Pjax::begin(['id' => 'pjax-order-payment-' . $order->or_id, 'enablePushState' => false, 'timeout' => 10000])?>
+        <h4><i class="fas fa-file-invoice-dollar"></i> Payment List</h4>
+        <?php
+        $paymentTotalPrice = 0;
+        $paymentClientTotalPrice = 0;
+        $payments = Payment::find()->andWhere(['pay_order_id' => $order->or_id])->all();
+        ?>
+            <?php if ($payments) : ?>
+             <table class="table table-bordered">
+                <tr>
+                    <th style="width: 100px">Payment ID</th>
+                    <th>Created</th>
+                    <th>Status</th>
+                    <th>Method</th>
+                    <th title="Amount, USD">Amount, USD</th>
+                    <th style="width: 60px"></th>
+                </tr>
+
+                    <?php foreach ($payments as $payment) :
+                        $paymentTotalPrice += $payment->pay_amount;
+                        ?>
+                        <tr>
+                            <td title="Payment ID"><?=Html::encode($payment->pay_id)?></td>
+                            <td><?=$payment->pay_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($payment->pay_created_dt)) : '-'?></td>
+                            <td><?= Payment::getStatusName($payment->pay_status_id) ?></td>
+                            <td>
+                                <?php if ($payment->pay_method_id) {
+                                        echo $payment->payMethod->pm_name;
+                                } ?>
+                            </td>
+                            <td class="text-right <?=$payment->pay_amount > 0 ? 'text-success' : 'text-danger' ?>"><?=number_format($payment->pay_amount, 2)?></td>
+                            <td>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fa fa-bars"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
+
+                                        <?php
+                                        if (Auth::can('/order/payment-actions/capture')) {
+                                            echo Html::a(
+                                                '<i class="fa fa-credit-card text-success" title="Capture"></i> Capture',
+                                                null,
+                                                [
+                                                        'class' => 'dropdown-item btn-payment-capture',
+                                                        'data-url' => \yii\helpers\Url::to([
+                                                            '/order/payment-actions/capture',
+                                                        ]),
+                                                        'data-payment-id' => $payment->pay_id,
+                                                ]
+                                            );
+                                        }
+                                        ?>
+
+                                        <?php
+                                        if (Auth::can('/order/payment-actions/refund')) {
+                                            echo Html::a(
+                                                '<i class="fa fa-credit-card text-danger" title="Refund"></i> Refund',
+                                                null,
+                                                [
+                                                    'class' => 'dropdown-item btn-payment-refund',
+                                                    'data-url' => \yii\helpers\Url::to([
+                                                        '/order/payment-actions/refund', 'id' => $payment->pay_id
+                                                    ]),
+                                                ]
+                                            );
+                                        }
+                                        ?>
+
+                                        <?php
+                                        if (Auth::can('/order/payment-actions/update')) {
+                                            echo Html::a(
+                                                '<i class="fa fa-edit text-warning" title="Update"></i> Update',
+                                                null,
+                                                [
+                                                    'class' => 'dropdown-item btn-payment-update',
+                                                    'data-url' => \yii\helpers\Url::to([
+                                                        '/order/payment-actions/update',
+                                                        'id' => $payment->pay_id
+                                                    ])
+                                                ]
+                                            );
+                                        }
+                                        ?>
+
+                                        <?php
+                                        if (Auth::can('/order/payment-actions/status-log')) {
+                                            echo Html::a(
+                                                '<i class="fa fa-list" title="Status Log"></i> Status Log',
+                                                null,
+                                                [
+                                                    'class' => 'dropdown-item btn-payment-status-log',
+                                                    'data-url' => \yii\helpers\Url::to([
+                                                        '/order/payment-actions/status-log',
+                                                        'id' => $payment->pay_id
+                                                    ])
+                                                ]
+                                            );
+                                        }
+                                        ?>
+
+                                        <?php
+                                        if (Auth::can('/order/payment-actions/delete')) {
+                                            echo Html::a(
+                                                '<i class="glyphicon glyphicon-remove-circle text-danger" title="Delete"></i> Delete',
+                                                null,
+                                                [
+                                                    'class' => 'dropdown-item btn-payment-delete',
+                                                    'data-url' => \yii\helpers\Url::to([
+                                                        '/order/payment-actions/delete',
+                                                    ]),
+                                                    'data-payment-id' => $payment->pay_id,
+                                                    'data-order-id' => $order->or_id,
+                                                ]
+                                            );
+                                        }
+                                        ?>
+
+                                    </div>
+                                </div>
+
+
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    <?php
+                    $paymentTotalPrice = round($paymentTotalPrice, 2);
+                    ?>
+                    <tr>
+                        <th class="text-right" colspan="4">Total: </th>
+                        <th class="text-right"><?=number_format($paymentTotalPrice, 2)?></th>
+                        <th></th>
+                    </tr>
+                </table>
+            <?php endif; ?>
+
         <?php \yii\widgets\Pjax::end() ?>
     </div>
 

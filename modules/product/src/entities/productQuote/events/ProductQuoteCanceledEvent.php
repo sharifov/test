@@ -6,7 +6,7 @@ namespace modules\product\src\entities\productQuote\events;
  * Class ProductQuoteCanceledEvent
  * @package modules\product\src\entities\productQuote\events
  */
-class ProductQuoteCanceledEvent
+class ProductQuoteCanceledEvent implements ProductQuotable
 {
     public $productQuoteId;
     public $startStatusId;
@@ -34,5 +34,10 @@ class ProductQuoteCanceledEvent
         $this->description = $description;
         $this->ownerId = $ownerId;
         $this->creatorId = $creatorId;
+    }
+
+    public function getProductQuoteId()
+    {
+        return $this->productQuoteId;
     }
 }

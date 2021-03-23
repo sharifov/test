@@ -5,10 +5,10 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel modules\hotel\models\search\HotelSearch */
+/* @var $searchModel modules\attraction\models\search\AttractionSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Hotels';
+$this->title = 'Attractions';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="hotel-index">
@@ -16,7 +16,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Create Hotel', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('Create Attraction', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?php Pjax::begin(); ?>
@@ -27,20 +27,13 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
-
-            'ph_id',
-            'ph_product_id',
-            'ph_check_in_date:date',
-            'ph_check_out_date:date',
-            'ph_destination_code',
-            'ph_destination_label',
-            'ph_zone_code',
-            'ph_hotel_code',
-            'ph_min_star_rate',
-            'ph_max_star_rate',
-            'ph_max_price_rate',
-            'ph_min_price_rate',
-            'ph_request_hash_key',
+            'atn_id',
+            'atn_product_id',
+            'atn_date_from:date',
+            'atn_date_to:date',
+            'atn_destination',
+            'atn_destination_code',
+            'atn_request_hash_key',
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

@@ -10,6 +10,7 @@ use modules\flight\models\FlightQuote;
 use modules\flight\src\helpers\FlightQuoteHelper;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use sales\auth\Auth;
 use yii\bootstrap4\Html;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
@@ -51,7 +52,7 @@ $totalAmountQuote = 0.0;
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-bars text-warning"></i></a>
                 <div class="dropdown-menu" role="menu">
-                    <h6 class="dropdown-header">Quote Q<?=($model->pq_id)?></h6>
+                    <h6 class="dropdown-header" title="FlightQuoteId: <?php echo $model->flightQuote->fq_id ?>">Quote Q<?=($model->pq_id)?></h6>
                     <?php /*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Update Request', null, [
                                 'class' => 'dropdown-item text-danger btn-update-product',
                                 'data-product-id' => $product->pr_id
@@ -216,13 +217,67 @@ $totalAmountQuote = 0.0;
                         ?>
                     <?php endif;?>
 
+                    <?php if (Auth::can('/flight/flight-quote/ajax-book') && $model->isBookable()) : ?>
+                        <?= Html::a(
+                            '<i class="fa fa-share-square"></i> Create Book',
+                            null,
+                            [
+                                'class' => 'dropdown-item js-btn-book-flight-quote',
+                                'data-url' => Url::to('/flight/flight-quote/ajax-book'),
+                                'data-flight-quote-id' => $model->flightQuote->fq_id,
+                                'data-product-id' => $model->pq_product_id,
+                            ]
+                        ) ?>
+                    <?php endif ?>
+
+                    <?php if (Auth::can('/flight/flight-quote/ajax-file-generate') && $model->isBooked()) : ?>
+                        <?= Html::a(
+                            '<i class="fa fa-file-pdf-o"></i> Generate PDF',
+                            null,
+                            [
+                                'class' => 'dropdown-item js-btn-generate-pdf-flight-quote',
+                                'data-url' => Url::to('/flight/flight-quote/ajax-file-generate'),
+                                'data-flight-quote-id' => $model->flightQuote->fq_id,
+                            ]
+                        ) ?>
+                    <?php endif ?>
+
+                    <?php if (Auth::can('/flight/flight-quote/cancel')) : ?>
+                        <?= Html::a(
+                            '<i class="fa fa-share-square"></i> Cancel Booking',
+                            null,
+                            [
+                                'class' => 'dropdown-item btn-flight-quote-cancel-book',
+                                'data-url' => Url::to('/flight/flight-quote/cancel'),
+                                'data-id' => $model->flightQuote->fq_id,
+                                'data-product-id' => $model->pq_product_id,
+                            ]
+                        ) ?>
+                    <?php endif;?>
+
+                    <?php if (Auth::can('/flight/flight-quote/void')) : ?>
+                        <?= Html::a(
+                            '<i class="fa fa-share-square"></i> Void Booking',
+                            null,
+                            [
+                                'class' => 'dropdown-item btn-flight-quote-void-book',
+                                'data-url' => Url::to('/flight/flight-quote/void'),
+                                'data-id' => $model->flightQuote->fq_id,
+                                'data-product-id' => $model->pq_product_id,
+                            ]
+                        ) ?>
+                    <?php endif;?>
+
+                    <?php if ($model->isDeletable()) : ?>
                     <div class="dropdown-divider"></div>
-                    <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [
-                        'class' => 'dropdown-item text-danger btn-delete-product-quote',
-                        'data-product-quote-id' => $model->pq_id,
-                        'data-flight-quote-id' => $model->flightQuote->fq_id,
-                        'data-product-id' => $model->pq_product_id,
-                    ]) ?>
+                        <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [
+                            'class' => 'dropdown-item text-danger btn-delete-product-quote',
+                            'data-product-quote-id' => $model->pq_id,
+                            'data-flight-quote-id' => $model->flightQuote->fq_id,
+                            'data-product-id' => $model->pq_product_id,
+                        ]) ?>
+                    <?php endif;?>
+
                 </div>
             </li>
         </ul>

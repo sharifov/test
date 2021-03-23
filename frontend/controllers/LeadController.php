@@ -478,6 +478,15 @@ class LeadController extends FController
                     } else {
                         //echo '<strong>Email Message</strong> has been successfully sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
 
+                        if ($offerList = @json_decode($previewEmailForm->e_offer_list)) {
+                            if (is_array($offerList)) {
+                                $service = Yii::createObject(OfferSendLogService::class);
+                                foreach ($offerList as $offerId) {
+                                    $service->log(new CreateDto($offerId, OfferSendLogType::EMAIL, $user->id, $previewEmailForm->e_email_to));
+                                }
+                            }
+                        }
+
 
                         if ($quoteList = @json_decode($previewEmailForm->e_quote_list)) {
                             if (is_array($quoteList)) {
@@ -690,12 +699,12 @@ class LeadController extends FController
                                 Yii::info('Allowed quantity of selected quotes is from ' . $tplConfigQuotes['minSelectedCount'] . ' to ' . $tplConfigQuotes['maxSelectedCount'] . ' inclusive. You selected ' . $selectedQuotes . '.', 'info\LeadController:view:mailPreview');
                                 $comForm->c_preview_email = 0;
                             } else {
-                                if ($comForm->offerList) {
-                                    $service = Yii::createObject(OfferSendLogService::class);
-                                    foreach ($comForm->offerList as $offerId) {
-                                        $service->log(new CreateDto($offerId, OfferSendLogType::EMAIL, $user->id, $comForm->c_email_to));
-                                    }
-                                }
+//                                if ($comForm->offerList) {
+//                                    $service = Yii::createObject(OfferSendLogService::class);
+//                                    foreach ($comForm->offerList as $offerId) {
+//                                        $service->log(new CreateDto($offerId, OfferSendLogType::EMAIL, $user->id, $comForm->c_email_to));
+//                                    }
+//                                }
 
                                 $emailBodyHtml = EmailService::prepareEmailBody($mailPreview['data']['email_body_html']);
 
@@ -712,6 +721,7 @@ class LeadController extends FController
                                 $previewEmailForm->e_email_from_name = Yii::$app->user->identity->nickname;
                                 $previewEmailForm->e_email_to_name = $lead->client ? $lead->client->full_name : '';
                                 $previewEmailForm->e_quote_list = @json_encode($comForm->quoteList);
+                                $previewEmailForm->e_offer_list = @json_encode($comForm->offerList);
                             }
                         }
 
@@ -1636,7 +1646,6 @@ class LeadController extends FController
     public function actionAlternative(): string
     {
         $user = Auth::user();
-
         $checkShiftTime = true;
         $isAccessNewLead = true;
         $accessLeadByFrequency = [];

@@ -22,6 +22,7 @@ class FlightQuoteSegmentSerializer extends Serializer
     public static function fields(): array
     {
         return [
+            'fqs_uid',
             'fqs_departure_dt',
             'fqs_arrival_dt',
             'fqs_stop',

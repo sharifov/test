@@ -114,14 +114,17 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
                             'class' => 'dropdown-item text-warning btn-update-product',
                             'data-product-id' => $product->pr_id,
                         ]) ?>
-                        <?= Html::a(
-                            '<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete Hotel',
-                            null,
-                            [
-                                'class' => 'dropdown-item text-danger btn-delete-product',
-                                'data-product-id' => $product->pr_id
-                            ]
-                        ) ?>
+
+                        <?php if ($product->isDeletable()) : ?>
+                            <?= Html::a(
+                                '<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete Hotel',
+                                null,
+                                [
+                                    'class' => 'dropdown-item text-danger btn-delete-product',
+                                    'data-product-id' => $product->pr_id
+                                ]
+                            ) ?>
+                        <?php endif ?>
 
                     </div>
                 </li>

@@ -25,7 +25,8 @@ use yii\bootstrap4\Html;
  */
 class ClientPhonesColumn extends DataColumn
 {
-    public $label = 'Client / Phones';
+    //public $label = 'Client / Phones';
+    public $label = 'Client';
 
     public $client;
 
@@ -64,10 +65,10 @@ class ClientPhonesColumn extends DataColumn
 
         $str = $clientName . '<br>';
 
-        if ($phones = $client->clientPhones) {
+        /*if ($phones = $client->clientPhones) {
             $ico = Html::tag('i', '', ['class' => 'fa fa-phone']);
             $str .= $ico . ' ' . implode(' <br>' . $ico, ArrayHelper::map($phones, 'phone', 'phone'));
-        }
+        }*/
 
         return $str;
     }

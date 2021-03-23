@@ -13,7 +13,7 @@ class LoggerBehavior extends BaseBehavior
         $logger = $controller->logger ?? null;
         if (!$logger instanceof ApiLogger) {
             $logger = null;
-            Yii::error('Controller: ' . $controller->id . '. Not found ApiLogger.', 'SimpleLoggerBehavior');
+            Yii::error('Controller: ' . $controller->id . '. Not found ApiLogger.', 'LoggerBehavior');
         }
         return $logger;
     }

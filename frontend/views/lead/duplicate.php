@@ -143,9 +143,9 @@ $this->registerCssFile('/css/style-duplicate.css');
                     $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName) . '';
                 }
 
-                $str = $model->l_client_email ? '<br><i class="fa fa-envelope"></i> ' . $model->l_client_email : '';
+               /* $str = $model->l_client_email ? '<br><i class="fa fa-envelope"></i> ' . $model->l_client_email : '';
                 $str .= $model->l_client_phone ? '<br><i class="fa fa-phone"></i>' . $model->l_client_phone : '';
-                $clientName .= $str;
+                $clientName .= $str;*/
 
                 return $clientName;
             },
@@ -176,10 +176,10 @@ $this->registerCssFile('/css/style-duplicate.css');
                         $clientName = ClientFormatter::formatExclude($model->client)  . $clientName;
                     }
 
-                    $str = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
+                    /*$str = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
                     $str .= $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
 
-                    $clientName .= '<br>' . $str;
+                    $clientName .= '<br>' . $str;*/
                 } else {
                     $clientName = '-';
                 }

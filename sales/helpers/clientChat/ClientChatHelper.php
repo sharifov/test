@@ -13,6 +13,7 @@ use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\clientChatUserChannel\entity\search\ClientChatUserChannelSearch;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
+use yii\helpers\VarDumper;
 
 class ClientChatHelper
 {
@@ -50,6 +51,26 @@ class ClientChatHelper
         if ($clientChat->isInClosedStatusGroup() || !$clientChat->isOwner($employee->getId())) {
             return false;
         }
+        return true;
+    }
+
+    public static function isDialogReadOnly($clientChat, ?Employee $employee): bool
+    {
+        if ($clientChat === null || $employee === null) {
+            return true;
+        }
+
+        if ($clientChat instanceof ClientChat) {
+            return $clientChat->isInClosedStatusGroup() || !$clientChat->isOwner($employee->getId());
+        }
+
+
+        if (is_array($clientChat)) {
+            $chatInClosedGroup = ArrayHelper::isIn((int)$clientChat['cch_status_id'], ClientChat::CLOSED_STATUS_GROUP);
+            $isUserOwner = (int)$clientChat['cch_owner_user_id'] === $employee->getId();
+            return $chatInClosedGroup || !$isUserOwner;
+        }
+
         return true;
     }
 

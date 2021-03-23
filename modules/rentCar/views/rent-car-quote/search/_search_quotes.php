@@ -31,7 +31,6 @@ use yii\widgets\Pjax;
                 return $this->render('_list_rent_car_quotes', ['dataRentCar' => $dataRentCar, 'index' => $index, 'key' => $key, 'rentCar' => $rentCar]);
             },
             'itemOptions' => [
-
                 'tag' => false,
             ],
         ]) ?>
@@ -40,17 +39,16 @@ use yii\widgets\Pjax;
 </div>
 
 <?php
-
 $addQuoteUrl = Url::to(['rent-car-quote/add-quote', 'id' => $rentCar->prc_id]);
+$contractRequestUrl = Url::to(['rent-car-quote/contract-request']);
 
 $js = <<<JS
     
     $('body').off('click', '.js-add-rent-car-quote').on('click', '.js-add-rent-car-quote', function (e) {
-        
       e.preventDefault();
-      let token = $(this).data('token');
-      
+      let token = $(this).data('token');      
       let btnAdd = $(this);
+      
       btnAdd.addClass('disabled').prop('disabled', true);
       btnAdd.find('i').removeClass('fa-plus').addClass('fa-spin fa-spinner');
 
@@ -97,7 +95,55 @@ $js = <<<JS
             $('#box-quote-' + token).addClass('bg-danger');
         }).always(function() {
         });      
-    });    
+    });   
+    
+    $('body').off('click', '.js-contract-request').on('click', '.js-contract-request', function (e) {        
+      e.preventDefault();
+      let requestId = $(this).data('requestId');
+      let referenceId = $(this).data('refId');
+      let token = $(this).data('token');
+      let btnAdd = $(this);
+      
+      btnAdd.addClass('disabled').prop('disabled', true);
+      btnAdd.find('i').removeClass('fa-angle-double-right').addClass('fa-spin fa-spinner');
+
+      $.ajax({
+          url: '{$contractRequestUrl}',
+          type: 'post',
+          data: {requestId: requestId, referenceId: referenceId},
+          dataType: 'json'
+      })
+          .done(function(data) {
+              if (data.status == 1) {                  
+                   new PNotify({
+                        title: 'Contract request success',
+                        type: 'success',
+                        text: data.message,
+                        hide: true
+                    });
+                  
+                  btnAdd.find('i').removeClass('fa-spin fa-spinner').addClass('fa-check-circle-o');
+                  btnAdd.removeClass('disabled').prop('disabled', false);
+              } else {                  
+                  new PNotify({
+                        title: 'Error: Contract request',
+                        type: 'error',
+                        text: data.message,
+                        hide: true
+                    });
+                  btnAdd.find('i').removeClass('fa-spin fa-spinner').addClass('fa-ban');
+                  btnAdd.removeClass('disabled').prop('disabled', false);
+                  $('#box-quote-' + token).addClass('bg-warning'); 
+              }
+          })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+            btnAdd.find('i').removeClass('fa-spin fa-spinner').addClass('fa-angle-double-right');
+            btnAdd.removeClass('disabled').prop('disabled', false);
+            $('#box-quote-' + token).addClass('bg-danger');
+        }).always(function() {
+        });      
+    });  
 JS;
 
 $this->registerJs($js, \yii\web\View::POS_READY, 'rent-car-search-quotes-js');

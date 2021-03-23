@@ -1,0 +1,85 @@
+<?php
+
+/**
+ * @var $this View
+ * @var $quote ProductQuote
+ * @var $flightQuote FlightQuote
+ * @var $priceData \modules\attraction\src\helpers\AttractionQuotePaxPriceDataDTO
+ * @var $attractionQuote \modules\attraction\models\AttractionQuote
+ */
+
+use kartik\editable\Editable;
+//use modules\flight\models\FlightQuote;
+//use modules\flight\src\helpers\FlightQuotePriceDataDTO;
+use modules\product\src\entities\productQuote\ProductQuote;
+use yii\helpers\Url;
+use yii\web\View;
+
+?>
+<table class="table table-bordered table-striped" id="quote-prices-<?= $quote->pq_id?>">
+    <thead>
+        <tr>
+            <th>Pricing Category</th>
+            <th>Q</th>
+            <th>NP, $</th>
+            <th>Mkp, $</th>
+            <th>Ex Mkp, $</th>
+            <th>SFP, %</th>
+            <th>SFP, $</th>
+            <th>SP, $</th>
+            <th>CSP, <?= $quote->pqClientCurrency->cur_symbol ?></th>
+        </tr>
+    </thead>
+    <tbody>
+    <?php foreach ($priceData->prices as $paxCode => $price) :?>
+        <?php $count = $price->tickets ?: 1; ?>
+        <tr>
+            <th><?= $price->label ?></th>
+            <td>x <?= $count ?></td>
+            <td><?= number_format($price->net / $count, 2) ?></td>
+            <td><?= number_format($price->markUp / $count, 2) ?></td>
+            <td><?php if ($quote->isNew()) :?>
+                    <?= Editable::widget([
+                        'name' => 'extra_markup[' . $attractionQuote->atnq_id  . '][' . $paxCode . ']',
+                        'asPopover' => false,
+                        'pjaxContainerId' => 'pjax-quote_prices-' . $quote->pq_id,
+                        'value' => number_format($price->extraMarkUp / $count, 2),
+                        'header' => 'Extra markup',
+                        'size' => 'sm',
+                        'inputType' => Editable::INPUT_TEXT,
+                        'buttonsTemplate' => '{submit}',
+//                        'pluginEvents' => ['editableSuccess' => "function(event, val, form, data) {  setTimeout(function() { $.pjax.reload({container: '#pjax-product-quote-{$flightQuote->fqProductQuote->pq_id}', async: false}); $.pjax.reload({container: '#pjax-quote_prices-{$flightQuote->fq_id}', async: false}); $('#quote_profit_{$flightQuote->fq_id}').popover('hide').popover('dispose');$.pjax.reload({container: '#pjax-quote_estimation_profit-{$flightQuote->fq_id}', async: false});$('#quote_profit_{$flightQuote->fq_id}').popover(); }, 500) }",],
+                        'pluginEvents' => ['editableSuccess' => "function(event, val, form, data) { $.pjax.reload({container: '#pjax-product-quote-{$attractionQuote->atnq_product_quote_id}', async: false}); }",],
+                        'inlineSettings' => [
+                            'templateBefore' => '<div class="editable-pannel">{loading}',
+                            'templateAfter' => '{buttons}{close}</div>'],
+                        'options' => ['class' => 'form-control','style' => 'width:50px;', 'placeholder' => 'Enter extra markup','resetButton' => '<i class="fa fa-ban"></i>'],
+                        'formOptions' => [
+                                'action' => Url::toRoute(['/attraction/attraction-quote/ajax-update-agent-markup'])
+                        ]
+                    ]) ?>
+                <?php else :?>
+                    <?= number_format($price->extraMarkUp / $count, 2)?>
+                <?php endif;?>
+            </td>
+            <td><?= number_format($priceData->serviceFeePercent, 2) ?> %</td>
+            <td><?= number_format($price->serviceFee / $count, 2) ?> </td>
+            <td><?= number_format($price->selling / $count, 2) ?></td>
+            <td><?= number_format($price->clientSelling / $count, 2) ?></td>
+        </tr>
+    <?php endforeach;?>
+    </tbody>
+    <tfoot>
+    <tr>
+        <th>Total</th>
+        <td><?= $priceData->total->tickets?></td>
+        <td><?= number_format($priceData->total->net, 2)?></td>
+        <td><?= number_format($priceData->total->markUp, 2)?></td>
+        <td class="total-markup-<?= $quote->pq_id ?>"><?= number_format($priceData->total->extraMarkUp, 2)?></td>
+        <td><?= number_format($priceData->serviceFeePercent, 2) ?> %</td>
+        <td><?= number_format($priceData->total->serviceFeeSum, 2) ?></td>
+        <td class="total-sellingPrice-<?= $quote->pq_id ?>"><?= number_format($priceData->total->selling, 2)?></td>
+        <td class="total-sellingPrice-<?= $quote->pq_id ?>"><?= number_format($priceData->total->clientSelling, 2)?></td>
+    </tr>
+    </tfoot>
+</table>

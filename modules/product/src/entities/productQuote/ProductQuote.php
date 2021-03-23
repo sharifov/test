@@ -8,6 +8,7 @@ use modules\flight\models\FlightQuote;
 use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
+use modules\order\src\entities\order\events\OrderRecalculateTotalPriceEvent;
 use modules\order\src\entities\order\events\OrderUserProfitUpdateProfitAmountEvent;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
@@ -29,6 +30,7 @@ use sales\dto\product\ProductQuoteDTO;
 use sales\entities\EventTrait;
 use sales\helpers\product\ProductQuoteHelper;
 use sales\entities\serializer\Serializable;
+use sales\services\CurrencyHelper;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -59,6 +61,9 @@ use yii\db\ActiveRecord;
  * @property string|null $pq_updated_dt
  * @property float|null $pq_profit_amount
  * @property int|null $pq_clone_id
+ * @property float|null $pq_app_markup
+ * @property float|null $pq_agent_markup
+ * @property float|null $pq_service_fee_percent
  *
  * @property OfferProduct[] $offerProducts
  * @property Offer[] $opOffers
@@ -120,6 +125,10 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
             ['pq_status_id', 'required'],
             ['pq_status_id', 'integer'],
             ['pq_status_id', 'in', 'range' => array_keys(ProductQuoteStatus::getList())],
+
+            ['pq_app_markup', 'number', /*'min' => 0,*/ 'max' => 99999999],
+            ['pq_agent_markup', 'number', /*'min' => 0,*/ 'max' => 99999999],
+            ['pq_service_fee_percent', 'number', 'min' => 0, 'max' => 9999],
         ];
     }
 
@@ -156,6 +165,9 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
             'pq_clone_id' => 'Clone Id',
             'clone' => 'Clone Id',
             'pq_profit_amount' => 'Profit amount',
+            'pq_app_markup' => 'App markup',
+            'pq_agent_markup' => 'Agent markup',
+            'pq_service_fee_percent' => 'Service fee percent',
         ];
     }
 
@@ -173,11 +185,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
-            'user' => [
-                'class' => BlameableBehavior::class,
-                'createdByAttribute' => 'pq_created_user_id', //'pq_owner_user_id',
-                'updatedByAttribute' => 'pq_updated_user_id',
-            ],
+//            'user' => [
+//                'class' => BlameableBehavior::class,
+//                'createdByAttribute' => 'pq_created_user_id', //'pq_owner_user_id',
+//                'updatedByAttribute' => 'pq_updated_user_id',
+//            ],
         ];
     }
 
@@ -317,6 +329,16 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return new Scopes(static::class);
     }
 
+    public static function findByGid(string $gid)
+    {
+        return self::findOne(['pq_gid' => $gid]);
+    }
+
+    public function applied(): void
+    {
+        $this->pq_status_id = ProductQuoteStatus::APPLIED;
+    }
+
     /**
      * @return float
      */
@@ -326,7 +348,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $options = $this->productQuoteOptions;
         if ($options) {
             foreach ($options as $option) {
-                $sum += $option->pqo_price;
+                $sum += $option->pqo_price + $option->pqo_extra_markup;
             }
             $sum = round($sum, 2);
         }
@@ -375,8 +397,9 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function recalculateProfitAmount(): bool
     {
         $isChanged = false;
-        $profitNew = ProductQuoteHelper::roundPrice($this->profitCalc());
-        $profitOld = ProductQuoteHelper::roundPrice((float) $this->pq_profit_amount);
+//        $profitNew = ProductQuoteHelper::roundPrice($this->profitCalc());
+        $profitNew = $this->pq_app_markup + $this->pq_agent_markup;
+        $profitOld = $this->pq_profit_amount;
 
         if ($profitOld !== $profitNew) {
             $this->pq_profit_amount = $profitNew;
@@ -386,11 +409,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return $isChanged;
     }
 
-    /**
-     * @param ProductQuoteDTO $dto
-     * @return ProductQuote
-     */
-    public static function create(ProductQuoteDTO $dto): ProductQuote
+    public static function create(ProductQuoteDTO $dto, $serviceFeePercent): ProductQuote
     {
         $quote = new self();
 
@@ -411,6 +430,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $quote->pq_owner_user_id = $dto->ownerUserId;
         $quote->pq_created_user_id = $dto->createdUserId;
         $quote->pq_updated_user_id = $dto->updatedUserId;
+        $quote->pq_service_fee_percent = $serviceFeePercent ?? 0;
 
         return $quote;
     }
@@ -488,6 +508,14 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return $this->pq_status_id === ProductQuoteStatus::NEW;
     }
 
+    /**
+     * @return bool
+     */
+    public function isPending(): bool
+    {
+        return $this->pq_status_id === ProductQuoteStatus::PENDING;
+    }
+
     public function isDeclined(): bool
     {
         return $this->pq_status_id === ProductQuoteStatus::DECLINED;
@@ -525,6 +553,16 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function isFlight(): bool
     {
         return $this->pqProduct->isFlight();
+    }
+
+    public function isAttraction(): bool
+    {
+        return $this->pqProduct->isAttraction();
+    }
+
+    public function isRentCar(): bool
+    {
+        return $this->pqProduct->isRenTCar();
     }
 
     /**
@@ -663,7 +701,9 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function setOrderRelation(int $orderId): void
     {
         $this->pq_order_id = $orderId;
-        $this->recordEvent((new OrderRecalculateProfitAmountEvent([$this->pqOrder])));
+        $order = $this->pqOrder;
+        $this->recordEvent(new OrderRecalculateProfitAmountEvent([$order]));
+        $this->recordEvent(new OrderRecalculateTotalPriceEvent($order));
     }
 
     public function isRelatedWithOrder(): bool
@@ -686,5 +726,52 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     {
         $optionsTotalPrice = ProductQuoteOptionsQuery::getTotalSumPriceByQuote($this->pq_id);
         return ProductQuoteHelper::roundPrice((float)$optionsTotalPrice['total_price'] + $this->pq_price);
+    }
+
+    public function isBooked(): bool
+    {
+        return $this->pq_status_id === ProductQuoteStatus::BOOKED;
+    }
+
+    public function isDeletable(): bool
+    {
+        return ProductQuoteStatus::isDeletable($this->pq_status_id);
+    }
+
+    public function isBookable(): bool
+    {
+        return (ProductQuoteStatus::isBookable($this->pq_status_id) && !$this->isBooked());
+    }
+
+    private function calculateServiceFeeSum(): void
+    {
+        $this->pq_service_fee_sum = CurrencyHelper::roundUp(($this->pq_origin_price + $this->pq_app_markup + $this->pq_agent_markup) * ($this->pq_service_fee_percent / 100));
+    }
+
+    private function calculatePrice(): void
+    {
+        $this->pq_price = $this->pq_origin_price + $this->pq_app_markup + $this->pq_agent_markup + $this->pq_service_fee_sum;
+    }
+
+    private function calculateClientPrice(): void
+    {
+        $this->pq_client_price = CurrencyHelper::convertFromBaseCurrency($this->pq_price, $this->pq_client_currency_rate);
+    }
+
+    private function updateProfitAmount(): void
+    {
+        $this->pq_profit_amount = $this->pq_app_markup + $this->pq_agent_markup;
+    }
+
+    public function updatePrices($originPrice, $appMarkup, $agentMarkup): void
+    {
+        $this->pq_origin_price = $originPrice ?? 0;
+        $this->pq_app_markup = $appMarkup ?? 0;
+        $this->pq_agent_markup = $agentMarkup ?? 0;
+
+        $this->calculateServiceFeeSum();
+        $this->calculatePrice();
+        $this->calculateClientPrice();
+        $this->updateProfitAmount();
     }
 }

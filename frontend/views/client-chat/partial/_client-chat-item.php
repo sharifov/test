@@ -1,6 +1,8 @@
 <?php
 
 use common\components\i18n\Formatter;
+use common\models\Employee;
+use sales\auth\Auth;
 use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
@@ -13,14 +15,14 @@ use yii\helpers\StringHelper;
 /** @var $clientChatId int|null */
 /** @var $formatter Formatter */
 /** @var int|null $resetUnreadMessagesChatId */
-/** @var int|null $userId */
+/** @var Employee|null $user */
 ?>
 
 <?php foreach ($clientChats as $clientChat) : ?>
     <?php
         $isClosed = ArrayHelper::isIn((int)$clientChat['cch_status_id'], ClientChat::CLOSED_STATUS_GROUP);
         $isIdle = (int)$clientChat['cch_status_id'] === ClientChat::STATUS_IDLE;
-        $isOwner = $userId === (int)$clientChat['cch_owner_user_id'];
+        $isOwner = $user->getId() === (int)$clientChat['cch_owner_user_id'];
 
         $clientFullName = $clientChat['client_full_name'] ?: ('Client-' . $clientChat['client_id']);
         $unreadMessages = $clientChat['count_unread_messages'] ?: null;
@@ -29,7 +31,15 @@ use yii\helpers\StringHelper;
     }
     ?>
 
-    <div id="dialog-<?= $clientChat['cch_id'] ?>" data-owner-id="<?= $clientChat['cch_owner_user_id'] ?>" class="_cc-list-item <?= $isClosed ? 'cc_closed' : ($isIdle && $isOwner ? 'cc_idle' : '') ?> <?= $clientChatId && $clientChatId === (int)$clientChat['cch_id'] ? '_cc_active' : '' ?>" data-rid="<?= $clientChat['cch_rid'] ?>" data-cch-id="<?= $clientChat['cch_id'] ?>" data-is-closed="<?= (int) $isClosed ?>">
+    <div
+        id="dialog-<?= $clientChat['cch_id'] ?>"
+        data-owner-id="<?= $clientChat['cch_owner_user_id'] ?>"
+        class="_cc-list-item <?= $isClosed ? 'cc_closed' : ($isIdle && $isOwner ? 'cc_idle' : '') ?> <?= $clientChatId && $clientChatId === (int)$clientChat['cch_id'] ? '_cc_active' : '' ?>"
+        data-rid="<?= $clientChat['cch_rid'] ?>"
+        data-cch-id="<?= $clientChat['cch_id'] ?>"
+        data-is-closed="<?= (int) $isClosed ?>"
+        data-is-readonly="<?= (int)ClientChatHelper::isDialogReadOnly($clientChat, Auth::user()) ?>"
+    >
 
         <div class="_cc-item-icon-wrapper">
             <span class="_cc-item-icon-round">

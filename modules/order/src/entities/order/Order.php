@@ -2,23 +2,36 @@
 
 namespace modules\order\src\entities\order;
 
+use common\models\BillingInfo;
+use common\models\Client;
 use common\models\Currency;
 use common\models\Employee;
+use common\models\Project;
 use modules\invoice\src\entities\invoice\Invoice;
 use common\models\Lead;
+use modules\order\src\entities\order\events\OrderCanceledEvent;
+use modules\order\src\entities\order\events\OrderCompletedEvent;
+use modules\order\src\entities\order\events\OrderPaymentPaidEvent;
+use modules\order\src\entities\order\events\OrderPreparedEvent;
 use modules\order\src\entities\order\events\OrderUserProfitUpdateProfitAmountEvent;
+use modules\order\src\entities\order\serializer\OrderSerializer;
 use modules\order\src\entities\orderTips\OrderTips;
 use modules\order\src\entities\orderTipsUserProfit\OrderTipsUserProfit;
 use modules\order\src\entities\orderUserProfit\OrderUserProfit;
+use modules\order\src\events\OrderProcessingEvent;
 use modules\order\src\services\CreateOrderDTO;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\interfaces\ProductDataInterface;
 use sales\entities\EventTrait;
+use sales\entities\serializer\Serializable;
 use sales\helpers\product\ProductQuoteHelper;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "order".
@@ -43,6 +56,7 @@ use yii\db\ActiveRecord;
  * @property string|null $or_created_dt
  * @property string|null $or_updated_dt
  * @property float|null $or_profit_amount
+ * @property array|null $or_request_data
  *
  * @property Currency $orClientCurrency
  * @property Invoice[] $invoices
@@ -56,8 +70,9 @@ use yii\db\ActiveRecord;
  * @property OrderUserProfit[] $orderUserProfit
  * @property OrderTips $orderTips
  * @property OrderTipsUserProfit[] $orderTipsUserProfit
+ * @property BillingInfo[] $billingInfo
  */
-class Order extends ActiveRecord
+class Order extends ActiveRecord implements Serializable, ProductDataInterface
 {
     use EventTrait;
 
@@ -86,6 +101,8 @@ class Order extends ActiveRecord
             [['or_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['or_created_user_id' => 'id']],
             [['or_owner_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['or_owner_user_id' => 'id']],
             [['or_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['or_updated_user_id' => 'id']],
+
+            ['or_request_data', 'safe'],
         ];
     }
 
@@ -113,6 +130,7 @@ class Order extends ActiveRecord
             'or_created_dt' => 'Created Dt',
             'or_updated_dt' => 'Updated Dt',
             'or_profit_amount' => 'Profit amount',
+            'or_request_data' => 'Request Data',
         ];
     }
 
@@ -131,11 +149,11 @@ class Order extends ActiveRecord
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
-            'user' => [
-                'class' => BlameableBehavior::class,
-                'createdByAttribute' => 'or_created_user_id',
-                'updatedByAttribute' => 'or_updated_user_id',
-            ],
+//            'user' => [
+//                'class' => BlameableBehavior::class,
+//                'createdByAttribute' => 'or_created_user_id',
+//                'updatedByAttribute' => 'or_updated_user_id',
+//            ],
         ];
     }
 
@@ -147,15 +165,26 @@ class Order extends ActiveRecord
         $this->or_pay_status_id = $dto->payStatus;
         $this->or_lead_id = $dto->leadId;
         $this->or_name = $this->generateName();
+        $this->or_client_currency = $dto->clientCurrency;
         if ($this->orLead && $this->orLead->employee_id) {
             $this->or_owner_user_id = $this->orLead->employee_id;
         }
         if (!$this->or_name && $this->or_lead_id) {
             $this->or_name = $this->generateName();
         }
-        $this->updateOrderTotalByCurrency();
+
+//        if (isset($dto->requestData['Request']['Card'])) {
+//            unset($dto->requestData['Request']['Card']);
+//        }
+        $this->or_request_data = $dto->requestData;
 
         return $this;
+    }
+
+    public function calculateTotalPrice(): void
+    {
+        $this->or_app_total = $this->orderTotalCalcSum;
+        $this->updateOrderTotalByCurrency();
     }
 
     /**
@@ -209,6 +238,11 @@ class Order extends ActiveRecord
     public function getOrderUserProfit(): ActiveQuery
     {
         return $this->hasMany(OrderUserProfit::class, ['oup_order_id' => 'or_id']);
+    }
+
+    public function getBillingInfo(): ActiveQuery
+    {
+        return $this->hasMany(BillingInfo::class, ['bi_order_id' => 'or_id']);
     }
 
     /**
@@ -292,7 +326,9 @@ class Order extends ActiveRecord
             $this->or_client_currency_rate = (float) $this->orClientCurrency->cur_app_rate;
         }
 
-        $this->or_client_total = round($this->or_app_total * $this->or_client_currency_rate, 2);
+        if ($this->or_app_total && $this->or_client_currency_rate) {
+            $this->or_client_total = round($this->or_app_total * $this->or_client_currency_rate, 2);
+        }
     }
 
     /**
@@ -336,16 +372,17 @@ class Order extends ActiveRecord
 
     public function processing(): void
     {
-        // ToDo: need to log status
-        if (!$this->isProcessing()) {
-            OrderStatus::guard($this->or_status_id, OrderStatus::PROCESSING);
-            foreach ($this->productQuotes as $productQuote) {
-                if (OrderStatus::guardOrder(OrderStatus::PROCESSING, $productQuote->pq_status_id)) {
-                    $this->setStatus(OrderStatus::PROCESSING);
-                    break;
-                }
-            }
-        }
+        $this->or_status_id = OrderStatus::PROCESSING;
+        $this->recordEvent(new OrderProcessingEvent($this));
+//        if (!$this->isProcessing()) {
+//            OrderStatus::guard($this->or_status_id, OrderStatus::PROCESSING);
+//            foreach ($this->productQuotes as $productQuote) {
+//                if (OrderStatus::guardOrder(OrderStatus::PROCESSING, $productQuote->pq_status_id)) {
+//                    $this->setStatus(OrderStatus::PROCESSING);
+//                    break;
+//                }
+//            }
+//        }
     }
 
     private function setStatus(int $status): void
@@ -356,5 +393,117 @@ class Order extends ActiveRecord
         OrderStatus::guard($this->or_status_id, $status);
 
         $this->or_status_id = $status;
+    }
+
+    public function prepare(?string $description, ?int $actionId, ?int $creatorId): void
+    {
+        $startStatus = $this->or_status_id;
+        $this->setStatus(OrderStatus::PREPARED);
+        $this->recordEvent(
+            new OrderPreparedEvent(
+                $this->or_id,
+                $startStatus,
+                $this->or_status_id,
+                $description,
+                $actionId,
+                $this->or_owner_user_id,
+                $creatorId
+            )
+        );
+    }
+
+    public function paymentPaid(\DateTimeImmutable $date): void
+    {
+        if ($this->isPaymentPaid()) {
+            throw new \DomainException('Order payment is already paid. Id: ' . $this->or_id);
+        }
+        $this->or_pay_status_id = OrderPayStatus::PAID;
+        $this->recordEvent(new OrderPaymentPaidEvent($this->or_id, $date->format('Y-m-d H:i:s.u')));
+    }
+
+    public function isPaymentPaid(): bool
+    {
+        return $this->or_pay_status_id === OrderPayStatus::PAID;
+    }
+
+    public function complete(?string $description, ?int $actionId, ?int $creatorId): void
+    {
+        if ($this->isComplete()) {
+            throw new \DomainException('Order is already complete.');
+        }
+        $startStatus = $this->or_status_id;
+        $this->setStatus(OrderStatus::COMPLETE);
+        $this->recordEvent(
+            new OrderCompletedEvent(
+                $this->or_id,
+                $startStatus,
+                $this->or_status_id,
+                $description,
+                $actionId,
+                $this->or_owner_user_id,
+                $creatorId
+            )
+        );
+    }
+
+    public function isComplete(): bool
+    {
+        return $this->or_status_id === OrderStatus::COMPLETE;
+    }
+
+    public function cancel(?string $description, ?int $actionId, ?int $creatorId): void
+    {
+        if ($this->isCanceled()) {
+            throw new \DomainException('Order is already canceled.');
+        }
+        $startStatus = $this->or_status_id;
+        $this->setStatus(OrderStatus::CANCELED);
+        $this->recordEvent(
+            new OrderCanceledEvent(
+                $this->or_id,
+                $startStatus,
+                $this->or_status_id,
+                $description,
+                $actionId,
+                $this->or_owner_user_id,
+                $creatorId
+            )
+        );
+    }
+
+    public function isCanceled(): bool
+    {
+        return $this->or_status_id === OrderStatus::CANCELED;
+    }
+
+    public function serialize(): array
+    {
+        return (new OrderSerializer($this))->getData();
+    }
+
+
+    public function getProject(): Project
+    {
+        return $this->orLead->project;
+    }
+
+    public function getLead(): Lead
+    {
+        return $this->orLead;
+    }
+
+    public function getClient(): Client
+    {
+        return $this->orLead->client;
+    }
+
+    public function getOrder(): ?Order
+    {
+        return $this;
+    }
+
+    public function getId(): int
+    {
+        return $this->or_id;
     }
 }

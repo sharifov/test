@@ -13,9 +13,7 @@ $formId = 'product-update-form';
 $modalId = 'modal-sm';
 
 ?>
-
     <div class="product-form">
-
         <?php
         $form = ActiveForm::begin([
             'id' => $formId,
@@ -40,11 +38,8 @@ $modalId = 'modal-sm';
         </div>
 
         <div class="form-group text-center">
-            <?= Html::submitButton('<i class="fa fa-save"></i> Save', ['class' => 'btn btn-success']) ?>
+            <?= Html::submitButton('<i class="fa fa-save"></i> Save', ['id' => 'update_product_btn', 'class' => 'btn btn-success']) ?>
         </div>
 
         <?php ActiveForm::end(); ?>
-
     </div>
-
-<?php

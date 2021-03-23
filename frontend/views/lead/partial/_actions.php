@@ -851,9 +851,26 @@ $js = <<<JS
     });
     
     
+    $('body').on('click', '.btn-copy-checkout-link', function (e) {
+         if(e.target.getAttribute('data-url')) {
+            copyToClipboard(e.target.getAttribute('data-url'))
+         }
+    });
     
+    $('body').on('click', '.btn-offer-copy-checkout-link', function (e) {
+         if(e.target.getAttribute('data-url')) {
+            copyToClipboard(e.target.getAttribute('data-url'))
+         }
+    });
     
-    
+    function copyToClipboard(text) {
+        let temp = $("<input>");
+        $("body").append(temp);
+        temp.val(text).select();
+        document.execCommand("copy");
+        temp.remove();
+    }
+
 
     //$(document).ready(function() {
     let clipboard = new ClipboardJS('.btn-clipboard');

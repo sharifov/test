@@ -113,4 +113,16 @@ class QuoteSegmentStop extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Airports::class, ['iata' => 'qss_location_code']);
     }
+
+    public static function createFromSearch(array $stopEntry): QuoteSegmentStop
+    {
+        $stop = new self();
+        $stop->qss_location_code = $stopEntry['locationCode'] ?? null;
+        $stop->qss_departure_dt = $stopEntry['departureDateTime'] ?? null;
+        $stop->qss_arrival_dt = $stopEntry['arrivalDateTime'] ?? null;
+        $stop->qss_duration = $stopEntry['duration'] ?? null;
+        $stop->qss_elapsed_time = $stopEntry['elapsedTime'] ?? null;
+        $stop->qss_equipment = $stopEntry['equipment'] ?? null;
+        return $stop;
+    }
 }

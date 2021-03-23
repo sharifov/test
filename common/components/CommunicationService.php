@@ -9,7 +9,6 @@
 
 namespace common\components;
 
-use modules\attraction\models\Attraction;
 use sales\helpers\setting\SettingHelper;
 use sales\model\call\useCase\conference\create\CreateCallForm;
 use Yii;
@@ -1218,51 +1217,26 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return SettingHelper::isCallRecordingSecurityEnabled() ? (Url::toRoute([$this->securityConferenceRecordingUrl, 'conferenceSid' => $conferenceSid])) : ($this->recordingUrl . $recordingSid);
     }
 
-    public function getAttractionQuotes(Attraction $attraction): array
+    public function getContent(string $key, array $contentData = [], string $languageId = 'en-US'): array
     {
-        $out = ['error' => false, 'data' => []];
-
+        $out = ['error' => false, 'content' => ''];
         $data = [
-            'date_from' => $attraction->atn_date_from,
-            'date_to' => $attraction->atn_date_to,
-            'destination' => $attraction->atn_destination,
+            'key' => $key,
+            'content_data' => $contentData,
+            'language_id' => $languageId,
         ];
-
-//        VarDumper::dump($data);die;
-
-        $response = $this->sendRequest('product/attraction-search', $data);
+        $response = $this->sendRequest('content/get', $data);
 
         if ($response->isOk) {
-            if (isset($response->data['data'])) {
-                $out['data'] = $response->data['data']['activitySearch'];
+            if (isset($response->data['data']['content'])) {
+                $out['content'] = $response->data['data']['content'];
             } else {
-                $out['error'] = 'Not found in response array data key [data]';
+                $out['error'] = 'Not found in response array data key [data][content]';
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::attractionQuotes');
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::mailPreview');
         }
-
-        return $out;
-    }
-
-    public function cruiseSearch($data): array
-    {
-        $out = ['error' => false, 'data' => []];
-
-        $response = $this->sendRequest('product/cruise-search', $data);
-
-        if ($response->isOk) {
-            if (isset($response->data['data']['cruises'])) {
-                $out['data'] = $response->data['data']['cruises'];
-            } else {
-                $out['error'] = 'Not found in response array data key [data][cruises]';
-            }
-        } else {
-            $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error']), 'Component:CommunicationService::cruiseSearch');
-        }
-
         return $out;
     }
 }

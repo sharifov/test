@@ -10,6 +10,7 @@
 use modules\hotel\models\Hotel;
 use yii\data\ArrayDataProvider;
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\web\View;
 
 $quoteRooms = $dataRoom['rates'];
@@ -40,17 +41,27 @@ $quoteExist = $hotelSearch->quoteExist($dataRoom['groupKey']);
   <tbody>
     <?php foreach ($quoteRooms as $quoteRoomKey => $quoteRoom) : ?>
     <tr id="tr-hotel-quote-<?=($dataRoom['groupKey'])?>" class="tr-hotel-quote-<?=($dataRoom['groupKey'])?> <?= $quoteExist ? 'bg-success' : '' ?>">
-      <th><?= $quoteRoomKey + 1 ?></th>
+      <th><?php echo $quoteRoomKey + 1 ?></th>
       <td>
         <div><?= Html::encode($quoteRoom['name']) ?></div>
-<!--        <div><small class="text-secondary">Non-Smoking, High Speed Internet Access, Coffee Maker, Hairdryer, Iron And Ironing Boa</small></div>-->
       </td>
       <td><span class="badge badge-secondary"><?= Html::encode($quoteRoom['boardName']) ?></span></td>
       <td>
         <span class="ml-2"><i class="fa fa-user"></i> <?=(Html::encode($quoteRoom['adults'] ?? 0))?></span>
         <span class="ml-2"><i class="fa fa-child"></i> <?=(Html::encode($quoteRoom['children'] ?? 0))?></span>
       </td>
-      <td colspan="2">$<?=number_format(Html::encode($quoteRoom['amount'] - ($quoteRoom['markup'] ?? 0)), 2)?></td>
+      <td>$<?=number_format(Html::encode($quoteRoom['amount']), 2)?></td>
+      <td class="text-right">
+        <?php echo $quoteRoom['type'] ?>
+        <?php if ($quoteRoom['type'] === 'RECHECK') : ?>
+            <br />
+            <?= Html::a('<i class="fa fa-angle-double-right"></i> Check Rate', null, [
+              'data-url' => Url::to(['/hotel/hotel-quote/check-rate']),
+              'data-hotel-id' => $hotelSearch->ph_id,
+              'data-room-key' => $quoteRoom['key'],
+              'class' => 'btn js-btn-check-rate-hotel']) ?>
+        <?php endif ?>
+      </td>
     </tr>
     <?php endforeach; ?>
   </tbody>

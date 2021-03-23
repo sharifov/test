@@ -163,15 +163,16 @@ $chevronClass = $pjaxRequest ? 'fa fa-chevron-up' : 'fa fa-chevron-down'
                                 'class' => 'dropdown-item text-warning btn-update-product',
                                 'data-product-id' => $product->pr_id,
                             ]) ?>
-                            <?= Html::a(
-                                '<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete Flight',
-                                null,
-                                [
-                                    'class' => 'dropdown-item text-danger btn-delete-product',
-                                    'data-product-id' => $product->pr_id
-                                ]
-                            ) ?>
-
+                            <?php if ($product->isDeletable()) : ?>
+                                <?= Html::a(
+                                    '<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete Flight',
+                                    null,
+                                    [
+                                        'class' => 'dropdown-item text-danger btn-delete-product',
+                                        'data-product-id' => $product->pr_id
+                                    ]
+                                ) ?>
+                            <?php endif ?>
                         </div>
                     </li>
                 <?php //php endif; ?>

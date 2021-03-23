@@ -42,7 +42,7 @@ if ($listParams['isFullList']) {
                 'clientChatId' => $clientChatId,
                 'formatter' => $formatter,
                 'resetUnreadMessagesChatId' => $resetUnreadMessagesChatId,
-                'userId' => Auth::id(),
+                'user' => Auth::user(),
             ]); ?>
         <?php endif; ?>
     </div>

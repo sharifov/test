@@ -57,6 +57,8 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
 {
     use EventTrait;
 
+    public const CHECKOUT_URL_PAGE = 'offer';
+
     public function isSent(): bool
     {
         return $this->lastSendLog ? true : false;
@@ -158,6 +160,12 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
         $this->of_gid = self::generateGid();
         $this->of_uid = self::generateUid();
         $this->of_status_id = OfferStatus::NEW;
+    }
+
+    public function calculateTotalPrice(): void
+    {
+        $this->of_app_total = $this->offerTotalCalcSum;
+        $this->updateOfferTotalByCurrency();
     }
 
     /**
@@ -288,7 +296,7 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
         if ($offerProducts) {
             foreach ($offerProducts as $offerProduct) {
                 if ($quote = $offerProduct->opProductQuote) {
-                    $sum += $quote->totalCalcSum + $quote->pq_service_fee_sum;
+                    $sum += $quote->totalCalcSum;
                 }
             }
             $sum = round($sum, 2);
@@ -341,5 +349,14 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
             $changed = true;
         }
         return $changed;
+    }
+    public function getCheckoutUrlPage(): string
+    {
+        $url = '#';
+        if ($this->ofLead && $this->ofLead->project && $this->ofLead->project->link) {
+            $url = $this->ofLead->project->link . '/' . self::CHECKOUT_URL_PAGE . '/' . $this->of_gid;
+        }
+
+        return $url;
     }
 }

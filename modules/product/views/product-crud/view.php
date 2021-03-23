@@ -31,6 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'pr_id',
+            'pr_gid',
             'pr_type_id:productType',
             'pr_name',
             [

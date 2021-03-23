@@ -21,6 +21,7 @@ class ProductSerializer extends Serializer
     {
         return [
             //'pr_id',
+            'pr_gid',
             'pr_type_id',
             'pr_name',
             'pr_lead_id',
@@ -36,6 +37,11 @@ class ProductSerializer extends Serializer
 
     public function getData(): array
     {
-        return $this->toArray();
+        $data = $this->toArray();
+        $data['holder'] = [];
+        if ($holder = $this->model->holder) {
+            $data['holder'] = $holder->serialize();
+        }
+        return $data;
     }
 }

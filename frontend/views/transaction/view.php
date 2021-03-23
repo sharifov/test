@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Transaction;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -33,10 +34,16 @@ $this->params['breadcrumbs'][] = $this->title;
             'tr_code',
             'tr_invoice_id',
             'tr_payment_id',
-            'tr_type_id',
+            [
+                'attribute' => 'tr_type_id',
+                'value' => static function (Transaction $model) {
+                    return Transaction::getTypeName($model->tr_type_id);
+                },
+            ],
             'tr_date',
             'tr_amount',
             'tr_currency',
+            'tr_comment',
             'tr_created_dt',
         ],
     ]) ?>

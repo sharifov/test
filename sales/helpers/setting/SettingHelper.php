@@ -115,4 +115,29 @@ class SettingHelper
     {
         return (bool)(\Yii::$app->params['settings']['enable_general_line_priority'] ?? false);
     }
+
+    public static function getFlightQuoteAutoSelectCount(): int
+    {
+        return (int)(Yii::$app->params['settings']['flight_quote_auto_select_count'] ?? 3);
+    }
+
+    public static function clientDataPrivacyEnable(): bool
+    {
+        return (bool)(\Yii::$app->params['settings']['client_data_privacy_enabled'] ?? false);
+    }
+
+    public static function orderAutoProcessingEnable(): bool
+    {
+        return (bool)(\Yii::$app->params['settings']['order_auto_processing_enable'] ?? false);
+    }
+
+    public static function isAllowToUseGeneralLinePhones(): bool
+    {
+        return (bool)(\Yii::$app->params['settings']['allow_to_use_general_line_phones'] ?? false);
+    }
+
+    public static function isEnabledClientChatJob(): bool
+    {
+        return (bool)(Yii::$app->params['settings']['enable_client_chat_job'] ?? false);
+    }
 }

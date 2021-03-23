@@ -55,7 +55,7 @@ class HotelQuoteCheckRateService
      * @throws \Throwable
      * @throws \yii\base\InvalidConfigException
      */
-    public function checkRate(HotelQuote $model): self
+    public function checkRateByHotelQuote(HotelQuote $model): self
     {
         $hotel = HotelQuoteCheckRateGuard::hotel($model);
         $hotelQuoteRooms = HotelQuoteCheckRateGuard::hotelQuoteRooms($model);
@@ -96,7 +96,7 @@ class HotelQuoteCheckRateService
                 }
             } elseif (!empty($apiResponse['data']['rateComments'])) {
                 HotelQuoteRoom::updateAll(
-                    ['hqr_rate_comments' => strip_tags($apiResponse['data']['rateComments'])],
+                    ['hqr_rate_comments' => HotelQuoteRoom::cleanRateComments($apiResponse['data']['rateComments'])],
                     ['hqr_hotel_quote_id' => $model->hq_id]
                 );
             }
@@ -116,5 +116,20 @@ class HotelQuoteCheckRateService
             ->saveChanges();
 
         return $this;
+    }
+
+    /**
+     * @param string $checkIn
+     * @param array $roomData
+     * @return array
+     */
+    public function checkRateRoom(string $checkIn, array $roomData): array
+    {
+        $room[] = $roomData;
+        $params = [
+            'checkIn' => $checkIn,
+            'rooms' => $room,
+        ];
+        return $this->apiService->requestBookingHandler('booking/checkrate', $params);
     }
 }

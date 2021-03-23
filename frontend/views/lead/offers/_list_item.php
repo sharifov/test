@@ -70,6 +70,20 @@ use yii\bootstrap4\Html;
                         'data-url' => \yii\helpers\Url::to(['/offer/offer-view-log/show', 'gid' => $offer->of_gid]),
                         'data-gid' => $offer->of_gid,
                     ]) ?>
+
+                    <?php  echo Html::a('<i class="fa fa-eye"></i> Checkout Page', $offer->getCheckoutUrlPage(), [
+                        'class' => 'dropdown-item',
+                        'target'    => '_blank',
+                        'title'     => 'View checkout',
+                        'data-pjax' => 0
+                    ]) ?>
+
+                    <?= Html::a('<i class="fa fa-camera"></i> Copy Checkout Link', null, [
+                        'class' => 'btn-offer-copy-checkout-link dropdown-item',
+                        'data-url' => $offer->getCheckoutUrlPage(),
+                        'title' => 'Copy To Clipboard'
+                    ]) ?>
+
                 </div>
             </li>
         </ul>
@@ -104,10 +118,10 @@ use yii\bootstrap4\Html;
                 <?php foreach ($offer->offerProducts as $product) :
                         $quote = $product->opProductQuote;
                         $originTotalPrice += $quote->pq_price;
-                        $clientTotalPrice += $quote->pq_client_price;
-                        //$clientTotalPrice += ProductQuoteHelper::calcClientPrice($quote->pq_client_price, $quote->pqProduct);
+                        $clientTotalPrice += ProductQuoteHelper::calcClientPrice($quote->pq_client_price * $offer->of_client_currency_rate, $quote->pqProduct);
                         $optionTotalPrice += $quote->optionAmountSum;
                         $totalFee += $quote->pq_service_fee_sum;
+//                        $clientTotalPrice += ($quote->pq_price + $optionTotalPrice + $totalFee);
                     ?>
                     <tr>
                         <td title="Product Quote ID: <?=Html::encode($quote->pq_id)?>"><?= $nr++ ?></td>
@@ -126,7 +140,7 @@ use yii\bootstrap4\Html;
                         <td class="text-right"><?=number_format($quote->optionAmountSum, 2)?></td>
                         <td class="text-right"><?=number_format($quote->pq_service_fee_sum, 2)?></td>
                         <td class="text-right"><?=number_format($quote->pq_price, 2)?></td>
-                        <td class="text-right"><?=number_format($quote->pq_client_price, 2)?> <?=Html::encode($quote->pq_client_currency)?></td>
+                        <td class="text-right"><?=number_format($quote->pq_price * $offer->of_client_currency_rate, 2)?> <?=Html::encode($offer->of_client_currency)?></td>
                         <td>
                             <?php
                               echo Html::a('<i class="glyphicon glyphicon-remove-circle text-danger" title="Remove"></i>', null, [
@@ -150,8 +164,9 @@ use yii\bootstrap4\Html;
                 <tr>
                     <th class="text-right" colspan="5">Total: </th>
                     <td class="text-right" colspan="2">(price + opt)</td>
-                    <th class="text-right"><?=number_format($originTotalPrice + $optionTotalPrice, 2)?></th>
-                    <th class="text-right"><?=number_format($clientTotalPrice, 2)?> <?=Html::encode($offer->of_client_currency)?></th>
+                    <?php /* <th class="text-right"><?=number_format($originTotalPrice + $optionTotalPrice, 2)?></th> */ ?>
+                    <th class="text-right"><?=number_format($offer->of_app_total, 2)?></th>
+                    <th class="text-right"><?=number_format($offer->of_client_total, 2)?> <?=Html::encode($offer->of_client_currency)?></th>
                     <th></th>
                 </tr>
             <?php endif; ?>
@@ -166,9 +181,9 @@ use yii\bootstrap4\Html;
             <?php $clientTotal = '' ?>
             <?php if (isset($clientTotalPrice) && !empty($offer->of_client_currency)) : ?>
                 <?php $clientCurrency = $offer->of_client_currency ?: 'USD' ?>
-                <?php $clientTotal = ', Client Total: <b>' . number_format($clientTotalPrice, 2) . ' ' . Html::encode($clientCurrency) . '</b>' ?>
+                <?php $clientTotal = ', Client Total: <b>' . number_format($offer->of_client_total, 2) . ' ' . Html::encode($clientCurrency) . '</b>' ?>
             <?php endif ?>
-            <h4>Total: <b><?=number_format($offer->offerTotalCalcSum, 2)?> USD</b><?php echo $clientTotal ?></h4>
+            <h4>Total: <b><?=number_format($offer->of_app_total, 2)?> USD</b><?php echo $clientTotal ?></h4>
         </div>
 
 

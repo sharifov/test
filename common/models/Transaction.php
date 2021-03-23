@@ -17,6 +17,7 @@ use Yii;
  * @property float $tr_amount
  * @property string|null $tr_currency
  * @property string|null $tr_created_dt
+ * @property string|null $tr_comment
  *
  * @property Currency $trCurrency
  * @property Invoice $trInvoice
@@ -24,6 +25,16 @@ use Yii;
  */
 class Transaction extends \yii\db\ActiveRecord
 {
+    public const TYPE_AUTHORIZATION = 1;
+    public const TYPE_CAPTURE = 2;
+    public const TYPE_REFUND = 3;
+
+    public const TYPE_LIST = [
+        self::TYPE_AUTHORIZATION => 'Authorized',
+        self::TYPE_CAPTURE => 'Capture',
+        self::TYPE_REFUND => 'Refund'
+    ];
+
     /**
      * {@inheritdoc}
      */
@@ -47,6 +58,8 @@ class Transaction extends \yii\db\ActiveRecord
             [['tr_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['tr_currency' => 'cur_code']],
             [['tr_invoice_id'], 'exist', 'skipOnError' => true, 'targetClass' => Invoice::class, 'targetAttribute' => ['tr_invoice_id' => 'inv_id']],
             [['tr_payment_id'], 'exist', 'skipOnError' => true, 'targetClass' => Payment::class, 'targetAttribute' => ['tr_payment_id' => 'pay_id']],
+
+            ['tr_comment', 'string', 'max' => 255],
         ];
     }
 
@@ -65,6 +78,7 @@ class Transaction extends \yii\db\ActiveRecord
             'tr_amount' => 'Amount',
             'tr_currency' => 'Currency',
             'tr_created_dt' => 'Created Dt',
+            'tr_comment' => 'Comment',
         ];
     }
 
@@ -99,5 +113,15 @@ class Transaction extends \yii\db\ActiveRecord
     public static function find()
     {
         return new \common\models\query\TransactionQuery(static::class);
+    }
+
+    public static function getTypeList(): array
+    {
+        return self::TYPE_LIST;
+    }
+
+    public static function getTypeName(?int $type): ?string
+    {
+        return self::getTypeList()[$type] ?? null;
     }
 }

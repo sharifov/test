@@ -3,9 +3,11 @@
 namespace modules\product\src\entities\productOption;
 
 use common\models\Employee;
+use modules\product\src\entities\productOption\serializer\ProductOptionSerializer;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productType\ProductType;
 use sales\entities\EventTrait;
+use sales\entities\serializer\Serializable;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -34,7 +36,7 @@ use yii\db\ActiveRecord;
  * @property Employee $poUpdatedUser
  * @property ProductQuoteOption[] $productQuoteOptions
  */
-class ProductOption extends ActiveRecord
+class ProductOption extends ActiveRecord implements Serializable
 {
     use EventTrait;
 
@@ -148,5 +150,10 @@ class ProductOption extends ActiveRecord
     public static function find(): Scopes
     {
         return new Scopes(static::class);
+    }
+
+    public function serialize(): array
+    {
+        return (new ProductOptionSerializer($this))->getData();
     }
 }

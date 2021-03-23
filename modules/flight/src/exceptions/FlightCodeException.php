@@ -27,4 +27,7 @@ class FlightCodeException
     public const FLIGHT_QUOTE_TRIP_REMOVE = Module::FLIGHT . 601;
 
     public const FLIGHT_QUOTE_SEGMENT_PAX_BAGGAGE_REMOVE = Module::FLIGHT . 700;
+
+    public const API_TICKET_FLIGHT_NOT_FOUND_DATA_ON_REQUEST = Module::FLIGHT . 800;
+    public const API_TICKET_FLIGHT_VALIDATE = Module::FLIGHT . 801;
 }

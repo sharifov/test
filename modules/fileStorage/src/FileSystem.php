@@ -35,6 +35,17 @@ class FileSystem
 
     /**
      * @param string $location
+     * @param $contents
+     * @param array $config
+     * @throws \League\Flysystem\FilesystemException
+     */
+    public function write(string $location, $contents, array $config = []): void
+    {
+        $this->filesystemOperator->write($location, $contents, array_merge($this->configurator->getUploadConfig(), $config));
+    }
+
+    /**
+     * @param string $location
      * @return resource
      * @throws \League\Flysystem\FilesystemException
      */

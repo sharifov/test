@@ -7,6 +7,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use sales\entities\cases\Cases;
 use yii\widgets\Pjax;
+use common\models\Language;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\entities\cases\CasesQSearch */
@@ -90,6 +91,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function (Cases $model) {
                     return $model->getClientTime();
                 },
+            ],
+            [
+                'attribute' => 'client_locale',
+                'value' => 'client.cl_locale',
+                'filter' => Language::getLocaleList(false)
             ],
             [
                 'header' => 'Agent',

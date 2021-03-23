@@ -72,11 +72,11 @@ class OrderUserProfit extends \yii\db\ActiveRecord
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
-            'user' => [
-                'class' => BlameableBehavior::class,
-                'createdByAttribute' => 'oup_created_user_id',
-                'updatedByAttribute' => 'oup_updated_user_id',
-            ],
+//            'user' => [
+//                'class' => BlameableBehavior::class,
+//                'createdByAttribute' => 'oup_created_user_id',
+//                'updatedByAttribute' => 'oup_updated_user_id',
+//            ],
         ];
     }
 
@@ -180,7 +180,7 @@ class OrderUserProfit extends \yii\db\ActiveRecord
         }
     }
 
-    public function create(int $orderId, int $userId, int $percent = null, float $amount = null): self
+    public function create(int $orderId, ?int $userId, int $percent = null, float $amount = null): self
     {
         $this->oup_order_id = $orderId;
         $this->oup_user_id = $userId;

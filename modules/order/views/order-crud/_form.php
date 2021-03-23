@@ -1,12 +1,14 @@
 <?php
 
 use common\models\Currency;
+use kdn\yii2\JsonEditor;
 use modules\order\src\entities\order\OrderPayStatus;
 use modules\order\src\entities\order\OrderStatus;
 use sales\access\ListsAccess;
 use sales\auth\Auth;
 use sales\widgets\DateTimePicker;
 use yii\helpers\Html;
+use yii\helpers\Json;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
@@ -18,10 +20,8 @@ $list = (new ListsAccess(Auth::id()));
 ?>
 
 <div class="order-form">
-
+    <?php $form = ActiveForm::begin(); ?>
     <div class="col-md-4">
-
-        <?php $form = ActiveForm::begin(); ?>
 
         <?= $form->field($model, 'or_gid')->textInput(['maxlength' => true]) ?>
 
@@ -60,8 +60,28 @@ $list = (new ListsAccess(Auth::id()));
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
         </div>
-
-        <?php ActiveForm::end(); ?>
     </div>
 
+    <div class="col-md-6">
+        <?php
+
+        $model->or_request_data = \frontend\helpers\JsonHelper::encode($model->or_request_data);
+
+        try {
+            echo $form->field($model, 'or_request_data')->widget(
+                \kdn\yii2\JsonEditor::class,
+                [
+                    'clientOptions' => [
+                        'modes' => ['code', 'form', 'tree', 'view'],
+                        'mode' => 'form'
+                    ],
+                    'expandAll' => ['tree', 'form'],
+                ]
+            );
+        } catch (Exception $exception) {
+            echo Html::textarea($model->formName() . '[or_request_data]', Json::encode($model->or_request_data), ['class' => 'form-control']);
+        }
+        ?>
+    </div>
+    <?php ActiveForm::end(); ?>
 </div>

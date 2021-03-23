@@ -5,7 +5,9 @@ use kartik\editable\Editable;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
+use sales\auth\Auth;
 use yii\data\ArrayDataProvider;
+use yii\helpers\Inflector;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\helpers\Html;
@@ -78,7 +80,7 @@ JS;
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-bars text-warning"></i></a>
                 <div class="dropdown-menu" role="menu">
-                    <h6 class="dropdown-header">Quote Q<?=($modelQuote->rcq_product_quote_id)?></h6>
+                    <h6 title="RCQuoteID: <?php echo $modelQuote->rcq_id ?>" class="dropdown-header">Quote Q<?=($modelQuote->rcq_product_quote_id)?></h6>
 
                     <?= Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
                         'class' => 'dropdown-item text-success btn-add-product-quote-option',
@@ -90,6 +92,32 @@ JS;
                         'data-url' => Url::to(['/product/product-quote-status-log/show', 'gid' => $modelQuote->rcqProductQuote->pq_gid]),
                         'data-gid' => $modelQuote->rcqProductQuote->pq_gid,
                     ]) ?>
+
+                    <?php if ($modelQuote->isBookable() && Auth::can('/rent-car/rent-car-quote/book')) : ?>
+                        <?php echo Html::a('<i class="fa fa-share-square"></i> Book', null, [
+                            'class' => 'dropdown-item js-btn-book-rent-car',
+                            'data-url' => Url::to('/rent-car/rent-car-quote/book'),
+                            'data-rent-car-quote-id' => $modelQuote->rcq_id,
+                            'data-product-id' => $modelQuote->rcqProductQuote->pq_product_id,
+                        ]) ?>
+                    <?php endif ?>
+                    <?php if ($modelQuote->rcqProductQuote->isBooked() && Auth::can('/rent-car/rent-car-quote/file-generate')) : ?>
+                        <?php echo Html::a('<i class="fa fa-file-pdf-o"></i> Generate PDF', null, [
+                            'class' => 'dropdown-item js-btn-generate-pdf-rent-car',
+                            'data-url' => Url::to('/rent-car/rent-car-quote/file-generate'),
+                            'data-rent-car-quote-id' => $modelQuote->rcq_id,
+                            'data-product-id' => $modelQuote->rcqProductQuote->pq_product_id,
+                        ]) ?>
+                    <?php endif ?>
+
+                    <?php if ($modelQuote->rcqProductQuote->isBooked() && Auth::can('/rent-car/rent-car-quote/cancel-book')) : ?>
+                        <?php echo Html::a('<i class="fa fa-share-square"></i> Cancel Book', null, [
+                            'class' => 'dropdown-item js-btn-cancel-book-rent-car',
+                            'data-url' => Url::to('/rent-car/rent-car-quote/cancel-book'),
+                            'data-rent-car-quote-id' => $modelQuote->rcq_id,
+                            'data-product-id' => $modelQuote->rcqProductQuote->pq_product_id,
+                        ]) ?>
+                    <?php endif ?>
 
                     <div class="dropdown-divider"></div>
                     <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [
@@ -160,23 +188,9 @@ JS;
                                 }
                                 $resultOption = '';
                                 foreach ($model->rcq_options as $key => $option) {
-                                    $resultOption .= ucfirst($key) . ' : <b>' . $option . '</b><br />';
+                                    $resultOption .= Inflector::humanize($key) . ' : <b>' . $option . '</b><br />';
                                 }
                                 return $resultOption;
-                            },
-                            'format' => 'raw',
-                        ],
-                        [
-                            'attribute' => 'rcq_advantages',
-                            'value' => static function (RentCarQuote $model) {
-                                if (!$model->rcq_advantages) {
-                                    return Yii::$app->formatter->nullDisplay;
-                                }
-                                $result = '';
-                                foreach ($model->rcq_advantages as $key => $advantage) {
-                                    $result .= '<span class="text-success">' . $advantage . '</span><br />';
-                                }
-                                return $result;
                             },
                             'format' => 'raw',
                         ],
@@ -187,7 +201,6 @@ JS;
 
         <div class="row box-rc-prices">
             <div class="col-md-12">
-
                 <?php Pjax::begin(['id' => 'pjax-quote_prices-' . $modelQuote->getId(), 'enablePushState' => false, 'enableReplaceState' => false]); ?>
                     <?= $this->render('_quote_prices', [
                         'rentCarQuote' => $modelQuote,
@@ -196,15 +209,12 @@ JS;
 
                     <?= $this->render('@frontend/views/lead/quotes/partial/_quote_option_list', ['productQuote' => $modelQuote->rcqProductQuote]) ?>
                     <?= $this->render('@frontend/views/lead/quotes/partial/_quote_total', ['productQuote' => $modelQuote->rcqProductQuote]) ?>
-
                 <?php Pjax::end(); ?>
-
             </div>
         </div>
 
-        <i class="fa fa-user"></i> <?=$modelQuote->rcqProductQuote->pqCreatedUser ? Html::encode($modelQuote->rcqProductQuote->pqCreatedUser->username) : '-'?>,
+        <i class="fa fa-user"></i> <?=$modelQuote->rcqProductQuote->pqOwnerUser ? Html::encode($modelQuote->rcqProductQuote->pqOwnerUser->username) : '-'?>,
         <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($modelQuote->rcqProductQuote->pq_created_dt)) ?>
-
     </div>
 </div>
     <?php Pjax::end(); ?>

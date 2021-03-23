@@ -40,14 +40,40 @@ class RentCarQuoteDto
         $model->rcq_vendor_logo_url = RentCarDataParser::getVendorLogo($data);
         $model->rcq_vendor_name = RentCarDataParser::getVendorName($data);
         $model->rcq_request_hash_key = $rentCar->prc_request_hash_key;
+        $model->rcq_car_reference_id = RentCarDataParser::getCarReferenceId($data);
 
-        $model->rcq_price_per_day = RentCarDataParser::getPricePerDay($data);
-        $model->rcq_days = $rentCar->calculateDays();
+        $days = RentCarDataParser::getNumRentalDays($data);
+        $totalPrice = RentCarDataParser::getTotalPrice($data);
+        $pricePerDay = $totalPrice / $days;
+
+        $model->rcq_price_per_day = round($pricePerDay, 2);
+        $model->rcq_days = $days;
         $model->rcq_system_mark_up = 0; // not data
         $model->rcq_agent_mark_up = 0; // not data
-        $model->rcq_service_fee_percent =
-            ProductTypePaymentMethodQuery::getDefaultPercentFeeByProductType(ProductType::PRODUCT_RENT_CAR) ??
-            Yii::$app->params['settings']['quote_service_fee_percent'];
+
+        $paymentFee = ProductTypePaymentMethodQuery::getDefaultPercentFeeByProductType(ProductType::PRODUCT_RENT_CAR);
+        if ($paymentFee) {
+            $model->rcq_service_fee_percent = $paymentFee;
+        } else {
+            $productTypeServiceFee = 0;
+            $productType = ProductType::find()->select(['pt_service_fee_percent'])->byRentCar()->asArray()->one();
+            if ($productType && $productType['pt_service_fee_percent']) {
+                $productTypeServiceFee = $productType['pt_service_fee_percent'];
+            }
+            $model->rcq_service_fee_percent = $productTypeServiceFee;
+        }
+
+        $model->rcq_created_dt = date('Y-m-d H:i:s');
+        if ($rentCar->prc_pick_up_date && $rentCar->prc_pick_up_time) {
+            $model->rcq_pick_up_dt =
+                date('Y-m-d H:i:s', strtotime($rentCar->prc_pick_up_date . ' ' . $rentCar->prc_pick_up_time));
+        }
+        if ($rentCar->prc_drop_off_date && $rentCar->prc_drop_off_time) {
+            $model->rcq_drop_off_dt =
+                date('Y-m-d H:i:s', strtotime($rentCar->prc_drop_off_date . ' ' . $rentCar->prc_drop_off_time));
+        }
+        $model->rcq_pick_up_location = RentCarDataParser::getPickUpLocation($data);
+        $model->rcq_drop_of_location = RentCarDataParser::getDropOffLocation($data);
 
         return $model;
     }

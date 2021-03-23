@@ -70,6 +70,94 @@ $statusLogUrl = \yii\helpers\Url::to(['/flight/flight-quote/quote-status-log']);
 // Menu details
 
 $js = <<<JS
+
+    $('body').off('click', '.js-btn-book-flight-quote').on('click', '.js-btn-book-flight-quote', function (e) {
+
+        if(!confirm('Are you sure you want to book flight quote?')) {
+            return false;
+        }
+
+        e.preventDefault();
+        $('#preloader').removeClass('d-none');
+        let quoteId = $(this).data('flight-quote-id');
+        let productId = $(this).data('product-id');
+        
+        $.ajax({
+          url: $(this).data('url'),
+          type: 'post',
+          data: {id: quoteId},
+          cache: false,
+          dataType: 'json',
+        }).done(function(data) {
+            if (parseInt(data.status) === 1) {
+                new PNotify({
+                    title: 'The quote was successfully booking',
+                    type: 'success',
+                    text: data.message,
+                    hide: true
+                });
+                pjaxReload({container: '#pjax-product-quote-list-' + productId});
+                addFileToFileStorageList();                
+            } else {
+                new PNotify({
+                    title: 'Booking failed',
+                    type: 'error',
+                    text: data.message,
+                    hide: true
+                });
+                pjaxReload({
+                    container: '#pjax-product-quote-list-' + productId
+                });
+            }
+        })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        }).always(function() {
+            $('#preloader').addClass('d-none');
+        });
+    });
+    
+    $('body').off('click', '.js-btn-generate-pdf-flight-quote').on('click', '.js-btn-generate-pdf-flight-quote', function (e) {
+
+        if(!confirm('Are you sure you want to generate documents?')) {
+            return false;
+        }
+
+        e.preventDefault();
+        $('#preloader').removeClass('d-none');
+        let quoteId = $(this).data('flight-quote-id');
+                
+        $.ajax({
+          url: $(this).data('url'),
+          type: 'post',
+          data: {id: quoteId},
+          cache: false,
+          dataType: 'json',
+        }).done(function(data) {
+            if (parseInt(data.status) === 1) {
+                new PNotify({
+                    title: 'Document have been successfully generated',
+                    type: 'success',
+                    text: data.message,
+                    hide: true
+                });                
+                addFileToFileStorageList();                
+            } else {
+                new PNotify({
+                    title: 'File generated failed',
+                    type: 'error',
+                    text: data.message,
+                    hide: true
+                });                
+            }
+        })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        }).always(function() {
+            $('#preloader').addClass('d-none');
+        });
+    });
+
     $('body').on('click','.btn-flight-quote-details', function (e) {
         e.preventDefault();
         let url = $(this).data('url');
@@ -100,23 +188,3 @@ $js = <<<JS
     $('[data-toggle="tooltip"]').tooltip({html:true});
 JS;
 $this->registerJs($js);
-
-//$js = <<<JS
-// $('.flight_quote_drop_down_menu').on('click', '.flight-quote-view-status-log', function(e){
-//        e.preventDefault();
-//        $('#preloader').removeClass('hidden');
-//        let modal = $('#modal-df');
-//        $('#modal-df-label').html('Quote Status Log');
-//        modal.find('.modal-body').html('');
-//        let id = $(this).attr('data-id');
-//        modal.find('.modal-body').load('$statusLogUrl?quoteId='+id, function( response, status, xhr ) {
-//            if (status == 'error') {
-//                alert(response);
-//            } else {
-//                $('#preloader').addClass('hidden');
-//                modal.modal('show');
-//            }
-//        });
-//    });
-//JS;
-//$this->registerJs($js);

@@ -7,5 +7,8 @@ namespace modules\order\src\entities\order;
  */
 class Scopes extends \yii\db\ActiveQuery
 {
-
+    public function byGid(string $gid): Scopes
+    {
+        return $this->andWhere(['or_gid' => $gid]);
+    }
 }

@@ -2,13 +2,13 @@
 
 namespace modules\attraction;
 
-use modules\flight\components\api\ApiFlightService;
+use modules\attraction\components\ApiAttractionService;
 use yii\helpers\ArrayHelper;
 
 /**
- * hotel module definition class
+ * attraction module definition class
  *
- * @property ApiFlightService $apiService The Flight module.
+ * @property ApiAttractionService $apiService The Attraction module.
  */
 class AttractionModule extends \yii\base\Module
 {
@@ -23,8 +23,6 @@ class AttractionModule extends \yii\base\Module
     public function init()
     {
         parent::init();
-
-
 
         $config = ArrayHelper::merge(
             require __DIR__ . '/config/config.php',
@@ -59,21 +57,19 @@ class AttractionModule extends \yii\base\Module
      */
     public static function getListMenu(string $modulePath = 'attraction'): array
     {
-        $items = [
+        return [
             ['label' => 'Main', 'url' => ['/' . $modulePath . '/default/index']],
-            /*['label' => 'Flight Request', 'url' => ['/' . $modulePath . '/flight/index']],
-            ['label' => 'Flight Segments', 'url' => ['/' . $modulePath . '/flight-segment/index']],
-            ['label' => 'Quotes', 'url' => ['/' . $modulePath . '/flight-quote/index']],
+            ['label' => 'Attraction Request', 'url' => ['/' . $modulePath . '/attraction/index']],
+            ['label' => 'Quotes', 'url' => ['/' . $modulePath . '/attraction-quote/index']],
+            ['label' => 'Pax', 'url' => ['/' . $modulePath . '/attraction-pax/index']],
+            /*['label' => 'Flight Segments', 'url' => ['/' . $modulePath . '/flight-segment/index']],
             ['label' => 'Quote Trip', 'url' => ['/' . $modulePath . '/flight-quote-trip/index']],
             ['label' => 'Quote Segments', 'url' => ['/' . $modulePath . '/flight-quote-segment/index']],
-            ['label' => 'Pax', 'url' => ['/' . $modulePath . '/flight-pax/index']],
             ['label' => 'Pax Price', 'url' => ['/' . $modulePath . '/flight-quote-pax-price/index']],
             ['label' => 'Stops', 'url' => ['/' . $modulePath . '/flight-quote-segment-stop/index']],
             ['label' => 'Baggage', 'url' => ['/' . $modulePath . '/flight-quote-segment-pax-baggage/index']],
             ['label' => 'Baggage charge', 'url' => ['/' . $modulePath . '/flight-quote-segment-pax-baggage-charge/index']],
             ['label' => 'Status Log', 'url' => ['/' . $modulePath . '/flight-quote-status-log/index']],*/
         ];
-
-        return $items;
     }
 }

@@ -49,6 +49,12 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'pq_owner_user_id')->textInput() ?>
 
+        <?= $form->field($model, 'pq_app_markup')->textInput(['number' => true]) ?>
+
+        <?= $form->field($model, 'pq_agent_markup')->textInput(['maxlength' => true]) ?>
+
+        <?= $form->field($model, 'pq_service_fee_percent')->textInput(['maxlength' => true]) ?>
+
         <?php /*= $form->field($model, 'pq_created_user_id')->textInput() ?>
 
     <?= $form->field($model, 'pq_updated_user_id')->textInput() ?>

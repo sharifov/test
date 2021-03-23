@@ -29,6 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             'pm_id',
             'pm_name',
+            'pm_key',
             'pm_short_name',
             'pm_enabled:boolean',
             [

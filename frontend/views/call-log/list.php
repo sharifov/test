@@ -1,11 +1,15 @@
 <?php
 
+use common\models\Call;
+use sales\model\callLog\entity\callLog\CallLogStatus;
+use sales\model\callLog\entity\callLog\CallLogType;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
 use sales\model\callLog\entity\callLog\search\CallLogSearch;
 use common\models\Project;
+use sales\helpers\phone\MaskPhoneHelper;
 
 /**
  * @var $searchModel sales\model\callLog\entity\callLog\search\CallLogSearch
@@ -45,9 +49,21 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'cl_department_id',
                 'relation' => 'department',
             ],
-            ['class' => \sales\model\callLog\grid\columns\CallLogTypeColumn::class],
-            ['class' => \sales\model\callLog\grid\columns\CallLogCategoryColumn::class],
-            ['class' => \sales\model\callLog\grid\columns\CallLogStatusColumn::class],
+            [
+                'class' => \sales\model\callLog\grid\columns\CallLogTypeColumn::class,
+                'attribute' =>  'cl_type_id',
+                'filter' => CallLogType::getList(),
+            ],
+            [
+                'class' => \sales\model\callLog\grid\columns\CallLogCategoryColumn::class,
+                'attribute' => 'cl_category_id',
+                'filter' => Call::SOURCE_LIST,
+            ],
+            [
+                'class' => \sales\model\callLog\grid\columns\CallLogStatusColumn::class,
+                'attribute' => 'cl_status_id',
+                'filter' => CallLogStatus::getList(),
+            ],
             [
                 'label' => 'From',
                 'attribute' => 'cl_phone_from',

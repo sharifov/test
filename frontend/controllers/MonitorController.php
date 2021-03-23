@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\components\schema\CallType;
 use common\models\Call;
 use common\models\CallUserAccess;
 use common\models\Department;
@@ -105,11 +106,22 @@ class MonitorController extends FController
         $response['projectList'] = Project::getList();
         $response['depList'] = Department::DEPARTMENT_LIST;
         $response['userList'] = Employee::getList();
+        $response['showCallStatusList'] = [
+            Call::STATUS_IVR,
+            Call::STATUS_QUEUE,
+            Call::STATUS_HOLD,
+            Call::STATUS_DELAY,
+            Call::STATUS_RINGING,
+            Call::STATUS_IN_PROGRESS
+        ];
 
         $response['callStatusList'] = Call::STATUS_LIST;
         $response['callSourceList'] = Call::SHORT_SOURCE_LIST;
+        $response['availableCallSourceList'] = [Call::SOURCE_GENERAL_LINE, Call::SOURCE_REDIRECT_CALL];
         $response['callTypeList'] = Call::TYPE_LIST;
+        $response['availableCallTypeList'] = [Call::CALL_TYPE_IN, Call::CALL_TYPE_JOIN];
         $response['callUserAccessStatusTypeList'] = CallUserAccess::STATUS_TYPE_LIST;
+        $response['callUserAccessStatusTypeListLabel'] = CallUserAccess::STATUS_TYPE_LIST_LABEL;
         $response['onlineUserList'] = $userOnlineSearch->searchUserByIncomingCall($params);
         $response['userStatusList'] = UserStatus::find()->all();
 

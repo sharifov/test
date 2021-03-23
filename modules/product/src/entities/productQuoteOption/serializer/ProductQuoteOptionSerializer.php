@@ -29,6 +29,7 @@ class ProductQuoteOptionSerializer extends Serializer
             'pqo_price',
             'pqo_client_price',
             'pqo_extra_markup',
+            'pqo_request_data'
             //'pqo_created_user_id',
             //'pqo_updated_user_id',
             //'pqo_created_dt',
@@ -38,6 +39,8 @@ class ProductQuoteOptionSerializer extends Serializer
 
     public function getData(): array
     {
-        return $this->toArray();
+        $data = $this->toArray();
+        $data['productOption'] = $this->model->pqoProductOption->serialize();
+        return $data;
     }
 }

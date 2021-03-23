@@ -4,6 +4,7 @@ namespace webapi\modules\v1\controllers;
 
 use common\components\jobs\clientChat\ClientChatFeedbackJob;
 use common\components\jobs\clientChat\ClientChatRequestCreateJob;
+use common\components\Metrics;
 use common\models\ApiLog;
 use common\models\Project;
 use sales\entities\cases\CaseCategory;
@@ -16,6 +17,7 @@ use sales\model\clientChatForm\entity\ClientChatForm;
 use sales\model\clientChatForm\form\ClientChatFormApiForm;
 use sales\model\clientChatForm\helper\ClientChatFormTranslateHelper;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
+use sales\model\clientChatRequest\repository\ClientChatRequestRepository;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestFeedbackSubForm;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
@@ -44,15 +46,26 @@ use webapi\src\Messages;
  * @package webapi\modules\v1\controllers
  *
  * @property ClientChatRequestService $clientChatRequestService
+ * @property ClientChatRequestRepository $clientChatRequestRepository
  */
 class ClientChatRequestController extends ApiBaseController
 {
     private ClientChatRequestService $clientChatRequestService;
+    /**
+     * @var ClientChatRequestRepository
+     */
+    private ClientChatRequestRepository $clientChatRequestRepository;
 
-    public function __construct($id, $module, ClientChatRequestService $clientChatRequestService, $config = [])
-    {
+    public function __construct(
+        $id,
+        $module,
+        ClientChatRequestService $clientChatRequestService,
+        ClientChatRequestRepository $clientChatRequestRepository,
+        $config = []
+    ) {
         $this->clientChatRequestService = $clientChatRequestService;
         parent::__construct($id, $module, $config);
+        $this->clientChatRequestRepository = $clientChatRequestRepository;
     }
 
 //    /**
@@ -217,22 +230,12 @@ class ClientChatRequestController extends ApiBaseController
         }
 
         $form = (new ClientChatRequestApiForm())->fillIn($event, $data);
+        $metrics = \Yii::$container->get(Metrics::class);
 
         if ($form->validate()) {
             try {
-                if (Yii::$app->params['settings']['enable_client_chat_job']) {
-                    $clientChatRequest = $this->clientChatRequestService->createRequest($form);
-                    $job = new ClientChatRequestCreateJob();
-                    $job->requestId = $clientChatRequest->ccr_id;
-                    if ($jobId = Yii::$app->queue_client_chat_job->priority(10)->push($job)) {
-                        $clientChatRequest->ccr_job_id = $jobId;
-                        $clientChatRequest->save();
-                    } else {
-                        throw new \Exception('ClientChatRequest not added to queue. ClientChatRequest RID : ' .
-                            $clientChatRequest->ccr_rid);
-                    }
-                } else {
-                    $this->clientChatRequestService->create($form);
+                if ($requestEventCreate = ClientChatRequest::getEventCreatorByEventId($form->eventId)) {
+                    $requestEventCreate->handle($form);
                 }
             } catch (\RuntimeException | \DomainException | NotFoundException $e) {
                 return $this->endApiLog($apiLog, new ErrorResponse(
@@ -248,13 +251,14 @@ class ClientChatRequestController extends ApiBaseController
                     new CodeMessage(ApiCodeException::INTERNAL_SERVER_ERROR)
                 ));
             }
-
+            $metrics->serviceCounter('client_chat_request', ['type' => 'success', 'action' => 'create']);
             return $this->endApiLog($apiLog, new SuccessResponse(
                 new StatusCodeMessage(200),
                 new MessageMessage('Ok'),
             ));
         }
 
+        $metrics->serviceCounter('client_chat_request', ['type' => 'error', 'action' => 'create']);
         return $this->endApiLog($apiLog, new ErrorResponse(
             new StatusCodeMessage(400),
             new MessageMessage('Some errors occurred while creating client chat request'),
@@ -399,10 +403,13 @@ class ClientChatRequestController extends ApiBaseController
         }
 
         $form = (new ClientChatRequestApiForm())->fillIn($event, $data);
+        $metrics = \Yii::$container->get(Metrics::class);
 
         if ($form->validate()) {
             try {
-                $this->clientChatRequestService->createMessage($form);
+                if ($requestEventCreate = ClientChatRequest::getEventCreatorByEventId($form->eventId)) {
+                    $requestEventCreate->handle($form);
+                }
             } catch (\RuntimeException | \DomainException | NotFoundException $e) {
                 return $this->endApiLog($apiLog, new ErrorResponse(
                     new StatusCodeMessage(400),
@@ -419,11 +426,15 @@ class ClientChatRequestController extends ApiBaseController
                 ));
             }
 
+            $metrics->serviceCounter('client_chat_request', ['type' => 'success', 'action' => 'create_message']);
+
             return $this->endApiLog($apiLog, new SuccessResponse(
                 new StatusCodeMessage(200),
                 new MessageMessage('Ok'),
             ));
         }
+
+        $metrics->serviceCounter('client_chat_request', ['type' => 'error', 'action' => 'create_message']);
 
         return $this->endApiLog($apiLog, new ErrorResponse(
             new StatusCodeMessage(400),
@@ -772,7 +783,8 @@ class ClientChatRequestController extends ApiBaseController
         }
 
         try {
-            $clientChatRequest = $this->clientChatRequestService->createRequest($form);
+            $clientChatRequest = ClientChatRequest::createByApi($form);
+            $this->clientChatRequestRepository->save($clientChatRequest);
         } catch (\Throwable $e) {
             return $this->endApiLog($apiLog, new ErrorResponse(
                 new StatusCodeMessage(400),

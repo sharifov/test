@@ -21,7 +21,7 @@ class LeadLinkChatForm extends Model
             ['leadId', 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['leadId' => 'id'], 'message' => 'Lead not found'],
             ['chatId', 'exist', 'skipOnError' => true, 'targetClass' => ClientChat::class, 'targetAttribute' => ['chatId' => 'cch_id'], 'message' => 'Chat not found'],
             [['leadId'], 'checkIsNotLinked', 'skipOnError' => true,],
-            [['leadId'], 'validateProject', 'skipOnError' => true],
+            [['leadId'], 'validateMatchParams', 'skipOnError' => true],
         ];
     }
 
@@ -32,17 +32,21 @@ class LeadLinkChatForm extends Model
         }
     }
 
-    public function validateProject()
+    public function validateMatchParams()
     {
         $chat = ClientChat::find()
-            ->select(['cch_project_id'])
+            ->select(['cch_project_id', 'cch_client_id'])
             ->where(['cch_id' => $this->chatId])
             ->asArray()
             ->one();
-        $lead = Lead::find()->select(['project_id'])->where(['id' => $this->leadId])->asArray()->one();
+        $lead = Lead::find()->select(['project_id', 'client_id'])->where(['id' => $this->leadId])->asArray()->one();
 
         if ($chat['cch_project_id'] !== $lead['project_id']) {
             $this->addError('leadId', 'The lead project does not match.');
+        }
+
+        if ($chat['cch_client_id'] && $chat['cch_client_id'] !== $lead['client_id']) {
+            $this->addError('leadId', 'The lead client doest not match');
         }
     }
 }

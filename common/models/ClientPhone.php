@@ -9,6 +9,7 @@ use Yii;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\VarDumper;
 use yii\queue\Queue;
@@ -315,5 +316,24 @@ class ClientPhone extends \yii\db\ActiveRecord
     public static function find()
     {
         return new ClientPhoneQuery(static::class);
+    }
+
+    public static function getGeneralPhone(int $clientId): ?string
+    {
+        $result = self::find()->select(['phone'])
+            ->andWhere(['client_id' => $clientId])
+            ->andWhere([
+                'OR',
+                ['IS', 'type', null],
+                ['<>', 'type', self::PHONE_INVALID],
+            ])
+            ->orderBy(new Expression('FIELD (type, ' . self::PHONE_FAVORITE . ', ' . self::PHONE_VALID . ', ' . self::PHONE_NOT_SET . ', null)'))
+            ->asArray()
+            ->one();
+
+        if ($result) {
+            return $result['phone'];
+        }
+        return null;
     }
 }

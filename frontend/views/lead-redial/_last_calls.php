@@ -94,7 +94,8 @@ use yii\helpers\Url;
             'visible' => !$user->isAgent(),
         ],
         [
-            'label' => 'Client / Phones',
+            //'label' => 'Client / Phones',
+            'label' => 'Client',
             'format' => 'raw',
             'value' => static function (LeadQcall $model) {
                 $lead = $model->lqcLead;
@@ -110,7 +111,7 @@ use yii\helpers\Url;
                 }
 
                 $str = $clientName . '<br>';
-                $str .= $lead->client->clientPhones ? '<i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', ArrayHelper::map($lead->client->clientPhones, 'phone', 'phone')) . '' : '';
+                //$str .= $lead->client->clientPhones ? '<i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', ArrayHelper::map($lead->client->clientPhones, 'phone', 'phone')) . '' : '';
 
                 return $str;
             },

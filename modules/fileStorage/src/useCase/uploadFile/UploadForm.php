@@ -10,20 +10,20 @@ use yii\web\UploadedFile;
 /**
  * Class UploadForm
  *
- * @property $file
+ * @property $files
  * @property $fs_title
  */
 class UploadForm extends Model
 {
-    public $file;
+    public $files;
     public $fs_title;
 
     public function rules(): array
     {
         return [
-            ['file', 'required'],
-            ['file', FileValidator::class],
-            ['file', 'validateName','skipOnError' => true],
+            ['files', 'required'],
+            ['files', FileValidator::class, 'maxFiles' => 3],
+            ['files', 'validateName','skipOnError' => true],
 
             ['fs_title', 'default', 'value' => null],
             ['fs_title', 'string', 'max' => 100],
@@ -32,15 +32,15 @@ class UploadForm extends Model
 
     public function validateName(): void
     {
-        /** @var UploadedFile $file */
-        $file = $this->file;
-
-        $validator = new StringValidator([
-            'min' => 1,
-            'max' => 100,
-        ]);
-        if (!$validator->validate($file->name, $error)) {
-            $this->addError('file', 'Filename: ' . $error);
+        foreach ($this->files as $file) {
+            /** @var UploadedFile $file */
+            $validator = new StringValidator([
+                'min' => 1,
+                'max' => 100,
+            ]);
+            if (!$validator->validate($file->name, $error)) {
+                $this->addError('files', 'Filename: ' . $error);
+            }
         }
     }
 

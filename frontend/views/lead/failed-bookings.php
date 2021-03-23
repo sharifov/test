@@ -97,12 +97,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 //'attribute' => 'pending',
                 'label' => 'Pending Time',
                 'value' => static function (\common\models\Lead $model) {
-                    $createdTS = strtotime($model->created);
-
-                    $diffTime = time() - $createdTS;
-                    $diffHours = (int)($diffTime / (60 * 60));
-
-                    return ($diffHours > 3 && $diffHours < 73) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+                    return Yii::$app->formatter->asRelativeDt($model->created);
                 },
                 'options' => [
                     'style' => 'width:180px'
@@ -110,7 +105,33 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'visible' => !$user->isAgent(),
             ],
-
+            [
+                'attribute' => 'expiration_dt',
+                'value' => static function (Lead $model) {
+                    return Yii::$app->formatter->asExpirationDt($model->l_expiration_dt);
+                },
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'expiration_dt',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                        'clearBtn' => true,
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' => 'Choose Date',
+                        'readonly' => '1',
+                    ],
+                    'clientEvents' => [
+                        'clearDate' => 'function (e) {$(e.target).find("input").change();}',
+                    ],
+                ]),
+                'options' => [
+                    'style' => 'width:180px'
+                ],
+                'format' => 'raw',
+            ],
             [
                 'attribute' => 'created',
                 'value' => static function (\common\models\Lead $model) {
@@ -154,8 +175,9 @@ $this->params['breadcrumbs'][] = $this->title;
                             $clientName = ClientFormatter::formatExclude($model->client)  . $clientName;
                         }
 
-                        $str = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
-                        $str .= $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
+                        $str = '';
+                        //$str = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
+                        //$str .= $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
 
                         $clientName .= '<br>' . $str;
                     } else {

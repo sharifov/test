@@ -18,7 +18,7 @@ class HotelQuoteSearch extends HotelQuote
     {
         return [
             [['hq_id', 'hq_hotel_id', 'hq_product_quote_id', 'hq_hotel_list_id'], 'integer'],
-            [['hq_request_hash'], 'string'],
+            [['hq_request_hash', 'hq_booking_id'], 'string'],
             [['hq_hash_key', 'hq_destination_name', 'hq_hotel_name'], 'safe'],
         ];
     }
@@ -47,13 +47,17 @@ class HotelQuoteSearch extends HotelQuote
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => [
+                'defaultOrder' => [
+                    'hq_id' => SORT_DESC,
+                ],
+            ],
         ]);
 
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
@@ -68,6 +72,7 @@ class HotelQuoteSearch extends HotelQuote
 
         $query->andFilterWhere(['like', 'hq_hash_key', $this->hq_hash_key])
             ->andFilterWhere(['like', 'hq_destination_name', $this->hq_destination_name])
+            ->andFilterWhere(['like', 'hq_booking_id', $this->hq_booking_id])
             ->andFilterWhere(['like', 'hq_hotel_name', $this->hq_hotel_name]);
 
         return $dataProvider;

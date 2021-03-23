@@ -23,84 +23,94 @@ class RentCarDataParser
 
     public static function getVendorName(array $data): ?string
     {
-        return ArrayHelper::getValue($data, 'vendor.image.description');
+        return ArrayHelper::getValue($data, 'partner.name');
     }
 
     public static function getVendorLogo(array $data): ?string
     {
-        return ArrayHelper::getValue($data, 'vendor.image.url');
+        return ArrayHelper::getValue($data, 'partner.logo');
     }
 
-    public static function getPricePerDay(array $data): ?string
+    public static function getBasePrice(array $data): ?string
     {
-        return ArrayHelper::getValue($data, 'priceSummary.lead.price.amount');
+        return ArrayHelper::getValue($data, 'price_details.base_price');
+    }
+
+    public static function getTotalPrice(array $data): ?string
+    {
+        return ArrayHelper::getValue($data, 'price_details.total_price');
+    }
+
+    public static function getBaseType(array $data): ?string
+    {
+        return ArrayHelper::getValue($data, 'price_details.base_type');
+    }
+
+    public static function getNumRentalDays(array $data): ?string
+    {
+        return ArrayHelper::getValue($data, 'price_details.num_rental_days');
     }
 
     public static function getPriceCurrencySymbol(array $data): ?string
     {
-        return ArrayHelper::getValue($data, 'priceSummary.total.price.currencyInfo.symbol');
+        return ArrayHelper::getValue($data, 'price_details.display_symbol');
     }
 
     public static function getPriceCurrencyCode(array $data): ?string
     {
-        return ArrayHelper::getValue($data, 'priceSummary.total.price.currencyInfo.code');
+        return ArrayHelper::getValue($data, 'price_details.currency');
     }
 
     public static function getPriceTotal(array $data): ?string
     {
-        return ArrayHelper::getValue($data, 'priceSummary.total.price.amount');
+        return ArrayHelper::getValue($data, 'price_details.total_price');
     }
 
     public static function getModelName(array $data): ?string
     {
-        return ArrayHelper::getValue($data, 'vehicle.description');
+        return ArrayHelper::getValue($data, 'car.example');
     }
 
     public static function getModelImg(array $data): ?string
     {
-        return ArrayHelper::getValue($data, 'vehicle.image.url');
+        return ArrayHelper::getValue($data, 'car.images.SIZE268X144') ??
+            ArrayHelper::getValue($data, 'car.imageurl');
     }
 
     public static function getModelCategory(array $data): ?string
     {
-        return ArrayHelper::getValue($data, 'vehicle.category');
+        return ArrayHelper::getValue($data, 'car.type_name');
     }
 
     public static function getPickUpLocation(array $data): ?string
     {
-        return ArrayHelper::getValue($data, 'tripLocations.pickUpLocation.text');
+        return ArrayHelper::getValue($data, 'pickup.location');
     }
 
     public static function getDropOffLocation(array $data): ?string
     {
-        return ArrayHelper::getValue($data, 'tripLocations.dropOffLocation.text');
+        return ArrayHelper::getValue($data, 'dropoff.location');
     }
 
     public static function getOfferToken(array $data, string $requestHash = ''): ?string
     {
-        return $requestHash . '_' . ArrayHelper::getValue($data, 'detailsContext.carOfferToken');
+        return $requestHash . '_' . md5(ArrayHelper::getValue($data, 'car_reference_id'));
     }
 
     public static function getOptions(array $data): array
     {
-        $result = [];
-        foreach (ArrayHelper::getValue($data, 'vehicle.attributes', []) as $value) {
-            if (($description = ArrayHelper::getValue($value, 'icon.description')) && !empty($value['text'])) {
-                $result[$description] = $value['text'];
-            }
-        }
-        return $result;
+        return self::getActionable($data);
     }
 
     public static function getActionable(array $data): array
     {
-        $result = [];
-        foreach (ArrayHelper::getValue($data, 'actionableConfidenceMessages', []) as $value) {
-            if (!empty($value['text'])) {
-                $result[] = $value['text'];
-            }
-        }
-        return $result;
+        return [
+            'passengers' => ArrayHelper::getValue($data, 'car.passengers'),
+            'doors' => ArrayHelper::getValue($data, 'car.doors'),
+            'bags' => ArrayHelper::getValue($data, 'car.bags'),
+            'automatic_transmission' => ArrayHelper::getValue($data, 'car.automatic_transmission') === 'true' ? 'Yes' : 'No',
+            'air_conditioning' => ArrayHelper::getValue($data, 'car.air_conditioning') === 'true' ? 'Yes' : 'No',
+        ];
     }
 
     public static function findQuoteByToken(array $data, string $token, string $requestHash = ''): array
@@ -116,5 +126,10 @@ class RentCarDataParser
     public static function getAttributeValue(array $data, string $attribute): ?string
     {
         return ArrayHelper::getValue(self::getOptions($data), $attribute);
+    }
+
+    public static function getCarReferenceId(array $data)
+    {
+        return ArrayHelper::getValue($data, 'car_reference_id');
     }
 }

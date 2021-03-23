@@ -9,6 +9,7 @@ use modules\product\src\entities\product\dto\CreateDto;
 use modules\product\src\entities\product\events\ProductClientBudgetChangedEvent;
 use modules\product\src\entities\product\events\ProductMarketPriceChangedEvent;
 use modules\product\src\entities\product\serializer\ProductSerializer;
+use modules\product\src\entities\productHolder\ProductHolder;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productType\ProductType;
 use modules\flight\models\Flight;
@@ -29,6 +30,7 @@ use yii\db\ActiveRecord;
  * This is the model class for table "product".
  *
  * @property int $pr_id
+ * @property string $pr_gid [varchar(32)]
  * @property int $pr_type_id
  * @property string|null $pr_name
  * @property int $pr_lead_id
@@ -57,6 +59,7 @@ use yii\db\ActiveRecord;
  * @property ProductQuote[] $productQuotes
  * @property RentCar $rentCar
  * @property RentCar[] $rentCars
+ * @property ProductHolder $holder
  *
  * @property Productable|null $childProduct
  */
@@ -69,6 +72,7 @@ class Product extends \yii\db\ActiveRecord implements Serializable
     public static function create(CreateDto $dto): self
     {
         $product = new static();
+        $product->pr_gid = self::generateGid();
         $product->pr_lead_id = $dto->pr_lead_id;
         $product->pr_type_id = $dto->pr_type_id;
         $product->pr_name = $dto->pr_name;
@@ -109,11 +113,11 @@ class Product extends \yii\db\ActiveRecord implements Serializable
         return $this->pr_type_id === ProductType::PRODUCT_HOTEL;
     }
 
-
     public function isAttraction(): bool
     {
         return $this->pr_type_id === ProductType::PRODUCT_ATTRACTION;
     }
+
     public function isRenTCar(): bool
     {
         return $this->pr_type_id === ProductType::PRODUCT_RENT_CAR;
@@ -143,6 +147,10 @@ class Product extends \yii\db\ActiveRecord implements Serializable
     public function rules(): array
     {
         return [
+            ['pr_gid', 'required'],
+            ['pr_gid', 'string', 'max' => 32],
+            ['pr_gid', 'unique'],
+
             ['pr_type_id', 'required'],
             ['pr_type_id', 'integer'],
             ['pr_type_id', 'exist', 'skipOnError' => true, 'targetClass' => ProductType::class, 'targetAttribute' => ['pr_type_id' => 'pt_id']],
@@ -246,6 +254,11 @@ class Product extends \yii\db\ActiveRecord implements Serializable
     public function getHotels(): ActiveQuery
     {
         return $this->hasMany(Hotel::class, ['ph_product_id' => 'pr_id']);
+    }
+
+    public function getHolder(): ActiveQuery
+    {
+        return $this->hasOne(ProductHolder::class, ['ph_product_id' => 'pr_id']);
     }
 
     /**
@@ -362,5 +375,37 @@ class Product extends \yii\db\ActiveRecord implements Serializable
     public function getIconClass(): string
     {
         return ($this->prType && $this->prType->pt_icon_class) ? $this->prType->pt_icon_class : '';
+    }
+
+    public function isDeletable(): bool
+    {
+        if (!$this->productQuotes) {
+            return true;
+        }
+        foreach ($this->productQuotes as $productQuote) {
+            if (!$productQuote->isDeletable()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public function getNotDeletableProductQuotes(): array
+    {
+        $result = [];
+        if (!$this->productQuotes) {
+            return $result;
+        }
+        foreach ($this->productQuotes as $productQuote) {
+            if (!$productQuote->isDeletable()) {
+                $result[$productQuote->pq_id] = $productQuote->pq_gid;
+            }
+        }
+        return $result;
+    }
+
+    public static function generateGid(): string
+    {
+        return md5(uniqid('fq', true));
     }
 }

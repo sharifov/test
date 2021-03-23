@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
+use sales\helpers\email\MaskEmailHelper;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\EmailUnsubscribeSearch */
@@ -29,7 +30,14 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
-            'eu_email:email',
+            //'eu_email:email',
+            [
+                'attribute' => 'eu_email',
+                'value' => static function (\common\models\EmailUnsubscribe $model) {
+                    return MaskEmailHelper::masking($model->eu_email);
+                },
+                'format' => 'email'
+            ],
             'eu_project_id',
             'eu_created_user_id',
             [

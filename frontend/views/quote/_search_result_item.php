@@ -98,6 +98,12 @@ if (!empty($result['meta']['group1'])) {
 if (!empty($result['meta']['rank'])) {
     $rank = $result['meta']['rank'];
 }
+
+$isCk = 'not set';
+if (isset($result['prices']['isCk'])) {
+    $isCk = ($result['prices']['isCk'] === true) ? 'true' : 'false';
+}
+
 ?>
 <div id="search-result__quote-<?= $resultKey?>"
     class="quote search-result__quote"
@@ -298,11 +304,12 @@ if (!empty($result['meta']['rank'])) {
             <?php echo QuoteHelper::formattedMetaRank($meta) ?>
 
         </div>
-        <div class="quote__actions">
+
+        <div class="quote__actions" >
             <table class="table table-striped table-prices">
                 <thead>
                 <tr>
-                    <th>Pax</th>
+                    <th title="isCk: <?php echo $isCk ?>">Pax</th>
                     <th>Q</th>
                     <th>NP, $</th>
                     <?php if (isset($result['prices']['markup']) && $result['prices']['markup'] > 0) :

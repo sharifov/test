@@ -14,6 +14,8 @@ use yii\widgets\ActiveForm;
 
         <?php $form = ActiveForm::begin(); ?>
 
+        <?= $form->field($model, 'pr_gid')->textInput() ?>
+
         <?= $form->field($model, 'pr_type_id')->textInput() ?>
 
         <?= $form->field($model, 'pr_name')->textInput(['maxlength' => true]) ?>

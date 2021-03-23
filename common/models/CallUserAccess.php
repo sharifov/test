@@ -46,6 +46,14 @@ class CallUserAccess extends \yii\db\ActiveRecord
         self::STATUS_TYPE_NO_ANSWERED   => 'No Answered',
     ];
 
+    public const STATUS_TYPE_LIST_LABEL = [
+        self::STATUS_TYPE_PENDING       => 'label-warning',
+        self::STATUS_TYPE_ACCEPT        => 'label-success',
+        self::STATUS_TYPE_SKIP          => 'label-default',
+        self::STATUS_TYPE_BUSY          => 'label-default',
+        self::STATUS_TYPE_NO_ANSWERED   => 'label-default',
+    ];
+
     /**
      * {@inheritdoc}
      */

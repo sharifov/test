@@ -1,7 +1,7 @@
 <?php
 
 use common\models\Lead;
-use sales\helpers\text\SimpleTextHelper;
+use sales\helpers\text\CleanTextHelper;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Json;
@@ -466,7 +466,7 @@ CSS;
             <?php endif ?>
 
         <?php else : ?>
-            <?php echo '<span class="text-danger">' . SimpleTextHelper::clean($result['error']) . '</span>'; ?>
+            <?php echo '<span class="text-danger">' . CleanTextHelper::simpleText($result['error']) . '</span>'; ?>
         <?php endif ?>
     </p>
     <?php else : ?>

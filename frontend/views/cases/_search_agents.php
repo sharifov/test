@@ -13,6 +13,7 @@ use sales\model\saleTicket\entity\SaleTicket;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use common\models\Language;
 
 /* @var $this yii\web\View */
 /* @var $model sales\entities\cases\CasesSearch */
@@ -87,6 +88,16 @@ use yii\widgets\ActiveForm;
                 </div>
                 <div class="col-md-1">
                     <?= $form->field($model, 'cs_need_action')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => '']) ?>
+                </div>
+                <div class="col-md-2">
+                        <?php echo $form->field($model, 'locales')->widget(Select2::class, [
+                            'data' => Language::getLocaleList(false),
+                            'size' => Select2::SMALL,
+                            'options' => ['id' => 'locales',
+                                'multiple' => true],
+                            'pluginOptions' => ['allowClear' => true],
+                        ]);
+?>
                 </div>
             </div>
         </div>

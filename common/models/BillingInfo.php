@@ -3,9 +3,12 @@
 namespace common\models;
 
 use modules\order\src\entities\order\Order;
+use sales\entities\serializer\Serializable;
+use sales\model\billingInfo\entity\serializer\BillingInfoSerializer;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
 /**
@@ -38,8 +41,9 @@ use yii\db\ActiveRecord;
  * @property Employee $biCreatedUser
  * @property Order $biOrder
  * @property Employee $biUpdatedUser
+ * @property PaymentMethod $paymentMethod
  */
-class BillingInfo extends \yii\db\ActiveRecord
+class BillingInfo extends \yii\db\ActiveRecord implements Serializable
 {
     /**
      * {@inheritdoc}
@@ -70,6 +74,7 @@ class BillingInfo extends \yii\db\ActiveRecord
             [['bi_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['bi_created_user_id' => 'id']],
             [['bi_order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['bi_order_id' => 'or_id']],
             [['bi_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['bi_updated_user_id' => 'id']],
+            [['bi_payment_method_id'], 'exist', 'skipOnError' => true, 'targetClass' => PaymentMethod::class, 'targetAttribute' => ['bi_payment_method_id' => 'pm_id']],
         ];
     }
 
@@ -119,24 +124,24 @@ class BillingInfo extends \yii\db\ActiveRecord
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
-            'user' => [
-                'class' => BlameableBehavior::class,
-                'createdByAttribute' => 'bi_created_user_id',
-                'updatedByAttribute' => 'bi_updated_user_id',
-            ],
         ];
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getBiCc()
     {
         return $this->hasOne(CreditCard::class, ['cc_id' => 'bi_cc_id']);
     }
 
+    public function getPaymentMethod(): ActiveQuery
+    {
+        return $this->hasOne(PaymentMethod::class, ['pm_id' => 'bi_payment_method_id']);
+    }
+
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getBiCreatedUser()
     {
@@ -144,7 +149,7 @@ class BillingInfo extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getBiOrder()
     {
@@ -152,7 +157,7 @@ class BillingInfo extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getBiUpdatedUser()
     {
@@ -166,5 +171,42 @@ class BillingInfo extends \yii\db\ActiveRecord
     public static function find()
     {
         return new \common\models\query\BillingInfoQuery(static::class);
+    }
+
+    public static function create(
+        string $firstName,
+        string $lastName,
+        string $middleName,
+        string $address,
+        string $city,
+        string $state,
+        string $country,
+        string $zip,
+        string $phone,
+        string $email,
+        int $paymentMethodId,
+        int $creditCardId,
+        int $orderId
+    ): self {
+        $billing = new self();
+        $billing->bi_first_name = $firstName;
+        $billing->bi_last_name = $lastName;
+        $billing->bi_middle_name = $middleName;
+        $billing->bi_address_line1 = $address;
+        $billing->bi_city = $city;
+        $billing->bi_state = $state;
+        $billing->bi_country = $country;
+        $billing->bi_zip = $zip;
+        $billing->bi_contact_phone = $phone;
+        $billing->bi_contact_email = $email;
+        $billing->bi_payment_method_id = $paymentMethodId;
+        $billing->bi_cc_id = $creditCardId;
+        $billing->bi_order_id = $orderId;
+        return $billing;
+    }
+
+    public function serialize(): array
+    {
+        return (new BillingInfoSerializer($this))->getData();
     }
 }

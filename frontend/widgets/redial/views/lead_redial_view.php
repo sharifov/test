@@ -96,8 +96,8 @@ $user = Yii::$app->user->identity;
                         'header' => 'Client Phones',
                         'format' => 'raw',
                         'value' => static function (Lead $lead) {
-                            if ($lead->client && $lead->client->clientPhones) {
-                                $str = '<i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', ArrayHelper::map($lead->client->clientPhones, 'phone', 'phone'));
+                            if ($lead->client && $clientPhone = $lead->client->clientPhones) {
+                                $str = '<i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', ArrayHelper::map($clientPhone, 'phone', 'phone'));
                             }
                             return $str ?? '-';
                         },

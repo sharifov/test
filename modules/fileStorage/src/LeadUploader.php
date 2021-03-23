@@ -12,7 +12,10 @@ use modules\fileStorage\src\entity\fileStorage\FileStorage;
 use modules\fileStorage\src\entity\fileStorage\FileStorageRepository;
 use modules\fileStorage\src\entity\fileStorage\Path;
 use modules\fileStorage\src\entity\fileStorage\Uid;
+use modules\fileStorage\src\entity\fileUser\FileUser;
+use modules\fileStorage\src\entity\fileUser\FileUserRepository;
 use modules\fileStorage\src\services\PathGenerator;
+use sales\auth\Auth;
 use sales\services\PostgresTransactionManager;
 use yii\web\UploadedFile;
 
@@ -24,6 +27,7 @@ use yii\web\UploadedFile;
  * @property FileClientRepository $fileClientRepository
  * @property FileLeadRepository $fileLeadRepository
  * @property PostgresTransactionManager $postgresTransactionManager
+ * @property FileuserRepository $fileUserRepository
  */
 class LeadUploader
 {
@@ -32,19 +36,22 @@ class LeadUploader
     private FileClientRepository $fileClientRepository;
     private FileLeadRepository $fileLeadRepository;
     private PostgresTransactionManager $postgresTransactionManager;
+    private FileUserRepository $fileUserRepository;
 
     public function __construct(
         FileSystem $fileStorage,
         FileStorageRepository $fileStorageRepository,
         FileClientRepository $fileClientRepository,
         FileLeadRepository $fileLeadRepository,
-        PostgresTransactionManager $postgresTransactionManager
+        PostgresTransactionManager $postgresTransactionManager,
+        FileUserRepository $fileUserRepository
     ) {
         $this->fileSystem = $fileStorage;
         $this->fileStorageRepository = $fileStorageRepository;
         $this->fileClientRepository = $fileClientRepository;
         $this->fileLeadRepository = $fileLeadRepository;
         $this->postgresTransactionManager = $postgresTransactionManager;
+        $this->fileUserRepository = $fileUserRepository;
     }
 
     public function upload(int $leadId, int $clientId, string $projectKey, ?string $title, UploadedFile $file): void
@@ -109,6 +116,9 @@ class LeadUploader
 
             $fileLead = FileLead::create($fileStorage->fs_id, $leadId);
             $this->fileLeadRepository->save($fileLead);
+
+            $fileUser = FileUser::create($fileStorage->fs_id, Auth::id());
+            $this->fileUserRepository->save($fileUser);
 
             return [$fileStorage, $fileClient, $fileLead];
         });

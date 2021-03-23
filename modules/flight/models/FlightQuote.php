@@ -4,12 +4,18 @@ namespace modules\flight\models;
 
 use common\components\SearchService;
 use common\models\Airline;
+use common\models\Client;
 use common\models\Employee;
+use common\models\Lead;
+use common\models\Project;
 use modules\flight\models\behaviors\FlightQuoteFqUid;
 use modules\flight\src\entities\flightQuote\events\FlightQuoteCloneCreatedEvent;
 use modules\flight\src\entities\flightQuote\serializer\FlightQuoteSerializer;
+use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteCreateDTO;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\interfaces\ProductDataInterface;
 use modules\product\src\interfaces\Quotable;
 use sales\entities\EventTrait;
 use yii\db\ActiveQuery;
@@ -44,6 +50,9 @@ use yii\helpers\ArrayHelper;
  * @property string|null $fq_last_ticket_date
  * @property string|null $fq_request_hash
  * @property string|null $fq_uid
+ * @property array|null $fq_json_booking
+ * @property string|null $fq_flight_request_uid
+ * @property array|null $fq_ticket_json
  *
  * @property Employee $fqCreatedUser
  * @property Flight $fqFlight
@@ -54,7 +63,7 @@ use yii\helpers\ArrayHelper;
  * @property FlightQuoteTrip[] $flightQuoteTrips
  * @property Airline $mainAirline
  */
-class FlightQuote extends ActiveRecord implements Quotable
+class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
 {
     use EventTrait;
 
@@ -173,6 +182,8 @@ class FlightQuote extends ActiveRecord implements Quotable
             [['fq_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['fq_created_user_id' => 'id']],
             [['fq_flight_id'], 'exist', 'skipOnError' => true, 'targetClass' => Flight::class, 'targetAttribute' => ['fq_flight_id' => 'fl_id']],
             [['fq_product_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['fq_product_quote_id' => 'pq_id']],
+            [['fq_json_booking', 'fq_ticket_json'], 'safe'],
+            [['fq_flight_request_uid'], 'string', 'max' => 100],
         ];
     }
 
@@ -206,6 +217,9 @@ class FlightQuote extends ActiveRecord implements Quotable
             'fq_last_ticket_date' => 'Last Ticket Date',
             'fq_request_hash' => 'Request Hash',
             'fq_uid' => 'Uid',
+            'fq_json_booking' => 'Booking Json',
+            'fq_flight_request_uid' => 'Flight request UID',
+            'fq_ticket_json' => 'Ticket json',
         ];
     }
 
@@ -297,6 +311,21 @@ class FlightQuote extends ActiveRecord implements Quotable
     public static function getFareTypeList(): array
     {
         return self::FARE_TYPE_LIST;
+    }
+
+    public static function getFareTypeName(?string $fareType): string
+    {
+        return self::getFareTypeList()[$fareType] ?? '--';
+    }
+
+    public static function getFareTypeNameById(?int $id): string
+    {
+        return self::getFareTypeName((string)array_search($id, self::getFareTypeIdList(), false));
+    }
+
+    public static function getFareTypeIdList(): array
+    {
+        return self::FARE_TYPE_ID_LIST;
     }
 
     /**
@@ -439,7 +468,7 @@ class FlightQuote extends ActiveRecord implements Quotable
      * @param $type
      * @return mixed|string
      */
-    public static function getTypeName(int $type)
+    public static function getTypeName(?int $type)
     {
         return self::TYPE_LIST[$type] ?? '-';
     }
@@ -568,5 +597,39 @@ class FlightQuote extends ActiveRecord implements Quotable
     public static function getGdsList(): array
     {
         return SearchService::GDS_LIST;
+    }
+
+    public function isBooked(): bool
+    {
+        return $this->fqProductQuote->isBooked();
+    }
+
+    public function isBookable(): bool
+    {
+        return (ProductQuoteStatus::isBookable($this->fqProductQuote->pq_status_id) && !$this->isBooked());
+    }
+
+    public function getProject(): Project
+    {
+        return $this->fqProductQuote->pqProduct->prLead->project;
+    }
+
+    public function getLead(): Lead
+    {
+        return $this->fqProductQuote->pqProduct->prLead;
+    }
+
+    public function getClient(): Client
+    {
+        return $this->fqProductQuote->pqProduct->prLead->client;
+    }
+
+    public function getOrder(): ?Order
+    {
+        if ($order = ArrayHelper::getValue($this, 'fqProductQuote.pqOrder')) {
+            /** @var Order $order */
+            return $order;
+        }
+        return null;
     }
 }

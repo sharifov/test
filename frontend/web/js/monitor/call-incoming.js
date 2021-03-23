@@ -1,5 +1,5 @@
 let userComponent = {
-    template: '<i :class="userIconClass()"></i> {{ userName() }}',
+    template: '<span data-toggle="tooltip" :title="userTooltip()"><i :class="userIconClass()"></i> {{ userName() }}</span>',
     props: {
         item: Object,
         index: Number
@@ -10,11 +10,14 @@ let userComponent = {
     },
     methods: {
         userName() {
-            return this.$root.getUserName(this.item.uo_user_id)
+            return this.$root.getUserName(this.item.uo_user_id);
         },
         userIconClass() {
-            return this.$root.getUserIconClass(this.item.uo_user_id)
+            return this.$root.getUserIconClass(this.item.uo_user_id);
         },
+        userTooltip() {
+            return this.$root.getUserTooltipName(this.item.uo_user_id);
+        }
         // stateClass() {
         //     return 'text-' + (this.item.uo_idle_state ? 'info' : 'success')
         // }
@@ -161,7 +164,6 @@ const callItemComponent = {
     data() {
         return {
             show: true,
-            showStatusList: [1, 2, 3, 4, 10, 12],
             userAccessList: [],
             userAccessList2: []
         };
@@ -175,11 +177,10 @@ const callItemComponent = {
         }*/
     },
     updated() {
-        if (this.showStatusList.includes(this.item.c_status_id)) {
+        if (this.$root.showStatusList.includes(this.item.c_status_id)) {
             this.show = true;
         } else {
             //this.show = false;
-            alert(3);
             this.removeElement(this.item.c_id);
         }
     },
@@ -196,6 +197,10 @@ const callItemComponent = {
         callStatusName() {
             return this.item.c_status_id > 0 ? this.$root.callStatusList[this.item.c_status_id] : '-';
         },
+        showTransferLabelForCall()
+        {
+            return this.item.c_is_transfer ? true : false;
+        },
         callTypeName() {
             return this.item.c_call_type_id > 0 ? this.$root.callTypeList[this.item.c_call_type_id] : '-';
         },
@@ -211,6 +216,9 @@ const callItemComponent = {
                 }
             }
             return name;
+        },
+        isCallAssignedToUserGroups() {
+            console.log(this.item);
         },
 
         callStatusTimerDateTime() {
@@ -233,7 +241,7 @@ const callItemComponent = {
     // },
     methods: {
         removeElement(index) {
-            alert(1);
+            alert(2);
             this.$root.removeCall(index); //callList.splice(index, 1);
             //this.$delete(this.finds, index)
         },
@@ -244,6 +252,9 @@ const callItemComponent = {
         },
         getUserAccessStatusTypeName: function (statusTypeId) {
             return statusTypeId > 0 ? this.$root.callUserAccessStatusTypeList[statusTypeId] : statusTypeId;
+        },
+        getUserAccessStatusTypeLabel: function (statusTypeId) {
+            return statusTypeId > 0 ? this.$root.callUserAccessStatusTypeListLabel[statusTypeId] : 'label-default';
         },
         createdDateTime(format) {
             let val = '';
@@ -332,8 +343,11 @@ var callMapApp = Vue.createApp({
             userList: [],
             callStatusList: [],
             callTypeList: [],
+            availableCallTypeList: [],
             callSourceList: [],
+            availableCallSourceList: [],
             callUserAccessStatusTypeList: [],
+            callUserAccessStatusTypeListLabel: [],
             callList: [],
             onlineUserList: [],
             userStatusList: [],
@@ -344,7 +358,8 @@ var callMapApp = Vue.createApp({
             accessCallSourceType: [],
             accessCallType: [],
             userDepartments: [],
-            userProjects: []
+            userProjects: [],
+            showStatusList: [],
         };
     },
     created() {
@@ -356,29 +371,29 @@ var callMapApp = Vue.createApp({
     },
     computed: {
         ivrCounter: function () {
-            return this.getCallListByStatusId([1]).length;
+            return this.getCallListByStatusId([1], this.availableCallTypeList, this.availableCallSourceList).length;
         },
         queueCounter: function () {
-            return this.getCallListByStatusId([2]).length;
+            return this.getCallListByStatusId([2], this.availableCallTypeList, this.availableCallSourceList).length;
         },
         delayCounter: function () {
-            return this.getCallListByStatusId([10]).length;
+            return this.getCallListByStatusId([10], this.availableCallTypeList, this.availableCallSourceList).length;
         },
         inProgressCounter: function () {
-            return this.getCallListByStatusId([4]).length;
+            return this.getCallListByStatusId([4], this.availableCallTypeList, this.availableCallSourceList).length;
         },
         ringingCounter: function () {
-            return this.getCallListByStatusId([3]).length;
+            return this.getCallListByStatusId([3], this.availableCallTypeList, this.availableCallSourceList).length;
         },
         holdCounter: function () {
-            return this.getCallListByStatusId([12]).length;
+            return this.getCallListByStatusId([12], this.availableCallTypeList, this.availableCallSourceList).length;
         },
 
         callListQueued: function () {
-            return this.getCallListByStatusId([12, 2, 1, 10]);
+            return this.getCallListByStatusId([12, 2, 1, 10], this.availableCallTypeList, this.availableCallSourceList);
         },
         callListInProgress: function () {
-            return this.getCallListByStatusId([3, 4]);
+            return this.getCallListByStatusId([3, 4], this.availableCallTypeList, this.availableCallSourceList);
         },
         onlineUserCounter: function () {
             return this.onlineUserList.length;
@@ -392,19 +407,14 @@ var callMapApp = Vue.createApp({
         }
     },
     methods: {
-        getCallListByStatusId(statusList, typeList) {
+        getCallListByStatusId(statusList, typeList, sourceList) {
             return this.callList.filter(function (item) {
                 if (item.c_status_id) {
                     let statusId = parseInt(item.c_status_id);
                     let callTypeId = parseInt(item.c_call_type_id);
-                    if (statusList.includes(statusId)) {
-                        if (typeList) {
-                            if (typeList.includes(callTypeId)) {
-                                return item;
-                            }
-                        } else {
-                            return item;
-                        }
+                    let callSourceId = parseInt(item.c_source_type_id);
+                    if (statusList.includes(statusId) && sourceList.includes(callSourceId) && typeList.includes(callTypeId)) {
+                        return item;
                     }
                 }
             });
@@ -448,27 +458,48 @@ var callMapApp = Vue.createApp({
         userOnlineList() {
             return this.onlineUserList.slice(0).sort((a, b) => this.getUserName(a.uo_user_id).toUpperCase() < this.getUserName(b.uo_user_id).toUpperCase() ? this.sortingOnline : -this.sortingOnline)
         },
-
+        findCallIndexById(id) {
+            let index = -1;
+            id = parseInt(id)
+            if (this.callList) {
+                index = this.callList.findIndex(item => parseInt(item.c_id) === id)
+            }
+            return index
+        },
         removeCall(index) {
-            alert(2);
-            this.callList = this.callList.splice(index, 1);
+            // if (this.callList.length === 1) {
+            //     this.callList = [];
+            // } else {
+            //     this.callList = this.callList.splice(index, 1);
+            // }
+            this.callList = this.callList.filter(function (elem, i) {
+                return i !== index;
+            });
+        },
+        actionCall(callData) {
+            if (this.callList.find(x => parseInt(x.c_id) === parseInt(callData.c_id))) {
+                if (this.showStatusList.includes(callData.c_status_id)) {
+                    return this.updateCall(callData);
+                } else {
+                    this.removeCall(this.findCallIndexById(callData.c_id));
+                    return false;
+                }
+            }
+
+            if (this.validateCall(callData)) {
+                this.addCall(callData);
+            }
         },
         addCall(callData) {
-            if (this.callList.find(x => x.c_id === callData.c_id)) {
-                return this.updateCall(callData);
-            } else {
-
-                if (!this.accessCallSourceType.includes(callData.c_source_type_id) || !this.accessCallType.includes(callData.c_call_type_id)) {
-                    return false;
-                }
-
-                if (!this.isAdmin && (!this.userDepartments.includes(callData.c_dep_id) || !this.userProjects.includes(callData.c_project_id))) {
-                    return false;
-                }
-
-                this.callList = [callData, ...this.callList];
-            }
-            //this.callList.push(callData);
+            this.callList = [...this.callList, callData];
+        },
+        validateCall(callData) {
+            let statusId = parseInt(callData.c_status_id);
+            let callTypeId = parseInt(callData.c_call_type_id);
+            let callSourceId = parseInt(callData.c_source_type_id);
+            return this.showStatusList.includes(statusId) &&
+                this.availableCallTypeList.includes(callTypeId) &&
+                this.availableCallSourceList.includes(callSourceId);
         },
         updateCall(callData) {
             this.callList = this.callList.map((x) => {
@@ -497,8 +528,11 @@ var callMapApp = Vue.createApp({
                     this.userList = response.data.userList;
                     this.callStatusList = response.data.callStatusList;
                     this.callTypeList = response.data.callTypeList;
+                    this.availableCallTypeList = response.data.availableCallTypeList;
                     this.callSourceList = response.data.callSourceList;
+                    this.availableCallSourceList = response.data.availableCallSourceList;
                     this.callUserAccessStatusTypeList = response.data.callUserAccessStatusTypeList;
+                    this.callUserAccessStatusTypeListLabel = response.data.callUserAccessStatusTypeListLabel;
                     this.onlineUserList = response.data.onlineUserList;
                     this.userTimeZone = response.data.userTimeZone;
                     this.userStatusList = response.data.userStatusList;
@@ -509,9 +543,9 @@ var callMapApp = Vue.createApp({
                     this.accessCallType = response.data.accessCallType;
                     this.userDepartments = response.data.userDepartments;
                     this.userProjects = response.data.userProjects;
+                    this.showStatusList = response.data.showCallStatusList;
                 })
                 .catch(error => {
-                    console.log(this.callUserAccessStatusTypeList);
                     console.error("There was an error!", error);
                 });
         },
@@ -569,8 +603,9 @@ var callMapApp = Vue.createApp({
         },
 
         getUserIconClass(userId) {
-            let iconClass = 'fa fa-user'
+            let iconClass = 'fa fa-user text-success'
             let item = this.userStatusFind(userId)
+            let isUserIdle = this.idleUserList.find(x => parseInt(x.uo_user_id) === userId);
             if (item) {
                 if ((+item.us_is_on_call)) {
                     iconClass = 'fa fa-phone text-success'
@@ -579,8 +614,28 @@ var callMapApp = Vue.createApp({
                 } else if (+item.us_has_call_access) {
                     iconClass = 'fa fa-random'
                 }
+            } else if (isUserIdle) {
+                iconClass = 'fa fa-user text-warning';
             }
             return iconClass
+        },
+
+        getUserTooltipName(userId) {
+            let tooltip = 'Ready'
+            let item = this.userStatusFind(userId)
+            let isUserIdle = this.idleUserList.find(x => parseInt(x.uo_user_id) === userId);
+            if (item) {
+                if ((+item.us_is_on_call)) {
+                    tooltip = 'On Call'
+                } else if (!(+item.us_call_phone_status)) {
+                    tooltip = 'Busy'
+                } else if (+item.us_has_call_access) {
+                    tooltip = 'Assigned'
+                }
+            } else if (isUserIdle) {
+                tooltip = 'Idle';
+            }
+            return tooltip
         },
 
         userStatusFindIndex(userId) {

@@ -6,6 +6,7 @@ use common\models\Employee;
 use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
 use sales\model\userClientChatData\entity\UserClientChatDataRepository;
+use sales\model\userClientChatData\service\UserClientChatDataService;
 use sales\repositories\clientChatUserChannel\ClientChatUserChannelRepository;
 use sales\services\clientChat\ClientChatRequesterService;
 use sales\services\clientChatMessage\ClientChatMessageService;
@@ -445,20 +446,9 @@ class UserClientChatDataController extends FController
             if (!$userClientChatData = $user->userClientChatData) {
                 throw new \RuntimeException('Not found UserClientChatData for this user(' . $userId . ')');
             }
-            if (!$rocketUsername = $userClientChatData->uccd_username) {
-                throw new \RuntimeException('Not found Username for this user(' . $userId . ')');
-            }
-            if (!$rocketPassword = $userClientChatData->uccd_password) {
-                throw new \RuntimeException('Not found Rocket Chat Auth Password for this user(' . $userId . ')');
-            }
 
-            $authToken = ClientChatRequesterService::refreshToken($rocketUsername, $rocketPassword);
-            $userClientChatData->uccd_auth_token = $authToken;
-            $userClientChatData->uccd_token_expired = \Yii::$app->rchat::generateTokenExpired();
-
-            if (!$userClientChatData->save(false)) {
-                throw new \RuntimeException($userClientChatData->getErrorSummary(false)[0]);
-            }
+            $userClientChatDataService = Yii::createObject(UserClientChatDataService::class);
+            $userClientChatDataService->refreshRocketChatUserToken($userClientChatData);
         } catch (\Throwable $e) {
             return $this->asJson([
                 'error' => true,

@@ -2,12 +2,20 @@
 
 namespace modules\rentCar\src\entity\rentCarQuote;
 
+use common\models\Client;
+use common\models\Lead;
+use common\models\Project;
+use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\interfaces\ProductDataInterface;
 use modules\product\src\interfaces\Quotable;
 use modules\rentCar\src\entity\rentCar\RentCar;
 use modules\rentCar\src\serializer\RentCarQuoteSerializer;
+use sales\entities\EventTrait;
 use sales\helpers\product\ProductQuoteHelper;
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "rent_car_quote".
@@ -41,12 +49,20 @@ use Yii;
  * @property float|null $rcq_system_mark_up
  * @property float|null $rcq_agent_mark_up
  * @property float|null $rcq_service_fee_percent
+ * @property string $rcq_car_reference_id
+ * @property array|null $rcq_booking_json
+ * @property string|null $rcq_booking_id
+ * @property array|null $rcq_contract_request_json
+ * @property string|null $rcq_pick_up_dt
+ * @property string|null $rcq_drop_off_dt
  *
  * @property ProductQuote $rcqProductQuote
  * @property RentCar $rcqRentCar
  */
-class RentCarQuote extends \yii\db\ActiveRecord implements Quotable
+class RentCarQuote extends \yii\db\ActiveRecord implements Quotable, ProductDataInterface
 {
+    use EventTrait;
+
     public function rules(): array
     {
         return [
@@ -107,6 +123,16 @@ class RentCarQuote extends \yii\db\ActiveRecord implements Quotable
 
             [['rcq_system_mark_up', 'rcq_agent_mark_up', 'rcq_service_fee_percent'], 'default', 'value' => 0.00],
             [['rcq_system_mark_up', 'rcq_agent_mark_up', 'rcq_service_fee_percent'], 'number'],
+
+            ['rcq_car_reference_id', 'string'],
+
+            ['rcq_booking_json', 'safe'],
+
+            ['rcq_booking_id', 'string', 'max' => 255],
+
+            ['rcq_contract_request_json', 'safe'],
+
+            [['rcq_pick_up_dt', 'rcq_drop_off_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s', 'skipOnError' => true, 'skipOnEmpty' => true],
         ];
     }
 
@@ -143,7 +169,7 @@ class RentCarQuote extends \yii\db\ActiveRecord implements Quotable
             'rcq_currency' => 'Currency',
             'rcq_advantages' => 'Advantages',
             'rcq_pick_up_location' => 'Pick Up Location',
-            'rcq_drop_of_location' => 'Drop Of Location',
+            'rcq_drop_of_location' => 'Drop Off Location',
             'rcq_created_dt' => 'Created Dt',
             'rcq_updated_dt' => 'Updated Dt',
             'rcq_created_user_id' => 'Created User ID',
@@ -151,6 +177,12 @@ class RentCarQuote extends \yii\db\ActiveRecord implements Quotable
             'rcq_request_hash_key' => 'Request hash key',
             'rcq_system_mark_up' => 'System mark up',
             'rcq_agent_mark_up' => 'Agent mark up',
+            'rcq_car_reference_id' => 'Car reference ID',
+            'rcq_booking_json' => 'Booking json',
+            'rcq_booking_id' => 'Booking ID',
+            'rcq_contract_request_json' => 'Contract request json',
+            'rcq_pick_up_dt' => 'Pick Up DT',
+            'rcq_drop_off_dt' => 'Drop Off DT',
         ];
     }
 
@@ -166,7 +198,7 @@ class RentCarQuote extends \yii\db\ActiveRecord implements Quotable
 
     public function isBookable(): bool
     {
-        return !$this->rcqProductQuote->isDeclined();
+        return (ProductQuoteStatus::isBookable($this->rcqProductQuote->pq_status_id));
     }
 
     public static function findByProductQuote(int $productQuoteId): ?Quotable
@@ -198,5 +230,29 @@ class RentCarQuote extends \yii\db\ActiveRecord implements Quotable
     public function getAgentMarkUp(): float
     {
         return $this->rcq_agent_mark_up;
+    }
+
+    public function getProject(): Project
+    {
+        return $this->rcqProductQuote->pqProduct->prLead->project;
+    }
+
+    public function getLead(): Lead
+    {
+        return $this->rcqProductQuote->pqProduct->prLead;
+    }
+
+    public function getClient(): Client
+    {
+        return $this->rcqProductQuote->pqProduct->prLead->client;
+    }
+
+    public function getOrder(): ?Order
+    {
+        if ($order = ArrayHelper::getValue($this, 'rcqProductQuote.pqOrder')) {
+            /** @var Order $order */
+            return $order;
+        }
+        return null;
     }
 }

@@ -22,6 +22,7 @@ use sales\helpers\app\AppHelper;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\emailList\entity\EmailList;
 use sales\model\phoneList\entity\PhoneList;
+use sales\services\cases\CasesSaleService;
 use thamtech\uuid\helpers\UuidHelper;
 use Yii;
 use yii\console\Controller;
@@ -993,5 +994,71 @@ class OneTimeController extends Controller
                 }
             }
         }
+    }
+
+    public function actionFixSaleSegments(): void
+    {
+        $offset = BaseConsole::input('Start from: ');
+        $limit = BaseConsole::input('Limit: ');
+
+        $offset = (int)$offset;
+        $limit = (int)$limit;
+
+        if ($offset < 1) {
+            echo 'Start must be > 0' . PHP_EOL;
+            return;
+        }
+
+        if ($limit < 1) {
+            echo 'Limit must be > 0' . PHP_EOL;
+            return;
+        }
+
+        $offset--;
+
+        printf(PHP_EOL . '--- Start [' . date('Y-m-d H:i:s') . '] %s ---' . PHP_EOL, $this->ansiFormat(self::class . '\\' . $this->action->id, Console::FG_YELLOW));
+        printf(PHP_EOL);
+        $time_start = microtime(true);
+
+        $query = CaseSale::find()
+            ->offset($offset)
+            ->limit($limit)
+            ->orderBy(['css_cs_id' => SORT_ASC]);
+
+        $count = CaseSale::find()->count();
+
+        Console::startProgress(0, $count);
+        $processed = 0;
+
+        $errors = [];
+        $saleService = Yii::createObject(CasesSaleService::class);
+        foreach ($query->each(20) as $sale) {
+            $processed++;
+            Console::updateProgress($processed, $count);
+            $saleData = $sale->getSaleDataDecoded();
+            if (!$saleData) {
+                continue;
+            }
+            $saleService->prepareSegmentsData($sale, $saleData);
+            if (!$sale->save()) {
+                $errors[] = [
+                    'saleCaseId' => $sale->css_cs_id,
+                    'errors' => $sale->getErrors(),
+                ];
+            }
+        }
+
+        if ($errors) {
+            echo 'Errors: ' . PHP_EOL;
+            VarDumper::dump($errors);
+        }
+
+        Console::endProgress(false);
+
+        $time_end = microtime(true);
+        $time = number_format(round($time_end - $time_start, 2), 2);
+
+        printf(PHP_EOL . 'Execute Time: %s' . PHP_EOL, $this->ansiFormat($time . ' s', Console::FG_RED));
+        printf(PHP_EOL . ' --- End [' . date('Y-m-d H:i:s') . '] %s ---' . PHP_EOL . PHP_EOL, $this->ansiFormat(self::class . '\\' . $this->action->id, Console::FG_YELLOW));
     }
 }

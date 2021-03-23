@@ -19,6 +19,8 @@ use yii\helpers\Url;
 use yii\widgets\Pjax;
 use yii\helpers\ArrayHelper;
 use sales\auth\Auth;
+use common\models\Language;
+use kartik\select2\Select2;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\entities\cases\CasesSearch */
@@ -164,8 +166,27 @@ $gridId = 'cases-grid-id';
                     'style' => 'width:180px'
                 ]
             ],
-            //'cs_gid',
+            [
+                'attribute' => 'client_locale',
+                'value' => 'client.cl_locale',
+                //'filter' => Language::getLocaleList(false)
+                'filter' => Select2::widget([
+                    'name' => 'CasesSearch[client_locale]',
+                    'data' =>  Language::getLocaleList(false),
 
+                    //'theme' => Select2::THEME_DEFAULT,
+                    'size' => Select2::SMALL,
+                    'value' => empty(Yii::$app->request->get('CasesSearch')['client_locale']) ? null : Yii::$app->request->get('CasesSearch')['client_locale'],
+                    //'hideSearch' => false,
+                    'options' => [
+                        'placeholder' => '',
+                    ],
+                    'pluginOptions' => [
+                        'allowClear' => true,
+                    ]
+                ]),
+                'visible' => $searchModel->showFields && in_array('client_locale', $searchModel->showFields, true),
+            ],
             [
                 'class' => \common\components\grid\project\ProjectColumn::class,
                 'attribute' => 'cs_project_id',
@@ -248,7 +269,14 @@ $gridId = 'cases-grid-id';
                 ],
                 'visible' => $searchModel->showFields && in_array('communication', $searchModel->showFields, true),
             ],
-
+            [
+                'label' => 'Files',
+                'attribute' => 'count_files',
+                'contentOptions' => [
+                    'class' => 'text-center'
+                ],
+                'visible' => $searchModel->showFields && in_array('count_files', $searchModel->showFields, true),
+            ],
             [
                 'class' => \common\components\grid\UserSelect2Column::class,
                 'attribute' => 'cs_user_id',

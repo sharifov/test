@@ -2,6 +2,9 @@
 
 namespace modules\product\controllers;
 
+use modules\offer\src\entities\offerProduct\OfferProduct;
+use modules\offer\src\services\OfferPriceUpdater;
+use modules\order\src\services\OrderPriceUpdater;
 use sales\dispatchers\EventDispatcher;
 use sales\helpers\app\AppHelper;
 use Yii;
@@ -21,22 +24,29 @@ use yii\web\Response;
 /**
  * Class ProductQuoteOptionController
  * @property EventDispatcher $eventDispatcher
+ * @property OfferPriceUpdater $offerPriceUpdater
+ * @property OrderPriceUpdater $orderPriceUpdater
  */
 class ProductQuoteOptionController extends FController
 {
     private $eventDispatcher;
 
-    /**
-     * ProductQuoteOptionCrudController constructor.
-     * @param $id
-     * @param $module
-     * @param EventDispatcher $eventDispatcher
-     * @param array $config
-     */
-    public function __construct($id, $module, EventDispatcher $eventDispatcher, $config = [])
-    {
+    private OfferPriceUpdater $offerPriceUpdater;
+
+    private OrderPriceUpdater $orderPriceUpdater;
+
+    public function __construct(
+        $id,
+        $module,
+        EventDispatcher $eventDispatcher,
+        OfferPriceUpdater $offerPriceUpdater,
+        OrderPriceUpdater $orderPriceUpdater,
+        $config = []
+    ) {
         parent::__construct($id, $module, $config);
         $this->eventDispatcher = $eventDispatcher;
+        $this->offerPriceUpdater = $offerPriceUpdater;
+        $this->orderPriceUpdater = $orderPriceUpdater;
     }
 
     /**
@@ -84,11 +94,20 @@ class ProductQuoteOptionController extends FController
                     $this->eventDispatcher->dispatchAll($productQuote->releaseEvents());
 
                     $transaction->commit();
+
+                    if ($productQuote->pq_order_id) {
+                        $this->orderPriceUpdater->update($productQuote->pq_order_id);
+                    }
+
+                    $offers = OfferProduct::find()->select(['op_offer_id'])->andWhere(['op_product_quote_id' => $productQuote->pq_id])->column();
+                    foreach ($offers as $offerId) {
+                        $this->offerPriceUpdater->update($offerId);
+                    }
                 } catch (\Throwable $throwable) {
                     $transaction->rollBack();
                     Yii::error(AppHelper::throwableFormatter($throwable), 'ProductQuoteOptionController:' . __FUNCTION__);
                 }
-                return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-product-quote-list-' . $model->pqoProductQuote->pq_product_id . '"});</script>';
+                return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-product-quote-list-' . $model->pqoProductQuote->pq_product_id . '"});pjaxReload({container: "#pjax-lead-orders", async: false, timeout: 5000});pjaxReload({container: "#pjax-lead-offers", async: false, timeout: 5000});</script>';
             }
         } else {
             $productQuoteId = (int) Yii::$app->request->get('id');
@@ -153,12 +172,22 @@ class ProductQuoteOptionController extends FController
                         $productQuote->recalculateProfitAmount();
                         $this->eventDispatcher->dispatchAll($productQuote->releaseEvents());
                     }
+
                     $transaction->commit();
+
+                    if (isset($model->pqoProductQuote->pq_order_id)) {
+                        $this->orderPriceUpdater->update($model->pqoProductQuote->pq_order_id);
+                    }
+
+                    $offers = OfferProduct::find()->select(['op_offer_id'])->andWhere(['op_product_quote_id' => $model->pqo_product_quote_id])->column();
+                    foreach ($offers as $offerId) {
+                        $this->offerPriceUpdater->update($offerId);
+                    }
                 } catch (\Throwable $throwable) {
                     $transaction->rollBack();
                     Yii::error(AppHelper::throwableFormatter($throwable), 'ProductQuoteOptionController:' . __FUNCTION__);
                 }
-                return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-product-quote-list-' . $model->pqoProductQuote->pq_product_id . '"});</script>';
+                return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-product-quote-list-' . $model->pqoProductQuote->pq_product_id . '"});pjaxReload({container: "#pjax-lead-orders", async: false, timeout: 5000});pjaxReload({container: "#pjax-lead-offers", async: false, timeout: 5000});</script>';
             }
         } else {
             $form->attributes = $model->attributes;
@@ -183,6 +212,8 @@ class ProductQuoteOptionController extends FController
         try {
             $model = $this->findModel($id);
             $productQuote = $model->pqoProductQuote;
+            $orderId = $model->pqoProductQuote->pq_order_id ?? null;
+            $productQuoteId = $model->pqo_product_quote_id;
             if (!$model->delete()) {
                 throw new Exception('Product Quote Option (' . $id . ') not deleted', 2);
             }
@@ -190,6 +221,15 @@ class ProductQuoteOptionController extends FController
             $this->eventDispatcher->dispatchAll($productQuote->releaseEvents());
 
             $transaction->commit();
+
+            if ($orderId) {
+                $this->orderPriceUpdater->update($orderId);
+            }
+
+            $offers = OfferProduct::find()->select(['op_offer_id'])->andWhere(['op_product_quote_id' => $productQuoteId])->column();
+            foreach ($offers as $offerId) {
+                $this->offerPriceUpdater->update($offerId);
+            }
         } catch (\Throwable $throwable) {
             $transaction->rollBack();
             Yii::error(AppHelper::throwableFormatter($throwable), 'ProductQuoteOptionController:' . __FUNCTION__);

@@ -6,28 +6,35 @@ use frontend\controllers\FController;
 use modules\fileStorage\src\services\FileStorageService;
 use modules\fileStorage\src\useCase\fileStorage\rename\RenameForm;
 use modules\fileStorage\src\useCase\fileStorage\update\EditForm;
+use sales\helpers\app\AppHelper;
+use sales\helpers\ErrorsToStringHelper;
 use Yii;
 use modules\fileStorage\src\entity\fileStorage\FileStorage;
 use modules\fileStorage\src\entity\fileStorage\search\FileStorageSearch;
 use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\db\StaleObjectException;
+use modules\fileStorage\src\entity\fileStorage\FileStorageRepository;
 
 /**
  * Class FileStorageController
  *
  * @property FileStorageService $fileStorageService
+ * @property FileStorageRepository $fileStorageRepository
  */
 class FileStorageController extends FController
 {
     private FileStorageService $fileStorageService;
+    private FileStorageRepository $fileStorageRepository;
 
-    public function __construct($id, $module, FileStorageService $fileStorageService, $config = [])
+    public function __construct($id, $module, FileStorageService $fileStorageService, FileStorageRepository $fileStorageRepository, $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->fileStorageService = $fileStorageService;
+        $this->fileStorageRepository = $fileStorageRepository;
     }
 
     /**
@@ -180,6 +187,64 @@ class FileStorageController extends FController
     }
 
     /**
+     * @return Response
+     * @throws BadRequestHttpException
+     */
+    public function actionTitleUpdate(): Response
+    {
+        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
+            try {
+                $titleData = Yii::$app->request->post('file_title');
+                $fileStorageId = array_key_first($titleData);
+                $value = $titleData[$fileStorageId];
+
+                if (is_int($fileStorageId) && $value !== null && $model = $this->findModel($fileStorageId)) {
+                    $model->fs_title = $value;
+                    if (!$model->validate('fs_title')) {
+                        throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($model), -1);
+                    }
+                    $this->fileStorageRepository->save($model);
+                    return $this->asJson(['output' => $value]);
+                }
+                throw new \RuntimeException('FileStorageId and Value is required.', -2);
+            } catch (\DomainException $e) {
+                return $this->asJson(['message' => $e->getMessage()]);
+            } catch (\Throwable $throwable) {
+                AppHelper::throwableLogger($throwable, 'FileStorageController:actionTitleUpdate');
+                return $this->asJson(['message' => $throwable->getMessage()]);
+            }
+        }
+        throw new BadRequestHttpException();
+    }
+
+    /**
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function actionDeleteAjax(): array
+    {
+        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+
+            $result = ['status' => 0, 'message' => ''];
+            $fileId = (int) Yii::$app->request->post('file_id');
+            try {
+                $model = $this->findModel($fileId);
+                $this->fileStorageService->remove($model->fs_id);
+                $result['status'] = 1;
+                $result['message'] = 'Success. Item deleted.';
+            } catch (\DomainException $e) {
+                $result['message'] = $e->getMessage();
+            } catch (\Throwable $throwable) {
+                $result['message'] = 'Server error. Try again later.';
+                AppHelper::throwableLogger($throwable, 'FileStorageController:actionDeleteAjax');
+            }
+            return $result;
+        }
+        throw new BadRequestHttpException();
+    }
+
+    /**
      * @param integer $id
      * @return FileStorage
      * @throws NotFoundHttpException
@@ -190,6 +255,6 @@ class FileStorageController extends FController
             return $model;
         }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+        throw new NotFoundHttpException('The FileStorage not found. ID(' . $id . ')');
     }
 }

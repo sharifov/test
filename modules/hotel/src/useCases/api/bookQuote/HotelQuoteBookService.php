@@ -11,8 +11,11 @@ use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLog;
 use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus;
 use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus as LogStatus;
 use sales\auth\Auth;
+use sales\helpers\app\AppHelper;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
+use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class HotelQuoteBookService
@@ -75,8 +78,8 @@ class HotelQuoteBookService
         }
 
         $params = [
-            'name' => $client->first_name,
-            'surname' => $client->last_name ?: $client->full_name,
+            'name' => self::getClientName($model),
+            'surname' => self::getClientLastName($model),
             'rooms' => $rooms,
         ];
 
@@ -86,16 +89,26 @@ class HotelQuoteBookService
         $apiResponse = $this->apiService->requestBookingHandler('booking/book', $params);
 
         if ($apiResponse['statusApi'] === HotelQuoteServiceLogStatus::STATUS_SUCCESS) {
-            $this->transactionManager->wrap(function () use ($model, $apiResponse, $productQuote, $userId) {
-                $model->setBookingId($apiResponse['data']['reference'])
-                    ->saveChanges();
+            try {
+                $this->transactionManager->wrap(function () use ($model, $apiResponse, $productQuote, $userId) {
+                    if (!$reference = ArrayHelper::getValue($apiResponse, 'data.reference')) {
+                        throw new \RuntimeException('In response from ApiHotelService is missing - data.reference');
+                    }
 
-                $productQuote->booked($userId);
-                $this->productQuoteRepository->save($productQuote);
+                    $model->hq_booking_id = $reference;
+                    $model->hq_json_booking = $apiResponse;
+                    $model->saveChanges();
 
-                $this->status = 1; // success
-                $this->message = 'Booking confirmed. (BookingId: ' . $model->hq_booking_id . ')';
-            });
+                    $productQuote->booked($userId);
+                    $this->productQuoteRepository->save($productQuote);
+
+                    $this->status = 1; // success
+                    $this->message = 'Booking confirmed. (BookingId: ' . $model->hq_booking_id . ')';
+                });
+            } catch (\Throwable $throwable) {
+                $this->message = 'Booking confirmed but not saved. Error: ' . $throwable->getMessage();
+                Yii::error(AppHelper::throwableLog($throwable), 'HotelQuoteBookService:response:book:success');
+            }
         } else {
             $this->message = $apiResponse['message'];
             $this->transactionManager->wrap(function () use ($model, $apiResponse, $userId) {
@@ -110,6 +123,31 @@ class HotelQuoteBookService
             ->saveChanges();
 
         return $this;
+    }
+
+    private static function getClientName(HotelQuote $hotelQuote): string
+    {
+        if ($name = ArrayHelper::getValue($hotelQuote, 'hqProductQuote.pqProduct.holder.ph_first_name')) {
+            return $name;
+        }
+        if ($name = ArrayHelper::getValue($hotelQuote, 'hqProductQuote.pqProduct.prLead.client.first_name')) {
+            return $name;
+        }
+        throw new \DomainException('Client first name not found.');
+    }
+
+    private static function getClientLastName(HotelQuote $hotelQuote): string
+    {
+        if ($surname = ArrayHelper::getValue($hotelQuote, 'hqProductQuote.pqProduct.holder.ph_last_name')) {
+            return $surname;
+        }
+        if ($surname = ArrayHelper::getValue($hotelQuote, 'hqProductQuote.pqProduct.prLead.client.last_name')) {
+            return $surname;
+        }
+        if ($surname = ArrayHelper::getValue($hotelQuote, 'hqProductQuote.pqProduct.prLead.client.full_name')) {
+            return $surname;
+        }
+        throw new \DomainException('Client last name not found.');
     }
 
     /**

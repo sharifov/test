@@ -2,12 +2,14 @@
 
 namespace modules\flight\models;
 
+use modules\flight\src\entities\flightQuoteTrip\serializer\FlightQuoteTripSerializer;
 use Yii;
 
 /**
  * This is the model class for table "flight_quote_trip".
  *
  * @property int $fqt_id
+ * @property string $fqt_uid [varchar(20)]
  * @property string|null $fqt_key
  * @property int $fqt_flight_quote_id
  * @property int|null $fqt_duration
@@ -34,6 +36,7 @@ class FlightQuoteTrip extends \yii\db\ActiveRecord
             [['fqt_flight_quote_id'], 'required'],
             [['fqt_flight_quote_id', 'fqt_duration'], 'integer'],
             [['fqt_key'], 'string', 'max' => 255],
+            [['fqt_uid'], 'string', 'max' => 20],
             [['fqt_flight_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => FlightQuote::class, 'targetAttribute' => ['fqt_flight_quote_id' => 'fq_id']],
         ];
     }
@@ -49,6 +52,14 @@ class FlightQuoteTrip extends \yii\db\ActiveRecord
             'fqt_flight_quote_id' => 'Fqt Flight Quote ID',
             'fqt_duration' => 'Fqt Duration',
         ];
+    }
+
+    public function beforeSave($insert): bool
+    {
+        if ($insert) {
+            $this->fqt_uid = $this->generateUid();
+        }
+        return parent::beforeSave($insert);
     }
 
     /**
@@ -101,5 +112,18 @@ class FlightQuoteTrip extends \yii\db\ActiveRecord
         $clone->fqt_flight_quote_id = $quoteId;
 
         return $clone;
+    }
+
+    public function serialize(): array
+    {
+        return (new FlightQuoteTripSerializer($this))->getData();
+    }
+
+    /**
+     * @return string
+     */
+    public function generateUid(): string
+    {
+        return uniqid('fqt');
     }
 }

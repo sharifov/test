@@ -15,16 +15,18 @@ use yii\httpclient\Response;
  * @package modules\RentCar\components
  *
  * @property string $url
- * @property string $username
- * @property string $password
+ * @property string $refid
+ * @property string $api_key
+ * @property string $format
+ *
  * @property Request $request
  */
-
 class ApiRentCarService extends Component
 {
     public $url;
-    public $username;
-    public $password;
+    public $refid;
+    public $api_key;
+    public $format = 'json2';
     public $options = [CURLOPT_ENCODING => 'gzip'];
 
     private $request;
@@ -40,13 +42,10 @@ class ApiRentCarService extends Component
      */
     private function initRequest(): bool
     {
-        $authStr = base64_encode($this->username . ':' . $this->password);
-
         try {
             $client = new Client();
             $client->setTransport(CurlTransport::class);
             $this->request = $client->createRequest();
-            $this->request->addHeaders(['Authorization' => 'Basic ' . $authStr]);
             return true;
         } catch (\Throwable $throwable) {
             \Yii::error(VarDumper::dumpAsString($throwable, 10), 'ApiRentCarService::initRequest:Throwable');
@@ -66,13 +65,17 @@ class ApiRentCarService extends Component
      */
     protected function sendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []): Response
     {
-        $url = $this->url . $action;
+        $dataParams['api_key'] = $this->api_key;
+        $dataParams['refid'] = $this->refid;
+        $dataParams['format'] = $this->format;
+
+        $url = $this->url . $action . '?' . http_build_query($dataParams);
+
         /* @var $this->request Client */
         $this->request->setMethod($method)
             ->setUrl($url)
             ->setData($data);
 
-        $this->setFormatJson($method);
         $this->request->setOptions(ArrayHelper::merge($this->options, $options));
         if ($headers) {
             $this->request->addHeaders($headers);
@@ -97,46 +100,181 @@ class ApiRentCarService extends Component
         ?string $pickUpTime = null,
         ?string $dropOffTime = null,
         ?string $dropOffCode = null,
-        ?string $dropOffDate = null
+        ?string $dropOffDate = null,
+        ?string $sid = null
     ): array {
         $out = ['error' => false, 'data' => []];
 
-        $data['date_from'] = $pickUpDate;
-        $data['location'] = $pickUpCode;
+        $data['pickup_date'] = $pickUpDate;
+        $data['pickup_code'] = $pickUpCode;
         if ($pickUpTime) {
-            $data['start_time'] = $pickUpTime;
-        }
-        if ($dropOffTime) {
-            $data['end_time'] = $dropOffTime;
-        }
-        if ($dropOffDate) {
-            $data['date_to'] = $dropOffDate;
+            $data['pickup_time'] = $pickUpTime;
         }
         if ($dropOffCode) {
-            /* TODO::  */
+            $data['dropoff_code'] = $dropOffCode;
+        }
+        if ($dropOffDate) {
+            $data['dropoff_date'] = $dropOffDate;
+        }
+        if ($dropOffTime) {
+            $data['dropoff_time'] = $dropOffTime;
+        }
+        if ($sid) {
+            $data['sid'] = $sid;
         }
 
         try {
-            $response = $this->sendRequest('product/rentcar-search', $data, 'post');
+            $response = $this->sendRequest('getResultsV3', $data, 'get');
 
-            if ($response->isOk && !isset($response->data['error'])) {
-                if (isset($response->data['data']['carSearch']['listings'])) {
-                    $out['data'] = $response->data['data']['carSearch']['listings'];
+            if ($response->isOk) {
+                if (isset($response->data['getCarResultsV3']['results']['result_list'])) {
+                    $out['data'] = $response->data['getCarResultsV3']['results'];
                 } else {
-                    $out['error'] = 'Not found in response array data key [carSearch]';
+                    $out['error'] = 'In response not found getCarResultsV3.results.result_list';
+                    \Yii::warning([
+                        'error' => $out['error'],
+                        'data' => $response->data ?? [],
+                    ], 'ApiRentCarService:search');
                 }
-            } elseif (isset($response->data['error'])) {
-                $out['error'] = VarDumper::dumpAsString($response->data['error']);
-                \Yii::error($out['error'], 'Component:ApiRentCarService::search');
             } else {
                 $out['error'] = 'Error (' . $response->statusCode . '): ' . $response->content;
-                \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:ApiRentCarService::search');
+                \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:ApiRentCarService:search');
             }
         } catch (\Throwable $throwable) {
-            \Yii::error(VarDumper::dumpAsString($throwable, 10), 'Component:ApiRentCarService::throwable');
+            \Yii::error(VarDumper::dumpAsString($throwable, 10), 'Component:ApiRentCarService:throwable');
             $out['error'] = 'ApiRentCarService error: ' . $throwable->getMessage();
         }
 
+        return $out;
+    }
+
+    public function contractRequest(string $referenceId, ?string $sid = null): array
+    {
+        $out = ['error' => false, 'data' => []];
+
+        $data['ppn_bundle'] = $referenceId;
+        if ($sid) {
+            $data['sid'] = $sid;
+        }
+
+        try {
+            $response = $this->sendRequest('getContractRequest', $data, 'get');
+
+            if ($response->isOk) {
+                if (isset($response->data['getCarContractRequest']['results']['status'])) {
+                    $out['data'] = $response->data['getCarContractRequest']['results'];
+                } else {
+                    $out['error'] = 'In response not found getCarContractRequest.results.status';
+                    \Yii::warning([
+                        'error' => $out['error'],
+                        'data' => $response->data ?? [],
+                    ], 'ApiRentCarService:contractRequest');
+                }
+            } else {
+                $out['error'] = 'Error (' . $response->statusCode . '): ' . $response->content;
+                \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ApiRentCarService:contractRequest:error');
+            }
+        } catch (\Throwable $throwable) {
+            \Yii::error(VarDumper::dumpAsString($throwable, 10), 'ApiRentCarService:contractRequest:throwable');
+            $out['error'] = 'ApiRentCarService error: ' . $throwable->getMessage();
+        }
+        return $out;
+    }
+
+    /**
+     * @param string $referenceId
+     * @param string $firstName
+     * @param string $lastName
+     * @param string $phone
+     * @param string $email
+     * @param string|null $sid
+     * @return array
+     */
+    public function book(
+        string $referenceId,
+        string $firstName,
+        string $lastName,
+        string $phone,
+        string $email,
+        ?string $sid = null
+    ) {
+        $out = ['error' => false, 'data' => []];
+
+        $data['ppn_bundle'] = $referenceId;
+        $data['car_book_bundle'] = $referenceId;
+        $data['driver_first_name'] = $firstName;
+        $data['driver_last_name'] = $lastName;
+        $data['cust_phone'] = $phone;
+        $data['cust_email'] = $email;
+        if ($sid) {
+            $data['sid'] = $sid;
+        }
+
+        try {
+            $response = $this->sendRequest('getBookRequest', $data, 'post');
+
+            if ($response->isOk) {
+                if ($results = ArrayHelper::getValue($response->data, 'getCarBookRequest.results')) {
+                    $out['data'] = $results;
+                } elseif ($error = ArrayHelper::getValue($response->data, 'getCarBookRequest.error.status')) {
+                    $out['error'] = $error;
+                } else {
+                    $out['error'] = 'In response not found results|error';
+                    \Yii::warning([
+                        'requestData' => $out['error'],
+                        'responseData' => $response->data ?? [],
+                    ], 'ApiRentCarService::book');
+                }
+            } else {
+                $out['error'] = 'Error (' . $response->statusCode . '): ' . $response->content;
+                \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ApiRentCarService:book:error');
+            }
+        } catch (\Throwable $throwable) {
+            \Yii::error(VarDumper::dumpAsString($throwable, 10), 'ApiRentCarService:book:throwable');
+            $out['error'] = 'ApiRentCarService error: ' . $throwable->getMessage();
+        }
+        return $out;
+    }
+
+    /**
+     * @param $bookingId
+     * @param string $email
+     * @param string|null $sid
+     * @return array
+     */
+    public function cancel($bookingId, string $email, ?string $sid = null): array
+    {
+        $out = ['error' => false, 'data' => []];
+
+        $data['booking_id'] = $bookingId;
+        $data['email'] = $email;
+        if ($sid) {
+            $data['sid'] = $sid;
+        }
+
+        try {
+            $response = $this->sendRequest('getCancelRequest', $data, 'get');
+
+            if ($response->isOk) {
+                if ($results = ArrayHelper::getValue($response->data, 'getCarCancelRequest.results')) {
+                    $out['data'] = $results;
+                } elseif ($error = ArrayHelper::getValue($response->data, 'getCarCancelRequest.error.status')) {
+                    $out['error'] = $error;
+                } else {
+                    $out['error'] = 'In response not found getCancelRequest.results.status';
+                    \Yii::warning([
+                        'error' => $out['error'],
+                        'data' => $response->data ?? [],
+                    ], 'ApiRentCarService:cancel');
+                }
+            } else {
+                $out['error'] = 'Error (' . $response->statusCode . '): ' . $response->content;
+                \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ApiRentCarService:cancel:error');
+            }
+        } catch (\Throwable $throwable) {
+            \Yii::error(VarDumper::dumpAsString($throwable, 10), 'ApiRentCarService:cancel:throwable');
+            $out['error'] = 'ApiRentCarService error: ' . $throwable->getMessage();
+        }
         return $out;
     }
 }

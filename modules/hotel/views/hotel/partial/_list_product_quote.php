@@ -11,6 +11,8 @@ use modules\hotel\models\Hotel;
 use modules\hotel\models\HotelQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
+use sales\auth\Auth;
+use sales\services\CurrencyHelper;
 use yii\data\ArrayDataProvider;
 use yii\helpers\Url;
 use yii\web\View;
@@ -47,9 +49,8 @@ use yii\widgets\Pjax;
                     text: data.message,
                     hide: true
                 });
-                pjaxReload({
-                    container: '#pjax-product-quote-list-' + productId
-                });
+                pjaxReload({container: '#pjax-product-quote-list-' + productId});
+                addFileToFileStorageList();                
             } else {
                 new PNotify({
                     title: 'Booking failed',
@@ -60,6 +61,47 @@ use yii\widgets\Pjax;
                 pjaxReload({
                     container: '#pjax-product-quote-list-' + productId
                 });
+            }
+        })
+        .fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        }).always(function() {
+            $('#preloader').addClass('d-none');
+        });
+    });
+    
+    $('body').off('click', '.js-btn-generate-pdf-quote').on('click', '.js-btn-generate-pdf-quote', function (e) {
+
+        if(!confirm('Are you sure you want to generate documents?')) {
+            return '';
+        }
+
+        e.preventDefault();
+        $('#preloader').removeClass('d-none');
+        let quoteId = $(this).data('hotel-quote-id');
+                
+        $.ajax({
+          url: $(this).data('url'),
+          type: 'post',
+          data: {'id': quoteId},
+          cache: false,
+          dataType: 'json',
+        }).done(function(data) {
+            if (parseInt(data.status) === 1) {
+                new PNotify({
+                    title: 'Document have been successfully generated',
+                    type: 'success',
+                    text: data.message,
+                    hide: true
+                });                
+                addFileToFileStorageList();                
+            } else {
+                new PNotify({
+                    title: 'File generated failed',
+                    type: 'error',
+                    text: data.message,
+                    hide: true
+                });                
             }
         })
         .fail(function( jqXHR, textStatus ) {
@@ -228,7 +270,18 @@ JS;
                             ]
                         ) ?>
                     <?php endif; ?>
-                    <?php if ($model->isBooking()) : ?>
+                    <?php if (Auth::can('/hotel/hotel-quote/ajax-file-generate') && $model->isBooked()) : ?>
+                        <?= Html::a(
+                            '<i class="fa fa-file-pdf-o"></i> Generate PDF',
+                            null,
+                            [
+                                'class' => 'dropdown-item js-btn-generate-pdf-quote',
+                                'data-url' => Url::to('/hotel/hotel-quote/ajax-file-generate'),
+                                'data-hotel-quote-id' => $model->hq_id,
+                            ]
+                        ) ?>
+                    <?php endif; ?>
+                    <?php if ($model->isBooked()) : ?>
                         <?= Html::a(
                             '<i class="fa fa-share-square"></i> Cancel Book',
                             null,
@@ -258,13 +311,15 @@ JS;
                         'data-gid' => $model->hqProductQuote->pq_gid,
                     ]) ?>
 
-                    <div class="dropdown-divider"></div>
-                    <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [
-                        'class' => 'dropdown-item text-danger btn-delete-product-quote',
-                        'data-product-quote-id' => $model->hq_product_quote_id,
-                        'data-hotel-quote-id' => $model->hq_id,
-                        'data-product-id' => $model->hqProductQuote->pq_product_id,
-                    ]) ?>
+                    <?php if ($model->hqProductQuote->isDeletable()) : ?>
+                        <div class="dropdown-divider"></div>
+                        <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [
+                            'class' => 'dropdown-item text-danger btn-delete-product-quote',
+                            'data-product-quote-id' => $model->hq_product_quote_id,
+                            'data-hotel-quote-id' => $model->hq_id,
+                            'data-product-id' => $model->hqProductQuote->pq_product_id,
+                        ]) ?>
+                    <?php endif; ?>
                 </div>
             </li>
         </ul>
@@ -289,6 +344,8 @@ JS;
             $totalNp = 0;
             $totalMkp = 0;
             $totalExMkp = 0;
+            $totalSfs = 0;
+            $totalSp = 0;
             ?>
             <div class="overflow_auto" style="overflow: auto">
                 <table class="table table-striped table-bordered">
@@ -314,6 +371,10 @@ JS;
                         $totalExMkp += $room->hqr_agent_mark_up;
 
                         $sfs = round(($room->hqr_amount + $room->hqr_system_mark_up + $room->hqr_agent_mark_up) * $room->hqr_service_fee_percent / 100, 2);
+                        $totalSfs += $sfs;
+
+                        $sp = CurrencyHelper::roundUp($room->hqr_amount + $room->hqr_system_mark_up + $room->hqr_agent_mark_up + $sfs);
+                        $totalSp += $sp;
                         ?>
 
                     <tr>
@@ -361,7 +422,7 @@ JS;
                         <td><?= Html::encode($room->hqr_service_fee_percent) ?>%</td>
                         <td><?= $sfs ?></td>
     <!--                    <td>--><?php ////=Html::encode($room->hqr_id)?><!--</td>-->
-                        <td class="text-right"><?=number_format($room->hqr_amount + $room->hqr_system_mark_up + $room->hqr_agent_mark_up + $sfs, 2)?> <?=Html::encode($room->hqr_currency)?></td>
+                        <td class="text-right"><?= $sp ?> <?=Html::encode($room->hqr_currency)?></td>
                     </tr>
                     <?php endforeach; ?>
                     <tr>
@@ -375,17 +436,47 @@ JS;
                         <td class="text-right"><?= number_format($totalMkp, 2) ?></td>
                         <td class="text-right"><?= number_format($totalExMkp, 2) ?></td>
                         <td class="text-right"></td>
-                        <td class="text-right"><?= number_format($model->hqProductQuote->pq_service_fee_sum, 2) ?></td>
+                        <td class="text-right"><?= number_format($totalSfs, 2) ?></td>
 
                         <?php
                             $price = round((float) $model->hqProductQuote->pq_price, 2);
                             $totalAmountRoom = round($totalAmountRoom, 2);
                         ?>
 
-                        <td class="text-right <?=($totalAmountRoom !== $price) ? 'danger' : ''?>">
-                            <b title="<?=$totalAmountRoom?> & <?=$price?>"><?=number_format($price, 2)?> USD</b>
+                        <td class="text-right">
+                            <b><?=number_format($totalSp, 2)?> USD</b>
                         </td>
                     </tr>
+                    <tr>
+                        <td colspan="3" class="text-right">Total: </td>
+                        <td class="text-center">
+                            <?=$adlTotalCount ? '<i class="fa fa-user"></i> ' . $adlTotalCount : '-'?>
+                            <?=$chdTotalCount ? ', <i class="fa fa-child"></i> ' . $chdTotalCount : '-'?>
+                        </td>
+                        <td class="text-right"></td>
+                        <td class="text-right"><?= number_format($totalNp * $model->getCountDays(), 2) ?></td>
+                        <td class="text-right"><?= number_format($totalMkp * $model->getCountDays(), 2) ?></td>
+                        <td class="text-right"><?= number_format($totalExMkp * $model->getCountDays(), 2) ?></td>
+                        <td class="text-right"></td>
+                        <?php
+                            $totalFeeSum = round($totalSfs * $model->getCountDays(), 2);
+                            $feeSum = round((float) $model->hqProductQuote->pq_service_fee_sum, 2);
+                        ?>
+
+                        <td class="text-right <?=($totalFeeSum !== $feeSum) ? 'danger' : ''?>">
+                            <b title="<?=$totalFeeSum?> & <?=$feeSum?>"><?=number_format($feeSum, 2)?> USD</b>
+                        </td>
+
+                        <?php
+                            $totalPrice = round($totalSp * $model->getCountDays(), 2);
+                            $price = round((float) $model->hqProductQuote->pq_price, 2);
+                        ?>
+
+                        <td class="text-right <?=($totalPrice !== $price) ? 'danger' : ''?>">
+                            <b title="<?=$totalPrice?> & <?=$price?>"><?=number_format($price, 2)?> USD</b>
+                        </td>
+                    </tr>
+
                 </table>
             </div>
         <?php endif; ?>

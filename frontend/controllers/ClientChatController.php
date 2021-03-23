@@ -20,6 +20,10 @@ use frontend\widgets\clientChat\ClientChatAccessWidget;
 use frontend\widgets\notification\NotificationSocketWidget;
 use frontend\widgets\notification\NotificationWidget;
 use http\Exception\RuntimeException;
+use Markdownify\Converter;
+use Markdownify\ConverterExtra;
+use modules\offer\src\entities\offer\OfferQuery;
+use modules\offer\src\entities\offer\search\OfferSearch;
 use sales\auth\Auth;
 use sales\entities\cases\CasesSearch;
 use sales\entities\chat\ChatExtendedGraphsSearch;
@@ -49,19 +53,18 @@ use sales\model\clientChat\useCase\close\ClientChatCloseForm;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChat\useCase\hold\ClientChatHoldForm;
 use sales\model\clientChat\useCase\sendOffer\GenerateImagesForm;
+use sales\model\clientChat\useCase\sendOffer\SendOfferForm;
 use sales\model\clientChat\useCase\transfer\ClientChatTransferForm;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatCouchNote\ClientChatCouchNoteRepository;
 use sales\model\clientChatCouchNote\entity\ClientChatCouchNote;
 use sales\model\clientChatHold\ClientChatHoldRepository;
 use sales\model\clientChatHold\entity\ClientChatHold;
-use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatNote\ClientChatNoteRepository;
 use sales\model\clientChatNote\entity\ClientChatNote;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatRequest\entity\search\ClientChatRequestSearch;
 use sales\model\clientChatRequest\repository\ClientChatRequestRepository;
-use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\model\clientChatUnread\entity\ClientChatUnread;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
@@ -114,7 +117,6 @@ use yii\widgets\ActiveForm;
  * @property TransactionManager $transactionManager
  * @property ClientChatChannelRepository $clientChatChannelRepository
  * @property ProjectRepository $projectRepository
- * @property ClientChatRequestService $clientChatRequestService
  * @property ClientChatRequestRepository $clientChatRequestRepository
  * @property ClientChatStatusLogService $clientChatStatusLogService
  * @property ClientChatStatusLogRepository $clientChatStatusLogRepository
@@ -168,10 +170,6 @@ class ClientChatController extends FController
      */
     private ProjectRepository $projectRepository;
     /**
-     * @var ClientChatRequestService
-     */
-    private ClientChatRequestService $clientChatRequestService;
-    /**
      * @var ClientChatRequestRepository
      */
     private ClientChatRequestRepository $clientChatRequestRepository;
@@ -203,7 +201,6 @@ class ClientChatController extends FController
         TransactionManager $transactionManager,
         ClientChatChannelRepository $clientChatChannelRepository,
         ProjectRepository $projectRepository,
-        ClientChatRequestService $clientChatRequestService,
         ClientChatRequestRepository $clientChatRequestRepository,
         ClientChatStatusLogService $clientChatStatusLogService,
         ClientChatStatusLogRepository $clientChatStatusLogRepository,
@@ -225,7 +222,6 @@ class ClientChatController extends FController
         $this->transactionManager = $transactionManager;
         $this->clientChatChannelRepository = $clientChatChannelRepository;
         $this->projectRepository = $projectRepository;
-        $this->clientChatRequestService = $clientChatRequestService;
         $this->clientChatRequestRepository = $clientChatRequestRepository;
         $this->clientChatStatusLogService = $clientChatStatusLogService;
         $this->clientChatStatusLogRepository = $clientChatStatusLogRepository;
@@ -370,7 +366,7 @@ class ClientChatController extends FController
                         'clientChatId' => $clientChat ? $clientChat->cch_id : '',
                         'formatter' => $formatter,
                         'resetUnreadMessagesChatId' => $resetUnreadMessagesChatId,
-                        'userId' => Auth::id(),
+                        'user' => Auth::user(),
                     ]);
                     $response['page'] = $page + 1;
                 }
@@ -394,6 +390,138 @@ class ClientChatController extends FController
         }
 
         return $this->render('index', [
+            'dataProvider' => $dataProvider,
+            'clientChat' => $clientChat,
+            'client' => $clientChat->cchClient ?? null,
+            'history' => null,
+            'filter' => $filter,
+            'actionPermissions' => $this->actionPermissions,
+            'countFreeToTake' => $countFreeToTake,
+            'accessChatError' => $accessChatError,
+            'resetUnreadMessagesChatId' => $resetUnreadMessagesChatId,
+            'couchNoteForm' => new ClientChatCouchNoteForm($clientChat, Auth::user()),
+            'listParams' => [
+                'page' => $page + 1,
+                'isFullList' => $isFullList,
+                'moreCount' => $moreCount,
+            ]
+        ]);
+    }
+
+    public function actionDashboardV2()
+    {
+        $filter = new FilterForm($this->channels);
+
+        if (!$filter->load(Yii::$app->request->get()) || !$filter->validate()) {
+            $filter->loadDefaultValues();
+        }
+
+        $filter->loadDefaultValuesByPermissions();
+
+        $page = (int)\Yii::$app->request->get('page');
+        if ($page < 1) {
+            $page = 1;
+        }
+
+        if ($filter->resetAdditionalFilter) {
+            $filter->resetAdditionalAttributes();
+        }
+
+        $countFreeToTake = 0;
+        $dataProvider = null;
+
+        if ($this->channels) {
+            if (Yii::$app->request->get('act') === 'select-all') {
+                $chatIds = (new ClientChatSearch())->getListOfChatsIds(Auth::user(), array_keys($this->channels), $filter);
+                return $this->asJson($chatIds);
+            }
+
+            $dataProvider = (new ClientChatSearch())->getListOfChats(Auth::user(), array_keys($this->channels), $filter);
+
+            if ($filter->group === GroupFilter::FREE_TO_TAKE) {
+                $countFreeToTake = $dataProvider->getTotalCount();
+            } else {
+                $countFreeToTake = (new ClientChatSearch())->countFreeToTake(Auth::user(), array_keys($this->channels), $filter);
+            }
+        }
+
+        $clientChat = null;
+        $accessChatError = false;
+        $resetUnreadMessagesChatId = null;
+        $chid = (int)Yii::$app->request->get('chid');
+
+        if ($chid) {
+            try {
+                $clientChat = $this->clientChatRepository->findById($chid);
+
+                if (!Auth::can('client-chat/view', ['chat' => $clientChat])) {
+                    $accessChatError = true;
+                    throw new \DomainException('You do not have access to this chat');
+                }
+
+                if ($clientChat->cch_owner_user_id && $clientChat->isOwner(Auth::id())) {
+                    $this->clientChatMessageService->discardUnreadMessages(
+                        $clientChat->cch_id,
+                        $clientChat->cch_owner_user_id
+                    );
+                    $resetUnreadMessagesChatId = $clientChat->cch_rid;
+                }
+            } catch (NotFoundException $e) {
+                $clientChat = null;
+            } catch (\DomainException $e) {
+                $clientChat = null;
+            }
+        }
+
+        $loadingChannels = \Yii::$app->request->get('loadingChannels');
+        if ($dataProvider) {
+            if ($loadingChannels) {
+                $dataProvider->pagination->setPage($page - 1);
+//            if (\Yii::$app->request->post('loadingChannels')) {
+//                $dataProvider->pagination->page = $filter->page;
+//            } else {
+//                $dataProvider->pagination->page = $filter->page = 0;
+//            }
+                $alreadyLoadedCount = $dataProvider->getPagination()->getPageSize() * ($page - 1) + $dataProvider->getCount();
+                $response = [
+                    'html' => '',
+                    'page' => $page,
+                    'isFullList' => $alreadyLoadedCount >= $dataProvider->getTotalCount(),
+                    'moreCount' => $dataProvider->getTotalCount() - $alreadyLoadedCount,
+                ];
+
+                if ($dataProvider->getCount()) {
+                    $formatter = new Formatter();
+                    $formatter->timeZone = Auth::user()->timezone;
+                    $response['html'] = $this->renderPartial('partial/_client-chat-item', [
+                        'clientChats' => $dataProvider->getModels(),
+                        'clientChatId' => $clientChat ? $clientChat->cch_id : '',
+                        'formatter' => $formatter,
+                        'resetUnreadMessagesChatId' => $resetUnreadMessagesChatId,
+                        'user' => Auth::user(),
+                    ]);
+                    $response['page'] = $page + 1;
+                }
+
+                return $this->asJson($response);
+            } else {
+                if ($page > 1) {
+                    $dataProvider->pagination->setPage(0);
+                    $dataProvider->pagination->pageSize = $page * $dataProvider->pagination->pageSize;
+                } else {
+                    $dataProvider->pagination->setPage($page - 1);
+                }
+            }
+        }
+
+        $isFullList = $dataProvider ? ($dataProvider->getCount() === $dataProvider->getTotalCount()) : false;
+        if ($isFullList || !$dataProvider) {
+            $moreCount = 0;
+        } else {
+            $moreCount = $dataProvider->getTotalCount() - $dataProvider->getCount();
+        }
+
+        return $this->render('dashboard-v2', [
             'dataProvider' => $dataProvider,
             'clientChat' => $clientChat,
             'client' => $clientChat->cchClient ?? null,
@@ -1245,7 +1373,48 @@ class ClientChatController extends FController
         }
     }
 
-    public function actionSendOfferList(): string
+    public function actionSendOfferList()
+    {
+        $chatId = (int)\Yii::$app->request->post('chat_id');
+        $leadId = (int)\Yii::$app->request->post('lead_id');
+
+        $errorMessage = '';
+        $dataProvider = null;
+
+        try {
+            $clientChat = $this->clientChatRepository->findById($chatId);
+            if (!Auth::can('client-chat/manage', ['chat' => $clientChat])) {
+                throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+            }
+            $lead = $this->leadRepository->find($leadId);
+
+            if (!$clientChat->isAssignedLead($lead->id)) {
+                throw new \DomainException('Lead is not assigned to Client Chat');
+            }
+
+            if (!OfferQuery::existsOffersByLeadId($lead->id)) {
+                throw new \DomainException('Not found Offers for Send');
+            }
+
+            $searchOffer = new OfferSearch();
+            $dataProvider = $searchOffer->searchByLead([
+                $searchOffer->formName() => [
+                    'of_lead_id' => $lead->id
+                ],
+            ], Auth::user());
+        } catch (\DomainException $e) {
+            $errorMessage = $e->getMessage();
+        }
+
+        return $this->renderAjax('partial/_send_offer_list', [
+            'dataProvider' => $dataProvider,
+            'errorMessage' => $errorMessage,
+            'chatId' => $chatId,
+            'leadId' => $leadId,
+        ]);
+    }
+
+    public function actionSendQuoteList(): string
     {
         $chatId = (int)\Yii::$app->request->post('chat_id');
         $leadId = (int)\Yii::$app->request->post('lead_id');
@@ -1259,7 +1428,7 @@ class ClientChatController extends FController
             }
             $lead = $this->leadRepository->find($leadId);
 
-            if (!$this->sendOfferCheckAccess($clientChat, Auth::user())) {
+            if (!$this->sendQuoteCheckAccess($clientChat, Auth::user())) {
                 throw new \DomainException('Access denied.');
             }
 
@@ -1271,12 +1440,12 @@ class ClientChatController extends FController
                 throw new \DomainException('Not found Quote for Send');
             }
 
-            $dataProvider = $this->getSendOfferProvider($lead);
+            $dataProvider = $this->getSendQuoteProvider($lead);
         } catch (\DomainException $e) {
             $errorMessage = $e->getMessage();
         }
 
-        return $this->renderAjax('partial/_send_offer_list', [
+        return $this->renderAjax('partial/_send_quote_list', [
             'dataProvider' => $dataProvider,
             'errorMessage' => $errorMessage,
             'chatId' => $chatId,
@@ -1284,7 +1453,7 @@ class ClientChatController extends FController
         ]);
     }
 
-    public function actionSendOfferGenerate(): string
+    public function actionSendQuoteGenerate(): string
     {
         $errorMessage = '';
         $captures = [];
@@ -1292,7 +1461,7 @@ class ClientChatController extends FController
         $form = new GenerateImagesForm();
 
         if (!$form->load(Yii::$app->request->post())) {
-            return $this->renderAjax('partial/_send_offer_generate', [
+            return $this->renderAjax('partial/_send_quote_generate', [
                 'errorMessage' => 'Cant load Data',
                 'form' => $form,
                 'captures' => $captures,
@@ -1300,7 +1469,7 @@ class ClientChatController extends FController
         }
 
         if (!$form->validate()) {
-            return $this->renderAjax('partial/_send_offer_generate', [
+            return $this->renderAjax('partial/_send_quote_generate', [
                 'errorMessage' => '',
                 'form' => $form,
                 'captures' => $captures,
@@ -1308,7 +1477,7 @@ class ClientChatController extends FController
         }
 
         try {
-            if (!$this->sendOfferCheckAccess($form->chat, Auth::user())) {
+            if (!$this->sendQuoteCheckAccess($form->chat, Auth::user())) {
                 throw new \DomainException('Access denied.');
             }
             foreach ($form->quotes as $quote) {
@@ -1353,14 +1522,14 @@ class ClientChatController extends FController
             $errorMessage = $e->getMessage();
         }
 
-        return $this->renderAjax('partial/_send_offer_generate', [
+        return $this->renderAjax('partial/_send_quote_generate', [
             'errorMessage' => $errorMessage,
             'form' => $form,
             'captures' => ArrayHelper::getColumn($captures, 'data'),
         ]);
     }
 
-    public function actionSendOffer(): Response
+    public function actionSendQuote(): Response
     {
         $out = ['error' => false, 'message' => '', 'warning' => ''];
         $chatId = (int)\Yii::$app->request->post('chatId');
@@ -1374,7 +1543,7 @@ class ClientChatController extends FController
                 throw new \DomainException('Not found saved quote captures. Please try again.');
             }
 
-            $message = $this->createOfferMessage($clientChat, ArrayHelper::getColumn($captures, 'data'));
+            $message = $this->createQuoteMessage($clientChat, ArrayHelper::getColumn($captures, 'data'));
 
             if (($rocketUserId = UserClientChatDataService::getCurrentRcUserId()) && ($rocketToken = UserClientChatDataService::getCurrentAuthToken())) {
                 $headers = [
@@ -1394,10 +1563,57 @@ class ClientChatController extends FController
                 if ($quote) {
                     $quote->setStatusSend();
                     if (!$this->quoteRepository->save($quote)) {
-                        Yii::error($quote->errors, 'ClientChatController::sendOffer:Quote:save');
+                        Yii::error($quote->errors, 'ClientChatController::sendQuote:Quote:save');
                         $out['warning'] = 'Update status of Quote(' . $quoteId . ') failed';
                     }
                 }
+            }
+        } catch (\DomainException $e) {
+            $out['error'] = true;
+            $out['message'] = $e->getMessage();
+        }
+
+        return $this->asJson($out);
+    }
+
+    public function actionSendOffer(): Response
+    {
+        $out = ['error' => false, 'message' => '', 'warning' => ''];
+        try {
+            $form = new SendOfferForm();
+
+            if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+                $clientChat = $this->clientChatRepository->findById($form->chatId);
+                $lead = $this->leadRepository->find($form->leadId);
+
+                $message = $this->renderPartial('partial/_send_offer_message', [
+                    'offers' => $form->offers
+                ]);
+
+                $converter = new ConverterExtra(Converter::LINK_IN_PARAGRAPH);
+                $data = [
+                    'message' => [
+                        'rid' => $clientChat->cch_rid,
+                        'msg' => trim($converter->parseString($message))
+                    ],
+                ];
+
+                if (($rocketUserId = UserClientChatDataService::getCurrentRcUserId()) && ($rocketToken = UserClientChatDataService::getCurrentAuthToken())) {
+                    $headers = [
+                        'X-User-Id' => $rocketUserId,
+                        'X-Auth-Token' => $rocketToken,
+                    ];
+                } else {
+                    $headers = Yii::$app->rchat->getSystemAuthDataHeader();
+                }
+
+                $response = Yii::$app->chatBot->sendMessage($data, $headers);
+
+                if ($response['error']) {
+                    throw new \DomainException($response['error']['error'] ?? 'Unknown error from chat bot');
+                }
+            } else {
+                throw new \DomainException($form->getErrorSummary(true)[0]);
             }
         } catch (\DomainException $e) {
             $out['error'] = true;
@@ -1456,7 +1672,7 @@ class ClientChatController extends FController
 
         if (!$this->saveQuoteCaptures($captures, Auth::id(), $chatId, $leadId)) {
             return $this->asJson([
-                'view' => $this->renderAjax('partial/_send_offer_generate', [
+                'view' => $this->renderAjax('partial/_send_quote_generate', [
                     'errorMessage' => '',
                     'form' => $form,
                     'captures' => ArrayHelper::getColumn($originalCaptures, 'data'),
@@ -1466,7 +1682,7 @@ class ClientChatController extends FController
         }
 
         return $this->asJson([
-            'view' => $this->renderAjax('partial/_send_offer_generate', [
+            'view' => $this->renderAjax('partial/_send_quote_generate', [
                 'errorMessage' => '',
                 'form' => $form,
                 'captures' => ArrayHelper::getColumn($captures, 'data'),
@@ -1667,7 +1883,7 @@ class ClientChatController extends FController
         ]);
     }
 
-    private function createOfferMessage(ClientChat $chat, array $captures): array
+    private function createQuoteMessage(ClientChat $chat, array $captures): array
     {
         $attachments = [];
 
@@ -1706,12 +1922,12 @@ class ClientChatController extends FController
     }
 
     //todo
-    private function sendOfferCheckAccess($chat, $user): bool
+    private function sendQuoteCheckAccess($chat, $user): bool
     {
         return true;
     }
 
-    private function getSendOfferProvider(Lead $lead): ActiveDataProvider
+    private function getSendQuoteProvider(Lead $lead): ActiveDataProvider
     {
         return $lead->getQuotesProvider([], [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED]);
     }
@@ -2218,6 +2434,8 @@ class ClientChatController extends FController
                 $result['isClosed'] = (int) $clientChat->isInClosedStatusGroup();
                 $result['iframe'] = (new ClientChatIframeHelper($clientChat))->generateIframe();
                 $result['isShowInput'] = (int) ClientChatHelper::isShowInput($clientChat, Auth::user());
+                $result['readonly'] = (int) ClientChatHelper::isDialogReadOnly($clientChat, Auth::user());
+                $result['rid'] = $clientChat->cch_rid;
             } catch (\Throwable $throwable) {
                 AppHelper::throwableLogger(
                     $throwable,

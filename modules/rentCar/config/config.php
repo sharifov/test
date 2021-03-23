@@ -4,12 +4,9 @@ return [
     'components' => [
         'apiService' => [
             'class' => \modules\rentCar\components\ApiRentCarService::class,
-            'url' => 'https://stage-communication-api.travel-dev.com/v1/',
-            'username' => 'sales',
-            'password' => 'Sales2018!',
+            'url' => 'https://api-sandbox.rezserver.com/api/car/',
+            'refid' => '',
+            'api_key' => '',
         ],
-    ],
-    'params' => [
-
     ],
 ];

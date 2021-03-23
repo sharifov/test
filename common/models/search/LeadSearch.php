@@ -18,6 +18,7 @@ use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use common\models\UserProfile;
 use Faker\Provider\DateTime;
+use modules\fileStorage\src\entity\fileLead\FileLead;
 use sales\access\EmployeeGroupAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\model\callLog\entity\callLog\CallLog;
@@ -42,6 +43,7 @@ use common\models\LeadFlow;
 use common\models\ProfitSplit;
 use common\models\TipsSplit;
 use common\components\ChartTools;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use sales\auth\Auth;
 
@@ -69,8 +71,10 @@ use sales\auth\Auth;
  * @property int|null $chatsQtyTo
  * @property array $show_fields
  * @property int|null $quoteTypeId
+ * @property string|null $expiration_dt
  *
  * @property $count_files
+ * @property int|null $includedFiles
  */
 class LeadSearch extends Lead
 {
@@ -148,10 +152,10 @@ class LeadSearch extends Lead
     public $chatsQtyFrom;
     public $chatsQtyTo;
     public $count_files;
-
+    public $includedFiles;
     public $show_fields = [];
-
     public $quoteTypeId;
+    public $expiration_dt;
 
     private $leadBadgesRepository;
 
@@ -221,6 +225,10 @@ class LeadSearch extends Lead
 
             ['quoteTypeId', 'integer'],
             ['quoteTypeId', 'in', 'range' => array_keys(Quote::TYPE_LIST)],
+
+            ['includedFiles', 'in', 'range' => [0, 1]],
+
+            [['expiration_dt'], 'date', 'format' => 'php:Y-m-d', 'skipOnEmpty' => true],
         ];
     }
 
@@ -233,6 +241,7 @@ class LeadSearch extends Lead
             'chatsQtyFrom' => 'Chats From', 'chatsQtyTo' => 'Chats To',
             'projectId' => 'Project',
             'quoteTypeId' => 'Quote Type',
+            'includedFiles' => 'Included Files',
             'origin_airport' => 'Origin Location Code',
             'destination_airport' => 'Destination Location Code'
         ];
@@ -297,6 +306,7 @@ class LeadSearch extends Lead
             'l_last_action_dt' => 'Last Action',
             'check_list' => 'Check List',
             'count_files' => 'Files',
+            'expiration_dt' => 'Expiration',
         ];
         return $data;
     }
@@ -569,6 +579,13 @@ class LeadSearch extends Lead
             $query->andWhere(['l_type_create' => $this->createdType]);
         }
 
+        if ($this->expiration_dt) {
+            $query->andWhere(new Expression(
+                'DATE(l_expiration_dt) = :date',
+                [':date' => date('Y-m-d', strtotime($this->expiration_dt))]
+            ));
+        }
+
         if ($this->quoteTypeId) {
              $query->andWhere([
                 'IN',
@@ -578,6 +595,21 @@ class LeadSearch extends Lead
                     ->where(['type_id' => $this->quoteTypeId])
                     ->groupBy('lead_id')
              ]);
+        }
+
+        if (ArrayHelper::isIn($this->includedFiles, ['1', '0'], false)) {
+            $leadIds = FileLead::find()
+                ->select('fld_lead_id')
+                ->groupBy(['fld_lead_id'])
+                ->indexBy('fld_lead_id')
+                ->column();
+            $command = $this->includedFiles ? 'IN' : 'NOT IN';
+
+            $query->andWhere([
+                $command,
+                'leads.id',
+                $leadIds
+            ]);
         }
 
         if (!empty($this->emailsQtyFrom) || !empty($this->emailsQtyTo)) {
@@ -1581,19 +1613,22 @@ class LeadSearch extends Lead
             $subQuery = ClientEmail::find()->select(['DISTINCT(client_id)'])->where(['=', 'email', $this->client_email]);
             $query->andWhere(['IN', 'client_id', $subQuery]);
         }
-
         if ($this->client_phone) {
             $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['phone' => $this->client_phone]);
             $query->andWhere(['IN', 'client_id', $subQuery]);
         }
-
         if ($this->quote_pnr) {
             $query->andWhere(['LIKE','leads.additional_information', new Expression('\'%"pnr":%"' . $this->quote_pnr . '"%\'')]);
         }
-
         if ($this->quoteTypeId) {
             $subQuery = Quote::find()->select(['DISTINCT(lead_id)'])->where(['type_id' => $this->quoteTypeId])->groupBy('lead_id');
             $query->andWhere(['IN', 'leads.id', $subQuery]);
+        }
+        if ($this->expiration_dt) {
+            $query->andWhere(new Expression(
+                'DATE(l_expiration_dt) = :date',
+                [':date' => date('Y-m-d', strtotime($this->expiration_dt))]
+            ));
         }
 
         return $dataProvider;
@@ -2011,11 +2046,29 @@ class LeadSearch extends Lead
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort' => ['defaultOrder' => ['l_last_action_dt' => SORT_DESC],'attributes' => ['id','updated','created','status', 'l_last_action_dt']],
+            'sort' => [
+                'defaultOrder' => ['l_last_action_dt' => SORT_DESC],
+                'attributes' => [
+                    'id',
+                    'updated',
+                    'created',
+                    'status',
+                    'l_last_action_dt',
+                    'expiration_dt',
+                ]
+            ],
             'pagination' => [
                 'pageSize' => 30,
             ],
         ]);
+        $sort = $dataProvider->getSort();
+        $sort->attributes = array_merge($sort->attributes, [
+            'expiration_dt' => [
+                'asc' => [Lead::tableName() . '.l_expiration_dt' => SORT_ASC],
+                'desc' => [Lead::tableName() . '.l_expiration_dt' => SORT_DESC]
+            ],
+        ]);
+        $dataProvider->setSort($sort);
 
         $this->load($params);
 
@@ -2074,8 +2127,12 @@ class LeadSearch extends Lead
 
         $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'leadChecklists', 'leadChecklists.lcType', 'employee']);
 
-        /*  $sqlRaw = $query->createCommand()->getRawSql();
-         VarDumper::dump($sqlRaw, 10, true); exit; */
+        if ($this->expiration_dt) {
+            $query->andWhere(new Expression(
+                'DATE(l_expiration_dt) = :date',
+                [':date' => date('Y-m-d', strtotime($this->expiration_dt))]
+            ));
+        }
 
         return $dataProvider;
     }
@@ -2094,6 +2151,15 @@ class LeadSearch extends Lead
             'sort' => ['defaultOrder' => ['created' => SORT_DESC]],
             'pagination' => $this->limit > 0 ? false : ['pageSize' => 20],
         ]);
+
+        $sort = $dataProvider->getSort();
+        $sort->attributes = array_merge($sort->attributes, [
+            'expiration_dt' => [
+                'asc' => [Lead::tableName() . '.l_expiration_dt' => SORT_ASC],
+                'desc' => [Lead::tableName() . '.l_expiration_dt' => SORT_DESC]
+            ],
+        ]);
+        $dataProvider->setSort($sort);
 
         if (!$this->validate()) {
             $query->where('0=1');
@@ -2121,6 +2187,13 @@ class LeadSearch extends Lead
 
         if ($user->isAdmin()) {
             $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'project', 'leadFlightSegments']);
+        }
+
+        if ($this->expiration_dt) {
+            $query->andWhere(new Expression(
+                'DATE(l_expiration_dt) = :date',
+                [':date' => date('Y-m-d', strtotime($this->expiration_dt))]
+            ));
         }
 
         return $dataProvider;
@@ -2672,6 +2745,15 @@ class LeadSearch extends Lead
             'pagination' => $this->limit > 0 ? false : ['pageSize' => 20],
         ]);
 
+        $sort = $dataProvider->getSort();
+        $sort->attributes = array_merge($sort->attributes, [
+            'expiration_dt' => [
+                'asc' => [Lead::tableName() . '.l_expiration_dt' => SORT_ASC],
+                'desc' => [Lead::tableName() . '.l_expiration_dt' => SORT_DESC]
+            ],
+        ]);
+        $dataProvider->setSort($sort);
+
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
             $query->where('0=1');
@@ -2701,6 +2783,13 @@ class LeadSearch extends Lead
 
         if ($user->isAdmin()) {
             $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'project', 'leadFlightSegments']);
+        }
+
+        if ($this->expiration_dt) {
+            $query->andWhere(new Expression(
+                'DATE(l_expiration_dt) = :date',
+                [':date' => date('Y-m-d', strtotime($this->expiration_dt))]
+            ));
         }
 
         return $dataProvider;

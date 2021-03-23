@@ -2,13 +2,17 @@
 
 namespace modules\offer\controllers;
 
+use common\models\Currency;
 use modules\offer\src\entities\offer\events\OfferRecalculateProfitAmountEvent;
 use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\offer\src\entities\offerProduct\OfferProductRepository;
+use modules\offer\src\services\OfferPriceUpdater;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\dispatchers\EventDispatcher;
 use sales\helpers\app\AppHelper;
+use sales\model\clientChat\socket\ClientChatSocketCommands;
+use sales\model\clientChatLead\entity\ClientChatLead;
 use Yii;
 use frontend\controllers\FController;
 use yii\db\Exception;
@@ -22,11 +26,13 @@ use yii\web\Response;
 /**
  * @property OfferProductRepository $offerProductRepository
  * @property EventDispatcher $eventDispatcher
+ * @property OfferPriceUpdater $offerPriceUpdater
  */
 class OfferProductController extends FController
 {
     private $offerProductRepository;
     private $eventDispatcher;
+    private OfferPriceUpdater $offerPriceUpdater;
 
     /**
      * OfferProductController constructor.
@@ -36,11 +42,18 @@ class OfferProductController extends FController
      * @param EventDispatcher $eventDispatcher
      * @param array $config
      */
-    public function __construct($id, $module, OfferProductRepository $offerProductRepository, EventDispatcher $eventDispatcher, $config = [])
-    {
+    public function __construct(
+        $id,
+        $module,
+        OfferProductRepository $offerProductRepository,
+        EventDispatcher $eventDispatcher,
+        OfferPriceUpdater $offerPriceUpdater,
+        $config = []
+    ) {
         parent::__construct($id, $module, $config);
         $this->offerProductRepository = $offerProductRepository;
         $this->eventDispatcher = $eventDispatcher;
+        $this->offerPriceUpdater = $offerPriceUpdater;
     }
 
     /**
@@ -105,6 +118,10 @@ class OfferProductController extends FController
                         );
                     }
 
+                    $offer->calculateTotalPrice();
+                    $offer->save();
+                    $this->offerPriceUpdater->update($offer->of_id);
+
                     return ['message' => 'Successfully deleted Product Quote ID (' . $productQuoteId . ') from offer: "' . Html::encode($offer->of_name) . '" (' . $offer->of_id . ')'];
                 }
             } else {
@@ -115,6 +132,16 @@ class OfferProductController extends FController
                 $offer->of_lead_id = $productQuote->pqProduct->pr_lead_id;
                 $offer->of_name = $offer->generateName();
                 // $offer->of_status_id = Offer::STATUS_NEW;
+                $leadPreferences = $productQuote->pqProduct->prLead->leadPreferences;
+                if ($leadPreferences && $leadPreferences->pref_currency) {
+                    $offer->of_client_currency = $leadPreferences->pref_currency;
+                } else {
+                    $defaultCurrency = Currency::find()->select(['cur_code'])->andWhere(['cur_default' => true, 'cur_enabled' => true])->one();
+                    if ($defaultCurrency && $defaultCurrency['cur_code']) {
+                        $offer->of_client_currency = $defaultCurrency['cur_code'];
+                    }
+                }
+                $offer->updateOfferTotalByCurrency();
 
                 if (!$offer->save()) {
                     throw new Exception('Product Quote ID (' . $productQuoteId . '), Offer ID (' . $offerId . '): ' . VarDumper::dumpAsString($offer->errors), 17);
@@ -123,6 +150,16 @@ class OfferProductController extends FController
 
             $offerProduct = OfferProduct::create($offer->of_id, $productQuoteId);
             $this->offerProductRepository->save($offerProduct);
+
+            $offer->calculateTotalPrice();
+            $offer->save();
+
+            $this->offerPriceUpdater->update($offer->of_id);
+
+            $chat = ClientChatLead::find()->andWhere(['ccl_lead_id' => $offer->of_lead_id])->one();
+            if ($chat) {
+                ClientChatSocketCommands::clientChatAddOfferButton($chat->chat, $offer->of_lead_id);
+            }
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableFormatter($throwable), 'OfferProductController:' . __FUNCTION__);
             return ['error' => 'Error: ' . $throwable->getMessage()];
@@ -146,6 +183,7 @@ class OfferProductController extends FController
             $this->offerProductRepository->remove($model);
             $this->eventDispatcher->dispatchAll([new OfferRecalculateProfitAmountEvent([$model->opOffer])]);
             $transaction->commit();
+            $this->offerPriceUpdater->update($offerId);
         } catch (\Throwable $throwable) {
             $transaction->rollBack();
             Yii::error(AppHelper::throwableFormatter($throwable), 'OfferProductController:' . __FUNCTION__);

@@ -19,4 +19,18 @@ class PathGenerator
         ];
         return implode('/', $chunks);
     }
+
+    public static function byClientAndUid(int $clientId, string $projectKey, string $originalName, string $uid): string
+    {
+        $chunks = [
+            $projectKey,
+            'client',
+            $clientId,
+            date('Y'),
+            date('m'),
+            $uid,
+            $originalName
+        ];
+        return implode('/', $chunks);
+    }
 }

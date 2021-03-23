@@ -5,6 +5,8 @@ namespace modules\product\src\entities\productQuote\serializer;
 use modules\flight\models\FlightQuote;
 use modules\hotel\models\HotelQuote;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteFiles;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use sales\entities\serializer\Serializer;
 
 /**
@@ -49,6 +51,8 @@ class ProductQuoteSerializer extends Serializer
     {
         $quoteData = $this->toArray();
 
+        $quoteData['pq_status_name'] = ProductQuoteStatus::getName($this->model->pq_status_id);
+        $quoteData['pq_files'] = (new ProductQuoteFiles())->getList($this->model);
         if ($quote = $this->model->getChildQuote()) {
             $quoteData['data'] = $quote->serialize();
         }

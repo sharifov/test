@@ -10,18 +10,27 @@ use yii\widgets\ListView;
 /** @var ActiveDataProvider $dataProvider */
 
 ?>
+
 <?php if ($errorMessage) : ?>
     <h3><?= $errorMessage ?></h3>
 <?php else : ?>
-    <?= ListView::widget([
+    <?= \yii\widgets\ListView::widget([
         'dataProvider' => $dataProvider,
-        'itemView' => '_quote_item',
-        'emptyText' => '<div class="text-center">Not found quotes</div><br>',
+
+        /*'options' => [
+            'tag' => 'table',
+            'class' => 'table table-bordered',
+        ],*/
+        'emptyText' => '<div class="text-center">Not found offers</div>',
         //'layout' => "\n{items}<div class=\"text-center\">{pager}</div>\n", // {summary}\n<div class="text-center">{pager}</div>
+        'itemView' => function ($model, $key, $index, $widget) {
+            return $this->render('_offer_item', ['offer' => $model, 'index' => $index]);
+        },
+
         'itemOptions' => [
             //'class' => 'item',
-            'tag' => false,
+            //'tag' => false,
         ],
-    ]);?>
-    <?= Html::button('Generate', ['class' => 'btn btn-info quotes-uid-chat-generate', 'data-chat-id' => $chatId, 'data-lead-id' => $leadId])?>
+    ]) ?>
+    <?= Html::button('Send', ['class' => 'btn btn-info send-offer', 'data-chat-id' => $chatId, 'data-lead-id' => $leadId])?>
 <?php endif; ?>

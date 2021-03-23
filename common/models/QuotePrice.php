@@ -387,4 +387,18 @@ class QuotePrice extends \yii\db\ActiveRecord
         }
         return self::PASSENGER_TYPE_LIST[$this->passenger_type] ?? '-';
     }
+
+    public static function createFromSearch(array $paxEntry, string $paxCode, bool $checkPayment, float $serviceFeePercent): QuotePrice
+    {
+        $price = new self();
+        $price->passenger_type = $paxCode;
+        $price->fare = $paxEntry['baseFare'] ?? null;
+        $price->taxes = $paxEntry['baseTax'] ?? null;
+        $price->net = $price->fare + $price->taxes;
+        $price->mark_up = $paxEntry['markup'] ?? null;
+        $price->selling = $price->net + $price->mark_up + $price->extra_mark_up;
+        $price->service_fee = ($checkPayment) ? self::calculateProcessingFeeAmount($price->selling, $serviceFeePercent) : 0;
+        $price->selling += $price->service_fee;
+        return $price;
+    }
 }

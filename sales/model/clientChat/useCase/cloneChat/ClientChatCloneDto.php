@@ -86,4 +86,24 @@ class ClientChatCloneDto
         $self->languageId = $clientChat->cch_language_id;
         return $self;
     }
+
+    /**
+     * @param ClientChat $clientChat
+     * @param int $ownerId
+     * @return static
+     */
+    public static function feelInOnClone(
+        ClientChat $clientChat
+    ): self {
+        $self = new self();
+        $self->cchRid = $clientChat->cch_rid;
+        $self->cchCcrId = $clientChat->cch_ccr_id;
+        $self->cchProjectId = $clientChat->cch_project_id;
+        $self->cchClientId = $clientChat->cch_client_id;
+        $self->isOnline = (int)$clientChat->cch_client_online;
+        $self->parentId = $clientChat->cch_id;
+        $self->channelId = $clientChat->cch_channel_id;
+        $self->languageId = $clientChat->cch_language_id;
+        return $self;
+    }
 }

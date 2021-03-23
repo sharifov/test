@@ -30,6 +30,13 @@ class AttractionSerializer extends Serializer
 
     public function getData(): array
     {
-        return $this->toArray();
+        $data = $this->toArray();
+
+        if ($this->model->attractionPaxes) {
+            foreach ($this->model->attractionPaxes as $traveler) {
+                $data['travelers'][] = $traveler->serialize();
+            }
+        }
+        return $data;
     }
 }

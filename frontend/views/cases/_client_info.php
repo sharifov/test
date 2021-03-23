@@ -172,7 +172,7 @@ use sales\helpers\phone\MaskPhoneHelper;
                                                 $unsubscribedIcon = in_array($email->email, $unsubscribedEmails) ? ' <i title="Unsubscribed" class="fa fa-bell-slash"></i>' : '';
                                                 $data[] = '<i class="fa fa-envelope"></i> 
                                                            <code class="' . $email::getEmailTypeTextDecoration($email->type) . '"
-                                                                 title="' . $email::getEmailType($email->type) . '">' . Html::encode($email->email) . '</code> ' . $email::getEmailTypeLabel($email->type) . $unsubscribedIcon;
+                                                                 title="' . $email::getEmailType($email->type) . '">' . Html::encode(MaskEmailHelper::masking($email->email)) . '</code> ' . $email::getEmailTypeLabel($email->type) . $unsubscribedIcon;
                                             }
                                         }
 

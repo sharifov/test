@@ -41,6 +41,10 @@ $this->title = 'My Client Chat';
 ClientChatAsset::register($this);
 
 $userRcAuthToken = UserClientChatDataService::getCurrentAuthToken() ?? '';
+
+$readonly = (int)!ClientChatHelper::isShowInput($clientChat, Auth::user());
+$agentToken = \sales\helpers\clientChat\ClientChatDialogHelper::getAgentToken(Auth::user());
+$server = Yii::$app->rchat->host;
 ?>
 
 <?php if ($filter->isEmptyChannels()) : ?>
@@ -103,6 +107,12 @@ $userRcAuthToken = UserClientChatDataService::getCurrentAuthToken() ?? '';
     <div class="col-md-6">
         <div id="_rc-iframe-wrapper">
             <?= $iframeData ?: '' ?>
+            <?php /* $this->render('partial/_client_chat_dialog', [
+                'agentToken' => $agentToken,
+                'server' => $server,
+                'rid' => $clientChat->cch_rid ?? null,
+                'readonly' => $readonly
+            ]) */ ?>
         </div>
         <?php if ($actionPermissions->canSendCannedResponse()) : ?>
             <?php echo $this->render('partial/_canned_response', ['clientChat' => $clientChat]) ?>
@@ -129,7 +139,10 @@ $userRcAuthToken = UserClientChatDataService::getCurrentAuthToken() ?? '';
     <?php echo $this->render('partial/bridge_js/_client_chat_common', [
             'clientChat' => $clientChat,
             'filter' => $filter,
-        ]);
+            'agentToken' => $agentToken,
+            'server' => $server,
+            'loadChannelsUrl' => \yii\helpers\Url::to('/client-chat/index')
+    ]);
     ?>
 
 <?php endif ?>

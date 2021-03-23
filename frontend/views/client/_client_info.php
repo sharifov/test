@@ -56,7 +56,7 @@ $unsubscribedEmails = array_column($model->project->emailUnsubscribes, 'eu_email
                         $data = [];
                         foreach ($model->clientEmails as $k => $email) {
                             $unsubscribedIcon = in_array($email->email, $unsubscribedEmails) ? ' <i title="Unsubscribed" class="fa fa-bell-slash"></i>' : '';
-                            $data[] = '<i class="fa fa-envelope"></i> <code>' . Html::encode($email->email) . '</code> ' . $email::getEmailTypeLabel($email->type) . $unsubscribedIcon;
+                            $data[] = '<i class="fa fa-envelope"></i> <code>' . Html::encode(MaskEmailHelper::masking($email->email)) . '</code> ' . $email::getEmailTypeLabel($email->type) . $unsubscribedIcon;
                         }
                         return implode('<br>', $data);
                     },

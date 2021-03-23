@@ -2,19 +2,30 @@
 
 namespace modules\hotel\models;
 
+use common\models\Client;
+use common\models\Currency;
+use common\models\Lead;
+use common\models\Project;
 use modules\hotel\src\entities\hotelQuote\events\HotelQuoteCloneCreatedEvent;
 use modules\hotel\src\entities\hotelQuote\serializer\HotelQuoteSerializer;
+use modules\hotel\src\services\hotelQuote\HotelQuotePriceCalculator;
+use modules\hotel\src\useCases\quote\HotelProductQuoteCreateDto;
+use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\hotel\src\entities\hotelQuote\Scopes;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\entities\productType\ProductType;
 use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMethodQuery;
+use modules\product\src\interfaces\ProductDataInterface;
 use modules\product\src\interfaces\Quotable;
 use sales\entities\EventTrait;
 use sales\helpers\product\ProductQuoteHelper;
+use sales\services\CurrencyHelper;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\Query;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 
 /**
@@ -28,15 +39,18 @@ use yii\helpers\VarDumper;
  * @property string $hq_hotel_name
  * @property int|null $hq_hotel_list_id
  * @property string|null $hq_request_hash
- * @property string|null $hq_json_booking
+ * @property array|null $hq_json_booking
  * @property string|null $hq_booking_id // field "reference" from api response
+ * @property array|null $hq_origin_search_data
+ * @property string|null $hq_check_in_date
+ * @property string|null $hq_check_out_date
  *
  * @property Hotel $hqHotel
  * @property HotelList $hqHotelList
  * @property ProductQuote $hqProductQuote
  * @property HotelQuoteRoom[] $hotelQuoteRooms
  */
-class HotelQuote extends ActiveRecord implements Quotable
+class HotelQuote extends ActiveRecord implements Quotable, ProductDataInterface
 {
     use EventTrait;
 
@@ -79,6 +93,9 @@ class HotelQuote extends ActiveRecord implements Quotable
             [['hq_hotel_id'], 'exist', 'skipOnError' => true, 'targetClass' => Hotel::class, 'targetAttribute' => ['hq_hotel_id' => 'ph_id']],
             [['hq_hotel_list_id'], 'exist', 'skipOnError' => true, 'targetClass' => HotelList::class, 'targetAttribute' => ['hq_hotel_list_id' => 'hl_id']],
             [['hq_product_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuote::class, 'targetAttribute' => ['hq_product_quote_id' => 'pq_id']],
+            [['hq_json_booking', 'hq_origin_search_data'], 'safe'],
+
+            [['hq_check_in_date', 'hq_check_out_date'], 'date', 'format' => 'php:Y-m-d', 'skipOnError' => true, 'skipOnEmpty' => true],
         ];
     }
 
@@ -96,6 +113,10 @@ class HotelQuote extends ActiveRecord implements Quotable
             'hq_hotel_name' => 'Hotel Name',
             'hq_hotel_list_id' => 'Hotel List ID',
             'hq_request_hash' => 'Request Hash',
+            'hq_json_booking' => 'Booking json',
+            'hq_origin_search_data' => 'Origin search data',
+            'hq_check_in_date' => 'Check in date',
+            'hq_check_out_date' => 'Check out date',
         ];
     }
 
@@ -145,12 +166,18 @@ class HotelQuote extends ActiveRecord implements Quotable
      * @param array $quoteData
      * @param HotelList $hotelModel
      * @param Hotel $hotelRequest
+     * @param int|null $ownerId
      * @param string $currency
      * @return array|HotelQuote|null
      * @throws \yii\base\InvalidConfigException
      */
-    public static function findOrCreateByData(array $quoteData, HotelList $hotelModel, Hotel $hotelRequest, string $currency = 'USD')
-    {
+    public static function findOrCreateByData(
+        array $quoteData,
+        HotelList $hotelModel,
+        Hotel $hotelRequest,
+        ?int $ownerId,
+        string $currency = 'USD'
+    ) {
         $hQuote = null;
 
         if (isset($quoteData['rates']) && $rooms = $quoteData['rates']) {
@@ -171,21 +198,22 @@ class HotelQuote extends ActiveRecord implements Quotable
                         $nameArray[] = $room['code'] ?? '';
                     }
 
-                    $prQuote = new ProductQuote();
-                    $prQuote->pq_product_id = $hotelRequest->ph_product_id;
-                    $prQuote->pq_origin_currency = $currency;
-                    $prQuote->pq_client_currency = ProductQuoteHelper::getClientCurrencyCode($hotelRequest->phProduct);
+                    $productQuoteDto = new HotelProductQuoteCreateDto();
+                    $productQuoteDto->productId = $hotelRequest->ph_product_id;
+                    $productQuoteDto->originCurrency = $currency;
+                    $productQuoteDto->ownerUserId = $ownerId;
+                    $productQuoteDto->clientCurrency = ProductQuoteHelper::getClientCurrencyCode($hotelRequest->phProduct);
+                    $productQuoteDto->clientCurrencyRate = ProductQuoteHelper::getClientCurrencyRate($hotelRequest->phProduct);
+                    $productQuoteDto->originCurrencyRate = Currency::getBaseRateByCurrencyCode($currency);
+                    $productQuoteDto->name = mb_substr(implode(' & ', $nameArray), 0, 40);
 
-                    $prQuote->pq_owner_user_id = Yii::$app->user->id;
-                    $prQuote->pq_price = (float)$totalAmount;
-                    $prQuote->pq_origin_price = (float)$totalAmount;
-                    $prQuote->pq_client_price = (float)$totalAmount;
-                    $prQuote->pq_status_id = ProductQuoteStatus::NEW;
-                    $prQuote->pq_gid = self::generateGid();
-                    $prQuote->pq_service_fee_sum = 0;
-                    $prQuote->pq_client_currency_rate = ProductQuoteHelper::getClientCurrencyRate($hotelRequest->phProduct);
-                    $prQuote->pq_origin_currency_rate = 1;
-                    $prQuote->pq_name = mb_substr(implode(' & ', $nameArray), 0, 40);
+                    $productTypeServiceFee = null;
+                    $productType = ProductType::find()->select(['pt_service_fee_percent'])->byHotel()->asArray()->one();
+                    if ($productType && $productType['pt_service_fee_percent']) {
+                        $productTypeServiceFee = $productType['pt_service_fee_percent'];
+                    }
+
+                    $prQuote = ProductQuote::create($productQuoteDto, $productTypeServiceFee);
 
                     if ($prQuote->save()) {
                         $hQuote = new self();
@@ -196,6 +224,9 @@ class HotelQuote extends ActiveRecord implements Quotable
                         $hQuote->hq_hotel_name = $hotelModel->hl_name;
                         $hQuote->hq_destination_name = $hotelModel->hl_destination_name;
                         $hQuote->hq_request_hash = $hotelRequest->ph_request_hash_key;
+                        $hQuote->hq_origin_search_data = $quoteData;
+                        $hQuote->hq_check_in_date = $hotelRequest->ph_check_in_date;
+                        $hQuote->hq_check_out_date = $hotelRequest->ph_check_out_date;
 
                         if (!$hQuote->save()) {
                             Yii::error(
@@ -207,6 +238,9 @@ class HotelQuote extends ActiveRecord implements Quotable
                 }
             }
 
+            $hotelQuoteRoomAmount = 0;
+            $hotelQuoteRoomSystemMarkup = 0;
+            $hotelQuoteRoomAgentMarkup = 0;
             if ($hQuote && !$hQuote->hotelQuoteRooms) {
                 $totalSystemPrice = 0;
                 $totalServiceFeeSum = 0;
@@ -257,6 +291,16 @@ class HotelQuote extends ActiveRecord implements Quotable
                         $qRoom->hqr_cancel_from_dt = date("Y-m-d H:i:s", strtotime($room['cancellationPolicies'][0]['from']));
                     } else {
                         $qRoom->hqr_cancel_from_dt = $room['cancellationPolicies']['from'] ?? null;
+                    }
+
+                    if ($qRoom->hqr_amount) {
+                        $hotelQuoteRoomAmount += $qRoom->hqr_amount;
+                    }
+                    if ($qRoom->hqr_system_mark_up) {
+                        $hotelQuoteRoomSystemMarkup += $qRoom->hqr_system_mark_up;
+                    }
+                    if ($qRoom->hqr_agent_mark_up) {
+                        $hotelQuoteRoomAgentMarkup += $qRoom->hqr_agent_mark_up;
                     }
 
                     if (!$qRoom->save()) {
@@ -336,15 +380,35 @@ class HotelQuote extends ActiveRecord implements Quotable
                 }
 
                 if (isset($prQuote)) {
-                    $systemPrice = ProductQuoteHelper::calcSystemPrice((float)$totalSystemPrice, $prQuote->pq_origin_currency);
-                    $prQuote->setQuotePrice(
-                        (float)$totalAmount,
-                        (float)$systemPrice,
-                        ProductQuoteHelper::roundPrice($systemPrice * $prQuote->pq_client_currency_rate),
-                        ProductQuoteHelper::roundPrice((float)$totalServiceFeeSum)
+//                    $prQuote->pq_origin_price = CurrencyHelper::convertToBaseCurrency((float)$hotelQuoteRoomAmount * $hQuote->getCountDays(), $prQuote->pq_origin_currency_rate);
+//                    $prQuote->pq_app_markup = CurrencyHelper::convertToBaseCurrency((float)$hotelQuoteRoomSystemMarkup * $hQuote->getCountDays(), $prQuote->pq_origin_currency_rate);
+//                     pq_agent_markup - already in base currency
+//                    $prQuote->pq_agent_markup = (float)$hotelQuoteRoomAgentMarkup * $hQuote->getCountDays();
+
+//                    $prQuote->calculateServiceFeeSum();
+//                    $prQuote->calculatePrice();
+//                    $prQuote->calculateClientPrice();
+
+//                    $systemPrice = ProductQuoteHelper::calcSystemPrice((float)$totalSystemPrice, $prQuote->pq_origin_currency);
+//                    $prQuote->setQuotePrice(
+//                        (float)$totalAmount,
+//                        (float)$systemPrice,
+//                        ProductQuoteHelper::roundPrice($systemPrice * $prQuote->pq_client_currency_rate),
+//                        ProductQuoteHelper::roundPrice((float)$totalServiceFeeSum)
+//                    );
+
+                    $prices = (new HotelQuotePriceCalculator())->calculate($hQuote, $prQuote->pq_origin_currency_rate);
+                    $prQuote->updatePrices(
+                        $prices['originPrice'],
+                        $prices['appMarkup'],
+                        $prices['agentMarkup']
                     );
-                    $prQuote->recalculateProfitAmount();
-                    $prQuote->save();
+                    if (!$prQuote->save()) {
+                        Yii::error([
+                            'message' => 'ProductQuote save after calculate prices error',
+                            'errors' => $prQuote->getErrors(),
+                        ], 'HotelQuoteAdd');
+                    }
                 }
             }
         }
@@ -368,9 +432,9 @@ class HotelQuote extends ActiveRecord implements Quotable
     /**
      * @return bool
      */
-    public function isBooking(): bool
+    public function isBooked(): bool
     {
-        return (!empty($this->hq_booking_id));
+        return ($this->hqProductQuote->isBooked() && !empty($this->hq_booking_id));
     }
 
     /**
@@ -378,7 +442,7 @@ class HotelQuote extends ActiveRecord implements Quotable
      */
     public function isBookable(): bool
     {
-        return (ProductQuoteStatus::isBookable($this->hqProductQuote->pq_status_id) && !$this->isBooking());
+        return (ProductQuoteStatus::isBookable($this->hqProductQuote->pq_status_id) && !$this->isBooked());
     }
 
     public static function findByProductQuote(int $productQuoteId): ?Quotable
@@ -440,7 +504,10 @@ class HotelQuote extends ActiveRecord implements Quotable
      */
     public function saveChanges(): bool
     {
-        return $this->save();
+        if (!$result = $this->save()) {
+            throw new \RuntimeException($this->getErrorSummary(false)[0]);
+        }
+        return $result;
     }
 
     /**
@@ -465,5 +532,41 @@ class HotelQuote extends ActiveRecord implements Quotable
             $result += $room->hqr_agent_mark_up;
         }
         return $result;
+    }
+
+    public function getCountDays()
+    {
+        $countDays = 1;
+        if ($this->hq_check_out_date && $this->hq_check_in_date) {
+            $date1 = date_create(date('Y-m-d', strtotime($this->hq_check_in_date)));
+            $date2 = date_create(date('Y-m-d', strtotime($this->hq_check_out_date)));
+            $diff = date_diff($date1, $date2);
+            $countDays = $diff->days;
+        }
+        return $countDays;
+    }
+
+    public function getProject(): Project
+    {
+        return $this->hqProductQuote->pqProduct->prLead->project;
+    }
+
+    public function getLead(): Lead
+    {
+        return $this->hqProductQuote->pqProduct->prLead;
+    }
+
+    public function getClient(): Client
+    {
+        return $this->hqProductQuote->pqProduct->prLead->client;
+    }
+
+    public function getOrder(): ?Order
+    {
+        if ($order = ArrayHelper::getValue($this, 'hqProductQuote.pqOrder')) {
+            /** @var Order $order */
+            return $order;
+        }
+        return null;
     }
 }

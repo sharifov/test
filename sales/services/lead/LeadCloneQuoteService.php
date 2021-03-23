@@ -100,7 +100,7 @@ class LeadCloneQuoteService
         self::guardSegments($leadQuote, $lead);
         self::guardTypeCabin($leadQuote, $lead);
         self::guardTypePassengers($currentQuote, $lead);
-        self::guardCountPassengers($currentQuote, $lead);
+//        self::guardCountPassengers($currentQuote, $lead);
 
         $result = $this->transactionManager->wrap(function () use ($currentQuote, $lead) {
 

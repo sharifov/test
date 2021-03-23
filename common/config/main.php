@@ -95,6 +95,11 @@ return [
             'xAccelRedirectUrl' => '',
             'voipApiUsername' => 'sales'
         ],
+        'hybrid' => [
+            'class' => \common\components\HybridService::class,
+            'username' => '',
+            'password' => '',
+        ],
         'airsearch' => [
             'class' => \common\components\AirSearchService::class,
             'url' => 'https://airsearch.api.travelinsides.com/',
@@ -113,6 +118,7 @@ return [
             'username' => '',
             'password' => '',
             'host' => 'https://rocketchat.travel-dev.com',
+            'apiServer' => 'https://chatbot.travel-dev.com',
         ],
         'chatBot' => [
             'class' => \common\components\ChatBot::class,
@@ -214,5 +220,6 @@ return [
         \common\bootstrap\SetUpListeners::class,
         \common\bootstrap\Logger::class,
         \common\bootstrap\FileStorage::class,
+        \common\bootstrap\PaymentSetup::class,
     ],
 ];

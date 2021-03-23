@@ -47,11 +47,6 @@ Modal::end();
 
 ?>
 
-<?= Html::a('<i class="fa fa-clone success"></i> Clone Quote', null, [
-    'class' => 'clone-quote-by-uid',
-    'title' => 'Clone Quote by UID'
-]) ?>
-
 <?php
 
 $js = <<<JS

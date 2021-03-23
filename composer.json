@@ -100,7 +100,10 @@
 		"stefangabos/world_countries": "^2.1",
 		"league/flysystem": "^2.0",
 		"league/flysystem-aws-s3-v3": "^2.0",
-		"webonyx/graphql-php": "^14.5"
+		"webonyx/graphql-php": "^14.5",
+		"kartik-v/yii2-widget-fileinput": "@dev",
+		"kartik-v/yii2-mpdf": "^1.0",
+		"pixel418/markdownify": "^2.3"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",
@@ -199,7 +202,8 @@
 		],
 		"post-update-cmd": [
 			"cghooks update"
-		]
+		],
+        "apidoc-gen": "apidoc -i \"./webapi/modules\" -o \"./webapi/web/doc\" -f \".*\\\\.php$\""
 	},
 	"extra": {
 		"hooks": {

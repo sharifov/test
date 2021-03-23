@@ -1,13 +1,17 @@
 <?php
 
+use common\models\Call;
 use sales\model\callLog\entity\callLog\CallLog;
 use common\components\grid\BooleanColumn;
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
+use sales\model\callLog\entity\callLog\CallLogStatus;
+use sales\model\callLog\entity\callLog\CallLogType;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use yii\web\View;
+use sales\helpers\phone\MaskPhoneHelper;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\callLog\entity\callLog\search\CallLogSearch */
@@ -39,9 +43,21 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => DateTimeColumn::class, 'attribute' => 'cl_call_finished_dt', 'format' => 'byUserDateTimeWithSeconds'],
             'cl_duration',
             ['class' => \sales\model\callLog\grid\columns\RecordingUrlColumn::class],
-            ['class' => \sales\model\callLog\grid\columns\CallLogStatusColumn::class],
-            ['class' => \sales\model\callLog\grid\columns\CallLogTypeColumn::class],
-            ['class' => \sales\model\callLog\grid\columns\CallLogCategoryColumn::class],
+            [
+                'class' => \sales\model\callLog\grid\columns\CallLogStatusColumn::class,
+                'attribute' => 'cl_status_id',
+                'filter' => CallLogStatus::getList(),
+            ],
+            [
+                'class' => \sales\model\callLog\grid\columns\CallLogTypeColumn::class,
+                'attribute' =>  'cl_type_id',
+                'filter' => CallLogType::getList(),
+            ],
+            [
+                'class' => \sales\model\callLog\grid\columns\CallLogCategoryColumn::class,
+                'attribute' => 'cl_category_id',
+                'filter' => Call::SOURCE_LIST,
+            ],
             ['class' => BooleanColumn::class, 'attribute' => 'cl_is_transfer'],
             [
                 'class' => \common\components\grid\project\ProjectColumn::class,

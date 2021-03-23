@@ -2,6 +2,7 @@
 
 namespace modules\rentCar\src\serializer;
 
+use common\models\Airports;
 use modules\rentCar\src\entity\rentCar\RentCar;
 use sales\entities\serializer\Serializer;
 
@@ -26,13 +27,17 @@ class RentCarSerializer extends Serializer
             'prc_pick_up_date',
             'prc_drop_off_date',
             'prc_pick_up_time',
-            'ph_destination_label',
-            'prc_drop_off_time'
+            'prc_drop_off_time',
         ];
     }
 
     public function getData(): array
     {
-        return $this->toArray();
+        $data = $this->toArray();
+
+        $data['pickUpLocation'] = $this->model->prc_pick_up_code ? Airports::getCityByIata($this->model->prc_pick_up_code) : '';
+        $data['dropOffLocation'] = $this->model->prc_drop_off_code ? Airports::getCityByIata($this->model->prc_drop_off_code) : '';
+
+        return $data;
     }
 }

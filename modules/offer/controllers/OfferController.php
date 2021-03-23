@@ -2,7 +2,11 @@
 
 namespace modules\offer\controllers;
 
+use common\models\Currency;
+use common\models\LeadPreferences;
 use modules\offer\src\entities\offerProduct\OfferProduct;
+use sales\model\clientChat\socket\ClientChatSocketCommands;
+use sales\model\clientChatLead\entity\ClientChatLead;
 use Yii;
 use common\models\Lead;
 use frontend\controllers\FController;
@@ -72,6 +76,10 @@ class OfferController extends FController
                 $offer->updateOfferTotalByCurrency();
 
                 if ($offer->save()) {
+                    $chat = ClientChatLead::find()->andWhere(['ccl_lead_id' => $offer->of_lead_id])->one();
+                    if ($chat) {
+                        ClientChatSocketCommands::clientChatAddOfferButton($chat->chat, $offer->of_lead_id);
+                    }
                     return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-lead-offers"})</script>';
                 }
 
@@ -92,6 +100,16 @@ class OfferController extends FController
             }
 
             $model->of_lead_id = $leadId;
+
+            $leadPreferences = $lead->leadPreferences;
+            if ($leadPreferences && $leadPreferences->pref_currency) {
+                $model->of_client_currency = $leadPreferences->pref_currency;
+            } else {
+                $defaultCurrency = Currency::find()->select(['cur_code'])->andWhere(['cur_default' => true, 'cur_enabled' => true])->one();
+                if ($defaultCurrency && $defaultCurrency['cur_code']) {
+                    $model->of_client_currency = $defaultCurrency['cur_code'];
+                }
+            }
         }
 
         return $this->renderAjax('forms/create_ajax_form', [
@@ -180,6 +198,7 @@ class OfferController extends FController
                 $modelOffer->of_client_currency_rate = $model->of_client_currency_rate;
                 $modelOffer->of_app_total = $model->of_app_total;
 
+                $modelOffer->calculateTotalPrice();
                 $modelOffer->updateOfferTotalByCurrency();
 
                 if ($modelOffer->save()) {
@@ -209,6 +228,10 @@ class OfferController extends FController
             $model = $this->findModel($id);
             if (!$model->delete()) {
                 throw new Exception('Offer (' . $id . ') not deleted', 2);
+            }
+            $chat = ClientChatLead::find()->andWhere(['ccl_lead_id' => $model->of_lead_id])->one();
+            if ($chat) {
+                ClientChatSocketCommands::clientChatRemoveOfferButton($chat->chat, $model->of_lead_id);
             }
         } catch (\Throwable $throwable) {
             return ['error' => 'Error: ' . $throwable->getMessage()];

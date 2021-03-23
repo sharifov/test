@@ -65,6 +65,10 @@ class ClientBeforeSubmit
         $js = <<< JS
 $('#{$widgetId}').on('beforeSubmit', function (e) {
         e.preventDefault();
+        let btn = document.getElementById("update_product_btn")        
+        if (btn.disabled === false){
+            btn.disabled = true
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processing'  
         $.ajax({
            type: $(this).attr('method'),
            url: $(this).attr('action'),
@@ -102,7 +106,7 @@ $('#{$widgetId}').on('beforeSubmit', function (e) {
         .always(function() {
            {$modalToggle};
         });
-        
+        }
         return false;
     }); 
 JS;

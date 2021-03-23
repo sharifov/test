@@ -8,7 +8,9 @@ use common\models\Employee;
 use common\models\Language;
 use common\models\Lead;
 use modules\fileStorage\src\entity\fileLead\FileLeadQuery;
+use modules\fileStorage\src\entity\fileStorage\FileStorage;
 use yii\base\Model;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class LeadPreviewEmailForm
@@ -27,6 +29,7 @@ use yii\base\Model;
  * @property array $e_content_data
  *
  * @property string $e_quote_list
+ * @property string $e_offer_list
  * @property boolean $is_send
  * @property string $keyCache
  *
@@ -49,6 +52,7 @@ class LeadPreviewEmailForm extends Model
     public $e_content_data = [];
 
     public $e_quote_list;
+    public $e_offer_list;
 
     public $is_send;
     public $keyCache;
@@ -67,7 +71,7 @@ class LeadPreviewEmailForm extends Model
             //[['e_type_id'], 'validateType'],
             [['e_email_to', 'e_email_from'], 'email'],
             [['e_email_tpl_id', 'e_lead_id'], 'integer'],
-            [['e_email_message', 'e_quote_list'], 'string'],
+            [['e_email_message', 'e_quote_list', 'e_offer_list'], 'string'],
             [['e_email_subject'], 'string', 'max' => 200, 'min' => 5],
             [['e_email_from_name', 'e_email_to_name'], 'string', 'max' => 50],
             [['e_language_id'], 'string', 'max' => 5],
@@ -115,8 +119,8 @@ class LeadPreviewEmailForm extends Model
         if ($this->fileList !== null) {
             return $this->fileList;
         }
-        $this->fileList = FileLeadQuery::getListByLead($this->e_lead_id);
-        return $this->fileList;
+        $fileLeadQuery = FileLeadQuery::getListByLead($this->e_lead_id);
+        return $this->fileList = ArrayHelper::map($fileLeadQuery, 'id', 'name');
     }
 
     public function getFilesPath(): array
@@ -125,14 +129,13 @@ class LeadPreviewEmailForm extends Model
         if (!$this->files) {
             return $files;
         }
-        $availableFiles = $this->getFileList();
         foreach ($this->files as $fileId) {
-            if (array_key_exists($fileId, $availableFiles)) {
+            if ($fileStorage = FileStorage::findOne(['fs_id' => $fileId])) {
                 $files[] = new \modules\fileStorage\src\services\url\FileInfo(
-                    $availableFiles[$fileId]['name'],
-                    $availableFiles[$fileId]['path'],
-                    $availableFiles[$fileId]['uid'],
-                    $availableFiles[$fileId]['title'],
+                    $fileStorage->fs_name,
+                    $fileStorage->fs_path,
+                    $fileStorage->fs_uid,
+                    $fileStorage->fs_title,
                     null
                 );
             }
