@@ -43,15 +43,15 @@ class IndexApiCest
 //    }
 
 
-    public function _before(ApiTester $I)
-    {
-        $I->haveFixtures([
-            'user' => [
-                'class' => UserFixture::class,
-                'dataFile' => codecept_data_dir() . 'user.php'
-            ]
-        ]);
-    }
+//    public function _before(ApiTester $I)
+//    {
+//        $I->haveFixtures([
+//            'user' => [
+//                'class' => UserFixture::class,
+//                'dataFile' => codecept_data_dir() . 'user.php'
+//            ]
+//        ]);
+//    }
 
 
 //    /**
@@ -81,7 +81,8 @@ class IndexApiCest
         $I->amHttpAuthenticated(self::API_USERNAME, self::API_PASSWORD);
         $I->haveHttpHeader('Accept-Encoding', 'Accept-Encoding: gzip, deflate');
 
-        echo Url::toRoute('/v2/department-phone-project/get'); exit;
+        echo Url::toRoute('/v2/department-phone-project/get');
+        exit;
 
         $I->sendPost(
             Url::toRoute('/v2/department-phone-project/get'),
