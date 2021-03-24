@@ -68,6 +68,8 @@ class PhoneController extends FController
             'access' => [
                 'allowActions' => [
                     'ajax-recording-disable',
+                    'ajax-call-transfer',
+                    'ajax-warm-transfer-to-user',
                 ],
             ],
         ];
@@ -786,6 +788,9 @@ class PhoneController extends FController
             $data = [];
 
             if ($type === 'user') {
+                if (!Auth::can('PhoneWidget_TransferToUser')) {
+                    throw new ForbiddenHttpException('Access denied.');
+                }
                 $user = Employee::findOne($id);
                 if (!$user) {
                     throw new BadRequestHttpException('Invalid User Id: ' . $id, 6);
@@ -799,6 +804,9 @@ class PhoneController extends FController
                     $data['dep_id'] = $userDepartment['upp_dep_id'];
                 }
             } elseif ($type === 'department') {
+                if (!Auth::can('PhoneWidget_TransferToDepartment')) {
+                    throw new ForbiddenHttpException('Access denied.');
+                }
                 $department = DepartmentPhoneProject::findOne($id);
                 if (!$department) {
                     throw new BadRequestHttpException('Invalid Department Id: ' . $id, 8);
@@ -985,7 +993,7 @@ class PhoneController extends FController
         return $result;
     }
 
-    public function actionAjaxWarmTransferDirect()
+    public function actionAjaxWarmTransferToUser()
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $result = [
@@ -994,6 +1002,10 @@ class PhoneController extends FController
         ];
 
         try {
+            if (!Auth::can('PhoneWidget_WarmTransferToUser')) {
+                throw new ForbiddenHttpException('Access denied.');
+            }
+
             $callSid = Yii::$app->request->post('callSid');
             $userId = (int)Yii::$app->request->post('userId');
 

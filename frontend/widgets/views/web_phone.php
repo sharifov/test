@@ -35,7 +35,7 @@ use yii\bootstrap4\Modal;
     $ajaxHangupUrl = Url::to(['/phone/ajax-hangup']);
     $ajaxCreateCallUrl = Url::to(['/phone/ajax-create-call']);
     $ajaxGetPhoneListIdUrl = Url::to(['/phone/ajax-get-phone-list-id']);
-    $ajaxWarmTransferDirectUrl = Url::to(['/phone/ajax-warm-transfer-direct']);
+    $ajaxWarmTransferToUserUrl = Url::to(['/phone/ajax-warm-transfer-to-user']);
 
     $conferenceBase = 0;
 if (isset(Yii::$app->params['settings']['voip_conference_base'])) {
@@ -57,7 +57,7 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
     const ajaxSaveCallUrl = '<?=$ajaxSaveCallUrl?>';
     const ajaxCallRedirectUrl = '<?=$ajaxRedirectCallUrl?>';
     const ajaxCallTransferUrl = '<?=$ajaxCallTransferUrl?>';
-    const ajaxWarmTransferDirectUrl = '<?=$ajaxWarmTransferDirectUrl?>';
+    const ajaxWarmTransferToUserUrl = '<?=$ajaxWarmTransferToUserUrl?>';
     const ajaxCallRedirectGetAgents = '<?=$ajaxCallRedirectGetAgents?>';
     const ajaxPhoneDialUrl = '<?=$ajaxPhoneDialUrl?>';
     const ajaxBlackList = '<?=$ajaxBlackList?>';
@@ -918,7 +918,7 @@ $js = <<<JS
         });
     });
 
-    $(document).on('click', '.btn-warm-transfer-direct', function(e) {
+    $(document).on('click', '.btn-warm-transfer-to-user', function(e) {
         e.preventDefault();
         
         let obj = $(e.target);
@@ -941,7 +941,7 @@ $js = <<<JS
                 'callSid': callSid,
                 'userId': userId
             },
-            url: ajaxWarmTransferDirectUrl,
+            url: ajaxWarmTransferToUserUrl,
             success: function (data) {
                 if (data.error) {
                     alert(data.message);
