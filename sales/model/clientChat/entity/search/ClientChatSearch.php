@@ -469,7 +469,7 @@ class ClientChatSearch extends ClientChat
 
         $query->orderBy([
             'cch_status_id not in (' . implode(',', ClientChat::CLOSED_STATUS_GROUP) . ')' => SORT_ASC,
-            'ccu_count' => SORT_DESC
+            'ccu_count > 0' => SORT_DESC
         ]);
 
         if ($filter->getOrderBy()) {
