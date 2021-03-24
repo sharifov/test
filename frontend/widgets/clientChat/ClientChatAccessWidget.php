@@ -8,6 +8,7 @@ use sales\auth\Auth;
 use sales\helpers\setting\SettingHelper;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserAccess\entity\search\ClientChatUserAccessSearch;
+use sales\repositories\NotFoundException;
 use yii\base\Widget;
 use yii\helpers\ArrayHelper;
 
@@ -131,6 +132,9 @@ class ClientChatAccessWidget extends Widget
 
         $search = new ClientChatUserAccessSearch();
         $accessItem = $search->getPendingRequestByChatUserAccessId($this->userAccessId);
+        if (empty($accessItem)) {
+            throw new NotFoundException('User Access not found by id: ' . $this->userAccessId);
+        }
 
         $accessItem['html'] = $this->render('cc_request_item', ['access' => $accessItem, 'formatter' => $formatter, 'user' => $user]);
         $accessItem['ccua_created_t'] = strtotime($accessItem['ccua_created_dt']);
