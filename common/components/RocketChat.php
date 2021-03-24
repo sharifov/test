@@ -30,6 +30,7 @@ use yii\httpclient\Response;
  * @property string $password
  * @property string $host
  * @property string $apiServer
+ * @property string $newDialogScriptUrl
  *
  * @property string $currentUserId
  * @property string $currentAuthToken
@@ -46,6 +47,7 @@ class RocketChat extends Component
     public string $host;
     public string $apiEntranceUrl = '/api/v1/';
     public string $apiServer;
+    public string $newDialogScriptUrl;
 
     private string $currentUserId;
     private string $currentAuthToken;

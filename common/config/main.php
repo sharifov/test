@@ -119,6 +119,7 @@ return [
             'password' => '',
             'host' => 'https://rocketchat.travel-dev.com',
             'apiServer' => 'https://chatbot.travel-dev.com',
+            'newDialogScriptUrl' => 'https://cdn.travelinsides.com/npmstatic/chatapi.min.js'
         ],
         'chatBot' => [
             'class' => \common\components\ChatBot::class,
