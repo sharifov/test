@@ -1,6 +1,5 @@
 <?php
 
-use common\models\Employee;
 use console\migrations\RbacMigrationService;
 use yii\db\Migration;
 
@@ -9,22 +8,18 @@ use yii\db\Migration;
  */
 class m210316_125225_add_permission_transfer_warm extends Migration
 {
-    private array $roles = [
-        Employee::ROLE_ADMIN,
-        Employee::ROLE_SUPER_ADMIN,
-    ];
+    public $newPermission1 = '/phone/ajax-warm-transfer-direct';
+    public $oldPermission1 = '/phone/ajax-call-transfer';
 
-    private array $routes = [
-        '/phone/ajax-warm-transfer-direct',
-        '/call/ajax-accept-warm-transfer-call',
-    ];
-
+    public $newPermission2 = '/call/ajax-accept-warm-transfer-call';
+    public $oldPermission2 = '/call/ajax-accept-incoming-call';
     /**
      * {@inheritdoc}
      */
     public function safeUp()
     {
-        (new RbacMigrationService())->up($this->routes, $this->roles);
+        (new RbacMigrationService())->addNewPermissionToRolesWhoCanOldPermission($this->newPermission1, $this->oldPermission1);
+        (new RbacMigrationService())->addNewPermissionToRolesWhoCanOldPermission($this->newPermission2, $this->oldPermission2);
     }
 
     /**
@@ -32,6 +27,7 @@ class m210316_125225_add_permission_transfer_warm extends Migration
      */
     public function safeDown()
     {
-        (new RbacMigrationService())->down($this->routes, $this->roles);
+        (new RbacMigrationService())->removePermissionFromRolesWhoCanOtherPermission($this->newPermission1, $this->oldPermission1);
+        (new RbacMigrationService())->removePermissionFromRolesWhoCanOtherPermission($this->newPermission2, $this->oldPermission2);
     }
 }

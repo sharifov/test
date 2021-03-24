@@ -7,6 +7,7 @@ use common\models\Call;
 use common\models\CallUserAccess;
 use common\models\ConferenceParticipant;
 use common\models\Notifications;
+use sales\model\call\helper\CallHelper;
 use yii\queue\JobInterface;
 
 /**
@@ -47,6 +48,10 @@ class CheckWarmTransferTimeExpiredJob implements JobInterface
         $this->sendNotificationsToTransferedUser($access->cuaCall);
         $this->sendNotificationToCurrentOwner($access);
 
+        if (!CallHelper::warmTransferAutoUnholdEnabled($access->cuaCall->c_dep_id)) {
+            return;
+        }
+
         try {
             $agentParticipant = ConferenceParticipant::find()->andWhere([
                 'cp_cf_sid' => $this->conferenceSid,
@@ -82,11 +87,6 @@ class CheckWarmTransferTimeExpiredJob implements JobInterface
                 'keeperSid' => $this->keeperSid,
             ], 'CheckWarmTransferTimeExpiredJob');
         }
-    }
-
-    private function isAutoUnhold(): bool
-    {
-        //todo
     }
 
     private function sendNotificationsToTransferedUser(Call $call): void

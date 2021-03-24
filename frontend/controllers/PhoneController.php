@@ -21,8 +21,11 @@ use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
 use sales\helpers\UserCallIdentity;
+use sales\model\call\helper\CallHelper;
 use sales\model\call\services\FriendlyName;
 use sales\model\call\services\RecordManager;
+use sales\model\call\services\reserve\CallReserver;
+use sales\model\call\services\reserve\Key;
 use sales\model\call\useCase\checkRecording\CheckRecordingForm;
 use sales\model\call\useCase\conference\create\CreateCallForm;
 use sales\model\callLog\entity\callLog\CallLog;
@@ -1126,7 +1129,8 @@ class PhoneController extends FController
                 }
                 if (Call::applyCallToAgentAccessWarmTransfer($parent, $userId)) {
                     $checkJob = new CheckWarmTransferTimeExpiredJob($parent->c_id, $userId, $data['conferenceSid'], $data['keeperSid'], $data['recordingDisabled']);
-                    Yii::$app->queue_job->delay(50)->push($checkJob);
+                    $timeOut = CallHelper::warmTransferTimeout($parent->c_dep_id);
+                    Yii::$app->queue_job->delay($timeOut)->push($checkJob);
                 }
             } else {
                 $childCall = Call::find()
@@ -1149,7 +1153,8 @@ class PhoneController extends FController
                 }
                 if (Call::applyCallToAgentAccessWarmTransfer($childCall, $userId)) {
                     $checkJob = new CheckWarmTransferTimeExpiredJob($childCall->c_id, $userId, $data['conferenceSid'], $data['keeperSid'], $data['recordingDisabled']);
-                    Yii::$app->queue_job->delay(50)->push($checkJob);
+                    $timeOut = CallHelper::warmTransferTimeout($childCall->c_dep_id);
+                    Yii::$app->queue_job->delay($timeOut)->push($checkJob);
                 }
             }
         } catch (\Throwable $e) {
@@ -1415,6 +1420,14 @@ class PhoneController extends FController
 
             if (!$participants = $conference->conferenceParticipants) {
                 throw new BadRequestHttpException('Not found participants on Conference Sid: ' . $call->c_conference_sid);
+            }
+
+            $reserver = Yii::createObject(CallReserver::class);
+            foreach ($participants as $participant) {
+                $key = Key::byWarmTransfer($participant->cp_call_id);
+                if ($reserver->isReserved($key)) {
+                    throw new \DomainException('Please wait. Try again later.');
+                }
             }
 
             foreach ($participants as $participant) {

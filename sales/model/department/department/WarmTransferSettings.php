@@ -10,8 +10,8 @@ namespace sales\model\department\department;
  */
 class WarmTransferSettings
 {
-    public ?bool $timeout;
-    public ?int $autoUnholdEnabled;
+    public ?int $timeout;
+    public ?bool $autoUnholdEnabled;
 
     public function __construct(array $params)
     {

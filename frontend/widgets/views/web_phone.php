@@ -35,7 +35,7 @@ use yii\bootstrap4\Modal;
     $ajaxHangupUrl = Url::to(['/phone/ajax-hangup']);
     $ajaxCreateCallUrl = Url::to(['/phone/ajax-create-call']);
     $ajaxGetPhoneListIdUrl = Url::to(['/phone/ajax-get-phone-list-id']);
-    $ajaxWarmTransferDirectUrl = Url::to(['phone/ajax-warm-transfer-direct']);
+    $ajaxWarmTransferDirectUrl = Url::to(['/phone/ajax-warm-transfer-direct']);
 
     $conferenceBase = 0;
 if (isset(Yii::$app->params['settings']['voip_conference_base'])) {

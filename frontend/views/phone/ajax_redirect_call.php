@@ -1,6 +1,7 @@
 <?php
 
 use common\models\DepartmentPhoneProject;
+use sales\auth\Auth;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -141,11 +142,13 @@ use yii\helpers\Html;
                                 'data-call-sid' => $call->c_call_sid
                             ])?>
 
-                            <?=Html::button('<i class="fa fa-feed"></i> Warm transfer', [
-                                    'class' => 'btn btn-xs ' . $btnClass . ' btn-warm-transfer-direct',
-                                    'data-user-id' => $userModel->id,
-                                    'data-call-sid' => $call->c_call_sid
-                            ])?>
+                            <?php if (Auth::can('/phone/ajax-warm-transfer-direct')) : ?>
+                                <?= Html::button('<i class="fa fa-feed"></i> Warm transfer', [
+                                        'class' => 'btn btn-xs ' . $btnClass . ' btn-warm-transfer-direct',
+                                        'data-user-id' => $userModel->id,
+                                        'data-call-sid' => $call->c_call_sid
+                                ])?>
+                            <?php endif; ?>
                         </td>
                     </tr>
                 <?php endforeach;?>
