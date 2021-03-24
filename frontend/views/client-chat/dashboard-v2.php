@@ -46,7 +46,7 @@ $readonly = (int)ClientChatHelper::isDialogReadOnly($clientChat, Auth::user());
 $agentToken = \sales\helpers\clientChat\ClientChatDialogHelper::getAgentToken(Auth::user());
 $server = Yii::$app->rchat->host;
 $apiServer = Yii::$app->rchat->apiServer;
-$newDialogScriptUrl = Yii::$app->rchat->newDialogScriptUrl;
+$chatApiScriptUrl = Yii::$app->rchat->chatApiScriptUrl;
 ?>
 
 <?php if ($filter->isEmptyChannels()) : ?>
@@ -115,7 +115,7 @@ $newDialogScriptUrl = Yii::$app->rchat->newDialogScriptUrl;
                 'rid' => $clientChat->cch_rid ?? null,
                 'readonly' => $readonly,
                 'apiServer' => $apiServer,
-                'newDialogScriptUrl' => $newDialogScriptUrl
+                'chatApiScriptUrl' => $chatApiScriptUrl
             ]) ?>
             </div>
             <?php if ($actionPermissions->canSendCannedResponse()) : ?>

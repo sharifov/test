@@ -3,7 +3,7 @@
  * @var string $agentToken
  * @var string $server
  * @var string $apiServer
- * @var string $newDialogScriptUrl
+ * @var string $chatApiScriptUrl
  * @var string $rid
  * @var int $readonly
  * @var \yii\web\View $this
@@ -20,7 +20,7 @@ $js = <<<JS
 (function(){function b(){
     var a=document.createElement("script");
     a.type="text/javascript";a.async=!0;
-    a.src="$newDialogScriptUrl";
+    a.src="$chatApiScriptUrl";
     document.getElementsByTagName("head")[0].appendChild(a)
 }
 window.k=window.k||{};
