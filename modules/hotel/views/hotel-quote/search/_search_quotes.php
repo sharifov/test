@@ -5,9 +5,12 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
-/* @var $this yii\web\View */
-/* @var $hotelSearch \modules\hotel\models\Hotel */
-/* @var $dataProvider yii\data\ArrayDataProvider */
+/**
+ * @var $this yii\web\View
+ * @var $hotelSearch \modules\hotel\models\Hotel
+ * @var $dataProvider yii\data\ArrayDataProvider
+ * @var $filtersForm \modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchForm
+ */
 
 //$this->title = 'Hotel Quotes';
 
@@ -68,7 +71,14 @@ The SPA service at Christmas is closed on December 25 and January 1.'
 
     <?php Pjax::begin(['timeout' => 15000, 'enablePushState' => false, 'enableReplaceState' => false, 'scrollTo' => false]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+<div class="row">
+    <div class="col-2 quote">
+        <?= $this->render('_quote_filters', [
+                'filtersForm' => $filtersForm
+        ]) ?>
+    </div>
 
+    <div class="col-10">
     <?= \yii\widgets\ListView::widget([
         'dataProvider' => $dataProvider,
         /*'options' => [
@@ -85,7 +95,8 @@ The SPA service at Christmas is closed on December 25 and January 1.'
             'tag' => false,
         ],
     ]) ?>
-
+    </div>
+</div>
 
     <?php /*= GridView::widget([
         'dataProvider' => $dataProvider,
