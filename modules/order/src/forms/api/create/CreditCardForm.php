@@ -42,7 +42,10 @@ class CreditCardForm extends Model
             [['expiration'], 'parseDate'],
             [['holder_name'], 'string', 'max' => 50],
             [['cvv'], 'string', 'max' => 4],
-            ['type', 'validateType']
+            [['type'], 'filter', 'filter' => function () {
+                $this->type_id = array_search($this->type, CreditCard::TYPE_LIST, false) ?: null;
+            }]
+//            ['type', 'validateType']
         ];
     }
 
