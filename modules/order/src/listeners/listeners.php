@@ -1,8 +1,13 @@
 <?php
 
 use modules\order\src\entities\order\events\OrderCanceledEvent;
+use modules\order\src\entities\order\events\OrderCancelProcessingEvent;
 use modules\order\src\entities\order\events\OrderCompletedEvent;
+use modules\order\src\entities\order\events\OrderDeclinedEvent;
+use modules\order\src\entities\order\events\OrderErrorEvent;
+use modules\order\src\entities\order\events\OrderNewEvent;
 use modules\order\src\entities\order\events\OrderPaymentPaidEvent;
+use modules\order\src\entities\order\events\OrderPendingEvent;
 use modules\order\src\entities\order\events\OrderPreparedEvent;
 use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
 use modules\order\src\entities\order\events\OrderRecalculateTotalPriceEvent;
@@ -38,6 +43,27 @@ return [
         OrderProcessingConfirmationListener::class,
         OrderProcessingHybridNotificationListener::class,
         listeners\StartAutoProcessingListener::class,
+        OrderChangeStatusLogListener::class,
+    ],
+
+    OrderCancelProcessingEvent::class => [
+        OrderChangeStatusLogListener::class,
+    ],
+
+    OrderDeclinedEvent::class => [
+        OrderChangeStatusLogListener::class,
+    ],
+
+    OrderErrorEvent::class => [
+        OrderChangeStatusLogListener::class,
+    ],
+
+    OrderNewEvent::class => [
+        OrderChangeStatusLogListener::class,
+    ],
+
+    OrderPendingEvent::class => [
+        OrderChangeStatusLogListener::class,
     ],
 
     OrderRecalculateTotalPriceEvent::class => [

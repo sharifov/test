@@ -8,10 +8,14 @@ class OrderStatusAction
 {
     public const JOB = 1;
     public const MANUAL = 2;
+    public const MULTIPLE_UPDATE = 3;
+    public const API = 4;
 
     private const LIST = [
         self::JOB => 'job',
         self::MANUAL => 'order/order-actions/cancel',
+        self::MULTIPLE_UPDATE => 'multiple-update',
+        self::API => 'api',
     ];
 
     public static function getList(): array

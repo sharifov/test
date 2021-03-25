@@ -4,11 +4,14 @@ namespace modules\order\controllers;
 
 use common\models\Lead;
 use modules\fileStorage\src\entity\fileOrder\FileOrder;
+use modules\order\src\entities\order\search\OrderCrudSearch;
+use modules\order\src\entities\order\search\OrderSearch;
 use modules\order\src\forms\OrderForm;
 use modules\order\src\processManager\OrderProcessManager;
 use modules\order\src\services\CreateOrderDTO;
 use modules\order\src\services\OrderManageService;
 use modules\product\src\entities\productQuote\ProductQuote;
+use sales\auth\Auth;
 use Yii;
 use modules\order\src\entities\order\Order;
 use frontend\controllers\FController;
@@ -55,6 +58,17 @@ class OrderController extends FController
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
+    public function actionSearch()
+    {
+        $searchModel = new OrderSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
+
+        return $this->render('search', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
     }
 
     /**

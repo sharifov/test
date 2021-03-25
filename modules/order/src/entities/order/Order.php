@@ -11,8 +11,13 @@ use common\models\Project;
 use modules\invoice\src\entities\invoice\Invoice;
 use common\models\Lead;
 use modules\order\src\entities\order\events\OrderCanceledEvent;
+use modules\order\src\entities\order\events\OrderCancelProcessingEvent;
 use modules\order\src\entities\order\events\OrderCompletedEvent;
+use modules\order\src\entities\order\events\OrderDeclinedEvent;
+use modules\order\src\entities\order\events\OrderErrorEvent;
+use modules\order\src\entities\order\events\OrderNewEvent;
 use modules\order\src\entities\order\events\OrderPaymentPaidEvent;
+use modules\order\src\entities\order\events\OrderPendingEvent;
 use modules\order\src\entities\order\events\OrderPreparedEvent;
 use modules\order\src\entities\order\events\OrderUserProfitUpdateProfitAmountEvent;
 use modules\order\src\entities\order\serializer\OrderSerializer;
@@ -126,7 +131,7 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
             'or_client_total' => 'Client Total',
             'or_client_currency' => 'Client Currency',
             'or_client_currency_rate' => 'Client Currency Rate',
-            'or_owner_user_id' => 'Owner User',
+            'or_owner_user_id' => 'Owner',
             'or_created_user_id' => 'Created User',
             'or_updated_user_id' => 'Updated User',
             'or_created_dt' => 'Created Dt',
@@ -377,10 +382,21 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
         return $this->or_status_id === OrderStatus::PROCESSING;
     }
 
-    public function processing(): void
+    public function processing(?string $description, ?int $actionId, ?int $creatorId): void
     {
+        $startStatus = $this->or_status_id;
         $this->or_status_id = OrderStatus::PROCESSING;
-        $this->recordEvent(new OrderProcessingEvent($this));
+        $this->recordEvent(
+            new OrderProcessingEvent(
+                $this,
+                $startStatus,
+                $this->or_status_id,
+                $description,
+                $actionId,
+                $this->or_owner_user_id,
+                $creatorId
+            )
+        );
 //        if (!$this->isProcessing()) {
 //            OrderStatus::guard($this->or_status_id, OrderStatus::PROCESSING);
 //            foreach ($this->productQuotes as $productQuote) {
@@ -483,11 +499,95 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
         return $this->or_status_id === OrderStatus::CANCELED;
     }
 
+    public function new(?string $description, ?int $actionId, ?int $creatorId): void
+    {
+        $startStatus = $this->or_status_id;
+        $this->setStatus(OrderStatus::NEW);
+        $this->recordEvent(
+            new OrderNewEvent(
+                $this->or_id,
+                $startStatus,
+                $this->or_status_id,
+                $description,
+                $actionId,
+                $this->or_owner_user_id,
+                $creatorId
+            )
+        );
+    }
+
+    public function pending(?string $description, ?int $actionId, ?int $creatorId): void
+    {
+        $startStatus = $this->or_status_id;
+        $this->setStatus(OrderStatus::PENDING);
+        $this->recordEvent(
+            new OrderPendingEvent(
+                $this->or_id,
+                $startStatus,
+                $this->or_status_id,
+                $description,
+                $actionId,
+                $this->or_owner_user_id,
+                $creatorId
+            )
+        );
+    }
+
+    public function cancelProcessing(?string $description, ?int $actionId, ?int $creatorId): void
+    {
+        $startStatus = $this->or_status_id;
+        $this->setStatus(OrderStatus::CANCEL_PROCESSING);
+        $this->recordEvent(
+            new OrderCancelProcessingEvent(
+                $this->or_id,
+                $startStatus,
+                $this->or_status_id,
+                $description,
+                $actionId,
+                $this->or_owner_user_id,
+                $creatorId
+            )
+        );
+    }
+
+    public function error(?string $description, ?int $actionId, ?int $creatorId): void
+    {
+        $startStatus = $this->or_status_id;
+        $this->setStatus(OrderStatus::ERROR);
+        $this->recordEvent(
+            new OrderErrorEvent(
+                $this->or_id,
+                $startStatus,
+                $this->or_status_id,
+                $description,
+                $actionId,
+                $this->or_owner_user_id,
+                $creatorId
+            )
+        );
+    }
+
+    public function decline(?string $description, ?int $actionId, ?int $creatorId): void
+    {
+        $startStatus = $this->or_status_id;
+        $this->setStatus(OrderStatus::DECLINED);
+        $this->recordEvent(
+            new OrderDeclinedEvent(
+                $this->or_id,
+                $startStatus,
+                $this->or_status_id,
+                $description,
+                $actionId,
+                $this->or_owner_user_id,
+                $creatorId
+            )
+        );
+    }
+
     public function serialize(): array
     {
         return (new OrderSerializer($this))->getData();
     }
-
 
     public function getProject(): Project
     {
