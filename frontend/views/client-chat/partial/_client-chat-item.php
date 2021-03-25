@@ -25,7 +25,7 @@ use yii\helpers\StringHelper;
         $isOwner = $user->getId() === (int)$clientChat['cch_owner_user_id'];
 
         $clientFullName = $clientChat['client_full_name'] ?: ('Client-' . $clientChat['client_id']);
-        $unreadMessages = $clientChat['count_unread_messages'] ?: null;
+        $unreadMessages = $clientChat['ccu_count'] ?: null;
     if ($unreadMessages && $resetUnreadMessagesChatId && $resetUnreadMessagesChatId === $clientChat['cch_id']) {
         $unreadMessages = null;
     }
