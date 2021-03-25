@@ -3331,7 +3331,8 @@
         "Parameter": [
           {
             "group": "Parameter",
-            "type": "String",
+            "type": "string",
+            "size": "max 32",
             "optional": false,
             "field": "offerGid",
             "description": "<p>Offer gid</p>"
@@ -3345,7 +3346,8 @@
           },
           {
             "group": "Parameter",
-            "type": "String",
+            "type": "string",
+            "size": "max 32",
             "optional": false,
             "field": "productQuotes.gid",
             "description": "<p>Product Quote Gid</p>"
@@ -3359,22 +3361,24 @@
           },
           {
             "group": "Parameter",
-            "type": "String",
+            "type": "string",
+            "size": "max 30",
             "optional": false,
             "field": "productQuotes.productOptions.productOptionKey",
             "description": "<p>Product option key</p>"
           },
           {
             "group": "Parameter",
-            "type": "String",
-            "optional": false,
+            "type": "string",
+            "size": "max 50",
+            "optional": true,
             "field": "productQuotes.productOptions.name",
             "description": "<p>Name</p>"
           },
           {
             "group": "Parameter",
-            "type": "String",
-            "optional": false,
+            "type": "string",
+            "optional": true,
             "field": "productQuotes.productOptions.description",
             "description": "<p>Description</p>"
           },
@@ -3387,38 +3391,135 @@
           },
           {
             "group": "Parameter",
-            "type": "Object",
+            "type": "string",
             "optional": false,
-            "field": "productQuotes.productHolder",
-            "description": "<p>Holder first name</p>"
+            "field": "productQuotes.productOptions.json_data",
+            "description": "<p>Original data</p>"
           },
           {
             "group": "Parameter",
-            "type": "String",
+            "type": "Object",
+            "optional": false,
+            "field": "productQuotes.productHolder",
+            "description": "<p>Holder Info</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 50",
             "optional": false,
             "field": "productQuotes.productHolder.firstName",
             "description": "<p>Holder first name</p>"
           },
           {
             "group": "Parameter",
-            "type": "String",
+            "type": "string",
+            "size": "max 50",
             "optional": false,
             "field": "productQuotes.productHolder.lastName",
             "description": "<p>Holder last name</p>"
           },
           {
             "group": "Parameter",
-            "type": "String",
+            "type": "string",
+            "size": "max 100",
             "optional": false,
             "field": "productQuotes.productHolder.email",
             "description": "<p>Holder email</p>"
           },
           {
             "group": "Parameter",
-            "type": "String",
+            "type": "string",
+            "size": "max 20",
             "optional": false,
             "field": "productQuotes.productHolder.phone",
             "description": "<p>Holder phone</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Object[]",
+            "optional": true,
+            "field": "productQuotes.productHolder.data",
+            "description": "<p>Quote options</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "productQuotes.productHolder.data.segment_uid",
+            "description": "<p>Segment uid</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "productQuotes.productHolder.data.pax_uid",
+            "description": "<p>Pax uid</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "productQuotes.productHolder.data.trip_uid",
+            "description": "<p>Trip uid</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Decimal",
+            "optional": false,
+            "field": "productQuotes.productHolder.data.total",
+            "description": "<p>Total</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 5",
+            "optional": false,
+            "field": "productQuotes.productHolder.data.currency",
+            "description": "<p>Currency</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Decimal",
+            "optional": false,
+            "field": "productQuotes.productHolder.data.usd_total",
+            "description": "<p>Total price in usd</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Decimal",
+            "optional": false,
+            "field": "productQuotes.productHolder.data.base_price",
+            "description": "<p>Base price in usd</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Decimal",
+            "optional": false,
+            "field": "productQuotes.productHolder.data.markup_amount",
+            "description": "<p>Markup amount</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Decimal",
+            "optional": false,
+            "field": "productQuotes.productHolder.data.usd_base_price",
+            "description": "<p>Base price in usd</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Decimal",
+            "optional": false,
+            "field": "productQuotes.productHolder.data.usd_markup_amount",
+            "description": "<p>Markup amount in usd</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 255",
+            "optional": false,
+            "field": "productQuotes.productHolder.data.display_name",
+            "description": "<p>Display name</p>"
           },
           {
             "group": "Parameter",
@@ -3429,21 +3530,23 @@
           },
           {
             "group": "Parameter",
-            "type": "String",
+            "type": "string",
             "optional": false,
             "field": "payment.type",
             "description": "<p>Type</p>"
           },
           {
             "group": "Parameter",
-            "type": "Integer",
+            "type": "string",
+            "size": "max 255",
             "optional": false,
             "field": "payment.transactionId",
             "description": "<p>Transaction Id</p>"
           },
           {
             "group": "Parameter",
-            "type": "String",
+            "type": "string",
+            "size": "format yyyy-mm-dd",
             "optional": false,
             "field": "payment.date",
             "description": "<p>Date</p>"
@@ -3457,7 +3560,8 @@
           },
           {
             "group": "Parameter",
-            "type": "String",
+            "type": "string",
+            "size": "max 3",
             "optional": false,
             "field": "payment.currency",
             "description": "<p>Currency</p>"
@@ -3465,13 +3569,14 @@
           {
             "group": "Parameter",
             "type": "Object",
-            "optional": false,
+            "optional": true,
             "field": "billingInfo",
             "description": "<p>BillingInfo</p>"
           },
           {
             "group": "Parameter",
             "type": "string",
+            "size": "max 30",
             "optional": false,
             "field": "billingInfo.first_name",
             "description": "<p>First Name</p>"
@@ -3479,6 +3584,7 @@
           {
             "group": "Parameter",
             "type": "string",
+            "size": "max 30",
             "optional": false,
             "field": "billingInfo.last_name",
             "description": "<p>Last Name</p>"
@@ -3486,6 +3592,7 @@
           {
             "group": "Parameter",
             "type": "string",
+            "size": "max 30",
             "optional": false,
             "field": "billingInfo.middle_name",
             "description": "<p>Middle Name</p>"
@@ -3493,6 +3600,7 @@
           {
             "group": "Parameter",
             "type": "string",
+            "size": "max 50",
             "optional": false,
             "field": "billingInfo.address",
             "description": "<p>Address</p>"
@@ -3500,6 +3608,7 @@
           {
             "group": "Parameter",
             "type": "string",
+            "size": "max 2",
             "optional": false,
             "field": "billingInfo.country_id",
             "description": "<p>Country Id</p>"
@@ -3507,6 +3616,7 @@
           {
             "group": "Parameter",
             "type": "string",
+            "size": "max 30",
             "optional": false,
             "field": "billingInfo.city",
             "description": "<p>City</p>"
@@ -3514,6 +3624,7 @@
           {
             "group": "Parameter",
             "type": "string",
+            "size": "max 40",
             "optional": false,
             "field": "billingInfo.state",
             "description": "<p>State</p>"
@@ -3521,6 +3632,7 @@
           {
             "group": "Parameter",
             "type": "string",
+            "size": "max 10",
             "optional": false,
             "field": "billingInfo.zip",
             "description": "<p>Zip</p>"
@@ -3528,6 +3640,7 @@
           {
             "group": "Parameter",
             "type": "string",
+            "size": "max 20",
             "optional": false,
             "field": "billingInfo.phone",
             "description": "<p>Phone</p>"
@@ -3535,6 +3648,7 @@
           {
             "group": "Parameter",
             "type": "string",
+            "size": "max 160",
             "optional": false,
             "field": "billingInfo.email",
             "description": "<p>Email</p>"
@@ -3548,38 +3662,142 @@
           },
           {
             "group": "Parameter",
-            "type": "String",
-            "optional": false,
+            "type": "string",
+            "size": "max 50",
+            "optional": true,
             "field": "creditCard.holder_name",
             "description": "<p>Holder Name</p>"
           },
           {
             "group": "Parameter",
-            "type": "String",
+            "type": "string",
+            "size": "max 20",
             "optional": false,
             "field": "creditCard.number",
             "description": "<p>Credit Card Number</p>"
           },
           {
             "group": "Parameter",
-            "type": "String",
-            "optional": false,
+            "type": "string",
+            "optional": true,
             "field": "creditCard.type",
             "description": "<p>Credit Card type</p>"
           },
           {
             "group": "Parameter",
-            "type": "String",
+            "type": "string",
+            "size": "max 18",
             "optional": false,
             "field": "creditCard.expiration",
             "description": "<p>Credit Card expiration</p>"
           },
           {
             "group": "Parameter",
-            "type": "String",
+            "type": "string",
+            "size": "max 4",
             "optional": false,
             "field": "creditCard.cvv",
             "description": "<p>Credit Card cvv</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": true,
+            "field": "Tips",
+            "description": "<p>Tips</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Decimal",
+            "optional": false,
+            "field": "Tips.total_amount",
+            "description": "<p>Total Amount</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": false,
+            "field": "Paxes[]",
+            "description": "<p>Paxes</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "Paxes.uid",
+            "description": "<p>Uid</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 40",
+            "optional": true,
+            "field": "Paxes.first_name",
+            "description": "<p>First Name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 40",
+            "optional": true,
+            "field": "Paxes.last_name",
+            "description": "<p>Last Name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 40",
+            "optional": true,
+            "field": "Paxes.middle_name",
+            "description": "<p>Middle Name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 5",
+            "optional": true,
+            "field": "Paxes.nationality",
+            "description": "<p>Nationality</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 1",
+            "optional": true,
+            "field": "Paxes.gender",
+            "description": "<p>Gender</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "format yyyy-mm-dd",
+            "optional": true,
+            "field": "Paxes.birth_date",
+            "description": "<p>Birth Date</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 100",
+            "optional": true,
+            "field": "Paxes.email",
+            "description": "<p>Email</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 5",
+            "optional": true,
+            "field": "Paxes.language",
+            "description": "<p>Language</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 5",
+            "optional": true,
+            "field": "Paxes.citizenship",
+            "description": "<p>Citizenship</p>"
           },
           {
             "group": "Parameter",

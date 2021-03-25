@@ -310,46 +310,77 @@ class OrderController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {String}       offerGid                                            Offer gid
-     * @apiParam {Object[]}     productQuotes                                       Product Quotes
-     * @apiParam {String}       productQuotes.gid                                   Product Quote Gid
-     * @apiParam {Object[]}     productQuotes.productOptions                        Quote Options
-     * @apiParam {String}       productQuotes.productOptions.productOptionKey       Product option key
-     * @apiParam {String}       productQuotes.productOptions.name                   Name
-     * @apiParam {String}       productQuotes.productOptions.description            Description
-     * @apiParam {Decimal}      productQuotes.productOptions.price                  Price
+     * @apiParam {string{max 32}}       offerGid                                            Offer gid
+     * @apiParam {Object[]}             productQuotes                                       Product Quotes
+     * @apiParam {string{max 32}}       productQuotes.gid                                   Product Quote Gid
+     * @apiParam {Object[]}             productQuotes.productOptions                        Quote Options
+     * @apiParam {string{max 30}}       productQuotes.productOptions.productOptionKey       Product option key
+     * @apiParam {string{max 50}}       [productQuotes.productOptions.name]                   Name
+     * @apiParam {string}               [productQuotes.productOptions.description]            Description
+     * @apiParam {Decimal}              productQuotes.productOptions.price                  Price
+     * @apiParam {string}               productQuotes.productOptions.json_data              Original data
      *
-     * @apiParam {Object}      productQuotes.productHolder                         Holder first name
-     * @apiParam {String}      productQuotes.productHolder.firstName               Holder first name
-     * @apiParam {String}      productQuotes.productHolder.lastName                Holder last name
-     * @apiParam {String}      productQuotes.productHolder.email                   Holder email
-     * @apiParam {String}      productQuotes.productHolder.phone                   Holder phone
+     * @apiParam {Object}               productQuotes.productHolder                         Holder Info
+     * @apiParam {string{max 50}}       productQuotes.productHolder.firstName               Holder first name
+     * @apiParam {string{max 50}}       productQuotes.productHolder.lastName                Holder last name
+     * @apiParam {string{max 100}}      productQuotes.productHolder.email                   Holder email
+     * @apiParam {string{max 20}}       productQuotes.productHolder.phone                   Holder phone
      *
-     * @apiParam {Object}       payment                 Payment
-     * @apiParam {String}       payment.type            Type
-     * @apiParam {Integer}      payment.transactionId   Transaction Id
-     * @apiParam {String}       payment.date            Date
-     * @apiParam {Decimal}      payment.amount          Amount
-     * @apiParam {String}       payment.currency        Currency
+     * @apiParam {Object[]}              [productQuotes.productHolder.data]                   Quote options
+     * @apiParam {string}                productQuotes.productHolder.data.segment_uid         Segment uid
+     * @apiParam {string}                productQuotes.productHolder.data.pax_uid         Pax uid
+     * @apiParam {string}                productQuotes.productHolder.data.trip_uid         Trip uid
+     * @apiParam {Decimal}               productQuotes.productHolder.data.total         Total
+     * @apiParam {string{max 5}}         productQuotes.productHolder.data.currency         Currency
+     * @apiParam {Decimal}               productQuotes.productHolder.data.usd_total         Total price in usd
+     * @apiParam {Decimal}               productQuotes.productHolder.data.base_price         Base price in usd
+     * @apiParam {Decimal}               productQuotes.productHolder.data.markup_amount         Markup amount
+     * @apiParam {Decimal}               productQuotes.productHolder.data.usd_base_price         Base price in usd
+     * @apiParam {Decimal}               productQuotes.productHolder.data.usd_markup_amount         Markup amount in usd
+     * @apiParam {string{max 255}}       productQuotes.productHolder.data.display_name         Display name
      *
-     * @apiParam {Object}       billingInfo                 BillingInfo
-     * @apiParam {string}       billingInfo.first_name      First Name
-     * @apiParam {string}       billingInfo.last_name       Last Name
-     * @apiParam {string}       billingInfo.middle_name     Middle Name
-     * @apiParam {string}       billingInfo.address         Address
-     * @apiParam {string}       billingInfo.country_id      Country Id
-     * @apiParam {string}       billingInfo.city            City
-     * @apiParam {string}       billingInfo.state           State
-     * @apiParam {string}       billingInfo.zip             Zip
-     * @apiParam {string}       billingInfo.phone           Phone
-     * @apiParam {string}       billingInfo.email           Email
+     * @apiParam {Object}               payment                 Payment
+     * @apiParam {string}               payment.type            Type
+     * @apiParam {string{max 255}}      payment.transactionId   Transaction Id
+     * @apiParam {string{format yyyy-mm-dd}}    payment.date            Date
+     * @apiParam {Decimal}              payment.amount          Amount
+     * @apiParam {string{max 3}}        payment.currency        Currency
      *
-     * @apiParam {Object}       creditCard                  Credit Card
-     * @apiParam {String}       creditCard.holder_name      Holder Name
-     * @apiParam {String}       creditCard.number           Credit Card Number
-     * @apiParam {String}       creditCard.type             Credit Card type
-     * @apiParam {String}       creditCard.expiration       Credit Card expiration
-     * @apiParam {String}       creditCard.cvv              Credit Card cvv
+     * @apiParam {Object}       [billingInfo]                 BillingInfo
+     * @apiParam {string{max 30}}       billingInfo.first_name      First Name
+     * @apiParam {string{max 30}}       billingInfo.last_name       Last Name
+     * @apiParam {string{max 30}}       billingInfo.middle_name     Middle Name
+     * @apiParam {string{max 50}}       billingInfo.address         Address
+     * @apiParam {string{max 2}}        billingInfo.country_id      Country Id
+     * @apiParam {string{max 30}}       billingInfo.city            City
+     * @apiParam {string{max 40}}       billingInfo.state           State
+     * @apiParam {string{max 10}}       billingInfo.zip             Zip
+     * @apiParam {string{max 20}}       billingInfo.phone           Phone
+     * @apiParam {string{max 160}}      billingInfo.email           Email
+     *
+     * @apiParam {Object}               creditCard                  Credit Card
+     * @apiParam {string{max 50}}       [creditCard.holder_name]      Holder Name
+     * @apiParam {string{max 20}}       creditCard.number           Credit Card Number
+     * @apiParam {string}               [creditCard.type]             Credit Card type
+     * @apiParam {string{max 18}}       creditCard.expiration       Credit Card expiration
+     * @apiParam {string{max 4}}        creditCard.cvv              Credit Card cvv
+     *
+     * @apiParam {Object}               [Tips]                  Tips
+     * @apiParam {Decimal}              Tips.total_amount       Total Amount
+     *
+     * @apiParam {Object}                       Paxes[]                 Paxes
+     * @apiParam {string}                       Paxes.uid                   Uid
+     * @apiParam {string{max 40}}               [Paxes.first_name]            First Name
+     * @apiParam {string{max 40}}               [Paxes.last_name]             Last Name
+     * @apiParam {string{max 40}}               [Paxes.middle_name]           Middle Name
+     * @apiParam {string{max 5}}    [Paxes.nationality]           Nationality
+     * @apiParam {string{max 1}}                [Paxes.gender]                Gender
+     * @apiParam {string{format yyyy-mm-dd}}    [Paxes.birth_date]            Birth Date
+     * @apiParam {string{max 100}}              [Paxes.email]                 Email
+     * @apiParam {string{max 5}}                [Paxes.language]              Language
+     * @apiParam {string{max 5}}                [Paxes.citizenship]           Citizenship
+     *
+     *
      *
      * @apiParam {Object}       Request                 Request Data for BO
      *
