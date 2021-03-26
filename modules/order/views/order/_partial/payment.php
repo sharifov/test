@@ -175,7 +175,7 @@ $js = <<<JS
             url: url,
             type: 'post',
             data: {id: paymentId},
-            dataType: 'json',
+            dataType: 'json'
         })
         .done(function(data) {
             if (data.error) {
@@ -208,7 +208,7 @@ $js = <<<JS
             url: url,
             type: 'post',
             data: {id: paymentId},
-            dataType: 'json',
+            dataType: 'json'
         })
         .done(function(data) {
             if (data.error) {
@@ -240,7 +240,7 @@ $js = <<<JS
             url: url,
             type: 'post',
             data: {id: paymentId},
-            dataType: 'json',
+            dataType: 'json'
         })
         .done(function(data) {
             if (data.error) {

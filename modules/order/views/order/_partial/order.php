@@ -307,7 +307,7 @@ $js = <<<JS
             url: url,
             type: 'post',
             data: {'id': orderId},
-            dataType: 'json',
+            dataType: 'json'
         })
         .done(function(data) {
             if (data.error) {
@@ -341,7 +341,7 @@ $js = <<<JS
             url: url,
             type: 'post',
             data: {'id': orderId},
-            dataType: 'json',
+            dataType: 'json'
         })
         .done(function(data) {
             if (data.error) {
@@ -516,7 +516,7 @@ $js = <<<JS
             url: url,
             type: 'post',
             data: {'id': orderId},
-            dataType: 'json',
+            dataType: 'json'
         })
         .done(function(data) {
             if (data.error) {
@@ -552,7 +552,7 @@ $js = <<<JS
             url: url,
             type: 'post',
             data: {'product_quote_id': productQuoteId, 'order_id': orderId},
-            dataType: 'json',
+            dataType: 'json'
         })
         .done(function(data) {
             if (data.error) {

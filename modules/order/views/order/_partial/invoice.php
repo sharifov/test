@@ -226,7 +226,7 @@ $js = <<<JS
             url: url,
             type: 'post',
             data: {'id': invoiceId},
-            dataType: 'json',
+            dataType: 'json'
         })
         .done(function(data) {
             if (data.error) {
