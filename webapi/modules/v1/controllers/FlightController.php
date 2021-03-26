@@ -6,12 +6,12 @@ use common\models\ApiLog;
 use modules\flight\models\FlightQuote;
 use modules\flight\src\exceptions\FlightCodeException;
 use modules\flight\src\forms\TicketFlightsForm;
-use modules\flight\src\jobs\FlightQuotePdfJob;
 use modules\flight\src\repositories\flightQuoteRepository\FlightQuoteRepository;
-use modules\flight\src\services\flightQuote\FlightQuotePdfService;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\exceptions\ProductCodeException;
 use sales\helpers\app\AppHelper;
 use sales\repositories\product\ProductQuoteRepository;
+use sales\services\TransactionManager;
 use webapi\src\ApiCodeException;
 use webapi\src\Messages;
 use webapi\src\response\ErrorResponse;
@@ -27,9 +27,30 @@ use yii\helpers\ArrayHelper;
 
 /**
  * Class FlightController
+ * @property FlightQuoteRepository $flightQuoteRepository
+ * @property ProductQuoteRepository $productQuoteRepository
+ * @property TransactionManager $transactionManager
  */
 class FlightController extends ApiBaseController
 {
+    private FlightQuoteRepository $flightQuoteRepository;
+    private ProductQuoteRepository $productQuoteRepository;
+    private TransactionManager $transactionManager;
+
+    public function __construct(
+        $id,
+        $module,
+        FlightQuoteRepository $flightQuoteRepository,
+        ProductQuoteRepository $productQuoteRepository,
+        TransactionManager $transactionManager,
+        $config = []
+    ) {
+        $this->flightQuoteRepository = $flightQuoteRepository;
+        $this->productQuoteRepository = $productQuoteRepository;
+        $this->transactionManager = $transactionManager;
+        parent::__construct($id, $module, $config);
+    }
+
     /**
      * @api {post} /v1/flight/ticket Flight Ticket
      * @apiVersion 0.1.0
@@ -287,6 +308,7 @@ class FlightController extends ApiBaseController
             ));
         }
 
+        /* TODO:: to refactor */
         $flightQuoteRepository = Yii::createObject(FlightQuoteRepository::class);
         $productQuoteRepository = Yii::createObject(ProductQuoteRepository::class);
         $productQuote = $flightQuote->fqProductQuote;
@@ -333,9 +355,148 @@ class FlightController extends ApiBaseController
      *  }
      *
      * @apiParamExample {json} Request-Example:
-     * {
-            "exampleKey": "exampleValue TODO::"
-       }
+     *
+     *   {
+            "parentBookingId": "OE96040",
+            "parentId": 205975,
+            "sameItinerary": true,
+            "flights": [
+                {
+                    "appKey": "038ce0121a1666678d4db57cb10e8667b98d8b08c408cdf7c9b04f1430071826",
+                    "uniqueId": "OE96040",
+                    "status": 6,
+                    "pnr": "",
+                    "gds": "",
+                    "flightType": "RT",
+                    "validatingCarrier": "PR",
+                    "bookingInfo": [
+                        {
+                            "bookingId": "OE96040",
+                            "pnr": "Q3PM1G",
+                            "gds": "S",
+                            "validatingCarrier": "PR",
+                            "status": 6,
+                            "state": "Rejected",
+                            "passengers": {
+                                "1": {
+                                    "fullName": "Arthur Davis",
+                                    "first_name": "Arthur",
+                                    "middle_name": "",
+                                    "last_name": "Davis",
+                                    "birth_date": "1963-04-07",
+                                    "nationality": "US",
+                                    "gender": "M",
+                                    "aGender": "Mr.",
+                                    "tktNumber": null,
+                                    "paxType": "ADT"
+                                }
+                            },
+                            "airlinesCode": [
+                                {
+                                    "code": "PR",
+                                    "airline": "Philippine Airlines",
+                                    "recordLocator": "Q3PM1G"
+                                }
+                            ],
+                            "insurance": []
+                        }
+                    ],
+                    "trips": [
+                        {
+                            "segments": [
+                                {
+                                    "segmentId": 1001959,
+                                    "airline": "PR",
+                                    "airlineName": "Philippine Airlines",
+                                    "mainAirline": "PR",
+                                    "arrivalAirport": "MNL",
+                                    "arrivalTime": "2021-05-15 04:00:00",
+                                    "departureAirport": "LAX",
+                                    "departureTime": "2021-05-13 22:30:00",
+                                    "bookingClass": "U",
+                                    "flightNumber": 103,
+                                    "statusCode": "HK",
+                                    "operatingAirline": "Philippine Airlines",
+                                    "operatingAirlineCode": "PR",
+                                    "cabin": "Economy",
+                                    "departureCity": "Los Angeles",
+                                    "arrivalCity": "Manila",
+                                    "departureCountry": "US",
+                                    "arrivalCountry": "PH",
+                                    "departureAirportName": "Los Angeles International Airport",
+                                    "arrivalAirportName": "Ninoy Aquino International Airport",
+                                    "flightDuration": 870,
+                                    "layoverDuration": 0,
+                                    "airlineRecordLocator": "Q3PM1G",
+                                    "aircraft": "773",
+                                    "baggage": 2,
+                                    "carryOn": true,
+                                    "marriageGroup": "773",
+                                    "fareCode": "U9XBUS",
+                                    "mileage": 7305
+                                },
+                                {
+                                    "segmentId": 1001960,
+                                    "airline": "PR",
+                                    "airlineName": "Philippine Airlines",
+                                    "mainAirline": "PR",
+                                    "arrivalAirport": "TPE",
+                                    "arrivalTime": "2021-05-15 08:40:00",
+                                    "departureAirport": "MNL",
+                                    "departureTime": "2021-05-15 06:30:00",
+                                    "bookingClass": "U",
+                                    "flightNumber": 890,
+                                    "statusCode": "HK",
+                                    "operatingAirline": "Philippine Airlines",
+                                    "operatingAirlineCode": "PR",
+                                    "cabin": "Economy",
+                                    "departureCity": "Manila",
+                                    "arrivalCity": "Taipei",
+                                    "departureCountry": "PH",
+                                    "arrivalCountry": "TW",
+                                    "departureAirportName": "Ninoy Aquino International Airport",
+                                    "arrivalAirportName": "Taiwan Taoyuan International Airport",
+                                    "flightDuration": 130,
+                                    "layoverDuration": 150,
+                                    "airlineRecordLocator": "Q3PM1G",
+                                    "aircraft": "321",
+                                    "baggage": 2,
+                                    "carryOn": true,
+                                    "marriageGroup": "321",
+                                    "fareCode": "U9XBUS",
+                                    "mileage": 728
+                                }
+                            ]
+                        }
+                    ],
+                    "price": {
+                        "tickets": 1,
+                        "selling": 767.75,
+                        "currentProfit": 0,
+                        "fare": 446,
+                        "net": 717.75,
+                        "taxes": 321.75,
+                        "tips": 0,
+                        "currency": "USD",
+                        "detail": {
+                            "ADT": {
+                                "selling": 767.75,
+                                "fare": 446,
+                                "baseTaxes": 271.75,
+                                "taxes": 321.75,
+                                "tickets": 1,
+                                "insurance": 0
+                            }
+                        }
+                    },
+                    "departureTime": "2021-05-13 22:30:00",
+                    "invoiceUri": "\/checkout\/download\/OE96040\/invoice",
+                    "eTicketUri": "\/checkout\/download\/OE96040\/e-ticket",
+                    "scheduleChange": "No"
+                }
+            ],
+            "trips": []
+        }
      *
      * @apiSuccessExample {json} Success-Response:
      * HTTP/1.1 200 OK
@@ -343,7 +504,7 @@ class FlightController extends ApiBaseController
      *      "status": 200,
      *      "message": "OK",
      *      "data": {
-     *          "exampleData": "Example Model status changed TODO::"
+     *          "resultMessage": "ProductQuote (exampleGID) changed status from (Pending) to (Error)"
      *      }
      * }
      *
@@ -353,8 +514,8 @@ class FlightController extends ApiBaseController
      *     "status": 422,
      *     "message": "Validation error",
      *     "errors": {
-     *         "id": [
-     *             "id cannot be blank."
+     *         "status": [
+     *             "status cannot be blank."
      *        ]
      *     },
      *     "code": "15801"
@@ -364,7 +525,7 @@ class FlightController extends ApiBaseController
      * HTTP/1.1 200 OK
      * {
      *     "status": 404,
-     *     "message": "Model not found",
+     *     "message": "FlightQuote not found",
      *     "code": "15300",
      *     "errors": []
      * }
@@ -388,17 +549,87 @@ class FlightController extends ApiBaseController
             );
         }
 
-        /* TODO::  */
+        $form = new TicketFlightsForm();
+        $post = Yii::$app->request->post();
+        $flights = \Yii::$app->request->post('flights');
+        if (!$flights) {
+            return $this->endApiLog($apiLog, new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage('Flights is not provided'),
+                new CodeMessage(ApiCodeException::EVENT_OR_DATA_IS_NOT_PROVIDED)
+            ));
+        }
+
+        $resultMessage = [];
+        foreach ($flights as $key => $flight) {
+            if (!$form->load($flight)) {
+                return $this->endApiLog($apiLog, new ErrorResponse(
+                    new StatusCodeMessage(400),
+                    new MessageMessage(Messages::LOAD_DATA_ERROR),
+                    new ErrorsMessage('Not found flights data on request'),
+                    new CodeMessage(FlightCodeException::API_TICKET_FLIGHT_NOT_FOUND_DATA_ON_REQUEST)
+                ));
+            }
+            if (!$form->validate()) {
+                return $this->endApiLog($apiLog, new ErrorResponse(
+                    new MessageMessage(Messages::VALIDATION_ERROR),
+                    new ErrorsMessage($form->getErrors()),
+                    new CodeMessage(FlightCodeException::API_TICKET_FLIGHT_VALIDATE)
+                ));
+            }
+            if (!$flightQuote = FlightQuote::find()->where(['fq_flight_request_uid' => $form->uniqueId])->orderBy(['fq_id' => SORT_DESC])->one()) {
+                return $this->endApiLog($apiLog, new ErrorResponse(
+                    new StatusCodeMessage(404),
+                    new MessageMessage('FlightQuote not found by uid (' . $form->uniqueId . ')'),
+                    new CodeMessage(FlightCodeException::FLIGHT_QUOTE_NOT_FOUND)
+                ));
+            }
+
+            /** @var FlightQuote $flightQuote */
+            if (!$productQuote = $flightQuote->fqProductQuote) {
+                return $this->endApiLog($apiLog, new ErrorResponse(
+                    new StatusCodeMessage(404),
+                    new MessageMessage('ProductQuote not found by FlightQuote (' . $form->uniqueId . ')'),
+                    new CodeMessage(ProductCodeException::PRODUCT_QUOTE_OPTION_NOT_FOUND)
+                ));
+            }
+
+            try {
+                $oldStatusName = ProductQuoteStatus::getName($productQuote->pq_status_id);
+
+                $productQuote = $this->transactionManager->wrap(function () use ($form, $post, $productQuote, $flightQuote) {
+                    if ($form->status === $form::SUCCESS_STATUS) {
+                        $productQuote->booked();
+                        $flightQuote->fq_ticket_json = $post;
+                        $this->flightQuoteRepository->save($flightQuote);
+                    } else {
+                        $productQuote->error();
+                    }
+                    $this->productQuoteRepository->save($productQuote);
+                    return $productQuote;
+                });
+
+                $newStatusName = ProductQuoteStatus::getName($productQuote->pq_status_id);
+                $resultMessage[] = 'ProductQuote (' . $productQuote->pq_gid .
+                    ') changed status from (' . $oldStatusName . ') to (' . $newStatusName . ')';
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableLog($throwable), 'FlightController:actionUpdate:TransactionFailed');
+                return $this->endApiLog($apiLog, new ErrorResponse(
+                    new StatusCodeMessage(400),
+                    new MessageMessage('Transaction failed. ProductQuote (' . $productQuote->pq_gid . ') not saved.'),
+                    new CodeMessage(ProductCodeException::PRODUCT_QUOTE_SAVE)
+                ));
+            }
+        }
 
         return $this->endApiLog($apiLog, new SuccessResponse(
             new StatusCodeMessage(200),
             new MessageMessage('OK'),
             new DataMessage([
-                'exampleData' => 'TODO::',
+                'resultMessage' => implode(', ', $resultMessage),
             ])
         ));
     }
-
 
     private function endApiLog(ApiLog $apiLog, Response $response): Response
     {

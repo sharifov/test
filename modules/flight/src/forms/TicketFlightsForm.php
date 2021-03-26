@@ -20,7 +20,7 @@ class TicketFlightsForm extends Model
         STATUS_ISSUED = 3,          // STATUS_ISSUED        STATUS_SUCCESS
         STATUS_ERROR = 4,           // STATUS_ERROR
         STATUS_EXPIRED = 5,         // STATUS EXPIRED
-        STATUS_CANCELED = 6,        // STATUS_CANCELD
+        STATUS_CANCELED = 6,        // STATUS_CANCELED
         STATUS_RESERVED = 7,        // STATUS_RESERVED
         STATUS_VOID_REQUEST = 8,    // STATUS_VOID_REQUEST  STATUS_WAITING_CANCEL
         STATUS_VOID = 9,            // STATUS_VOID
@@ -56,6 +56,7 @@ class TicketFlightsForm extends Model
 
             ['status', 'required'],
             ['status', 'integer'],
+            ['status', 'filter', 'filter' => 'intval', 'skipOnError' => true, 'skipOnEmpty' => true],
         ];
     }
 
