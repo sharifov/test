@@ -1724,7 +1724,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "\nHTTP/1.1 200 OK\n{\n     \"status\": 200,\n     \"message\": \"OK\",\n     \"data\": {\n         \"flightRequestUid\": \"OE96040\",\n         \"flightQuoteId\": 12345,\n         \"productQuoteGid\": \"58a60dfd87b1728f422e1871fd302fcf\",\n         \"statusMessage\": \"ProductQuote changed status from (In progress) to (Error)\"\n     }\n}",
+          "content": "\nHTTP/1.1 200 OK\n{\n     \"status\": 200,\n     \"message\": \"OK\",\n     \"data\": {\n         \"resultMessage\": \"ProductQuote (exampleGID) changed status from (Pending) to (Error)\"\n     }\n}",
           "type": "json"
         }
       ]

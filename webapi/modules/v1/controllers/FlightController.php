@@ -218,10 +218,7 @@ class FlightController extends ApiBaseController
      *      "status": 200,
      *      "message": "OK",
      *      "data": {
-     *          "flightRequestUid": "OE96040",
-     *          "flightQuoteId": 12345,
-     *          "productQuoteGid": "58a60dfd87b1728f422e1871fd302fcf",
-     *          "statusMessage": "ProductQuote changed status from (In progress) to (Error)"
+     *          "resultMessage": "ProductQuote (exampleGID) changed status from (Pending) to (Error)"
      *      }
      * }
      *
@@ -262,7 +259,6 @@ class FlightController extends ApiBaseController
                 new CodeMessage(ApiCodeException::REQUEST_IS_NOT_POST)
             );
         }
-
         if (!Yii::$app->request->post()) {
             return new ErrorResponse(
                 new StatusCodeMessage(400),
@@ -274,7 +270,6 @@ class FlightController extends ApiBaseController
         $form = new TicketFlightsForm();
         $post = Yii::$app->request->post();
         $flights = \Yii::$app->request->post('flights');
-
         if (!$flights) {
             return $this->endApiLog($apiLog, new ErrorResponse(
                 new StatusCodeMessage(400),
@@ -283,58 +278,73 @@ class FlightController extends ApiBaseController
             ));
         }
 
-        if (!$form->load($flights[0])) { /* TODO::  */
-            return $this->endApiLog($apiLog, new ErrorResponse(
-                new StatusCodeMessage(400),
-                new MessageMessage(Messages::LOAD_DATA_ERROR),
-                new ErrorsMessage('Not found flights data on request'),
-                new CodeMessage(FlightCodeException::API_TICKET_FLIGHT_NOT_FOUND_DATA_ON_REQUEST)
-            ));
+        $resultMessage = [];
+        foreach ($flights as $key => $flight) {
+            if (!$form->load($flight)) {
+                return $this->endApiLog($apiLog, new ErrorResponse(
+                    new StatusCodeMessage(400),
+                    new MessageMessage(Messages::LOAD_DATA_ERROR),
+                    new ErrorsMessage('Not found flights data on request'),
+                    new CodeMessage(FlightCodeException::API_TICKET_FLIGHT_NOT_FOUND_DATA_ON_REQUEST)
+                ));
+            }
+            if (!$form->validate()) {
+                return $this->endApiLog($apiLog, new ErrorResponse(
+                    new MessageMessage(Messages::VALIDATION_ERROR),
+                    new ErrorsMessage($form->getErrors()),
+                    new CodeMessage(FlightCodeException::API_TICKET_FLIGHT_VALIDATE)
+                ));
+            }
+            if (!$flightQuote = FlightQuote::find()->where(['fq_flight_request_uid' => $form->uniqueId])->orderBy(['fq_id' => SORT_DESC])->one()) {
+                return $this->endApiLog($apiLog, new ErrorResponse(
+                    new StatusCodeMessage(404),
+                    new MessageMessage('FlightQuote not found by uid (' . $form->uniqueId . ')'),
+                    new CodeMessage(FlightCodeException::FLIGHT_QUOTE_NOT_FOUND)
+                ));
+            }
+
+            /** @var FlightQuote $flightQuote */
+            if (!$productQuote = $flightQuote->fqProductQuote) {
+                return $this->endApiLog($apiLog, new ErrorResponse(
+                    new StatusCodeMessage(404),
+                    new MessageMessage('ProductQuote not found by FlightQuote (' . $form->uniqueId . ')'),
+                    new CodeMessage(ProductCodeException::PRODUCT_QUOTE_OPTION_NOT_FOUND)
+                ));
+            }
+
+            try {
+                $oldStatusName = ProductQuoteStatus::getName($productQuote->pq_status_id);
+
+                $productQuote = $this->transactionManager->wrap(function () use ($form, $post, $productQuote, $flightQuote) {
+                    if ($form->status === $form::SUCCESS_STATUS) {
+                        $productQuote->booked();
+                        $flightQuote->fq_ticket_json = $post;
+                        $this->flightQuoteRepository->save($flightQuote);
+                    } else {
+                        $productQuote->error();
+                    }
+                    $this->productQuoteRepository->save($productQuote);
+                    return $productQuote;
+                });
+
+                $newStatusName = ProductQuoteStatus::getName($productQuote->pq_status_id);
+                $resultMessage[] = 'ProductQuote (' . $productQuote->pq_gid .
+                    ') changed status from (' . $oldStatusName . ') to (' . $newStatusName . ')';
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableLog($throwable), 'FlightController:actionUpdate:TransactionFailed');
+                return $this->endApiLog($apiLog, new ErrorResponse(
+                    new StatusCodeMessage(400),
+                    new MessageMessage('Transaction failed. ProductQuote (' . $productQuote->pq_gid . ') not saved.'),
+                    new CodeMessage(ProductCodeException::PRODUCT_QUOTE_SAVE)
+                ));
+            }
         }
-
-        if (!$form->validate()) {
-            return $this->endApiLog($apiLog, new ErrorResponse(
-                new MessageMessage(Messages::VALIDATION_ERROR),
-                new ErrorsMessage($form->getErrors()),
-                new CodeMessage(FlightCodeException::API_TICKET_FLIGHT_VALIDATE)
-            ));
-        }
-
-        if (!$flightQuote = FlightQuote::findOne(['fq_flight_request_uid' => $form->uniqueId])) {
-            return $this->endApiLog($apiLog, new ErrorResponse(
-                new StatusCodeMessage(404),
-                new MessageMessage('FlightQuote not found'),
-                new CodeMessage(FlightCodeException::FLIGHT_QUOTE_NOT_FOUND)
-            ));
-        }
-
-        /* TODO:: to refactor */
-        $flightQuoteRepository = Yii::createObject(FlightQuoteRepository::class);
-        $productQuoteRepository = Yii::createObject(ProductQuoteRepository::class);
-        $productQuote = $flightQuote->fqProductQuote;
-        $oldStatus = ProductQuoteStatus::getName($productQuote->pq_status_id);
-
-        if ($form->status === $form::SUCCESS_STATUS) {
-            $productQuote->booked();
-        } else {
-            $productQuote->error();
-        }
-        $productQuoteRepository->save($productQuote);
-
-        $flightQuote->fq_ticket_json = $post;
-        $flightQuoteRepository->save($flightQuote);
-
-        $newStatus = ProductQuoteStatus::getName($productQuote->pq_status_id);
-        $statusMessage = 'ProductQuote changed status from (' . $oldStatus . ') to (' . $newStatus . ')';
 
         return $this->endApiLog($apiLog, new SuccessResponse(
             new StatusCodeMessage(200),
             new MessageMessage('OK'),
             new DataMessage([
-                'flightQuoteUid' => $flightQuote->fq_uid,
-                'flightQuoteId' => $flightQuote->fq_id,
-                'productQuoteGid' => $productQuote->pq_gid,
-                'statusMessage' => $statusMessage,
+                'resultMessage' => implode(', ', $resultMessage),
             ])
         ));
     }
