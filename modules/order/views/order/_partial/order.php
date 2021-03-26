@@ -522,15 +522,9 @@ $js = <<<JS
             if (data.error) {
                 createNotify('Error', data.error, 'error');
             } else {
-                pjaxReload({container: '#pjax-order-view-' + orderId}); 
-                pjaxReload({container: '#pjax-order-file-' + orderId}); 
-                pjaxReload({container: '#pjax-order-additional-' + orderId}); 
-                pjaxReload({container: '#pjax-order-invoice-' + orderId}); 
-                pjaxReload({container: '#pjax-order-payment-' + orderId}); 
-                pjaxReload({container: '#pjax-order-billing-info-' + orderId}); 
                 
                 createNotify('The order was successfully removed', 'Success', 'success');
-                // TODO:: redirect
+                alert('TODO:: redirect'); // TODO:: redirect
             }
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
