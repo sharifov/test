@@ -256,10 +256,13 @@ class ApiLead extends Model
             }
         } else {
             $sources = Sources::findAll(['project_id' => $this->project_id]);
-            $this->source_id = $sources[0]->id;
+            if (!$sources) {
+                $this->addError('source_id', "Source ID not found" . $this->project_id ? "(project: " . $this->project_id . ")" : " Invalid Project ID");
+            } else {
+                $this->source_id = $sources[0]->id;
+            }
         }
     }
-
 
     /**
      *
