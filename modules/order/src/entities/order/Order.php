@@ -6,6 +6,7 @@ use common\models\BillingInfo;
 use common\models\Client;
 use common\models\Currency;
 use common\models\Employee;
+use common\models\Payment;
 use common\models\Project;
 use modules\invoice\src\entities\invoice\Invoice;
 use common\models\Lead;
@@ -71,6 +72,7 @@ use yii\helpers\VarDumper;
  * @property OrderTips $orderTips
  * @property OrderTipsUserProfit[] $orderTipsUserProfit
  * @property BillingInfo[] $billingInfo
+ * @property Payment[] $payments
  */
 class Order extends ActiveRecord implements Serializable, ProductDataInterface
 {
@@ -201,6 +203,11 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
     public function getInvoices(): ActiveQuery
     {
         return $this->hasMany(Invoice::class, ['inv_order_id' => 'or_id']);
+    }
+
+    public function getPayments(): ActiveQuery
+    {
+        return $this->hasMany(Payment::class, ['pay_order_id' => 'or_id']);
     }
 
     /**
@@ -505,5 +512,10 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
     public function getId(): int
     {
         return $this->or_id;
+    }
+
+    public function getOrderTipsAmount(): float
+    {
+        return $this->orderTips->ot_amount ?? 0.00;
     }
 }

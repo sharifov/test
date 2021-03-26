@@ -12,6 +12,7 @@ use modules\fileStorage\src\FileSystem;
 use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
@@ -71,16 +72,17 @@ class GetController extends FController
             throw new NotFoundHttpException();
         }
 
-        if ($form->isLead()) {
-            $this->leadGuard($file->fs_id);
-        }
-
-        if ($form->isCase()) {
-            $this->caseGuard($file->fs_id);
+        if ($form->guard_enabled) {
+            if ($form->isLead()) {
+                $this->leadGuard($file->fs_id);
+            }
+            if ($form->isCase()) {
+                $this->caseGuard($file->fs_id);
+            }
         }
 
         try {
-            if ((bool) \Yii::$app->request->get('as_file', false)) {
+            if ($form->as_file) {
                 \Yii::$app->response->sendContentAsFile($this->fileSystem->read($file->fs_path), $file->fs_name);
             } else {
                 \Yii::$app->response->format = Response::FORMAT_RAW;

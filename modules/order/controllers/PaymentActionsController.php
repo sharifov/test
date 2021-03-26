@@ -122,9 +122,17 @@ class PaymentActionsController extends FController
                 }
                 $payment->refund();
                 $this->paymentRepository->save($payment);
-                return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-orders", push: false, replace: false, async: false, timeout: 2000});</script>';
+
+                return '<script>
+                    $("#modal-df").modal("hide"); 
+                    $.pjax.reload({container: "#pjax-order-payment-' . $payment->pay_order_id . '", push: false, replace: false, async: false, timeout: 2000});
+                </script>';
             } catch (\Throwable $e) {
-                return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-orders", push: false, replace: false, async: false, timeout: 2000}); createNotify(\'Refund payment\', \'' . $e->getMessage() . '\', \'error\')</script>';
+                return '<script>
+                    $("#modal-df").modal("hide"); 
+                    $.pjax.reload({container: "#pjax-order-payment-' . $payment->pay_order_id . '", push: false, replace: false, async: false, timeout: 2000}); 
+                    createNotify(\'Refund payment\', \'' . $e->getMessage() . '\', \'error\');
+                </script>';
             }
         }
 

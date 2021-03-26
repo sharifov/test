@@ -176,8 +176,8 @@ $i = 1;
 $canView = $canView ? 'true' : 'false';
 $urlDeleteFile = Url::to(['/file-storage/file-storage/delete-ajax']);
 $js = <<<JS
-  
-$(document).on('click', '.js-delete-file-btn', function(e){    
+
+$(document).on('click', '.js-delete-file-btn', function(e){
     e.preventDefault();
     
     if(!confirm('Are you sure you want to delete the file?')) {
@@ -193,14 +193,14 @@ $(document).on('click', '.js-delete-file-btn', function(e){
         dataType: 'json'   
     })
     .done(function(dataResponse) {
-        if (dataResponse.status === 1) {                
+        if (dataResponse.status === 1) {
             pjaxReload({container: '#pjax-file-list'});  
-            createNotify('Success', dataResponse.message, 'success');   
+            createNotify('Success', dataResponse.message, 'success');
             
             let counter = $('#file-count-value');
             let count = parseInt(counter.text());
             count--;
-            counter.text(count);                         
+            counter.text(count);
         } else if (dataResponse.message.length) {
             createNotify('Error', dataResponse.message, 'error');
         } else {
@@ -212,7 +212,7 @@ $(document).on('click', '.js-delete-file-btn', function(e){
         createNotify('Error', 'Server error. Try again later.', 'error');      
     })
     .always(function(jqXHR, textStatus, errorThrown) {});
-});     
+});
 
 function addFileToFileStorageList() {
     pjaxReload({container: '#pjax-file-list'}); 
