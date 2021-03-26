@@ -317,6 +317,89 @@ class FlightController extends ApiBaseController
         ));
     }
 
+    /**
+     * @api {post} /v1/flight/update Flight Update
+     * @apiVersion 0.1.0
+     * @apiName Flight Update
+     * @apiGroup Flight
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeader {string} Accept-Encoding
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParamExample {json} Request-Example:
+     * {
+            "exampleKey": "exampleValue TODO::"
+       }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     * HTTP/1.1 200 OK
+     * {
+     *      "status": 200,
+     *      "message": "OK",
+     *      "data": {
+     *          "exampleData": "Example Model status changed TODO::"
+     *      }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     * HTTP/1.1 200 OK
+     * {
+     *     "status": 422,
+     *     "message": "Validation error",
+     *     "errors": {
+     *         "id": [
+     *             "id cannot be blank."
+     *        ]
+     *     },
+     *     "code": "15801"
+     * }
+     *
+     * @apiErrorExample {json} Error-Response (404):
+     * HTTP/1.1 200 OK
+     * {
+     *     "status": 404,
+     *     "message": "Model not found",
+     *     "code": "15300",
+     *     "errors": []
+     * }
+     */
+    public function actionUpdate()
+    {
+        $apiLog = $this->startApiLog($this->action->uniqueId);
+
+        if (!Yii::$app->request->isPost) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage('Not found POST request'),
+                new CodeMessage(ApiCodeException::REQUEST_IS_NOT_POST)
+            );
+        }
+        if (!Yii::$app->request->post()) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage('POST data request is empty'),
+                new CodeMessage(ApiCodeException::POST_DATA_IS_EMPTY)
+            );
+        }
+
+        /* TODO::  */
+
+        return $this->endApiLog($apiLog, new SuccessResponse(
+            new StatusCodeMessage(200),
+            new MessageMessage('OK'),
+            new DataMessage([
+                'exampleData' => 'TODO::',
+            ])
+        ));
+    }
+
+
     private function endApiLog(ApiLog $apiLog, Response $response): Response
     {
         $apiLog->endApiLog(ArrayHelper::toArray($response));
