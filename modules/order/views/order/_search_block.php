@@ -35,6 +35,15 @@ use yii\widgets\ActiveForm;
                         <div class="col-md-6">
                             <?= $form->field($model, 'or_gid')->textInput(['maxlength' => true]) ?>
                         </div>
+                        <div class="col-md-4">
+                            <?= $form->field($model, 'billingName')->textInput(['maxlength' => true]) ?>
+                        </div>
+                        <div class="col-md-4">
+                            <?= $form->field($model, 'billingPhone')->textInput(['maxlength' => true]) ?>
+                        </div>
+                        <div class="col-md-4">
+                            <?= $form->field($model, 'billingEmail')->textInput(['maxlength' => true]) ?>
+                        </div>
                     </div>
                 </div>
                 <div class=" profile-bottom text-center">
@@ -95,6 +104,24 @@ use yii\widgets\ActiveForm;
                                     ]
                                 ]
                             ])->label('Updated From / To') ?>
+                        </div>
+                        <div class="col-md-3">
+                            <?= $form->field($model, 'statusRangeTime', [
+                                'options' => ['class' => 'form-group']
+                            ])->widget(\kartik\daterange\DateRangePicker::class, [
+                                'presetDropdown' => false,
+                                'hideInput' => true,
+                                'convertFormat' => true,
+                                'pluginOptions' => [
+                                    'timePicker' => true,
+                                    'timePickerIncrement' => 1,
+                                    'timePicker24Hour' => true,
+                                    'locale' => [
+                                        'format' => 'd-M-Y H:i',
+                                        'separator' => ' - '
+                                    ]
+                                ]
+                            ])->label('Status From / To') ?>
                         </div>
                     </div>
                 </div>

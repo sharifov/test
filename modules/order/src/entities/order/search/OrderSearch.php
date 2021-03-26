@@ -2,10 +2,15 @@
 
 namespace modules\order\src\entities\order\search;
 
+use common\models\BillingInfo;
 use common\models\Employee;
+use modules\order\src\entities\orderStatusLog\OrderStatusLog;
 use sales\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 use modules\order\src\entities\order\Order;
+use yii\db\Expression;
+use yii\db\Query;
+use yii\helpers\VarDumper;
 
 /**
  * Class OrderSearch
@@ -13,12 +18,21 @@ use modules\order\src\entities\order\Order;
  * @property $show_fields
  * @property $createdRangeTime
  * @property $updatedRangeTime
+ * @property $statusRangeTime
+ * @property $billingName
+ * @property $billingPhone
+ * @property $billingEmail
  */
 class OrderSearch extends Order
 {
     public $show_fields = [];
     public $createdRangeTime;
     public $updatedRangeTime;
+    public $statusRangeTime;
+
+    public $billingName;
+    public $billingEmail;
+    public $billingPhone;
 
     public function rules(): array
     {
@@ -34,13 +48,15 @@ class OrderSearch extends Order
                 return is_array($value) ? $value : [];
             }, 'skipOnEmpty' => true],
 
-            [['createdRangeTime', 'updatedRangeTime'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+            [['createdRangeTime', 'updatedRangeTime', 'statusRangeTime'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+
+            [['billingEmail', 'billingName','billingPhone'], 'string'],
         ];
     }
 
     public function search($params, Employee $user): ActiveDataProvider
     {
-        $query = self::find()->with(['orLead', 'orOwnerUser', 'orCreatedUser', 'orUpdatedUser', 'productQuotes.pqProduct.prType']);
+        $query = self::find()->select('*')->with(['orLead', 'orOwnerUser', 'orCreatedUser', 'orUpdatedUser', 'productQuotes.pqProduct.prType']);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -57,6 +73,14 @@ class OrderSearch extends Order
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
+        }
+
+        if ($this->billingPhone || $this->billingEmail || $this->billingName) {
+            $query
+                ->leftJoin(BillingInfo::tableName(), 'bi_order_id = or_id')
+                ->andFilterWhere(['like', 'bi_contact_name', $this->billingName])
+                ->andFilterWhere(['like', 'bi_contact_email', $this->billingEmail])
+                ->andFilterWhere(['like', 'bi_contact_phone', $this->billingPhone]);
         }
 
         if ($this->or_created_dt) {
@@ -84,6 +108,24 @@ class OrderSearch extends Order
             }
             if ($updatedRange[1]) {
                 $query->andFilterWhere(['<=', 'or_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($updatedRange[1]))]);
+            }
+        }
+
+        if ($this->statusRangeTime) {
+            $query->addSelect([
+                'end_status_date' => (new Query())
+                    ->select('orsl_start_dt')
+                    ->from(OrderStatusLog::tableName())
+                    ->andWhere('orsl_order_id = or_id')
+                    ->orderBy(['orsl_id' => SORT_DESC])
+                    ->limit(1)
+            ]);
+            $statusRange = explode(" - ", $this->statusRangeTime);
+            if ($statusRange[0]) {
+                $query->andFilterHaving(['>=', 'end_status_date', Employee::convertTimeFromUserDtToUTC(strtotime($statusRange[0]))]);
+            }
+            if ($statusRange[1]) {
+                $query->andFilterHaving(['<=', 'end_status_date', Employee::convertTimeFromUserDtToUTC(strtotime($statusRange[1]))]);
             }
         }
 
