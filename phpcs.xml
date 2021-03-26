@@ -37,8 +37,7 @@
     </rule>
     <rule ref="PSR2.Methods.MethodDeclaration.Underscore">
         <exclude-pattern>frontend/tests/unit/models</exclude-pattern>
-        <exclude-pattern>webapi/tests/unit/models</exclude-pattern>
-        <exclude-pattern>webapi/tests/acceptance</exclude-pattern>
+        <exclude-pattern>webapi/tests</exclude-pattern>
     </rule>
     <rule ref="PSR1.Classes.ClassDeclaration">
         <exclude-pattern>console/migrations/*</exclude-pattern>

@@ -4,8 +4,8 @@ return [
     [
         'au_id' => 1,
         'au_name' => 'apiUser1',
-        'au_api_username' => 'apiUser1',
-        'au_api_password' => 'tUu1qHcde0diwUol3xeI-18MuHkkprQI',
+        'au_api_username' => 'test',
+        'au_api_password' => '7288edd0fc3ffcbe93a0cf06e3568e28521687bc', // test123
         'au_updated_dt' => '2021-02-01 04:33:15',
         'au_email' => 'sfriesen@jenkins.info',
         'au_enabled' => 1

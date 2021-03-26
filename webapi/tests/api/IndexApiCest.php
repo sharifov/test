@@ -2,13 +2,14 @@
 
 namespace webapi\tests;
 
-use webapi\fixtures\UserFixture;
+use webapi\fixtures\ApiUserFixture;
 use yii\helpers\Url;
 
 class IndexApiCest
 {
     public const API_USERNAME = 'test';
     public const API_PASSWORD = 'test123';
+    public const PROJECT_ID = 6;
 
 //    /**
 //     * @param \webapi\tests\ApiTester $I
@@ -43,15 +44,15 @@ class IndexApiCest
 //    }
 
 
-//    public function _before(ApiTester $I)
-//    {
-//        $I->haveFixtures([
-//            'user' => [
-//                'class' => UserFixture::class,
-//                'dataFile' => codecept_data_dir() . 'user.php'
-//            ]
-//        ]);
-//    }
+    public function _before(ApiTester $I)
+    {
+        $I->haveFixtures([
+            'user' => [
+                'class' => ApiUserFixture::class,
+                'dataFile' => codecept_data_dir() . 'user.php'
+            ]
+        ]);
+    }
 
 
 //    /**
@@ -77,17 +78,29 @@ class IndexApiCest
      */
     public function getDepartmentPhoneProject(ApiTester $I, \Codeception\Example $example): void
     {
-        $I->wantTo('[POST] Get Department Phone Project');
+
+        $route = '/v2/department-phone-project/get';
+
+        $I->wantTo('[POST] Get Department Phone Project | Route: ' . Url::toRoute($route));
+        //$I->wantToTest('Route: ' . Url::toRoute($route));
         $I->amHttpAuthenticated(self::API_USERNAME, self::API_PASSWORD);
         $I->haveHttpHeader('Accept-Encoding', 'Accept-Encoding: gzip, deflate');
 
-        echo Url::toRoute('/v2/department-phone-project/get');
-        exit;
+
+        $I->sendGet(
+            Url::toRoute($route),
+            [
+                'project_id' => self::PROJECT_ID,
+                'department' => $example[0]
+            ]
+        );
+
+        $I->seeResponseCodeIs(405); // 200
 
         $I->sendPost(
-            Url::toRoute('/v2/department-phone-project/get'),
+            Url::toRoute($route),
             [
-            'project_id' => 6,
+            'project_id' => self::PROJECT_ID,
             'department' => $example[0]
             ]
         );
