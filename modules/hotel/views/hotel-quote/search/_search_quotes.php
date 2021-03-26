@@ -73,9 +73,11 @@ The SPA service at Christmas is closed on December 25 and January 1.'
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 <div class="row">
     <div class="col-2 quote">
-        <?= $this->render('_quote_filters', [
+        <?php if ($dataProvider) :?>
+            <?= $this->render('_quote_filters', [
                 'filtersForm' => $filtersForm
         ]) ?>
+        <?php endif; ?>
     </div>
 
     <div class="col-10">
@@ -86,8 +88,8 @@ The SPA service at Christmas is closed on December 25 and January 1.'
             'class' => 'table table-bordered',
         ],*/
         'emptyText' => '<div class="text-center">Not found any hotels</div><br>',
-        'itemView' => function ($dataHotel, $key, $index, $widget) use ($hotelSearch) {
-            return $this->render('_list_hotel_quotes', ['dataHotel' => $dataHotel, 'index' => $index, 'key' => $key, 'hotelSearch' => $hotelSearch]);
+        'itemView' => function ($dataHotel, $key, $index, $widget) use ($hotelSearch, $filtersForm) {
+            return $this->render('_list_hotel_quotes', ['dataHotel' => $dataHotel, 'index' => $index, 'key' => $key, 'hotelSearch' => $hotelSearch, 'form' => $filtersForm]);
         },
         //'layout' => "{items}<div class=\"text-center\" style='margin-top: -20px; margin-bottom: -25px'>{pager}</div>", // {summary}\n<div class="text-center">{pager}</div>
         'itemOptions' => [

@@ -100,6 +100,7 @@ class AppHelper
     public static function filterByValueMultiLevel(array $array, array $indexPath, $value = null): array
     {
         $newArray = [];
+
         if (is_array($array) && $array) {
             foreach (array_keys($array) as $key) {
                 if ($value !== null) {
@@ -130,12 +131,12 @@ class AppHelper
         $newArray = [];
         if (is_array($array) && $array) {
             foreach (array_keys($array) as $key) { /// to do
-                if ($minValue !== null) {
+                if ($minValue !== null && $maxValue !== null) {
                     $current = $array[$key];
-                    foreach ($indexPath as $step) {
-                        $current = $current[$step];
-                        if ($current === $minValue) {
+                    foreach ($current[$indexPath[0]] as $element) {
+                        if ((int) $element[$indexPath[1]] >= $minValue && (int) $element[$indexPath[1]] <= $maxValue) {
                             $newArray[$key] = $array[$key];
+                            continue;
                         }
                     }
                 } else {

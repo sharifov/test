@@ -5,6 +5,7 @@
 /* @var $index int */
 /* @var $key int */
 /* @var $hotelSearch Hotel */
+/* @var $form \modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchForm */
 
 use modules\hotel\assets\HotelAsset;
 use modules\hotel\models\Hotel;
@@ -56,7 +57,8 @@ $roomDataProvider = new ArrayDataProvider([
     'allModels' => $dataHotel['rooms'] ?? [],
     'pagination' => [
         'pageSize' => 15,
-        'pageParam' => 'qh-page' . $key
+        'pageParam' => 'qh-page' . $key,
+        'params' => array_merge(Yii::$app->request->get(), $form->getFilters(), $params ?? []),
     ],
     /*'sort' => [
         'attributes' => ['ranking', 'name', 's2C'],

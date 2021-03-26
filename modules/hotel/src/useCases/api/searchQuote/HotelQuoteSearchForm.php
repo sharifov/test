@@ -51,12 +51,13 @@ class HotelQuoteSearchForm extends Model
     public function applyFilters(array $hotels): array
     {
         if ($this->onlyHotels) {
-            //VarDumper::dump($hotels[0], 10, true); die();
-            $hotels = AppHelper::filterByValueMultiLevel($hotels, ['rooms', 'totalAmount'], 'HOTEL');
+            $hotels = AppHelper::filterByValueMultiLevel($hotels, ['accomodationType', 'code'], 'HOTEL');
         }
 
         if (!empty($this->priceRange)) {
-            //$hotels = AppHelper::filterByRangeMultiLevel($hotels, ['accomodationType', 'code'], 'HOTEL');
+            //VarDumper::dump($hotels[0], 10, true); die();
+            $range = explode('-', $this->priceRange);
+            $hotels = AppHelper::filterByRangeMultiLevel($hotels, ['rooms', 'totalAmount'], $range[0], $range[1]);
         }
 
         return $hotels;
@@ -72,7 +73,7 @@ class HotelQuoteSearchForm extends Model
                 }
                 $price = (int) $room['totalAmount'];
                 if ($price <= $min) {
-                    $min =  $price ;
+                    $min = $price ;
                 }
 
                 if ($price > $max) {

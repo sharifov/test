@@ -160,8 +160,7 @@ class HotelQuoteController extends FController
             $hotelList = $form->applyFilters($hotelList);
         }
 
-        VarDumper::dump($hotelList[0], 10, true);
-        die();
+        //VarDumper::dump($hotelList[0], 10, true); die();
 
         $dataProvider = new ArrayDataProvider([
             'allModels' => $hotelList,

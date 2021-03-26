@@ -66,8 +66,8 @@ use yii\bootstrap4\Html;
         ],
         step: step,
         range: {
-            'min': maxPrice,
-            'max': minPrice
+            'min': minPrice,
+            'max': maxPrice
         }
     });
 
