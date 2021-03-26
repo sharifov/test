@@ -23,7 +23,7 @@ use yii\widgets\ActiveForm;
     <?= $form->field($model, 'atnq_supplier_name')->textInput() ?>
 
     <?= $form->field($model, 'atnq_type_name')->textInput() ?>
-    <?= $form->field($model, 'atnq_date')->textInput() ?>
+    <?= $form->field($model, 'atnq_availability_date')->textInput() ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

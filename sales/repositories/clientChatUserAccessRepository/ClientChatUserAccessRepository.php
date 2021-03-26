@@ -81,8 +81,6 @@ class ClientChatUserAccessRepository
             $data = ClientChatAccessMessage::skip($chatId, $userId, (int)$chatUserAccessId);
         }
 
-        \Yii::info('UserId: ' . $userId . '; ' . VarDumper::dumpAsString($data), 'info\updateChatUserAccessWidget');
-
         Notifications::publish('clientChatRequest', ['user_id' => $userId], ['data' => $data]);
     }
 

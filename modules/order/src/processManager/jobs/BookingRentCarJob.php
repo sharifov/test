@@ -5,6 +5,7 @@ namespace modules\order\src\processManager\jobs;
 use common\models\Notifications;
 use frontend\widgets\notification\NotificationMessage;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
+use modules\rentCar\src\services\RentCarQuoteBookGuard;
 use modules\rentCar\src\services\RentCarQuoteBookService;
 use yii\queue\JobInterface;
 use yii\queue\RetryableJobInterface;
@@ -41,6 +42,7 @@ class BookingRentCarJob implements JobInterface
         }
 
         try {
+            RentCarQuoteBookGuard::guard($quote);
             RentCarQuoteBookService::book($quote, null);
         } catch (\Throwable $e) {
             \Yii::error([

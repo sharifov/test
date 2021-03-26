@@ -133,11 +133,7 @@ class ApiAttractionService extends Component
                                 label
                                 dataType
                                 isAnswered
-                                dataFormat
-                                availableOptions {
-                                    label
-                                    value
-                                }
+                                dataFormat                                
                                 answerValue
                                 answerFormattedText
                             }
@@ -208,6 +204,7 @@ class ApiAttractionService extends Component
                         id                        
                         isValid
                         optionList {
+                            isComplete
                             nodes {
                                 id
                                 label
@@ -350,20 +347,24 @@ class ApiAttractionService extends Component
               product(id: $productId) {
                 id
                 code
-                name                
+                name
+                abstract
                 guidePriceCurrency
                 guidePrice
                 difficultyLevel
                 supplierName
-                __typename
+                
+                availabilityCount
+                availabilityType
+                bookingUrl
                 previewImage {
-                  url
+                    url
                 }
-                contentList {nodes{
-                  name
-                  type
-                  description
-                }}
+                cancellationPolicy {
+                    isCancellable
+                }
+                minDuration
+                maxDuration
               }
             }',
             'variables' => '{"productId":"' . $productId . '"}',

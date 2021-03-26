@@ -344,7 +344,7 @@ class CreditCard extends ActiveRecord
         int $expirationMonth,
         int $expirationYear,
         string $cvv,
-        int $typeId
+        ?int $typeId
     ): CreditCard {
         $card = new self();
         $card->cc_number = $number;

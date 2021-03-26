@@ -40,6 +40,7 @@ $form = ActiveForm::begin([
     <?php endforeach; ?>
 </div>
 
+<?php if (!empty($availability['pricingCategoryList']['nodes'])) : ?>
 <div class="row">
     <div class="col-md-12">
             <table class="table table-bordered">
@@ -55,7 +56,6 @@ $form = ActiveForm::begin([
                 </tr>
                 </thead>
                 <tbody>
-                <?php if (!empty($availability['pricingCategoryList']['nodes'])) : ?>
                     <?php foreach ($availability['pricingCategoryList']['nodes'] as $nr => $pax) : ?>
                         <tr>
                             <td title="Pax Id: <?=Html::encode($pax['id'])?>"><?=($nr + 1)?>. Pricing Category</td>
@@ -67,14 +67,14 @@ $form = ActiveForm::begin([
                             <td><?= Html::encode($pax['priceFormattedText']) ?></td>
                         </tr>
                     <?php endforeach; ?>
-                <?php endif; ?>
                 </tbody>
             </table>
     </div>
 </div>
+<?php endif; ?>
 
 <div class="form-group text-center">
-    <?= Html::submitButton('<i class="fa fa-save"></i> Apply Options', ['class' => 'btn btn-success']) ?>
+    <?= Html::submitButton('<i class="fa fa-plus"></i> Apply Options', ['class' => 'btn btn-success']) ?>
 </div>
 
 <?php ActiveForm::end() ?>

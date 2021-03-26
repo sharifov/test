@@ -2,6 +2,8 @@
 
 namespace webapi\src\logger\behaviors;
 
+use sales\helpers\app\AppHelper;
+use Throwable;
 use webapi\src\logger\behaviors\filters\Filterable;
 use Yii;
 use webapi\src\logger\EndDTO;
@@ -9,6 +11,7 @@ use webapi\src\logger\StartDTO;
 use yii\base\Action;
 use yii\base\ActionEvent;
 use yii\base\Request;
+use yii\helpers\Json;
 use yii\rest\Controller;
 use yii\web\IdentityInterface;
 
@@ -48,17 +51,25 @@ class SimpleLoggerBehavior extends LoggerBehavior
         /** @var IdentityInterface $user */
         $user = Yii::$app->user;
 
-        $logger->start(
-            new StartDTO([
-                'data' => @json_encode($this->filterData($request->post())),
-                'action' => $action->uniqueId,
-                'userId' => $user->getId(),
-                'ip' => $request->getRemoteIP(),
-                'startTime' => microtime(true),
-                'startMemory' => memory_get_usage(),
-            ])
-        );
-
+        try {
+            $data = Json::encode($this->filterData($request->post()));
+            $logger->start(
+                new StartDTO([
+                    'data' => $data,
+                    'action' => $action->uniqueId,
+                    'userId' => $user->getId(),
+                    'ip' => $request->getRemoteIP(),
+                    'startTime' => microtime(true),
+                    'startMemory' => memory_get_usage(),
+                ])
+            );
+        } catch (\Throwable $throwable) {
+            $log = AppHelper::throwableLog($throwable);
+            $log['action'] = $action->uniqueId;
+            $log['userId'] = $user->getId();
+            $log['ip'] = $request->getRemoteIP();
+            Yii::error($log, 'SimpleLoggerBehavior:beforeAction:logger');
+        }
         return $event->isValid;
     }
 
@@ -79,15 +90,19 @@ class SimpleLoggerBehavior extends LoggerBehavior
             return $result;
         }
 
-        $logger->end(
-            new EndDTO([
-                'result' => @json_encode($result->getResponse()),
-                'endTime' => microtime(true),
-                'endMemory' => memory_get_usage(),
-                'profiling' => Yii::getLogger()->getDbProfiling(),
-            ])
-        );
-
+        try {
+            $encodeResponse = Json::encode($result->getResponse());
+            $logger->end(
+                new EndDTO([
+                    'result' => $encodeResponse,
+                    'endTime' => microtime(true),
+                    'endMemory' => memory_get_usage(),
+                    'profiling' => Yii::getLogger()->getDbProfiling(),
+                ])
+            );
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), 'SimpleLoggerBehavior:afterAction:logger');
+        }
         return $result;
     }
 
@@ -102,7 +117,7 @@ class SimpleLoggerBehavior extends LoggerBehavior
             if ($filter instanceof Filterable) {
                 return $filter->filterData($data);
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Yii::error('Error create filter. ' . $e->getMessage(), 'SimpleLoggerBehavior');
         }
 

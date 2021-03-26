@@ -5,6 +5,12 @@ namespace sales\model\clientChatRequest\entity;
 use DateTime;
 use sales\forms\clientChat\RealTimeStartChatForm;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
+use sales\model\clientChatRequest\useCase\api\create\requestEventCreator\AgentUtteredEventCreator;
+use sales\model\clientChatRequest\useCase\api\create\requestEventCreator\ChatRequestEventCreator;
+use sales\model\clientChatRequest\useCase\api\create\requestEventCreator\GuestDisconnectedEventCreator;
+use sales\model\clientChatRequest\useCase\api\create\requestEventCreator\GuestUtteredEventCreator;
+use sales\model\clientChatRequest\useCase\api\create\requestEventCreator\RoomConnectedEventCreator;
+use sales\model\clientChatRequest\useCase\api\create\requestEventCreator\TrackEventCreator;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 
@@ -50,6 +56,14 @@ class ClientChatRequest extends \yii\db\ActiveRecord
         self::EVENT_TRACK => 'TRACK_EVENT',
         self::EVENT_LEAVE_FEEDBACK => 'LEAVE_FEEDBACK',
         self::EVENT_CREATE_BY_AGENT => 'CREATE_BY_AGENT'
+    ];
+
+    private const EVENT_CREATORS = [
+        self::EVENT_ROOM_CONNECTED => RoomConnectedEventCreator::class,
+        self::EVENT_GUEST_DISCONNECTED => GuestDisconnectedEventCreator::class,
+        self::EVENT_TRACK => TrackEventCreator::class,
+        self::EVENT_GUEST_UTTERED => GuestUtteredEventCreator::class,
+        self::EVENT_AGENT_UTTERED => AgentUtteredEventCreator::class,
     ];
 
     private array $decodedJsonData = [];
@@ -342,5 +356,14 @@ class ClientChatRequest extends \yii\db\ActiveRecord
             " FOR VALUES FROM ('" . date_format($partFromDateTime, "Y-m-d") . "') TO ('" . date_format($partToDateTime, "Y-m-d") . "')");
         $cmd->execute();
         return $partTableName;
+    }
+
+    public static function getEventCreatorByEventId(int $id): ?ChatRequestEventCreator
+    {
+        if (isset(self::EVENT_CREATORS[$id])) {
+            $creator = self::EVENT_CREATORS[$id];
+            return \Yii::createObject($creator);
+        }
+        return null;
     }
 }

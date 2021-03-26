@@ -42,14 +42,14 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             //'pay_date',
             'pay_code',
+            'pay_invoice_id',
+            'pay_order_id',
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'pay_date'
             ],
             //'pay_amount',
             //'pay_currency',
-            //'pay_invoice_id',
-            //'pay_order_id',
             //'pay_created_user_id',
             //'pay_updated_user_id',
             //'pay_created_dt',

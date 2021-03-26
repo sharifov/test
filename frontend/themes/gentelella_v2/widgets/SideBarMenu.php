@@ -534,6 +534,15 @@ class SideBarMenu extends \yii\bootstrap\Widget
             ]
         ];
 
+        $menuItems[] = [
+            'label' => 'Orders',
+            'url' => 'javascript:',
+            'icon' => 'fa fa-list',
+            'items' => [
+                ['label' => 'Search orders', 'url' => ['/order/order/search'], 'icon' => 'fa fa-list'],
+            ]
+        ];
+
         $menuModuleItems = [];
 
         if (class_exists('\modules\attraction\AttractionModule')) {

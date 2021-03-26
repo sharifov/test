@@ -3,10 +3,15 @@
 namespace modules\order\controllers;
 
 use common\models\Lead;
+use modules\fileStorage\src\entity\fileOrder\FileOrder;
+use modules\order\src\entities\order\search\OrderCrudSearch;
+use modules\order\src\entities\order\search\OrderSearch;
 use modules\order\src\forms\OrderForm;
+use modules\order\src\processManager\OrderProcessManager;
 use modules\order\src\services\CreateOrderDTO;
 use modules\order\src\services\OrderManageService;
 use modules\product\src\entities\productQuote\ProductQuote;
+use sales\auth\Auth;
 use Yii;
 use modules\order\src\entities\order\Order;
 use frontend\controllers\FController;
@@ -18,6 +23,7 @@ use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
+use modules\fileStorage\src\services\url\UrlGenerator;
 
 /**
  * Class OrderController
@@ -52,6 +58,17 @@ class OrderController extends FController
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
+    public function actionSearch()
+    {
+        $searchModel = new OrderSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
+
+        return $this->render('search', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
     }
 
     /**
@@ -130,7 +147,15 @@ class OrderController extends FController
                 //$modelOrder->or_client_currency_rate = $model->or_client_currency_rate;
 
                 if ($modelOrder->save()) {
-                    return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-orders", push: false, replace: false, async: false, timeout: 2000});</script>';
+                    return '<script>
+                        $("#modal-df").modal("hide"); 
+                        if ($("#pjax-lead-orders").length) {
+                            $.pjax.reload({container: "#pjax-lead-orders", push: false, replace: false, async: false, timeout: 2000});
+                        }
+                        if ($("#pjax-order-view-' . $model->or_id . '").length) {
+                            $.pjax.reload({container: "#pjax-order-view-' . $model->or_id . '", push: false, replace: false, async: false, timeout: 2000});
+                        }
+                    </script>';
                 }
 
                 Yii::error(VarDumper::dumpAsString($modelOrder->errors), 'OrderController:actionUpdateAjax:Order:save');
@@ -219,6 +244,20 @@ class OrderController extends FController
         return ['html' => implode('', $offerList)];
     }
 
+    public function actionView(string $gid, UrlGenerator $urlGenerator)
+    {
+        if (!$order = Order::findOne(['or_gid' => $gid])) {
+            throw new NotFoundHttpException('Order not found by GID(' . $gid . ')');
+        }
+
+        return $this->render('view', [
+            'order' => $order,
+            'orderProcessManage' => OrderProcessManager::findOne($order->or_id),
+            'orderFiles' => FileOrder::findAll(['fo_or_id' => $order->or_id]),
+            'urlGenerator' => $urlGenerator,
+        ]);
+    }
+
     /**
      * @param $id
      * @return Order
@@ -229,7 +268,6 @@ class OrderController extends FController
         if (($model = Order::findOne($id)) !== null) {
             return $model;
         }
-
-        throw new NotFoundHttpException('The requested page does not exist.');
+        throw new NotFoundHttpException('Order not found by ID(' . $id . ')');
     }
 }

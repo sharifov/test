@@ -12,6 +12,7 @@ use modules\invoice\src\entities\invoice\Invoice;
 use modules\invoice\src\entities\invoice\InvoiceRepository;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderRepository;
+use modules\order\src\entities\order\OrderStatusAction;
 use modules\order\src\entities\orderTips\OrderTips;
 use modules\order\src\entities\orderTips\OrderTipsRepository;
 use modules\order\src\entities\orderUserProfit\OrderUserProfit;
@@ -173,7 +174,7 @@ class OrderApiManageService
     {
         return $this->transactionManager->wrap(function () use ($dto, $form) {
             $newOrder = (new Order())->create($dto);
-            $newOrder->processing();
+            $newOrder->processing(null, OrderStatusAction::API, null);
             $orderId = $this->orderRepository->save($newOrder);
 //            $this->recalculateProfitAmountService->setOrders([$newOrder])->recalculateOrders();
 

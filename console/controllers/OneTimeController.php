@@ -1020,20 +1020,19 @@ class OneTimeController extends Controller
         printf(PHP_EOL);
         $time_start = microtime(true);
 
-        $sales = CaseSale::find()
+        $query = CaseSale::find()
             ->offset($offset)
             ->limit($limit)
-            ->orderBy(['css_cs_id' => SORT_ASC])
-            ->all();
+            ->orderBy(['css_cs_id' => SORT_ASC]);
 
-        $count = count($sales);
+        $count = CaseSale::find()->count();
 
         Console::startProgress(0, $count);
         $processed = 0;
 
         $errors = [];
         $saleService = Yii::createObject(CasesSaleService::class);
-        foreach ($sales as $sale) {
+        foreach ($query->each(20) as $sale) {
             $processed++;
             Console::updateProgress($processed, $count);
             $saleData = $sale->getSaleDataDecoded();
