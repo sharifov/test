@@ -4,8 +4,8 @@ namespace modules\order\controllers;
 
 use frontend\controllers\FController;
 use modules\order\src\entities\order\Order;
-use modules\order\src\processManager\OrderProcessManager;
-use modules\order\src\processManager\OrderProcessManagerRepository;
+use modules\order\src\processManager\phoneToBook\OrderProcessManager;
+use modules\order\src\processManager\phoneToBook\OrderProcessManagerRepository;
 use Yii;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;

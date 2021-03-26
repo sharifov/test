@@ -5,7 +5,7 @@ namespace modules\order\src\payment\listeners;
 use common\models\Payment;
 use modules\order\src\entities\order\events\OrderPreparedEvent;
 use modules\order\src\payment\jobs\ChargePaymentJob;
-use modules\order\src\processManager\OrderProcessManager;
+use modules\order\src\processManager\phoneToBook\OrderProcessManager;
 
 class OrderProcessPaymentChargeListener
 {

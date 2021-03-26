@@ -1,7 +1,7 @@
 <?php
 
-use modules\order\src\processManager\OrderProcessManager;
-use modules\order\src\processManager\OrderProcessManagerSearch;
+use modules\order\src\processManager\phoneToBook\OrderProcessManager;
+use modules\order\src\processManager\phoneToBook\OrderProcessManagerSearch;
 use common\components\grid\DateTimeColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;

@@ -28,13 +28,13 @@ use modules\order\src\listeners\order\OrderLogPaymentStatusListener;
 use modules\order\src\listeners\order\OrderProcessingConfirmationListener;
 use modules\order\src\listeners\order\OrderProcessingHybridNotificationListener;
 use modules\order\src\listeners\order\OrderRecalculateTotalPriceListener;
-use modules\order\src\processManager\listeners\OrderPrepareOrderProcessingListener;
+use modules\order\src\processManager\phoneToBook\listeners\OrderPrepareOrderProcessingListener;
 use modules\order\src\listeners\order\OrderRecalculateProfitAmountListener;
 use modules\order\src\listeners\orderTipsUserProfit\UpdateOrderTipsUserProfitAmountEventListener;
 use modules\order\src\listeners\orderUserProfit\OrderUserProfitUpdateProfitAmountEventListener;
 use modules\order\src\payment\listeners\OrderProcessPaymentChargeListener;
-use modules\order\src\processManager\events;
-use modules\order\src\processManager\listeners;
+use modules\order\src\processManager\phoneToBook\events;
+use modules\order\src\processManager\phoneToBook\listeners;
 
 return [
     OrderRecalculateProfitAmountEvent::class => [OrderRecalculateProfitAmountListener::class],

@@ -3,7 +3,7 @@
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderPayStatus;
 use modules\order\src\entities\order\OrderStatus;
-use modules\order\src\processManager\OrderProcessManager;
+use modules\order\src\processManager\phoneToBook\OrderProcessManager;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use sales\auth\Auth;
 use yii\helpers\Html;

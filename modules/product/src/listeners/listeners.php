@@ -1,8 +1,8 @@
 <?php
 
 use modules\order\src\listeners\order\OrderPrepareListener;
-use modules\order\src\processManager\listeners\AfterBookedFlightOrderProcessListener;
-use modules\order\src\processManager\listeners\AfterBookedQuoteOrderProcessListener;
+use modules\order\src\processManager\phoneToBook\listeners\AfterBookedFlightOrderProcessListener;
+use modules\order\src\processManager\phoneToBook\listeners\AfterBookedQuoteOrderProcessListener;
 use modules\product\src\entities\product\events\ProductClientBudgetChangedEvent;
 use modules\product\src\entities\product\events\ProductMarketPriceChangedEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteCloneCreatedEvent;

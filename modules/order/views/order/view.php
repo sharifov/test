@@ -3,7 +3,7 @@
 use modules\fileStorage\src\entity\fileOrder\FileOrder;
 use modules\fileStorage\src\services\url\UrlGenerator;
 use modules\order\src\entities\order\Order;
-use modules\order\src\processManager\OrderProcessManager;
+use modules\order\src\processManager\phoneToBook\OrderProcessManager;
 use sales\auth\Auth;
 use yii\helpers\Html;
 

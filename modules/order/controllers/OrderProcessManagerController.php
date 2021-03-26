@@ -2,8 +2,8 @@
 
 namespace modules\order\controllers;
 
-use modules\order\src\processManager\OrderProcessManagerSearch;
-use modules\order\src\processManager\OrderProcessManager;
+use modules\order\src\processManager\phoneToBook\OrderProcessManagerSearch;
+use modules\order\src\processManager\phoneToBook\OrderProcessManager;
 use sales\auth\Auth;
 use Yii;
 use frontend\controllers\FController;
