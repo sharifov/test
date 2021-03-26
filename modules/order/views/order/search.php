@@ -190,7 +190,7 @@ JS;
                 'template' => '{view}',
                 'buttons' => [
                     'view' => static function ($url, Order $model) {
-                        return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', ['/order/order-crud/view', 'id' => $model->or_id], [
+                        return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', ['/order/order/view', 'gid' => $model->or_gid], [
                             'target' => '_blank',
                             'data-pjax' => 0,
                             'title' => 'View',
