@@ -7,6 +7,16 @@ namespace modules\product\src\entities\productQuote;
  */
 class Scopes extends \yii\db\ActiveQuery
 {
+    public function byOrderId(int $orderId): self
+    {
+        return $this->andWhere(['pq_order_id' => $orderId]);
+    }
+
+    public function applied(): self
+    {
+        return $this->andWhere(['pq_status_id' => ProductQuoteStatus::APPLIED]);
+    }
+
     /**
      * @param null $db
      * @return array|ProductQuote|null

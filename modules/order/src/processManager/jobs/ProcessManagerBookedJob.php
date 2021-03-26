@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\order\src\processManager\phoneToBook\jobs;
+namespace modules\order\src\processManager\jobs;
 
 use modules\order\src\processManager\phoneToBook\OrderProcessManagerRepository;
 use yii\queue\JobInterface;

@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\order\src\processManager\phoneToBook\jobs;
+namespace modules\order\src\processManager\jobs;
 
 use modules\flight\components\api\FlightQuoteBookService;
 use modules\flight\models\FlightQuote;

@@ -3,6 +3,9 @@
 namespace modules\order\src\processManager\phoneToBook\jobs;
 
 use modules\order\src\entities\order\Order;
+use modules\order\src\processManager\jobs\BookingAttractionJob;
+use modules\order\src\processManager\jobs\BookingHotelJob;
+use modules\order\src\processManager\jobs\BookingRentCarJob;
 use yii\queue\JobInterface;
 
 /**

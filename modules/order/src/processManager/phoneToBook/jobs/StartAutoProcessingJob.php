@@ -23,15 +23,17 @@ class StartAutoProcessingJob implements JobInterface
 
     public function execute($queue)
     {
-        if (OrderProcessManager::find()->andWhere(['opm_id' => $this->orderId])->exists()) {
+        $repo = \Yii::createObject(OrderProcessManagerRepository::class);
+
+        if ($repo->get($this->orderId)) {
             \Yii::error([
                 'message' => 'Order Process Manager is already exist.',
                 'orderId' => $this->orderId
             ], 'OrderProcessManager:StartAutoProcessingJob');
             return;
         }
+
         try {
-            $repo = \Yii::createObject(OrderProcessManagerRepository::class);
             $process = OrderProcessManager::create($this->orderId, new \DateTimeImmutable());
             $repo->save($process);
         } catch (\Throwable $e) {

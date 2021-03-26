@@ -2,7 +2,6 @@
 
 namespace modules\order\src\processManager\phoneToBook\jobs;
 
-use modules\order\src\processManager\phoneToBook\OrderProcessManager;
 use modules\order\src\processManager\phoneToBook\OrderProcessManagerRepository;
 use yii\queue\JobInterface;
 use yii\queue\RetryableJobInterface;
@@ -23,7 +22,9 @@ class StartBookingJob implements JobInterface
 
     public function execute($queue)
     {
-        $process = OrderProcessManager::findOne($this->orderId);
+        $repo = \Yii::createObject(OrderProcessManagerRepository::class);
+
+        $process = $repo->get($this->orderId);
 
         if (!$process) {
             \Yii::error([
@@ -34,7 +35,6 @@ class StartBookingJob implements JobInterface
         }
 
         try {
-            $repo = \Yii::createObject(OrderProcessManagerRepository::class);
             $process->bookingFlight(new \DateTimeImmutable());
             $repo->save($process);
         } catch (\Throwable $e) {

@@ -10,6 +10,7 @@ use modules\invoice\src\entities\invoice\InvoiceStatus;
 use modules\order\src\entities\order\OrderPayStatus;
 use modules\order\src\entities\order\OrderStatus;
 use modules\order\src\processManager\phoneToBook\OrderProcessManager;
+use modules\order\src\processManager\Status;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use sales\auth\Auth;
 use yii\bootstrap4\Html;
@@ -32,7 +33,7 @@ $formatter = new \common\components\i18n\Formatter();
             <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $order->or_profit_amount ?>
         <?php endif; ?>
         <?php if ($process) : ?>
-            &nbsp;&nbsp;&nbsp;&nbsp;Auto Process: (<?= OrderProcessManager::STATUS_LIST[$process->opm_status] ?? 'undefined'?>)
+            &nbsp;&nbsp;&nbsp;&nbsp;Auto Process: (<?= Status::LIST[$process->opm_status] ?? 'undefined'?>)
         <?php endif; ?>
         <ul class="nav navbar-right panel_toolbox">
             <!--            <li>-->

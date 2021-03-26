@@ -2,7 +2,6 @@
 
 namespace modules\order\src\processManager\phoneToBook\jobs;
 
-use modules\order\src\processManager\phoneToBook\OrderProcessManager;
 use modules\order\src\processManager\phoneToBook\OrderProcessManagerRepository;
 use modules\product\src\entities\productQuote\ProductQuote;
 use yii\queue\JobInterface;
@@ -42,7 +41,8 @@ class AfterBookedFlightJob implements JobInterface
             return;
         }
 
-        $process = OrderProcessManager::findOne($quote->pq_order_id);
+        $repo = \Yii::createObject(OrderProcessManagerRepository::class);
+        $process = $repo->get($quote->pq_order_id);
 
         if (!$process) {
             \Yii::error([

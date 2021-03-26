@@ -2,8 +2,7 @@
 
 namespace modules\order\src\processManager\phoneToBook\listeners;
 
-use modules\order\src\processManager\phoneToBook\jobs\ProcessManagerBookedJob;
-use modules\order\src\processManager\phoneToBook\OrderProcessManager;
+use modules\order\src\processManager\jobs\ProcessManagerBookedJob;
 use modules\order\src\processManager\phoneToBook\OrderProcessManagerRepository;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
 use modules\product\src\entities\productQuote\ProductQuote;
@@ -11,15 +10,15 @@ use modules\product\src\entities\productQuote\ProductQuote;
 /**
  * Class AfterBookedQuoteOrderProcessListener
  *
- * @property OrderProcessManagerRepository $orderProcessManagerRepository
+ * @property OrderProcessManagerRepository $repository
  */
 class AfterBookedQuoteOrderProcessListener
 {
-    private OrderProcessManagerRepository $orderProcessManagerRepository;
+    private OrderProcessManagerRepository $repository;
 
-    public function __construct(OrderProcessManagerRepository $orderProcessManagerRepository)
+    public function __construct(OrderProcessManagerRepository $repository)
     {
-        $this->orderProcessManagerRepository = $orderProcessManagerRepository;
+        $this->repository = $repository;
     }
 
     public function handle(ProductQuoteBookedEvent $event): void
@@ -46,7 +45,8 @@ class AfterBookedQuoteOrderProcessListener
             return;
         }
 
-        $process = OrderProcessManager::findOne($quote->pq_order_id);
+        $process = $this->repository->get($quote->pq_order_id);
+
         if (!$process) {
 //            \Yii::info([
 //                'message' => 'Not found Order Process Manager',

@@ -4,6 +4,7 @@ use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderPayStatus;
 use modules\order\src\entities\order\OrderStatus;
 use modules\order\src\processManager\phoneToBook\OrderProcessManager;
+use modules\order\src\processManager\Status;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use sales\auth\Auth;
 use yii\helpers\Html;
@@ -50,7 +51,7 @@ $formatter = new \common\components\i18n\Formatter();
                             <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $order->or_profit_amount ?>
                         <?php endif; ?>
                         <?php if ($orderProcessManage) : ?>
-                            &nbsp;&nbsp;&nbsp;&nbsp;Auto Process: (<?= OrderProcessManager::STATUS_LIST[$orderProcessManage->opm_status] ?? 'undefined'?>)
+                            &nbsp;&nbsp;&nbsp;&nbsp;Auto Process: (<?= Status::LIST[$orderProcessManage->opm_status] ?? 'undefined'?>)
                         <?php endif; ?>
                         <ul class="nav navbar-right panel_toolbox">
                             <li>

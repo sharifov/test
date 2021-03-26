@@ -4,7 +4,7 @@ namespace modules\order\src\processManager\phoneToBook\listeners;
 
 use modules\order\src\entities\order\Order;
 use modules\order\src\processManager\phoneToBook\events\BookingFlightEvent;
-use modules\order\src\processManager\phoneToBook\jobs\BookingFlightJob;
+use modules\order\src\processManager\jobs\BookingFlightJob;
 
 class BookingFlightListener
 {

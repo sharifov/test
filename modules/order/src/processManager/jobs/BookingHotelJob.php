@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\order\src\processManager\phoneToBook\jobs;
+namespace modules\order\src\processManager\jobs;
 
 use common\models\Notifications;
 use frontend\widgets\notification\NotificationMessage;

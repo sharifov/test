@@ -3,12 +3,24 @@
 namespace modules\order\src\processManager\phoneToBook\listeners;
 
 use modules\order\src\processManager\phoneToBook\jobs\AfterBookedFlightJob;
-use modules\order\src\processManager\phoneToBook\OrderProcessManager;
+use modules\order\src\processManager\phoneToBook\OrderProcessManagerRepository;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
 use modules\product\src\entities\productQuote\ProductQuote;
 
+/**
+ * Class AfterBookedFlightOrderProcessListener
+ *
+ * @property OrderProcessManagerRepository $repository
+ */
 class AfterBookedFlightOrderProcessListener
 {
+    private OrderProcessManagerRepository $repository;
+
+    public function __construct(OrderProcessManagerRepository $repository)
+    {
+        $this->repository = $repository;
+    }
+
     public function handle(ProductQuoteBookedEvent $event): void
     {
         $quote = ProductQuote::findOne($event->productQuoteId);
@@ -37,7 +49,7 @@ class AfterBookedFlightOrderProcessListener
             return;
         }
 
-        $process = OrderProcessManager::findOne($quote->pq_order_id);
+        $process = $this->repository->get($quote->pq_order_id);
 
         if (!$process) {
             return;

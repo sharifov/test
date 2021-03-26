@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\order\src\processManager\phoneToBook;
+namespace modules\order\src\processManager;
 
 use common\models\Employee;
 use sales\helpers\query\QueryHelper;
@@ -12,6 +12,8 @@ class OrderProcessManagerSearch extends OrderProcessManager
     {
         return [
             ['opm_status', 'integer'],
+
+            ['opm_type', 'integer'],
 
             ['opm_id', 'integer'],
 
@@ -45,6 +47,7 @@ class OrderProcessManagerSearch extends OrderProcessManager
         $query->andFilterWhere([
             'opm_id' => $this->opm_id,
             'opm_status' => $this->opm_status,
+            'opm_type' => $this->opm_type,
         ]);
 
         return $dataProvider;

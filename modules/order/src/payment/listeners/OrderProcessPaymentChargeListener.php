@@ -5,13 +5,25 @@ namespace modules\order\src\payment\listeners;
 use common\models\Payment;
 use modules\order\src\entities\order\events\OrderPreparedEvent;
 use modules\order\src\payment\jobs\ChargePaymentJob;
-use modules\order\src\processManager\phoneToBook\OrderProcessManager;
+use modules\order\src\processManager\phoneToBook\OrderProcessManagerRepository;
 
+/**
+ * Class OrderProcessPaymentChargeListener
+ *
+ * @property OrderProcessManagerRepository $repository
+ */
 class OrderProcessPaymentChargeListener
 {
+    private OrderProcessManagerRepository $repository;
+
+    public function __construct(OrderProcessManagerRepository $repository)
+    {
+        $this->repository = $repository;
+    }
+
     public function handle(OrderPreparedEvent $event): void
     {
-        $process = OrderProcessManager::findOne($event->orderId);
+        $process = $this->repository->get($event->orderId);
 
         if (!$process) {
             return;
