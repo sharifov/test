@@ -19,27 +19,32 @@ class OrderProcessManagerRepository
         $this->eventDispatcher = $eventDispatcher;
     }
 
+    public function exist(int $id): bool
+    {
+        return OrderProcessManager::find()->byId($id)->phoneToBook()->exists();
+    }
+
     public function get(int $id): ?OrderProcessManager
     {
-        if ($process = OrderProcessManager::find()->byId($id)->phoneToBook()->one()) {
-            return $process;
+        if ($manager = OrderProcessManager::find()->byId($id)->phoneToBook()->one()) {
+            return $manager;
         }
         return null;
     }
 
     public function find(int $id): OrderProcessManager
     {
-        if ($process = OrderProcessManager::find()->byId($id)->phoneToBook()->one()) {
-            return $process;
+        if ($manager = OrderProcessManager::find()->byId($id)->phoneToBook()->one()) {
+            return $manager;
         }
         throw new NotFoundException('Order Process Manager is not found');
     }
 
-    public function save(OrderProcessManager $process): void
+    public function save(OrderProcessManager $manager): void
     {
-        if (!$process->save(false)) {
+        if (!$manager->save(false)) {
             throw new \RuntimeException('Saving error');
         }
-        $this->eventDispatcher->dispatchAll($process->releaseEvents());
+        $this->eventDispatcher->dispatchAll($manager->releaseEvents());
     }
 }
