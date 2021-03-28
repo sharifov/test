@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\order\src\payment\listeners;
+namespace modules\order\src\processManager\phoneToBook\listeners;
 
 use common\models\Payment;
 use modules\order\src\entities\order\events\OrderPreparedEvent;
@@ -23,13 +23,13 @@ class OrderProcessPaymentChargeListener
 
     public function handle(OrderPreparedEvent $event): void
     {
-        $process = $this->repository->get($event->orderId);
+        $manager = $this->repository->get($event->orderId);
 
-        if (!$process) {
+        if (!$manager) {
             return;
         }
 
-        if (!$process->isBooked()) {
+        if (!$manager->isBooked()) {
             return;
         }
 

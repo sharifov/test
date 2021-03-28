@@ -1,8 +1,8 @@
 <?php
 
-namespace modules\order\src\processManager\phoneToBook\listeners;
+namespace modules\order\src\processManager\listeners;
 
-use modules\order\src\processManager\phoneToBook\events\Orderable;
+use modules\order\src\processManager\events\Orderable;
 
 class LogCreatedListener
 {

@@ -12,7 +12,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
  *
  * @property OrderProcessManagerRepository $repository
  */
-class AfterBookedQuoteOrderProcessListener
+class OrderProcessManagerBookingListener
 {
     private OrderProcessManagerRepository $repository;
 
@@ -45,9 +45,9 @@ class AfterBookedQuoteOrderProcessListener
             return;
         }
 
-        $process = $this->repository->get($quote->pq_order_id);
+        $manager = $this->repository->get($quote->pq_order_id);
 
-        if (!$process) {
+        if (!$manager) {
 //            \Yii::info([
 //                'message' => 'Not found Order Process Manager',
 //                'orderId' => $quote->pq_order_id,
@@ -55,9 +55,9 @@ class AfterBookedQuoteOrderProcessListener
             return;
         }
 
-        if (!$process->isOtherProductsBooking()) {
+        if (!$manager->isOtherProductsBooking()) {
             \Yii::error([
-                'message' => 'Order Process Manager is not in Other Products Booking. Status Id: ' . $process->opm_status,
+                'message' => 'Order Process Manager is not in Other Products Booking. Status Id: ' . $manager->opm_status,
                 'quoteId' => $quote->pq_id,
                 'orderId' => $quote->pq_order_id,
             ], 'OrderProcessManager:AfterBookedQuoteOrderProcessListener');
@@ -92,6 +92,6 @@ class AfterBookedQuoteOrderProcessListener
             }
         }
 
-        \Yii::$app->queue_job->push(new ProcessManagerBookedJob($process->opm_id));
+        \Yii::$app->queue_job->push(new ProcessManagerBookedJob($manager->opm_id));
     }
 }

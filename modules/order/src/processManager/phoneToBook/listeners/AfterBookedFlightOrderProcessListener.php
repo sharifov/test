@@ -49,15 +49,15 @@ class AfterBookedFlightOrderProcessListener
             return;
         }
 
-        $process = $this->repository->get($quote->pq_order_id);
+        $manager = $this->repository->get($quote->pq_order_id);
 
-        if (!$process) {
+        if (!$manager) {
             return;
         }
 
-        if (!$process->isRunning()) {
+        if (!$manager->isRunning()) {
             \Yii::info([
-                'message' => 'Order Process is not Running',
+                'message' => 'Order Process Manager is not Running',
                 'orderId' => $quote->pq_order_id,
             ], 'info\OrderProcessManager:AfterBookedQuoteListener');
             return;

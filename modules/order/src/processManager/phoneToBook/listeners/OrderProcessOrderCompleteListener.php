@@ -22,13 +22,13 @@ class OrderProcessOrderCompleteListener
 
     public function handle(OrderPaymentPaidEvent $event): void
     {
-        $process = $this->repository->get($event->orderId);
+        $manager = $this->repository->get($event->orderId);
 
-        if (!$process) {
+        if (!$manager) {
             return;
         }
 
-        if (!$process->isBooked()) {
+        if (!$manager->isBooked()) {
             return;
         }
 

@@ -3,11 +3,24 @@
 namespace modules\order\src\processManager\phoneToBook\listeners;
 
 use modules\order\src\entities\order\Order;
-use modules\order\src\processManager\phoneToBook\events\BookingFlightEvent;
+use modules\order\src\processManager\events\BookingFlightEvent;
 use modules\order\src\processManager\jobs\BookingFlightJob;
+use modules\order\src\processManager\phoneToBook\OrderProcessManagerRepository;
 
+/**
+ * Class BookingFlightListener
+ *
+ * @property OrderProcessManagerRepository $managerRepository
+ */
 class BookingFlightListener
 {
+    private OrderProcessManagerRepository $managerRepository;
+
+    public function __construct(OrderProcessManagerRepository $managerRepository)
+    {
+        $this->managerRepository = $managerRepository;
+    }
+
     public function handle(BookingFlightEvent $event): void
     {
         $order = Order::findOne($event->orderId);
@@ -17,6 +30,10 @@ class BookingFlightListener
                 'message' => 'Not found Order',
                 'orderId' => $event->orderId,
             ], 'BookingFlightListener');
+            return;
+        }
+
+        if (!$this->managerRepository->exist($order->or_id)) {
             return;
         }
 

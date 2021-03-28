@@ -29,9 +29,9 @@ class OrderPrepareListener
             return;
         }
 
-        $process = OrderProcessManager::findOne($quote->pq_order_id);
+        $manager = OrderProcessManager::find()->byId($quote->pq_order_id)->exists();
 
-        if ($process) {
+        if ($manager) {
             return;
         }
 

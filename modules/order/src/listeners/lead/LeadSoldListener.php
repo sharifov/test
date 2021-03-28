@@ -6,8 +6,20 @@ use modules\order\src\entities\order\events\OrderCompletedEvent;
 use modules\order\src\entities\order\Order;
 use sales\repositories\lead\LeadRepository;
 
+/**
+ * Class LeadSoldListener
+ *
+ * @property LeadRepository $leadRepository
+ */
 class LeadSoldListener
 {
+    private LeadRepository $leadRepository;
+
+    public function __construct(LeadRepository $leadRepository)
+    {
+        $this->leadRepository = $leadRepository;
+    }
+
     public function handle(OrderCompletedEvent $event): void
     {
         try {
@@ -24,12 +36,12 @@ class LeadSoldListener
             $lead = $order->orLead;
 
             $lead->sold($lead->employee_id);
-            $repo = \Yii::createObject(LeadRepository::class);
-            $repo->save($lead);
+            $this->leadRepository->save($lead);
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => 'Transfer Lead to Sold error',
                 'error' => $e->getMessage(),
+                'orderId' => $event->orderId,
             ], 'LeadSoldListener');
         }
     }
