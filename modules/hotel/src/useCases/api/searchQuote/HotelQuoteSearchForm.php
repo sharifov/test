@@ -207,8 +207,8 @@ class HotelQuoteSearchForm extends Model
         $min = $max = 0;
         foreach ($hotels as $key => $hotel) {
             foreach ($hotel['rooms'] as $room) {
-                if ($key == 0) {
-                    $min = $max = (int) $room['totalAmount'];
+                if ($min == 0) {
+                    $min = (int) $room['totalAmount'];
                 }
                 $price = (int) $room['totalAmount'];
                 if ($price <= $min) {
