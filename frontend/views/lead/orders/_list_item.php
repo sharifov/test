@@ -15,6 +15,7 @@ use sales\auth\Auth;
 use yii\bootstrap4\Html;
 
 $process = OrderProcessManager::findOne($order->or_id);
+$formatter = new \common\components\i18n\Formatter();
 ?>
 
 <div class="x_panel">
@@ -24,6 +25,7 @@ $process = OrderProcessManager::findOne($order->or_id);
         (<span title="GID: <?=\yii\helpers\Html::encode($order->or_gid)?>"><?=\yii\helpers\Html::encode($order->or_uid)?></span>)
         <?= OrderStatus::asFormat($order->or_status_id) ?>
         <?= OrderPayStatus::asFormat($order->or_pay_status_id) ?>
+        <?= $order->or_project_id ? $formatter->asProjectName($order->or_project_id) : null ?>
         "<b><?=\yii\helpers\Html::encode($order->or_name)?></b>"
 
         <?php if ($order->or_profit_amount > 0) : ?>

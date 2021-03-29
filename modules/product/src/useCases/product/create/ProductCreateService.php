@@ -5,6 +5,7 @@ namespace modules\product\src\useCases\product\create;
 use modules\product\src\entities\product\Product;
 use modules\product\src\guards\ProductAvailableGuard;
 use modules\product\src\entities\product\ProductRepository;
+use modules\product\src\interfaces\Productable;
 use modules\product\src\repositories\ProductableRepository;
 use modules\product\src\services\ProductFactory;
 use sales\repositories\lead\LeadRepository;
@@ -41,11 +42,11 @@ class ProductCreateService
         $this->leadRepository = $leadRepository;
     }
 
-    public function create(ProductCreateForm $form): int
+    public function create(ProductCreateForm $form): Product
     {
         ProductAvailableGuard::check($form->pr_type_id);
 
-        $productId = $this->transactionManager->wrap(function () use ($form) {
+        return $this->transactionManager->wrap(function () use ($form) {
 
             $product = Product::create($form->getDto());
 
@@ -55,9 +56,7 @@ class ProductCreateService
 
             $this->productableRepository->save($form->pr_type_id, $productItem);
 
-            return $product->pr_id;
+            return $product;
         });
-
-        return $productId;
     }
 }

@@ -21,6 +21,15 @@ class ProjectRepository
         throw new NotFoundException('Project not found by key: ' . $key);
     }
 
+    public function findByApiKey(string $key)
+    {
+        if ($project = Project::find()->select(['id'])->byApiKey($key)->active()->one()) {
+            return $project;
+        }
+        \Yii::error('Project not found by key: ' . $key, 'ProjectRepository::findByKey::notFound');
+        throw new NotFoundException('Project not found by key: ' . $key);
+    }
+
     public function getIdByName(string $name): ?int
     {
         $project = $this->findByName($name);

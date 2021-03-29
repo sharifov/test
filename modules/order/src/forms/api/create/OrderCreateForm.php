@@ -2,6 +2,7 @@
 
 namespace modules\order\src\forms\api\create;
 
+use common\models\Project;
 use modules\offer\src\entities\offer\Offer;
 use sales\forms\CompositeRecursiveForm;
 
@@ -10,6 +11,7 @@ use sales\forms\CompositeRecursiveForm;
  * @package modules\order\src\forms\api
  *
  * @property string $offerGid
+ * @property string $projectApiKey
  * @property ProductQuotesForm[] $productQuotes
  * @property PaymentForm $payment
  * @property BillingInfoForm $billingInfo
@@ -20,6 +22,8 @@ use sales\forms\CompositeRecursiveForm;
 class OrderCreateForm extends CompositeRecursiveForm
 {
     public string $offerGid = '';
+
+    public string $projectApiKey = '';
 
     public function __construct(int $countProductQuotes, int $countPaxes, $config = [])
     {
@@ -43,9 +47,10 @@ class OrderCreateForm extends CompositeRecursiveForm
     public function rules(): array
     {
         return [
-            [['offerGid'], 'required'],
-            [['offerGid'], 'string'],
-            ['offerGid', 'exist', 'targetClass' => Offer::class, 'targetAttribute' => 'of_gid']
+            [['offerGid', 'projectApiKey'], 'required'],
+            [['offerGid', 'projectApiKey'], 'string'],
+            ['offerGid', 'exist', 'targetClass' => Offer::class, 'targetAttribute' => 'of_gid'],
+            ['projectApiKey', 'exist', 'targetClass' => Project::class, 'targetAttribute' => 'api_key']
         ];
     }
 

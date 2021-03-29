@@ -5,15 +5,24 @@ namespace webapi\modules\v2\controllers;
 use modules\fileStorage\src\entity\fileStorage\FileStorage;
 use modules\fileStorage\src\FileSystem;
 use modules\offer\src\entities\offer\OfferRepository;
+use modules\order\src\entities\order\OrderSourceType;
 use modules\order\src\entities\order\OrderRepository;
+use modules\order\src\entities\orderRequest\OrderRequest;
+use modules\order\src\entities\orderRequest\OrderRequestRepository;
 use modules\order\src\exceptions\OrderCodeException;
 use modules\order\src\forms\api\create\OrderCreateForm;
 use modules\order\src\forms\api\view\OrderViewForm;
+use modules\order\src\forms\createC2b\OrderCreateC2BForm;
 use modules\order\src\services\CreateOrderDTO;
 use modules\order\src\services\OrderApiManageService;
+use modules\product\src\entities\productType\ProductType;
+use modules\product\src\entities\productType\ProductTypeRepository;
+use modules\product\src\useCases\product\create\ProductCreateForm;
+use modules\product\src\useCases\product\create\ProductCreateService;
 use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
 use sales\repositories\product\ProductQuoteRepository;
+use sales\repositories\project\ProjectRepository;
 use webapi\src\logger\ApiLogger;
 use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
 use webapi\src\logger\behaviors\SimpleLoggerBehavior;
@@ -51,6 +60,10 @@ use yii\web\NotFoundHttpException;
  * @property ProductQuoteRepository $productQuoteRepository
  * @property OrderRepository $orderRepository
  * @property FileSystem $fileSystem
+ * @property OrderRequestRepository $orderRequestRepository
+ * @property ProjectRepository $projectRepository
+ * @property ProductCreateService $productCreateService
+ * @property ProductTypeRepository $productTypeRepository
  */
 class OrderController extends BaseController
 {
@@ -75,6 +88,22 @@ class OrderController extends BaseController
      * @var FileSystem
      */
     private FileSystem $fileSystem;
+    /**
+     * @var OrderRequestRepository
+     */
+    private OrderRequestRepository $orderRequestRepository;
+    /**
+     * @var ProjectRepository
+     */
+    private ProjectRepository $projectRepository;
+    /**
+     * @var ProductCreateService
+     */
+    private ProductCreateService $productCreateService;
+    /**
+     * @var ProductTypeRepository
+     */
+    private ProductTypeRepository $productTypeRepository;
 
     public function __construct(
         $id,
@@ -86,6 +115,10 @@ class OrderController extends BaseController
         ProductQuoteRepository $productQuoteRepository,
         OrderRepository $orderRepository,
         FileSystem $fileSystem,
+        OrderRequestRepository $orderRequestRepository,
+        ProjectRepository $projectRepository,
+        ProductCreateService $productCreateService,
+        ProductTypeRepository $productTypeRepository,
         $config = []
     ) {
         parent::__construct($id, $module, $logger, $config);
@@ -95,6 +128,10 @@ class OrderController extends BaseController
         $this->productQuoteRepository = $productQuoteRepository;
         $this->orderRepository = $orderRepository;
         $this->fileSystem = $fileSystem;
+        $this->orderRequestRepository = $orderRequestRepository;
+        $this->projectRepository = $projectRepository;
+        $this->productCreateService = $productCreateService;
+        $this->productTypeRepository = $productTypeRepository;
     }
 
     public function behaviors(): array
@@ -310,6 +347,7 @@ class OrderController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
+     * @apiParam {string{max 255}}      projectApiKey                                       Project api key
      * @apiParam {string{max 32}}       offerGid                                            Offer gid
      * @apiParam {Object[]}             productQuotes                                       Product Quotes
      * @apiParam {string{max 32}}       productQuotes.gid                                   Product Quote Gid
@@ -1322,24 +1360,41 @@ class OrderController extends BaseController
         }
 
         try {
-            $offer = $this->offerRepository->findByGid($form->offerGid);
+            $orderRequest = OrderRequest::create($request->post(), OrderSourceType::P2B);
+            $this->orderRequestRepository->save($orderRequest);
 
-            $order = $this->orderManageService->createOrder((new CreateOrderDTO($offer->of_lead_id, $form->payment->currency, $request->post())), $form);
+            $offer = $this->offerRepository->findByGid($form->offerGid);
+            $project = $this->projectRepository->findByApiKey($form->projectApiKey);
+
+            $dto = new CreateOrderDTO($offer->of_lead_id, $form->payment->currency, $request->post(), OrderSourceType::P2B, $orderRequest->orr_id, $project->id);
+            $order = $this->orderManageService->createOrder($dto, $form);
+
+            $response = new SuccessResponse(
+                new DataMessage(
+                    new Message('order_gid', $order->or_gid),
+                )
+            );
+
+            $orderRequest->successResponse(ArrayHelper::toArray($response));
+            $this->orderRequestRepository->save($orderRequest);
+            return $response;
         } catch (\Throwable $e) {
             Yii::error(AppHelper::throwableFormatter($e), 'API::OrderController::actionCreate::Throwable');
-            return new ErrorResponse(
+
+            $response = new ErrorResponse(
                 new StatusFailedMessage(),
                 new MessageMessage($e->getMessage()),
                 new ErrorsMessage($e->getMessage()),
                 new CodeMessage($e->getCode())
             );
-        }
 
-        return new SuccessResponse(
-            new DataMessage(
-                new Message('order_gid', $order->or_gid),
-            )
-        );
+            if (isset($orderRequest)) {
+                $orderRequest->errorResponse(ArrayHelper::toArray($response));
+                $this->orderRequestRepository->save($orderRequest);
+            }
+
+            return $response;
+        }
     }
 
     /**
@@ -1789,6 +1844,94 @@ class OrderController extends BaseController
             ], 'API:OrderController:GetFile');
             \Yii::$app->response->headers->add('Content-Type', 'text/html');
             return $this->asJson(['message' => 'Server error.']);
+        }
+    }
+
+    /**
+     * @return \webapi\src\response\Response
+     * @api {post} /v2/order/create-c2b Create Order
+     * @apiVersion 1.0.0
+     * @apiName CreateOrderClickToBook
+     * @apiGroup Orders
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     * {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string{max 255}}      projectApiKey           Project api key
+     * @apiParam {Object[]}             quotes                  Product Quotes
+     * @apiParam {string{}}             quotes.productKey       Product Quotes
+     *
+     * @return ErrorResponse|SuccessResponse
+     */
+    public function actionCreateC2b()
+    {
+        $request = Yii::$app->request;
+        $form = new OrderCreateC2BForm(count($request->post('productQuotes', [])), count($request->post('paxes', [])));
+
+        if (!$form->load($request->post())) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new ErrorsMessage('Not found data on POST request'),
+            );
+        }
+
+        if (!$form->validate()) {
+            return new ErrorResponse(
+                new MessageMessage(Messages::VALIDATION_ERROR),
+                new ErrorsMessage($form->getErrors()),
+            );
+        }
+
+        try {
+            $orderRequest = OrderRequest::create($request->post(), OrderSourceType::C2B);
+            $this->orderRequestRepository->save($orderRequest);
+
+            $project = $this->projectRepository->findByApiKey($form->projectApiKey);
+
+
+            foreach ($form->quotes as $quoteForm) {
+                $productType = $this->productTypeRepository->findByKey($quoteForm->productKey);
+                $productCreateForm = new ProductCreateForm();
+                $productCreateForm->pr_type_id = $productType->pt_id;
+                $product = $this->productCreateService->create($productCreateForm);
+
+                $service = $product->getChildProduct();
+
+                $dto = new CreateOrderDTO(null, null, $request->post(), OrderSourceType::C2B, $orderRequest->orr_id, $project->id);
+                $order = $this->orderManageService->createOrder($dto, $form);
+            }
+
+            $response = new SuccessResponse(
+                new DataMessage(
+                    new Message('order_gid', $order->or_gid),
+                )
+            );
+
+            $orderRequest->successResponse(ArrayHelper::toArray($response));
+            $this->orderRequestRepository->save($orderRequest);
+            return $response;
+        } catch (\Throwable $e) {
+            Yii::error(AppHelper::throwableFormatter($e), 'API::OrderController::actionCreateC2b::Throwable');
+
+            $response = new ErrorResponse(
+                new StatusFailedMessage(),
+                new MessageMessage($e->getMessage()),
+                new ErrorsMessage($e->getMessage()),
+                new CodeMessage($e->getCode())
+            );
+
+            if (isset($orderRequest)) {
+                $orderRequest->errorResponse(ArrayHelper::toArray($response));
+                $this->orderRequestRepository->save($orderRequest);
+            }
+
+            return $response;
         }
     }
 

@@ -17,7 +17,6 @@ use modules\hotel\models\Hotel;
 use modules\attraction\models\Attraction;
 use modules\product\src\entities\product\events\ProductCreateEvent;
 use modules\product\src\interfaces\Productable;
-use modules\product\src\useCases\product\create\ProductCreateForm;
 use modules\rentCar\src\entity\rentCar\RentCar;
 use sales\entities\EventTrait;
 use sales\entities\serializer\Serializable;

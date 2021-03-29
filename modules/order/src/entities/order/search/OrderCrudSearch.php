@@ -12,7 +12,7 @@ class OrderCrudSearch extends Order
     public function rules(): array
     {
         return [
-            [['or_id', 'or_lead_id', 'or_status_id', 'or_pay_status_id', 'or_owner_user_id', 'or_created_user_id', 'or_updated_user_id'], 'integer'],
+            [['or_id', 'or_lead_id', 'or_status_id', 'or_pay_status_id', 'or_owner_user_id', 'or_created_user_id', 'or_updated_user_id', 'or_project_id'], 'integer'],
             [['or_gid', 'or_uid', 'or_name', 'or_description', 'or_client_currency'], 'safe'],
             [['or_app_total', 'or_app_markup', 'or_agent_markup', 'or_client_total', 'or_client_currency_rate', 'or_profit_amount'], 'number'],
 
@@ -67,6 +67,7 @@ class OrderCrudSearch extends Order
             'or_created_user_id' => $this->or_created_user_id,
             'or_updated_user_id' => $this->or_updated_user_id,
             'or_profit_amount' => $this->or_profit_amount,
+            'or_project_id' => $this->or_project_id
         ]);
 
         $query->andFilterWhere(['like', 'or_gid', $this->or_gid])

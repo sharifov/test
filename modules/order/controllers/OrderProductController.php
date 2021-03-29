@@ -5,6 +5,7 @@ namespace modules\order\controllers;
 use frontend\controllers\FController;
 use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
 use modules\order\src\entities\order\Order;
+use modules\order\src\entities\order\OrderSourceType;
 use modules\order\src\services\CreateOrderDTO;
 use modules\order\src\services\OrderManageService;
 use modules\order\src\services\OrderPriceUpdater;
@@ -109,7 +110,15 @@ class OrderProductController extends FController
                     return ['message' => 'Successfully deleted Product Quote ID (' . $productQuoteId . ') from order: "' . Html::encode($order->or_name) . '" (' . $order->or_id . ')'];
                 }
             } else {
-                $order = $this->orderManageService->createOrder((new CreateOrderDTO($productQuote->pqProduct->pr_lead_id, $productQuote->pq_client_currency)));
+                $dto = new CreateOrderDTO(
+                    $productQuote->pqProduct->pr_lead_id,
+                    $productQuote->pq_client_currency,
+                    [],
+                    OrderSourceType::MANUAL,
+                    null,
+                    $productQuote->pqProduct->prLead->project_id ?? null
+                );
+                $order = $this->orderManageService->createOrder($dto);
             }
 
             $productQuote->setOrderRelation($order->or_id);

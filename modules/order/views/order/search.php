@@ -98,6 +98,11 @@ JS;
                 'attribute' => 'or_status_id'
             ],
             [
+                'attribute' => 'or_project_id',
+                'format' => 'projectName',
+                'filter' => \common\models\Project::getList()
+            ],
+            [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'or_created_dt',
             ],

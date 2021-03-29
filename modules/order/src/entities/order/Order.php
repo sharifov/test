@@ -21,6 +21,7 @@ use modules\order\src\entities\order\events\OrderPendingEvent;
 use modules\order\src\entities\order\events\OrderPreparedEvent;
 use modules\order\src\entities\order\events\OrderUserProfitUpdateProfitAmountEvent;
 use modules\order\src\entities\order\serializer\OrderSerializer;
+use modules\order\src\entities\orderRequest\OrderRequest;
 use modules\order\src\entities\orderTips\OrderTips;
 use modules\order\src\entities\orderTipsUserProfit\OrderTipsUserProfit;
 use modules\order\src\entities\orderUserProfit\OrderUserProfit;
@@ -63,6 +64,9 @@ use yii\helpers\VarDumper;
  * @property string|null $or_updated_dt
  * @property float|null $or_profit_amount
  * @property array|null $or_request_data
+ * @property int $or_request_id [int]
+ * @property int $or_project_id [int]
+ * @property bool $or_type_id [tinyint(1)]
  *
  * @property Currency $orClientCurrency
  * @property Invoice[] $invoices
@@ -78,6 +82,9 @@ use yii\helpers\VarDumper;
  * @property OrderTipsUserProfit[] $orderTipsUserProfit
  * @property BillingInfo[] $billingInfo
  * @property Payment[] $payments
+ * @property OrderRequest $orderRequest
+ * @property Project $relatedProject
+ * @property Project $project
  */
 class Order extends ActiveRecord implements Serializable, ProductDataInterface
 {
@@ -109,6 +116,12 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
             [['or_owner_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['or_owner_user_id' => 'id']],
             [['or_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['or_updated_user_id' => 'id']],
 
+            [['or_request_id', 'or_project_id', 'or_type_id'], 'integer'],
+
+            [['or_request_id'], 'exist', 'skipOnError' => true, 'skipOnEmpty' => true, 'targetClass' => OrderRequest::class, 'targetAttribute' => ['or_request_id' => 'orr_id']],
+            [['or_project_id'], 'exist', 'skipOnError' => true, 'skipOnEmpty' => true, 'targetClass' => Project::class, 'targetAttribute' => ['or_project_id' => 'orr_id']],
+            [['or_type_id'], 'in', 'range' => array_keys(OrderSourceType::LIST), 'skipOnEmpty' => true],
+
             ['or_request_data', 'safe'],
         ];
     }
@@ -138,6 +151,7 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
             'or_updated_dt' => 'Updated Dt',
             'or_profit_amount' => 'Profit amount',
             'or_request_data' => 'Request Data',
+            'or_project_id' => 'Project'
         ];
     }
 
@@ -180,10 +194,11 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
             $this->or_name = $this->generateName();
         }
 
-//        if (isset($dto->requestData['Request']['Card'])) {
-//            unset($dto->requestData['Request']['Card']);
-//        }
         $this->or_request_data = $dto->requestData;
+
+        $this->or_request_id = $dto->requestId;
+        $this->or_project_id = $dto->projectId;
+        $this->or_type_id = $dto->creationTypeId;
 
         return $this;
     }
@@ -229,6 +244,22 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
     public function getOrCreatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'or_created_user_id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getOrderRequest(): ActiveQuery
+    {
+        return $this->hasOne(OrderRequest::class, ['orr_id' => 'or_request_id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getRelatedProject(): ActiveQuery
+    {
+        return $this->hasOne(Project::class, ['id' => 'or_project_id']);
     }
 
     /**
