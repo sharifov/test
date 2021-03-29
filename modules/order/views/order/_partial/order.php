@@ -13,6 +13,8 @@ use yii\widgets\Pjax;
 /* @var yii\web\View $this */
 /* @var Order $order */
 /* @var OrderProcessManager|null $orderProcessManage */
+
+$formatter = new \common\components\i18n\Formatter();
 ?>
 
 <div class="order-view-box">
@@ -41,6 +43,7 @@ use yii\widgets\Pjax;
                         (<span title="GID: <?=\yii\helpers\Html::encode($order->or_gid)?>"><?=\yii\helpers\Html::encode($order->or_uid)?></span>)
                         <?= OrderStatus::asFormat($order->or_status_id) ?>
                         <?= OrderPayStatus::asFormat($order->or_pay_status_id) ?>
+                        <?= $order->or_project_id ? $formatter->asProjectName($order->or_project_id) : null ?>
                         "<b><?=\yii\helpers\Html::encode($order->or_name)?></b>"
 
                         <?php if ($order->or_profit_amount > 0) : ?>

@@ -151,6 +151,7 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
             'or_updated_dt' => 'Updated Dt',
             'or_profit_amount' => 'Profit amount',
             'or_request_data' => 'Request Data',
+            'or_project_id' => 'Project'
         ];
     }
 

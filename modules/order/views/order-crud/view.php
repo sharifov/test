@@ -39,6 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'or_uid',
                 'or_name',
                 'orLead:lead',
+                'or_project_id:projectName',
                 'or_description:ntext',
                 'or_status_id:orderStatus',
                 'or_pay_status_id:orderPayStatus',

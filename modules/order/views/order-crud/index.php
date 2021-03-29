@@ -40,6 +40,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'or_lead_id',
                 'relation' => 'orLead',
             ],
+            [
+                'attribute' => 'or_project_id',
+                'label' => 'Project',
+                'format' => 'projectName',
+                'filter' => \common\models\Project::getList()
+            ],
             'or_description:ntext',
             [
                 'class' => OrderStatusColumn::class,
