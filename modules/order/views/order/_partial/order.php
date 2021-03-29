@@ -525,9 +525,8 @@ $js = <<<JS
             if (data.error) {
                 createNotify('Error', data.error, 'error');
             } else {
-                
                 createNotify('The order was successfully removed', 'Success', 'success');
-                alert('TODO:: redirect'); // TODO:: redirect
+                $(location).attr('href', '/order/order/search');
             }
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
