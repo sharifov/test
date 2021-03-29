@@ -613,25 +613,27 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
 
     public function getProject(): Project
     {
-        return $this->fqProductQuote->pqProduct->prLead->project;
+        if ($project = ArrayHelper::getValue($this, 'fqProductQuote.pqProduct.project')) {
+            return $project;
+        }
+        if ($project = ArrayHelper::getValue($this, 'fqProductQuote.pqProduct.prLead.project')) {
+            return $project;
+        }
+        throw new \DomainException('FlightQuote not related to project');
     }
 
-    public function getLead(): Lead
+    public function getLead(): ?Lead
     {
-        return $this->fqProductQuote->pqProduct->prLead;
+        return ArrayHelper::getValue($this, 'fqProductQuote.pqProduct.prLead');
     }
 
-    public function getClient(): Client
+    public function getClient(): ?Client
     {
-        return $this->fqProductQuote->pqProduct->prLead->client;
+        return ArrayHelper::getValue($this, 'fqProductQuote.pqProduct.prLead.client');
     }
 
     public function getOrder(): ?Order
     {
-        if ($order = ArrayHelper::getValue($this, 'fqProductQuote.pqOrder')) {
-            /** @var Order $order */
-            return $order;
-        }
-        return null;
+        return ArrayHelper::getValue($this, 'fqProductQuote.pqOrder');
     }
 }

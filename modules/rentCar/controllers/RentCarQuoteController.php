@@ -251,7 +251,14 @@ class RentCarQuoteController extends FController
                 $result['message'] = 'Document have been successfully generated';
             }
         } catch (\Throwable $throwable) {
-            Yii::warning(AppHelper::throwableLog($throwable), 'RentCarQuoteController:actionFileGenerate');
+            $throwableLog = AppHelper::throwableLog($throwable);
+            Yii::warning(
+                ArrayHelper::merge(
+                    $throwableLog,
+                    ['productQuoteId' => isset($rentCarQuote) ? $rentCarQuote->rcqProductQuote->pq_id : null]
+                ),
+                'RentCarQuoteController:actionFileGenerate'
+            );
             $result['message'] = $throwable->getMessage();
         }
         return $result;

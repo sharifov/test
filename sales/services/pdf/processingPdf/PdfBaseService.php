@@ -24,7 +24,7 @@ use yii\helpers\VarDumper;
 /**
  * Class PdfBaseService
  * @property ProductDataInterface $object
- * @property int $leadId
+ * @property int|null $leadId
  * @property int|null $orderId
  * @property int $clientId
  * @property string $projectKey
@@ -69,12 +69,12 @@ abstract class PdfBaseService
     public function __construct(ProductDataInterface $object)
     {
         $this->object = $object;
-        $this->leadId = $object->getLead()->id;
-        $this->clientId = $object->getClient()->id;
+        $this->leadId = $object->getLead() ? $object->getLead()->id : null;
+        $this->clientId = $object->getClient() ? $object->getClient()->id : null;
         $this->projectKey = $object->getProject()->project_key;
         $this->orderId = $object->getOrder() ? $object->getOrder()->or_id : null;
 
-        $this->fileStorageRepository = Yii::createObject(FileStorageRepository::class);
+        $this->fileStorageRepository = Yii::createObject(FileStorageRepository::class); /* TODO::  */
         $this->fileClientRepository = Yii::createObject(FileClientRepository::class);
         $this->fileOrderRepository = Yii::createObject(FileOrderRepository::class);
         $this->fileLeadRepository = Yii::createObject(FileLeadRepository::class);
@@ -88,14 +88,16 @@ abstract class PdfBaseService
     {
         $patchToLocalFile = $this->generateAsFile();
         $fileStorageId = $this->fileStorage($patchToLocalFile);
-        $this->fileToClient($fileStorageId);
-        $this->fileToLead($fileStorageId);
-
+        if ($this->clientId) {
+            $this->fileToClient($fileStorageId);
+        }
+        if ($this->leadId) {
+            $this->fileToLead($fileStorageId);
+        }
         if ($this->orderId) {
             $this->fileToOrder($fileStorageId);
             $this->dispatchEvent($fileStorageId);
         }
-
         $this->unlinkLocalFile($patchToLocalFile);
 
         return true;
@@ -103,12 +105,12 @@ abstract class PdfBaseService
 
     public function generateAsFile(): string
     {
-        return GeneratorPdfService::generateAsFile($this->generateContent(), $this->generateName());
+        return GeneratorPdfService::generateAsFile($this->generateContent(), $this->generateName(), false);
     }
 
     public function generateForBrowserOutput()
     {
-        return GeneratorPdfService::generateForBrowserOutput($this->generateContent(), $this->generateName());
+        return GeneratorPdfService::generateForBrowserOutput($this->generateContent(), $this->generateName(), false);
     }
 
     public function fillData()

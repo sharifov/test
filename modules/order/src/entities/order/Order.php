@@ -84,7 +84,6 @@ use yii\helpers\VarDumper;
  * @property Payment[] $payments
  * @property OrderRequest $orderRequest
  * @property Project $relatedProject
- * @property Project $project
  */
 class Order extends ActiveRecord implements Serializable, ProductDataInterface
 {
@@ -620,22 +619,28 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
         return (new OrderSerializer($this))->getData();
     }
 
-    public function getProject(): Project
+    public function getProject(): ?Project
     {
-        return $this->orLead->project;
+        if ($this->relatedProject) {
+            return $this->relatedProject;
+        }
+        if ($this->getLead()) {
+            return $this->getLead()->project;
+        }
+        throw new \DomainException('Order not related to project');
     }
 
-    public function getLead(): Lead
+    public function getLead(): ?Lead
     {
         return $this->orLead;
     }
 
-    public function getClient(): Client
+    public function getClient(): ?Client
     {
-        return $this->orLead->client;
+        return $this->getLead() ? $this->orLead->client : null;
     }
 
-    public function getOrder(): ?Order
+    public function getOrder(): Order
     {
         return $this;
     }

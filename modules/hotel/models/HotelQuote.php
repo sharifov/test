@@ -548,25 +548,27 @@ class HotelQuote extends ActiveRecord implements Quotable, ProductDataInterface
 
     public function getProject(): Project
     {
-        return $this->hqProductQuote->pqProduct->prLead->project;
+        if ($project = ArrayHelper::getValue($this, 'hqProductQuote.pqProduct.project')) {
+            return $project;
+        }
+        if ($project = ArrayHelper::getValue($this, 'hqProductQuote.pqProduct.prLead.project')) {
+            return $project;
+        }
+        throw new \DomainException('HotelQuote not related to project');
     }
 
-    public function getLead(): Lead
+    public function getLead(): ?Lead
     {
-        return $this->hqProductQuote->pqProduct->prLead;
+        return ArrayHelper::getValue($this, 'hqProductQuote.pqProduct.prLead');
     }
 
-    public function getClient(): Client
+    public function getClient(): ?Client
     {
-        return $this->hqProductQuote->pqProduct->prLead->client;
+        return ArrayHelper::getValue($this, 'hqProductQuote.pqProduct.prLead.client');
     }
 
     public function getOrder(): ?Order
     {
-        if ($order = ArrayHelper::getValue($this, 'hqProductQuote.pqOrder')) {
-            /** @var Order $order */
-            return $order;
-        }
-        return null;
+        return ArrayHelper::getValue($this, 'hqProductQuote.pqOrder');
     }
 }

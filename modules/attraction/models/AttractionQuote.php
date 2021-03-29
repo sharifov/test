@@ -388,25 +388,27 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable, ProductD
 
     public function getProject(): Project
     {
-        return $this->atnqProductQuote->pqProduct->prLead->project;
+        if ($project = ArrayHelper::getValue($this, 'atnqProductQuote.pqProduct.project')) {
+            return $project;
+        }
+        if ($project = ArrayHelper::getValue($this, 'atnqProductQuote.pqProduct.prLead.project')) {
+            return $project;
+        }
+        throw new \DomainException('AttractionQuote not related to project');
     }
 
-    public function getLead(): Lead
+    public function getLead(): ?Lead
     {
-        return $this->atnqProductQuote->pqProduct->prLead;
+        return ArrayHelper::getValue($this, 'atnqProductQuote.pqProduct.prLead');
     }
 
-    public function getClient(): Client
+    public function getClient(): ?Client
     {
-        return $this->atnqProductQuote->pqProduct->prLead->client;
+        return ArrayHelper::getValue($this, 'atnqProductQuote.pqProduct.prLead.client');
     }
 
     public function getOrder(): ?Order
     {
-        if ($order = ArrayHelper::getValue($this, 'atnqProductQuote.pqOrder')) {
-            /** @var Order $order */
-            return $order;
-        }
-        return null;
+        return ArrayHelper::getValue($this, 'atnqProductQuote.pqOrder');
     }
 }
