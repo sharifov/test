@@ -23,7 +23,6 @@ use modules\order\src\events\OrderFileGeneratedEvent;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\entities\productType\ProductType;
-use modules\product\src\useCases\product\create\ProductCreateForm;
 use modules\product\src\useCases\product\create\ProductCreateService;
 use sales\auth\Auth;
 use sales\forms\CompositeFormHelper;

@@ -47,12 +47,8 @@ use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentPaxBaggageD
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentStopDTO;
 use modules\flight\src\useCases\flightQuote\create\ProductQuoteCreateDTO;
 use modules\product\src\entities\productType\ProductType;
-use modules\product\src\useCases\product\create\ProductCreateForm;
-use modules\product\src\useCases\product\create\ProductCreateService;
-use sales\helpers\product\ProductQuoteHelper;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
-use yii\helpers\ArrayHelper;
 
 /**
  * Class FlightQuoteManageService

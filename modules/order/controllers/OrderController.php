@@ -4,6 +4,7 @@ namespace modules\order\controllers;
 
 use common\models\Lead;
 use modules\fileStorage\src\entity\fileOrder\FileOrder;
+use modules\order\src\entities\order\OrderSourceType;
 use modules\order\src\entities\order\search\OrderCrudSearch;
 use modules\order\src\entities\order\search\OrderSearch;
 use modules\order\src\forms\OrderForm;
@@ -79,33 +80,40 @@ class OrderController extends FController
     {
         $model = new OrderForm(); //new Product();
 
+        $leadId = (int) Yii::$app->request->get('id');
+
+        if (!$leadId) {
+            throw new BadRequestHttpException('Not found Lead identity.');
+        }
+
+        $lead = Lead::findOne($leadId);
+        if (!$lead) {
+            throw new BadRequestHttpException('Not found Lead');
+        }
 
         if ($model->load(Yii::$app->request->post())) {
             //Yii::$app->response->format = Response::FORMAT_JSON;
 
             if ($model->validate()) {
                 try {
-                    $this->orderManageService->createOrder((new CreateOrderDTO($model->or_lead_id)));
+                    $dto = new CreateOrderDTO(
+                        $model->or_lead_id,
+                        null,
+                        [],
+                        OrderSourceType::MANUAL,
+                        null,
+                        $lead->project_id
+                    );
+                    $this->orderManageService->createOrder($dto);
 
                     return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-orders", push: false, replace: false, async: false, timeout: 2000});</script>';
                 } catch (\Throwable $e) {
                     Yii::error(VarDumper::dumpAsString($e->getMessage()), 'OrderController:CreateAjax:orderManageService:createOrder');
                 }
             }
-        } else {
-            $leadId = (int) Yii::$app->request->get('id');
-
-            if (!$leadId) {
-                throw new BadRequestHttpException('Not found Lead identity.');
-            }
-
-            $lead = Lead::findOne($leadId);
-            if (!$lead) {
-                throw new BadRequestHttpException('Not found Lead');
-            }
-
-            $model->or_lead_id = $leadId;
         }
+
+        $model->or_lead_id = $leadId;
 
         return $this->renderAjax('forms/create_ajax_form', [
             'model' => $model,
@@ -169,9 +177,9 @@ class OrderController extends FController
         ]);
     }
 
-     /**
-     * @return array
-     */
+    /**
+    * @return array
+    */
     public function actionDeleteAjax(): array
     {
         $id = Yii::$app->request->post('id');
