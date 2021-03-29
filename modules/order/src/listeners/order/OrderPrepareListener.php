@@ -4,11 +4,24 @@ namespace modules\order\src\listeners\order;
 
 use modules\order\src\jobs\OrderPrepareJob;
 use modules\order\src\processManager\phoneToBook\OrderProcessManager;
+use modules\order\src\processManager\queue\Queue;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
 use modules\product\src\entities\productQuote\ProductQuote;
 
+/**
+ * Class OrderPrepareListener
+ *
+ * @property Queue $queue
+ */
 class OrderPrepareListener
 {
+    private Queue $queue;
+
+    public function __construct(Queue $queue)
+    {
+        $this->queue = $queue;
+    }
+
     public function handle(ProductQuoteBookedEvent $event): void
     {
         $quote = ProductQuote::findOne($event->productQuoteId);
@@ -63,6 +76,6 @@ class OrderPrepareListener
             }
         }
 
-        \Yii::$app->queue_job->push(new OrderPrepareJob($order->or_id));
+        $this->queue->push(new OrderPrepareJob($order->or_id));
     }
 }

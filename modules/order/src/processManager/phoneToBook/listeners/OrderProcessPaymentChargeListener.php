@@ -6,19 +6,23 @@ use common\models\Payment;
 use modules\order\src\entities\order\events\OrderPreparedEvent;
 use modules\order\src\payment\jobs\ChargePaymentJob;
 use modules\order\src\processManager\phoneToBook\OrderProcessManagerRepository;
+use modules\order\src\processManager\queue\Queue;
 
 /**
  * Class OrderProcessPaymentChargeListener
  *
  * @property OrderProcessManagerRepository $repository
+ * @property Queue $queue
  */
 class OrderProcessPaymentChargeListener
 {
     private OrderProcessManagerRepository $repository;
+    private Queue $queue;
 
-    public function __construct(OrderProcessManagerRepository $repository)
+    public function __construct(OrderProcessManagerRepository $repository, Queue $queue)
     {
         $this->repository = $repository;
+        $this->queue = $queue;
     }
 
     public function handle(OrderPreparedEvent $event): void
@@ -44,6 +48,6 @@ class OrderProcessPaymentChargeListener
             return;
         }
 
-        \Yii::$app->queue_job->push(new ChargePaymentJob($payment->pay_id));
+        $this->queue->push(new ChargePaymentJob($payment->pay_id));
     }
 }

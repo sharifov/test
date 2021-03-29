@@ -6,6 +6,7 @@ use modules\order\src\entities\order\Order;
 use modules\order\src\processManager\jobs\BookingAttractionJob;
 use modules\order\src\processManager\jobs\BookingHotelJob;
 use modules\order\src\processManager\jobs\BookingRentCarJob;
+use modules\order\src\processManager\queue\Queue;
 use yii\queue\JobInterface;
 
 /**
@@ -44,19 +45,21 @@ class StartBookingOtherProductsJob implements JobInterface
             return;
         }
 
+        $queueJob = \Yii::createObject(Queue::class);
+
         $createdAnyJob = false;
         foreach ($quotes as $quote) {
             if ($quote->isBooked()) {
                 continue;
             }
             if ($quote->pqProduct->isHotel()) {
-                \Yii::$app->queue_job->push(new BookingHotelJob($quote->childQuote->getId()));
+                $queueJob->push(new BookingHotelJob($quote->childQuote->getId()));
                 $createdAnyJob = true;
             } elseif ($quote->pqProduct->isAttraction()) {
-                \Yii::$app->queue_job->push(new BookingAttractionJob($quote->childQuote->getId()));
+                $queueJob->push(new BookingAttractionJob($quote->childQuote->getId()));
                 $createdAnyJob = true;
             } elseif ($quote->pqProduct->isRenTCar()) {
-                \Yii::$app->queue_job->push(new BookingRentCarJob($quote->childQuote->getId()));
+                $queueJob->push(new BookingRentCarJob($quote->childQuote->getId()));
                 $createdAnyJob = true;
             }
         }

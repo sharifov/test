@@ -1,13 +1,13 @@
 <?php
 
-namespace modules\order\src\processManager;
+namespace modules\order\src\processManager\queue;
 
 /**
- * Class Queue
+ * Class SimpleQueue
  *
  * @property \yii\queue\Queue $queue
  */
-class Queue
+class SimpleQueue implements Queue
 {
     private \yii\queue\Queue $queue;
 
@@ -16,7 +16,7 @@ class Queue
         $this->queue = $queue;
     }
 
-    public function push($job)
+    public function push($job): ?string
     {
         return $this->queue->push($job);
     }
@@ -24,5 +24,10 @@ class Queue
     public function delay($value)
     {
         return $this->queue->delay($value);
+    }
+
+    public function priority($value)
+    {
+        return $this->queue->priority($value);
     }
 }

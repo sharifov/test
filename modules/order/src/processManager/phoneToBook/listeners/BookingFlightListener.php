@@ -6,19 +6,23 @@ use modules\order\src\entities\order\Order;
 use modules\order\src\processManager\events\BookingFlightEvent;
 use modules\order\src\processManager\jobs\BookingFlightJob;
 use modules\order\src\processManager\phoneToBook\OrderProcessManagerRepository;
+use modules\order\src\processManager\queue\Queue;
 
 /**
  * Class BookingFlightListener
  *
  * @property OrderProcessManagerRepository $managerRepository
+ * @property Queue $queue
  */
 class BookingFlightListener
 {
     private OrderProcessManagerRepository $managerRepository;
+    private Queue $queue;
 
-    public function __construct(OrderProcessManagerRepository $managerRepository)
+    public function __construct(OrderProcessManagerRepository $managerRepository, Queue $queue)
     {
         $this->managerRepository = $managerRepository;
+        $this->queue = $queue;
     }
 
     public function handle(BookingFlightEvent $event): void
@@ -49,7 +53,7 @@ class BookingFlightListener
 
         foreach ($quotes as $quote) {
             if ($quote->pqProduct->isFlight()) {
-                $jobId = \Yii::$app->queue_job->push(new BookingFlightJob($quote->childQuote->getId()));
+                $jobId = $this->queue->push(new BookingFlightJob($quote->childQuote->getId()));
                 \Yii::info([
                     'message' => 'Added job BookingFlightJob',
                     'productQuoteId' => $quote->pq_id,

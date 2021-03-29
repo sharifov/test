@@ -4,6 +4,7 @@ namespace modules\order\src\processManager\phoneToBook\listeners;
 
 use modules\order\src\processManager\phoneToBook\jobs\AfterBookedFlightJob;
 use modules\order\src\processManager\phoneToBook\OrderProcessManagerRepository;
+use modules\order\src\processManager\queue\Queue;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
 use modules\product\src\entities\productQuote\ProductQuote;
 
@@ -11,14 +12,17 @@ use modules\product\src\entities\productQuote\ProductQuote;
  * Class AfterBookedFlightOrderProcessListener
  *
  * @property OrderProcessManagerRepository $repository
+ * @property Queue $queue
  */
 class AfterBookedFlightOrderProcessListener
 {
     private OrderProcessManagerRepository $repository;
+    private Queue $queue;
 
-    public function __construct(OrderProcessManagerRepository $repository)
+    public function __construct(OrderProcessManagerRepository $repository, Queue $queue)
     {
         $this->repository = $repository;
+        $this->queue = $queue;
     }
 
     public function handle(ProductQuoteBookedEvent $event): void
@@ -63,6 +67,6 @@ class AfterBookedFlightOrderProcessListener
             return;
         }
 
-        \Yii::$app->queue_job->push(new AfterBookedFlightJob($event->productQuoteId));
+        $this->queue->push(new AfterBookedFlightJob($event->productQuoteId));
     }
 }

@@ -3,6 +3,7 @@
 namespace modules\order\src\processManager;
 
 use modules\order\src\processManager\clickToBook\jobs\BookingHotelJob;
+use modules\order\src\processManager\queue\Queue;
 use modules\product\src\entities\productQuote\ProductQuote;
 
 /**

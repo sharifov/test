@@ -10,13 +10,13 @@ use sales\helpers\setting\SettingHelper;
 /**
  * Class StartAutoProcessingListener
  *
- * @property processManager\Queue $queue
+ * @property processManager\queue\Queue $queue
  */
 class StartAutoProcessingListener
 {
-    private processManager\Queue $queue;
+    private processManager\queue\Queue $queue;
 
-    public function __construct(processManager\Queue $queue)
+    public function __construct(processManager\queue\Queue $queue)
     {
         $this->queue = $queue;
     }

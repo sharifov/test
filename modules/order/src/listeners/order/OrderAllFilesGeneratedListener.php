@@ -5,10 +5,23 @@ namespace modules\order\src\listeners\order;
 use modules\fileStorage\src\entity\fileOrder\FileOrder;
 use modules\order\src\events\OrderFileGeneratedEvent;
 use modules\order\src\jobs\OrderSendCompletedConfirmationJob;
+use modules\order\src\processManager\queue\Queue;
 use modules\product\src\entities\productQuote\ProductQuote;
 
+/**
+ * Class OrderAllFilesGeneratedListener
+ *
+ * @property Queue $queue
+ */
 class OrderAllFilesGeneratedListener
 {
+    private Queue $queue;
+
+    public function __construct(Queue $queue)
+    {
+        $this->queue = $queue;
+    }
+
     public function handle(OrderFileGeneratedEvent $event): void
     {
         $receipt = FileOrder::find()->andWhere([
@@ -34,7 +47,7 @@ class OrderAllFilesGeneratedListener
         }
 
         if (!$this->isSent($event->orderId)) {
-            \Yii::$app->queue_job->push(new OrderSendCompletedConfirmationJob($event->orderId));
+            $this->queue->push(new OrderSendCompletedConfirmationJob($event->orderId));
         }
     }
 
