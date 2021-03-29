@@ -72,13 +72,13 @@ The SPA service at Christmas is closed on December 25 and January 1.'
     <?php Pjax::begin(['timeout' => 15000, 'enablePushState' => false, 'enableReplaceState' => false, 'scrollTo' => false]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 <div class="row">
-    <div class="col-2 quote">
-        <?php if ($dataProvider) :?>
-            <?= $this->render('_quote_filters', [
-                'filtersForm' => $filtersForm
-        ]) ?>
-        <?php endif; ?>
-    </div>
+    <?php if (!empty($dataProvider->allModels)) :?>
+        <div class="col-2 quote">
+                <?= $this->render('_quote_filters', [
+                    'filtersForm' => $filtersForm
+            ]) ?>
+        </div>
+    <?php endif; ?>
 
     <div class="col-10">
     <?= \yii\widgets\ListView::widget([
