@@ -9,21 +9,19 @@ class EmailConfirmationData
     public function generate(Order $order): array
     {
         $projectData = [];
-        if ($order->or_lead_id) {
-            if ($order->orLead->project_id) {
-                $project = $order->orLead->project;
-                $projectContactInfo = [];
-                if ($project->contact_info) {
-                    $projectContactInfo = @json_decode($project->contact_info, true);
-                }
-                $projectData = [
-                    'name'      => $project->name,
-                    'url'       => $project->link,
-                    'address'   => $projectContactInfo['address'] ?? '',
-                    'phone'     => $projectContactInfo['phone'] ?? '',
-                    'email'     => $projectContactInfo['email'] ?? '',
-                ];
+        if ($order->or_project_id) {
+            $project = $order->project;
+            $projectContactInfo = [];
+            if ($project->contact_info) {
+                $projectContactInfo = @json_decode($project->contact_info, true);
             }
+            $projectData = [
+                'name'      => $project->name,
+                'url'       => $project->link,
+                'address'   => $projectContactInfo['address'] ?? '',
+                'phone'     => $projectContactInfo['phone'] ?? '',
+                'email'     => $projectContactInfo['email'] ?? '',
+            ];
         }
 
         return [

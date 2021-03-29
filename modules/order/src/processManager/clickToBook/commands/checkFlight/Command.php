@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\order\src\processManager\clickToBook\commands\checkOrderIsPayment;
+namespace modules\order\src\processManager\clickToBook\commands\checkFlight;
 
 /**
  * Class Command

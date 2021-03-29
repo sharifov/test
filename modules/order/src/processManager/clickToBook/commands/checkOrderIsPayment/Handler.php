@@ -1,11 +1,12 @@
 <?php
 
-namespace modules\order\src\processManager\clickToBook\commands;
+namespace modules\order\src\processManager\clickToBook\commands\checkOrderIsPayment;
 
 use modules\order\src\processManager\AppliedProductsBookingRunner;
 use modules\order\src\processManager\BookableQuoteChecker;
 use modules\order\src\processManager\clickToBook\OrderProcessManagerRepository;
-use modules\order\src\processManager\ErrorOrder;
+use modules\order\src\processManager\clickToBook\ErrorOrder;
+use modules\order\src\processManager\Status;
 
 /**
  * @property OrderProcessManagerRepository $repository
@@ -37,13 +38,13 @@ class Handler
         $manager = $this->repository->find($command->orderId);
 
         if (!$manager->isFlightProductProcessed()) {
-            throw new \DomainException('OrderProcessManager is not Flight Product Processed. OrderId: ' . $manager->opm_id);
+            throw new \DomainException('ClickToBook Order Process Manager (Id: ' . $manager->opm_id . ') is not Flight Product Processed status. Current Status: ' . Status::getName($manager->opm_status));
         }
 
         $order = $manager->order;
 
         if (!$order->isPaymentPaid()) {
-            $this->errorOrder->error($order->or_id);
+            $this->errorOrder->error($order->or_id, 'ClickToBook AutoProcessing error. Order Payment is not Paid.');
             return;
         }
 

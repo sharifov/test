@@ -32,7 +32,7 @@ class OrderCanceledHybridNotificationJob implements JobInterface
             ], 'OrderCanceledHybridNotificationJob');
         }
         try {
-            \Yii::$app->hybrid->updateStatus($order->orLead->project_id, $order->or_gid, OrderStatus::CANCELED);
+            \Yii::$app->hybrid->updateStatus($order->or_project_id, $order->or_gid, OrderStatus::CANCELED);
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => 'Send canceled status to hybrid',

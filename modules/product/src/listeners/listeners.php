@@ -40,6 +40,7 @@ return [
         ProductQuoteBookedEventListener::class,
         processManager\phoneToBook\listeners\AfterBookedFlightOrderProcessListener::class,
         processManager\phoneToBook\listeners\OrderProcessManagerBookingListener::class,
+        processManager\clickToBook\listeners\AllProductsBookedListener::class,
         OrderPrepareListener::class,
         ProductQuoteUpdateLeadOrderListener::class,
         ProductQuoteUpdateLeadOfferListener::class,

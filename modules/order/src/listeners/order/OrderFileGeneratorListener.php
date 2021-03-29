@@ -8,6 +8,7 @@ use modules\hotel\src\jobs\HotelQuotePdfJob;
 use modules\order\src\entities\order\events\OrderCompletedEvent;
 use modules\order\src\entities\order\Order;
 use modules\order\src\jobs\OrderGeneratorPdfJob;
+use modules\product\src\entities\productQuote\ProductQuote;
 use modules\rentCar\src\jobs\RentCarQuotePdfJob;
 use sales\helpers\app\AppHelper;
 use Yii;
@@ -28,7 +29,9 @@ class OrderFileGeneratorListener
             $orderGeneratorPdfJob->orderId = $event->orderId;
             Yii::$app->queue_job->priority(10)->push($orderGeneratorPdfJob);
 
-            foreach ($order->productQuotes as $productQuote) {
+            $quotes = ProductQuote::find()->byOrderId($order->or_id)->booked()->all();
+
+            foreach ($quotes as $productQuote) {
                 if ($quote = $productQuote->getChildQuote()) {
                     if ($productQuote->isHotel()) {
                         $hotelQuotePdfJob = new HotelQuotePdfJob();

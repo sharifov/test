@@ -1,9 +1,8 @@
 <?php
 
-namespace modules\order\src\processManager\phoneToBook\jobs;
+namespace modules\order\src\processManager\clickToBook\jobs;
 
-use modules\order\src\processManager\phoneToBook\OrderProcessManager;
-use modules\order\src\processManager\phoneToBook\OrderProcessManagerRepository;
+use modules\order\src\processManager\clickToBook\commands;
 use yii\queue\JobInterface;
 use yii\queue\RetryableJobInterface;
 
@@ -23,22 +22,12 @@ class StartAutoProcessingJob implements JobInterface
 
     public function execute($queue)
     {
-        $repo = \Yii::createObject(OrderProcessManagerRepository::class);
-
-        if ($repo->exist($this->orderId)) {
-            \Yii::error([
-                'message' => 'Order Process Manager is already exist.',
-                'orderId' => $this->orderId
-            ], 'OrderProcessManager:StartAutoProcessingJob');
-            return;
-        }
-
         try {
-            $process = OrderProcessManager::create($this->orderId, new \DateTimeImmutable());
-            $repo->save($process);
+            $handler = \Yii::createObject(commands\checkFlight\Handler::class);
+            $handler->handle(new commands\checkFlight\Command($this->orderId));
         } catch (\Throwable $e) {
             \Yii::error([
-                'message' => 'OrderProcess manager create error',
+                'message' => 'ClickToBook OrderProcess manager check Flight error',
                 'error' => $e->getMessage(),
                 'orderId' => $this->orderId,
             ], 'StartAutoProcessingJob');

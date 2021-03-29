@@ -23,4 +23,9 @@ class Status
         self::WAIT_BO_RESPONSE => 'Wait BO response',
         self::FLIGHT_PRODUCT_PROCESSED => 'Flight product processed',
     ];
+
+    public static function getName(?int $id): string
+    {
+        return self::LIST[$id] ?? 'undefined';
+    }
 }

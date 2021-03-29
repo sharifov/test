@@ -19,35 +19,32 @@ class OrderProcessManagerRepository
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function find(int $id): OrderProcessManager
+    public function exist(int $id): bool
     {
-        if ($process = OrderProcessManager::find()->byId($id)->clickToBook()->one()) {
-            return $process;
-        }
-        throw new NotFoundException('Order Process Manager is not found');
+        return OrderProcessManager::find()->byId($id)->clickToBook()->exists();
     }
 
     public function get(int $id): ?OrderProcessManager
     {
-        if ($process = OrderProcessManager::find()->byId($id)->clickToBook()->one()) {
-            return $process;
+        if ($manager = OrderProcessManager::find()->byId($id)->clickToBook()->one()) {
+            return $manager;
         }
         return null;
     }
 
-    public function save(OrderProcessManager $process): void
+    public function find(int $id): OrderProcessManager
     {
-        if (!$process->save(false)) {
-            throw new \RuntimeException('Saving error');
+        if ($manager = OrderProcessManager::find()->byId($id)->clickToBook()->one()) {
+            return $manager;
         }
-        $this->eventDispatcher->dispatchAll($process->releaseEvents());
+        throw new NotFoundException('ClickToBook Order Process Manager is not found. Id: ' . $id);
     }
 
-    public function remove(OrderProcessManager $process): void
+    public function save(OrderProcessManager $manager): void
     {
-        if (!$process->delete()) {
-            throw new \RuntimeException('Removing error');
+        if (!$manager->save(false)) {
+            throw new \RuntimeException('Saving error');
         }
-        $this->eventDispatcher->dispatchAll($process->releaseEvents());
+        $this->eventDispatcher->dispatchAll($manager->releaseEvents());
     }
 }

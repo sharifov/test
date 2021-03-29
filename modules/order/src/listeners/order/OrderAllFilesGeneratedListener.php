@@ -20,7 +20,7 @@ class OrderAllFilesGeneratedListener
             return;
         }
 
-        $quotes = ProductQuote::find()->select(['pq_id'])->andWhere(['pq_order_id' => $event->orderId])->column();
+        $quotes = ProductQuote::find()->select(['pq_id'])->byOrderId($event->orderId)->booked()->column();
         foreach ($quotes as $quote) {
             $confirm = FileOrder::find()->andWhere([
                 'fo_category_id' => FileOrder::CATEGORY_CONFIRMATION,

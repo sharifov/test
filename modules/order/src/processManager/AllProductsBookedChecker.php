@@ -17,12 +17,20 @@ class AllProductsBookedChecker
             return false;
         }
 
+        $isBooked = false;
+
         foreach ($quotes as $quote) {
-            if (!$quote->isBooked()) {
+            if ($quote->isBooked()) {
+                $isBooked = true;
+            }
+            if ($quote->isError()) {
+                return false;
+            }
+            if ($quote->isApplied()) {
                 return false;
             }
         }
 
-        return true;
+        return $isBooked;
     }
 }

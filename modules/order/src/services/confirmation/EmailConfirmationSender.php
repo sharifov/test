@@ -34,7 +34,7 @@ class EmailConfirmationSender
         /** @var FileOrder[] $confirmations */
         $confirmations = [];
 
-        $quotes = ProductQuote::find()->select(['pq_id'])->andWhere(['pq_order_id' => $order->or_id])->column();
+        $quotes = ProductQuote::find()->select(['pq_id'])->byOrderId($order->or_id)->booked()->column();
         foreach ($quotes as $quote) {
             $confirm = FileOrder::find()->andWhere([
                 'fo_category_id' => FileOrder::CATEGORY_CONFIRMATION,
@@ -94,7 +94,7 @@ class EmailConfirmationSender
         /** @var FileOrder[] $confirmations */
         $confirmations = [];
 
-        $quotes = ProductQuote::find()->select(['pq_id'])->andWhere(['pq_order_id' => $order->or_id])->column();
+        $quotes = ProductQuote::find()->select(['pq_id'])->byOrderId($order->or_id)->booked()->column();
         foreach ($quotes as $quote) {
             $confirm = FileOrder::find()->andWhere([
                 'fo_category_id' => FileOrder::CATEGORY_CONFIRMATION,
@@ -126,7 +126,7 @@ class EmailConfirmationSender
 
     private function send(Order $order, array $files): void
     {
-        $projectId = $order->orLead->project_id ?? null;
+        $projectId = $order->or_project_id ?? null;
 
         if (!$projectId) {
             \Yii::error([
@@ -136,7 +136,7 @@ class EmailConfirmationSender
             return;
         }
 
-        $project = $order->orLead->project;
+        $project = $order->project;
 
         $from = $project->getContactInfo()->email;
         $fromName = $project->name;
@@ -207,7 +207,7 @@ class EmailConfirmationSender
         array $files
     ): void {
         $mail = new Email();
-        $mail->e_project_id = $order->orLead->project_id;
+        $mail->e_project_id = $order->or_project_id;
         $mail->e_lead_id = $order->or_lead_id;
         $templateTypeId = EmailTemplateType::find()
             ->select(['etp_id'])

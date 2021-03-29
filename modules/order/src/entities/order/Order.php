@@ -66,7 +66,7 @@ use yii\helpers\VarDumper;
  * @property array|null $or_request_data
  * @property int $or_request_id [int]
  * @property int $or_project_id [int]
- * @property bool $or_type_id [tinyint(1)]
+ * @property int $or_type_id [tinyint(1)]
  *
  * @property Currency $orClientCurrency
  * @property Invoice[] $invoices
@@ -653,5 +653,15 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
     public function getOrderTipsAmount(): float
     {
         return $this->orderTips->ot_amount ?? 0.00;
+    }
+
+    public function isClickToBook(): bool
+    {
+        return $this->or_type_id === OrderSourceType::C2B;
+    }
+
+    public function isPhoneToBook(): bool
+    {
+        return $this->or_type_id === OrderSourceType::P2B;
     }
 }

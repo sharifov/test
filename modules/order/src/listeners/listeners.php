@@ -18,7 +18,7 @@ return [
     OrderProcessingEvent::class => [
         OrderListeners\OrderProcessingConfirmationListener::class,
         OrderListeners\OrderProcessingHybridNotificationListener::class,
-        processManager\phoneToBook\listeners\StartAutoProcessingListener::class,
+        processManager\listeners\StartAutoProcessingListener::class,
         OrderListeners\OrderChangeStatusLogListener::class,
     ],
     OrderEvents\OrderCancelProcessingEvent::class => [
@@ -69,6 +69,7 @@ return [
 
     processManager\events\CreatedEvent::class => [
         processManager\phoneToBook\listeners\StartBookingListener::class,
+        processManager\clickToBook\listeners\StartBookingListener::class,
         processManager\listeners\LogCreatedListener::class,
         processManager\listeners\OrderProcessStatusReloadLeadOrdersListener::class,
     ],
@@ -84,6 +85,7 @@ return [
     ],
     processManager\events\BookedEvent::class => [
         processManager\phoneToBook\listeners\OrderPrepareOrderProcessingListener::class,
+        processManager\clickToBook\listeners\CompleteOrderListener::class,
         processManager\listeners\OrderProcessStatusReloadLeadOrdersListener::class,
         processManager\listeners\LogStatusListener::class,
     ],
@@ -94,5 +96,8 @@ return [
     processManager\events\FailedEvent::class => [
         processManager\listeners\LogStatusListener::class,
         processManager\listeners\OrderProcessStatusReloadLeadOrdersListener::class,
+    ],
+    processManager\events\FlightProductProcessedEvent::class => [
+
     ],
 ];

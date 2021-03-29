@@ -22,6 +22,7 @@ use sales\entities\EventTrait;
 use sales\events\lead\LeadBookedEvent;
 use sales\events\lead\LeadCallExpertRequestEvent;
 use sales\events\lead\LeadCallStatusChangeEvent;
+use sales\events\lead\LeadCreatedBookFailedEvent;
 use sales\events\lead\LeadCreatedByApiBOEvent;
 use sales\events\lead\LeadCreatedByApiEvent;
 use sales\events\lead\LeadCreatedByIncomingCallEvent;
@@ -857,6 +858,16 @@ class Lead extends ActiveRecord implements Objectable
         $lead->request_ip = $ip;
         $lead->offset_gmt = $gmtOffset;
         $lead->recordEvent(new LeadCreatedClientChatEvent($lead, $creatorId));
+        return $lead;
+    }
+
+    public static function createBookFailed($projectId): self
+    {
+        $lead = self::create();
+        $lead->project_id = $projectId;
+        $lead->l_dep_id = Department::DEPARTMENT_SALES;
+        $lead->status = self::STATUS_BOOK_FAILED;
+        $lead->recordEvent(new LeadCreatedBookFailedEvent($lead, $lead->status));
         return $lead;
     }
 

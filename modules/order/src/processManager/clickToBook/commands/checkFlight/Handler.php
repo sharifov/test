@@ -1,20 +1,20 @@
 <?php
 
-namespace modules\order\src\processManager\clickToBook\listeners;
+namespace modules\order\src\processManager\clickToBook\commands\checkFlight;
 
 use modules\order\src\processManager\clickToBook\OrderProcessManagerRepository;
-use modules\order\src\processManager\ErrorOrder;
-use modules\order\src\processManager\events\CreatedEvent;
+use modules\order\src\processManager\clickToBook\ErrorOrder;
 use modules\order\src\processManager\FlightChecker;
+use modules\order\src\processManager\Status;
 
 /**
- * Class CheckFlightListener
+ * Class Handler
  *
  * @property OrderProcessManagerRepository $repository
  * @property FlightChecker $flightChecker
  * @property ErrorOrder $errorOrder
  */
-class CheckFlightListener
+class Handler
 {
     private OrderProcessManagerRepository $repository;
     private FlightChecker $flightChecker;
@@ -30,17 +30,14 @@ class CheckFlightListener
         $this->errorOrder = $errorOrder;
     }
 
-    public function handle(CreatedEvent $event): void
+    public function handle(Command $command): void
     {
-        $manager = $this->repository->get($event->getOrderId());
-        if (!$manager) {
-            return;
-        }
+        $manager = $this->repository->find($command->orderId);
         if (!$manager->isNew()) {
-            return;
+            throw new \DomainException('ClickToBook Order Process Manager (Id: ' . $command->orderId . ') must be in New status. Current status: ' . Status::getName($manager->opm_status));
         }
         if (!$this->flightChecker->has($manager->opm_id)) {
-            $this->errorOrder->error($manager->opm_id);
+            $this->errorOrder->error($manager->opm_id, 'ClickToBook AutoProcessing Error. Not found Flight Product.');
             return;
         }
         $manager->waitBoResponse(new \DateTimeImmutable());
