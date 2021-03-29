@@ -62,6 +62,9 @@ use yii\widgets\ActiveForm;
                             <?= $form->field($model, 'or_status_id')->dropDownList(OrderStatus::getList(), ['prompt' => '-']) ?>
                         </div>
                         <div class="col-md-3">
+                            <?= $form->field($model, 'or_project_id')->dropDownList($lists->getProjects(), ['prompt' => '-']) ?>
+                        </div>
+                        <div class="col-md-3">
                             <?php echo $form->field($model, 'or_owner_user_id')->widget(Select2::class, [
                                 'data' => $lists->getEmployees(true),
                                 'size' => Select2::SMALL,

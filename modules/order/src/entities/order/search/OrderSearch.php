@@ -78,7 +78,13 @@ class OrderSearch extends Order
         if ($this->billingPhone || $this->billingEmail || $this->billingName) {
             $query
                 ->leftJoin(BillingInfo::tableName(), 'bi_order_id = or_id')
-                ->andFilterWhere(['like', 'bi_contact_name', $this->billingName])
+                ->andFilterWhere([
+                    'OR',
+                    ['like', 'bi_contact_name', $this->billingName],
+                    ['like', 'bi_first_name', $this->billingName],
+                    ['like', 'bi_last_name', $this->billingName],
+                    ['like', 'bi_middle_name', $this->billingName],
+                ])
                 ->andFilterWhere(['like', 'bi_contact_email', $this->billingEmail])
                 ->andFilterWhere(['like', 'bi_contact_phone', $this->billingPhone]);
         }
