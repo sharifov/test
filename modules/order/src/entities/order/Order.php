@@ -47,7 +47,7 @@ use yii\helpers\VarDumper;
  * @property string $or_gid
  * @property string|null $or_uid
  * @property string|null $or_name
- * @property int $or_lead_id
+ * @property int|null $or_lead_id
  * @property string|null $or_description
  * @property int|null $or_status_id
  * @property int|null $or_pay_status_id
@@ -97,7 +97,7 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
     public function rules(): array
     {
         return [
-            [['or_gid', 'or_lead_id'], 'required'],
+            [['or_gid'], 'required'],
             [['or_lead_id', 'or_status_id', 'or_pay_status_id', 'or_owner_user_id', 'or_created_user_id', 'or_updated_user_id'], 'integer'],
             [['or_description'], 'string'],
             [['or_app_total', 'or_app_markup', 'or_agent_markup', 'or_client_total', 'or_client_currency_rate', 'or_profit_amount'], 'number'],
