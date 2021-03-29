@@ -118,7 +118,7 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
             [['or_request_id', 'or_project_id', 'or_type_id'], 'integer'],
 
             [['or_request_id'], 'exist', 'skipOnError' => true, 'skipOnEmpty' => true, 'targetClass' => OrderRequest::class, 'targetAttribute' => ['or_request_id' => 'orr_id']],
-            [['or_project_id'], 'exist', 'skipOnError' => true, 'skipOnEmpty' => true, 'targetClass' => Project::class, 'targetAttribute' => ['or_project_id' => 'orr_id']],
+            [['or_project_id'], 'exist', 'skipOnError' => true, 'skipOnEmpty' => true, 'targetClass' => Project::class, 'targetAttribute' => ['or_project_id' => 'id']],
             [['or_type_id'], 'in', 'range' => array_keys(OrderSourceType::LIST), 'skipOnEmpty' => true],
 
             ['or_request_data', 'safe'],
