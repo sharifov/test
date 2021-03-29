@@ -3913,6 +3913,69 @@
   },
   {
     "type": "post",
+    "url": "/v2/order/create-c2b",
+    "title": "Create Order",
+    "version": "1.0.0",
+    "name": "CreateOrderClickToBook",
+    "group": "Orders",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n     \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n     \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n }",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 255",
+            "optional": false,
+            "field": "projectApiKey",
+            "description": "<p>Project api key</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Object[]",
+            "optional": false,
+            "field": "quotes",
+            "description": "<p>Product Quotes</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "quotes.productKey",
+            "description": "<p>Product Quotes</p>"
+          }
+        ]
+      }
+    },
+    "filename": "webapi/modules/v2/controllers/OrderController.php",
+    "groupTitle": "Orders"
+  },
+  {
+    "type": "post",
     "url": "/v2/order/create-proxy",
     "title": "Create Order Proxy",
     "version": "0.2.0",

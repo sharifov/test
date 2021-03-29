@@ -23,7 +23,6 @@ class OrderCreateForm extends CompositeRecursiveForm
 {
     public string $offerGid = '';
 
-    public string $projectApiKey = '';
 
     public function __construct(int $countProductQuotes, int $countPaxes, $config = [])
     {
@@ -47,10 +46,9 @@ class OrderCreateForm extends CompositeRecursiveForm
     public function rules(): array
     {
         return [
-            [['offerGid', 'projectApiKey'], 'required'],
-            [['offerGid', 'projectApiKey'], 'string'],
+            [['offerGid'], 'required'],
+            [['offerGid'], 'string'],
             ['offerGid', 'exist', 'targetClass' => Offer::class, 'targetAttribute' => 'of_gid'],
-            ['projectApiKey', 'exist', 'targetClass' => Project::class, 'targetAttribute' => 'api_key']
         ];
     }
 

@@ -23,6 +23,7 @@ use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\repositories\project\ProjectRepository;
+use webapi\models\ApiUser;
 use webapi\src\logger\ApiLogger;
 use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
 use webapi\src\logger\behaviors\SimpleLoggerBehavior;
@@ -347,7 +348,6 @@ class OrderController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{max 255}}      projectApiKey                                       Project api key
      * @apiParam {string{max 32}}       offerGid                                            Offer gid
      * @apiParam {Object[]}             productQuotes                                       Product Quotes
      * @apiParam {string{max 32}}       productQuotes.gid                                   Product Quote Gid
@@ -1364,7 +1364,7 @@ class OrderController extends BaseController
             $this->orderRequestRepository->save($orderRequest);
 
             $offer = $this->offerRepository->findByGid($form->offerGid);
-            $project = $this->projectRepository->findByApiKey($form->projectApiKey);
+            $project = $this->projectRepository->findById($this->auth->au_project_id ?? 0);
 
             $dto = new CreateOrderDTO($offer->of_lead_id, $form->payment->currency, $request->post(), OrderSourceType::P2B, $orderRequest->orr_id, $project->id);
             $order = $this->orderManageService->createOrder($dto, $form);
@@ -1864,7 +1864,7 @@ class OrderController extends BaseController
      *
      * @apiParam {string{max 255}}      projectApiKey           Project api key
      * @apiParam {Object[]}             quotes                  Product Quotes
-     * @apiParam {string{}}             quotes.productKey       Product Quotes
+     * @apiParam {string}             quotes.productKey       Product Quotes
      *
      * @return ErrorResponse|SuccessResponse
      */

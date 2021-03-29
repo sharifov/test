@@ -37,7 +37,6 @@ class OrderRequest extends \yii\db\ActiveRecord
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
-            ''
         ];
     }
 

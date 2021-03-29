@@ -41,4 +41,12 @@ class ProjectRepository
         $project = $this->findByKey($key);
         return $project->id ?? null;
     }
+
+    public function findById(int $id): Project
+    {
+        if ($project = Project::findOne(['id' => $id])) {
+            return $project;
+        }
+        throw new NotFoundException('Project not found by id: ' . $id);
+    }
 }
