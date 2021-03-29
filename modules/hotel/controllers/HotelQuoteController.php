@@ -18,6 +18,7 @@ use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCancelBookGuard;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCheckRateService;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookService;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCancelBookService;
+use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchForm;
 use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchGuard;
 use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchService;
 use modules\hotel\src\useCases\quote\HotelQuoteManageService;
@@ -120,6 +121,8 @@ class HotelQuoteController extends FController
     {
         $hotelId = (int) Yii::$app->request->get('id');
         $hotel = $this->hotelRepository->find($hotelId);
+        $form = new HotelQuoteSearchForm();
+        $form->load(Yii::$app->request->post() ?: Yii::$app->request->get());
 
         $this->increaseLimits();
 
@@ -152,10 +155,18 @@ class HotelQuoteController extends FController
         }
         $hotelList = array_values($hotelList);*/
 
+        if (!empty($hotelList)) {
+            $form->initFilters($hotelList);
+            $hotelList = $form->applyFilters($hotelList);
+        }
+
+        //VarDumper::dump($hotelList[0], 10, true); die();
+
         $dataProvider = new ArrayDataProvider([
             'allModels' => $hotelList,
             'pagination' => [
                 'pageSize' => 10,
+                'params' => array_merge(Yii::$app->request->get(), $form->getFilters(), $params ?? []),
             ],
             'sort' => [
                 'attributes' => ['ranking', 'name', 's2C'],
@@ -164,7 +175,8 @@ class HotelQuoteController extends FController
 
         return $this->renderAjax('search/_search_quotes', [
             'dataProvider' => $dataProvider,
-            'hotelSearch'   => $hotel
+            'hotelSearch'   => $hotel,
+            'filtersForm' => $form
         ]);
     }
 
