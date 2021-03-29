@@ -1,6 +1,6 @@
 <?php
 
-use yii\widgets\ActiveForm;
+use yii\bootstrap\ActiveForm;
 use yii\bootstrap4\Html;
 
 /**
@@ -14,8 +14,7 @@ use yii\bootstrap4\Html;
     ],
 ]) ?>
 
-<div class="row">
-    <div class="col-md-12 d-flex align-items-center justify-content-center">
+    <div class="btn-wrapper text-center">
         <br>
         <?= Html::submitButton('<i class="fa fa-filter"></i> Apply filter', [
             'class' => 'btn btn-success btn-sm',
@@ -23,10 +22,8 @@ use yii\bootstrap4\Html;
             'id' => 'hotel-quote-search-submit'
         ]) ?>
     </div>
-</div>
 
 <?= $form->field($filtersForm, 'onlyHotels')->checkbox() ?>
-
 
 <div class="form-group">
     <div class="d-flex align-items-center justify-content-between">
@@ -50,7 +47,7 @@ use yii\bootstrap4\Html;
         step = 1;
 
     noUiSlider.create(sliderPrice, {
-        start: ['<?= $price[0] ?>', '<?= $price[1] ?>'],
+        start: ['<?= !empty($price[0]) ? $price[0] : 0 ?>', '<?= !empty($price[1]) ? $price[1] : 0 ?>'],
         connect: [false, true, false],
         tooltips: [
             {
@@ -79,6 +76,31 @@ use yii\bootstrap4\Html;
         $('#hotelquotesearchform-pricerange').val(parseInt(values[0], 10) + '-' + parseInt(values[1], 10));
     });
 </script>
+
+
+<?= $form->field($filtersForm, 'selectedCategories')->checkboxList($filtersForm->categories, [
+    'item' => function ($index, $label, $name, $checked, $value) {
+        $checked = $checked ? 'checked' : '';
+        return "<div><label><input type='checkbox' {$checked} name='{$name}' value='{$value}'>&nbsp;{$label}</label></div>";
+    }
+])
+                                                                        ?>
+
+<?= $form->field($filtersForm, 'selectedBoardsTypes')->checkboxList($filtersForm->boardsTypes, [
+    'item' => function ($index, $label, $name, $checked, $value) {
+        $checked = $checked ? 'checked' : '';
+        return "<div><label><input type='checkbox' {$checked} name='{$name}' value='{$value}'>&nbsp;{$label}</label></div>";
+    }
+])
+?>
+
+<?= $form->field($filtersForm, 'selectedServiceTypes')->checkboxList($filtersForm->serviceTypes, [
+    'item' => function ($index, $label, $name, $checked, $value) {
+        $checked = $checked ? 'checked' : '';
+        return "<div><label><input type='checkbox' {$checked} name='{$name}' value='{$value}'>&nbsp;{$label}</label></div>";
+    }
+])
+?>
 
 
 <?php ActiveForm::end(); ?>
