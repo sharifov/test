@@ -4,6 +4,7 @@ namespace modules\product\src\entities\product;
 
 use common\models\Employee;
 use common\models\Lead;
+use common\models\Project;
 use modules\cruise\src\entity\cruise\Cruise;
 use modules\product\src\entities\product\dto\CreateDto;
 use modules\product\src\entities\product\events\ProductClientBudgetChangedEvent;
@@ -42,6 +43,7 @@ use yii\db\ActiveRecord;
  * @property string|null $pr_updated_dt
  * @property $pr_market_price
  * @property $pr_client_budget
+ * @property int|null $pr_project_id [int]
  *
  * @property Attraction[] $attractions
  * @property Attraction $attraction
@@ -61,6 +63,7 @@ use yii\db\ActiveRecord;
  * @property ProductHolder $holder
  *
  * @property Productable|null $childProduct
+ * @property Project $project
  */
 class Product extends \yii\db\ActiveRecord implements Serializable
 {
@@ -335,6 +338,11 @@ class Product extends \yii\db\ActiveRecord implements Serializable
     public function getProductQuotes(): ActiveQuery
     {
         return $this->hasMany(ProductQuote::class, ['pq_product_id' => 'pr_id']);
+    }
+
+    public function getProject(): ActiveQuery
+    {
+        return $this->hasOne(Project::class, ['id' => 'pr_project_id']);
     }
 
     public static function find(): Scopes
