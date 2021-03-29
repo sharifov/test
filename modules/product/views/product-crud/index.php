@@ -45,6 +45,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'relation' => 'prLead',
             ],
             'pr_description:ntext',
+            'pr_project_id:projectName',
             'pr_status_id',
             'pr_service_fee_percent',
             'pr_market_price',

@@ -180,6 +180,9 @@ class Product extends \yii\db\ActiveRecord implements Serializable
 
             ['pr_market_price', 'number'],
             ['pr_client_budget', 'number'],
+
+            ['pr_project_id', 'integer'],
+            [['pr_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['pr_project_id' => 'id']],
         ];
     }
 
@@ -199,6 +202,7 @@ class Product extends \yii\db\ActiveRecord implements Serializable
             'pr_updated_dt' => 'Updated Dt',
             'pr_market_price' => 'Market price',
             'pr_client_budget' => 'Client budget',
+            'pr_project_id' => 'Project',
         ];
     }
 

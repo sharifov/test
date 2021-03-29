@@ -45,6 +45,8 @@ class ProductCrudSearch extends Product
             ['pr_name', 'string', 'max' => 40],
 
             [['pr_created_dt', 'pr_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
+
+            ['pr_project_id', 'integer'],
         ];
     }
 
@@ -84,6 +86,7 @@ class ProductCrudSearch extends Product
             'pr_client_budget' => $this->pr_client_budget,
             'pr_created_user_id' => $this->pr_created_user_id,
             'pr_updated_user_id' => $this->pr_updated_user_id,
+            'pr_project_id' => $this->pr_project_id,
         ]);
 
         $query->andFilterWhere(['like', 'pr_name', $this->pr_name])
