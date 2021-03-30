@@ -12,12 +12,15 @@ class m210329_142651_alter_column_or_lead_id extends Migration
      */
     public function safeUp()
     {
-        /* TODO::  */
-        //$this->dropForeignKey('FK-order-or_lead_id', '{{%order}}');
+        if ($this->checkFk('order', 'FK-order-or_lead_id')) {
+            $this->dropForeignKey('FK-order-or_lead_id', '{{%order}}');
+        }
 
-        //$this->alterColumn('{{%order}}', 'or_lead_id', $this->integer());
+        $this->alterColumn('{{%order}}', 'or_lead_id', $this->integer());
 
-        //$this->addForeignKey('FK-order-or_lead_id', '{{%order}}', ['or_lead_id'], '{{%leads}}', ['id'], 'SET NULL', 'CASCADE');
+        if (!$this->checkFk('order', 'FK-order-leads')) {
+            $this->addForeignKey('FK-order-leads', '{{%order}}', ['or_lead_id'], '{{%leads}}', ['id'], 'SET NULL', 'CASCADE');
+        }
     }
 
     /**
@@ -25,11 +28,43 @@ class m210329_142651_alter_column_or_lead_id extends Migration
      */
     public function safeDown()
     {
-        /* TODO::  */
-        //$this->dropForeignKey('FK-order-or_lead_id', '{{%order}}');
+        if ($this->checkFk('order', 'FK-order-leads')) {
+            $this->dropForeignKey('FK-order-leads', '{{%order}}');
+        }
+        if ($this->checkFk('order', 'FK-order-or_lead_id')) {
+            $this->dropForeignKey('FK-order-or_lead_id', '{{%order}}');
+        }
 
-        //$this->alterColumn('{{%order}}', 'or_lead_id', $this->integer()->notNull());
+        $this->alterColumn('{{%order}}', 'or_lead_id', $this->integer()->notNull());
 
-        //$this->addForeignKey('FK-order-or_lead_id', '{{%order}}', ['or_lead_id'], '{{%leads}}', ['id'], 'CASCADE', 'CASCADE');
+        if (!$this->checkFk('order', 'FK-order-or_lead_id')) {
+            $this->addForeignKey('FK-order-or_lead_id', '{{%order}}', ['or_lead_id'], '{{%leads}}', ['id'], 'CASCADE', 'CASCADE');
+        }
+    }
+
+    private function checkFk(string $table, string $foreignKey)
+    {
+        $db = Yii::$app->getDb();
+        $schema = $db->createCommand('select database()')->queryScalar();
+
+        $query = $db->createCommand('
+            SELECT 
+                COUNT(1) AS cnt 
+            FROM 
+                information_schema.table_constraints 
+            WHERE 
+                constraint_name=:foreignKey 
+            AND 
+                table_name=:tableName
+            AND 
+                constraint_schema=:schema',
+            [
+                ':foreignKey' => $foreignKey,
+                ':tableName' => $table,
+                ':schema' => $schema,
+            ]
+        )->queryOne();
+
+        return (int) $query['cnt'];
     }
 }
