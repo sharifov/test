@@ -121,34 +121,6 @@ class AppHelper
 
     /**
      * @param array $array
-     * @param array $indexPath
-     * @param null $minValue
-     * @param null $maxValue
-     * @return array
-     */
-    public static function filterByRangeMultiLevel(array $array, array $indexPath, $minValue = null, $maxValue = null): array
-    {
-        $newArray = [];
-        if (is_array($array) && $array) {
-            foreach (array_keys($array) as $key) { /// to do
-                if ($minValue !== null && $maxValue !== null) {
-                    $current = $array[$key];
-                    foreach ($current[$indexPath[0]] as $element) {
-                        if ((int) $element[$indexPath[1]] >= $minValue && (int) $element[$indexPath[1]] <= $maxValue) {
-                            $newArray[$key] = $array[$key];
-                            continue;
-                        }
-                    }
-                } else {
-                    $newArray[$key] = $array[$key];
-                }
-            }
-        }
-        return $newArray;
-    }
-
-    /**
-     * @param array $array
      * @param string $index
      * @param array $arrayVal
      * @return array

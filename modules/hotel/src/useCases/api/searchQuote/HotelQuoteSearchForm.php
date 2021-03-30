@@ -84,7 +84,7 @@ class HotelQuoteSearchForm extends Model
 
         if (!empty($this->priceRange)) {
             $range = explode('-', $this->priceRange);
-            $hotels = AppHelper::filterByRangeMultiLevel($hotels, ['rooms', 'totalAmount'], $range[0], $range[1]);
+            $hotels = self::filterByPriceRange($hotels, $range[0], $range[1]);
         }
 
         if (!empty($this->selectedCategories)) {
@@ -100,6 +100,49 @@ class HotelQuoteSearchForm extends Model
         }
 
         return $hotels;
+    }
+
+    /**
+     * @param array $hotels
+     * @param null $minValue
+     * @param null $maxValue
+     * @return array
+     */
+    private static function filterByPriceRange(array $hotels, $minValue = null, $maxValue = null): array
+    {
+        $filteredByPrice = [];
+
+        foreach ($hotels as $key => $hotel) {
+            $excludeHotelFlag = true;
+            foreach ($hotel['rooms'] as $room) {
+                foreach ($room['rates'] as $rate) {
+                    if ((int) $rate['amount'] >= $minValue && (int) $rate['amount'] <= $maxValue) {
+                        $excludeHotelFlag = false;
+                        continue;
+                    }
+                }
+            }
+            if (!$excludeHotelFlag) {
+                $filteredByPrice[$key] = $hotels[$key];
+            }
+        }
+
+        foreach ($filteredByPrice as $key => $hotel) {
+            foreach ($hotel['rooms'] as $roomKey => $room) {
+                $unsetFlag = true;
+                foreach ($room['rates'] as $rate) {
+                    if ((int) $rate['amount'] >= $minValue && (int) $rate['amount'] <= $maxValue) {
+                        $unsetFlag = false;
+                        continue;
+                    }
+                }
+                if ($unsetFlag) {
+                    unset($filteredByPrice[$key]['rooms'][$roomKey]);
+                }
+            }
+        }
+
+        return $filteredByPrice;
     }
 
     private function filterByBoard(array $hotels, array $boardsTypes, array $selectedBoard): array
@@ -221,16 +264,18 @@ class HotelQuoteSearchForm extends Model
         $min = $max = 0;
         foreach ($hotels as $key => $hotel) {
             foreach ($hotel['rooms'] as $room) {
-                if ($min == 0) {
-                    $min = (int) $room['totalAmount'];
-                }
-                $price = (int) $room['totalAmount'];
-                if ($price <= $min) {
-                    $min = $price ;
-                }
+                foreach ($room['rates'] as $rate) {
+                    if ($min == 0) {
+                        $min = (int) $rate['amount'];
+                    }
+                    $price = (int) $rate['amount'];
+                    if ($price <= $min) {
+                        $min = $price ;
+                    }
 
-                if ($price > $max) {
-                    $max =  $price ;
+                    if ($price > $max) {
+                        $max =  $price ;
+                    }
                 }
             }
         }
