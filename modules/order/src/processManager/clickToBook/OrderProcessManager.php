@@ -59,6 +59,15 @@ class OrderProcessManager extends BaseProcessManager
         $this->recordEvent(new events\BookedEvent($this->opm_id, $date->format('Y-m-d H:i:s.u')));
     }
 
+    public function cancel(\DateTimeImmutable $date): void
+    {
+        if ($this->isCanceled()) {
+            throw new \DomainException('OrderProcessManager is already Canceled. Id: ' . $this->opm_id);
+        }
+        $this->opm_status = Status::CANCELED;
+        $this->recordEvent(new events\CanceledEvent($this->opm_id, $date->format('Y-m-d H:i:s.u')));
+    }
+
     public function isNew(): bool
     {
         return $this->opm_status === Status::NEW;
@@ -72,6 +81,11 @@ class OrderProcessManager extends BaseProcessManager
     public function isFailed(): bool
     {
         return $this->opm_status === Status::FAILED;
+    }
+
+    public function isCanceled(): bool
+    {
+        return $this->opm_status === Status::CANCELED;
     }
 
     public function isFlightProductProcessed(): bool
