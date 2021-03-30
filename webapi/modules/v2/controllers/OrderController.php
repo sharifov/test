@@ -1923,6 +1923,10 @@ class OrderController extends BaseController
                         $childProduct->getService()->c2bHandle($childProduct, $quoteForm);
                     }
                 }
+
+                $order->calculateTotalPrice();
+                $order->recalculateProfitAmount();
+                $this->orderRepository->save($order);
             });
 
             $response = new SuccessResponse(
