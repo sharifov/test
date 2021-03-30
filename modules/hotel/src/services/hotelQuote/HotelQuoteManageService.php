@@ -28,7 +28,7 @@ class HotelQuoteManageService implements ProductQuoteService
             $currency = $hotelData['currency'] ?? 'USD';
 
             $hotelModel = HotelList::findOrCreateByData($hotelData);
-            HotelQuote::findOrCreateByData($hotelData, $hotelModel, $product, null, $currency);
+            HotelQuote::findOrCreateByData($hotelData, $hotelModel, $product, null, $form->orderId, $currency);
         } catch (\Throwable $e) {
             $dto = new OrderC2BDtoException(
                 $product,

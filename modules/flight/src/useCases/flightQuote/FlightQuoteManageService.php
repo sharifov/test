@@ -417,6 +417,7 @@ class FlightQuoteManageService implements ProductQuoteService
             $quoteData = Json::decode($form->originSearchData);
 
             $productQuote = ProductQuote::create(new ProductQuoteCreateDTO($flightProduct, $quoteData, null), $productTypeServiceFee);
+            $productQuote->pq_order_id = $form->orderId;
             $this->productQuoteRepository->save($productQuote);
 
             $flightQuote = FlightQuote::create((new FlightQuoteCreateDTO($flightProduct, $productQuote, $quoteData, null)));

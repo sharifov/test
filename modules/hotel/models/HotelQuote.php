@@ -167,6 +167,7 @@ class HotelQuote extends ActiveRecord implements Quotable, ProductDataInterface
      * @param HotelList $hotelModel
      * @param Hotel $hotelRequest
      * @param int|null $ownerId
+     * @param int|null $orderId
      * @param string $currency
      * @return array|HotelQuote|null
      * @throws \yii\base\InvalidConfigException
@@ -176,6 +177,7 @@ class HotelQuote extends ActiveRecord implements Quotable, ProductDataInterface
         HotelList $hotelModel,
         Hotel $hotelRequest,
         ?int $ownerId,
+        ?int $orderId,
         string $currency = 'USD'
     ) {
         $hQuote = null;
@@ -206,6 +208,7 @@ class HotelQuote extends ActiveRecord implements Quotable, ProductDataInterface
                     $productQuoteDto->clientCurrencyRate = ProductQuoteHelper::getClientCurrencyRate($hotelRequest->phProduct);
                     $productQuoteDto->originCurrencyRate = Currency::getBaseRateByCurrencyCode($currency);
                     $productQuoteDto->name = mb_substr(implode(' & ', $nameArray), 0, 40);
+                    $productQuoteDto->orderId = $orderId;
 
                     $productTypeServiceFee = null;
                     $productType = ProductType::find()->select(['pt_service_fee_percent'])->byHotel()->asArray()->one();

@@ -272,7 +272,7 @@ class HotelQuoteController extends FController
             if (isset($resultData['rooms'])) {
                 unset($resultData['rooms']);
             }
-            $hotelQuote = HotelQuote::findOrCreateByData($resultData, $hotelModel, $hotel, Auth::id(), $currency);
+            $hotelQuote = HotelQuote::findOrCreateByData($resultData, $hotelModel, $hotel, Auth::id(), null, $currency);
 
             if (!$hotelQuote) {
                 throw new Exception('Not added hotel quote - hotel code (' . $hotelCode . ') room key (' . $quoteKey . ')', 8);

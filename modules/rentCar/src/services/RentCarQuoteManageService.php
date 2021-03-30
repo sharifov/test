@@ -28,6 +28,7 @@ class RentCarQuoteManageService implements ProductQuoteService
             $quoteData = Json::decode($form->originSearchData);
 
             $productQuote = RentCarProductQuoteDto::create($product, $quoteData, null);
+            $productQuote->pq_order_id = $form->orderId;
             if (!$productQuote->save()) {
                 throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($productQuote));
             }

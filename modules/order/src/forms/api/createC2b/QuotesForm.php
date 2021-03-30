@@ -5,6 +5,16 @@ namespace modules\order\src\forms\api\createC2b;
 use common\components\validators\CheckJsonValidator;
 use modules\product\src\entities\productType\ProductType;
 
+/**
+ * Class QuotesForm
+ * @package modules\order\src\forms\api\createC2b
+ *
+ * @property string $productKey
+ * @property string $originSearchData
+ * @property string $paxData
+ * @property string $quoteOtaId
+ * @property int $orderId
+ */
 class QuotesForm extends \yii\base\Model
 {
     public $productKey;
@@ -14,6 +24,8 @@ class QuotesForm extends \yii\base\Model
     public $paxData;
 
     public $quoteOtaId;
+
+    public $orderId;
 
     public function rules(): array
     {

@@ -1909,8 +1909,10 @@ class OrderController extends BaseController
 
             $dto = new CreateOrderDTO(null, null, $request->post(), OrderSourceType::C2B, $orderRequest->orr_id, $project->id);
             $order = $this->orderManageService->createByC2bFlow($dto);
-            $this->transactionManager->wrap(function () use ($form, $project) {
+            $this->transactionManager->wrap(function () use ($form, $project, $order) {
                 foreach ($form->quotes as $quoteForm) {
+                    $quoteForm->orderId = $order->or_id;
+
                     $productType = $this->productTypeRepository->findByKey($quoteForm->productKey);
                     $productCreateForm = new ProductCreateForm();
                     $productCreateForm->pr_type_id = $productType->pt_id;
