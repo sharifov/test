@@ -47,7 +47,8 @@ class m210329_142651_alter_column_or_lead_id extends Migration
         $db = Yii::$app->getDb();
         $schema = $db->createCommand('select database()')->queryScalar();
 
-        $query = $db->createCommand('
+        $query = $db->createCommand(
+            '
             SELECT 
                 COUNT(1) AS cnt 
             FROM 
