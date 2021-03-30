@@ -157,15 +157,9 @@ HotelAsset::register($this);
         <div class="col-9">
           <h5 class="mb-2">
             <span class="mr-1"><?= Html::encode($dataHotel['name']) ?></span>
-            <?php if (isset($dataHotel['s2C'])) : ?>
-              <span class="text-warning">
-                <small>
-                  <?php for ($i = 0; $i < (int)$dataHotel['s2C']; $i++) : ?>
-                    <i class="fa fa-star"></i>
-                  <?php endfor; ?>
-                </small>
-              </span>
-            <?php endif; ?>
+              <?php if (isset($dataHotel['categoryCode'])) : ?>
+                <img alt="stars" src="https://cdn4.hotelopia.com/freya/img/stars/<?= $dataHotel['categoryCode'] ?>.gif">
+              <?php endif; ?>
           </h5>
           <div class="mb-4">
             <i class="fa fa-map-marker mr-1 text-info"></i>
