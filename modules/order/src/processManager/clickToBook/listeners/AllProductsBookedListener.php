@@ -5,7 +5,7 @@ namespace modules\order\src\processManager\clickToBook\listeners;
 use modules\order\src\processManager\AllProductsBookedChecker;
 use modules\order\src\processManager\clickToBook\jobs\BookManagerJob;
 use modules\order\src\processManager\clickToBook\OrderProcessManagerRepository;
-use modules\order\src\processManager\Queue;
+use modules\order\src\processManager\queue\Queue;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
 use modules\product\src\entities\productQuote\ProductQuote;
 

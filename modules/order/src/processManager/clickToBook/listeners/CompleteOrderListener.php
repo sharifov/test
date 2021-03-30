@@ -5,7 +5,7 @@ namespace modules\order\src\processManager\clickToBook\listeners;
 use modules\order\src\processManager\clickToBook\jobs\CompleteOrderJob;
 use modules\order\src\processManager\clickToBook\OrderProcessManagerRepository;
 use modules\order\src\processManager\events\BookedEvent;
-use modules\order\src\processManager\Queue;
+use modules\order\src\processManager\queue\Queue;
 
 /**
  * Class CompleteOrderListener

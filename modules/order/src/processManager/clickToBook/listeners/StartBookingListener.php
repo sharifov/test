@@ -5,7 +5,7 @@ namespace modules\order\src\processManager\clickToBook\listeners;
 use modules\order\src\processManager\clickToBook\jobs\StartAutoProcessingJob;
 use modules\order\src\processManager\clickToBook\OrderProcessManagerRepository;
 use modules\order\src\processManager\events\CreatedEvent;
-use modules\order\src\processManager\Queue;
+use modules\order\src\processManager\queue\Queue;
 
 /**
  * Class StartBookingListener
