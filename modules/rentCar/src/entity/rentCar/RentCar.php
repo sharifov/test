@@ -6,9 +6,11 @@ use DateTime;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\interfaces\Productable;
+use modules\product\src\interfaces\ProductQuoteService;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use modules\rentCar\src\helpers\RentCarHelper;
 use modules\rentCar\src\serializer\RentCarSerializer;
+use modules\rentCar\src\services\RentCarQuoteManageService;
 use sales\auth\Auth;
 use sales\entities\EventTrait;
 use Yii;
@@ -220,5 +222,15 @@ class RentCar extends ActiveRecord implements Productable
             }
         }
         return 1;
+    }
+
+    public function getService(): ProductQuoteService
+    {
+        return Yii::createObject(RentCarQuoteManageService::class);
+    }
+
+    public function getProductName(): string
+    {
+        return 'RentCar';
     }
 }

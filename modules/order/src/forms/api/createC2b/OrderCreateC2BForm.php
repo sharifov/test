@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\order\src\forms\createC2b;
+namespace modules\order\src\forms\api\createC2b;
 
 use common\models\Project;
 use sales\forms\CompositeForm;
@@ -9,15 +9,10 @@ use sales\forms\CompositeForm;
  * Class CreateC2BForm
  * @package modules\order\src\forms\createC2b
  *
- * @property string $projectApiKey
  * @property QuotesForm[] $quotes
  */
 class OrderCreateC2BForm extends CompositeForm
 {
-    public $quotes;
-
-    public $projectApiKey;
-
     public function __construct(int $cntQuotes, $config = [])
     {
         $quotesForm = [];
@@ -31,10 +26,6 @@ class OrderCreateC2BForm extends CompositeForm
     public function rules(): array
     {
         return [
-            ['projectApiKey', 'required'],
-            ['projectApiKey', 'string', 'max' => 255],
-
-            [['projectApiKey'], 'exist', 'targetClass' => Project::class, 'targetAttribute' => 'api_key']
         ];
     }
 

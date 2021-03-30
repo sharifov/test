@@ -16,6 +16,7 @@ class Message
     public const REQUEST_MESSAGE = 'request';
     public const DATA_MESSAGE = 'data';
     public const SOURCE_MESSAGE = 'source';
+    public const DETAIL_ERROR_MESSAGE = 'detailError';
 
     private $key;
     private $value;

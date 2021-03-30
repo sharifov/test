@@ -35,6 +35,7 @@ use modules\flight\models\search\FlightQuoteSearch;
 use frontend\controllers\FController;
 use yii\data\ArrayDataProvider;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
@@ -351,6 +352,9 @@ class FlightQuoteController extends FController
             if (!$selectedQuote) {
                 throw new \DomainException('Quote Key not equal to key from Cache');
             }
+
+            VarDumper::dump(Json::encode($selectedQuote));
+            die;
 
             $this->flightQuoteManageService->create($flight, $selectedQuote, Auth::id());
 

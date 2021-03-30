@@ -5,10 +5,13 @@ namespace modules\flight\models;
 use modules\flight\src\entities\flight\events\FlightChangedDelayedChargeEvent;
 use modules\flight\src\entities\flight\events\FlightChangedStopsEvent;
 use modules\flight\src\entities\flight\serializer\FlightSerializer;
+use modules\flight\src\services\flight\FlightManageService;
+use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
 use modules\product\src\entities\product\Product;
 use modules\flight\models\query\FlightQuery;
 use modules\flight\src\events\FlightRequestUpdateEvent;
 use modules\product\src\interfaces\Productable;
+use modules\product\src\interfaces\ProductQuoteService;
 use sales\entities\EventTrait;
 use yii\db\ActiveQuery;
 
@@ -386,5 +389,15 @@ class Flight extends \yii\db\ActiveRecord implements Productable
     public static function findByProduct(int $productId): ?Productable
     {
         return self::find()->byProduct($productId)->limit(1)->one();
+    }
+
+    public function getService(): ProductQuoteService
+    {
+        return \Yii::createObject(FlightQuoteManageService::class);
+    }
+
+    public function getProductName(): string
+    {
+        return "Flight";
     }
 }

@@ -32,6 +32,7 @@ use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
@@ -268,6 +269,9 @@ class HotelQuoteController extends FController
             $hotelModel = HotelList::findOrCreateByData($hotelData);
             $currency = $hotelData['currency'] ?? 'USD';
             $resultData = ArrayHelper::merge($hotelData, $quoteData);
+            if (isset($resultData['rooms'])) {
+                unset($resultData['rooms']);
+            }
             $hotelQuote = HotelQuote::findOrCreateByData($resultData, $hotelModel, $hotel, Auth::id(), $currency);
 
             if (!$hotelQuote) {

@@ -1,7 +1,8 @@
 <?php
 
-namespace modules\order\src\forms\createC2b;
+namespace modules\order\src\forms\api\createC2b;
 
+use common\components\validators\CheckJsonValidator;
 use modules\product\src\entities\productType\ProductType;
 
 class QuotesForm extends \yii\base\Model
@@ -12,13 +13,20 @@ class QuotesForm extends \yii\base\Model
 
     public $paxData;
 
-    public function rules()
+    public $quoteOtaId;
+
+    public function rules(): array
     {
         return [
-            [['productKey', 'originSearchData', 'paxData'], 'required'],
-            ['productKey', 'string'],
-            [['originSearchData', 'paxData'], 'safe'],
-            [['productKey'], 'exist', 'targetClass' => ProductType::class, 'targetAttribute' => 'pt_key']
+            [['productKey', 'originSearchData', 'paxData', 'quoteOtaId'], 'required'],
+            [['productKey', 'quoteOtaId'], 'string'],
+            [['productKey'], 'exist', 'targetClass' => ProductType::class, 'targetAttribute' => 'pt_key'],
+            [['originSearchData', 'paxData'], CheckJsonValidator::class],
         ];
+    }
+
+    public function formName(): string
+    {
+        return "quotes";
     }
 }

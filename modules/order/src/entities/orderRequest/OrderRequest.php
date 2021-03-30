@@ -6,6 +6,7 @@ use modules\order\src\entities\order\OrderSourceType;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\Json;
 
 /**
  * This is the model class for table "order_request".
@@ -82,7 +83,7 @@ class OrderRequest extends \yii\db\ActiveRecord
     public static function create(array $requestData, int $sourceType): self
     {
         $request = new self();
-        $request->orr_request_data_json = $requestData;
+        $request->orr_request_data_json = Json::encode($requestData);
         $request->orr_source_type_id = $sourceType;
         return $request;
     }
@@ -90,12 +91,12 @@ class OrderRequest extends \yii\db\ActiveRecord
     public function successResponse(array $data): void
     {
         $this->orr_response_type_id = self::RESPONSE_TYPE_SUCCESS;
-        $this->orr_response_data_json = $data;
+        $this->orr_response_data_json = Json::encode($data);
     }
 
     public function errorResponse(array $data): void
     {
         $this->orr_response_type_id = self::RESPONSE_TYPE_ERROR;
-        $this->orr_response_data_json = $data;
+        $this->orr_response_data_json = Json::encode($data);
     }
 }

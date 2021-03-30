@@ -132,7 +132,7 @@ class FlightQuoteStatusLog extends \yii\db\ActiveRecord
      * @param int $statusId
      * @return FlightQuoteStatusLog
      */
-    public static function create(int $userId, int $flightQuoteId, int $statusId): FlightQuoteStatusLog
+    public static function create(?int $userId, int $flightQuoteId, int $statusId): FlightQuoteStatusLog
     {
         $log = new self();
         $log->qsl_created_user_id = $userId;

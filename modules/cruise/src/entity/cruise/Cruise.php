@@ -4,9 +4,11 @@ namespace modules\cruise\src\entity\cruise;
 
 use modules\cruise\src\entity\cruise\serializer\CruiseSerializer;
 use modules\cruise\src\entity\cruiseCabin\CruiseCabin;
+use modules\cruise\src\useCase\createQuote\CreateQuoteService;
 use modules\cruise\src\useCase\updateCruiseRequest\CruiseUpdateRequestForm;
 use modules\product\src\entities\product\Product;
 use modules\product\src\interfaces\Productable;
+use modules\product\src\interfaces\ProductQuoteService;
 use sales\entities\EventTrait;
 use Yii;
 
@@ -126,5 +128,15 @@ class Cruise extends \yii\db\ActiveRecord implements Productable
             }
         }
         return $count;
+    }
+
+    public function getService(): ProductQuoteService
+    {
+        return Yii::createObject(CreateQuoteService::class);
+    }
+
+    public function getProductName(): string
+    {
+        return 'Cruise';
     }
 }

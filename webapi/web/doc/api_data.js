@@ -3959,14 +3959,35 @@ define({ "api": [
             "type": "Object[]",
             "optional": false,
             "field": "quotes",
-            "description": "<p>Product Quotes</p>"
+            "description": "<p>Product quotes</p>"
           },
           {
             "group": "Parameter",
             "type": "string",
             "optional": false,
             "field": "quotes.productKey",
-            "description": "<p>Product Quotes</p>"
+            "description": "<p>Product key</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "quotes.originSearchData",
+            "description": "<p>Product quote origin search data</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "quotes.paxData",
+            "description": "<p>Product quote pax data</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "quotes.quoteOtaId",
+            "description": "<p>Product quote custom id</p>"
           }
         ]
       }

@@ -44,10 +44,11 @@ class FlightQuoteCreateDTO
     /**
      * FlightQuoteCreateDTO constructor.
      * @param Flight $flight
-     * @param array $quote
      * @param ProductQuote $productQuote
+     * @param array $quote
+     * @param int|null $userId
      */
-    public function __construct(Flight $flight, ProductQuote $productQuote, array $quote, int $userId)
+    public function __construct(Flight $flight, ProductQuote $productQuote, array $quote, ?int $userId)
     {
         $this->flightId = $flight->fl_id;
         $this->sourceId = null;

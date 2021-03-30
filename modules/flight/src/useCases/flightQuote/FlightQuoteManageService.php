@@ -9,6 +9,7 @@ use modules\flight\models\FlightSegment;
 use modules\flight\models\forms\ItineraryEditForm;
 use modules\flight\src\dto\flightSegment\SegmentDTO;
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
+use modules\flight\src\exceptions\FlightCodeException;
 use modules\flight\src\repositories\flight\FlightRepository;
 use modules\flight\src\repositories\flightQuoteStatusLogRepository\FlightQuoteStatusLogRepository;
 use modules\flight\src\repositories\flightSegment\FlightSegmentRepository;
@@ -18,6 +19,9 @@ use modules\flight\src\useCases\flightQuote\createManually\FlightQuoteCreateForm
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuotePaxPriceForm;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\offer\src\services\OfferPriceUpdater;
+use modules\order\src\exceptions\OrderC2BDtoException;
+use modules\order\src\exceptions\OrderC2BException;
+use modules\order\src\forms\api\createC2b\QuotesForm;
 use modules\order\src\services\OrderPriceUpdater;
 use modules\product\src\entities\product\ProductRepository;
 use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateProfitAmountEvent;
@@ -47,8 +51,12 @@ use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentPaxBaggageD
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentStopDTO;
 use modules\flight\src\useCases\flightQuote\create\ProductQuoteCreateDTO;
 use modules\product\src\entities\productType\ProductType;
+use modules\product\src\interfaces\Productable;
+use modules\product\src\interfaces\ProductQuoteService;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
+use yii\helpers\Json;
+use yii\helpers\VarDumper;
 
 /**
  * Class FlightQuoteManageService
@@ -68,7 +76,7 @@ use sales\services\TransactionManager;
  * @property OfferPriceUpdater $offerPriceUpdater
  * @property OrderPriceUpdater $orderPriceUpdater
  */
-class FlightQuoteManageService
+class FlightQuoteManageService implements ProductQuoteService
 {
     /**
      * @var FlightQuoteRepository
@@ -390,6 +398,44 @@ class FlightQuoteManageService
         foreach ($baggage['charge'] as $charge) {
             $paxBaggageCharge = FlightQuoteSegmentPaxBaggageCharge::create((new FlightQuoteSegmentPaxBaggageChargeDTO($flightQuoteSegment, $paxType, $charge)));
             $this->baggageChargeRepository->save($paxBaggageCharge);
+        }
+    }
+
+    /**
+     * @param Productable|Flight $flightProduct
+     * @param QuotesForm $form
+     */
+    public function c2bHandle(Productable $flightProduct, QuotesForm $form): void
+    {
+        try {
+            $productTypeServiceFee = null;
+            $productType = ProductType::find()->select(['pt_service_fee_percent'])->byFlight()->asArray()->one();
+            if ($productType && $productType['pt_service_fee_percent']) {
+                $productTypeServiceFee = $productType['pt_service_fee_percent'];
+            }
+
+            $quoteData = Json::decode($form->originSearchData);
+
+            $productQuote = ProductQuote::create(new ProductQuoteCreateDTO($flightProduct, $quoteData, null), $productTypeServiceFee);
+            $this->productQuoteRepository->save($productQuote);
+
+            $flightQuote = FlightQuote::create((new FlightQuoteCreateDTO($flightProduct, $productQuote, $quoteData, null)));
+            $this->flightQuoteRepository->save($flightQuote);
+
+            $flightQuoteLog = FlightQuoteStatusLog::create($flightQuote->fq_created_user_id, $flightQuote->fq_id, $productQuote->pq_status_id);
+            $this->flightQuoteStatusLogRepository->save($flightQuoteLog);
+
+            $this->createQuotePaxPrice($flightQuote, $productQuote, $quoteData);
+
+            $this->calcProductQuotePrice($productQuote, $flightQuote);
+
+            $this->createFlightTrip($flightQuote, $quoteData);
+        } catch (\Throwable $e) {
+            $dto = new OrderC2BDtoException(
+                $flightProduct,
+                $form->quoteOtaId
+            );
+            throw new OrderC2BException($dto, $e->getMessage(), FlightCodeException::API_C2B_HANDLE);
         }
     }
 }

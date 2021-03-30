@@ -2,23 +2,18 @@
 
 namespace modules\order\controllers;
 
+use frontend\controllers\FController;
 use Yii;
 use modules\order\src\entities\orderRequest\OrderRequest;
 use modules\order\src\entities\orderRequest\search\OrderRequestSearch;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\db\StaleObjectException;
 use yii\helpers\ArrayHelper;
 
-class OrderRequestCrudController extends Controller
+class OrderRequestCrudController extends FController
 {
-    public function init(): void
-    {
-        parent::init();
-    }
-
     public function behaviors(): array
     {
         $behaviors = [
