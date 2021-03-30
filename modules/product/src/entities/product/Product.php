@@ -79,6 +79,7 @@ class Product extends \yii\db\ActiveRecord implements Serializable
         $product->pr_type_id = $dto->pr_type_id;
         $product->pr_name = $dto->pr_name;
         $product->pr_description = $dto->pr_description;
+        $product->pr_project_id = $dto->pr_project_id;
         $product->recordEvent(new ProductCreateEvent($product));
         return $product;
     }

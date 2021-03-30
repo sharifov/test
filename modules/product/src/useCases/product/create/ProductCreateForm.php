@@ -66,6 +66,10 @@ class ProductCreateForm extends Model
 
     public function getDto(): CreateDto
     {
-        return new CreateDto($this->pr_lead_id, $this->pr_type_id, $this->pr_name, $this->pr_description);
+        $projectId = null;
+        if ($lead = Lead::findOne($this->pr_lead_id)) {
+            $projectId = $lead->project_id;
+        }
+        return new CreateDto($this->pr_lead_id, $this->pr_type_id, $this->pr_name, $this->pr_description, $projectId);
     }
 }
