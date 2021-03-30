@@ -368,6 +368,7 @@ class FlightController extends ApiBaseController
      *
      *   {
             "type": "ticket_issue", // flight_replace, flight_fail
+            "orderUid": "order uid example",
             "parentBookingId": "OE96040",
             "parentId": 205975,
             "sameItinerary": true,
@@ -513,14 +514,16 @@ class FlightController extends ApiBaseController
                     "pay_currency":"usd",
                     "pay_code":"ch_1IYvYZFhXDZuLIpUisShKSRP",
                     "pay_method_key":"card",
-                    "pay_date":"2021-03-25"
+                    "pay_date":"2021-03-25",
+                    "pay_description": "example description"
                 },
                 {
                     "pay_amount":54.35,
                     "pay_currency":"eur",
                     "pay_code":"transactionIdcode",
                     "pay_method_key":"card",
-                    "pay_date":"2021-03-29"
+                    "pay_date":"2021-03-29",
+                    "pay_description": "example description"
                 }
             ]
         }
