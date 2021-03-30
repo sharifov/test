@@ -4,6 +4,7 @@ namespace modules\order\src\forms\api\createC2b;
 
 use common\components\validators\CheckJsonValidator;
 use modules\product\src\entities\productType\ProductType;
+use sales\forms\CompositeForm;
 
 /**
  * Class QuotesForm
@@ -14,8 +15,10 @@ use modules\product\src\entities\productType\ProductType;
  * @property string $paxData
  * @property string $quoteOtaId
  * @property int $orderId
+ *
+ * @property ProductHolderForm $holder
  */
-class QuotesForm extends \yii\base\Model
+class QuotesForm extends CompositeForm
 {
     public $productKey;
 
@@ -37,8 +40,22 @@ class QuotesForm extends \yii\base\Model
         ];
     }
 
+    public function load($data, $formName = null)
+    {
+        $this->holder = new ProductHolderForm();
+        return parent::load($data, $formName);
+    }
+
     public function formName(): string
     {
         return "quotes";
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function internalForms()
+    {
+        return ['holder'];
     }
 }

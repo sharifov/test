@@ -24,6 +24,8 @@ use modules\order\src\exceptions\OrderC2BException;
 use modules\order\src\forms\api\createC2b\QuotesForm;
 use modules\order\src\services\OrderPriceUpdater;
 use modules\product\src\entities\product\ProductRepository;
+use modules\product\src\entities\productHolder\ProductHolder;
+use modules\product\src\entities\productHolder\ProductHolderRepository;
 use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateProfitAmountEvent;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\flight\models\Flight;
@@ -73,8 +75,8 @@ use yii\helpers\VarDumper;
  * @property FlightQuoteSegmentPaxBaggageChargeRepository $baggageChargeRepository
  * @property FlightQuotePaxPriceRepository $flightQuotePaxPriceRepository
  * @property FlightQuoteStatusLogRepository $flightQuoteStatusLogRepository
- * @property OfferPriceUpdater $offerPriceUpdater
  * @property OrderPriceUpdater $orderPriceUpdater
+ * @property ProductHolderRepository $productHolderRepository
  */
 class FlightQuoteManageService implements ProductQuoteService
 {
@@ -130,6 +132,10 @@ class FlightQuoteManageService implements ProductQuoteService
      * @var OfferPriceUpdater
      */
     private OfferPriceUpdater $offerPriceUpdater;
+    /**
+     * @var ProductHolderRepository
+     */
+    private ProductHolderRepository $productHolderRepository;
 
     /**
      * FlightQuoteService constructor.
@@ -144,6 +150,8 @@ class FlightQuoteManageService implements ProductQuoteService
      * @param FlightQuotePaxPriceRepository $flightQuotePaxPriceRepository
      * @param FlightQuoteStatusLogRepository $flightQuoteStatusLogRepository
      * @param TransactionManager $transactionManager
+     * @param OrderPriceUpdater $orderPriceUpdater
+     * @param ProductHolderRepository $productHolderRepository
      */
     public function __construct(
         FlightQuoteRepository $flightQuoteRepository,
@@ -158,7 +166,7 @@ class FlightQuoteManageService implements ProductQuoteService
         FlightQuoteStatusLogRepository $flightQuoteStatusLogRepository,
         TransactionManager $transactionManager,
         OrderPriceUpdater $orderPriceUpdater,
-        OfferPriceUpdater $offerPriceUpdater
+        ProductHolderRepository $productHolderRepository
     ) {
         $this->flightQuoteRepository = $flightQuoteRepository;
         $this->productQuoteRepository = $productQuoteRepository;
@@ -172,7 +180,7 @@ class FlightQuoteManageService implements ProductQuoteService
         $this->flightQuoteStatusLogRepository = $flightQuoteStatusLogRepository;
         $this->transactionManager = $transactionManager;
         $this->orderPriceUpdater = $orderPriceUpdater;
-        $this->offerPriceUpdater = $offerPriceUpdater;
+        $this->productHolderRepository = $productHolderRepository;
     }
 
     /**
@@ -419,6 +427,15 @@ class FlightQuoteManageService implements ProductQuoteService
             $productQuote = ProductQuote::create(new ProductQuoteCreateDTO($flightProduct, $quoteData, null), $productTypeServiceFee);
             $productQuote->pq_order_id = $form->orderId;
             $this->productQuoteRepository->save($productQuote);
+
+            $productHolder = ProductHolder::create(
+                $productQuote->pq_product_id,
+                $form->holder->firstName,
+                $form->holder->lastName,
+                $form->holder->email,
+                $form->holder->phone,
+            );
+            $this->productHolderRepository->save($productHolder);
 
             $flightQuote = FlightQuote::create((new FlightQuoteCreateDTO($flightProduct, $productQuote, $quoteData, null)));
             $this->flightQuoteRepository->save($flightQuote);

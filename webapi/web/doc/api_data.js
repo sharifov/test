@@ -3988,6 +3988,45 @@ define({ "api": [
             "optional": false,
             "field": "quotes.quoteOtaId",
             "description": "<p>Product quote custom id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": false,
+            "field": "quotes.holder",
+            "description": "<p>Holder Info</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 50",
+            "optional": false,
+            "field": "quotes.holder.firstName",
+            "description": "<p>Holder first name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 50",
+            "optional": false,
+            "field": "quotes.holder.lastName",
+            "description": "<p>Holder last name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 100",
+            "optional": false,
+            "field": "quotes.holder.email",
+            "description": "<p>Holder email</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 20",
+            "optional": false,
+            "field": "quotes.holder.phone",
+            "description": "<p>Holder phone</p>"
           }
         ]
       }

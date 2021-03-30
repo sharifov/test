@@ -1879,6 +1879,12 @@ class OrderController extends BaseController
      * @apiParam {string}               quotes.paxData          Product quote pax data
      * @apiParam {string}               quotes.quoteOtaId          Product quote custom id
      *
+     * @apiParam {Object}               quotes.holder                         Holder Info
+     * @apiParam {string{max 50}}       quotes.holder.firstName               Holder first name
+     * @apiParam {string{max 50}}       quotes.holder.lastName                Holder last name
+     * @apiParam {string{max 100}}      quotes.holder.email                   Holder email
+     * @apiParam {string{max 20}}       quotes.holder.phone                   Holder phone
+     *
      * @return ErrorResponse|SuccessResponse
      */
     public function actionCreateC2b()
