@@ -100,9 +100,9 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable, ProductD
         ];
     }
 
-    public static function getHashKey(string $key): string
+    public static function getHashKey(array $quote): string
     {
-        return md5($key);
+        return md5($quote['productId'] . '|' . $quote['date']);
     }
 
     public static function generateGid(): string
@@ -110,82 +110,12 @@ class AttractionQuote extends \yii\db\ActiveRecord implements Quotable, ProductD
         return md5(uniqid('aq', true));
     }
 
-    public static function findOrCreateByData(
-        array $quoteData,
-        Attraction $attractionProduct,
-        string $date,
-        ?int $ownerId,
-        string $currency = 'USD'
-    ) {
-        $aQuote = null;
-
-        if (isset($quoteData['product']) && $quoteId = $quoteData['product']['id']) {
-            $totalAmount = 0;
-            if (isset($quoteId)) {
-                $hashKey = self::getHashKey($quoteData, $attractionProduct);
-
-                $aQuote = self::find()->where([
-                    'atnq_attraction_id' => $attractionProduct->atn_id,
-                    'atnq_hash_key' => $hashKey
-                ])->one();
-
-                //$totalAmount = substr($quoteData['leadTicket']['price']['lead']['formatted'], 1);
-                $totalAmount = $quoteData['product']['guidePrice'];
-
-                if (!$aQuote) {
-                    $productQuoteDto = new AttractionProductQuoteCreateDto();
-                    $productQuoteDto->productId = $attractionProduct->atn_product_id;
-                    $productQuoteDto->originCurrency = $currency;
-                    $productQuoteDto->clientCurrency = ProductQuoteHelper::getClientCurrencyCode($attractionProduct->atnProduct);
-                    $productQuoteDto->ownerUserId = $ownerId;
-                    $productQuoteDto->price = (float)$totalAmount;
-                    $productQuoteDto->originPrice = (float)$totalAmount;
-                    $productQuoteDto->clientPrice = (float)$totalAmount;
-                    $productQuoteDto->serviceFeeSum = 0;
-//                    $productQuoteDto->clientCurrencyRate = ProductQuoteHelper::getClientCurrencyRate($hotelRequest->phProduct);
-                    $productQuoteDto->originCurrencyRate = 1;
-                    $productQuoteDto->name = mb_substr($quoteData['product']['name'], 0, 40);
-
-                    $productTypeServiceFee = null;
-                    $productType = ProductType::find()->select(['pt_service_fee_percent'])->byAttraction()->asArray()->one();
-                    if ($productType && $productType['pt_service_fee_percent']) {
-                        $productTypeServiceFee = $productType['pt_service_fee_percent'];
-                    }
-
-                    $prQuote = ProductQuote::create($productQuoteDto, $productTypeServiceFee);
-
-                    if ($prQuote->save()) {
-                        $aQuote = new self();
-                        $aQuote->atnq_hash_key = $hashKey;
-                        $aQuote->atnq_attraction_id = $attractionProduct->atn_id;
-                        $aQuote->atnq_product_quote_id = $prQuote->pq_id;
-                        $aQuote->atnq_attraction_name = $quoteData['product']['name'];
-                        $aQuote->atnq_supplier_name = $quoteData['product']['supplierName'];
-                        $aQuote->atnq_type_name = $quoteData['product']['__typename'];
-                        $aQuote->atnq_json_response = $quoteData;
-                        //$aQuote->atnq_date = $date;
-                        //$aQuote->hq_request_hash = $hotelRequest->ph_request_hash_key;
-
-                        if (!$aQuote->save()) {
-                            Yii::error(
-                                VarDumper::dumpAsString($aQuote->errors),
-                                'Model:AttractionQuote:findOrCreateByData:AttractionQuote:save'
-                            );
-                        }
-                    }
-                }
-            }
-        }
-
-        return $aQuote;
-    }
-
     public static function findOrCreateByDataNew(array $quoteData, Attraction $attraction, ?int $ownerId)
     {
         $aQuote = null;
 
         if (!empty($quoteData['id'])) {
-            $hashKey = self::getHashKey($quoteData['id']);
+            $hashKey = self::getHashKey($quoteData);
 
             $aQuote = self::find()->where([
                     'atnq_attraction_id' => $attraction->atn_id,

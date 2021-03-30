@@ -14,6 +14,7 @@ use yii\helpers\ArrayHelper;
 
 $paxForm->availability_id = $availability['id'];
 $model->availability_id = $availability['id'];
+$availabilityID = $availability['id'];
 
 ?>
 
@@ -79,8 +80,12 @@ $model->availability_id = $availability['id'];
 
 <?php
 $form = ActiveForm::begin([
-    'validateOnSubmit' => false,
-    'options' => ['data-pjax' => true],
+    'id' => 'test',
+    'enableClientValidation' => false,
+    'enableAjaxValidation' => true,
+    'validateOnChange' => false,
+    'validateOnBlur' => false,
+    //'options' => ['data-pjax' => true],
     'action' => ['/attraction/attraction-quote/add-quote-ajax', 'id' => $attractionId],
     'method' => 'post'
 ]);
@@ -134,3 +139,51 @@ $form = ActiveForm::begin([
 <?php endif; ?>
 
 <?php ActiveForm::end() ?>
+
+<?php
+$js = <<<JS
+
+var availabilityID = '$availabilityID'
+
+$('#test').on('beforeSubmit', function (e) {
+    e.preventDefault();
+    
+    $.ajax({
+       type: $(this).attr('method'),
+       url: $(this).attr('action'),
+       data: $(this).serializeArray(),
+       dataType: 'json',
+       success: function(data) {
+            if (!data.error) {
+                $('#' + availabilityID).html(data.html);                
+                //$('#modal-client-manage-info').modal('hide');
+                
+                new PNotify({
+                    title: 'Quote successfully added',
+                    text: data.message,
+                    type: 'success'
+                });
+            } else {
+                if (data.message == 'Quantity not selected'){
+                    new PNotify({
+                        title: 'Error',
+                        text: data.message,
+                        type: 'error'                
+                    });
+                }
+            }
+            console.log(data.message)
+       },
+       error: function (error) {
+            new PNotify({
+                title: 'Error',
+                text: 'Internal Server Error. Try again letter.',
+                type: 'error'                
+            });
+       }
+    })
+    return false;
+}); 
+JS;
+$this->registerJs($js);
+?>
