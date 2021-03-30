@@ -41,11 +41,11 @@ class BookingFlightListener
             return;
         }
 
-        $quotes = $order->productQuotes;
+        $quotes = $order->productQuotesApplied;
 
         if (!$quotes) {
             \Yii::error([
-                'message' => 'Not found Quotes for Order',
+                'message' => 'Not found Applied Quotes for Order',
                 'orderId' => $event->orderId,
             ], 'BookingFlightListener');
             return;

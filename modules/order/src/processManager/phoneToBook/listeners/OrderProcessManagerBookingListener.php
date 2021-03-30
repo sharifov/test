@@ -2,6 +2,7 @@
 
 namespace modules\order\src\processManager\phoneToBook\listeners;
 
+use modules\order\src\processManager\AllProductsBookedChecker;
 use modules\order\src\processManager\jobs\ProcessManagerBookedJob;
 use modules\order\src\processManager\phoneToBook\OrderProcessManagerRepository;
 use modules\order\src\processManager\queue\Queue;
@@ -13,16 +14,19 @@ use modules\product\src\entities\productQuote\ProductQuote;
  *
  * @property OrderProcessManagerRepository $repository
  * @property Queue $queue
+ * @property AllProductsBookedChecker $allProductsBookedChecker
  */
 class OrderProcessManagerBookingListener
 {
     private OrderProcessManagerRepository $repository;
     private Queue $queue;
+    private AllProductsBookedChecker $allProductsBookedChecker;
 
-    public function __construct(OrderProcessManagerRepository $repository, Queue $queue)
+    public function __construct(OrderProcessManagerRepository $repository, Queue $queue, AllProductsBookedChecker $allProductsBookedChecker)
     {
         $this->repository = $repository;
         $this->queue = $queue;
+        $this->allProductsBookedChecker = $allProductsBookedChecker;
     }
 
     public function handle(ProductQuoteBookedEvent $event): void
@@ -79,23 +83,8 @@ class OrderProcessManagerBookingListener
             return;
         }
 
-        $quotes = $order->productQuotes;
-
-        if (!$quotes) {
-            \Yii::error([
-                'message' => 'Not found Quotes for Order',
-                'quoteId' => $event->productQuoteId,
-                'orderId' => $order->or_id,
-            ], 'OrderProcessManager:AfterBookedQuoteOrderProcessListener');
-            return;
+        if ($this->allProductsBookedChecker->isBooked($order->or_id)) {
+            $this->queue->push(new ProcessManagerBookedJob($manager->opm_id));
         }
-
-        foreach ($quotes as $quote) {
-            if (!$quote->isBooked()) {
-                return;
-            }
-        }
-
-        $this->queue->push(new ProcessManagerBookedJob($manager->opm_id));
     }
 }

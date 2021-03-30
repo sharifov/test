@@ -73,7 +73,7 @@ class AfterBookedFlightJob implements JobInterface
             return;
         }
 
-        $quotes = $order->productQuotes;
+        $quotes = $order->productQuotesApplied;
 
         if (!$quotes) {
             \Yii::error([

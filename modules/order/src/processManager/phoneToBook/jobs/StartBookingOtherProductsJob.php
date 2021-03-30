@@ -35,7 +35,7 @@ class StartBookingOtherProductsJob implements JobInterface
             return;
         }
 
-        $quotes = $order->productQuotes;
+        $quotes = $order->productQuotesApplied;
 
         if (!$quotes) {
             \Yii::error([
@@ -49,9 +49,6 @@ class StartBookingOtherProductsJob implements JobInterface
 
         $createdAnyJob = false;
         foreach ($quotes as $quote) {
-            if ($quote->isBooked()) {
-                continue;
-            }
             if ($quote->pqProduct->isHotel()) {
                 $queueJob->push(new BookingHotelJob($quote->childQuote->getId()));
                 $createdAnyJob = true;

@@ -84,6 +84,7 @@ use yii\helpers\VarDumper;
  * @property Payment[] $payments
  * @property OrderRequest $orderRequest
  * @property Project $relatedProject
+ * @property ProductQuote[] $productQuotesApplied
  */
 class Order extends ActiveRecord implements Serializable, ProductDataInterface
 {
@@ -295,6 +296,12 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
     {
         return $this->hasMany(ProductQuote::class, ['pq_order_id' => 'or_id'])
             ->where(['not', ['pq_status_id' => ProductQuoteStatus::CANCEL_GROUP]]);
+    }
+
+    public function getProductQuotesApplied(): ActiveQuery
+    {
+        return $this->hasMany(ProductQuote::class, ['pq_order_id' => 'or_id'])
+            ->where(['pq_status_id' => ProductQuoteStatus::APPLIED]);
     }
 
     /**
