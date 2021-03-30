@@ -11,7 +11,7 @@ class FlightChecker
 {
     public function has(int $orderId): bool
     {
-        $quotes = ProductQuote::find()->byOrderId($orderId)->all();
+        $quotes = ProductQuote::find()->byOrderId($orderId)->inProgress()->all();
         if (!$quotes) {
             return false;
         }

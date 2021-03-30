@@ -17,6 +17,11 @@ class Scopes extends \yii\db\ActiveQuery
         return $this->andWhere(['pq_status_id' => ProductQuoteStatus::APPLIED]);
     }
 
+    public function inProgress(): self
+    {
+        return $this->andWhere(['pq_status_id' => ProductQuoteStatus::IN_PROGRESS]);
+    }
+
     public function booked(): self
     {
         return $this->andWhere(['pq_status_id' => ProductQuoteStatus::BOOKED]);

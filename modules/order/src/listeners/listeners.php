@@ -98,6 +98,12 @@ return [
         processManager\listeners\OrderProcessStatusReloadLeadOrdersListener::class,
     ],
     processManager\events\FlightProductProcessedEvent::class => [
-
+        processManager\clickToBook\listeners\CheckOrderIsPaymentListener::class,
+    ],
+    processManager\clickToBook\events\FlightProductProcessedSuccessEvent::class => [
+        processManager\clickToBook\listeners\FlightProductProcessedSuccessListener::class,
+    ],
+    processManager\clickToBook\events\FlightProductProcessedErrorEvent::class => [
+        processManager\clickToBook\listeners\FlightProductProcessedErrorListener::class,
     ],
 ];
