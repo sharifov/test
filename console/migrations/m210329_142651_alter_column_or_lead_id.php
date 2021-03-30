@@ -12,6 +12,8 @@ class m210329_142651_alter_column_or_lead_id extends Migration
      */
     public function safeUp()
     {
+        $db = Yii::$app->getDb();
+        $db->createCommand('SET FOREIGN_KEY_CHECKS=0;')->execute();
         if ($this->checkFk('order', 'FK-order-or_lead_id')) {
             $this->dropForeignKey('FK-order-or_lead_id', '{{%order}}');
         }
@@ -21,6 +23,7 @@ class m210329_142651_alter_column_or_lead_id extends Migration
         if (!$this->checkFk('order', 'FK-order-leads')) {
             $this->addForeignKey('FK-order-leads', '{{%order}}', ['or_lead_id'], '{{%leads}}', ['id'], 'SET NULL', 'CASCADE');
         }
+        $db->createCommand('SET FOREIGN_KEY_CHECKS=1;')->execute();
     }
 
     /**
@@ -28,6 +31,8 @@ class m210329_142651_alter_column_or_lead_id extends Migration
      */
     public function safeDown()
     {
+        $db = Yii::$app->getDb();
+        $db->createCommand('SET FOREIGN_KEY_CHECKS=0;')->execute();
         if ($this->checkFk('order', 'FK-order-leads')) {
             $this->dropForeignKey('FK-order-leads', '{{%order}}');
         }
@@ -40,6 +45,7 @@ class m210329_142651_alter_column_or_lead_id extends Migration
         if (!$this->checkFk('order', 'FK-order-or_lead_id')) {
             $this->addForeignKey('FK-order-or_lead_id', '{{%order}}', ['or_lead_id'], '{{%leads}}', ['id'], 'CASCADE', 'CASCADE');
         }
+        $db->createCommand('SET FOREIGN_KEY_CHECKS=1;')->execute();
     }
 
     private function checkFk(string $table, string $foreignKey)
