@@ -105,7 +105,7 @@ class HotelQuoteSearchForm extends Model
     private function filterByBoard(array $hotels, array $boardsTypes, array $selectedBoard): array
     {
         $selectedBoardsNames = [];
-        $filteredBoardsTypes = [];
+        $filteredByBoardsTypes = [];
 
         foreach ($selectedBoard as $identifier) {
             $selectedBoardsNames[] = $boardsTypes[$identifier];
@@ -115,13 +115,27 @@ class HotelQuoteSearchForm extends Model
             foreach ($hotel['rooms'] as $room) {
                 foreach ($room['rates'] as $data) {
                     if (in_array($data['boardName'], $selectedBoardsNames, true)) {
-                        $filteredBoardsTypes[$key] = $hotels[$key];
+                        $filteredByBoardsTypes[$key] = $hotels[$key];
                     }
                 }
             }
         }
 
-        return $filteredBoardsTypes;
+        foreach ($filteredByBoardsTypes as $key => $hotel) {
+            foreach ($hotel['rooms'] as $roomKey => $room) {
+                $unsetFlag = true;
+                foreach ($room['rates'] as $data) {
+                    if (in_array($data['boardName'], $selectedBoardsNames, true)) {
+                        $unsetFlag = false;
+                    }
+                }
+                if ($unsetFlag) {
+                    unset($filteredByBoardsTypes[$key]['rooms'][$roomKey]);
+                }
+            }
+        }
+
+        return $filteredByBoardsTypes;
     }
 
     private function filterByCategories(array $hotels, array $categories, array $selectedCategories): array
