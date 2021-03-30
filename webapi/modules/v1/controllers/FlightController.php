@@ -367,6 +367,7 @@ class FlightController extends ApiBaseController
      * @apiParamExample {json} Request-Example:
      *
      *   {
+            "type": "ticket_issue", // flight_replace, flight_fail
             "parentBookingId": "OE96040",
             "parentId": 205975,
             "sameItinerary": true,
@@ -505,7 +506,23 @@ class FlightController extends ApiBaseController
                     "scheduleChange": "No"
                 }
             ],
-            "trips": []
+            "trips": [],
+            "payments":[ // if type ticket_issue
+                {
+                    "pay_amount":154.21,
+                    "pay_currency":"usd",
+                    "pay_code":"ch_1IYvYZFhXDZuLIpUisShKSRP",
+                    "pay_method_key":"card",
+                    "pay_date":"2021-03-25"
+                },
+                {
+                    "pay_amount":54.35,
+                    "pay_currency":"eur",
+                    "pay_code":"transactionIdcode",
+                    "pay_method_key":"card",
+                    "pay_date":"2021-03-29"
+                }
+            ]
         }
      *
      * @apiSuccessExample {json} Success-Response:
