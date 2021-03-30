@@ -47,6 +47,10 @@ class OrderProcessManagerFactory
             return;
         }
 
-        throw new \DomainException('Undefined Type: ' . $type);
+        if (isset(OrderSourceType::LIST[$type])) {
+            throw new \DomainException('Order Type: ' . OrderSourceType::LIST[$type] . ' not supported.');
+        }
+
+        throw new \DomainException('Undefined Order Type');
     }
 }
