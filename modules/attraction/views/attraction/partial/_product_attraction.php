@@ -35,7 +35,7 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
                     <span style="color: #53a265" class="product-quote-counter-<?= $product->pr_id ?>"
                           data-value="<?= count($product->productQuotes) ?>">
                         <?php if ($product->productQuotes) : ?>
-                            <sup title="Number of quotes">(<?= count($product->productQuotes) ?>)</sup>
+                            <sup title="Number of quotes">(<?= count($product->attraction->attractionQuotes) ?>)</sup>
                         <?php endif; ?>
                     </span>
                 </a>

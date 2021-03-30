@@ -80,9 +80,9 @@ $availabilityID = $availability['id'];
 
 <?php
 $form = ActiveForm::begin([
-    'id' => 'test',
+    'id' => 'form-' . $availabilityID,
     'enableClientValidation' => false,
-    'enableAjaxValidation' => true,
+    'enableAjaxValidation' => false,
     'validateOnChange' => false,
     'validateOnBlur' => false,
     //'options' => ['data-pjax' => true],
@@ -145,7 +145,7 @@ $js = <<<JS
 
 var availabilityID = '$availabilityID'
 
-$('#test').on('beforeSubmit', function (e) {
+$('#form-' + availabilityID).on('beforeSubmit', function (e) {
     e.preventDefault();
     
     $.ajax({
@@ -155,9 +155,8 @@ $('#test').on('beforeSubmit', function (e) {
        dataType: 'json',
        success: function(data) {
             if (!data.error) {
-                $('#' + availabilityID).html(data.html);                
-                //$('#modal-client-manage-info').modal('hide');
-                
+                $('#' + data.availabilityID).html(data.html);                
+                //$('#modal-client-manage-info').modal('hide');                
                 new PNotify({
                     title: 'Quote successfully added',
                     text: data.message,
@@ -171,8 +170,7 @@ $('#test').on('beforeSubmit', function (e) {
                         type: 'error'                
                     });
                 }
-            }
-            console.log(data.message)
+            }            
        },
        error: function (error) {
             new PNotify({
