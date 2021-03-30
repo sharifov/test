@@ -76,7 +76,7 @@ use yii\widgets\ActiveForm;
                             <?= $form->field($model, 'createdRangeTime', [
                                 'options' => ['class' => 'form-group']
                             ])->widget(\kartik\daterange\DateRangePicker::class, [
-                                'presetDropdown' => false,
+                                'presetDropdown' => true,
                                 'hideInput' => true,
                                 'convertFormat' => true,
                                 'pluginOptions' => [
@@ -94,7 +94,7 @@ use yii\widgets\ActiveForm;
                             <?= $form->field($model, 'updatedRangeTime', [
                                 'options' => ['class' => 'form-group']
                             ])->widget(\kartik\daterange\DateRangePicker::class, [
-                                'presetDropdown' => false,
+                                'presetDropdown' => true,
                                 'hideInput' => true,
                                 'convertFormat' => true,
                                 'pluginOptions' => [
@@ -112,7 +112,7 @@ use yii\widgets\ActiveForm;
                             <?= $form->field($model, 'statusRangeTime', [
                                 'options' => ['class' => 'form-group']
                             ])->widget(\kartik\daterange\DateRangePicker::class, [
-                                'presetDropdown' => false,
+                                'presetDropdown' => true,
                                 'hideInput' => true,
                                 'convertFormat' => true,
                                 'pluginOptions' => [
