@@ -176,7 +176,8 @@ class HotelQuoteController extends FController
         return $this->renderAjax('search/_search_quotes', [
             'dataProvider' => $dataProvider,
             'hotelSearch'   => $hotel,
-            'filtersForm' => $form
+            'filtersForm' => $form,
+            'showFilters' => empty($result['hotels'])
         ]);
     }
 

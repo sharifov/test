@@ -10,6 +10,7 @@ use yii\widgets\Pjax;
  * @var $hotelSearch \modules\hotel\models\Hotel
  * @var $dataProvider yii\data\ArrayDataProvider
  * @var $filtersForm \modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchForm
+ * @var $showFilters bool
  */
 
 //$this->title = 'Hotel Quotes';
@@ -72,7 +73,7 @@ The SPA service at Christmas is closed on December 25 and January 1.'
     <?php Pjax::begin(['timeout' => 15000, 'enablePushState' => false, 'enableReplaceState' => false, 'scrollTo' => false]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 <div class="row">
-    <?php if (!empty($dataProvider->allModels)) :?>
+    <?php if (!$showFilters) :?>
         <div class="col-2 quote">
                 <?= $this->render('_quote_filters', [
                     'filtersForm' => $filtersForm
