@@ -636,4 +636,9 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
     {
         return ArrayHelper::getValue($this, 'fqProductQuote.pqOrder');
     }
+
+    public static function findLastByFlightRequestUid(string $flightRequestUid)
+    {
+        return self::find()->where(['fq_flight_request_uid' => $flightRequestUid])->orderBy(['fq_id' => SORT_DESC])->one();
+    }
 }

@@ -68,13 +68,16 @@ class Invoice extends ActiveRecord
             [['inv_created_dt', 'inv_updated_dt'], 'safe'],
             [['inv_gid'], 'string', 'max' => 32],
             [['inv_uid'], 'string', 'max' => 15],
-            [['inv_client_currency'], 'string', 'max' => 3],
             [['inv_gid'], 'unique'],
             [['inv_uid'], 'unique'],
-            [['inv_client_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['inv_client_currency' => 'cur_code']],
             [['inv_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['inv_created_user_id' => 'id']],
             [['inv_order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['inv_order_id' => 'or_id']],
             [['inv_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['inv_updated_user_id' => 'id']],
+
+            [['inv_client_currency'], 'filter', 'filter' => 'trim'],
+            [['inv_client_currency'], 'filter', 'filter' => 'strtoupper'],
+            [['inv_client_currency'], 'string', 'max' => 3],
+            [['inv_client_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['inv_client_currency' => 'cur_code']],
         ];
     }
 

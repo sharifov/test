@@ -74,6 +74,7 @@ use modules\attraction\src\services\AttractionQuotePdfService;
 use modules\email\src\helpers\MailHelper;
 use modules\email\src\Notifier;
 use modules\flight\models\FlightQuote;
+use modules\flight\src\forms\api\TicketIssuePaymentApiForm;
 use modules\flight\src\services\flightQuote\FlightQuotePdfService;
 use modules\hotel\HotelModule;
 use modules\hotel\models\HotelList;
@@ -2106,27 +2107,6 @@ class TestController extends FController
 
     public function actionZ()
     {
-        $y = [
-            [
-                'pay_amount' => 154.21,
-                'pay_currency' => 'usd',
-                'pay_code' => 'ch_1IYvYZFhXDZuLIpUisShKSRP',
-                'pay_method_key' => 'card',
-                'pay_date' => '2021-03-25'
-            ],
-            [
-                'pay_amount' => 54.35,
-                'pay_currency' => 'eur',
-                'pay_code' => 'transactionIdcode',
-                'pay_method_key' => 'card',
-                'pay_date' => '2021-03-29',
-            ]
-        ];
-
-        $x['payments'] = $y;
-
-        return $this->asJson($x);
-
         return $this->render('z');
     }
 
