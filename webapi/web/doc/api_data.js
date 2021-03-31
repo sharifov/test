@@ -3914,7 +3914,7 @@ define({ "api": [
   {
     "type": "post",
     "url": "/v2/order/create-c2b",
-    "title": "Create Order",
+    "title": "Create Order c2b flow",
     "version": "1.0.0",
     "name": "CreateOrderClickToBook",
     "group": "Orders",
@@ -3949,27 +3949,265 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
-            "size": "max 255",
+            "size": "max 10",
             "optional": false,
-            "field": "projectApiKey",
-            "description": "<p>Project api key</p>"
+            "field": "sourceCid",
+            "description": "<p>Source cid</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 10",
+            "optional": false,
+            "field": "requestUid",
+            "description": "<p>Request uid</p>"
           },
           {
             "group": "Parameter",
             "type": "Object[]",
             "optional": false,
             "field": "quotes",
-            "description": "<p>Product Quotes</p>"
+            "description": "<p>Product quotes</p>"
           },
           {
             "group": "Parameter",
             "type": "string",
             "optional": false,
             "field": "quotes.productKey",
-            "description": "<p>Product Quotes</p>"
+            "description": "<p>Product key</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "quotes.originSearchData",
+            "description": "<p>Product quote origin search data</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "quotes.quoteOtaId",
+            "description": "<p>Product quote custom id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": false,
+            "field": "quotes.holder",
+            "description": "<p>Holder Info</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 50",
+            "optional": false,
+            "field": "quotes.holder.firstName",
+            "description": "<p>Holder first name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 50",
+            "optional": false,
+            "field": "quotes.holder.lastName",
+            "description": "<p>Holder last name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 100",
+            "optional": false,
+            "field": "quotes.holder.email",
+            "description": "<p>Holder email</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 20",
+            "optional": false,
+            "field": "quotes.holder.phone",
+            "description": "<p>Holder phone</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": true,
+            "field": "quotes.flightPaxData",
+            "description": "<p>[]      Flight pax data</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "allowedValues": [
+              "\"ADT\"",
+              "\"CHD\"",
+              "\"INF\""
+            ],
+            "optional": false,
+            "field": "quotes.flightPaxData.type",
+            "description": "<p>Pax type</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 40",
+            "optional": true,
+            "field": "quotes.flightPaxData.first_name",
+            "description": "<p>First Name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 40",
+            "optional": true,
+            "field": "quotes.flightPaxData.last_name",
+            "description": "<p>Last Name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 40",
+            "optional": true,
+            "field": "quotes.flightPaxData.middle_name",
+            "description": "<p>Middle Name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 5",
+            "optional": true,
+            "field": "quotes.flightPaxData.nationality",
+            "description": "<p>Nationality</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 1",
+            "optional": true,
+            "field": "quotes.flightPaxData.gender",
+            "description": "<p>Gender</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "format yyyy-mm-dd",
+            "optional": true,
+            "field": "quotes.flightPaxData.birth_date",
+            "description": "<p>Birth Date</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 100",
+            "optional": true,
+            "field": "quotes.flightPaxData.email",
+            "description": "<p>Email</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 5",
+            "optional": true,
+            "field": "quotes.flightPaxData.language",
+            "description": "<p>Language</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 5",
+            "optional": true,
+            "field": "quotes.flightPaxData.citizenship",
+            "description": "<p>Citizenship</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": true,
+            "field": "quotes.hotelPaxData",
+            "description": "<p>[]      Flight pax data</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "allowedValues": [
+              "\"ADT\"",
+              "\"CHD\""
+            ],
+            "optional": false,
+            "field": "quotes.hotelPaxData.type",
+            "description": "<p>Pax type</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 40",
+            "optional": true,
+            "field": "quotes.hotelPaxData.first_name",
+            "description": "<p>First Name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 40",
+            "optional": true,
+            "field": "quotes.hotelPaxData.last_name",
+            "description": "<p>Last Name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "format yyyy-mm-dd",
+            "optional": true,
+            "field": "quotes.hotelPaxData.birth_date",
+            "description": "<p>Birth Date</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "integer",
+            "optional": true,
+            "field": "quotes.hotelPaxData.age",
+            "description": "<p>Age</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "quotes.hotelPaxData.hotelRoomKey",
+            "description": "<p>Hotel Room Key</p>"
           }
         ]
-      }
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "\n{\n            \"sourceCid\": \"ACHUY23AS\",\n            \"requestUid\": \"WCJ12CSIJ\",\n            \"quotes\": [\n                {\n                    \"productKey\": \"flight\",\n                    \"originSearchData\": \"{\\\"key\\\":\\\"2_U0FMMTAxKlkyMTAwL0tJVkxPTjIwMjEtMDktMDkvTE9OQkNOMjAyMS0xMC0wNypPU34jT1M2NTYjT1M0NTUjT1M0NTYjT1MzOTF+bGM6ZW5fdXM=\\\",\\\"routingId\\\":1,\\\"prices\\\":{\\\"lastTicketDate\\\":\\\"2021-03-29\\\",\\\"totalPrice\\\":684.4,\\\"totalTax\\\":538.4,\\\"comm\\\":0,\\\"isCk\\\":false,\\\"markupId\\\":0,\\\"markupUid\\\":\\\"\\\",\\\"markup\\\":0},\\\"passengers\\\":{\\\"ADT\\\":{\\\"codeAs\\\":\\\"JWZ\\\",\\\"cnt\\\":2,\\\"baseFare\\\":53,\\\"pubBaseFare\\\":53,\\\"baseTax\\\":185.4,\\\"markup\\\":0,\\\"comm\\\":0,\\\"price\\\":238.4,\\\"tax\\\":185.4,\\\"oBaseFare\\\":{\\\"amount\\\":53,\\\"currency\\\":\\\"USD\\\"},\\\"oBaseTax\\\":{\\\"amount\\\":185.4,\\\"currency\\\":\\\"USD\\\"}},\\\"CHD\\\":{\\\"codeAs\\\":\\\"JWC\\\",\\\"cnt\\\":1,\\\"baseFare\\\":40,\\\"pubBaseFare\\\":40,\\\"baseTax\\\":167.6,\\\"markup\\\":0,\\\"comm\\\":0,\\\"price\\\":207.6,\\\"tax\\\":167.6,\\\"oBaseFare\\\":{\\\"amount\\\":40,\\\"currency\\\":\\\"USD\\\"},\\\"oBaseTax\\\":{\\\"amount\\\":167.6,\\\"currency\\\":\\\"USD\\\"}}},\\\"penalties\\\":{\\\"exchange\\\":true,\\\"refund\\\":false,\\\"list\\\":[{\\\"type\\\":\\\"ex\\\",\\\"applicability\\\":\\\"before\\\",\\\"permitted\\\":true,\\\"amount\\\":0},{\\\"type\\\":\\\"ex\\\",\\\"applicability\\\":\\\"after\\\",\\\"permitted\\\":true,\\\"amount\\\":0},{\\\"type\\\":\\\"re\\\",\\\"applicability\\\":\\\"before\\\",\\\"permitted\\\":false},{\\\"type\\\":\\\"re\\\",\\\"applicability\\\":\\\"after\\\",\\\"permitted\\\":false}]},\\\"trips\\\":[{\\\"tripId\\\":1,\\\"segments\\\":[{\\\"segmentId\\\":1,\\\"departureTime\\\":\\\"2021-09-09 16:00\\\",\\\"arrivalTime\\\":\\\"2021-09-09 16:40\\\",\\\"stop\\\":0,\\\"stops\\\":[],\\\"flightNumber\\\":\\\"656\\\",\\\"bookingClass\\\":\\\"K\\\",\\\"duration\\\":100,\\\"departureAirportCode\\\":\\\"KIV\\\",\\\"departureAirportTerminal\\\":\\\"\\\",\\\"arrivalAirportCode\\\":\\\"VIE\\\",\\\"arrivalAirportTerminal\\\":\\\"3\\\",\\\"operatingAirline\\\":\\\"OS\\\",\\\"airEquipType\\\":\\\"E95\\\",\\\"marketingAirline\\\":\\\"OS\\\",\\\"marriageGroup\\\":\\\"I\\\",\\\"mileage\\\":583,\\\"cabin\\\":\\\"Y\\\",\\\"cabinIsBasic\\\":true,\\\"brandId\\\":\\\"735817\\\",\\\"brandName\\\":\\\"Classic\\\",\\\"meal\\\":\\\"\\\",\\\"fareCode\\\":\\\"K03CLSE3\\\",\\\"baggage\\\":{\\\"ADT\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":1},\\\"CHD\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":1}},\\\"recheckBaggage\\\":false},{\\\"segmentId\\\":2,\\\"departureTime\\\":\\\"2021-09-09 17:15\\\",\\\"arrivalTime\\\":\\\"2021-09-09 18:40\\\",\\\"stop\\\":0,\\\"stops\\\":[],\\\"flightNumber\\\":\\\"455\\\",\\\"bookingClass\\\":\\\"K\\\",\\\"duration\\\":145,\\\"departureAirportCode\\\":\\\"VIE\\\",\\\"departureAirportTerminal\\\":\\\"3\\\",\\\"arrivalAirportCode\\\":\\\"LHR\\\",\\\"arrivalAirportTerminal\\\":\\\"2\\\",\\\"operatingAirline\\\":\\\"OS\\\",\\\"airEquipType\\\":\\\"321\\\",\\\"marketingAirline\\\":\\\"OS\\\",\\\"marriageGroup\\\":\\\"O\\\",\\\"mileage\\\":774,\\\"cabin\\\":\\\"Y\\\",\\\"cabinIsBasic\\\":true,\\\"brandId\\\":\\\"735817\\\",\\\"brandName\\\":\\\"Classic\\\",\\\"meal\\\":\\\"\\\",\\\"fareCode\\\":\\\"K03CLSE3\\\",\\\"baggage\\\":{\\\"ADT\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":1},\\\"CHD\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":1}},\\\"recheckBaggage\\\":false}],\\\"duration\\\":280},{\\\"tripId\\\":2,\\\"segments\\\":[{\\\"segmentId\\\":1,\\\"departureTime\\\":\\\"2021-10-07 19:30\\\",\\\"arrivalTime\\\":\\\"2021-10-07 22:45\\\",\\\"stop\\\":0,\\\"stops\\\":[],\\\"flightNumber\\\":\\\"456\\\",\\\"bookingClass\\\":\\\"K\\\",\\\"duration\\\":135,\\\"departureAirportCode\\\":\\\"LHR\\\",\\\"departureAirportTerminal\\\":\\\"2\\\",\\\"arrivalAirportCode\\\":\\\"VIE\\\",\\\"arrivalAirportTerminal\\\":\\\"3\\\",\\\"operatingAirline\\\":\\\"OS\\\",\\\"airEquipType\\\":\\\"321\\\",\\\"marketingAirline\\\":\\\"OS\\\",\\\"marriageGroup\\\":\\\"I\\\",\\\"mileage\\\":774,\\\"cabin\\\":\\\"Y\\\",\\\"cabinIsBasic\\\":true,\\\"brandId\\\":\\\"735831\\\",\\\"brandName\\\":\\\"LIGHT\\\",\\\"meal\\\":\\\"\\\",\\\"fareCode\\\":\\\"K03LGTE8\\\",\\\"baggage\\\":{\\\"ADT\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":0},\\\"CHD\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":0}},\\\"recheckBaggage\\\":false},{\\\"segmentId\\\":2,\\\"departureTime\\\":\\\"2021-10-08 07:00\\\",\\\"arrivalTime\\\":\\\"2021-10-08 09:20\\\",\\\"stop\\\":0,\\\"stops\\\":[],\\\"flightNumber\\\":\\\"391\\\",\\\"bookingClass\\\":\\\"K\\\",\\\"duration\\\":140,\\\"departureAirportCode\\\":\\\"VIE\\\",\\\"departureAirportTerminal\\\":\\\"3\\\",\\\"arrivalAirportCode\\\":\\\"BCN\\\",\\\"arrivalAirportTerminal\\\":\\\"1\\\",\\\"operatingAirline\\\":\\\"OS\\\",\\\"airEquipType\\\":\\\"320\\\",\\\"marketingAirline\\\":\\\"OS\\\",\\\"marriageGroup\\\":\\\"O\\\",\\\"mileage\\\":851,\\\"cabin\\\":\\\"Y\\\",\\\"cabinIsBasic\\\":true,\\\"brandId\\\":\\\"735831\\\",\\\"brandName\\\":\\\"LIGHT\\\",\\\"meal\\\":\\\"\\\",\\\"fareCode\\\":\\\"K03LGTE8\\\",\\\"baggage\\\":{\\\"ADT\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":0},\\\"CHD\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":0}},\\\"recheckBaggage\\\":false}],\\\"duration\\\":770}],\\\"maxSeats\\\":9,\\\"paxCnt\\\":3,\\\"validatingCarrier\\\":\\\"OS\\\",\\\"gds\\\":\\\"T\\\",\\\"pcc\\\":\\\"DVI\\\",\\\"cons\\\":\\\"GTT\\\",\\\"fareType\\\":\\\"PUB\\\",\\\"tripType\\\":\\\"MC\\\",\\\"cabin\\\":\\\"Y\\\",\\\"currency\\\":\\\"USD\\\",\\\"currencies\\\":[\\\"USD\\\"],\\\"currencyRates\\\":{\\\"USDUSD\\\":{\\\"from\\\":\\\"USD\\\",\\\"to\\\":\\\"USD\\\",\\\"rate\\\":1}},\\\"keys\\\":{\\\"travelport\\\":{\\\"traceId\\\":\\\"71fcc2ec-1ea8-47d7-a3fd-82ed1ac672b2\\\",\\\"availabilitySources\\\":\\\"Q,Q,Q,Q\\\",\\\"type\\\":\\\"T\\\"},\\\"seatHoldSeg\\\":{\\\"trip\\\":0,\\\"segment\\\":0,\\\"seats\\\":9}},\\\"ngsFeatures\\\":{\\\"stars\\\":1,\\\"name\\\":\\\"Classic\\\",\\\"list\\\":[]},\\\"meta\\\":{\\\"eip\\\":0,\\\"noavail\\\":false,\\\"searchId\\\":\\\"U0FMMTAxWTIxMDB8S0lWTE9OMjAyMS0wOS0wOXxMT05CQ04yMDIxLTEwLTA3\\\",\\\"lang\\\":\\\"en\\\",\\\"rank\\\":8,\\\"cheapest\\\":true,\\\"fastest\\\":false,\\\"best\\\":true,\\\"bags\\\":0,\\\"country\\\":\\\"us\\\",\\\"prod_types\\\":[\\\"PUB\\\"]},\\\"price\\\":238.4,\\\"originRate\\\":1,\\\"stops\\\":[1,1],\\\"time\\\":[{\\\"departure\\\":\\\"2021-09-09 16:00\\\",\\\"arrival\\\":\\\"2021-09-09 18:40\\\"},{\\\"departure\\\":\\\"2021-10-07 19:30\\\",\\\"arrival\\\":\\\"2021-10-08 09:20\\\"}],\\\"bagFilter\\\":\\\"\\\",\\\"airportChange\\\":false,\\\"technicalStopCnt\\\":0,\\\"duration\\\":[280,770],\\\"totalDuration\\\":1050,\\\"topCriteria\\\":\\\"bestcheapest\\\",\\\"rank\\\":8}\",\n                    \"flightPaxData\": [\n                        {\n                            \"first_name\": \"Test name\",\n                            \"last_name\": \"Test last name\",\n                            \"middle_name\": \"Test middle name\",\n                            \"nationality\": \"US\",\n                            \"gender\": \"M\",\n                            \"birth_date\": \"1963-04-07\",\n                            \"email\": \"mike.kane@techork.com\",\n                            \"language\": \"en-US\",\n                            \"citizenship\": \"US\",\n                            \"type\": \"ADT\"\n                        }\n                    ],\n                    \"quoteOtaId\": \"asdff43fsgfdsv343ddx\",\n                    \"holder\": {\n                        \"firstName\": \"Test\",\n                        \"lastName\": \"Test\",\n                        \"email\": \"test@test.test\",\n                        \"phone\": \"+19074861000\"\n                    }\n                },\n                {\n                    \"productKey\": \"hotel\",\n                    \"originSearchData\": \"{\\\"categoryName\\\":\\\"3 STARS\\\",\\\"destinationName\\\":\\\"Chisinau\\\",\\\"zoneName\\\":\\\"Chisinau\\\",\\\"minRate\\\":135.92,\\\"maxRate\\\":285.94,\\\"currency\\\":\\\"USD\\\",\\\"code\\\":148030,\\\"name\\\":\\\"Cosmos Hotel\\\",\\\"description\\\":\\\"The hotel is situated in the heart of Chisinau, the capital of Moldova. It is perfectly located for access to the business centre, cultural institutions and much more. Chisinau Airport is only 15 minutes away and the railway station is less than 5 minutes away from the hotel.\\\\n\\\\nThe city hotel offers a choice of 150 rooms, 24-hour reception and check-out services in the lobby, luggage storage, a hotel safe, currency exchange facility and a cloakroom. There is lift access to the upper floors as well as an on-site restaurant and conference facilities. Internet access, a laundry service (fees apply) and free parking in the car park are also on offer to guests during their stay.\\\\n\\\\nAll the rooms are furnished with double or king-size beds and provide an en suite bathroom with a shower. Air conditioning, central heating, satellite TV, a telephone, mini fridge, radio and free wireless Internet access are also on offer.\\\\n\\\\nThere is a golf course about 12 km from the hotel.\\\\n\\\\nThe hotel restaurant offers a wide selection of local and European cuisine. Breakfast is served as a buffet and lunch and dinner can be chosen la carte.\\\",\\\"countryCode\\\":\\\"MD\\\",\\\"stateCode\\\":\\\"MD\\\",\\\"destinationCode\\\":\\\"KIV\\\",\\\"zoneCode\\\":1,\\\"latitude\\\":47.014293,\\\"longitude\\\":28.853371,\\\"categoryCode\\\":\\\"3EST\\\",\\\"categoryGroupCode\\\":\\\"GRUPO3\\\",\\\"accomodationType\\\":{\\\"code\\\":\\\"HOTEL\\\"},\\\"boardCodes\\\":[\\\"BB\\\",\\\"AI\\\",\\\"HB\\\",\\\"FB\\\",\\\"RO\\\"],\\\"segmentCodes\\\":[],\\\"address\\\":\\\"NEGRUZZI, 2\\\",\\\"postalCode\\\":\\\"MD2001\\\",\\\"city\\\":\\\"CHISINAU\\\",\\\"email\\\":\\\"info@hotel-cosmos.com\\\",\\\"phones\\\":[{\\\"type\\\":\\\"PHONEBOOKING\\\",\\\"number\\\":\\\"+37322890054\\\"},{\\\"type\\\":\\\"PHONEHOTEL\\\",\\\"number\\\":\\\"+37322837505\\\"},{\\\"type\\\":\\\"FAXNUMBER\\\",\\\"number\\\":\\\"+37322542744\\\"}],\\\"images\\\":[{\\\"url\\\":\\\"14/148030/148030a_hb_a_001.jpg\\\",\\\"type\\\":\\\"GEN\\\"}],\\\"web\\\":\\\"http://hotel-cosmos.com/\\\",\\\"lastUpdate\\\":\\\"2020-11-23\\\",\\\"s2C\\\":\\\"1*\\\",\\\"ranking\\\":14,\\\"serviceType\\\":\\\"HOTELBEDS\\\",\\\"groupKey\\\":\\\"2118121725\\\",\\\"totalAmount\\\":341.32,\\\"totalMarkup\\\":26.69,\\\"totalPublicAmount\\\":347.99,\\\"totalSavings\\\":6.67,\\\"totalEarnings\\\":3.34,\\\"rates\\\":[{\\\"code\\\":\\\"ROO.ST\\\",\\\"name\\\":\\\"Room Standard\\\",\\\"key\\\":\\\"20210608|20210616|W|504|148030|ROO.ST|ID_B2B_76|BB|B2B|1~1~0||N@06~~24ebc~-829367492~N~~~NOR~C98A4E21F1184B3161702850635900AWUS0000029001400030824ebc\\\",\\\"class\\\":\\\"NOR\\\",\\\"allotment\\\":3,\\\"type\\\":\\\"RECHECK\\\",\\\"paymentType\\\":\\\"AT_WEB\\\",\\\"boardCode\\\":\\\"BB\\\",\\\"boardName\\\":\\\"BED AND BREAKFAST\\\",\\\"rooms\\\":1,\\\"adults\\\":1,\\\"markup\\\":16.62,\\\"amount\\\":205.4,\\\"publicAmmount\\\":209.55,\\\"savings\\\":4.15,\\\"earnings\\\":2.08},{\\\"code\\\":\\\"ROO.ST\\\",\\\"name\\\":\\\"Room Standard\\\",\\\"key\\\":\\\"20210608|20210616|W|504|148030|ROO.ST|ID_B2B_76|RO|B2B|1~2~0||N@06~~2557d~-972866252~N~~~NOR~C98A4E21F1184B3161702850635900AWUS000002900140003082557d\\\",\\\"class\\\":\\\"NOR\\\",\\\"allotment\\\":3,\\\"type\\\":\\\"RECHECK\\\",\\\"paymentType\\\":\\\"AT_WEB\\\",\\\"boardCode\\\":\\\"RO\\\",\\\"boardName\\\":\\\"ROOM ONLY\\\",\\\"rooms\\\":1,\\\"adults\\\":2,\\\"markup\\\":10.07,\\\"amount\\\":135.92,\\\"publicAmmount\\\":138.44,\\\"savings\\\":2.52,\\\"earnings\\\":1.26}]}\",\n\n                    \"quoteOtaId\": \"asdfw43wfdswef3x\",\n                    \"holder\": {\n                        \"firstName\": \"Test 2\",\n                        \"lastName\": \"Test 2\",\n                        \"email\": \"test+2@test.test\",\n                        \"phone\": \"+19074861000\"\n                    },\n                    \"hotelPaxData\": [\n                        {\n                            \"hotelRoomKey\": \"20210608|20210616|W|504|148030|ROO.ST|ID_B2B_76|RO|B2B|1~2~0||N@06~~2557d~-972866252~N~~~NOR~C98A4E21F1184B3161702850635900AWUS000002900140003082557d\",\n                            \"first_name\": \"Test\",\n                            \"last_name\": \"Test\",\n                            \"birth_date\": \"1963-04-07\",\n                            \"age\": \"45\",\n                            \"type\": \"ADT\"\n                        },\n                        {\n                            \"hotelRoomKey\": \"20210608|20210616|W|504|148030|ROO.ST|ID_B2B_76|RO|B2B|1~2~0||N@06~~2557d~-972866252~N~~~NOR~C98A4E21F1184B3161702850635900AWUS000002900140003082557d\",\n                            \"first_name\": \"Mary\",\n                            \"last_name\": \"Smith\",\n                            \"birth_date\": \"1963-04-07\",\n                            \"age\": \"32\",\n                            \"type\": \"ADT\"\n                        }\n                    ]\n                }\n            ]\n        }",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n            \"status\": 200,\n            \"message\": \"OK\",\n            \"data\": {\n                \"order_gid\": \"1588da7b87cd3b91cc1df4aed0d7aeba\"\n            }\n        }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n            \"status\": 422,\n            \"message\": \"Validation error\",\n            \"errors\": {\n                \"quotes.0.productKey\": [\n                    \"Product type not found by key: flights\"\n                ]\n            },\n            \"code\": 0\n        }",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n            \"status\": \"Failed\",\n            \"message\": \"Some error occurred\",\n            \"detailError\": {\n                \"product\": \"Flight\",\n                \"quoteOtaId\": \"asdff43fsgfdsv343ddx\"\n            },\n            \"code\": 15901,\n            \"errors\": []\n        }",
+          "type": "json"
+        }
+      ]
     },
     "filename": "webapi/modules/v2/controllers/OrderController.php",
     "groupTitle": "Orders"

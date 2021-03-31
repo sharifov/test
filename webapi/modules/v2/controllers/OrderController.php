@@ -2,27 +2,32 @@
 
 namespace webapi\modules\v2\controllers;
 
+use frontend\helpers\JsonHelper;
 use modules\fileStorage\src\entity\fileStorage\FileStorage;
 use modules\fileStorage\src\FileSystem;
 use modules\offer\src\entities\offer\OfferRepository;
 use modules\order\src\entities\order\OrderSourceType;
 use modules\order\src\entities\order\OrderRepository;
+use modules\order\src\entities\orderData\OrderData;
+use modules\order\src\entities\orderData\OrderDataRepository;
 use modules\order\src\entities\orderRequest\OrderRequest;
 use modules\order\src\entities\orderRequest\OrderRequestRepository;
+use modules\order\src\exceptions\OrderC2BException;
 use modules\order\src\exceptions\OrderCodeException;
 use modules\order\src\forms\api\create\OrderCreateForm;
+use modules\order\src\forms\api\createC2b\OrderCreateC2BForm;
 use modules\order\src\forms\api\view\OrderViewForm;
-use modules\order\src\forms\createC2b\OrderCreateC2BForm;
 use modules\order\src\services\CreateOrderDTO;
 use modules\order\src\services\OrderApiManageService;
-use modules\product\src\entities\productType\ProductType;
 use modules\product\src\entities\productType\ProductTypeRepository;
 use modules\product\src\useCases\product\create\ProductCreateForm;
 use modules\product\src\useCases\product\create\ProductCreateService;
 use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
+use sales\repositories\NotFoundException;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\repositories\project\ProjectRepository;
+use sales\services\TransactionManager;
 use webapi\models\ApiUser;
 use webapi\src\logger\ApiLogger;
 use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
@@ -35,19 +40,19 @@ use webapi\src\response\behaviors\ResponseStatusCodeBehavior;
 use webapi\src\response\ErrorResponse;
 use webapi\src\response\messages\CodeMessage;
 use webapi\src\response\messages\DataMessage;
+use webapi\src\response\messages\DetailErrorMessage;
 use webapi\src\response\messages\ErrorsMessage;
 use webapi\src\response\messages\Message;
 use webapi\src\response\messages\MessageMessage;
-use webapi\src\response\messages\RequestMessage;
 use webapi\src\response\messages\SourceMessage;
 use webapi\src\response\messages\Sources;
 use webapi\src\response\messages\StatusCodeMessage;
 use webapi\src\response\messages\StatusFailedMessage;
 use webapi\src\response\ProxyResponse;
-use webapi\src\response\SimpleResponse;
 use webapi\src\response\SuccessResponse;
 use Yii;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\httpclient\Response;
 use yii\web\NotFoundHttpException;
@@ -65,6 +70,8 @@ use yii\web\NotFoundHttpException;
  * @property ProjectRepository $projectRepository
  * @property ProductCreateService $productCreateService
  * @property ProductTypeRepository $productTypeRepository
+ * @property TransactionManager $transactionManager
+ * @property OrderDataRepository $orderDataRepository
  */
 class OrderController extends BaseController
 {
@@ -105,6 +112,14 @@ class OrderController extends BaseController
      * @var ProductTypeRepository
      */
     private ProductTypeRepository $productTypeRepository;
+    /**
+     * @var TransactionManager
+     */
+    private TransactionManager $transactionManager;
+    /**
+     * @var OrderDataRepository
+     */
+    private OrderDataRepository $orderDataRepository;
 
     public function __construct(
         $id,
@@ -120,6 +135,8 @@ class OrderController extends BaseController
         ProjectRepository $projectRepository,
         ProductCreateService $productCreateService,
         ProductTypeRepository $productTypeRepository,
+        TransactionManager $transactionManager,
+        OrderDataRepository $orderDataRepository,
         $config = []
     ) {
         parent::__construct($id, $module, $logger, $config);
@@ -133,6 +150,8 @@ class OrderController extends BaseController
         $this->projectRepository = $projectRepository;
         $this->productCreateService = $productCreateService;
         $this->productTypeRepository = $productTypeRepository;
+        $this->transactionManager = $transactionManager;
+        $this->orderDataRepository = $orderDataRepository;
     }
 
     public function behaviors(): array
@@ -146,7 +165,7 @@ class OrderController extends BaseController
         $behaviors['request'] = [
             'class' => RequestBehavior::class,
             'filter' => CreditCardFilter::class,
-            'except' => ['create', 'get-file'],
+            'except' => ['create', 'get-file', 'create-c2b'],
         ];
         $behaviors['responseStatusCode'] = [
             'class' => ResponseStatusCodeBehavior::class,
@@ -154,7 +173,7 @@ class OrderController extends BaseController
         ];
         $behaviors['technical'] = [
             'class' => TechnicalInfoBehavior::class,
-            'except' => ['get-file'],
+            'except' => ['get-file', 'create-c2b'],
         ];
         return $behaviors;
     }
@@ -1849,7 +1868,7 @@ class OrderController extends BaseController
 
     /**
      * @return \webapi\src\response\Response
-     * @api {post} /v2/order/create-c2b Create Order
+     * @api {post} /v2/order/create-c2b Create Order c2b flow
      * @apiVersion 1.0.0
      * @apiName CreateOrderClickToBook
      * @apiGroup Orders
@@ -1861,17 +1880,149 @@ class OrderController extends BaseController
      *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
+     * @apiParam {string{max 10}}               sourceCid       Source cid
+     * @apiParam {string{max 10}}               requestUid       Request uid
      *
-     * @apiParam {string{max 255}}      projectApiKey           Project api key
-     * @apiParam {Object[]}             quotes                  Product Quotes
-     * @apiParam {string}             quotes.productKey       Product Quotes
+     * @apiParam {Object[]}             quotes                  Product quotes
+     * @apiParam {string}               quotes.productKey       Product key
+     * @apiParam {string}               quotes.originSearchData       Product quote origin search data
+     * @apiParam {string}               quotes.quoteOtaId          Product quote custom id
+     *
+     * @apiParam {Object}               quotes.holder                         Holder Info
+     * @apiParam {string{max 50}}       quotes.holder.firstName               Holder first name
+     * @apiParam {string{max 50}}       quotes.holder.lastName                Holder last name
+     * @apiParam {string{max 100}}      quotes.holder.email                   Holder email
+     * @apiParam {string{max 20}}       quotes.holder.phone                   Holder phone
+     *
+     * @apiParam {Object}                           [quotes.flightPaxData][]      Flight pax data
+     * @apiParam {string="ADT","CHD","INF"}         quotes.flightPaxData.type                  Pax type
+     * @apiParam {string{max 40}}                   [quotes.flightPaxData.first_name]            First Name
+     * @apiParam {string{max 40}}                   [quotes.flightPaxData.last_name]             Last Name
+     * @apiParam {string{max 40}}                   [quotes.flightPaxData.middle_name]           Middle Name
+     * @apiParam {string{max 5}}                    [quotes.flightPaxData.nationality]           Nationality
+     * @apiParam {string{max 1}}                    [quotes.flightPaxData.gender]                Gender
+     * @apiParam {string{format yyyy-mm-dd}}        [quotes.flightPaxData.birth_date]            Birth Date
+     * @apiParam {string{max 100}}                  [quotes.flightPaxData.email]                 Email
+     * @apiParam {string{max 5}}                    [quotes.flightPaxData.language]              Language
+     * @apiParam {string{max 5}}                    [quotes.flightPaxData.citizenship]           Citizenship
+     *
+     * @apiParam {Object}                           [quotes.hotelPaxData][]      Flight pax data
+     * @apiParam {string="ADT","CHD"}               quotes.hotelPaxData.type                    Pax type
+     * @apiParam {string{max 40}}                   [quotes.hotelPaxData.first_name]            First Name
+     * @apiParam {string{max 40}}                   [quotes.hotelPaxData.last_name]             Last Name
+     * @apiParam {string{format yyyy-mm-dd}}        [quotes.hotelPaxData.birth_date]            Birth Date
+     * @apiParam {integer}                          [quotes.hotelPaxData.age]                   Age
+     * @apiParam {string}                           quotes.hotelPaxData.hotelRoomKey            Hotel Room Key
+     *
+     * @apiParamExample {json} Request-Example:
+     *
+     * {
+            "sourceCid": "ACHUY23AS",
+            "requestUid": "WCJ12CSIJ",
+            "quotes": [
+                {
+                    "productKey": "flight",
+                    "originSearchData": "{\"key\":\"2_U0FMMTAxKlkyMTAwL0tJVkxPTjIwMjEtMDktMDkvTE9OQkNOMjAyMS0xMC0wNypPU34jT1M2NTYjT1M0NTUjT1M0NTYjT1MzOTF+bGM6ZW5fdXM=\",\"routingId\":1,\"prices\":{\"lastTicketDate\":\"2021-03-29\",\"totalPrice\":684.4,\"totalTax\":538.4,\"comm\":0,\"isCk\":false,\"markupId\":0,\"markupUid\":\"\",\"markup\":0},\"passengers\":{\"ADT\":{\"codeAs\":\"JWZ\",\"cnt\":2,\"baseFare\":53,\"pubBaseFare\":53,\"baseTax\":185.4,\"markup\":0,\"comm\":0,\"price\":238.4,\"tax\":185.4,\"oBaseFare\":{\"amount\":53,\"currency\":\"USD\"},\"oBaseTax\":{\"amount\":185.4,\"currency\":\"USD\"}},\"CHD\":{\"codeAs\":\"JWC\",\"cnt\":1,\"baseFare\":40,\"pubBaseFare\":40,\"baseTax\":167.6,\"markup\":0,\"comm\":0,\"price\":207.6,\"tax\":167.6,\"oBaseFare\":{\"amount\":40,\"currency\":\"USD\"},\"oBaseTax\":{\"amount\":167.6,\"currency\":\"USD\"}}},\"penalties\":{\"exchange\":true,\"refund\":false,\"list\":[{\"type\":\"ex\",\"applicability\":\"before\",\"permitted\":true,\"amount\":0},{\"type\":\"ex\",\"applicability\":\"after\",\"permitted\":true,\"amount\":0},{\"type\":\"re\",\"applicability\":\"before\",\"permitted\":false},{\"type\":\"re\",\"applicability\":\"after\",\"permitted\":false}]},\"trips\":[{\"tripId\":1,\"segments\":[{\"segmentId\":1,\"departureTime\":\"2021-09-09 16:00\",\"arrivalTime\":\"2021-09-09 16:40\",\"stop\":0,\"stops\":[],\"flightNumber\":\"656\",\"bookingClass\":\"K\",\"duration\":100,\"departureAirportCode\":\"KIV\",\"departureAirportTerminal\":\"\",\"arrivalAirportCode\":\"VIE\",\"arrivalAirportTerminal\":\"3\",\"operatingAirline\":\"OS\",\"airEquipType\":\"E95\",\"marketingAirline\":\"OS\",\"marriageGroup\":\"I\",\"mileage\":583,\"cabin\":\"Y\",\"cabinIsBasic\":true,\"brandId\":\"735817\",\"brandName\":\"Classic\",\"meal\":\"\",\"fareCode\":\"K03CLSE3\",\"baggage\":{\"ADT\":{\"carryOn\":true,\"allowPieces\":1},\"CHD\":{\"carryOn\":true,\"allowPieces\":1}},\"recheckBaggage\":false},{\"segmentId\":2,\"departureTime\":\"2021-09-09 17:15\",\"arrivalTime\":\"2021-09-09 18:40\",\"stop\":0,\"stops\":[],\"flightNumber\":\"455\",\"bookingClass\":\"K\",\"duration\":145,\"departureAirportCode\":\"VIE\",\"departureAirportTerminal\":\"3\",\"arrivalAirportCode\":\"LHR\",\"arrivalAirportTerminal\":\"2\",\"operatingAirline\":\"OS\",\"airEquipType\":\"321\",\"marketingAirline\":\"OS\",\"marriageGroup\":\"O\",\"mileage\":774,\"cabin\":\"Y\",\"cabinIsBasic\":true,\"brandId\":\"735817\",\"brandName\":\"Classic\",\"meal\":\"\",\"fareCode\":\"K03CLSE3\",\"baggage\":{\"ADT\":{\"carryOn\":true,\"allowPieces\":1},\"CHD\":{\"carryOn\":true,\"allowPieces\":1}},\"recheckBaggage\":false}],\"duration\":280},{\"tripId\":2,\"segments\":[{\"segmentId\":1,\"departureTime\":\"2021-10-07 19:30\",\"arrivalTime\":\"2021-10-07 22:45\",\"stop\":0,\"stops\":[],\"flightNumber\":\"456\",\"bookingClass\":\"K\",\"duration\":135,\"departureAirportCode\":\"LHR\",\"departureAirportTerminal\":\"2\",\"arrivalAirportCode\":\"VIE\",\"arrivalAirportTerminal\":\"3\",\"operatingAirline\":\"OS\",\"airEquipType\":\"321\",\"marketingAirline\":\"OS\",\"marriageGroup\":\"I\",\"mileage\":774,\"cabin\":\"Y\",\"cabinIsBasic\":true,\"brandId\":\"735831\",\"brandName\":\"LIGHT\",\"meal\":\"\",\"fareCode\":\"K03LGTE8\",\"baggage\":{\"ADT\":{\"carryOn\":true,\"allowPieces\":0},\"CHD\":{\"carryOn\":true,\"allowPieces\":0}},\"recheckBaggage\":false},{\"segmentId\":2,\"departureTime\":\"2021-10-08 07:00\",\"arrivalTime\":\"2021-10-08 09:20\",\"stop\":0,\"stops\":[],\"flightNumber\":\"391\",\"bookingClass\":\"K\",\"duration\":140,\"departureAirportCode\":\"VIE\",\"departureAirportTerminal\":\"3\",\"arrivalAirportCode\":\"BCN\",\"arrivalAirportTerminal\":\"1\",\"operatingAirline\":\"OS\",\"airEquipType\":\"320\",\"marketingAirline\":\"OS\",\"marriageGroup\":\"O\",\"mileage\":851,\"cabin\":\"Y\",\"cabinIsBasic\":true,\"brandId\":\"735831\",\"brandName\":\"LIGHT\",\"meal\":\"\",\"fareCode\":\"K03LGTE8\",\"baggage\":{\"ADT\":{\"carryOn\":true,\"allowPieces\":0},\"CHD\":{\"carryOn\":true,\"allowPieces\":0}},\"recheckBaggage\":false}],\"duration\":770}],\"maxSeats\":9,\"paxCnt\":3,\"validatingCarrier\":\"OS\",\"gds\":\"T\",\"pcc\":\"DVI\",\"cons\":\"GTT\",\"fareType\":\"PUB\",\"tripType\":\"MC\",\"cabin\":\"Y\",\"currency\":\"USD\",\"currencies\":[\"USD\"],\"currencyRates\":{\"USDUSD\":{\"from\":\"USD\",\"to\":\"USD\",\"rate\":1}},\"keys\":{\"travelport\":{\"traceId\":\"71fcc2ec-1ea8-47d7-a3fd-82ed1ac672b2\",\"availabilitySources\":\"Q,Q,Q,Q\",\"type\":\"T\"},\"seatHoldSeg\":{\"trip\":0,\"segment\":0,\"seats\":9}},\"ngsFeatures\":{\"stars\":1,\"name\":\"Classic\",\"list\":[]},\"meta\":{\"eip\":0,\"noavail\":false,\"searchId\":\"U0FMMTAxWTIxMDB8S0lWTE9OMjAyMS0wOS0wOXxMT05CQ04yMDIxLTEwLTA3\",\"lang\":\"en\",\"rank\":8,\"cheapest\":true,\"fastest\":false,\"best\":true,\"bags\":0,\"country\":\"us\",\"prod_types\":[\"PUB\"]},\"price\":238.4,\"originRate\":1,\"stops\":[1,1],\"time\":[{\"departure\":\"2021-09-09 16:00\",\"arrival\":\"2021-09-09 18:40\"},{\"departure\":\"2021-10-07 19:30\",\"arrival\":\"2021-10-08 09:20\"}],\"bagFilter\":\"\",\"airportChange\":false,\"technicalStopCnt\":0,\"duration\":[280,770],\"totalDuration\":1050,\"topCriteria\":\"bestcheapest\",\"rank\":8}",
+                    "flightPaxData": [
+                        {
+                            "first_name": "Test name",
+                            "last_name": "Test last name",
+                            "middle_name": "Test middle name",
+                            "nationality": "US",
+                            "gender": "M",
+                            "birth_date": "1963-04-07",
+                            "email": "mike.kane@techork.com",
+                            "language": "en-US",
+                            "citizenship": "US",
+                            "type": "ADT"
+                        }
+                    ],
+                    "quoteOtaId": "asdff43fsgfdsv343ddx",
+                    "holder": {
+                        "firstName": "Test",
+                        "lastName": "Test",
+                        "email": "test@test.test",
+                        "phone": "+19074861000"
+                    }
+                },
+                {
+                    "productKey": "hotel",
+                    "originSearchData": "{\"categoryName\":\"3 STARS\",\"destinationName\":\"Chisinau\",\"zoneName\":\"Chisinau\",\"minRate\":135.92,\"maxRate\":285.94,\"currency\":\"USD\",\"code\":148030,\"name\":\"Cosmos Hotel\",\"description\":\"The hotel is situated in the heart of Chisinau, the capital of Moldova. It is perfectly located for access to the business centre, cultural institutions and much more. Chisinau Airport is only 15 minutes away and the railway station is less than 5 minutes away from the hotel.\\n\\nThe city hotel offers a choice of 150 rooms, 24-hour reception and check-out services in the lobby, luggage storage, a hotel safe, currency exchange facility and a cloakroom. There is lift access to the upper floors as well as an on-site restaurant and conference facilities. Internet access, a laundry service (fees apply) and free parking in the car park are also on offer to guests during their stay.\\n\\nAll the rooms are furnished with double or king-size beds and provide an en suite bathroom with a shower. Air conditioning, central heating, satellite TV, a telephone, mini fridge, radio and free wireless Internet access are also on offer.\\n\\nThere is a golf course about 12 km from the hotel.\\n\\nThe hotel restaurant offers a wide selection of local and European cuisine. Breakfast is served as a buffet and lunch and dinner can be chosen la carte.\",\"countryCode\":\"MD\",\"stateCode\":\"MD\",\"destinationCode\":\"KIV\",\"zoneCode\":1,\"latitude\":47.014293,\"longitude\":28.853371,\"categoryCode\":\"3EST\",\"categoryGroupCode\":\"GRUPO3\",\"accomodationType\":{\"code\":\"HOTEL\"},\"boardCodes\":[\"BB\",\"AI\",\"HB\",\"FB\",\"RO\"],\"segmentCodes\":[],\"address\":\"NEGRUZZI, 2\",\"postalCode\":\"MD2001\",\"city\":\"CHISINAU\",\"email\":\"info@hotel-cosmos.com\",\"phones\":[{\"type\":\"PHONEBOOKING\",\"number\":\"+37322890054\"},{\"type\":\"PHONEHOTEL\",\"number\":\"+37322837505\"},{\"type\":\"FAXNUMBER\",\"number\":\"+37322542744\"}],\"images\":[{\"url\":\"14/148030/148030a_hb_a_001.jpg\",\"type\":\"GEN\"}],\"web\":\"http://hotel-cosmos.com/\",\"lastUpdate\":\"2020-11-23\",\"s2C\":\"1*\",\"ranking\":14,\"serviceType\":\"HOTELBEDS\",\"groupKey\":\"2118121725\",\"totalAmount\":341.32,\"totalMarkup\":26.69,\"totalPublicAmount\":347.99,\"totalSavings\":6.67,\"totalEarnings\":3.34,\"rates\":[{\"code\":\"ROO.ST\",\"name\":\"Room Standard\",\"key\":\"20210608|20210616|W|504|148030|ROO.ST|ID_B2B_76|BB|B2B|1~1~0||N@06~~24ebc~-829367492~N~~~NOR~C98A4E21F1184B3161702850635900AWUS0000029001400030824ebc\",\"class\":\"NOR\",\"allotment\":3,\"type\":\"RECHECK\",\"paymentType\":\"AT_WEB\",\"boardCode\":\"BB\",\"boardName\":\"BED AND BREAKFAST\",\"rooms\":1,\"adults\":1,\"markup\":16.62,\"amount\":205.4,\"publicAmmount\":209.55,\"savings\":4.15,\"earnings\":2.08},{\"code\":\"ROO.ST\",\"name\":\"Room Standard\",\"key\":\"20210608|20210616|W|504|148030|ROO.ST|ID_B2B_76|RO|B2B|1~2~0||N@06~~2557d~-972866252~N~~~NOR~C98A4E21F1184B3161702850635900AWUS000002900140003082557d\",\"class\":\"NOR\",\"allotment\":3,\"type\":\"RECHECK\",\"paymentType\":\"AT_WEB\",\"boardCode\":\"RO\",\"boardName\":\"ROOM ONLY\",\"rooms\":1,\"adults\":2,\"markup\":10.07,\"amount\":135.92,\"publicAmmount\":138.44,\"savings\":2.52,\"earnings\":1.26}]}",
+
+                    "quoteOtaId": "asdfw43wfdswef3x",
+                    "holder": {
+                        "firstName": "Test 2",
+                        "lastName": "Test 2",
+                        "email": "test+2@test.test",
+                        "phone": "+19074861000"
+                    },
+                    "hotelPaxData": [
+                        {
+                            "hotelRoomKey": "20210608|20210616|W|504|148030|ROO.ST|ID_B2B_76|RO|B2B|1~2~0||N@06~~2557d~-972866252~N~~~NOR~C98A4E21F1184B3161702850635900AWUS000002900140003082557d",
+                            "first_name": "Test",
+                            "last_name": "Test",
+                            "birth_date": "1963-04-07",
+                            "age": "45",
+                            "type": "ADT"
+                        },
+                        {
+                            "hotelRoomKey": "20210608|20210616|W|504|148030|ROO.ST|ID_B2B_76|RO|B2B|1~2~0||N@06~~2557d~-972866252~N~~~NOR~C98A4E21F1184B3161702850635900AWUS000002900140003082557d",
+                            "first_name": "Mary",
+                            "last_name": "Smith",
+                            "birth_date": "1963-04-07",
+                            "age": "32",
+                            "type": "ADT"
+                        }
+                    ]
+                }
+            ]
+        }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *
+     * HTTP/1.1 200 OK
+     * {
+            "status": 200,
+            "message": "OK",
+            "data": {
+                "order_gid": "1588da7b87cd3b91cc1df4aed0d7aeba"
+            }
+        }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+            "status": 422,
+            "message": "Validation error",
+            "errors": {
+                "quotes.0.productKey": [
+                    "Product type not found by key: flights"
+                ]
+            },
+            "code": 0
+        }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+            "status": "Failed",
+            "message": "Some error occurred",
+            "detailError": {
+                "product": "Flight",
+                "quoteOtaId": "asdff43fsgfdsv343ddx"
+            },
+            "code": 15901,
+            "errors": []
+        }
      *
      * @return ErrorResponse|SuccessResponse
      */
     public function actionCreateC2b()
     {
         $request = Yii::$app->request;
-        $form = new OrderCreateC2BForm(count($request->post('productQuotes', [])), count($request->post('paxes', [])));
+        $form = new OrderCreateC2BForm(count($request->post('quotes', [])));
 
         if (!$form->load($request->post())) {
             return new ErrorResponse(
@@ -1892,30 +2043,51 @@ class OrderController extends BaseController
             $orderRequest = OrderRequest::create($request->post(), OrderSourceType::C2B);
             $this->orderRequestRepository->save($orderRequest);
 
-            $project = $this->projectRepository->findByApiKey($form->projectApiKey);
+            $project = $this->projectRepository->findById($this->auth->au_project_id ?? 0);
 
+            $dto = new CreateOrderDTO(null, null, $request->post(), OrderSourceType::C2B, $orderRequest->orr_id, $project->id);
+            $order = $this->orderManageService->createByC2bFlow($dto);
+            $this->transactionManager->wrap(function () use ($form, $project, $order) {
+                foreach ($form->quotes as $quoteForm) {
+                    $quoteForm->orderId = $order->or_id;
 
-            foreach ($form->quotes as $quoteForm) {
-                $productType = $this->productTypeRepository->findByKey($quoteForm->productKey);
-                $productCreateForm = new ProductCreateForm();
-                $productCreateForm->pr_type_id = $productType->pt_id;
-                $product = $this->productCreateService->create($productCreateForm);
+                    $productType = $this->productTypeRepository->findByKey($quoteForm->productKey);
+                    $productCreateForm = new ProductCreateForm();
+                    $productCreateForm->pr_type_id = $productType->pt_id;
+                    $productCreateForm->pr_project_id = $project->id;
+                    $product = $this->productCreateService->handle($productCreateForm);
+                    $childProduct = $product->getChildProduct();
+                    if ($childProduct) {
+                        $childProduct->getService()->c2bHandle($childProduct, $quoteForm);
+                    }
+                }
 
-                $service = $product->getChildProduct();
+                $order->calculateTotalPrice();
+                $order->recalculateProfitAmount();
+                $this->orderRepository->save($order);
 
-                $dto = new CreateOrderDTO(null, null, $request->post(), OrderSourceType::C2B, $orderRequest->orr_id, $project->id);
-                $order = $this->orderManageService->createOrder($dto, $form);
-            }
+                $orderData = OrderData::create($order->or_id, $form->sourceCid, $form->requestUid);
+                $orderData->detachBehavior('user');
+                $this->orderDataRepository->save($orderData);
+            });
 
             $response = new SuccessResponse(
                 new DataMessage(
                     new Message('order_gid', $order->or_gid),
                 )
             );
+        } catch (OrderC2BException $e) {
+            Yii::error(AppHelper::throwableFormatter($e), 'API::OrderController::actionCreateC2b::OrderC2BException');
 
-            $orderRequest->successResponse(ArrayHelper::toArray($response));
-            $this->orderRequestRepository->save($orderRequest);
-            return $response;
+            $response = new ErrorResponse(
+                new StatusFailedMessage(),
+                new MessageMessage($e->getMessage()),
+                new DetailErrorMessage([
+                    'product' => $e->dto->product->getProductName(),
+                    'quoteOtaId' => $e->dto->quoteOtaId
+                ]),
+                new CodeMessage($e->getCode())
+            );
         } catch (\Throwable $e) {
             Yii::error(AppHelper::throwableFormatter($e), 'API::OrderController::actionCreateC2b::Throwable');
 
@@ -1925,12 +2097,11 @@ class OrderController extends BaseController
                 new ErrorsMessage($e->getMessage()),
                 new CodeMessage($e->getCode())
             );
-
+        } finally {
             if (isset($orderRequest)) {
                 $orderRequest->errorResponse(ArrayHelper::toArray($response));
                 $this->orderRequestRepository->save($orderRequest);
             }
-
             return $response;
         }
     }

@@ -29,4 +29,6 @@ class HotelCodeException
     public const HOTEL_ROOM_PAX_NOT_FOUND = Module::HOTEL . 600;
     public const HOTEL_ROOM_PAX_SAVE = Module::HOTEL . 601;
     public const HOTEL_ROOM_PAX_REMOVE = Module::HOTEL . 602;
+
+    public const API_C2B_HANDLE = Module::HOTEL . 901;
 }

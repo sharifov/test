@@ -332,4 +332,13 @@ class OrderApiManageService
             return $newOrder;
         });
     }
+
+    public function createByC2bFlow(CreateOrderDTO $dto): Order
+    {
+        $newOrder = (new Order())->create($dto);
+        $newOrder->processing(null, OrderStatusAction::API, null);
+        $this->orderRepository->save($newOrder);
+
+        return $newOrder;
+    }
 }

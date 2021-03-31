@@ -9,6 +9,7 @@ use modules\flight\models\FlightSegment;
 use modules\flight\models\forms\ItineraryEditForm;
 use modules\flight\src\dto\flightSegment\SegmentDTO;
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
+use modules\flight\src\exceptions\FlightCodeException;
 use modules\flight\src\repositories\flight\FlightRepository;
 use modules\flight\src\repositories\flightQuoteStatusLogRepository\FlightQuoteStatusLogRepository;
 use modules\flight\src\repositories\flightSegment\FlightSegmentRepository;
@@ -18,8 +19,13 @@ use modules\flight\src\useCases\flightQuote\createManually\FlightQuoteCreateForm
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuotePaxPriceForm;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\offer\src\services\OfferPriceUpdater;
+use modules\order\src\exceptions\OrderC2BDtoException;
+use modules\order\src\exceptions\OrderC2BException;
+use modules\order\src\forms\api\createC2b\QuotesForm;
 use modules\order\src\services\OrderPriceUpdater;
 use modules\product\src\entities\product\ProductRepository;
+use modules\product\src\entities\productHolder\ProductHolder;
+use modules\product\src\entities\productHolder\ProductHolderRepository;
 use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateProfitAmountEvent;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\flight\models\Flight;
@@ -47,8 +53,12 @@ use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentPaxBaggageD
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentStopDTO;
 use modules\flight\src\useCases\flightQuote\create\ProductQuoteCreateDTO;
 use modules\product\src\entities\productType\ProductType;
+use modules\product\src\interfaces\Productable;
+use modules\product\src\interfaces\ProductQuoteService;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
+use yii\helpers\Json;
+use yii\helpers\VarDumper;
 
 /**
  * Class FlightQuoteManageService
@@ -65,10 +75,10 @@ use sales\services\TransactionManager;
  * @property FlightQuoteSegmentPaxBaggageChargeRepository $baggageChargeRepository
  * @property FlightQuotePaxPriceRepository $flightQuotePaxPriceRepository
  * @property FlightQuoteStatusLogRepository $flightQuoteStatusLogRepository
- * @property OfferPriceUpdater $offerPriceUpdater
  * @property OrderPriceUpdater $orderPriceUpdater
+ * @property ProductHolderRepository $productHolderRepository
  */
-class FlightQuoteManageService
+class FlightQuoteManageService implements ProductQuoteService
 {
     /**
      * @var FlightQuoteRepository
@@ -122,6 +132,10 @@ class FlightQuoteManageService
      * @var OfferPriceUpdater
      */
     private OfferPriceUpdater $offerPriceUpdater;
+    /**
+     * @var ProductHolderRepository
+     */
+    private ProductHolderRepository $productHolderRepository;
 
     /**
      * FlightQuoteService constructor.
@@ -136,6 +150,8 @@ class FlightQuoteManageService
      * @param FlightQuotePaxPriceRepository $flightQuotePaxPriceRepository
      * @param FlightQuoteStatusLogRepository $flightQuoteStatusLogRepository
      * @param TransactionManager $transactionManager
+     * @param OrderPriceUpdater $orderPriceUpdater
+     * @param ProductHolderRepository $productHolderRepository
      */
     public function __construct(
         FlightQuoteRepository $flightQuoteRepository,
@@ -150,7 +166,7 @@ class FlightQuoteManageService
         FlightQuoteStatusLogRepository $flightQuoteStatusLogRepository,
         TransactionManager $transactionManager,
         OrderPriceUpdater $orderPriceUpdater,
-        OfferPriceUpdater $offerPriceUpdater
+        ProductHolderRepository $productHolderRepository
     ) {
         $this->flightQuoteRepository = $flightQuoteRepository;
         $this->productQuoteRepository = $productQuoteRepository;
@@ -164,7 +180,7 @@ class FlightQuoteManageService
         $this->flightQuoteStatusLogRepository = $flightQuoteStatusLogRepository;
         $this->transactionManager = $transactionManager;
         $this->orderPriceUpdater = $orderPriceUpdater;
-        $this->offerPriceUpdater = $offerPriceUpdater;
+        $this->productHolderRepository = $productHolderRepository;
     }
 
     /**
@@ -390,6 +406,78 @@ class FlightQuoteManageService
         foreach ($baggage['charge'] as $charge) {
             $paxBaggageCharge = FlightQuoteSegmentPaxBaggageCharge::create((new FlightQuoteSegmentPaxBaggageChargeDTO($flightQuoteSegment, $paxType, $charge)));
             $this->baggageChargeRepository->save($paxBaggageCharge);
+        }
+    }
+
+    /**
+     * @param Productable|Flight $flightProduct
+     * @param QuotesForm $form
+     */
+    public function c2bHandle(Productable $flightProduct, QuotesForm $form): void
+    {
+        try {
+            $productTypeServiceFee = null;
+            $productType = ProductType::find()->select(['pt_service_fee_percent'])->byFlight()->asArray()->one();
+            if ($productType && $productType['pt_service_fee_percent']) {
+                $productTypeServiceFee = $productType['pt_service_fee_percent'];
+            }
+
+            $quoteData = Json::decode($form->originSearchData);
+
+            $productQuote = ProductQuote::create(new ProductQuoteCreateDTO($flightProduct, $quoteData, null), $productTypeServiceFee);
+            $productQuote->pq_order_id = $form->orderId;
+            $this->productQuoteRepository->save($productQuote);
+
+            $productHolder = ProductHolder::create(
+                $productQuote->pq_product_id,
+                $form->holder->firstName,
+                $form->holder->lastName,
+                $form->holder->email,
+                $form->holder->phone,
+            );
+            $this->productHolderRepository->save($productHolder);
+
+            $flightQuote = FlightQuote::create((new FlightQuoteCreateDTO($flightProduct, $productQuote, $quoteData, null)));
+            $this->flightQuoteRepository->save($flightQuote);
+
+            $flightQuoteLog = FlightQuoteStatusLog::create($flightQuote->fq_created_user_id, $flightQuote->fq_id, $productQuote->pq_status_id);
+            $this->flightQuoteStatusLogRepository->save($flightQuoteLog);
+
+            foreach ($quoteData['passengers'] as $passengerType => $passenger) {
+                $flightQuotePaxPrice = FlightQuotePaxPrice::create((new FlightQuotePaxPriceDTO($flightQuote, $productQuote, $passenger, $passengerType, $quoteData)));
+                $this->flightQuotePaxPriceRepository->save($flightQuotePaxPrice);
+
+                $paxKeySet = null;
+                for ($i = 0; $i < $passenger['cnt']; $i++) {
+                    $flightPax = FlightPax::create(new FlightPaxDTO($flightQuote->fqFlight, $passengerType));
+                    foreach ($form->flightPaxData as $key => $paxForm) {
+                        if ($paxForm->type === $passengerType && $paxKeySet !== $key) {
+                            $flightPax->fp_first_name = $paxForm->first_name;
+                            $flightPax->fp_last_name = $paxForm->last_name;
+                            $flightPax->fp_middle_name = $paxForm->middle_name;
+                            $flightPax->fp_dob = $paxForm->birth_date;
+                            $flightPax->fp_nationality = $paxForm->nationality;
+                            $flightPax->fp_gender = $paxForm->gender;
+                            $flightPax->fp_email = $paxForm->email;
+                            $flightPax->fp_citizenship = $paxForm->citizenship;
+
+                            $paxKeySet = $key;
+                            break;
+                        }
+                    }
+                    $this->flightPaxRepository->save($flightPax);
+                }
+            }
+
+            $this->calcProductQuotePrice($productQuote, $flightQuote);
+
+            $this->createFlightTrip($flightQuote, $quoteData);
+        } catch (\Throwable $e) {
+            $dto = new OrderC2BDtoException(
+                $flightProduct,
+                $form->quoteOtaId
+            );
+            throw new OrderC2BException($dto, $e->getMessage(), FlightCodeException::API_C2B_HANDLE);
         }
     }
 }

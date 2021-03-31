@@ -4,12 +4,14 @@ namespace modules\hotel\models;
 
 use modules\hotel\src\entities\hotel\events\HotelUpdateRequestEvent;
 use modules\hotel\src\entities\hotel\serializer\HotelSerializer;
+use modules\hotel\src\services\hotelQuote\HotelQuoteManageService;
 use modules\hotel\src\useCases\request\update\HotelUpdateRequestForm;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\hotel\models\query\HotelQuery;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\interfaces\Productable;
+use modules\product\src\interfaces\ProductQuoteService;
 use sales\auth\Auth;
 use sales\entities\EventTrait;
 use Yii;
@@ -351,5 +353,15 @@ class Hotel extends ActiveRecord implements Productable
     public static function findByProduct(int $productId): ?Productable
     {
         return self::find()->byProduct($productId)->limit(1)->one();
+    }
+
+    public function getService(): ProductQuoteService
+    {
+        return Yii::createObject(HotelQuoteManageService::class);
+    }
+
+    public function getProductName(): string
+    {
+        return 'Hotel';
     }
 }

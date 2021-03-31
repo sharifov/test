@@ -5,9 +5,11 @@ namespace modules\attraction\models;
 use common\components\CommunicationService;
 use modules\attraction\src\entities\attraction\events\AttractionUpdateRequestEvent;
 use modules\attraction\src\entities\attraction\serializer\AttractionSerializer;
+use modules\attraction\src\services\attractionQuote\CreateQuoteService;
 use modules\attraction\src\useCases\request\update\AttractionUpdateRequestForm;
 use modules\product\src\interfaces\Productable;
 use modules\product\src\entities\product\Product;
+use modules\product\src\interfaces\ProductQuoteService;
 use sales\entities\EventTrait;
 use yii\db\ActiveQuery;
 use Yii;
@@ -273,5 +275,15 @@ class Attraction extends \yii\db\ActiveRecord implements Productable
     public function getAttractionQuotes()
     {
         return $this->hasMany(AttractionQuote::class, ['atnq_attraction_id' => 'atn_id']);
+    }
+
+    public function getService(): ProductQuoteService
+    {
+        return Yii::createObject(CreateQuoteService::class);
+    }
+
+    public function getProductName(): string
+    {
+        return 'Attraction';
     }
 }
