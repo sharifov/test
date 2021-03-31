@@ -8,6 +8,8 @@ use modules\fileStorage\src\FileSystem;
 use modules\offer\src\entities\offer\OfferRepository;
 use modules\order\src\entities\order\OrderSourceType;
 use modules\order\src\entities\order\OrderRepository;
+use modules\order\src\entities\orderData\OrderData;
+use modules\order\src\entities\orderData\OrderDataRepository;
 use modules\order\src\entities\orderRequest\OrderRequest;
 use modules\order\src\entities\orderRequest\OrderRequestRepository;
 use modules\order\src\exceptions\OrderC2BException;
@@ -69,6 +71,7 @@ use yii\web\NotFoundHttpException;
  * @property ProductCreateService $productCreateService
  * @property ProductTypeRepository $productTypeRepository
  * @property TransactionManager $transactionManager
+ * @property OrderDataRepository $orderDataRepository
  */
 class OrderController extends BaseController
 {
@@ -113,6 +116,10 @@ class OrderController extends BaseController
      * @var TransactionManager
      */
     private TransactionManager $transactionManager;
+    /**
+     * @var OrderDataRepository
+     */
+    private OrderDataRepository $orderDataRepository;
 
     public function __construct(
         $id,
@@ -129,6 +136,7 @@ class OrderController extends BaseController
         ProductCreateService $productCreateService,
         ProductTypeRepository $productTypeRepository,
         TransactionManager $transactionManager,
+        OrderDataRepository $orderDataRepository,
         $config = []
     ) {
         parent::__construct($id, $module, $logger, $config);
@@ -143,6 +151,7 @@ class OrderController extends BaseController
         $this->productCreateService = $productCreateService;
         $this->productTypeRepository = $productTypeRepository;
         $this->transactionManager = $transactionManager;
+        $this->orderDataRepository = $orderDataRepository;
     }
 
     public function behaviors(): array
@@ -1872,7 +1881,6 @@ class OrderController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{max 255}}      projectApiKey           Project api key
      * @apiParam {Object[]}             quotes                  Product quotes
      * @apiParam {string}               quotes.productKey       Product key
      * @apiParam {string}               quotes.originSearchData       Product quote origin search data
@@ -1952,6 +1960,10 @@ class OrderController extends BaseController
                 $order->calculateTotalPrice();
                 $order->recalculateProfitAmount();
                 $this->orderRepository->save($order);
+
+                $orderData = OrderData::create($order->or_id, $form->sourceCid, $form->requestUid);
+                $orderData->detachBehavior('user');
+                $this->orderDataRepository->save($orderData);
             });
 
             $response = new SuccessResponse(

@@ -32,7 +32,7 @@ class HotelPaxDataForm extends \yii\base\Model
         return [
             [['type', 'hotelRoomKey', 'birth_date'], 'string'],
             [['age'], 'integer'],
-            ['type', 'in', 'range' => ['ADT', 'CHD', 'INF']],
+            ['type', 'in', 'range' => ['ADT', 'CHD']],
 
             ['birth_date', 'date', 'format' => 'php:Y-m-d', 'message' => 'Birth date is invalid. Valid format is Y-m-d.'],
 

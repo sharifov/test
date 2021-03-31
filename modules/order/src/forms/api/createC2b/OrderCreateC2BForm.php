@@ -9,9 +9,15 @@ use sales\forms\CompositeForm;
  * @package modules\order\src\forms\createC2b
  *
  * @property QuotesForm[] $quotes
+ * @property string $sourceCid
+ * @property string $requestUid
  */
 class OrderCreateC2BForm extends CompositeForm
 {
+    public $sourceCid;
+
+    public $requestUid;
+
     public function __construct(int $cntQuotes, $config = [])
     {
         $quotesForm = [];
@@ -25,6 +31,8 @@ class OrderCreateC2BForm extends CompositeForm
     public function rules(): array
     {
         return [
+            [['sourceCid', 'requestUid'], 'required'],
+            [['sourceCid', 'requestUid'], 'string', 'max' => 10]
         ];
     }
 

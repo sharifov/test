@@ -107,4 +107,13 @@ class OrderData extends \yii\db\ActiveRecord
     {
         return 'order_data';
     }
+
+    public static function create(int $orderId, string $displayUid, string $sourceId): self
+    {
+        $data = new self();
+        $data->od_order_id = $orderId;
+        $data->od_display_uid = $displayUid;
+        $data->od_source_cid = $sourceId;
+        return $data;
+    }
 }
