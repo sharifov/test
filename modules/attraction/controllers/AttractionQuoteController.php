@@ -170,7 +170,8 @@ class AttractionQuoteController extends FController
 
         return $this->renderAjax('search/_list_availabilities', [
             'dataProvider' => $dataProvider,
-            'attraction'   => $attraction
+            'attraction'   => $attraction,
+            'productKey' => $productKey
         ]);
     }
 

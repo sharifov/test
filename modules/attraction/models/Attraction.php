@@ -230,6 +230,21 @@ class Attraction extends \yii\db\ActiveRecord implements Productable
         return $count;
     }
 
+    public function quoteExist(string $productId, string $date): bool
+    {
+        $quoteHash = md5($productId . '|' . $date);
+        $quotes = $this->attractionQuotes;
+
+        if ($quotes) {
+            foreach ($quotes as $quote) {
+                if ($quote->atnq_hash_key === $quoteHash) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     /**
      * Gets query for [[AtnProduct]].
      *

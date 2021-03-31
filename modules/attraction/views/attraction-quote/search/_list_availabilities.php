@@ -3,8 +3,9 @@
 /**
  * @var $dataProvider \yii\data\ArrayDataProvider
  * @var $attraction \modules\attraction\models\Attraction
+ * @var $productKey string
  */
-//var_dump($dataProvider); die();
+
 ?>
 
 <?= \yii\widgets\ListView::widget([
@@ -15,9 +16,15 @@
         ],*/
     'summary' => false,
     'emptyText' => '<div class="text-center">Not found any attractions</div><br>',
-    'itemView' => function ($dataAvailabilities, $key, $index, $widget) use ($attraction) {
+    'itemView' => function ($dataAvailabilities, $key, $index, $widget) use ($attraction, $productKey) {
         //\yii\helpers\VarDumper::dump($dataAvailabilities, 10, true); exit;
-        return $this->render('_list_availabilities_grid', ['dataAvailabilities' => $dataAvailabilities, 'index' => $index, 'key' => $key, 'attraction' => $attraction]);
+        return $this->render('_list_availabilities_grid', [
+            'dataAvailabilities' => $dataAvailabilities,
+            'index' => $index,
+            'key' => $key,
+            'attraction' => $attraction,
+            'productKey' => $productKey
+        ]);
     },
     //'layout' => "{items}<div class=\"text-center\" style='margin-top: -20px; margin-bottom: -25px'>{pager}</div>", // {summary}\n<div class="text-center">{pager}</div>
     'itemOptions' => [
