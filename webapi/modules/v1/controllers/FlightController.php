@@ -624,8 +624,8 @@ class FlightController extends ApiBaseController
                 TicketIssueCheckDataService::checkFlights($flightUpdateApiForm->flights);
                 TicketIssueCheckDataService::checkPayments($flightUpdateApiForm->payments);
 
-                $this->transactionManager->wrap(function () use ($flightUpdateApiForm) {
-                    $this->ticketIssueProcessingDataService->processingQuote($flightUpdateApiForm);
+                $this->transactionManager->wrap(function () use ($flightUpdateApiForm, $post) {
+                    $this->ticketIssueProcessingDataService->processingQuote($flightUpdateApiForm, $post);
                     $this->ticketIssueProcessingDataService->processingPayment($flightUpdateApiForm);
                     $this->eventDispatcher->dispatch(new FlightProductProcessedSuccessEvent($flightUpdateApiForm->order->or_id));
                 });

@@ -59,12 +59,12 @@ class TicketIssueProcessingDataService
         $this->paymentMethodRepository = $paymentMethodRepository;
     }
 
-    public function processingQuote(FlightUpdateRequestApiForm $flightUpdateApiForm): void
+    public function processingQuote(FlightUpdateRequestApiForm $flightUpdateApiForm, array $post): void
     {
         foreach ($flightUpdateApiForm->flights as $key => $flight) {
             /** @var FlightQuote $flightQuote */
             $flightQuote = FlightQuote::findLastByFlightRequestUid($flight['uniqueId']);
-            $flightQuote->fq_ticket_json = $flight;
+            $flightQuote->fq_ticket_json = $post;
             $this->flightQuoteRepository->save($flightQuote);
 
             $productQuote = $flightQuote->fqProductQuote;
