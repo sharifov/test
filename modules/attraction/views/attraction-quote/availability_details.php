@@ -93,27 +93,33 @@ $form = ActiveForm::begin([
 <?= $form->field($paxForm, 'availability_id')->hiddenInput()->label(false) ?>
 
 <?php if (!empty($availability['pricingCategoryList']['nodes'])) : ?>
-    <div class="row">
-        <div class="col-md-12">
-            <h2>Pricing Category List</h2>
-            <table class="table table-bordered">
-                <thead>
-                <tr class=" bg-info">
-                    <th>Nr.</th>
-                    <th>Label</th>
-                    <th>Min Participants</th>
-                    <th>Max Participants</th>
-                    <th>Min Age</th>
-                    <th>Max Age</th>
-                    <th>Price per Unit</th>
-                    <th>Quantity</th>
-                </tr>
-                </thead>
-                <tbody>
-
+    <?php if (
+    !empty(array_filter($availability['pricingCategoryList']['nodes'], function ($a) {
+        return $a !== null;
+    }))
+) : ?>
+        <div class="row">
+            <div class="col-md-12">
+                <h2>Pricing Category List</h2>
+                <table class="table table-bordered">
+                    <thead>
+                    <tr class=" bg-info">
+                        <th>Nr.</th>
+                        <th>Label</th>
+                        <th>Min Participants</th>
+                        <th>Max Participants</th>
+                        <th>Min Age</th>
+                        <th>Max Age</th>
+                        <th>Price per Unit</th>
+                        <th>Quantity</th>
+                    </tr>
+                    </thead>
+                    <tbody>
                     <?php foreach ($availability['pricingCategoryList']['nodes'] as $key => $pax) : ?>
                         <tr>
-                            <td title="Pax category Id: <?= Html::encode($pax['id']) ?>"><?= ($key + 1) ?>. Pricing Category</td>
+                            <td title="Pax category Id: <?= Html::encode($pax['id']) ?>"><?= ($key + 1) ?>. Pricing
+                                Category
+                            </td>
                             <td><b><?= Html::encode($pax['label']) ?></b></td>
                             <td><?= Html::encode($pax['minParticipants']) ?></td>
                             <td><?= Html::encode($pax['maxParticipants']) ?></td>
@@ -121,21 +127,25 @@ $form = ActiveForm::begin([
                             <td><?= Html::encode($pax['maxAge']) ?></td>
                             <td><?= Html::encode($pax['priceFormattedText']) ?></td>
                             <td style="width: 40px">
-                                <?= $form->field($paxForm, 'pax_quantity[' . $key . '][' . $pax['id'] . ']')->textInput([                               'type' => 'number',
+                                <?= $form->field($paxForm, 'pax_quantity[' . $key . '][' . $pax['id'] . ']')->textInput([
+                                    'type' => 'number',
                                     'value' => 0,
                                     'min' => 0
                                 ])->label(false) ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
 
-    <div class="form-group text-center">
-        <?= Html::submitButton('<i class="fa fa-save"></i> Add Quote', ['class' => 'btn btn-success']) ?>
-    </div>
+        <div class="form-group text-center">
+            <?= Html::submitButton('<i class="fa fa-save"></i> Add Quote', ['class' => 'btn btn-success']) ?>
+        </div>
+    <?php else : ?>
+        <div class="text-center"> Not found Pricing Categories </div>
+    <?php endif; ?>
 <?php endif; ?>
 
 <?php ActiveForm::end() ?>
