@@ -574,4 +574,10 @@ class HotelQuote extends ActiveRecord implements Quotable, ProductDataInterface
     {
         return ArrayHelper::getValue($this, 'hqProductQuote.pqOrder');
     }
+
+    //todo
+    public function canFreeCancel(): bool
+    {
+        return true;
+    }
 }

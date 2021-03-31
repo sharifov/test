@@ -22,6 +22,11 @@ return [
         OrderListeners\OrderChangeStatusLogListener::class,
     ],
     OrderEvents\OrderCancelProcessingEvent::class => [
+        processManager\listeners\StopOrderProcessManagerListener::class,
+        OrderListeners\OrderChangeStatusLogListener::class,
+    ],
+    OrderEvents\OrderCancelFailedEvent::class => [
+        processManager\listeners\StopOrderProcessManagerListener::class,
         OrderListeners\OrderChangeStatusLogListener::class,
     ],
     OrderEvents\OrderDeclinedEvent::class => [
@@ -94,6 +99,10 @@ return [
         processManager\listeners\OrderProcessStatusReloadLeadOrdersListener::class,
     ],
     processManager\events\FailedEvent::class => [
+        processManager\listeners\LogStatusListener::class,
+        processManager\listeners\OrderProcessStatusReloadLeadOrdersListener::class,
+    ],
+    processManager\events\StoppedEvent::class => [
         processManager\listeners\LogStatusListener::class,
         processManager\listeners\OrderProcessStatusReloadLeadOrdersListener::class,
     ],

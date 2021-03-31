@@ -24,18 +24,18 @@ class OrderProcessManagerCanceler
         $this->clickToBookRepository = $clickToBookRepository;
     }
 
-    public function cancel(int $orderId): void
+    public function stop(int $orderId): void
     {
         $clickToBookManager = $this->clickToBookRepository->get($orderId);
         if ($clickToBookManager) {
-            $clickToBookManager->cancel(new \DateTimeImmutable());
+            $clickToBookManager->stop(new \DateTimeImmutable());
             $this->clickToBookRepository->save($clickToBookManager);
             return;
         }
 
         $phoneToBookManager = $this->phoneToBookRepository->get($orderId);
         if ($phoneToBookManager) {
-            $phoneToBookManager->cancel(new \DateTimeImmutable());
+            $phoneToBookManager->stop(new \DateTimeImmutable());
             $this->phoneToBookRepository->save($phoneToBookManager);
             return;
         }
