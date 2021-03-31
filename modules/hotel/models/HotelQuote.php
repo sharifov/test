@@ -354,7 +354,7 @@ class HotelQuote extends ActiveRecord implements Quotable, ProductDataInterface
 
                     if (!$importHotelRoomStatus) { // if not found in hotel_room_pax
                         if (!empty($qRoom->hqr_adults) && $qRoom->hqr_adults) { // adults
-                            for ($i = 0; $i <= $qRoom->hqr_adults; $i++) {
+                            for ($i = 0; $i < $qRoom->hqr_adults; $i++) {
                                 $hotelQuoteRoomPax = new HotelQuoteRoomPax();
                                 $hotelQuoteRoomPax->hqrp_hotel_quote_room_id = $qRoom->hqr_id;
                                 $hotelQuoteRoomPax->hqrp_type_id = $hotelQuoteRoomPax::PAX_TYPE_ADL;
@@ -371,7 +371,7 @@ class HotelQuote extends ActiveRecord implements Quotable, ProductDataInterface
                                     $hotelQuoteRoomPax->save();
                                 }
                             } else { // without age
-                                for ($i = 0; $i <= $qRoom->hqr_children; $i++) {
+                                for ($i = 0; $i < $qRoom->hqr_children; $i++) {
                                     $hotelQuoteRoomPax = new HotelQuoteRoomPax();
                                     $hotelQuoteRoomPax->hqrp_hotel_quote_room_id = $qRoom->hqr_id;
                                     $hotelQuoteRoomPax->hqrp_type_id = $hotelQuoteRoomPax::PAX_TYPE_CHD;

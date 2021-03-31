@@ -443,7 +443,31 @@ class FlightQuoteManageService implements ProductQuoteService
             $flightQuoteLog = FlightQuoteStatusLog::create($flightQuote->fq_created_user_id, $flightQuote->fq_id, $productQuote->pq_status_id);
             $this->flightQuoteStatusLogRepository->save($flightQuoteLog);
 
-            $this->createQuotePaxPrice($flightQuote, $productQuote, $quoteData);
+            foreach ($quoteData['passengers'] as $passengerType => $passenger) {
+                $flightQuotePaxPrice = FlightQuotePaxPrice::create((new FlightQuotePaxPriceDTO($flightQuote, $productQuote, $passenger, $passengerType, $quoteData)));
+                $this->flightQuotePaxPriceRepository->save($flightQuotePaxPrice);
+
+                $paxKeySet = null;
+                for ($i = 0; $i < $passenger['cnt']; $i++) {
+                    $flightPax = FlightPax::create(new FlightPaxDTO($flightQuote->fqFlight, $passengerType));
+                    foreach ($form->flightPaxData as $key => $paxForm) {
+                        if ($paxForm->type === $passengerType && $paxKeySet !== $key) {
+                            $flightPax->fp_first_name = $paxForm->first_name;
+                            $flightPax->fp_last_name = $paxForm->last_name;
+                            $flightPax->fp_middle_name = $paxForm->middle_name;
+                            $flightPax->fp_dob = $paxForm->birth_date;
+                            $flightPax->fp_nationality = $paxForm->nationality;
+                            $flightPax->fp_gender = $paxForm->gender;
+                            $flightPax->fp_email = $paxForm->email;
+                            $flightPax->fp_citizenship = $paxForm->citizenship;
+
+                            $paxKeySet = $key;
+                            break;
+                        }
+                    }
+                    $this->flightPaxRepository->save($flightPax);
+                }
+            }
 
             $this->calcProductQuotePrice($productQuote, $flightQuote);
 

@@ -2,7 +2,6 @@
 
 namespace modules\order\src\forms\api\createC2b;
 
-use common\models\Project;
 use sales\forms\CompositeForm;
 
 /**

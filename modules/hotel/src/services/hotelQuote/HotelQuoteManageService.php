@@ -5,6 +5,7 @@ namespace modules\hotel\src\services\hotelQuote;
 use modules\hotel\models\Hotel;
 use modules\hotel\models\HotelList;
 use modules\hotel\models\HotelQuote;
+use modules\hotel\models\HotelQuoteRoomPax;
 use modules\hotel\src\exceptions\HotelCodeException;
 use modules\order\src\exceptions\OrderC2BDtoException;
 use modules\order\src\exceptions\OrderC2BException;
@@ -47,16 +48,40 @@ class HotelQuoteManageService implements ProductQuoteService
             $currency = $hotelData['currency'] ?? 'USD';
 
             $hotelModel = HotelList::findOrCreateByData($hotelData);
-            HotelQuote::findOrCreateByData($hotelData, $hotelModel, $product, null, $form->orderId, $currency);
+            $hotelQuote = HotelQuote::findOrCreateByData($hotelData, $hotelModel, $product, null, $form->orderId, $currency);
 
             $productHolder = ProductHolder::create(
-                $product->getId(),
+                $product->ph_product_id,
                 $form->holder->firstName,
                 $form->holder->lastName,
                 $form->holder->email,
                 $form->holder->phone,
             );
             $this->productHolderRepository->save($productHolder);
+
+            $hotelQuote->refresh();
+            foreach ($hotelQuote->hotelQuoteRooms as $quoteRoom) {
+                if ($quoteRoomPax = HotelQuoteRoomPax::find()->byQuoteRoomId($quoteRoom->hqr_id)->all()) {
+                    $updatePaxKey = null;
+                    foreach ($quoteRoomPax as $roomPax) {
+                        foreach ($form->hotelPaxData as $key => $paxData) {
+                            if ($updatePaxKey !== $key && $quoteRoom->hqr_key === $paxData->hotelRoomKey && $roomPax->getTypeShortName() ===  $paxData->type) {
+                                $roomPax->hqrp_first_name = $paxData->first_name;
+                                $roomPax->hqrp_last_name = $paxData->last_name;
+                                $roomPax->hqrp_age = $paxData->age;
+                                $roomPax->hqrp_dob = $paxData->birth_date;
+
+                                if (!$roomPax->save()) {
+                                    \Yii::warning('Hotel room pax personal info saving failed: ' . $roomPax->getErrorSummary(true)[0], 'HotelQuoteManageService::c2bHandle');
+                                }
+
+                                $updatePaxKey = $key;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
         } catch (\Throwable $e) {
             $dto = new OrderC2BDtoException(
                 $product,

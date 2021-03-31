@@ -3979,13 +3979,6 @@
             "group": "Parameter",
             "type": "string",
             "optional": false,
-            "field": "quotes.paxData",
-            "description": "<p>Product quote pax data</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "optional": false,
             "field": "quotes.quoteOtaId",
             "description": "<p>Product quote custom id</p>"
           },
@@ -4027,6 +4020,153 @@
             "optional": false,
             "field": "quotes.holder.phone",
             "description": "<p>Holder phone</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": true,
+            "field": "quotes.flightPaxData",
+            "description": "<p>[]      Flight pax data</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "allowedValues": [
+              "\"ADT\"",
+              "\"CHD\"",
+              "\"INF\""
+            ],
+            "optional": false,
+            "field": "quotes.flightPaxData.type",
+            "description": "<p>Pax type</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 40",
+            "optional": true,
+            "field": "quotes.flightPaxData.first_name",
+            "description": "<p>First Name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 40",
+            "optional": true,
+            "field": "quotes.flightPaxData.last_name",
+            "description": "<p>Last Name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 40",
+            "optional": true,
+            "field": "quotes.flightPaxData.middle_name",
+            "description": "<p>Middle Name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 5",
+            "optional": true,
+            "field": "quotes.flightPaxData.nationality",
+            "description": "<p>Nationality</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 1",
+            "optional": true,
+            "field": "quotes.flightPaxData.gender",
+            "description": "<p>Gender</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "format yyyy-mm-dd",
+            "optional": true,
+            "field": "quotes.flightPaxData.birth_date",
+            "description": "<p>Birth Date</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 100",
+            "optional": true,
+            "field": "quotes.flightPaxData.email",
+            "description": "<p>Email</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 5",
+            "optional": true,
+            "field": "quotes.flightPaxData.language",
+            "description": "<p>Language</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 5",
+            "optional": true,
+            "field": "quotes.flightPaxData.citizenship",
+            "description": "<p>Citizenship</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": true,
+            "field": "quotes.hotelPaxData",
+            "description": "<p>[]      Flight pax data</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "allowedValues": [
+              "\"ADT\"",
+              "\"CHD\""
+            ],
+            "optional": false,
+            "field": "quotes.hotelPaxData.type",
+            "description": "<p>Pax type</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 40",
+            "optional": true,
+            "field": "quotes.hotelPaxData.first_name",
+            "description": "<p>First Name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 40",
+            "optional": true,
+            "field": "quotes.hotelPaxData.last_name",
+            "description": "<p>Last Name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "format yyyy-mm-dd",
+            "optional": true,
+            "field": "quotes.hotelPaxData.birth_date",
+            "description": "<p>Birth Date</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "integer",
+            "optional": true,
+            "field": "quotes.hotelPaxData.age",
+            "description": "<p>Age</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "quotes.hotelPaxData.hotelRoomKey",
+            "description": "<p>Hotel Room Key</p>"
           }
         ]
       }

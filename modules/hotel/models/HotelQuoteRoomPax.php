@@ -29,6 +29,11 @@ class HotelQuoteRoomPax extends ActiveRecord
         self::PAX_TYPE_CHD => 'Child',
     ];
 
+    public const PAX_TYPE_SHORT_NAME_LIST = [
+        self::PAX_TYPE_ADL => 'ADT',
+        self::PAX_TYPE_CHD => 'CHD'
+    ];
+
     /**
      * {@inheritdoc}
      */
@@ -112,5 +117,10 @@ class HotelQuoteRoomPax extends ActiveRecord
         }
 
         return $paxes;
+    }
+
+    public function getTypeShortName(): string
+    {
+        return self::PAX_TYPE_SHORT_NAME_LIST[$this->hqrp_type_id] ?? '';
     }
 }

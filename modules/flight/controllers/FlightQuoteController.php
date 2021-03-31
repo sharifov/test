@@ -410,7 +410,7 @@ class FlightQuoteController extends FController
 
                 $flightQuotePaxPrice = $this->flightQuotePaxPriceRepository->findByIdAndCode($fqId, $paxCodeId);
 
-                $this->flightQuoteManageService->updateAgentMarkup($flightQuotePaxPrice, $value);
+                $this->flightQuoteManageService->updateAgentMarkup($flightQuotePaxPrice, (float)$value);
                 $leadId = $flightQuotePaxPrice->qppFlightQuote->fqProductQuote->pqProduct->pr_lead_id ?? null;
                 if ($leadId) {
                     Notifications::pub(

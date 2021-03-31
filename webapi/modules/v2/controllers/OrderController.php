@@ -1876,7 +1876,6 @@ class OrderController extends BaseController
      * @apiParam {Object[]}             quotes                  Product quotes
      * @apiParam {string}               quotes.productKey       Product key
      * @apiParam {string}               quotes.originSearchData       Product quote origin search data
-     * @apiParam {string}               quotes.paxData          Product quote pax data
      * @apiParam {string}               quotes.quoteOtaId          Product quote custom id
      *
      * @apiParam {Object}               quotes.holder                         Holder Info
@@ -1884,6 +1883,26 @@ class OrderController extends BaseController
      * @apiParam {string{max 50}}       quotes.holder.lastName                Holder last name
      * @apiParam {string{max 100}}      quotes.holder.email                   Holder email
      * @apiParam {string{max 20}}       quotes.holder.phone                   Holder phone
+     *
+     * @apiParam {Object}                           [quotes.flightPaxData][]      Flight pax data
+     * @apiParam {string="ADT","CHD","INF"}         quotes.flightPaxData.type                  Pax type
+     * @apiParam {string{max 40}}                   [quotes.flightPaxData.first_name]            First Name
+     * @apiParam {string{max 40}}                   [quotes.flightPaxData.last_name]             Last Name
+     * @apiParam {string{max 40}}                   [quotes.flightPaxData.middle_name]           Middle Name
+     * @apiParam {string{max 5}}                    [quotes.flightPaxData.nationality]           Nationality
+     * @apiParam {string{max 1}}                    [quotes.flightPaxData.gender]                Gender
+     * @apiParam {string{format yyyy-mm-dd}}        [quotes.flightPaxData.birth_date]            Birth Date
+     * @apiParam {string{max 100}}                  [quotes.flightPaxData.email]                 Email
+     * @apiParam {string{max 5}}                    [quotes.flightPaxData.language]              Language
+     * @apiParam {string{max 5}}                    [quotes.flightPaxData.citizenship]           Citizenship
+     *
+     * @apiParam {Object}                           [quotes.hotelPaxData][]      Flight pax data
+     * @apiParam {string="ADT","CHD"}               quotes.hotelPaxData.type                    Pax type
+     * @apiParam {string{max 40}}                   [quotes.hotelPaxData.first_name]            First Name
+     * @apiParam {string{max 40}}                   [quotes.hotelPaxData.last_name]             Last Name
+     * @apiParam {string{format yyyy-mm-dd}}        [quotes.hotelPaxData.birth_date]            Birth Date
+     * @apiParam {integer}                          [quotes.hotelPaxData.age]                   Age
+     * @apiParam {string}                           quotes.hotelPaxData.hotelRoomKey            Hotel Room Key
      *
      * @return ErrorResponse|SuccessResponse
      */

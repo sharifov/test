@@ -31,4 +31,9 @@ class HotelQuoteRoomPaxQuery extends \yii\db\ActiveQuery
     {
         return parent::one($db);
     }
+
+    public function byQuoteRoomId(int $id): HotelQuoteRoomPaxQuery
+    {
+        return $this->andWhere(['hqrp_hotel_quote_room_id' => $id]);
+    }
 }
