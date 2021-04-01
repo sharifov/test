@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(['id' => 'client_chat_crud']); ?>
-    <?php  /*echo $this->render('_search', ['model' => $searchModel]);*/ ?>
+    <?php  echo $this->render('_search', ['model' => $searchModel]); ?>
     <?php if (Auth::user()->isAdmin()) : ?>
     <p>
     <div class="btn-group">
@@ -59,7 +59,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'cch_id',
                 'options' => ['style' => 'width:100px']
             ],
-            /*[
+            [
                 'attribute' => 'cch_parent_id',
                 'value' => static function (ClientChat $model) {
                     return $model->cch_parent_id ?
@@ -73,7 +73,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'options' => ['style' => 'width:100px'],
             ],
             'cch_rid',
-            [
+            /*[
                 'label' => 'Messages',
                 'value' => static function (ClientChat $model) {
                     $count = ClientChatMessage::countByChatId($model->cch_id);
