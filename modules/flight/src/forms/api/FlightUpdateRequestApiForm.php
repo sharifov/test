@@ -29,7 +29,7 @@ class FlightUpdateRequestApiForm extends Model
         return [
             [['orderUid'], 'required'],
             [['orderUid'], 'string', 'max' => 255],
-            [['orderUid'], 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['orderUid' => 'or_uid']],
+            [['orderUid'], 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['orderUid' => 'or_gid']],
             [['orderUid'], 'setOrder'],
 
             [['flights'], 'required'],
@@ -43,12 +43,18 @@ class FlightUpdateRequestApiForm extends Model
             [['payments'], 'filter', 'filter' => static function ($value) {
                 return JsonHelper::decode($value);
             }],
+
+            [['trips'], 'required'],
+            [['trips'], CheckJsonValidator::class],
+            [['trips'], 'filter', 'filter' => static function ($value) {
+                return JsonHelper::decode($value);
+            }],
         ];
     }
 
     public function setOrder()
     {
-        $this->order = Order::findOne(['or_uid' => $this->orderUid]);
+        $this->order = Order::findOne(['or_gid' => $this->orderUid]);
     }
 
     public function formName(): string

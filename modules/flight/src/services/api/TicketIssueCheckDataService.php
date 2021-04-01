@@ -4,7 +4,7 @@ namespace modules\flight\src\services\api;
 
 use modules\flight\src\forms\api\FlightUpdateRequestApiForm;
 use modules\flight\src\forms\api\TicketIssuePaymentApiForm;
-use modules\flight\src\forms\TicketIssueFlightApiForm;
+use modules\flight\src\forms\api\TicketIssueFlightApiForm;
 use sales\helpers\ErrorsToStringHelper;
 
 /**

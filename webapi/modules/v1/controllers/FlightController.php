@@ -771,6 +771,9 @@ class FlightController extends ApiBaseController
         try {
             // TODO::
             $this->transactionManager->wrap(function () use ($flightUpdateApiForm, $post) {
+                //$this->ticketIssueProcessingDataService->processingPayment($flightTicketIssueRequestApiForm);
+
+
                 $this->eventDispatcher->dispatch(new FlightProductProcessedSuccessEvent($flightUpdateApiForm->order->or_id));
             });
 

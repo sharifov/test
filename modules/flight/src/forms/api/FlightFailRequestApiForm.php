@@ -22,7 +22,7 @@ class FlightFailRequestApiForm extends Model
         return [
             [['orderUid'], 'required'],
             [['orderUid'], 'string', 'max' => 15],
-            [['orderUid'], 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['orderUid' => 'or_uid']],
+            [['orderUid'], 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['orderUid' => 'or_gid']],
             [['orderUid'], 'setOrder'],
 
             [['description'], 'string', 'max' => 100],
@@ -31,7 +31,7 @@ class FlightFailRequestApiForm extends Model
 
     public function setOrder()
     {
-        $this->order = Order::findOne(['or_uid' => $this->orderUid]);
+        $this->order = Order::findOne(['or_gid' => $this->orderUid]);
     }
 
     public function formName(): string

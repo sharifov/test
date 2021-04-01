@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\flight\src\forms;
+namespace modules\flight\src\forms\api;
 
 use frontend\helpers\JsonHelper;
 use modules\flight\models\FlightQuote;
