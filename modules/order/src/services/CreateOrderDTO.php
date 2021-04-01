@@ -42,10 +42,11 @@ class CreateOrderDTO
         array $requestData = [],
         ?int $creationTypeId = null,
         ?int $requestId = null,
-        ?int $projectId = null
+        ?int $projectId = null,
+        ?int $status = OrderStatus::PENDING
     ) {
         $this->payStatus = OrderPayStatus::NOT_PAID;
-        $this->status = OrderStatus::PENDING;
+        $this->status = $status;
         $this->leadId = $leadId;
         $this->requestData = $requestData;
         $this->clientCurrency = $clientCurrency;

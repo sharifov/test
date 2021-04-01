@@ -426,6 +426,11 @@ class FlightQuoteManageService implements ProductQuoteService
 
             $productQuote = ProductQuote::create(new ProductQuoteCreateDTO($flightProduct, $quoteData, null), $productTypeServiceFee);
             $productQuote->pq_order_id = $form->orderId;
+            if ($form->isBooked()) {
+                $productQuote->applied();
+            } else {
+                $productQuote->failed();
+            }
             $this->productQuoteRepository->save($productQuote);
 
             $productHolder = ProductHolder::create(

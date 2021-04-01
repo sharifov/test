@@ -13,6 +13,7 @@ use modules\order\src\forms\api\createC2b\QuotesForm;
 use modules\product\src\entities\productHolder\ProductHolder;
 use modules\product\src\entities\productHolder\ProductHolderRepository;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\interfaces\Productable;
 use modules\product\src\interfaces\ProductQuoteService;
 use yii\helpers\Json;
@@ -22,6 +23,7 @@ use yii\helpers\Json;
  * @package modules\hotel\src\services\hotelQuote
  *
  * @property ProductHolderRepository $productHolderRepository
+ * @property ProductQuoteRepository $productQuoteRepository
  */
 class HotelQuoteManageService implements ProductQuoteService
 {
@@ -29,10 +31,15 @@ class HotelQuoteManageService implements ProductQuoteService
      * @var ProductHolderRepository
      */
     private ProductHolderRepository $productHolderRepository;
+    /**
+     * @var ProductQuoteRepository
+     */
+    private ProductQuoteRepository $productQuoteRepository;
 
-    public function __construct(ProductHolderRepository $productHolderRepository)
+    public function __construct(ProductHolderRepository $productHolderRepository, ProductQuoteRepository $productQuoteRepository)
     {
         $this->productHolderRepository = $productHolderRepository;
+        $this->productQuoteRepository = $productQuoteRepository;
     }
 
     /**
@@ -49,6 +56,14 @@ class HotelQuoteManageService implements ProductQuoteService
 
             $hotelModel = HotelList::findOrCreateByData($hotelData);
             $hotelQuote = HotelQuote::findOrCreateByData($hotelData, $hotelModel, $product, null, $form->orderId, $currency);
+
+            $productQuote = $hotelQuote->hqProductQuote;
+            if ($form->isBooked()) {
+                $productQuote->applied();
+            } else {
+                $productQuote->failed();
+            }
+            $this->productQuoteRepository->save($productQuote);
 
             $productHolder = ProductHolder::create(
                 $product->ph_product_id,

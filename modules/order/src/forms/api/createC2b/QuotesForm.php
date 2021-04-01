@@ -11,6 +11,7 @@ use sales\forms\CompositeForm;
  * @package modules\order\src\forms\api\createC2b
  *
  * @property string $productKey
+ * @property string $status
  * @property string $originSearchData
  * @property string $quoteOtaId
  * @property int $orderId
@@ -24,6 +25,8 @@ class QuotesForm extends CompositeForm
 {
     public $productKey;
 
+    public $status;
+
     public $originSearchData;
 
     public $quoteOtaId;
@@ -32,11 +35,15 @@ class QuotesForm extends CompositeForm
 
     public $productType;
 
+    private const STATUS_BOOKED = 'booked';
+    private const STATUS_FAILED = 'failed';
+
     public function rules(): array
     {
         return [
             [['productKey', 'originSearchData', 'quoteOtaId'], 'required'],
-            [['productKey', 'quoteOtaId'], 'string'],
+            [['status'], 'string'],
+            [['status'], 'in', 'range' => [self::STATUS_BOOKED, self::STATUS_FAILED]],
             [['productKey'], 'validateProductType'],
             [['originSearchData'], CheckJsonValidator::class],
         ];
@@ -94,5 +101,15 @@ class QuotesForm extends CompositeForm
             }
             $this->hotelPaxData = $paxData;
         }
+    }
+
+    public function isBooked(): bool
+    {
+        return $this->status === self::STATUS_BOOKED;
+    }
+
+    public function isFailed(): bool
+    {
+        return $this->status === self::STATUS_FAILED;
     }
 }

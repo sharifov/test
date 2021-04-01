@@ -2,6 +2,7 @@
 
 namespace modules\order\src\forms\api\createC2b;
 
+use modules\order\src\entities\order\OrderStatus;
 use sales\forms\CompositeForm;
 
 /**
@@ -13,12 +14,23 @@ use sales\forms\CompositeForm;
  * @property BillingInfoForm $billingInfo
  * @property string $sourceCid
  * @property string $requestUid
+ * @property string $status
  */
 class OrderCreateC2BForm extends CompositeForm
 {
     public $sourceCid;
 
     public $requestUid;
+
+    public $status;
+
+    private const STATUS_SUCCESS = 'success';
+    private const STATUS_FAILED = 'failed';
+
+    private const ORDER_STATUS_RELATION = [
+        self::STATUS_SUCCESS => OrderStatus::PROCESSING,
+        self::STATUS_FAILED => OrderStatus::ERROR
+    ];
 
     public function __construct(int $cntQuotes, bool $creditCardForm = false, bool $billingInfoForm = false, $config = [])
     {
@@ -39,8 +51,9 @@ class OrderCreateC2BForm extends CompositeForm
     public function rules(): array
     {
         return [
-            [['sourceCid', 'requestUid'], 'required'],
-            [['sourceCid', 'requestUid'], 'string', 'max' => 10]
+            [['sourceCid', 'requestUid', 'status'], 'required'],
+            [['sourceCid', 'requestUid', 'status'], 'string', 'max' => 10],
+            [['status'], 'in', 'range' => [self::STATUS_SUCCESS, self::STATUS_FAILED]]
         ];
     }
 
@@ -55,5 +68,20 @@ class OrderCreateC2BForm extends CompositeForm
     protected function internalForms(): array
     {
         return ['quotes', 'creditCard', 'billingInfo'];
+    }
+
+    public function isSuccess(): bool
+    {
+        return $this->status === self::STATUS_SUCCESS;
+    }
+
+    public function isFailed(): bool
+    {
+        return $this->status === self::STATUS_FAILED;
+    }
+
+    public function getOrderStatus(): int
+    {
+        return self::ORDER_STATUS_RELATION[$this->status] ?? OrderStatus::PROCESSING;
     }
 }

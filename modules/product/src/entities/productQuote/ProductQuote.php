@@ -339,6 +339,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $this->pq_status_id = ProductQuoteStatus::APPLIED;
     }
 
+    public function failed(): void
+    {
+        $this->pq_status_id = ProductQuoteStatus::ERROR;
+    }
+
     /**
      * @return float
      */
