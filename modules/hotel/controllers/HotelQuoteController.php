@@ -141,6 +141,7 @@ class HotelQuoteController extends FController
             }
         }
         $hotelList = $result['hotels'] ?? [];
+        $hotelTypes = $result['hotelTypes'] ?? [];
 
         /*foreach ($hotelList as $key => $value) {
             foreach ($value['rooms'] as $keyRoom => $room) {
@@ -157,7 +158,7 @@ class HotelQuoteController extends FController
         $hotelList = array_values($hotelList);*/
 
         if (!empty($hotelList)) {
-            $form->initFilters($hotelList);
+            $form->initFilters($hotelList, $hotelTypes);
             $hotelList = $form->applyFilters($hotelList);
         }
 
@@ -178,7 +179,8 @@ class HotelQuoteController extends FController
             'dataProvider' => $dataProvider,
             'hotelSearch'   => $hotel,
             'filtersForm' => $form,
-            'showFilters' => empty($result['hotels'])
+            'showFilters' => empty($result['hotels']),
+            'hotelTypes' => $hotelTypes
         ]);
     }
 

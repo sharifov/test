@@ -20,6 +20,8 @@ use yii\helpers\VarDumper;
  * @property array $selectedBoardsTypes
  * @property array $serviceTypes
  * @property array $selectedServiceTypes
+ * @property array $hotelTypes
+ * @property array $selectedHotelTypes
  */
 
 class HotelQuoteSearchForm extends Model
@@ -34,12 +36,14 @@ class HotelQuoteSearchForm extends Model
     public $selectedBoardsTypes = [];
     public $serviceTypes = [];
     public $selectedServiceTypes = [];
+    public $hotelTypes = [];
+    public $selectedHotelTypes = [];
 
     public function rules(): array
     {
         return [
             [['onlyHotels', 'priceRange', 'max', 'min', 'categories', 'selectedCategories', 'boardsTypes', 'selectedBoardsTypes',
-                'serviceTypes', 'selectedServiceTypes'], 'safe']
+                'serviceTypes', 'selectedServiceTypes', 'hotelTypes', 'selectedHotelTypes'], 'safe']
         ];
     }
 
@@ -49,11 +53,12 @@ class HotelQuoteSearchForm extends Model
             'onlyHotels' => 'Show Hotels Only',
             'selectedCategories' => 'Category',
             'selectedBoardsTypes' => 'Board Type',
-            'selectedServiceTypes' => 'Service'
+            'selectedServiceTypes' => 'Service',
+            'selectedHotelTypes' => 'Type of Hotel'
         ];
     }
 
-    public function initFilters(array $hotels): void
+    public function initFilters(array $hotels, array $types): void
     {
         if (empty($this->priceRange)) {
             $this->priceRange = self::getRoomsPriceRange($hotels);
@@ -67,9 +72,13 @@ class HotelQuoteSearchForm extends Model
             $this->boardsTypes = self::getBoards($hotels);
         }
 
-        if (empty($this->serviceTypes)) {
-            $this->serviceTypes = self::getServiceTypes($hotels);
+        if (empty($this->hotelTypes)) {
+            $this->hotelTypes = self::getTypes($types);
         }
+
+        /*if (empty($this->serviceTypes)) {
+            $this->serviceTypes = self::getServiceTypes($hotels);
+        }*/
     }
 
     /**
@@ -95,11 +104,29 @@ class HotelQuoteSearchForm extends Model
             $hotels = self::filterByBoard($hotels, $this->boardsTypes, $this->selectedBoardsTypes);
         }
 
-        if (!empty($this->selectedServiceTypes)) {
-            $hotels = self::filterByServiceType($hotels, $this->serviceTypes, $this->selectedServiceTypes);
+        if (!empty($this->selectedHotelTypes)) {
+            $hotels = self::filterByHotelTypes($hotels, $this->selectedHotelTypes);
         }
 
+        /*if (!empty($this->selectedServiceTypes)) {
+            $hotels = self::filterByServiceType($hotels, $this->serviceTypes, $this->selectedServiceTypes);
+        }*/
+
         return $hotels;
+    }
+
+    private static function filterByHotelTypes(array $hotels, array $types): array
+    {
+        $filteredHotels = [];
+
+        foreach ($hotels as $key => $hotel) {
+            if (!empty($hotel['segmentCodes'])) {
+                if (!empty(array_intersect($hotel['segmentCodes'], $types))) {
+                    $filteredHotels[$key] = $hotels[$key];
+                }
+            }
+        }
+        return  $filteredHotels;
     }
 
     /**
@@ -232,6 +259,17 @@ class HotelQuoteSearchForm extends Model
         }
 
         return $boardsTypes;
+    }
+
+    private function getTypes(array $types): array
+    {
+        $hotelTypes = [];
+
+        foreach ($types as $type) {
+            $hotelTypes[$type['code']] = $type['name'];
+        }
+
+        return $hotelTypes;
     }
 
     private function getCategories(array $hotels): array
