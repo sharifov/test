@@ -1721,6 +1721,14 @@ define({ "api": [
             "optional": false,
             "field": "orderUid",
             "description": "<p>Order Uid</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "100",
+            "optional": true,
+            "field": "description",
+            "description": "<p>Description</p>"
           }
         ]
       },
