@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(['id' => 'client_chat_crud']); ?>
-    <?php  /*echo $this->render('_search', ['model' => $searchModel]);*/ ?>
+    <?php  echo $this->render('_search', ['model' => $searchModel]); ?>
     <?php if (Auth::user()->isAdmin()) : ?>
     <p>
     <div class="btn-group">
