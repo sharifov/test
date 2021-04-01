@@ -451,7 +451,7 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
         if (!array_key_exists($status, OrderStatus::getList())) {
             throw new \InvalidArgumentException('Invalid Status');
         }
-        OrderStatus::guard($this->or_status_id, $status);
+//        OrderStatus::guard($this->or_status_id, $status);
 
         $this->or_status_id = $status;
     }
