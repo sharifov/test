@@ -20,6 +20,7 @@ use sales\forms\CompositeForm;
  * @property ProductType $productType
  * @property FlightPaxDataForm[] $flightPaxData
  * @property HotelPaxDataForm[] $hotelPaxData
+ * @property ProductQuoteOptionsForm[] $options
  */
 class QuotesForm extends CompositeForm
 {
@@ -54,6 +55,7 @@ class QuotesForm extends CompositeForm
         $this->holder = new ProductHolderForm();
         $this->createFlightPaxDataForm($data);
         $this->createHotelPaxDataForm($data);
+        $this->createOptionsForm($data);
         return parent::load($data, $formName);
     }
 
@@ -67,7 +69,7 @@ class QuotesForm extends CompositeForm
      */
     protected function internalForms(): array
     {
-        return ['holder', 'flightPaxData', 'hotelPaxData'];
+        return ['holder', 'flightPaxData', 'hotelPaxData', 'options'];
     }
 
     public function validateProductType(): bool
@@ -100,6 +102,18 @@ class QuotesForm extends CompositeForm
                 $paxData[] = new HotelPaxDataForm();
             }
             $this->hotelPaxData = $paxData;
+        }
+    }
+
+    private function createOptionsForm(array $data): void
+    {
+        $this->options = [];
+        if (isset($data['options']) && $paxCnt = count((array)$data['options'])) {
+            $options = [];
+            for ($i = 0; $i < $paxCnt; $i++) {
+                $options[] = new ProductQuoteOptionsForm();
+            }
+            $this->options = $options;
         }
     }
 

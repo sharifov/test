@@ -26,6 +26,7 @@ use modules\order\src\services\OrderPriceUpdater;
 use modules\product\src\entities\product\ProductRepository;
 use modules\product\src\entities\productHolder\ProductHolder;
 use modules\product\src\entities\productHolder\ProductHolderRepository;
+use modules\product\src\entities\productOption\ProductOptionRepository;
 use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateProfitAmountEvent;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\flight\models\Flight;
@@ -52,6 +53,8 @@ use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentPaxBaggageC
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentPaxBaggageDTO;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentStopDTO;
 use modules\flight\src\useCases\flightQuote\create\ProductQuoteCreateDTO;
+use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
+use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository;
 use modules\product\src\entities\productType\ProductType;
 use modules\product\src\interfaces\Productable;
 use modules\product\src\interfaces\ProductQuoteService;
@@ -77,6 +80,8 @@ use yii\helpers\VarDumper;
  * @property FlightQuoteStatusLogRepository $flightQuoteStatusLogRepository
  * @property OrderPriceUpdater $orderPriceUpdater
  * @property ProductHolderRepository $productHolderRepository
+ * @property ProductOptionRepository $productOptionRepository
+ * @property ProductQuoteOptionRepository $productQuoteOptionRepository
  */
 class FlightQuoteManageService implements ProductQuoteService
 {
@@ -136,23 +141,15 @@ class FlightQuoteManageService implements ProductQuoteService
      * @var ProductHolderRepository
      */
     private ProductHolderRepository $productHolderRepository;
-
     /**
-     * FlightQuoteService constructor.
-     * @param FlightQuoteRepository $flightQuoteRepository
-     * @param ProductQuoteRepository $productQuoteRepository
-     * @param FlightPaxRepository $flightPaxRepository
-     * @param FlightQuoteTripRepository $flightQuoteTripRepository
-     * @param FlightQuoteSegmentRepository $flightQuoteSegmentRepository
-     * @param FlightQuoteSegmentStopRepository $flightQuoteSegmentStopRepository
-     * @param FlightQuoteSegmentPaxBaggageRepository $flightQuoteSegmentPaxBaggageRepository
-     * @param FlightQuoteSegmentPaxBaggageChargeRepository $baggageChargeRepository
-     * @param FlightQuotePaxPriceRepository $flightQuotePaxPriceRepository
-     * @param FlightQuoteStatusLogRepository $flightQuoteStatusLogRepository
-     * @param TransactionManager $transactionManager
-     * @param OrderPriceUpdater $orderPriceUpdater
-     * @param ProductHolderRepository $productHolderRepository
+     * @var ProductOptionRepository
      */
+    private ProductOptionRepository $productOptionRepository;
+    /**
+     * @var ProductQuoteOptionRepository
+     */
+    private ProductQuoteOptionRepository $productQuoteOptionRepository;
+
     public function __construct(
         FlightQuoteRepository $flightQuoteRepository,
         ProductQuoteRepository $productQuoteRepository,
@@ -166,7 +163,9 @@ class FlightQuoteManageService implements ProductQuoteService
         FlightQuoteStatusLogRepository $flightQuoteStatusLogRepository,
         TransactionManager $transactionManager,
         OrderPriceUpdater $orderPriceUpdater,
-        ProductHolderRepository $productHolderRepository
+        ProductHolderRepository $productHolderRepository,
+        ProductOptionRepository $productOptionRepository,
+        ProductQuoteOptionRepository $productQuoteOptionRepository
     ) {
         $this->flightQuoteRepository = $flightQuoteRepository;
         $this->productQuoteRepository = $productQuoteRepository;
@@ -181,6 +180,8 @@ class FlightQuoteManageService implements ProductQuoteService
         $this->transactionManager = $transactionManager;
         $this->orderPriceUpdater = $orderPriceUpdater;
         $this->productHolderRepository = $productHolderRepository;
+        $this->productOptionRepository = $productOptionRepository;
+        $this->productQuoteOptionRepository = $productQuoteOptionRepository;
     }
 
     /**
@@ -432,6 +433,26 @@ class FlightQuoteManageService implements ProductQuoteService
                 $productQuote->failed();
             }
             $this->productQuoteRepository->save($productQuote);
+
+            if (isset($form->options)) {
+                foreach ($form->options as $optionsForm) {
+                    $productOption = $this->productOptionRepository->findByKey($optionsForm->productOptionKey);
+
+                    $productQuoteOption = ProductQuoteOption::create(
+                        $productQuote->pq_id,
+                        $productOption->po_id,
+                        $optionsForm->name,
+                        $optionsForm->description,
+                        $optionsForm->price,
+                        $optionsForm->price,
+                        null,
+                        null
+                    );
+                    $productQuoteOption->calculateClientPrice();
+                    $productQuoteOption->pending();
+                    $this->productQuoteOptionRepository->save($productQuoteOption);
+                }
+            }
 
             $productHolder = ProductHolder::create(
                 $productQuote->pq_product_id,
