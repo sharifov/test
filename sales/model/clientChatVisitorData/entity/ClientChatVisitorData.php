@@ -169,34 +169,20 @@ class ClientChatVisitorData extends \yii\db\ActiveRecord
 
     public static function getCountryList(): array
     {
-        try {
-            $data = ArrayHelper::map(
-                self::find()->orderBy(['cvd_country' => SORT_ASC])->distinct()->asArray()->all(),
-                'cvd_country',
-                'cvd_country'
-            );
-        } catch (\Throwable $e) {
-            \Yii::error($e->getMessage(), 'ClientChatVisitorData:getCountryList');
-            return [];
-        }
-
-        return $data;
+        return ArrayHelper::map(
+            self::find()->orderBy(['cvd_country' => SORT_ASC])->distinct()->asArray()->all(),
+            'cvd_country',
+            'cvd_country'
+        );
     }
 
     public static function getCityList(): array
     {
-        try {
-            $data = ArrayHelper::map(
-                self::find()->orderBy(['cvd_city' => SORT_ASC])->distinct()->asArray()->all(),
-                'cvd_city',
-                'cvd_city'
-            );
-        } catch (\Throwable $e) {
-            \Yii::error($e->getMessage(), 'ClientChatVisitorData:getCityList');
-            return [];
-        }
-
-        return $data;
+        return ArrayHelper::map(
+            self::find()->orderBy(['cvd_city' => SORT_ASC])->distinct()->asArray()->all(),
+            'cvd_city',
+            'cvd_city'
+        );
     }
 
     public function getDecodedData(): array

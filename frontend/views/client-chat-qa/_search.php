@@ -97,12 +97,12 @@ use yii\widgets\Pjax;
             </div>
 
             <div class="row">
-                <div class="col-md-2">
-                    <?php echo $form->field($model, 'dataCountry')->dropDownList(ClientChatVisitorData::getCountryList(), ['prompt' => '-']) ?>
-                </div>
-                <div class="col-md-2">
-                    <?php echo $form->field($model, 'dataCity')->dropDownList(ClientChatVisitorData::getCityList(), ['prompt' => '-']) ?>
-                </div>
+                <!--<div class="col-md-2">
+                    <?php /*echo $form->field($model, 'dataCountry')->dropDownList(ClientChatVisitorData::getCountryList(), ['prompt' => '-']) */?>
+                </div>-->
+               <!-- <div class="col-md-2">
+                    <?php /*echo $form->field($model, 'dataCity')->dropDownList(ClientChatVisitorData::getCityList(), ['prompt' => '-']) */?>
+                </div>-->
                 <!--<div class="col-md-1">
                     <?php /* echo $form->field($model, 'messageBy')->dropDownList(ClientChatQaSearch::MESSAGE_BY_LIST, ['prompt' => '-']) */ ?>
                 </div>-->
