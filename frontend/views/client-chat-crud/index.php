@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(['id' => 'client_chat_crud']); ?>
-    <?php  echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php  /*echo $this->render('_search', ['model' => $searchModel]);*/ ?>
     <?php if (Auth::user()->isAdmin()) : ?>
     <p>
     <div class="btn-group">
@@ -73,7 +73,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'options' => ['style' => 'width:100px'],
             ],
             'cch_rid',
-            /*[
+            [
                 'label' => 'Messages',
                 'value' => static function (ClientChat $model) {
                     $count = ClientChatMessage::countByChatId($model->cch_id);
@@ -187,7 +187,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => DateTimeColumn::class,
                 'attribute' => 'cch_created_dt',
                 'format' => 'byUserDateTime',
-            ],*/
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
             ],
