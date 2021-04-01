@@ -26,7 +26,7 @@ class FlightCanceler
         /** @var FlightQuote $flightQuote */
         $flightQuote = $quote->childQuote;
         if (!$flightQuote->fq_flight_request_uid) {
-            throw new CanceledException('Unable to process flight cancellation.');
+            throw new FlightCanceledException();
         }
         try {
             if ($quote->isBooked()) {
@@ -34,7 +34,7 @@ class FlightCanceler
             } elseif ($quote->isInProgress()) {
                 FlightQuoteBookService::cancel($flightQuote->fq_flight_request_uid, $projectId);
             } else {
-                throw new CanceledException('Unable to process flight cancellation.');
+                throw new FlightCanceledException();
             }
             $quote->cancelled(null, 'Cancel Flow');
             $this->repository->save($quote);
@@ -46,6 +46,6 @@ class FlightCanceler
                 'hotel' => $quote->getAttributes(),
             ], 'FlightCanceler');
         }
-        throw new CanceledException('Unable to process flight cancellation.');
+        throw new FlightCanceledException();
     }
 }

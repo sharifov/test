@@ -33,6 +33,6 @@ class HotelCanceler
                 'hotel' => $quote->getAttributes(),
             ], 'HotelCanceler');
         }
-        throw new CanceledException('Unable to process hotel cancellation.');
+        throw new HotelCanceledException();
     }
 }

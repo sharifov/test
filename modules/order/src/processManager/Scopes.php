@@ -18,12 +18,12 @@ class Scopes extends ActiveQuery
 
     public function clickToBook(): self
     {
-        return $this->andWhere(['opm_type_id' => Type::CLICK_TO_BOOK]);
+        return $this->andWhere(['opm_type' => Type::CLICK_TO_BOOK]);
     }
 
     public function phoneToBook(): self
     {
-        return $this->andWhere(['opm_type_id' => Type::PHONE_TO_BOOK]);
+        return $this->andWhere(['opm_type' => Type::PHONE_TO_BOOK]);
     }
 
     public function notStopped(): self

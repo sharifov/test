@@ -41,7 +41,7 @@ class CancelOrder
 
         try {
             if (!$this->freeCancelChecker->can($order)) {
-                throw new CanceledException('The order is not available for processing.');
+                throw new OrderUnavailableProcessingException();
             }
 
             $order->cancelProcessing('Cancel Order Flow', OrderStatusAction::CANCEL_FLOW, null);
@@ -57,7 +57,7 @@ class CancelOrder
 
             $order->cancel('Cancel Order Flow', OrderStatusAction::CANCEL_FLOW, null);
             $this->orderRepository->save($order);
-        } catch (CanceledException $e) {
+        } catch (\DomainException $e) {
             $this->processingFail($order);
             throw $e;
         }

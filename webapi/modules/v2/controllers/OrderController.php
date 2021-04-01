@@ -2233,6 +2233,141 @@ class OrderController extends BaseController
         return isset($data['FlightRequest']);
     }
 
+     /**
+      * @api {post} /v2/order/cancel Cancel Order
+      * @apiVersion 0.2.0
+      * @apiName CancelOrder
+      * @apiGroup Order
+      * @apiPermission Authorized User
+      *
+      * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+      * @apiHeaderExample {json} Header-Example:
+      *  {
+      *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+      *  }
+      *
+      * @apiParam {string}       gid            Order gid
+      *
+      * @apiParamExample {json} Request-Example:
+      *
+      * {
+      *     "gid": "04d3fe3fc74d0514ee93e208a52bcf90"
+      * }
+      *
+      * @apiSuccessExample {json} Success-Response:
+      *
+      * HTTP/1.1 200 OK
+      * {
+      *    "status": 200,
+      *    "message": "OK",
+      *    "code": 0,
+      *    "technical": {
+      *        "action": "v2/order/cancel",
+      *        "response_id": 15629,
+      *        "request_dt": "2021-04-01 09:03:11",
+      *        "response_dt": "2021-04-01 09:03:11",
+      *        "execution_time": 0.019,
+      *        "memory_usage": 186192
+      *    },
+      *    "request": {
+      *       "gid": "04d3fe3fc74d0514ee93e208a52bcf90"
+      *    }
+      * }
+      *
+      * @apiErrorExample {json} Error-Response (400):
+      *
+      * HTTP/1.1 400 Bad Request
+      * {
+      *       "status": 400,
+      *       "message": "Load data error",
+      *       "errors": [
+      *           "Not found data on POST request"
+      *       ],
+      *       "code": 10,
+      *       "request": {
+      *           ...
+      *       },
+      *       "technical": {
+      *           ...
+      *      }
+      * }
+      *
+      * @apiErrorExample {json} Error-Response (422):
+      *
+      * HTTP/1.1 422 Unprocessable entity
+      * {
+      *     "status": 422,
+      *     "message": "Validation error",
+      *     "errors": {
+      *          "gid": [
+      *            "Gid is invalid."
+      *         ]
+      *     },
+      *     "code": 20,
+      *     "technical": {
+      *           ...
+      *     },
+      *     "request": {
+      *           ...
+      *     }
+      * }
+      *
+      * @apiErrorExample {json} Error-Response (422):
+      *
+      * HTTP/1.1 422 Unprocessable entity
+      * {
+      *     "status": 422,
+      *     "message": "Error",
+      *     "errors": {
+      *         "The order is not available for processing."
+      *     },
+      *     "code": 30,
+      *     "technical": {
+      *           ...
+      *     },
+      *     "request": {
+      *           ...
+      *     }
+      * }
+      *
+      * @apiErrorExample {json} Error-Response (422):
+      *
+      * HTTP/1.1 422 Unprocessable entity
+      * {
+      *     "status": 422,
+      *     "message": "Error",
+      *     "errors": {
+      *         "Unable to process flight cancellation."
+      *     },
+      *     "code": 40,
+      *     "technical": {
+      *           ...
+      *     },
+      *     "request": {
+      *           ...
+      *     }
+      * }
+      *
+      * @apiErrorExample {json} Error-Response (422):
+      *
+      * HTTP/1.1 422 Unprocessable entity
+      * {
+      *     "status": 422,
+      *     "message": "Error",
+      *     "errors": {
+      *         "Unable to process hotel cancellation."
+      *     },
+      *     "code": 50,
+      *     "technical": {
+      *           ...
+      *     },
+      *     "request": {
+      *           ...
+      *     }
+      * }
+      *
+      */
     public function actionCancel()
     {
         $form = new CancelForm();
@@ -2256,16 +2391,11 @@ class OrderController extends BaseController
 
         try {
             $this->cancelOrder->cancel($form->gid);
-        } catch (CanceledException $e) {
-            return new ErrorResponse(
-                new ErrorsMessage($e->getMessage()),
-                new CodeMessage($e->getCode()),
-                new StatusCodeMessage(503)
-            );
         } catch (\DomainException $e) {
             return new ErrorResponse(
+                new MessageMessage('Error'),
                 new ErrorsMessage($e->getMessage()),
-                new StatusCodeMessage(503)
+                new CodeMessage($e->getCode())
             );
         } catch (\Throwable $e) {
             Yii::error([
@@ -2274,8 +2404,9 @@ class OrderController extends BaseController
                 'orderGid' => $form->gid
             ], 'OrderCancelFlow:actionCancel');
             return new ErrorResponse(
+                new MessageMessage('Error'),
                 new ErrorsMessage('Server error. Please try again later.'),
-                new StatusCodeMessage(503)
+                new StatusCodeMessage(500)
             );
         }
         return new SuccessResponse(
