@@ -13,7 +13,9 @@ use yii\helpers\Html;
 /* @var FileOrder[]|null $orderFiles */
 /* @var UrlGenerator $urlGenerator */
 
-$this->title = $order->or_name;
+$this->title = $order->or_id;
+$this->params['breadcrumbs'][] = ['label' => 'Order search', 'url' => ['/order/order/search']];
+$this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
 <div class="order-view">
