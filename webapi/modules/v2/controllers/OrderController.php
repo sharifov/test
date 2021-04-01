@@ -17,6 +17,9 @@ use modules\order\src\entities\orderRequest\OrderRequest;
 use modules\order\src\entities\orderRequest\OrderRequestRepository;
 use modules\order\src\exceptions\OrderC2BException;
 use modules\order\src\exceptions\OrderCodeException;
+use modules\order\src\flow\cancelOrder\CanceledException;
+use modules\order\src\flow\cancelOrder\CancelOrder;
+use modules\order\src\forms\api\cancel\CancelForm;
 use modules\order\src\forms\api\create\OrderCreateForm;
 use modules\order\src\forms\api\createC2b\OrderCreateC2BForm;
 use modules\order\src\forms\api\view\OrderViewForm;
@@ -79,6 +82,7 @@ use yii\web\NotFoundHttpException;
  * @property OrderDataRepository $orderDataRepository
  * @property CreditCardRepository $creditCardRepository
  * @property BillingInfoRepository $billingInfoRepository
+ * @property CancelOrder $cancelOrder
  */
 class OrderController extends BaseController
 {
@@ -136,6 +140,8 @@ class OrderController extends BaseController
      */
     private BillingInfoRepository $billingInfoRepository;
 
+    private CancelOrder $cancelOrder;
+
     public function __construct(
         $id,
         $module,
@@ -154,6 +160,7 @@ class OrderController extends BaseController
         OrderDataRepository $orderDataRepository,
         CreditCardRepository $creditCardRepository,
         BillingInfoRepository $billingInfoRepository,
+        CancelOrder $cancelOrder,
         $config = []
     ) {
         parent::__construct($id, $module, $logger, $config);
@@ -171,6 +178,7 @@ class OrderController extends BaseController
         $this->orderDataRepository = $orderDataRepository;
         $this->creditCardRepository = $creditCardRepository;
         $this->billingInfoRepository = $billingInfoRepository;
+        $this->cancelOrder = $cancelOrder;
     }
 
     public function behaviors(): array
@@ -2223,5 +2231,55 @@ class OrderController extends BaseController
     private function isClickToBook($data): bool
     {
         return isset($data['FlightRequest']);
+    }
+
+    public function actionCancel()
+    {
+        $form = new CancelForm();
+
+        if (!$form->load(Yii::$app->request->post())) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new ErrorsMessage('Not found data on POST request'),
+                new CodeMessage(10)
+            );
+        }
+
+        if (!$form->validate()) {
+            return new ErrorResponse(
+                new MessageMessage(Messages::VALIDATION_ERROR),
+                new ErrorsMessage($form->getErrors()),
+                new CodeMessage(20)
+            );
+        }
+
+        try {
+            $this->cancelOrder->cancel($form->gid);
+        } catch (CanceledException $e) {
+            return new ErrorResponse(
+                new ErrorsMessage($e->getMessage()),
+                new CodeMessage($e->getCode()),
+                new StatusCodeMessage(503)
+            );
+        } catch (\DomainException $e) {
+            return new ErrorResponse(
+                new ErrorsMessage($e->getMessage()),
+                new StatusCodeMessage(503)
+            );
+        } catch (\Throwable $e) {
+            Yii::error([
+                'message' => 'Order cancel error.',
+                'error' => $e->getMessage(),
+                'orderGid' => $form->gid
+            ], 'OrderCancelFlow:actionCancel');
+            return new ErrorResponse(
+                new ErrorsMessage('Server error. Please try again later.'),
+                new StatusCodeMessage(503)
+            );
+        }
+        return new SuccessResponse(
+            new CodeMessage(0)
+        );
     }
 }

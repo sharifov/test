@@ -13,7 +13,7 @@ namespace modules\order\src\entities\order\events;
  * @property int|null $ownerId
  * @property int|null $creatorId
  */
-class OrderDeclinedEvent implements OrderChangeStatusInterface
+class OrderDeclinedEvent implements OrderChangeStatusInterface, OrderCancelable
 {
     public int $orderId;
     public ?int $startStatus;

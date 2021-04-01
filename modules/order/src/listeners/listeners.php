@@ -30,6 +30,7 @@ return [
         OrderListeners\OrderChangeStatusLogListener::class,
     ],
     OrderEvents\OrderDeclinedEvent::class => [
+        processManager\listeners\StopOrderProcessManagerListener::class,
         OrderListeners\OrderChangeStatusLogListener::class,
     ],
     OrderEvents\OrderErrorEvent::class => [
@@ -62,6 +63,7 @@ return [
         LeadListeners\LeadStatusReloadOrdersListener::class,
     ],
     OrderEvents\OrderCanceledEvent::class => [
+        processManager\listeners\StopOrderProcessManagerListener::class,
         OrderListeners\OrderChangeStatusLogListener::class,
 //        OrderListeners\OrderCanceledConfirmationListener::class,
         OrderListeners\OrderCanceledHybridNotificationListener::class,
