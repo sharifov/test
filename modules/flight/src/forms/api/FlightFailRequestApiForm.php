@@ -8,12 +8,14 @@ use yii\base\Model;
 /**
  * Class FlightFailRequestApiForm
  * @property $orderUid
+ * @property $description
  * @property Order $order
  */
 class FlightFailRequestApiForm extends Model
 {
     public $orderUid;
     public $order;
+    public $description;
 
     public function rules(): array
     {
@@ -22,6 +24,8 @@ class FlightFailRequestApiForm extends Model
             [['orderUid'], 'string', 'max' => 15],
             [['orderUid'], 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['orderUid' => 'or_uid']],
             [['orderUid'], 'setOrder'],
+
+            [['description'], 'string', 'max' => 100],
         ];
     }
 

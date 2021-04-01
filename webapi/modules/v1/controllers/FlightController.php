@@ -1090,7 +1090,8 @@ class FlightController extends ApiBaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{15}}   orderUid    Order Uid
+     * @apiParam {string{15}}   orderUid       Order Uid
+     * @apiParam {string{100}}  [description]  Description
      *
      * @apiParamExample {json} Request-Example:
      *   {
