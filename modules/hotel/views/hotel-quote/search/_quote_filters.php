@@ -94,6 +94,14 @@ use yii\bootstrap4\Html;
 ])
 ?>
 
+<?= $form->field($filtersForm, 'selectedHotelTypes')->checkboxList($filtersForm->hotelTypes, [
+    'item' => function ($index, $label, $name, $checked, $value) {
+        $checked = $checked ? 'checked' : '';
+        return "<div><label><input type='checkbox' {$checked} name='{$name}' value='{$value}'>&nbsp;{$label}</label></div>";
+    }
+])
+?>
+
 <?php /*= $form->field($filtersForm, 'selectedServiceTypes')->checkboxList($filtersForm->serviceTypes, [
     'item' => function ($index, $label, $name, $checked, $value) {
         $checked = $checked ? 'checked' : '';

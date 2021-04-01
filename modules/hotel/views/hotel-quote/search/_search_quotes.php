@@ -11,6 +11,7 @@ use yii\widgets\Pjax;
  * @var $dataProvider yii\data\ArrayDataProvider
  * @var $filtersForm \modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchForm
  * @var $showFilters bool
+ * @var $hotelTypes array
  */
 
 //$this->title = 'Hotel Quotes';
@@ -89,8 +90,15 @@ The SPA service at Christmas is closed on December 25 and January 1.'
             'class' => 'table table-bordered',
         ],*/
         'emptyText' => '<div class="text-center">Not found any hotels</div><br>',
-        'itemView' => function ($dataHotel, $key, $index, $widget) use ($hotelSearch, $filtersForm) {
-            return $this->render('_list_hotel_quotes', ['dataHotel' => $dataHotel, 'index' => $index, 'key' => $key, 'hotelSearch' => $hotelSearch, 'form' => $filtersForm]);
+        'itemView' => function ($dataHotel, $key, $index, $widget) use ($hotelSearch, $filtersForm, $hotelTypes) {
+            return $this->render('_list_hotel_quotes', [
+                'dataHotel' => $dataHotel,
+                'index' => $index,
+                'key' => $key,
+                'hotelSearch' => $hotelSearch,
+                'form' => $filtersForm,
+                'hotelTypes' => $hotelTypes
+            ]);
         },
         //'layout' => "{items}<div class=\"text-center\" style='margin-top: -20px; margin-bottom: -25px'>{pager}</div>", // {summary}\n<div class="text-center">{pager}</div>
         'itemOptions' => [
