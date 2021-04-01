@@ -3370,6 +3370,99 @@
   },
   {
     "type": "post",
+    "url": "/v2/order/cancel",
+    "title": "Cancel Order",
+    "version": "0.2.0",
+    "name": "CancelOrder",
+    "group": "Order",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "gid",
+            "description": "<p>Order gid</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "\n{\n    \"gid\": \"04d3fe3fc74d0514ee93e208a52bcf90\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n   \"status\": 200,\n   \"message\": \"OK\",\n   \"code\": 0,\n   \"technical\": {\n       \"action\": \"v2/order/cancel\",\n       \"response_id\": 15629,\n       \"request_dt\": \"2021-04-01 09:03:11\",\n       \"response_dt\": \"2021-04-01 09:03:11\",\n       \"execution_time\": 0.019,\n       \"memory_usage\": 186192\n   },\n   \"request\": {\n      \"gid\": \"04d3fe3fc74d0514ee93e208a52bcf90\"\n   }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n      \"status\": 400,\n      \"message\": \"Load data error\",\n      \"errors\": [\n          \"Not found data on POST request\"\n      ],\n      \"code\": 10,\n      \"request\": {\n          ...\n      },\n      \"technical\": {\n          ...\n     }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": {\n         \"gid\": [\n           \"Gid is invalid.\"\n        ]\n    },\n    \"code\": 20,\n    \"technical\": {\n          ...\n    },\n    \"request\": {\n          ...\n    }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n    \"status\": 422,\n    \"message\": \"Error\",\n    \"errors\": {\n        \"The order is not available for processing.\"\n    },\n    \"code\": 30,\n    \"technical\": {\n          ...\n    },\n    \"request\": {\n          ...\n    }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n    \"status\": 422,\n    \"message\": \"Error\",\n    \"errors\": {\n        \"Unable to process flight cancellation.\"\n    },\n    \"code\": 40,\n    \"technical\": {\n          ...\n    },\n    \"request\": {\n          ...\n    }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n    \"status\": 422,\n    \"message\": \"Error\",\n    \"errors\": {\n        \"Unable to process hotel cancellation.\"\n    },\n    \"code\": 50,\n    \"technical\": {\n          ...\n    },\n    \"request\": {\n          ...\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/OrderController.php",
+    "groupTitle": "Order"
+  },
+  {
+    "type": "post",
     "url": "/v2/order/create",
     "title": "Create Order",
     "version": "0.2.0",
@@ -4396,7 +4489,7 @@
         },
         {
           "title": "Error-Response (422):",
-          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n            \"status\": \"Failed\",\n            \"message\": \"Some error occurred\",\n            \"detailError\": {\n                \"product\": \"Flight\",\n                \"quoteOtaId\": \"asdff43fsgfdsv343ddx\"\n            },\n            \"code\": 15901,\n            \"errors\": []\n        }",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n            \"status\": 422,\n            \"message\": \"test\",\n            \"detailError\": {\n                \"product\": \"Flight\",\n                \"quoteOtaId\": \"asdff43fsgfdsv343ddx\"\n            },\n            \"code\": 15901,\n            \"errors\": []\n        }",
           "type": "json"
         }
       ]
