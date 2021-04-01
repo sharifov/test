@@ -53,6 +53,7 @@ use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentPaxBaggageC
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentPaxBaggageDTO;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentStopDTO;
 use modules\flight\src\useCases\flightQuote\create\ProductQuoteCreateDTO;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository;
 use modules\product\src\entities\productType\ProductType;
@@ -427,10 +428,10 @@ class FlightQuoteManageService implements ProductQuoteService
 
             $productQuote = ProductQuote::create(new ProductQuoteCreateDTO($flightProduct, $quoteData, null), $productTypeServiceFee);
             $productQuote->pq_order_id = $form->orderId;
-            if ($form->isBooked()) {
-                $productQuote->applied();
-            } else {
+            if ($form->isFailed()) {
                 $productQuote->failed();
+            } else {
+                $productQuote->pq_status_id = ProductQuoteStatus::IN_PROGRESS;
             }
             $this->productQuoteRepository->save($productQuote);
 
