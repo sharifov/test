@@ -3,7 +3,9 @@
 namespace modules\order\src\entities\orderRequest;
 
 use modules\order\src\entities\order\OrderSourceType;
+use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
 use Yii;
+use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\Json;
@@ -38,6 +40,18 @@ class OrderRequest extends \yii\db\ActiveRecord
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
+            'creditCard' => [
+                'class' => AttributeBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['orr_request_data_json'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['orr_request_data_json'],
+                ],
+                'value' => static function ($event) {
+                    $requestData = Json::decode($event->sender->orr_request_data_json);
+                    $filter = new CreditCardFilter();
+                    return Json::encode($filter->filterData($requestData));
+                }
+            ]
         ];
     }
 

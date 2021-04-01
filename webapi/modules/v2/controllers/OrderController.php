@@ -2,6 +2,9 @@
 
 namespace webapi\modules\v2\controllers;
 
+use common\models\BillingInfo;
+use common\models\CreditCard;
+use common\models\Payment;
 use frontend\helpers\JsonHelper;
 use modules\fileStorage\src\entity\fileStorage\FileStorage;
 use modules\fileStorage\src\FileSystem;
@@ -24,6 +27,8 @@ use modules\product\src\useCases\product\create\ProductCreateForm;
 use modules\product\src\useCases\product\create\ProductCreateService;
 use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
+use sales\repositories\billingInfo\BillingInfoRepository;
+use sales\repositories\creditCard\CreditCardRepository;
 use sales\repositories\NotFoundException;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\repositories\project\ProjectRepository;
@@ -72,6 +77,8 @@ use yii\web\NotFoundHttpException;
  * @property ProductTypeRepository $productTypeRepository
  * @property TransactionManager $transactionManager
  * @property OrderDataRepository $orderDataRepository
+ * @property CreditCardRepository $creditCardRepository
+ * @property BillingInfoRepository $billingInfoRepository
  */
 class OrderController extends BaseController
 {
@@ -120,6 +127,14 @@ class OrderController extends BaseController
      * @var OrderDataRepository
      */
     private OrderDataRepository $orderDataRepository;
+    /**
+     * @var CreditCardRepository
+     */
+    private CreditCardRepository $creditCardRepository;
+    /**
+     * @var BillingInfoRepository
+     */
+    private BillingInfoRepository $billingInfoRepository;
 
     public function __construct(
         $id,
@@ -137,6 +152,8 @@ class OrderController extends BaseController
         ProductTypeRepository $productTypeRepository,
         TransactionManager $transactionManager,
         OrderDataRepository $orderDataRepository,
+        CreditCardRepository $creditCardRepository,
+        BillingInfoRepository $billingInfoRepository,
         $config = []
     ) {
         parent::__construct($id, $module, $logger, $config);
@@ -152,6 +169,8 @@ class OrderController extends BaseController
         $this->productTypeRepository = $productTypeRepository;
         $this->transactionManager = $transactionManager;
         $this->orderDataRepository = $orderDataRepository;
+        $this->creditCardRepository = $creditCardRepository;
+        $this->billingInfoRepository = $billingInfoRepository;
     }
 
     public function behaviors(): array
@@ -1914,6 +1933,25 @@ class OrderController extends BaseController
      * @apiParam {integer}                          [quotes.hotelPaxData.age]                   Age
      * @apiParam {string}                           quotes.hotelPaxData.hotelRoomKey            Hotel Room Key
      *
+     * @apiParam {Object}               [billingInfo]               BillingInfo
+     * @apiParam {string{max 30}}       [billingInfo.first_name]      First Name
+     * @apiParam {string{max 30}}       [billingInfo.last_name]       Last Name
+     * @apiParam {string{max 30}}       [billingInfo.middle_name]     Middle Name
+     * @apiParam {string{max 50}}       [billingInfo.address]         Address
+     * @apiParam {string{max 2}}        [billingInfo.country_id]      Country Id
+     * @apiParam {string{max 30}}       [billingInfo.city]            City
+     * @apiParam {string{max 40}}       [billingInfo.state]           State
+     * @apiParam {string{max 10}}       [billingInfo.zip]             Zip
+     * @apiParam {string{max 20}}       [billingInfo.phone]           Phone
+     * @apiParam {string{max 160}}      [billingInfo.email]           Email
+     *
+     * @apiParam {Object}               [creditCard]                    Credit Card
+     * @apiParam {string{max 50}}       [creditCard.holder_name]        Holder Name
+     * @apiParam {string{max 20}}       creditCard.number               Credit Card Number
+     * @apiParam {string}               [creditCard.type]               Credit Card type
+     * @apiParam {string{max 18}}       creditCard.expiration           Credit Card expiration
+     * @apiParam {string{max 4}}        creditCard.cvv                  Credit Card cvv
+     *
      * @apiParamExample {json} Request-Example:
      *
      * {
@@ -1975,7 +2013,26 @@ class OrderController extends BaseController
                         }
                     ]
                 }
-            ]
+            ],
+            "creditCard": {
+                "holder_name": "Barbara Elmore",
+                "number": "1111111111111111",
+                "type": "Visas",
+                "expiration": "07 / 23",
+                "cvv": "324"
+            },
+            "billingInfo": {
+                "first_name": "Barbara Elmore",
+                "middle_name": "",
+                "last_name": "T",
+                "address": "1013 Weda Cir",
+                "country_id": "US",
+                "city": "Mayfield",
+                "state": "KY",
+                "zip": "99999",
+                "phone": "+19074861000",
+                "email": "barabara@test.com"
+            }
         }
      *
      * @apiSuccessExample {json} Success-Response:
@@ -2022,7 +2079,7 @@ class OrderController extends BaseController
     public function actionCreateC2b()
     {
         $request = Yii::$app->request;
-        $form = new OrderCreateC2BForm(count($request->post('quotes', [])));
+        $form = new OrderCreateC2BForm(count($request->post('quotes', [])), !empty($request->post()['creditCard']), !empty($request->post()['billingInfo']));
 
         if (!$form->load($request->post())) {
             return new ErrorResponse(
@@ -2069,6 +2126,39 @@ class OrderController extends BaseController
                 $orderData = OrderData::create($order->or_id, $form->sourceCid, $form->requestUid);
                 $orderData->detachBehavior('user');
                 $this->orderDataRepository->save($orderData);
+
+                if (isset($form->creditCard)) {
+                    $creditCard = CreditCard::create(
+                        $form->creditCard->number,
+                        $form->creditCard->holder_name,
+                        $form->creditCard->expiration_month,
+                        $form->creditCard->expiration_year,
+                        $form->creditCard->cvv,
+                        $form->creditCard->type_id,
+                    );
+                    $creditCard->updateSecureCardNumber();
+                    $creditCard->updateSecureCvv();
+                    $this->creditCardRepository->save($creditCard);
+                }
+
+                if (isset($form->billingInfo)) {
+                    $billingInfo = BillingInfo::create(
+                        $form->billingInfo->first_name,
+                        $form->billingInfo->last_name,
+                        $form->billingInfo->middle_name,
+                        $form->billingInfo->address,
+                        $form->billingInfo->city,
+                        $form->billingInfo->state,
+                        $form->billingInfo->country_id,
+                        $form->billingInfo->zip,
+                        $form->billingInfo->phone,
+                        $form->billingInfo->email,
+                        null,
+                        $creditCard->cc_id ?? null,
+                        $order->or_id
+                    );
+                    $this->billingInfoRepository->save($billingInfo);
+                }
             });
 
             $response = new SuccessResponse(
@@ -2076,6 +2166,11 @@ class OrderController extends BaseController
                     new Message('order_gid', $order->or_gid),
                 )
             );
+
+            $orderRequest->successResponse(ArrayHelper::toArray($response));
+            $this->orderRequestRepository->save($orderRequest);
+
+            return $response;
         } catch (OrderC2BException $e) {
             Yii::error(AppHelper::throwableFormatter($e), 'API::OrderController::actionCreateC2b::OrderC2BException');
 
@@ -2097,13 +2192,14 @@ class OrderController extends BaseController
                 new ErrorsMessage($e->getMessage()),
                 new CodeMessage($e->getCode())
             );
-        } finally {
-            if (isset($orderRequest)) {
-                $orderRequest->errorResponse(ArrayHelper::toArray($response));
-                $this->orderRequestRepository->save($orderRequest);
-            }
-            return $response;
         }
+
+        if (isset($orderRequest)) {
+            $orderRequest->errorResponse(ArrayHelper::toArray($response));
+            $this->orderRequestRepository->save($orderRequest);
+        }
+
+        return $response;
     }
 
     private function isClickToBook($data): bool
