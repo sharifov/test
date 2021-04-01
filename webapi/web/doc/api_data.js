@@ -1735,7 +1735,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n          \"orderUid\": \"or6061be5ec5c0e\"\n       }",
+          "content": "{\n          \"orderUid\": \"or6061be5ec5c0e\",\n          \"description\": \"Example reason failing\"\n       }",
           "type": "json"
         }
       ]

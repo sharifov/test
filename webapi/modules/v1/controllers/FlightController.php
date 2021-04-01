@@ -1095,7 +1095,8 @@ class FlightController extends ApiBaseController
      *
      * @apiParamExample {json} Request-Example:
      *   {
-            "orderUid": "or6061be5ec5c0e"
+            "orderUid": "or6061be5ec5c0e",
+            "description": "Example reason failing"
          }
      *
      * @apiSuccessExample {json} Success-Response:
