@@ -15,6 +15,7 @@ use sales\forms\CompositeForm;
  * @property string $sourceCid
  * @property string $requestUid
  * @property string $status
+ * @property PaymentForm $payment
  */
 class OrderCreateC2BForm extends CompositeForm
 {
@@ -45,6 +46,7 @@ class OrderCreateC2BForm extends CompositeForm
         if ($billingInfoForm) {
             $this->billingInfo = new BillingInfoForm();
         }
+        $this->payment = new PaymentForm();
         parent::__construct($config);
     }
 
@@ -67,7 +69,7 @@ class OrderCreateC2BForm extends CompositeForm
      */
     protected function internalForms(): array
     {
-        return ['quotes', 'creditCard', 'billingInfo'];
+        return ['quotes', 'creditCard', 'billingInfo', 'payment'];
     }
 
     public function isSuccess(): bool

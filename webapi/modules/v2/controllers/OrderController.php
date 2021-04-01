@@ -1967,6 +1967,9 @@ class OrderController extends BaseController
      * @apiParam {string{max 18}}       creditCard.expiration           Credit Card expiration
      * @apiParam {string{max 4}}        creditCard.cvv                  Credit Card cvv
      *
+     * @apiParam {Object}               [payment]                    Payment info
+     * @apiParam {string{max 3}}        [payment.clientCurrency]     Client currency
+     *
      * @apiParamExample {json} Request-Example:
      *
      * {
@@ -2058,6 +2061,9 @@ class OrderController extends BaseController
                 "zip": "99999",
                 "phone": "+19074861000",
                 "email": "barabara@test.com"
+            },
+            "payment": {
+                "clientCurrency": "USD"
             }
         }
      *
@@ -2128,7 +2134,7 @@ class OrderController extends BaseController
 
             $project = $this->projectRepository->findById($this->auth->au_project_id ?? 0);
 
-            $dto = new CreateOrderDTO(null, null, $request->post(), OrderSourceType::C2B, $orderRequest->orr_id, $project->id, $form->getOrderStatus());
+            $dto = new CreateOrderDTO(null, $form->payment->clientCurrency, $request->post(), OrderSourceType::C2B, $orderRequest->orr_id, $project->id, $form->getOrderStatus());
             $order = $this->orderManageService->createByC2bFlow($dto);
             $this->transactionManager->wrap(function () use ($form, $project, $order) {
                 foreach ($form->quotes as $quoteForm) {
