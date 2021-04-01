@@ -4,20 +4,18 @@ namespace modules\flight\src\forms\api;
 
 use common\components\validators\CheckJsonValidator;
 use frontend\helpers\JsonHelper;
-use modules\flight\src\services\api\FlightUpdateRequestApiService;
 use modules\order\src\entities\order\Order;
 use yii\base\Model;
-use yii\helpers\ArrayHelper;
 
 /**
- * Class FlightUpdateApiForm
+ * Class FlightTicketIssueRequestApiForm
 
  * @property $orderUid
  * @property $flights
  * @property $payments
  * @property Order $order
  */
-class FlightUpdateRequestApiForm extends Model
+class FlightTicketIssueRequestApiForm extends Model
 {
     public $orderUid;
     public $flights;
@@ -28,7 +26,7 @@ class FlightUpdateRequestApiForm extends Model
     {
         return [
             [['orderUid'], 'required'],
-            [['orderUid'], 'string', 'max' => 255],
+            [['orderUid'], 'string', 'max' => 15],
             [['orderUid'], 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['orderUid' => 'or_uid']],
             [['orderUid'], 'setOrder'],
 

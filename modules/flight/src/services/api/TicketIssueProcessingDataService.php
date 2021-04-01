@@ -5,6 +5,7 @@ namespace modules\flight\src\services\api;
 use common\models\Payment;
 use common\models\PaymentMethod;
 use modules\flight\models\FlightQuote;
+use modules\flight\src\forms\api\FlightTicketIssueRequestApiForm;
 use modules\flight\src\forms\api\FlightUpdateRequestApiForm;
 use modules\flight\src\forms\api\TicketIssuePaymentApiForm;
 use modules\flight\src\repositories\flightQuoteRepository\FlightQuoteRepository;
@@ -59,7 +60,7 @@ class TicketIssueProcessingDataService
         $this->paymentMethodRepository = $paymentMethodRepository;
     }
 
-    public function processingQuote(FlightUpdateRequestApiForm $flightUpdateApiForm, array $post): void
+    public function processingQuote(FlightTicketIssueRequestApiForm $flightUpdateApiForm, array $post): void
     {
         foreach ($flightUpdateApiForm->flights as $key => $flight) {
             /** @var FlightQuote $flightQuote */
@@ -73,7 +74,7 @@ class TicketIssueProcessingDataService
         }
     }
 
-    public function processingPayment(FlightUpdateRequestApiForm $flightUpdateApiForm): void
+    public function processingPayment(FlightTicketIssueRequestApiForm $flightUpdateApiForm): void
     {
         $order = $flightUpdateApiForm->order;
         foreach ($flightUpdateApiForm->payments as $key => $payment) {

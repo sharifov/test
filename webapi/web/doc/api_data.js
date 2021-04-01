@@ -1674,6 +1674,237 @@ define({ "api": [
   },
   {
     "type": "post",
+    "url": "/v1/flight/fail",
+    "title": "Flight Oder Fail",
+    "version": "0.1.0",
+    "name": "Flight_Oder_Fail",
+    "group": "Flight",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          },
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Accept-Encoding",
+            "description": ""
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "15",
+            "optional": false,
+            "field": "orderUid",
+            "description": "<p>Order Uid</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n          \"orderUid\": \"or6061be5ec5c0e\"\n       }",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n     \"status\": 200,\n     \"message\": \"OK\",\n     \"data\": {\n         \"resultMessage\": \"Order Uid(or6061be5ec5c0e) successful failed\"\n     }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (422):",
+          "content": "HTTP/1.1 200 OK\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": {\n        \"orderUid\": [\n            \"orderUid cannot be blank\"\n       ]\n    },\n    \"code\": \"15801\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (404):",
+          "content": "HTTP/1.1 200 OK\n{\n    \"status\": 404,\n    \"message\": \"Order not found\",\n    \"code\": \"15300\",\n    \"errors\": []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v1/controllers/FlightController.php",
+    "groupTitle": "Flight"
+  },
+  {
+    "type": "post",
+    "url": "/v1/flight/replace",
+    "title": "Flight Replace",
+    "version": "0.1.0",
+    "name": "Flight_Replace",
+    "group": "Flight",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          },
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Accept-Encoding",
+            "description": ""
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "15",
+            "optional": false,
+            "field": "orderUid",
+            "description": "<p>Order Uid</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "trips",
+            "description": "<p>Trips data array</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "flights",
+            "description": "<p>Flights data array</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "payments",
+            "description": "<p>Payments data array</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "float",
+            "optional": false,
+            "field": "payments.pay_amount",
+            "description": "<p>Payment amount</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "payments.pay_currency",
+            "description": "<p>Payment currency code (for example USD)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "100",
+            "optional": true,
+            "field": "payments.pay_method_key",
+            "description": "<p>Payment method key (by default &quot;card&quot;)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "date",
+            "optional": false,
+            "field": "payments.pay_date",
+            "description": "<p>Payment date (format Y-m-d)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "255",
+            "optional": true,
+            "field": "payments.pay_description",
+            "description": "<p>Payment description</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "\n{\n          \"orderUid\": \"order uid example\",\n          \"parentBookingId\": \"OE96040\",\n          \"parentId\": 205975,\n          \"sameItinerary\": true,\n          \"flights\": [\n              {\n                  \"appKey\": \"038ce0121a1666678d4db57cb10e8667b98d8b08c408cdf7c9b04f1430071826\",\n                  \"uniqueId\": \"OE96040\",\n                  \"status\": 6,\n                  \"pnr\": \"\",\n                  \"gds\": \"\",\n                  \"flightType\": \"RT\",\n                  \"validatingCarrier\": \"PR\",\n                  \"bookingInfo\": [\n                      {\n                          \"bookingId\": \"OE96040\",\n                          \"pnr\": \"Q3PM1G\",\n                          \"gds\": \"S\",\n                          \"validatingCarrier\": \"PR\",\n                          \"status\": 6,\n                          \"state\": \"Rejected\",\n                          \"passengers\": {\n                              \"1\": {\n                                  \"fullName\": \"Arthur Davis\",\n                                  \"first_name\": \"Arthur\",\n                                  \"middle_name\": \"\",\n                                  \"last_name\": \"Davis\",\n                                  \"birth_date\": \"1963-04-07\",\n                                  \"nationality\": \"US\",\n                                  \"gender\": \"M\",\n                                  \"aGender\": \"Mr.\",\n                                  \"tktNumber\": null,\n                                  \"paxType\": \"ADT\"\n                              }\n                          },\n                          \"airlinesCode\": [\n                              {\n                                  \"code\": \"PR\",\n                                  \"airline\": \"Philippine Airlines\",\n                                  \"recordLocator\": \"Q3PM1G\"\n                              }\n                          ],\n                          \"insurance\": []\n                      }\n                  ],\n                  \"trips\": [\n                      {\n                          \"segments\": [\n                              {\n                                  \"segmentId\": 1001959,\n                                  \"airline\": \"PR\",\n                                  \"airlineName\": \"Philippine Airlines\",\n                                  \"mainAirline\": \"PR\",\n                                  \"arrivalAirport\": \"MNL\",\n                                  \"arrivalTime\": \"2021-05-15 04:00:00\",\n                                  \"departureAirport\": \"LAX\",\n                                  \"departureTime\": \"2021-05-13 22:30:00\",\n                                  \"bookingClass\": \"U\",\n                                  \"flightNumber\": 103,\n                                  \"statusCode\": \"HK\",\n                                  \"operatingAirline\": \"Philippine Airlines\",\n                                  \"operatingAirlineCode\": \"PR\",\n                                  \"cabin\": \"Economy\",\n                                  \"departureCity\": \"Los Angeles\",\n                                  \"arrivalCity\": \"Manila\",\n                                  \"departureCountry\": \"US\",\n                                  \"arrivalCountry\": \"PH\",\n                                  \"departureAirportName\": \"Los Angeles International Airport\",\n                                  \"arrivalAirportName\": \"Ninoy Aquino International Airport\",\n                                  \"flightDuration\": 870,\n                                  \"layoverDuration\": 0,\n                                  \"airlineRecordLocator\": \"Q3PM1G\",\n                                  \"aircraft\": \"773\",\n                                  \"baggage\": 2,\n                                  \"carryOn\": true,\n                                  \"marriageGroup\": \"773\",\n                                  \"fareCode\": \"U9XBUS\",\n                                  \"mileage\": 7305\n                              },\n                              {\n                                  \"segmentId\": 1001960,\n                                  \"airline\": \"PR\",\n                                  \"airlineName\": \"Philippine Airlines\",\n                                  \"mainAirline\": \"PR\",\n                                  \"arrivalAirport\": \"TPE\",\n                                  \"arrivalTime\": \"2021-05-15 08:40:00\",\n                                  \"departureAirport\": \"MNL\",\n                                  \"departureTime\": \"2021-05-15 06:30:00\",\n                                  \"bookingClass\": \"U\",\n                                  \"flightNumber\": 890,\n                                  \"statusCode\": \"HK\",\n                                  \"operatingAirline\": \"Philippine Airlines\",\n                                  \"operatingAirlineCode\": \"PR\",\n                                  \"cabin\": \"Economy\",\n                                  \"departureCity\": \"Manila\",\n                                  \"arrivalCity\": \"Taipei\",\n                                  \"departureCountry\": \"PH\",\n                                  \"arrivalCountry\": \"TW\",\n                                  \"departureAirportName\": \"Ninoy Aquino International Airport\",\n                                  \"arrivalAirportName\": \"Taiwan Taoyuan International Airport\",\n                                  \"flightDuration\": 130,\n                                  \"layoverDuration\": 150,\n                                  \"airlineRecordLocator\": \"Q3PM1G\",\n                                  \"aircraft\": \"321\",\n                                  \"baggage\": 2,\n                                  \"carryOn\": true,\n                                  \"marriageGroup\": \"321\",\n                                  \"fareCode\": \"U9XBUS\",\n                                  \"mileage\": 728\n                              }\n                          ]\n                      }\n                  ],\n                  \"price\": {\n                      \"tickets\": 1,\n                      \"selling\": 767.75,\n                      \"currentProfit\": 0,\n                      \"fare\": 446,\n                      \"net\": 717.75,\n                      \"taxes\": 321.75,\n                      \"tips\": 0,\n                      \"currency\": \"USD\",\n                      \"detail\": {\n                          \"ADT\": {\n                              \"selling\": 767.75,\n                              \"fare\": 446,\n                              \"baseTaxes\": 271.75,\n                              \"taxes\": 321.75,\n                              \"tickets\": 1,\n                              \"insurance\": 0\n                          }\n                      }\n                  },\n                  \"departureTime\": \"2021-05-13 22:30:00\",\n                  \"invoiceUri\": \"\\/checkout\\/download\\/OE96040\\/invoice\",\n                  \"eTicketUri\": \"\\/checkout\\/download\\/OE96040\\/e-ticket\",\n                  \"scheduleChange\": \"No\"\n              }\n          ],\n          \"trips\": [\n              {\n                \"segments\": [\n                  {\n                    \"segmentId\": 3166630,\n                    \"airline\": \"AV\",\n                    \"airlineName\": \"Avianca\",\n                    \"mainAirline\": \"AV\",\n                    \"arrivalAirport\": \"GUA\",\n                    \"arrivalTime\": \"2021-04-24 05:10:00\",\n                    \"departureAirport\": \"LAX\",\n                    \"departureTime\": \"2021-04-23 23:30:00\",\n                    \"bookingClass\": \"U\",\n                    \"flightNumber\": 641,\n                    \"statusCode\": \"HK\",\n                    \"operatingAirline\": \"Avianca\",\n                    \"operatingAirlineCode\": \"AV\",\n                    \"cabin\": \"ECONOMY\",\n                    \"departureCity\": \"Los Angeles\",\n                    \"arrivalCity\": \"Guatemala City\",\n                    \"departureCountry\": \"US\",\n                    \"arrivalCountry\": \"GT\",\n                    \"departureAirportName\": \"Los Angeles International Airport\",\n                    \"arrivalAirportName\": \"La Aurora Airport\",\n                    \"flightDuration\": 280,\n                    \"layoverDuration\": 510,\n                    \"airlineRecordLocator\": \"2NAXNK\",\n                    \"aircraft\": null,\n                    \"baggage\": 0,\n                    \"carryOn\": true,\n                    \"marriageGroup\": null,\n                    \"fareCode\": null,\n                    \"mileage\": null\n                  },\n                  {\n                    \"segmentId\": 3166631,\n                    \"airline\": \"AV\",\n                    \"airlineName\": \"Avianca\",\n                    \"mainAirline\": \"AV\",\n                    \"arrivalAirport\": \"SJO\",\n                    \"arrivalTime\": \"2021-04-24 08:00:00\",\n                    \"departureAirport\": \"GUA\",\n                    \"departureTime\": \"2021-04-24 06:30:00\",\n                    \"bookingClass\": \"U\",\n                    \"flightNumber\": 641,\n                    \"statusCode\": \"HK\",\n                    \"operatingAirline\": \"Avianca\",\n                    \"operatingAirlineCode\": \"AV\",\n                    \"cabin\": \"ECONOMY\",\n                    \"departureCity\": \"Guatemala City\",\n                    \"arrivalCity\": \"San José\",\n                    \"departureCountry\": \"GT\",\n                    \"arrivalCountry\": \"CR\",\n                    \"departureAirportName\": \"La Aurora Airport\",\n                    \"arrivalAirportName\": \"Juan Santamaria International Airport\",\n                    \"flightDuration\": 90,\n                    \"layoverDuration\": 80,\n                    \"airlineRecordLocator\": \"2NAXNK\",\n                    \"aircraft\": null,\n                    \"baggage\": 0,\n                    \"carryOn\": true,\n                    \"marriageGroup\": null,\n                    \"fareCode\": null,\n                    \"mileage\": null\n                  }\n                ]\n              },\n              {\n                \"segments\": [\n                  {\n                    \"segmentId\": 3166628,\n                    \"airline\": \"AS\",\n                    \"airlineName\": \"Alaska Airlines\",\n                    \"mainAirline\": \"AS\",\n                    \"arrivalAirport\": \"LIR\",\n                    \"arrivalTime\": \"2021-05-02 09:40:00\",\n                    \"departureAirport\": \"SJO\",\n                    \"departureTime\": \"2021-05-02 08:50:00\",\n                    \"bookingClass\": \"X\",\n                    \"flightNumber\": 283,\n                    \"statusCode\": \"HK\",\n                    \"operatingAirline\": \"Alaska Airlines\",\n                    \"operatingAirlineCode\": \"AS\",\n                    \"cabin\": \"ECONOMY\",\n                    \"departureCity\": \"San José\",\n                    \"arrivalCity\": \"Liberia\",\n                    \"departureCountry\": \"CR\",\n                    \"arrivalCountry\": \"CR\",\n                    \"departureAirportName\": \"Juan Santamaria International Airport\",\n                    \"arrivalAirportName\": \"Daniel Oduber Quiros International Airport\",\n                    \"flightDuration\": 50,\n                    \"layoverDuration\": 0,\n                    \"airlineRecordLocator\": \"APTSYZ\",\n                    \"aircraft\": null,\n                    \"baggage\": 0,\n                    \"carryOn\": true,\n                    \"marriageGroup\": null,\n                    \"fareCode\": null,\n                    \"mileage\": null\n                  },\n                  {\n                    \"segmentId\": 3166629,\n                    \"airline\": \"AS\",\n                    \"airlineName\": \"Alaska Airlines\",\n                    \"mainAirline\": \"AS\",\n                    \"arrivalAirport\": \"LAX\",\n                    \"arrivalTime\": \"2021-05-02 15:25:00\",\n                    \"departureAirport\": \"LIR\",\n                    \"departureTime\": \"2021-05-02 10:30:00\",\n                    \"bookingClass\": \"X\",\n                    \"flightNumber\": 283,\n                    \"statusCode\": \"HK\",\n                    \"operatingAirline\": \"Alaska Airlines\",\n                    \"operatingAirlineCode\": \"AS\",\n                    \"cabin\": \"ECONOMY\",\n                    \"departureCity\": \"Liberia\",\n                    \"arrivalCity\": \"Los Angeles\",\n                    \"departureCountry\": \"CR\",\n                    \"arrivalCountry\": \"US\",\n                    \"departureAirportName\": \"Daniel Oduber Quiros International Airport\",\n                    \"arrivalAirportName\": \"Los Angeles International Airport\",\n                    \"flightDuration\": 355,\n                    \"layoverDuration\": 295,\n                    \"airlineRecordLocator\": \"APTSYZ\",\n                    \"aircraft\": null,\n                    \"baggage\": 0,\n                    \"carryOn\": true,\n                    \"marriageGroup\": null,\n                    \"fareCode\": null,\n                    \"mileage\": null\n                  }\n                ]\n              }\n          ],\n          \"payments\":[\n              {\n                  \"pay_amount\":154.21,\n                  \"pay_currency\":\"usd\",\n                  \"pay_code\":\"ch_1IYvYZFhXDZuLIpUisShKSRP\",\n                  \"pay_method_key\":\"card\",\n                  \"pay_date\":\"2021-03-25\",\n                  \"pay_description\": \"example description\"\n              },\n              {\n                  \"pay_amount\":54.35,\n                  \"pay_currency\":\"eur\",\n                  \"pay_code\":\"transactionIdcode\",\n                  \"pay_method_key\":\"card\",\n                  \"pay_date\":\"2021-03-29\",\n                  \"pay_description\": \"example description\"\n              }\n          ]\n      }",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n     \"status\": 200,\n     \"message\": \"OK\",\n     \"data\": {\n         \"resultMessage\": \"Order Uid(or6061be5ec5c0e) successful processed\"\n     }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (422):",
+          "content": "HTTP/1.1 200 OK\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": {\n        \"orderUid\": [\n            \"orderUid cannot be blank\"\n       ]\n    },\n    \"code\": \"15801\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (404):",
+          "content": "HTTP/1.1 200 OK\n{\n    \"status\": 404,\n    \"message\": \"Order not found\",\n    \"code\": \"15300\",\n    \"errors\": []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v1/controllers/FlightController.php",
+    "groupTitle": "Flight"
+  },
+  {
+    "type": "post",
     "url": "/v1/flight/ticket",
     "title": "Flight Ticket",
     "version": "0.1.0",
@@ -1748,10 +1979,10 @@ define({ "api": [
   },
   {
     "type": "post",
-    "url": "/v1/flight/update",
-    "title": "Flight Update",
+    "url": "/v1/flight/ticket-issue",
+    "title": "Flight Ticket Issue",
     "version": "0.1.0",
-    "name": "Flight_Update",
+    "name": "Flight_Ticket_Issue",
     "group": "Flight",
     "permission": [
       {
@@ -1786,10 +2017,74 @@ define({ "api": [
       ]
     },
     "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "15",
+            "optional": false,
+            "field": "orderUid",
+            "description": "<p>Order Uid</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "flights",
+            "description": "<p>Flights data array</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "payments",
+            "description": "<p>Payments data array</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "float",
+            "optional": false,
+            "field": "payments.pay_amount",
+            "description": "<p>Payment amount</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "payments.pay_currency",
+            "description": "<p>Payment currency code (for example USD)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "100",
+            "optional": true,
+            "field": "payments.pay_method_key",
+            "description": "<p>Payment method key (by default &quot;card&quot;)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "date",
+            "optional": false,
+            "field": "payments.pay_date",
+            "description": "<p>Payment date (format Y-m-d)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "255",
+            "optional": true,
+            "field": "payments.pay_description",
+            "description": "<p>Payment description</p>"
+          }
+        ]
+      },
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "\n{\n          \"type\": \"ticket_issue\", // flight_replace, flight_fail\n          \"orderUid\": \"order uid example\",\n          \"parentBookingId\": \"OE96040\",\n          \"parentId\": 205975,\n          \"sameItinerary\": true,\n          \"flights\": [\n              {\n                  \"appKey\": \"038ce0121a1666678d4db57cb10e8667b98d8b08c408cdf7c9b04f1430071826\",\n                  \"uniqueId\": \"OE96040\",\n                  \"status\": 6,\n                  \"pnr\": \"\",\n                  \"gds\": \"\",\n                  \"flightType\": \"RT\",\n                  \"validatingCarrier\": \"PR\",\n                  \"bookingInfo\": [\n                      {\n                          \"bookingId\": \"OE96040\",\n                          \"pnr\": \"Q3PM1G\",\n                          \"gds\": \"S\",\n                          \"validatingCarrier\": \"PR\",\n                          \"status\": 6,\n                          \"state\": \"Rejected\",\n                          \"passengers\": {\n                              \"1\": {\n                                  \"fullName\": \"Arthur Davis\",\n                                  \"first_name\": \"Arthur\",\n                                  \"middle_name\": \"\",\n                                  \"last_name\": \"Davis\",\n                                  \"birth_date\": \"1963-04-07\",\n                                  \"nationality\": \"US\",\n                                  \"gender\": \"M\",\n                                  \"aGender\": \"Mr.\",\n                                  \"tktNumber\": null,\n                                  \"paxType\": \"ADT\"\n                              }\n                          },\n                          \"airlinesCode\": [\n                              {\n                                  \"code\": \"PR\",\n                                  \"airline\": \"Philippine Airlines\",\n                                  \"recordLocator\": \"Q3PM1G\"\n                              }\n                          ],\n                          \"insurance\": []\n                      }\n                  ],\n                  \"trips\": [\n                      {\n                          \"segments\": [\n                              {\n                                  \"segmentId\": 1001959,\n                                  \"airline\": \"PR\",\n                                  \"airlineName\": \"Philippine Airlines\",\n                                  \"mainAirline\": \"PR\",\n                                  \"arrivalAirport\": \"MNL\",\n                                  \"arrivalTime\": \"2021-05-15 04:00:00\",\n                                  \"departureAirport\": \"LAX\",\n                                  \"departureTime\": \"2021-05-13 22:30:00\",\n                                  \"bookingClass\": \"U\",\n                                  \"flightNumber\": 103,\n                                  \"statusCode\": \"HK\",\n                                  \"operatingAirline\": \"Philippine Airlines\",\n                                  \"operatingAirlineCode\": \"PR\",\n                                  \"cabin\": \"Economy\",\n                                  \"departureCity\": \"Los Angeles\",\n                                  \"arrivalCity\": \"Manila\",\n                                  \"departureCountry\": \"US\",\n                                  \"arrivalCountry\": \"PH\",\n                                  \"departureAirportName\": \"Los Angeles International Airport\",\n                                  \"arrivalAirportName\": \"Ninoy Aquino International Airport\",\n                                  \"flightDuration\": 870,\n                                  \"layoverDuration\": 0,\n                                  \"airlineRecordLocator\": \"Q3PM1G\",\n                                  \"aircraft\": \"773\",\n                                  \"baggage\": 2,\n                                  \"carryOn\": true,\n                                  \"marriageGroup\": \"773\",\n                                  \"fareCode\": \"U9XBUS\",\n                                  \"mileage\": 7305\n                              },\n                              {\n                                  \"segmentId\": 1001960,\n                                  \"airline\": \"PR\",\n                                  \"airlineName\": \"Philippine Airlines\",\n                                  \"mainAirline\": \"PR\",\n                                  \"arrivalAirport\": \"TPE\",\n                                  \"arrivalTime\": \"2021-05-15 08:40:00\",\n                                  \"departureAirport\": \"MNL\",\n                                  \"departureTime\": \"2021-05-15 06:30:00\",\n                                  \"bookingClass\": \"U\",\n                                  \"flightNumber\": 890,\n                                  \"statusCode\": \"HK\",\n                                  \"operatingAirline\": \"Philippine Airlines\",\n                                  \"operatingAirlineCode\": \"PR\",\n                                  \"cabin\": \"Economy\",\n                                  \"departureCity\": \"Manila\",\n                                  \"arrivalCity\": \"Taipei\",\n                                  \"departureCountry\": \"PH\",\n                                  \"arrivalCountry\": \"TW\",\n                                  \"departureAirportName\": \"Ninoy Aquino International Airport\",\n                                  \"arrivalAirportName\": \"Taiwan Taoyuan International Airport\",\n                                  \"flightDuration\": 130,\n                                  \"layoverDuration\": 150,\n                                  \"airlineRecordLocator\": \"Q3PM1G\",\n                                  \"aircraft\": \"321\",\n                                  \"baggage\": 2,\n                                  \"carryOn\": true,\n                                  \"marriageGroup\": \"321\",\n                                  \"fareCode\": \"U9XBUS\",\n                                  \"mileage\": 728\n                              }\n                          ]\n                      }\n                  ],\n                  \"price\": {\n                      \"tickets\": 1,\n                      \"selling\": 767.75,\n                      \"currentProfit\": 0,\n                      \"fare\": 446,\n                      \"net\": 717.75,\n                      \"taxes\": 321.75,\n                      \"tips\": 0,\n                      \"currency\": \"USD\",\n                      \"detail\": {\n                          \"ADT\": {\n                              \"selling\": 767.75,\n                              \"fare\": 446,\n                              \"baseTaxes\": 271.75,\n                              \"taxes\": 321.75,\n                              \"tickets\": 1,\n                              \"insurance\": 0\n                          }\n                      }\n                  },\n                  \"departureTime\": \"2021-05-13 22:30:00\",\n                  \"invoiceUri\": \"\\/checkout\\/download\\/OE96040\\/invoice\",\n                  \"eTicketUri\": \"\\/checkout\\/download\\/OE96040\\/e-ticket\",\n                  \"scheduleChange\": \"No\"\n              }\n          ],\n          \"trips\": [],\n          \"payments\":[ // if type ticket_issue\n              {\n                  \"pay_amount\":154.21,\n                  \"pay_currency\":\"usd\",\n                  \"pay_code\":\"ch_1IYvYZFhXDZuLIpUisShKSRP\",\n                  \"pay_method_key\":\"card\",\n                  \"pay_date\":\"2021-03-25\",\n                  \"pay_description\": \"example description\"\n              },\n              {\n                  \"pay_amount\":54.35,\n                  \"pay_currency\":\"eur\",\n                  \"pay_code\":\"transactionIdcode\",\n                  \"pay_method_key\":\"card\",\n                  \"pay_date\":\"2021-03-29\",\n                  \"pay_description\": \"example description\"\n              }\n          ]\n      }",
+          "content": "\n{\n          \"orderUid\": \"or6061be5ec5c0e\",\n          \"flights\": [\n              {\n                  \"appKey\": \"038ce0121a1666678d4db57cb10e8667b98d8b08c408cdf7c9b04f1430071826\",\n                  \"uniqueId\": \"OE96040\",\n                  \"status\": 3,\n                  \"pnr\": \"\",\n                  \"gds\": \"\",\n                  \"flightType\": \"RT\",\n                  \"validatingCarrier\": \"PR\",\n                  \"bookingInfo\": [\n                      {\n                          \"bookingId\": \"OE96040\",\n                          \"pnr\": \"Q3PM1G\",\n                          \"gds\": \"S\",\n                          \"validatingCarrier\": \"PR\",\n                          \"status\": 3,\n                          \"state\": \"Success\",\n                          \"passengers\": {\n                              \"1\": {\n                                  \"fullName\": \"Arthur Davis\",\n                                  \"first_name\": \"Arthur\",\n                                  \"middle_name\": \"\",\n                                  \"last_name\": \"Davis\",\n                                  \"birth_date\": \"1963-04-07\",\n                                  \"nationality\": \"US\",\n                                  \"gender\": \"M\",\n                                  \"aGender\": \"Mr.\",\n                                  \"tktNumber\": \"tktNumber\",\n                                  \"paxType\": \"ADT\"\n                              }\n                          },\n                          \"airlinesCode\": [\n                              {\n                                  \"code\": \"PR\",\n                                  \"airline\": \"Philippine Airlines\",\n                                  \"recordLocator\": \"Q3PM1G\"\n                              }\n                          ],\n                          \"insurance\": []\n                      }\n                  ],\n                  \"trips\": [\n                      {\n                          \"segments\": [\n                              {\n                                  \"segmentId\": 1001959,\n                                  \"airline\": \"PR\",\n                                  \"airlineName\": \"Philippine Airlines\",\n                                  \"mainAirline\": \"PR\",\n                                  \"arrivalAirport\": \"MNL\",\n                                  \"arrivalTime\": \"2021-05-15 04:00:00\",\n                                  \"departureAirport\": \"LAX\",\n                                  \"departureTime\": \"2021-05-13 22:30:00\",\n                                  \"bookingClass\": \"U\",\n                                  \"flightNumber\": 103,\n                                  \"statusCode\": \"HK\",\n                                  \"operatingAirline\": \"Philippine Airlines\",\n                                  \"operatingAirlineCode\": \"PR\",\n                                  \"cabin\": \"Economy\",\n                                  \"departureCity\": \"Los Angeles\",\n                                  \"arrivalCity\": \"Manila\",\n                                  \"departureCountry\": \"US\",\n                                  \"arrivalCountry\": \"PH\",\n                                  \"departureAirportName\": \"Los Angeles International Airport\",\n                                  \"arrivalAirportName\": \"Ninoy Aquino International Airport\",\n                                  \"flightDuration\": 870,\n                                  \"layoverDuration\": 0,\n                                  \"airlineRecordLocator\": \"Q3PM1G\",\n                                  \"aircraft\": \"773\",\n                                  \"baggage\": 2,\n                                  \"carryOn\": true,\n                                  \"marriageGroup\": \"773\",\n                                  \"fareCode\": \"U9XBUS\",\n                                  \"mileage\": 7305\n                              },\n                              {\n                                  \"segmentId\": 1001960,\n                                  \"airline\": \"PR\",\n                                  \"airlineName\": \"Philippine Airlines\",\n                                  \"mainAirline\": \"PR\",\n                                  \"arrivalAirport\": \"TPE\",\n                                  \"arrivalTime\": \"2021-05-15 08:40:00\",\n                                  \"departureAirport\": \"MNL\",\n                                  \"departureTime\": \"2021-05-15 06:30:00\",\n                                  \"bookingClass\": \"U\",\n                                  \"flightNumber\": 890,\n                                  \"statusCode\": \"HK\",\n                                  \"operatingAirline\": \"Philippine Airlines\",\n                                  \"operatingAirlineCode\": \"PR\",\n                                  \"cabin\": \"Economy\",\n                                  \"departureCity\": \"Manila\",\n                                  \"arrivalCity\": \"Taipei\",\n                                  \"departureCountry\": \"PH\",\n                                  \"arrivalCountry\": \"TW\",\n                                  \"departureAirportName\": \"Ninoy Aquino International Airport\",\n                                  \"arrivalAirportName\": \"Taiwan Taoyuan International Airport\",\n                                  \"flightDuration\": 130,\n                                  \"layoverDuration\": 150,\n                                  \"airlineRecordLocator\": \"Q3PM1G\",\n                                  \"aircraft\": \"321\",\n                                  \"baggage\": 2,\n                                  \"carryOn\": true,\n                                  \"marriageGroup\": \"321\",\n                                  \"fareCode\": \"U9XBUS\",\n                                  \"mileage\": 728\n                              }\n                          ]\n                      }\n                  ],\n                  \"price\": {\n                      \"tickets\": 1,\n                      \"selling\": 767.75,\n                      \"currentProfit\": 0,\n                      \"fare\": 446,\n                      \"net\": 717.75,\n                      \"taxes\": 321.75,\n                      \"tips\": 0,\n                      \"currency\": \"USD\",\n                      \"detail\": {\n                          \"ADT\": {\n                              \"selling\": 767.75,\n                              \"fare\": 446,\n                              \"baseTaxes\": 271.75,\n                              \"taxes\": 321.75,\n                              \"tickets\": 1,\n                              \"insurance\": 0\n                          }\n                      }\n                  },\n                  \"departureTime\": \"2021-05-13 22:30:00\",\n                  \"invoiceUri\": \"\\/checkout\\/download\\/OE96040\\/invoice\",\n                  \"eTicketUri\": \"\\/checkout\\/download\\/OE96040\\/e-ticket\",\n                  \"scheduleChange\": \"No\"\n              }\n          ],\n          \"trips\": [],\n          \"payments\":[\n              {\n                  \"pay_amount\":154.21,\n                  \"pay_currency\":\"usd\",\n                  \"pay_code\":\"ch_1IYvYZFhXDZuLIpUisShKSRP\",\n                  \"pay_method_key\":\"card\",\n                  \"pay_date\":\"2021-03-25\",\n                  \"pay_description\": \"example description\"\n              },\n              {\n                  \"pay_amount\":54.35,\n                  \"pay_currency\":\"eur\",\n                  \"pay_code\":\"transactionIdcode\",\n                  \"pay_method_key\":\"card\",\n                  \"pay_date\":\"2021-03-29\",\n                  \"pay_description\": \"example description\"\n              }\n          ]\n      }",
           "type": "json"
         }
       ]
@@ -1798,7 +2093,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n     \"status\": 200,\n     \"message\": \"OK\",\n     \"data\": {\n         \"resultMessage\": \"ProductQuote (exampleGID) changed status from (Pending) to (Error)\"\n     }\n}",
+          "content": "HTTP/1.1 200 OK\n{\n     \"status\": 200,\n     \"message\": \"OK\",\n     \"data\": {\n         \"resultMessage\": \"Order Uid(or6061be5ec5c0e) successful processed\"\n     }\n}",
           "type": "json"
         }
       ]
@@ -1807,12 +2102,12 @@ define({ "api": [
       "examples": [
         {
           "title": "Error-Response (422):",
-          "content": "HTTP/1.1 200 OK\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": {\n        \"status\": [\n            \"status cannot be blank.\"\n       ]\n    },\n    \"code\": \"15801\"\n}",
+          "content": "HTTP/1.1 200 OK\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": {\n        \"orderUid\": [\n            \"orderUid cannot be blank\"\n       ]\n    },\n    \"code\": \"15801\"\n}",
           "type": "json"
         },
         {
           "title": "Error-Response (404):",
-          "content": "HTTP/1.1 200 OK\n{\n    \"status\": 404,\n    \"message\": \"FlightQuote not found\",\n    \"code\": \"15300\",\n    \"errors\": []\n}",
+          "content": "HTTP/1.1 200 OK\n{\n    \"status\": 404,\n    \"message\": \"Order not found\",\n    \"code\": \"15300\",\n    \"errors\": []\n}",
           "type": "json"
         }
       ]
