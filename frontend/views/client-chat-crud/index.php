@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(['id' => 'client_chat_crud']); ?>
-    <?php  echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php  /*echo $this->render('_search', ['model' => $searchModel]);*/ ?>
     <?php if (Auth::user()->isAdmin()) : ?>
     <p>
     <div class="btn-group">
@@ -59,7 +59,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'cch_id',
                 'options' => ['style' => 'width:100px']
             ],
-            [
+            /*[
                 'attribute' => 'cch_parent_id',
                 'value' => static function (ClientChat $model) {
                     return $model->cch_parent_id ?
@@ -143,11 +143,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw',
             ],
-            /*[
-                'attribute' => 'cch_owner_user_id',
-                'class' => \common\components\grid\UserColumn::class,
-                'relation' => 'cchOwnerUser',
-            ],*/
             [
                 'class' => UserSelect2Column::class,
                 'attribute' => 'cch_owner_user_id',
@@ -192,7 +187,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => DateTimeColumn::class,
                 'attribute' => 'cch_created_dt',
                 'format' => 'byUserDateTime',
-            ],
+            ],*/
 
             ['class' => 'yii\grid\ActionColumn'],
             ],
