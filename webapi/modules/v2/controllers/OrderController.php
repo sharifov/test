@@ -2082,8 +2082,8 @@ class OrderController extends BaseController
      *
      * HTTP/1.1 422 Unprocessable entity
      * {
-            "status": "Failed",
-            "message": "Some error occurred",
+            "status": 422,
+            "message": "test",
             "detailError": {
                 "product": "Flight",
                 "quoteOtaId": "asdff43fsgfdsv343ddx"
@@ -2193,7 +2193,7 @@ class OrderController extends BaseController
             Yii::error(AppHelper::throwableFormatter($e), 'API::OrderController::actionCreateC2b::OrderC2BException');
 
             $response = new ErrorResponse(
-                new StatusFailedMessage(),
+                new StatusCodeMessage(422),
                 new MessageMessage($e->getMessage()),
                 new DetailErrorMessage([
                     'product' => $e->dto->product->getProductName(),
@@ -2205,7 +2205,7 @@ class OrderController extends BaseController
             Yii::error(AppHelper::throwableFormatter($e), 'API::OrderController::actionCreateC2b::Throwable');
 
             $response = new ErrorResponse(
-                new StatusFailedMessage(),
+                new StatusCodeMessage(400),
                 new MessageMessage($e->getMessage()),
                 new ErrorsMessage($e->getMessage()),
                 new CodeMessage($e->getCode())
