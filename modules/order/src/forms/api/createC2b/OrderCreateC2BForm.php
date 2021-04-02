@@ -2,6 +2,7 @@
 
 namespace modules\order\src\forms\api\createC2b;
 
+use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderStatus;
 use sales\forms\CompositeForm;
 
@@ -13,7 +14,8 @@ use sales\forms\CompositeForm;
  * @property CreditCardForm $creditCard
  * @property BillingInfoForm $billingInfo
  * @property string $sourceCid
- * @property string $requestUid
+ * @property string $bookingId
+ * @property string $fareId
  * @property string $status
  * @property PaymentForm $payment
  */
@@ -21,9 +23,11 @@ class OrderCreateC2BForm extends CompositeForm
 {
     public $sourceCid;
 
-    public $requestUid;
+    public $bookingId;
 
     public $status;
+
+    public $fareId;
 
     private const STATUS_SUCCESS = 'success';
     private const STATUS_FAILED = 'failed';
@@ -53,9 +57,11 @@ class OrderCreateC2BForm extends CompositeForm
     public function rules(): array
     {
         return [
-            [['sourceCid', 'requestUid', 'status'], 'required'],
-            [['sourceCid', 'requestUid', 'status'], 'string', 'max' => 10],
-            [['status'], 'in', 'range' => [self::STATUS_SUCCESS, self::STATUS_FAILED]]
+            [['sourceCid', 'bookingId', 'status', 'fareId'], 'required'],
+            [['sourceCid', 'bookingId', 'status'], 'string', 'max' => 10],
+            [['fareId'], 'string', 'max' => 255],
+            [['status'], 'in', 'range' => [self::STATUS_SUCCESS, self::STATUS_FAILED]],
+            ['fareId', 'unique', 'targetClass' => Order::class, 'targetAttribute' => 'or_fare_id']
         ];
     }
 

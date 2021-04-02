@@ -1908,7 +1908,8 @@ class OrderController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      * @apiParam {string{max 10}}               sourceCid       Source cid
-     * @apiParam {string{max 10}}               requestUid       Request uid
+     * @apiParam {string{max 10}}               bookingId       Booking id
+     * @apiParam {string{max 255}}              fareId          Unique value of order
      * @apiParam {string="success","failed"{max 10}}               status       Request uid
      *
      * @apiParam {Object[]}             quotes                  Product quotes
@@ -1974,7 +1975,8 @@ class OrderController extends BaseController
      *
      * {
             "sourceCid": "ACHUY23AS",
-            "requestUid": "WCJ12CSIJ",
+            "bookingId": "WCJ12CSIJ",
+            "fareId": "A0EA9F-5cc2ce331e8bb3.16383647",
             "status": "success",
             "quotes": [
                 {
@@ -2106,6 +2108,20 @@ class OrderController extends BaseController
             "errors": []
         }
      *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+            "status": 422,
+            "message": "Validation error",
+            "errors": {
+                "fareId": [
+                    "Fare Id \"A0EA9F-5cc2ce331e8bb3.16383647\" has already been taken."
+                ]
+            },
+            "code": 0
+        }
+     *
      * @return ErrorResponse|SuccessResponse
      */
     public function actionCreateC2b()
@@ -2135,7 +2151,7 @@ class OrderController extends BaseController
             $project = $this->projectRepository->findById($this->auth->au_project_id ?? 0);
 
             $order = $this->transactionManager->wrap(function () use ($form, $project, $request, $orderRequest) {
-                $dto = new CreateOrderDTO(null, $form->payment->clientCurrency, $request->post(), OrderSourceType::C2B, $orderRequest->orr_id, $project->id, $form->getOrderStatus());
+                $dto = new CreateOrderDTO(null, $form->payment->clientCurrency, $request->post(), OrderSourceType::C2B, $orderRequest->orr_id, $project->id, $form->getOrderStatus(), $form->fareId);
                 $order = $this->orderManageService->createByC2bFlow($dto);
 
                 foreach ($form->quotes as $quoteForm) {
@@ -2156,7 +2172,7 @@ class OrderController extends BaseController
                 $order->recalculateProfitAmount();
                 $this->orderRepository->save($order);
 
-                $orderData = OrderData::create($order->or_id, $form->sourceCid, $form->requestUid);
+                $orderData = OrderData::create($order->or_id, $form->sourceCid, $form->bookingId);
                 $orderData->detachBehavior('user');
                 $this->orderDataRepository->save($orderData);
 
@@ -2242,141 +2258,141 @@ class OrderController extends BaseController
         return isset($data['FlightRequest']);
     }
 
-     /**
-      * @api {post} /v2/order/cancel Cancel Order
-      * @apiVersion 0.2.0
-      * @apiName CancelOrder
-      * @apiGroup Order
-      * @apiPermission Authorized User
-      *
-      * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
-      * @apiHeaderExample {json} Header-Example:
-      *  {
-      *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
-      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
-      *  }
-      *
-      * @apiParam {string}       gid            Order gid
-      *
-      * @apiParamExample {json} Request-Example:
-      *
-      * {
-      *     "gid": "04d3fe3fc74d0514ee93e208a52bcf90"
-      * }
-      *
-      * @apiSuccessExample {json} Success-Response:
-      *
-      * HTTP/1.1 200 OK
-      * {
-      *    "status": 200,
-      *    "message": "OK",
-      *    "code": 0,
-      *    "technical": {
-      *        "action": "v2/order/cancel",
-      *        "response_id": 15629,
-      *        "request_dt": "2021-04-01 09:03:11",
-      *        "response_dt": "2021-04-01 09:03:11",
-      *        "execution_time": 0.019,
-      *        "memory_usage": 186192
-      *    },
-      *    "request": {
-      *       "gid": "04d3fe3fc74d0514ee93e208a52bcf90"
-      *    }
-      * }
-      *
-      * @apiErrorExample {json} Error-Response (400):
-      *
-      * HTTP/1.1 400 Bad Request
-      * {
-      *       "status": 400,
-      *       "message": "Load data error",
-      *       "errors": [
-      *           "Not found data on POST request"
-      *       ],
-      *       "code": 10,
-      *       "request": {
-      *           ...
-      *       },
-      *       "technical": {
-      *           ...
-      *      }
-      * }
-      *
-      * @apiErrorExample {json} Error-Response (422):
-      *
-      * HTTP/1.1 422 Unprocessable entity
-      * {
-      *     "status": 422,
-      *     "message": "Validation error",
-      *     "errors": {
-      *          "gid": [
-      *            "Gid is invalid."
-      *         ]
-      *     },
-      *     "code": 20,
-      *     "technical": {
-      *           ...
-      *     },
-      *     "request": {
-      *           ...
-      *     }
-      * }
-      *
-      * @apiErrorExample {json} Error-Response (422):
-      *
-      * HTTP/1.1 422 Unprocessable entity
-      * {
-      *     "status": 422,
-      *     "message": "Error",
-      *     "errors": {
-      *         "The order is not available for processing."
-      *     },
-      *     "code": 30,
-      *     "technical": {
-      *           ...
-      *     },
-      *     "request": {
-      *           ...
-      *     }
-      * }
-      *
-      * @apiErrorExample {json} Error-Response (422):
-      *
-      * HTTP/1.1 422 Unprocessable entity
-      * {
-      *     "status": 422,
-      *     "message": "Error",
-      *     "errors": {
-      *         "Unable to process flight cancellation."
-      *     },
-      *     "code": 40,
-      *     "technical": {
-      *           ...
-      *     },
-      *     "request": {
-      *           ...
-      *     }
-      * }
-      *
-      * @apiErrorExample {json} Error-Response (422):
-      *
-      * HTTP/1.1 422 Unprocessable entity
-      * {
-      *     "status": 422,
-      *     "message": "Error",
-      *     "errors": {
-      *         "Unable to process hotel cancellation."
-      *     },
-      *     "code": 50,
-      *     "technical": {
-      *           ...
-      *     },
-      *     "request": {
-      *           ...
-      *     }
-      * }
-      *
-      */
+    /**
+     * @api {post} /v2/order/cancel Cancel Order
+     * @apiVersion 0.2.0
+     * @apiName CancelOrder
+     * @apiGroup Order
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string}       gid            Order gid
+     *
+     * @apiParamExample {json} Request-Example:
+     *
+     * {
+     *     "gid": "04d3fe3fc74d0514ee93e208a52bcf90"
+     * }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *
+     * HTTP/1.1 200 OK
+     * {
+     *    "status": 200,
+     *    "message": "OK",
+     *    "code": 0,
+     *    "technical": {
+     *        "action": "v2/order/cancel",
+     *        "response_id": 15629,
+     *        "request_dt": "2021-04-01 09:03:11",
+     *        "response_dt": "2021-04-01 09:03:11",
+     *        "execution_time": 0.019,
+     *        "memory_usage": 186192
+     *    },
+     *    "request": {
+     *       "gid": "04d3fe3fc74d0514ee93e208a52bcf90"
+     *    }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response (400):
+     *
+     * HTTP/1.1 400 Bad Request
+     * {
+     *       "status": 400,
+     *       "message": "Load data error",
+     *       "errors": [
+     *           "Not found data on POST request"
+     *       ],
+     *       "code": 10,
+     *       "request": {
+     *           ...
+     *       },
+     *       "technical": {
+     *           ...
+     *      }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *     "status": 422,
+     *     "message": "Validation error",
+     *     "errors": {
+     *          "gid": [
+     *            "Gid is invalid."
+     *         ]
+     *     },
+     *     "code": 20,
+     *     "technical": {
+     *           ...
+     *     },
+     *     "request": {
+     *           ...
+     *     }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *     "status": 422,
+     *     "message": "Error",
+     *     "errors": {
+     *         "The order is not available for processing."
+     *     },
+     *     "code": 30,
+     *     "technical": {
+     *           ...
+     *     },
+     *     "request": {
+     *           ...
+     *     }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *     "status": 422,
+     *     "message": "Error",
+     *     "errors": {
+     *         "Unable to process flight cancellation."
+     *     },
+     *     "code": 40,
+     *     "technical": {
+     *           ...
+     *     },
+     *     "request": {
+     *           ...
+     *     }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *     "status": 422,
+     *     "message": "Error",
+     *     "errors": {
+     *         "Unable to process hotel cancellation."
+     *     },
+     *     "code": 50,
+     *     "technical": {
+     *           ...
+     *     },
+     *     "request": {
+     *           ...
+     *     }
+     * }
+     *
+     */
     public function actionCancel()
     {
         $form = new CancelForm();

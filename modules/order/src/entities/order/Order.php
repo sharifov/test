@@ -47,6 +47,7 @@ use yii\helpers\VarDumper;
  * @property int $or_id
  * @property string $or_gid
  * @property string|null $or_uid
+ * @property string $or_fare_id
  * @property string|null $or_name
  * @property int|null $or_lead_id
  * @property string|null $or_description
@@ -99,12 +100,13 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
     public function rules(): array
     {
         return [
-            [['or_gid'], 'required'],
+            [['or_gid', 'or_fare_id'], 'required'],
             [['or_lead_id', 'or_status_id', 'or_pay_status_id', 'or_owner_user_id', 'or_created_user_id', 'or_updated_user_id'], 'integer'],
             [['or_description'], 'string'],
             [['or_app_total', 'or_app_markup', 'or_agent_markup', 'or_client_total', 'or_client_currency_rate', 'or_profit_amount'], 'number'],
             [['or_created_dt', 'or_updated_dt'], 'safe'],
             [['or_gid'], 'string', 'max' => 32],
+            [['or_fare_id'], 'string', 'max' => 255],
             [['or_uid'], 'string', 'max' => 15],
             [['or_name'], 'string', 'max' => 40],
             [['or_client_currency'], 'string', 'max' => 3],
@@ -152,7 +154,8 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
             'or_updated_dt' => 'Updated Dt',
             'or_profit_amount' => 'Profit amount',
             'or_request_data' => 'Request Data',
-            'or_project_id' => 'Project'
+            'or_project_id' => 'Project',
+            'or_fare_id' => 'Fare Id',
         ];
     }
 
@@ -183,6 +186,7 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
     {
         $this->or_gid = self::generateGid();
         $this->or_uid = self::generateUid();
+        $this->or_fare_id = $dto->fareId;
         $this->or_status_id = $dto->status;
         $this->or_pay_status_id = $dto->payStatus;
         $this->or_lead_id = $dto->leadId;
