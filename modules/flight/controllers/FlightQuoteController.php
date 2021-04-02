@@ -353,8 +353,6 @@ class FlightQuoteController extends FController
                 throw new \DomainException('Quote Key not equal to key from Cache');
             }
 
-//            VarDumper::dump(Json::encode($selectedQuote));die;
-
             $this->flightQuoteManageService->create($flight, $selectedQuote, Auth::id());
 
             $result['status'] = true;
