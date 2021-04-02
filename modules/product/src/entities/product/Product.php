@@ -221,11 +221,11 @@ class Product extends \yii\db\ActiveRecord implements Serializable
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
-            'user' => [
-                'class' => BlameableBehavior::class,
-                'createdByAttribute' => 'pr_created_user_id',
-                'updatedByAttribute' => 'pr_updated_user_id',
-            ],
+//            'user' => [
+//                'class' => BlameableBehavior::class,
+//                'createdByAttribute' => 'pr_created_user_id',
+//                'updatedByAttribute' => 'pr_updated_user_id',
+//            ],
         ];
     }
 

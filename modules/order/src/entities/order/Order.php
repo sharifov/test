@@ -11,6 +11,7 @@ use common\models\Project;
 use modules\invoice\src\entities\invoice\Invoice;
 use common\models\Lead;
 use modules\order\src\entities\order\events\OrderCanceledEvent;
+use modules\order\src\entities\order\events\OrderCancelFailedEvent;
 use modules\order\src\entities\order\events\OrderCancelProcessingEvent;
 use modules\order\src\entities\order\events\OrderCompletedEvent;
 use modules\order\src\entities\order\events\OrderDeclinedEvent;
@@ -450,7 +451,7 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
         if (!array_key_exists($status, OrderStatus::getList())) {
             throw new \InvalidArgumentException('Invalid Status');
         }
-        OrderStatus::guard($this->or_status_id, $status);
+//        OrderStatus::guard($this->or_status_id, $status);
 
         $this->or_status_id = $status;
     }
@@ -531,6 +532,31 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
         );
     }
 
+    public function cancelFailed(?string $description, ?int $actionId, ?int $creatorId): void
+    {
+        if ($this->isCancelFailed()) {
+            throw new \DomainException('Order is already cancel failed.');
+        }
+        $startStatus = $this->or_status_id;
+        $this->setStatus(OrderStatus::CANCEL_FAILED);
+        $this->recordEvent(
+            new OrderCancelFailedEvent(
+                $this->or_id,
+                $startStatus,
+                $this->or_status_id,
+                $description,
+                $actionId,
+                $this->or_owner_user_id,
+                $creatorId
+            )
+        );
+    }
+
+    public function isCancelFailed(): bool
+    {
+        return $this->or_status_id === OrderStatus::CANCEL_FAILED;
+    }
+
     public function isCanceled(): bool
     {
         return $this->or_status_id === OrderStatus::CANCELED;
@@ -587,6 +613,11 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
         );
     }
 
+    public function isCancelProcessing(): bool
+    {
+        return $this->or_status_id === OrderStatus::CANCEL_PROCESSING;
+    }
+
     public function error(?string $description, ?int $actionId, ?int $creatorId): void
     {
         $startStatus = $this->or_status_id;
@@ -619,6 +650,11 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
                 $creatorId
             )
         );
+    }
+
+    public function isDeclined(): bool
+    {
+        return $this->or_status_id === OrderStatus::DECLINED;
     }
 
     public function serialize(): array

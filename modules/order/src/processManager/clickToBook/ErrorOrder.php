@@ -37,7 +37,7 @@ class ErrorOrder
             $this->orderRepository->save($order);
 
             $manager = $this->managerRepository->find($orderId);
-            $manager->failed(new \DateTimeImmutable());
+            $manager->stop(new \DateTimeImmutable());
             $this->managerRepository->save($manager);
         });
     }

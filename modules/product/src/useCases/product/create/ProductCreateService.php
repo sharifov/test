@@ -47,16 +47,20 @@ class ProductCreateService
         ProductAvailableGuard::check($form->pr_type_id);
 
         return $this->transactionManager->wrap(function () use ($form) {
-
-            $product = Product::create($form->getDto());
-
-            $this->productRepository->save($product);
-
-            $productItem = $this->factory->create($form->pr_type_id, $product->pr_id);
-
-            $this->productableRepository->save($form->pr_type_id, $productItem);
-
-            return $product;
+            return $this->handle($form);
         });
+    }
+
+    public function handle(ProductCreateForm $form): Product
+    {
+        $product = Product::create($form->getDto());
+
+        $this->productRepository->save($product);
+
+        $productItem = $this->factory->create($form->pr_type_id, $product->pr_id);
+
+        $this->productableRepository->save($form->pr_type_id, $productItem);
+
+        return $product;
     }
 }

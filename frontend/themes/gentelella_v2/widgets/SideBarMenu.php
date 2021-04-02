@@ -356,6 +356,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Product Quotes', 'url' => ['/product/product-quote-crud/index']],
                 ['label' => 'Product Quotes Status Log', 'url' => ['/product/product-quote-status-log-crud/index']],
                 ['label' => 'Product Quote Options', 'url' => ['/product/product-quote-option-crud/index']],
+                ['label' => 'Product Quote Relation', 'url' => ['/product/product-quote-relation-crud/index']],
+
                 ['label' => 'Orders', 'url' => 'javascript:', 'items' => [
                     ['label' => 'Orders', 'url' => ['/order/order-crud/index']],
                     ['label' => 'Orders Status Log', 'url' => ['/order/order-status-log-crud/index']],
@@ -364,6 +366,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     ['label' => 'Orders Tips User Profit', 'url' => ['/order/order-tips-user-profit-crud/index']],
                     ['label' => 'Order Process Manager', 'url' => ['/order/order-process-manager/index']],
                     ['label' => 'Order Request', 'url' => ['/order/order-request-crud/index']],
+                    ['label' => 'Order Data', 'url' => ['/order/order-data-crud/index']],
                 ], 'hasChild' => true],
                 ['label' => 'Offers', 'url' => ['/offer/offer-crud/index']],
                 ['label' => 'Offers Send Log', 'url' => ['/offer/offer-send-log-crud/index']],

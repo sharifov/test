@@ -25,4 +25,6 @@ class CruiseCodeException
     public const CRUISE_CABIN_PAX_NOT_FOUND = Module::CRUISE . 600;
     public const CRUISE_CABIN_PAX_SAVE = Module::CRUISE . 601;
     public const CRUISE_CABIN_PAX_REMOVE = Module::CRUISE . 602;
+
+    public const API_C2B_HANDLE = Module::CRUISE . 901;
 }

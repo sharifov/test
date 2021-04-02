@@ -19,12 +19,12 @@ class CreateDto
     public $pr_description;
     public $pr_project_id;
 
-    public function __construct(int $pr_lead_id, int $pr_type_id, ?string $pr_name, ?string $pr_description, ?int $projectId)
+    public function __construct(?int $pr_lead_id, int $pr_type_id, ?string $pr_name, ?string $pr_description, ?int $project_id)
     {
         $this->pr_lead_id = $pr_lead_id;
         $this->pr_type_id = $pr_type_id;
         $this->pr_name = $pr_name;
         $this->pr_description = $pr_description;
-        $this->pr_project_id = $projectId;
+        $this->pr_project_id = $project_id;
     }
 }

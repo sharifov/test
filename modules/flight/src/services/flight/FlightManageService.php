@@ -113,6 +113,7 @@ class FlightManageService
             $productCreateForm = new ProductCreateForm();
             $productCreateForm->pr_lead_id = $lead->id;
             $productCreateForm->pr_type_id = ProductType::PRODUCT_FLIGHT;
+            $productCreateForm->pr_project_id = $lead->project_id;
             $newProduct = $this->productCreateService->create($productCreateForm);
 //            $product = $this->productRepository->find($newProductId);
 

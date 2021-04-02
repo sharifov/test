@@ -82,7 +82,7 @@ class OrderProcessActionsController extends FController
         $orderId = (int)Yii::$app->request->post('id');
 
         try {
-            $this->orderProcessManagerCanceler->cancel($orderId);
+            $this->orderProcessManagerCanceler->stop($orderId);
             return $this->asJson([
                 'error' => false,
                 'message' => 'Success'

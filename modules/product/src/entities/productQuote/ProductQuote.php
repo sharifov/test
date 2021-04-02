@@ -339,6 +339,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $this->pq_status_id = ProductQuoteStatus::APPLIED;
     }
 
+    public function failed(): void
+    {
+        $this->pq_status_id = ProductQuoteStatus::ERROR;
+    }
+
     /**
      * @return float
      */
@@ -731,6 +736,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function isBooked(): bool
     {
         return $this->pq_status_id === ProductQuoteStatus::BOOKED;
+    }
+
+    public function isInProgress(): bool
+    {
+        return $this->pq_status_id === ProductQuoteStatus::IN_PROGRESS;
     }
 
     public function isError(): bool

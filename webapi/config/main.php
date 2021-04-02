@@ -1,5 +1,6 @@
 <?php
 
+use modules\hotel\HotelModule;
 use yii\log\FileTarget;
 use yii\log\DbTarget;
 use webapi\bootstrap\SetUp;
@@ -33,6 +34,9 @@ return [
             'class' => 'webapi\modules\v2\Module',
             'basePath' => '@webapi/modules/v2',
             'controllerNamespace' => 'webapi\modules\v2\controllers',
+        ],
+        'hotel' => [
+            'class' => HotelModule::class,
         ],
     ],
 

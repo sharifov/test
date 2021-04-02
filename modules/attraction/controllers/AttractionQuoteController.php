@@ -170,7 +170,8 @@ class AttractionQuoteController extends FController
 
         return $this->renderAjax('search/_list_availabilities', [
             'dataProvider' => $dataProvider,
-            'attraction'   => $attraction
+            'attraction'   => $attraction,
+            'productKey' => $productKey
         ]);
     }
 
@@ -262,14 +263,15 @@ class AttractionQuoteController extends FController
                 $attractionQuote->atnq_product_details_json = $productDetails;
                 $attractionQuote->save();
 
-                /*Notifications::pub(
+                Notifications::pub(
                     ['lead-' . $attractionQuote->atnqProductQuote->pqProduct->pr_lead_id],
                     'addedQuote',
                     ['data' => ['productId' => $productId]]
-                );*/
+                );
 
                 $response['error'] = false;
                 $response['message'] = 'Quote ID: ' . $attractionQuote->atnq_product_quote_id;
+                $response['availabilityID'] = $availabilityPaxModel->availability_id;
                 $response['html'] = $this->renderAjax('quote_details', [
                     'quoteDetails' => $quoteDetails,
                     'productId' => $productId

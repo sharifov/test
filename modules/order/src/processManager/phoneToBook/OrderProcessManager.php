@@ -50,21 +50,12 @@ class OrderProcessManager extends BaseProcessManager
         $this->recordEvent(new events\BookedEvent($this->opm_id, $date->format('Y-m-d H:i:s.u')));
     }
 
-    public function failed(\DateTimeImmutable $date): void
+    public function stop(\DateTimeImmutable $date): void
     {
-        if (!$this->isRunning()) {
-            throw new \DomainException('OrderProcessManager is Not Running. Id: ' . $this->opm_id . ' Status: ' . $this->opm_status);
+        if ($this->isStopped()) {
+            throw new \DomainException('OrderProcessManager is already Stopped. Id: ' . $this->opm_id);
         }
-        $this->opm_status = Status::FAILED;
-        $this->recordEvent(new events\FailedEvent($this->opm_id, $date->format('Y-m-d H:i:s.u')));
-    }
-
-    public function cancel(\DateTimeImmutable $date): void
-    {
-        if (!$this->isRunning()) {
-            throw new \DomainException('OrderProcessManager is Not Running. Id: ' . $this->opm_id . ' Status: ' . $this->opm_status);
-        }
-        $this->opm_status = Status::CANCELED;
+        $this->opm_status = Status::STOPPED;
         $this->recordEvent(new events\CanceledEvent($this->opm_id, $date->format('Y-m-d H:i:s.u')));
     }
 
@@ -86,5 +77,10 @@ class OrderProcessManager extends BaseProcessManager
     public function isBooked(): bool
     {
         return $this->opm_status === Status::BOOKED;
+    }
+
+    public function isStopped(): bool
+    {
+        return $this->opm_status === Status::STOPPED;
     }
 }

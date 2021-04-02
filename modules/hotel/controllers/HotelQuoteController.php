@@ -32,6 +32,7 @@ use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
@@ -140,6 +141,7 @@ class HotelQuoteController extends FController
             }
         }
         $hotelList = $result['hotels'] ?? [];
+        $hotelTypes = $result['hotelTypes'] ?? [];
 
         /*foreach ($hotelList as $key => $value) {
             foreach ($value['rooms'] as $keyRoom => $room) {
@@ -156,7 +158,7 @@ class HotelQuoteController extends FController
         $hotelList = array_values($hotelList);*/
 
         if (!empty($hotelList)) {
-            $form->initFilters($hotelList);
+            $form->initFilters($hotelList, $hotelTypes);
             $hotelList = $form->applyFilters($hotelList);
         }
 
@@ -176,7 +178,9 @@ class HotelQuoteController extends FController
         return $this->renderAjax('search/_search_quotes', [
             'dataProvider' => $dataProvider,
             'hotelSearch'   => $hotel,
-            'filtersForm' => $form
+            'filtersForm' => $form,
+            'showFilters' => empty($result['hotels']),
+            'hotelTypes' => $hotelTypes
         ]);
     }
 
@@ -267,7 +271,10 @@ class HotelQuoteController extends FController
             $hotelModel = HotelList::findOrCreateByData($hotelData);
             $currency = $hotelData['currency'] ?? 'USD';
             $resultData = ArrayHelper::merge($hotelData, $quoteData);
-            $hotelQuote = HotelQuote::findOrCreateByData($resultData, $hotelModel, $hotel, Auth::id(), $currency);
+            if (isset($resultData['rooms'])) {
+                unset($resultData['rooms']);
+            }
+            $hotelQuote = HotelQuote::findOrCreateByData($resultData, $hotelModel, $hotel, Auth::id(), null, $currency);
 
             if (!$hotelQuote) {
                 throw new Exception('Not added hotel quote - hotel code (' . $hotelCode . ') room key (' . $quoteKey . ')', 8);

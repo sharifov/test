@@ -47,6 +47,8 @@ class ProductCrudSearch extends Product
             [['pr_created_dt', 'pr_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
 
             ['pr_project_id', 'integer'],
+
+            ['pr_gid', 'string', 'max' => 32],
         ];
     }
 
@@ -90,6 +92,7 @@ class ProductCrudSearch extends Product
         ]);
 
         $query->andFilterWhere(['like', 'pr_name', $this->pr_name])
+            ->andFilterWhere(['like', 'pr_gid', $this->pr_gid])
             ->andFilterWhere(['like', 'pr_description', $this->pr_description]);
 
         return $dataProvider;

@@ -113,7 +113,7 @@ class Payment extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['pay_type_id', 'pay_method_id', 'pay_status_id', 'pay_invoice_id', 'pay_order_id', 'pay_created_user_id', 'pay_updated_user_id'], 'integer'],
+            [['pay_type_id', 'pay_status_id', 'pay_invoice_id', 'pay_order_id', 'pay_created_user_id', 'pay_updated_user_id'], 'integer'],
             [['pay_date', 'pay_amount'], 'required'],
             ['pay_date', 'date', 'format' => 'php:Y-m-d'],
             [['pay_created_dt', 'pay_updated_dt'], 'safe'],
@@ -124,7 +124,9 @@ class Payment extends \yii\db\ActiveRecord
             [['pay_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pay_created_user_id' => 'id']],
             [['pay_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['pay_currency' => 'cur_code']],
             [['pay_invoice_id'], 'exist', 'skipOnError' => true, 'targetClass' => Invoice::class, 'targetAttribute' => ['pay_invoice_id' => 'inv_id']],
-            [['pay_method_id'], 'exist', 'skipOnError' => true, 'targetClass' => PaymentMethod::class, 'targetAttribute' => ['pay_method_id' => 'pm_id']],
+
+            [['pay_method_id'], 'exist', 'skipOnError' => true, 'skipOnEmpty' => true,
+                'targetClass' => PaymentMethod::class, 'targetAttribute' => ['pay_method_id' => 'pm_id']],
             [['pay_order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['pay_order_id' => 'or_id']],
             [['pay_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pay_updated_user_id' => 'id']],
         ];
@@ -251,7 +253,7 @@ class Payment extends \yii\db\ActiveRecord
     }
 
     public static function create(
-        int $methodId,
+        ?int $methodId,
         string $date,
         float $amount,
         string $currency,

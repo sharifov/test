@@ -35,6 +35,7 @@ use modules\flight\models\search\FlightQuoteSearch;
 use frontend\controllers\FController;
 use yii\data\ArrayDataProvider;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
@@ -406,7 +407,7 @@ class FlightQuoteController extends FController
 
                 $flightQuotePaxPrice = $this->flightQuotePaxPriceRepository->findByIdAndCode($fqId, $paxCodeId);
 
-                $this->flightQuoteManageService->updateAgentMarkup($flightQuotePaxPrice, $value);
+                $this->flightQuoteManageService->updateAgentMarkup($flightQuotePaxPrice, (float)$value);
                 $leadId = $flightQuotePaxPrice->qppFlightQuote->fqProductQuote->pqProduct->pr_lead_id ?? null;
                 if ($leadId) {
                     Notifications::pub(

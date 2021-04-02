@@ -184,8 +184,8 @@ class BillingInfo extends \yii\db\ActiveRecord implements Serializable
         string $zip,
         string $phone,
         string $email,
-        int $paymentMethodId,
-        int $creditCardId,
+        ?int $paymentMethodId,
+        ?int $creditCardId,
         int $orderId
     ): self {
         $billing = new self();

@@ -52,9 +52,9 @@ class ProductQuoteHelper
      */
     public static function getClientCurrencyCode(Product $product): string
     {
-        $leadPreferences = $product->prLead->leadPreferences;
+        $leadPreferences = $product->prLead->leadPreferences ?? null;
         if ($leadPreferences && $currency = $leadPreferences->prefCurrency) {
-                return $currency->cur_code ?? Currency::getDefaultCurrencyCode();
+            return $currency->cur_code ?? Currency::getDefaultCurrencyCode();
         }
         return Currency::getDefaultCurrencyCode();
     }
@@ -65,9 +65,9 @@ class ProductQuoteHelper
      */
     public static function getClientCurrencyRate(Product $product): float
     {
-        $leadPreferences = $product->prLead->leadPreferences;
+        $leadPreferences = $product->prLead->leadPreferences ?? null;
         if ($leadPreferences && $currency = $leadPreferences->prefCurrency) {
-                return $currency->cur_app_rate ?? Currency::getDefaultClientCurrencyRate();
+            return $currency->cur_app_rate ?? Currency::getDefaultClientCurrencyRate();
         }
         return Currency::getDefaultClientCurrencyRate();
     }

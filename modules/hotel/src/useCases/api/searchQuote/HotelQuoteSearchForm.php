@@ -20,6 +20,8 @@ use yii\helpers\VarDumper;
  * @property array $selectedBoardsTypes
  * @property array $serviceTypes
  * @property array $selectedServiceTypes
+ * @property array $hotelTypes
+ * @property array $selectedHotelTypes
  */
 
 class HotelQuoteSearchForm extends Model
@@ -34,12 +36,14 @@ class HotelQuoteSearchForm extends Model
     public $selectedBoardsTypes = [];
     public $serviceTypes = [];
     public $selectedServiceTypes = [];
+    public $hotelTypes = [];
+    public $selectedHotelTypes = [];
 
     public function rules(): array
     {
         return [
             [['onlyHotels', 'priceRange', 'max', 'min', 'categories', 'selectedCategories', 'boardsTypes', 'selectedBoardsTypes',
-                'serviceTypes', 'selectedServiceTypes'], 'safe']
+                'serviceTypes', 'selectedServiceTypes', 'hotelTypes', 'selectedHotelTypes'], 'safe']
         ];
     }
 
@@ -49,11 +53,12 @@ class HotelQuoteSearchForm extends Model
             'onlyHotels' => 'Show Hotels Only',
             'selectedCategories' => 'Category',
             'selectedBoardsTypes' => 'Board Type',
-            'selectedServiceTypes' => 'Service'
+            'selectedServiceTypes' => 'Service',
+            'selectedHotelTypes' => 'Type of Hotel'
         ];
     }
 
-    public function initFilters(array $hotels): void
+    public function initFilters(array $hotels, array $types): void
     {
         if (empty($this->priceRange)) {
             $this->priceRange = self::getRoomsPriceRange($hotels);
@@ -67,9 +72,13 @@ class HotelQuoteSearchForm extends Model
             $this->boardsTypes = self::getBoards($hotels);
         }
 
-        if (empty($this->serviceTypes)) {
-            $this->serviceTypes = self::getServiceTypes($hotels);
+        if (empty($this->hotelTypes)) {
+            $this->hotelTypes = self::getTypes($types);
         }
+
+        /*if (empty($this->serviceTypes)) {
+            $this->serviceTypes = self::getServiceTypes($hotels);
+        }*/
     }
 
     /**
@@ -84,7 +93,7 @@ class HotelQuoteSearchForm extends Model
 
         if (!empty($this->priceRange)) {
             $range = explode('-', $this->priceRange);
-            $hotels = AppHelper::filterByRangeMultiLevel($hotels, ['rooms', 'totalAmount'], $range[0], $range[1]);
+            $hotels = self::filterByPriceRange($hotels, $range[0], $range[1]);
         }
 
         if (!empty($this->selectedCategories)) {
@@ -95,11 +104,72 @@ class HotelQuoteSearchForm extends Model
             $hotels = self::filterByBoard($hotels, $this->boardsTypes, $this->selectedBoardsTypes);
         }
 
-        if (!empty($this->selectedServiceTypes)) {
-            $hotels = self::filterByServiceType($hotels, $this->serviceTypes, $this->selectedServiceTypes);
+        if (!empty($this->selectedHotelTypes)) {
+            $hotels = self::filterByHotelTypes($hotels, $this->selectedHotelTypes);
         }
 
+        /*if (!empty($this->selectedServiceTypes)) {
+            $hotels = self::filterByServiceType($hotels, $this->serviceTypes, $this->selectedServiceTypes);
+        }*/
+
         return $hotels;
+    }
+
+    private static function filterByHotelTypes(array $hotels, array $types): array
+    {
+        $filteredHotels = [];
+
+        foreach ($hotels as $key => $hotel) {
+            if (!empty($hotel['segmentCodes'])) {
+                if (!empty(array_intersect($hotel['segmentCodes'], $types))) {
+                    $filteredHotels[$key] = $hotels[$key];
+                }
+            }
+        }
+        return  $filteredHotels;
+    }
+
+    /**
+     * @param array $hotels
+     * @param null $minValue
+     * @param null $maxValue
+     * @return array
+     */
+    private static function filterByPriceRange(array $hotels, $minValue = null, $maxValue = null): array
+    {
+        $filteredByPrice = [];
+
+        foreach ($hotels as $key => $hotel) {
+            $excludeHotelFlag = true;
+            foreach ($hotel['rooms'] as $room) {
+                foreach ($room['rates'] as $rate) {
+                    if ((int) $rate['amount'] >= $minValue && (int) $rate['amount'] <= $maxValue) {
+                        $excludeHotelFlag = false;
+                        continue;
+                    }
+                }
+            }
+            if (!$excludeHotelFlag) {
+                $filteredByPrice[$key] = $hotels[$key];
+            }
+        }
+
+        foreach ($filteredByPrice as $key => $hotel) {
+            foreach ($hotel['rooms'] as $roomKey => $room) {
+                $unsetFlag = true;
+                foreach ($room['rates'] as $rate) {
+                    if ((int) $rate['amount'] >= $minValue && (int) $rate['amount'] <= $maxValue) {
+                        $unsetFlag = false;
+                        continue;
+                    }
+                }
+                if ($unsetFlag) {
+                    unset($filteredByPrice[$key]['rooms'][$roomKey]);
+                }
+            }
+        }
+
+        return $filteredByPrice;
     }
 
     private function filterByBoard(array $hotels, array $boardsTypes, array $selectedBoard): array
@@ -191,6 +261,17 @@ class HotelQuoteSearchForm extends Model
         return $boardsTypes;
     }
 
+    private function getTypes(array $types): array
+    {
+        $hotelTypes = [];
+
+        foreach ($types as $type) {
+            $hotelTypes[$type['code']] = $type['name'];
+        }
+
+        return $hotelTypes;
+    }
+
     private function getCategories(array $hotels): array
     {
         $categories = [];
@@ -221,16 +302,18 @@ class HotelQuoteSearchForm extends Model
         $min = $max = 0;
         foreach ($hotels as $key => $hotel) {
             foreach ($hotel['rooms'] as $room) {
-                if ($min == 0) {
-                    $min = (int) $room['totalAmount'];
-                }
-                $price = (int) $room['totalAmount'];
-                if ($price <= $min) {
-                    $min = $price ;
-                }
+                foreach ($room['rates'] as $rate) {
+                    if ($min == 0) {
+                        $min = (int) $rate['amount'];
+                    }
+                    $price = (int) $rate['amount'];
+                    if ($price <= $min) {
+                        $min = $price ;
+                    }
 
-                if ($price > $max) {
-                    $max =  $price ;
+                    if ($price > $max) {
+                        $max =  $price ;
+                    }
                 }
             }
         }

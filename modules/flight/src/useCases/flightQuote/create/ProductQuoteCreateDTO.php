@@ -21,7 +21,7 @@ class ProductQuoteCreateDTO extends ProductQuoteDTO
      * @param array $quote
      * @param int $userId
      */
-    public function __construct(Flight $flight, array $quote, int $userId)
+    public function __construct(Flight $flight, array $quote, ?int $userId)
     {
         $this->name = $flight->flProduct->pr_name;
         $this->productId = $flight->fl_product_id;

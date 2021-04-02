@@ -6,11 +6,13 @@ use yii\bootstrap\Html;
  * @var $availabilityItem array
  * @var $key int
  * @var $attraction \modules\attraction\models\Attraction
+ * @var $productKey string
  */
+$quoteExist = $attraction->quoteExist($productKey, $availabilityItem['date']);
 
 ?>
 
-<tr id="tr-atraction-quote-<?= ($availabilityItem['id']) ?>" class="tr-hotel-quote-<?= ($availabilityItem['id']) ?> <?= $quoteExist = false ? 'bg-success' : '' ?>">
+<tr id="tr-atraction-quote-<?= ($availabilityItem['id']) ?>" class="<?= $quoteExist  ? 'bg-success' : '' ?>">
     <th><?= $key + 1 ?></th>
     <td>
         <div><?= Html::encode($availabilityItem['id']) ?></div>
@@ -23,7 +25,7 @@ use yii\bootstrap\Html;
     </td>
     <td><?= Html::encode(empty($availabilityItem['guidePriceFormattedText'])) ? ' - ' : $availabilityItem['guidePriceFormattedText'] ?></td>
     <td class="text-right">
-        <?php if ($quoteExist = false) : ?>
+        <?php if ($quoteExist) : ?>
             <span class="badge badge-white">Added</span>
         <?php else : ?>
             <?= \yii\bootstrap4\Html::a('<i class="fa fa-plus"></i> Get Options', null, [

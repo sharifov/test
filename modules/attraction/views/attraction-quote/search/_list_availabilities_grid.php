@@ -5,6 +5,8 @@ use yii\web\View;
 
 /**
  * @var $attraction \modules\attraction\models\Attraction
+ * @var $productKey string
+ * @var $key string
  */
 
 $availabilitiesDataProvider = new ArrayDataProvider([
@@ -26,12 +28,18 @@ $availabilitiesDataProvider = new ArrayDataProvider([
         'dataProvider' => $availabilitiesDataProvider,
         'options' => [
             'tag' => 'table',
-            'class' => 'table table-striped table-bordered',
+            'class' => 'table table-bordered',
         ],
         'emptyText' => '<div class="text-center">No availabilities at this moment</div><br>',
-        'itemView' => function ($availabilityItem, $key, $index, $widget) use ($attraction) {
+        'itemView' => function ($availabilityItem, $key, $index, $widget) use ($attraction, $productKey) {
             //\yii\helpers\VarDumper::dump($availabilityItem, 10, true); exit;
-            return $this->render('_list_availabilities_item', ['availabilityItem' => $availabilityItem, 'index' => $index, 'key' => $key, 'attraction' => $attraction]);
+            return $this->render('_list_availabilities_item', [
+                'availabilityItem' => $availabilityItem,
+                'index' => $index,
+                'key' => $key,
+                'attraction' => $attraction,
+                'productKey' => $productKey
+            ]);
         },
         //'layout' => "{items}<div class=\"text-center\" style='margin-top: -20px; margin-bottom: -25px'>{pager}</div>", // {summary}\n<div class="text-center">{pager}</div>
         'layout' => '{summary}<thead class="thead-light"> <tr> <th>#</th> <th>ID</th>  <th>Date</th> <th>Travellers</th> <th>Price</th> <th></th>  </tr> </thead>{items}',

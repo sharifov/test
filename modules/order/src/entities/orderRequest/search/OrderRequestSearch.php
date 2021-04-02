@@ -2,8 +2,8 @@
 
 namespace modules\order\src\entities\orderRequest\search;
 
-use yii\data\ActiveDataProvider;
 use modules\order\src\entities\orderRequest\OrderRequest;
+use yii\data\ActiveDataProvider;
 
 class OrderRequestSearch extends OrderRequest
 {
