@@ -21,12 +21,12 @@ $pjaxListId = 'pjax-api-log';
 ?>
 <div class="api-log-index">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+    <h1><i class="fa fa-list"></i> <?= Html::encode($this->title) ?></h1>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <p>
-        <?= Html::a('Delete All', ['delete-all'], [
+        <?= Html::a('<i class="fa fa-remove"></i> Delete All', ['delete-all'], [
             'class' => 'btn btn-danger',
             'data' => [
                 'confirm' => 'Are you sure you want to delete all items?',

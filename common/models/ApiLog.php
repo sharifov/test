@@ -274,15 +274,23 @@ class ApiLog extends \yii\db\ActiveRecord
     public static function getActionFilter(): array
     {
         $arr = [];
-        $data = self::find()->select(['COUNT(*) AS cnt', 'al_action'])
-            ->where('al_action IS NOT NULL')
+//        $data = self::find()->select(['COUNT(*) AS cnt', 'al_action'])
+//            ->where('al_action IS NOT NULL')
+//            //->andWhere("job_start_dt >= NOW() - interval '24 hour'")
+//            ->groupBy(['al_action'])
+//            ->orderBy('cnt DESC')->asArray()->all();
+
+        $data = self::find()->select(['DISTINCT(al_action) AS al_action'])
+            // ->where('al_action IS NOT NULL')
             //->andWhere("job_start_dt >= NOW() - interval '24 hour'")
-            ->groupBy(['al_action'])
-            ->orderBy('cnt DESC')->asArray()->all();
+            //->groupBy(['al_action'])
+            ->orderBy('al_action')
+            ->cache(60)
+            ->asArray()->all();
 
         if ($data) {
             foreach ($data as $v) {
-                $arr[$v['al_action']] = $v['al_action'] . ' - [' . $v['cnt'] . ']';
+                $arr[$v['al_action']] = $v['al_action']; // . ' - [' . $v['cnt'] . ']';
             }
         }
 

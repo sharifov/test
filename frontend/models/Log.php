@@ -75,15 +75,25 @@ class Log extends \yii\db\ActiveRecord
     public static function getCategoryFilter()
     {
         $arr = [];
-        $data = self::find()->select(["COUNT(*) AS cnt", "category"])
-            ->where('category IS NOT NULL')
+//        $data = self::find()->select(["COUNT(*) AS cnt", "category"])
+//            ->where('category IS NOT NULL')
+//            //->andWhere("job_start_dt >= NOW() - interval '24 hour'")
+//            ->groupBy(["category"])
+//            ->orderBy('cnt DESC')
+//            ->asArray()->all();
+
+
+        $data = self::find()->select("DISTINCT(category) AS category")
+            //->where('category IS NOT NULL')
             //->andWhere("job_start_dt >= NOW() - interval '24 hour'")
-            ->groupBy(["category"])
-            ->orderBy('cnt DESC')->asArray()->all();
+            //->groupBy(["category"])
+            ->cache(60)
+            ->orderBy('category')
+            ->asArray()->all();
 
         if ($data) {
             foreach ($data as $v) {
-                $arr[$v['category']] = $v['category'] . ' - [' . $v['cnt'] . ']';
+                $arr[$v['category']] = $v['category']; // . ' - [' . $v['cnt'] . ']';
             }
         }
 

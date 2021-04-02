@@ -11,13 +11,13 @@ use dosamigos\datepicker\DatePicker;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var DbCleanerParamsForm $modelCleaner */
 
-$this->title = 'Logs';
+$this->title = 'System Logs';
 $this->params['breadcrumbs'][] = $this->title;
 $pjaxListId = 'pjax-log';
 ?>
 <div class="log-index">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+    <h1><i class="fa fa-bug"></i> <?= Html::encode($this->title) ?></h1>
 
     <?php if (Auth::can('global/clean/table')) : ?>
         <div class="row">
