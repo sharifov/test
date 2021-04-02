@@ -8,7 +8,7 @@ return [
             'class' => 'yii\web\User',
             'identityClass' => 'common\models\User',
         ],*/
-        'request' => [],
+        //'request' => [],
         /*'request' => [
             'cookieValidationKey' => 'test',
         ],*/

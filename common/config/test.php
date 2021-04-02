@@ -4,12 +4,17 @@ return [
     'id' => 'app-common-tests',
     'basePath' => dirname(__DIR__),
     'components' => [
-        'user' => [
-            'class' => 'yii\web\User',
-            'identityClass' => 'common\models\User',
+        'db' => [
+            'dsn' => 'sqlite:' . __DIR__ . '/../data/db.sqlite',
+            'charset' => 'utf8mb4',
+            'enableSchemaCache' => false
         ],
-        'request' => [
-            'cookieValidationKey' => 'test',
-        ],
+//        'user' => [
+//            'class' => 'yii\web\User',
+//            'identityClass' => 'common\models\User',
+//        ],
+//        'request' => [
+//            'cookieValidationKey' => 'test',
+//        ],
     ],
 ];

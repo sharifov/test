@@ -28,7 +28,7 @@ class ClientEmailController extends BaseController
 {
 
     /**
-     * @api {get} /v2/client-email/subscribe Client Email Subscribe
+     * @api {post} /v2/client-email/subscribe Client Email Subscribe
      * @apiVersion 0.2.0
      * @apiName Client Email Subscribe
      * @apiGroup ClientEmail
@@ -174,7 +174,7 @@ class ClientEmailController extends BaseController
     }
 
     /**
-     * @api {get} /v2/client-email/unsubscribe Client Email Unsubscribe
+     * @api {post} /v2/client-email/unsubscribe Client Email Unsubscribe
      * @apiVersion 0.2.0
      * @apiName Client Email Unsubscribe
      * @apiGroup ClientEmail
