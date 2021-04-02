@@ -2134,9 +2134,10 @@ class OrderController extends BaseController
 
             $project = $this->projectRepository->findById($this->auth->au_project_id ?? 0);
 
-            $dto = new CreateOrderDTO(null, $form->payment->clientCurrency, $request->post(), OrderSourceType::C2B, $orderRequest->orr_id, $project->id, $form->getOrderStatus());
-            $order = $this->orderManageService->createByC2bFlow($dto);
-            $this->transactionManager->wrap(function () use ($form, $project, $order) {
+            $order = $this->transactionManager->wrap(function () use ($form, $project, $request, $orderRequest) {
+                $dto = new CreateOrderDTO(null, $form->payment->clientCurrency, $request->post(), OrderSourceType::C2B, $orderRequest->orr_id, $project->id, $form->getOrderStatus());
+                $order = $this->orderManageService->createByC2bFlow($dto);
+
                 foreach ($form->quotes as $quoteForm) {
                     $quoteForm->orderId = $order->or_id;
 
@@ -2191,6 +2192,8 @@ class OrderController extends BaseController
                     );
                     $this->billingInfoRepository->save($billingInfo);
                 }
+
+                return $order;
             });
 
             $response = new SuccessResponse(

@@ -2,7 +2,6 @@
 
 namespace modules\order\src\exceptions;
 
-use modules\product\src\interfaces\Productable;
 use Throwable;
 
 /**
