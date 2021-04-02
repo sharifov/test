@@ -2,17 +2,11 @@
 
 namespace console\controllers;
 
-use common\models\UserCallStatus;
 use common\models\UserConnection;
 use common\models\UserOnline;
-use console\socket\Commands\Connectionable;
-use console\socket\Commands\Serverable;
-use sales\auth\Auth;
-use sales\model\call\services\currentQueueCalls\CurrentQueueCallsService;
 use sales\model\user\entity\monitor\UserMonitor;
 use Swoole\Redis;
 use Swoole\Table;
-use Swoole\WebSocket\Frame;
 use Swoole\WebSocket\Server;
 use yii\console\Controller;
 use yii\helpers\ArrayHelper;
@@ -29,16 +23,11 @@ class WebsocketServerController extends Controller
 
     public function init()
     {
-
         \Yii::$app->log->flushInterval = 1;
         \Yii::$app->log->targets['file']->exportInterval = 1;
         \Yii::$app->log->targets['db-error']->exportInterval = 1;
         \Yii::$app->log->targets['db-info']->exportInterval = 1;
         \Yii::$app->log->targets['file-air']->exportInterval = 1;
-
-//        \Yii::error(__METHOD__, 'WebSocket:actionStart');
-//        \Yii::warning(__METHOD__, 'WebSocket:actionStart');
-
     }
 
     /**
