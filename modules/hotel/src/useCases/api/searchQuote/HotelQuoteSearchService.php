@@ -47,6 +47,14 @@ class HotelQuoteSearchService
             $params['minRate'] = $hotel->ph_min_price_rate;
         }
 
+        if ($hotel->ph_min_price_rate) {
+            $params['minStarRating'] = $hotel->ph_min_price_rate;
+        }
+
+        if ($hotel->ph_max_star_rate) {
+            $params['maxStarRating'] = $hotel->ph_max_star_rate;
+        }
+
         $keyCache = $hotel->ph_request_hash_key;
         $result = \Yii::$app->cacheFile->get($keyCache);
 
