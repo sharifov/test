@@ -47,8 +47,8 @@ class HotelQuoteSearchService
             $params['minRate'] = $hotel->ph_min_price_rate;
         }
 
-        if ($hotel->ph_min_price_rate) {
-            $params['minStarRating'] = $hotel->ph_min_price_rate;
+        if ($hotel->ph_min_star_rate) {
+            $params['minStarRating'] = $hotel->ph_min_star_rate;
         }
 
         if ($hotel->ph_max_star_rate) {
