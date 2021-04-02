@@ -88,6 +88,7 @@ class TicketIssueProcessingDataService
                 $ticketIssuePaymentApiForm->pay_currency,
                 $ticketIssuePaymentApiForm->pay_description
             );
+            $this->invoiceRepository->save($invoice);
             $invoice->paid();
             $this->invoiceRepository->save($invoice);
 
