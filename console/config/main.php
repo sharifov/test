@@ -54,11 +54,11 @@ return [
         'log' => [
             'traceLevel' => 0,
             'targets' => [
-                [
+                'file' => [
                     'class' => 'yii\log\FileTarget',
                     'levels' => ['error', 'warning'],
                 ],
-                [
+                'db-error' => [
                     'class' => 'yii\log\DbTarget',
                     'levels' => ['error', 'warning'],
                     'except' => [
@@ -70,9 +70,9 @@ return [
                         $hostname = php_uname('n');
                         return "[$hostname][console]";
                     },
-                    'db' => 'db_postgres'
+                    'db' => 'db_postgres',
                 ],
-                [
+                'db-info' => [
                     'class' => \yii\log\DbTarget::class,
                     'levels' => ['info'],
                     'except' => [
@@ -84,9 +84,9 @@ return [
                         $hostname = php_uname('n');
                         return "[$hostname][console]";
                     },
-                    'db' => 'db_postgres'
+                    'db' => 'db_postgres',
                 ],
-                [
+                'file-air' => [
                     'class' => \common\components\logger\AirFileTarget::class,
                     'levels' => ['error', 'warning'],
                     'except' => [
@@ -94,7 +94,7 @@ return [
                     ],
                     //'logVars' => YII_DEBUG ? ['_GET', '_POST', '_FILES', '_COOKIE', '_SESSION', '_SERVER'] : [],
                     'logVars' => [],
-                    'logFile' => '@runtime/logs/stash.log'
+                    'logFile' => '@runtime/logs/stash.log',
                 ],
             ],
         ],

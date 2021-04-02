@@ -65,7 +65,7 @@ class FlightQuoteSearchHelper
         return $quotes;
     }
 
-    private static function parseQuoteData(array $quote, array &$originalData = []): array
+    public static function parseQuoteData(array $quote, array &$originalData = []): array
     {
         $quote['price'] = self::getQuotePrice($quote);
         $quote['originRate'] = self::getOriginRate($quote);

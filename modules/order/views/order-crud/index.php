@@ -34,6 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'or_id',
             'or_gid',
             'or_uid',
+            'or_fare_id',
             'or_name',
             [
                 'class' => LeadColumn::class,

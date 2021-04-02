@@ -14,6 +14,7 @@ use modules\flight\src\repositories\flight\FlightRepository;
 use modules\flight\src\repositories\flightQuoteStatusLogRepository\FlightQuoteStatusLogRepository;
 use modules\flight\src\repositories\flightSegment\FlightSegmentRepository;
 use modules\flight\src\services\flightQuote\FlightQuotePriceCalculator;
+use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
 use modules\flight\src\useCases\flightQuote\create\FlightPaxDTO;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuoteCreateForm;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuotePaxPriceForm;
@@ -424,7 +425,7 @@ class FlightQuoteManageService implements ProductQuoteService
                 $productTypeServiceFee = $productType['pt_service_fee_percent'];
             }
 
-            $quoteData = Json::decode($form->originSearchData);
+            $quoteData = FlightQuoteSearchHelper::parseQuoteData(Json::decode($form->originSearchData));
 
             $productQuote = ProductQuote::create(new ProductQuoteCreateDTO($flightProduct, $quoteData, null), $productTypeServiceFee);
             $productQuote->pq_order_id = $form->orderId;

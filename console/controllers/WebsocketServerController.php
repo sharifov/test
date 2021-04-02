@@ -2,17 +2,11 @@
 
 namespace console\controllers;
 
-use common\models\UserCallStatus;
 use common\models\UserConnection;
 use common\models\UserOnline;
-use console\socket\Commands\Connectionable;
-use console\socket\Commands\Serverable;
-use sales\auth\Auth;
-use sales\model\call\services\currentQueueCalls\CurrentQueueCallsService;
 use sales\model\user\entity\monitor\UserMonitor;
 use Swoole\Redis;
 use Swoole\Table;
-use Swoole\WebSocket\Frame;
 use Swoole\WebSocket\Server;
 use yii\console\Controller;
 use yii\helpers\ArrayHelper;
@@ -27,12 +21,22 @@ use yii\web\IdentityInterface;
 class WebsocketServerController extends Controller
 {
 
+    public function init()
+    {
+        \Yii::$app->log->flushInterval = 1;
+        \Yii::$app->log->targets['file']->exportInterval = 1;
+        \Yii::$app->log->targets['db-error']->exportInterval = 1;
+        \Yii::$app->log->targets['db-info']->exportInterval = 1;
+        \Yii::$app->log->targets['file-air']->exportInterval = 1;
+    }
+
     /**
      *
      */
     public function actionStart()
     {
         printf("\n--- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+        \Yii::info(__METHOD__, 'info\ws:actionStart');
 
         $thisClass = $this;
         $frontendConfig = ArrayHelper::merge(
@@ -51,6 +55,8 @@ class WebsocketServerController extends Controller
 
 //        $redis2 = new \Swoole\Coroutine\Redis();
 //        $redis2->connect("localhost", 6379);
+
+
 
         $tblConnections = new Table(4000);
         $tblConnections->column('fd', Table::TYPE_INT);
@@ -81,6 +87,8 @@ class WebsocketServerController extends Controller
 
         $server->on('start', static function (Server $server) {
             echo ' Swoole WebSocket Server is started at ' . $server->host . ':' . $server->port . PHP_EOL;
+            \Yii::info(' Swoole WebSocket Server is started at ' . $server->host . ':' . $server->port, 'info\ws:actionStart:event:start');
+
             if (!empty(\Yii::$app->params['appInstance'])) {
                 $ucList = UserConnection::find()->where(['uc_app_instance' => \Yii::$app->params['appInstance']])->all();
                 if ($ucList) {
@@ -94,6 +102,7 @@ class WebsocketServerController extends Controller
 
         $server->on('workerStart', static function ($server, $workerId) use ($frontendConfig, $thisClass, $redisConfig) {
             echo ' Worker (Id: ' . $workerId . ')  start: ' . date('Y-m-d H:i:s') . PHP_EOL;
+            \Yii::info(' Worker (Id: ' . $workerId . ')  start: ' . date('Y-m-d H:i:s'), 'info\ws:actionStart:event:workerStart');
 
 
             $server->tick(20000, static function () use ($server) {
@@ -199,6 +208,7 @@ class WebsocketServerController extends Controller
                             UserMonitor::addEvent($uo->uo_user_id, UserMonitor::TYPE_ACTIVE);
                         } else {
                             echo 'Error: UserOnline:save' . PHP_EOL;
+                            \Yii::error($uo->errors, 'ws:open:UserOnline:save');
                         }
                         unset($uo);
                     } else {
@@ -211,6 +221,7 @@ class WebsocketServerController extends Controller
                     unset($userOnline);
                 } else {
                     echo 'Error: UserConnection:save' . PHP_EOL;
+                    \Yii::error($userConnection->errors, 'ws:open:UserConnection:save');
                     // VarDumper::dump($userConnection->errors);
                 }
 
@@ -422,6 +433,7 @@ class WebsocketServerController extends Controller
         $server->on('workerError', static function (Server $server, int $workerId, $workerPid, $exitCode, $signal) {
             $message = "Error Worker (Id: {$workerId}): pid={$workerPid} code={$exitCode} signal={$signal}";
             echo '> ' . $message . PHP_EOL;
+            \Yii::error(['message' => 'Error Worker', 'workerId' => $workerId, 'workerPid' => $workerPid, 'exitCode' => $exitCode, 'signal' => $signal], 'ws:workerError');
         });
 
         $server->start();
@@ -450,6 +462,7 @@ class WebsocketServerController extends Controller
         }
 
         if (!empty($out['errors'])) {
+            \Yii::warning($out['errors'], 'ws:dataProcessing');
             return $out;
         }
 
@@ -519,6 +532,7 @@ class WebsocketServerController extends Controller
                 $out = $controller($params);
             } catch (\Throwable $e) {
                 $out ['errors'][] = $e->getMessage();
+                \Yii::error($e->getMessage(), 'ws:dataProcessing:resolveController');
             }
             unset($controller);
         }

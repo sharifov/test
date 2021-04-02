@@ -1388,7 +1388,7 @@ class OrderController extends BaseController
     public function actionCreate(): \webapi\src\response\Response
     {
         $request = Yii::$app->request;
-        $form = new OrderCreateForm(count($request->post('productQuotes', [])), count($request->post('paxes', [])));
+        $form = new OrderCreateForm();
 
         if (!$form->load($request->post())) {
             return new ErrorResponse(
@@ -1908,7 +1908,8 @@ class OrderController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      * @apiParam {string{max 10}}               sourceCid       Source cid
-     * @apiParam {string{max 10}}               requestUid       Request uid
+     * @apiParam {string{max 10}}               bookingId       Booking id
+     * @apiParam {string{max 255}}              fareId          Unique value of order
      * @apiParam {string="success","failed"{max 10}}               status       Request uid
      *
      * @apiParam {Object[]}             quotes                  Product quotes
@@ -1974,13 +1975,14 @@ class OrderController extends BaseController
      *
      * {
             "sourceCid": "ACHUY23AS",
-            "requestUid": "WCJ12CSIJ",
+            "bookingId": "WCJ12CSIJ",
+            "fareId": "A0EA9F-5cc2ce331e8bb3.16383647",
             "status": "success",
             "quotes": [
                 {
                     "status": "booked",
                     "productKey": "flight",
-                    "originSearchData": "{\"key\":\"2_U0FMMTAxKlkyMTAwL0tJVkxPTjIwMjEtMDktMDkvTE9OQkNOMjAyMS0xMC0wNypPU34jT1M2NTYjT1M0NTUjT1M0NTYjT1MzOTF+bGM6ZW5fdXM=\",\"routingId\":1,\"prices\":{\"lastTicketDate\":\"2021-03-29\",\"totalPrice\":684.4,\"totalTax\":538.4,\"comm\":0,\"isCk\":false,\"markupId\":0,\"markupUid\":\"\",\"markup\":0},\"passengers\":{\"ADT\":{\"codeAs\":\"JWZ\",\"cnt\":2,\"baseFare\":53,\"pubBaseFare\":53,\"baseTax\":185.4,\"markup\":0,\"comm\":0,\"price\":238.4,\"tax\":185.4,\"oBaseFare\":{\"amount\":53,\"currency\":\"USD\"},\"oBaseTax\":{\"amount\":185.4,\"currency\":\"USD\"}},\"CHD\":{\"codeAs\":\"JWC\",\"cnt\":1,\"baseFare\":40,\"pubBaseFare\":40,\"baseTax\":167.6,\"markup\":0,\"comm\":0,\"price\":207.6,\"tax\":167.6,\"oBaseFare\":{\"amount\":40,\"currency\":\"USD\"},\"oBaseTax\":{\"amount\":167.6,\"currency\":\"USD\"}}},\"penalties\":{\"exchange\":true,\"refund\":false,\"list\":[{\"type\":\"ex\",\"applicability\":\"before\",\"permitted\":true,\"amount\":0},{\"type\":\"ex\",\"applicability\":\"after\",\"permitted\":true,\"amount\":0},{\"type\":\"re\",\"applicability\":\"before\",\"permitted\":false},{\"type\":\"re\",\"applicability\":\"after\",\"permitted\":false}]},\"trips\":[{\"tripId\":1,\"segments\":[{\"segmentId\":1,\"departureTime\":\"2021-09-09 16:00\",\"arrivalTime\":\"2021-09-09 16:40\",\"stop\":0,\"stops\":[],\"flightNumber\":\"656\",\"bookingClass\":\"K\",\"duration\":100,\"departureAirportCode\":\"KIV\",\"departureAirportTerminal\":\"\",\"arrivalAirportCode\":\"VIE\",\"arrivalAirportTerminal\":\"3\",\"operatingAirline\":\"OS\",\"airEquipType\":\"E95\",\"marketingAirline\":\"OS\",\"marriageGroup\":\"I\",\"mileage\":583,\"cabin\":\"Y\",\"cabinIsBasic\":true,\"brandId\":\"735817\",\"brandName\":\"Classic\",\"meal\":\"\",\"fareCode\":\"K03CLSE3\",\"baggage\":{\"ADT\":{\"carryOn\":true,\"allowPieces\":1},\"CHD\":{\"carryOn\":true,\"allowPieces\":1}},\"recheckBaggage\":false},{\"segmentId\":2,\"departureTime\":\"2021-09-09 17:15\",\"arrivalTime\":\"2021-09-09 18:40\",\"stop\":0,\"stops\":[],\"flightNumber\":\"455\",\"bookingClass\":\"K\",\"duration\":145,\"departureAirportCode\":\"VIE\",\"departureAirportTerminal\":\"3\",\"arrivalAirportCode\":\"LHR\",\"arrivalAirportTerminal\":\"2\",\"operatingAirline\":\"OS\",\"airEquipType\":\"321\",\"marketingAirline\":\"OS\",\"marriageGroup\":\"O\",\"mileage\":774,\"cabin\":\"Y\",\"cabinIsBasic\":true,\"brandId\":\"735817\",\"brandName\":\"Classic\",\"meal\":\"\",\"fareCode\":\"K03CLSE3\",\"baggage\":{\"ADT\":{\"carryOn\":true,\"allowPieces\":1},\"CHD\":{\"carryOn\":true,\"allowPieces\":1}},\"recheckBaggage\":false}],\"duration\":280},{\"tripId\":2,\"segments\":[{\"segmentId\":1,\"departureTime\":\"2021-10-07 19:30\",\"arrivalTime\":\"2021-10-07 22:45\",\"stop\":0,\"stops\":[],\"flightNumber\":\"456\",\"bookingClass\":\"K\",\"duration\":135,\"departureAirportCode\":\"LHR\",\"departureAirportTerminal\":\"2\",\"arrivalAirportCode\":\"VIE\",\"arrivalAirportTerminal\":\"3\",\"operatingAirline\":\"OS\",\"airEquipType\":\"321\",\"marketingAirline\":\"OS\",\"marriageGroup\":\"I\",\"mileage\":774,\"cabin\":\"Y\",\"cabinIsBasic\":true,\"brandId\":\"735831\",\"brandName\":\"LIGHT\",\"meal\":\"\",\"fareCode\":\"K03LGTE8\",\"baggage\":{\"ADT\":{\"carryOn\":true,\"allowPieces\":0},\"CHD\":{\"carryOn\":true,\"allowPieces\":0}},\"recheckBaggage\":false},{\"segmentId\":2,\"departureTime\":\"2021-10-08 07:00\",\"arrivalTime\":\"2021-10-08 09:20\",\"stop\":0,\"stops\":[],\"flightNumber\":\"391\",\"bookingClass\":\"K\",\"duration\":140,\"departureAirportCode\":\"VIE\",\"departureAirportTerminal\":\"3\",\"arrivalAirportCode\":\"BCN\",\"arrivalAirportTerminal\":\"1\",\"operatingAirline\":\"OS\",\"airEquipType\":\"320\",\"marketingAirline\":\"OS\",\"marriageGroup\":\"O\",\"mileage\":851,\"cabin\":\"Y\",\"cabinIsBasic\":true,\"brandId\":\"735831\",\"brandName\":\"LIGHT\",\"meal\":\"\",\"fareCode\":\"K03LGTE8\",\"baggage\":{\"ADT\":{\"carryOn\":true,\"allowPieces\":0},\"CHD\":{\"carryOn\":true,\"allowPieces\":0}},\"recheckBaggage\":false}],\"duration\":770}],\"maxSeats\":9,\"paxCnt\":3,\"validatingCarrier\":\"OS\",\"gds\":\"T\",\"pcc\":\"DVI\",\"cons\":\"GTT\",\"fareType\":\"PUB\",\"tripType\":\"MC\",\"cabin\":\"Y\",\"currency\":\"USD\",\"currencies\":[\"USD\"],\"currencyRates\":{\"USDUSD\":{\"from\":\"USD\",\"to\":\"USD\",\"rate\":1}},\"keys\":{\"travelport\":{\"traceId\":\"71fcc2ec-1ea8-47d7-a3fd-82ed1ac672b2\",\"availabilitySources\":\"Q,Q,Q,Q\",\"type\":\"T\"},\"seatHoldSeg\":{\"trip\":0,\"segment\":0,\"seats\":9}},\"ngsFeatures\":{\"stars\":1,\"name\":\"Classic\",\"list\":[]},\"meta\":{\"eip\":0,\"noavail\":false,\"searchId\":\"U0FMMTAxWTIxMDB8S0lWTE9OMjAyMS0wOS0wOXxMT05CQ04yMDIxLTEwLTA3\",\"lang\":\"en\",\"rank\":8,\"cheapest\":true,\"fastest\":false,\"best\":true,\"bags\":0,\"country\":\"us\",\"prod_types\":[\"PUB\"]},\"price\":238.4,\"originRate\":1,\"stops\":[1,1],\"time\":[{\"departure\":\"2021-09-09 16:00\",\"arrival\":\"2021-09-09 18:40\"},{\"departure\":\"2021-10-07 19:30\",\"arrival\":\"2021-10-08 09:20\"}],\"bagFilter\":\"\",\"airportChange\":false,\"technicalStopCnt\":0,\"duration\":[280,770],\"totalDuration\":1050,\"topCriteria\":\"bestcheapest\",\"rank\":8}",
+                    "originSearchData": "{\"key\":\"2_QldLMTAxKlkxMDAwL0pGS1BBUjIwMjEtMDgtMDcqREx+I0RMOTE4MH5sYzplbl91cw==\",\"routingId\":1,\"prices\":{\"lastTicketDate\":\"2021-04-05\",\"totalPrice\":354.2,\"totalTax\":229.2,\"comm\":0,\"isCk\":false,\"markupId\":0,\"markupUid\":\"\",\"markup\":0},\"passengers\":{\"ADT\":{\"codeAs\":\"ADT\",\"cnt\":1,\"baseFare\":125,\"pubBaseFare\":125,\"baseTax\":229.2,\"markup\":0,\"comm\":0,\"price\":354.2,\"tax\":229.2,\"oBaseFare\":{\"amount\":125,\"currency\":\"USD\"},\"oBaseTax\":{\"amount\":229.2,\"currency\":\"USD\"}}},\"penalties\":{\"exchange\":true,\"refund\":false,\"list\":[{\"type\":\"ex\",\"applicability\":\"before\",\"permitted\":true,\"amount\":0},{\"type\":\"ex\",\"applicability\":\"after\",\"permitted\":true,\"amount\":0},{\"type\":\"re\",\"applicability\":\"before\",\"permitted\":false},{\"type\":\"re\",\"applicability\":\"after\",\"permitted\":false}]},\"trips\":[{\"tripId\":1,\"segments\":[{\"segmentId\":1,\"departureTime\":\"2021-08-07 16:30\",\"arrivalTime\":\"2021-08-08 05:55\",\"stop\":0,\"stops\":[],\"flightNumber\":\"9180\",\"bookingClass\":\"E\",\"duration\":445,\"departureAirportCode\":\"JFK\",\"departureAirportTerminal\":\"1\",\"arrivalAirportCode\":\"CDG\",\"arrivalAirportTerminal\":\"2E\",\"operatingAirline\":\"AF\",\"airEquipType\":\"77W\",\"marketingAirline\":\"DL\",\"marriageGroup\":\"O\",\"mileage\":3629,\"cabin\":\"Y\",\"cabinIsBasic\":true,\"brandId\":\"686562\",\"brandName\":\"BASIC ECONOMY\",\"meal\":\"\",\"fareCode\":\"VH7L09B1\",\"baggage\":{\"ADT\":{\"carryOn\":true,\"allowPieces\":0}},\"recheckBaggage\":false}],\"duration\":445}],\"maxSeats\":9,\"paxCnt\":1,\"validatingCarrier\":\"DL\",\"gds\":\"T\",\"pcc\":\"E9V\",\"cons\":\"GTT\",\"fareType\":\"PUB\",\"tripType\":\"OW\",\"cabin\":\"Y\",\"currency\":\"USD\",\"currencies\":[\"USD\"],\"currencyRates\":{\"USDUSD\":{\"from\":\"USD\",\"to\":\"USD\",\"rate\":1}},\"keys\":{\"travelport\":{\"traceId\":\"9cbb17ae-40dd-4d94-83be-2f0eed47e9ad\",\"availabilitySources\":\"S\",\"type\":\"T\"},\"seatHoldSeg\":{\"trip\":0,\"segment\":0,\"seats\":9}},\"meta\":{\"eip\":0,\"noavail\":false,\"searchId\":\"QldLMTAxWTEwMDB8SkZLUEFSMjAyMS0wOC0wNw==\",\"lang\":\"en\",\"rank\":10,\"cheapest\":true,\"fastest\":false,\"best\":true,\"bags\":0,\"country\":\"us\",\"prod_types\":[\"PUB\"]}}",
                     "options": [
                         {
                             "productOptionKey": "travelGuard",
@@ -2106,12 +2108,26 @@ class OrderController extends BaseController
             "errors": []
         }
      *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+            "status": 422,
+            "message": "Validation error",
+            "errors": {
+                "fareId": [
+                    "Fare Id \"A0EA9F-5cc2ce331e8bb3.16383647\" has already been taken."
+                ]
+            },
+            "code": 0
+        }
+     *
      * @return ErrorResponse|SuccessResponse
      */
     public function actionCreateC2b()
     {
         $request = Yii::$app->request;
-        $form = new OrderCreateC2BForm(count($request->post('quotes', [])), !empty($request->post()['creditCard']), !empty($request->post()['billingInfo']));
+        $form = new OrderCreateC2BForm();
 
         if (!$form->load($request->post())) {
             return new ErrorResponse(
@@ -2135,7 +2151,7 @@ class OrderController extends BaseController
             $project = $this->projectRepository->findById($this->auth->au_project_id ?? 0);
 
             $order = $this->transactionManager->wrap(function () use ($form, $project, $request, $orderRequest) {
-                $dto = new CreateOrderDTO(null, $form->payment->clientCurrency, $request->post(), OrderSourceType::C2B, $orderRequest->orr_id, $project->id, $form->getOrderStatus());
+                $dto = new CreateOrderDTO(null, $form->payment->clientCurrency, $request->post(), OrderSourceType::C2B, $orderRequest->orr_id, $project->id, $form->getOrderStatus(), $form->fareId);
                 $order = $this->orderManageService->createByC2bFlow($dto);
 
                 foreach ($form->quotes as $quoteForm) {
@@ -2156,7 +2172,7 @@ class OrderController extends BaseController
                 $order->recalculateProfitAmount();
                 $this->orderRepository->save($order);
 
-                $orderData = OrderData::create($order->or_id, $form->sourceCid, $form->requestUid);
+                $orderData = OrderData::create($order->or_id, $form->sourceCid, $form->bookingId);
                 $orderData->detachBehavior('user');
                 $this->orderDataRepository->save($orderData);
 
@@ -2242,141 +2258,141 @@ class OrderController extends BaseController
         return isset($data['FlightRequest']);
     }
 
-     /**
-      * @api {post} /v2/order/cancel Cancel Order
-      * @apiVersion 0.2.0
-      * @apiName CancelOrder
-      * @apiGroup Order
-      * @apiPermission Authorized User
-      *
-      * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
-      * @apiHeaderExample {json} Header-Example:
-      *  {
-      *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
-      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
-      *  }
-      *
-      * @apiParam {string}       gid            Order gid
-      *
-      * @apiParamExample {json} Request-Example:
-      *
-      * {
-      *     "gid": "04d3fe3fc74d0514ee93e208a52bcf90"
-      * }
-      *
-      * @apiSuccessExample {json} Success-Response:
-      *
-      * HTTP/1.1 200 OK
-      * {
-      *    "status": 200,
-      *    "message": "OK",
-      *    "code": 0,
-      *    "technical": {
-      *        "action": "v2/order/cancel",
-      *        "response_id": 15629,
-      *        "request_dt": "2021-04-01 09:03:11",
-      *        "response_dt": "2021-04-01 09:03:11",
-      *        "execution_time": 0.019,
-      *        "memory_usage": 186192
-      *    },
-      *    "request": {
-      *       "gid": "04d3fe3fc74d0514ee93e208a52bcf90"
-      *    }
-      * }
-      *
-      * @apiErrorExample {json} Error-Response (400):
-      *
-      * HTTP/1.1 400 Bad Request
-      * {
-      *       "status": 400,
-      *       "message": "Load data error",
-      *       "errors": [
-      *           "Not found data on POST request"
-      *       ],
-      *       "code": 10,
-      *       "request": {
-      *           ...
-      *       },
-      *       "technical": {
-      *           ...
-      *      }
-      * }
-      *
-      * @apiErrorExample {json} Error-Response (422):
-      *
-      * HTTP/1.1 422 Unprocessable entity
-      * {
-      *     "status": 422,
-      *     "message": "Validation error",
-      *     "errors": {
-      *          "gid": [
-      *            "Gid is invalid."
-      *         ]
-      *     },
-      *     "code": 20,
-      *     "technical": {
-      *           ...
-      *     },
-      *     "request": {
-      *           ...
-      *     }
-      * }
-      *
-      * @apiErrorExample {json} Error-Response (422):
-      *
-      * HTTP/1.1 422 Unprocessable entity
-      * {
-      *     "status": 422,
-      *     "message": "Error",
-      *     "errors": {
-      *         "The order is not available for processing."
-      *     },
-      *     "code": 30,
-      *     "technical": {
-      *           ...
-      *     },
-      *     "request": {
-      *           ...
-      *     }
-      * }
-      *
-      * @apiErrorExample {json} Error-Response (422):
-      *
-      * HTTP/1.1 422 Unprocessable entity
-      * {
-      *     "status": 422,
-      *     "message": "Error",
-      *     "errors": {
-      *         "Unable to process flight cancellation."
-      *     },
-      *     "code": 40,
-      *     "technical": {
-      *           ...
-      *     },
-      *     "request": {
-      *           ...
-      *     }
-      * }
-      *
-      * @apiErrorExample {json} Error-Response (422):
-      *
-      * HTTP/1.1 422 Unprocessable entity
-      * {
-      *     "status": 422,
-      *     "message": "Error",
-      *     "errors": {
-      *         "Unable to process hotel cancellation."
-      *     },
-      *     "code": 50,
-      *     "technical": {
-      *           ...
-      *     },
-      *     "request": {
-      *           ...
-      *     }
-      * }
-      *
-      */
+    /**
+     * @api {post} /v2/order/cancel Cancel Order
+     * @apiVersion 0.2.0
+     * @apiName CancelOrder
+     * @apiGroup Order
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string}       gid            Order gid
+     *
+     * @apiParamExample {json} Request-Example:
+     *
+     * {
+     *     "gid": "04d3fe3fc74d0514ee93e208a52bcf90"
+     * }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *
+     * HTTP/1.1 200 OK
+     * {
+     *    "status": 200,
+     *    "message": "OK",
+     *    "code": 0,
+     *    "technical": {
+     *        "action": "v2/order/cancel",
+     *        "response_id": 15629,
+     *        "request_dt": "2021-04-01 09:03:11",
+     *        "response_dt": "2021-04-01 09:03:11",
+     *        "execution_time": 0.019,
+     *        "memory_usage": 186192
+     *    },
+     *    "request": {
+     *       "gid": "04d3fe3fc74d0514ee93e208a52bcf90"
+     *    }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response (400):
+     *
+     * HTTP/1.1 400 Bad Request
+     * {
+     *       "status": 400,
+     *       "message": "Load data error",
+     *       "errors": [
+     *           "Not found data on POST request"
+     *       ],
+     *       "code": 10,
+     *       "request": {
+     *           ...
+     *       },
+     *       "technical": {
+     *           ...
+     *      }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *     "status": 422,
+     *     "message": "Validation error",
+     *     "errors": {
+     *          "gid": [
+     *            "Gid is invalid."
+     *         ]
+     *     },
+     *     "code": 20,
+     *     "technical": {
+     *           ...
+     *     },
+     *     "request": {
+     *           ...
+     *     }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *     "status": 422,
+     *     "message": "Error",
+     *     "errors": {
+     *         "The order is not available for processing."
+     *     },
+     *     "code": 30,
+     *     "technical": {
+     *           ...
+     *     },
+     *     "request": {
+     *           ...
+     *     }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *     "status": 422,
+     *     "message": "Error",
+     *     "errors": {
+     *         "Unable to process flight cancellation."
+     *     },
+     *     "code": 40,
+     *     "technical": {
+     *           ...
+     *     },
+     *     "request": {
+     *           ...
+     *     }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *     "status": 422,
+     *     "message": "Error",
+     *     "errors": {
+     *         "Unable to process hotel cancellation."
+     *     },
+     *     "code": 50,
+     *     "technical": {
+     *           ...
+     *     },
+     *     "request": {
+     *           ...
+     *     }
+     * }
+     *
+     */
     public function actionCancel()
     {
         $form = new CancelForm();

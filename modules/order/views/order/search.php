@@ -88,6 +88,7 @@ JS;
             'or_id',
             'or_gid',
             'or_uid',
+            'or_fare_id',
             [
                 'class' => LeadColumn::class,
                 'attribute' => 'or_lead_id',
