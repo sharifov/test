@@ -541,10 +541,10 @@ class SideBarMenu extends \yii\bootstrap\Widget
         $menuItems[] = [
             'label' => 'Orders',
             'url' => 'javascript:',
-            'icon' => 'fa fa-shopping-cart',
+            'icon' => 'shopping-cart',
             'items' => [
-                ['label' => 'Search Orders', 'url' => ['/order/order/search'], 'icon' => 'fa fa-search'],
-                ['label' => 'Error Orders', 'url' => ['/order/order/error-list'], 'icon' => 'fa fa-exclamation-triangle'],
+                ['label' => 'Search Orders', 'url' => ['/order/order/search'], 'icon' => 'search'],
+                ['label' => 'Error Orders', 'url' => ['/order/order/error-list'], 'icon' => 'exclamation-triangle'],
             ]
         ];
 
