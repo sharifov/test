@@ -13,8 +13,10 @@ use frontend\helpers\QuoteHelper;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
 use PhpParser\Node\Expr\Empty_;
 use sales\auth\Auth;
+use sales\exception\AdditionalDataException;
 use sales\forms\api\searchQuote\FlightQuoteSearchForm;
 use sales\helpers\app\AppHelper;
+use sales\helpers\ErrorsToStringHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\socket\ClientChatSocketCommands;
@@ -28,6 +30,7 @@ use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\services\parsingDump\BaggageService;
 use sales\services\parsingDump\lib\ParsingDump;
 use sales\services\parsingDump\ReservationService;
+use sales\services\quote\addQuote\AddQuoteManualService;
 use sales\services\quote\addQuote\AddQuoteService;
 use sales\services\quote\addQuote\guard\FlightQuoteGuard;
 use sales\services\quote\addQuote\guard\GdsByQuoteGuard;
@@ -730,136 +733,141 @@ class QuoteController extends FController
             'errors' => [],
         ];
 
-        $transaction = Quote::getDb()->beginTransaction();
+        $transaction = Yii::$app->db->beginTransaction();
         try {
-            if (Yii::$app->request->isPost) {
-                $leadId = (int) Yii::$app->request->get('lead_id');
-                if (!$lead = Lead::findOne(['id' => $leadId])) {
-                    throw new \DomainException('Lead id(' . $leadId . ') not found', -1);
-                }
-
-                $post = Yii::$app->request->post();
-
-                if (isset($post['Quote'])) {
-                    $postQuote = $post['Quote'];
-                    $postQuote['employee_id'] = Yii::$app->user->id;
-                    $postQuote['employee_name'] = Yii::$app->user->identity->username;
-
-                    if (!$gds = ParsingDump::getGdsByQuote($postQuote['gds'])) {
-                        throw new \DomainException('This gds(' . $postQuote['gds'] . ') cannot be processed', -2);
-                    }
-
-                    $quote = Quote::createQuote($postQuote, $lead->id, $lead->originalQuoteExist());
-                    $quote->setMetricLabels(['action' => 'created', 'type_creation' => 'manual']);
-
-                    if ((new ReservationService($gds))->parseReservation($post['prepare_dump'], true, $quote->itinerary)) {
-                        $itinerary = Quote::createDump($quote->itinerary);
-                    } elseif (
-                        !empty($post['reservation_result']) &&
-                        (new ReservationService('sabre'))->parseReservation(str_replace('&nbsp;', ' ', $post['reservation_result']), true, $quote->itinerary)
-                    ) {
-                        $itinerary = Quote::createDump($quote->itinerary);
-                    } else {
-                        throw new \DomainException('Parse "reservation dump" failed', -3);
-                    }
-
-                    $quote->reservation_dump = str_replace('&nbsp;', ' ', implode("\n", $itinerary));
-
-                    if (!$quote->save()) {
-                        $response['errors'] = $quote->getErrors();
-                        throw new \DomainException('Quote not saved. Error: ' . $quote->getErrorSummary(false)[0], -4);
-                    }
-
-                    if (empty($post['QuotePrice'])) {
-                        throw new \DomainException('Error: QuotePrice cannot be empty.', -5);
-                    }
-
-                    foreach ($post['QuotePrice'] as $key => $quotePrice) {
-                        if ($price = new AddQuotePriceForm()) {
-                            $price->quote_id = $quote->id;
-                            $price->passenger_type = $quotePrice['passenger_type'];
-                            $price->fare = $quotePrice['fare'];
-                            $price->taxes = $quotePrice['taxes'];
-                            $price->net = $quotePrice['net'];
-                            $price->mark_up = $quotePrice['mark_up'];
-                            $price->selling = $quotePrice['selling'];
-                            $price->service_fee = ($quote->check_payment) ? round($price->selling * (new Quote())->serviceFee, 2) : 0;
-
-                            if (!$price->validate()) {
-                                $response['errorsPrices'][$key] = $price->getErrors();
-                            } else {
-                                $quotePrice = QuotePrice::manualCreation($price);
-                                $quotePrice->roundAttributesValue();
-                                $quotePrice->save(false);
-                            }
-                        }
-                    }
-
-                    if (count($response['errorsPrices'])) {
-                        throw new \DomainException('QuotePrice not saved.', -6);
-                    }
-
-                    $this->logQuote($quote);
-                    $quote->createQuoteTrips();
-
-                    foreach ($post as $postKey => $postValues) {
-                        $patternBaggageForm = '/SegmentBaggageForm_([A-Z]{3})([A-Z]{3})\z/';
-                        preg_match($patternBaggageForm, $postKey, $iataMatches);
-                        if (!isset($iataMatches[2])) {
-                            continue;
-                        }
-                        if (
-                            (isset($postValues['baggageData']) && is_array($postValues['baggageData'])) &&
-                            $segment = QuoteSegment::getByQuoteAndIata($quote->id, $iataMatches[1], $iataMatches[2])
-                        ) {
-                            $firstPiece = $lastPiece = 0;
-
-                            foreach ($postValues['baggageData'] as $key => $baggageData) {
-                                $segmentBaggageForm = new SegmentBaggageForm();
-                                $segmentBaggageForm->segmentId = $segment->qs_id;
-                                $segmentBaggageForm->load($baggageData, '');
-
-                                if ($segmentBaggageForm->validate()) {
-                                    if ($segmentBaggageForm->type === BaggageService::TYPE_PAID) {
-                                        if ($segmentBaggageForm->piece === 1) {
-                                            ++$firstPiece;
-                                            $lastPiece = $firstPiece;
-                                        } else {
-                                            $firstPiece = $lastPiece + 1;
-                                            $lastPiece = $firstPiece + $segmentBaggageForm->piece - 1;
-                                        }
-                                        $baggageObj = QuoteSegmentBaggageCharge::creationFromForm($segmentBaggageForm, $firstPiece, $lastPiece);
-                                    } else {
-                                        $baggageObj = QuoteSegmentBaggage::creationFromForm($segmentBaggageForm);
-                                    }
-                                    $baggageObj->save(false);
-                                }
-                            }
-                        }
-                    }
-
-                    if ($lead->called_expert) {
-                        $quote->sendUpdateBO();
-                    }
-
-                    $transaction->commit();
-                    $response['status'] = 1;
-                } else {
-                    $response['errorMessage'] = 'POST data Quote required';
-                }
-            } else {
-                throw new \DomainException('POST data required', -6);
+            if (!Yii::$app->request->isPost) {
+                throw new \DomainException('POST data required', -1);
             }
+            $leadId = (int) Yii::$app->request->get('lead_id');
+            if (!$lead = Lead::findOne(['id' => $leadId])) {
+                throw new \DomainException('Lead id(' . $leadId . ') not found', -1);
+            }
+
+            $post = Yii::$app->request->post();
+
+            if (!isset($post['Quote'])) {
+                throw new \DomainException('POST data Quote required', -1);
+            }
+
+            $postQuote = $post['Quote'];
+            $postQuote['employee_id'] = Yii::$app->user->id;
+            $postQuote['employee_name'] = Yii::$app->user->identity->username;
+
+            if (!$gds = ParsingDump::getGdsByQuote($postQuote['gds'])) {
+                throw new \DomainException('This gds(' . $postQuote['gds'] . ') cannot be processed', -1);
+            }
+
+            $quote = Quote::createQuote($postQuote, $lead->id, $lead->originalQuoteExist());
+            $quote->setMetricLabels(['action' => 'created', 'type_creation' => 'manual']);
+
+            if ((new ReservationService($gds))->parseReservation($post['prepare_dump'], true, $quote->itinerary)) {
+                $itinerary = Quote::createDump($quote->itinerary);
+            } elseif (
+                !empty($post['reservation_result']) &&
+                (new ReservationService('sabre'))->parseReservation(str_replace('&nbsp;', ' ', $post['reservation_result']), true, $quote->itinerary)
+            ) {
+                $itinerary = Quote::createDump($quote->itinerary);
+            } else {
+                throw new \DomainException('Parse "reservation dump" failed', -1);
+            }
+
+            $quote->reservation_dump = str_replace('&nbsp;', ' ', implode("\n", $itinerary));
+
+            if (!$quote->save()) {
+                $response['errors'] = $quote->getErrors();
+                throw new \DomainException('Quote not saved. Error: ' . $quote->getErrorSummary(false)[0], -1);
+            }
+
+            if (empty($post['QuotePrice'])) {
+                throw new \DomainException('Error: QuotePrice cannot be empty.', -1);
+            }
+
+            foreach ($post['QuotePrice'] as $key => $quotePrice) {
+                if ($price = new AddQuotePriceForm()) {
+                    $price->quote_id = $quote->id;
+                    $price->passenger_type = $quotePrice['passenger_type'];
+                    $price->fare = $quotePrice['fare'];
+                    $price->taxes = $quotePrice['taxes'];
+                    $price->net = $quotePrice['net'];
+                    $price->mark_up = $quotePrice['mark_up'];
+                    $price->selling = $quotePrice['selling'];
+                    $price->service_fee = ($quote->check_payment) ? round($price->selling * (new Quote())->serviceFee, 2) : 0;
+
+                    if (!$price->validate()) {
+                        $response['errorsPrices'][$key] = $price->getErrors();
+                    } else {
+                        $quotePrice = QuotePrice::manualCreation($price);
+                        $quotePrice->roundAttributesValue();
+                        $quotePrice->save(false);
+                    }
+                }
+            }
+
+            if (count($response['errorsPrices'])) {
+                throw new \DomainException('QuotePrice not saved.', -1);
+            }
+
+            AddQuoteManualService::createQuoteTripsManually($quote);
+
+            foreach ($post as $postKey => $postValues) {
+                $patternBaggageForm = '/SegmentBaggageForm_([A-Z]{3})([A-Z]{3})\z/';
+                preg_match($patternBaggageForm, $postKey, $iataMatches);
+                if (!isset($iataMatches[2])) {
+                    continue;
+                }
+                if (
+                    (isset($postValues['baggageData']) && is_array($postValues['baggageData'])) &&
+                    $segment = QuoteSegment::getByQuoteAndIata($quote->id, $iataMatches[1], $iataMatches[2])
+                ) {
+                    $firstPiece = $lastPiece = 0;
+
+                    foreach ($postValues['baggageData'] as $key => $baggageData) {
+                        $segmentBaggageForm = new SegmentBaggageForm();
+                        $segmentBaggageForm->segmentId = $segment->qs_id;
+                        $segmentBaggageForm->load($baggageData, '');
+
+                        if ($segmentBaggageForm->validate()) {
+                            if ($segmentBaggageForm->type === BaggageService::TYPE_PAID) {
+                                if ($segmentBaggageForm->piece === 1) {
+                                    ++$firstPiece;
+                                    $lastPiece = $firstPiece;
+                                } else {
+                                    $firstPiece = $lastPiece + 1;
+                                    $lastPiece = $firstPiece + $segmentBaggageForm->piece - 1;
+                                }
+                                $baggageObj = QuoteSegmentBaggageCharge::creationFromForm($segmentBaggageForm, $firstPiece, $lastPiece);
+                            } else {
+                                $baggageObj = QuoteSegmentBaggage::creationFromForm($segmentBaggageForm);
+                            }
+                            $baggageObj->save(false);
+                        }
+                    }
+                }
+            }
+
+            $this->logQuote($quote);
+
+            $transaction->commit();
+            $response['status'] = 1;
         } catch (\Throwable $throwable) {
             $transaction->rollBack();
             $response['errorMessage'] = $throwable->getMessage();
-            if ($throwable->getCode() > 0) {
-                \Yii::error(
-                    \yii\helpers\VarDumper::dumpAsString($throwable, 10),
-                    'QuoteController:actionSaveFromDump:Throwable'
-                );
+
+            $errorMessage = ($throwable instanceof AdditionalDataException) ?
+                ArrayHelper::merge(AppHelper::throwableLog($throwable), $throwable->getAdditionalData()) :
+                VarDumper::dumpAsString($throwable, 10);
+
+            if ($throwable->getCode() >= 0) {
+                \Yii::error($errorMessage, 'QuoteController:actionSaveFromDump:Throwable');
+            } else {
+                \Yii::warning($errorMessage, 'QuoteController:actionSaveFromDump:Throwable');
             }
         }
+
+        if ($lead->called_expert) {
+            $quote->sendUpdateBO();
+        }
+
         return $response;
     }
 
