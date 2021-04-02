@@ -1388,7 +1388,7 @@ class OrderController extends BaseController
     public function actionCreate(): \webapi\src\response\Response
     {
         $request = Yii::$app->request;
-        $form = new OrderCreateForm(count($request->post('productQuotes', [])), count($request->post('paxes', [])));
+        $form = new OrderCreateForm();
 
         if (!$form->load($request->post())) {
             return new ErrorResponse(
@@ -2127,7 +2127,7 @@ class OrderController extends BaseController
     public function actionCreateC2b()
     {
         $request = Yii::$app->request;
-        $form = new OrderCreateC2BForm(count($request->post('quotes', [])), !empty($request->post()['creditCard']), !empty($request->post()['billingInfo']));
+        $form = new OrderCreateC2BForm();
 
         if (!$form->load($request->post())) {
             return new ErrorResponse(
