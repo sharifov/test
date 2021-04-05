@@ -80,7 +80,7 @@ class LogController extends FController
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         $result = ['error' => '', 'data' => []];
-        $result['data'] = Log::getActionFilterByCnt();
+        $result['data'] = Log::getCategoryFilterByCnt();
         return $result;
     }
 
