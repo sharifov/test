@@ -71,20 +71,27 @@ class Log extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param int|null $level
      * @param bool $countGroup
      * @return array
      */
-    public static function getCategoryFilter(bool $countGroup = false): array
+    public static function getCategoryFilter(?int $level = null, bool $countGroup = false): array
     {
         $arr = [];
 
         if ($countGroup) {
-            $data = self::find()->select(["COUNT(*) AS cnt", "category"])
+            $query = self::find()->select(["COUNT(*) AS cnt", "category"])
                 ->where('category IS NOT NULL')
                 ->groupBy(["category"])
                 ->orderBy('cnt DESC')
                 ->cache(60)
-                ->asArray()->all();
+                ->asArray();
+
+            if ($level) {
+                $query->andWhere(['level' => (int) $level]);
+            }
+
+            $data = $query->all();
 
             if ($data) {
                 foreach ($data as $v) {
@@ -92,10 +99,16 @@ class Log extends \yii\db\ActiveRecord
                 }
             }
         } else {
-            $data = self::find()->select("DISTINCT(category) AS category")
+            $query = self::find()->select("DISTINCT(category) AS category")
                 ->cache(60)
                 ->orderBy('category')
-                ->asArray()->all();
+                ->asArray();
+
+            if ($level) {
+                $query->andWhere(['level' => (int) $level]);
+            }
+
+            $data = $query->all();
 
             if ($data) {
                 foreach ($data as $v) {

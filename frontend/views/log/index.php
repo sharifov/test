@@ -80,7 +80,7 @@ $pjaxListId = 'pjax-log';
                     //'category',
                     [
                         'attribute' => 'category',
-                        'filter' => \frontend\models\Log::getCategoryFilter(Yii::$app->request->isPjax),
+                        'filter' => \frontend\models\Log::getCategoryFilter(is_numeric($searchModel->level) ? $searchModel->level : null, Yii::$app->request->isPjax),
                         'contentOptions' => ['style' => 'width: 200px;text-align:center;']
                     ],
                     [
