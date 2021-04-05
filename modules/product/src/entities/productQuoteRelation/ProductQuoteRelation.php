@@ -109,4 +109,30 @@ class ProductQuoteRelation extends \yii\db\ActiveRecord
     {
         return self::TYPE_LIST[$typeId] ?? '-';
     }
+
+    /**
+     * @param int $parentId
+     * @param int $relatedId
+     * @param int|null $userId
+     * @return ProductQuoteRelation
+     */
+    public static function replace(int $parentId, int $relatedId, ?int $userId = null): ProductQuoteRelation
+    {
+        $model = new self();
+        $model->pqr_parent_pq_id = $parentId;
+        $model->pqr_related_pq_id = $relatedId;
+        $model->pqr_created_user_id = $userId;
+        $model->pqr_type_id = self::TYPE_REPLACE;
+        return $model;
+    }
+
+    public static function clone(int $parentId, int $relatedId, ?int $userId = null): ProductQuoteRelation
+    {
+        $model = new self();
+        $model->pqr_parent_pq_id = $parentId;
+        $model->pqr_related_pq_id = $relatedId;
+        $model->pqr_created_user_id = $userId;
+        $model->pqr_type_id = self::TYPE_CLONE;
+        return $model;
+    }
 }

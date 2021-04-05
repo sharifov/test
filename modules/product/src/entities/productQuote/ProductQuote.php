@@ -25,6 +25,7 @@ use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionsQuery;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
+use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\interfaces\Quotable;
 use sales\dto\product\ProductQuoteDTO;
 use sales\entities\EventTrait;
@@ -82,6 +83,8 @@ use yii\db\ActiveRecord;
  * @property ProductQuoteOption[] $productQuoteOptionsActive
  * @property ProductQuote|null $clone
  * @property FlightQuote|null $flightQuote
+ * @property ProductQuote[]|null $relates
+ * @property ProductQuote|null $relateParent
  *
  * @property Quotable|null $childQuote
  */
@@ -218,6 +221,18 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function getClone(): ActiveQuery
     {
         return $this->hasOne(static::class, ['pq_id' => 'pq_clone_id']);
+    }
+
+    public function getRelates(): ActiveQuery
+    {
+        return $this->hasMany(static::class, ['pq_id' => 'pqr_related_pq_id'])
+            ->viaTable('product_quote_relation', ['pqr_parent_pq_id' => 'pq_id']);
+    }
+
+    public function getRelateParent(): ActiveQuery
+    {
+        return $this->hasOne(static::class, ['pq_id' => 'pqr_parent_pq_id'])
+            ->viaTable('product_quote_relation', ['pqr_related_pq_id' => 'pq_id']);
     }
 
     /**

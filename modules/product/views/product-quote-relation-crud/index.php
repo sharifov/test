@@ -44,7 +44,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'pqr_type_id',
-                'label' => 'Project',
                 'value' => static function (ProductQuoteRelation $model) {
                     return ProductQuoteRelation::getTypeName($model->pqr_type_id);
                 },

@@ -41,4 +41,6 @@ class ProductCodeException
     public const PRODUCT_TYPE_NOT_FOUND = Module::PRODUCT . 700;
     public const PRODUCT_TYPE_SAVE = Module::PRODUCT . 701;
     public const PRODUCT_TYPE_REMOVE = Module::PRODUCT . 702;
+
+    public const PRODUCT_QUOTE_RELATION_SAVE = Module::PRODUCT . 800;
 }

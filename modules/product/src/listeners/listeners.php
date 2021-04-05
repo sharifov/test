@@ -25,11 +25,15 @@ use modules\product\src\listeners\productQuote\ProductQuoteBookedEventListener;
 use modules\product\src\listeners\productQuote\ProductQuoteCanceledEventListener;
 use modules\product\src\listeners\productQuote\ProductQuoteErrorEventListener;
 use modules\product\src\listeners\productQuote\ProductQuoteInProgressEventListener;
+use modules\product\src\listeners\ProductQuoteCloneListener;
 use sales\model\user\entity\profit\event\UserProfitCalculateByOrderUserProfitEvent;
 use sales\model\user\entity\profit\listener\UserProfitCalculateByOrderUserProfitEventListener;
 
 return [
-    ProductQuoteCloneCreatedEvent::class => [ProductQuoteChangeStatusLogListener::class],
+    ProductQuoteCloneCreatedEvent::class => [
+        ProductQuoteChangeStatusLogListener::class,
+        ProductQuoteCloneListener::class,
+    ],
     ProductQuoteOptionCloneCreatedEvent::class => [],
     ProductQuoteInProgressEvent::class => [
         ProductQuoteInProgressEventListener::class,
