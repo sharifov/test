@@ -147,6 +147,7 @@ $formatter = new \common\components\i18n\Formatter();
             $ordTotalFee = 0;
             $calcTotalPrice = 0;
             $orderTipsAmount = 0.00;
+            $orderTipsAmountClient = 0.00;
         ?>
 
         <table class="table table-bordered">
