@@ -151,6 +151,13 @@ class OrderController extends FController
 
                 $modelOrder->updateOrderTotalByCurrency();
 
+                foreach ($modelOrder->productQuotes as $productQuote) {
+                    $productQuote->pq_client_currency = $modelOrder->or_client_currency;
+                    $productQuote->pq_client_currency_rate = $modelOrder->or_client_currency_rate;
+                    $productQuote->updatePrices($productQuote->pq_origin_price, $productQuote->pq_app_markup, $productQuote->pq_agent_markup);
+                    $productQuote->save();
+                }
+
                 //$modelOrder->or_client_total = $model->or_client_total;
                 //$modelOrder->or_client_currency_rate = $model->or_client_currency_rate;
 
