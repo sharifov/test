@@ -5,14 +5,14 @@ namespace modules\order\controllers;
 use Yii;
 use modules\order\src\entities\orderData\OrderData;
 use modules\order\src\entities\orderData\search\OrderDataSearch;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\db\StaleObjectException;
 use yii\helpers\ArrayHelper;
+use frontend\controllers\FController;
 
-class OrderDataCrudController extends Controller
+class OrderDataCrudController extends FController
 {
     public function init(): void
     {
