@@ -269,33 +269,68 @@ class ApiLog extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param bool $countGroup
      * @return array
      */
-    public static function getActionFilter(): array
+    public static function getActionFilter(bool $countGroup = false): array
     {
         $arr = [];
-//        $data = self::find()->select(['COUNT(*) AS cnt', 'al_action'])
-//            ->where('al_action IS NOT NULL')
-//            //->andWhere("job_start_dt >= NOW() - interval '24 hour'")
-//            ->groupBy(['al_action'])
-//            ->orderBy('cnt DESC')->asArray()->all();
 
-        $data = self::find()->select(['DISTINCT(al_action) AS al_action'])
-            // ->where('al_action IS NOT NULL')
-            //->andWhere("job_start_dt >= NOW() - interval '24 hour'")
-            //->groupBy(['al_action'])
-            ->orderBy('al_action')
-            ->cache(60)
-            ->asArray()->all();
+        if ($countGroup) {
+            $data = self::find()->select(["COUNT(*) AS cnt", "al_action"])
+                ->where('al_action IS NOT NULL')
+                ->groupBy(["al_action"])
+                ->orderBy('cnt DESC')
+                ->cache(60)
+                ->asArray()->all();
 
-        if ($data) {
-            foreach ($data as $v) {
-                $arr[$v['al_action']] = $v['al_action']; // . ' - [' . $v['cnt'] . ']';
+            if ($data) {
+                foreach ($data as $v) {
+                    $arr[$v['al_action']] = $v['al_action'] . ' - [' . $v['cnt'] . ']';
+                }
+            }
+        } else {
+            $data = self::find()->select("DISTINCT(al_action) AS al_action")
+                ->cache(60)
+                ->orderBy('al_action')
+                ->asArray()->all();
+
+            if ($data) {
+                foreach ($data as $v) {
+                    $arr[$v['al_action']] = $v['al_action'];
+                }
             }
         }
 
         return $arr;
     }
+
+    /**
+     * @return array
+     */
+    public static function getActionFilterByCnt(): array
+    {
+        $arr = [];
+        $data = self::find()->select(["COUNT(*) AS cnt", "al_action"])
+            ->where('al_action IS NOT NULL')
+            ->groupBy(["al_action"])
+            ->orderBy('cnt DESC')
+            ->cache(60)
+            ->asArray()->all();
+
+        if ($data) {
+            foreach ($data as $v) {
+                $arr[] = [
+                    'hash' => md5($v['al_action']),
+                    'name' => $v['al_action'],
+                    'cnt' => $v['cnt']
+                ];
+            }
+        }
+
+        return $arr;
+    }
+
 
     public static function getActionsList()
     {

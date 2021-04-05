@@ -80,7 +80,7 @@ $pjaxListId = 'pjax-log';
                     //'category',
                     [
                         'attribute' => 'category',
-                        'filter' => \frontend\models\Log::getCategoryFilter(),
+                        'filter' => \frontend\models\Log::getCategoryFilter(Yii::$app->request->isPjax),
                         'contentOptions' => ['style' => 'width: 200px;text-align:center;']
                     ],
                     [
@@ -142,7 +142,35 @@ yii\bootstrap4\Modal::begin([
     ]);
 yii\bootstrap4\Modal::end();
 
+$ajaxUrl = \yii\helpers\Url::to(['/log/ajax-category-list']);
+$categoryValue = $searchModel->category ? md5($searchModel->category) : '';
+
 $jsCode = <<<JS
+    let ajaxUrlCategoryList = '$ajaxUrl';
+    let categoryValue = '$categoryValue';
+
+    function updateCategoryList() {
+        $.getJSON(ajaxUrlCategoryList, function(response) {
+            let obj = $( "select[name='LogSearch[category]']" );
+        
+            obj.html('');
+            obj.append('<option value=""></option>');
+            
+            //$( response.data).each(function( item ) {
+            $.each(response.data, function(){
+                let selected = '';
+                
+                if (categoryValue === this.hash) {
+                    selected = 'selected';
+                }
+                obj.append('<option value="'+ this.name +'" ' + selected + '>'+ this.name +' - ['+ this.cnt +']</option>')
+            });
+
+        });
+    }
+
+    setTimeout(updateCategoryList, 2000);
+    
     $(document).on('click', '.showModalButton', function(){
         $('#modal').modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
         $('#modal-title').html($(this).attr('title'));
