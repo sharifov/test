@@ -267,18 +267,22 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                 </div>
             <?php endif; ?>
 
-            <?php if (!empty($caseSaleModel) && $package = ArrayHelper::getValue($caseSaleModel->getSaleDataDecoded(), 'cfar')) : ?>
+            <?php if (!empty($caseSaleModel) && $cfar = ArrayHelper::getValue($caseSaleModel->getSaleDataDecoded(), 'cfar')) : ?>
                 <div class="row">
                     <div class="col-md-2">
                         <h2>CFAR</h2>
                         <table class="table table-bordered table-hover table-striped">
                             <tr>
                                 <th>Type</th>
-                                <td><?php echo Html::encode(ArrayHelper::getValue($package, 'type')) ?></td>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($cfar, 'type')) ?></td>
                             </tr>
                             <tr>
                                 <th>Amount</th>
-                                <td><?php echo Html::encode(ArrayHelper::getValue($package, 'amount')) ?></td>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($cfar, 'amount')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Is Activated</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($cfar, 'isActivated')) ?></td>
                             </tr>
                         </table>
                     </div>
@@ -291,7 +295,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                 <th>Limit</th>
                                 <th>Value</th>
                             </tr>
-                            <?php foreach (ArrayHelper::getValue($package, 'options') as $option) : ?>
+                            <?php foreach (ArrayHelper::getValue($cfar, 'options') as $option) : ?>
                                 <tr>
                                     <td><?=Html::encode($option['name'])?></td>
                                     <td><?=Html::encode($option['type'])?></td>
