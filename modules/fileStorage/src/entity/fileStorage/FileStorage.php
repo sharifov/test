@@ -6,6 +6,7 @@ use modules\fileStorage\src\entity\fileCase\FileCase;
 use modules\fileStorage\src\entity\fileClient\FileClient;
 use modules\fileStorage\src\entity\fileLead\FileLead;
 use modules\fileStorage\src\entity\fileLog\FileLog;
+use modules\fileStorage\src\entity\fileOrder\FileOrder;
 use modules\fileStorage\src\entity\fileShare\FileShare;
 use modules\fileStorage\src\entity\fileStorage\events\FileEditedEvent;
 use modules\fileStorage\src\entity\fileStorage\events\FileFailedEvent;
@@ -41,6 +42,7 @@ use Yii;
  * @property FileLog[] $logs
  * @property FileShare[] $shares
  * @property FileUser[] $users
+ * @property FileOrder[] $fileOrders
  */
 class FileStorage extends \yii\db\ActiveRecord
 {
@@ -187,6 +189,11 @@ class FileStorage extends \yii\db\ActiveRecord
     public function getUsers(): \yii\db\ActiveQuery
     {
         return $this->hasMany(FileUser::class, ['fus_fs_id' => 'fs_id']);
+    }
+
+    public function getFileOrders(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(FileOrder::class, ['fo_fs_id' => 'fs_id']);
     }
 
     public function attributeLabels(): array

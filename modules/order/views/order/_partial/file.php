@@ -3,6 +3,7 @@
 use common\models\Employee;
 use kartik\editable\Editable;
 use modules\fileStorage\src\entity\fileOrder\FileOrder;
+use modules\fileStorage\src\entity\fileStorage\FileStorage;
 use modules\fileStorage\src\services\access\FileStorageAccessService;
 use modules\fileStorage\src\services\url\FileInfo;
 use modules\fileStorage\src\services\url\QueryParams;
@@ -16,7 +17,7 @@ use yii\widgets\Pjax;
 
 /* @var yii\web\View $this */
 /* @var Order $order */
-/* @var FileOrder[]|null $orderFiles */
+/* @var FileStorage[]|null $orderFiles */
 /* @var UrlGenerator $urlGenerator */
 
 $queryParamsView = (new QueryParams(['guard_enabled' => false]));
@@ -50,11 +51,7 @@ $i = 1;
                                 <th>Created</th>
                                 <th>Actions</th>
                             </tr>
-                            <?php foreach ($orderFiles as $fileOrder) : ?>
-                                <?php if (!$file = $fileOrder->file) : ?>
-                                    <?php continue ?>
-                                <?php endif ?>
-
+                            <?php foreach ($orderFiles as $file) : ?>
                                 <?php $shortName = StringHelper::truncate(Html::encode($file->fs_name), 30) ?>
                                 <?php $shortTitle = StringHelper::truncate(Html::encode($file->fs_title), 30) ?>
                                 <?php $linkView = $urlGenerator->generate(FileInfo::byFileStorage($file, $queryParamsView)) ?>

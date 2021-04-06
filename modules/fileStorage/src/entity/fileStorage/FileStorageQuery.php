@@ -15,4 +15,17 @@ class FileStorageQuery
         $clientId = FileClientQuery::getClient($fileId);
         return new FileStorageRelations($leadId, $caseId, $clientId);
     }
+
+    /**
+     * @param int $orderId
+     * @return FileStorage[]|null
+     */
+    public static function getByOrderId(int $orderId): ?array
+    {
+        return FileStorage::find()
+            ->innerJoinWith('fileOrders')
+            ->where(['fo_or_id' => $orderId])
+            ->orderBy(['fs_id' => SORT_DESC])
+            ->all();
+    }
 }

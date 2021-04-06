@@ -1,6 +1,7 @@
 <?php
 
 use modules\fileStorage\src\entity\fileOrder\FileOrder;
+use modules\fileStorage\src\entity\fileStorage\FileStorage;
 use modules\fileStorage\src\services\url\UrlGenerator;
 use modules\order\src\entities\order\Order;
 use modules\order\src\processManager\phoneToBook\OrderProcessManager;
@@ -10,7 +11,7 @@ use yii\helpers\Html;
 /* @var yii\web\View $this */
 /* @var Order $order */
 /* @var OrderProcessManager|null $orderProcessManage */
-/* @var FileOrder[]|null $orderFiles */
+/* @var FileStorage[]|null $orderFiles */
 /* @var UrlGenerator $urlGenerator */
 
 $this->title = $order->or_id;

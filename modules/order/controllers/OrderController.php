@@ -4,6 +4,7 @@ namespace modules\order\controllers;
 
 use common\models\Lead;
 use modules\fileStorage\src\entity\fileOrder\FileOrder;
+use modules\fileStorage\src\entity\fileStorage\FileStorageQuery;
 use modules\order\src\entities\order\OrderSourceType;
 use modules\order\src\entities\order\search\OrderCrudSearch;
 use modules\order\src\entities\order\search\OrderSearch;
@@ -268,7 +269,7 @@ class OrderController extends FController
         return $this->render('view', [
             'order' => $order,
             'orderProcessManage' => OrderProcessManager::findOne($order->or_id),
-            'orderFiles' => FileOrder::findAll(['fo_or_id' => $order->or_id]),
+            'orderFiles' => FileStorageQuery::getByOrderId($order->or_id),
             'urlGenerator' => $urlGenerator,
         ]);
     }
