@@ -5,6 +5,7 @@ namespace modules\hotel\models;
 use common\models\Currency;
 use frontend\helpers\JsonHelper;
 use modules\hotel\models\query\HotelQuoteRoomQuery;
+use sales\behaviors\StringToJsonBehavior;
 use sales\helpers\email\TextConvertingHelper;
 use modules\hotel\src\entities\hotelQuoteRoom\events\HotelQuoteRoomCloneCreatedEvent;
 use modules\hotel\src\entities\hotelQuoteRoom\serializer\HotelQuoteRoomSerializer;
@@ -83,16 +84,10 @@ class HotelQuoteRoom extends ActiveRecord implements Serializable
     public function behaviors(): array
     {
         return [
-            'cancellationPolicies' => [
-                'class' => AttributeBehavior::class,
-                'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['hqr_cancellation_policies'],
-                    ActiveRecord::EVENT_BEFORE_UPDATE => ['hqr_cancellation_policies'],
-                ],
-                'value' => static function ($event) {
-                    return JsonHelper::decode($event->sender->hqr_cancellation_policies);
-                }
-            ]
+            'stringToJson' => [
+                'class' => StringToJsonBehavior::class,
+                'jsonColumn' => 'hqr_cancellation_policies',
+            ],
         ];
     }
 
