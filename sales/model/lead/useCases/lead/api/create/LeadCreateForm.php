@@ -30,6 +30,7 @@ use yii\base\Model;
  * @property int $flight_id
  * @property string|null $user_language
  * @property string|null $expire_at
+ * @property int $type
  *
  * @property FlightForm[] $flightsForm
  * @property ClientForm $clientForm
@@ -54,6 +55,7 @@ class LeadCreateForm extends Model
     public $flight_id;
     public ?string $user_language = null;
     public $expire_at;
+    public $type;
 
     public $flightsForm;
     public $clientForm;
@@ -104,6 +106,9 @@ class LeadCreateForm extends Model
 
             ['status', 'required'],
             ['status', 'in', 'range' => [Lead::STATUS_BOOK_FAILED, Lead::STATUS_ALTERNATIVE]],
+            ['status', function () {
+                $this->setLeadType();
+            }, 'skipOnError' => true, 'skipOnEmpty' => true],
 
             ['flights', 'required'],
             ['flights', IsArrayValidator::class],
@@ -132,6 +137,11 @@ class LeadCreateForm extends Model
     public function formName(): string
     {
         return 'lead';
+    }
+
+    private function setLeadType()
+    {
+        $this->type = 10;
     }
 
     private function loadAndValidateFlights(): void
