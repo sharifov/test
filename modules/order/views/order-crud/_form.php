@@ -27,6 +27,8 @@ $list = (new ListsAccess(Auth::id()));
 
         <?= $form->field($model, 'or_uid')->textInput(['maxlength' => true]) ?>
 
+        <?= $form->field($model, 'or_fare_id')->textInput(['maxlength' => true]) ?>
+
         <?= $form->field($model, 'or_name')->textInput(['maxlength' => true]) ?>
 
         <?= $form->field($model, 'or_lead_id')->textInput() ?>
@@ -56,6 +58,8 @@ $list = (new ListsAccess(Auth::id()));
         <?= $form->field($model, 'or_created_user_id')->dropDownList($list->getEmployees(), ['prompt' => 'Select user']) ?>
 
         <?= $form->field($model, 'or_created_dt')->widget(DateTimePicker::class) ?>
+
+        <?php echo $form->errorSummary($model) ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

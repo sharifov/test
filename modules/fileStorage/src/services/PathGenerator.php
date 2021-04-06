@@ -22,7 +22,7 @@ class PathGenerator
 
     public static function byClientAndUid(int $clientId, string $projectKey, string $originalName, string $uid): string
     {
-        $chunks = [
+        return implode('/', [
             $projectKey,
             'client',
             $clientId,
@@ -30,7 +30,19 @@ class PathGenerator
             date('m'),
             $uid,
             $originalName
-        ];
-        return implode('/', $chunks);
+        ]);
+    }
+
+    public static function byOrder(int $orderId, string $projectKey, string $originalName, string $uid): string
+    {
+        return implode('/', [
+            $projectKey,
+            'order',
+            $orderId,
+            date('Y'),
+            date('m'),
+            $uid,
+            $originalName
+        ]);
     }
 }

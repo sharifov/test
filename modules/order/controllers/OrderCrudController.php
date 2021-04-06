@@ -86,7 +86,9 @@ class OrderCrudController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post())) {
-            $model->or_request_data = JsonHelper::decode($model->or_request_data);
+            if (!empty($model->or_request_data)) {
+                $model->or_request_data = JsonHelper::decode($model->or_request_data);
+            }
             if ($model->save()) {
                 return $this->redirect(['view', 'id' => $model->or_id]);
             }

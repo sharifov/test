@@ -2105,6 +2105,47 @@ class TestController extends FController
         return $pdfRC->generateForBrowserOutput();
     }
 
+    public function actionPqPdf(int $id, int $data = 0, int $json = 1)
+    {
+        if (!$productQuote = ProductQuote::findOne(['pq_id' => $id])) {
+            throw new NotFoundException('ProductQuote not found. Id (' . $id . ')');
+        }
+        if (!$quote = $productQuote->getChildQuote()) {
+            throw new NotFoundException('ChildQuote not found. Id (' . $id . ')');
+        }
+
+        if ($productQuote->isFlight()) {
+            /** @var FlightQuote $quote */
+            $pdfService = new FlightQuotePdfService($quote);
+        } elseif ($productQuote->isHotel()) {
+            /** @var HotelQuote $quote */
+            HotelQuotePdfService::guard($quote);
+            $pdfService = new HotelQuotePdfService($quote);
+        } elseif ($productQuote->isRentCar()) {
+            /** @var RentCarQuote $quote */
+            $pdfService = new RentCarQuotePdfService($quote);
+        } else {
+            throw new NotFoundException('Only Flight/Hotel/RC ProductQuote');
+        }
+
+        if ($data === 1) {
+            if ($json === 1) {
+                return $this->asJson($pdfService->getCommunicationData());
+            }
+            VarDumper::dump($pdfService->getCommunicationData(), 20, true);
+            exit();
+        }
+
+        try {
+            $pdfService->processingFile();
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), 'TestController:actionPqPdf');
+            VarDumper::dump($throwable->getMessage(), 20, true);
+            exit();
+        }
+        return $pdfService->generateForBrowserOutput();
+    }
+
     public function actionZ()
     {
         return $this->render('z');

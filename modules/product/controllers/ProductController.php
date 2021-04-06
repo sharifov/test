@@ -105,6 +105,7 @@ class ProductController extends FController
 
             $form->pr_lead_id = $leadId;
             $form->pr_type_id = $typeId;
+            $form->pr_project_id = $lead->project_id;
         }
 
         return $this->renderAjax('_ajax_form', [

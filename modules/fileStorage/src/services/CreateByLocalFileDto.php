@@ -2,6 +2,8 @@
 
 namespace modules\fileStorage\src\services;
 
+use dosamigos\arrayquery\conditions\GreaterThan;
+use kartik\select2\ThemeDefaultAsset;
 use modules\fileStorage\src\entity\fileStorage\FileStorageStatus;
 use modules\fileStorage\src\entity\fileStorage\Path;
 use modules\fileStorage\src\entity\fileStorage\Uid;
@@ -21,13 +23,15 @@ use yii\helpers\FileHelper;
  * @property string|null $createdDt
  * @property int|null $status
  * @property string $pathToLocalFile
- * @property int $clientId
+ * @property int|null $clientId
+ * @property int|null $orderId
  * @property string $projectKey
  */
 class CreateByLocalFileDto
 {
     public string $pathToLocalFile;
-    public int $clientId;
+    public ?int $clientId;
+    public ?int $orderId;
     public string $projectKey;
 
     public ?string $name;
@@ -46,11 +50,18 @@ class CreateByLocalFileDto
      * @param int $clientId
      * @param string $projectKey
      * @param string|null $title
+     * @param int|null $orderId
      */
-    public function __construct(string $pathToLocalFile, int $clientId, string $projectKey, string $title = 'BookingConfirmation')
-    {
+    public function __construct(
+        string $pathToLocalFile,
+        ?int $clientId,
+        string $projectKey,
+        string $title = 'Confirmation',
+        ?int $orderId = null
+    ) {
         $this->pathToLocalFile = $pathToLocalFile;
         $this->clientId = $clientId;
+        $this->orderId = $orderId;
         $this->projectKey = $projectKey;
         $this->title = $title;
         $this->setAll();
@@ -112,14 +123,28 @@ class CreateByLocalFileDto
 
     private function setPatch(): CreateByLocalFileDto
     {
-        $path = new Path(
-            PathGenerator::byClientAndUid(
-                $this->clientId,
-                $this->projectKey,
-                $this->name,
-                $this->uid
-            )
-        );
+        if ($this->clientId) {
+            $path = new Path(
+                PathGenerator::byClientAndUid(
+                    $this->clientId,
+                    $this->projectKey,
+                    $this->name,
+                    $this->uid
+                )
+            );
+        } elseif ($this->orderId) {
+            $path = new Path(
+                PathGenerator::byOrder(
+                    $this->orderId,
+                    $this->projectKey,
+                    $this->name,
+                    $this->uid
+                )
+            );
+        } else {
+            throw new \DomainException('FilePatch error. Client or Order must be filled');
+        }
+
         $this->path = $path->getValue();
         return $this;
     }

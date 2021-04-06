@@ -26,7 +26,7 @@ use yii\helpers\VarDumper;
  * @property ProductDataInterface $object
  * @property int|null $leadId
  * @property int|null $orderId
- * @property int $clientId
+ * @property int|null $clientId
  * @property string $projectKey
  * @property string $templateKey
  * @property int|null $productQuoteId
@@ -74,7 +74,7 @@ abstract class PdfBaseService
         $this->projectKey = $object->getProject()->project_key;
         $this->orderId = $object->getOrder() ? $object->getOrder()->or_id : null;
 
-        $this->fileStorageRepository = Yii::createObject(FileStorageRepository::class); /* TODO::  */
+        $this->fileStorageRepository = Yii::createObject(FileStorageRepository::class);
         $this->fileClientRepository = Yii::createObject(FileClientRepository::class);
         $this->fileOrderRepository = Yii::createObject(FileOrderRepository::class);
         $this->fileLeadRepository = Yii::createObject(FileLeadRepository::class);
@@ -105,12 +105,12 @@ abstract class PdfBaseService
 
     public function generateAsFile(): string
     {
-        return GeneratorPdfService::generateAsFile($this->generateContent(), $this->generateName(), false);
+        return GeneratorPdfService::generateAsFile($this->generateContent(), $this->generateName());
     }
 
     public function generateForBrowserOutput()
     {
-        return GeneratorPdfService::generateForBrowserOutput($this->generateContent(), $this->generateName(), false);
+        return GeneratorPdfService::generateForBrowserOutput($this->generateContent(), $this->generateName());
     }
 
     public function fillData()
@@ -184,7 +184,7 @@ abstract class PdfBaseService
 
     private function fileStorage($patchToLocalFile)
     {
-        $createDto = new CreateByLocalFileDto($patchToLocalFile, $this->clientId, $this->projectKey, $this->generateTitle());
+        $createDto = new CreateByLocalFileDto($patchToLocalFile, $this->clientId, $this->projectKey, $this->generateTitle(), $this->orderId);
         $fileStorage = FileStorage::createByLocalFile($createDto);
 
         $this->fileSystem->write($fileStorage->fs_path, file_get_contents($patchToLocalFile));

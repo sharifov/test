@@ -1910,7 +1910,7 @@ class OrderController extends BaseController
      * @apiParam {string{max 10}}               sourceCid       Source cid
      * @apiParam {string{max 10}}               bookingId       Booking id
      * @apiParam {string{max 255}}              fareId          Unique value of order
-     * @apiParam {string="success","failed"{max 10}}               status       Request uid
+     * @apiParam {string="success","failed"{max 10}}               status       Status
      *
      * @apiParam {Object[]}             quotes                  Product quotes
      * @apiParam {string}               quotes.productKey       Product key

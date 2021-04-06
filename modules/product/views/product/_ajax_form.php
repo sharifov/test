@@ -31,9 +31,10 @@ $pjaxId = 'add-product-pjax'; // . uniqid();
 
     <?= $form->field($model, 'pr_name')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'pr_lead_id')->hiddenInput()->label(false) ?>
-
     <?= $form->field($model, 'pr_description')->textarea(['rows' => 4]) ?>
+
+    <?= $form->field($model, 'pr_lead_id')->hiddenInput()->label(false) ?>
+    <?= $form->field($model, 'pr_project_id')->hiddenInput()->label(false) ?>
 
 
     <div class="form-group text-center">
