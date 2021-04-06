@@ -2124,6 +2124,9 @@ class TestController extends FController
         } elseif ($productQuote->isRentCar()) {
             /** @var RentCarQuote $quote */
             $pdfService = new RentCarQuotePdfService($quote);
+        } elseif ($productQuote->isAttraction()) {
+            /** @var AttractionQuote $quote */
+            $pdfService = new AttractionQuotePdfService($quote);
         } else {
             throw new NotFoundException('Only Flight/Hotel/RC ProductQuote');
         }
