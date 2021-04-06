@@ -251,8 +251,8 @@ class HotelQuoteRoom extends ActiveRecord implements Serializable
 
     public function canFreeCancel(): bool
     {
-        if ($this->isNonRefundable()) {
-            return false;
+        if (!$this->isNonRefundable()) {
+            return true;
         }
 
         foreach ($this->hqr_cancellation_policies ?? [] as $item) {
