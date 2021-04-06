@@ -3,6 +3,7 @@
 namespace modules\hotel\models;
 
 use common\models\Currency;
+use frontend\helpers\JsonHelper;
 use modules\hotel\models\query\HotelQuoteRoomQuery;
 use sales\helpers\email\TextConvertingHelper;
 use modules\hotel\src\entities\hotelQuoteRoom\events\HotelQuoteRoomCloneCreatedEvent;
@@ -89,10 +90,7 @@ class HotelQuoteRoom extends ActiveRecord implements Serializable
                     ActiveRecord::EVENT_BEFORE_UPDATE => ['hqr_cancellation_policies'],
                 ],
                 'value' => static function ($event) {
-                    if (is_string($event->sender->hqr_cancellation_policies)) {
-                        return Json::decode($event->sender->hqr_cancellation_policies);
-                    }
-                    return $event->sender->hqr_cancellation_policies;
+                    return JsonHelper::decode($event->sender->hqr_cancellation_policies);
                 }
             ]
         ];
