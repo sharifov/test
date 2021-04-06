@@ -57,7 +57,7 @@ class OrderForm extends Model
     public function rules()
     {
         return [
-            [['or_lead_id'], 'required'],
+//            [['or_lead_id'], 'required'],
             [['or_lead_id', 'or_status_id', 'or_pay_status_id', 'or_owner_user_id'], 'integer'],
             [['or_description'], 'string'],
             [['or_app_total', 'or_app_markup', 'or_agent_markup', 'or_client_total', 'or_client_currency_rate'], 'number'],
@@ -67,7 +67,7 @@ class OrderForm extends Model
             [['or_client_currency'], 'string', 'max' => 3],
             [['or_gid'], 'unique'],
             [['or_uid'], 'unique'],
-            [['or_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['or_lead_id' => 'id']],
+            [['or_lead_id'], 'exist', 'skipOnEmpty' => true, 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['or_lead_id' => 'id']],
             [['or_owner_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['or_owner_user_id' => 'id']],
         ];
     }
