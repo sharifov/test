@@ -20,8 +20,11 @@ class FreeCancelChecker
         foreach ($hotelQuotes as $hotelQuote) {
             /** @var HotelQuote $childQuote */
             $childQuote = $hotelQuote->childQuote;
-            if (!$childQuote->canFreeCancel()) {
-                return false;
+
+            foreach ($childQuote->hotelQuoteRooms ?? [] as $hotelQuoteRoom) {
+                if (!$hotelQuoteRoom->canFreeCancel()) {
+                    return false;
+                }
             }
         }
 

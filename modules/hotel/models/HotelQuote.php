@@ -284,17 +284,7 @@ class HotelQuote extends ActiveRecord implements Quotable, ProductDataInterface
                     $totalServiceFeeSum += $serviceFeeSum;
                     $totalSystemPrice += $qRoom->hqr_amount + $serviceFeeSum + $qRoom->hqr_system_mark_up;
 
-
-                    if (isset($room['cancellationPolicies'][0]['amount'])) {
-                        $qRoom->hqr_cancel_amount = $room['cancellationPolicies'][0]['amount'];
-                    } else {
-                        $qRoom->hqr_cancel_amount = $room['cancellationPolicies']['amount'] ?? null;
-                    }
-                    if (isset($room['cancellationPolicies']) && $room['cancellationPolicies'][0]['from']) {
-                        $qRoom->hqr_cancel_from_dt = date("Y-m-d H:i:s", strtotime($room['cancellationPolicies'][0]['from']));
-                    } else {
-                        $qRoom->hqr_cancel_from_dt = $room['cancellationPolicies']['from'] ?? null;
-                    }
+                    $qRoom->hqr_cancellation_policies = $room['cancellationPolicies'] ?? [];
 
                     if ($qRoom->hqr_amount) {
                         $hotelQuoteRoomAmount += $qRoom->hqr_amount;
@@ -573,11 +563,5 @@ class HotelQuote extends ActiveRecord implements Quotable, ProductDataInterface
     public function getOrder(): ?Order
     {
         return ArrayHelper::getValue($this, 'hqProductQuote.pqOrder');
-    }
-
-    //todo
-    public function canFreeCancel(): bool
-    {
-        return true;
     }
 }

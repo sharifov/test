@@ -100,7 +100,7 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
     public function rules(): array
     {
         return [
-            [['or_gid', 'or_fare_id'], 'required'],
+            [['or_gid'], 'required'],
             [['or_lead_id', 'or_status_id', 'or_pay_status_id', 'or_owner_user_id', 'or_created_user_id', 'or_updated_user_id'], 'integer'],
             [['or_description'], 'string'],
             [['or_app_total', 'or_app_markup', 'or_agent_markup', 'or_client_total', 'or_client_currency_rate', 'or_profit_amount'], 'number'],

@@ -21,7 +21,7 @@ class HotelQuoteHelper
         foreach ($rooms as $room) {
             $dtoRoom = new HotelQuoteRoomPriceDTO(
                 $room->hqr_amount,
-                $room->hqr_cancel_amount,
+                $room->getActualCancelAmount(),
                 $room->hqr_service_fee_percent,
                 $room->hqr_system_mark_up,
                 $room->hqr_agent_mark_up

@@ -36,8 +36,8 @@ class CommunicationDataService
 
         foreach (HotelQuoteRoom::getRoomsByQuoteId($hotelQuote->hq_id) as $key => $room) {
             $cancellations[0] = [
-                'date' => $room->hqr_cancel_from_dt,
-                'cost' => $room->hqr_cancel_amount,
+                'date' => $room->getActualCancelDate(),
+                'cost' => $room->getActualCancelAmount(),
             ];
             $prepareRoom = [
                 'imgPreview' => '',

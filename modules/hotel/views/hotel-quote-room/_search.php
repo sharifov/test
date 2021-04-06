@@ -34,10 +34,6 @@ use yii\widgets\ActiveForm;
 
     <?php // echo $form->field($model, 'hqr_currency') ?>
 
-    <?php // echo $form->field($model, 'hqr_cancel_amount') ?>
-
-    <?php // echo $form->field($model, 'hqr_cancel_from_dt') ?>
-
     <?php // echo $form->field($model, 'hqr_payment_type') ?>
 
     <?php // echo $form->field($model, 'hqr_board_code') ?>

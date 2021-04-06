@@ -1,5 +1,6 @@
 <?php
 
+use kdn\yii2\JsonEditor;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -26,10 +27,6 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'hqr_currency')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'hqr_cancel_amount')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'hqr_cancel_from_dt')->textInput() ?>
-
     <?= $form->field($model, 'hqr_payment_type')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'hqr_board_code')->textInput(['maxlength' => true]) ?>
@@ -41,6 +38,12 @@ use yii\widgets\ActiveForm;
     <?= $form->field($model, 'hqr_adults')->textInput() ?>
 
     <?= $form->field($model, 'hqr_children')->textInput() ?>
+
+    <?= $form->field($model, 'hqr_cancellation_policies')->widget(JsonEditor::class, [
+        'model' => $model,
+        'name' => 'hqr_cancellation_policies',
+        'value' => \yii\helpers\Json::encode($model->hqr_cancellation_policies)
+    ]) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

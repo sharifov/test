@@ -393,8 +393,8 @@ JS;
                             <?=$room->hqr_children ? ', <i class="fa fa-child"></i> ' . ($room->hqr_children) : '-'?>
                         </td>
                         <td>
-                            <?php if ($room->hqr_cancel_amount) : ?>
-                                <?=Html::encode($room->hqr_cancel_amount)?>, <?=Html::encode($room->hqr_cancel_from_dt)?>
+                            <?php if ($room->getActualCancelAmount()) : ?>
+                                <?=Html::encode($room->getActualCancelAmount())?>, <?=Html::encode($room->getActualCancelDate())?>
                             <?php endif; ?>
                         </td>
                         <td><?= Html::encode($room->hqr_amount) ?></td>

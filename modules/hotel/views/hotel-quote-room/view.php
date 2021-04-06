@@ -1,6 +1,8 @@
 <?php
 
+use modules\hotel\models\HotelQuoteRoom;
 use yii\helpers\Html;
+use yii\helpers\VarDumper;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
@@ -37,14 +39,22 @@ $this->params['breadcrumbs'][] = $this->title;
             'hqr_class',
             'hqr_amount',
             'hqr_currency',
-            'hqr_cancel_amount',
-            'hqr_cancel_from_dt',
             'hqr_payment_type',
             'hqr_board_code',
             'hqr_board_name',
             'hqr_rooms',
             'hqr_adults',
             'hqr_children',
+            [
+                'attribute' => 'hqr_cancellation_policies',
+                'value' => static function (HotelQuoteRoom $model) {
+                    if ($model->hqr_cancellation_policies) {
+                        return VarDumper::dumpAsString($model->hqr_cancellation_policies, 10, true);
+                    }
+                    return Yii::$app->formatter->nullDisplay;
+                },
+                'format' => 'raw'
+            ]
         ],
     ]) ?>
 

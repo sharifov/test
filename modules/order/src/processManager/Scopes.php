@@ -28,7 +28,7 @@ class Scopes extends ActiveQuery
 
     public function notStopped(): self
     {
-        return $this->andWhere(['IS NOT', 'opm_status', Status::STOPPED]);
+        return $this->andWhere(['<>', 'opm_status', Status::STOPPED]);
     }
 
     public function one($db = null)

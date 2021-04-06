@@ -37,12 +37,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'hqr_class',
             'hqr_amount',
             'hqr_currency',
-            'hqr_cancel_amount',
-            //'hqr_cancel_from_dt',
-            [
-                'class' => DateTimeColumn::class,
-                'attribute' => 'hqr_cancel_from_dt'
-            ],
             'hqr_payment_type',
             'hqr_board_code',
             'hqr_board_name',

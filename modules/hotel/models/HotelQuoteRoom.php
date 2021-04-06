@@ -10,8 +10,12 @@ use modules\hotel\src\entities\hotelQuoteRoom\serializer\HotelQuoteRoomSerialize
 use sales\entities\EventTrait;
 use sales\entities\serializer\Serializable;
 use sales\helpers\text\CleanTextHelper;
+use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
+use yii\behaviors\AttributeBehavior;
+use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\Json;
 use yii\helpers\StringHelper;
 
 /**
@@ -25,8 +29,6 @@ use yii\helpers\StringHelper;
  * @property string|null $hqr_class
  * @property float|null $hqr_amount
  * @property string|null $hqr_currency
- * @property float|null $hqr_cancel_amount
- * @property string|null $hqr_cancel_from_dt
  * @property string|null $hqr_payment_type
  * @property string|null $hqr_board_code
  * @property string|null $hqr_board_name
@@ -43,6 +45,9 @@ use yii\helpers\StringHelper;
  *
  * @property Currency $hqrCurrency
  * @property HotelQuote $hqrHotelQuote
+ * @property string $hqr_cancellation_policies [json]
+ * @property float|null $actualCancelAmount
+ * @property string|null $actualCancelDate
  */
 class HotelQuoteRoom extends ActiveRecord implements Serializable
 {
@@ -56,6 +61,12 @@ class HotelQuoteRoom extends ActiveRecord implements Serializable
         self::TYPE_BOOKABLE => 'BOOKABLE',
     ];
 
+    private const CLASS_NON_REFUNDABLE = 'NRF';
+
+    private ?float $actualCancelAmount = null;
+
+    private ?string $actualCancelDate = null;
+
     public static function clone(HotelQuoteRoom $room, int $quoteId)
     {
         $clone = new self();
@@ -66,6 +77,25 @@ class HotelQuoteRoom extends ActiveRecord implements Serializable
         $clone->recordEvent(new HotelQuoteRoomCloneCreatedEvent($clone));
 
         return $clone;
+    }
+
+    public function behaviors(): array
+    {
+        return [
+            'cancellationPolicies' => [
+                'class' => AttributeBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['hqr_cancellation_policies'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['hqr_cancellation_policies'],
+                ],
+                'value' => static function ($event) {
+                    if (is_string($event->sender->hqr_cancellation_policies)) {
+                        return Json::decode($event->sender->hqr_cancellation_policies);
+                    }
+                    return $event->sender->hqr_cancellation_policies;
+                }
+            ]
+        ];
     }
 
     /**
@@ -84,8 +114,8 @@ class HotelQuoteRoom extends ActiveRecord implements Serializable
         return [
             [['hqr_hotel_quote_id', 'hqr_type'], 'required'],
             [['hqr_hotel_quote_id', 'hqr_rooms', 'hqr_adults', 'hqr_children', 'hqr_type'], 'integer'],
-            [['hqr_amount', 'hqr_cancel_amount', 'hqr_service_fee_percent', 'hqr_system_mark_up', 'hqr_agent_mark_up'], 'number'],
-            [['hqr_cancel_from_dt'], 'safe'],
+            [['hqr_amount', 'hqr_service_fee_percent', 'hqr_system_mark_up', 'hqr_agent_mark_up'], 'number'],
+            [['hqr_cancellation_policies'], 'safe'],
             [['hqr_room_name'], 'string', 'max' => 150],
             [['hqr_key'], 'string', 'max' => 255],
             [['hqr_class'], 'string', 'max' => 5],
@@ -123,8 +153,6 @@ class HotelQuoteRoom extends ActiveRecord implements Serializable
             'hqr_class' => 'Class',
             'hqr_amount' => 'Amount',
             'hqr_currency' => 'Currency',
-            'hqr_cancel_amount' => 'Cancel Amount',
-            'hqr_cancel_from_dt' => 'Cancel From Dt',
             'hqr_payment_type' => 'Payment Type',
             'hqr_board_code' => 'Board Code',
             'hqr_board_name' => 'Board Name',
@@ -134,6 +162,7 @@ class HotelQuoteRoom extends ActiveRecord implements Serializable
             'hqr_service_fee_percent' => 'Service Fee Percent',
             'hqr_system_mark_up' => 'System mark up',
             'hqr_agent_mark_up' => 'Agent mark up',
+            'hqr_cancellation_policies' => 'Cancellation Policies',
         ];
     }
 
@@ -213,5 +242,55 @@ class HotelQuoteRoom extends ActiveRecord implements Serializable
     public static function getRoomsByQuoteId(int $hotelQuoteId): array
     {
         return self::find()->where(['hqr_hotel_quote_id' => $hotelQuoteId])->all();
+    }
+
+    private function isNonRefundable(): bool
+    {
+        return $this->hqr_class === self::CLASS_NON_REFUNDABLE;
+    }
+
+    public function canFreeCancel(): bool
+    {
+        if ($this->isNonRefundable()) {
+            return false;
+        }
+
+        foreach ($this->hqr_cancellation_policies ?? [] as $item) {
+            if (!(time() < strtotime($item['from']))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function getActualCancelAmount(): float
+    {
+        if ($this->actualCancelAmount !== null) {
+            return $this->actualCancelAmount;
+        }
+
+        foreach ($this->hqr_cancellation_policies ?? [] as $item) {
+            if ((time() < strtotime($item['from']))) {
+                $this->actualCancelAmount = $item['amount'] ?? null;
+                break;
+            }
+        }
+        return (float)$this->actualCancelAmount;
+    }
+
+    public function getActualCancelDate(): ?string
+    {
+        if ($this->actualCancelDate !== null) {
+            return $this->actualCancelDate;
+        }
+
+        foreach ($this->hqr_cancellation_policies ?? [] as $item) {
+            if ((time() < strtotime($item['from']))) {
+                $this->actualCancelDate = (new \DateTimeImmutable($item['from']))->format('Y-m-d H:i:s');
+                break;
+            }
+        }
+        return $this->actualCancelDate;
     }
 }

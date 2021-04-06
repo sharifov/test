@@ -126,8 +126,6 @@ use yii\helpers\Html;
 <!--                    'hqr_class',-->
 <!--                    'hqr_amount',-->
 <!--                    'hqr_currency',-->
-<!--                    'hqr_cancel_amount',-->
-<!--                    'hqr_cancel_from_dt',-->
 <!--                    'hqr_payment_type',-->
 <!--                    'hqr_board_code',-->
 <!--                    'hqr_board_name',-->
@@ -152,8 +150,8 @@ use yii\helpers\Html;
                     <td class="text-center"><?=$room->hqr_adults ? '<i class="fa fa-user"></i> ' . ($room->hqr_adults) : '-'?></td>
                     <td class="text-center"><?=$room->hqr_children ? '<i class="fa fa-child"></i> ' . ($room->hqr_children) : '-'?></td>
                     <td>
-                        <?php if ($room->hqr_cancel_amount) : ?>
-                            <?=Html::encode($room->hqr_cancel_amount)?>, <?=Html::encode($room->hqr_cancel_from_dt)?>
+                        <?php if ($room->getActualCancelAmount()) : ?>
+                            <?=Html::encode($room->getActualCancelAmount())?>, <?=Html::encode($room->getActualCancelDate())?>
                         <?php endif; ?>
                     </td>
 <!--                    <td>--><?php ////=Html::encode($room->hqr_id)?><!--</td>-->
