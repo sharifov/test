@@ -367,6 +367,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     ['label' => 'Order Process Manager', 'url' => ['/order/order-process-manager/index']],
                     ['label' => 'Order Request', 'url' => ['/order/order-request-crud/index']],
                     ['label' => 'Order Data', 'url' => ['/order/order-data-crud/index']],
+                    ['label' => 'Case Order Relation', 'url' => ['/case-order-crud/index']],
                 ], 'hasChild' => true],
                 ['label' => 'Offers', 'url' => ['/offer/offer-crud/index']],
                 ['label' => 'Offers Send Log', 'url' => ['/offer/offer-send-log-crud/index']],

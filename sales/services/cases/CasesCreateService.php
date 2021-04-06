@@ -195,4 +195,8 @@ class CasesCreateService
 
         return $case;
     }
+
+    public function createByC2BFlow(): void
+    {
+    }
 }
