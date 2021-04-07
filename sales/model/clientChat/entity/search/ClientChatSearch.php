@@ -430,32 +430,41 @@ class ClientChatSearch extends ClientChat
                 ['!=', 'cch_owner_user_id', $user->id],
                 ['IS', 'cch_owner_user_id', null]
             ]);
-            $query->orderBy([
-                '(cch_status_id = ' . ClientChat::STATUS_ARCHIVE .
-                    ' OR cch_status_id = ' . ClientChat::STATUS_CLOSED . ')' => SORT_ASC,
-                '(cch_owner_user_id IS NULL)' => SORT_DESC,
-                'cch_created_dt' => SORT_ASC,
-            ]);
+//            $query->orderBy([
+//                '(cch_status_id = ' . ClientChat::STATUS_ARCHIVE .
+//                    ' OR cch_status_id = ' . ClientChat::STATUS_CLOSED . ')' => SORT_ASC,
+//                '(cch_owner_user_id IS NULL)' => SORT_DESC,
+//                'cch_created_dt' => SORT_ASC,
+//            ]);
         } elseif (GroupFilter::isFreeToTake($filter->group)) {
             $query->freeToTake($user->id);
-            $query->orderBy([
-//                '(cch_status_id = ' . ClientChat::STATUS_TRANSFER . ')' => SORT_DESC,
-                'cch_created_dt' => SORT_ASC,
-            ]);
+//            $query->orderBy([
+////                '(cch_status_id = ' . ClientChat::STATUS_TRANSFER . ')' => SORT_DESC,
+//                'cch_created_dt' => SORT_ASC,
+//            ]);
         } elseif (GroupFilter::isTeamChats($filter->group)) {
             $commonUsers = EmployeeGroupAccess::getUsersIdsInCommonGroups($user->id);
             if (isset($commonUsers[$user->id])) {
                 unset($commonUsers[$user->id]);
             }
             $query->andWhere(['cch_owner_user_id' => array_keys($commonUsers)]);
-            $query->orderBy([
-                '(cch_status_id = ' . ClientChat::STATUS_ARCHIVE .
-                ' OR cch_status_id = ' . ClientChat::STATUS_CLOSED . ')' => SORT_ASC,
-                'last_message_date' => SORT_DESC,
-            ]);
+//            $query->orderBy([
+//                '(cch_status_id = ' . ClientChat::STATUS_ARCHIVE .
+//                ' OR cch_status_id = ' . ClientChat::STATUS_CLOSED . ')' => SORT_ASC,
+//                'last_message_date' => SORT_DESC,
+//            ]);
         } else {
             $query->byOwner($user->id);
-            $query->orderBy(['cch_updated_dt' => SORT_DESC]);
+//            $query->orderBy(['cch_updated_dt' => SORT_DESC]);
+        }
+
+        $query->orderBy([
+            'cch_status_id not in (' . implode(',', ClientChat::CLOSED_STATUS_GROUP) . ')' => SORT_ASC,
+            'if (ccu_count > 0, 1, 0)' => SORT_DESC
+        ]);
+
+        if ($filter->getOrderBy()) {
+            $query->addOrderBy($filter->getOrderBy());
         }
 
         if ($filter->channelId) {

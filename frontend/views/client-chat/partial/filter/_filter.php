@@ -152,6 +152,30 @@ use yii\web\JsExpression;
                     </div>
                 <?php endif; ?>
 
+                <?php if ($filter->permissions->canSortPriority()) : ?>
+                    <div class="col-md-6">
+                        <?= Html::label('Sort Priority:', null, ['class' => 'control-label']); ?>
+                        <?= Select2::widget([
+                            'data' => $filter->getSortPriorityList(),
+                            'name' => Html::getInputName($filter, 'sortPriority'),
+                            'size' => Select2::SIZE_SMALL,
+                            'options' => [
+                                'placeholder' => 'Choose the sort priority...',
+                                'id' => Html::getInputId($filter, 'sortPriority'),
+                            ],
+                            'value' => $filter->sortPriority,
+                            'pluginOptions' => [
+                                'width' => '100%',
+                            ],
+                            'pluginEvents' => [
+                                'change' => new \yii\web\JsExpression('function (e) {
+                                    window.refreshClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
+                                }'),
+                            ],
+                        ]); ?>
+                    </div>
+                <?php endif; ?>
+
                 <?php if ($filter->permissions->canCreatedDate()) : ?>
                     <div class="col-md-12 js-created_box">
                         <?= Html::label('Created:', null, ['class' => 'control-label']); ?>

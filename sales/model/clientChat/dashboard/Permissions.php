@@ -21,6 +21,7 @@ use sales\auth\Auth;
  * @property $group_team_chats
  * @property $client_name
  * @property $client_email
+ * @property $sort_priority
  */
 class Permissions
 {
@@ -38,6 +39,7 @@ class Permissions
     private $group_team_chats;
     private $client_name;
     private $client_email;
+    private $sort_priority;
 
     public function canChannel(): bool
     {
@@ -109,6 +111,15 @@ class Permissions
         }
         $this->read_unread = Auth::can('client-chat/dashboard/filter/read_unread');
         return $this->read_unread;
+    }
+
+    public function canSortPriority(): bool
+    {
+        if ($this->sort_priority !== null) {
+            return $this->sort_priority;
+        }
+        $this->sort_priority = Auth::can('client-chat/dashboard/filter/sort_priority');
+        return $this->sort_priority;
     }
 
     public function canGroupMyChats(): bool

@@ -137,7 +137,11 @@ class WebsocketServerController extends Controller
                     if ($cmd === 'message') {
                         if (!empty($server->channelList[$channel])) {
                             foreach ($server->channelList[$channel] as $fd) {
-                                $server->push($fd, $value);
+                                try {
+                                    $server->push($fd, $value);
+                                } catch (\Throwable $e) {
+                                    echo 'Error: ' . $e->getMessage();
+                                }
                             }
                         }
                     }
