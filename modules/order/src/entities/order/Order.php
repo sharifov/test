@@ -156,6 +156,7 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
             'or_request_data' => 'Request Data',
             'or_project_id' => 'Project',
             'or_fare_id' => 'Fare Id',
+            'or_type_id' => 'Source Type'
         ];
     }
 
@@ -710,5 +711,10 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
     public function isPhoneToBook(): bool
     {
         return $this->or_type_id === OrderSourceType::P2B;
+    }
+
+    public function getOrderSourceType(): string
+    {
+        return OrderSourceType::LIST[$this->or_type_id] ?? 'Unknown';
     }
 }

@@ -1,6 +1,8 @@
 <?php
 
 use modules\lead\src\grid\columns\LeadColumn;
+use modules\order\src\entities\order\OrderSourceType;
+use modules\order\src\entities\order\search\OrderCrudSearch;
 use modules\order\src\grid\columns\OrderPayStatusColumn;
 use modules\order\src\grid\columns\OrderStatusColumn;
 use common\components\grid\DateTimeColumn;
@@ -10,7 +12,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel \modules\order\src\entities\order\search\OrderCrudSearch */
+/* @var $searchModel OrderCrudSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Orders';
@@ -63,7 +65,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'or_client_currency',
             'or_client_currency_rate',
             'or_profit_amount',
-
+            [
+                'attribute' => 'or_type_id',
+                'value' => static function (OrderCrudSearch $model) {
+                    return $model->getOrderSourceType();
+                },
+                'filter' => OrderSourceType::LIST
+            ],
             [
                 'class' => UserSelect2Column::class,
                 'attribute' => 'or_owner_user_id',

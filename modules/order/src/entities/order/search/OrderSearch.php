@@ -37,7 +37,8 @@ class OrderSearch extends Order
     public function rules(): array
     {
         return [
-            [['or_id', 'or_lead_id', 'or_status_id', 'or_pay_status_id', 'or_owner_user_id', 'or_created_user_id', 'or_updated_user_id', 'or_project_id'], 'integer'],
+            [['or_id', 'or_lead_id', 'or_status_id', 'or_pay_status_id', 'or_owner_user_id',
+                'or_created_user_id', 'or_updated_user_id', 'or_project_id', 'or_type_id'], 'integer'],
             [['or_gid', 'or_uid', 'or_fare_id', 'or_name', 'or_description', 'or_client_currency'], 'safe'],
             [['or_app_total', 'or_app_markup', 'or_agent_markup', 'or_client_total', 'or_client_currency_rate', 'or_profit_amount'], 'number'],
 
@@ -151,13 +152,14 @@ class OrderSearch extends Order
             'or_updated_user_id' => $this->or_updated_user_id,
             'or_profit_amount' => $this->or_profit_amount,
             'or_project_id' => $this->or_project_id,
-            'or_fare_id' => $this->or_fare_id,
+            'or_type_id' => $this->or_type_id
         ]);
 
         $query->andFilterWhere(['like', 'or_gid', $this->or_gid])
             ->andFilterWhere(['like', 'or_uid', $this->or_uid])
             ->andFilterWhere(['like', 'or_name', $this->or_name])
             ->andFilterWhere(['like', 'or_description', $this->or_description])
+            ->andFilterWhere(['like', 'or_fare_id', $this->or_fare_id])
             ->andFilterWhere(['like', 'or_client_currency', $this->or_client_currency]);
 
         return $dataProvider;
@@ -189,7 +191,8 @@ class OrderSearch extends Order
             'or_created_user_id' => 'Created user',
             'or_updated_user_id' => 'Updated user',
             'or_updated_dt' => 'Updated dt',
-            'or_project_id' => 'Project'
+            'or_project_id' => 'Project',
+            'or_type_id' => 'Source Type'
         ];
     }
 }

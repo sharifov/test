@@ -3,6 +3,7 @@
 use frontend\widgets\multipleUpdate\button\MultipleUpdateButtonWidget;
 use modules\lead\src\grid\columns\LeadColumn;
 use modules\order\src\entities\order\Order;
+use modules\order\src\entities\order\OrderSourceType;
 use modules\order\src\entities\order\search\OrderSearch;
 use modules\order\src\grid\columns\OrderPayStatusColumn;
 use modules\order\src\grid\columns\OrderStatusColumn;
@@ -130,6 +131,13 @@ JS;
                     return $out;
                 },
                 'format' => 'raw'
+            ],
+            [
+                'attribute' => 'or_type_id',
+                'value' => static function (OrderSearch $model) {
+                    return $model->getOrderSourceType();
+                },
+                'filter' => OrderSourceType::LIST
             ],
             [
                 'class' => OrderPayStatusColumn::class,
