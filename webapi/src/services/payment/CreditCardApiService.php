@@ -17,6 +17,7 @@ class CreditCardApiService
             ->andWhere(['cc_type_id' => $form->type_id])
             ->andWhere(['cc_expiration_month' => $form->expiration_month])
             ->andWhere(['cc_expiration_year' => $form->expiration_year])
+            ->andWhere(['cc_type_id' => $form->type_id])
             ->exists();
     }
 
