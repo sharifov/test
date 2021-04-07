@@ -11,6 +11,8 @@ use modules\fileStorage\src\FileSystem;
 use modules\offer\src\entities\offer\OfferRepository;
 use modules\order\src\entities\order\OrderSourceType;
 use modules\order\src\entities\order\OrderRepository;
+use modules\order\src\entities\orderContact\OrderContact;
+use modules\order\src\entities\orderContact\OrderContactRepository;
 use modules\order\src\entities\orderData\OrderData;
 use modules\order\src\entities\orderData\OrderDataRepository;
 use modules\order\src\entities\orderRequest\OrderRequest;
@@ -83,64 +85,26 @@ use yii\web\NotFoundHttpException;
  * @property CreditCardRepository $creditCardRepository
  * @property BillingInfoRepository $billingInfoRepository
  * @property CancelOrder $cancelOrder
+ * @property OrderContactRepository $orderContactRepository
  */
 class OrderController extends BaseController
 {
     private $requestBo;
-    /**
-     * @var OfferRepository
-     */
     private OfferRepository $offerRepository;
-    /**
-     * @var OrderApiManageService
-     */
     private OrderApiManageService $orderManageService;
-    /**
-     * @var ProductQuoteRepository
-     */
     private ProductQuoteRepository $productQuoteRepository;
-    /**
-     * @var OrderRepository
-     */
     private OrderRepository $orderRepository;
-    /**
-     * @var FileSystem
-     */
     private FileSystem $fileSystem;
-    /**
-     * @var OrderRequestRepository
-     */
     private OrderRequestRepository $orderRequestRepository;
-    /**
-     * @var ProjectRepository
-     */
     private ProjectRepository $projectRepository;
-    /**
-     * @var ProductCreateService
-     */
     private ProductCreateService $productCreateService;
-    /**
-     * @var ProductTypeRepository
-     */
     private ProductTypeRepository $productTypeRepository;
-    /**
-     * @var TransactionManager
-     */
     private TransactionManager $transactionManager;
-    /**
-     * @var OrderDataRepository
-     */
     private OrderDataRepository $orderDataRepository;
-    /**
-     * @var CreditCardRepository
-     */
     private CreditCardRepository $creditCardRepository;
-    /**
-     * @var BillingInfoRepository
-     */
     private BillingInfoRepository $billingInfoRepository;
-
     private CancelOrder $cancelOrder;
+    private OrderContactRepository $orderContactRepository;
 
     public function __construct(
         $id,
@@ -161,6 +125,7 @@ class OrderController extends BaseController
         CreditCardRepository $creditCardRepository,
         BillingInfoRepository $billingInfoRepository,
         CancelOrder $cancelOrder,
+        OrderContactRepository $orderContactRepository,
         $config = []
     ) {
         parent::__construct($id, $module, $logger, $config);
@@ -179,6 +144,7 @@ class OrderController extends BaseController
         $this->creditCardRepository = $creditCardRepository;
         $this->billingInfoRepository = $billingInfoRepository;
         $this->cancelOrder = $cancelOrder;
+        $this->orderContactRepository = $orderContactRepository;
     }
 
     public function behaviors(): array
@@ -439,8 +405,8 @@ class OrderController extends BaseController
      * @apiParam {string{max 30}}       billingInfo.city            City
      * @apiParam {string{max 40}}       billingInfo.state           State
      * @apiParam {string{max 10}}       billingInfo.zip             Zip
-     * @apiParam {string{max 20}}       billingInfo.phone           Phone
-     * @apiParam {string{max 160}}      billingInfo.email           Email
+     * @apiParam {string{max 20}}       billingInfo.phone           Phone <code>Deprecated</code>
+     * @apiParam {string{max 160}}      billingInfo.email           Email <code>Deprecated</code>
      *
      * @apiParam {Object}               creditCard                  Credit Card
      * @apiParam {string{max 50}}       [creditCard.holder_name]      Holder Name
@@ -1502,9 +1468,9 @@ class OrderController extends BaseController
                 "bi_state": "KY",
                 "bi_country": "US",
                 "bi_zip": "99999",
-                "bi_contact_phone": "+19074861000",
-                "bi_contact_email": "mike.kane@techork.com",
-                "bi_contact_name": null,
+                "bi_contact_phone": "+19074861000", -- deprecated, will be removed soon
+                "bi_contact_email": "mike.kane@techork.com", -- deprecated, will be removed soon
+                "bi_contact_name": null, -- deprecated, will be removed soon
                 "bi_payment_method_id": 1,
                 "bi_country_name": "United States of America",
                 "bi_payment_method_name": "Credit / Debit Card"
@@ -1958,8 +1924,8 @@ class OrderController extends BaseController
      * @apiParam {string{max 30}}       [billingInfo.city]            City
      * @apiParam {string{max 40}}       [billingInfo.state]           State
      * @apiParam {string{max 10}}       [billingInfo.zip]             Zip
-     * @apiParam {string{max 20}}       [billingInfo.phone]           Phone
-     * @apiParam {string{max 160}}      [billingInfo.email]           Email
+     * @apiParam {string{max 20}}       [billingInfo.phone]           Phone <code>Deprecated</code>
+     * @apiParam {string{max 160}}      [billingInfo.email]           Email <code>Deprecated</code>
      *
      * @apiParam {Object}               [creditCard]                    Credit Card
      * @apiParam {string{max 50}}       [creditCard.holder_name]        Holder Name
@@ -2061,8 +2027,8 @@ class OrderController extends BaseController
                 "city": "Mayfield",
                 "state": "KY",
                 "zip": "99999",
-                "phone": "+19074861000",
-                "email": "barabara@test.com"
+                "phone": "+19074861000", -- deprecated, will be removed soon
+                "email": "barabara@test.com" -- deprecated, will be removed soon
             },
             "payment": {
                 "clientCurrency": "USD"
@@ -2208,6 +2174,16 @@ class OrderController extends BaseController
                         $order->or_id
                     );
                     $this->billingInfoRepository->save($billingInfo);
+
+                    $orderContact = OrderContact::create(
+                        $order->or_id,
+                        $form->billingInfo->first_name,
+                        $form->billingInfo->last_name,
+                        $form->billingInfo->middle_name,
+                        $form->billingInfo->email,
+                        $form->billingInfo->phone
+                    );
+                    $this->orderContactRepository->save($orderContact);
                 }
 
                 return $order;
