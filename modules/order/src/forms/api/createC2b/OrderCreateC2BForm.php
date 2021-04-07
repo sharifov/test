@@ -79,6 +79,7 @@ class OrderCreateC2BForm extends CompositeForm
         return [
             [['sourceCid', 'bookingId', 'status', 'fareId'], 'required'],
             [['sourceCid', 'bookingId', 'status'], 'string', 'max' => 10],
+            [['bookingId'], 'string', 'max' => 7],
             [['fareId'], 'string', 'max' => 255],
             [['status'], 'in', 'range' => [self::STATUS_SUCCESS, self::STATUS_FAILED]],
             ['fareId', 'unique', 'targetClass' => Order::class, 'targetAttribute' => 'or_fare_id']

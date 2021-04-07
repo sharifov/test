@@ -6,7 +6,14 @@ use modules\hotel\models\HotelQuote;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\entities\order\OrderStatusAction;
+use modules\order\src\entities\orderData\OrderData;
 use modules\product\src\entities\productQuote\ProductQuote;
+use sales\entities\cases\CaseCategory;
+use sales\entities\cases\Cases;
+use sales\helpers\setting\SettingHelper;
+use sales\model\caseOrder\entity\CaseOrder;
+use sales\repositories\cases\CasesRepository;
+use sales\services\cases\CasesCreateService;
 
 /**
  * Class CancelOrder
@@ -15,6 +22,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
  * @property FreeCancelChecker $freeCancelChecker
  * @property FlightCanceler $flightCanceler
  * @property HotelCanceler $hotelCanceler
+ * @property CasesRepository $casesRepository
  */
 class CancelOrder
 {
@@ -22,17 +30,20 @@ class CancelOrder
     private FreeCancelChecker $freeCancelChecker;
     private FlightCanceler $flightCanceler;
     private HotelCanceler $hotelCanceler;
+    private CasesRepository $casesRepository;
 
     public function __construct(
         OrderRepository $orderRepository,
         FreeCancelChecker $freeCancelChecker,
         FlightCanceler $flightCanceler,
-        HotelCanceler $hotelCanceler
+        HotelCanceler $hotelCanceler,
+        CasesRepository $casesRepository
     ) {
         $this->orderRepository = $orderRepository;
         $this->freeCancelChecker = $freeCancelChecker;
         $this->flightCanceler = $flightCanceler;
         $this->hotelCanceler = $hotelCanceler;
+        $this->casesRepository = $casesRepository;
     }
 
     public function cancel(string $gid): void
@@ -57,6 +68,31 @@ class CancelOrder
 
             $order->cancel('Cancel Order Flow', OrderStatusAction::CANCEL_FLOW, null);
             $this->orderRepository->save($order);
+
+            if (
+                SettingHelper::isCreateCaseOnOrderCancelEnabled()
+                &&
+                $caseCategory = CaseCategory::find()->byKey(SettingHelper::getCaseCategoryKeyOnOrderCancel())->one()
+            ) {
+                $orderData = OrderData::findOne(['od_order_id' => $order->or_id]);
+
+                $case = Cases::createByApi(
+                    null,
+                    $order->or_project_id,
+                    $caseCategory->cc_dep_id,
+                    $orderData->od_display_uid ?? null,
+                    null,
+                    null,
+                    $caseCategory->cc_id
+                );
+                $this->casesRepository->save($case);
+
+                $caseOrder = CaseOrder::create($case->cs_id, $order->or_id);
+                $caseOrder->detachBehavior('user');
+                if (!$caseOrder->save()) {
+                    throw new \RuntimeException($caseOrder->getErrorSummary(true)[0]);
+                }
+            }
         } catch (\DomainException $e) {
             $this->processingFail($order);
             throw $e;

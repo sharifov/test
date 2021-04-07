@@ -140,4 +140,14 @@ class SettingHelper
     {
         return (bool)(Yii::$app->params['settings']['enable_client_chat_job'] ?? false);
     }
+
+    public static function isCreateCaseOnOrderCancelEnabled(): bool
+    {
+        return (bool)(Yii::$app->params['settings']['order_cancellation_case_enabled'] ?? false);
+    }
+
+    public static function getCaseCategoryKeyOnOrderCancel(): string
+    {
+        return Yii::$app->params['settings']['order_cancellation_case_category_key'] ?? '';
+    }
 }

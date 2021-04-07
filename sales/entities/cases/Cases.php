@@ -192,7 +192,7 @@ class Cases extends ActiveRecord implements Objectable
     }
 
     public static function createByApi(
-        int $clientId,
+        ?int $clientId,
         int $projectId,
         int $departmentId,
         ?string $orderUid,

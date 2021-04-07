@@ -1908,7 +1908,7 @@ class OrderController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      * @apiParam {string{max 10}}               sourceCid       Source cid
-     * @apiParam {string{max 10}}               bookingId       Booking id
+     * @apiParam {string{max 7}}               bookingId       Booking id
      * @apiParam {string{max 255}}              fareId          Unique value of order
      * @apiParam {string="success","failed"{max 10}}               status       Status
      *
@@ -1975,7 +1975,7 @@ class OrderController extends BaseController
      *
      * {
             "sourceCid": "ACHUY23AS",
-            "bookingId": "WCJ12CSIJ",
+            "bookingId": "WCJ12C",
             "fareId": "A0EA9F-5cc2ce331e8bb3.16383647",
             "status": "success",
             "quotes": [
@@ -2156,6 +2156,7 @@ class OrderController extends BaseController
 
                 foreach ($form->quotes as $quoteForm) {
                     $quoteForm->orderId = $order->or_id;
+                    $quoteForm->bookingId = $form->bookingId;
 
                     $productType = $this->productTypeRepository->findByKey($quoteForm->productKey);
                     $productCreateForm = new ProductCreateForm();
@@ -2172,7 +2173,7 @@ class OrderController extends BaseController
                 $order->recalculateProfitAmount();
                 $this->orderRepository->save($order);
 
-                $orderData = OrderData::create($order->or_id, $form->sourceCid, $form->bookingId);
+                $orderData = OrderData::create($order->or_id, $form->bookingId, $form->sourceCid);
                 $orderData->detachBehavior('user');
                 $this->orderDataRepository->save($orderData);
 

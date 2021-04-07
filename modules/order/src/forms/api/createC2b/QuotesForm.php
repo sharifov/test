@@ -15,6 +15,7 @@ use sales\forms\CompositeForm;
  * @property string $originSearchData
  * @property string $quoteOtaId
  * @property int $orderId
+ * @property string $bookingId
  *
  * @property ProductHolderForm $holder
  * @property ProductType $productType
@@ -35,6 +36,8 @@ class QuotesForm extends CompositeForm
     public $orderId;
 
     public $productType;
+
+    public $bookingId;
 
     private const STATUS_BOOKED = 'booked';
     private const STATUS_FAILED = 'failed';
