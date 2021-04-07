@@ -431,6 +431,12 @@ class OrderController extends BaseController
      * @apiParam {string{max 5}}                [Paxes.citizenship]           Citizenship
      *
      *
+     * @apiParam {Object[]}             contactsInfo                 BillingInfo
+     * @apiParam {string{max 50}}       contactsInfo.first_name      First Name
+     * @apiParam {string{max 50}}       [contactsInfo.last_name]       Last Name
+     * @apiParam {string{max 50}}       [contactsInfo.middle_name]     Middle Name
+     * @apiParam {string{max 20}}       [contactsInfo.phone]           Phone number
+     * @apiParam {string{max 100}}      contactsInfo.email           Email
      *
      * @apiParam {Object}       Request                 Request Data for BO
      *
@@ -523,6 +529,22 @@ class OrderController extends BaseController
             "email": "mike.kane@techork.com",
             "language": "en-US",
             "citizenship": "US"
+        }
+    ],
+    "contactsInfo": [
+        {
+            "first_name": "Barbara",
+            "last_name": "Elmore",
+            "middle_name": "",
+            "phone": "+19074861000",
+            "email": "barabara@test.com"
+        },
+        {
+            "first_name": "John",
+            "last_name": "Doe",
+            "middle_name": "",
+            "phone": "+19074865678",
+            "email": "john@test.com"
         }
     ],
     "Request": {
@@ -1939,7 +1961,7 @@ class OrderController extends BaseController
      * @apiParam {string{max 50}}       [contactsInfo.last_name]       Last Name
      * @apiParam {string{max 50}}       [contactsInfo.middle_name]     Middle Name
      * @apiParam {string{max 20}}       [contactsInfo.phone]           Phone number
-     * @apiParam {string{max 160}}      contactsInfo.email           Email
+     * @apiParam {string{max 100}}      contactsInfo.email           Email
      *
      * @apiParam {Object}               [payment]                    Payment info
      * @apiParam {string{max 3}}        [payment.clientCurrency]     Client currency

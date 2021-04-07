@@ -13,6 +13,8 @@ use modules\invoice\src\entities\invoice\InvoiceRepository;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\entities\order\OrderStatusAction;
+use modules\order\src\entities\orderContact\OrderContact;
+use modules\order\src\entities\orderContact\OrderContactRepository;
 use modules\order\src\entities\orderTips\OrderTips;
 use modules\order\src\entities\orderTips\OrderTipsRepository;
 use modules\order\src\entities\orderUserProfit\OrderUserProfit;
@@ -54,77 +56,28 @@ use sales\services\TransactionManager;
  * @property FlightPaxRepository $flightPaxRepository
  * @property ProductHolderRepository $productHolderRepository
  * @property FlightQuoteOptionRepository $flightQuoteOptionRepository
+ * @property OrderContactRepository $orderContactRepository
  */
 class OrderApiManageService
 {
-    /**
-     * @var OrderRepository
-     */
-    private $orderRepository;
-    /**
-     * @var OrderUserProfitRepository
-     */
-    private $orderUserProfitRepository;
-    /**
-     * @var TransactionManager
-     */
-    private $transactionManager;
-    /**
-     * @var RecalculateProfitAmountService
-     */
-    private $recalculateProfitAmountService;
-    /**
-     * @var ProductQuoteRepository
-     */
+    private OrderRepository $orderRepository;
+    private OrderUserProfitRepository $orderUserProfitRepository;
+    private TransactionManager $transactionManager;
+    private RecalculateProfitAmountService $recalculateProfitAmountService;
     private ProductQuoteRepository $productQuoteRepository;
-    /**
-     * @var InvoiceRepository
-     */
     private InvoiceRepository $invoiceRepository;
-    /**
-     * @var PaymentMethodRepository
-     */
     private PaymentMethodRepository $paymentMethodRepository;
-    /**
-     * @var PaymentRepository
-     */
     private PaymentRepository $paymentRepository;
-    /**
-     * @var LeadRepository
-     */
     private LeadRepository $leadRepository;
-    /**
-     * @var CreditCardRepository
-     */
     private CreditCardRepository $creditCardRepository;
-    /**
-     * @var BillingInfoRepository
-     */
     private BillingInfoRepository $billingInfoRepository;
-    /**
-     * @var OrderTipsRepository
-     */
     private OrderTipsRepository $orderTipsRepository;
-    /**
-     * @var ProductOptionRepository
-     */
     private ProductOptionRepository $productOptionRepository;
-    /**
-     * @var ProductQuoteOptionRepository
-     */
     private ProductQuoteOptionRepository $productQuoteOptionRepository;
-    /**
-     * @var FlightPaxRepository
-     */
     private FlightPaxRepository $flightPaxRepository;
-    /**
-     * @var ProductHolderRepository
-     */
     private ProductHolderRepository $productHolderRepository;
-    /**
-     * @var FlightQuoteOptionRepository
-     */
     private FlightQuoteOptionRepository $flightQuoteOptionRepository;
+    private OrderContactRepository $orderContactRepository;
 
     public function __construct(
         OrderRepository $orderRepository,
@@ -143,7 +96,8 @@ class OrderApiManageService
         ProductQuoteOptionRepository $productQuoteOptionRepository,
         FlightPaxRepository $flightPaxRepository,
         ProductHolderRepository $productHolderRepository,
-        FlightQuoteOptionRepository $flightQuoteOptionRepository
+        FlightQuoteOptionRepository $flightQuoteOptionRepository,
+        OrderContactRepository $orderContactRepository
     ) {
         $this->orderRepository = $orderRepository;
         $this->orderUserProfitRepository = $orderUserProfitRepository;
@@ -162,6 +116,7 @@ class OrderApiManageService
         $this->flightPaxRepository = $flightPaxRepository;
         $this->productHolderRepository = $productHolderRepository;
         $this->flightQuoteOptionRepository = $flightQuoteOptionRepository;
+        $this->orderContactRepository = $orderContactRepository;
     }
 
     /**
@@ -327,6 +282,20 @@ class OrderApiManageService
                     $paxForm->citizenship
                 );
                 $this->flightPaxRepository->save($pax);
+            }
+
+            if (isset($form->contactsInfo)) {
+                foreach ($form->contactsInfo as $contactInfoForm) {
+                    $orderContact = OrderContact::create(
+                        $newOrder->or_id,
+                        $contactInfoForm->first_name,
+                        $contactInfoForm->last_name,
+                        $contactInfoForm->middle_name,
+                        $contactInfoForm->email,
+                        $contactInfoForm->phone
+                    );
+                    $this->orderContactRepository->save($orderContact);
+                }
             }
 
             return $newOrder;
