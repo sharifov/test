@@ -72,6 +72,7 @@ use sales\auth\Auth;
  * @property array $show_fields
  * @property int|null $quoteTypeId
  * @property string|null $expiration_dt
+ * @property integer|null $lead_type
  *
  * @property $count_files
  * @property int|null $includedFiles
@@ -118,6 +119,7 @@ class LeadSearch extends Lead
     public $soldRangeTime;
     public $createTimeRange;
     public $createdType;
+    public $leadType;
     public $reportTimezone;
     public $timeFrom;
     public $timeTo;
@@ -156,6 +158,7 @@ class LeadSearch extends Lead
     public $show_fields = [];
     public $quoteTypeId;
     public $expiration_dt;
+    public $lead_type;
 
     private $leadBadgesRepository;
 
@@ -174,8 +177,8 @@ class LeadSearch extends Lead
             [['datetime_start', 'datetime_end', 'createTimeRange'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['id', 'client_id', 'employee_id', 'status', 'project_id', 'projectId', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id', 'l_duplicate_lead_id', 'l_type_create'], 'integer'],
-            [['email_status', 'quote_status', 'l_is_test'], 'integer'],
-            [['lfOwnerId', 'userGroupId', 'departmentId', 'projectId', 'createdType'], 'integer'],
+            [['email_status', 'quote_status', 'l_is_test', 'l_type'], 'integer'],
+            [['lfOwnerId', 'userGroupId', 'departmentId', 'projectId', 'createdType', 'lead_type'], 'integer'],
 
             [['client_name', 'client_email', 'quote_pnr', 'gid', 'origin_airport','destination_airport', 'origin_country', 'destination_country', 'l_request_hash'], 'string'],
 
@@ -307,6 +310,7 @@ class LeadSearch extends Lead
             'check_list' => 'Check List',
             'count_files' => 'Files',
             'expiration_dt' => 'Expiration',
+            'l_type' => 'Lead Type',
         ];
         return $data;
     }
@@ -394,6 +398,7 @@ class LeadSearch extends Lead
             'request_ip'    => $this->request_ip,
             'l_is_test'     => $this->l_is_test,
             'hybrid_uid' => $this->hybrid_uid,
+            'l_type' => $this->l_type
         ]);
 
         if ($this->statuses) {
@@ -577,6 +582,10 @@ class LeadSearch extends Lead
 
         if ($this->createdType) {
             $query->andWhere(['l_type_create' => $this->createdType]);
+        }
+
+        if ($this->lead_type) {
+            $query->andWhere(['l_type' => $this->lead_type]);
         }
 
         if ($this->expiration_dt) {
@@ -1842,6 +1851,7 @@ class LeadSearch extends Lead
             $leadTable . '.project_id' => $this->project_id,
             $leadTable . '.source_id' => $this->source_id,
             $leadTable . '.employee_id' => $this->employee_id,
+            $leadTable . '.l_type' => $this->l_type,
         ]);
 
 //        $query
@@ -2016,6 +2026,7 @@ class LeadSearch extends Lead
             $leadTable . '.bo_flight_id' => $this->bo_flight_id,
             $leadTable . '.project_id' => $this->project_id,
             $leadTable . '.employee_id' => $this->employee_id,
+            $leadTable . '.l_type' => $this->l_type,
         ]);
 
         if ($this->created) {
@@ -2096,6 +2107,7 @@ class LeadSearch extends Lead
             $leadTable . '.status' => $this->status,
             $leadTable . '.l_answered' => $this->l_answered,
             $leadTable . '.l_init_price' => $this->l_init_price,
+            $leadTable . '.l_type' => $this->l_type,
         ]);
 
 //        $query->andWhere(['IN','leads.status', [self::STATUS_SNOOZE, self::STATUS_PROCESSING, self::STATUS_ON_HOLD]])
@@ -2179,6 +2191,7 @@ class LeadSearch extends Lead
             $leadTable . '.id' => $this->id,
             $leadTable . '.cabin' => $this->cabin,
             $leadTable . '.request_ip' => $this->request_ip,
+            $leadTable . '.l_type' => $this->l_type,
         ]);
 
         if ($this->limit > 0) {
@@ -2282,6 +2295,7 @@ class LeadSearch extends Lead
             $leadTable . '.id' => $this->id,
             $leadTable . '.l_answered' => $this->l_answered,
             $leadTable . '.project_id' => $this->project_id,
+            $leadTable . '.l_type' => $this->l_type,
         ]);
 
 //        $query
@@ -2424,6 +2438,7 @@ class LeadSearch extends Lead
             $leadTable . '.id' => $this->id,
             $leadTable . '.l_answered' => $this->l_answered,
             $leadTable . '.project_id' => $this->project_id,
+            $leadTable . '.l_type' => $this->l_type,
         ]);
 
 //        $query
@@ -2617,6 +2632,7 @@ class LeadSearch extends Lead
             $leadTable . '.l_init_price' => $this->l_init_price,
             $leadTable . '.l_is_test' => $this->l_is_test,
             $leadTable . '.l_call_status_id' => $this->l_call_status_id,
+            $leadTable . '.l_type' => $this->l_type,
         ]);
 
         if ($this->limit > 0) {
@@ -2664,6 +2680,7 @@ class LeadSearch extends Lead
             $leadTable . '.l_init_price' => $this->l_init_price,
             $leadTable . '.l_is_test' => $this->l_is_test,
             $leadTable . '.l_call_status_id' => $this->l_call_status_id,
+            $leadTable . '.l_type' => $this->l_type,
         ]);
 
         $query->with(['client', 'client.clientEmails', 'client.clientPhones']);
@@ -2710,6 +2727,7 @@ class LeadSearch extends Lead
             $leadTable . '.id' => $this->id,
             $leadTable . '.cabin' => $this->cabin,
             $leadTable . '.request_ip' => $this->request_ip,
+            $leadTable . '.l_type' => $this->l_type,
         ]);
 
         if ($this->limit > 0) {
@@ -2774,6 +2792,7 @@ class LeadSearch extends Lead
             $leadTable . '.id' => $this->id,
             $leadTable . '.cabin' => $this->cabin,
             $leadTable . '.request_ip' => $this->request_ip,
+            $leadTable . '.l_type' => $this->l_type,
         ]);
 
         if ($this->limit > 0) {
@@ -2919,6 +2938,7 @@ class LeadSearch extends Lead
             $leadTable . '.id' => $this->id,
             $leadTable . '.project_id' => $this->project_id,
             $leadTable . '.employee_id' => $this->employee_id,
+            $leadTable . '.l_type' => $this->l_type,
         ]);
 
 //        $query
@@ -2976,6 +2996,7 @@ class LeadSearch extends Lead
             $leadTable . '.l_request_hash' => $this->l_request_hash,
             $leadTable . '.project_id' => $this->project_id,
             $leadTable . '.employee_id' => $this->employee_id,
+            $leadTable . '.l_type' => $this->l_type,
         ]);
 
 //        $query

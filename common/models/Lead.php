@@ -355,6 +355,12 @@ class Lead extends ActiveRecord implements Objectable
     public const TYPE_ALTERNATIVE = 2;
     public const TYPE_FAILED_BOOK = 3;
 
+    public const TYPE_LIST = [
+        //self::TYPE_BASIC => 'Basic',
+        self::TYPE_ALTERNATIVE => 'Alternative',
+        self::TYPE_FAILED_BOOK => 'Failed Book'
+    ];
+
     private const PROCESSED_VTF = [
         0 => 'Pending',
         1 => 'Verified'
@@ -787,8 +793,6 @@ class Lead extends ActiveRecord implements Objectable
 
     public static function createByApiBO(LeadCreateForm $form, Client $client): self
     {
-        var_dump($form->type);
-        die();
         $lead = self::create();
         $lead->client_id = $client->id;
         $lead->l_client_first_name = $client->first_name;

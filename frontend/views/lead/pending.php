@@ -6,6 +6,7 @@ use yii\helpers\Html;
 use yii\widgets\Pjax;
 //use kartik\grid\GridView;
 use yii\grid\GridView;
+use common\models\Lead;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\LeadSearch */
@@ -55,6 +56,15 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => [
                 'style' => 'width:80px'
             ]
+        ],
+
+        [
+            'attribute' => 'l_type',
+            'value' => static function (Lead $model) {
+                return $model->l_type ? '<span class="label label-default" style="font-size: 13px">' . $model::TYPE_LIST[$model->l_type] . '</span>' : ' - ';
+            },
+            'format' => 'raw',
+            'filter' => Lead::TYPE_LIST,
         ],
 
         [

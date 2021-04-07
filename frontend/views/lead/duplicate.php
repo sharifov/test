@@ -58,6 +58,14 @@ $this->registerCssFile('/css/style-duplicate.css');
                 'style' => 'width:80px'
             ]
         ],
+        [
+            'attribute' => 'l_type',
+            'value' => static function (Lead $model) {
+                return $model->l_type ? '<span class="label label-default" style="font-size: 13px">' . $model::TYPE_LIST[$model->l_type] . '</span>' : ' - ';
+            },
+            'format' => 'raw',
+            'filter' => Lead::TYPE_LIST,
+        ],
 
         [
             'attribute' => 'l_duplicate_lead_id',

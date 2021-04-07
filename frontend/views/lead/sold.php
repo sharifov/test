@@ -54,6 +54,14 @@ $this->params['breadcrumbs'][] = $this->title;
             ]
         ],
         [
+            'attribute' => 'l_type',
+            'value' => static function (Lead $model) {
+                return $model->l_type ? '<span class="label label-default" style="font-size: 13px">' . $model::TYPE_LIST[$model->l_type] . '</span>' : ' - ';
+            },
+            'format' => 'raw',
+            'filter' => Lead::TYPE_LIST,
+        ],
+        [
             'attribute' => 'bo_flight_id',
             'label' => 'Sale ID (BO)',
             'value' => static function (\common\models\Lead $model) {

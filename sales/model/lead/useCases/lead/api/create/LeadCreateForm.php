@@ -141,7 +141,11 @@ class LeadCreateForm extends Model
 
     private function setLeadType()
     {
-        $this->type = 10;
+        if ($this->status == Lead::STATUS_ALTERNATIVE) {
+            $this->type = Lead::TYPE_ALTERNATIVE;
+        } elseif ($this->status == Lead::STATUS_BOOK_FAILED) {
+            $this->type = Lead::TYPE_FAILED_BOOK;
+        }
     }
 
     private function loadAndValidateFlights(): void
