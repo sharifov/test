@@ -405,8 +405,8 @@ class OrderController extends BaseController
      * @apiParam {string{max 30}}       billingInfo.city            City
      * @apiParam {string{max 40}}       billingInfo.state           State
      * @apiParam {string{max 10}}       billingInfo.zip             Zip
-     * @apiParam {string{max 20}}       billingInfo.phone           Phone
-     * @apiParam {string{max 160}}      billingInfo.email           Email
+     * @apiParam {string{max 20}}       billingInfo.phone           Phone <code>Deprecated</code>
+     * @apiParam {string{max 160}}      billingInfo.email           Email <code>Deprecated</code>
      *
      * @apiParam {Object}               creditCard                  Credit Card
      * @apiParam {string{max 50}}       [creditCard.holder_name]      Holder Name
@@ -1468,9 +1468,9 @@ class OrderController extends BaseController
                 "bi_state": "KY",
                 "bi_country": "US",
                 "bi_zip": "99999",
-                "bi_contact_phone": "+19074861000",
-                "bi_contact_email": "mike.kane@techork.com",
-                "bi_contact_name": null,
+                "bi_contact_phone": "+19074861000", -- deprecated, will be removed soon
+                "bi_contact_email": "mike.kane@techork.com", -- deprecated, will be removed soon
+                "bi_contact_name": null, -- deprecated, will be removed soon
                 "bi_payment_method_id": 1,
                 "bi_country_name": "United States of America",
                 "bi_payment_method_name": "Credit / Debit Card"
@@ -1924,8 +1924,8 @@ class OrderController extends BaseController
      * @apiParam {string{max 30}}       [billingInfo.city]            City
      * @apiParam {string{max 40}}       [billingInfo.state]           State
      * @apiParam {string{max 10}}       [billingInfo.zip]             Zip
-     * @apiParam {string{max 20}}       [billingInfo.phone]           Phone
-     * @apiParam {string{max 160}}      [billingInfo.email]           Email
+     * @apiParam {string{max 20}}       [billingInfo.phone]           Phone <code>Deprecated</code>
+     * @apiParam {string{max 160}}      [billingInfo.email]           Email <code>Deprecated</code>
      *
      * @apiParam {Object}               [creditCard]                    Credit Card
      * @apiParam {string{max 50}}       [creditCard.holder_name]        Holder Name
@@ -2027,8 +2027,8 @@ class OrderController extends BaseController
                 "city": "Mayfield",
                 "state": "KY",
                 "zip": "99999",
-                "phone": "+19074861000",
-                "email": "barabara@test.com"
+                "phone": "+19074861000", -- deprecated, will be removed soon
+                "email": "barabara@test.com" -- deprecated, will be removed soon
             },
             "payment": {
                 "clientCurrency": "USD"
