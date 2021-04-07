@@ -16,9 +16,11 @@ use yii\db\ActiveRecord;
  * @property int|null $ph_product_id
  * @property string|null $ph_first_name
  * @property string|null $ph_last_name
+ * @property string|null $ph_middle_name
  * @property string|null $ph_email
  * @property string|null $ph_phone_number
  * @property string|null $ph_created_dt
+ * @property string|null $ph_updated_dt
  *
  * @property Product $phProduct
  */
@@ -34,6 +36,7 @@ class ProductHolder extends \yii\db\ActiveRecord implements Serializable
                 'class' => TimestampBehavior::class,
                 'attributes' => [
                     ActiveRecord::EVENT_BEFORE_INSERT => ['ph_created_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['ph_updated_dt'],
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
@@ -44,7 +47,7 @@ class ProductHolder extends \yii\db\ActiveRecord implements Serializable
     {
         return [
             [['ph_product_id', 'ph_first_name', 'ph_last_name', 'ph_email', 'ph_phone_number'], 'required'],
-            ['ph_created_dt', 'safe'],
+            [['ph_created_dt', 'ph_updated_dt'], 'safe'],
 
             ['ph_email', 'string', 'max' => 100],
             ['ph_email', 'email'],
@@ -52,6 +55,8 @@ class ProductHolder extends \yii\db\ActiveRecord implements Serializable
             ['ph_first_name', 'string', 'max' => 50],
 
             ['ph_last_name', 'string', 'max' => 50],
+
+            ['ph_middle_name', 'string', 'max' => 50],
 
             ['ph_phone_number', 'string', 'max' => 20],
             ['ph_phone_number', PhoneValidator::class, 'skipOnEmpty' => true],
@@ -73,9 +78,11 @@ class ProductHolder extends \yii\db\ActiveRecord implements Serializable
             'ph_product_id' => 'Product ID',
             'ph_first_name' => 'First Name',
             'ph_last_name' => 'Last Name',
+            'ph_middle_name' => 'Middle Name',
             'ph_email' => 'Email',
             'ph_phone_number' => 'Phone Number',
             'ph_created_dt' => 'Created Dt',
+            'ph_updated_dt' => 'Updated Dt',
         ];
     }
 
@@ -93,6 +100,7 @@ class ProductHolder extends \yii\db\ActiveRecord implements Serializable
         int $productId,
         string $firstName,
         string $lastName,
+        ?string $middleName,
         string $email,
         string $phone
     ): self {
@@ -100,6 +108,7 @@ class ProductHolder extends \yii\db\ActiveRecord implements Serializable
         $holder->ph_product_id = $productId;
         $holder->ph_first_name = $firstName;
         $holder->ph_last_name = $lastName;
+        $holder->ph_middle_name = $middleName;
         $holder->ph_email = $email;
         $holder->ph_phone_number = $phone;
         return $holder;

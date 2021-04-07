@@ -373,6 +373,7 @@ class OrderController extends BaseController
      * @apiParam {Object}               productQuotes.productHolder                         Holder Info
      * @apiParam {string{max 50}}       productQuotes.productHolder.firstName               Holder first name
      * @apiParam {string{max 50}}       productQuotes.productHolder.lastName                Holder last name
+     * @apiParam {string{max 50}}       [productQuotes.productHolder.middleName]            Holder middle name
      * @apiParam {string{max 100}}      productQuotes.productHolder.email                   Holder email
      * @apiParam {string{max 20}}       productQuotes.productHolder.phone                   Holder phone
      *
@@ -474,6 +475,7 @@ class OrderController extends BaseController
             "productHolder": {
                 "firstName": "Test",
                 "lastName": "Test",
+                "middleName": "",
                 "email": "test@test.test",
                 "phone": "+19074861000"
             }
@@ -1908,6 +1910,7 @@ class OrderController extends BaseController
      * @apiParam {Object}               quotes.holder                         Holder Info
      * @apiParam {string{max 50}}       quotes.holder.firstName               Holder first name
      * @apiParam {string{max 50}}       quotes.holder.lastName                Holder last name
+     * @apiParam {string{max 50}}       [quotes.holder.middleName]              Holder middle name
      * @apiParam {string{max 100}}      quotes.holder.email                   Holder email
      * @apiParam {string{max 20}}       quotes.holder.phone                   Holder phone
      *
@@ -2004,6 +2007,7 @@ class OrderController extends BaseController
                     "holder": {
                         "firstName": "Test",
                         "lastName": "Test",
+                        "middleName": "Test",
                         "email": "test@test.test",
                         "phone": "+19074861000"
                     }

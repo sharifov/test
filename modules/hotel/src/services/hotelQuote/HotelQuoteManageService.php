@@ -69,6 +69,7 @@ class HotelQuoteManageService implements ProductQuoteService
                 $product->ph_product_id,
                 $form->holder->firstName,
                 $form->holder->lastName,
+                $form->holder->middleName,
                 $form->holder->email,
                 $form->holder->phone,
             );

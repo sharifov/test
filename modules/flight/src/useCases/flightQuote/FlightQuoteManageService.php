@@ -460,6 +460,7 @@ class FlightQuoteManageService implements ProductQuoteService
                 $productQuote->pq_product_id,
                 $form->holder->firstName,
                 $form->holder->lastName,
+                $form->holder->middleName,
                 $form->holder->email,
                 $form->holder->phone,
             );

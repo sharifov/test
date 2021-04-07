@@ -16,6 +16,8 @@ class ProductHolderSearch extends ProductHolder
 
             ['ph_first_name', 'safe'],
 
+            ['ph_middle_name', 'safe'],
+
             ['ph_id', 'integer'],
 
             ['ph_last_name', 'safe'],
@@ -49,6 +51,7 @@ class ProductHolderSearch extends ProductHolder
 
         $query->andFilterWhere(['like', 'ph_first_name', $this->ph_first_name])
             ->andFilterWhere(['like', 'ph_last_name', $this->ph_last_name])
+            ->andFilterWhere(['like', 'ph_middle_name', $this->ph_middle_name])
             ->andFilterWhere(['like', 'ph_email', $this->ph_email])
             ->andFilterWhere(['like', 'ph_phone_number', $this->ph_phone_number]);
 

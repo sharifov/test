@@ -35,6 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'ph_product_id',
                 'ph_first_name',
                 'ph_last_name',
+                'ph_middle_name',
                 'ph_email:email',
                 'ph_phone_number',
                 'ph_created_dt:byUserDateTime',

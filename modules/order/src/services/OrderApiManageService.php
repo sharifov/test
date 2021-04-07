@@ -195,6 +195,7 @@ class OrderApiManageService
                     $quote->pq_product_id,
                     $productQuotesForm->productHolder->firstName,
                     $productQuotesForm->productHolder->lastName,
+                    $productQuotesForm->productHolder->middleName,
                     $productQuotesForm->productHolder->email,
                     $productQuotesForm->productHolder->phone,
                 );

@@ -14,6 +14,7 @@ class ProductHolderSerializer extends Serializer
         return [
             'ph_first_name',
             'ph_last_name',
+            'ph_middle_name',
             'ph_email',
             'ph_phone_number'
         ];

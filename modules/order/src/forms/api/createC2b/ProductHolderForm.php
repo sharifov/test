@@ -10,6 +10,7 @@ use common\components\validators\PhoneValidator;
  *
  * @property string $firstName
  * @property string $lastName
+ * @property string|null $middleName
  * @property string $email
  * @property string $phone
  */
@@ -18,6 +19,8 @@ class ProductHolderForm extends \yii\base\Model
     public $firstName;
 
     public $lastName;
+
+    public $middleName;
 
     public $email;
 
@@ -28,7 +31,7 @@ class ProductHolderForm extends \yii\base\Model
         return [
             [['firstName', 'lastName', 'email', 'phone'], 'required'],
 
-            [['firstName', 'lastName'], 'string', 'max' => 50],
+            [['firstName', 'lastName', 'middleName'], 'string', 'max' => 50],
 
             [['email'], 'string', 'max' => 100],
             [['email'], 'email'],
