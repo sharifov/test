@@ -34,6 +34,4 @@ class m210407_123637_alter_tbl_flight_quote_segment_update_column extends Migrat
 
         Yii::$app->db->getSchema()->refreshTableSchema('{{%flight_quote_segment}}');
     }
-
-
 }
