@@ -431,6 +431,12 @@ class OrderController extends BaseController
      * @apiParam {string{max 5}}                [Paxes.citizenship]           Citizenship
      *
      *
+     * @apiParam {Object[]}             contactsInfo                 BillingInfo
+     * @apiParam {string{max 50}}       contactsInfo.first_name      First Name
+     * @apiParam {string{max 50}}       [contactsInfo.last_name]       Last Name
+     * @apiParam {string{max 50}}       [contactsInfo.middle_name]     Middle Name
+     * @apiParam {string{max 20}}       [contactsInfo.phone]           Phone number
+     * @apiParam {string{max 100}}      contactsInfo.email           Email
      *
      * @apiParam {Object}       Request                 Request Data for BO
      *
@@ -523,6 +529,22 @@ class OrderController extends BaseController
             "email": "mike.kane@techork.com",
             "language": "en-US",
             "citizenship": "US"
+        }
+    ],
+    "contactsInfo": [
+        {
+            "first_name": "Barbara",
+            "last_name": "Elmore",
+            "middle_name": "",
+            "phone": "+19074861000",
+            "email": "barabara@test.com"
+        },
+        {
+            "first_name": "John",
+            "last_name": "Doe",
+            "middle_name": "",
+            "phone": "+19074865678",
+            "email": "john@test.com"
         }
     ],
     "Request": {
@@ -1934,6 +1956,13 @@ class OrderController extends BaseController
      * @apiParam {string{max 18}}       creditCard.expiration           Credit Card expiration
      * @apiParam {string{max 4}}        creditCard.cvv                  Credit Card cvv
      *
+     * @apiParam {Object[]}             contactsInfo                 BillingInfo
+     * @apiParam {string{max 50}}       contactsInfo.first_name      First Name
+     * @apiParam {string{max 50}}       [contactsInfo.last_name]       Last Name
+     * @apiParam {string{max 50}}       [contactsInfo.middle_name]     Middle Name
+     * @apiParam {string{max 20}}       [contactsInfo.phone]           Phone number
+     * @apiParam {string{max 100}}      contactsInfo.email           Email
+     *
      * @apiParam {Object}               [payment]                    Payment info
      * @apiParam {string{max 3}}        [payment.clientCurrency]     Client currency
      *
@@ -2030,6 +2059,22 @@ class OrderController extends BaseController
                 "phone": "+19074861000", -- deprecated, will be removed soon
                 "email": "barabara@test.com" -- deprecated, will be removed soon
             },
+            "contactsInfo": [
+                {
+                    "first_name": "Barbara",
+                    "last_name": "Elmore",
+                    "middle_name": "",
+                    "phone": "+19074861000",
+                    "email": "barabara@test.com"
+                },
+                {
+                    "first_name": "John",
+                    "last_name": "Doe",
+                    "middle_name": "",
+                    "phone": "+19074865678",
+                    "email": "john@test.com"
+                }
+            ],
             "payment": {
                 "clientCurrency": "USD"
             }
@@ -2174,16 +2219,20 @@ class OrderController extends BaseController
                         $order->or_id
                     );
                     $this->billingInfoRepository->save($billingInfo);
+                }
 
-                    $orderContact = OrderContact::create(
-                        $order->or_id,
-                        $form->billingInfo->first_name,
-                        $form->billingInfo->last_name,
-                        $form->billingInfo->middle_name,
-                        $form->billingInfo->email,
-                        $form->billingInfo->phone
-                    );
-                    $this->orderContactRepository->save($orderContact);
+                if (isset($form->contactsInfo)) {
+                    foreach ($form->contactsInfo as $contactInfoForm) {
+                        $orderContact = OrderContact::create(
+                            $order->or_id,
+                            $contactInfoForm->first_name,
+                            $contactInfoForm->last_name,
+                            $contactInfoForm->middle_name,
+                            $contactInfoForm->email,
+                            $contactInfoForm->phone
+                        );
+                        $this->orderContactRepository->save($orderContact);
+                    }
                 }
 
                 return $order;
