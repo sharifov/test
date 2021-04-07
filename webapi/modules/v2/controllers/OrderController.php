@@ -11,6 +11,8 @@ use modules\fileStorage\src\FileSystem;
 use modules\offer\src\entities\offer\OfferRepository;
 use modules\order\src\entities\order\OrderSourceType;
 use modules\order\src\entities\order\OrderRepository;
+use modules\order\src\entities\orderContact\OrderContact;
+use modules\order\src\entities\orderContact\OrderContactRepository;
 use modules\order\src\entities\orderData\OrderData;
 use modules\order\src\entities\orderData\OrderDataRepository;
 use modules\order\src\entities\orderRequest\OrderRequest;
@@ -83,64 +85,26 @@ use yii\web\NotFoundHttpException;
  * @property CreditCardRepository $creditCardRepository
  * @property BillingInfoRepository $billingInfoRepository
  * @property CancelOrder $cancelOrder
+ * @property OrderContactRepository $orderContactRepository
  */
 class OrderController extends BaseController
 {
     private $requestBo;
-    /**
-     * @var OfferRepository
-     */
     private OfferRepository $offerRepository;
-    /**
-     * @var OrderApiManageService
-     */
     private OrderApiManageService $orderManageService;
-    /**
-     * @var ProductQuoteRepository
-     */
     private ProductQuoteRepository $productQuoteRepository;
-    /**
-     * @var OrderRepository
-     */
     private OrderRepository $orderRepository;
-    /**
-     * @var FileSystem
-     */
     private FileSystem $fileSystem;
-    /**
-     * @var OrderRequestRepository
-     */
     private OrderRequestRepository $orderRequestRepository;
-    /**
-     * @var ProjectRepository
-     */
     private ProjectRepository $projectRepository;
-    /**
-     * @var ProductCreateService
-     */
     private ProductCreateService $productCreateService;
-    /**
-     * @var ProductTypeRepository
-     */
     private ProductTypeRepository $productTypeRepository;
-    /**
-     * @var TransactionManager
-     */
     private TransactionManager $transactionManager;
-    /**
-     * @var OrderDataRepository
-     */
     private OrderDataRepository $orderDataRepository;
-    /**
-     * @var CreditCardRepository
-     */
     private CreditCardRepository $creditCardRepository;
-    /**
-     * @var BillingInfoRepository
-     */
     private BillingInfoRepository $billingInfoRepository;
-
     private CancelOrder $cancelOrder;
+    private OrderContactRepository $orderContactRepository;
 
     public function __construct(
         $id,
@@ -161,6 +125,7 @@ class OrderController extends BaseController
         CreditCardRepository $creditCardRepository,
         BillingInfoRepository $billingInfoRepository,
         CancelOrder $cancelOrder,
+        OrderContactRepository $orderContactRepository,
         $config = []
     ) {
         parent::__construct($id, $module, $logger, $config);
@@ -179,6 +144,7 @@ class OrderController extends BaseController
         $this->creditCardRepository = $creditCardRepository;
         $this->billingInfoRepository = $billingInfoRepository;
         $this->cancelOrder = $cancelOrder;
+        $this->orderContactRepository = $orderContactRepository;
     }
 
     public function behaviors(): array
@@ -2208,6 +2174,16 @@ class OrderController extends BaseController
                         $order->or_id
                     );
                     $this->billingInfoRepository->save($billingInfo);
+
+                    $orderContact = OrderContact::create(
+                        $order->or_id,
+                        $form->billingInfo->first_name,
+                        $form->billingInfo->last_name,
+                        $form->billingInfo->middle_name,
+                        $form->billingInfo->email,
+                        $form->billingInfo->phone
+                    );
+                    $this->orderContactRepository->save($orderContact);
                 }
 
                 return $order;

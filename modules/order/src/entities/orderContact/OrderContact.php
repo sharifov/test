@@ -100,4 +100,22 @@ class OrderContact extends \yii\db\ActiveRecord
     {
         return trim(Html::encode($this->oc_first_name . ' ' . $this->oc_last_name . ' ' . $this->oc_last_name));
     }
+
+    public static function create(
+        int $orderId,
+        string $firstName,
+        ?string $lastName,
+        ?string $middleName,
+        string $email,
+        string $phoneNumber
+    ): OrderContact {
+        $self = new self();
+        $self->oc_order_id = $orderId;
+        $self->oc_first_name = $firstName;
+        $self->oc_last_name = $lastName;
+        $self->oc_middle_name = $middleName;
+        $self->oc_email = $email;
+        $self->oc_phone_number = $phoneNumber;
+        return $self;
+    }
 }
