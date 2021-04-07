@@ -3,11 +3,11 @@
 namespace modules\flight\src\forms\api;
 
 use common\models\Currency;
-use common\models\PaymentMethod;
+use common\models\Payment;
 use yii\base\Model;
 
 /**
- * Class TicketIssuePaymentApiForm
+ * Class PaymentApiForm
  *
  * @property $pay_amount
  * @property $pay_currency
@@ -15,8 +15,10 @@ use yii\base\Model;
  * @property $pay_date
  * @property $pay_method_key
  * @property $pay_description
+ * @property $pay_type
+ * @property $pay_auth_id
  */
-class TicketIssuePaymentApiForm extends Model
+class PaymentApiForm extends Model
 {
     public $pay_amount;
     public $pay_currency;
@@ -24,11 +26,25 @@ class TicketIssuePaymentApiForm extends Model
     public $pay_date;
     public $pay_method_key;
     public $pay_description;
+    public $pay_type;
+    public $pay_auth_id;
+
+    public const TYPE_AUTHORIZE = 'authorize';
+    public const TYPE_CAPTURE = 'capture';
+    public const TYPE_REFUND = 'refund';
+    public const TYPE_VOID = 'void';
+
+    public const TYPE_LIST = [
+        self::TYPE_AUTHORIZE => 'Authorize',
+        self::TYPE_CAPTURE => 'Capture',
+        self::TYPE_REFUND => 'Refund',
+        self::TYPE_VOID => 'Void',
+    ];
 
     public function rules(): array
     {
         return [
-            [['pay_amount', 'pay_currency', 'pay_code', 'pay_date'], 'required'],
+            [['pay_amount', 'pay_currency', 'pay_code', 'pay_date', 'pay_auth_id', 'pay_type'], 'required'],
 
             [['pay_amount'], 'number'],
             [['pay_amount'], 'filter', 'filter' => static function ($value) {
@@ -46,9 +62,15 @@ class TicketIssuePaymentApiForm extends Model
 
             [['pay_method_key'], 'default', 'value' => 'card'],
             [['pay_method_key'], 'string', 'max' => 50],
-            [['pay_method_key'], 'exist', 'skipOnError' => true, 'targetClass' => PaymentMethod::class, 'targetAttribute' => ['pay_method_key' => 'pm_key']],
 
-            [['pay_description'], 'string', 'max' => 500],
+            [['pay_description'], 'string', 'max' => 255],
+
+            [['pay_auth_id'], 'integer'],
+            [['pay_auth_id'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+
+            [['pay_type'], 'string'],
+            [['pay_type'], 'filter', 'filter' => 'strtolower'],
+            [['pay_type'], 'in', 'range' => array_keys(self::TYPE_LIST)],
         ];
     }
 

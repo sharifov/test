@@ -6,8 +6,7 @@ use common\models\Payment;
 use common\models\PaymentMethod;
 use modules\flight\models\FlightQuote;
 use modules\flight\src\forms\api\FlightTicketIssueRequestApiForm;
-use modules\flight\src\forms\api\FlightUpdateRequestApiForm;
-use modules\flight\src\forms\api\TicketIssuePaymentApiForm;
+use modules\flight\src\forms\api\PaymentApiForm;
 use modules\flight\src\repositories\flightQuoteRepository\FlightQuoteRepository;
 use modules\invoice\src\entities\invoice\Invoice;
 use modules\order\src\entities\order\Order;
@@ -78,7 +77,7 @@ class TicketIssueProcessingDataService
     {
         $order = $flightUpdateApiForm->order;
         foreach ($flightUpdateApiForm->payments as $key => $payment) {
-            $ticketIssuePaymentApiForm = new TicketIssuePaymentApiForm();
+            $ticketIssuePaymentApiForm = new PaymentApiForm();
             $ticketIssuePaymentApiForm->load($payment);
             $ticketIssuePaymentApiForm->validate();
 

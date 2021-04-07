@@ -8,23 +8,14 @@ use yii\validators\EmailValidator;
 class BillingInfoForm extends \yii\base\Model
 {
     public $first_name;
-
     public $last_name;
-
     public $middle_name;
-
     public $address;
-
     public $country_id;
-
     public $city;
-
     public $state;
-
     public $zip;
-
     public $phone;
-
     public $email;
 
     public function rules()

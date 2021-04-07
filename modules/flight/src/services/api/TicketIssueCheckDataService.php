@@ -3,7 +3,7 @@
 namespace modules\flight\src\services\api;
 
 use modules\flight\src\forms\api\FlightUpdateRequestApiForm;
-use modules\flight\src\forms\api\TicketIssuePaymentApiForm;
+use modules\flight\src\forms\api\PaymentApiForm;
 use modules\flight\src\forms\api\TicketIssueFlightApiForm;
 use sales\helpers\ErrorsToStringHelper;
 
@@ -30,10 +30,10 @@ class TicketIssueCheckDataService
     public static function checkPayments(array $payments): bool
     {
         foreach ($payments as $key => $payment) {
-            $ticketIssuePaymentApiForm = new TicketIssuePaymentApiForm();
+            $ticketIssuePaymentApiForm = new PaymentApiForm();
 
             if (!$ticketIssuePaymentApiForm->load($payment)) {
-                throw new \DomainException('TicketIssuePaymentApiForm is not loaded');
+                throw new \DomainException('PaymentApiForm is not loaded');
             }
             if (!$ticketIssuePaymentApiForm->validate()) {
                 throw new \DomainException(ErrorsToStringHelper::extractFromModel($ticketIssuePaymentApiForm));

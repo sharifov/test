@@ -817,6 +817,7 @@ class FlightController extends ApiBaseController
      * @apiParam {string{100}}  [payments.pay_method_key]   Payment method key (by default "card")
      * @apiParam {date}         payments.pay_date           Payment date (format Y-m-d)
      * @apiParam {string{255}}  [payments.pay_description]  Payment description
+     * @apiParam {int}          payments.pay_status_id      Payment status
      *
      * @apiParamExample {json} Request-Example:
      *
@@ -961,22 +962,38 @@ class FlightController extends ApiBaseController
             "payments":[
                 {
                     "pay_amount":154.21,
-                    "pay_currency":"usd",
+                    "pay_currency":"USD",
                     "pay_code":"ch_1IYvYZFhXDZuLIpUisShKSRP",
                     "pay_method_key":"card",
+                    "pay_status_id":1,
                     "pay_date":"2021-03-25",
                     "pay_description": "example description"
                 },
                 {
                     "pay_amount":54.35,
-                    "pay_currency":"eur",
+                    "pay_currency":"EUR",
                     "pay_code":"transactionIdcode",
                     "pay_method_key":"card",
+                    "pay_status_id":1,
                     "pay_date":"2021-03-29",
                     "pay_description": "example description"
                 }
             ]
         }
+     *
+     * * @apiParamExample {json} Payment Status ID Mapping
+     * {
+     *      1: "New",
+     *      2: "Pending",
+     *      3: "In Progress",
+     *      4: "Authorized",
+     *      5: "Captured",
+     *      6: "Refunded",
+     *      7: "Canceled",
+     *      8: "Failed",
+     *      9: "Declined",
+     *      10: "Completed"
+     * }
      *
      * @apiSuccessExample {json} Success-Response:
      * HTTP/1.1 200 OK

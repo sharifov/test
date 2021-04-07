@@ -3,6 +3,7 @@
 namespace common\models;
 
 use modules\invoice\src\entities\invoice\Invoice;
+use sales\entities\EventTrait;
 use Yii;
 
 /**
@@ -25,14 +26,18 @@ use Yii;
  */
 class Transaction extends \yii\db\ActiveRecord
 {
+    use EventTrait;
+
     public const TYPE_AUTHORIZATION = 1;
     public const TYPE_CAPTURE = 2;
     public const TYPE_REFUND = 3;
+    public const TYPE_VOID = 4;
 
     public const TYPE_LIST = [
         self::TYPE_AUTHORIZATION => 'Authorized',
         self::TYPE_CAPTURE => 'Capture',
-        self::TYPE_REFUND => 'Refund'
+        self::TYPE_REFUND => 'Refund',
+        self::TYPE_VOID => 'Void',
     ];
 
     /**
@@ -123,5 +128,26 @@ class Transaction extends \yii\db\ActiveRecord
     public static function getTypeName(?int $type): ?string
     {
         return self::getTypeList()[$type] ?? null;
+    }
+
+    public static function create(
+        float $amount,
+        string $code,
+        string $date,
+        int $paymentId,
+        int $typeId,
+        string $currency,
+        ?string $comment
+    ): Transaction {
+        $model = new self();
+        $model->tr_amount = $amount;
+        $model->tr_code = $code;
+        $model->tr_date = $date;
+        $model->tr_payment_id = $paymentId;
+        $model->tr_comment = $comment;
+        $model->tr_type_id = $typeId;
+        $model->tr_currency = $currency;
+        $model->tr_created_dt = date('Y-m-d H:i:s');
+        return $model;
     }
 }

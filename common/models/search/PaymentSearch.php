@@ -22,44 +22,31 @@ class PaymentSearch extends Payment
             [['pay_amount'], 'number'],
             [['pay_code'], 'string'],
             [['pay_created_dt', 'pay_updated_dt', 'pay_date'], 'date', 'format' => 'php:Y-m-d'],
+
+            [['pay_description'], 'string', 'max' => 255],
         ];
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function scenarios()
-    {
-        // bypass scenarios() implementation in the parent class
-        return Model::scenarios();
-    }
-
-    /**
-     * Creates data provider instance with search query applied
-     *
      * @param array $params
-     *
      * @return ActiveDataProvider
      */
     public function search($params)
     {
         $query = Payment::find();
 
-        // add conditions that should always apply here
-
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['pay_id' => SORT_DESC]],
         ]);
 
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
-        // grid filtering conditions
         $query->andFilterWhere([
             'pay_id' => $this->pay_id,
             'pay_type_id' => $this->pay_type_id,
@@ -77,6 +64,7 @@ class PaymentSearch extends Payment
         ]);
 
         $query->andFilterWhere(['like', 'pay_currency', $this->pay_currency]);
+        $query->andFilterWhere(['like', 'pay_description', $this->pay_description]);
 
         return $dataProvider;
     }

@@ -36,6 +36,8 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'pay_order_id')->textInput() ?>
 
+    <?= $form->field($model, 'pay_description')->textInput(['maxlength' => true]) ?>
+
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>

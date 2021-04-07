@@ -74,7 +74,7 @@ use modules\attraction\src\services\AttractionQuotePdfService;
 use modules\email\src\helpers\MailHelper;
 use modules\email\src\Notifier;
 use modules\flight\models\FlightQuote;
-use modules\flight\src\forms\api\TicketIssuePaymentApiForm;
+use modules\flight\src\forms\api\PaymentApiForm;
 use modules\flight\src\services\flightQuote\FlightQuotePdfService;
 use modules\hotel\HotelModule;
 use modules\hotel\models\HotelList;
