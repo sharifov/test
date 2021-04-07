@@ -8,6 +8,8 @@ use yii\bootstrap4\Html;
 
 $this->title = 'Client Chat - Real Time Visitors';
 $this->params['breadcrumbs'][] = $this->title;
+
+$chatApiScriptUrl = Yii::$app->rchat->chatApiScriptUrl;
 ?>
 <div class="client-chat-real-time">
     <h3><i class="fa fa-comments"></i> <?= Html::encode($this->title) ?></h3>
@@ -17,7 +19,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <?php
 $url = \yii\helpers\Url::toRoute('/client-chat/real-time-start-chat');
 $js = <<<JS
-(function(){function b(){var a=document.createElement("script");a.type="text/javascript";a.async=!0;a.src="https://cdn.travelinsides.com/npmstatic/chatapi-dev.min.js";document.getElementsByTagName("head")[0].appendChild(a)}window.k=window.k||{};window.k.livechat=window.k.livechat||{};var c=[];["create","setCustomProps","track","onReady"].forEach(function(a){window.k.livechat[a]=function(){c.push([a,arguments])}});window.k.livechat.queue=c;"complete"===document.readyState?
+(function(){function b(){var a=document.createElement("script");a.type="text/javascript";a.async=!0;a.src="$chatApiScriptUrl";document.getElementsByTagName("head")[0].appendChild(a)}window.k=window.k||{};window.k.livechat=window.k.livechat||{};var c=[];["create","setCustomProps","track","onReady"].forEach(function(a){window.k.livechat[a]=function(){c.push([a,arguments])}});window.k.livechat.queue=c;"complete"===document.readyState?
 b():window.addEventListener("load",b)})();
 
     

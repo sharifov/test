@@ -350,28 +350,19 @@ class ClientChatSearch extends ClientChat
         $query = $this->listOfChatsQuery($filter, $user, $channelsIds);
 
         $data = $query->asArray()->all();
-        $data = ArrayHelper::index($data, 'cch_id');
-        $chatIds = ArrayHelper::map($data, 'cch_id', 'cch_id');
-        $lastMessages = ClientChatMessage::find()->select(['ccm_sent_dt' => 'MAX(ccm_sent_dt)', 'ccm_cch_id'])->byChatIds($chatIds)->groupBy(['ccm_cch_id'])->asArray()->all();
-        $lastMessages = ArrayHelper::index($lastMessages, 'ccm_cch_id');
+//        $data = ArrayHelper::index($data, 'cch_id');
+//        $chatIds = ArrayHelper::map($data, 'cch_id', 'cch_id');
+//        $lastMessages = ClientChatMessage::find()->select(['ccm_sent_dt' => 'MAX(ccm_sent_dt)', 'ccm_cch_id'])->byChatIds($chatIds)->groupBy(['ccm_cch_id'])->asArray()->all();
+//        $lastMessages = ArrayHelper::index($lastMessages, 'ccm_cch_id');
 
-        foreach ($data as $key => $item) {
-            if (isset($lastMessages[$key])) {
-                $data[$key]['ccm_sent_dt'] = $lastMessages[$key]['ccm_sent_dt'] ? strtotime($lastMessages[$key]['ccm_sent_dt']) : 0;
-            } else {
-                $data[$key]['ccm_sent_dt'] = 0;
-            }
-            $data[$key]['count_unread_messages'] = (int) $item['ccu_count'];
-        }
-
-        if (GroupFilter::isMy($filter->group)) {
-            if (ReadUnreadFilter::isUnread($filter->readUnread)) {
-                $data = array_filter($data, static function ($item) {
-                    return $item['count_unread_messages'] > 0;
-                });
-            }
-        }
-
+//        foreach ($data as $key => $item) {
+//            if (isset($lastMessages[$key])) {
+//                $data[$key]['ccm_sent_dt'] = $lastMessages[$key]['ccm_sent_dt'] ? strtotime($lastMessages[$key]['ccm_sent_dt']) : 0;
+//            } else {
+//                $data[$key]['ccm_sent_dt'] = 0;
+//            }
+//            $data[$key]['count_unread_messages'] = (int) $item['ccu_count'];
+//        }
 
         $dataProvider = new ArrayDataProvider([
             'allModels' => $data,
@@ -439,32 +430,41 @@ class ClientChatSearch extends ClientChat
                 ['!=', 'cch_owner_user_id', $user->id],
                 ['IS', 'cch_owner_user_id', null]
             ]);
-            $query->orderBy([
-                '(cch_status_id = ' . ClientChat::STATUS_ARCHIVE .
-                    ' OR cch_status_id = ' . ClientChat::STATUS_CLOSED . ')' => SORT_ASC,
-                '(cch_owner_user_id IS NULL)' => SORT_DESC,
-                'cch_created_dt' => SORT_ASC,
-            ]);
+//            $query->orderBy([
+//                '(cch_status_id = ' . ClientChat::STATUS_ARCHIVE .
+//                    ' OR cch_status_id = ' . ClientChat::STATUS_CLOSED . ')' => SORT_ASC,
+//                '(cch_owner_user_id IS NULL)' => SORT_DESC,
+//                'cch_created_dt' => SORT_ASC,
+//            ]);
         } elseif (GroupFilter::isFreeToTake($filter->group)) {
             $query->freeToTake($user->id);
-            $query->orderBy([
-//                '(cch_status_id = ' . ClientChat::STATUS_TRANSFER . ')' => SORT_DESC,
-                'cch_created_dt' => SORT_ASC,
-            ]);
+//            $query->orderBy([
+////                '(cch_status_id = ' . ClientChat::STATUS_TRANSFER . ')' => SORT_DESC,
+//                'cch_created_dt' => SORT_ASC,
+//            ]);
         } elseif (GroupFilter::isTeamChats($filter->group)) {
             $commonUsers = EmployeeGroupAccess::getUsersIdsInCommonGroups($user->id);
             if (isset($commonUsers[$user->id])) {
                 unset($commonUsers[$user->id]);
             }
             $query->andWhere(['cch_owner_user_id' => array_keys($commonUsers)]);
-            $query->orderBy([
-                '(cch_status_id = ' . ClientChat::STATUS_ARCHIVE .
-                ' OR cch_status_id = ' . ClientChat::STATUS_CLOSED . ')' => SORT_ASC,
-                'last_message_date' => SORT_DESC,
-            ]);
+//            $query->orderBy([
+//                '(cch_status_id = ' . ClientChat::STATUS_ARCHIVE .
+//                ' OR cch_status_id = ' . ClientChat::STATUS_CLOSED . ')' => SORT_ASC,
+//                'last_message_date' => SORT_DESC,
+//            ]);
         } else {
             $query->byOwner($user->id);
-            $query->orderBy(['cch_updated_dt' => SORT_DESC]);
+//            $query->orderBy(['cch_updated_dt' => SORT_DESC]);
+        }
+
+        $query->orderBy([
+            'cch_status_id not in (' . implode(',', ClientChat::CLOSED_STATUS_GROUP) . ')' => SORT_ASC,
+            'if (ccu_count > 0, 1, 0)' => SORT_DESC
+        ]);
+
+        if ($filter->getOrderBy()) {
+            $query->addOrderBy($filter->getOrderBy());
         }
 
         if ($filter->channelId) {
@@ -511,6 +511,12 @@ class ClientChatSearch extends ClientChat
         if ($filter->clientEmail) {
             $subQuery = ClientEmail::find()->select(['DISTINCT(client_id)'])->where(['=', 'email', $filter->clientEmail]);
             $query->andWhere(['IN', 'cch_client_id', $subQuery]);
+        }
+
+        if (GroupFilter::isMy($filter->group)) {
+            if (ReadUnreadFilter::isUnread($filter->readUnread)) {
+                $query->andWhere(['>', 'ccu_count', 0]);
+            }
         }
 
         $query->join('JOIN', ['client' => Client::tableName()], 'cch_client_id = client.id');

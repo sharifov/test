@@ -69,6 +69,7 @@
         $('.cc_btn_read_filter').removeClass('active');
         pjaxReload({container: '#pjax-client-chat-channel-list'});
         window.refreshChannelList();
+        window.allDialogsLoaded = false;
     };
 
     window.updateClientChatFilter = function(formId, formName, loadChannelsUrl) {

@@ -31,6 +31,7 @@ use yii\helpers\Html;
  * @property $clientName
  * @property $clientEmail
  * @property $resetAdditionalFilter
+ * @property $sortPriority
  * @property array       $channels
  * @property Permissions $permissions
  */
@@ -50,6 +51,35 @@ class FilterForm extends Model
     public const DEFAULT_VALUE_CLIENT_NAME = null;
     public const DEFAULT_VALUE_CLIENT_EMAIL = null;
 
+    public const SORT_PRIORITY_LAST_MESSAGE = 1;
+    public const SORT_PRIORITY_LAST_UPDATE = 2;
+    public const SORT_PRIORITY_OLDEST = 3;
+    public const SORT_PRIORITY_NEWEST = 4;
+
+    public const SORT_PRIORITY_LIST = [
+        self::SORT_PRIORITY_LAST_MESSAGE => 'Last Message',
+        self::SORT_PRIORITY_LAST_UPDATE => 'Last Update',
+        self::SORT_PRIORITY_OLDEST => 'Oldest',
+        self::SORT_PRIORITY_NEWEST => 'Newest',
+    ];
+
+    public const SORT_PRIORITY_DEFAULT = self::SORT_PRIORITY_LAST_MESSAGE;
+
+    public const SORT_PRIORITY_VALUE = [
+        self::SORT_PRIORITY_LAST_MESSAGE => [
+            'last_message_date' => SORT_DESC
+        ],
+        self::SORT_PRIORITY_LAST_UPDATE => [
+            'cch_updated_dt' => SORT_DESC
+        ],
+        self::SORT_PRIORITY_OLDEST => [
+            'cch_created_dt' => SORT_ASC
+        ],
+        self::SORT_PRIORITY_NEWEST => [
+            'cch_created_dt' => SORT_DESC
+        ],
+    ];
+
     public $channelId;
     public $status;
     public $dep;
@@ -66,6 +96,7 @@ class FilterForm extends Model
     public $showFilter;
     public $clientName;
     public $clientEmail;
+    public $sortPriority;
 
     private array $channels;
 
@@ -77,7 +108,8 @@ class FilterForm extends Model
         'rangeDate',
         'status',
         'clientName',
-        'clientEmail'
+        'clientEmail',
+        'sortPriority'
     ];
 
     public function __construct(array $channels, $config = [])
@@ -145,6 +177,11 @@ class FilterForm extends Model
 
             ['clientEmail', 'email'],
             ['clientEmail', 'string', 'max' => 100],
+
+            ['sortPriority', 'integer'],
+            ['sortPriority', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['sortPriority', 'default', 'value' => self::SORT_PRIORITY_DEFAULT],
+            ['sortPriority', 'in', 'range' => array_keys(self::SORT_PRIORITY_LIST)],
         ];
     }
 
@@ -237,6 +274,9 @@ class FilterForm extends Model
         if ($this->clientEmail === null || $this->hasErrors('clientEmail')) {
             $this->clientEmail = self::DEFAULT_VALUE_CLIENT_EMAIL;
         }
+        if ($this->sortPriority === null || $this->hasErrors('sortPriority')) {
+            $this->sortPriority = self::SORT_PRIORITY_DEFAULT;
+        }
     }
 
     public function loadDefaultValuesByPermissions(): FilterForm
@@ -268,6 +308,9 @@ class FilterForm extends Model
         }
         if (!$this->permissions->canCreatedDate()) {
             $this->createdDate = self::DEFAULT_VALUE_CREATED_DATE;
+        }
+        if (!$this->permissions->canSortPriority()) {
+            $this->sortPriority = self::SORT_PRIORITY_DEFAULT;
         }
         return $this;
     }
@@ -372,7 +415,7 @@ class FilterForm extends Model
     public function isAdditionalFilterActive(): bool
     {
         foreach ($this->getAdditionalFilterAttributes() as $key => $attrName) {
-            if (!empty($this->{$attrName}) && $this->{$attrName} !== 0) {
+            if (!empty($this->{$attrName}) && $this->{$attrName} !== 0 && $this->{$attrName} !== self::SORT_PRIORITY_DEFAULT) {
                 return true;
             }
         }
@@ -389,5 +432,15 @@ class FilterForm extends Model
         $this->clientName = self::DEFAULT_VALUE_CLIENT_NAME;
         $this->clientEmail = self::DEFAULT_VALUE_CLIENT_EMAIL;
         return $this;
+    }
+
+    public function getOrderBy(): ?array
+    {
+        return self::SORT_PRIORITY_VALUE[$this->sortPriority] ?? null;
+    }
+
+    public function getSortPriorityList(): array
+    {
+        return self::SORT_PRIORITY_LIST;
     }
 }

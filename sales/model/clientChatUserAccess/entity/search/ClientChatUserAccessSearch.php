@@ -73,7 +73,7 @@ class ClientChatUserAccessSearch extends ClientChatUserAccess
     {
         $query = $this->widgetQuery();
         $query->byId($id);
-        return $query->asArray()->one();
+        return $query->asArray()->one() ?? [];
     }
 
     public function getTotalItems(int $userId)
