@@ -141,7 +141,7 @@ class PaymentController extends BaseController
                     "creditCard": {
                         "holder_name": "Tester holder",
                         "number": "111**********111",
-                        "type": "Visas",
+                        "type": "Visa",
                         "expiration": "07 / 23",
                         "cvv": "123"
                     },
