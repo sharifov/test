@@ -2,6 +2,7 @@
 
 namespace modules\flight\migrations;
 
+use Yii;
 use yii\db\Migration;
 
 /**
