@@ -6,12 +6,10 @@ use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\UserContactList;
-use http\Exception\RuntimeException;
+use modules\order\src\entities\orderContact\OrderContact;
 use sales\model\clientAccount\entity\ClientAccount;
-use sales\model\clientAccount\form\ClientAccountCreateApiForm;
 use sales\repositories\client\ClientsCollection;
 use sales\repositories\client\ClientsQuery;
-use sales\services\client\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\model\client\ClientCodeException;
@@ -20,7 +18,6 @@ use sales\model\clientChatVisitor\repository\ClientChatVisitorRepository;
 use sales\repositories\client\ClientEmailRepository;
 use sales\repositories\client\ClientPhoneRepository;
 use sales\repositories\client\ClientRepository;
-use sales\repositories\NotFoundException;
 use sales\services\ServiceFinder;
 use yii\base\InvalidConfigException;
 use yii\db\ActiveRecord;
@@ -636,5 +633,29 @@ class ClientManageService
             return $ip;
         }
         return null;
+    }
+
+    public function createBasedOnOrderContact(OrderContact $orderContact, ?int $projectId): Client
+    {
+        $clientForm = new ClientCreateForm();
+        $clientForm->firstName = $orderContact->oc_first_name;
+        $clientForm->lastName = $orderContact->oc_last_name;
+        $clientForm->middleName = $orderContact->oc_middle_name;
+        $clientForm->projectId = $projectId;
+        $client = $this->create($clientForm, null);
+
+        if ($orderContact->oc_email) {
+            $emailForm = new EmailCreateForm();
+            $emailForm->email = $orderContact->oc_email;
+            $this->addEmail($client, $emailForm);
+        }
+
+        if ($orderContact->oc_phone_number) {
+            $phoneForm = new PhoneCreateForm();
+            $phoneForm->phone = $orderContact->oc_phone_number;
+            $this->addPhone($client, $phoneForm);
+        }
+
+        return $client;
     }
 }

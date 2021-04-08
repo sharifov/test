@@ -22,6 +22,7 @@ use modules\order\src\entities\order\events\OrderPendingEvent;
 use modules\order\src\entities\order\events\OrderPreparedEvent;
 use modules\order\src\entities\order\events\OrderUserProfitUpdateProfitAmountEvent;
 use modules\order\src\entities\order\serializer\OrderSerializer;
+use modules\order\src\entities\orderContact\OrderContact;
 use modules\order\src\entities\orderRequest\OrderRequest;
 use modules\order\src\entities\orderTips\OrderTips;
 use modules\order\src\entities\orderTipsUserProfit\OrderTipsUserProfit;
@@ -87,6 +88,7 @@ use yii\helpers\VarDumper;
  * @property OrderRequest $orderRequest
  * @property Project $relatedProject
  * @property ProductQuote[] $productQuotesApplied
+ * @property OrderContact[] $orderContacts
  */
 class Order extends ActiveRecord implements Serializable, ProductDataInterface
 {
@@ -266,6 +268,14 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
     public function getRelatedProject(): ActiveQuery
     {
         return $this->hasOne(Project::class, ['id' => 'or_project_id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getOrderContacts(): ActiveQuery
+    {
+        return $this->hasMany(OrderContact::class, ['oc_order_id' => 'or_id']);
     }
 
     /**

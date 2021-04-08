@@ -6,6 +6,7 @@ use modules\hotel\models\HotelQuote;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\entities\order\OrderStatusAction;
+use modules\order\src\entities\orderContact\OrderContact;
 use modules\order\src\entities\orderData\OrderData;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\entities\cases\CaseCategory;
@@ -14,6 +15,8 @@ use sales\helpers\setting\SettingHelper;
 use sales\model\caseOrder\entity\CaseOrder;
 use sales\repositories\cases\CasesRepository;
 use sales\services\cases\CasesCreateService;
+use sales\services\client\ClientCreateForm;
+use sales\services\client\ClientManageService;
 
 /**
  * Class CancelOrder
@@ -23,6 +26,7 @@ use sales\services\cases\CasesCreateService;
  * @property FlightCanceler $flightCanceler
  * @property HotelCanceler $hotelCanceler
  * @property CasesRepository $casesRepository
+ * @property ClientManageService $clientManageService
  */
 class CancelOrder
 {
@@ -31,19 +35,22 @@ class CancelOrder
     private FlightCanceler $flightCanceler;
     private HotelCanceler $hotelCanceler;
     private CasesRepository $casesRepository;
+    private ClientManageService $clientManageService;
 
     public function __construct(
         OrderRepository $orderRepository,
         FreeCancelChecker $freeCancelChecker,
         FlightCanceler $flightCanceler,
         HotelCanceler $hotelCanceler,
-        CasesRepository $casesRepository
+        CasesRepository $casesRepository,
+        ClientManageService $clientManageService
     ) {
         $this->orderRepository = $orderRepository;
         $this->freeCancelChecker = $freeCancelChecker;
         $this->flightCanceler = $flightCanceler;
         $this->hotelCanceler = $hotelCanceler;
         $this->casesRepository = $casesRepository;
+        $this->clientManageService = $clientManageService;
     }
 
     public function cancel(string $gid): void
@@ -76,8 +83,14 @@ class CancelOrder
             ) {
                 $orderData = OrderData::findOne(['od_order_id' => $order->or_id]);
 
+                $orderContact = OrderContact::find()->byOrderId($order->or_id)->last()->one();
+                if (!$orderContact) {
+                    throw new \DomainException('Cannot create client, order contact not found');
+                }
+                $client = $this->clientManageService->createBasedOnOrderContact($orderContact, $order->or_project_id);
+
                 $case = Cases::createByApi(
-                    null,
+                    $client->id,
                     $order->or_project_id,
                     $caseCategory->cc_dep_id,
                     $orderData->od_display_uid ?? null,
