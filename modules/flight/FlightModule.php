@@ -52,7 +52,6 @@ class FlightModule extends \yii\base\Module
         return \Yii::t('modules/flight/' . $category, $message, $params, $language);
     }
 
-
     /**
      * @param string $modulePath
      * @return array
@@ -73,6 +72,8 @@ class FlightModule extends \yii\base\Module
             ['label' => 'Baggage charge', 'url' => ['/' . $modulePath . '/flight-quote-segment-pax-baggage-charge/index']],
             ['label' => 'Status Log', 'url' => ['/' . $modulePath . '/flight-quote-status-log/index']],
             ['label' => 'Flight Quote Option', 'url' => ['/' . $modulePath . '/flight-quote-option-crud/index']],
+            ['label' => 'Flight Quote Flight', 'url' => ['/' . $modulePath . '/flight-quote-flight-crud/index']],
+            ['label' => 'Flight Quote Ticket', 'url' => ['/' . $modulePath . '/flight-quote-ticket-crud/index']],
         ];
 
         return $items;
