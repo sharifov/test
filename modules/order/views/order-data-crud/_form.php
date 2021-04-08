@@ -18,7 +18,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'od_display_uid')->textInput(['maxlength' => true]) ?>
 
-        <?= $form->field($model, 'od_source_cid')->textInput(['maxlength' => true]) ?>
+        <?= $form->field($model, 'od_source_id')->input('number') ?>
 
         <?= $form->field($model, 'od_created_by')->textInput() ?>
 

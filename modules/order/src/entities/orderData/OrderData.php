@@ -3,6 +3,7 @@
 namespace modules\order\src\entities\orderData;
 
 use common\models\Employee;
+use common\models\Sources;
 use modules\order\src\entities\order\Order;
 use Yii;
 use yii\behaviors\BlameableBehavior;
@@ -24,6 +25,7 @@ use yii\db\ActiveRecord;
  * @property Employee $odCreatedBy
  * @property Order $odOrder
  * @property Employee $odUpdatedBy
+ * @property int $od_source_id [int]
  */
 class OrderData extends \yii\db\ActiveRecord
 {
@@ -41,7 +43,7 @@ class OrderData extends \yii\db\ActiveRecord
             'user' => [
                 'class' => BlameableBehavior::class,
                 'createdByAttribute' => 'od_created_by',
-                'updatedByAttribute' => 'od_updated_dt',
+                'updatedByAttribute' => 'od_updated_by',
             ],
         ];
     }
@@ -49,6 +51,9 @@ class OrderData extends \yii\db\ActiveRecord
     public function rules(): array
     {
         return [
+            ['od_source_id', 'integer'],
+            ['od_source_id', 'exist', 'skipOnEmpty' => true, 'targetClass' => Sources::class, 'targetAttribute' => ['od_source_id' => 'id']],
+
             ['od_created_by', 'integer'],
             ['od_created_by', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['od_created_by' => 'id']],
 
@@ -59,8 +64,6 @@ class OrderData extends \yii\db\ActiveRecord
             ['od_order_id', 'required'],
             ['od_order_id', 'integer'],
             ['od_order_id', 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['od_order_id' => 'or_id']],
-
-            ['od_source_cid', 'string', 'max' => 10],
 
             ['od_updated_by', 'integer'],
             ['od_updated_by', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['od_updated_by' => 'id']],
@@ -83,6 +86,10 @@ class OrderData extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Employee::class, ['id' => 'od_updated_by']);
     }
+    public function getSource(): \yii\db\ActiveQuery
+    {
+        return $this->hasOne(Sources::class, ['id' => 'od_source_id']);
+    }
 
     public function attributeLabels(): array
     {
@@ -90,7 +97,7 @@ class OrderData extends \yii\db\ActiveRecord
             'od_id' => 'ID',
             'od_order_id' => 'Order ID',
             'od_display_uid' => 'Display Uid',
-            'od_source_cid' => 'Source Cid',
+            'od_source_id' => 'Source id',
             'od_created_by' => 'Created By',
             'od_updated_by' => 'Updated By',
             'od_created_dt' => 'Created Dt',
@@ -108,12 +115,12 @@ class OrderData extends \yii\db\ActiveRecord
         return 'order_data';
     }
 
-    public static function create(int $orderId, string $displayUid, string $sourceId): self
+    public static function create(int $orderId, string $displayUid, int $sourceId): self
     {
         $data = new self();
         $data->od_order_id = $orderId;
         $data->od_display_uid = $displayUid;
-        $data->od_source_cid = $sourceId;
+        $data->od_source_id = $sourceId;
         return $data;
     }
 }
