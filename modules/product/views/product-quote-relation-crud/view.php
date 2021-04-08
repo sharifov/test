@@ -1,5 +1,6 @@
 <?php
 
+use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
@@ -31,11 +32,25 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= DetailView::widget([
             'model' => $model,
             'attributes' => [
-                'pqr_parent_pq_id',
-                'pqr_related_pq_id',
-                'pqr_type_id',
-                'pqr_created_user_id',
-                'pqr_created_dt',
+                [
+                    'class' => modules\product\src\grid\columns\ProductQuoteColumn::class,
+                    'attribute' => 'pqr_parent_pq_id',
+                    'relation' => 'pqrParentPq',
+                ],
+                [
+                    'class' => modules\product\src\grid\columns\ProductQuoteColumn::class,
+                    'attribute' => 'pqr_related_pq_id',
+                    'relation' => 'pqrRelatedPq',
+                ],
+                [
+                    'attribute' => 'pqr_type_id',
+                    'value' => static function (ProductQuoteRelation $model) {
+                        return ProductQuoteRelation::getTypeName($model->pqr_type_id);
+                    },
+                    'format' => 'raw',
+                ],
+                'pqr_created_user_id:userName',
+                'pqr_created_dt:ByUserDateTime',
             ],
         ]) ?>
 

@@ -21,6 +21,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'pqr_type_id')->dropDownList(ProductQuoteRelation::TYPE_LIST) ?>
 
+        <?= $form->field($model, 'pqr_created_user_id')->dropDownList(\common\models\Employee::getList(), ['prompt' => '...']) ?>
+
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
         </div>
