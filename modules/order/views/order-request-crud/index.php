@@ -91,7 +91,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'filter' => OrderRequest::RESPONSE_TYPE_LIST
             ],
-            //'orr_created_dt',
+            [
+                'attribute' => 'orr_created_dt',
+                'format' => 'byUserDateTime',
+                'options' => [
+                    'width' => '200px'
+                ]
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],
