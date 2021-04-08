@@ -16,16 +16,16 @@ use yii\db\ActiveRecord;
  * @property int $od_id
  * @property int $od_order_id
  * @property string|null $od_display_uid
- * @property string|null $od_source_cid
  * @property int|null $od_created_by
  * @property int|null $od_updated_by
  * @property string|null $od_created_dt
  * @property string|null $od_updated_dt
+ * @property int $od_source_id [int]
  *
  * @property Employee $odCreatedBy
  * @property Order $odOrder
  * @property Employee $odUpdatedBy
- * @property int $od_source_id [int]
+ * @property Sources $source
  */
 class OrderData extends \yii\db\ActiveRecord
 {
@@ -115,7 +115,7 @@ class OrderData extends \yii\db\ActiveRecord
         return 'order_data';
     }
 
-    public static function create(int $orderId, string $displayUid, int $sourceId): self
+    public static function create(int $orderId, ?string $displayUid, int $sourceId): self
     {
         $data = new self();
         $data->od_order_id = $orderId;
