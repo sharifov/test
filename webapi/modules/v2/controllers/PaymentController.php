@@ -121,7 +121,7 @@ class PaymentController extends BaseController
      * @apiParam {object}               creditCard                  Credit Card
      * @apiParam {string{max 50}}       [creditCard.holder_name]    Holder Name
      * @apiParam {string{max 20}}       creditCard.number           Credit Card Number
-     * @apiParam {string{max 20}=Visa,Master Card,American Express,Discover,Diners Club,JCB}    [creditCard.type]   Credit Card type
+     * @apiParam {string{max 20}}       [creditCard.type]   Credit Card type (Visa,Master Card,American Express,Discover,Diners Club,JCB)
      * @apiParam {string{max 18}}       creditCard.expiration       Credit Card expiration
      * @apiParam {string{max 4}}        creditCard.cvv              Credit Card cvv
      *

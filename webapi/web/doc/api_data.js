@@ -5375,20 +5375,9 @@ define({ "api": [
             "group": "Parameter",
             "type": "string",
             "size": "max 20",
-            "allowedValues": [
-              "Visa",
-              "Master",
-              "Card",
-              "American",
-              "Express",
-              "Discover",
-              "Diners",
-              "Club",
-              "JCB"
-            ],
             "optional": true,
             "field": "creditCard.type",
-            "description": "<p>Credit Card type</p>"
+            "description": "<p>Credit Card type (Visa,Master Card,American Express,Discover,Diners Club,JCB)</p>"
           },
           {
             "group": "Parameter",
