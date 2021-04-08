@@ -45,20 +45,20 @@ use yii\widgets\ActiveForm;
 
         <?php
             $model->fqf_original_data_json = JsonHelper::encode($model->fqf_original_data_json);
-            try {
-                echo $form->field($model, 'fqf_original_data_json')->widget(
-                    \kdn\yii2\JsonEditor::class,
-                    [
-                        'clientOptions' => [
-                            'modes' => ['code', 'form', 'tree'],
-                            'mode' => 'code',
-                        ],
-                        'expandAll' => ['tree', 'form']
-                    ]
-                );
-            } catch (Exception $exception) {
-                echo $form->field($model, 'fqf_original_data_json')->textarea(['rows' => 6]);
-            }
+        try {
+            echo $form->field($model, 'fqf_original_data_json')->widget(
+                \kdn\yii2\JsonEditor::class,
+                [
+                    'clientOptions' => [
+                        'modes' => ['code', 'form', 'tree'],
+                        'mode' => 'code',
+                    ],
+                    'expandAll' => ['tree', 'form']
+                ]
+            );
+        } catch (Exception $exception) {
+            echo $form->field($model, 'fqf_original_data_json')->textarea(['rows' => 6]);
+        }
         ?>
 
         <div class="form-group">
