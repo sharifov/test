@@ -176,7 +176,7 @@ class PaymentController extends BaseController
                     },
                     "billingInfo": {
                         "first_name": "Eater",
-                        "middle_name": "Rotten",
+                        "middle_name": "Fresh",
                         "last_name": "Sausage",
                         "address": "1013 Weda Cir",
                         "country_id": "US",
@@ -317,7 +317,13 @@ class PaymentController extends BaseController
                         ($billingInfoForm = ArrayHelper::getValue($billingInfoForms, $key)) &&
                         !BillingInfoApiService::existBillingInfo($billingInfoForm, $orderId)
                     ) {
-                        $billingInfo = BillingInfoApiService::createBillingInfo($billingInfoForm, $creditCardId, $orderId);
+                        $billingInfo = BillingInfoApiService::createBillingInfo(
+                            $billingInfoForm,
+                            $creditCardId,
+                            $orderId,
+                            $payment->pay_id,
+                            $invoiceId
+                        );
                         $this->billingInfoRepository->save($billingInfo);
                     }
                 }

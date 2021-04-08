@@ -16,10 +16,10 @@ class InvoiceApiService
         int $orderId,
         string $description = 'Created automatically from InvoiceApiService'
     ): ?Invoice {
-        if ($invoice = self::getByOrderAndSum($orderId, (float)$form->pay_amount)) {
-            return $invoice;
-        }
-        if (ArrayHelper::isIn($form->pay_type, [$form::TYPE_AUTHORIZE, $form::TYPE_CAPTURE])) {
+        if (
+            ArrayHelper::isIn($form->pay_type, [$form::TYPE_CAPTURE]) &&
+            !TransactionApiService::existTransactionByCode((string) $form->pay_auth_id)
+        ) {
             return Invoice::create(
                 $orderId,
                 (float) $form->pay_amount,

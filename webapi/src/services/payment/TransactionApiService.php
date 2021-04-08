@@ -47,4 +47,11 @@ class TransactionApiService
         }
         throw new \DomainException('Unknown transaction type (' . $typeKey . ')');
     }
+
+    public static function existTransactionByCode(string $code): bool
+    {
+        return Transaction::find()
+            ->andWhere(['tr_code' => $code])
+            ->exists();
+    }
 }
