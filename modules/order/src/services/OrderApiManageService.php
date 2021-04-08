@@ -306,7 +306,9 @@ class OrderApiManageService
     public function createByC2bFlow(CreateOrderDTO $dto): Order
     {
         $newOrder = (new Order())->create($dto);
-        $newOrder->processing(null, OrderStatusAction::API, null);
+        if ($newOrder->isProcessing()) {
+            $newOrder->processing(null, OrderStatusAction::API, null);
+        }
         $this->orderRepository->save($newOrder);
 
         return $newOrder;

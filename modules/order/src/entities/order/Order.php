@@ -430,7 +430,7 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
         return $changed;
     }
 
-    public function isProcessing()
+    public function isProcessing(): bool
     {
         return $this->or_status_id === OrderStatus::PROCESSING;
     }
