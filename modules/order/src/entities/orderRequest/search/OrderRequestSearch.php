@@ -30,6 +30,11 @@ class OrderRequestSearch extends OrderRequest
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => [
+                'defaultOrder' => [
+                    'orr_id' => SORT_DESC
+                ]
+            ]
         ]);
 
         $this->load($params);

@@ -113,4 +113,14 @@ class OrderRequest extends \yii\db\ActiveRecord
         $this->orr_response_type_id = self::RESPONSE_TYPE_ERROR;
         $this->orr_response_data_json = Json::encode($data);
     }
+
+    public function getSourceName(): string
+    {
+        return OrderSourceType::LIST[$this->orr_source_type_id] ?? 'Unknown';
+    }
+
+    public function getResponseType(): string
+    {
+        return self::RESPONSE_TYPE_LIST[$this->orr_response_type_id] ?? 'Unknown';
+    }
 }
