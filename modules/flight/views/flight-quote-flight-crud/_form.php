@@ -1,5 +1,6 @@
 <?php
 
+use frontend\helpers\JsonHelper;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
@@ -41,6 +42,24 @@ use yii\widgets\ActiveForm;
         <?= $form->field($model, 'fqf_validating_carrier')->textInput(['maxlength' => true]) ?>
 
         <?= $form->field($model, 'fqf_original_data_json')->textInput() ?>
+
+        <?php
+            $model->fqf_original_data_json = JsonHelper::encode($model->fqf_original_data_json);
+            try {
+                echo $form->field($model, 'fqf_original_data_json')->widget(
+                    \kdn\yii2\JsonEditor::class,
+                    [
+                        'clientOptions' => [
+                            'modes' => ['code', 'form', 'tree'],
+                            'mode' => 'code',
+                        ],
+                        'expandAll' => ['tree', 'form']
+                    ]
+                );
+            } catch (Exception $exception) {
+                echo $form->field($model, 'fqf_original_data_json')->textarea(['rows' => 6]);
+            }
+        ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

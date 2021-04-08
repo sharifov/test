@@ -1,6 +1,8 @@
 <?php
 
+use modules\flight\models\FlightQuoteFlight;
 use yii\bootstrap4\Html;
+use yii\helpers\VarDumper;
 use yii\widgets\DetailView;
 
 /* @var yii\web\View $this */
@@ -46,7 +48,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 'fqf_booking_id',
                 'fqf_pnr',
                 'fqf_validating_carrier',
-                'fqf_original_data_json',
+                [
+                    'attribute' => 'fqf_original_data_json',
+                    'value' => static function (FlightQuoteFlight $model) {
+                        if ($model->fqf_original_data_json) {
+                            return VarDumper::dumpAsString($model->fqf_original_data_json, 20, true);
+                        }
+                        return Yii::$app->formatter->nullDisplay;
+                    },
+                    'format' => 'raw'
+                ],
                 'fqf_created_dt:byUserDateTime',
                 'fqf_updated_dt:byUserDateTime',
             ],
