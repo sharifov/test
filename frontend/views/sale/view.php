@@ -347,6 +347,47 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                 </div>
             <?php endif ?>
 
+            <?php if (!empty($caseSaleModel) && $insurance = ArrayHelper::getValue($caseSaleModel->getSaleDataDecoded(), 'travelInsurance')) : ?>
+                <div class="row">
+                    <div class="col-md-2">
+                        <h2>Travel Insurance</h2>
+                        <table class="table table-bordered table-hover table-striped">
+                            <tr>
+                                <th>Type</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($insurance, 'type')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Amount</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($insurance, 'amount')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Pax</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($insurance, 'paxCount')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Policy Number</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($insurance, 'policyNumber')) ?></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-5">
+                        <h2>Insurance Detail</h2>
+                        <table class="table table-bordered table-hover">
+                            <tr>
+                                <th>Type</th>
+                                <th>Amount</th>
+                            </tr>
+                            <?php foreach (ArrayHelper::getValue($insurance, 'detail') as $detail) : ?>
+                                <tr>
+                                    <td><?=Html::encode($detail['type'])?></td>
+                                    <td><?=Html::encode($detail['amount'])?></td>
+                                </tr>
+                            <?php endforeach;?>
+                        </table>
+                    </div>
+                </div>
+            <?php endif ?>
+
             <div class="row">
                 <div class="col-md-5">
 
