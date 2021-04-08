@@ -20,7 +20,7 @@ class OrderDataSearch extends OrderData
 
             ['od_order_id', 'integer'],
 
-            ['od_source_cid', 'safe'],
+            ['od_source_id', 'integer'],
 
             ['od_updated_by', 'integer'],
 
@@ -50,10 +50,10 @@ class OrderDataSearch extends OrderData
             'od_updated_by' => $this->od_updated_by,
             'od_created_dt' => $this->od_created_dt,
             'od_updated_dt' => $this->od_updated_dt,
+            'od_source_id' => $this->od_source_id,
         ]);
 
-        $query->andFilterWhere(['like', 'od_display_uid', $this->od_display_uid])
-            ->andFilterWhere(['like', 'od_source_cid', $this->od_source_cid]);
+        $query->andFilterWhere(['like', 'od_display_uid', $this->od_display_uid]);
 
         return $dataProvider;
     }

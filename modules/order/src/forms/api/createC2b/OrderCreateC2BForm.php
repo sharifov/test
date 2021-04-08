@@ -2,6 +2,7 @@
 
 namespace modules\order\src\forms\api\createC2b;
 
+use common\models\Sources;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderStatus;
 use sales\forms\CompositeForm;
@@ -17,6 +18,8 @@ use sales\forms\CompositeForm;
  * @property string $bookingId
  * @property string $fareId
  * @property string $status
+ * @property int $sourceId
+ * @property int $projectId
  * @property PaymentForm $payment
  * @property ContactsInfoForm[] $contactsInfo
  */
@@ -29,6 +32,10 @@ class OrderCreateC2BForm extends CompositeForm
     public $status;
 
     public $fareId;
+
+    public $sourceId;
+
+    public $projectId;
 
     private const STATUS_SUCCESS = 'success';
     private const STATUS_FAILED = 'failed';
@@ -93,6 +100,14 @@ class OrderCreateC2BForm extends CompositeForm
         return [
             [['sourceCid', 'bookingId', 'status', 'fareId'], 'required'],
             [['sourceCid', 'bookingId', 'status'], 'string', 'max' => 10],
+            ['sourceCid', function () {
+                if ($source = Sources::find()->select(['id', 'project_id'])->where(['cid' => $this->sourceCid])->asArray()->limit(1)->one()) {
+                    $this->sourceId = $source['id'];
+                    $this->projectId = $source['project_id'];
+                } else {
+                    $this->addError('sourceCid', 'Source not found');
+                }
+            }],
             [['bookingId'], 'string', 'max' => 7],
             [['fareId'], 'string', 'max' => 255],
             [['status'], 'in', 'range' => [self::STATUS_SUCCESS, self::STATUS_FAILED]],

@@ -24,7 +24,7 @@ use common\components\bootstrap4\activeForm\ActiveForm;
 
     <?= $form->field($model, 'od_display_uid') ?>
 
-    <?= $form->field($model, 'od_source_cid') ?>
+    <?= $form->field($model, 'od_source_id') ?>
 
     <?= $form->field($model, 'od_created_by') ?>
 

@@ -34,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'od_id',
                 'od_order_id',
                 'od_display_uid',
-                'od_source_cid',
+                'od_source_id:source',
                 'od_created_by',
                 'od_updated_by',
                 'od_created_dt',
