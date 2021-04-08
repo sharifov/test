@@ -51,8 +51,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'bi_updated_user_id',
             'bi_created_dt',
             'bi_updated_dt',
-            'bi_payment_id',
-            'bi_invoice_id',
         ],
     ]) ?>
 

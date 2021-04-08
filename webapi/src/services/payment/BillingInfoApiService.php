@@ -28,13 +28,8 @@ class BillingInfoApiService
             ->exists();
     }
 
-    public static function createBillingInfo(
-        BillingInfoForm $form,
-        ?int $creditCardId,
-        int $orderId,
-        ?int $paymentId,
-        ?int $invoiceId
-    ): BillingInfo {
+    public static function createBillingInfo(BillingInfoForm $form, ?int $creditCardId, int $orderId): BillingInfo
+    {
         return BillingInfo::create(
             $form->first_name,
             $form->last_name,
@@ -48,9 +43,7 @@ class BillingInfoApiService
             $form->email,
             null,
             $creditCardId,
-            $orderId,
-            $paymentId,
-            $invoiceId
+            $orderId
         );
     }
 }

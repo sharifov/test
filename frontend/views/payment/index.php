@@ -23,7 +23,6 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -42,6 +41,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'pay_code',
             'pay_invoice_id',
             'pay_order_id',
+            'pay_billing_id',
             'pay_date',
             'pay_amount',
             'pay_currency',

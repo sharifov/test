@@ -50,10 +50,6 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'bi_updated_user_id')->textInput() ?>
 
-    <?= $form->field($model, 'bi_payment_id')->textInput() ?>
-
-    <?= $form->field($model, 'bi_invoice_id')->textInput() ?>
-
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>

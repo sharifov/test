@@ -10,6 +10,7 @@ use sales\entities\EventTrait;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
@@ -31,6 +32,7 @@ use yii\helpers\ArrayHelper;
  * @property string|null $pay_updated_dt
  * @property string|null $pay_code
  * @property string|null $pay_description
+ * @property int|null $pay_billing_id
  *
  * @property Employee $payCreatedUser
  * @property Currency $payCurrency
@@ -39,6 +41,7 @@ use yii\helpers\ArrayHelper;
  * @property Order $payOrder
  * @property Employee $payUpdatedUser
  * @property Transaction[] $transactions
+ * @property BillingInfo $billingInfo
  */
 class Payment extends \yii\db\ActiveRecord
 {
@@ -146,6 +149,9 @@ class Payment extends \yii\db\ActiveRecord
             [['pay_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pay_updated_user_id' => 'id']],
 
             [['pay_description'], 'string', 'max' => 255],
+
+            [['pay_billing_id'], 'integer'],
+            [['pay_billing_id'], 'exist', 'skipOnError' => true, 'targetClass' => BillingInfo::class, 'targetAttribute' => ['pay_billing_id' => 'bi_id']],
         ];
     }
 
@@ -170,6 +176,7 @@ class Payment extends \yii\db\ActiveRecord
             'pay_updated_dt' => 'Updated Dt',
             'pay_code' => 'Code',
             'pay_description' => 'Pay description',
+            'pay_billing_id' => 'Billing Info',
         ];
     }
 
@@ -251,6 +258,11 @@ class Payment extends \yii\db\ActiveRecord
         return $this->hasMany(Transaction::class, ['tr_payment_id' => 'pay_id']);
     }
 
+    public function getBillingInfo(): ActiveQuery
+    {
+        return $this->hasOne(BillingInfo::class, ['bi_id' => 'pay_billing_id']);
+    }
+
     /**
      * {@inheritdoc}
      * @return \common\models\query\PaymentQuery the active query used by this AR class.
@@ -278,7 +290,8 @@ class Payment extends \yii\db\ActiveRecord
         ?int $invoiceId,
         int $orderId,
         string $code,
-        ?string $payDescription = null
+        ?string $payDescription = null,
+        ?int $billingInfoId = null
     ): self {
         $payment = new self();
         $payment->pay_method_id = $methodId;
@@ -289,6 +302,7 @@ class Payment extends \yii\db\ActiveRecord
         $payment->pay_order_id = $orderId;
         $payment->pay_code = $code;
         $payment->pay_description = $payDescription;
+        $payment->pay_billing_id = $billingInfoId;
         return $payment;
     }
 

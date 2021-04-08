@@ -17,7 +17,7 @@ class PaymentApiService
      * @param int|null $invoiceId
      * @return Payment
      */
-    public static function getOrCreatePayment(PaymentApiForm $form, int $orderId, ?int $invoiceId): Payment
+    public static function getOrCreatePayment(PaymentApiForm $form, int $orderId, ?int $invoiceId, ?int $billingInfoId): Payment
     {
         if ($payment = Payment::findLastByCodeAndOrder($form->pay_code, $orderId)) {
             if ($payment->pay_invoice_id && $invoiceId) {
@@ -33,7 +33,8 @@ class PaymentApiService
             $invoiceId,
             $orderId,
             $form->pay_code,
-            $form->pay_description
+            $form->pay_description,
+            $billingInfoId
         );
         $payment->inProgress();
         return $payment;

@@ -45,6 +45,8 @@ $list = new ListsAccess(Auth::id());
 
         <?= $form->field($model, 'inv_updated_dt')->widget(DateTimePicker::class) ?>
 
+        <?= $form->field($model, 'inv_billing_id')->textInput() ?>
+
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
         </div>

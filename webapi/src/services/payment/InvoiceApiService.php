@@ -14,6 +14,7 @@ class InvoiceApiService
     public static function getOrCreateInvoice(
         PaymentApiForm $form,
         int $orderId,
+        ?int $billingInfoId,
         string $description = 'Created automatically from InvoiceApiService'
     ): ?Invoice {
         if (
@@ -24,7 +25,8 @@ class InvoiceApiService
                 $orderId,
                 (float) $form->pay_amount,
                 $form->pay_currency,
-                $description
+                $description,
+                $billingInfoId
             );
         }
         return null;

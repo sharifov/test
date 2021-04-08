@@ -37,8 +37,6 @@ use yii\db\ActiveRecord;
  * @property int|null $bi_updated_user_id
  * @property string|null $bi_created_dt
  * @property string|null $bi_updated_dt
- * @property int|null $bi_payment_id
- * @property int|null $bi_invoice_id
  *
  * @property CreditCard $biCc
  * @property Employee $biCreatedUser
@@ -80,12 +78,6 @@ class BillingInfo extends \yii\db\ActiveRecord implements Serializable
             [['bi_order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['bi_order_id' => 'or_id']],
             [['bi_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['bi_updated_user_id' => 'id']],
             [['bi_payment_method_id'], 'exist', 'skipOnError' => true, 'targetClass' => PaymentMethod::class, 'targetAttribute' => ['bi_payment_method_id' => 'pm_id']],
-
-            [['bi_payment_id'], 'integer'],
-            [['bi_payment_id'], 'exist', 'skipOnError' => true, 'targetClass' => Payment::class, 'targetAttribute' => ['bi_payment_id' => 'pay_id']],
-
-            [['bi_invoice_id'], 'integer'],
-            [['bi_invoice_id'], 'exist', 'skipOnError' => true, 'targetClass' => Invoice::class, 'targetAttribute' => ['bi_invoice_id' => 'inv_id']],
         ];
     }
 
@@ -174,16 +166,6 @@ class BillingInfo extends \yii\db\ActiveRecord implements Serializable
         return $this->hasOne(Employee::class, ['id' => 'bi_updated_user_id']);
     }
 
-    public function getPayment(): ActiveQuery
-    {
-        return $this->hasOne(Payment::class, ['pay_id' => 'bi_payment_id']);
-    }
-
-    public function getInvoice(): ActiveQuery
-    {
-        return $this->hasOne(Invoice::class, ['inv_id' => 'bi_invoice_id']);
-    }
-
     /**
      * {@inheritdoc}
      * @return \common\models\query\BillingInfoQuery the active query used by this AR class.
@@ -206,9 +188,7 @@ class BillingInfo extends \yii\db\ActiveRecord implements Serializable
         string $email,
         ?int $paymentMethodId,
         ?int $creditCardId,
-        int $orderId,
-        ?int $paymentId = null,
-        ?int $invoiceId = null
+        int $orderId
     ): self {
         $billing = new self();
         $billing->bi_first_name = $firstName;
@@ -224,8 +204,6 @@ class BillingInfo extends \yii\db\ActiveRecord implements Serializable
         $billing->bi_payment_method_id = $paymentMethodId;
         $billing->bi_cc_id = $creditCardId;
         $billing->bi_order_id = $orderId;
-        $billing->bi_invoice_id = $invoiceId;
-        $billing->bi_payment_id = $paymentId;
         return $billing;
     }
 

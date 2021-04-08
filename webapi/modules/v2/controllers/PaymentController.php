@@ -281,13 +281,39 @@ class PaymentController extends BaseController
                 $transactionProcessed = [];
 
                 foreach ($paymentApiForms as $key => $paymentApiForm) {
+                    $creditCardId = null;
+                    /** @var CreditCardForm $creditCardForm */
+                    if (
+                        ($creditCardForm = ArrayHelper::getValue($creditCardForms, $key)) &&
+                        !CreditCardApiService::existCreditCard($creditCardForm)
+                    ) {
+                        $creditCard = CreditCardApiService::createCreditCard($creditCardForm);
+                        $this->creditCardRepository->save($creditCard);
+                        $creditCardId = $creditCard->cc_id;
+                    }
+
+                    $billingInfoId = null;
+                    /** @var BillingInfoForm $billingInfoForm */
+                    if (
+                        ($billingInfoForm = ArrayHelper::getValue($billingInfoForms, $key)) &&
+                        !BillingInfoApiService::existBillingInfo($billingInfoForm, $orderId)
+                    ) {
+                        $billingInfo = BillingInfoApiService::createBillingInfo(
+                            $billingInfoForm,
+                            $creditCardId,
+                            $orderId
+                        );
+                        $this->billingInfoRepository->save($billingInfo);
+                        $billingInfoId = $billingInfo->bi_id;
+                    }
+
                     $invoiceId = null;
-                    if ($invoice = InvoiceApiService::getOrCreateInvoice($paymentApiForm, $orderId)) {
+                    if ($invoice = InvoiceApiService::getOrCreateInvoice($paymentApiForm, $orderId, $billingInfoId)) {
                         $this->invoiceRepository->save($invoice);
                         $invoiceId = $invoice->inv_id;
                     }
 
-                    $payment = PaymentApiService::getOrCreatePayment($paymentApiForm, $orderId, $invoiceId);
+                    $payment = PaymentApiService::getOrCreatePayment($paymentApiForm, $orderId, $invoiceId, $billingInfoId);
                     $this->paymentRepository->save($payment);
 
                     $payment = PaymentApiService::processingPayment($payment, $paymentApiForm);
@@ -300,32 +326,6 @@ class PaymentController extends BaseController
                     $transaction = TransactionApiService::createTransaction($paymentApiForm, $payment->pay_id);
                     $this->transactionRepository->save($transaction);
                     $transactionProcessed[] = $transaction->tr_code;
-
-                    $creditCardId = null;
-                    /** @var CreditCardForm $creditCardForm */
-                    if (
-                        ($creditCardForm = ArrayHelper::getValue($creditCardForms, $key)) &&
-                        !CreditCardApiService::existCreditCard($creditCardForm)
-                    ) {
-                        $creditCard = CreditCardApiService::createCreditCard($creditCardForm);
-                        $this->creditCardRepository->save($creditCard);
-                        $creditCardId = $creditCard->cc_id;
-                    }
-
-                    /** @var BillingInfoForm $billingInfoForm */
-                    if (
-                        ($billingInfoForm = ArrayHelper::getValue($billingInfoForms, $key)) &&
-                        !BillingInfoApiService::existBillingInfo($billingInfoForm, $orderId)
-                    ) {
-                        $billingInfo = BillingInfoApiService::createBillingInfo(
-                            $billingInfoForm,
-                            $creditCardId,
-                            $orderId,
-                            $payment->pay_id,
-                            $invoiceId
-                        );
-                        $this->billingInfoRepository->save($billingInfo);
-                    }
                 }
                 return $transactionProcessed;
             });
