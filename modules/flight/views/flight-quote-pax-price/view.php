@@ -44,6 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'qpp_client_tax',
             'qpp_created_dt',
             'qpp_updated_dt',
+            'qpp_flight_id',
         ],
     ]) ?>
 

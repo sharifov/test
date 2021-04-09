@@ -17,7 +17,7 @@ class FlightQuoteTripSearch extends FlightQuoteTrip
     public function rules()
     {
         return [
-            [['fqt_id', 'fqt_flight_quote_id', 'fqt_duration'], 'integer'],
+            [['fqt_id', 'fqt_flight_quote_id', 'fqt_duration', 'fqp_flight_id'], 'integer'],
             [['fqt_key', 'fqt_uid'], 'safe'],
         ];
     }
@@ -65,6 +65,7 @@ class FlightQuoteTripSearch extends FlightQuoteTrip
             'fqt_id' => $this->fqt_id,
             'fqt_flight_quote_id' => $this->fqt_flight_quote_id,
             'fqt_duration' => $this->fqt_duration,
+            'fqp_flight_id' => $this->fqp_flight_id,
         ]);
 
         $query->andFilterWhere(['like', 'fqt_key', $this->fqt_key]);

@@ -17,7 +17,7 @@ class FlightQuoteSegmentStopSearch extends FlightQuoteSegmentStop
     public function rules()
     {
         return [
-            [['qss_id', 'qss_quote_segment_id', 'qss_elapsed_time', 'qss_duration'], 'integer'],
+            [['qss_id', 'qss_quote_segment_id', 'qss_elapsed_time', 'qss_duration', 'qss_flight_id'], 'integer'],
             [['qss_location_iata', 'qss_equipment'], 'safe'],
             [['qss_departure_dt', 'qss_arrival_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
@@ -69,6 +69,7 @@ class FlightQuoteSegmentStopSearch extends FlightQuoteSegmentStop
             'qss_duration' => $this->qss_duration,
             'DATE(qss_departure_dt)' => $this->qss_departure_dt,
             'DATE(qss_arrival_dt)' => $this->qss_arrival_dt,
+            'qss_flight_id' => $this->qss_flight_id,
         ]);
 
         $query->andFilterWhere(['like', 'qss_location_iata', $this->qss_location_iata])
