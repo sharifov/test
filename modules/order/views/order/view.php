@@ -46,6 +46,10 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
 
         <div class="col-md-6">
+            <?php echo $this->render('_partial/product', [
+                'order' => $order,
+            ]) ?>
+
             <?php if (Auth::can('order/view/invoice')) : ?>
                 <?php echo $this->render('_partial/invoice', [
                     'order' => $order,
