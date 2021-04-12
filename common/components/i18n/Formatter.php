@@ -257,6 +257,15 @@ class Formatter extends \yii\i18n\Formatter
         return OrderFormatter::asOrder($order);
     }
 
+    public function asOrderId(?int $id): string
+    {
+        if ($id === null) {
+            return $this->nullDisplay;
+        }
+
+        return OrderFormatter::asOrderId($id);
+    }
+
     public function asOrderPayStatus($value): string
     {
         if ($value === null) {

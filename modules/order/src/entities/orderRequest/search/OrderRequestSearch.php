@@ -48,7 +48,7 @@ class OrderRequestSearch extends OrderRequest
             'orr_id' => $this->orr_id,
             'orr_source_type_id' => $this->orr_source_type_id,
             'orr_response_type_id' => $this->orr_response_type_id,
-            'orr_created_dt' => $this->orr_created_dt,
+            'date(orr_created_dt)' => $this->orr_created_dt,
         ]);
 
         $query->andFilterWhere(['like', 'orr_request_data_json', $this->orr_request_data_json])
