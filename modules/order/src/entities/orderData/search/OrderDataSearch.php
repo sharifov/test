@@ -48,8 +48,8 @@ class OrderDataSearch extends OrderData
             'od_order_id' => $this->od_order_id,
             'od_created_by' => $this->od_created_by,
             'od_updated_by' => $this->od_updated_by,
-            'od_created_dt' => $this->od_created_dt,
-            'od_updated_dt' => $this->od_updated_dt,
+            'date(od_created_dt)' => $this->od_created_dt,
+            'date(od_updated_dt)' => $this->od_updated_dt,
             'od_source_id' => $this->od_source_id,
         ]);
 
