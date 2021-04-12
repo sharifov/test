@@ -1,5 +1,6 @@
 <?php
 
+use common\components\grid\DateTimeColumn;
 use common\components\i18n\Formatter;
 use modules\order\src\entities\orderContact\OrderContact;
 use yii\bootstrap4\Html;
@@ -41,8 +42,16 @@ $this->params['breadcrumbs'][] = $this->title;
             'oc_middle_name',
             'oc_email:email',
             'oc_phone_number',
-            'oc_created_dt:byUserDateTime',
-            'oc_updated_dt:byUserDateTime',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'oc_created_dt',
+                'format' => 'byUserDateTime'
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'oc_updated_dt',
+                'format' => 'byUserDateTime'
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],
