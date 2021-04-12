@@ -8,6 +8,7 @@ use common\models\EmailTemplateType;
 use common\models\Lead;
 use modules\fileStorage\src\entity\fileOrder\FileOrder;
 use modules\order\src\entities\order\Order;
+use modules\order\src\entities\orderContact\OrderContact;
 use modules\order\src\entities\orderEmail\OrderEmail;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\model\project\entity\projectLocale\ProjectLocale;
@@ -147,46 +148,47 @@ class EmailConfirmationSender
 
         $project = $order->project;
 
-        $from = $project->getContactInfo()->email;
+        $from = $project->getContactInfo()->getEmailNoReply();
         $fromName = $project->name;
-
-        $billingInfo = BillingInfo::find()->select([
-            'bi_id',
-            'bi_contact_email'
-        ])->andWhere(['bi_order_id' => $order->or_id])->orderBy(['bi_id' => SORT_DESC])->asArray()->one();
-        if (!$billingInfo) {
-            throw new \DomainException('Not found Billing Info. OrderId: ' . $order->or_id);
-        }
-        if (!$billingInfo['bi_contact_email']) {
-            throw new \DomainException('Not found Billing Email. OrderId: ' . $order->or_id . ' BillingInfoId: ' . $billingInfo['bi_id']);
-        }
-        $to = $billingInfo['bi_contact_email'];
 
         $languageId = $this->getLanguage($order->orLead);
 
-        $mailPreview = \Yii::$app->communication->mailPreview(
-            $projectId,
-            $this->template,
-            $from,
-            $to,
-            (new EmailConfirmationData())->generate($order),
-        );
-
-        if ($mailPreview['error'] !== false) {
-            throw new \DomainException($mailPreview['error']);
+        $orderContacts = OrderContact::find()->byOrderId($order->or_id)->all();
+        if (!$orderContacts) {
+            throw new \DomainException('Order Contacts not found by order id: ' . $order->or_id);
         }
 
-        $this->sendEmail(
-            $order,
-            $this->template,
-            $from,
-            $fromName,
-            $to,
-            $languageId,
-            $mailPreview['data']['email_subject'],
-            $mailPreview['data']['email_body_html'],
-            $files
-        );
+        $mailPreviewErrors = [];
+
+        foreach ($orderContacts as $orderContact) {
+            $mailPreview = \Yii::$app->communication->mailPreview(
+                $projectId,
+                $this->template,
+                $from,
+                $orderContact->oc_email,
+                (new EmailConfirmationData())->generate($order),
+            );
+
+            if ($mailPreview['error'] !== false) {
+                $mailPreviewErrors[] = $this->mailPreviewError($from, $orderContact->oc_email, $mailPreview['error']);
+            } else {
+                $this->sendEmail(
+                    $order,
+                    $this->template,
+                    $from,
+                    $fromName,
+                    $orderContact->oc_email,
+                    $languageId,
+                    $mailPreview['data']['email_subject'],
+                    $mailPreview['data']['email_body_html'],
+                    $files
+                );
+            }
+        }
+
+        if ($mailPreviewErrors) {
+            throw new \DomainException(implode('; ', $mailPreviewErrors));
+        }
     }
 
     private function getLanguage(Lead $lead): string
@@ -255,5 +257,10 @@ class EmailConfirmationSender
         if ($mailResponse['error'] !== false) {
             throw new \DomainException('Email(Id: ' . $mail->e_id . ') has not been sent.');
         }
+    }
+
+    private function mailPreviewError(string $from, string $to, string $message): string
+    {
+        return 'Sending email from ' . $from . ' to ' . $to . ' failed: ' . $message;
     }
 }
