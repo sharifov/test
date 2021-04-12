@@ -13,7 +13,7 @@ class FlightQuoteTicketSearch extends FlightQuoteTicket
             ['fqt_flight_id', 'integer'],
             ['fqt_pax_id', 'integer'],
             ['fqt_ticket_number', 'string'],
-            [['fqt_created_dt', 'fqt_updated_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+            [['fqt_created_dt', 'fqt_updated_dt'], 'datetime', 'format' => 'php:Y-m-d'],
         ];
     }
 
