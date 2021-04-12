@@ -38,7 +38,7 @@ class LeadOrderSearch extends LeadOrder
         $query->andFilterWhere([
             'lo_order_id' => $this->lo_order_id,
             'lo_lead_id' => $this->lo_lead_id,
-            'lo_create_dt' => $this->lo_create_dt,
+            'date(lo_create_dt)' => $this->lo_create_dt,
             'lo_created_user_id' => $this->lo_created_user_id,
         ]);
 

@@ -38,7 +38,7 @@ class CaseOrderSearch extends CaseOrder
         $query->andFilterWhere([
             'co_order_id' => $this->co_order_id,
             'co_case_id' => $this->co_case_id,
-            'co_create_dt' => $this->co_create_dt,
+            'date(co_create_dt)' => $this->co_create_dt,
             'co_created_user_id' => $this->co_created_user_id,
         ]);
 
