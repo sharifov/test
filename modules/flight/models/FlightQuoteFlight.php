@@ -3,6 +3,7 @@
 namespace modules\flight\models;
 
 use common\components\validators\CheckJsonValidator;
+use sales\behaviors\StringToJsonBehavior;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -87,6 +88,10 @@ class FlightQuoteFlight extends \yii\db\ActiveRecord
                     ActiveRecord::EVENT_BEFORE_UPDATE => ['fqf_updated_dt'],
                 ],
                 'value' => date('Y-m-d H:i:s')
+            ],
+            'stringToJson' => [
+                'class' => StringToJsonBehavior::class,
+                'jsonColumn' => 'fqf_original_data_json',
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
