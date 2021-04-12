@@ -5,6 +5,7 @@ namespace modules\order\src\jobs;
 use common\models\Notifications;
 use modules\order\src\entities\order\Order;
 use modules\order\src\services\confirmation\EmailConfirmationSender;
+use sales\helpers\setting\SettingHelper;
 use yii\queue\JobInterface;
 use yii\queue\RetryableJobInterface;
 
@@ -35,7 +36,7 @@ class OrderCanceledConfirmationJob implements JobInterface
         }
 
         try {
-            (new EmailConfirmationSender())->sendWithoutAttachments($order);
+            (new EmailConfirmationSender(SettingHelper::getOrderFreeCancelEmailTemplateKey()))->sendWithoutAttachments($order);
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => 'Send Order Canceled Confirmation Error',

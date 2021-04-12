@@ -13,9 +13,17 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use sales\model\project\entity\projectLocale\ProjectLocale;
 use yii\helpers\VarDumper;
 
+/**
+ * @property string $template
+ */
 class EmailConfirmationSender
 {
-    private const TEMPLATE = 'order_update';
+    private string $template;
+
+    public function __construct(string $template = 'order_update')
+    {
+        $this->template = $template;
+    }
 
     public function sendWithoutAttachments(Order $order): void
     {
@@ -158,7 +166,7 @@ class EmailConfirmationSender
 
         $mailPreview = \Yii::$app->communication->mailPreview(
             $projectId,
-            self::TEMPLATE,
+            $this->template,
             $from,
             $to,
             (new EmailConfirmationData())->generate($order),
@@ -170,7 +178,7 @@ class EmailConfirmationSender
 
         $this->sendEmail(
             $order,
-            self::TEMPLATE,
+            $this->template,
             $from,
             $fromName,
             $to,
