@@ -8,6 +8,7 @@ use common\models\EmailTemplateType;
 use common\models\Lead;
 use modules\fileStorage\src\entity\fileOrder\FileOrder;
 use modules\order\src\entities\order\Order;
+use modules\order\src\entities\orderEmail\OrderEmail;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\model\project\entity\projectLocale\ProjectLocale;
 use yii\helpers\VarDumper;
@@ -233,6 +234,11 @@ class EmailConfirmationSender
         if (!$mail->save()) {
             throw new \DomainException(VarDumper::dumpAsString($mail->getErrors()));
         }
+
+        $orderEmail = new OrderEmail();
+        $orderEmail->oe_order_id = $order->or_id;
+        $orderEmail->oe_email_id = $mail->e_id;
+        $orderEmail->save();
 
         $mail->e_message_id = $mail->generateMessageId();
         $mail->save();
