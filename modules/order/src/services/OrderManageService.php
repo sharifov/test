@@ -7,6 +7,7 @@ use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\entities\orderUserProfit\OrderUserProfit;
 use modules\order\src\entities\orderUserProfit\OrderUserProfitRepository;
 use modules\order\src\forms\OrderForm;
+use sales\model\leadOrder\entity\LeadOrder;
 use sales\services\RecalculateProfitAmountService;
 use sales\services\TransactionManager;
 
@@ -57,6 +58,15 @@ class OrderManageService
             $newOrder = (new Order())->create($dto);
             $orderId = $this->orderRepository->save($newOrder);
             $this->recalculateProfitAmountService->setOrders([$newOrder])->recalculateOrders();
+
+            if ($dto->leadId) {
+                $leadOrder = new LeadOrder();
+                $leadOrder->lo_lead_id = $dto->leadId;
+                $leadOrder->lo_order_id = $orderId;
+                if (!$leadOrder->save()) {
+                    throw new \RuntimeException('Lead order saving failed');
+                }
+            }
 
             $newOrderUserProfit = (new OrderUserProfit())->create($orderId, $newOrder->or_owner_user_id, 100, $newOrder->or_profit_amount);
             $this->orderUserProfitRepository->save($newOrderUserProfit);

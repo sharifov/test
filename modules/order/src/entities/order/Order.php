@@ -198,14 +198,14 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
         $this->or_status_id = $dto->status;
         $this->or_pay_status_id = $dto->payStatus;
         $this->or_lead_id = $dto->leadId;
-        $this->or_name = $this->generateName();
+        $this->or_name = $this->generateName($dto->leadId);
         $this->or_client_currency = $dto->clientCurrency;
         if ($this->orLead && $this->orLead->employee_id) {
             $this->or_owner_user_id = $this->orLead->employee_id;
         }
-        if (!$this->or_name && $this->or_lead_id) {
-            $this->or_name = $this->generateName();
-        }
+//        if (!$this->or_name && $this->or_lead_id) {
+//            $this->or_name = $this->generateName($dto->leadId);
+//        }
 
         $this->or_request_data = $dto->requestData;
 
@@ -377,9 +377,9 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
     /**
      * @return string
      */
-    public function generateName(): string
+    public function generateName(int $leadId): string
     {
-        $count = self::find()->where(['or_lead_id' => $this->or_lead_id])->count();
+        $count = self::find()->joinLeadOrdersByLead($leadId)->count();
         return 'Order ' . ($count + 1);
     }
 

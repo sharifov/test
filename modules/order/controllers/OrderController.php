@@ -230,7 +230,7 @@ class OrderController extends FController
                 throw new Exception('Lead (' . $leadId . ') not found', 4);
             }
 
-            $orders = Order::find()->where(['or_lead_id' => $lead->id])->orderBy(['or_id' => SORT_DESC])->all();
+            $orders = Order::find()->joinLeadOrdersByLead($leadId)->orderBy(['or_id' => SORT_DESC])->all();
 
             if ($orders) {
                 foreach ($orders as $order) {
