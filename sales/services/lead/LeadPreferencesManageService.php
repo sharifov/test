@@ -66,7 +66,7 @@ class LeadPreferencesManageService
             $lead->editDelayedChargeAndNote($form->delayedCharge, $form->notesForExperts);
             if ($lead->l_client_lang !== $form->clientLang) {
                 $lead->l_client_lang = $form->clientLang;
-                $this->processOrderData($lead->id, $lead->l_client_lang);
+//                $this->processOrderData($lead->id, $lead->l_client_lang);
             }
 
             $this->leadRepository->save($lead);
