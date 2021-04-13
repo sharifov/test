@@ -238,22 +238,27 @@ class QuoteHelper
      */
     private static function getQuotePriceRange(array &$quotes): void
     {
-        $minPrice = $quotes['results'][0]['prices']['totalPrice'];
-        if (isset($quotes['results'][0]['passengers']['ADT'])) {
-            $minPrice = $quotes['results'][0]['passengers']['ADT']['price'];
-        } elseif (isset($quotes['results'][0]['passengers']['CHD'])) {
-            $minPrice = $quotes['results'][0]['passengers']['CHD']['price'];
-        } elseif (isset($quotes['results'][0]['passengers']['INF'])) {
-            $minPrice = $quotes['results'][0]['passengers']['INF']['price'];
-        }
-        $lastResult = end($quotes['results']);
-        $maxPrice = $lastResult['prices']['totalPrice'];
-        if (isset($lastResult['passengers']['ADT'])) {
-            $maxPrice = $lastResult['passengers']['ADT']['price'];
-        } elseif (isset($lastResult['passengers']['CHD'])) {
-            $maxPrice = $lastResult['passengers']['CHD']['price'];
-        } elseif (isset($lastResult['passengers']['INF'])) {
-            $maxPrice = $lastResult['passengers']['INF']['price'];
+        $price = $minPrice = $maxPrice = 0;
+
+        foreach ($quotes['results'] as $key => $quote) {
+            if (isset($quote['passengers']['ADT'])) {
+                $price = $quote['passengers']['ADT']['price'];
+            } elseif (isset($quote['passengers']['CHD'])) {
+                $price = $quote['passengers']['CHD']['price'];
+            } elseif (isset($quote['passengers']['INF'])) {
+                $price = $quote['passengers']['INF']['price'];
+            }
+            if ($key == 0) {
+                $minPrice = $maxPrice = $price;
+            }
+
+            if ($price < $minPrice) {
+                $minPrice = $price;
+            }
+
+            if ($price > $maxPrice) {
+                $maxPrice = $price;
+            }
         }
 
         $quotes['minPrice'] = $minPrice;
