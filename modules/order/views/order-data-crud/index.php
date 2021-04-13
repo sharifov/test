@@ -1,6 +1,8 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
+use common\models\Language;
+use modules\order\src\entities\orderData\OrderData;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -33,6 +35,14 @@ $this->params['breadcrumbs'][] = $this->title;
             'od_order_id',
             'od_display_uid',
             'od_source_id:source',
+            [
+                'attribute' => 'od_language_id',
+                'value' => static function (OrderData $model) {
+                    return $model->od_language_id ? $model->language->name : null;
+                },
+                'filter' => Language::getList()
+            ],
+            'od_market_country',
             'od_created_by',
             'od_updated_by',
             [

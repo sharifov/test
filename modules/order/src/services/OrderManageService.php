@@ -4,6 +4,9 @@ namespace modules\order\src\services;
 
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderRepository;
+use modules\order\src\entities\orderData\OrderData;
+use modules\order\src\entities\orderData\OrderDataLanguage;
+use modules\order\src\entities\orderData\OrderDataMarketCountry;
 use modules\order\src\entities\orderUserProfit\OrderUserProfit;
 use modules\order\src\entities\orderUserProfit\OrderUserProfitRepository;
 use modules\order\src\forms\OrderForm;
@@ -19,6 +22,7 @@ use sales\services\TransactionManager;
  * @property OrderUserProfitRepository $orderUserProfitRepository
  * @property TransactionManager $transactionManager
  * @property RecalculateProfitAmountService $recalculateProfitAmountService
+ * @property OrderDataService $orderDataService
  */
 class OrderManageService
 {
@@ -38,23 +42,36 @@ class OrderManageService
      * @var RecalculateProfitAmountService
      */
     private $recalculateProfitAmountService;
+    /**
+     * @var OrderDataService
+     */
+    private OrderDataService $orderDataService;
 
-    public function __construct(OrderRepository $orderRepository, OrderUserProfitRepository $orderUserProfitRepository, RecalculateProfitAmountService $recalculateProfitAmountService, TransactionManager $transactionManager)
-    {
+    public function __construct(
+        OrderRepository $orderRepository,
+        OrderUserProfitRepository $orderUserProfitRepository,
+        RecalculateProfitAmountService $recalculateProfitAmountService,
+        TransactionManager $transactionManager,
+        OrderDataService $orderDataService
+    ) {
         $this->orderRepository = $orderRepository;
         $this->orderUserProfitRepository = $orderUserProfitRepository;
         $this->transactionManager = $transactionManager;
         $this->recalculateProfitAmountService = $recalculateProfitAmountService;
+        $this->orderDataService = $orderDataService;
     }
 
     /**
      * @param CreateOrderDTO $dto
+     * @param int|null $sourceId
+     * @param string $action
+     * @param int|null $createdUserId
      * @return Order
      * @throws \Throwable
      */
-    public function createOrder(CreateOrderDTO $dto): Order
+    public function createOrder(CreateOrderDTO $dto, ?int $sourceId, string $action, ?int $createdUserId): Order
     {
-        return $this->transactionManager->wrap(function () use ($dto) {
+        return $this->transactionManager->wrap(function () use ($dto, $sourceId, $action, $createdUserId) {
             $newOrder = (new Order())->create($dto);
             $orderId = $this->orderRepository->save($newOrder);
             $this->recalculateProfitAmountService->setOrders([$newOrder])->recalculateOrders();
@@ -70,6 +87,17 @@ class OrderManageService
 
             $newOrderUserProfit = (new OrderUserProfit())->create($orderId, $newOrder->or_owner_user_id, 100, $newOrder->or_profit_amount);
             $this->orderUserProfitRepository->save($newOrderUserProfit);
+
+            $this->orderDataService->create(
+                $orderId,
+                $dto->projectId,
+                null,
+                $sourceId,
+                $dto->languageId,
+                $dto->marketCountry,
+                $action,
+                $createdUserId
+            );
 
             return $newOrder;
         });

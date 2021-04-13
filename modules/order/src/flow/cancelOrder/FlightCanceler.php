@@ -43,7 +43,7 @@ class FlightCanceler
             \Yii::error([
                 'message' => 'Cancel Flight Quote error.',
                 'error' => $e->getMessage(),
-                'hotel' => $quote->getAttributes(),
+                'flight' => $quote->getAttributes(),
             ], 'FlightCanceler');
         }
         throw new FlightCanceledException();

@@ -16,6 +16,9 @@ use modules\order\src\entities\order\OrderStatusAction;
 use modules\order\src\entities\orderContact\OrderContact;
 use modules\order\src\entities\orderContact\OrderContactRepository;
 use modules\order\src\entities\orderData\OrderData;
+use modules\order\src\entities\orderData\OrderDataActions;
+use modules\order\src\entities\orderData\OrderDataLanguage;
+use modules\order\src\entities\orderData\OrderDataMarketCountry;
 use modules\order\src\entities\orderData\OrderDataRepository;
 use modules\order\src\entities\orderTips\OrderTips;
 use modules\order\src\entities\orderTips\OrderTipsRepository;
@@ -59,7 +62,7 @@ use sales\services\TransactionManager;
  * @property ProductHolderRepository $productHolderRepository
  * @property FlightQuoteOptionRepository $flightQuoteOptionRepository
  * @property OrderContactRepository $orderContactRepository
- * @property OrderDataRepository $orderDataRepository
+ * @property OrderDataService $orderDataService
  */
 class OrderApiManageService
 {
@@ -81,7 +84,7 @@ class OrderApiManageService
     private ProductHolderRepository $productHolderRepository;
     private FlightQuoteOptionRepository $flightQuoteOptionRepository;
     private OrderContactRepository $orderContactRepository;
-    private OrderDataRepository $orderDataRepository;
+    private OrderDataService $orderDataService;
 
     public function __construct(
         OrderRepository $orderRepository,
@@ -102,7 +105,7 @@ class OrderApiManageService
         ProductHolderRepository $productHolderRepository,
         FlightQuoteOptionRepository $flightQuoteOptionRepository,
         OrderContactRepository $orderContactRepository,
-        OrderDataRepository $orderDataRepository
+        OrderDataService $orderDataService
     ) {
         $this->orderRepository = $orderRepository;
         $this->orderUserProfitRepository = $orderUserProfitRepository;
@@ -122,26 +125,34 @@ class OrderApiManageService
         $this->productHolderRepository = $productHolderRepository;
         $this->flightQuoteOptionRepository = $flightQuoteOptionRepository;
         $this->orderContactRepository = $orderContactRepository;
-        $this->orderDataRepository = $orderDataRepository;
+        $this->orderDataService = $orderDataService;
     }
 
     /**
      * @param CreateOrderDTO $dto
      * @param OrderCreateForm $form
+     * @param int|null $createdUserId
      * @return Order
      * @throws \Throwable
      */
-    public function createOrder(CreateOrderDTO $dto, OrderCreateForm $form): Order
+    public function createOrder(CreateOrderDTO $dto, OrderCreateForm $form, ?int $createdUserId): Order
     {
-        return $this->transactionManager->wrap(function () use ($dto, $form) {
+        return $this->transactionManager->wrap(function () use ($dto, $form, $createdUserId) {
             $newOrder = (new Order())->create($dto);
             $newOrder->processing(null, OrderStatusAction::API, null);
             $orderId = $this->orderRepository->save($newOrder);
 //            $this->recalculateProfitAmountService->setOrders([$newOrder])->recalculateOrders();
 
-            $orderData = OrderData::create($orderId, null, $form->sourceId);
-            $orderData->detachBehavior('user');
-            $this->orderDataRepository->save($orderData);
+            $this->orderDataService->create(
+                $orderId,
+                $dto->projectId,
+                null,
+                $form->sourceId,
+                $dto->languageId,
+                $dto->marketCountry,
+                OrderDataActions::API_ORDER_CREATE,
+                $createdUserId
+            );
 
             if ($newOrder->or_owner_user_id) {
                 $newOrderUserProfit = (new OrderUserProfit())->create($orderId, $newOrder->or_owner_user_id, 100, $newOrder->or_profit_amount);

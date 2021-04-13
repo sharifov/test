@@ -3,6 +3,7 @@
 namespace modules\order\src\entities\orderData;
 
 use common\models\Employee;
+use common\models\Language;
 use common\models\Sources;
 use modules\order\src\entities\order\Order;
 use Yii;
@@ -21,11 +22,14 @@ use yii\db\ActiveRecord;
  * @property string|null $od_created_dt
  * @property string|null $od_updated_dt
  * @property int $od_source_id [int]
+ * @property string|null $od_language_id
+ * @property string|null $od_market_country
  *
  * @property Employee $odCreatedBy
  * @property Order $odOrder
  * @property Employee $odUpdatedBy
  * @property Sources $source
+ * @property Language $language
  */
 class OrderData extends \yii\db\ActiveRecord
 {
@@ -69,6 +73,13 @@ class OrderData extends \yii\db\ActiveRecord
             ['od_updated_by', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['od_updated_by' => 'id']],
 
             ['od_updated_dt', 'safe'],
+
+            ['od_language_id', 'default', 'value' => null],
+            ['od_language_id', 'string', 'max' => 5],
+            ['od_language_id', 'exist', 'skipOnError' => true, 'targetClass' => Language::class, 'targetAttribute' => ['od_language_id' => 'language_id']],
+
+            ['od_market_country', 'string', 'max' => 2],
+            ['od_market_country', 'in', 'range' => array_keys(Language::getCountryNames())],
         ];
     }
 
@@ -86,9 +97,15 @@ class OrderData extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Employee::class, ['id' => 'od_updated_by']);
     }
+
     public function getSource(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Sources::class, ['id' => 'od_source_id']);
+    }
+
+    public function getLanguage(): \yii\db\ActiveQuery
+    {
+        return $this->hasOne(Language::class, ['language_id' => 'od_language_id']);
     }
 
     public function attributeLabels(): array
@@ -102,6 +119,8 @@ class OrderData extends \yii\db\ActiveRecord
             'od_updated_by' => 'Updated By',
             'od_created_dt' => 'Created Dt',
             'od_updated_dt' => 'Updated Dt',
+            'od_language_id' => 'Language',
+            'od_market_country' => 'Market Country',
         ];
     }
 
@@ -115,12 +134,26 @@ class OrderData extends \yii\db\ActiveRecord
         return 'order_data';
     }
 
-    public static function create(int $orderId, ?string $displayUid, int $sourceId): self
-    {
+    public static function create(
+        int $orderId,
+        ?string $displayUid,
+        ?int $sourceId,
+        ?string $languageId,
+        ?string $marketCountry,
+        ?int $createdUserId
+    ): self {
         $data = new self();
         $data->od_order_id = $orderId;
         $data->od_display_uid = $displayUid;
         $data->od_source_id = $sourceId;
+        $data->od_language_id = $languageId;
+        $data->od_market_country = $marketCountry;
+        $data->od_created_by = $createdUserId;
         return $data;
+    }
+
+    public function changeLanguage(?string $languageId): void
+    {
+        $this->od_language_id = $languageId;
     }
 }

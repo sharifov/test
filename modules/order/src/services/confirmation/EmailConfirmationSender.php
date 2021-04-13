@@ -9,6 +9,7 @@ use common\models\Lead;
 use modules\fileStorage\src\entity\fileOrder\FileOrder;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\orderContact\OrderContact;
+use modules\order\src\entities\orderData\OrderData;
 use modules\order\src\entities\orderEmail\OrderEmail;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\model\project\entity\projectLocale\ProjectLocale;
@@ -151,14 +152,14 @@ class EmailConfirmationSender
         $from = $project->getContactInfo()->getEmailNoReply();
         $fromName = $project->name;
 
-        $languageId = $this->getLanguage($order->orLead);
-
         $orderContacts = OrderContact::find()->byOrderId($order->or_id)->all();
         if (!$orderContacts) {
             throw new \DomainException('Order Contacts not found by order id: ' . $order->or_id);
         }
 
         $mailPreviewErrors = [];
+
+        $languageId = $this->getLanguage($order);
 
         foreach ($orderContacts as $orderContact) {
             $mailPreview = \Yii::$app->communication->mailPreview(
@@ -191,13 +192,14 @@ class EmailConfirmationSender
         }
     }
 
-    private function getLanguage(Lead $lead): string
+    private function getLanguage(Order $order): string
     {
-        if ($lead->l_client_lang) {
-            return $lead->l_client_lang;
+        $data = OrderData::find()->select(['od_language_id'])->byOrderId($order->or_id)->asArray()->one();
+        if ($data && $data['od_language_id']) {
+            return $data['od_language_id'];
         }
         $locale = ProjectLocale::find()->select(['pl_language_id'])->andWhere([
-            'pl_project_id' => $lead->project_id,
+            'pl_project_id' => $order->or_project_id,
             'pl_default' => true
         ])->orderBy(['pl_id' => SORT_ASC])->asArray()->one();
         if ($locale && $locale['pl_language_id']) {

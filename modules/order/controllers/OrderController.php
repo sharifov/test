@@ -6,8 +6,10 @@ use common\models\Lead;
 use modules\fileStorage\src\entity\fileOrder\FileOrder;
 use modules\fileStorage\src\entity\fileStorage\FileStorageQuery;
 use modules\order\src\entities\order\OrderSourceType;
+use modules\order\src\entities\order\OrderStatus;
 use modules\order\src\entities\order\search\OrderCrudSearch;
 use modules\order\src\entities\order\search\OrderSearch;
+use modules\order\src\entities\orderData\OrderDataActions;
 use modules\order\src\forms\OrderForm;
 use modules\order\src\processManager\phoneToBook\OrderProcessManager;
 use modules\order\src\services\CreateOrderDTO;
@@ -103,9 +105,13 @@ class OrderController extends FController
                         [],
                         OrderSourceType::MANUAL,
                         null,
-                        $lead->project_id
+                        $lead->project_id,
+                        OrderStatus::PENDING,
+                        null,
+                        $lead->l_client_lang,
+                        null
                     );
-                    $this->orderManageService->createOrder($dto);
+                    $this->orderManageService->createOrder($dto, $lead->source_id, OrderDataActions::CREATE_ORDER_FROM_LEAD, Auth::id());
 
                     return '<script>$("#modal-df").modal("hide"); $.pjax.reload({container: "#pjax-lead-orders", push: false, replace: false, async: false, timeout: 2000});</script>';
                 } catch (\Throwable $e) {

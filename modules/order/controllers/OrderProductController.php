@@ -6,11 +6,14 @@ use frontend\controllers\FController;
 use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderSourceType;
+use modules\order\src\entities\order\OrderStatus;
+use modules\order\src\entities\orderData\OrderDataActions;
 use modules\order\src\services\CreateOrderDTO;
 use modules\order\src\services\OrderManageService;
 use modules\order\src\services\OrderPriceUpdater;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
+use sales\auth\Auth;
 use sales\dispatchers\EventDispatcher;
 use sales\helpers\app\AppHelper;
 use Yii;
@@ -116,9 +119,13 @@ class OrderProductController extends FController
                     [],
                     OrderSourceType::MANUAL,
                     null,
-                    $productQuote->pqProduct->prLead->project_id ?? null
+                    $productQuote->pqProduct->prLead->project_id,
+                    OrderStatus::PENDING,
+                    null,
+                    $productQuote->pqProduct->prLead->l_client_lang,
+                    null
                 );
-                $order = $this->orderManageService->createOrder($dto);
+                $order = $this->orderManageService->createOrder($dto, $productQuote->pqProduct->prLead->source_id, OrderDataActions::CREATE_ORDER_WITH_PRODUCT_QUOTE, Auth::id());
             }
 
             $productQuote->setOrderRelation($order->or_id);

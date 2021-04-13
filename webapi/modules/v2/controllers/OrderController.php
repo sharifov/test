@@ -11,9 +11,13 @@ use modules\fileStorage\src\FileSystem;
 use modules\offer\src\entities\offer\OfferRepository;
 use modules\order\src\entities\order\OrderSourceType;
 use modules\order\src\entities\order\OrderRepository;
+use modules\order\src\entities\order\OrderStatus;
 use modules\order\src\entities\orderContact\OrderContact;
 use modules\order\src\entities\orderContact\OrderContactRepository;
 use modules\order\src\entities\orderData\OrderData;
+use modules\order\src\entities\orderData\OrderDataActions;
+use modules\order\src\entities\orderData\OrderDataLanguage;
+use modules\order\src\entities\orderData\OrderDataMarketCountry;
 use modules\order\src\entities\orderData\OrderDataRepository;
 use modules\order\src\entities\orderRequest\OrderRequest;
 use modules\order\src\entities\orderRequest\OrderRequestRepository;
@@ -27,6 +31,7 @@ use modules\order\src\forms\api\createC2b\OrderCreateC2BForm;
 use modules\order\src\forms\api\view\OrderViewForm;
 use modules\order\src\services\CreateOrderDTO;
 use modules\order\src\services\OrderApiManageService;
+use modules\order\src\services\OrderDataService;
 use modules\product\src\entities\productType\ProductTypeRepository;
 use modules\product\src\useCases\product\create\ProductCreateForm;
 use modules\product\src\useCases\product\create\ProductCreateService;
@@ -86,6 +91,7 @@ use yii\web\NotFoundHttpException;
  * @property BillingInfoRepository $billingInfoRepository
  * @property CancelOrder $cancelOrder
  * @property OrderContactRepository $orderContactRepository
+ * @property OrderDataService $orderDataService
  */
 class OrderController extends BaseController
 {
@@ -105,6 +111,7 @@ class OrderController extends BaseController
     private BillingInfoRepository $billingInfoRepository;
     private CancelOrder $cancelOrder;
     private OrderContactRepository $orderContactRepository;
+    private OrderDataService $orderDataService;
 
     public function __construct(
         $id,
@@ -126,6 +133,7 @@ class OrderController extends BaseController
         BillingInfoRepository $billingInfoRepository,
         CancelOrder $cancelOrder,
         OrderContactRepository $orderContactRepository,
+        OrderDataService $orderDataService,
         $config = []
     ) {
         parent::__construct($id, $module, $logger, $config);
@@ -145,6 +153,7 @@ class OrderController extends BaseController
         $this->billingInfoRepository = $billingInfoRepository;
         $this->cancelOrder = $cancelOrder;
         $this->orderContactRepository = $orderContactRepository;
+        $this->orderDataService = $orderDataService;
     }
 
     public function behaviors(): array
@@ -362,6 +371,8 @@ class OrderController extends BaseController
      *
      * @apiParam {string{max 10}}       sourceCid                                           Source cid
      * @apiParam {string{max 32}}       offerGid                                            Offer gid
+     * @apiParam {string{max 5}}        languageId                                          Language Id
+     * @apiParam {string{max 2}}        marketCountry                                       Market Country
      * @apiParam {Object[]}             productQuotes                                       Product Quotes
      * @apiParam {string{max 32}}       productQuotes.gid                                   Product Quote Gid
      * @apiParam {Object[]}             productQuotes.productOptions                        Quote Options
@@ -446,6 +457,8 @@ class OrderController extends BaseController
      * {
     "sourceCid": "OVA102",
     "offerGid": "73c8bf13111feff52794883446461740",
+    "languageId": "en-US",
+    "marketCountry": "US",
     "productQuotes": [
         {
             "gid": "aebf921f5a64a7ac98d4942ace67e498",
@@ -1403,8 +1416,19 @@ class OrderController extends BaseController
 
             $offer = $this->offerRepository->findByGid($form->offerGid);
 
-            $dto = new CreateOrderDTO($offer->of_lead_id, $form->payment->currency, $request->post(), OrderSourceType::P2B, $orderRequest->orr_id, $form->projectId);
-            $order = $this->orderManageService->createOrder($dto, $form);
+            $dto = new CreateOrderDTO(
+                $offer->of_lead_id,
+                $form->payment->currency,
+                $request->post(),
+                OrderSourceType::P2B,
+                $orderRequest->orr_id,
+                $form->projectId,
+                OrderStatus::PENDING,
+                null,
+                $form->languageId,
+                $form->marketCountry
+            );
+            $order = $this->orderManageService->createOrder($dto, $form, null);
 
             $response = new SuccessResponse(
                 new DataMessage(
@@ -1902,6 +1926,8 @@ class OrderController extends BaseController
      * @apiParam {string{max 7}}               bookingId       Booking id
      * @apiParam {string{max 255}}              fareId          Unique value of order
      * @apiParam {string="success","failed"{max 10}}               status       Status
+     * @apiParam {string{max 5}}               languageId          Language Id
+     * @apiParam {string{max 2}}               marketCountry       Market Country
      *
      * @apiParam {Object[]}             quotes                  Product quotes
      * @apiParam {string}               quotes.productKey       Product key
@@ -1977,6 +2003,8 @@ class OrderController extends BaseController
             "bookingId": "WCJ12C",
             "fareId": "A0EA9F-5cc2ce331e8bb3.16383647",
             "status": "success",
+            "languageId": "en-US",
+            "marketCountry": "US",
             "quotes": [
                 {
                     "status": "booked",
@@ -2165,7 +2193,18 @@ class OrderController extends BaseController
             $this->orderRequestRepository->save($orderRequest);
 
             $order = $this->transactionManager->wrap(function () use ($form, $request, $orderRequest) {
-                $dto = new CreateOrderDTO(null, $form->payment->clientCurrency, $request->post(), OrderSourceType::C2B, $orderRequest->orr_id, $form->projectId, $form->getOrderStatus(), $form->fareId);
+                $dto = new CreateOrderDTO(
+                    null,
+                    $form->payment->clientCurrency,
+                    $request->post(),
+                    OrderSourceType::C2B,
+                    $orderRequest->orr_id,
+                    $form->projectId,
+                    $form->getOrderStatus(),
+                    $form->fareId,
+                    $form->languageId,
+                    $form->marketCountry
+                );
                 $order = $this->orderManageService->createByC2bFlow($dto);
 
                 foreach ($form->quotes as $quoteForm) {
@@ -2187,9 +2226,16 @@ class OrderController extends BaseController
                 $order->recalculateProfitAmount();
                 $this->orderRepository->save($order);
 
-                $orderData = OrderData::create($order->or_id, $form->bookingId, $form->sourceId);
-                $orderData->detachBehavior('user');
-                $this->orderDataRepository->save($orderData);
+                $this->orderDataService->create(
+                    $order->or_id,
+                    $dto->projectId,
+                    $form->bookingId,
+                    $form->sourceId,
+                    $dto->languageId,
+                    $dto->marketCountry,
+                    OrderDataActions::API_ORDER_CREATE_C2B,
+                    null
+                );
 
                 if (isset($form->creditCard)) {
                     $creditCard = CreditCard::create(

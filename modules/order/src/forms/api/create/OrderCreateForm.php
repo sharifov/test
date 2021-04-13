@@ -14,6 +14,8 @@ use sales\forms\CompositeRecursiveForm;
  * @property string $sourceCid
  * @property int $sourceId
  * @property int $projectId
+ * @property string|null $languageId
+ * @property string|null $marketCountry
  * @property string $offerGid
  * @property string $projectApiKey
  * @property ProductQuotesForm[] $productQuotes
@@ -33,6 +35,10 @@ class OrderCreateForm extends CompositeRecursiveForm
     public $sourceId;
 
     public $projectId;
+
+    public $languageId;
+
+    public $marketCountry;
 
     public function __construct($config = [])
     {
@@ -88,6 +94,10 @@ class OrderCreateForm extends CompositeRecursiveForm
             }],
             [['offerGid'], 'string'],
             ['offerGid', 'exist', 'targetClass' => Offer::class, 'targetAttribute' => 'of_gid'],
+
+            ['languageId', 'safe'],
+
+            ['marketCountry', 'safe'],
         ];
     }
 

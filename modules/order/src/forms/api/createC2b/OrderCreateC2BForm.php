@@ -20,6 +20,8 @@ use sales\forms\CompositeForm;
  * @property string $status
  * @property int $sourceId
  * @property int $projectId
+ * @property string|null $languageId
+ * @property string|null $marketCountry
  * @property PaymentForm $payment
  * @property ContactsInfoForm[] $contactsInfo
  */
@@ -36,6 +38,10 @@ class OrderCreateC2BForm extends CompositeForm
     public $sourceId;
 
     public $projectId;
+
+    public $languageId;
+
+    public $marketCountry;
 
     private const STATUS_SUCCESS = 'success';
     private const STATUS_FAILED = 'failed';
@@ -111,7 +117,11 @@ class OrderCreateC2BForm extends CompositeForm
             [['bookingId'], 'string', 'max' => 7],
             [['fareId'], 'string', 'max' => 255],
             [['status'], 'in', 'range' => [self::STATUS_SUCCESS, self::STATUS_FAILED]],
-            ['fareId', 'unique', 'targetClass' => Order::class, 'targetAttribute' => 'or_fare_id']
+            ['fareId', 'unique', 'targetClass' => Order::class, 'targetAttribute' => 'or_fare_id'],
+
+            ['languageId', 'safe'],
+
+            ['marketCountry', 'safe'],
         ];
     }
 

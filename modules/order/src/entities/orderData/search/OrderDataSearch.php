@@ -25,6 +25,10 @@ class OrderDataSearch extends OrderData
             ['od_updated_by', 'integer'],
 
             ['od_updated_dt', 'safe'],
+
+            ['od_language_id', 'string'],
+
+            ['od_market_country', 'string'],
         ];
     }
 
@@ -51,6 +55,8 @@ class OrderDataSearch extends OrderData
             'date(od_created_dt)' => $this->od_created_dt,
             'date(od_updated_dt)' => $this->od_updated_dt,
             'od_source_id' => $this->od_source_id,
+            'od_language_id' => $this->od_language_id,
+            'od_market_country' => $this->od_market_country,
         ]);
 
         $query->andFilterWhere(['like', 'od_display_uid', $this->od_display_uid]);

@@ -1,11 +1,13 @@
 <?php
 
 use yii\bootstrap4\Html;
+use yii\helpers\VarDumper;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
 /* @var $model modules\order\src\entities\orderData\OrderData */
 /* @var $form ActiveForm */
+
 ?>
 
 <div class="order-data-form">
@@ -19,6 +21,10 @@ use yii\widgets\ActiveForm;
         <?= $form->field($model, 'od_display_uid')->textInput(['maxlength' => true]) ?>
 
         <?= $form->field($model, 'od_source_id')->input('number') ?>
+
+        <?= $form->field($model, 'od_language_id')->dropDownList(\common\models\Language::getLanguages(true, 'language'), ['prompt' => '---']) ?>
+
+        <?= $form->field($model, 'od_market_country')->dropDownList(\common\models\Language::getCountryNames(), ['prompt' => '---']) ?>
 
         <?= $form->field($model, 'od_created_by')->textInput() ?>
 

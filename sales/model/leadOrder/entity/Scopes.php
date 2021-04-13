@@ -7,6 +7,11 @@ namespace sales\model\leadOrder\entity;
 */
 class Scopes extends \yii\db\ActiveQuery
 {
+    public function byLead(int $leadId): self
+    {
+        return $this->andWhere(['lo_lead_id' => $leadId]);
+    }
+
     /**
     * @return LeadOrder[]|array
     */

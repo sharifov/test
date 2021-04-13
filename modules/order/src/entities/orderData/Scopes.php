@@ -7,6 +7,11 @@ namespace modules\order\src\entities\orderData;
 */
 class Scopes extends \yii\db\ActiveQuery
 {
+    public function byOrderId(int $orderId): self
+    {
+        return $this->andWhere(['od_order_id' => $orderId]);
+    }
+
     /**
     * @return OrderData[]|array
     */
