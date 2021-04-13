@@ -198,7 +198,7 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
         $this->or_status_id = $dto->status;
         $this->or_pay_status_id = $dto->payStatus;
         $this->or_lead_id = $dto->leadId;
-        $this->or_name = $this->generateName($dto->leadId);
+        $this->or_name = $this->generateName((int)$dto->leadId);
         $this->or_client_currency = $dto->clientCurrency;
         if ($this->orLead && $this->orLead->employee_id) {
             $this->or_owner_user_id = $this->orLead->employee_id;
