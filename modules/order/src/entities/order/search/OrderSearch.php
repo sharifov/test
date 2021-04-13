@@ -167,13 +167,20 @@ class OrderSearch extends Order
 
     public function searchByLead(int $leadId): ActiveDataProvider
     {
-        $query = self::find()->andWhere(['or_lead_id' => $leadId]);
+        $query = self::find()->joinLeadOrdersByLead($leadId);
 
-        $dataProvider = new ActiveDataProvider([
+        return new ActiveDataProvider([
             'query' => $query,
         ]);
+    }
 
-        return $dataProvider;
+    public function searchByCase(int $caseId): ActiveDataProvider
+    {
+        $query = self::find()->joinCaseOrdersByCase($caseId);
+
+        return new ActiveDataProvider([
+            'query' => $query,
+        ]);
     }
 
     public function getViewFields(): array

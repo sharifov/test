@@ -31,6 +31,7 @@ use frontend\models\CasePreviewSmsForm;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\entity\fileCase\FileCase;
 use modules\fileStorage\src\services\url\UrlGenerator;
+use modules\order\src\entities\order\search\OrderSearch;
 use sales\auth\Auth;
 use sales\entities\cases\CasesSourceType;
 use sales\entities\cases\CasesStatus;
@@ -721,6 +722,8 @@ class CasesController extends FController
         $enableCommunication = true;
         $isAdmin = true;
 
+        $dataProviderOrders = (new OrderSearch())->searchByCase($model->cs_id);
+
         return $this->render('view', [
             'model' => $model,
             'previewEmailForm' => $previewEmailForm,
@@ -747,7 +750,9 @@ class CasesController extends FController
             'sendCouponsForm' => $sendCouponForm,
 
             'fromPhoneNumbers' => $fromPhoneNumbers,
-            'smsEnabled' => $smsEnabled
+            'smsEnabled' => $smsEnabled,
+
+            'dataProviderOrders' => $dataProviderOrders
         ]);
     }
 

@@ -35,6 +35,8 @@ use modules\product\src\interfaces\ProductDataInterface;
 use sales\entities\EventTrait;
 use sales\entities\serializer\Serializable;
 use sales\helpers\product\ProductQuoteHelper;
+use sales\model\caseOrder\entity\CaseOrder;
+use sales\model\leadOrder\entity\LeadOrder;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -90,6 +92,8 @@ use yii\helpers\VarDumper;
  * @property ProductQuote[] $productQuotesApplied
  * @property OrderContact[] $orderContacts
  * @property Project $project
+ * @property LeadOrder[] $leadOrder
+ * @property CaseOrder[] $caseOrder
  */
 class Order extends ActiveRecord implements Serializable, ProductDataInterface
 {
@@ -253,6 +257,16 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
     public function getOrCreatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'or_created_user_id']);
+    }
+
+    public function getLeadOrder(): ActiveQuery
+    {
+        return $this->hasMany(LeadOrder::class, ['lo_order_id' => 'or_id']);
+    }
+
+    public function getCaseOrder(): ActiveQuery
+    {
+        return $this->hasMany(CaseOrder::class, ['co_order_id' => 'or_id']);
     }
 
     /**
