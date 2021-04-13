@@ -599,6 +599,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return $this->pqProduct->isRenTCar();
     }
 
+    public function isCruise(): bool
+    {
+        return $this->pqProduct->isCruise();
+    }
+
     /**
      * @param int|null $creatorId
      * @param string|null $description

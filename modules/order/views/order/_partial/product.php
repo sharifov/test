@@ -14,6 +14,7 @@ $filterProducts = [];
 $flightProductQuotes = [];
 $hotelProductQuotes = [];
 $rentCarProductQuotes = [];
+$cruiseProductQuotes = [];
 
 
 foreach ($orderRelatedQuotes as $productQuote) {
@@ -77,6 +78,10 @@ foreach ($orderRelatedQuotes as $productQuote) {
                                 <?php $rentCarProductQuotes[] = $productQuote; ?>
                             <?php endif; ?>
 
+                            <?php if ($productQuote->isCruise() && $productQuote->pq_product_id == $product->pr_id) :?>
+                                <?php $cruiseProductQuotes[] = $productQuote; ?>
+                            <?php endif; ?>
+
                         <?php endforeach; ?>
 
                         <?php if ($product->isFlight()) :?>
@@ -99,11 +104,20 @@ foreach ($orderRelatedQuotes as $productQuote) {
                                 'productId' => $product->pr_id
                             ]) ?>
                         <?php endif; ?>
+
+                        <?php if ($product->isRenTCar()) :?>
+                            <?= $this->render('product_cruise_quotes', [
+                                'data' => $cruiseProductQuotes,
+                                'productId' => $product->pr_id
+                            ]) ?>
+                        <?php endif; ?>
                     </div>
                 </div>
                     <?php
                         $flightProductQuotes = [];
                         $hotelProductQuotes = [];
+                        $rentCarProductQuotes = [];
+                        $cruiseProductQuotes = [];
                     ?>
                 <?php endforeach; ?>
             </div>
