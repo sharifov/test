@@ -82,7 +82,10 @@ foreach ($orderRelatedQuotes as $productQuote) {
                         <?php endif; ?>
 
                         <?php if ($product->isHotel()) :?>
-                            <? //= $this->render('product_flight_quotes', ['data' => $hotelProductQuotes]) ?>
+                            <?= $this->render('product_hotel_quotes', [
+                                    'data' => $hotelProductQuotes,
+                                    'productId' => $product->pr_id
+                            ]) ?>
                         <?php endif; ?>
                     </div>
                 </div>

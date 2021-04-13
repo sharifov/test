@@ -5,6 +5,7 @@ namespace modules\product\src\entities\productQuote;
 use common\models\Currency;
 use common\models\Employee;
 use modules\flight\models\FlightQuote;
+use modules\hotel\models\HotelQuote;
 use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
@@ -83,6 +84,7 @@ use yii\db\ActiveRecord;
  * @property ProductQuoteOption[] $productQuoteOptionsActive
  * @property ProductQuote|null $clone
  * @property FlightQuote|null $flightQuote
+ * @property HotelQuote|null $hotelQuote
  * @property ProductQuote[]|null $relates
  * @property ProductQuote|null $relateParent
  *
@@ -246,6 +248,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function getFlightQuote()
     {
         return $this->hasOne(FlightQuote::class, ['fq_product_quote_id' => 'pq_id']);
+    }
+
+    public function getHotelQuote()
+    {
+        return $this->hasOne(HotelQuote::class, ['hq_product_quote_id' => 'pq_id']);
     }
 
     /**
