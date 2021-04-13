@@ -68,7 +68,13 @@ class OrderDataLanguage
     public static function default(int $projectId): self
     {
         $languageId = null;
-        $projectLocale = ProjectLocale::find()->select('pl_language_id')->enabled()->default()->byProject($projectId)->asArray()->one();
+        $projectLocale = ProjectLocale::find()
+            ->select('pl_language_id')
+            ->enabled()
+            ->default()
+            ->byProject($projectId)
+            ->asArray()
+            ->one();
         if ($projectLocale && $projectLocale['pl_language_id']) {
             $languageId = $projectLocale['pl_language_id'];
         }

@@ -3,6 +3,8 @@
 namespace modules\order\src\services\confirmation;
 
 use modules\order\src\entities\order\Order;
+use modules\order\src\entities\orderData\OrderData;
+use sales\services\cases\CasesCommunicationService;
 
 class EmailConfirmationData
 {
@@ -24,12 +26,22 @@ class EmailConfirmationData
             ];
         }
 
+        $languageId = null;
+        $marketingCountry = null;
+        $orderData = OrderData::find()->select(['od_language_id', 'od_market_country'])->byOrderId($order->or_id)->asArray()->one();
+        if ($orderData) {
+            $languageId = $orderData['od_language_id'];
+            $marketingCountry = $orderData['od_market_country'];
+        }
+        $localeParams = CasesCommunicationService::getLocaleParams($order->or_project_id, $marketingCountry, $languageId);
+
         return [
             'project' => $projectData,
             'project_key' => $project->project_key ?? '',
             'order' => $order->serialize(),
             'content' => '',
             'subject' => '',
+            'localeParams' => $localeParams,
         ];
     }
 }
