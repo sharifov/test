@@ -6,6 +6,7 @@ use common\models\Currency;
 use common\models\Employee;
 use modules\flight\models\FlightQuote;
 use modules\hotel\models\HotelQuote;
+use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
@@ -85,6 +86,7 @@ use yii\db\ActiveRecord;
  * @property ProductQuote|null $clone
  * @property FlightQuote|null $flightQuote
  * @property HotelQuote|null $hotelQuote
+ * @property RentCarQuote|null $rentCarQuote
  * @property ProductQuote[]|null $relates
  * @property ProductQuote|null $relateParent
  *
@@ -253,6 +255,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function getHotelQuote()
     {
         return $this->hasOne(HotelQuote::class, ['hq_product_quote_id' => 'pq_id']);
+    }
+
+    public function getRentCarQuote()
+    {
+        return $this->hasOne(RentCarQuote::class, ['rcq_product_quote_id' => 'pq_id']);
     }
 
     /**
