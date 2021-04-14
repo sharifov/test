@@ -1169,12 +1169,12 @@ var PhoneWidgetCall = function () {
         );
     }
 
-    function addPriorityCallNotification(data) {
+    function addPriorityCallNotification(data, isShow) {
         // let key = data.project + '.' + data.department;
         return window.phoneWidget.notifier.add(
             window.phoneWidget.notifier.keys.priorityCall,
             window.phoneWidget.notifier.types.priorityCall,
-            createPriorityCallNotification(data)
+            createPriorityCallNotification(data, isShow)
         );
     }
 
@@ -1187,11 +1187,11 @@ var PhoneWidgetCall = function () {
         );
     }
 
-    function createPriorityCallNotification(data) {
+    function createPriorityCallNotification(data, isShow) {
         return  {
             'project': data.project,
             'department': data.department,
-            'isShow': true,
+            'isShow': isShow,
             'eventName': window.phoneWidget.events.priorityQueueAccepted
         };
     }
@@ -1248,11 +1248,6 @@ var PhoneWidgetCall = function () {
             }
         });
 
-        data.priority.forEach(function (item) {
-            queues.priority.addMany(item.project, item.department, item.count);
-            addPriorityCallNotification(item);
-        });
-
         let outgoingExist = false;
         data.outgoing.forEach(function (call) {
             queues.outgoing.add(call);
@@ -1266,6 +1261,15 @@ var PhoneWidgetCall = function () {
         });
         data.conferences.forEach(function (conference) {
             storage.conference.add(conference);
+        });
+
+        data.priority.forEach(function (item) {
+            queues.priority.addMany(item.project, item.department, item.count);
+            if (queues.active.count() > 0 || queues.outgoing.count() > 0) {
+                addPriorityCallNotification(item, false);
+            } else {
+                addPriorityCallNotification(item, true);
+            }
         });
 
         openWidget();
@@ -1317,12 +1321,19 @@ var PhoneWidgetCall = function () {
         console.log('add priority call');
         queues.priority.add(data.project, data.department);
 
+         if (queues.active.count() > 0 || queues.outgoing.count() > 0) {
+             addPriorityCallNotification(data, false);
+         } else {
+             addPriorityCallNotification(data, true);
+         }
+
         // if (queues.active.count() > 0 || queues.outgoing.count() > 0 || panes.incoming.isActive()) {
-            addPriorityCallNotification(data);
+        //     addPriorityCallNotification(data);
         // } else {
             // addFirstPriorityCallNotification(data);
             // panes.incoming.init(call, (queues.direct.count() + queues.general.count()), (queues.active.count() + queues.hold.count()));
         // }
+
         panes.queue.refresh();
         audio.incoming.refresh();
         //iconUpdate();
