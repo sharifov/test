@@ -298,7 +298,7 @@ JS;
             <!--<i title="code: <?php /*=\yii\helpers\Html::encode($model->atnq_hash_key)*/?>">Hash: <?php /* =\yii\helpers\Html::encode($model->atnq_hash_key)*/?></i>-->
 
 
-                <?php Pjax::begin(['id' => 'pjax-quote_prices-' . $model->atnq_id, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
+                <?php Pjax::begin(['id' => 'pjax-quote_prices-' . $model->attractionQuote->atnq_id, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
                 <?= $this->render('attraction_quote_item_prices', [
                     'attractionQuote' => $model->attractionQuote,
                     'quote' => $model,
