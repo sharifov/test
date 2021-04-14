@@ -2,14 +2,7 @@
 
 namespace webapi\modules\v2\controllers;
 
-use modules\invoice\src\entities\invoice\InvoiceRepository;
-use modules\order\src\forms\api\create\BillingInfoForm;
-use modules\order\src\forms\api\create\CreditCardForm;
-use modules\order\src\payment\PaymentRepository;
-use modules\order\src\transaction\repository\TransactionRepository;
 use sales\helpers\app\AppHelper;
-use sales\repositories\billingInfo\BillingInfoRepository;
-use sales\repositories\creditCard\CreditCardRepository;
 use sales\services\TransactionManager;
 use webapi\src\forms\payment\PaymentFromBoForm;
 use webapi\src\logger\ApiLogger;
@@ -20,11 +13,7 @@ use webapi\src\response\messages\ErrorsMessage;
 use webapi\src\response\messages\MessageMessage;
 use webapi\src\response\messages\StatusCodeMessage;
 use webapi\src\response\SuccessResponse;
-use webapi\src\services\payment\BillingInfoApiService;
-use webapi\src\services\payment\CreditCardApiService;
-use webapi\src\services\payment\InvoiceApiService;
-use webapi\src\services\payment\PaymentApiService;
-use webapi\src\services\payment\TransactionApiService;
+use webapi\src\services\payment\PaymentManageApiService;
 use Yii;
 use yii\helpers\ArrayHelper;
 
@@ -32,31 +21,19 @@ use yii\helpers\ArrayHelper;
  * Class PaymentController
  *
  * @property TransactionManager $transactionManager
- * @property PaymentRepository $paymentRepository
- * @property TransactionRepository $transactionRepository
- * @property CreditCardRepository $creditCardRepository
- * @property BillingInfoRepository $billingInfoRepository
- * @property InvoiceRepository $invoiceRepository
+ * @property PaymentManageApiService $paymentManageApiService
  */
 class PaymentController extends BaseController
 {
-    private PaymentRepository $paymentRepository;
     private TransactionManager $transactionManager;
-    private TransactionRepository $transactionRepository;
-    private CreditCardRepository $creditCardRepository;
-    private BillingInfoRepository $billingInfoRepository;
-    private InvoiceRepository $invoiceRepository;
+    private PaymentManageApiService $paymentManageApiService;
 
     /**
      * @param $id
      * @param $module
      * @param ApiLogger $logger
      * @param TransactionManager $transactionManager
-     * @param PaymentRepository $paymentRepository
-     * @param TransactionRepository $transactionRepository
-     * @param CreditCardRepository $creditCardRepository
-     * @param BillingInfoRepository $billingInfoRepository
-     * @param InvoiceRepository $invoiceRepository
+     * @param PaymentManageApiService $paymentManageApiService
      * @param array $config
      */
     public function __construct(
@@ -64,19 +41,11 @@ class PaymentController extends BaseController
         $module,
         ApiLogger $logger,
         TransactionManager $transactionManager,
-        PaymentRepository $paymentRepository,
-        TransactionRepository $transactionRepository,
-        CreditCardRepository $creditCardRepository,
-        BillingInfoRepository $billingInfoRepository,
-        InvoiceRepository $invoiceRepository,
+        PaymentManageApiService $paymentManageApiService,
         $config = []
     ) {
         $this->transactionManager = $transactionManager;
-        $this->paymentRepository = $paymentRepository;
-        $this->transactionRepository = $transactionRepository;
-        $this->creditCardRepository = $creditCardRepository;
-        $this->billingInfoRepository = $billingInfoRepository;
-        $this->invoiceRepository = $invoiceRepository;
+        $this->paymentManageApiService = $paymentManageApiService;
 
         parent::__construct($id, $module, $logger, $config);
     }
@@ -96,7 +65,6 @@ class PaymentController extends BaseController
      *  }
      *
      * @apiParam {string{255}}          fareId                      Fare Id (Order identity)
-     *
      * @apiParam {object}               payments                    Payments data array
      * @apiParam {float}                payments.pay_amount         Payment amount
      * @apiParam {string{3}}            payments.pay_currency       Payment currency code (for example USD)
@@ -274,60 +242,7 @@ class PaymentController extends BaseController
 
         try {
             $transactionResult = $this->transactionManager->wrap(function () use ($paymentFromBoForm) {
-                $paymentApiForms = $paymentFromBoForm->getPaymentApiForms();
-                $creditCardForms = $paymentFromBoForm->getCreditCardForms();
-                $billingInfoForms = $paymentFromBoForm->getBillingInfoForms();
-                $orderId = $paymentFromBoForm->order->getId();
-                $transactionProcessed = [];
-
-                foreach ($paymentApiForms as $key => $paymentApiForm) {
-                    $creditCardId = null;
-                    /** @var CreditCardForm $creditCardForm */
-                    if (
-                        ($creditCardForm = ArrayHelper::getValue($creditCardForms, $key)) &&
-                        !CreditCardApiService::existCreditCard($creditCardForm)
-                    ) {
-                        $creditCard = CreditCardApiService::createCreditCard($creditCardForm);
-                        $this->creditCardRepository->save($creditCard);
-                        $creditCardId = $creditCard->cc_id;
-                    }
-
-                    $billingInfoId = null;
-                    /** @var BillingInfoForm $billingInfoForm */
-                    if (
-                        ($billingInfoForm = ArrayHelper::getValue($billingInfoForms, $key)) &&
-                        !BillingInfoApiService::existBillingInfo($billingInfoForm, $orderId)
-                    ) {
-                        $billingInfo = BillingInfoApiService::createBillingInfo(
-                            $billingInfoForm,
-                            $creditCardId,
-                            $orderId
-                        );
-                        $this->billingInfoRepository->save($billingInfo);
-                        $billingInfoId = $billingInfo->bi_id;
-                    }
-
-                    $invoiceId = null;
-                    if ($invoice = InvoiceApiService::getOrCreateInvoice($paymentApiForm, $orderId, $billingInfoId)) {
-                        $this->invoiceRepository->save($invoice);
-                        $invoiceId = $invoice->inv_id;
-                    }
-
-                    $payment = PaymentApiService::getOrCreatePayment($paymentApiForm, $orderId, $invoiceId, $billingInfoId);
-                    $this->paymentRepository->save($payment);
-
-                    $payment = PaymentApiService::processingPayment($payment, $paymentApiForm);
-                    $this->paymentRepository->save($payment);
-
-                    if (TransactionApiService::existTransaction($paymentApiForm, $payment->pay_id)) {
-                        throw new \DomainException('Transaction already exist. Code:(' . $paymentApiForm->pay_auth_id . ')');
-                    }
-
-                    $transaction = TransactionApiService::createTransaction($paymentApiForm, $payment->pay_id);
-                    $this->transactionRepository->save($transaction);
-                    $transactionProcessed[] = $transaction->tr_code;
-                }
-                return $transactionProcessed;
+                return $this->paymentManageApiService->handler($paymentFromBoForm);
             });
         } catch (\Throwable $throwable) {
             \Yii::error(

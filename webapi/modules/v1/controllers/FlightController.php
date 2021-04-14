@@ -24,6 +24,8 @@ use sales\helpers\ErrorsToStringHelper;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
 use webapi\src\ApiCodeException;
+use webapi\src\forms\flight\FlightRequestApiForm;
+use webapi\src\forms\payment\PaymentFromBoForm;
 use webapi\src\Messages;
 use webapi\src\response\ErrorResponse;
 use webapi\src\response\messages\CodeMessage;
@@ -33,7 +35,10 @@ use webapi\src\response\messages\MessageMessage;
 use webapi\src\response\messages\StatusCodeMessage;
 use webapi\src\response\Response;
 use webapi\src\response\SuccessResponse;
+use webapi\src\services\flight\FlightManageApiService;
+use webapi\src\services\payment\PaymentManageApiService;
 use Yii;
+use yii\base\Model;
 use yii\helpers\ArrayHelper;
 use sales\dispatchers\EventDispatcher;
 
@@ -45,6 +50,8 @@ use sales\dispatchers\EventDispatcher;
  * @property PaymentRepository $paymentRepository
  * @property TicketIssueProcessingDataService $ticketIssueProcessingDataService
  * @property EventDispatcher $eventDispatcher
+ * @property PaymentManageApiService $paymentManageApiService
+ * @property FlightManageApiService $flightManageApiService
  */
 class FlightController extends ApiBaseController
 {
@@ -54,6 +61,8 @@ class FlightController extends ApiBaseController
     private PaymentRepository $paymentRepository;
     private TicketIssueProcessingDataService $ticketIssueProcessingDataService;
     private EventDispatcher $eventDispatcher;
+    private PaymentManageApiService $paymentManageApiService;
+    private FlightManageApiService $flightManageApiService;
 
     public function __construct(
         $id,
@@ -64,6 +73,8 @@ class FlightController extends ApiBaseController
         PaymentRepository $paymentRepository,
         TicketIssueProcessingDataService $ticketIssueProcessingDataService,
         EventDispatcher $eventDispatcher,
+        PaymentManageApiService $paymentManageApiService,
+        FlightManageApiService $flightManageApiService,
         $config = []
     ) {
         $this->flightQuoteRepository = $flightQuoteRepository;
@@ -72,6 +83,8 @@ class FlightController extends ApiBaseController
         $this->paymentRepository = $paymentRepository;
         $this->ticketIssueProcessingDataService = $ticketIssueProcessingDataService;
         $this->eventDispatcher = $eventDispatcher;
+        $this->paymentManageApiService = $paymentManageApiService;
+        $this->flightManageApiService = $flightManageApiService;
 
         parent::__construct($id, $module, $config);
     }
@@ -389,7 +402,7 @@ class FlightController extends ApiBaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{15}}   orderUid                    Order Uid
+     * @apiParam {string{15}}   fareId                      Fare Id (Order identity)
      * @apiParam {object}       trips                       Trips data array
      * @apiParam {object}       flights                     Flights data array
      * @apiParam {object}       payments                    Payments data array
@@ -402,7 +415,7 @@ class FlightController extends ApiBaseController
      * @apiParamExample {json} Request-Example:
      *
      *   {
-            "orderUid": "order uid example",
+            "fareId": "or6061be5ec5c0e",
             "parentBookingId": "OE96040",
             "parentId": 205975,
             "sameItinerary": true,
@@ -809,20 +822,20 @@ class FlightController extends ApiBaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{15}}   orderUid                    Order Uid
-     * @apiParam {object}       flights                     Flights data array
-     * @apiParam {object}       payments                    Payments data array
-     * @apiParam {float}        payments.pay_amount         Payment amount
-     * @apiParam {string{3}}    payments.pay_currency       Payment currency code (for example USD)
-     * @apiParam {string{100}}  [payments.pay_method_key]   Payment method key (by default "card")
-     * @apiParam {date}         payments.pay_date           Payment date (format Y-m-d)
-     * @apiParam {string{255}}  [payments.pay_description]  Payment description
-     * @apiParam {int}          payments.pay_status_id      Payment status
+     * @apiParam {string{255}}          fareId                      Fare Id (Order identity)
+     * @apiParam {object}               flights                     Flights data array
+     * @apiParam {object}               payments                    Payments data array
+     * @apiParam {float}                payments.pay_amount         Payment amount
+     * @apiParam {string{3}}            payments.pay_currency       Payment currency code (for example USD)
+     * @apiParam {string{100}}          [payments.pay_method_key]   Payment method key (by default "card")
+     * @apiParam {date}                 payments.pay_date           Payment date (format Y-m-d)
+     * @apiParam {string{255}}          [payments.pay_description]  Payment description
+     * @apiParam {int}                  payments.pay_status_id      Payment status
      *
      * @apiParamExample {json} Request-Example:
      *
      *   {
-            "orderUid": "or6061be5ec5c0e",
+            "fareId": "or6061be5ec5c0e",
             "flights": [
                 {
                     "appKey": "038ce0121a1666678d4db57cb10e8667b98d8b08c408cdf7c9b04f1430071826",
@@ -961,39 +974,37 @@ class FlightController extends ApiBaseController
             "trips": [],
             "payments":[
                 {
-                    "pay_amount":154.21,
-                    "pay_currency":"USD",
-                    "pay_code":"ch_1IYvYZFhXDZuLIpUisShKSRP",
+                    "pay_amount": 200.21,
+                    "pay_currency": "USD",
+                    "pay_auth_id": 728282,
+                    "pay_type": "Capture",
+                    "pay_code": "ch_YYYYYYYYYYYYYYYYYYYYY",
+                    "pay_date": "2021-03-25",
                     "pay_method_key":"card",
-                    "pay_status_id":1,
-                    "pay_date":"2021-03-25",
-                    "pay_description": "example description"
-                },
-                {
-                    "pay_amount":54.35,
-                    "pay_currency":"EUR",
-                    "pay_code":"transactionIdcode",
-                    "pay_method_key":"card",
-                    "pay_status_id":1,
-                    "pay_date":"2021-03-29",
-                    "pay_description": "example description"
+                    "pay_description": "example description",
+                    "creditCard": {
+                        "holder_name": "Tester holder",
+                        "number": "111**********111",
+                        "type": "Visa",
+                        "expiration": "07 / 23",
+                        "cvv": "123"
+                    },
+                    "billingInfo": {
+                        "first_name": "Hobbit",
+                        "middle_name": "Hard",
+                        "last_name": "Lover",
+                        "address": "1013 Weda Cir",
+                        "country_id": "US",
+                        "city": "Gotham City",
+                        "state": "KY",
+                        "zip": "99999",
+                        "phone": "+19074861000",
+                        "email": "barabara@test.com"
+                    }
                 }
             ]
         }
      *
-     * * @apiParamExample {json} Payment Status ID Mapping
-     * {
-     *      1: "New",
-     *      2: "Pending",
-     *      3: "In Progress",
-     *      4: "Authorized",
-     *      5: "Captured",
-     *      6: "Refunded",
-     *      7: "Canceled",
-     *      8: "Failed",
-     *      9: "Declined",
-     *      10: "Completed"
-     * }
      *
      * @apiSuccessExample {json} Success-Response:
      * HTTP/1.1 200 OK
@@ -1046,43 +1057,47 @@ class FlightController extends ApiBaseController
             );
         }
 
-        $flightTicketIssueRequestApiForm = new FlightTicketIssueRequestApiForm();
         $post = Yii::$app->request->post();
-        if (!$flightTicketIssueRequestApiForm->load($post)) {
-            return $this->endApiLog($apiLog, new ErrorResponse(
-                new StatusCodeMessage(400),
-                new MessageMessage(Messages::LOAD_DATA_ERROR),
-                new ErrorsMessage('Not found data on request'),
-                new CodeMessage(FlightCodeException::API_TICKET_FLIGHT_NOT_FOUND_DATA_ON_REQUEST)
-            ));
+        $flightRequestApiForm = new FlightRequestApiForm();
+        if (!$flightRequestApiForm->load($post)) {
+            return $this->endApiLog($apiLog, self::notLoadErrorResponse('FlightTicketIssueRequestApiForm'));
         }
-        if (!$flightTicketIssueRequestApiForm->validate()) {
+        if (!$flightRequestApiForm->validate()) {
             \Yii::warning(
-                ErrorsToStringHelper::extractFromModel($flightTicketIssueRequestApiForm),
-                'FlightController:actionTicketIssue:flightUpdateApiForm'
+                ErrorsToStringHelper::extractFromModel($flightRequestApiForm),
+                'FlightController:actionTicketIssue:FlightTicketIssueRequestApiForm'
             );
-            return $this->endApiLog($apiLog, new ErrorResponse(
-                new MessageMessage(Messages::VALIDATION_ERROR),
-                new ErrorsMessage($flightTicketIssueRequestApiForm->getErrors()),
-                new CodeMessage(FlightCodeException::API_TICKET_FLIGHT_VALIDATE)
-            ));
+            return $this->endApiLog($apiLog, self::validateErrorResponse($flightRequestApiForm));
         }
+
+        $paymentFromBoForm = new PaymentFromBoForm();
+        if (!$paymentFromBoForm->load($post)) {
+            return $this->endApiLog($apiLog, self::notLoadErrorResponse('PaymentFromBoForm'));
+        }
+        if (!$paymentFromBoForm->validate()) {
+            \Yii::warning(
+                ErrorsToStringHelper::extractFromModel($paymentFromBoForm),
+                'FlightController:actionTicketIssue:PaymentFromBoForm'
+            );
+            return $this->endApiLog($apiLog, self::validateErrorResponse($paymentFromBoForm));
+        }
+
 
         try {
-            TicketIssueCheckDataService::checkFlights($flightTicketIssueRequestApiForm->flights);
-            TicketIssueCheckDataService::checkPayments($flightTicketIssueRequestApiForm->payments);
+            $this->transactionManager->wrap(function () use ($flightRequestApiForm, $paymentFromBoForm, $post) {
+                $x = true; /* TODO::  */
 
-            $this->transactionManager->wrap(function () use ($flightTicketIssueRequestApiForm, $post) {
-                $this->ticketIssueProcessingDataService->processingQuote($flightTicketIssueRequestApiForm, $post);
-                $this->ticketIssueProcessingDataService->processingPayment($flightTicketIssueRequestApiForm);
-                $this->eventDispatcher->dispatch(new FlightProductProcessedSuccessEvent($flightTicketIssueRequestApiForm->order->or_id));
+                $this->flightManageApiService->handler($flightRequestApiForm);
+
+                $this->paymentManageApiService->handler($paymentFromBoForm);
+                $this->eventDispatcher->dispatch(new FlightProductProcessedSuccessEvent($flightRequestApiForm->order->or_id));
             });
 
             return $this->endApiLog($apiLog, new SuccessResponse(
                 new StatusCodeMessage(200),
                 new MessageMessage('OK'),
                 new DataMessage([
-                    'resultMessage' => 'Order Uid(' . $flightTicketIssueRequestApiForm->orderUid . ') successful processed',
+                    'resultMessage' => 'Order Uid(' . $flightRequestApiForm->orderUid . ') successful processed',
                 ])
             ));
         } catch (\Throwable $throwable) {
@@ -1219,5 +1234,24 @@ class FlightController extends ApiBaseController
     {
         $apiLog->endApiLog(ArrayHelper::toArray($response));
         return $response;
+    }
+
+    private static function validateErrorResponse(Model $form): ErrorResponse
+    {
+        return  new ErrorResponse(
+            new MessageMessage(Messages::VALIDATION_ERROR),
+            new ErrorsMessage($form->getErrors()),
+            new CodeMessage(FlightCodeException::API_TICKET_FLIGHT_VALIDATE)
+        );
+    }
+
+    private static function notLoadErrorResponse(string $formName = ''): ErrorResponse
+    {
+        return new ErrorResponse(
+            new StatusCodeMessage(400),
+            new MessageMessage(Messages::LOAD_DATA_ERROR),
+            new ErrorsMessage($formName . '. Not found data on request'),
+            new CodeMessage(FlightCodeException::API_TICKET_FLIGHT_NOT_FOUND_DATA_ON_REQUEST)
+        );
     }
 }
