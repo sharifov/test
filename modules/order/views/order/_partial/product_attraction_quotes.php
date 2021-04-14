@@ -34,16 +34,16 @@ $pjaxId = 'pjax-product-quote-list-' . $productId;
             </h2>
 
             <ul class="nav navbar-right panel_toolbox">
-                <li>
-                    <?= Html::a('<i class="fa fa-search warning"></i> Search Quotes', null, [
+                <!--<li>
+                    <?/*= Html::a('<i class="fa fa-search warning"></i> Search Quotes', null, [
                         'data-url' => \yii\helpers\Url::to([
                             '/attraction/attraction-quote/search-ajax',
                             'id' => $productId
                         ]),
                         'data-hotel-id' => $productId,
                         'class' => 'btn-search-attraction-quotes'
-                    ]) ?>
-                </li>
+                    ]) */?>
+                </li>-->
                 <li>
                     <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                 </li>
