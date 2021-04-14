@@ -7,9 +7,9 @@ use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
-/* @var yii\web\View $this */
-/* @var modules\flight\models\search\FlightQuoteTicketSearch $searchModel */
-/* @var yii\data\ActiveDataProvider $dataProvider */
+/* @var $this yii\web\View */
+/* @var $searchModel modules\flight\models\search\FlightQuoteTicketSearch */
+/* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Flight Quote Tickets';
 $this->params['breadcrumbs'][] = $this->title;
@@ -28,11 +28,13 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => SerialColumn::class],
+
             'fqt_pax_id',
-            'fqt_flight_id',
+            'fqt_fqb_id',
             'fqt_ticket_number',
             ['class' => DateTimeColumn::class, 'attribute' => 'fqt_created_dt'],
             ['class' => DateTimeColumn::class, 'attribute' => 'fqt_updated_dt'],
+
 
             ['class' => ActionColumn::class],
         ],

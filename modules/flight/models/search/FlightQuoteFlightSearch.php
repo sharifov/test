@@ -12,11 +12,8 @@ class FlightQuoteFlightSearch extends FlightQuoteFlight
         return [
             ['fqf_booking_id', 'string', 'max' => 50],
             ['fqf_cabin_class', 'string', 'max' => 1],
-            ['fqf_gds', 'string', 'max' => 2],
-            ['fqf_gds_pcc', 'string', 'max' => 10],
             ['fqf_main_airline', 'string', 'max' => 2],
             ['fqf_pnr', 'string', 'max' => 10],
-            ['fqf_record_locator', 'string', 'max' => 8],
             ['fqf_original_data_json', 'string'],
             ['fqf_validating_carrier', 'string', 'max' => 2],
 
@@ -53,9 +50,7 @@ class FlightQuoteFlightSearch extends FlightQuoteFlight
             'DATE(fqf_updated_dt)' => $this->fqf_updated_dt,
         ]);
 
-        $query->andFilterWhere(['like', 'fqf_record_locator', $this->fqf_record_locator])
-            ->andFilterWhere(['like', 'fqf_gds', $this->fqf_gds])
-            ->andFilterWhere(['like', 'fqf_gds_pcc', $this->fqf_gds_pcc])
+        $query
             ->andFilterWhere(['like', 'fqf_cabin_class', $this->fqf_cabin_class])
             ->andFilterWhere(['like', 'fqf_main_airline', $this->fqf_main_airline])
             ->andFilterWhere(['like', 'fqf_booking_id', $this->fqf_booking_id])

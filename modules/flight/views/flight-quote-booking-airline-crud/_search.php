@@ -4,11 +4,11 @@ use yii\bootstrap4\Html;
 use common\components\bootstrap4\activeForm\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model modules\flight\models\search\FlightQuoteTicketSearch */
+/* @var $model modules\flight\models\search\FlightQuoteBookingAirlineSearch */
 /* @var $form common\components\bootstrap4\activeForm\ActiveForm */
 ?>
 
-<div class="flight-quote-ticket-search">
+<div class="flight-quote-booking-airline-search">
 
     <?php $form = ActiveForm::begin([
         'action' => ['index'],
@@ -18,15 +18,17 @@ use common\components\bootstrap4\activeForm\ActiveForm;
         ],
     ]); ?>
 
-    <?= $form->field($model, 'fqt_pax_id') ?>
+    <?= $form->field($model, 'fqba_id') ?>
 
-    <?= $form->field($model, 'fqt_ticket_number') ?>
+    <?= $form->field($model, 'fqba_fqb_id') ?>
 
-    <?= $form->field($model, 'fqt_created_dt') ?>
+    <?= $form->field($model, 'fqba_record_locator') ?>
 
-    <?= $form->field($model, 'fqt_updated_dt') ?>
+    <?= $form->field($model, 'fqba_airline_code') ?>
 
-    <?= $form->field($model, 'fqt_fqb_id') ?>
+    <?= $form->field($model, 'fqba_created_dt') ?>
+
+    <?php // echo $form->field($model, 'fqba_updated_dt') ?>
 
     <div class="form-group">
         <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>

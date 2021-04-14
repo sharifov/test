@@ -28,9 +28,6 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             'fqf_id',
             'fqf_fq_id',
-            'fqf_record_locator',
-            'fqf_gds',
-            'fqf_gds_pcc',
             'fqf_type_id',
             'fqf_cabin_class',
             'fqf_trip_type_id',

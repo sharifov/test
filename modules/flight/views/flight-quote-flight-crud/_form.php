@@ -17,12 +17,6 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'fqf_fq_id')->textInput() ?>
 
-        <?= $form->field($model, 'fqf_record_locator')->textInput(['maxlength' => true]) ?>
-
-        <?= $form->field($model, 'fqf_gds')->textInput(['maxlength' => true]) ?>
-
-        <?= $form->field($model, 'fqf_gds_pcc')->textInput(['maxlength' => true]) ?>
-
         <?= $form->field($model, 'fqf_type_id')->textInput() ?>
 
         <?= $form->field($model, 'fqf_cabin_class')->textInput(['maxlength' => true]) ?>

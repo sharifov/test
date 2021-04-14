@@ -7,7 +7,7 @@ use yii\bootstrap4\Html;
 
 $this->title = 'Update Flight Quote Ticket: ' . $model->fqt_pax_id;
 $this->params['breadcrumbs'][] = ['label' => 'Flight Quote Tickets', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->fqt_pax_id, 'url' => ['view', 'fqt_pax_id' => $model->fqt_pax_id, 'fqt_flight_id' => $model->fqt_flight_id]];
+$this->params['breadcrumbs'][] = ['label' => $model->fqt_pax_id, 'url' => ['view', 'fqt_pax_id' => $model->fqt_pax_id, 'fqt_fqb_id' => $model->fqt_fqb_id]];
 $this->params['breadcrumbs'][] = 'Update';
 ?>
 <div class="flight-quote-ticket-update">

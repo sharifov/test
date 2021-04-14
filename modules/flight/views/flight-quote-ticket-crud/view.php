@@ -16,9 +16,10 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <div class="col-md-4">
+
         <p>
-            <?= Html::a('Update', ['update', 'fqt_pax_id' => $model->fqt_pax_id, 'fqt_flight_id' => $model->fqt_flight_id], ['class' => 'btn btn-primary']) ?>
-            <?= Html::a('Delete', ['delete', 'fqt_pax_id' => $model->fqt_pax_id, 'fqt_flight_id' => $model->fqt_flight_id], [
+            <?= Html::a('Update', ['update', 'fqt_pax_id' => $model->fqt_pax_id, 'fqt_fqb_id' => $model->fqt_fqb_id], ['class' => 'btn btn-primary']) ?>
+            <?= Html::a('Delete', ['delete', 'fqt_pax_id' => $model->fqt_pax_id, 'fqt_fqb_id' => $model->fqt_fqb_id], [
                 'class' => 'btn btn-danger',
                 'data' => [
                     'confirm' => 'Are you sure you want to delete this item?',
@@ -31,12 +32,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'model' => $model,
             'attributes' => [
                 'fqt_pax_id',
-                'fqt_flight_id',
+                'fqt_fqb_id',
                 'fqt_ticket_number',
                 'fqt_created_dt:byUserDateTime',
                 'fqt_updated_dt:byUserDateTime',
             ],
         ]) ?>
+
     </div>
 
 </div>

@@ -4,18 +4,15 @@ namespace modules\flight\controllers;
 
 use frontend\controllers\FController;
 use Yii;
-use modules\flight\models\FlightQuoteTicket;
-use modules\flight\models\search\FlightQuoteTicketSearch;
+use modules\flight\models\FlightQuoteBookingAirline;
+use modules\flight\models\search\FlightQuoteBookingAirlineSearch;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\db\StaleObjectException;
 use yii\helpers\ArrayHelper;
 
-/**
- * Class FlightQuoteTicketCrudController
- */
-class FlightQuoteTicketCrudController extends FController
+class FlightQuoteBookingAirlineCrudController extends FController
 {
     public function init(): void
     {
@@ -41,7 +38,7 @@ class FlightQuoteTicketCrudController extends FController
      */
     public function actionIndex(): string
     {
-        $searchModel = new FlightQuoteTicketSearch();
+        $searchModel = new FlightQuoteBookingAirlineSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -51,15 +48,14 @@ class FlightQuoteTicketCrudController extends FController
     }
 
     /**
-     * @param integer $fqt_pax_id
-     * @param integer $fqt_fqb_id
+     * @param integer $id
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($fqt_pax_id, $fqt_fqb_id): string
+    public function actionView($id): string
     {
         return $this->render('view', [
-            'model' => $this->findModel($fqt_pax_id, $fqt_fqb_id),
+            'model' => $this->findModel($id),
         ]);
     }
 
@@ -68,10 +64,10 @@ class FlightQuoteTicketCrudController extends FController
      */
     public function actionCreate()
     {
-        $model = new FlightQuoteTicket();
+        $model = new FlightQuoteBookingAirline();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'fqt_pax_id' => $model->fqt_pax_id, 'fqt_fqb_id' => $model->fqt_fqb_id]);
+            return $this->redirect(['view', 'id' => $model->fqba_id]);
         }
 
         return $this->render('create', [
@@ -80,17 +76,16 @@ class FlightQuoteTicketCrudController extends FController
     }
 
     /**
-     * @param integer $fqt_pax_id
-     * @param integer $fqt_fqb_id
+     * @param integer $id
      * @return string|Response
      * @throws NotFoundHttpException
      */
-    public function actionUpdate($fqt_pax_id, $fqt_fqb_id)
+    public function actionUpdate($id)
     {
-        $model = $this->findModel($fqt_pax_id, $fqt_fqb_id);
+        $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'fqt_pax_id' => $model->fqt_pax_id, 'fqt_fqb_id' => $model->fqt_fqb_id]);
+            return $this->redirect(['view', 'id' => $model->fqba_id]);
         }
 
         return $this->render('update', [
@@ -99,31 +94,29 @@ class FlightQuoteTicketCrudController extends FController
     }
 
     /**
-     * @param integer $fqt_pax_id
-     * @param integer $fqt_fqb_id
+     * @param integer $id
      * @return Response
      * @throws NotFoundHttpException
      * @throws \Throwable
      * @throws StaleObjectException
      */
-    public function actionDelete($fqt_pax_id, $fqt_fqb_id): Response
+    public function actionDelete($id): Response
     {
-        $this->findModel($fqt_pax_id, $fqt_fqb_id)->delete();
+        $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
     }
 
     /**
-     * @param integer $fqt_pax_id
-     * @param integer $fqt_fqb_id
-     * @return FlightQuoteTicket
+     * @param integer $id
+     * @return FlightQuoteBookingAirline
      * @throws NotFoundHttpException
      */
-    protected function findModel($fqt_pax_id, $fqt_fqb_id): FlightQuoteTicket
+    protected function findModel($id): FlightQuoteBookingAirline
     {
-        if (($model = FlightQuoteTicket::findOne(['fqt_pax_id' => $fqt_pax_id, 'fqt_fqb_id' => $fqt_fqb_id])) !== null) {
+        if (($model = FlightQuoteBookingAirline::findOne($id)) !== null) {
             return $model;
         }
-        throw new NotFoundHttpException('FlightQuoteTicket not found. (' . $fqt_pax_id . '/' . $fqt_fqb_id . ')');
+        throw new NotFoundHttpException('FlightQuoteBookingAirline by ID(' . $id . ')');
     }
 }

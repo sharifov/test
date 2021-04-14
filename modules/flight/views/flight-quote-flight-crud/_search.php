@@ -22,12 +22,6 @@ use common\components\bootstrap4\activeForm\ActiveForm;
 
     <?= $form->field($model, 'fqf_fq_id') ?>
 
-    <?= $form->field($model, 'fqf_record_locator') ?>
-
-    <?= $form->field($model, 'fqf_gds') ?>
-
-    <?= $form->field($model, 'fqf_gds_pcc') ?>
-
     <?php // echo $form->field($model, 'fqf_type_id') ?>
 
     <?php // echo $form->field($model, 'fqf_cabin_class') ?>

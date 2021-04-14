@@ -10,7 +10,7 @@ class FlightQuoteTicketSearch extends FlightQuoteTicket
     public function rules(): array
     {
         return [
-            ['fqt_flight_id', 'integer'],
+            ['fqt_fqb_id', 'integer'],
             ['fqt_pax_id', 'integer'],
             ['fqt_ticket_number', 'string'],
             [['fqt_created_dt', 'fqt_updated_dt'], 'datetime', 'format' => 'php:Y-m-d'],
@@ -35,9 +35,9 @@ class FlightQuoteTicketSearch extends FlightQuoteTicket
 
         $query->andFilterWhere([
             'fqt_pax_id' => $this->fqt_pax_id,
-            'fqt_flight_id' => $this->fqt_flight_id,
             'DATE(fqt_created_dt)' => $this->fqt_created_dt,
             'DATE(fqt_updated_dt)' => $this->fqt_updated_dt,
+            'fqt_fqb_id' => $this->fqt_fqb_id,
         ]);
 
         $query->andFilterWhere(['like', 'fqt_ticket_number', $this->fqt_ticket_number]);

@@ -58,7 +58,7 @@ class FlightModule extends \yii\base\Module
      */
     public static function getListMenu(string $modulePath = 'flight'): array
     {
-        $items = [
+        return [
             ['label' => 'Main', 'url' => ['/' . $modulePath . '/default/index']],
             ['label' => 'Flight Request', 'url' => ['/' . $modulePath . '/flight/index']],
             ['label' => 'Flight Segments', 'url' => ['/' . $modulePath . '/flight-segment/index']],
@@ -74,8 +74,9 @@ class FlightModule extends \yii\base\Module
             ['label' => 'Flight Quote Option', 'url' => ['/' . $modulePath . '/flight-quote-option-crud/index']],
             ['label' => 'Flight Quote Flight', 'url' => ['/' . $modulePath . '/flight-quote-flight-crud/index']],
             ['label' => 'Flight Quote Ticket', 'url' => ['/' . $modulePath . '/flight-quote-ticket-crud/index']],
-        ];
 
-        return $items;
+            ['label' => 'Flight Quote Booking', 'url' => ['/' . $modulePath . '/flight-quote-booking-crud/index']],
+            ['label' => 'Flight Quote Booking Airline', 'url' => ['/' . $modulePath . '/flight-quote-booking-airline-crud/index']],
+        ];
     }
 }

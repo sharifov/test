@@ -11,12 +11,12 @@ use yii\helpers\ArrayHelper;
  * This is the model class for table "flight_quote_ticket".
  *
  * @property int $fqt_pax_id
- * @property int $fqt_flight_id
  * @property string|null $fqt_ticket_number
  * @property string|null $fqt_created_dt
  * @property string|null $fqt_updated_dt
+ * @property int $fqt_fqb_id
  *
- * @property FlightQuoteFlight $fqtFlight
+ * @property FlightQuoteBooking $fqtFqb
  * @property FlightPax $fqtPax
  */
 class FlightQuoteTicket extends \yii\db\ActiveRecord
@@ -24,11 +24,11 @@ class FlightQuoteTicket extends \yii\db\ActiveRecord
     public function rules(): array
     {
         return [
-            [['fqt_pax_id', 'fqt_flight_id'], 'unique', 'targetAttribute' => ['fqt_pax_id', 'fqt_flight_id']],
+            [['fqt_pax_id', 'fqt_fqb_id'], 'unique', 'targetAttribute' => ['fqt_pax_id', 'fqt_fqb_id']],
 
-            ['fqt_flight_id', 'required'],
-            ['fqt_flight_id', 'integer'],
-            ['fqt_flight_id', 'exist', 'skipOnError' => true, 'targetClass' => FlightQuoteFlight::class, 'targetAttribute' => ['fqt_flight_id' => 'fqf_id']],
+            ['fqt_fqb_id', 'required'],
+            ['fqt_fqb_id', 'integer'],
+            ['fqt_fqb_id', 'exist', 'skipOnError' => true, 'targetClass' => FlightQuoteBooking::class, 'targetAttribute' => ['fqt_fqb_id' => 'fqb_id']],
 
             ['fqt_pax_id', 'required'],
             ['fqt_pax_id', 'integer'],
@@ -55,9 +55,9 @@ class FlightQuoteTicket extends \yii\db\ActiveRecord
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
-    public function getFqtFlight(): \yii\db\ActiveQuery
+    public function getFqtFqb(): \yii\db\ActiveQuery
     {
-        return $this->hasOne(FlightQuoteFlight::class, ['fqf_id' => 'fqt_flight_id']);
+        return $this->hasOne(FlightQuoteBooking::class, ['fqb_id' => 'fqt_fqb_id']);
     }
 
     public function getFqtPax(): \yii\db\ActiveQuery
@@ -68,11 +68,11 @@ class FlightQuoteTicket extends \yii\db\ActiveRecord
     public function attributeLabels(): array
     {
         return [
-            'fqt_pax_id' => 'Pax ID',
-            'fqt_flight_id' => 'Flight ID',
+            'fqt_pax_id' => 'Pax',
             'fqt_ticket_number' => 'Ticket Number',
             'fqt_created_dt' => 'Created Dt',
             'fqt_updated_dt' => 'Updated Dt',
+            'fqt_fqb_id' => 'Flight Quote Booking',
         ];
     }
 

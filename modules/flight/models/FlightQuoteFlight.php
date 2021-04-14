@@ -14,9 +14,6 @@ use yii\helpers\ArrayHelper;
  *
  * @property int $fqf_id
  * @property int|null $fqf_fq_id
- * @property string|null $fqf_record_locator
- * @property string|null $fqf_gds
- * @property string|null $fqf_gds_pcc
  * @property int|null $fqf_type_id
  * @property string|null $fqf_cabin_class
  * @property int|null $fqf_trip_type_id
@@ -33,10 +30,9 @@ use yii\helpers\ArrayHelper;
  * @property FlightQuotePaxPrice[] $flightQuotePaxPrices
  * @property FlightQuoteSegmentStop[] $flightQuoteSegmentStops
  * @property FlightQuoteSegment[] $flightQuoteSegments
- * @property FlightQuoteTicket[] $flightQuoteTickets
  * @property FlightQuoteTrip[] $flightQuoteTrips
  * @property FlightQuote $fqfFq
- * @property FlightPax[] $fqtPaxes
+ * @property FlightQuoteBooking[] $flightQuoteBookings
  */
 class FlightQuoteFlight extends \yii\db\ActiveRecord
 {
@@ -52,11 +48,8 @@ class FlightQuoteFlight extends \yii\db\ActiveRecord
 
             ['fqf_booking_id', 'string', 'max' => 50],
             ['fqf_cabin_class', 'string', 'max' => 1],
-            ['fqf_gds', 'string', 'max' => 2],
-            ['fqf_gds_pcc', 'string', 'max' => 10],
             ['fqf_main_airline', 'string', 'max' => 2],
             ['fqf_pnr', 'string', 'max' => 10],
-            ['fqf_record_locator', 'string', 'max' => 8],
             ['fqf_validating_carrier', 'string', 'max' => 2],
 
             ['fqf_status_id', 'integer'],
@@ -103,14 +96,14 @@ class FlightQuoteFlight extends \yii\db\ActiveRecord
         return $this->hasMany(FlightQuoteSegment::class, ['fqs_flight_id' => 'fqf_id']);
     }
 
-    public function getFlightQuoteTickets(): \yii\db\ActiveQuery
-    {
-        return $this->hasMany(FlightQuoteTicket::class, ['fqt_flight_id' => 'fqf_id']);
-    }
-
     public function getFlightQuoteTrips(): \yii\db\ActiveQuery
     {
         return $this->hasMany(FlightQuoteTrip::class, ['fqp_flight_id' => 'fqf_id']);
+    }
+
+    public function getFlightQuoteBookings(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(FlightQuoteBooking::class, ['fqb_fqf_id' => 'fqf_id']);
     }
 
     public function getFqfFq(): \yii\db\ActiveQuery
@@ -118,19 +111,11 @@ class FlightQuoteFlight extends \yii\db\ActiveRecord
         return $this->hasOne(FlightQuote::class, ['fq_id' => 'fqf_fq_id']);
     }
 
-    public function getFqtPaxes(): \yii\db\ActiveQuery
-    {
-        return $this->hasMany(FlightPax::class, ['fp_id' => 'fqt_pax_id'])->viaTable('flight_quote_ticket', ['fqt_flight_id' => 'fqf_id']);
-    }
-
     public function attributeLabels(): array
     {
         return [
             'fqf_id' => 'ID',
             'fqf_fq_id' => 'FlightQuote ID',
-            'fqf_record_locator' => 'Record Locator',
-            'fqf_gds' => 'Gds',
-            'fqf_gds_pcc' => 'Gds Pcc',
             'fqf_type_id' => 'Type ID',
             'fqf_cabin_class' => 'Cabin Class',
             'fqf_trip_type_id' => 'Trip Type ID',
@@ -158,9 +143,6 @@ class FlightQuoteFlight extends \yii\db\ActiveRecord
 
     public static function create(
         int $flightQuoteId,
-        ?string $recordLocator,
-        ?string $gds,
-        ?string $gdsPcc,
         ?int $typeId,
         ?string $cabinClass,
         ?int $tripTypeId,
@@ -169,9 +151,6 @@ class FlightQuoteFlight extends \yii\db\ActiveRecord
     ): FlightQuoteFlight {
         $model = new self();
         $model->fqf_fq_id = $flightQuoteId;
-        $model->fqf_record_locator = $recordLocator;
-        $model->fqf_gds = $gds;
-        $model->fqf_gds_pcc = $gdsPcc;
         $model->fqf_type_id = $typeId;
         $model->fqf_cabin_class = $cabinClass;
         $model->fqf_trip_type_id = $tripTypeId;
