@@ -1,10 +1,9 @@
 <?php
 
-/* @var $this yii\web\View */
-/* @var $index int */
-/* @var $key int */
-/* @var $attractionProduct \modules\attraction\models\Attraction */
-/* @var $model \modules\attraction\models\AttractionQuote */
+/**
+ * @var $this yii\web\View
+ * @var $model ProductQuote
+ */
 
 use kartik\editable\Editable;
 use modules\hotel\models\Hotel;
@@ -18,10 +17,11 @@ use yii\web\View;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use modules\attraction\src\helpers\AttractionQuoteHelper;
+use modules\product\src\entities\productQuote\ProductQuote;
 
 ?>
 
-<?php if ($model->atnqProductQuote) : ?>
+
     <?php
     $js = <<<JS
     $('body').off('click', '.btn-attraction-book-quote').on('click', '.btn-attraction-book-quote', function (e) {
@@ -202,27 +202,27 @@ JS;
                 <!--            <li>-->
                 <!--                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>-->
                 <!--            </li>-->
-                <li class="dropdown dropdown-offer-menu" data-product-quote-id="<?=($model->atnq_product_quote_id)?>" data-lead-id="<?=($attractionProduct->atnProduct->pr_lead_id)?>" data-url="<?= Url::to(['/offer/offer/list-menu-ajax'])?>">
+                <!--<li class="dropdown dropdown-offer-menu" data-product-quote-id="<?/*=($model->atnq_product_quote_id)*/?>" data-lead-id="<?/*=($attractionProduct->atnProduct->pr_lead_id)*/?>" data-url="<?/*= Url::to(['/offer/offer/list-menu-ajax'])*/?>">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="far fa-handshake"></i> Offers</a>
                     <div class="dropdown-menu" role="menu">
-                        <?php // ajax loaded content ?>
+                        <?php /*// ajax loaded content */?>
                     </div>
                 </li>
 
-                <li class="dropdown dropdown-order-menu" data-product-quote-id="<?=($model->atnq_product_quote_id)?>" data-lead-id="<?=($attractionProduct->atnProduct->pr_lead_id)?>" data-url="<?= Url::to(['/order/order/list-menu-ajax'])?>">
+                <li class="dropdown dropdown-order-menu" data-product-quote-id="<?/*=($model->atnq_product_quote_id)*/?>" data-lead-id="<?/*=($attractionProduct->atnProduct->pr_lead_id)*/?>" data-url="<?/*= Url::to(['/order/order/list-menu-ajax'])*/?>">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fas fa-money-check-alt"></i> Orders</a>
                     <div class="dropdown-menu" role="menu">
-                        <?php // ajax loaded content ?>
+                        <?php /*// ajax loaded content */?>
                     </div>
-                </li>
+                </li>-->
 
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-bars text-warning"></i></a>
                     <div class="dropdown-menu" role="menu">
-                        <h6 class="dropdown-header">Quote Q<?=($model->atnq_product_quote_id)?></h6>
+                        <h6 class="dropdown-header">Quote Q<?=($model->attractionQuote->atnq_product_quote_id)?></h6>
 
-                        <?php if ($model->isBookable()) : ?>
-                            <?= Html::a(
+                        <!--<?php /*if ($model->isBookable()) : */?>
+                            <?/*= Html::a(
                                 '<i class="fa fa-share-square"></i> Book',
                                 null,
                                 [
@@ -231,10 +231,10 @@ JS;
                                     'data-attraction-quote-id' => $model->atnq_id,
                                     'data-product-id' => $model->atnqProductQuote->pq_product_id,
                                 ]
-                            ) ?>
-                        <?php endif; ?>
-                        <?php if ($model->isBooking()) : ?>
-                            <?= Html::a(
+                            ) */?>
+                        <?php /*endif; */?>
+                        <?php /*if ($model->isBooking()) : */?>
+                            <?/*= Html::a(
                                 '<i class="fa fa-share-square"></i> Cancel Book',
                                 null,
                                 [
@@ -243,15 +243,15 @@ JS;
                                     'data-attraction-quote-id' => $model->atnq_id,
                                     'data-product-id' => $model->atnqProductQuote->pq_product_id,
                                 ]
-                            ) ?>
-                        <?php endif; ?>
+                            ) */?>
+                        <?php /*endif; */?>
 
-                        <?= Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
+                        <?/*= Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
                             'class' => 'dropdown-item text-success btn-add-product-quote-option',
                             'data-url' => Url::to(['/product/product-quote-option/create-ajax', 'id' => $model->atnq_product_quote_id]),
-                        ]) ?>
+                        ]) */?>
 
-                        <?= Html::a(
+                        <?/*= Html::a(
                             '<i class="fa fa-list"></i> API Service Log',
                             null,
                             [
@@ -260,16 +260,16 @@ JS;
                                 'data-attraction-quote-id' => $model->atnq_id,
                                 'data-product-id' => $model->atnqProductQuote->pq_product_id,
                             ]
-                        )?>
+                        )*/?>
 
-                        <?= Html::a('<i class="fa fa-list"></i> Status log', null, [
+                        <?/*= Html::a('<i class="fa fa-list"></i> Status log', null, [
                             'class' => 'dropdown-item text-secondary btn-product-quote-status-log',
                             'data-url' => Url::to(['/product/product-quote-status-log/show', 'gid' => $model->atnqProductQuote->pq_gid]),
                             'data-gid' => $model->atnqProductQuote->pq_gid,
-                        ]) ?>
+                        ]) */?>
 
-                        <?php if (Auth::can('/attraction/attraction-quote/ajax-file-generate') && $model->isBooking()) : ?>
-                            <?= Html::a(
+                        <?php /*if (Auth::can('/attraction/attraction-quote/ajax-file-generate') && $model->isBooking()) : */?>
+                            <?/*= Html::a(
                                 '<i class="fa fa-file-pdf-o"></i> Generate PDF',
                                 null,
                                 [
@@ -277,44 +277,41 @@ JS;
                                     'data-url' => Url::to('/attraction/attraction-quote/ajax-file-generate'),
                                     'data-quote-id' => $model->atnq_id,
                                 ]
-                            ) ?>
-                        <?php endif; ?>
+                            ) */?>
+                        <?php /*endif; */?>
 
                         <div class="dropdown-divider"></div>
-                        <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [
+                        <?/*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [
                             'class' => 'dropdown-item text-danger btn-delete-product-quote',
                             'data-product-quote-id' => $model->atnq_product_quote_id,
                             'data-attraction-quote-id' => $model->atnq_id,
                             'data-product-id' => $model->atnqProductQuote->pq_product_id,
-                        ]) ?>
+                        ]) */?>-->
                     </div>
                 </li>
             </ul>
             <div class="clearfix"></div>
         </div>
         <div class="x_content" style="display: block">
-            <i class="fa fa-user"></i> <?=$model->atnqProductQuote->pqCreatedUser ? Html::encode($model->atnqProductQuote->pqCreatedUser->username) : '-'?>,
-            <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($model->atnqProductQuote->pq_created_dt)) ?>
+            <i class="fa fa-user"></i> <?=$model->pqCreatedUser ? Html::encode($model->pqCreatedUser->username) : '-'?>,
+            <i class="fa fa-calendar fa-info-circle"></i> <?=Yii::$app->formatter->asDatetime(strtotime($model->pq_created_dt)) ?>
             <!--<i title="code: <?php /*=\yii\helpers\Html::encode($model->atnq_hash_key)*/?>">Hash: <?php /* =\yii\helpers\Html::encode($model->atnq_hash_key)*/?></i>-->
 
 
-
-            <?php if ($model->atnqProductQuote) : ?>
                 <?php Pjax::begin(['id' => 'pjax-quote_prices-' . $model->atnq_id, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
                 <?= $this->render('attraction_quote_item_prices', [
-                    'attractionQuote' => $model,
-                    'quote' => $model->atnqProductQuote,
-                    'priceData' => AttractionQuoteHelper::getPricesData($model)
+                    'attractionQuote' => $model->attractionQuote,
+                    'quote' => $model,
+                    'priceData' => AttractionQuoteHelper::getPricesData($model->attractionQuote)
                 ]); ?>
                 <?php Pjax::end(); ?>
-            <?php endif; ?>
 
-            <?= $this->render('@frontend/views/lead/quotes/partial/_quote_option_list', ['productQuote' => $model->atnqProductQuote]) ?>
-            <?= $this->render('@frontend/views/lead/quotes/partial/_quote_total', ['productQuote' => $model->atnqProductQuote]) ?>
+
+            <?= $this->render('@frontend/views/lead/quotes/partial/_quote_option_list', ['productQuote' => $model]) ?>
+            <?= $this->render('@frontend/views/lead/quotes/partial/_quote_total', ['productQuote' => $model]) ?>
 
         </div>
     </div>
     <?php Pjax::end(); ?>
 
-<?php endif; ?>
 
