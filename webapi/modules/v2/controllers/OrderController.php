@@ -182,7 +182,7 @@ class OrderController extends BaseController
      * @api {post} /v2/order/create-proxy Create Order Proxy
      * @apiVersion 0.2.0
      * @apiName CreateOrderProxy
-     * @apiGroup Orders
+     * @apiGroup Order
      * @apiPermission Authorized User
      *
      * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
@@ -350,7 +350,7 @@ class OrderController extends BaseController
      * @api {post} /v2/order/create Create Order
      * @apiVersion 0.2.0
      * @apiName CreateOrder
-     * @apiGroup Orders
+     * @apiGroup Order
      * @apiPermission Authorized User
      *
      * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
@@ -360,6 +360,7 @@ class OrderController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
+     * @apiParam {string{max 10}}       sourceCid                                           Source cid
      * @apiParam {string{max 32}}       offerGid                                            Offer gid
      * @apiParam {Object[]}             productQuotes                                       Product Quotes
      * @apiParam {string{max 32}}       productQuotes.gid                                   Product Quote Gid
@@ -443,6 +444,7 @@ class OrderController extends BaseController
      *
      * @apiParamExample {json} Request-Example:
      * {
+    "sourceCid": "OVA102",
     "offerGid": "73c8bf13111feff52794883446461740",
     "productQuotes": [
         {
@@ -1400,9 +1402,8 @@ class OrderController extends BaseController
             $this->orderRequestRepository->save($orderRequest);
 
             $offer = $this->offerRepository->findByGid($form->offerGid);
-            $project = $this->projectRepository->findById($this->auth->au_project_id ?? 0);
 
-            $dto = new CreateOrderDTO($offer->of_lead_id, $form->payment->currency, $request->post(), OrderSourceType::P2B, $orderRequest->orr_id, $project->id);
+            $dto = new CreateOrderDTO($offer->of_lead_id, $form->payment->currency, $request->post(), OrderSourceType::P2B, $orderRequest->orr_id, $form->projectId);
             $order = $this->orderManageService->createOrder($dto, $form);
 
             $response = new SuccessResponse(
@@ -1437,7 +1438,7 @@ class OrderController extends BaseController
      * @api {post} /v2/order/view View Order
      * @apiVersion 0.1.0
      * @apiName ViewOrder
-     * @apiGroup Orders
+     * @apiGroup Order
      * @apiPermission Authorized User
      *
      * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
@@ -1833,7 +1834,7 @@ class OrderController extends BaseController
      * @api {get} /v2/order/get-file Get File
      * @apiVersion 0.2.0
      * @apiName GetFile
-     * @apiGroup Orders
+     * @apiGroup Order
      * @apiPermission Authorized User
      *
      * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
@@ -1888,7 +1889,7 @@ class OrderController extends BaseController
      * @api {post} /v2/order/create-c2b Create Order c2b flow
      * @apiVersion 1.0.0
      * @apiName CreateOrderClickToBook
-     * @apiGroup Orders
+     * @apiGroup Order
      * @apiPermission Authorized User
      *
      * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
@@ -2163,10 +2164,8 @@ class OrderController extends BaseController
             $orderRequest = OrderRequest::create($request->post(), OrderSourceType::C2B);
             $this->orderRequestRepository->save($orderRequest);
 
-            $project = $this->projectRepository->findById($this->auth->au_project_id ?? 0);
-
-            $order = $this->transactionManager->wrap(function () use ($form, $project, $request, $orderRequest) {
-                $dto = new CreateOrderDTO(null, $form->payment->clientCurrency, $request->post(), OrderSourceType::C2B, $orderRequest->orr_id, $project->id, $form->getOrderStatus(), $form->fareId);
+            $order = $this->transactionManager->wrap(function () use ($form, $request, $orderRequest) {
+                $dto = new CreateOrderDTO(null, $form->payment->clientCurrency, $request->post(), OrderSourceType::C2B, $orderRequest->orr_id, $form->projectId, $form->getOrderStatus(), $form->fareId);
                 $order = $this->orderManageService->createByC2bFlow($dto);
 
                 foreach ($form->quotes as $quoteForm) {
@@ -2176,7 +2175,7 @@ class OrderController extends BaseController
                     $productType = $this->productTypeRepository->findByKey($quoteForm->productKey);
                     $productCreateForm = new ProductCreateForm();
                     $productCreateForm->pr_type_id = $productType->pt_id;
-                    $productCreateForm->pr_project_id = $project->id;
+                    $productCreateForm->pr_project_id = $form->projectId;
                     $product = $this->productCreateService->handle($productCreateForm);
                     $childProduct = $product->getChildProduct();
                     if ($childProduct) {
@@ -2188,7 +2187,7 @@ class OrderController extends BaseController
                 $order->recalculateProfitAmount();
                 $this->orderRepository->save($order);
 
-                $orderData = OrderData::create($order->or_id, $form->bookingId, $form->sourceCid);
+                $orderData = OrderData::create($order->or_id, $form->bookingId, $form->sourceId);
                 $orderData->detachBehavior('user');
                 $this->orderDataRepository->save($orderData);
 

@@ -1,5 +1,6 @@
 <?php
 
+use common\components\grid\DateTimeColumn;
 use common\components\i18n\Formatter;
 use sales\model\leadOrder\entity\LeadOrder;
 use yii\bootstrap4\Html;
@@ -42,7 +43,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw'
             ],
-            'lo_create_dt:byUserDateTime',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'lo_create_dt',
+                'format' => 'byUserDateTime'
+            ],
             'lo_created_user_id:username',
 
             ['class' => 'yii\grid\ActionColumn'],

@@ -150,4 +150,19 @@ class SettingHelper
     {
         return Yii::$app->params['settings']['order_cancellation_case_category_key'] ?? '';
     }
+
+    public static function getOrderFreeCancelEmailTemplateKey(): string
+    {
+        return Yii::$app->params['settings']['order_free_cancel_email_template_key'] ?? 'order_free_cancel_success';
+    }
+
+    public static function getOrderProcessingEmailTemplateKey(): string
+    {
+        return Yii::$app->params['settings']['order_processing_email_template_key'] ?? 'order_status';
+    }
+
+    public static function getOrderCompleteEmailTemplateKey(): string
+    {
+        return Yii::$app->params['settings']['order_complete_email_template_key'] ?? 'order_status';
+    }
 }

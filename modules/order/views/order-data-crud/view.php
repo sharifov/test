@@ -32,13 +32,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'model' => $model,
             'attributes' => [
                 'od_id',
-                'od_order_id',
+                'od_order_id:orderId',
                 'od_display_uid',
-                'od_source_cid',
+                'od_source_id:source',
                 'od_created_by',
                 'od_updated_by',
-                'od_created_dt',
-                'od_updated_dt',
+                'od_created_dt:byUserDateTime',
+                'od_updated_dt:byUserDateTime',
             ],
         ]) ?>
 

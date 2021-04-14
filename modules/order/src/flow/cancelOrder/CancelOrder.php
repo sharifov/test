@@ -27,6 +27,7 @@ use sales\services\client\ClientManageService;
  * @property HotelCanceler $hotelCanceler
  * @property CasesRepository $casesRepository
  * @property ClientManageService $clientManageService
+ * @property CasesCreateService $casesCreateService
  */
 class CancelOrder
 {
@@ -36,6 +37,7 @@ class CancelOrder
     private HotelCanceler $hotelCanceler;
     private CasesRepository $casesRepository;
     private ClientManageService $clientManageService;
+    private CasesCreateService $casesCreateService;
 
     public function __construct(
         OrderRepository $orderRepository,
@@ -43,7 +45,8 @@ class CancelOrder
         FlightCanceler $flightCanceler,
         HotelCanceler $hotelCanceler,
         CasesRepository $casesRepository,
-        ClientManageService $clientManageService
+        ClientManageService $clientManageService,
+        CasesCreateService $casesCreateService
     ) {
         $this->orderRepository = $orderRepository;
         $this->freeCancelChecker = $freeCancelChecker;
@@ -51,6 +54,7 @@ class CancelOrder
         $this->hotelCanceler = $hotelCanceler;
         $this->casesRepository = $casesRepository;
         $this->clientManageService = $clientManageService;
+        $this->casesCreateService = $casesCreateService;
     }
 
     public function cancel(string $gid): void
@@ -75,39 +79,9 @@ class CancelOrder
 
             $order->cancel('Cancel Order Flow', OrderStatusAction::CANCEL_FLOW, null);
             $this->orderRepository->save($order);
-
-            if (
-                SettingHelper::isCreateCaseOnOrderCancelEnabled()
-                &&
-                $caseCategory = CaseCategory::find()->byKey(SettingHelper::getCaseCategoryKeyOnOrderCancel())->one()
-            ) {
-                $orderData = OrderData::findOne(['od_order_id' => $order->or_id]);
-
-                $orderContact = OrderContact::find()->byOrderId($order->or_id)->last()->one();
-                if (!$orderContact) {
-                    throw new \DomainException('Cannot create client, order contact not found');
-                }
-                $client = $this->clientManageService->createBasedOnOrderContact($orderContact, $order->or_project_id);
-
-                $case = Cases::createByApi(
-                    $client->id,
-                    $order->or_project_id,
-                    $caseCategory->cc_dep_id,
-                    $orderData->od_display_uid ?? null,
-                    null,
-                    null,
-                    $caseCategory->cc_id
-                );
-                $this->casesRepository->save($case);
-
-                $caseOrder = CaseOrder::create($case->cs_id, $order->or_id);
-                $caseOrder->detachBehavior('user');
-                if (!$caseOrder->save()) {
-                    throw new \RuntimeException($caseOrder->getErrorSummary(true)[0]);
-                }
-            }
         } catch (\DomainException $e) {
             $this->processingFail($order);
+            $this->casesCreateService->createByCancelFailedOrder($order);
             throw $e;
         }
     }

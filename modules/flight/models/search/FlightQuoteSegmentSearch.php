@@ -17,7 +17,7 @@ class FlightQuoteSegmentSearch extends FlightQuoteSegment
     public function rules()
     {
         return [
-            [['fqs_id', 'fqs_flight_quote_id', 'fqs_flight_quote_trip_id', 'fqs_stop', 'fqs_flight_number', 'fqs_duration', 'fqs_ticket_id', 'fqs_recheck_baggage', 'fqs_mileage'], 'integer'],
+            [['fqs_id', 'fqs_flight_quote_id', 'fqs_flight_quote_trip_id', 'fqs_stop', 'fqs_flight_number', 'fqs_duration', 'fqs_ticket_id', 'fqs_recheck_baggage', 'fqs_mileage', 'fqs_flight_id'], 'integer'],
             [['fqs_booking_class', 'fqs_departure_airport_iata', 'fqs_departure_airport_terminal', 'fqs_arrival_airport_iata', 'fqs_arrival_airport_terminal', 'fqs_operating_airline', 'fqs_marketing_airline', 'fqs_air_equip_type', 'fqs_marriage_group', 'fqs_cabin_class', 'fqs_meal', 'fqs_fare_code', 'fqs_key', 'fqs_uid'], 'safe'],
             [['fqs_departure_dt', 'fqs_arrival_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
@@ -74,6 +74,7 @@ class FlightQuoteSegmentSearch extends FlightQuoteSegment
             'fqs_ticket_id' => $this->fqs_ticket_id,
             'fqs_recheck_baggage' => $this->fqs_recheck_baggage,
             'fqs_mileage' => $this->fqs_mileage,
+            'fqs_flight_id' => $this->fqs_flight_id,
         ]);
 
         $query->andFilterWhere(['like', 'fqs_booking_class', $this->fqs_booking_class])

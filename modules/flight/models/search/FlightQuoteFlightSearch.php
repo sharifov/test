@@ -22,7 +22,7 @@ class FlightQuoteFlightSearch extends FlightQuoteFlight
 
             [['fqf_fare_type_id', 'fqf_fq_id', 'fqf_id', 'fqf_status_id', 'fqf_trip_type_id', 'fqf_type_id'], 'integer'],
 
-            [['fqf_created_dt', 'fqf_updated_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+            [['fqf_created_dt', 'fqf_updated_dt'], 'datetime', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -49,8 +49,8 @@ class FlightQuoteFlightSearch extends FlightQuoteFlight
             'fqf_trip_type_id' => $this->fqf_trip_type_id,
             'fqf_fare_type_id' => $this->fqf_fare_type_id,
             'fqf_status_id' => $this->fqf_status_id,
-            'fqf_created_dt' => $this->fqf_created_dt,
-            'fqf_updated_dt' => $this->fqf_updated_dt,
+            'DATE(fqf_created_dt)' => $this->fqf_created_dt,
+            'DATE(fqf_updated_dt)' => $this->fqf_updated_dt,
         ]);
 
         $query->andFilterWhere(['like', 'fqf_record_locator', $this->fqf_record_locator])

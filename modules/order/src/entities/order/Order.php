@@ -89,6 +89,7 @@ use yii\helpers\VarDumper;
  * @property Project $relatedProject
  * @property ProductQuote[] $productQuotesApplied
  * @property OrderContact[] $orderContacts
+ * @property Project $project
  */
 class Order extends ActiveRecord implements Serializable, ProductDataInterface
 {

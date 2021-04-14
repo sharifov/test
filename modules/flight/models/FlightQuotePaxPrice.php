@@ -6,6 +6,7 @@ use common\models\Currency;
 use modules\flight\src\entities\flightQuotePaxPrice\serializer\FlightQuotePaxPriceSerializer;
 use modules\flight\src\useCases\flightQuote\create\FlightQuotePaxPriceDTO;
 use Yii;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "flight_quote_pax_price".
@@ -26,10 +27,12 @@ use Yii;
  * @property string|null $qpp_created_dt
  * @property string|null $qpp_updated_dt
  * @property string|null $qpp_cnt
+ * @property int|null $qpp_flight_id
  *
  * @property Currency $qppClientCurrency
  * @property FlightQuote $qppFlightQuote
  * @property Currency $qppOriginCurrency
+ * @property FlightQuoteFlight $flightQuoteFlight
  */
 class FlightQuotePaxPrice extends \yii\db\ActiveRecord
 {
@@ -57,6 +60,9 @@ class FlightQuotePaxPrice extends \yii\db\ActiveRecord
             [['qpp_origin_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['qpp_origin_currency' => 'cur_code']],
 
             ['qpp_cnt', 'integer'],
+
+            [['qpp_flight_id'], 'integer'],
+            [['qpp_flight_id'], 'exist', 'skipOnError' => true, 'targetClass' => FlightQuoteFlight::class, 'targetAttribute' => ['qpp_flight_id' => 'fqf_id']],
         ];
     }
 
@@ -82,7 +88,13 @@ class FlightQuotePaxPrice extends \yii\db\ActiveRecord
             'qpp_cnt' => 'Count',
             'qpp_created_dt' => 'Created Dt',
             'qpp_updated_dt' => 'Updated Dt',
+            'qpp_flight_id' => 'Quote Flight',
         ];
+    }
+
+    public function getFlightQuoteFlight(): ActiveQuery
+    {
+        return $this->hasOne(FlightQuoteFlight::class, ['fqf_id' => 'qpp_flight_id']);
     }
 
     /**

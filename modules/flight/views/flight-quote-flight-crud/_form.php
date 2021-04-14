@@ -41,8 +41,6 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'fqf_validating_carrier')->textInput(['maxlength' => true]) ?>
 
-        <?= $form->field($model, 'fqf_original_data_json')->textInput() ?>
-
         <?php
             $model->fqf_original_data_json = JsonHelper::encode($model->fqf_original_data_json);
         try {

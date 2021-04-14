@@ -33,6 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'fqt_key',
             'fqt_flight_quote_id',
             'fqt_duration',
+            'fqp_flight_id',
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

@@ -9,10 +9,13 @@
 
 namespace common\components;
 
+use common\models\Project;
 use sales\helpers\setting\SettingHelper;
 use sales\model\call\useCase\conference\create\CreateCallForm;
+use sales\model\project\entity\projectLocale\ProjectLocale;
 use Yii;
 use yii\base\Component;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
 use yii\httpclient\Client;
@@ -1217,7 +1220,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return SettingHelper::isCallRecordingSecurityEnabled() ? (Url::toRoute([$this->securityConferenceRecordingUrl, 'conferenceSid' => $conferenceSid])) : ($this->recordingUrl . $recordingSid);
     }
 
-    public function getContent(string $key, array $contentData = [], string $languageId = 'en-US'): array
+    public function getContent(string $key, array $contentData = [], string $languageId = 'en-US', ?string $locale = null): array
     {
         $out = ['error' => false, 'content' => ''];
         $data = [
@@ -1225,6 +1228,17 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'content_data' => $contentData,
             'language_id' => $languageId,
         ];
+
+        if ($locale) {
+            $data['locale'] = $locale;
+        } elseif (
+            !$locale &&
+            ($project = Project::findOne(['project_key' => ArrayHelper::getValue($contentData, 'project_key')])) &&
+            $defaultMarketCountry = ProjectLocale::getDefaultMarketCountryByProject($project->id)
+        ) {
+            $data['locale'] = $defaultMarketCountry;
+        }
+
         $response = $this->sendRequest('content/get', $data);
 
         if ($response->isOk) {

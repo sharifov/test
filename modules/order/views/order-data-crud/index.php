@@ -1,5 +1,6 @@
 <?php
 
+use common\components\grid\DateTimeColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -31,12 +32,19 @@ $this->params['breadcrumbs'][] = $this->title;
             'od_id',
             'od_order_id',
             'od_display_uid',
-            'od_source_cid',
+            'od_source_id:source',
             'od_created_by',
-            //'od_updated_by',
-            //'od_created_dt',
-            //'od_updated_dt',
-
+            'od_updated_by',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'od_created_dt',
+                'format' => 'byUserDateTime'
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'od_updated_dt',
+                'format' => 'byUserDateTime'
+            ],
             ['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>

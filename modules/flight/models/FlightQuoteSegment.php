@@ -7,6 +7,7 @@ use common\models\Airports;
 use modules\flight\src\entities\flightQuoteSegment\serializer\FlightQuoteSegmentSerializer;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentDTO;
 use Yii;
+use yii\db\ActiveQuery;
 use yii\helpers\VarDumper;
 
 /**
@@ -37,6 +38,7 @@ use yii\helpers\VarDumper;
  * @property int|null $fqs_ticket_id
  * @property int|null $fqs_recheck_baggage
  * @property int|null $fqs_mileage
+ * @property int|null $fqs_flight_id
  *
  * @property FlightQuote $fqsFlightQuote
  * @property FlightQuoteTrip $fqsFlightQuoteTrip
@@ -46,6 +48,7 @@ use yii\helpers\VarDumper;
  * @property Airline $marketingAirline
  * @property Airports $departureAirport
  * @property Airports $arrivalAirport
+ * @property FlightQuoteFlight $flightQuoteFlight
  */
 class FlightQuoteSegment extends \yii\db\ActiveRecord
 {
@@ -82,6 +85,9 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
             [['fqs_key'], 'string', 'max' => 40],
             [['fqs_flight_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => FlightQuote::class, 'targetAttribute' => ['fqs_flight_quote_id' => 'fq_id']],
             [['fqs_flight_quote_trip_id'], 'exist', 'skipOnError' => true, 'targetClass' => FlightQuoteTrip::class, 'targetAttribute' => ['fqs_flight_quote_trip_id' => 'fqt_id']],
+
+            [['fqs_flight_id'], 'integer'],
+            [['fqs_flight_id'], 'exist', 'skipOnError' => true, 'targetClass' => FlightQuoteFlight::class, 'targetAttribute' => ['fqs_flight_id' => 'fqf_id']],
         ];
     }
 
@@ -115,6 +121,7 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
             'fqs_ticket_id' => 'Fqs Ticket ID',
             'fqs_recheck_baggage' => 'Fqs Recheck Baggage',
             'fqs_mileage' => 'Fqs Mileage',
+            'fqs_flight_id' => 'Quote Flight',
         ];
     }
 
@@ -124,6 +131,11 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
             $this->fqs_uid = $this->generateUid();
         }
         return parent::beforeSave($insert);
+    }
+
+    public function getFlightQuoteFlight(): ActiveQuery
+    {
+        return $this->hasOne(FlightQuoteFlight::class, ['fqf_id' => 'fqs_flight_id']);
     }
 
     /**

@@ -13,7 +13,7 @@ class FlightQuoteTicketSearch extends FlightQuoteTicket
             ['fqt_flight_id', 'integer'],
             ['fqt_pax_id', 'integer'],
             ['fqt_ticket_number', 'string'],
-            [['fqt_created_dt', 'fqt_updated_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+            [['fqt_created_dt', 'fqt_updated_dt'], 'datetime', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -23,7 +23,7 @@ class FlightQuoteTicketSearch extends FlightQuoteTicket
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort' => ['defaultOrder' => ['fqf_updated_dt' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['fqt_updated_dt' => SORT_DESC]],
         ]);
 
         $this->load($params);
@@ -36,8 +36,8 @@ class FlightQuoteTicketSearch extends FlightQuoteTicket
         $query->andFilterWhere([
             'fqt_pax_id' => $this->fqt_pax_id,
             'fqt_flight_id' => $this->fqt_flight_id,
-            'fqf_created_dt' => $this->fqt_created_dt,
-            'fqf_updated_dt' => $this->fqt_updated_dt,
+            'DATE(fqt_created_dt)' => $this->fqt_created_dt,
+            'DATE(fqt_updated_dt)' => $this->fqt_updated_dt,
         ]);
 
         $query->andFilterWhere(['like', 'fqt_ticket_number', $this->fqt_ticket_number]);

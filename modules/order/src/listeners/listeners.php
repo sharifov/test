@@ -65,7 +65,7 @@ return [
     OrderEvents\OrderCanceledEvent::class => [
         processManager\listeners\StopOrderProcessManagerListener::class,
         OrderListeners\OrderChangeStatusLogListener::class,
-//        OrderListeners\OrderCanceledConfirmationListener::class,
+        OrderListeners\OrderCanceledConfirmationListener::class,
         OrderListeners\OrderCanceledHybridNotificationListener::class,
         LeadListeners\LeadStatusReloadOrdersListener::class,
     ],

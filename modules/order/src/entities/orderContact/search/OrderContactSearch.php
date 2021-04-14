@@ -53,8 +53,8 @@ class OrderContactSearch extends OrderContact
         $query->andFilterWhere([
             'oc_id' => $this->oc_id,
             'oc_order_id' => $this->oc_order_id,
-            'oc_created_dt' => $this->oc_created_dt,
-            'oc_updated_dt' => $this->oc_updated_dt,
+            'date(oc_created_dt)' => $this->oc_created_dt,
+            'date(oc_updated_dt)' => $this->oc_updated_dt,
         ]);
 
         $query->andFilterWhere(['like', 'oc_first_name', $this->oc_first_name])

@@ -3,6 +3,7 @@
 namespace modules\order\src\forms\api\create;
 
 use common\models\Project;
+use common\models\Sources;
 use modules\offer\src\entities\offer\Offer;
 use sales\forms\CompositeRecursiveForm;
 
@@ -10,6 +11,9 @@ use sales\forms\CompositeRecursiveForm;
  * Class OrderCreateForm
  * @package modules\order\src\forms\api
  *
+ * @property string $sourceCid
+ * @property int $sourceId
+ * @property int $projectId
  * @property string $offerGid
  * @property string $projectApiKey
  * @property ProductQuotesForm[] $productQuotes
@@ -24,6 +28,11 @@ class OrderCreateForm extends CompositeRecursiveForm
 {
     public string $offerGid = '';
 
+    public $sourceCid;
+
+    public $sourceId;
+
+    public $projectId;
 
     public function __construct($config = [])
     {
@@ -67,7 +76,16 @@ class OrderCreateForm extends CompositeRecursiveForm
     public function rules(): array
     {
         return [
-            [['offerGid'], 'required'],
+            [['offerGid', 'sourceCid'], 'required'],
+            [['sourceId'], 'string', 'max' => 10],
+            ['sourceCid', function () {
+                if ($source = Sources::find()->select(['id', 'project_id'])->where(['cid' => $this->sourceCid])->asArray()->limit(1)->one()) {
+                    $this->sourceId = $source['id'];
+                    $this->projectId = $source['project_id'];
+                } else {
+                    $this->addError('sourceCid', 'Source not found');
+                }
+            }],
             [['offerGid'], 'string'],
             ['offerGid', 'exist', 'targetClass' => Offer::class, 'targetAttribute' => 'of_gid'],
         ];
