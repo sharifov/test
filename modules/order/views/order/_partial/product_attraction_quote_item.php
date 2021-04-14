@@ -185,16 +185,16 @@ JS;
     $this->registerJs($js, \yii\web\View::POS_READY);
     ?>
 
-    <?php Pjax::begin(['id' => 'pjax-product-quote-' . $model->atnqProductQuote->pq_id, 'timeout' => 2000, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
+    <?php Pjax::begin(['id' => 'pjax-product-quote-' . $model->pq_id, 'timeout' => 2000, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
     <div class="x_panel">
         <div class="x_title">
-            <span class="badge badge-white">Q<?=($model->atnq_product_quote_id)?></span> Attraction "<b><?=\yii\helpers\Html::encode($model->atnq_attraction_name)?></b>"
+            <span class="badge badge-white">Q<?=($model->attractionQuote->atnq_product_quote_id)?></span> Attraction "<b><?=\yii\helpers\Html::encode($model->attractionQuote->atnq_attraction_name)?></b>"
 
-            | <?= ProductQuoteStatus::asFormat($model->atnqProductQuote->pq_status_id) ?>
+            | <?= ProductQuoteStatus::asFormat($model->pq_status_id) ?>
 
-            <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $model->atnqProductQuote->pq_profit_amount ?>
+            <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $model->pq_profit_amount ?>
 
-            <?php if ($model->atnqProductQuote->pq_clone_id) : ?>
+            <?php if ($model->pq_clone_id) : ?>
                 <span class="badge badge-warning" style="padding-left: 5px">CLONE</span>
             <?php endif;?>
 
