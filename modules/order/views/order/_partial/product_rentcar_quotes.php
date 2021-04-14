@@ -34,16 +34,16 @@ $pjaxId = 'pjax-product-quote-list-' . $productId;
                 </h2>
 
                 <ul class="nav navbar-right panel_toolbox">
-                    <li>
-                        <?= Html::a('<i class="fa fa-search warning"></i> Search Rent Car', null, [
+                    <!--<li>
+                        <?/*= Html::a('<i class="fa fa-search warning"></i> Search Rent Car', null, [
                             'data-url' => \yii\helpers\Url::to([
                                 '/rent-car/rent-car-quote/search-ajax',
                                 'id' => $productId
                             ]),
                             'data-model-id' => $productId,
                             'class' => 'btn-search-rent-car-quotes'
-                        ]) ?>
-                    </li>
+                        ]) */?>
+                    </li>-->
                     <li>
                         <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                     </li>

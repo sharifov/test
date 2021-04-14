@@ -199,41 +199,41 @@ JS;
                 <!--            <li>-->
                 <!--                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>-->
                 <!--            </li>-->
-                <li class="dropdown dropdown-offer-menu" data-product-quote-id="<?=($model->pq_id)?>" data-lead-id="<?=($model->pqProduct->pr_lead_id)?>" data-url="<?= Url::to(['/offer/offer/list-menu-ajax'])?>">
+                <!--<li class="dropdown dropdown-offer-menu" data-product-quote-id="<?/*=($model->pq_id)*/?>" data-lead-id="<?/*=($model->pqProduct->pr_lead_id)*/?>" data-url="<?/*= Url::to(['/offer/offer/list-menu-ajax'])*/?>">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="far fa-handshake"></i> Offers</a>
                     <div class="dropdown-menu" role="menu">
-                        <?php // ajax loaded content?>
+                        <?php /*// ajax loaded content*/?>
                     </div>
                 </li>
 
-                <li class="dropdown dropdown-order-menu" data-product-quote-id="<?=($model->pq_id)?>" data-lead-id="<?=($model->pqProduct->pr_lead_id)?>" data-url="<?= Url::to(['/order/order/list-menu-ajax'])?>">
+                <li class="dropdown dropdown-order-menu" data-product-quote-id="<?/*=($model->pq_id)*/?>" data-lead-id="<?/*=($model->pqProduct->pr_lead_id)*/?>" data-url="<?/*= Url::to(['/order/order/list-menu-ajax'])*/?>">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fas fa-money-check-alt"></i> Orders</a>
                     <div class="dropdown-menu" role="menu">
-                        <?php // ajax loaded content?>
+                        <?php /*// ajax loaded content*/?>
                     </div>
-                </li>
+                </li>-->
 
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-bars text-warning"></i></a>
                     <div class="dropdown-menu" role="menu">
                         <h6 class="dropdown-header">Quote Q<?=($model->pq_id)?></h6>
 
-                        <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-warning"></i> Clone quote', null, [
+                        <!--<?/*= Html::a('<i class="glyphicon glyphicon-remove-circle text-warning"></i> Clone quote', null, [
                             'class' => 'dropdown-item text-warning btn-clone-product-quote',
                             'data-product-quote-id' => $model->pq_id,
                             'data-hotel-quote-id' => $model->hotelQuote->hq_id,
                             'data-product-id' => $model->pqProduct->pr_id,
-                        ]) ?>
+                        ]) */?>
 
-                        <?= Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
+                        <?/*= Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
                             'class' => 'dropdown-item text-success btn-add-product-quote-option',
                             //'data-product-quote-id' => $model->hq_product_quote_id,
                             'data-url' => Url::to(['/product/product-quote-option/create-ajax', 'id' => $model->hotelQuote->hq_product_quote_id]),
                             //'data-product-id' => $model->hqProductQuote->pq_product_id,
-                        ]) ?>
+                        ]) */?>
 
-                        <?php if ($model->isBookable()) : ?>
-                            <?= Html::a(
+                        <?php /*if ($model->isBookable()) : */?>
+                            <?/*= Html::a(
                                 '<i class="fa fa-share-square"></i> Book',
                                 null,
                                 [
@@ -242,8 +242,8 @@ JS;
                                     'data-hotel-quote-id' => $model->hotelQuote->hq_id,
                                     'data-product-id' => $model->pqProduct->pr_id,
                                 ]
-                            ) ?>
-                        <?php endif; ?>
+                            ) */?>
+                        <?php /*endif; */?>-->
                     </div>
                 </li>
             </ul>

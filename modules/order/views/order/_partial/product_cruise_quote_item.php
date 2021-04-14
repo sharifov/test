@@ -148,19 +148,19 @@ JS;
             <i class="ml-2 fas fa-donate" title="Profit Amount"></i> <?= $model->pq_profit_amount ?>
 
             <ul class="nav navbar-right panel_toolbox">
-                <li class="dropdown dropdown-offer-menu" data-product-quote-id="<?=($model->cruiseQuote->crq_product_quote_id)?>" data-lead-id="<?=($model->pqProduct->pr_lead_id)?>" data-url="<?= Url::to(['/offer/offer/list-menu-ajax'])?>">
+                <!--<li class="dropdown dropdown-offer-menu" data-product-quote-id="<?/*=($model->cruiseQuote->crq_product_quote_id)*/?>" data-lead-id="<?/*=($model->pqProduct->pr_lead_id)*/?>" data-url="<?/*= Url::to(['/offer/offer/list-menu-ajax'])*/?>">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="far fa-handshake"></i> Offers</a>
                     <div class="dropdown-menu" role="menu">
-                        <?php // ajax loaded content ?>
+                        <?php /*// ajax loaded content */?>
                     </div>
                 </li>
 
-                <li class="dropdown dropdown-order-menu" data-product-quote-id="<?=($model->cruiseQuote->crq_product_quote_id)?>" data-lead-id="<?=($model->pqProduct->pr_lead_id)?>" data-url="<?= Url::to(['/order/order/list-menu-ajax'])?>">
+                <li class="dropdown dropdown-order-menu" data-product-quote-id="<?/*=($model->cruiseQuote->crq_product_quote_id)*/?>" data-lead-id="<?/*=($model->pqProduct->pr_lead_id)*/?>" data-url="<?/*= Url::to(['/order/order/list-menu-ajax'])*/?>">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fas fa-money-check-alt"></i> Orders</a>
                     <div class="dropdown-menu" role="menu">
-                        <?php // ajax loaded content ?>
+                        <?php /*// ajax loaded content */?>
                     </div>
-                </li>
+                </li>-->
 
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-bars text-warning"></i></a>
@@ -168,18 +168,18 @@ JS;
                         <h6 class="dropdown-header">Quote Q<?=($model->cruiseQuote->crq_product_quote_id)?></h6>
 
 
-                        <?php echo Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
+                        <!--<?php /*echo Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
                             'class' => 'dropdown-item text-success btn-add-product-quote-option',
                             'data-url' => Url::to(['/product/product-quote-option/create-ajax', 'id' => $model->cruiseQuote->crq_product_quote_id]),
-                        ]) ?>
+                        ]) */?>
 
                         <div class="dropdown-divider"></div>
-                        <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [
+                        <?/*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [
                             'class' => 'dropdown-item text-danger btn-delete-product-quote',
                             'data-product-quote-id' => $model->cruiseQuote->crq_product_quote_id,
                             'data-cruise-quote-id' => $model->cruiseQuote->crq_id,
                             'data-product-id' => $model->pq_product_id,
-                        ]) ?>
+                        ]) */?>-->
                     </div>
                 </li>
             </ul>

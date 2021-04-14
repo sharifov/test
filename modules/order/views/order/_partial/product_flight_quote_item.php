@@ -33,68 +33,40 @@ $totalAmountQuote = 0.0;
                 <!--            <li>-->
                 <!--                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>-->
                 <!--            </li>-->
-                <?php if (!$model->isDeclined()) : ?>
-                    <li class="dropdown dropdown-offer-menu" data-product-quote-id="<?=($model->pq_id)?>" data-lead-id="<?=($model->pqProduct->pr_lead_id)?>" data-url="<?=\yii\helpers\Url::to(['/offer/offer/list-menu-ajax'])?>">
+                <!--<?php /*if (!$model->isDeclined()) : */?>
+                    <li class="dropdown dropdown-offer-menu" data-product-quote-id="<?/*=($model->pq_id)*/?>" data-lead-id="<?/*=($model->pqProduct->pr_lead_id)*/?>" data-url="<?/*=\yii\helpers\Url::to(['/offer/offer/list-menu-ajax'])*/?>">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="far fa-handshake"></i> Offers</a>
                         <div class="dropdown-menu" role="menu">
-                            <?php // ajax loaded content ?>
+                            <?php /*// ajax loaded content */?>
                         </div>
                     </li>
 
-                    <li class="dropdown dropdown-order-menu" data-product-quote-id="<?=($model->pq_id)?>" data-lead-id="<?=($model->pqProduct->pr_lead_id)?>" data-url="<?=\yii\helpers\Url::to(['/order/order/list-menu-ajax'])?>">
+                    <li class="dropdown dropdown-order-menu" data-product-quote-id="<?/*=($model->pq_id)*/?>" data-lead-id="<?/*=($model->pqProduct->pr_lead_id)*/?>" data-url="<?/*=\yii\helpers\Url::to(['/order/order/list-menu-ajax'])*/?>">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fas fa-money-check-alt"></i> Orders</a>
                         <div class="dropdown-menu" role="menu">
-                            <?php // ajax loaded content ?>
+                            <?php /*// ajax loaded content */?>
                         </div>
                     </li>
-                <?php endif; ?>
+                <?php /*endif; */?>-->
 
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-bars text-warning"></i></a>
                     <div class="dropdown-menu" role="menu">
                         <h6 class="dropdown-header" title="FlightQuoteId: <?php echo $model->flightQuote->fq_id ?>">Quote Q<?=($model->pq_id)?></h6>
-                        <?php /*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Update Request', null, [
-                                'class' => 'dropdown-item text-danger btn-update-product',
-                                'data-product-id' => $product->pr_id
-                            ])*/ ?>
-                        <?php /* <div class="dropdown-divider"></div>
 
-                    <!-- Level three dropdown-->
-                    <div class="dropdown-submenu">
-                        <a id="dropdownMenu<?=($model->hq_product_quote_id)?>" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="dropdown-item dropdown-toggle">Add to Offer</a>
-                        <div aria-labelledby="dropdownMenu<?=($model->hq_product_quote_id)?>" class="dropdown-menu">
-                            <a href="#" class="dropdown-item">3rd level</a>
-                            <a href="#" class="dropdown-item">3rd level</a>
-                        </div>
-                    </div>*/ ?>
-                        <!-- End Level three -->
-
-                        <!--                    <ul>-->
-                        <!--                        <li class="dropdown">-->
-                        <!--                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Dropdown</a>-->
-                        <!--                            <div class="dropdown-menu" role="menu">-->
-                        <!--                                <a href="#" class="dropdown-item"><i class="fa fa-cog"></i> aaa</a>-->
-                        <!--                            </div>-->
-                        <!--                        </li>-->
-                        <!--                    </ul>-->
-
-
-
-
-
-                        <?= Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
+                        <!--<?/*= Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
                             'class' => 'dropdown-item text-success btn-add-product-quote-option',
                             //'data-product-quote-id' => $model->hq_product_quote_id,
                             'data-url' => \yii\helpers\Url::to(['/product/product-quote-option/create-ajax', 'id' => $model->pq_id]),
                             //'data-product-id' => $model->hqProductQuote->pq_product_id,
-                        ]) ?>
+                        ]) */?>
 
-                        <?= Html::a('<i class="fa fa-list"></i> Status log', null, [
+                        <?/*= Html::a('<i class="fa fa-list"></i> Status log', null, [
                             'class' => 'dropdown-item text-secondary btn-product-quote-status-log',
                             'data-url' => \yii\helpers\Url::to(['/product/product-quote-status-log/show', 'gid' => $model->pq_gid]),
                             'data-gid' => $model->pq_gid,
                             'title' => 'View status log'
-                        ]) ?>
+                        ]) */?>-->
 
                         <?php if ($flightQuote) : ?>
                             <?php
@@ -146,35 +118,35 @@ $totalAmountQuote = 0.0;
                             <?php endforeach;?>
 
 
-                            <?= Html::a('<i class="fa fa-search"></i> Details', null, [
+                            <!--<?/*= Html::a('<i class="fa fa-search"></i> Details', null, [
                                 'class' => 'btn-flight-quote-details dropdown-item',
                                 'data-id' => $model->pq_id,
                                 'data-title' => implode(', ', $tripsInfo),
                                 'data-url' => Url::to(['/flight/flight-quote/ajax-quote-details', 'id' => $model->pq_id]),
                                 //'data-target' => '#quote_detail_'.$model->uid,
                                 'title' => 'Details'
-                            ]) ?>
+                            ]) */?>
 
 
-                            <?= Html::a('<i class="fa fa-clone"></i> Clone', null, [
+                            <?/*= Html::a('<i class="fa fa-clone"></i> Clone', null, [
                                 'class' => 'dropdown-item btn-clone-product-quote',
                                 'data-product-quote-id' => $model->pq_id,
                                 'data-flight-quote-id' => $model->flightQuote->fq_id,
                                 'data-product-id' => $model->pq_product_id,
                                 'title' => 'Clone quote'
-                            ]) ?>
+                            ]) */?>
 
-                            <?php  echo Html::a('<i class="fa fa-eye"></i> Checkout Page', $model->getCheckoutUrlPage(), [
+                            <?php /* echo Html::a('<i class="fa fa-eye"></i> Checkout Page', $model->getCheckoutUrlPage(), [
                                 'class' => 'dropdown-item',
                                 'target'    => '_blank',
                                 'title'     => 'View checkout',
                                 'data-pjax' => 0
                             ]);
-                            ?>
+                            */?>-->
                         <?php endif;?>
 
-                        <?php if (Auth::can('/flight/flight-quote/ajax-book') && $model->isBookable()) : ?>
-                            <?= Html::a(
+                        <!--<?php /*if (Auth::can('/flight/flight-quote/ajax-book') && $model->isBookable()) : */?>
+                            <?/*= Html::a(
                                 '<i class="fa fa-share-square"></i> Create Book',
                                 null,
                                 [
@@ -183,11 +155,11 @@ $totalAmountQuote = 0.0;
                                     'data-flight-quote-id' => $model->flightQuote->fq_id,
                                     'data-product-id' => $model->pq_product_id,
                                 ]
-                            ) ?>
-                        <?php endif ?>
+                            ) */?>
+                        <?php /*endif */?>
 
-                        <?php if (Auth::can('/flight/flight-quote/ajax-file-generate') && $model->isBooked()) : ?>
-                            <?= Html::a(
+                        <?php /*if (Auth::can('/flight/flight-quote/ajax-file-generate') && $model->isBooked()) : */?>
+                            <?/*= Html::a(
                                 '<i class="fa fa-file-pdf-o"></i> Generate PDF',
                                 null,
                                 [
@@ -195,11 +167,11 @@ $totalAmountQuote = 0.0;
                                     'data-url' => Url::to('/flight/flight-quote/ajax-file-generate'),
                                     'data-flight-quote-id' => $model->flightQuote->fq_id,
                                 ]
-                            ) ?>
-                        <?php endif ?>
+                            ) */?>
+                        <?php /*endif */?>
 
-                        <?php if (Auth::can('/flight/flight-quote/cancel')) : ?>
-                            <?= Html::a(
+                        <?php /*if (Auth::can('/flight/flight-quote/cancel')) : */?>
+                            <?/*= Html::a(
                                 '<i class="fa fa-share-square"></i> Cancel Booking',
                                 null,
                                 [
@@ -208,11 +180,11 @@ $totalAmountQuote = 0.0;
                                     'data-id' => $model->flightQuote->fq_id,
                                     'data-product-id' => $model->pq_product_id,
                                 ]
-                            ) ?>
-                        <?php endif;?>
+                            ) */?>
+                        <?php /*endif;*/?>
 
-                        <?php if (Auth::can('/flight/flight-quote/void')) : ?>
-                            <?= Html::a(
+                        <?php /*if (Auth::can('/flight/flight-quote/void')) : */?>
+                            <?/*= Html::a(
                                 '<i class="fa fa-share-square"></i> Void Booking',
                                 null,
                                 [
@@ -221,18 +193,18 @@ $totalAmountQuote = 0.0;
                                     'data-id' => $model->flightQuote->fq_id,
                                     'data-product-id' => $model->pq_product_id,
                                 ]
-                            ) ?>
-                        <?php endif;?>
+                            ) */?>
+                        <?php /*endif;*/?>
 
-                        <?php if ($model->isDeletable()) : ?>
+                        <?php /*if ($model->isDeletable()) : */?>
                             <div class="dropdown-divider"></div>
-                            <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [
+                            <?/*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [
                                 'class' => 'dropdown-item text-danger btn-delete-product-quote',
                                 'data-product-quote-id' => $model->pq_id,
                                 'data-flight-quote-id' => $model->flightQuote->fq_id,
                                 'data-product-id' => $model->pq_product_id,
-                            ]) ?>
-                        <?php endif;?>
+                            ]) */?>
+                        <?php /*endif;*/?>-->
 
                     </div>
                 </li>

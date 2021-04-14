@@ -62,74 +62,74 @@ JS;
 
             <ul class="nav navbar-right panel_toolbox">
 
-                <li
+                <!--<li
                     class="dropdown dropdown-offer-menu"
-                    data-product-quote-id="<?=($model->pq_id)?>"
-                    data-lead-id="<?=($model->pqProduct->pr_lead_id)?>"
-                    data-url="<?= Url::to(['/offer/offer/list-menu-ajax'])?>"
+                    data-product-quote-id="<?/*=($model->pq_id)*/?>"
+                    data-lead-id="<?/*=($model->pqProduct->pr_lead_id)*/?>"
+                    data-url="<?/*= Url::to(['/offer/offer/list-menu-ajax'])*/?>"
                 >
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="far fa-handshake"></i> Offers</a>
                     <div class="dropdown-menu" role="menu">
-                        <?php // ajax loaded content?>
+                        <?php /*// ajax loaded content*/?>
                     </div>
-                </li>
+                </li>-->
 
-                <li class="dropdown dropdown-order-menu" data-product-quote-id="<?=($model->pq_id)?>" data-lead-id="<?=($model->pqProduct->pr_lead_id)?>" data-url="<?= Url::to(['/order/order/list-menu-ajax'])?>">
+                <!--<li class="dropdown dropdown-order-menu" data-product-quote-id="<?/*=($model->pq_id)*/?>" data-lead-id="<?/*=($model->pqProduct->pr_lead_id)*/?>" data-url="<?/*= Url::to(['/order/order/list-menu-ajax'])*/?>">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fas fa-money-check-alt"></i> Orders</a>
                     <div class="dropdown-menu" role="menu">
-                        <?php // ajax loaded content?>
+                        <?php /*// ajax loaded content*/?>
                     </div>
-                </li>
+                </li>-->
 
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-bars text-warning"></i></a>
                     <div class="dropdown-menu" role="menu">
                         <h6 title="RCQuoteID: <?php echo $model->rentCarQuote->rcq_id ?>" class="dropdown-header">Quote Q<?=($model->pq_id)?></h6>
 
-                        <?= Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
+                        <!--<?/*= Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
                             'class' => 'dropdown-item text-success btn-add-product-quote-option',
                             'data-url' => Url::to(['/product/product-quote-option/create-ajax', 'id' => $model->pq_id]),
-                        ]) ?>
+                        ]) */?>
 
-                        <?= Html::a('<i class="fa fa-list"></i> Status log', null, [
+                        <?/*= Html::a('<i class="fa fa-list"></i> Status log', null, [
                             'class' => 'dropdown-item text-secondary btn-product-quote-status-log',
                             'data-url' => Url::to(['/product/product-quote-status-log/show', 'gid' => $model->pq_gid]),
                             'data-gid' => $model->pq_gid,
-                        ]) ?>
+                        ]) */?>
 
-                        <?php if ($model->isBookable() && Auth::can('/rent-car/rent-car-quote/book')) : ?>
-                            <?php echo Html::a('<i class="fa fa-share-square"></i> Book', null, [
+                        <?php /*if ($model->isBookable() && Auth::can('/rent-car/rent-car-quote/book')) : */?>
+                            <?php /*echo Html::a('<i class="fa fa-share-square"></i> Book', null, [
                                 'class' => 'dropdown-item js-btn-book-rent-car',
                                 'data-url' => Url::to('/rent-car/rent-car-quote/book'),
                                 'data-rent-car-quote-id' => $model->rentCarQuote->rcq_id,
                                 'data-product-id' => $model->pq_product_id,
-                            ]) ?>
-                        <?php endif ?>
-                        <?php if ($model->isBooked() && Auth::can('/rent-car/rent-car-quote/file-generate')) : ?>
-                            <?php echo Html::a('<i class="fa fa-file-pdf-o"></i> Generate PDF', null, [
+                            ]) */?>
+                        <?php /*endif */?>
+                        <?php /*if ($model->isBooked() && Auth::can('/rent-car/rent-car-quote/file-generate')) : */?>
+                            <?php /*echo Html::a('<i class="fa fa-file-pdf-o"></i> Generate PDF', null, [
                                 'class' => 'dropdown-item js-btn-generate-pdf-rent-car',
                                 'data-url' => Url::to('/rent-car/rent-car-quote/file-generate'),
                                 'data-rent-car-quote-id' => $model->rentCarQuote->rcq_id,
                                 'data-product-id' => $model->pq_product_id,
-                            ]) ?>
-                        <?php endif ?>
+                            ]) */?>
+                        <?php /*endif */?>
 
-                        <?php if ($model->isBooked() && Auth::can('/rent-car/rent-car-quote/cancel-book')) : ?>
-                            <?php echo Html::a('<i class="fa fa-share-square"></i> Cancel Book', null, [
+                        <?php /*if ($model->isBooked() && Auth::can('/rent-car/rent-car-quote/cancel-book')) : */?>
+                            <?php /*echo Html::a('<i class="fa fa-share-square"></i> Cancel Book', null, [
                                 'class' => 'dropdown-item js-btn-cancel-book-rent-car',
                                 'data-url' => Url::to('/rent-car/rent-car-quote/cancel-book'),
                                 'data-rent-car-quote-id' => $model->rentCarQuote->rcq_id,
                                 'data-product-id' => $model->pq_product_id,
-                            ]) ?>
-                        <?php endif ?>
+                            ]) */?>
+                        <?php /*endif */?>
 
                         <div class="dropdown-divider"></div>
-                        <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [
+                        <?/*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete quote', null, [
                             'class' => 'dropdown-item text-danger btn-delete-product-quote',
                             'data-product-quote-id' => $model->rentCarQuote->rcq_product_quote_id,
                             'data-model-quote-id' => $model->rentCarQuote->rcq_id,
                             'data-product-id' => $model->pq_product_id,
-                        ]) ?>
+                        ]) */?>-->
 
                     </div>
                 </li>
