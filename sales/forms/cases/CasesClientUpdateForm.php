@@ -58,7 +58,7 @@ class CasesClientUpdateForm extends Model
             ['locale', 'string', 'max' => 5],
             [['locale'], 'exist', 'skipOnError' => true, 'targetClass' => Language::class, 'targetAttribute' => ['locale' => 'language_id']],
 
-            ['marketingCountry', 'string', 'max' => 10],
+            ['marketingCountry', 'string', 'max' => 2],
             ['marketingCountry', 'filter', 'filter' => 'strtoupper', 'skipOnEmpty' => true],
         ];
     }
