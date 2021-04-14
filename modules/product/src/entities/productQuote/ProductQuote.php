@@ -8,6 +8,7 @@ use modules\flight\models\FlightQuote;
 use modules\hotel\models\HotelQuote;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use modules\cruise\src\entity\cruiseQuote\CruiseQuote;
+use modules\attraction\models\AttractionQuote;
 use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
@@ -89,6 +90,7 @@ use yii\db\ActiveRecord;
  * @property HotelQuote|null $hotelQuote
  * @property RentCarQuote|null $rentCarQuote
  * @property CruiseQuote|null $cruiseQuote
+ * @property AttractionQuote| $attractionQuote
  * @property ProductQuote[]|null $relates
  * @property ProductQuote|null $relateParent
  *
@@ -267,6 +269,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function getCruiseQuote()
     {
         return $this->hasOne(CruiseQuote::class, ['crq_product_quote_id' => 'pq_id']);
+    }
+
+    public function getAttractionQuote()
+    {
+        return $this->hasOne(AttractionQuote::class, ['atnq_product_quote_id' => 'pq_id']);
     }
 
     /**
