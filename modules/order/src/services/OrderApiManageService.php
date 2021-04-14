@@ -145,7 +145,6 @@ class OrderApiManageService
 
             $this->orderDataService->create(
                 $orderId,
-                $dto->projectId,
                 null,
                 $form->sourceId,
                 $dto->languageId,

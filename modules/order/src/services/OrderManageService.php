@@ -90,7 +90,6 @@ class OrderManageService
 
             $this->orderDataService->create(
                 $orderId,
-                $dto->projectId,
                 null,
                 $sourceId,
                 $dto->languageId,

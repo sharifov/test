@@ -2228,7 +2228,6 @@ class OrderController extends BaseController
 
                 $this->orderDataService->create(
                     $order->or_id,
-                    $dto->projectId,
                     $form->bookingId,
                     $form->sourceId,
                     $dto->languageId,
