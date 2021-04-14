@@ -84,7 +84,13 @@ class HotelQuoteServiceLog extends ActiveRecord
             'user' => [
                 'class' => BlameableBehavior::class,
                 'createdByAttribute' => 'hqsl_created_user_id',
-                'updatedByAttribute' => false
+                'updatedByAttribute' => false,
+                'value' => static function ($event) {
+                    if (\Yii::$app->id === 'app-frontend') {
+                        return \Yii::$app->user->id;
+                    }
+                    return null;
+                },
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
