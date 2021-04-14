@@ -26,7 +26,7 @@ use yii\helpers\Html;
                 <div class="x_panel">
                     <div class="x_title"></div>
                     <div class="x_content" style="display: block">
-                        <?php if ($order->orLead && Auth::can('lead/view', ['lead' => $order->orLead])) : ?>
+                        <?php /*if ($order->orLead && Auth::can('lead/view', ['lead' => $order->orLead])) : ?>
                             <?php echo Html::a('<i class="glyphicon glyphicon-search"></i> View Lead', [
                                 '/lead/view/' . $order->orLead->gid,
                             ], [
@@ -35,7 +35,35 @@ use yii\helpers\Html;
                                 'data-pjax' => 0,
                                 'title' => 'View',
                             ]); ?>
-                        <?php endif ?>
+                        <?php endif */ ?>
+                        <?php if ($order->leadOrder) : ?>
+                            <div>
+                                <h3>Leads</h3>
+                                <?= \yii\grid\GridView::widget([
+                                    'dataProvider' => new \yii\data\ArrayDataProvider([
+                                        'allModels' => $order->leadOrder
+                                    ]),
+                                    'columns' => [
+                                        'lead:lead',
+                                        'lo_create_dt:byUserDateTime'
+                                    ]
+                                ]) ?>
+                            </div>
+                        <?php endif; ?>
+                        <?php if ($order->caseOrder) : ?>
+                            <div>
+                                <h3>Cases</h3>
+                                <?= \yii\grid\GridView::widget([
+                                    'dataProvider' => new \yii\data\ArrayDataProvider([
+                                        'allModels' => $order->caseOrder
+                                    ]),
+                                    'columns' => [
+                                        'cases:case',
+                                        'co_create_dt:byUserDateTime'
+                                    ]
+                                ]) ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>

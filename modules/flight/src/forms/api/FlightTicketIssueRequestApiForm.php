@@ -10,43 +10,37 @@ use yii\base\Model;
 /**
  * Class FlightTicketIssueRequestApiForm
 
- * @property $orderUid
+ * @property $fareId
  * @property $flights
- * @property $payments
  * @property Order $order
  */
 class FlightTicketIssueRequestApiForm extends Model
 {
-    public $orderUid;
+    public $fareId;
     public $flights;
-    public $payments;
-    public $order;
+
+    private $order;
 
     public function rules(): array
     {
         return [
-            [['orderUid'], 'required'],
-            [['orderUid'], 'string', 'max' => 32],
-            [['orderUid'], 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['orderUid' => 'or_gid']],
-            [['orderUid'], 'setOrder'],
+            [['fareId'], 'required'],
+            [['fareId'], 'string', 'max' => 255],
+            [['fareId'], 'detectOrder'],
 
             [['flights'], 'required'],
             [['flights'], CheckJsonValidator::class],
             [['flights'], 'filter', 'filter' => static function ($value) {
                 return JsonHelper::decode($value);
             }],
-
-            [['payments'], 'required'],
-            [['payments'], CheckJsonValidator::class],
-            [['payments'], 'filter', 'filter' => static function ($value) {
-                return JsonHelper::decode($value);
-            }],
         ];
     }
 
-    public function setOrder()
+    public function detectOrder($attribute)
     {
-        $this->order = Order::findOne(['or_gid' => $this->orderUid]);
+        if (!$this->order = Order::findOne(['or_fare_id' => $this->fareId])) {
+            $this->addError($attribute, 'Order not found by fareId(' . $this->fareId . ')');
+        }
     }
 
     public function formName(): string

@@ -45,34 +45,25 @@ class FlightQuoteFlight extends \yii\db\ActiveRecord
         return [
             [['fqf_fq_id'], 'required'],
 
-            ['fqf_booking_id', 'string', 'max' => 50],
-
-            ['fqf_cabin_class', 'string', 'max' => 1],
-
             ['fqf_fare_type_id', 'integer'],
 
             ['fqf_fq_id', 'integer'],
             ['fqf_fq_id', 'exist', 'skipOnError' => true, 'targetClass' => FlightQuote::class, 'targetAttribute' => ['fqf_fq_id' => 'fq_id']],
 
+            ['fqf_booking_id', 'string', 'max' => 50],
+            ['fqf_cabin_class', 'string', 'max' => 1],
             ['fqf_gds', 'string', 'max' => 2],
-
             ['fqf_gds_pcc', 'string', 'max' => 10],
-
             ['fqf_main_airline', 'string', 'max' => 2],
-
             ['fqf_pnr', 'string', 'max' => 10],
-
             ['fqf_record_locator', 'string', 'max' => 8],
+            ['fqf_validating_carrier', 'string', 'max' => 2],
 
             ['fqf_status_id', 'integer'],
-
             ['fqf_trip_type_id', 'integer'],
-
             ['fqf_type_id', 'integer'],
 
             [['fqf_created_dt', 'fqf_updated_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
-
-            ['fqf_validating_carrier', 'string', 'max' => 2],
 
             ['fqf_original_data_json', CheckJsonValidator::class],
         ];
@@ -163,5 +154,29 @@ class FlightQuoteFlight extends \yii\db\ActiveRecord
     public static function tableName(): string
     {
         return 'flight_quote_flight';
+    }
+
+    public static function create(
+        int $flightQuoteId,
+        ?string $recordLocator,
+        ?string $gds,
+        ?string $gdsPcc,
+        ?int $typeId,
+        ?string $cabinClass,
+        ?int $tripTypeId,
+        ?string $mainAirline,
+        ?int $fareTypeId
+    ): FlightQuoteFlight {
+        $model = new self();
+        $model->fqf_fq_id = $flightQuoteId;
+        $model->fqf_record_locator = $recordLocator;
+        $model->fqf_gds = $gds;
+        $model->fqf_gds_pcc = $gdsPcc;
+        $model->fqf_type_id = $typeId;
+        $model->fqf_cabin_class = $cabinClass;
+        $model->fqf_trip_type_id = $tripTypeId;
+        $model->fqf_main_airline = $mainAirline;
+        $model->fqf_fare_type_id = $fareTypeId;
+        return $model;
     }
 }

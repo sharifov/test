@@ -35,6 +35,8 @@ use modules\product\src\interfaces\ProductDataInterface;
 use sales\entities\EventTrait;
 use sales\entities\serializer\Serializable;
 use sales\helpers\product\ProductQuoteHelper;
+use sales\model\caseOrder\entity\CaseOrder;
+use sales\model\leadOrder\entity\LeadOrder;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -90,6 +92,8 @@ use yii\helpers\VarDumper;
  * @property ProductQuote[] $productQuotesApplied
  * @property OrderContact[] $orderContacts
  * @property Project $project
+ * @property LeadOrder[] $leadOrder
+ * @property CaseOrder[] $caseOrder
  */
 class Order extends ActiveRecord implements Serializable, ProductDataInterface
 {
@@ -194,14 +198,14 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
         $this->or_status_id = $dto->status;
         $this->or_pay_status_id = $dto->payStatus;
         $this->or_lead_id = $dto->leadId;
-        $this->or_name = $this->generateName();
+        $this->or_name = $this->generateName((int)$dto->leadId);
         $this->or_client_currency = $dto->clientCurrency;
         if ($this->orLead && $this->orLead->employee_id) {
             $this->or_owner_user_id = $this->orLead->employee_id;
         }
-        if (!$this->or_name && $this->or_lead_id) {
-            $this->or_name = $this->generateName();
-        }
+//        if (!$this->or_name && $this->or_lead_id) {
+//            $this->or_name = $this->generateName($dto->leadId);
+//        }
 
         $this->or_request_data = $dto->requestData;
 
@@ -253,6 +257,16 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
     public function getOrCreatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'or_created_user_id']);
+    }
+
+    public function getLeadOrder(): ActiveQuery
+    {
+        return $this->hasMany(LeadOrder::class, ['lo_order_id' => 'or_id']);
+    }
+
+    public function getCaseOrder(): ActiveQuery
+    {
+        return $this->hasMany(CaseOrder::class, ['co_order_id' => 'or_id']);
     }
 
     /**
@@ -363,9 +377,9 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
     /**
      * @return string
      */
-    public function generateName(): string
+    public function generateName(int $leadId): string
     {
-        $count = self::find()->where(['or_lead_id' => $this->or_lead_id])->count();
+        $count = self::find()->joinLeadOrdersByLead($leadId)->count();
         return 'Order ' . ($count + 1);
     }
 

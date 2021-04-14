@@ -59,6 +59,30 @@ $this->params['breadcrumbs'][] = $this->title;
         ]) ?>
       </div>
       <div class="col-md-6">
+          <div>
+              <h3>Leads</h3>
+              <?= \yii\grid\GridView::widget([
+                  'dataProvider' => new \yii\data\ArrayDataProvider([
+                      'allModels' => $model->leadOrder
+                  ]),
+                  'columns' => [
+                      'lead:lead',
+                      'lo_create_dt:byUserDateTime'
+                  ]
+              ]) ?>
+          </div>
+          <div>
+              <h3>Cases</h3>
+              <?= \yii\grid\GridView::widget([
+                  'dataProvider' => new \yii\data\ArrayDataProvider([
+                      'allModels' => $model->caseOrder
+                  ]),
+                  'columns' => [
+                      'cases:case',
+                      'co_create_dt:byUserDateTime'
+                  ]
+              ]) ?>
+          </div>
         <h4><?=$model->getAttributeLabel('or_request_data')?></h4>
         <pre>
             <?php

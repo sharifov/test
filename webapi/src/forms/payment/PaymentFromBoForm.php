@@ -36,7 +36,7 @@ class PaymentFromBoForm extends Model
         return [
             [['fareId'], 'required'],
             [['fareId'], 'string', 'max' => 255],
-            [['fareId'], 'checkOrder'],
+            [['fareId'], 'detectOrder'],
 
             [['payments'], 'required'],
             [['payments'], CheckJsonValidator::class],
@@ -47,7 +47,7 @@ class PaymentFromBoForm extends Model
         ];
     }
 
-    public function checkOrder($attribute)
+    public function detectOrder($attribute)
     {
         if (!$this->order = Order::findOne(['or_fare_id' => $this->fareId])) {
             $this->addError($attribute, 'Order not found by fareId(' . $this->fareId . ')');
