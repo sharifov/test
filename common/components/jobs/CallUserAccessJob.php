@@ -11,6 +11,7 @@ namespace common\components\jobs;
 use common\models\Call;
 use common\models\Employee;
 use common\models\Notifications;
+use sales\helpers\setting\SettingHelper;
 use sales\repositories\cases\CasesRepository;
 use sales\services\cases\CasesCreateService;
 use sales\services\client\ClientManageService;
@@ -77,7 +78,7 @@ class CallUserAccessJob extends BaseObject implements JobInterface
 
 
                     $last_hours = (int)(Yii::$app->params['settings']['general_line_last_hours'] ?? 1);
-                    $limitCallUsers = (int)(Yii::$app->params['settings']['general_line_user_limit'] ?? 1);
+                    $limitCallUsers = SettingHelper::getGeneralLineUserLimit($call->cDep, $call->c_to);
 
                     if ($this->isExceptUsers) {
                         $exceptUserIds = ArrayHelper::map($call->callUserAccesses, 'cua_user_id', 'cua_user_id');
@@ -96,7 +97,7 @@ class CallUserAccessJob extends BaseObject implements JobInterface
                         Notifications::pingUserMap();
                     }
 
-                    $timeStartCallUserAccess = (int) Yii::$app->params['settings']['time_repeat_call_user_access'] ?? 0;
+                    $timeStartCallUserAccess = SettingHelper::getTimeRepeatCallUserAccess($call->cDep, $call->c_to);
 
                     if ($timeStartCallUserAccess) {
                         $job = new CallUserAccessJob();
