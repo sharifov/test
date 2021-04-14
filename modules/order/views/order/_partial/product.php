@@ -105,7 +105,7 @@ foreach ($orderRelatedQuotes as $productQuote) {
                             ]) ?>
                         <?php endif; ?>
 
-                        <?php if ($product->isRenTCar()) :?>
+                        <?php if ($product->isCruise()) :?>
                             <?= $this->render('product_cruise_quotes', [
                                 'data' => $cruiseProductQuotes,
                                 'productId' => $product->pr_id
