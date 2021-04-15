@@ -3,6 +3,7 @@
 namespace frontend\helpers;
 
 use common\models\Quote;
+use yii\helpers\VarDumper;
 
 /**
  * Class QuoteHelper
@@ -230,7 +231,75 @@ class QuoteHelper
             $quotes['results'][$key]['rank'] = self::getQuoteRank($quote);
         }
 
+        return self::sortByTopCriteria($quotes);
+    }
+
+    private static function sortByTopCriteria($quotes)
+    {
+        $combinationOne = [];
+        $combinationTwo = [];
+        $combinationThree = [];
+        $combinationFour = [];
+        $combinationFive = [];
+        $combinationSix = [];
+        $combinationSeven = [];
+        $combinationEight = [];
+
+        foreach ($quotes['results'] as $quote) {
+            $meta = $quote['meta'];
+            if ($meta['cheapest'] && $meta['fastest'] && $meta['best']) {
+                $combinationOne[] = $quote;
+                continue;
+            }
+            if ($meta['cheapest'] && $meta['fastest'] && !$meta['best']) {
+                $combinationTwo[] = $quote;
+                continue;
+            }
+            if ($meta['cheapest'] && !$meta['fastest'] && $meta['best']) {
+                $combinationThree[] = $quote;
+                continue;
+            }
+            if (!$meta['cheapest'] && $meta['fastest'] && $meta['best']) {
+                $combinationFour[] = $quote;
+                continue;
+            }
+            if ($meta['cheapest'] && !$meta['fastest'] && !$meta['best']) {
+                $combinationFive[] = $quote;
+                continue;
+            }
+            if (!$meta['cheapest'] && $meta['fastest'] && !$meta['best']) {
+                $combinationSix[] = $quote;
+                continue;
+            }
+            if (!$meta['cheapest'] && !$meta['fastest'] && $meta['best']) {
+                $combinationSeven[] = $quote;
+                continue;
+            }
+            if (!$meta['cheapest'] && !$meta['fastest'] && !$meta['best']) {
+                $combinationEight[] = $quote;
+            }
+        }
+
+        $quotes['results'] = array_merge(
+            self::sortAscByPrice($combinationOne),
+            self::sortAscByPrice($combinationTwo),
+            self::sortAscByPrice($combinationThree),
+            self::sortAscByPrice($combinationFour),
+            self::sortAscByPrice($combinationFive),
+            self::sortAscByPrice($combinationSix),
+            self::sortAscByPrice($combinationSeven),
+            self::sortAscByPrice($combinationEight)
+        );
+
         return $quotes;
+    }
+
+    private static function sortAscByPrice(array $data)
+    {
+        usort($data, function ($item1, $item2) {
+            return self::getQuotePrice($item1) <=> self::getQuotePrice($item2);
+        });
+        return $data;
     }
 
     /**
