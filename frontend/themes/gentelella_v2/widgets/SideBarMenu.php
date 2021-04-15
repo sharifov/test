@@ -549,6 +549,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
             'items' => [
                 ['label' => 'Search Orders', 'url' => ['/order/order/search'], 'icon' => 'search'],
                 ['label' => 'Error Orders', 'url' => ['/order/order/error-list'], 'icon' => 'exclamation-triangle'],
+                ['label' => 'New', 'url' => ['/order/order-q/new'], 'icon' => 'paste text-warning'],
             ]
         ];
 
