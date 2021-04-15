@@ -104,4 +104,22 @@ class FlightQuoteBooking extends \yii\db\ActiveRecord
     {
         return 'flight_quote_booking';
     }
+
+    public static function create(
+        int $flightQuoteFlightId,
+        ?string $bookingId,
+        ?string $pnr,
+        ?string $gds,
+        ?string $gdsPss,
+        ?string $validatingCarrier
+    ): FlightQuoteBooking {
+        $model = new self();
+        $model->fqb_fqf_id = $flightQuoteFlightId;
+        $model->fqb_booking_id = $bookingId;
+        $model->fqb_pnr = $pnr;
+        $model->fqb_gds = $gds;
+        $model->fqb_gds_pcc = $gdsPss;
+        $model->fqb_validating_carrier = $validatingCarrier;
+        return $model;
+    }
 }

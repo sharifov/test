@@ -36,6 +36,16 @@ use yii\helpers\ArrayHelper;
  */
 class FlightQuoteFlight extends \yii\db\ActiveRecord
 {
+    public const TRIP_TYPE_OW = 1;
+    public const TRIP_TYPE_RT = 2;
+    public const TRIP_TYPE_MC = 3;
+
+    public const TRIP_TYPE_LIST = [
+        self::TRIP_TYPE_OW => 'OW',
+        self::TRIP_TYPE_RT => 'RT',
+        self::TRIP_TYPE_MC => 'MC',
+    ];
+
     public function rules(): array
     {
         return [

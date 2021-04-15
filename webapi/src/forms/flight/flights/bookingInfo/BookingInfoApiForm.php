@@ -103,8 +103,23 @@ class BookingInfoApiForm extends Model
         }
     }
 
+    public function isIssued(): bool
+    {
+        return $this->status === FlightUpdateRequestApiService::SUCCESS_STATUS;
+    }
+
     public function formName(): string
     {
         return '';
+    }
+
+    public function getPassengerForms(): array
+    {
+        return $this->passengerForms;
+    }
+
+    public function getAirlinesCodeForms(): array
+    {
+        return $this->airlinesCodeForms;
     }
 }

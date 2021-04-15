@@ -5,6 +5,7 @@ namespace  webapi\src\forms\flight\flights;
 use common\components\SearchService;
 use common\components\validators\CheckJsonValidator;
 use frontend\helpers\JsonHelper;
+use modules\flight\models\FlightQuoteFlight;
 use modules\flight\src\services\api\FlightUpdateRequestApiService;
 use modules\order\src\entities\order\Order;
 use sales\helpers\ErrorsToStringHelper;
@@ -23,7 +24,7 @@ use yii\base\Model;
  * @property $bookingInfo
  * @property $trips
  *
- * @property $bookingInfoForms
+ * @property BookingInfoApiForm[] $bookingInfoForms
  */
 class FlightApiForm extends Model
 {
@@ -52,11 +53,11 @@ class FlightApiForm extends Model
             [['status'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             [['status'], 'in', 'range' => array_keys(FlightUpdateRequestApiService::STATUS_LIST)],
 
-            [['pnr'], 'string', 'max' => 100, 'skipOnEmpty' => true],
-
+            [['pnr'], 'string', 'max' => 100],
             [['gds'], 'string', 'max' => 1],
 
             [['flightType'], 'string', 'min' => 2, 'max' => 2, 'skipOnEmpty' => true],
+            [['flightType'], 'in', 'range' => FlightQuoteFlight::TRIP_TYPE_LIST],
 
             [['validatingCarrier'], 'string', 'max' => 2],
 
@@ -102,5 +103,10 @@ class FlightApiForm extends Model
     public function formName(): string
     {
         return '';
+    }
+
+    public function getBookingInfoForms(): array
+    {
+        return $this->bookingInfoForms;
     }
 }

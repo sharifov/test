@@ -836,13 +836,16 @@ class FlightController extends ApiBaseController
      *
      *   {
             "fareId": "or6061be5ec5c0e",
+            "parentBookingId": "OE96041",
+            "parentId": 205975,
+            "sameItinerary": true,
             "flights": [
                 {
                     "appKey": "038ce0121a1666678d4db57cb10e8667b98d8b08c408cdf7c9b04f1430071826",
                     "uniqueId": "OE96040",
                     "status": 3,
-                    "pnr": "",
-                    "gds": "",
+                    "pnr": "Q3PM1G",
+                    "gds": "S",
                     "flightType": "RT",
                     "validatingCarrier": "PR",
                     "bookingInfo": [
@@ -1071,7 +1074,7 @@ class FlightController extends ApiBaseController
         }
 
         $paymentFromBoForm = new PaymentFromBoForm();
-        if (!$paymentFromBoForm->load($post)) {
+        /*if (!$paymentFromBoForm->load($post)) {
             return $this->endApiLog($apiLog, self::notLoadErrorResponse('PaymentFromBoForm'));
         }
         if (!$paymentFromBoForm->validate()) {
@@ -1080,16 +1083,14 @@ class FlightController extends ApiBaseController
                 'FlightController:actionTicketIssue:PaymentFromBoForm'
             );
             return $this->endApiLog($apiLog, self::validateErrorResponse($paymentFromBoForm));
-        }
+        }*/
 
 
         try {
             $this->transactionManager->wrap(function () use ($flightRequestApiForm, $paymentFromBoForm, $post) {
-                $x = true; /* TODO::  */
-
                 $this->flightManageApiService->handler($flightRequestApiForm);
 
-                $this->paymentManageApiService->handler($paymentFromBoForm);
+                //$this->paymentManageApiService->handler($paymentFromBoForm);
                 $this->eventDispatcher->dispatch(new FlightProductProcessedSuccessEvent($flightRequestApiForm->order->or_id));
             });
 
@@ -1097,11 +1098,11 @@ class FlightController extends ApiBaseController
                 new StatusCodeMessage(200),
                 new MessageMessage('OK'),
                 new DataMessage([
-                    'resultMessage' => 'Order Uid(' . $flightRequestApiForm->orderUid . ') successful processed',
+                    'resultMessage' => 'Order Gid(' . $flightRequestApiForm->order->or_gid . ') successful processed',
                 ])
             ));
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableLog($throwable), 'FlightController:actionTicketIssue:TICKET_ISSUE');
+            Yii::error(AppHelper::throwableLog($throwable), 'FlightController:actionTicketIssue:Throwable');
             return $this->endApiLog($apiLog, new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage($throwable->getMessage()),

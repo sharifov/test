@@ -76,4 +76,16 @@ class FlightQuoteBookingAirline extends \yii\db\ActiveRecord
     {
         return 'flight_quote_booking_airline';
     }
+
+    public static function create(
+        int $flightQuoteBookingId,
+        ?string $recordLocator,
+        ?string $airlineCode
+    ): FlightQuoteBookingAirline {
+        $model = new self();
+        $model->fqba_fqb_id = $flightQuoteBookingId;
+        $model->fqba_record_locator = $recordLocator;
+        $model->fqba_airline_code = $airlineCode;
+        return $model;
+    }
 }

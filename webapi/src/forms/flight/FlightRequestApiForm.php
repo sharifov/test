@@ -32,9 +32,9 @@ class FlightRequestApiForm extends Model
     public $parentId;
     public $parentBookingId;
 
-    private Order $order;
+    private $order;
     private $flightQuote;
-    private array $flightApiForms;
+    private array $flightApiForms = [];
 
     public function rules(): array
     {
@@ -62,7 +62,7 @@ class FlightRequestApiForm extends Model
         if (!$this->order = Order::findOne(['or_fare_id' => $this->fareId])) {
             $this->addError($attribute, 'Order not found by fareId(' . $this->fareId . ')');
         }
-        if (!$this->flightQuote = self::getFlightQuoteByOrderId($this->order->getId())) {
+        if ($this->order && !$this->flightQuote = self::getFlightQuoteByOrderId($this->order->getId())) {
             $this->addError($attribute, 'FlightQuote not found in Order fareId(' . $this->fareId . ')');
         }
     }
@@ -112,5 +112,10 @@ class FlightRequestApiForm extends Model
     public function getFlightApiForms(): array
     {
         return $this->flightApiForms;
+    }
+
+    public function getFlightQuote(): FlightQuote
+    {
+        return $this->flightQuote;
     }
 }

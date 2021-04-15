@@ -20,7 +20,8 @@ class AirlinesCodeApiForm extends Model
     public function rules(): array
     {
         return [
-            /* TODO:: required ? */
+            [['recordLocator', 'code'], 'required'],
+
             [['code'], 'string', 'max' => 3],
             [['airline'], 'string', 'max' => 50],
             [['recordLocator'], 'string', 'max' => 255],
