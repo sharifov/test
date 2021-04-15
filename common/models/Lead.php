@@ -874,11 +874,11 @@ class Lead extends ActiveRecord implements Objectable
         return $lead;
     }
 
-    public static function createBookFailed($projectId): self
+    public static function createBookFailed($projectId, $department): self
     {
         $lead = self::create();
         $lead->project_id = $projectId;
-        $lead->l_dep_id = Department::DEPARTMENT_SALES;
+        $lead->l_dep_id = $department;
         $lead->status = self::STATUS_BOOK_FAILED;
         $lead->recordEvent(new LeadCreatedBookFailedEvent($lead, $lead->status));
         return $lead;

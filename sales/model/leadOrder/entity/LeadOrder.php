@@ -24,6 +24,14 @@ use yii\db\ActiveRecord;
  */
 class LeadOrder extends \yii\db\ActiveRecord
 {
+    public static function create(int $leadId, int $orderId): self
+    {
+        $leadOrder = new self();
+        $leadOrder->lo_lead_id = $leadId;
+        $leadOrder->lo_order_id = $orderId;
+        return $leadOrder;
+    }
+
     public function behaviors()
     {
         return [
