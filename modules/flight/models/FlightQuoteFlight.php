@@ -144,12 +144,23 @@ class FlightQuoteFlight extends \yii\db\ActiveRecord
     public static function create(
         int $flightQuoteId,
         ?int $tripTypeId,
-        ?string $mainAirline
+        ?string $mainAirline,
+        ?string $bookingId,
+        ?int $statusId,
+        ?string $pnr,
+        ?string $validatingCarrier,
+        $originalDataJson
     ): FlightQuoteFlight {
         $model = new self();
         $model->fqf_fq_id = $flightQuoteId;
         $model->fqf_trip_type_id = $tripTypeId;
         $model->fqf_main_airline = $mainAirline;
+        $model->fqf_booking_id = $bookingId;
+        $model->fqf_status_id = $statusId;
+        $model->fqf_booking_id = $bookingId;
+        $model->fqf_pnr = $pnr;
+        $model->fqf_validating_carrier = $validatingCarrier;
+        $model->fqf_original_data_json = $originalDataJson;
         return $model;
     }
 }

@@ -69,10 +69,10 @@ class FlightQuoteTicket extends \yii\db\ActiveRecord
     {
         return [
             'fqt_pax_id' => 'Pax',
+            'fqt_fqb_id' => 'Flight Quote Booking',
             'fqt_ticket_number' => 'Ticket Number',
             'fqt_created_dt' => 'Created Dt',
             'fqt_updated_dt' => 'Updated Dt',
-            'fqt_fqb_id' => 'Flight Quote Booking',
         ];
     }
 
@@ -84,5 +84,14 @@ class FlightQuoteTicket extends \yii\db\ActiveRecord
     public static function tableName(): string
     {
         return 'flight_quote_ticket';
+    }
+
+    public static function create(int $paxId, int $flightQuoteBookingId, string $ticketNumber): FlightQuoteTicket
+    {
+        $model = new self();
+        $model->fqt_pax_id = $paxId;
+        $model->fqt_fqb_id = $flightQuoteBookingId;
+        $model->fqt_ticket_number = $ticketNumber;
+        return $model;
     }
 }

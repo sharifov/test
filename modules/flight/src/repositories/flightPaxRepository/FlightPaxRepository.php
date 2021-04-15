@@ -26,4 +26,22 @@ class FlightPaxRepository
         }
         throw new NotFoundException('Flight pax not found by uid: ' . $uid);
     }
+
+    public function remove(FlightPax $flightPax): void
+    {
+        if (!$flightPax->delete()) {
+            throw new \RuntimeException('FlightPax remove failed');
+        }
+    }
+
+    public function removePaxByFlight(int $flightId): array
+    {
+        $removedResult = [];
+        foreach (FlightPax::findAll(['fp_flight_id' => $flightId]) as $flightPax) {
+            $flightPaxId = $flightPax->fp_id;
+            $this->remove($flightPax);
+            $removedResult[] = $flightPaxId;
+        }
+        return $removedResult;
+    }
 }

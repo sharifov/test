@@ -1085,7 +1085,6 @@ class FlightController extends ApiBaseController
             return $this->endApiLog($apiLog, self::validateErrorResponse($paymentFromBoForm));
         }*/
 
-
         try {
             $this->transactionManager->wrap(function () use ($flightRequestApiForm, $paymentFromBoForm, $post) {
                 $this->flightManageApiService->handler($flightRequestApiForm);

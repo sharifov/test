@@ -70,7 +70,7 @@ class FlightRequestApiForm extends Model
     public function checkFlights($attribute): void
     {
         foreach ($this->flights as $key => $flight) {
-            $flightApiForm = new FlightApiForm();
+            $flightApiForm = new FlightApiForm($flight);
             if (!$flightApiForm->load($flight)) {
                 $this->addError($attribute, 'FlightApiForm is not loaded');
                 break;

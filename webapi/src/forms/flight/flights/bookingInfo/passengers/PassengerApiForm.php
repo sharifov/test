@@ -2,12 +2,13 @@
 
 namespace  webapi\src\forms\flight\flights\bookingInfo\passengers;
 
+use frontend\helpers\JsonHelper;
 use yii\base\Model;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class PassengerApiForm
  *
- * @property $keyIdentity
  * @property $fullName
  * @property $first_name
  * @property $middle_name
@@ -17,6 +18,8 @@ use yii\base\Model;
  * @property $gender
  * @property $tktNumber
  * @property $paxType
+ *
+ * @property int $keyIdentity
  */
 class PassengerApiForm extends Model
 {
@@ -73,5 +76,17 @@ class PassengerApiForm extends Model
     public function getKeyIdentity(): int
     {
         return $this->keyIdentity;
+    }
+
+    public function getHashIdentity(): string
+    {
+        return md5(
+            $this->paxType .
+            $this->gender .
+            $this->first_name .
+            $this->middle_name .
+            $this->last_name .
+            $this->birth_date
+        );
     }
 }

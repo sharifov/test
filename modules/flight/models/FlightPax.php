@@ -151,6 +151,28 @@ class FlightPax extends \yii\db\ActiveRecord implements Serializable
         return $flightPax;
     }
 
+    public static function createByParams(
+        int $flightId,
+        string $paxType,
+        ?string $firstName = null,
+        ?string $lastName = null,
+        ?string $middleName = null,
+        ?string $dob = null,
+        ?string $gender = null,
+        ?string $nationality = null
+    ): FlightPax {
+        $flightPax = new self();
+        $flightPax->fp_flight_id = $flightId;
+        $flightPax->fp_pax_type = $paxType;
+        $flightPax->fp_first_name = $firstName;
+        $flightPax->fp_last_name = $lastName;
+        $flightPax->fp_middle_name = $middleName;
+        $flightPax->fp_dob = $dob;
+        $flightPax->fp_gender = $gender;
+        $flightPax->fp_nationality = $nationality;
+        return $flightPax;
+    }
+
     /**
      * @return array
      */

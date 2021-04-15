@@ -10,6 +10,7 @@ use modules\flight\src\services\api\FlightUpdateRequestApiService;
 use modules\order\src\entities\order\Order;
 use sales\helpers\ErrorsToStringHelper;
 use webapi\src\forms\flight\flights\bookingInfo\BookingInfoApiForm;
+use webapi\src\forms\flight\flights\price\PriceApiForm;
 use yii\base\Model;
 
 /**
@@ -23,8 +24,10 @@ use yii\base\Model;
  * @property $validatingCarrier
  * @property $bookingInfo
  * @property $trips
+ * @property $price
  *
  * @property BookingInfoApiForm[] $bookingInfoForms
+ * @property $originalDataJson
  */
 class FlightApiForm extends Model
 {
@@ -38,6 +41,13 @@ class FlightApiForm extends Model
     public $trips;
 
     private array $bookingInfoForms = [];
+    private $originalDataJson;
+
+    public function __construct($originalDataJson, $config = [])
+    {
+        $this->originalDataJson = $originalDataJson;
+        parent::__construct($config);
+    }
 
     public function rules(): array
     {
@@ -74,6 +84,12 @@ class FlightApiForm extends Model
                 return JsonHelper::decode($value);
             }],
             [['trips'], 'checkTrips'],
+
+            /*[['price'], CheckJsonValidator::class], // TODO::
+            [['price'], 'filter', 'filter' => static function ($value) {
+                return JsonHelper::decode($value);
+            }],
+            [['price'], 'checkPrice'],*/
         ];
     }
 
@@ -93,6 +109,22 @@ class FlightApiForm extends Model
         }
     }
 
+    /*public function checkPrice($attribute): void // TODO::
+    {
+        foreach ($this->price as $key => $price) {
+            $priceApiForm = new PriceApiForm();
+            if (!$priceApiForm->load($price)) {
+                $this->addError($attribute, 'PriceApiForm is not loaded');
+                break;
+            }
+            if (!$priceApiForm->validate()) {
+                $this->addError($attribute, 'PriceApiForm: ' . ErrorsToStringHelper::extractFromModel($priceApiForm));
+                break;
+            }
+            $this->priceApiForms[$key] = $priceApiForm;
+        }
+    }*/
+
     public function checkTrips($attribute): void
     {
         foreach ($this->trips as $key => $trip) {
@@ -108,5 +140,10 @@ class FlightApiForm extends Model
     public function getBookingInfoForms(): array
     {
         return $this->bookingInfoForms;
+    }
+
+    public function getOriginalDataJson()
+    {
+        return $this->originalDataJson;
     }
 }
