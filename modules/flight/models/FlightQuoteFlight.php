@@ -57,7 +57,9 @@ class FlightQuoteFlight extends \yii\db\ActiveRecord
             ['fqf_validating_carrier', 'string', 'max' => 2],
 
             ['fqf_status_id', 'integer'],
+
             ['fqf_trip_type_id', 'integer'],
+            ['fqf_trip_type_id', 'in', 'range' => array_keys(self::TRIP_TYPE_LIST)],
 
             [['fqf_created_dt', 'fqf_updated_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
 
