@@ -14,11 +14,8 @@ use yii\helpers\ArrayHelper;
  *
  * @property int $fqf_id
  * @property int|null $fqf_fq_id
- * @property int|null $fqf_type_id
- * @property string|null $fqf_cabin_class
  * @property int|null $fqf_trip_type_id
  * @property string|null $fqf_main_airline
- * @property int|null $fqf_fare_type_id
  * @property int|null $fqf_status_id
  * @property string|null $fqf_booking_id
  * @property string|null $fqf_pnr
@@ -51,20 +48,16 @@ class FlightQuoteFlight extends \yii\db\ActiveRecord
         return [
             [['fqf_fq_id'], 'required'],
 
-            ['fqf_fare_type_id', 'integer'],
-
             ['fqf_fq_id', 'integer'],
             ['fqf_fq_id', 'exist', 'skipOnError' => true, 'targetClass' => FlightQuote::class, 'targetAttribute' => ['fqf_fq_id' => 'fq_id']],
 
             ['fqf_booking_id', 'string', 'max' => 50],
-            ['fqf_cabin_class', 'string', 'max' => 1],
             ['fqf_main_airline', 'string', 'max' => 2],
             ['fqf_pnr', 'string', 'max' => 10],
             ['fqf_validating_carrier', 'string', 'max' => 2],
 
             ['fqf_status_id', 'integer'],
             ['fqf_trip_type_id', 'integer'],
-            ['fqf_type_id', 'integer'],
 
             [['fqf_created_dt', 'fqf_updated_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
 
@@ -126,11 +119,8 @@ class FlightQuoteFlight extends \yii\db\ActiveRecord
         return [
             'fqf_id' => 'ID',
             'fqf_fq_id' => 'FlightQuote ID',
-            'fqf_type_id' => 'Type ID',
-            'fqf_cabin_class' => 'Cabin Class',
             'fqf_trip_type_id' => 'Trip Type ID',
             'fqf_main_airline' => 'Main Airline',
-            'fqf_fare_type_id' => 'Fare Type ID',
             'fqf_status_id' => 'Status ID',
             'fqf_booking_id' => 'Booking ID',
             'fqf_pnr' => 'Pnr',
@@ -153,19 +143,13 @@ class FlightQuoteFlight extends \yii\db\ActiveRecord
 
     public static function create(
         int $flightQuoteId,
-        ?int $typeId,
-        ?string $cabinClass,
         ?int $tripTypeId,
-        ?string $mainAirline,
-        ?int $fareTypeId
+        ?string $mainAirline
     ): FlightQuoteFlight {
         $model = new self();
         $model->fqf_fq_id = $flightQuoteId;
-        $model->fqf_type_id = $typeId;
-        $model->fqf_cabin_class = $cabinClass;
         $model->fqf_trip_type_id = $tripTypeId;
         $model->fqf_main_airline = $mainAirline;
-        $model->fqf_fare_type_id = $fareTypeId;
         return $model;
     }
 }

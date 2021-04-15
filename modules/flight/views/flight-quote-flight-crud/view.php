@@ -36,11 +36,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'attributes' => [
                 'fqf_id',
                 'fqf_fq_id',
-                'fqf_type_id',
-                'fqf_cabin_class',
                 'fqf_trip_type_id',
                 'fqf_main_airline',
-                'fqf_fare_type_id',
                 'fqf_status_id',
                 'fqf_booking_id',
                 'fqf_pnr',

@@ -22,15 +22,9 @@ use common\components\bootstrap4\activeForm\ActiveForm;
 
     <?= $form->field($model, 'fqf_fq_id') ?>
 
-    <?php // echo $form->field($model, 'fqf_type_id') ?>
-
-    <?php // echo $form->field($model, 'fqf_cabin_class') ?>
-
     <?php // echo $form->field($model, 'fqf_trip_type_id') ?>
 
     <?php // echo $form->field($model, 'fqf_main_airline') ?>
-
-    <?php // echo $form->field($model, 'fqf_fare_type_id') ?>
 
     <?php // echo $form->field($model, 'fqf_status_id') ?>
 

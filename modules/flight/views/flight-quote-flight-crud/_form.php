@@ -17,15 +17,9 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'fqf_fq_id')->textInput() ?>
 
-        <?= $form->field($model, 'fqf_type_id')->textInput() ?>
-
-        <?= $form->field($model, 'fqf_cabin_class')->textInput(['maxlength' => true]) ?>
-
         <?= $form->field($model, 'fqf_trip_type_id')->textInput() ?>
 
         <?= $form->field($model, 'fqf_main_airline')->textInput(['maxlength' => true]) ?>
-
-        <?= $form->field($model, 'fqf_fare_type_id')->textInput() ?>
 
         <?= $form->field($model, 'fqf_status_id')->textInput() ?>
 
