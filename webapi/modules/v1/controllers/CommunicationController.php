@@ -1100,7 +1100,7 @@ class CommunicationController extends ApiBaseController
         if (isset($calData['From']) && $calData['From']) {
             $clientPhoneNumber = $calData['From'];
             if ($clientPhoneNumber) {
-                $clientPhone = ClientPhone::find()->where(['phone' => $clientPhoneNumber])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+                $clientPhone = ClientPhone::find()->where(['phone' => $clientPhoneNumber])->notInvalid()->orderBy(['id' => SORT_DESC])->limit(1)->one();
             }
         }
 

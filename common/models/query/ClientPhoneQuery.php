@@ -10,6 +10,15 @@ use yii\db\ActiveQuery;
  */
 class ClientPhoneQuery extends ActiveQuery
 {
+    public function notInvalid(): self
+    {
+        return $this->andWhere([
+            'OR',
+            ['is', 'type', null],
+            ['<>', 'type', ClientPhone::PHONE_INVALID],
+        ]);
+    }
+
     /**
      * @param null $db
      * @return array|ClientPhone|null
