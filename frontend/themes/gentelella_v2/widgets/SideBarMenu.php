@@ -550,6 +550,15 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Search Orders', 'url' => ['/order/order/search'], 'icon' => 'search'],
                 ['label' => 'Error Orders', 'url' => ['/order/order/error-list'], 'icon' => 'exclamation-triangle'],
                 ['label' => 'New', 'url' => ['/order/order-q/new'], 'icon' => 'paste text-warning'],
+                ['label' => 'Pending', 'url' => ['/order/order-q/pending'], 'icon' => 'briefcase text-info'],
+                ['label' => 'Processing', 'url' => ['/order/order-q/processing'], 'icon' => 'spinner'],
+                ['label' => 'Prepared', 'url' => ['/order/order-q/prepared'], 'icon' => 'recycle'],
+                ['label' => 'Complete', 'url' => ['/order/order-q/complete'], 'icon' => 'flag text-success'],
+                ['label' => 'Cancel Processing', 'url' => ['/order/order-q/cancel-processing'], 'icon' => 'spinner text-danger'],
+                ['label' => 'Error', 'url' => ['/order/order-q/error'], 'icon' => 'exclamation-triangle text-danger'],
+                ['label' => 'Declined', 'url' => ['/order/order-q/declined'], 'icon' => 'reply'],
+                ['label' => 'Canceled', 'url' => ['/order/order-q/canceled'], 'icon' => 'close'],
+                ['label' => 'Canceled failed', 'url' => ['/order/order-q/cancel-failed'], 'icon' => 'close text-danger'],
             ]
         ];
 

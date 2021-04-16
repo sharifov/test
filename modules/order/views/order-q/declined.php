@@ -14,16 +14,16 @@ use common\components\grid\DateTimeColumn;
  * @var $dataProvider yii\data\ActiveDataProvider
  */
 
-$this->title = 'New';
+$this->title = 'Declined';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
 <h1>
-    <i class="fa fa-paste text-warning"></i> <?= Html::encode($this->title) ?>
+    <i class="fa fa-reply"></i> <?= Html::encode($this->title) ?>
 </h1>
 
-<div class="orders-q-new">
-    <?php Pjax::begin(['id' => 'orders-q-new-pjax-list', 'timeout' => 5000, 'enablePushState' => true]); ?>
+<div class="orders-q-error">
+    <?php Pjax::begin(['id' => 'orders-q-declined-pjax-list', 'timeout' => 5000, 'enablePushState' => true]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
