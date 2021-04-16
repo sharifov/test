@@ -31,6 +31,21 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             [
                 'attribute' => 'or_id',
+                'value' => static function (order $model) {
+                    return Html::a($model->or_id, [
+                        'order/view', 'gid' => $model->or_gid
+                    ], [
+                        'data-pjax' => 0,
+                        'target' => '_blank'
+                    ]);
+                },
+                'format' => 'raw',
+                'options' => [
+                    'style' => 'width:80px'
+                ],
+                'contentOptions' => [
+                    'class' => 'text-center'
+                ],
             ],
             'or_fare_id',
             [
@@ -49,8 +64,13 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Status time',
                 'value' => static function (Order $order) {
-                    $data = $order->orderStatusLogs;
-                    return $data ? Yii::$app->formatter->asDuration(time() - strtotime(end($data)->orsl_start_dt)) : ' - ';
+                    foreach ($order->orderStatusLogs as $statusLog) {
+                        if ($statusLog->orsl_end_status_id == $order->or_status_id) {
+                            $data = $statusLog;
+                        }
+                    }
+
+                    return !empty($data) ? Yii::$app->formatter->asDuration(time() - strtotime($data->orsl_start_dt)) : ' - ';
                 }
             ],
 
