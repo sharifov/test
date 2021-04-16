@@ -24,10 +24,9 @@ class ClientsQuery
             ->all();
     }
 
-
-    public static function oneByEmailAndProject(string $email, int $projectId)
+    public static function oneByEmailAndProject(string $email, int $projectId, ?int $typeId = null)
     {
-        return Client::find()->alias('clients')->select(['clients.*'])
+        $query = Client::find()->alias('clients')->select(['clients.*'])
             ->innerJoin(
                 ClientEmail::tableName() . ' AS emails',
                 'emails.client_id = clients.id AND emails.email = :email',
@@ -35,8 +34,28 @@ class ClientsQuery
             )
             ->where(['clients.cl_project_id' => $projectId])
             ->orderBy(['clients.id' => SORT_DESC])
-            ->limit(1)
-            ->one();
+            ->limit(1);
+        if ($typeId) {
+            $query->andWhere(['cl_type_id' => $typeId]);
+        }
+        return $query->one();
+    }
+
+    public static function oneByPhoneAndProject(string $phone, int $projectId, ?int $typeId = null)
+    {
+        $query = Client::find()->alias('clients')->select(['clients.*'])
+            ->innerJoin(
+                ClientPhone::tableName() . ' AS phones',
+                'phones.client_id = clients.id AND phones.phone = :phone',
+                [':phone' => $phone]
+            )
+            ->where(['clients.cl_project_id' => $projectId])
+            ->orderBy(['clients.id' => SORT_DESC])
+            ->limit(1);
+        if ($typeId) {
+            $query->andWhere(['cl_type_id' => $typeId]);
+        }
+        return $query->one();
     }
 
     public static function findParentByEmail(?string $email, int $projectId)

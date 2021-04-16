@@ -635,8 +635,22 @@ class ClientManageService
         return null;
     }
 
-    public function createBasedOnOrderContact(OrderContact $orderContact, ?int $projectId): Client
+    public function createBasedOnOrderContact(OrderContact $orderContact, int $projectId): Client
     {
+        if ($orderContact->oc_email) {
+            $client = ClientsQuery::oneByEmailAndProject($orderContact->oc_email ?? '', $projectId, Client::TYPE_CLIENT);
+            if ($client && $client->first_name === $orderContact->oc_first_name && $client->last_name === $orderContact->oc_last_name) {
+                return $client;
+            }
+        }
+
+        if ($orderContact->oc_phone_number) {
+            $client = ClientsQuery::oneByPhoneAndProject($orderContact->oc_phone_number ?? '', $projectId, Client::TYPE_CLIENT);
+            if ($client && $client->first_name === $orderContact->oc_first_name && $client->last_name === $orderContact->oc_last_name) {
+                return $client;
+            }
+        }
+
         $clientForm = new ClientCreateForm();
         $clientForm->firstName = $orderContact->oc_first_name;
         $clientForm->lastName = $orderContact->oc_last_name;

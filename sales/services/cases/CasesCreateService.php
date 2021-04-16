@@ -218,7 +218,10 @@ class CasesCreateService
                 if (!$orderContact) {
                     throw new \DomainException('Cannot create client, order contact not found');
                 }
-                $client = $this->clientManageService->createBasedOnOrderContact($orderContact, $order->or_project_id);
+
+                if (!$client = $orderContact->client) {
+                    $client = $this->clientManageService->createBasedOnOrderContact($orderContact, $order->or_project_id);
+                }
 
                 $case = Cases::createByApi(
                     $client->id,
