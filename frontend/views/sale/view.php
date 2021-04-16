@@ -267,9 +267,56 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                 </div>
             <?php endif; ?>
 
+            <?php if (!empty($caseSaleModel) && $cfar = ArrayHelper::getValue($caseSaleModel->getSaleDataDecoded(), 'cfar')) : ?>
+                <div class="row">
+                    <div class="col-md-3">
+                        <h2>CFAR</h2>
+                        <table class="table table-bordered table-hover table-striped">
+                            <tr>
+                                <th>Type</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($cfar, 'type')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Amount</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($cfar, 'amount')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Is Activated</th>
+                                <td><?php echo ArrayHelper::getValue($cfar, 'isActivated') ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>' ?></td>
+                            </tr>
+                            <?php if (ArrayHelper::getValue($cfar, 'reason')) : ?>
+                            <tr>
+                                <th>Reason</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($cfar, 'reason')) ?></td>
+                            </tr>
+                            <?php endif; ?>
+                        </table>
+                    </div>
+                    <div class="col-md-5">
+                        <h2>CFAR options</h2>
+                        <table class="table table-bordered table-hover">
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Limit</th>
+                                <th>Value</th>
+                            </tr>
+                            <?php foreach (ArrayHelper::getValue($cfar, 'options') as $option) : ?>
+                                <tr>
+                                    <td><?=Html::encode($option['name'])?></td>
+                                    <td><?=Html::encode($option['type'])?></td>
+                                    <td><?=Html::encode($option['limit'])?></td>
+                                    <td><?=Html::encode($option['value'])?></td>
+                                </tr>
+                            <?php endforeach;?>
+                        </table>
+                    </div>
+                </div>
+            <?php endif ?>
+
             <?php if (!empty($caseSaleModel) && $package = ArrayHelper::getValue($caseSaleModel->getSaleDataDecoded(), 'package')) : ?>
                 <div class="row">
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <h2>Package</h2>
                         <table class="table table-bordered table-hover table-striped">
                             <tr>
@@ -282,8 +329,14 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                             </tr>
                             <tr>
                                 <th>Is Activated</th>
-                                <td><?php echo Html::encode(ArrayHelper::getValue($package, 'isActivated')) ?></td>
+                                <td><?php echo ArrayHelper::getValue($package, 'isActivated') ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>' ?></td>
                             </tr>
+                            <?php if (ArrayHelper::getValue($package, 'reason')) : ?>
+                            <tr>
+                                <th>Reason</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($package, 'reason')) ?></td>
+                            </tr>
+                            <?php endif; ?>
                         </table>
                     </div>
                     <div class="col-md-5">
@@ -299,6 +352,47 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                     <td><?=Html::encode($option['name'])?></td>
                                     <td><?=Html::encode($option['type'])?></td>
                                     <td><?=Html::encode($option['value'])?></td>
+                                </tr>
+                            <?php endforeach;?>
+                        </table>
+                    </div>
+                </div>
+            <?php endif ?>
+
+            <?php if (!empty($caseSaleModel) && $insurance = ArrayHelper::getValue($caseSaleModel->getSaleDataDecoded(), 'travelInsurance')) : ?>
+                <div class="row">
+                    <div class="col-md-3">
+                        <h2>Travel Insurance</h2>
+                        <table class="table table-bordered table-hover table-striped">
+                            <tr>
+                                <th>Type</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($insurance, 'type')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Amount</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($insurance, 'amount')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Pax</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($insurance, 'paxCount')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Policy Number</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($insurance, 'policyNumber') ?? ' - ') ?></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-5">
+                        <h2>Insurance Detail</h2>
+                        <table class="table table-bordered table-hover">
+                            <tr>
+                                <th>Type</th>
+                                <th>Amount</th>
+                            </tr>
+                            <?php foreach (ArrayHelper::getValue($insurance, 'detail') as $detail) : ?>
+                                <tr>
+                                    <td><?=Html::encode($detail['type'])?></td>
+                                    <td><?=Html::encode($detail['amount'])?></td>
                                 </tr>
                             <?php endforeach;?>
                         </table>

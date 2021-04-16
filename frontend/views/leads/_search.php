@@ -63,8 +63,11 @@ use frontend\extensions\DatePicker;
                         </div>
                     <!--</div>
                     <div class="row">-->
-                        <div class="col-md-2">
+                        <div class="col-md-1">
                             <?= $form->field($model, 'createdType')->dropDownList(Lead::TYPE_CREATE_LIST, ['prompt' => '-']) ?>
+                        </div>
+                        <div class="col-md-1">
+                            <?= $form->field($model, 'lead_type')->dropDownList(Lead::TYPE_LIST, ['prompt' => '-']) ?>
                         </div>
                     </div>
                 </div>

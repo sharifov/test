@@ -14,6 +14,7 @@ use common\models\Department;
 use common\models\Employee;
 use common\models\Notifications;
 use sales\forms\lead\PhoneCreateForm;
+use sales\helpers\setting\SettingHelper;
 use sales\repositories\cases\CasesRepository;
 use sales\services\cases\CasesCreateService;
 use sales\services\client\ClientManageService;
@@ -98,7 +99,7 @@ class AgentCallQueueJob extends BaseObject implements JobInterface
                     }
 
                     if (!$isCalled) {
-                        $limitCallUsers = (int) (Yii::$app->params['settings']['general_line_user_limit'] ?? 1); //direct_agent_user_limit
+                        $limitCallUsers = SettingHelper::getGeneralLineUserLimit($call->cDep, $call->c_to);
 
                         $exceptUserIds = ArrayHelper::map($call->callUserAccesses, 'cua_user_id', 'cua_user_id');
                         $users = Employee::getUsersForCallQueue($call, $limitCallUsers, $last_hours, $exceptUserIds);

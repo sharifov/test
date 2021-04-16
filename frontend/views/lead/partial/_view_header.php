@@ -82,6 +82,12 @@ $bundle = \frontend\assets\TimerAsset::register($this);
                             <?= implode('&#9900', $lead->getAdditionalInformationMultiplePnr()) ?>
                         </span>
                     </div>
+                    <?php if ($lead->l_type) : ?>
+                        <div class="page-header__general-item">
+                            <strong>Type:</strong>
+                            <span><?= Html::encode($lead::TYPE_LIST[$lead->l_type])?></span>
+                        </div>
+                    <?php endif ?>
 
 <!--                    <div class="page-header__general-item">-->
 <!--                        --><?php //= $this->render('_rating', [

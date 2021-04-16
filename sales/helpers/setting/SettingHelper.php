@@ -2,7 +2,10 @@
 
 namespace sales\helpers\setting;
 
+use common\models\Department;
+use common\models\DepartmentPhoneProject;
 use Yii;
+use yii\helpers\VarDumper;
 
 class SettingHelper
 {
@@ -139,5 +142,99 @@ class SettingHelper
     public static function isEnabledClientChatJob(): bool
     {
         return (bool)(Yii::$app->params['settings']['enable_client_chat_job'] ?? false);
+    }
+
+    public static function isCreateCaseOnOrderCancelEnabled(): bool
+    {
+        return (bool)(Yii::$app->params['settings']['order_cancellation_case_enabled'] ?? false);
+    }
+
+    public static function getCaseCategoryKeyOnOrderCancel(): string
+    {
+        return Yii::$app->params['settings']['order_cancellation_case_category_key'] ?? '';
+    }
+
+    public static function getOrderFreeCancelEmailTemplateKey(): string
+    {
+        return Yii::$app->params['settings']['order_free_cancel_email_template_key'] ?? 'order_free_cancel_success';
+    }
+
+    public static function getOrderProcessingEmailTemplateKey(): string
+    {
+        return Yii::$app->params['settings']['order_processing_email_template_key'] ?? 'order_status';
+    }
+
+    public static function getOrderCompleteEmailTemplateKey(): string
+    {
+        return Yii::$app->params['settings']['order_complete_email_template_key'] ?? 'order_status';
+    }
+
+    public static function getTimeStartCallUserAccessGeneral(?Department $department, $phone): int
+    {
+        $key = 'time_start_call_user_access_general';
+        if ($phone) {
+            $result = self::getDepartmentPhoneQueueDistributionParam($phone, $key);
+            if ($result !== null) {
+                return $result;
+            }
+        }
+        if ($department) {
+            $params = $department->getParams();
+            if ($params && $params->queueDistribution->timeStartCallUserAccessGeneral !== null) {
+                return (int)$params->queueDistribution->timeStartCallUserAccessGeneral;
+            }
+        }
+        return (int)(Yii::$app->params['settings'][$key] ?? 0);
+    }
+
+    public static function getGeneralLineUserLimit(?Department $department, $phone): int
+    {
+        $key = 'general_line_user_limit';
+        if ($phone) {
+            $result = self::getDepartmentPhoneQueueDistributionParam($phone, $key);
+            if ($result !== null) {
+                return $result;
+            }
+        }
+        if ($department) {
+            $params = $department->getParams();
+            if ($params && $params->queueDistribution->generalLineUserLimit !== null) {
+                return (int)$params->queueDistribution->generalLineUserLimit;
+            }
+        }
+        return (int)(Yii::$app->params['settings'][$key] ?? 1);
+    }
+
+    public static function getTimeRepeatCallUserAccess(?Department $department, $phone): int
+    {
+        $key = 'time_repeat_call_user_access';
+        if ($phone) {
+            $result = self::getDepartmentPhoneQueueDistributionParam($phone, $key);
+            if ($result !== null) {
+                return $result;
+            }
+        }
+        if ($department) {
+            $params = $department->getParams();
+            if ($params && $params->queueDistribution->timeRepeatCallUserAccess !== null) {
+                return (int)$params->queueDistribution->timeRepeatCallUserAccess;
+            }
+        }
+        return (int)(Yii::$app->params['settings'][$key] ?? 0);
+    }
+
+    private static function getDepartmentPhoneQueueDistributionParam(string $phone, string $key): ?int
+    {
+        $params = DepartmentPhoneProject::find()->select(['dpp_params'])->byPhone($phone, false)->scalar();
+        if ($params) {
+            $params = @json_decode($params, true);
+            if ($params) {
+                $params = @json_decode($params, true);
+                if ($params && isset($params['queue_distribution'][$key])) {
+                    return (int)$params['queue_distribution'][$key];
+                }
+            }
+        }
+        return null;
     }
 }

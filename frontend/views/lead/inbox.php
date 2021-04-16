@@ -162,7 +162,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'id',
             'label' => 'Lead ID',
-            'value' => static function (\common\models\Lead $model) {
+            'value' => static function (Lead $model) {
                 return $model->id;
             },
             'visible' => ! $isAgent,
@@ -171,9 +171,17 @@ $this->params['breadcrumbs'][] = $this->title;
             ]
         ],
         [
+            'attribute' => 'l_type',
+            'value' => static function (Lead $model) {
+                return $model->l_type ? '<span class="label label-default" style="font-size: 13px">' . $model::TYPE_LIST[$model->l_type] . '</span>' : ' - ';
+            },
+            'format' => 'raw',
+            'filter' => Lead::TYPE_LIST,
+        ],
+        [
             //'attribute' => 'pending',
             'label' => 'Pending Time',
-            'value' => static function (\common\models\Lead $model) {
+            'value' => static function (Lead $model) {
                 $createdTS = strtotime($model->created);
 
                 $diffTime = time() - $createdTS;

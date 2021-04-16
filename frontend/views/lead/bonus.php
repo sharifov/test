@@ -53,6 +53,14 @@ $this->params['breadcrumbs'][] = $this->title;
             ]
         ],
         [
+            'attribute' => 'l_type',
+            'value' => static function (Lead $model) {
+                return $model->l_type ? '<span class="label label-default" style="font-size: 13px">' . $model::TYPE_LIST[$model->l_type] . '</span>' : ' - ';
+            },
+            'format' => 'raw',
+            'filter' => Lead::TYPE_LIST,
+        ],
+        [
             'attribute' => 'created',
             'label' => 'Pending Time',
             'value' => static function (Lead $lead) {

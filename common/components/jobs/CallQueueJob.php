@@ -18,6 +18,7 @@ use common\models\ProjectEmployeeAccess;
 use common\models\UserGroupAssign;
 use sales\forms\lead\PhoneCreateForm;
 use sales\helpers\app\AppHelper;
+use sales\helpers\setting\SettingHelper;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\services\cases\CasesCreateService;
@@ -279,7 +280,7 @@ class CallQueueJob extends BaseObject implements JobInterface
 
 
                                     if ((int)$call->c_source_type_id === Call::SOURCE_GENERAL_LINE) {
-                                        $timeStartCallUserAccess = (int)(Yii::$app->params['settings']['time_start_call_user_access_general'] ?? 0);
+                                        $timeStartCallUserAccess = SettingHelper::getTimeStartCallUserAccessGeneral($call->cDep, $call->c_to);
                                     } else {
                                         $timeStartCallUserAccess = (int)(Yii::$app->params['settings']['time_start_call_user_access_direct'] ?? 0);
                                     }
@@ -300,7 +301,7 @@ class CallQueueJob extends BaseObject implements JobInterface
 
                         $last_hours = (int)(Yii::$app->params['settings']['general_line_last_hours'] ?? 1);
 
-                        $limitCallUsers = (int)(Yii::$app->params['settings']['general_line_user_limit'] ?? 1);
+                        $limitCallUsers = SettingHelper::getGeneralLineUserLimit($call->cDep, $call->c_to);
 
                         $users = Employee::getUsersForCallQueue($call, $limitCallUsers, $last_hours);
                         if ($users) {
@@ -311,7 +312,7 @@ class CallQueueJob extends BaseObject implements JobInterface
                         }
 
 
-                        $timeStartCallUserAccess = (int) (Yii::$app->params['settings']['time_start_call_user_access_general'] ?? 0);
+                        $timeStartCallUserAccess = SettingHelper::getTimeStartCallUserAccessGeneral($call->cDep, $call->c_to);
 
                         if ($timeStartCallUserAccess) {
                             $job = new CallUserAccessJob();
