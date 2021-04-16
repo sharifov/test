@@ -369,6 +369,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     ['label' => 'Order Data', 'url' => ['/order/order-data-crud/index']],
                     ['label' => 'Case Order Relation', 'url' => ['/case-order-crud/index']],
                     ['label' => 'Lead Order Relation', 'url' => ['/lead-order-crud/index']],
+                    ['label' => 'Lead Product Relation', 'url' => ['/lead-product-crud/index']],
                     ['label' => 'Order Contact', 'url' => ['/order/order-contact-crud/index']],
                     ['label' => 'Order Email', 'url' => ['/order/order-email-crud/index']],
                 ], 'hasChild' => true],

@@ -5,10 +5,14 @@ namespace modules\lead\src\services;
 use common\models\Department;
 use common\models\Lead;
 use modules\order\src\entities\order\Order;
+use modules\order\src\entities\orderContact\OrderContact;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
+use modules\product\src\services\ProductCloneService;
 use sales\model\leadOrder\services\LeadOrderService;
+use sales\model\leadProduct\services\LeadProductService;
 use sales\repositories\lead\LeadRepository;
+use sales\services\TransactionManager;
 
 /**
  * Class LeadFailBooking
@@ -16,41 +20,53 @@ use sales\repositories\lead\LeadRepository;
  * @property ProductQuoteRepository $productQuoteRepository
  * @property LeadRepository $leadRepository
  * @property LeadOrderService $leadOrderService
+ * @property LeadProductService $leadProductService
+ * @property ProductCloneService $productCloneService
+ * @property TransactionManager $transactionManager
  */
 class LeadFailBooking
 {
     private ProductQuoteRepository $productQuoteRepository;
     private LeadRepository $leadRepository;
     private LeadOrderService $leadOrderService;
+    private LeadProductService $leadProductService;
+    private ProductCloneService $productCloneService;
+    private TransactionManager $transactionManager;
 
     public function __construct(
         ProductQuoteRepository $productQuoteRepository,
         LeadRepository $leadRepository,
-        LeadOrderService $leadOrderService
+        LeadOrderService $leadOrderService,
+        LeadProductService $leadProductService,
+        ProductCloneService $productCloneService,
+        TransactionManager $transactionManager
     ) {
         $this->productQuoteRepository = $productQuoteRepository;
         $this->leadRepository = $leadRepository;
         $this->leadOrderService = $leadOrderService;
+        $this->leadProductService = $leadProductService;
+        $this->productCloneService = $productCloneService;
+        $this->transactionManager = $transactionManager;
     }
 
-    public function create(int $quoteId)
+    public function create(int $quoteId, ?int $createdUserId)
     {
         $quote = $this->productQuoteRepository->find($quoteId);
 
         $order = $this->getOrder($quote);
 
-        $lead = Lead::createBookFailed(
-            $order->or_project_id,
-            Department::DEPARTMENT_SALES
-        );
-        $this->leadRepository->save($lead);
+        $this->transactionManager->wrap(function () use ($order, $quote, $createdUserId) {
+            $lead = Lead::createBookFailed(
+                $order->or_project_id,
+                Department::DEPARTMENT_SALES,
+                $this->getClientId($order->or_id)
+            );
+            $this->leadRepository->save($lead);
 
-        $this->leadOrderService->create($lead->id, $order->or_id);
-
-        $quote->pqProduct->pr_lead_id = $lead->id;
-        $quote->pqProduct->save();
-
-        $this->connectClient();
+            $this->leadOrderService->create($lead->id, $order->or_id);
+            $this->leadProductService->create($lead->id, $quote->pq_product_id, $quote->pq_id);
+            $this->productCloneService->clone($quote->pq_product_id, $lead->id, $createdUserId);
+        });
     }
 
     private function getOrder(ProductQuote $quote): Order
@@ -62,7 +78,19 @@ class LeadFailBooking
         return $quote->pqOrder;
     }
 
-    private function connectClient()
+    private function getClientId(int $orderId): ?int
     {
+        $clientId = OrderContact::find()->select(['oc_client_id'])->byOrderId($orderId)->asArray()->scalar();
+
+        if ($clientId) {
+            return (int)$clientId;
+        }
+
+        \Yii::error([
+            'message' => 'Not found clientId in OrderContact',
+            'orderId' => $orderId
+        ], 'LeadFailBooking:create');
+
+        return null;
     }
 }
