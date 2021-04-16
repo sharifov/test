@@ -76,6 +76,10 @@ class QuoteController extends ApiBaseController
      *
      * @apiSuccess {array} errors    Errors
      * @apiSuccess {string} uid    Quote UID
+     * @apiSuccess {integer} lead_id    Lead ID
+     * @apiSuccess {string} lead_uid    Lead UID
+     * @apiSuccess {integer} client_id    Client ID
+     * @apiSuccess {integer} lead_type    <code>TYPE_ALTERNATIVE = 2, TYPE_FAILED_BOOK = 3</code>
      * @apiSuccess {string} agentName    Agent Name
      * @apiSuccess {string} agentEmail    Agent Email
      * @apiSuccess {string} agentDirectLine    Agent DirectLine
@@ -250,6 +254,7 @@ class QuoteController extends ApiBaseController
      *    },
      *   "lead_delayed_charge": 0,
      *   "lead_status": "sold",
+     *   "lead_type": 2,
      *   "booked_quote_uid": "5b8ddfc56a15c",
      *   "source_code": "38T556",
      *   "check_payment": true,
@@ -370,6 +375,7 @@ class QuoteController extends ApiBaseController
             ];
             $response['lead_delayed_charge'] = $model->lead->l_delayed_charge;
             $response['lead_status'] = null;
+            $response['lead_type'] = $model->lead->l_type;
             $response['booked_quote_uid'] = null;
             $response['source_code'] = ($model->lead && isset($model->lead->source)) ? $model->lead->source->cid : null;
             $response['gdsOfferId'] = $model->gds_offer_id;

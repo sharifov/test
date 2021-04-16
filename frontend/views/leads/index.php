@@ -172,6 +172,15 @@ $this->registerJs($js);
             'filter' => $showFilter,
         ],
         [
+            'attribute' => 'l_type',
+            'value' => static function (Lead $model) {
+                return $model->l_type ? '<span class="label label-default" style="font-size: 13px">' . $model::TYPE_LIST[$model->l_type] . '</span>' : ' - ';
+            },
+            'format' => 'raw',
+            'visible' => $searchModel->show_fields && in_array('l_type', $searchModel->show_fields, true),
+            'filter' => $showFilter ? Lead::TYPE_LIST : false,
+        ],
+        [
             'class' => \common\components\grid\project\ProjectColumn::class,
             'attribute' => 'project_id',
             'relation' => 'project',

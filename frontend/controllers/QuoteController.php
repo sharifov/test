@@ -151,10 +151,10 @@ class QuoteController extends FController
                         'pageSize' => 10,
                         'params' => array_merge(Yii::$app->request->get(), $form->getFilters(), $params ?? []),
                     ],
-                    'sort' => [
+                    /*'sort' => [
                         'attributes' => ['price', 'duration'],
                         'defaultOrder' => [$form->getSortBy() => $form->getSortType()],
-                    ],
+                    ],*/
                 ]);
 
                 $viewData['leadId'] = $leadId;

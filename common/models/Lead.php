@@ -133,6 +133,7 @@ use yii\helpers\VarDumper;
  * @property int|null $l_visitor_log_id
  * @property string|null $l_status_dt
  * @property string|null $l_expiration_dt
+ * @property int|null $l_type
  *
  * @property float $finalProfit
  * @property int $quotesCount
@@ -349,6 +350,16 @@ class Lead extends ActiveRecord implements Objectable
         self::TYPE_CREATE_CLONE => 'Clone',
         self::TYPE_CREATE_IMPORT => 'Import',
         self::TYPE_CREATE_CLIENT_CHAT => 'Client Chat',
+    ];
+
+    public const TYPE_BASIC = 1;
+    public const TYPE_ALTERNATIVE = 2;
+    public const TYPE_FAILED_BOOK = 3;
+
+    public const TYPE_LIST = [
+        //self::TYPE_BASIC => 'Basic',
+        self::TYPE_ALTERNATIVE => 'Alternative',
+        self::TYPE_FAILED_BOOK => 'Failed Book'
     ];
 
     private const PROCESSED_VTF = [
@@ -584,6 +595,7 @@ class Lead extends ActiveRecord implements Objectable
             ['l_client_lang', 'exist', 'skipOnError' => true, 'targetClass' => Language::class, 'targetAttribute' => ['l_client_lang' => 'language_id']],
 
             [['l_expiration_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s', 'skipOnError' => true, 'skipOnEmpty' => true],
+            ['l_type', 'integer']
         ];
     }
 
@@ -804,6 +816,7 @@ class Lead extends ActiveRecord implements Objectable
         $lead->l_type_create = self::TYPE_CREATE_API;
         $lead->l_client_lang = $form->user_language;
         $lead->l_expiration_dt = $form->expire_at;
+        $lead->l_type = $form->type;
         return $lead;
     }
 
@@ -1816,6 +1829,7 @@ class Lead extends ActiveRecord implements Objectable
             'l_visitor_log_id' => 'Visitor log ID',
             'l_status_dt' => 'Status Dt',
             'l_expiration_dt' => 'Expiration',
+            'l_type' => 'Type',
         ];
     }
 
