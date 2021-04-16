@@ -31,7 +31,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'fqba_fqb_id',
             'fqba_record_locator',
             'fqba_airline_code',
-            'fqba_created_dt',
             ['class' => DateTimeColumn::class, 'attribute' => 'fqba_created_dt'],
             //'fqba_updated_dt',
 
