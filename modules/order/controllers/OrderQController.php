@@ -3,9 +3,11 @@
 namespace modules\order\controllers;
 
 use frontend\controllers\FController;
+use modules\order\src\entities\order\OrderStatus;
 use modules\order\src\entities\order\search\OrderQSearch;
 use sales\auth\Auth;
 use Yii;
+use yii\helpers\Json;
 
 class OrderQController extends FController
 {
@@ -117,5 +119,75 @@ class OrderQController extends FController
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider
         ]);
+    }
+
+    public function actionGetBadgesCount(): string
+    {
+        $types = Yii::$app->request->post('types');
+
+        $searchModel = new OrderQSearch();
+
+        if (!is_array($types)) {
+            return Json::encode([]);
+        }
+
+        $result = [];
+
+        foreach ($types as $type) {
+            switch ($type) {
+                case 'new':
+                    if ($count = $searchModel->ordersCounter(OrderStatus::NEW)) {
+                        $result['new'] = $count;
+                    }
+                    break;
+                case 'pending':
+                    if ($count = $searchModel->ordersCounter(OrderStatus::PENDING)) {
+                        $result['pending'] = $count;
+                    }
+                    break;
+                case 'processing':
+                    if ($count = $searchModel->ordersCounter(OrderStatus::PROCESSING)) {
+                        $result['processing'] = $count;
+                    }
+                    break;
+                case 'prepared':
+                    if ($count = $searchModel->ordersCounter(OrderStatus::PREPARED)) {
+                        $result['prepared'] = $count;
+                    }
+                    break;
+                case 'complete':
+                    if ($count = $searchModel->ordersCounter(OrderStatus::COMPLETE)) {
+                        $result['complete'] = $count;
+                    }
+                    break;
+                case 'cancel-processing':
+                    if ($count = $searchModel->ordersCounter(OrderStatus::CANCEL_PROCESSING)) {
+                        $result['cancel-processing'] = $count;
+                    }
+                    break;
+                case 'error':
+                    if ($count = $searchModel->ordersCounter(OrderStatus::ERROR)) {
+                        $result['error'] = $count;
+                    }
+                    break;
+                case 'declined':
+                    if ($count = $searchModel->ordersCounter(OrderStatus::DECLINED)) {
+                        $result['declined'] = $count;
+                    }
+                    break;
+                case 'canceled':
+                    if ($count = $searchModel->ordersCounter(OrderStatus::CANCELED)) {
+                        $result['canceled'] = $count;
+                    }
+                    break;
+                case 'canceled-failed':
+                    if ($count = $searchModel->ordersCounter(OrderStatus::CANCEL_FAILED)) {
+                        $result['canceled-failed'] = $count;
+                    }
+                    break;
+            }
+        }
+
+        return Json::encode($result);
     }
 }

@@ -432,4 +432,9 @@ class OrderQSearch extends Order
 
         return $dataProvider;
     }
+
+    public function ordersCounter($status)
+    {
+        return self::find()->where(['or_status_id' => $status])->count();
+    }
 }

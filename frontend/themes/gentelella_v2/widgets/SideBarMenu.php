@@ -549,16 +549,16 @@ class SideBarMenu extends \yii\bootstrap\Widget
             'items' => [
                 ['label' => 'Search Orders', 'url' => ['/order/order/search'], 'icon' => 'search'],
                 ['label' => 'Error Orders', 'url' => ['/order/order/error-list'], 'icon' => 'exclamation-triangle'],
-                ['label' => 'New', 'url' => ['/order/order-q/new'], 'icon' => 'paste text-warning'],
-                ['label' => 'Pending', 'url' => ['/order/order-q/pending'], 'icon' => 'briefcase text-info'],
-                ['label' => 'Processing', 'url' => ['/order/order-q/processing'], 'icon' => 'spinner'],
-                ['label' => 'Prepared', 'url' => ['/order/order-q/prepared'], 'icon' => 'recycle'],
-                ['label' => 'Complete', 'url' => ['/order/order-q/complete'], 'icon' => 'flag text-success'],
-                ['label' => 'Cancel Processing', 'url' => ['/order/order-q/cancel-processing'], 'icon' => 'spinner text-danger'],
-                ['label' => 'Error', 'url' => ['/order/order-q/error'], 'icon' => 'exclamation-triangle text-danger'],
-                ['label' => 'Declined', 'url' => ['/order/order-q/declined'], 'icon' => 'reply'],
-                ['label' => 'Canceled', 'url' => ['/order/order-q/canceled'], 'icon' => 'close'],
-                ['label' => 'Canceled failed', 'url' => ['/order/order-q/cancel-failed'], 'icon' => 'close text-danger'],
+                ['label' => 'New <span id="order-q-new" data-type="new" class="label-warning label pull-right order-q-info"></span>', 'url' => ['/order/order-q/new'], 'icon' => 'paste text-warning'],
+                ['label' => 'Pending <span id="order-q-pending" data-type="pending" class="label-info label pull-right order-q-info"></span>', 'url' => ['/order/order-q/pending'], 'icon' => 'briefcase text-info'],
+                ['label' => 'Processing <span id="order-q-processing" data-type="processing" class="label-info label pull-right order-q-info"></span>', 'url' => ['/order/order-q/processing'], 'icon' => 'spinner'],
+                ['label' => 'Prepared <span id="order-q-prepared" data-type="prepared" class="label-success label pull-right order-q-info"></span>', 'url' => ['/order/order-q/prepared'], 'icon' => 'recycle'],
+                ['label' => 'Complete <span id="order-q-complete" data-type="complete" class="label-success label pull-right order-q-info"></span>', 'url' => ['/order/order-q/complete'], 'icon' => 'flag text-success'],
+                ['label' => 'Cancel Processing <span id="order-q-cancel-processing" data-type="cancel-processing" class="label-danger label pull-right order-q-info"></span>', 'url' => ['/order/order-q/cancel-processing'], 'icon' => 'spinner text-danger'],
+                ['label' => 'Error <span id="order-q-error" data-type="error" class="label-danger label pull-right order-q-info"></span>', 'url' => ['/order/order-q/error'], 'icon' => 'exclamation-triangle text-danger'],
+                ['label' => 'Declined <span id="order-q-declined" data-type="declined" class="label-danger label pull-right order-q-info"></span>', 'url' => ['/order/order-q/declined'], 'icon' => 'reply'],
+                ['label' => 'Canceled <span id="order-q-canceled" data-type="canceled" class="label-danger label pull-right order-q-info"></span>', 'url' => ['/order/order-q/canceled'], 'icon' => 'close'],
+                ['label' => 'Canceled failed <span id="order-q-canceled-failed" data-type="canceled-failed" class="label-danger label pull-right order-q-info"></span>', 'url' => ['/order/order-q/cancel-failed'], 'icon' => 'close '],
             ]
         ];
 
