@@ -31,6 +31,7 @@ use modules\order\src\forms\api\createC2b\OrderCreateC2BForm;
 use modules\order\src\forms\api\view\OrderViewForm;
 use modules\order\src\services\CreateOrderDTO;
 use modules\order\src\services\OrderApiManageService;
+use modules\order\src\services\OrderContactManageService;
 use modules\order\src\services\OrderDataService;
 use modules\product\src\entities\productType\ProductTypeRepository;
 use modules\product\src\useCases\product\create\ProductCreateForm;
@@ -92,6 +93,7 @@ use yii\web\NotFoundHttpException;
  * @property CancelOrder $cancelOrder
  * @property OrderContactRepository $orderContactRepository
  * @property OrderDataService $orderDataService
+ * @property OrderContactManageService $orderContactManageService
  */
 class OrderController extends BaseController
 {
@@ -112,6 +114,7 @@ class OrderController extends BaseController
     private CancelOrder $cancelOrder;
     private OrderContactRepository $orderContactRepository;
     private OrderDataService $orderDataService;
+    private OrderContactManageService $orderContactManageService;
 
     public function __construct(
         $id,
@@ -134,6 +137,7 @@ class OrderController extends BaseController
         CancelOrder $cancelOrder,
         OrderContactRepository $orderContactRepository,
         OrderDataService $orderDataService,
+        OrderContactManageService $orderContactManageService,
         $config = []
     ) {
         parent::__construct($id, $module, $logger, $config);
@@ -154,6 +158,7 @@ class OrderController extends BaseController
         $this->cancelOrder = $cancelOrder;
         $this->orderContactRepository = $orderContactRepository;
         $this->orderDataService = $orderDataService;
+        $this->orderContactManageService = $orderContactManageService;
     }
 
     public function behaviors(): array
@@ -2271,15 +2276,15 @@ class OrderController extends BaseController
 
                 if (isset($form->contactsInfo)) {
                     foreach ($form->contactsInfo as $contactInfoForm) {
-                        $orderContact = OrderContact::create(
+                        $this->orderContactManageService->create(
                             $order->or_id,
                             $contactInfoForm->first_name,
                             $contactInfoForm->last_name,
                             $contactInfoForm->middle_name,
                             $contactInfoForm->email,
-                            $contactInfoForm->phone
+                            $contactInfoForm->phone,
+                            $order->or_project_id
                         );
-                        $this->orderContactRepository->save($orderContact);
                     }
                 }
 

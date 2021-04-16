@@ -63,6 +63,7 @@ use sales\services\TransactionManager;
  * @property FlightQuoteOptionRepository $flightQuoteOptionRepository
  * @property OrderContactRepository $orderContactRepository
  * @property OrderDataService $orderDataService
+ * @property OrderContactManageService $orderContactManageService
  */
 class OrderApiManageService
 {
@@ -85,6 +86,7 @@ class OrderApiManageService
     private FlightQuoteOptionRepository $flightQuoteOptionRepository;
     private OrderContactRepository $orderContactRepository;
     private OrderDataService $orderDataService;
+    private OrderContactManageService $orderContactManageService;
 
     public function __construct(
         OrderRepository $orderRepository,
@@ -105,7 +107,8 @@ class OrderApiManageService
         ProductHolderRepository $productHolderRepository,
         FlightQuoteOptionRepository $flightQuoteOptionRepository,
         OrderContactRepository $orderContactRepository,
-        OrderDataService $orderDataService
+        OrderDataService $orderDataService,
+        OrderContactManageService $orderContactManageService
     ) {
         $this->orderRepository = $orderRepository;
         $this->orderUserProfitRepository = $orderUserProfitRepository;
@@ -126,6 +129,7 @@ class OrderApiManageService
         $this->flightQuoteOptionRepository = $flightQuoteOptionRepository;
         $this->orderContactRepository = $orderContactRepository;
         $this->orderDataService = $orderDataService;
+        $this->orderContactManageService = $orderContactManageService;
     }
 
     /**
@@ -307,15 +311,15 @@ class OrderApiManageService
 
             if (isset($form->contactsInfo)) {
                 foreach ($form->contactsInfo as $contactInfoForm) {
-                    $orderContact = OrderContact::create(
+                    $this->orderContactManageService->create(
                         $newOrder->or_id,
                         $contactInfoForm->first_name,
                         $contactInfoForm->last_name,
                         $contactInfoForm->middle_name,
                         $contactInfoForm->email,
-                        $contactInfoForm->phone
+                        $contactInfoForm->phone,
+                        $newOrder->or_project_id
                     );
-                    $this->orderContactRepository->save($orderContact);
                 }
             }
 

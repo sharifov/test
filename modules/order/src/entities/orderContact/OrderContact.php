@@ -3,9 +3,11 @@
 namespace modules\order\src\entities\orderContact;
 
 use common\components\validators\PhoneValidator;
+use common\models\Client;
 use modules\order\src\entities\order\Order;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\Html;
 
@@ -21,8 +23,10 @@ use yii\helpers\Html;
  * @property string|null $oc_phone_number
  * @property string|null $oc_created_dt
  * @property string|null $oc_updated_dt
+ * @property int|null $oc_client_id
  *
  * @property Order $ocOrder
+ * @property Client $client
  */
 class OrderContact extends \yii\db\ActiveRecord
 {
@@ -59,6 +63,9 @@ class OrderContact extends \yii\db\ActiveRecord
             ['oc_order_id', 'integer'],
             ['oc_order_id', 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['oc_order_id' => 'or_id']],
 
+            ['oc_client_id', 'integer'],
+            ['oc_client_id', 'exist', 'skipOnError' => true, 'skipOnEmpty' => true, 'targetClass' => Client::class, 'targetAttribute' => ['oc_client_id' => 'id']],
+
             ['oc_phone_number', 'string', 'max' => 20],
             ['oc_phone_number', PhoneValidator::class, 'skipOnEmpty' => true],
 
@@ -69,6 +76,11 @@ class OrderContact extends \yii\db\ActiveRecord
     public function getOcOrder(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Order::class, ['or_id' => 'oc_order_id']);
+    }
+
+    public function getClient(): ActiveQuery
+    {
+        return $this->hasOne(Client::class, ['id' => 'oc_client_id']);
     }
 
     public function attributeLabels(): array
@@ -83,6 +95,7 @@ class OrderContact extends \yii\db\ActiveRecord
             'oc_phone_number' => 'Phone Number',
             'oc_created_dt' => 'Created Dt',
             'oc_updated_dt' => 'Updated Dt',
+            'oc_client_id' => 'Client',
         ];
     }
 
