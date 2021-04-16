@@ -31,6 +31,21 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             [
                 'attribute' => 'or_id',
+                'value' => static function (order $model) {
+                    return Html::a($model->or_id, [
+                        'order/view', 'gid' => $model->or_gid
+                    ], [
+                        'data-pjax' => 0,
+                        'target' => '_blank'
+                    ]);
+                },
+                'format' => 'raw',
+                'options' => [
+                    'style' => 'width:80px'
+                ],
+                'contentOptions' => [
+                    'class' => 'text-center'
+                ],
             ],
             'or_fare_id',
             [
