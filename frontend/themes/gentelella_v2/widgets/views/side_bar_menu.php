@@ -89,6 +89,10 @@ if (Yii::$app->user->can('caseSection')) {
     $urlCasesQCount = Url::to(['/cases-q-counters/get-q-count']);
     $this->registerJs("updateCounters('$urlCasesQCount', 'cases-q-info', 'cases-q');", $this::POS_LOAD);
 }
+
+    $urlOrderCount = Url::to(['/order/order-q/get-badges-count']);
+    $this->registerJs("updateCounters('$urlOrderCount', 'order-q-info', 'order-q');", $this::POS_LOAD);
+
 if (Yii::$app->user->can('/qa-task/qa-task-queue/count')) {
     $urlQaTaskCount = Url::to(['/qa-task/qa-task-queue/count']);
     $this->registerJs("updateCounters('$urlQaTaskCount', 'qa-task-info', 'qa-task-q');", $this::POS_LOAD);
