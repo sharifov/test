@@ -214,7 +214,7 @@ class CasesCreateService
             try {
                 $orderData = OrderData::findOne(['od_order_id' => $order->or_id]);
 
-                $orderContact = OrderContact::find()->byOrderId($order->or_id)->last()->one();
+                $orderContact = OrderContact::find()->byOrderId($order->or_id)->one();
                 if (!$orderContact) {
                     throw new \DomainException('Cannot create client, order contact not found');
                 }
