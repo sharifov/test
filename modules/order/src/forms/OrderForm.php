@@ -3,6 +3,7 @@
 namespace modules\order\src\forms;
 
 use common\models\Employee;
+use common\models\Language;
 use common\models\Lead;
 use modules\order\src\entities\order\Scopes;
 use Yii;
@@ -29,6 +30,8 @@ use yii\db\ActiveRecord;
  * @property string $or_client_currency
  * @property string $or_client_currency_rate
  * @property int $or_owner_user_id
+ * @property string|null $od_language_id
+ * @property string|null $od_market_country
  *
  */
 class OrderForm extends Model
@@ -49,6 +52,8 @@ class OrderForm extends Model
     public $or_client_currency;
     public $or_client_currency_rate;
     public $or_owner_user_id;
+    public $od_language_id;
+    public $od_market_country;
 
 
     /**
@@ -69,6 +74,10 @@ class OrderForm extends Model
             [['or_uid'], 'unique'],
             [['or_lead_id'], 'exist', 'skipOnEmpty' => true, 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['or_lead_id' => 'id']],
             [['or_owner_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['or_owner_user_id' => 'id']],
+            ['od_language_id', 'default', 'value' => null],
+            ['od_language_id', 'string', 'max' => 5],
+            ['od_market_country', 'string', 'max' => 2],
+            ['od_market_country', 'in', 'range' => array_keys(Language::getCountryNames())],
         ];
     }
 
@@ -93,6 +102,8 @@ class OrderForm extends Model
             'or_client_currency' => 'Client Currency',
             'or_client_currency_rate' => 'Client Currency Rate',
             'or_owner_user_id' => 'Owner User ID',
+            'od_language_id' => 'Language',
+            'od_market_country' => 'Market Country'
         ];
     }
 }

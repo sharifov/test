@@ -71,6 +71,15 @@ $pjaxId = 'pjax-order-form';
         </div>
     </div>
 
+    <div class="row">
+        <div class="col-md-6">
+            <?= $form->field($model, 'od_language_id')->dropDownList(\common\models\Language::getLanguages(true, 'language'), ['prompt' => '---']) ?>
+        </div>
+        <div class="col-md-6">
+            <?= $form->field($model, 'od_market_country')->dropDownList(\common\models\Language::getCountryNames(), ['prompt' => '---']) ?>
+        </div>
+    </div>
+
     <div class="form-group text-center">
         <?= Html::submitButton('<i class="fa fa-save"></i> Save order', ['class' => 'btn btn-success']) ?>
     </div>

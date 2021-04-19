@@ -44,6 +44,7 @@ use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use modules\order\src\entities\orderStatusLog\OrderStatusLog;
+use modules\order\src\entities\orderData\OrderData;
 
 /**
  * This is the model class for table "order".
@@ -96,6 +97,7 @@ use modules\order\src\entities\orderStatusLog\OrderStatusLog;
  * @property LeadOrder[] $leadOrder
  * @property CaseOrder[] $caseOrder
  * @property OrderStatusLog[] $orderStatusLogs
+ * @property OrderData $orderData
  */
 class Order extends ActiveRecord implements Serializable, ProductDataInterface
 {
@@ -293,6 +295,11 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
     public function getOrderContacts(): ActiveQuery
     {
         return $this->hasMany(OrderContact::class, ['oc_order_id' => 'or_id']);
+    }
+
+    public function getOrderData()
+    {
+        return $this->hasOne(OrderData::class, ['od_order_id' => 'or_id']);
     }
 
     /**
