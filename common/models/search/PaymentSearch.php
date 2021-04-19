@@ -17,7 +17,10 @@ class PaymentSearch extends Payment
     public function rules()
     {
         return [
-            [['pay_id', 'pay_type_id', 'pay_method_id', 'pay_status_id', 'pay_invoice_id', 'pay_order_id', 'pay_created_user_id', 'pay_updated_user_id'], 'integer'],
+            [[
+                'pay_id', 'pay_type_id', 'pay_method_id', 'pay_status_id', 'pay_invoice_id',
+                'pay_order_id', 'pay_created_user_id', 'pay_updated_user_id', 'pay_billing_id'
+            ], 'integer'],
             [['pay_currency'], 'safe'],
             [['pay_amount'], 'number'],
             [['pay_code'], 'string'],
@@ -61,6 +64,7 @@ class PaymentSearch extends Payment
             'pay_updated_user_id' => $this->pay_updated_user_id,
             'DATE(pay_created_dt)' => $this->pay_created_dt,
             'DATE(pay_updated_dt)' => $this->pay_updated_dt,
+            'pay_billing_id' => $this->pay_billing_id,
         ]);
 
         $query->andFilterWhere(['like', 'pay_currency', $this->pay_currency]);

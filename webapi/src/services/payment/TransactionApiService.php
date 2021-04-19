@@ -18,7 +18,7 @@ class TransactionApiService
             ->exists();
     }
 
-    public static function createTransaction(PaymentApiForm $form, int $paymentId): Transaction
+    public static function createTransaction(PaymentApiForm $form, int $paymentId, ?int $invoiceId): Transaction
     {
         return Transaction::create(
             $form->pay_amount,
@@ -27,7 +27,8 @@ class TransactionApiService
             $paymentId,
             self::getTypeId($form->pay_type),
             $form->pay_currency,
-            $form->pay_description
+            $form->pay_description,
+            $invoiceId
         );
     }
 

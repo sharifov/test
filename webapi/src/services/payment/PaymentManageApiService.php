@@ -69,9 +69,8 @@ class PaymentManageApiService
             /** @var CreditCardForm $creditCardForm */
             if (
                 ($creditCardForm = ArrayHelper::getValue($creditCardForms, $key)) &&
-                !CreditCardApiService::existCreditCard($creditCardForm)
+                $creditCard = CreditCardApiService::getOrCreate($creditCardForm)
             ) {
-                $creditCard = CreditCardApiService::createCreditCard($creditCardForm);
                 $this->creditCardRepository->save($creditCard);
                 $creditCardId = $creditCard->cc_id;
             }
@@ -80,19 +79,14 @@ class PaymentManageApiService
             /** @var BillingInfoForm $billingInfoForm */
             if (
                 ($billingInfoForm = ArrayHelper::getValue($billingInfoForms, $key)) &&
-                !BillingInfoApiService::existBillingInfo($billingInfoForm, $orderId)
+                $billingInfo = BillingInfoApiService::getOrCreateBillingInfo($billingInfoForm, $orderId, $creditCardId)
             ) {
-                $billingInfo = BillingInfoApiService::createBillingInfo(
-                    $billingInfoForm,
-                    $creditCardId,
-                    $orderId
-                );
                 $this->billingInfoRepository->save($billingInfo);
                 $billingInfoId = $billingInfo->bi_id;
             }
 
             $invoiceId = null;
-            if ($invoice = InvoiceApiService::getOrCreateInvoice($paymentApiForm, $orderId, $billingInfoId)) {
+            if ($invoice = InvoiceApiService::createInvoice($paymentApiForm, $orderId, $billingInfoId)) {
                 $this->invoiceRepository->save($invoice);
                 $invoiceId = $invoice->inv_id;
             }
@@ -107,7 +101,7 @@ class PaymentManageApiService
                 throw new \DomainException('Transaction already exist. Code:(' . $paymentApiForm->pay_auth_id . ')');
             }
 
-            $transaction = TransactionApiService::createTransaction($paymentApiForm, $payment->pay_id);
+            $transaction = TransactionApiService::createTransaction($paymentApiForm, $payment->pay_id, $invoiceId);
             $this->transactionRepository->save($transaction);
             $transactionProcessed[] = $transaction->tr_code;
         }

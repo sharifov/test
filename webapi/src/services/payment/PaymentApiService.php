@@ -15,12 +15,13 @@ class PaymentApiService
      * @param PaymentApiForm $form
      * @param int $orderId
      * @param int|null $invoiceId
+     * @param int|null $billingInfoId
      * @return Payment
      */
     public static function getOrCreatePayment(PaymentApiForm $form, int $orderId, ?int $invoiceId, ?int $billingInfoId): Payment
     {
         if ($payment = Payment::findLastByCodeAndOrder($form->pay_code, $orderId)) {
-            if ($payment->pay_invoice_id && $invoiceId) {
+            if ($invoiceId && !$payment->pay_invoice_id) {
                 $payment->pay_invoice_id = $invoiceId;
             }
             return $payment;

@@ -11,7 +11,7 @@ use yii\helpers\ArrayHelper;
  */
 class InvoiceApiService
 {
-    public static function getOrCreateInvoice(
+    public static function createInvoice(
         PaymentApiForm $form,
         int $orderId,
         ?int $billingInfoId,

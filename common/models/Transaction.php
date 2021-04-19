@@ -137,7 +137,8 @@ class Transaction extends \yii\db\ActiveRecord
         int $paymentId,
         int $typeId,
         string $currency,
-        ?string $comment
+        ?string $comment,
+        ?int $invoiceId
     ): Transaction {
         $model = new self();
         $model->tr_amount = $amount;
@@ -147,6 +148,7 @@ class Transaction extends \yii\db\ActiveRecord
         $model->tr_comment = $comment;
         $model->tr_type_id = $typeId;
         $model->tr_currency = $currency;
+        $model->tr_invoice_id = $invoiceId;
         $model->tr_created_dt = date('Y-m-d H:i:s');
         return $model;
     }

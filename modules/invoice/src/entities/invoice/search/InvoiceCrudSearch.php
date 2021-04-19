@@ -12,7 +12,7 @@ class InvoiceCrudSearch extends Invoice
     public function rules(): array
     {
         return [
-            [['inv_id', 'inv_order_id', 'inv_status_id', 'inv_created_user_id', 'inv_updated_user_id'], 'integer'],
+            [['inv_id', 'inv_order_id', 'inv_status_id', 'inv_created_user_id', 'inv_updated_user_id', 'inv_billing_id'], 'integer'],
             [['inv_gid', 'inv_uid', 'inv_client_currency', 'inv_description'], 'safe'],
             [['inv_sum', 'inv_client_sum', 'inv_currency_rate'], 'number'],
 
@@ -55,6 +55,7 @@ class InvoiceCrudSearch extends Invoice
             'inv_currency_rate' => $this->inv_currency_rate,
             'inv_created_user_id' => $this->inv_created_user_id,
             'inv_updated_user_id' => $this->inv_updated_user_id,
+            'inv_billing_id' => $this->inv_billing_id,
         ]);
 
         $query->andFilterWhere(['like', 'inv_gid', $this->inv_gid])
