@@ -25,6 +25,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'oc_email')->textInput(['maxlength' => true]) ?>
 
+
         <?= $form->field($model, 'oc_phone_number')->widget(PhoneInput::class, [
             'jsOptions' => [
                 'formatOnDisplay' => false,
@@ -35,6 +36,8 @@ use yii\widgets\ActiveForm;
                 'customContainer' => 'intl-tel-input'
             ]
         ]) ?>
+
+        <?= $form->field($model, 'oc_client_id')->input('number') ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

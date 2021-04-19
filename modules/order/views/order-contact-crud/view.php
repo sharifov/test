@@ -46,6 +46,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'oc_middle_name',
                 'oc_email:email',
                 'oc_phone_number',
+                'oc_client_id:client',
                 'oc_created_dt:byUserDateTime',
                 'oc_updated_dt:byUserDateTime',
             ],
