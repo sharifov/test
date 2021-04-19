@@ -119,8 +119,8 @@ class OrderContact extends \yii\db\ActiveRecord
         string $firstName,
         ?string $lastName,
         ?string $middleName,
-        string $email,
-        string $phoneNumber
+        ?string $email,
+        ?string $phoneNumber
     ): OrderContact {
         $self = new self();
         $self->oc_order_id = $orderId;

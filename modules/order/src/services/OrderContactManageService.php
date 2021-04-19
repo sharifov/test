@@ -30,8 +30,8 @@ class OrderContactManageService
         string $firstName,
         ?string $lastName,
         ?string $middleName,
-        string $email,
-        string $phoneNumber,
+        ?string $email,
+        ?string $phoneNumber,
         int $projectId
     ): OrderContact {
         $orderContact = OrderContact::create(
