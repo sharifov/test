@@ -78,7 +78,7 @@ class LeadFailBooking
         return $quote->pqOrder;
     }
 
-    private function getClientId(int $orderId): ?int
+    private function getClientId(int $orderId): int
     {
         $clientId = OrderContact::find()->select(['oc_client_id'])->byOrderId($orderId)->asArray()->scalar();
 
@@ -86,11 +86,6 @@ class LeadFailBooking
             return (int)$clientId;
         }
 
-        \Yii::error([
-            'message' => 'Not found clientId in OrderContact',
-            'orderId' => $orderId
-        ], 'LeadFailBooking:create');
-
-        return null;
+        throw new \DomainException('Not found clientId in OrderContact. OrderId: ' . $orderId);
     }
 }
