@@ -23,7 +23,7 @@ $formatter = new \common\components\i18n\Formatter();
 
         <div class="x_panel x_panel_orders">
             <?php echo !empty($order->orOwnerUser->username) ? '<span title="Owner"><i class="fa fa-user"></i> ' . $order->orOwnerUser->username  . ' <strong>|</strong><span> ' : null ?>
-            <?php echo !empty($order->orderData->od_market_country) ? '<span title="Language"><i class="fa fa-language"></i> ' . strtoupper($order->orderData->language->language) . ' <strong>|</strong><span> ' : null?>
+            <?php echo !empty($order->orderData->od_market_country) ? '<span title="Language"><i class="fa fa-language"></i> ' . $order->orderData->language->language_id . ' <strong>|</strong><span> ' : null?>
             <?php echo !empty($order->orderData->od_market_country) ? '<span title="Market Country"><i class="fa fa-globe"></i> ' . $order->orderData->od_market_country . ' <strong>|</strong><span> ' : null ?>
             <?php echo !empty($order->orderData->source->name) ? '<span title="Source"><i class="fa fa-bookmark-o"></i> ' . $order->orderData->source->name . ' <strong>|</strong><span> ' : null?>
             <?php echo !empty($order->or_lead_id) ? '<span title="Related Lead"><i class="fa fa-flag"></i> ' . $order->or_lead_id . ' <strong>|</strong><span> ' : null?>
