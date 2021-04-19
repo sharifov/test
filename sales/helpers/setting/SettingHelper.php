@@ -236,7 +236,7 @@ class SettingHelper
             }
         }
         return null;
-	}
+    }
 
     public static function warmTransferTimeout(): int
     {
