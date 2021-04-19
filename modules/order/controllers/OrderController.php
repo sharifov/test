@@ -143,6 +143,8 @@ class OrderController extends FController
         $model = new OrderForm();
         $model->or_lead_id = $modelOrder->or_lead_id;
         $model->or_id = $modelOrder->or_id;
+        $model->od_language_id = $modelOrder->orderData->od_language_id;
+        $model->od_market_country = $modelOrder->orderData->od_market_country;
 
         if ($model->load(Yii::$app->request->post())) {
             if ($model->validate()) {
@@ -155,6 +157,9 @@ class OrderController extends FController
                 $modelOrder->or_app_total = $model->or_app_total;
                 $modelOrder->or_agent_markup = $model->or_agent_markup;
                 $modelOrder->or_app_markup = $model->or_app_markup;
+                $orderData = $modelOrder->orderData;
+                $orderData->od_language_id = $model->od_language_id;
+                $orderData->od_market_country = $model->od_market_country;
 
                 $modelOrder->updateOrderTotalByCurrency();
 
@@ -169,6 +174,7 @@ class OrderController extends FController
                 //$modelOrder->or_client_currency_rate = $model->or_client_currency_rate;
 
                 if ($modelOrder->save()) {
+                    $orderData->save();
                     return '<script>
                         $("#modal-df").modal("hide"); 
                         if ($("#pjax-lead-orders").length) {

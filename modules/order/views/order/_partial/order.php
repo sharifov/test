@@ -22,12 +22,21 @@ $formatter = new \common\components\i18n\Formatter();
     <?php Pjax::begin(['id' => 'pjax-order-view-' . $order->getId(), 'timeout' => 10000]) ?>
 
         <div class="x_panel x_panel_orders">
+            <?php echo !empty($order->orOwnerUser->username) ? '<span title="Owner"><i class="fa fa-user"></i> ' . $order->orOwnerUser->username  . ' <strong>|</strong><span> ' : null ?>
+            <?php echo !empty($order->orderData->od_market_country) ? '<span title="Language"><i class="fa fa-language"></i> ' . strtoupper($order->orderData->language->language) . ' <strong>|</strong><span> ' : null?>
+            <?php echo !empty($order->orderData->od_market_country) ? '<span title="Market Country"><i class="fa fa-globe"></i> ' . $order->orderData->od_market_country . ' <strong>|</strong><span> ' : null ?>
+            <?php echo !empty($order->orderData->source->name) ? '<span title="Source"><i class="fa fa-bookmark-o"></i> ' . $order->orderData->source->name . ' <strong>|</strong><span> ' : null?>
+            <?php echo !empty($order->or_lead_id) ? '<span title="Related Lead"><i class="fa fa-flag"></i> ' . $order->or_lead_id . ' <strong>|</strong><span> ' : null?>
+            <?php echo !empty($order->or_fare_id) ? '<span title="Fare ID"><i class="fa fa-fire"></i> ' . $order->or_fare_id . ' <strong>|</strong><span> ' : null?>
+        </div>
+
+        <div class="x_panel x_panel_orders">
             <div class="x_title">
                 <h2>
                     <i class="fas fa-money-check-alt"></i>&nbsp;
                         Order GID (<?php echo $order->or_gid ?>)&nbsp;
-                        ID(<?php echo $order->getId() ?>)&nbsp;
-                        Name(<?php echo $order->or_name ?>)
+                        ID (<?php echo $order->getId() ?>)&nbsp;
+                        Name (<?php echo $order->or_name ?>)
                 </h2>
                 <ul class="nav navbar-right panel_toolbox">
                     <li>
