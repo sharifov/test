@@ -63,7 +63,7 @@ class CancelOrder
 
         try {
             if (!$this->freeCancelChecker->can($order)) {
-                throw new OrderUnavailableProcessingException();
+                throw new OrderUnavailableProcessingException($this->freeCancelChecker->message);
             }
 
             $order->cancelProcessing('Cancel Order Flow', OrderStatusAction::CANCEL_FLOW, null);
