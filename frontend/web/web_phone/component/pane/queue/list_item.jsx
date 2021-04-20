@@ -133,7 +133,10 @@ function ListItemMenu(props) {
             <li className="call-item-menu__list-item">
                 <a href="#" className="call-item-menu__close"><i className="fa fa-chevron-right"> </i></a>
             </li>
-            <ListItemBtnTransfer call={call}/>
+            {!call.data.isHold
+             ? <ListItemBtnTransfer call={call}/>
+             : ''
+            }
             {conferenceBase
                 ?
                 <React.Fragment>

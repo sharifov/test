@@ -437,6 +437,10 @@ class PhoneController extends FController
                 throw new BadRequestHttpException('Is not your Call', 8);
             }
 
+            if ($originalCall->currentParticipant->isHold()) {
+                throw new \Exception('Call is Hold');
+            }
+
 //            $to_id = (int)Yii::$app->request->post('to_id');
 //            $projectId = (int)Yii::$app->request->post('project_id');
 //            $lead_id = (int)Yii::$app->request->post('lead_id');
@@ -785,6 +789,10 @@ class PhoneController extends FController
                 throw new BadRequestHttpException('Is not your Call', 8);
             }
 
+            if ($originCall->currentParticipant->isHold()) {
+                throw new \Exception('Call is Hold');
+            }
+
             $data = [];
 
             if ($type === 'user') {
@@ -1036,6 +1044,10 @@ class PhoneController extends FController
                 throw new BadRequestHttpException('Is not your Call');
             }
 
+            if ($originCall->currentParticipant->isHold()) {
+                throw new \Exception('Call is Hold');
+            }
+
             $user = Employee::findOne($userId);
 
             if (!$user) {
@@ -1045,6 +1057,7 @@ class PhoneController extends FController
             if (!$user->isOnline()) {  // || !$userRedirect->isCallFree()
                 throw new NotAcceptableHttpException('This agent is not online (Id: ' . $userId . ')');
             }
+
 
             //
             $groupId = $originCall->c_group_id ?: $originCall->c_id;
