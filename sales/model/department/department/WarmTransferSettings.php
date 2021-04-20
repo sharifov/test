@@ -15,7 +15,7 @@ class WarmTransferSettings
 
     public function __construct(array $params)
     {
-        if (!array_key_exists('timeout', $params)) {
+        if (!array_key_exists('timeout', $params) || $params['timeout'] === null) {
             $this->timeout = null;
         } else {
             $this->timeout = (int)$params['timeout'];
