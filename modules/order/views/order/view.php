@@ -30,13 +30,17 @@ $this->params['breadcrumbs'][] = $this->title;
                 ]) ?>
             <?php endif ?>
 
-            <?php echo $this->render('_partial/product', [
-                'order' => $order,
-            ]) ?>
+            <?php if (Auth::can('order/view/products')) : ?>
+                <?php echo $this->render('_partial/product', [
+                    'order' => $order,
+                ]) ?>
+            <?php endif ?>
 
-            <?php echo $this->render('_partial/contacts', [
-                'order' => $order,
-            ]) ?>
+            <?php if (Auth::can('order/view/contacts')) : ?>
+                <?php echo $this->render('_partial/contacts', [
+                    'order' => $order,
+                ]) ?>
+            <?php endif ?>
 
             <?php if (Auth::can('order/view/file')) : ?>
                 <?php echo $this->render('_partial/file', [
