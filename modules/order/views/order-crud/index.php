@@ -7,6 +7,7 @@ use modules\order\src\grid\columns\OrderPayStatusColumn;
 use modules\order\src\grid\columns\OrderStatusColumn;
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
+use modules\order\src\entities\order\Order;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -38,10 +39,32 @@ $this->params['breadcrumbs'][] = $this->title;
             'or_uid',
             'or_fare_id',
             'or_name',
-            [
+            /*[
                 'class' => LeadColumn::class,
                 'attribute' => 'or_lead_id',
                 'relation' => 'orLead',
+            ],*/
+            [
+                'label' => 'Leads',
+                'value' => static function (Order $order) {
+                    $data = [];
+                    foreach ($order->leadOrder as $lead) {
+                        $data[] = Yii::$app->formatter->format($lead->lead, 'lead');
+                    }
+                    return !empty($data) ? implode('</br>', $data) : ' - ';
+                },
+                'format' => 'raw'
+            ],
+            [
+                'label' => 'Cases',
+                'value' => static function (Order $order) {
+                    $data = [];
+                    foreach ($order->caseOrder as $case) {
+                        $data[] = Yii::$app->formatter->format($case->cases, 'case');
+                    }
+                    return !empty($data) ? implode('</br>', $data) : ' - ';
+                },
+                'format' => 'raw'
             ],
             [
                 'attribute' => 'or_project_id',
