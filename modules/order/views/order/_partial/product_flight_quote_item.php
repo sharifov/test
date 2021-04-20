@@ -118,17 +118,17 @@ $totalAmountQuote = 0.0;
                             <?php endforeach;?>
 
 
-                            <!--<?/*= Html::a('<i class="fa fa-search"></i> Details', null, [
+                            <?= Html::a('<i class="fa fa-search"></i> Details', null, [
                                 'class' => 'btn-flight-quote-details dropdown-item',
                                 'data-id' => $model->pq_id,
                                 'data-title' => implode(', ', $tripsInfo),
                                 'data-url' => Url::to(['/flight/flight-quote/ajax-quote-details', 'id' => $model->pq_id]),
                                 //'data-target' => '#quote_detail_'.$model->uid,
                                 'title' => 'Details'
-                            ]) */?>
+                            ]) ?>
 
 
-                            <?/*= Html::a('<i class="fa fa-clone"></i> Clone', null, [
+                            <!--<?/*= Html::a('<i class="fa fa-clone"></i> Clone', null, [
                                 'class' => 'dropdown-item btn-clone-product-quote',
                                 'data-product-quote-id' => $model->pq_id,
                                 'data-flight-quote-id' => $model->flightQuote->fq_id,
