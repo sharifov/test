@@ -3,7 +3,7 @@
 namespace console\controllers;
 
 use sales\model\clientChatMessage\entity\ClientChatMessage;
-use sales\services\log\GlobalLogFormatAttrService;
+use sales\services\log\GlobalEntityAttributeFormatServiceService;
 use yii\console\Controller;
 use yii\helpers\Console;
 
@@ -11,23 +11,23 @@ use yii\helpers\Console;
  * Class PostgresDbController
  * @package console\controllers
  *
- * @property GlobalLogFormatAttrService $globalLogFormatAttrService
+ * @property GlobalEntityAttributeFormatServiceService $globalLogFormatAttrService
  */
 class PostgresDbController extends Controller
 {
     /**
-     * @var GlobalLogFormatAttrService
+     * @var GlobalEntityAttributeFormatServiceService
      */
-    private GlobalLogFormatAttrService $globalLogFormatAttrService;
+    private GlobalEntityAttributeFormatServiceService $globalLogFormatAttrService;
 
     /**
      * PostgresDbController constructor.
      * @param $id
      * @param $module
-     * @param GlobalLogFormatAttrService $globalLogFormatAttrService
+     * @param GlobalEntityAttributeFormatServiceService $globalLogFormatAttrService
      * @param array $config
      */
-    public function __construct($id, $module, GlobalLogFormatAttrService $globalLogFormatAttrService, $config = [])
+    public function __construct($id, $module, GlobalEntityAttributeFormatServiceService $globalLogFormatAttrService, $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->globalLogFormatAttrService = $globalLogFormatAttrService;

@@ -44,6 +44,13 @@ class DeferredEventDispatcher implements EventDispatcher
         $this->defer = false;
     }
 
+    public function detachByKey(string $key): void
+    {
+        if (isset($this->queue[$key])) {
+            unset($this->queue[$key]);
+        }
+    }
+
     public function release(): void
     {
         foreach ($this->queue as $i => $event) {

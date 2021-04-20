@@ -103,6 +103,8 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
 {
     use EventTrait;
 
+    public const UPDATE_EVENT_KEY = 'orderUpdateEvent';
+
     public static function tableName(): string
     {
         return 'order';

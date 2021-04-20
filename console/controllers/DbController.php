@@ -24,7 +24,7 @@ use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\model\project\entity\projectLocale\ProjectLocale;
 use sales\services\lead\qcall\CalculateDateService;
-use sales\services\log\GlobalLogFormatAttrService;
+use sales\services\log\GlobalEntityAttributeFormatServiceService;
 use yii\base\InvalidConfigException;
 use yii\console\Controller;
 use Yii;
@@ -40,17 +40,16 @@ use yii\helpers\VarDumper;
  * Class DbController
  * @package console\controllers
  *
- * @property GlobalLogFormatAttrService $globalLogFormatAttrService
+ * @property GlobalEntityAttributeFormatServiceService $globalLogFormatAttrService
  */
 class DbController extends Controller
 {
-
     private const MODELS_PATH = [
         '\\common\\models\\',
         '\\frontend\\models\\'
     ];
     /**
-     * @var GlobalLogFormatAttrService
+     * @var GlobalEntityAttributeFormatServiceService
      */
     private $globalLogFormatAttrService;
 
@@ -58,10 +57,10 @@ class DbController extends Controller
      * DbController constructor.
      * @param $id
      * @param $module
-     * @param GlobalLogFormatAttrService $globalLogFormatAttrService
+     * @param GlobalEntityAttributeFormatServiceService $globalLogFormatAttrService
      * @param array $config
      */
-    public function __construct($id, $module, GlobalLogFormatAttrService $globalLogFormatAttrService, $config = [])
+    public function __construct($id, $module, GlobalEntityAttributeFormatServiceService $globalLogFormatAttrService, $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->globalLogFormatAttrService = $globalLogFormatAttrService;
@@ -170,7 +169,6 @@ class DbController extends Controller
      */
     public function actionConvertCollate()
     {
-
         $collate = 'utf8mb4';
         $collation = 'utf8mb4_unicode_ci';
 
@@ -205,7 +203,6 @@ class DbController extends Controller
      */
     public function actionConvertCollateTbl(string $tableName)
     {
-
         $collate = 'utf8mb4';
         $collation = 'utf8mb4_unicode_ci';
 
@@ -285,7 +282,6 @@ class DbController extends Controller
      */
     public function actionUpdateLeadFlow()
     {
-
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
         $db = Yii::$app->getDb();
 
@@ -382,7 +378,7 @@ ORDER BY lf.lead_id, id';
 
         //Yii::$app->telegram->curl_call
 
-          //  $jsonResponse = $this->curl_call("https://api.telegram.org/bot" . $this->botToken . "/setWebhook", $option);
+        //  $jsonResponse = $this->curl_call("https://api.telegram.org/bot" . $this->botToken . "/setWebhook", $option);
 
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
@@ -408,7 +404,7 @@ ORDER BY lf.lead_id, id';
      * todo delete
      */
 //    public function actionMigrateOldLeadLogsInGlobalLog($limit = 1000): void
-//  {
+    //  {
 //      printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 //      $time_start = microtime(true);
 //      \Yii::$app->db->pdo->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
@@ -503,7 +499,7 @@ ORDER BY lf.lead_id, id';
 //      $time = number_format(round($time_end - $time_start, 2), 2);
 //      printf("\nExecute Time: %s, count Old Logs: " . $leadLogCount, $this->ansiFormat($time . ' s', Console::FG_RED));
 //      printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
-//  }
+    //  }
 
     public function actionTruncateGlobalLog(): void
     {

@@ -9,6 +9,7 @@ use frontend\helpers\JsonHelper;
 use modules\fileStorage\src\entity\fileStorage\FileStorage;
 use modules\fileStorage\src\FileSystem;
 use modules\offer\src\entities\offer\OfferRepository;
+use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderSourceType;
 use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\entities\order\OrderStatus;
@@ -37,6 +38,8 @@ use modules\product\src\entities\productType\ProductTypeRepository;
 use modules\product\src\useCases\product\create\ProductCreateForm;
 use modules\product\src\useCases\product\create\ProductCreateService;
 use sales\auth\Auth;
+use sales\dispatchers\DeferredEventDispatcher;
+use sales\dispatchers\EventDispatcher;
 use sales\helpers\app\AppHelper;
 use sales\repositories\billingInfo\BillingInfoRepository;
 use sales\repositories\creditCard\CreditCardRepository;
@@ -2287,6 +2290,10 @@ class OrderController extends BaseController
                         );
                     }
                 }
+
+                /** @var DeferredEventDispatcher $eventDispatcher */
+                $eventDispatcher = Yii::$container->get(EventDispatcher::class);
+                $eventDispatcher->detachByKey(Order::UPDATE_EVENT_KEY);
 
                 return $order;
             });
