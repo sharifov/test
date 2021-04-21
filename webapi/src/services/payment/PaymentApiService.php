@@ -65,6 +65,11 @@ class PaymentApiService
                 $amount = 0.00;
             }
             $payment->changeAmount($amount);
+        } else {
+            \Yii::warning(
+                'PayType(' . $form->pay_type . ') not applicable for PaymentStatus(' . Payment::getStatusName($payment->pay_status_id) . ')',
+                'PaymentApiService:ProcessingPayment:StatusWarning'
+            );
         }
         return $payment;
     }

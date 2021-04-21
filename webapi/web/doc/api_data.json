@@ -5171,6 +5171,13 @@
           },
           {
             "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "payments.pay_code",
+            "description": "<p>Payment Identity</p>"
+          },
+          {
+            "group": "Parameter",
             "type": "int",
             "optional": false,
             "field": "payments.pay_auth_id",

@@ -70,6 +70,7 @@ class PaymentController extends BaseController
      * @apiParam {string{3}}            payments.pay_currency       Payment currency code (for example USD)
      * @apiParam {date}                 payments.pay_date           Payment date (format Y-m-d)
      * @apiParam {string{1..10}=Capture,Refund,Authorize}    payments.pay_type           Payment Type ("Capture","Refund","Authorize")
+     * @apiParam {string}               payments.pay_code           Payment Identity
      * @apiParam {int}                  payments.pay_auth_id        Payment transaction ID
      * @apiParam {string{100}}          [payments.pay_method_key]   Payment method key (by default "card")
      * @apiParam {string{255}}          [payments.pay_description]  Payment description
