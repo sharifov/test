@@ -355,4 +355,19 @@ class CreditCard extends ActiveRecord
         $card->cc_type_id = $typeId;
         return $card;
     }
+
+    public static function getCreditCardByParams(
+        int $expirationMonth,
+        int $expirationYear,
+        ?string $holderName,
+        ?int $typeId
+    ): ?CreditCard {
+        return self::find()
+            ->where(['cc_holder_name' => $holderName])
+            ->andWhere(['cc_type_id' => $typeId])
+            ->andWhere(['cc_expiration_month' => $expirationMonth])
+            ->andWhere(['cc_expiration_year' => $expirationYear])
+            ->orderBy(['cc_id' => SORT_DESC])
+            ->one();
+    }
 }

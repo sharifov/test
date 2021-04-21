@@ -2245,17 +2245,26 @@ class OrderController extends BaseController
                 );
 
                 if (isset($form->creditCard)) {
-                    $creditCard = CreditCard::create(
-                        $form->creditCard->number,
-                        $form->creditCard->holder_name,
-                        $form->creditCard->expiration_month,
-                        $form->creditCard->expiration_year,
-                        $form->creditCard->cvv,
-                        $form->creditCard->type_id,
-                    );
-                    $creditCard->updateSecureCardNumber();
-                    $creditCard->updateSecureCvv();
-                    $this->creditCardRepository->save($creditCard);
+                    if (
+                        !$creditCard = CreditCard::getCreditCardByParams(
+                            $form->creditCard->expiration_month,
+                            $form->creditCard->expiration_year,
+                            $form->creditCard->holder_name,
+                            $form->creditCard->type_id
+                        )
+                    ) {
+                        $creditCard = CreditCard::create(
+                            $form->creditCard->number,
+                            $form->creditCard->holder_name,
+                            $form->creditCard->expiration_month,
+                            $form->creditCard->expiration_year,
+                            $form->creditCard->cvv,
+                            $form->creditCard->type_id,
+                        );
+                        $creditCard->updateSecureCardNumber();
+                        $creditCard->updateSecureCvv();
+                        $this->creditCardRepository->save($creditCard);
+                    }
                 }
 
                 if (isset($form->billingInfo)) {
