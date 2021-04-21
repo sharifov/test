@@ -757,15 +757,20 @@ class FlightController extends ApiBaseController
             $originProductQuote = $originFlightQuote->fqProductQuote;
 
             $this->transactionManager->wrap(function () use ($flightRequestApiForm, $originProductQuote, $originFlightQuote) {
-                $newProductQuote = $this->productQuoteReplaceService->replaceFromApiBo($originProductQuote->pq_id, $originFlightQuote);
-                if (!$newFlightQuote = $newProductQuote->flightQuote) {
-                    throw new \DomainException('FlightQuote not created');
+                if ($this->flightManageApiService->checkProcessedStatus($flightRequestApiForm)) {
+                    $newProductQuote = $this->productQuoteReplaceService->replaceFromApiBo($originProductQuote->pq_id, $originFlightQuote);
+                    if (!$newFlightQuote = $newProductQuote->flightQuote) {
+                        throw new \DomainException('FlightQuote not created');
+                    }
+
+                    $this->flightManageApiService->replaceProcessing($flightRequestApiForm, $newFlightQuote);
+                    $this->flightManageApiService->recalculatePricingProcessing($newProductQuote, $newFlightQuote);
+
+                    $this->eventDispatcher->dispatch(new FlightProductProcessedSuccessEvent($flightRequestApiForm->order->or_id));
+                } else {
+                    $this->ticketIssueProcessingDataService->failQuote($flightRequestApiForm->order);
+                    $this->eventDispatcher->dispatch(new FlightProductProcessedErrorEvent($flightRequestApiForm->order->or_id));
                 }
-
-                $this->flightManageApiService->replaceProcessing($flightRequestApiForm, $newFlightQuote);
-                $this->flightManageApiService->recalculatePricingProcessing($newProductQuote, $newFlightQuote);
-
-                //$this->eventDispatcher->dispatch(new ?FlightProductProcessedReplaceEvent($flightRequestApiForm->order->or_id)); /* TODO:: need separate task */
             });
 
             return $this->endApiLog($apiLog, new SuccessResponse(

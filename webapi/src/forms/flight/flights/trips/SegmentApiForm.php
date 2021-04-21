@@ -107,11 +107,11 @@ class SegmentApiForm extends Model
             [['airlineRecordLocator'], 'string'],
             [['baggage'], 'integer'],
             [['carryOn'], 'boolean'],
+            [['marriageGroup'], 'string', 'max' => 3],
+            [['mileage'], 'integer'],
+            [['fareCode'], 'string', 'max' => 50],
 
             [['aircraft'], 'safe'],
-            [['marriageGroup'], 'safe'],
-            [['fareCode'], 'safe'],
-            [['mileage'], 'safe'],
         ];
     }
 

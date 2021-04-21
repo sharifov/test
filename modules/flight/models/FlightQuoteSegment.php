@@ -79,8 +79,14 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
             [['fqs_flight_quote_id', 'fqs_flight_quote_trip_id', 'fqs_stop', 'fqs_flight_number', 'fqs_duration', 'fqs_ticket_id', 'fqs_recheck_baggage', 'fqs_mileage'], 'integer'],
             [['fqs_departure_dt', 'fqs_arrival_dt', 'fqs_uid'], 'safe'],
             [['fqs_booking_class'], 'string', 'max' => 1],
-            [['fqs_departure_airport_iata', 'fqs_departure_airport_terminal', 'fqs_arrival_airport_iata', 'fqs_arrival_airport_terminal'], 'string', 'max' => 3],
-            [['fqs_operating_airline', 'fqs_marketing_airline', 'fqs_marriage_group', 'fqs_cabin_class', 'fqs_meal'], 'string', 'max' => 2],
+            [
+                [
+                    'fqs_departure_airport_iata', 'fqs_departure_airport_terminal', 'fqs_arrival_airport_iata',
+                    'fqs_arrival_airport_terminal', 'fqs_marriage_group'
+                ],
+                'string', 'max' => 3
+            ],
+            [['fqs_operating_airline', 'fqs_marketing_airline', 'fqs_cabin_class', 'fqs_meal'], 'string', 'max' => 2],
             [['fqs_air_equip_type'], 'string', 'max' => 30],
             [['fqs_uid'], 'string', 'max' => 20],
             [['fqs_fare_code'], 'string', 'max' => 50],
