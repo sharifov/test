@@ -55,7 +55,7 @@ class PaymentApiService
             if ($amount < 0) {
                 \Yii::error(
                     [
-                        'message' => 'Refund - payment is less than zero',
+                        'message' => 'Refund transaction amount is more than the original payment amount.',
                         'amount' => $amount,
                         'payment' => $payment->toArray(),
                         'paymentApiForm' => $form->toArray()
