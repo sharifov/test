@@ -4,10 +4,12 @@ namespace modules\flight\models;
 
 use common\models\Airline;
 use common\models\Airports;
+use modules\flight\src\dto\flightSegment\FlightQuoteSegmentApiBoDto;
 use modules\flight\src\entities\flightQuoteSegment\serializer\FlightQuoteSegmentSerializer;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentDTO;
 use Yii;
 use yii\db\ActiveQuery;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 
 /**
@@ -278,5 +280,34 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
     public function generateUid(): string
     {
         return uniqid('fqs');
+    }
+
+    public static function createFromBo(FlightQuoteSegmentApiBoDto $dto): FlightQuoteSegment
+    {
+        $segment = new self();
+        $segment->fqs_flight_quote_id = $dto->flightQuoteId;
+        $segment->fqs_flight_quote_trip_id = $dto->flightQuoteTripId;
+        $segment->fqs_departure_dt = $dto->departureDt;
+        $segment->fqs_arrival_dt = $dto->arrivalDt;
+        $segment->fqs_stop = $dto->stop;
+        $segment->fqs_flight_number = $dto->flightNumber;
+        $segment->fqs_booking_class = $dto->bookingClass;
+        $segment->fqs_duration = $dto->duration;
+        $segment->fqs_departure_airport_iata = $dto->departureAirportIata;
+        $segment->fqs_departure_airport_terminal = $dto->departureAirportTerminal;
+        $segment->fqs_arrival_airport_iata = $dto->arrivalAirportIata;
+        $segment->fqs_arrival_airport_terminal = $dto->arrivalAirportTerminal;
+        $segment->fqs_operating_airline = $dto->operatingAirline;
+        $segment->fqs_marketing_airline = $dto->marketingAirline;
+        $segment->fqs_air_equip_type = $dto->airEquipType;
+        $segment->fqs_marriage_group = $dto->marriageGroup;
+        $segment->fqs_cabin_class = $dto->cabinClass;
+        $segment->fqs_meal = $dto->meal;
+        $segment->fqs_fare_code = $dto->fareCode;
+        $segment->fqs_key = $dto->key;
+        $segment->fqs_ticket_id = $dto->ticketId;
+        $segment->fqs_recheck_baggage = $dto->recheckBaggage;
+        $segment->fqs_mileage = $dto->mileage;
+        return $segment;
     }
 }

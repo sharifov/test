@@ -38,7 +38,7 @@ class FlightUpdateRequestApiService
         self::STATUS_PAYMENT_RELEASED => 'PAYMENT_RELEASED',
     ];
 
-    public const SUCCESS_STATUS = 3;
+    public const SUCCESS_STATUS = self::STATUS_ISSUED;
 
     public const TYPE_TICKET_ISSUE = 'ticket_issue';
     public const TYPE_FLIGHT_REPLACE = 'flight_replace';

@@ -21,6 +21,7 @@ class BillingInfoForm extends \yii\base\Model
     public function rules()
     {
         return [
+            [['first_name', 'last_name', 'address', 'city', 'country_id'], 'required'],
             [['first_name', 'middle_name', 'last_name', 'address', 'country_id', 'city', 'state', 'zip', 'phone', 'email'], 'string'],
             [['first_name', 'last_name', 'middle_name', 'city'], 'string', 'max' => 30],
             [['address'], 'string', 'max' => 50],

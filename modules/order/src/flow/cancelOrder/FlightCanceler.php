@@ -34,7 +34,7 @@ class FlightCanceler
             } elseif ($quote->isInProgress()) {
                 FlightQuoteBookService::cancel($flightQuote->fq_flight_request_uid, $projectId);
             } else {
-                throw new FlightCanceledException();
+                throw new FlightCanceledException('Unable to process flight cancellation because flight quote status is not booked and not in progress');
             }
             $quote->cancelled(null, 'Cancel Flow');
             $this->repository->save($quote);
@@ -46,6 +46,6 @@ class FlightCanceler
                 'flight' => $quote->getAttributes(),
             ], 'FlightCanceler');
         }
-        throw new FlightCanceledException();
+        throw new FlightCanceledException('');
     }
 }

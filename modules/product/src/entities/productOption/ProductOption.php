@@ -40,6 +40,8 @@ class ProductOption extends ActiveRecord implements Serializable
 {
     use EventTrait;
 
+    public const TRAVEL_GUARD_FLIGHT_KEY = 'travelGuard';
+
     /**
      * @return string
      */

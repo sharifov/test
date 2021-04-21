@@ -90,10 +90,32 @@ JS;
             'or_gid',
             'or_uid',
             'or_fare_id',
-            [
+            /*[
                 'class' => LeadColumn::class,
                 'attribute' => 'or_lead_id',
                 'relation' => 'orLead',
+            ],*/
+            [
+                'label' => 'Leads',
+                'value' => static function (Order $order) {
+                    $data = [];
+                    foreach ($order->leadOrder as $lead) {
+                        $data[] = Yii::$app->formatter->format($lead->lead, 'lead');
+                    }
+                    return !empty($data) ? implode('</br>', $data) : ' - ';
+                },
+                'format' => 'raw'
+            ],
+            [
+                'label' => 'Cases',
+                'value' => static function (Order $order) {
+                    $data = [];
+                    foreach ($order->caseOrder as $case) {
+                        $data[] = Yii::$app->formatter->format($case->cases, 'case');
+                    }
+                    return !empty($data) ? implode('</br>', $data) : ' - ';
+                },
+                'format' => 'raw'
             ],
             [
                 'class' => OrderStatusColumn::class,

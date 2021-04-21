@@ -103,6 +103,8 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
 {
     use EventTrait;
 
+    public const UPDATE_EVENT_KEY = 'orderUpdateEvent';
+
     public static function tableName(): string
     {
         return 'order';
@@ -403,7 +405,7 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
     public function getOrderTotalCalcSum(): float
     {
         $sum = 0;
-        $quotes = $this->productQuotes;
+        $quotes = $this->productQuotesActive;
         if ($quotes) {
             foreach ($quotes as $quote) {
                 $sum += $quote->totalCalcSum;
@@ -412,7 +414,6 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
         }
         return $sum;
     }
-
 
     public function updateOrderTotalByCurrency(): void
     {

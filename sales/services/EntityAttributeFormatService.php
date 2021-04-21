@@ -1,45 +1,13 @@
 <?php
 
-namespace sales\services\log;
+namespace sales\services;
 
 use sales\logger\formatter\Formatter;
 use yii\db\ActiveRecord;
 
-class GlobalLogFormatAttrService
+abstract class EntityAttributeFormatService
 {
-    /**
-     * @param string $modelPath
-     * @param string $oldAttr
-     * @param string $newAttr
-     * @return string|null
-     */
-    public function formatAttr(string $modelPath, ?string $oldAttr, ?string $newAttr): ?string
-    {
-        $formattedAttr = [];
-
-        try {
-            $model = \Yii::createObject($modelPath);
-
-            $formatterName = 'sales\\logger\\formatter\\' . (new \ReflectionClass($modelPath))->getShortName() . 'Formatter';
-
-            if (class_exists($formatterName)) {
-                $formatter = \Yii::createObject($formatterName);
-                $this->formatByFormatter($formatter, $formattedAttr, $oldAttr, $newAttr);
-            } else {
-                $this->formatByModel($model, $formattedAttr, $oldAttr, $newAttr);
-            }
-
-            if (empty($formattedAttr)) {
-                return null;
-            }
-
-            return json_encode($formattedAttr);
-        } catch (\Throwable $e) {
-            \Yii::error($e->getMessage() . ' File: ' . $e->getFile() . ' Line: ' . $e->getLine(), 'Console:LoggerController:formAttr:Throwable');
-
-            return null;
-        }
-    }
+    abstract public function formatAttr(string $modelPath, ?string $oldAttr, ?string $newAttr): ?string;
 
     /**
      * @param Formatter $formatter
@@ -47,7 +15,7 @@ class GlobalLogFormatAttrService
      * @param string|null $oldAttr
      * @param string|null $newAttr
      */
-    private function formatByFormatter(Formatter $formatter, array &$formattedAttr, ?string $oldAttr, ?string $newAttr): void
+    protected function formatByFormatter(Formatter $formatter, array &$formattedAttr, ?string $oldAttr, ?string $newAttr): void
     {
         if ($newAttr) {
             $oldAttr = json_decode($oldAttr, true);
@@ -69,7 +37,7 @@ class GlobalLogFormatAttrService
      * @param string|null $oldAttr
      * @param string|null $newAttr
      */
-    private function formatByModel(ActiveRecord $model, array &$formattedAttr, ?string $oldAttr, ?string $newAttr): void
+    protected function formatByModel(ActiveRecord $model, array &$formattedAttr, ?string $oldAttr, ?string $newAttr): void
     {
         if ($newAttr) {
             $oldAttr = json_decode($oldAttr, true);
@@ -87,7 +55,7 @@ class GlobalLogFormatAttrService
      * @param array $errors
      * @return string
      */
-    private function getParsedErrors(array $errors): string
+    protected function getParsedErrors(array $errors): string
     {
         return implode('<br>', array_map(static function ($errors) {
             return implode('<br>', $errors);

@@ -3,6 +3,7 @@
 use modules\order\src\events\OrderFileGeneratedEvent;
 use modules\order\src\events\OrderProcessingEvent;
 use modules\order\src\entities\order\events as OrderEvents;
+use modules\order\src\events\OrderUpdateEvent;
 use modules\order\src\listeners\lead as LeadListeners;
 use modules\order\src\listeners\order as OrderListeners;
 use modules\order\src\processManager;
@@ -117,4 +118,8 @@ return [
     processManager\clickToBook\events\FlightProductProcessedErrorEvent::class => [
         processManager\clickToBook\listeners\FlightProductProcessedErrorListener::class,
     ],
+
+    OrderUpdateEvent::class => [
+        OrderListeners\OrderSendWebhookBOListener::class
+    ]
 ];

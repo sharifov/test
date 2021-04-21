@@ -33,6 +33,8 @@ use modules\product\src\entities\productOption\ProductOptionRepository;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository;
+use sales\dispatchers\DeferredEventDispatcher;
+use sales\dispatchers\EventDispatcher;
 use sales\repositories\billingInfo\BillingInfoRepository;
 use sales\repositories\creditCard\CreditCardRepository;
 use sales\repositories\lead\LeadRepository;
@@ -322,6 +324,10 @@ class OrderApiManageService
                     );
                 }
             }
+
+            /** @var DeferredEventDispatcher $eventDispatcher */
+            $eventDispatcher = \Yii::$container->get(EventDispatcher::class);
+            $eventDispatcher->detachByKey(Order::UPDATE_EVENT_KEY);
 
             return $newOrder;
         });
