@@ -26,7 +26,7 @@ class FlightCanceler
         /** @var FlightQuote $flightQuote */
         $flightQuote = $quote->childQuote;
         if (!$flightQuote->fq_flight_request_uid) {
-            throw new FlightCanceledException();
+            throw new FlightCanceledException('Flight Quote does not have request uid');
         }
         try {
             if ($quote->isBooked()) {
