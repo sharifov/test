@@ -217,11 +217,11 @@ class CallLogTransferService
             $this->callLog['cl_status_id'] = $this->call['c_status_id'];
 //        }
 
-        if ($this->call['c_queue_start_dt'] !== null) {
-            $this->callLog['cl_duration'] = $this->call['c_call_duration'] + (strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']));
-        } else {
+//        if ($this->call['c_queue_start_dt'] !== null) {
+//            $this->callLog['cl_duration'] = $this->call['c_call_duration'] + (strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']));
+//        } else {
             $this->callLog['cl_duration'] = $this->call['c_call_duration'];
-        }
+//        }
 
         if ($this->call['c_queue_start_dt'] !== null) {
             $this->queue['clq_queue_time'] = strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']);
@@ -251,11 +251,11 @@ class CallLogTransferService
             $this->callLog['cl_status_id'] = $this->call['c_status_id'];
 //        }
 
-        if ($this->call['c_queue_start_dt'] !== null) {
-            $this->callLog['cl_duration'] = $this->call['c_call_duration'] + (strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']));
-        } else {
+//        if ($this->call['c_queue_start_dt'] !== null) {
+//            $this->callLog['cl_duration'] = $this->call['c_call_duration'] + (strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']));
+//        } else {
             $this->callLog['cl_duration'] = $this->call['c_call_duration'];
-        }
+//        }
 
         $this->callLog['cl_group_id'] = $this->call['c_id'];
 
