@@ -179,12 +179,12 @@ $isQuoteAssignedToFlight = false;
             <?php $meta = !empty($result['meta']) ? $result['meta'] : null ?>
             <?php echo QuoteHelper::formattedFreeBaggage($meta) ?>
 
-            <span class="quote__badge quote__badge--amenities <?php if (!$hasFreeBaggage) :
-                ?>quote__badge--disabled<?php
-                                                              endif;?>" data-toggle="tooltip"
-                  title="<?= ($freeBaggageInfo) ? $freeBaggageInfo : 'No free baggage'?>" data-original-title="<?= ($freeBaggageInfo) ? $freeBaggageInfo : 'No free baggage'?>">
+            <!--<span class="quote__badge quote__badge--amenities <?php /*if (!$hasFreeBaggage) :
+                */?>quote__badge--disabled<?php
+/*                                                              endif;*/?>" data-toggle="tooltip"
+                  title="<?/*= ($freeBaggageInfo) ? $freeBaggageInfo : 'No free baggage'*/?>" data-original-title="<?/*= ($freeBaggageInfo) ? $freeBaggageInfo : 'No free baggage'*/?>">
                 <i class="fa fa-suitcase"></i><span class="quote__badge-num"></span>
-            </span>
+            </span>-->
 
             <?php
 
