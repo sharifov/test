@@ -46,6 +46,6 @@ class FlightCanceler
                 'flight' => $quote->getAttributes(),
             ], 'FlightCanceler');
         }
-        throw new FlightCanceledException('');
+        throw new FlightCanceledException();
     }
 }
