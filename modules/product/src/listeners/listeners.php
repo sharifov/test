@@ -9,6 +9,7 @@ use modules\product\src\entities\productQuote\events\ProductQuoteDeclinedEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteExpiredEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateChildrenProfitAmountEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateProfitAmountEvent;
+use modules\product\src\entities\productQuote\events\ProductQuoteReplaceEvent;
 use modules\product\src\entities\productQuoteOption\events\ProductQuoteOptionCloneCreatedEvent;
 use modules\product\src\listeners\productQuote\ProductQuoteDeclinedEventListener;
 use modules\product\src\listeners\productQuote\ProductQuoteExpiredEventListener;
@@ -26,6 +27,7 @@ use modules\product\src\listeners\productQuote\ProductQuoteCanceledEventListener
 use modules\product\src\listeners\productQuote\ProductQuoteErrorEventListener;
 use modules\product\src\listeners\productQuote\ProductQuoteInProgressEventListener;
 use modules\product\src\listeners\ProductQuoteCloneListener;
+use modules\product\src\listeners\ProductQuoteReplaceListener;
 use sales\model\user\entity\profit\event\UserProfitCalculateByOrderUserProfitEvent;
 use sales\model\user\entity\profit\listener\UserProfitCalculateByOrderUserProfitEventListener;
 
@@ -33,6 +35,9 @@ return [
     ProductQuoteCloneCreatedEvent::class => [
         ProductQuoteChangeStatusLogListener::class,
         ProductQuoteCloneListener::class,
+    ],
+    ProductQuoteReplaceEvent::class => [
+        ProductQuoteReplaceListener::class,
     ],
     ProductQuoteOptionCloneCreatedEvent::class => [],
     ProductQuoteInProgressEvent::class => [

@@ -3,6 +3,7 @@
 namespace modules\flight\models;
 
 use common\models\Currency;
+use modules\flight\src\dto\flightQuotePaxPrice\FlightQuotePaxPriceApiBoDto;
 use modules\flight\src\entities\flightQuotePaxPrice\serializer\FlightQuotePaxPriceSerializer;
 use modules\flight\src\useCases\flightQuote\create\FlightQuotePaxPriceDTO;
 use Yii;
@@ -194,6 +195,32 @@ class FlightQuotePaxPrice extends \yii\db\ActiveRecord
         $paxPrice->qpp_client_tax = 0;
         $paxPrice->qpp_flight_pax_code_id = $paxCodeId;
 
+        return $paxPrice;
+    }
+
+    public static function createFromBo(FlightQuotePaxPriceApiBoDto $dto): FlightQuotePaxPrice
+    {
+        $paxPrice = new self();
+        $paxPrice->qpp_flight_quote_id = $dto->flightQuoteId;
+        $paxPrice->qpp_flight_pax_code_id = $dto->flightPaxCodeId;
+        $paxPrice->qpp_cnt = $dto->cnt;
+
+        $paxPrice->qpp_fare = $dto->fare;
+        $paxPrice->qpp_tax = $dto->tax;
+
+        $paxPrice->qpp_origin_fare = $dto->originFare;
+        $paxPrice->qpp_origin_currency = $dto->originCurrency;
+        $paxPrice->qpp_origin_tax = $dto->originTax;
+
+        $paxPrice->qpp_client_fare = $dto->clientFare;
+        $paxPrice->qpp_client_currency = $dto->clientCurrency;
+        $paxPrice->qpp_client_tax = $dto->clientTax;
+
+        $paxPrice->qpp_system_mark_up = $dto->systemMarkUp;
+        $paxPrice->qpp_agent_mark_up = $dto->agentMarkUp;
+
+        $paxPrice->qpp_created_dt = date('Y-m-d H:i:s');
+        $paxPrice->qpp_updated_dt = date('Y-m-d H:i:s');
         return $paxPrice;
     }
 }

@@ -6,6 +6,7 @@ use common\models\Currency;
 use common\models\Employee;
 use modules\flight\models\FlightQuote;
 use modules\hotel\models\HotelQuote;
+use modules\product\src\entities\productQuote\events\ProductQuoteReplaceEvent;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use modules\cruise\src\entity\cruiseQuote\CruiseQuote;
 use modules\attraction\models\AttractionQuote;
@@ -514,6 +515,19 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return $clone;
     }
 
+    public static function replace(ProductQuote $quote): self
+    {
+        $clone = new self();
+        $clone->attributes = $quote->attributes;
+
+        $clone->pq_id = null;
+        $clone->pq_gid = self::generateGid();
+        $clone->pq_status_id = ProductQuoteStatus::NEW;
+        $clone->pq_clone_id = $quote->pq_id;
+        $clone->recordEvent(new ProductQuoteReplaceEvent($clone, $quote->pq_id));
+        return $clone;
+    }
+
     /**
      * @return string
      */
@@ -833,6 +847,18 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $this->pq_agent_markup = $agentMarkup ?? 0;
 
         $this->calculateServiceFeeSum();
+        $this->calculatePrice();
+        $this->calculateClientPrice();
+        $this->updateProfitAmount();
+    }
+
+    public function updatePricesC2b(float $originPrice): void
+    {
+        $this->pq_origin_price = $originPrice;
+        $this->pq_app_markup = 0.00;
+        $this->pq_agent_markup = 0.00;
+        $this->pq_service_fee_sum = 0.00;
+
         $this->calculatePrice();
         $this->calculateClientPrice();
         $this->updateProfitAmount();

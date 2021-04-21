@@ -11,7 +11,6 @@ use yii\db\ActiveRecord;
 /**
  * This is the model class for table "order_tips".
  *
- * @property int $ot_id
  * @property int|null $ot_order_id
  * @property float|null $ot_client_amount
  * @property float|null $ot_amount

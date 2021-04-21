@@ -11,7 +11,9 @@ use modules\order\src\entities\order\Order;
 use sales\helpers\ErrorsToStringHelper;
 use webapi\src\forms\flight\flights\bookingInfo\BookingInfoApiForm;
 use webapi\src\forms\flight\flights\price\PriceApiForm;
+use webapi\src\forms\flight\flights\trips\SegmentApiForm;
 use yii\base\Model;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class FlightApiForm
@@ -27,6 +29,8 @@ use yii\base\Model;
  * @property $price
  *
  * @property BookingInfoApiForm[] $bookingInfoForms
+ * @property PriceApiForm|null $priceApiForm
+ * @property array $tripSegments
  * @property $originalDataJson
  */
 class FlightApiForm extends Model
@@ -39,9 +43,12 @@ class FlightApiForm extends Model
     public $validatingCarrier;
     public $bookingInfo;
     public $trips;
+    public $price;
 
     private array $bookingInfoForms = [];
+    private $priceApiForm;
     private $originalDataJson;
+    private array $tripSegments = [];
 
     public function __construct($originalDataJson, $config = [])
     {
@@ -85,11 +92,11 @@ class FlightApiForm extends Model
             }],
             [['trips'], 'checkTrips'],
 
-            /*[['price'], CheckJsonValidator::class], // TODO::
+            [['price'], CheckJsonValidator::class],
             [['price'], 'filter', 'filter' => static function ($value) {
                 return JsonHelper::decode($value);
             }],
-            [['price'], 'checkPrice'],*/
+            [['price'], 'checkPrice'],
         ];
     }
 
@@ -102,33 +109,45 @@ class FlightApiForm extends Model
                 break;
             }
             if (!$bookingInfoApiForm->validate()) {
-                $this->addError($attribute, 'BookingInfoApiForm: ' . ErrorsToStringHelper::extractFromModel($bookingInfoApiForm));
+                $this->addError($attribute, 'BookingInfoApiForm: ' . ErrorsToStringHelper::extractFromModel($bookingInfoApiForm, ', '));
                 break;
             }
             $this->bookingInfoForms[$key] = $bookingInfoApiForm;
         }
     }
 
-    /*public function checkPrice($attribute): void // TODO::
+    public function checkPrice($attribute): void
     {
-        foreach ($this->price as $key => $price) {
-            $priceApiForm = new PriceApiForm();
-            if (!$priceApiForm->load($price)) {
-                $this->addError($attribute, 'PriceApiForm is not loaded');
-                break;
-            }
-            if (!$priceApiForm->validate()) {
-                $this->addError($attribute, 'PriceApiForm: ' . ErrorsToStringHelper::extractFromModel($priceApiForm));
-                break;
-            }
-            $this->priceApiForms[$key] = $priceApiForm;
+        $priceApiForm = new PriceApiForm();
+        if (!$priceApiForm->load($this->price)) {
+            $this->addError($attribute, 'PriceApiForm is not loaded');
         }
-    }*/
+        if (!$priceApiForm->validate()) {
+            $this->addError($attribute, 'PriceApiForm: ' . ErrorsToStringHelper::extractFromModel($priceApiForm, ', '));
+        }
+        if (!$this->hasErrors($attribute)) {
+            $this->priceApiForm = $priceApiForm;
+        }
+    }
 
     public function checkTrips($attribute): void
     {
-        foreach ($this->trips as $key => $trip) {
-            $x = true; /* TODO::  */
+        foreach ($this->trips as $tripKey => $trip) {
+            if (!$segments = ArrayHelper::getValue($trip, 'segments')) {
+                $this->addError($attribute, 'Segments is required');
+            }
+            foreach ($segments as $segment) {
+                $segmentApiForm = new SegmentApiForm($tripKey);
+                if (!$segmentApiForm->load($segment)) {
+                    $this->addError($attribute, 'SegmentApiForm is not loaded');
+                    break;
+                }
+                if (!$segmentApiForm->validate()) {
+                    $this->addError($attribute, 'SegmentApiForm: ' . ErrorsToStringHelper::extractFromModel($segmentApiForm, ', '));
+                    break;
+                }
+                $this->tripSegments[$tripKey][] = $segmentApiForm;
+            }
         }
     }
 
@@ -145,5 +164,20 @@ class FlightApiForm extends Model
     public function getOriginalDataJson()
     {
         return $this->originalDataJson;
+    }
+
+    public function getPriceApiForm(): ?PriceApiForm
+    {
+        return $this->priceApiForm;
+    }
+
+    public function getTripSegments(): array
+    {
+        return $this->tripSegments;
+    }
+
+    public function isIssued(): bool
+    {
+        return $this->status === FlightUpdateRequestApiService::SUCCESS_STATUS;
     }
 }

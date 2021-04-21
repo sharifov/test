@@ -33,4 +33,15 @@ class FlightQuoteSegmentRepository
             throw new \RuntimeException('Removing error', FlightCodeException::FLIGHT_QUOTE_SEGMENT_REMOVE);
         }
     }
+
+    public function removeByFlightQuoteId(int $flightQuoteId): array
+    {
+        $removedIds = [];
+        foreach (FlightQuoteSegment::findAll(['fqs_flight_quote_id' => $flightQuoteId]) as $model) {
+            $id = $model->fqs_id;
+            $this->remove($model);
+            $removedIds[] = $id;
+        }
+        return $removedIds;
+    }
 }

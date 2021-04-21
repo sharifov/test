@@ -63,7 +63,7 @@ class PaymentFromBoForm extends Model
                 break;
             }
             if (!$paymentApiForm->validate()) {
-                $this->addError($attribute, 'PaymentApiForm error: ' . ErrorsToStringHelper::extractFromModel($paymentApiForm));
+                $this->addError($attribute, 'PaymentApiForm error: ' . ErrorsToStringHelper::extractFromModel($paymentApiForm, ' '));
                 break;
             }
             $this->paymentApiForms[$key] = $paymentApiForm;
@@ -74,7 +74,7 @@ class PaymentFromBoForm extends Model
                 break;
             }
             if (!$creditCardForm->validate()) {
-                $this->addError($attribute, 'CreditCardForm error: ' . ErrorsToStringHelper::extractFromModel($creditCardForm));
+                $this->addError($attribute, 'CreditCardForm error: ' . ErrorsToStringHelper::extractFromModel($creditCardForm, ' '));
             }
             $this->creditCardForms[$key] = $creditCardForm;
 
@@ -84,7 +84,7 @@ class PaymentFromBoForm extends Model
                 break;
             }
             if (!$billingInfoForm->validate()) {
-                $this->addError($attribute, 'BillingInfoForm error: ' . ErrorsToStringHelper::extractFromModel($billingInfoForm));
+                $this->addError($attribute, 'BillingInfoForm error: ' . ErrorsToStringHelper::extractFromModel($billingInfoForm, ' '));
                 break;
             }
             $this->billingInfoForms[$key] = $billingInfoForm;

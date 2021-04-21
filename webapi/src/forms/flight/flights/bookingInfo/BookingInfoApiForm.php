@@ -7,6 +7,7 @@ use frontend\helpers\JsonHelper;
 use modules\flight\src\services\api\FlightUpdateRequestApiService;
 use sales\helpers\ErrorsToStringHelper;
 use webapi\src\forms\flight\flights\bookingInfo\airlinesCode\AirlinesCodeApiForm;
+use webapi\src\forms\flight\flights\bookingInfo\insurance\InsuranceApiForm;
 use webapi\src\forms\flight\flights\bookingInfo\passengers\PassengerApiForm;
 use yii\base\Model;
 
@@ -21,8 +22,10 @@ use yii\base\Model;
  * @property $validatingCarrier
  * @property $passengers
  * @property $airlinesCode
+ * @property $insurance
  * @property PassengerApiForm[] $passengerForms
  * @property AirlinesCodeApiForm[] $airlinesCodeForms
+ * @property InsuranceApiForm|null $insuranceApiForm
  */
 class BookingInfoApiForm extends Model
 {
@@ -34,9 +37,11 @@ class BookingInfoApiForm extends Model
     public $validatingCarrier;
     public $passengers;
     public $airlinesCode;
+    public $insurance;
 
     private array $passengerForms = [];
     private array $airlinesCodeForms = [];
+    private $insuranceApiForm;
 
     public function rules(): array
     {
@@ -68,6 +73,13 @@ class BookingInfoApiForm extends Model
                 return JsonHelper::decode($value);
             }],
             [['airlinesCode'], 'checkAirlinesCode'],
+
+            [['insurance'], 'required'],
+            [['insurance'], CheckJsonValidator::class],
+            [['insurance'], 'filter', 'filter' => static function ($value) {
+                return JsonHelper::decode($value);
+            }],
+            [['insurance'], 'checkInsurance'],
         ];
     }
 
@@ -103,6 +115,22 @@ class BookingInfoApiForm extends Model
         }
     }
 
+    public function checkInsurance($attribute): void
+    {
+        if (!empty($this->insurance)) {
+            $insuranceApiForm = new InsuranceApiForm();
+            if (!$insuranceApiForm->load($this->insurance)) {
+                $this->addError($attribute, 'InsuranceApiForm is not loaded');
+            }
+            if (!$insuranceApiForm->validate()) {
+                $this->addError($attribute, 'InsuranceApiForm: ' . ErrorsToStringHelper::extractFromModel($insuranceApiForm));
+            }
+            if (!$this->hasErrors($attribute)) {
+                $this->insuranceApiForm = $insuranceApiForm;
+            }
+        }
+    }
+
     public function isIssued(): bool
     {
         return $this->status === FlightUpdateRequestApiService::SUCCESS_STATUS;
@@ -121,5 +149,10 @@ class BookingInfoApiForm extends Model
     public function getAirlinesCodeForms(): array
     {
         return $this->airlinesCodeForms;
+    }
+
+    public function getInsuranceApiForm(): ?InsuranceApiForm
+    {
+        return $this->insuranceApiForm;
     }
 }

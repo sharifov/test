@@ -7,9 +7,11 @@ use yii\bootstrap4\Html;
 class ProductQuoteStatusAction
 {
     public const CLONE = 1;
+    public const REPLACE = 2;
 
     private const LIST = [
         self::CLONE => 'clone',
+        self::REPLACE => 'replace',
     ];
 
     public static function getList(): array
