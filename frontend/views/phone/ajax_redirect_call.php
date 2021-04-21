@@ -10,6 +10,7 @@ use yii\helpers\Html;
 /* @var $departments DepartmentPhoneProject[] */
 /* @var $call \common\models\Call */
 /* @var $error string */
+/* @var $canWarmTransfer bool */
 ?>
 <div class="ajax-redirect-call">
     <?php if ($error) :?>
@@ -146,7 +147,7 @@ use yii\helpers\Html;
                                 ])?>
                             <?php endif; ?>
 
-                            <?php if (Auth::can('PhoneWidget_WarmTransferToUser')) : ?>
+                            <?php if ($canWarmTransfer && Auth::can('PhoneWidget_WarmTransferToUser')) : ?>
                                 <?= Html::button('<i class="fa fa-feed"></i> Warm transfer', [
                                         'class' => 'btn btn-xs ' . $btnClass . ' btn-warm-transfer-to-user',
                                         'data-user-id' => $userModel->id,

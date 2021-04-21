@@ -737,7 +737,8 @@ class PhoneController extends FController
             'phones' => $phones,
             'departments' => $departments,
             'call' => $call,
-            'error' => $error
+            'error' => $error,
+            'canWarmTransfer' => $call ? $call->isIn() : false
         ]);
     }
 
@@ -1031,6 +1032,10 @@ class PhoneController extends FController
                 //todo status
 //                ->andWhere(['c_status_id' => [Call::STATUS_IN_PROGRESS]])
                 ->limit(1)->one();
+
+            if (!$originCall->isIn()) {
+                throw new BadRequestHttpException('Call must be Incoming');
+            }
 
             if (!$originCall) {
                 throw new BadRequestHttpException('Not found Call');
