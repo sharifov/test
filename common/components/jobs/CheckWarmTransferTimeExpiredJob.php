@@ -5,6 +5,7 @@ namespace common\components\jobs;
 use common\components\purifier\Purifier;
 use common\models\Call;
 use common\models\CallUserAccess;
+use common\models\Conference;
 use common\models\ConferenceParticipant;
 use common\models\Notifications;
 use sales\model\call\helper\CallHelper;
@@ -27,8 +28,13 @@ class CheckWarmTransferTimeExpiredJob implements JobInterface
     public $keeperSid;
     public $recordingDisabled;
 
-    public function __construct(int $callId, int $toUserId, string $conferenceSid, string $keeperSid, bool $recordingDisabled)
-    {
+    public function __construct(
+        int $callId,
+        int $toUserId,
+        string $conferenceSid,
+        string $keeperSid,
+        bool $recordingDisabled
+    ) {
         $this->callId = $callId;
         $this->toUserId = $toUserId;
         $this->conferenceSid = $conferenceSid;
@@ -40,7 +46,19 @@ class CheckWarmTransferTimeExpiredJob implements JobInterface
     {
         $access = CallUserAccess::find()->byWarmTransfer()->byCall($this->callId)->byUser($this->toUserId)->one();
         if (!$access) {
-            return;
+            $access = CallUserAccess::find()->accepted()->byCall($this->callId)->byUser($this->toUserId)->one();
+            if (!$access) {
+                return;
+            }
+            $oldConferenceIsActive = Conference::find()->bySid($this->conferenceSid)->active()->exists();
+            if (!$oldConferenceIsActive) {
+                return;
+            }
+            $ringingAcceptedCallByNewUser = Call::find()->select(['c_call_sid'])->byCreatedUser($this->toUserId)->byParentId($this->callId)->ringing()->asArray()->scalar();
+            if (!$ringingAcceptedCallByNewUser) {
+                return;
+            }
+            $this->cancelCall($ringingAcceptedCallByNewUser);
         }
         $access->noAnsweredCall();
         $access->save();
@@ -85,6 +103,27 @@ class CheckWarmTransferTimeExpiredJob implements JobInterface
                 'toUserId' => $this->toUserId,
                 'conferenceSid' => $this->conferenceSid,
                 'keeperSid' => $this->keeperSid,
+            ], 'CheckWarmTransferTimeExpiredJob');
+        }
+    }
+
+    private function cancelCall(string $sid): void
+    {
+        try {
+            $result = \Yii::$app->communication->hangUp($sid);
+            $isError = (bool)($result['error'] ?? true);
+            if ($isError) {
+                \Yii::error([
+                    'message' => 'Cancel warm transfer accepted call',
+                    'error' => $result['message'],
+                    'sid' => $sid
+                ], 'CheckWarmTransferTimeExpiredJob');
+            }
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'message' => 'Cancel warm transfer accepted call',
+                'error' => $e->getMessage(),
+                'sid' => $sid
             ], 'CheckWarmTransferTimeExpiredJob');
         }
     }

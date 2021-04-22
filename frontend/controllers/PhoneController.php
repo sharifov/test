@@ -1158,9 +1158,11 @@ class PhoneController extends FController
                     throw new \DomainException($result['message']);
                 }
                 if (Call::applyCallToAgentAccessWarmTransfer($parent, $userId)) {
-                    $checkJob = new CheckWarmTransferTimeExpiredJob($parent->c_id, $userId, $data['conferenceSid'], $data['keeperSid'], $data['recordingDisabled']);
                     $timeOut = CallHelper::warmTransferTimeout($parent->c_dep_id);
-                    Yii::$app->queue_job->delay($timeOut)->push($checkJob);
+                    if ($timeOut) {
+                        $checkJob = new CheckWarmTransferTimeExpiredJob($parent->c_id, $userId, $data['conferenceSid'], $data['keeperSid'], $data['recordingDisabled']);
+                        Yii::$app->queue_job->delay($timeOut)->push($checkJob);
+                    }
                 }
             } else {
                 $childCall = Call::find()
@@ -1182,9 +1184,11 @@ class PhoneController extends FController
                     throw new \DomainException($result['message']);
                 }
                 if (Call::applyCallToAgentAccessWarmTransfer($childCall, $userId)) {
-                    $checkJob = new CheckWarmTransferTimeExpiredJob($childCall->c_id, $userId, $data['conferenceSid'], $data['keeperSid'], $data['recordingDisabled']);
                     $timeOut = CallHelper::warmTransferTimeout($childCall->c_dep_id);
-                    Yii::$app->queue_job->delay($timeOut)->push($checkJob);
+                    if ($timeOut) {
+                        $checkJob = new CheckWarmTransferTimeExpiredJob($childCall->c_id, $userId, $data['conferenceSid'], $data['keeperSid'], $data['recordingDisabled']);
+                        Yii::$app->queue_job->delay($timeOut)->push($checkJob);
+                    }
                 }
             }
         } catch (\Throwable $e) {

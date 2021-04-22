@@ -44,6 +44,11 @@ class CallQuery extends \yii\db\ActiveQuery
         return $this->andWhere(['c_created_user_id' => $userId]);
     }
 
+    public function byParentId(int $id): self
+    {
+        return $this->andWhere(['c_parent_id' => $id]);
+    }
+
     public function inProgress(): self
     {
         return $this->andWhere(['c_status_id' => Call::STATUS_IN_PROGRESS]);
