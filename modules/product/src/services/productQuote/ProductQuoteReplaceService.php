@@ -77,7 +77,7 @@ class ProductQuoteReplaceService
                 }
             }
 
-            $originalQuote->cancelled(null, 'Cancelled from point - ReplaceFromApiBo. New QuoteId(' . $productQuote->pq_id . ')');
+            $originalQuote->cancelled(null, 'Cancelled from ReplaceFromApiBo. New QuoteId(' . $productQuote->pq_id . ')');
             $this->productQuoteRepository->save($originalQuote);
 
             return $productQuote;

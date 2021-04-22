@@ -211,6 +211,10 @@ class FlightManageApiService
                 }
             }
         }
+
+        $productQuote = $flightRequestApiForm->flightQuote->fqProductQuote;
+        $productQuote->booked();
+        $this->productQuoteRepository->save($productQuote);
     }
 
     public function replaceProcessing(FlightRequestApiForm $flightRequestApiForm, FlightQuote $newFlightQuote): FlightManageApiService
