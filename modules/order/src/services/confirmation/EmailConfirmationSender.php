@@ -148,11 +148,15 @@ class EmailConfirmationSender
         }
 
         $project = $order->project;
-
         $from = $project->getContactInfo()->getEmailNoReply();
         $fromName = $project->name;
 
-        $orderContacts = OrderContact::find()->byOrderId($order->or_id)->all();
+        $orderContacts = OrderContact::find()
+            ->select('oc_email')
+            ->distinct()
+            ->byOrderId($order->or_id)
+            ->all();
+
         if (!$orderContacts) {
             throw new \DomainException('Order Contacts not found by order id: ' . $order->or_id);
         }
