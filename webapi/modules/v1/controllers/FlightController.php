@@ -685,6 +685,24 @@ class FlightController extends ApiBaseController
                     }
                   ]
                 }
+            ],
+            "auxPdfData":[
+                [
+                    {
+                        "origin":"EWR",
+                        "tripId":0,
+                        "passengers":{
+                            "p1":{
+                                "fullname":"Tester Testerov",
+                                "products":{
+                                    "bag":"test_30kg",
+                                    "seat":"24E"
+                                }
+                            }
+                        },
+                        "destination":"KEF"
+                    }
+                ]
             ]
         }
      *
@@ -950,7 +968,25 @@ class FlightController extends ApiBaseController
                     "scheduleChange": "No"
                 }
             ],
-            "trips": []
+            "trips": [],
+            "auxPdfData":[
+                [
+                    {
+                        "origin":"EWR",
+                        "tripId":0,
+                        "passengers":{
+                            "p1":{
+                                "fullname":"Tester Testerov",
+                                "products":{
+                                    "bag":"test_30kg",
+                                    "seat":"24E"
+                                }
+                            }
+                        },
+                        "destination":"KEF"
+                    }
+                ]
+            ]
         }
      *
      *
