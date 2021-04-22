@@ -20,7 +20,7 @@ class WarmTransferSettings
         } else {
             $this->timeout = (int)$params['timeout'];
         }
-        if (!array_key_exists('auto_unhold_enabled', $params)) {
+        if (!array_key_exists('auto_unhold_enabled', $params) || $params['auto_unhold_enabled'] === null) {
             $this->autoUnholdEnabled = null;
         } else {
             $this->autoUnholdEnabled = (bool)$params['auto_unhold_enabled'];
