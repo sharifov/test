@@ -10,6 +10,7 @@ use modules\flight\models\FlightQuote;
 use modules\flight\src\helpers\FlightQuoteHelper;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use sales\auth\Auth;
 use yii\bootstrap4\Html;
 use yii\helpers\Url;
@@ -308,11 +309,14 @@ $totalAmountQuote = 0.0;
                     </td>
                     <?php endif;?>
 
-
-                    <?php if ($model->pq_clone_id) : ?>
-                    <td>
-                        <span class="badge badge-warning" style="padding-left: 5px">CLONE</span>
-                    </td>
+                    <?php if (ProductQuoteRelation::isClone($model->pq_id)) : ?>
+                        <td>
+                            <span class="badge badge-warning" style="padding-left: 5px">CLONE</span>
+                        </td>
+                    <?php elseif (ProductQuoteRelation::isReplace($model->pq_id)) : ?>
+                        <td>
+                            <span class="badge badge-warning" style="padding-left: 5px">REPLACE</span>
+                        </td>
                     <?php endif;?>
 
                     <td>

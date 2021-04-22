@@ -135,4 +135,20 @@ class ProductQuoteRelation extends \yii\db\ActiveRecord
         $model->pqr_type_id = self::TYPE_CLONE;
         return $model;
     }
+
+    public static function isReplace(int $productQuoteId): bool
+    {
+        return self::find()
+            ->where(['pqr_related_pq_id' => $productQuoteId])
+            ->andWhere(['pqr_type_id' => self::TYPE_REPLACE])
+            ->exists();
+    }
+
+    public static function isClone(int $productQuoteId): bool
+    {
+        return self::find()
+            ->where(['pqr_related_pq_id' => $productQuoteId])
+            ->andWhere(['pqr_type_id' => self::TYPE_CLONE])
+            ->exists();
+    }
 }
