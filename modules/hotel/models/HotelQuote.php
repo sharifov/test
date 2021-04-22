@@ -325,16 +325,17 @@ class HotelQuote extends ActiveRecord implements Quotable, ProductDataInterface
                                 $hotelRoomPaxes = $hotelRoomPax::find()
                                     ->where(['hrp_hotel_room_id' => $hotelRoom['hr_id']])
                                     ->all();
-
-                                foreach ($hotelRoomPaxes as $pax) {
-                                    $hotelQuoteRoomPax = new HotelQuoteRoomPax();
-                                    $hotelQuoteRoomPax->hqrp_hotel_quote_room_id = $qRoom->hqr_id;
-                                    $hotelQuoteRoomPax->hqrp_type_id = $pax->hrp_type_id;
-                                    $hotelQuoteRoomPax->hqrp_age = $pax->hrp_age;
-                                    $hotelQuoteRoomPax->hqrp_first_name = $pax->hrp_first_name;
-                                    $hotelQuoteRoomPax->hqrp_last_name = $pax->hrp_last_name;
-                                    $hotelQuoteRoomPax->hqrp_dob = $pax->hrp_dob;
-                                    $hotelQuoteRoomPax->save();
+                                if (!in_array($hotelRoom['hr_id'], $importedHotelRoomIds)) {
+                                    foreach ($hotelRoomPaxes as $pax) {
+                                        $hotelQuoteRoomPax = new HotelQuoteRoomPax();
+                                        $hotelQuoteRoomPax->hqrp_hotel_quote_room_id = $qRoom->hqr_id;
+                                        $hotelQuoteRoomPax->hqrp_type_id = $pax->hrp_type_id;
+                                        $hotelQuoteRoomPax->hqrp_age = $pax->hrp_age;
+                                        $hotelQuoteRoomPax->hqrp_first_name = $pax->hrp_first_name;
+                                        $hotelQuoteRoomPax->hqrp_last_name = $pax->hrp_last_name;
+                                        $hotelQuoteRoomPax->hqrp_dob = $pax->hrp_dob;
+                                        $hotelQuoteRoomPax->save();
+                                    }
                                 }
                                 $importedHotelRoomIds[] = $hotelRoom['hr_id'];
                                 $importHotelRoomStatus = true;
