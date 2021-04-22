@@ -7,6 +7,8 @@ use modules\hotel\models\HotelList;
 use modules\hotel\models\HotelQuote;
 use modules\hotel\models\HotelQuoteRoomPax;
 use modules\hotel\src\exceptions\HotelCodeException;
+use modules\hotel\src\helpers\HotelQuoteHelper;
+use modules\hotel\src\repositories\hotel\HotelRepository;
 use modules\order\src\exceptions\OrderC2BDtoException;
 use modules\order\src\exceptions\OrderC2BException;
 use modules\order\src\forms\api\createC2b\QuotesForm;
@@ -16,6 +18,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\interfaces\Productable;
 use modules\product\src\interfaces\ProductQuoteService;
+use sales\helpers\app\AppHelper;
 use yii\helpers\Json;
 
 /**
@@ -24,22 +27,22 @@ use yii\helpers\Json;
  *
  * @property ProductHolderRepository $productHolderRepository
  * @property ProductQuoteRepository $productQuoteRepository
+ * @property HotelRepository $hotelRepository
  */
 class HotelQuoteManageService implements ProductQuoteService
 {
-    /**
-     * @var ProductHolderRepository
-     */
     private ProductHolderRepository $productHolderRepository;
-    /**
-     * @var ProductQuoteRepository
-     */
     private ProductQuoteRepository $productQuoteRepository;
+    private HotelRepository $hotelRepository;
 
-    public function __construct(ProductHolderRepository $productHolderRepository, ProductQuoteRepository $productQuoteRepository)
-    {
+    public function __construct(
+        ProductHolderRepository $productHolderRepository,
+        ProductQuoteRepository $productQuoteRepository,
+        HotelRepository $hotelRepository
+    ) {
         $this->productHolderRepository = $productHolderRepository;
         $this->productQuoteRepository = $productQuoteRepository;
+        $this->hotelRepository = $hotelRepository;
     }
 
     /**
@@ -50,6 +53,12 @@ class HotelQuoteManageService implements ProductQuoteService
     public function c2bHandle(Productable $product, QuotesForm $form): void
     {
         try {
+            $product->ph_destination_code = $form->hotelRequest->destinationCode;
+            $product->ph_destination_label = $form->hotelRequest->destinationName;
+            $product->ph_check_in_date = $form->hotelRequest->checkIn;
+            $product->ph_check_out_date = $form->hotelRequest->checkOut;
+            $this->hotelRepository->save($product);
+
             $hotelData = Json::decode($form->originSearchData);
 
             $currency = $hotelData['currency'] ?? 'USD';
@@ -99,6 +108,11 @@ class HotelQuoteManageService implements ProductQuoteService
                 }
             }
         } catch (\Throwable $e) {
+            if ($e->getCode() >= 500) {
+                \Yii::error(AppHelper::throwableLog($e, true), 'HotelQuoteManageService::c2bHandle');
+                throw $e;
+            }
+
             $dto = new OrderC2BDtoException(
                 $product,
                 $form->quoteOtaId

@@ -64,7 +64,6 @@ class HotelQuoteBookService
     public function book(HotelQuote $model): self
     {
         $rooms = [];
-        $client = $this->getClient($model);
         $productQuote = $model->hqProductQuote;
         $userId = Auth::id();
         $productQuote->inProgress($userId);
@@ -111,11 +110,9 @@ class HotelQuoteBookService
             }
         } else {
             $this->message = $apiResponse['message'];
-            $this->transactionManager->wrap(function () use ($model, $apiResponse, $userId) {
-                $productQuote = $model->hqProductQuote;
-                $productQuote->error($userId, $apiResponse['message']);
-                $this->productQuoteRepository->save($productQuote);
-            });
+            $productQuote = $model->hqProductQuote;
+            $productQuote->error($userId, $apiResponse['message']);
+            $this->productQuoteRepository->save($productQuote);
         }
 
         $hotelQuoteServiceLog->setStatus($apiResponse['statusApi'])

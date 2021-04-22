@@ -146,4 +146,9 @@ class ProductType extends \yii\db\ActiveRecord
             ->asArray()
             ->all();
     }
+
+    public function isHotel(): bool
+    {
+        return $this->pt_id === self::PRODUCT_HOTEL;
+    }
 }
