@@ -166,7 +166,7 @@ class Project extends \yii\db\ActiveRecord
     {
         if (empty($this->_contactInfo)) {
             $this->_contactInfo = new ContactInfo();
-            $contactArr = @json_decode($this->contact_info, true, 512, JSON_THROW_ON_ERROR);
+            $contactArr = @json_decode($this->contact_info, true, 512);
             if ($contactArr) {
                 $this->_contactInfo->attributes = $contactArr;
             }
