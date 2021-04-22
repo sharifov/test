@@ -60,6 +60,9 @@ class ProductQuoteReplaceService
             $productQuote = ProductQuote::replace($originalQuote);
             $this->productQuoteRepository->save($productQuote);
 
+            $productQuote->booked();
+            $this->productQuoteRepository->save($productQuote);
+
             $childQuote = $originalQuote->getChildQuote();
             $childProduct = $originalQuote->pqProduct->getChildProduct();
 
