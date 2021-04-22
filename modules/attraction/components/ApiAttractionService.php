@@ -156,8 +156,7 @@ class ApiAttractionService extends Component
                                 }
                                 minAge
                                 maxAge
-                                price
-                                currency                                
+                                price                                                                
                                 priceFormattedText
                                 priceTotal
                                 priceTotalFormattedText
@@ -234,8 +233,7 @@ class ApiAttractionService extends Component
                                 }
                                 minAge
                                 maxAge
-                                price
-                                currency
+                                price                                
                                 priceFormattedText
                                 priceTotal
                                 priceTotalFormattedText
@@ -291,8 +289,7 @@ class ApiAttractionService extends Component
                             }
                             minAge
                             maxAge
-                            price
-                            currency
+                            price                            
                             priceFormattedText
                             priceTotal
                             priceTotalFormattedText
