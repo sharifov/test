@@ -921,12 +921,36 @@ class Call extends \yii\db\ActiveRecord
                 ])->all();
                 if ($callUserAccessAny) {
                     foreach ($callUserAccessAny as $callAccess) {
+                        $sendWarmTransferMissedNotification = $callAccess->isWarmTransfer();
                         $callAccess->noAnsweredCall();
                         if ($callAccess->update() === false) {
                             Yii::error(
                                 VarDumper::dumpAsString($callAccess->errors),
                                 'Call:afterSave:CallUserAccess:update'
                             );
+                        } else {
+                            if ($sendWarmTransferMissedNotification) {
+                                $message = 'Missed Call (' . self::SOURCE_LIST[self::SOURCE_TRANSFER_CALL] . ')  from ' . $this->c_from;
+                                if ($this->c_lead_id && $this->cLead) {
+                                    $message .= ', Lead (Id: ' . Purifier::createLeadShortLink($this->cLead) . ')';
+                                }
+                                if ($this->c_case_id && $this->cCase) {
+                                    $message .= ', Case (Id: ' . Purifier::createCaseShortLink($this->cCase) . ')';
+                                }
+
+                                if (
+                                    $ntf = Notifications::create(
+                                        $callAccess->cua_user_id,
+                                        'Missed Call (' . self::SOURCE_LIST[self::SOURCE_TRANSFER_CALL] . ')',
+                                        $message,
+                                        Notifications::TYPE_WARNING,
+                                        true
+                                    )
+                                ) {
+                                    $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                                    Notifications::publish('getNewNotification', ['user_id' => $callAccess->cua_user_id], $dataNotification);
+                                }
+                            }
                         }
                         Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $callAccess->cua_user_id], RemoveIncomingRequestMessage::create($this->c_call_sid));
                     }
