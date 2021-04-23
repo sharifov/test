@@ -63,6 +63,7 @@ use yii\helpers\ArrayHelper;
  * @property FlightQuoteStatusLog[] $flightQuoteStatusLogs
  * @property FlightQuoteTrip[] $flightQuoteTrips
  * @property Airline $mainAirline
+ * @property FlightQuoteFlight[] $flightQuoteFlights
  */
 class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
 {
@@ -300,6 +301,11 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
     public function getFlightQuoteTrips(): \yii\db\ActiveQuery
     {
         return $this->hasMany(FlightQuoteTrip::class, ['fqt_flight_quote_id' => 'fq_id']);
+    }
+
+    public function getFlightQuoteFlights(): ActiveQuery
+    {
+        return $this->hasMany(FlightQuoteFlight::class, ['fqf_fq_id' => 'fq_id']);
     }
 
     public static function find(): Scopes

@@ -463,6 +463,15 @@ class FlightController extends ApiBaseController
                             "segments": [
                                 {
                                     "segmentId": 1001959,
+                                    "passengers":{
+                                        "p1":{
+                                            "fullname":"Tester Testerov",
+                                            "products":{
+                                                "bag":"test_30kg",
+                                                "seat":"24E"
+                                            }
+                                        }
+                                    },
                                     "airline": "PR",
                                     "airlineName": "Philippine Airlines",
                                     "mainAirline": "PR",
@@ -494,6 +503,15 @@ class FlightController extends ApiBaseController
                                 },
                                 {
                                     "segmentId": 1001960,
+                                    "passengers":{
+                                        "p1":{
+                                            "fullname":"Tester Testerov",
+                                            "products":{
+                                                "bag":"test_30kg",
+                                                "seat":"25E"
+                                            }
+                                        }
+                                    },
                                     "airline": "PR",
                                     "airlineName": "Philippine Airlines",
                                     "mainAirline": "PR",
@@ -685,24 +703,6 @@ class FlightController extends ApiBaseController
                     }
                   ]
                 }
-            ],
-            "auxPdfData":[
-                [
-                    {
-                        "origin":"EWR",
-                        "tripId":0,
-                        "passengers":{
-                            "p1":{
-                                "fullname":"Tester Testerov",
-                                "products":{
-                                    "bag":"test_30kg",
-                                    "seat":"24E"
-                                }
-                            }
-                        },
-                        "destination":"KEF"
-                    }
-                ]
             ]
         }
      *
@@ -879,6 +879,15 @@ class FlightController extends ApiBaseController
                             "segments": [
                                 {
                                     "segmentId": 1001959,
+                                    "passengers":{
+                                        "p1":{
+                                            "fullname":"Tester Testerov",
+                                            "products":{
+                                                "bag":"test_30kg",
+                                                "seat":"24E"
+                                            }
+                                        }
+                                    },
                                     "airline": "PR",
                                     "airlineName": "Philippine Airlines",
                                     "mainAirline": "PR",
@@ -910,6 +919,15 @@ class FlightController extends ApiBaseController
                                 },
                                 {
                                     "segmentId": 1001960,
+                                    "passengers":{
+                                        "p1":{
+                                            "fullname":"Tester Testerov",
+                                            "products":{
+                                                "bag":"test_30kg",
+                                                "seat":"25E"
+                                            }
+                                        }
+                                    },
                                     "airline": "PR",
                                     "airlineName": "Philippine Airlines",
                                     "mainAirline": "PR",
@@ -968,25 +986,7 @@ class FlightController extends ApiBaseController
                     "scheduleChange": "No"
                 }
             ],
-            "trips": [],
-            "auxPdfData":[
-                [
-                    {
-                        "origin":"EWR",
-                        "tripId":0,
-                        "passengers":{
-                            "p1":{
-                                "fullname":"Tester Testerov",
-                                "products":{
-                                    "bag":"test_30kg",
-                                    "seat":"24E"
-                                }
-                            }
-                        },
-                        "destination":"KEF"
-                    }
-                ]
-            ]
+            "trips": []
         }
      *
      *

@@ -76,6 +76,7 @@ use modules\email\src\Notifier;
 use modules\flight\models\FlightQuote;
 use modules\flight\src\forms\api\PaymentApiForm;
 use modules\flight\src\services\flightQuote\FlightQuotePdfService;
+use modules\flight\src\services\flightQuoteFlight\FlightQuoteFlightPdfService;
 use modules\hotel\HotelModule;
 use modules\hotel\models\HotelList;
 use modules\hotel\models\HotelQuote;
@@ -1979,21 +1980,37 @@ class TestController extends FController
         exit('Done');
     }
 
-    public function actionFlightQuotePdf(int $id, int $data = 0, int $json = 1)
+    public function actionFlightQuotePdf(int $id, int $json = 1)
     {
         if (!$flightQuote = FlightQuote::findOne(['fq_id' => $id])) {
             throw new NotFoundHttpException('FlightQuote not found');
         }
-        //FlightQuotePdfService::processingFile($flightQuote); // O787EB0
-        $pdfService = new FlightQuotePdfService($flightQuote);
+        $generatedData = [];
         try {
-            $pdfService->processingFile();
+            foreach ($flightQuote->flightQuoteFlights as $flightQuoteFlight) {
+                $flightQuoteFlightPdfService = new FlightQuoteFlightPdfService($flightQuoteFlight);
+                $flightQuoteFlightPdfService->processingFile();
+                $generatedData[] = $flightQuoteFlightPdfService->getCommunicationData();
+            }
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableLog($throwable), 'Test:actionFlightQuotePdf');
-            \yii\helpers\VarDumper::dump($throwable->getMessage(), 10, true);
+            Yii::error(AppHelper::throwableLog($throwable, true), 'Test:actionFlightQuotePdf');
+            VarDumper::dump($throwable->getMessage(), 20, true);
             exit();
         }
-        return $pdfService->generateForBrowserOutput();
+
+        if (count($generatedData) === 1) {
+            if ($json === 1) {
+                return $this->asJson($generatedData[0]);
+            }
+            VarDumper::dump($generatedData[0], 20, true);
+            exit();
+        }
+
+        if ($json === 1) {
+            return $this->asJson($generatedData);
+        }
+        VarDumper::dump($generatedData, 20, true);
+        exit();
     }
 
     public function actionReceiptPdf(int $order_id, int $data = 0, int $json = 1)

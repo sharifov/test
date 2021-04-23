@@ -148,7 +148,7 @@ class EmailConfirmationSender
         }
 
         $project = $order->project;
-        $from = $project->getContactInfo()->getEmailNoReply();
+        $from = $project->getEmailNoReply();
         $fromName = $project->name;
 
         $orderContacts = OrderContact::find()

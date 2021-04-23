@@ -42,6 +42,7 @@ use yii\widgets\ActiveForm;
                     ],
                     //'collapseAll' => ['view'],
                     'expandAll' => ['tree', 'form'],
+                    'value' => @json_encode(\yii\helpers\ArrayHelper::merge($model->contactInfo->attributes, json_decode($model->contact_info)))
                 ]
             );
         } catch (Exception $exception) {

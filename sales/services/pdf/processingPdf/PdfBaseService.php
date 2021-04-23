@@ -207,4 +207,14 @@ abstract class PdfBaseService
     {
         return $this->communicationData;
     }
+
+    /**
+     * @param int|null $leadId
+     * @return PdfBaseService
+     */
+    public function setLeadId(?int $leadId): PdfBaseService
+    {
+        $this->leadId = $leadId;
+        return $this;
+    }
 }
