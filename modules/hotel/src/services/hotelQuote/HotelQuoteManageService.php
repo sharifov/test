@@ -6,6 +6,10 @@ use modules\hotel\models\Hotel;
 use modules\hotel\models\HotelList;
 use modules\hotel\models\HotelQuote;
 use modules\hotel\models\HotelQuoteRoomPax;
+use modules\hotel\models\HotelRoom;
+use modules\hotel\models\HotelRoomPax;
+use modules\hotel\src\entities\hotelRoom\HotelRoomRepository;
+use modules\hotel\src\entities\hotelRoomPax\HotelRoomPaxRepository;
 use modules\hotel\src\exceptions\HotelCodeException;
 use modules\hotel\src\helpers\HotelQuoteHelper;
 use modules\hotel\src\repositories\hotel\HotelRepository;
@@ -28,21 +32,29 @@ use yii\helpers\Json;
  * @property ProductHolderRepository $productHolderRepository
  * @property ProductQuoteRepository $productQuoteRepository
  * @property HotelRepository $hotelRepository
+ * @property HotelRoomRepository $hotelRoomRepository
+ * @property HotelRoomPaxRepository $hotelRoomPaxRepository
  */
 class HotelQuoteManageService implements ProductQuoteService
 {
     private ProductHolderRepository $productHolderRepository;
     private ProductQuoteRepository $productQuoteRepository;
     private HotelRepository $hotelRepository;
+    private HotelRoomRepository $hotelRoomRepository;
+    private HotelRoomPaxRepository $hotelRoomPaxRepository;
 
     public function __construct(
         ProductHolderRepository $productHolderRepository,
         ProductQuoteRepository $productQuoteRepository,
-        HotelRepository $hotelRepository
+        HotelRepository $hotelRepository,
+        HotelRoomRepository $hotelRoomRepository,
+        HotelRoomPaxRepository $hotelRoomPaxRepository
     ) {
         $this->productHolderRepository = $productHolderRepository;
         $this->productQuoteRepository = $productQuoteRepository;
         $this->hotelRepository = $hotelRepository;
+        $this->hotelRoomRepository = $hotelRoomRepository;
+        $this->hotelRoomPaxRepository = $hotelRoomPaxRepository;
     }
 
     /**
@@ -85,7 +97,11 @@ class HotelQuoteManageService implements ProductQuoteService
             $this->productHolderRepository->save($productHolder);
 
             $hotelQuote->refresh();
+            $roomCount = 1;
             foreach ($hotelQuote->hotelQuoteRooms as $quoteRoom) {
+                $hotelRoom = HotelRoom::create($product->getId(), 'Room ' . $roomCount++);
+                $this->hotelRoomRepository->save($hotelRoom);
+
                 if ($quoteRoomPax = HotelQuoteRoomPax::find()->byQuoteRoomId($quoteRoom->hqr_id)->all()) {
                     $updatePaxKey = null;
                     foreach ($quoteRoomPax as $roomPax) {
@@ -104,6 +120,16 @@ class HotelQuoteManageService implements ProductQuoteService
                                 break;
                             }
                         }
+
+                        $hotelRoomPax = HotelRoomPax::create(
+                            $hotelRoom->hr_id,
+                            $roomPax->hqrp_type_id,
+                            $roomPax->hqrp_age,
+                            $roomPax->hqrp_first_name,
+                            $roomPax->hqrp_last_name,
+                            $roomPax->hqrp_dob
+                        );
+                        $this->hotelRoomPaxRepository->save($hotelRoomPax);
                     }
                 }
             }
