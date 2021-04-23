@@ -377,28 +377,48 @@ class ApiAttractionService extends Component
     {
         $query = [
             'query' => 'query holibob ($term: String!){
-              productList(filter: {search: $term}) {
-                recordCount
-                pageCount 
-                nodes {
-                  id
-                  name  
-                  availabilityType
-                  guidePriceFormattedText
-                  guidePrice
-                  supplierName
-                  abstract
-                  previewImage {
-                     url
-                  }
-                   place {
-                     cityId
-                     cityName                    
-                     countryId
-                     countryName
-                   }
+                productList(filter: {search: $term} pageSize: 100 sort: {isRecommended: desc}) {
+                    recordCount
+                    pageCount 
+                    nodes {
+                        id
+                        abstract  
+                        availabilityType
+                        cancellationPolicy {
+                            isCancellable
+                            penaltyList {
+                                nodes {
+                                    amount
+                                    amountCurrency
+                                    amountType
+                                    formattedText
+                                    ordinalPosition
+                                    refundPercentage
+                                    relativeTo
+                                    type
+                                }
+                            }
+                        }
+                        categoryList {
+                            nodes {                      
+                                name
+                            }
+                        }
+                        name                        
+                        guidePriceFormattedText
+                        guidePrice
+                        supplierName
+                        minDuration
+                        maxDuration                  
+                        previewImage {
+                            url
+                        }
+                        place {                     
+                            cityName
+                            countryName
+                        }                                                
+                    }
                 }
-              }
             }',
             'variables' => '{"term":"' . $attraction->atn_destination . '"}',
             'operationName' => 'holibob',
