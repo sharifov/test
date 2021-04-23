@@ -2,8 +2,10 @@
 
 namespace modules\flight\models;
 
+use sales\entities\serializer\Serializable;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
@@ -19,7 +21,7 @@ use yii\helpers\ArrayHelper;
  * @property FlightQuoteBooking $fqtFqb
  * @property FlightPax $fqtPax
  */
-class FlightQuoteTicket extends \yii\db\ActiveRecord
+class FlightQuoteTicket extends ActiveRecord
 {
     public function rules(): array
     {
@@ -55,12 +57,12 @@ class FlightQuoteTicket extends \yii\db\ActiveRecord
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
-    public function getFqtFqb(): \yii\db\ActiveQuery
+    public function getFqtFqb(): ActiveQuery
     {
         return $this->hasOne(FlightQuoteBooking::class, ['fqb_id' => 'fqt_fqb_id']);
     }
 
-    public function getFqtPax(): \yii\db\ActiveQuery
+    public function getFqtPax(): ActiveQuery
     {
         return $this->hasOne(FlightPax::class, ['fp_id' => 'fqt_pax_id']);
     }
