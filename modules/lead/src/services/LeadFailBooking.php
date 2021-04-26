@@ -8,6 +8,7 @@ use modules\order\src\entities\order\Order;
 use modules\order\src\entities\orderContact\OrderContact;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
+use modules\product\src\entities\productQuoteLead\service\ProductQuoteLeadService;
 use modules\product\src\services\ProductCloneService;
 use sales\model\leadOrder\services\LeadOrderService;
 use sales\model\leadProduct\services\LeadProductService;
@@ -22,6 +23,7 @@ use sales\services\TransactionManager;
  * @property LeadOrderService $leadOrderService
  * @property LeadProductService $leadProductService
  * @property ProductCloneService $productCloneService
+ * @property ProductQuoteLeadService $productQuoteLeadService
  * @property TransactionManager $transactionManager
  */
 class LeadFailBooking
@@ -31,6 +33,7 @@ class LeadFailBooking
     private LeadOrderService $leadOrderService;
     private LeadProductService $leadProductService;
     private ProductCloneService $productCloneService;
+    private ProductQuoteLeadService $productQuoteLeadService;
     private TransactionManager $transactionManager;
 
     public function __construct(
@@ -39,6 +42,7 @@ class LeadFailBooking
         LeadOrderService $leadOrderService,
         LeadProductService $leadProductService,
         ProductCloneService $productCloneService,
+        ProductQuoteLeadService $productQuoteLeadService,
         TransactionManager $transactionManager
     ) {
         $this->productQuoteRepository = $productQuoteRepository;
@@ -46,6 +50,7 @@ class LeadFailBooking
         $this->leadOrderService = $leadOrderService;
         $this->leadProductService = $leadProductService;
         $this->productCloneService = $productCloneService;
+        $this->productQuoteLeadService = $productQuoteLeadService;
         $this->transactionManager = $transactionManager;
     }
 
@@ -65,6 +70,7 @@ class LeadFailBooking
 
             $this->leadOrderService->create($lead->id, $order->or_id);
             $this->leadProductService->create($lead->id, $quote->pq_product_id);
+            $this->productQuoteLeadService->create($quote->pq_id, $lead->id);
             $this->productCloneService->clone($quote->pq_product_id, $lead->id, $createdUserId);
         });
     }

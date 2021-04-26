@@ -59,4 +59,12 @@ class ProductQuoteLead extends \yii\db\ActiveRecord
     {
         return 'product_quote_lead';
     }
+
+    public static function create(int $quoteId, $leadId): self
+    {
+        $self = new self();
+        $self->pql_product_quote_id = $quoteId;
+        $self->pql_lead_id = $leadId;
+        return $self;
+    }
 }
