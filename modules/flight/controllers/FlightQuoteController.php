@@ -578,6 +578,7 @@ class FlightQuoteController extends FController
 
             foreach ($flightQuote->flightQuoteFlights as $flightQuoteFlight) {
                 $flightQuoteFlightPdfService = new FlightQuoteFlightPdfService($flightQuoteFlight);
+                $flightQuoteFlightPdfService->setProductQuoteId($flightQuoteFlight->fqfFq->fq_product_quote_id);
                 $flightQuoteFlightPdfService->processingFile();
             }
 

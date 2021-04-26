@@ -40,6 +40,7 @@ class FlightQuotePdfJob implements RetryableJobInterface
 
             foreach ($flightQuote->flightQuoteFlights as $flightQuoteFlight) {
                 $flightQuoteFlightPdfService = new FlightQuoteFlightPdfService($flightQuoteFlight);
+                $flightQuoteFlightPdfService->setProductQuoteId($flightQuoteFlight->fqfFq->fq_product_quote_id);
                 $flightQuoteFlightPdfService->processingFile();
             }
 

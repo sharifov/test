@@ -7,6 +7,8 @@ use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\Lead;
 use modules\fileStorage\src\entity\fileOrder\FileOrder;
+use modules\fileStorage\src\entity\fileProductQuote\FileProductQuote;
+use modules\fileStorage\src\entity\fileProductQuote\FileProductQuoteQuery;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\orderContact\OrderContact;
 use modules\order\src\entities\orderData\OrderData;
@@ -34,29 +36,13 @@ class EmailConfirmationSender
 
     public function sendWithAllAttachments(Order $order): void
     {
+        $files = [];
         $receipt = FileOrder::find()->andWhere([
             'fo_category_id' => FileOrder::CATEGORY_RECEIPT,
             'fo_or_id' => $order->or_id
         ])->one();
         if (!$receipt) {
             throw new \DomainException('Not found Receipt File. OrderId: ' . $order->or_id);
-        }
-
-        /** @var FileOrder[] $confirmations */
-        $confirmations = [];
-
-        $quotes = ProductQuote::find()->select(['pq_id'])->byOrderId($order->or_id)->booked()->column();
-        foreach ($quotes as $quote) {
-            $confirm = FileOrder::find()->andWhere([
-                'fo_category_id' => FileOrder::CATEGORY_CONFIRMATION,
-                'fo_or_id' => $order->or_id,
-                'fo_pq_id' => $quote
-            ])->with(['file'])->one();
-
-            if (!$confirm) {
-                throw new \DomainException('Not found File Confirmation. QuoteId: ' . $quote . ' OrderId: ' . $order->or_id);
-            }
-            $confirmations[] = $confirm;
         }
 
         $files[] = new \modules\fileStorage\src\services\url\FileInfo(
@@ -67,14 +53,20 @@ class EmailConfirmationSender
             null
         );
 
-        foreach ($confirmations as $confirmation) {
-            $files[] = new \modules\fileStorage\src\services\url\FileInfo(
-                $confirmation->file->fs_name,
-                $confirmation->file->fs_path,
-                $confirmation->file->fs_uid,
-                $confirmation->file->fs_title,
-                null
-            );
+        $quotes = ProductQuote::find()->select(['pq_id'])->byOrderId($order->or_id)->booked()->column();
+        foreach ($quotes as $quote) {
+            if (!$fileProductQuotes = FileProductQuoteQuery::getByQuoteOrderAndCategory($quote, $order->or_id, FileOrder::CATEGORY_CONFIRMATION)) {
+                throw new \DomainException('Not found File Confirmation. QuoteId: ' . $quote . ' OrderId: ' . $order->or_id);
+            }
+            foreach ($fileProductQuotes as $fileProductQuote) {
+                $files[] = new \modules\fileStorage\src\services\url\FileInfo(
+                    $fileProductQuote->file->fs_name,
+                    $fileProductQuote->file->fs_path,
+                    $fileProductQuote->file->fs_uid,
+                    $fileProductQuote->file->fs_title,
+                    null
+                );
+            }
         }
 
         $fileStorageUrlGenerator = \Yii::createObject(\modules\fileStorage\src\services\url\UrlGenerator::class);
@@ -102,31 +94,16 @@ class EmailConfirmationSender
             );
         }
 
-        /** @var FileOrder[] $confirmations */
-        $confirmations = [];
-
-        $quotes = ProductQuote::find()->select(['pq_id'])->byOrderId($order->or_id)->booked()->column();
-        foreach ($quotes as $quote) {
-            $confirm = FileOrder::find()->andWhere([
-                'fo_category_id' => FileOrder::CATEGORY_CONFIRMATION,
-                'fo_or_id' => $order->or_id,
-                'fo_pq_id' => $quote
-            ])->with(['file'])->one();
-
-            if (!$confirm) {
-                continue;
+        if ($fileProductQuotes = FileProductQuoteQuery::getByOrderAndCategory($order->or_id, FileOrder::CATEGORY_CONFIRMATION)) {
+            foreach ($fileProductQuotes as $fileProductQuote) {
+                $files[] = new \modules\fileStorage\src\services\url\FileInfo(
+                    $fileProductQuote->file->fs_name,
+                    $fileProductQuote->file->fs_path,
+                    $fileProductQuote->file->fs_uid,
+                    $fileProductQuote->file->fs_title,
+                    null
+                );
             }
-            $confirmations[] = $confirm;
-        }
-
-        foreach ($confirmations as $confirmation) {
-            $files[] = new \modules\fileStorage\src\services\url\FileInfo(
-                $confirmation->file->fs_name,
-                $confirmation->file->fs_path,
-                $confirmation->file->fs_uid,
-                $confirmation->file->fs_title,
-                null
-            );
         }
 
         $fileStorageUrlGenerator = \Yii::createObject(\modules\fileStorage\src\services\url\UrlGenerator::class);

@@ -8,6 +8,8 @@ use modules\fileStorage\src\entity\fileLead\FileLead;
 use modules\fileStorage\src\entity\fileLead\FileLeadRepository;
 use modules\fileStorage\src\entity\fileOrder\FileOrder;
 use modules\fileStorage\src\entity\fileOrder\FileOrderRepository;
+use modules\fileStorage\src\entity\fileProductQuote\FileProductQuote;
+use modules\fileStorage\src\entity\fileProductQuote\FileProductQuoteRepository;
 use modules\fileStorage\src\entity\fileStorage\FileStorage;
 use modules\fileStorage\src\entity\fileStorage\FileStorageRepository;
 use modules\fileStorage\src\FileSystem;
@@ -36,6 +38,7 @@ use yii\helpers\VarDumper;
  *
  * @property string $extension
  *
+ * @property FileProductQuoteRepository $fileProductQuoteRepository
  * @property FileStorageRepository $fileStorageRepository
  * @property FileClientRepository $fileClientRepository
  * @property FileOrderRepository $fileOrderRepository
@@ -57,12 +60,13 @@ abstract class PdfBaseService
     public ?int $productQuoteId = null;
     public ?array $communicationData = null;
 
-    public FileStorageRepository $fileStorageRepository;
-    public FileClientRepository $fileClientRepository;
-    public FileOrderRepository $fileOrderRepository;
-    public FileLeadRepository $fileLeadRepository;
-    public EventDispatcher $eventDispatcher;
-    public FileSystem $fileSystem;
+    private FileProductQuoteRepository $fileProductQuoteRepository;
+    private FileStorageRepository $fileStorageRepository;
+    private FileClientRepository $fileClientRepository;
+    private FileOrderRepository $fileOrderRepository;
+    private FileLeadRepository $fileLeadRepository;
+    private EventDispatcher $eventDispatcher;
+    private FileSystem $fileSystem;
 
     private string $extension = 'pdf';
 
@@ -74,6 +78,7 @@ abstract class PdfBaseService
         $this->projectKey = $object->getProject()->project_key;
         $this->orderId = $object->getOrder() ? $object->getOrder()->or_id : null;
 
+        $this->fileProductQuoteRepository = Yii::createObject(FileProductQuoteRepository::class);
         $this->fileStorageRepository = Yii::createObject(FileStorageRepository::class);
         $this->fileClientRepository = Yii::createObject(FileClientRepository::class);
         $this->fileOrderRepository = Yii::createObject(FileOrderRepository::class);
@@ -93,6 +98,9 @@ abstract class PdfBaseService
         }
         if ($this->leadId) {
             $this->fileToLead($fileStorageId);
+        }
+        if ($this->getProductQuoteId()) {
+            $this->fileToProductQuote($fileStorageId);
         }
         if ($this->orderId) {
             $this->fileToOrder($fileStorageId);
@@ -180,6 +188,11 @@ abstract class PdfBaseService
     public function fileToLead(int $fileStorageId): void
     {
         $this->fileLeadRepository->save(FileLead::create($fileStorageId, $this->leadId));
+    }
+
+    private function fileToProductQuote(int $fileStorageId): void
+    {
+        $this->fileProductQuoteRepository->save(FileProductQuote::create($fileStorageId, $this->getProductQuoteId()));
     }
 
     public function fileStorage($patchToLocalFile)
