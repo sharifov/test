@@ -34,6 +34,6 @@ class ProductCloneService
             $this->hotelCloneService->clone($product->pr_id, $cloneProduct->pr_id);
         }
 
-        return $product;
+        return $cloneProduct;
     }
 }

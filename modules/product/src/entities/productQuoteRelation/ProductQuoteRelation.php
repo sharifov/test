@@ -25,10 +25,12 @@ class ProductQuoteRelation extends \yii\db\ActiveRecord
 {
     public const TYPE_REPLACE = 1;
     public const TYPE_CLONE = 2;
+    public const TYPE_ALTERNATIVE = 3;
 
     public const TYPE_LIST = [
         self::TYPE_REPLACE => 'Replace',
         self::TYPE_CLONE => 'Clone',
+        self::TYPE_ALTERNATIVE => 'Alternative',
     ];
 
     public static function tableName(): string
@@ -100,9 +102,9 @@ class ProductQuoteRelation extends \yii\db\ActiveRecord
         return $this->hasOne(ProductQuote::class, ['pq_id' => 'pqr_related_pq_id']);
     }
 
-    public static function find(): ProductQuoteRelationScopes
+    public static function find(): Scopes
     {
-        return new ProductQuoteRelationScopes(static::class);
+        return new Scopes(static::class);
     }
 
     public static function getTypeName($typeId): string
@@ -133,6 +135,16 @@ class ProductQuoteRelation extends \yii\db\ActiveRecord
         $model->pqr_related_pq_id = $relatedId;
         $model->pqr_created_user_id = $userId;
         $model->pqr_type_id = self::TYPE_CLONE;
+        return $model;
+    }
+
+    public static function createAlternative(int $parentId, int $relatedId, ?int $userId = null): self
+    {
+        $model = new self();
+        $model->pqr_parent_pq_id = $parentId;
+        $model->pqr_related_pq_id = $relatedId;
+        $model->pqr_created_user_id = $userId;
+        $model->pqr_type_id = self::TYPE_ALTERNATIVE;
         return $model;
     }
 }

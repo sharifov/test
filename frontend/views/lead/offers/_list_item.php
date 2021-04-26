@@ -17,6 +17,11 @@ use yii\bootstrap4\Html;
     <div class="x_title">
 
             <?= Html::checkbox('offer_checkbox[' . $offer->of_id . ']', false, ['id' => 'off_ch' . $offer->of_id, 'class' => 'offer-checkbox', 'data-id' => $offer->of_id, 'style' => 'width: 16px; height: 16px;'])?>
+
+            <?php if ($offer->isAlternative()) : ?>
+                <i class="fab fa-autoprefixer" title="Alternative Offer" data-toggle="tooltip" data-placement="top"></i>
+            <?php endif;?>
+
             <small><span class="badge badge-white">OF<?=($offer->of_id)?></span></small>
             <?= OfferStatus::asFormat($offer->of_status_id) ?>
             (<span title="GID: <?=\yii\helpers\Html::encode($offer->of_gid)?>"><?=\yii\helpers\Html::encode($offer->of_uid)?></span>)

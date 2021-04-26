@@ -23,6 +23,8 @@ use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchGuard;
 use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchService;
 use modules\hotel\src\useCases\quote\HotelQuoteManageService;
 use modules\order\src\events\OrderFileGeneratedEvent;
+use modules\product\src\entities\productQuoteOrigin\ProductQuoteOrigin;
+use modules\product\src\entities\productQuoteRelation\service\ProductQuoteRelationService;
 use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
 use Yii;
@@ -45,25 +47,15 @@ use yii\web\Response;
  * @property HotelQuoteSearchService $hotelQuoteSearchService
  * @property HotelQuoteRoomRepository $hotelQuoteRoomRepository
  * @property HotelQuoteManageService $hotelQuoteManageService
+ * @property ProductQuoteRelationService $productQuoteRelationService
  */
 class HotelQuoteController extends FController
 {
-    /**
-     * @var HotelRepository
-     */
     private $hotelRepository;
-    /**
-     * @var HotelQuoteSearchService
-     */
     private $hotelQuoteSearchService;
-    /**
-     * @var HotelQuoteRoomRepository
-     */
     private $hotelQuoteRoomRepository;
-    /**
-     * @var HotelQuoteManageService
-     */
     private $hotelQuoteManageService;
+    private $productQuoteRelationService;
 
     public function __construct(
         $id,
@@ -72,6 +64,7 @@ class HotelQuoteController extends FController
         HotelRepository $hotelRepository,
         HotelQuoteManageService $hotelQuoteManageService,
         HotelQuoteRoomRepository $hotelQuoteRoomRepository,
+        ProductQuoteRelationService $productQuoteRelationService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -80,6 +73,7 @@ class HotelQuoteController extends FController
         $this->hotelRepository = $hotelRepository;
         $this->hotelQuoteRoomRepository = $hotelQuoteRoomRepository;
         $this->hotelQuoteManageService = $hotelQuoteManageService;
+        $this->productQuoteRelationService = $productQuoteRelationService;
     }
 
     /**
@@ -278,6 +272,10 @@ class HotelQuoteController extends FController
 
             if (!$hotelQuote) {
                 throw new Exception('Not added hotel quote - hotel code (' . $hotelCode . ') room key (' . $quoteKey . ')', 8);
+            }
+
+            if ($productQuoteOrigin = ProductQuoteOrigin::findOne(['pqa_product_id' => $hotel->ph_product_id])) {
+                $this->productQuoteRelationService->createAlternative($productQuoteOrigin->pqa_quote_id, $hotelQuote->hq_product_quote_id, Auth::id());
             }
 
             Notifications::pub(

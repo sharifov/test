@@ -11,6 +11,7 @@ use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\entities\productQuoteLead\service\ProductQuoteLeadService;
 use modules\product\src\entities\productQuoteOrigin\service\ProductQuoteOriginService;
 use modules\product\src\services\ProductCloneService;
+use sales\model\leadOrder\entity\LeadOrderQuery;
 use sales\model\leadOrder\services\LeadOrderService;
 use sales\model\leadProduct\services\LeadProductService;
 use sales\repositories\lead\LeadRepository;
@@ -66,14 +67,8 @@ class LeadFailBooking
         $order = $this->getOrder($quote);
 
         $this->transactionManager->wrap(function () use ($order, $quote, $createdUserId) {
-            $lead = Lead::createBookFailed(
-                $order->or_project_id,
-                Department::DEPARTMENT_SALES,
-                $this->getClientId($order->or_id)
-            );
-            $this->leadRepository->save($lead);
+            $lead = $this->getOrCreateLeadBookedFailedByOrderId($order->or_project_id, $order->or_id);
 
-            $this->leadOrderService->create($lead->id, $order->or_id);
             $this->leadProductService->create($lead->id, $quote->pq_product_id);
             $this->productQuoteLeadService->create($quote->pq_id, $lead->id);
             $product = $this->productCloneService->clone($quote->pq_product_id, $lead->id, $createdUserId);
@@ -99,5 +94,23 @@ class LeadFailBooking
         }
 
         throw new \DomainException('Not found clientId in OrderContact. OrderId: ' . $orderId);
+    }
+
+    private function getOrCreateLeadBookedFailedByOrderId(int $projectId, int $orderId): Lead
+    {
+        if ($leadOrder = LeadOrderQuery::findLeadFailedBookByOrderIdProjectId($orderId, $projectId)) {
+            return $leadOrder->lead;
+        }
+
+        $lead = Lead::createBookFailed(
+            $projectId,
+            Department::DEPARTMENT_SALES,
+            $this->getClientId($orderId)
+        );
+        $this->leadRepository->save($lead);
+
+        $this->leadOrderService->create($lead->id, $orderId);
+
+        return $lead;
     }
 }
