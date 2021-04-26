@@ -142,14 +142,14 @@ abstract class PdfBaseService
         return $this;
     }
 
-    private function unlinkLocalFile(string $patchToLocalFile): void
+    public function unlinkLocalFile(string $patchToLocalFile): void
     {
         if (file_exists($patchToLocalFile)) {
             FileHelper::unlink($patchToLocalFile);
         }
     }
 
-    private function fileToOrder(int $fileStorageId): void
+    public function fileToOrder(int $fileStorageId): void
     {
         $this->fileOrderRepository->save(
             FileOrder::create(
@@ -172,17 +172,17 @@ abstract class PdfBaseService
         );
     }
 
-    private function fileToClient(int $fileStorageId): void
+    public function fileToClient(int $fileStorageId): void
     {
         $this->fileClientRepository->save(FileClient::create($fileStorageId, $this->clientId));
     }
 
-    private function fileToLead(int $fileStorageId): void
+    public function fileToLead(int $fileStorageId): void
     {
         $this->fileLeadRepository->save(FileLead::create($fileStorageId, $this->leadId));
     }
 
-    private function fileStorage($patchToLocalFile)
+    public function fileStorage($patchToLocalFile)
     {
         $createDto = new CreateByLocalFileDto($patchToLocalFile, $this->clientId, $this->projectKey, $this->generateTitle(), $this->orderId);
         $fileStorage = FileStorage::createByLocalFile($createDto);
