@@ -19,8 +19,6 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'lp_product_id')->textInput() ?>
 
-        <?= $form->field($model, 'lp_quote_id')->textInput() ?>
-
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
         </div>

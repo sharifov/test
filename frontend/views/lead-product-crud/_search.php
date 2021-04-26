@@ -23,8 +23,6 @@ use common\components\bootstrap4\activeForm\ActiveForm;
 
     <?= $form->field($model, 'lp_product_id') ?>
 
-    <?= $form->field($model, 'lp_quote_id') ?>
-
     <div class="form-group">
         <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
         <?= Html::resetButton('Reset', ['class' => 'btn btn-outline-secondary']) ?>

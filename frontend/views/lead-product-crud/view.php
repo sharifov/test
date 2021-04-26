@@ -34,7 +34,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'attributes' => [
                 'lead:lead',
                 'lp_product_id',
-                'lp_quote_id',
             ],
         ]) ?>
 

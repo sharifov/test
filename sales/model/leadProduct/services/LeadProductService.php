@@ -19,9 +19,9 @@ class LeadProductService
         $this->repository = $repository;
     }
 
-    public function create(int $leadId, int $productId, int $quoteId): void
+    public function create(int $leadId, int $productId): void
     {
-        $leadOrder = LeadProduct::create($leadId, $productId, $quoteId);
+        $leadOrder = LeadProduct::create($leadId, $productId);
         $this->repository->save($leadOrder);
     }
 }

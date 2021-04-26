@@ -13,8 +13,6 @@ class LeadProductSearch extends LeadProduct
             ['lp_lead_id', 'integer'],
 
             ['lp_product_id', 'integer'],
-
-            ['lp_quote_id', 'integer'],
         ];
     }
 
@@ -36,7 +34,6 @@ class LeadProductSearch extends LeadProduct
         $query->andFilterWhere([
             'lp_lead_id' => $this->lp_lead_id,
             'lp_product_id' => $this->lp_product_id,
-            'lp_quote_id' => $this->lp_quote_id,
         ]);
 
         return $dataProvider;

@@ -38,7 +38,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw'
             ],
             'lp_product_id',
-            'lp_quote_id',
 
             ['class' => 'yii\grid\ActionColumn'],
         ],
