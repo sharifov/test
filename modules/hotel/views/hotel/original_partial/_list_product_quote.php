@@ -39,6 +39,15 @@ use yii\widgets\Pjax;
             <span class="badge badge-warning" style="padding-left: 5px">CLONE</span>
         <?php endif;?>
 
+        <ul class="nav navbar-right panel_toolbox">
+            <li class="dropdown dropdown-offer-menu" data-product-quote-id="<?=($model->hq_product_quote_id)?>" data-lead-id="<?=($hotelProduct->phProduct->pr_lead_id)?>" data-url="<?= Url::to(['/offer/offer/list-menu-ajax'])?>">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="far fa-handshake"></i> Offers</a>
+                <div class="dropdown-menu" role="menu">
+                    <?php // ajax loaded content?>
+                </div>
+            </li>
+        </ul>
+
         <div class="clearfix"></div>
     </div>
     <div class="x_content" style="display: block">

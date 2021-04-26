@@ -23,7 +23,7 @@ class ProductCloneService
         $this->hotelCloneService = $hotelCloneService;
     }
 
-    public function clone(int $productId, int $leadId, ?int $createdUserId)
+    public function clone(int $productId, int $leadId, ?int $createdUserId): Product
     {
         $product = $this->productRepository->find($productId);
 
@@ -33,5 +33,7 @@ class ProductCloneService
         if ($cloneProduct->isHotel()) {
             $this->hotelCloneService->clone($product->pr_id, $cloneProduct->pr_id);
         }
+
+        return $product;
     }
 }

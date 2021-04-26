@@ -357,6 +357,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Product Quotes Status Log', 'url' => ['/product/product-quote-status-log-crud/index']],
                 ['label' => 'Product Quote Options', 'url' => ['/product/product-quote-option-crud/index']],
                 ['label' => 'Product Quote Relation', 'url' => ['/product/product-quote-relation-crud/index']],
+                ['label' => 'Product Quote Lead', 'url' => ['/product/product-quote-lead/index']],
 
                 ['label' => 'Orders', 'url' => 'javascript:', 'items' => [
                     ['label' => 'Orders', 'url' => ['/order/order-crud/index']],
