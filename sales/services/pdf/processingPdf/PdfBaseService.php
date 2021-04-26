@@ -96,9 +96,6 @@ abstract class PdfBaseService
         if ($this->clientId) {
             $this->fileToClient($fileStorageId);
         }
-        if ($this->leadId) {
-            $this->fileToLead($fileStorageId);
-        }
         if ($this->getProductQuoteId()) {
             $this->fileToProductQuote($fileStorageId);
         }
