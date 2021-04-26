@@ -55,7 +55,6 @@ class FlightQuoteBookingSerializer extends Serializer
                 }
             }
         }
-
         return $data;
     }
 }

@@ -33,14 +33,16 @@ class FlightQuoteFlightSerializer extends Serializer
         ];
     }
 
-    public function getData(): array
+    public function getData(bool $withBooking = true): array
     {
         $data = $this->toArray();
 
-        $data['bookings'] = [];
-        if ($this->model->flightQuoteBookings) {
-            foreach ($this->model->flightQuoteBookings as $keyBooking => $flightQuoteBooking) {
-                $data['bookings'][$keyBooking] = $flightQuoteBooking->serialize();
+        if ($withBooking) {
+            $data['bookings'] = [];
+            if ($this->model->flightQuoteBookings) {
+                foreach ($this->model->flightQuoteBookings as $keyBooking => $flightQuoteBooking) {
+                    $data['bookings'][$keyBooking] = $flightQuoteBooking->serialize();
+                }
             }
         }
 

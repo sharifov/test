@@ -15,6 +15,7 @@ class FlightQuoteFlightPdfService extends PdfBaseService
 
     public function fillData()
     {
+        /* TODO:: to remove */
         $this->communicationData['flight_quote_flight'] = $this->object->serialize();
         $this->communicationData['project_key'] = $this->projectKey;
         return $this;

@@ -201,8 +201,8 @@ class FlightQuoteFlight extends ActiveRecord implements ProductDataInterface
         return $this->fqf_id;
     }
 
-    public function serialize(): array
+    public function serialize(bool $withBooking = true): array
     {
-        return (new FlightQuoteFlightSerializer($this))->getData();
+        return (new FlightQuoteFlightSerializer($this))->getData($withBooking);
     }
 }

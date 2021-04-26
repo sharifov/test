@@ -2,8 +2,13 @@
 
 namespace modules\flight\models;
 
+use common\models\Client;
+use common\models\Lead;
+use common\models\Project;
 use modules\flight\models\query\FlightQuoteBookingQuery;
 use modules\flight\src\entities\flightQuoteBooking\serializer\FlightQuoteBookingSerializer;
+use modules\order\src\entities\order\Order;
+use modules\product\src\interfaces\ProductDataInterface;
 use sales\entities\serializer\Serializable;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -28,7 +33,7 @@ use yii\helpers\ArrayHelper;
  * @property FlightQuoteFlight $fqbFqf
  * @property FlightPax[] $fqtPaxes
  */
-class FlightQuoteBooking extends ActiveRecord implements Serializable
+class FlightQuoteBooking extends ActiveRecord implements Serializable, ProductDataInterface
 {
     public function rules(): array
     {
@@ -129,5 +134,30 @@ class FlightQuoteBooking extends ActiveRecord implements Serializable
     public function serialize(): array
     {
         return (new FlightQuoteBookingSerializer($this))->getData();
+    }
+
+    public function getProject(): ?Project
+    {
+        return $this->fqbFqf->getProject();
+    }
+
+    public function getLead(): ?Lead
+    {
+        return $this->fqbFqf->getLead();
+    }
+
+    public function getClient(): ?Client
+    {
+        return $this->fqbFqf->getClient();
+    }
+
+    public function getOrder(): ?Order
+    {
+        return $this->fqbFqf->getOrder();
+    }
+
+    public function getId(): int
+    {
+        return $this->fqb_id;
     }
 }
