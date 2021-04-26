@@ -1,5 +1,6 @@
 <?php
 
+use yii\grid\ActionColumn;
 use modules\lead\src\grid\columns\LeadColumn;
 use modules\product\src\grid\columns\ProductTypeColumn;
 use common\components\grid\DateTimeColumn;
@@ -24,14 +25,11 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            //['class' => 'yii\grid\SerialColumn'],
-
             'pr_id',
             'pr_gid',
             [
@@ -54,30 +52,17 @@ $this->params['breadcrumbs'][] = $this->title;
             'pr_service_fee_percent',
             'pr_market_price',
             'pr_client_budget',
-
             [
                 'class' => UserSelect2Column::class,
                 'attribute' => 'pr_created_user_id',
                 'relation' => 'prCreatedUser',
                 'placeholder' => 'Select User',
             ],
-
-            [
-                'class' => UserSelect2Column::class,
-                'attribute' => 'pr_updated_user_id',
-                'relation' => 'prUpdatedUser',
-                'placeholder' => 'Select User',
-            ],
-
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'pr_created_dt',
             ],
-            [
-                'class' => DateTimeColumn::class,
-                'attribute' => 'pr_updated_dt',
-            ],
-            ['class' => 'yii\grid\ActionColumn'],
+            ['class' => ActionColumn::class],
         ],
     ]); ?>
 
