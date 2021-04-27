@@ -247,9 +247,9 @@ class HotelQuote extends ActiveRecord implements Quotable, ProductDataInterface
             if ($hQuote && !$hQuote->hotelQuoteRooms) {
                 $totalSystemPrice = 0;
                 $totalServiceFeeSum = 0;
+                $importedHotelRoomIds = [];
+                $importHotelRoomStatus = false;
                 foreach ($rooms as $room) {
-                    $importedHotelRoomIds = [];
-                    $importHotelRoomStatus = false;
                     $childrenAges = '';
                     if (array_key_exists('childrenAges', $room) && !empty($room['childrenAges'])) {
                         $childrenAgesArr = explode(',', $room['childrenAges']);
