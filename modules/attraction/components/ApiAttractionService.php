@@ -161,6 +161,7 @@ class ApiAttractionService extends Component
                                 priceTotal
                                 priceTotalFormattedText
                             }
+                            errors
                         }
                     }
                 }',
@@ -209,6 +210,7 @@ class ApiAttractionService extends Component
                                 label
                                 dataType
                                 dataFormat
+                                isAnswered
                                 availableOptions {
                                     label
                                     value

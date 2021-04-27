@@ -60,8 +60,9 @@ $availabilityID = $availability['id'];
             <table class="table table-bordered caption-top">
                 <thead>
                 <tr class=" bg-info">
-                    <th>Name</th>
-                    <th>value</th>
+                    <th>Question</th>
+                    <th>Answer</th>
+                    <th>Is Answered</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -69,6 +70,7 @@ $availabilityID = $availability['id'];
                     <tr>
                         <td> <?= $option['label'] ?> </td>
                         <td> <?= $option['answerFormattedText'] ?> </td>
+                        <td> <?= $option['isAnswered'] ? '<span class="label-success label">Yes<span>' : '<span class="label-danger label">No<span>' ?> </td>
                     </tr>
                 <?php endforeach; ?>
                 </tbody>
@@ -110,6 +112,7 @@ $form = ActiveForm::begin([
                         <th>Max Participants</th>
                         <th>Min Age</th>
                         <th>Max Age</th>
+                        <th>Is Valid</th>
                         <th>Price per Unit</th>
                         <th>Quantity</th>
                     </tr>
@@ -125,6 +128,7 @@ $form = ActiveForm::begin([
                             <td><?= Html::encode($pax['maxParticipants']) ?></td>
                             <td><?= Html::encode($pax['minAge']) ?></td>
                             <td><?= Html::encode($pax['maxAge']) ?></td>
+                            <td><?= $pax['isValid'] ? '<span class="label-success label">Yes<span>' : '<span class="label-danger label">No<span>' ?></td>
                             <td><?= Html::encode($pax['priceFormattedText']) ?></td>
                             <td style="width: 40px">
                                 <?= $form->field($paxForm, 'pax_quantity[' . $key . '][' . $pax['id'] . ']')->textInput([
@@ -172,11 +176,25 @@ $('#form-' + availabilityID).on('beforeSubmit', function (e) {
                     text: data.message,
                     type: 'success'
                 });
-            } else {
+            } else {               
                 if (data.message == 'Quantity not selected'){
                     new PNotify({
                         title: 'Error',
                         text: data.message,
+                        type: 'error'                
+                    });
+                }
+                if (data.message == 'invalidPricing'){
+                    new PNotify({
+                        title: 'Error',
+                        text: 'Please check quantity according to participants',
+                        type: 'error'                
+                    });
+                }
+                if (Array.isArray(data.message) && data.message.length > 0){
+                    new PNotify({
+                        title: 'Error',
+                        text: data.message.join(" <br> "),
                         type: 'error'                
                     });
                 }

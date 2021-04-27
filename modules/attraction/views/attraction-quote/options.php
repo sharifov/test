@@ -52,6 +52,7 @@ $form = ActiveForm::begin([
                     <th>Max Participants</th>
                     <th>Min Age</th>
                     <th>Max Age</th>
+                    <th>Is Valid</th>
                     <th>Price per Unit</th>
                 </tr>
                 </thead>
@@ -64,6 +65,7 @@ $form = ActiveForm::begin([
                             <td><?= Html::encode($pax['maxParticipants']) ?></td>
                             <td><?= Html::encode($pax['minAge']) ?></td>
                             <td><?= Html::encode($pax['maxAge']) ?></td>
+                            <td><?= $pax['isValid'] ? '<span class="label-success label">Yes<span>' : '<span class="label-danger label">No<span>' ?></td>
                             <td><?= Html::encode($pax['priceFormattedText']) ?></td>
                         </tr>
                     <?php endforeach; ?>
