@@ -8,6 +8,7 @@ use common\models\Project;
 use modules\cruise\src\entity\cruise\Cruise;
 use modules\product\src\entities\product\dto\CreateDto;
 use modules\product\src\entities\product\events\ProductClientBudgetChangedEvent;
+use modules\product\src\entities\product\events\ProductClonedEvent;
 use modules\product\src\entities\product\events\ProductMarketPriceChangedEvent;
 use modules\product\src\entities\product\serializer\ProductSerializer;
 use modules\product\src\entities\productHolder\ProductHolder;
@@ -82,6 +83,24 @@ class Product extends \yii\db\ActiveRecord implements Serializable
         $product->pr_project_id = $dto->pr_project_id;
         $product->recordEvent(new ProductCreateEvent($product));
         return $product;
+    }
+
+    public static function clone(Product $product, int $leadId, ?int $createdUserId): self
+    {
+        $clone = new static();
+        $clone->pr_gid = self::generateGid();
+        $clone->pr_type_id = $product->pr_type_id;
+        $clone->pr_name = $product->pr_name;
+        $clone->pr_lead_id = $leadId;
+        $clone->pr_description = $product->pr_description;
+        $clone->pr_status_id = $product->pr_status_id;
+        $clone->pr_service_fee_percent = $product->pr_service_fee_percent;
+        $clone->pr_created_user_id = $createdUserId;
+        $clone->pr_market_price = $product->pr_market_price;
+        $clone->pr_client_budget = $product->pr_client_budget;
+        $clone->pr_project_id = $product->pr_project_id;
+        $clone->recordEvent(new ProductClonedEvent($product));
+        return $clone;
     }
 
     public function updateInfo(?string $name, ?string $description)

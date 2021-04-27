@@ -7,6 +7,7 @@ use common\models\Employee;
 use modules\flight\models\FlightQuote;
 use modules\hotel\models\HotelQuote;
 use modules\product\src\entities\productQuote\events\ProductQuoteReplaceEvent;
+use modules\product\src\entities\productQuoteRelation\ProductQuoteRelationQuery;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use modules\cruise\src\entity\cruiseQuote\CruiseQuote;
 use modules\attraction\models\AttractionQuote;
@@ -102,6 +103,8 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     use EventTrait;
 
     private $childQuote;
+
+    private ?bool $isQuoteAlternative = null;
 
     public const CHECKOUT_URL_PAGE = 'checkout/quote';
 
@@ -862,5 +865,10 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $this->calculatePrice();
         $this->calculateClientPrice();
         $this->updateProfitAmount();
+    }
+
+    public function isAlternative(): bool
+    {
+        return $this->isQuoteAlternative ?? ($this->isQuoteAlternative = ProductQuoteRelationQuery::isRelatedAlternativeQuoteExists($this->pq_id));
     }
 }

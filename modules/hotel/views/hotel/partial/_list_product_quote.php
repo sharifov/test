@@ -183,6 +183,10 @@ JS;
 <div class="x_panel">
     <div class="x_title">
 
+        <?php if ($model->hqProductQuote->isAlternative()) : ?>
+            <i class="fab fa-autoprefixer" title="Alternative Quote" data-toggle="tooltip" data-placement="top"></i>
+        <?php endif;?>
+
         <span class="badge badge-white">Q<?=($model->hq_product_quote_id)?></span> Hotel "<b><?=\yii\helpers\Html::encode($model->hqHotelList->hl_name)?></b>"
             (<?=\yii\helpers\Html::encode($model->hqHotelList->hl_star)?>),
             <?php //=\yii\helpers\Html::encode($model->hqProductQuote->pq_name)?>

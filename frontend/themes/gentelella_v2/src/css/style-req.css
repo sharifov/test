@@ -6023,3 +6023,7 @@ td.selected-cell {
     max-width: 10% !important;
   }
 }
+
+.panel_toolbox {
+    min-width: 0px;
+}

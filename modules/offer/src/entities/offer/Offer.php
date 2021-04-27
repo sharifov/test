@@ -57,6 +57,8 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
 {
     use EventTrait;
 
+    private ?bool $isOfferAlternative = null;
+
     public const CHECKOUT_URL_PAGE = 'offer';
 
     public function isSent(): bool
@@ -358,5 +360,14 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
         }
 
         return $url;
+    }
+
+    public function isAlternative(): bool
+    {
+        if ($this->isOfferAlternative !== null) {
+            return $this->isOfferAlternative;
+        }
+
+        return $this->ofLead && $this->ofLead->isBookFailed();
     }
 }
