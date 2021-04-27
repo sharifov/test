@@ -1994,13 +1994,6 @@ class TestController extends FController
             exit();
         }
 
-        if (count($generatedData) === 1) {
-            if ($json === 1) {
-                return $this->asJson($generatedData[0]);
-            }
-            VarDumper::dump($generatedData[0], 20, true);
-            exit();
-        }
         if ($json === 1) {
             return $this->asJson($generatedData);
         }
