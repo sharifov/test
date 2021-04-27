@@ -70,7 +70,7 @@ class LeadFailBooking
             $lead = $this->getOrCreateLeadBookedFailedByOrderId($order->or_project_id, $order->or_id);
 
             $this->leadProductService->create($lead->id, $quote->pq_product_id);
-            $this->productQuoteLeadService->create($quote->pq_id, $lead->id);
+//            $this->productQuoteLeadService->create($quote->pq_id, $lead->id);
             $product = $this->productCloneService->clone($quote->pq_product_id, $lead->id, $createdUserId);
             $this->productQuoteOriginService->create($product->pr_id, $quote->pq_id);
         });

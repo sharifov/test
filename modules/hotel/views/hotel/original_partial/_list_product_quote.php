@@ -41,8 +41,8 @@ use yii\widgets\Pjax;
         <?php endif;?>
 
         <ul class="nav navbar-right panel_toolbox">
-            <li class="create-product-alternative" data-product-quote-id="<?=($model->hq_product_quote_id)?>" data-lead-id="<?= $lead->id ?>" data-url="<?= Url::to(['/hotel/hotel/ajax-create-alternative-product'])?>">
-                <a href="#" title="Create a product to search for an alternative offer"><i class="fa fa-hotel"></i></a>
+            <li class="create-product-alternative" data-toggle="tooltip" title="Create a product to search for an alternative offer" data-product-quote-id="<?=($model->hq_product_quote_id)?>" data-lead-id="<?= $lead->id ?>" data-url="<?= Url::to(['/hotel/hotel/ajax-create-alternative-product'])?>">
+                <a href="#"><i class="fa fa-hotel"></i></a>
             </li>
         </ul>
 
