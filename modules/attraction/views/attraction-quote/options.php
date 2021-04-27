@@ -76,8 +76,18 @@ $form = ActiveForm::begin([
 <?php endif; ?>
 
 <div class="form-group text-center">
-    <?= Html::submitButton('<i class="fa fa-plus"></i> Apply Options', ['class' => 'btn btn-success']) ?>
+    <?= Html::submitButton('<i class="fa fa-plus"></i> Apply Options', ['class' => 'btn btn-success btn-add-attraction-option']) ?>
 </div>
 
 <?php ActiveForm::end() ?>
 <?php Pjax::end() ?>
+
+<?php
+$js = <<<JS
+$('body').off('click', '.btn-add-attraction-option').on('click', '.btn-add-attraction-option', function (e) {                 
+      let btnAdd = $(this);     
+      btnAdd.find('i').removeClass('fa-plus').addClass('fa-spin fa-spinner');
+})
+JS;
+$this->registerJs($js);
+?>
