@@ -47,7 +47,7 @@ $availabilityID = $availability['id'];
     </div>
 
     <div class="form-group text-center">
-        <?= Html::submitButton('<i class="fa fa-save"></i> Answer ', ['class' => 'btn btn-success']) ?>
+        <?= Html::submitButton('<i class="fa fa-save"></i> Answer ', ['class' => 'btn btn-success .btn-add-attraction-answer']) ?>
     </div>
 
     <?php ActiveForm::end() ?>
@@ -145,7 +145,7 @@ $form = ActiveForm::begin([
         </div>
 
         <div class="form-group text-center">
-            <?= Html::submitButton('<i class="fa fa-save"></i> Add Quote', ['class' => 'btn btn-success']) ?>
+            <?= Html::submitButton('<i class="fa fa-save"></i> Add Quote', ['class' => 'btn btn-success btn-add-quote']) ?>
         </div>
     <?php else : ?>
         <div class="text-center"> Not found Pricing Categories </div>
@@ -161,6 +161,9 @@ var availabilityID = '$availabilityID'
 
 $('#form-' + availabilityID).on('beforeSubmit', function (e) {
     e.preventDefault();
+    
+    let btnAdd = $('.btn-add-quote');     
+      btnAdd.find('i').removeClass('fa-save').addClass('fa-spin fa-spinner');
     
     $.ajax({
        type: $(this).attr('method'),
@@ -210,6 +213,16 @@ $('#form-' + availabilityID).on('beforeSubmit', function (e) {
     })
     return false;
 }); 
+JS;
+$this->registerJs($js);
+?>
+
+<?php
+$js = <<<JS
+$('body').off('click', '.btn-add-attraction-answer').on('click', '.btn-add-attraction-answer', function (e) {                 
+      let btnAdd = $(this);     
+      btnAdd.find('i').removeClass('fa-save').addClass('fa-spin fa-spinner');
+})
 JS;
 $this->registerJs($js);
 ?>

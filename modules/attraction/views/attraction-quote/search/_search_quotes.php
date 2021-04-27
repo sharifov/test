@@ -138,11 +138,11 @@ $('body').off('click', '.btn-availability-quote').on('click', '.btn-availability
       })
           .done(function(data) {
               if (data.error) {
-                  alert(data.error);
+                  //alert(data.error);
                   new PNotify({
-                        title: 'Error: fail to get Quotes',
-                        type: 'error',
-                        text: data.error,
+                        title: 'Info: fail to get availability data',
+                        type: 'info',
+                        text: data.message,
                         hide: true
                     });
                   btnAdd.find('i').removeClass('fa-spin fa-spinner').addClass('fa-stop');

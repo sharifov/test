@@ -186,22 +186,24 @@ class AttractionQuoteController extends FController
 
         $apiAttractionService = AttractionModule::getInstance()->apiService;
         if ($availabilityKey) {
-            try {
-                $result = $apiAttractionService->getAvailability($availabilityKey);
-            } catch (\DomainException $e) {
-                Yii::$app->session->setFlash('error', $e->getMessage());
-            }
+            $result = $apiAttractionService->getAvailability($availabilityKey);
         }
 
         $availability = $result['availability'];
 
         //VarDumper::dump($result, 10, true);
 
-        return $this->renderAjax('options', [
-            'model' => $optionsForm,
-            'availability' => $availability,
-            'attractionId' => $attractionId
-        ]);
+        if ($availability) {
+            return $this->renderAjax('options', [
+                'model' => $optionsForm,
+                'availability' => $availability,
+                'attractionId' => $attractionId
+            ]);
+        } else {
+            $response['error'] = true;
+            $response['message'] = 'Search service dont return any data about tis availability';
+            return $response;
+        }
     }
 
     public function actionInputAvailabilityOptions()
