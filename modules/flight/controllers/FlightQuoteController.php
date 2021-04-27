@@ -586,7 +586,7 @@ class FlightQuoteController extends FController
             $result['message'] = 'Document have been successfully generated';
         } catch (\Throwable $throwable) {
             $result['message'] = $throwable->getMessage();
-            \Yii::error(AppHelper::throwableLog($throwable, true), 'FlightQuoteController:actionAjaxFileGenerate');
+            \Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteController:actionAjaxFileGenerate');
         }
         return $result;
     }

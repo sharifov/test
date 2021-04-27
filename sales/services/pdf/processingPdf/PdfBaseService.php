@@ -70,8 +70,8 @@ abstract class PdfBaseService
     private EventDispatcher $eventDispatcher;
     private FileSystem $fileSystem;
 
-    private ?string $fileName;
-    private ?string $fileTitle;
+    private ?string $fileName = null;
+    private ?string $fileTitle = null;
     private string $extension = 'pdf';
 
     public function __construct(ProductDataInterface $object)

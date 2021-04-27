@@ -46,7 +46,7 @@ class FileProductQuoteQuery
                 FileOrder::tableName(),
                 'fo_pq_id = fpq_pq_id'
             )
-            ->where(['fpq_pq_id', $productQuoteId])
+            ->where(['fpq_pq_id' => $productQuoteId])
             ->andWhere([
                 'fo_category_id' => $categoryId,
                 'fo_or_id' => $orderId
