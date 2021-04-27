@@ -8,6 +8,7 @@ use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $product Product */
+/* @var $lead \common\models\Lead */
 
 $pjaxId = 'pjax-product-' . $product->pr_id;
 ?>
@@ -36,7 +37,7 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
                 <?php endif; ?>
             </h2>
             <ul class="nav navbar-right panel_toolbox">
-                <?php //php if ($is_manager) : ?>
+                <?php //php if ($is_manager) :?>
                     <!--                    <li>-->
                     <!--                        --><?php //=Html::a('<i class="fa fa-plus-circle success"></i> Add Quote', null, ['class' => 'add-clone-alt-quote', 'data-uid' => 0, 'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0])])?>
                     <!--                    </li>-->
@@ -67,22 +68,62 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
                 <li>
                     <a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
                 </li>
-                <?php //php endif; ?>
+                <?php //php endif;?>
 
             </ul>
             <div class="clearfix"></div>
         </div>
         <div class="x_content" style="display: none">
-            <?php //php if ((int) $product->pr_type_id === \common\models\ProductType::PRODUCT_HOTEL && $product->hotel): ?>
+            <?php //php if ((int) $product->pr_type_id === \common\models\ProductType::PRODUCT_HOTEL && $product->hotel):?>
                 <?php \yii\widgets\Pjax::begin(['id' => 'pjax-product-search-' . $product->pr_id, 'enablePushState' => false, 'timeout' => 5000])?>
                 <?= $this->render('_view_search', [
                     'model' => $product->hotel,
+                    'lead' => $lead
                     //'dataProviderQuotes' => $dataProviderQuotes
                     //'dataProviderRooms'
                 ]) ?>
                 <?php \yii\widgets\Pjax::end();?>
-            <?php //php endif; ?>
+            <?php //php endif;?>
         </div>
     </div>
 <?php
 \yii\widgets\Pjax::end();
+
+$js = <<<JS
+$('body').off('click', '.create-product-alternative').on('click', '.create-product-alternative', function (e) {
+    e.preventDefault();
+    
+    let btn = $(this);
+    let btnHtml = btn.html();
+    let productQuoteId = btn.attr('data-product-quote-id');
+    let leadId = btn.attr('data-lead-id');
+    let url = btn.attr('data-url');
+    
+    $.ajax({
+        url: url,
+        type: 'post',
+        data: {productQuoteId: productQuoteId, leadId: leadId},
+        cache: false,
+        dataType: 'json',
+        beforeSend: function () {
+            btn.html('<i class="fa fa-spinner fa-spin"></i>');
+        },
+        success: function (data) {
+            if (data.error) {
+                createNotify('Error', data.message, 'error');
+            } else {
+                $.pjax.reload({container: '#pjax-lead-products-wrap', async: false, replace: false, pushState: false});
+                createNotify('Success', 'Product created successfully', 'success');
+            }
+        },
+        error: function (xhr) {
+            createNotify('Error', xhr.responseText, 'error');
+        },
+        complete: function () {
+            btn.html(btnHtml);
+        }
+    })
+});
+JS;
+$this->registerJs($js);
+

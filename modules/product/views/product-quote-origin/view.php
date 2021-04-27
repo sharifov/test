@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model modules\product\src\entities\productQuoteOrigin\ProductQuoteOrigin */
 
-$this->title = $model->pqa_product_id;
+$this->title = $model->pqo_product_id;
 $this->params['breadcrumbs'][] = ['label' => 'Product Quote Origins', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
@@ -18,8 +18,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="col-md-4">
 
         <p>
-            <?= Html::a('Update', ['update', 'pqa_product_id' => $model->pqa_product_id, 'pqa_quote_id' => $model->pqa_quote_id], ['class' => 'btn btn-primary']) ?>
-            <?= Html::a('Delete', ['delete', 'pqa_product_id' => $model->pqa_product_id, 'pqa_quote_id' => $model->pqa_quote_id], [
+            <?= Html::a('Update', ['update', 'pqo_product_id' => $model->pqo_product_id, 'pqo_quote_id' => $model->pqo_quote_id], ['class' => 'btn btn-primary']) ?>
+            <?= Html::a('Delete', ['delete', 'pqo_product_id' => $model->pqo_product_id, 'pqo_quote_id' => $model->pqo_quote_id], [
                 'class' => 'btn btn-danger',
                 'data' => [
                     'confirm' => 'Are you sure you want to delete this item?',
@@ -31,8 +31,8 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= DetailView::widget([
             'model' => $model,
             'attributes' => [
-                'pqa_product_id',
-                'pqa_quote_id',
+                'pqo_product_id',
+                'pqo_quote_id',
             ],
         ]) ?>
 

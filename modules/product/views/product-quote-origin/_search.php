@@ -18,9 +18,9 @@ use common\components\bootstrap4\activeForm\ActiveForm;
         ],
     ]); ?>
 
-    <?= $form->field($model, 'pqa_product_id') ?>
+    <?= $form->field($model, 'pqo_product_id') ?>
 
-    <?= $form->field($model, 'pqa_quote_id') ?>
+    <?= $form->field($model, 'pqo_quote_id') ?>
 
     <div class="form-group">
         <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>

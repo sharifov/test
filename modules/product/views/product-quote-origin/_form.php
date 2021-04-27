@@ -14,9 +14,9 @@ use yii\widgets\ActiveForm;
 
         <?php $form = ActiveForm::begin(); ?>
 
-        <?= $form->field($model, 'pqa_product_id')->textInput() ?>
+        <?= $form->field($model, 'pqo_product_id')->textInput() ?>
 
-        <?= $form->field($model, 'pqa_quote_id')->textInput() ?>
+        <?= $form->field($model, 'pqo_quote_id')->textInput() ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

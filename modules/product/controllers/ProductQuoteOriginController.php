@@ -43,15 +43,15 @@ class ProductQuoteOriginController extends FController
     }
 
     /**
-     * @param integer $pqa_product_id
-     * @param integer $pqa_quote_id
+     * @param integer $pqo_product_id
+     * @param integer $pqo_quote_id
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($pqa_product_id, $pqa_quote_id): string
+    public function actionView($pqo_product_id, $pqo_quote_id): string
     {
         return $this->render('view', [
-            'model' => $this->findModel($pqa_product_id, $pqa_quote_id),
+            'model' => $this->findModel($pqo_product_id, $pqo_quote_id),
         ]);
     }
 
@@ -63,7 +63,7 @@ class ProductQuoteOriginController extends FController
         $model = new ProductQuoteOrigin();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'pqa_product_id' => $model->pqa_product_id, 'pqa_quote_id' => $model->pqa_quote_id]);
+            return $this->redirect(['view', 'pqo_product_id' => $model->pqo_product_id, 'pqo_quote_id' => $model->pqo_quote_id]);
         }
 
         return $this->render('create', [
@@ -72,17 +72,17 @@ class ProductQuoteOriginController extends FController
     }
 
     /**
-     * @param integer $pqa_product_id
-     * @param integer $pqa_quote_id
+     * @param integer $pqo_product_id
+     * @param integer $pqo_quote_id
      * @return string|Response
      * @throws NotFoundHttpException
      */
-    public function actionUpdate($pqa_product_id, $pqa_quote_id)
+    public function actionUpdate($pqo_product_id, $pqo_quote_id)
     {
-        $model = $this->findModel($pqa_product_id, $pqa_quote_id);
+        $model = $this->findModel($pqo_product_id, $pqo_quote_id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'pqa_product_id' => $model->pqa_product_id, 'pqa_quote_id' => $model->pqa_quote_id]);
+            return $this->redirect(['view', 'pqo_product_id' => $model->pqo_product_id, 'pqo_quote_id' => $model->pqo_quote_id]);
         }
 
         return $this->render('update', [
@@ -91,29 +91,29 @@ class ProductQuoteOriginController extends FController
     }
 
     /**
-     * @param integer $pqa_product_id
-     * @param integer $pqa_quote_id
+     * @param integer $pqo_product_id
+     * @param integer $pqo_quote_id
      * @return Response
      * @throws NotFoundHttpException
      * @throws \Throwable
      * @throws StaleObjectException
      */
-    public function actionDelete($pqa_product_id, $pqa_quote_id): Response
+    public function actionDelete($pqo_product_id, $pqo_quote_id): Response
     {
-        $this->findModel($pqa_product_id, $pqa_quote_id)->delete();
+        $this->findModel($pqo_product_id, $pqo_quote_id)->delete();
 
         return $this->redirect(['index']);
     }
 
     /**
-     * @param integer $pqa_product_id
-     * @param integer $pqa_quote_id
+     * @param integer $pqo_product_id
+     * @param integer $pqo_quote_id
      * @return ProductQuoteOrigin
      * @throws NotFoundHttpException
      */
-    protected function findModel($pqa_product_id, $pqa_quote_id): ProductQuoteOrigin
+    protected function findModel($pqo_product_id, $pqo_quote_id): ProductQuoteOrigin
     {
-        if (($model = ProductQuoteOrigin::findOne(['pqa_product_id' => $pqa_product_id, 'pqa_quote_id' => $pqa_quote_id])) !== null) {
+        if (($model = ProductQuoteOrigin::findOne(['pqo_product_id' => $pqo_product_id, 'pqo_quote_id' => $pqo_quote_id])) !== null) {
             return $model;
         }
 

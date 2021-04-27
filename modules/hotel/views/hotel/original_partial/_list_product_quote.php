@@ -5,6 +5,7 @@
 /* @var $key int */
 /* @var $hotelProduct Hotel */
 /* @var $model HotelQuote */
+/* @var $lead \common\models\Lead */
 
 use kartik\editable\Editable;
 use modules\hotel\models\Hotel;
@@ -40,11 +41,8 @@ use yii\widgets\Pjax;
         <?php endif;?>
 
         <ul class="nav navbar-right panel_toolbox">
-            <li class="dropdown dropdown-offer-menu" data-product-quote-id="<?=($model->hq_product_quote_id)?>" data-lead-id="<?=($hotelProduct->phProduct->pr_lead_id)?>" data-url="<?= Url::to(['/offer/offer/list-menu-ajax'])?>">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="far fa-handshake"></i> Offers</a>
-                <div class="dropdown-menu" role="menu">
-                    <?php // ajax loaded content?>
-                </div>
+            <li class="create-product-alternative" data-product-quote-id="<?=($model->hq_product_quote_id)?>" data-lead-id="<?= $lead->id ?>" data-url="<?= Url::to(['/hotel/hotel/ajax-create-alternative-product'])?>">
+                <a href="#" title="Create a product to search for an alternative offer"><i class="fa fa-hotel"></i></a>
             </li>
         </ul>
 

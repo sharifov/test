@@ -79,6 +79,7 @@ if ($originalProducts) {
         if ((int) $originalProduct->product->isHotel() && $originalProduct->product->hotel) {
             echo $this->render('@modules/hotel/views/hotel/original_partial/_product_hotel', [
                 'product' => $originalProduct->product,
+                'lead' => $lead
             ]);
         }
     }

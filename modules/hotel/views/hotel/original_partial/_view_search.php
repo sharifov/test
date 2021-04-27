@@ -7,6 +7,7 @@ use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $model modules\hotel\models\Hotel */
+/* @var $lead \common\models\Lead */
 ///* @var $dataProviderQuotes \yii\data\ActiveDataProvider */
 
 
@@ -150,7 +151,8 @@ $dataProviderQuotes = $searchModel->searchProduct($params);
         <div class="col-md-12">
             <?= $this->render('_view_product_quote_list', [
                 'hotelProduct' => $model,
-                'dataProviderQuotes' => $dataProviderQuotes
+                'dataProviderQuotes' => $dataProviderQuotes,
+                'lead' => $lead
             ]) ?>
         </div>
     </div>

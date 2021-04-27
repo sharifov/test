@@ -10,9 +10,9 @@ class ProductQuoteOriginSearch extends ProductQuoteOrigin
     public function rules(): array
     {
         return [
-            ['pqa_product_id', 'integer'],
+            ['pqo_product_id', 'integer'],
 
-            ['pqa_quote_id', 'integer'],
+            ['pqo_quote_id', 'integer'],
         ];
     }
 
@@ -32,8 +32,8 @@ class ProductQuoteOriginSearch extends ProductQuoteOrigin
         }
 
         $query->andFilterWhere([
-            'pqa_product_id' => $this->pqa_product_id,
-            'pqa_quote_id' => $this->pqa_quote_id,
+            'pqo_product_id' => $this->pqo_product_id,
+            'pqo_quote_id' => $this->pqo_quote_id,
         ]);
 
         return $dataProvider;

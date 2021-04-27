@@ -36,13 +36,13 @@ class m210426_114526_create_tbl_product_quote_origin extends Migration
         }
 
         $this->createTable($this->tableName, [
-            'pqa_product_id' => $this->integer(),
-            'pqa_quote_id' => $this->integer()
+            'pqo_product_id' => $this->integer(),
+            'pqo_quote_id' => $this->integer()
         ], $tableOptions);
 
-        $this->addPrimaryKey('PK-product_quote_origin', $this->tableName, ['pqa_product_id', 'pqa_quote_id']);
-        $this->addForeignKey('FK-product_quote_origin-pqa_product_id', $this->tableName, 'pqa_product_id', '{{%product}}', 'pr_id', 'CASCADE', 'CASCADE');
-        $this->addForeignKey('FK-product_quote_origin-pqa_quote_id', $this->tableName, 'pqa_quote_id', '{{%product_quote}}', 'pq_id', 'CASCADE', 'CASCADE');
+        $this->addPrimaryKey('PK-product_quote_origin', $this->tableName, ['pqo_product_id', 'pqo_quote_id']);
+        $this->addForeignKey('FK-product_quote_origin-pqo_product_id', $this->tableName, 'pqo_product_id', '{{%product}}', 'pr_id', 'CASCADE', 'CASCADE');
+        $this->addForeignKey('FK-product_quote_origin-pqo_quote_id', $this->tableName, 'pqo_quote_id', '{{%product_quote}}', 'pq_id', 'CASCADE', 'CASCADE');
 
         (new \console\migrations\RbacMigrationService())->up($this->route, $this->roles);
     }
@@ -52,8 +52,8 @@ class m210426_114526_create_tbl_product_quote_origin extends Migration
      */
     public function safeDown()
     {
-        $this->dropForeignKey('FK-product_quote_origin-pqa_product_id', $this->tableName);
-        $this->dropForeignKey('FK-product_quote_origin-pqa_quote_id', $this->tableName);
+        $this->dropForeignKey('FK-product_quote_origin-pqo_product_id', $this->tableName);
+        $this->dropForeignKey('FK-product_quote_origin-pqo_quote_id', $this->tableName);
         $this->dropTable($this->tableName);
         (new \console\migrations\RbacMigrationService())->down($this->route, $this->roles);
     }

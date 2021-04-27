@@ -7,6 +7,7 @@ use yii\widgets\Pjax;
 /* @var $this yii\web\View */
 /* @var $hotelProduct modules\hotel\models\Hotel */
 /* @var $dataProviderQuotes \yii\data\ActiveDataProvider */
+/* @var $lead \common\models\Lead */
 
 
 //\yii\web\YiiAsset::register($this);
@@ -43,8 +44,8 @@ $pjaxId = 'pjax-product-quote-list-' . $hotelProduct->ph_product_id;
                     'class' => 'table table-bordered',
                 ],*/
                 'emptyText' => '<div class="text-center">Not found quotes</div><br>',
-                'itemView' => function ($model, $key, $index, $widget) use ($hotelProduct) {
-                    return $this->render('_list_product_quote', ['model' => $model, 'index' => $index, 'key' => $key, 'hotelProduct' => $hotelProduct]);
+                'itemView' => function ($model, $key, $index, $widget) use ($lead, $hotelProduct) {
+                    return $this->render('_list_product_quote', ['model' => $model, 'index' => $index, 'key' => $key, 'hotelProduct' => $hotelProduct, 'lead' => $lead]);
                 },
                 //'layout' => "{items}<div class=\"text-center\" style='margin-top: -20px; margin-bottom: -25px'>{pager}</div>", // {summary}\n<div class="text-center">{pager}</div>
                 'itemOptions' => [
