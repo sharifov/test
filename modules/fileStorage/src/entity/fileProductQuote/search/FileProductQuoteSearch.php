@@ -34,8 +34,8 @@ class FileProductQuoteSearch extends FileProductQuote
         }
 
         $query->andFilterWhere([
-            'fld_fs_id' => $this->fpq_fs_id,
-            'fld_lead_id' => $this->fpq_pq_id,
+            'fpq_fs_id' => $this->fpq_fs_id,
+            'fpq_pq_id' => $this->fpq_pq_id,
             'DATE(fpq_created_dt)' => $this->fpq_created_dt,
         ]);
 
