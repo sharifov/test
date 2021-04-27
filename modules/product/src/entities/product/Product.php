@@ -191,7 +191,7 @@ class Product extends \yii\db\ActiveRecord implements Serializable
 
             ['pr_description', 'string'],
 
-            ['pr_service_fee_percent', 'number'],
+            ['pr_service_fee_percent', 'number', 'max' => 100],
 
             ['pr_name', 'string', 'max' => 40],
 
