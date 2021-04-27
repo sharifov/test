@@ -248,34 +248,49 @@ class AttractionQuoteController extends FController
 
                 $result = $apiAttractionService->inputPriceCategoryToAvailability($availabilityPaxModel);
                 $quoteDetails = $result['availability'];
-                $productDetails = $apiAttractionService->getProductById($quoteDetails['productId']);
 
-                if (!$quoteDetails) {
-                    throw new Exception('Not found quote - quote key (' . $availabilityPaxModel->availability_id . ')', 7);
+                $invalidPricing = !empty(array_filter($quoteDetails['pricingCategoryList']['nodes'], function ($data) {
+                    return $data['isValid'] == false;
+                }));
+
+                if (!empty($quoteDetails['pricingCategoryList']['errors']) || $invalidPricing) {
+                    $response['error'] = true;
+                    $response['message'] = 'invalidPricing';
+                    /*if ($invalidPricing && empty($quoteDetails['pricingCategoryList']['errors'])) {
+                        $response['message'] = 'invalidPricing';
+                    } else {
+                        $response['message'] = $quoteDetails['pricingCategoryList']['errors'];
+                    }*/
+                } else {
+                    $productDetails = $apiAttractionService->getProductById($quoteDetails['productId']);
+
+                    if (!$quoteDetails) {
+                        throw new Exception('Not found quote - quote key (' . $availabilityPaxModel->availability_id . ')', 7);
+                    }
+
+                    $attractionQuote = AttractionQuote::findOrCreateByDataNew($quoteDetails, $attraction, Auth::id());
+
+                    if (!$attractionQuote) {
+                        throw new Exception('Not added attraction quote - id:  (' . $availabilityPaxModel->availability_id  . ')', 8);
+                    }
+
+                    $attractionQuote->atnq_product_details_json = $productDetails;
+                    $attractionQuote->save();
+
+                    Notifications::pub(
+                        ['lead-' . $attractionQuote->atnqProductQuote->pqProduct->pr_lead_id],
+                        'addedQuote',
+                        ['data' => ['productId' => $productId]]
+                    );
+
+                    $response['error'] = false;
+                    $response['message'] = 'Quote ID: ' . $attractionQuote->atnq_product_quote_id;
+                    $response['availabilityID'] = $availabilityPaxModel->availability_id;
+                    $response['html'] = $this->renderAjax('quote_details', [
+                        'quoteDetails' => $quoteDetails,
+                        'productId' => $productId
+                    ]);
                 }
-
-                $attractionQuote = AttractionQuote::findOrCreateByDataNew($quoteDetails, $attraction, Auth::id());
-
-                if (!$attractionQuote) {
-                    throw new Exception('Not added attraction quote - id:  (' . $availabilityPaxModel->availability_id  . ')', 8);
-                }
-
-                $attractionQuote->atnq_product_details_json = $productDetails;
-                $attractionQuote->save();
-
-                Notifications::pub(
-                    ['lead-' . $attractionQuote->atnqProductQuote->pqProduct->pr_lead_id],
-                    'addedQuote',
-                    ['data' => ['productId' => $productId]]
-                );
-
-                $response['error'] = false;
-                $response['message'] = 'Quote ID: ' . $attractionQuote->atnq_product_quote_id;
-                $response['availabilityID'] = $availabilityPaxModel->availability_id;
-                $response['html'] = $this->renderAjax('quote_details', [
-                    'quoteDetails' => $quoteDetails,
-                    'productId' => $productId
-                ]);
             } else {
                 $response['error'] = true;
                 $response['message'] = $this->getParsedErrors($availabilityPaxModel->getErrors());
