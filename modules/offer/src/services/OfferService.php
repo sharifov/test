@@ -5,6 +5,7 @@ namespace modules\offer\src\services;
 use modules\offer\src\entities\offer\Offer;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderRepository;
+use modules\order\src\services\OrderPriceUpdater;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\services\ProductQuoteService;
@@ -15,22 +16,22 @@ use modules\product\src\services\ProductQuoteService;
  *
  * @property-read ProductQuoteService $productQuoteService
  * @property-read ProductQuoteRepository $productQuoteRepository
- * @property-read OrderRepository $orderRepository
+ * @property-read OrderPriceUpdater $orderPriceUpdater
  */
 class OfferService
 {
     private ProductQuoteService $productQuoteService;
     private ProductQuoteRepository $productQuoteRepository;
-    private OrderRepository $orderRepository;
+    private OrderPriceUpdater $orderPriceUpdater;
 
     public function __construct(
         ProductQuoteService $productQuoteService,
         ProductQuoteRepository $productQuoteRepository,
-        OrderRepository $orderRepository
+        OrderPriceUpdater $orderPriceUpdater
     ) {
         $this->productQuoteService = $productQuoteService;
         $this->productQuoteRepository = $productQuoteRepository;
-        $this->orderRepository = $orderRepository;
+        $this->orderPriceUpdater = $orderPriceUpdater;
     }
 
     public function confirmAlternative(Offer $offer): void
@@ -47,9 +48,7 @@ class OfferService
 
         /** @var Order|null $order */
         if ($order) {
-            $order->calculateTotalPrice();
-            $order->recalculateProfitAmount();
-            $this->orderRepository->save($order);
+            $this->orderPriceUpdater->update($order->or_id);
         }
     }
 }
