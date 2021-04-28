@@ -2633,6 +2633,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $projects[$project->id] = [
                 'id' => $project->id,
                 'name' => $project->name,
+                'key' => $project->project_key,
                 'closed' => $project->closed,
             ];
         }

@@ -755,6 +755,15 @@ class SideBarMenu extends \yii\bootstrap\Widget
             ],
         ];
 
+        $menuItems[] = [
+            'label' => 'ABAC',
+            'url' => 'javascript:',
+            'icon' => 'cogs',
+            'items' => [
+                ['label' => 'ABAC Policy List', 'url' => ['/abac/abac-policy']],
+            ],
+        ];
+
         if ($search_text = Yii::$app->request->get('search_text')) {
             self::filterMenuItems($menuItems, $search_text);
         }

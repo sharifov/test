@@ -38,9 +38,9 @@ class Access
         return $this->user->username;
     }
 
-    public function getAllProjects(): array
+    public function getAllProjects(?string $key = 'name'): array
     {
-        return array_column($this->getProjects(), 'name', 'id');
+        return array_column($this->getProjects(), $key, 'id');
     }
 
     public function getActiveProjects(): array

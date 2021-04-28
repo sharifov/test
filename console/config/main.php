@@ -40,7 +40,7 @@ return [
                 'modules\attraction\migrations',
                 'modules\rentCar\migrations',
                 'modules\cruise\migrations',
-
+                'modules\abac\migrations',
             ],
         ],
 
