@@ -53,6 +53,4 @@ class AbacComponent extends Component
         }
         return $objectList;
     }
-
-
 }

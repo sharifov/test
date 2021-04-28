@@ -36,5 +36,4 @@ class OrderAbacPolicy
     public const OBJ_ALL            = self::NS . 'obj/*';
     public const OBJ_LEAD           = self::NS . 'obj/lead';
     public const OBJ_CASE           = self::NS . 'obj/case';
-
 }

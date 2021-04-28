@@ -160,6 +160,4 @@ class AbacPolicy extends ActiveRecord
         //$list['flight'] = 'flight/*';
         return $list;
     }
-
-
 }

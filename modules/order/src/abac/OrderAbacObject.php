@@ -89,7 +89,7 @@ class OrderAbacObject implements AbacInterface
     public const ATTR_INPUT_CHECKBOX    = 'checkbox';
     public const ATTR_INPUT_SELECT      = 'select';
 
-    public const ATTR_OPERATOR_equal = 'equal';
+    public const ATTR_OPERATOR_EQUAL = 'equal';
 
 /*'equal',
 'not_equal',
@@ -157,5 +157,4 @@ class OrderAbacObject implements AbacInterface
 //    {
 //
 //    }
-
 }

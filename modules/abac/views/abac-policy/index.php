@@ -5,6 +5,7 @@ use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel modules\abac\src\entities\search\AbacPolicySearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */

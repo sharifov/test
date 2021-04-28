@@ -73,7 +73,7 @@ use yii\widgets\ActiveForm;
                     'options' => ['placeholder' => 'Select Effect', 'multiple' => false],
                     'pluginOptions' => ['allowClear' => true],
                 ])*/
-?>
+                ?>
                 <?= $form->field($model, 'ap_effect')->dropDownList(AbacPolicy::getEffectList(), ['prompt' => '---']) ?>
                 </div>
                 <div class="col-md-6">
