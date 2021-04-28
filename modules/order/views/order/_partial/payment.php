@@ -10,12 +10,17 @@ use yii\widgets\Pjax;
 /* @var yii\web\View $this */
 /* @var Order $order */
 ?>
+<?php
+    $paymentTotalPrice = 0;
+    $paymentClientTotalPrice = 0;
+    $payments = $order->payments;
+?>
 <div class="order-view-payment-box">
     <?php Pjax::begin(['id' => 'pjax-order-payment-' . $order->or_id, 'enablePushState' => false, 'timeout' => 10000])?>
 
         <div class="x_panel x_panel_payment">
             <div class="x_title">
-                <h2><i class="fas fa-credit-card"></i> Payment List</h2>
+                <h2><i class="fas fa-credit-card"></i> Payment List <sup>(<?php echo count($payments) ?>)</sup></h2>
                 <ul class="nav navbar-right panel_toolbox">
                     <li>
                         <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
@@ -26,14 +31,10 @@ use yii\widgets\Pjax;
             <div class="x_content" style="display: block">
                 <div class="x_panel">
                     <div class="x_title"></div>
-                    <div class="x_content" style="display: block">
-                        <?php
-                            $paymentTotalPrice = 0;
-                            $paymentClientTotalPrice = 0;
-                            $payments = $order->payments;
-                        ?>
+                    <div class="x_content" style="display: <?php echo $payments ? 'block' : 'none' ?>">
+
                         <?php if ($payments) : ?>
-                        <table class="table table-bordered">
+                        <table class="table table-bordered table-hover table-striped">
                             <tr>
                                 <th style="width: 100px">Payment ID</th>
                                 <th>Created</th>
@@ -46,8 +47,14 @@ use yii\widgets\Pjax;
                             <?php foreach ($payments as $payment) :
                                 $paymentTotalPrice += $payment->pay_amount;
                                 ?>
-                                <tr>
-                                    <td title="Payment ID"><?=Html::encode($payment->pay_id)?></td>
+                                <tr class="payment_row_<?php echo $payment->pay_id ?>">
+                                    <td title="Payment ID">
+                                        <?php if (Auth::can('/payment/view')) : ?>
+                                            <?php echo Html::a($payment->pay_id, ['/payment/view', 'id' => $payment->pay_id], ['target' => '_blank', 'data-pjax' => 0]) ?>
+                                        <?php else : ?>
+                                            <?php echo $payment->pay_id ?>
+                                        <?php endif ?>
+                                    </td>
                                     <td><?=$payment->pay_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($payment->pay_created_dt)) : '-'?></td>
                                     <td><?= Payment::getStatusName($payment->pay_status_id) ?></td>
                                     <td>

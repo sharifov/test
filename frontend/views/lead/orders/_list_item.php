@@ -11,9 +11,11 @@ use modules\order\src\entities\order\OrderPayStatus;
 use modules\order\src\entities\order\OrderStatus;
 use modules\order\src\processManager\phoneToBook\OrderProcessManager;
 use modules\order\src\processManager\Status;
+use modules\order\src\transaction\services\TransactionService;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use sales\auth\Auth;
 use yii\bootstrap4\Html;
+use yii\widgets\Pjax;
 
 $process = OrderProcessManager::findOne($order->or_id);
 $formatter = new \common\components\i18n\Formatter();
@@ -412,7 +414,7 @@ $formatter = new \common\components\i18n\Formatter();
                     <?php foreach ($payments as $payment) :
                         $paymentTotalPrice += $payment->pay_amount;
                         ?>
-                        <tr>
+                        <tr class="payment_row_<?php echo $payment->pay_id ?>">
                             <td title="Payment ID"><?=Html::encode($payment->pay_id)?></td>
                             <td><?=$payment->pay_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($payment->pay_created_dt)) : '-'?></td>
                             <td><?= Payment::getStatusName($payment->pay_status_id) ?></td>
@@ -528,7 +530,17 @@ $formatter = new \common\components\i18n\Formatter();
             <?php endif; ?>
 
         <?php \yii\widgets\Pjax::end() ?>
+        <hr>
+        <?php if (Auth::can('global/transaction/list/view')) : ?>
+            <?php Pjax::begin(['id' => 'pjax-order-transaction-' . $order->or_id, 'enablePushState' => false, 'timeout' => 10000])?>
+                <?php if ($transactions = TransactionService::getTransactionsByOrder($order->or_id)) : ?>
+                    <h4><i class="fa fa-exchange"></i> Transaction List</h4>
+                    <?php echo $this->render('@frontend/views/transaction/_partial/_transaction_table', [
+                        'transactions' => $transactions,
+                    ]) ?>
+                <?php endif ?>
+            <?php Pjax::end() ?>
+        <?php endif ?>
     </div>
-
 
 </div>
