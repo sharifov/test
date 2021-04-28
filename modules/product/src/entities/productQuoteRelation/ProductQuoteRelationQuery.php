@@ -10,11 +10,19 @@ class ProductQuoteRelationQuery
         return $query->byRelatedQuoteId($relatedQuoteId)->alternative()->exists();
     }
 
-    public static function getRelatedAlternativeQuote(int $relatedQuoteId): bool
+    public static function getAlternativeQuoteIdsByOrigin(int $originQuoteId): array
     {
-        $query = ProductQuoteRelation::find();
-        $query->byRelatedQuoteId($relatedQuoteId)
-            ->alternative()
-            ->innerJoin('');
+        $query = ProductQuoteRelation::find()->select('pqr_related_pq_id');
+        $query->byParentQuoteId($originQuoteId)
+            ->alternative();
+        return $query->asArray()->column();
+    }
+
+    public static function isOriginQuoteExists(int $originQuoteId): bool
+    {
+        $query = ProductQuoteRelation::find()->select('pqr_related_pq_id');
+        $query->byParentQuoteId($originQuoteId)
+            ->alternative();
+        return $query->exists();
     }
 }

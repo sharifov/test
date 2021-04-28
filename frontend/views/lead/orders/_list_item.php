@@ -13,6 +13,7 @@ use modules\order\src\processManager\phoneToBook\OrderProcessManager;
 use modules\order\src\processManager\Status;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use sales\auth\Auth;
+use sales\helpers\product\ProductQuoteHelper;
 use yii\bootstrap4\Html;
 
 $process = OrderProcessManager::findOne($order->or_id);
@@ -174,7 +175,7 @@ $formatter = new \common\components\i18n\Formatter();
                     $ordOptionTotalPrice += $quote->optionAmountSum;
                     ?>
                     <tr>
-                        <td title="Product Quote ID: <?=Html::encode($quote->pq_id)?>"><?= $nr++ ?></td>
+                        <td title="Product Quote ID: <?=Html::encode($quote->pq_id)?>"><?= $nr++ ?> <br> <?= ProductQuoteHelper::displayOriginOrAlternativeIcon($quote) ?></td>
                         <td title="<?=Html::encode($quote->pq_product_id)?>">
                             <?= $quote->pqProduct->prType->pt_icon_class ? Html::tag('i', '', ['class' => $quote->pqProduct->prType->pt_icon_class]) : '' ?>
                             <?=Html::encode($quote->pqProduct->prType->pt_name)?>
