@@ -22,4 +22,14 @@ class Scopes extends \yii\db\ActiveQuery
     {
         return parent::one($db);
     }
+
+    public function byLeadId(int $id): Scopes
+    {
+        return $this->andWhere(['pql_lead_id' => $id]);
+    }
+
+    public function byQuoteId(int $id): Scopes
+    {
+        return $this->andWhere(['pql_product_quote_id' => $id]);
+    }
 }

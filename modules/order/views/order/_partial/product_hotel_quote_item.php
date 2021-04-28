@@ -13,6 +13,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
 use sales\auth\Auth;
+use sales\helpers\product\ProductQuoteHelper;
 use sales\services\CurrencyHelper;
 use yii\data\ArrayDataProvider;
 use yii\helpers\Url;
@@ -183,6 +184,8 @@ JS;
     <?php Pjax::begin(['id' => 'pjax-product-quote-' . $model->pq_id, 'timeout' => 2000, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
     <div class="x_panel">
         <div class="x_title">
+
+            <?= ProductQuoteHelper::displayOriginOrAlternativeIcon($model) ?>
 
             <span class="badge badge-white">Q<?=($model->pq_id)?></span> Hotel "<b><?=\yii\helpers\Html::encode($model->hotelQuote->hqHotelList->hl_name)?></b>"
             (<?=\yii\helpers\Html::encode($model->hotelQuote->hqHotelList->hl_star)?>),
