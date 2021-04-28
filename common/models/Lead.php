@@ -2939,6 +2939,11 @@ Reason: {reason}',
         $query = self::find()->innerJoinWith(['client.clientPhones'])
             ->where(['client_phone.phone' => $phoneNumber])
             ->andWhere(['<>', 'leads.status', self::STATUS_TRASH])
+            ->andWhere([
+                'OR',
+                ['IS', 'client_phone.type', null],
+                ['!=', 'client_phone.type', ClientPhone::PHONE_INVALID],
+            ])
             ->orderBy(['leads.id' => SORT_DESC])
             ->limit(1);
 

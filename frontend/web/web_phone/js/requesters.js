@@ -16,7 +16,8 @@
             'clientInfoUrl': '',
             'recordingEnableUrl': '',
             'recordingDisableUrl': '',
-            'acceptPriorityCallUrl': ''
+            'acceptPriorityCallUrl': '',
+            'acceptWarmTransferCallUrl': ''
         };
 
         this.init = function (settings) {
@@ -72,6 +73,33 @@
                 dataType: 'json',
                 data: {
                     act: 'accept',
+                    call_sid: call.data.callSid
+                }
+            })
+                .done(function (data) {
+                    if (data.error) {
+                        createNotify('Accept Call', data.message, 'error');
+                        call.unSetAcceptCallRequestState();
+                        window.phoneWidget.notifier.on(call.data.callSid);
+                        PhoneWidgetCall.audio.incoming.on(call.data.callSid);
+                    }
+                })
+                .fail(function () {
+                    createNotify('Accept Call', 'Server error', 'error');
+                    call.unSetAcceptCallRequestState();
+                    window.phoneWidget.notifier.on(call.data.callSid);
+                    PhoneWidgetCall.audio.incoming.on(call.data.callSid);
+                })
+        };
+
+        this.acceptWarmTransfer = function (call) {
+            window.phoneWidget.notifier.off(call.data.callSid);
+            PhoneWidgetCall.audio.incoming.off(call.data.callSid);
+            $.ajax({
+                type: 'post',
+                url: this.settings.acceptWarmTransferCallUrl,
+                dataType: 'json',
+                data: {
                     call_sid: call.data.callSid
                 }
             })

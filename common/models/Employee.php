@@ -2673,7 +2673,17 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $last_hours = (int)(Yii::$app->params['settings']['general_line_last_hours'] ?? 1);
         $date_time = date('Y-m-d H:i:s', strtotime('-' . $last_hours . ' hours'));
 
-        $onCall = Call::find()->where(['c_created_user_id' => $this->id, 'c_status_id' => [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING]])->exists();
+        $onCall = Call::find()
+            ->andWhere(['c_created_user_id' => $this->id, 'c_status_id' => [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING]])
+            ->innerJoin(
+                ConferenceParticipant::tableName(),
+                'cp_call_id = c_id AND cp_status_id != :status AND cp_type_id = :type',
+                [
+                    ':status' => ConferenceParticipant::STATUS_LEAVE,
+                    ':type' => ConferenceParticipant::TYPE_AGENT,
+                ]
+            )
+            ->exists();
         $glCallCount = (int) Call::find()->select('COUNT(*)')->where(['c_created_user_id' => $this->id, 'c_call_type_id' => Call::CALL_TYPE_IN, 'c_status_id' => Call::STATUS_COMPLETED])
             ->andWhere(['IS NOT', 'c_parent_id', null])
             ->andWhere(['>=', 'c_created_dt', $date_time])

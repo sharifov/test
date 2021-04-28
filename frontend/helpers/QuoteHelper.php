@@ -130,7 +130,9 @@ class QuoteHelper
                 <span class="inside_icon">' . (int) $meta['bags'] . '</span>
             </span>';
         }
-        return '';
+        return '<span class="' . $class . ' quote__badge--disabled" data-toggle="tooltip" title="" data-original-title="No free baggage">
+                <i class="fa fa-suitcase"></i>
+            </span>';
     }
 
     public static function formattedMetaRank(?array $meta): string
