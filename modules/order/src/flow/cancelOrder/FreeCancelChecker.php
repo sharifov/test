@@ -13,7 +13,7 @@ class FreeCancelChecker
     public function can(Order $order): bool
     {
         if ($order->isCanceled() || $order->isCancelProcessing() || $order->isDeclined()) {
-            $this->message = 'Unable to cancel because order in status' . OrderStatus::getName($order->or_status_id);
+            $this->message = 'Unable to cancel because order in status ' . OrderStatus::getName($order->or_status_id);
             return false;
         }
 

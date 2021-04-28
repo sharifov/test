@@ -313,7 +313,129 @@ class OfferController extends BaseController
                         "ph_phone_number": "+19074861000"
                     }
                 },
-                "productQuoteOptions": []
+                "productQuoteOptions": [],
+                "origin": {
+                    "pq_gid": "eebad5110d96b60fee6d2084c866ce28",
+                    "pq_name": "ROO.ST & ROO.ST",
+                    "pq_order_id": 526,
+                    "pq_description": null,
+                    "pq_status_id": 8,
+                    "pq_price": 7065.34,
+                    "pq_origin_price": 6292.6,
+                    "pq_client_price": 7065.34,
+                    "pq_service_fee_sum": 238.93,
+                    "pq_origin_currency": "USD",
+                    "pq_client_currency": "USD",
+                    "pq_status_name": "Error",
+                    "pq_files": [],
+                    "data": {
+                        "hq_hash_key": "f293c1629f74b2938d41cdea92769ffe",
+                        "hq_destination_name": "Chisinau",
+                        "hq_hotel_name": "Cosmos Hotel",
+                        "hq_request_hash": "9de433bc355aed187eca25f7628a480e",
+                        "hq_booking_id": null,
+                        "hq_json_booking": null,
+                        "hq_check_in_date": "2021-09-10",
+                        "hq_check_out_date": "2021-09-30",
+                        "hq_nights": 20,
+                        "hotel_request": {
+                            "ph_check_in_date": "2021-09-10",
+                            "ph_check_out_date": "2021-09-30",
+                            "ph_destination_code": "KIV",
+                            "ph_destination_label": "Moldova, Chisinau",
+                            "ph_holder_name": null,
+                            "ph_holder_surname": null,
+                            "destination_city": "Chisinau"
+                        },
+                        "hotel": {
+                            "hl_name": "Cosmos Hotel",
+                            "hl_star": "",
+                            "hl_category_name": "3 STARS",
+                            "hl_destination_name": "Chisinau",
+                            "hl_zone_name": "Chisinau",
+                            "hl_country_code": "MD",
+                            "hl_state_code": "MD",
+                            "hl_description": "The hotel is situated in the heart of Chisinau, the capital of Moldova. It is perfectly located for access to the business centre, cultural institutions and much more. Chisinau Airport is only 15 minutes away and the railway station is less than 5 minutes away from the hotel.\n\nThe city hotel offers a choice of 150 rooms, 24-hour reception and check-out services in the lobby, luggage storage, a hotel safe, currency exchange facility and a cloakroom. There is lift access to the upper floors as well as an on-site restaurant and conference facilities. Internet access, a laundry service (fees apply) and free parking in the car park are also on offer to guests during their stay.\n\nAll the rooms are furnished with double or king-size beds and provide an en suite bathroom with a shower. Air conditioning, central heating, satellite TV, a telephone, mini fridge, radio and free wireless Internet access are also on offer.\n\nThere is a golf course about 12 km from the hotel.\n\nThe hotel's restaurant offers a wide selection of local and European cuisine. Breakfast is served as a buffet and lunch and dinner can be chosen à la carte.",
+                            "hl_address": "NEGRUZZI, 2",
+                            "hl_postal_code": "MD2001",
+                            "hl_city": "CHISINAU",
+                            "hl_email": "info@hotel-cosmos.com",
+                            "hl_web": null,
+                            "hl_phone_list": [
+                                {
+                                    "type": "PHONEBOOKING",
+                                    "number": "+37322890054"
+                                },
+                                {
+                                    "type": "PHONEHOTEL",
+                                    "number": "+37322837505"
+                                },
+                                {
+                                    "type": "FAXNUMBER",
+                                    "number": "+37322542744"
+                                }
+                            ],
+                            "hl_image_list": [
+                                {
+                                    "url": "14/148030/148030a_hb_a_001.jpg",
+                                    "type": "GEN"
+                                }
+                            ],
+                            "hl_image_base_url": null,
+                            "json_booking": null
+                        },
+                        "rooms": [
+                            {
+                                "hqr_room_name": "Room Standard",
+                                "hqr_class": "NOR",
+                                "hqr_amount": 188.78,
+                                "hqr_currency": "USD",
+                                "hqr_board_name": "BED AND BREAKFAST",
+                                "hqr_rooms": 1,
+                                "hqr_adults": 1,
+                                "hqr_children": null,
+                                "hqr_cancellation_policies": []
+                            },
+                            {
+                                "hqr_room_name": "Room Standard",
+                                "hqr_class": "NRF",
+                                "hqr_amount": 125.85,
+                                "hqr_currency": "USD",
+                                "hqr_board_name": "ROOM ONLY",
+                                "hqr_rooms": 1,
+                                "hqr_adults": 2,
+                                "hqr_children": null,
+                                "hqr_cancellation_policies": [
+                                    {
+                                        "from": "2021-12-31T21:59:00:00:00",
+                                        "amount": 72.46
+                                    },
+                                    {
+                                        "from": "2021-12-05T21:59:00+00:00",
+                                        "amount": 134.92
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "product": {
+                        "pr_gid": "337b7f7fe27143e543c31b0b60688de0",
+                        "pr_type_id": 2,
+                        "pr_name": null,
+                        "pr_lead_id": null,
+                        "pr_description": null,
+                        "pr_status_id": null,
+                        "pr_service_fee_percent": null,
+                        "holder": {
+                            "ph_first_name": "Test 2",
+                            "ph_last_name": "Test 2",
+                            "ph_middle_name": null,
+                            "ph_email": "test+2@test.test",
+                            "ph_phone_number": "+19074861000"
+                        }
+                    },
+                    "productQuoteOptions": []
+                }
             }
         ]
     },

@@ -14,6 +14,7 @@ use common\models\Lead;
 use frontend\models\LeadForm;
 use sales\auth\Auth;
 use sales\forms\lead\ItineraryEditForm;
+use sales\model\leadProduct\entity\LeadProduct;
 use yii\helpers\Html;
 
 ?>
@@ -70,6 +71,20 @@ JS;
         </div>
     </div>
 <?php endif; ?>
+<?php
+
+$originalProducts = LeadProduct::find()->byLead($lead->id)->with(['product'])->all();
+if ($originalProducts) {
+    foreach ($originalProducts as $originalProduct) {
+        if ((int) $originalProduct->product->isHotel() && $originalProduct->product->hotel) {
+            echo $this->render('@modules/hotel/views/hotel/original_partial/_product_hotel', [
+                'product' => $originalProduct->product,
+                'lead' => $lead
+            ]);
+        }
+    }
+}
+?>
 <?php foreach ($products as $product) :?>
     <?php if ((int) $product->isHotel() && $product->hotel) : ?>
         <?= $this->render('@modules/hotel/views/hotel/partial/_product_hotel', [

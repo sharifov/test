@@ -24,6 +24,7 @@ class FlightQuoteTicketSearch extends FlightQuoteTicket
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => ['defaultOrder' => ['fqt_updated_dt' => SORT_DESC]],
+            'pagination' => ['pageSize' => 30],
         ]);
 
         $this->load($params);

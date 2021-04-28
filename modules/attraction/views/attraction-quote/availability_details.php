@@ -47,7 +47,7 @@ $availabilityID = $availability['id'];
     </div>
 
     <div class="form-group text-center">
-        <?= Html::submitButton('<i class="fa fa-save"></i> Answer ', ['class' => 'btn btn-success']) ?>
+        <?= Html::submitButton('<i class="fa fa-save"></i> Answer ', ['class' => 'btn btn-success .btn-add-attraction-answer']) ?>
     </div>
 
     <?php ActiveForm::end() ?>
@@ -60,8 +60,9 @@ $availabilityID = $availability['id'];
             <table class="table table-bordered caption-top">
                 <thead>
                 <tr class=" bg-info">
-                    <th>Name</th>
-                    <th>value</th>
+                    <th>Question</th>
+                    <th>Answer</th>
+                    <th>Is Answered</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -69,6 +70,7 @@ $availabilityID = $availability['id'];
                     <tr>
                         <td> <?= $option['label'] ?> </td>
                         <td> <?= $option['answerFormattedText'] ?> </td>
+                        <td> <?= $option['isAnswered'] ? '<span class="label-success label">Yes<span>' : '<span class="label-danger label">No<span>' ?> </td>
                     </tr>
                 <?php endforeach; ?>
                 </tbody>
@@ -110,6 +112,7 @@ $form = ActiveForm::begin([
                         <th>Max Participants</th>
                         <th>Min Age</th>
                         <th>Max Age</th>
+                        <th>Is Valid</th>
                         <th>Price per Unit</th>
                         <th>Quantity</th>
                     </tr>
@@ -125,6 +128,7 @@ $form = ActiveForm::begin([
                             <td><?= Html::encode($pax['maxParticipants']) ?></td>
                             <td><?= Html::encode($pax['minAge']) ?></td>
                             <td><?= Html::encode($pax['maxAge']) ?></td>
+                            <td><?= $pax['isValid'] ? '<span class="label-success label">Yes<span>' : '<span class="label-danger label">No<span>' ?></td>
                             <td><?= Html::encode($pax['priceFormattedText']) ?></td>
                             <td style="width: 40px">
                                 <?= $form->field($paxForm, 'pax_quantity[' . $key . '][' . $pax['id'] . ']')->textInput([
@@ -141,7 +145,7 @@ $form = ActiveForm::begin([
         </div>
 
         <div class="form-group text-center">
-            <?= Html::submitButton('<i class="fa fa-save"></i> Add Quote', ['class' => 'btn btn-success']) ?>
+            <?= Html::submitButton('<i class="fa fa-save"></i> Add Quote', ['class' => 'btn btn-success btn-add-quote']) ?>
         </div>
     <?php else : ?>
         <div class="text-center"> Not found Pricing Categories </div>
@@ -158,6 +162,9 @@ var availabilityID = '$availabilityID'
 $('#form-' + availabilityID).on('beforeSubmit', function (e) {
     e.preventDefault();
     
+    let btnAdd = $('.btn-add-quote');     
+      btnAdd.find('i').removeClass('fa-save').addClass('fa-spin fa-spinner');
+    
     $.ajax({
        type: $(this).attr('method'),
        url: $(this).attr('action'),
@@ -172,7 +179,7 @@ $('#form-' + availabilityID).on('beforeSubmit', function (e) {
                     text: data.message,
                     type: 'success'
                 });
-            } else {
+            } else {               
                 if (data.message == 'Quantity not selected'){
                     new PNotify({
                         title: 'Error',
@@ -180,6 +187,21 @@ $('#form-' + availabilityID).on('beforeSubmit', function (e) {
                         type: 'error'                
                     });
                 }
+                if (data.message == 'invalidPricing'){
+                    new PNotify({
+                        title: 'Error',
+                        text: 'Please check quantity according to participants',
+                        type: 'error'                
+                    });
+                }
+                if (Array.isArray(data.message) && data.message.length > 0){
+                    new PNotify({
+                        title: 'Error',
+                        text: data.message.join(" <br> "),
+                        type: 'error'                
+                    });
+                }
+                btnAdd.find('i').removeClass('fa-spin fa-spinner').addClass('fa-save');
             }            
        },
        error: function (error) {
@@ -192,6 +214,16 @@ $('#form-' + availabilityID).on('beforeSubmit', function (e) {
     })
     return false;
 }); 
+JS;
+$this->registerJs($js);
+?>
+
+<?php
+$js = <<<JS
+$('body').off('click', '.btn-add-attraction-answer').on('click', '.btn-add-attraction-answer', function (e) {                 
+      let btnAdd = $(this);     
+      btnAdd.find('i').removeClass('fa-save').addClass('fa-spin fa-spinner');
+})
 JS;
 $this->registerJs($js);
 ?>

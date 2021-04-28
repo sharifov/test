@@ -4,8 +4,13 @@ namespace modules\hotel\controllers;
 
 use modules\hotel\src\useCases\request\update\HotelUpdateRequestForm;
 use modules\hotel\src\useCases\request\update\HotelRequestUpdateService;
+use modules\product\src\entities\productQuoteOrigin\service\ProductQuoteOriginService;
 use modules\product\src\entities\productType\ProductType;
 use modules\hotel\src\helpers\HotelFormatHelper;
+use modules\product\src\services\ProductCloneService;
+use sales\auth\Auth;
+use sales\repositories\lead\LeadRepository;
+use sales\repositories\product\ProductQuoteRepository;
 use Yii;
 use modules\hotel\models\Hotel;
 use modules\hotel\models\search\HotelSearch;
@@ -13,6 +18,7 @@ use frontend\controllers\FController;
 use yii\base\Exception;
 use yii\db\StaleObjectException;
 use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -21,15 +27,35 @@ use yii\web\Response;
  * HotelController implements the CRUD actions for Hotel model.
  *
  * @property HotelRequestUpdateService $hotelRequestUpdateService
+ * @property ProductQuoteRepository $productQuoteRepository
+ * @property LeadRepository $leadRepository
+ * @property ProductCloneService $productCloneService
+ * @property ProductQuoteOriginService $productQuoteOriginService
  */
 class HotelController extends FController
 {
-    private $hotelRequestUpdateService;
+    private HotelRequestUpdateService $hotelRequestUpdateService;
+    private ProductQuoteRepository $productQuoteRepository;
+    private LeadRepository $leadRepository;
+    private ProductCloneService $productCloneService;
+    private ProductQuoteOriginService $productQuoteOriginService;
 
-    public function __construct($id, $module, HotelRequestUpdateService $hotelRequestUpdateService, $config = [])
-    {
+    public function __construct(
+        $id,
+        $module,
+        HotelRequestUpdateService $hotelRequestUpdateService,
+        ProductQuoteRepository $productQuoteRepository,
+        LeadRepository $leadRepository,
+        ProductCloneService $productCloneService,
+        ProductQuoteOriginService $productQuoteOriginService,
+        $config = []
+    ) {
         parent::__construct($id, $module, $config);
         $this->hotelRequestUpdateService = $hotelRequestUpdateService;
+        $this->productQuoteRepository = $productQuoteRepository;
+        $this->leadRepository = $leadRepository;
+        $this->productCloneService = $productCloneService;
+        $this->productQuoteOriginService = $productQuoteOriginService;
     }
 
     /**
@@ -209,6 +235,38 @@ class HotelController extends FController
         }
 
         return $this->asJson(['results' => HotelFormatHelper::formatRows($result, $term)]);
+    }
+
+    public function actionAjaxCreateAlternativeProduct(): Response
+    {
+        $leadId = Yii::$app->request->post('leadId');
+        $productQuoteId = Yii::$app->request->post('productQuoteId');
+
+        if (!$leadId) {
+            throw new BadRequestHttpException('Lead id not found in post params');
+        }
+
+        if (!$productQuoteId) {
+            throw new BadRequestHttpException('Product quote id not found in post params');
+        }
+
+        $result = [
+            'error' => false,
+            'message' => ''
+        ];
+
+        try {
+            $productQuote = $this->productQuoteRepository->find($productQuoteId);
+            $lead = $this->leadRepository->find($leadId);
+
+            $product = $this->productCloneService->clone($productQuote->pq_product_id, $lead->id, Auth::id());
+            $this->productQuoteOriginService->create($product->pr_id, $productQuote->pq_id);
+        } catch (\RuntimeException | NotFoundHttpException $e) {
+            $result['message'] = $e->getMessage();
+            $result['error'] = true;
+        }
+
+        return $this->asJson($result);
     }
 
     /**

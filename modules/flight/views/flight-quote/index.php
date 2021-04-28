@@ -44,7 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'fq_trip_type_id',
             'fq_main_airline',
             'fq_fare_type_id',
-            [
+            /*[
                 'label' => 'Ticket exist',
                 'attribute' => 'ticketExist',
                 'value' => static function (FlightQuote $model) {
@@ -52,7 +52,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw',
                 'filter' => [1 => 'Yes', 0 => 'No'],
-            ],
+            ],*/
             [
                 'class' => \common\components\grid\UserSelect2Column::class,
                 'attribute' => 'fq_created_user_id',

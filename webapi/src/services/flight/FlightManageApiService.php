@@ -29,6 +29,7 @@ use modules\flight\src\services\flightQuote\FlightQuotePriceCalculator;
 use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\entities\orderTips\OrderTips;
 use modules\order\src\entities\orderTips\OrderTipsRepository;
+use modules\order\src\services\OrderPriceUpdater;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productOption\ProductOption;
 use modules\product\src\entities\productOption\ProductOptionRepository;
@@ -48,6 +49,8 @@ use yii\helpers\ArrayHelper;
 /**
  * Class FlightManageApiService
  *
+ * @property bool processedStatus
+ *
  * @property FlightQuoteFlightRepository $flightQuoteFlightRepository
  * @property FlightQuoteBookingRepository $flightQuoteBookingRepository
  * @property FlightQuoteBookingAirlineRepository $flightQuoteBookingAirlineRepository
@@ -64,9 +67,12 @@ use yii\helpers\ArrayHelper;
  * @property ProductOptionRepository $productOptionRepository
  * @property ProductQuoteOptionRepository $productQuoteOptionRepository
  * @property OrderRepository $orderRepository
+ * @property OrderPriceUpdater $orderPriceUpdater
  */
 class FlightManageApiService
 {
+    private bool $processedStatus = false;
+
     private FlightQuoteFlightRepository $flightQuoteFlightRepository;
     private FlightQuoteBookingRepository $flightQuoteBookingRepository;
     private FlightQuoteBookingAirlineRepository $flightQuoteBookingAirlineRepository;
@@ -83,6 +89,7 @@ class FlightManageApiService
     private ProductOptionRepository $productOptionRepository;
     private ProductQuoteOptionRepository $productQuoteOptionRepository;
     private OrderRepository $orderRepository;
+    private OrderPriceUpdater $orderPriceUpdater;
 
     /**
      * @param FlightQuoteFlightRepository $flightQuoteFlightRepository
@@ -101,6 +108,7 @@ class FlightManageApiService
      * @param ProductOptionRepository $productOptionRepository
      * @param ProductQuoteOptionRepository $productQuoteOptionRepository
      * @param OrderRepository $orderRepository
+     * @param OrderPriceUpdater $orderPriceUpdater
      */
     public function __construct(
         FlightQuoteFlightRepository $flightQuoteFlightRepository,
@@ -118,7 +126,8 @@ class FlightManageApiService
         ProductQuoteRepository $productQuoteRepository,
         ProductOptionRepository $productOptionRepository,
         ProductQuoteOptionRepository $productQuoteOptionRepository,
-        OrderRepository $orderRepository
+        OrderRepository $orderRepository,
+        OrderPriceUpdater $orderPriceUpdater
     ) {
         $this->flightQuoteFlightRepository = $flightQuoteFlightRepository;
         $this->flightQuoteBookingRepository = $flightQuoteBookingRepository;
@@ -136,6 +145,7 @@ class FlightManageApiService
         $this->productOptionRepository = $productOptionRepository;
         $this->productQuoteOptionRepository = $productQuoteOptionRepository;
         $this->orderRepository = $orderRepository;
+        $this->orderPriceUpdater = $orderPriceUpdater;
     }
 
     public function ticketIssue(FlightRequestApiForm $flightRequestApiForm): void
@@ -201,6 +211,10 @@ class FlightManageApiService
                 }
             }
         }
+
+        $productQuote = $flightRequestApiForm->flightQuote->fqProductQuote;
+        $productQuote->booked();
+        $this->productQuoteRepository->save($productQuote);
     }
 
     public function replaceProcessing(FlightRequestApiForm $flightRequestApiForm, FlightQuote $newFlightQuote): FlightManageApiService
@@ -350,12 +364,20 @@ class FlightManageApiService
         $productQuote->updatePricesC2b($totalPaxPrice);
         $this->productQuoteRepository->save($productQuote);
 
-        /* TODO::  */
-        $order = $productQuote->pqOrder;
-        $order->calculateTotalPrice();
-        $this->orderRepository->save($order);
+        $this->orderPriceUpdater->updateC2b($productQuote->pqOrder);
 
         return $this;
+    }
+
+    public function checkProcessedStatus(FlightRequestApiForm $flightRequestApiForm): bool
+    {
+        foreach ($flightRequestApiForm->getFlightApiForms() as $flightApiForm) {
+            if ($flightApiForm->isIssued()) {
+                $this->setProcessedStatus(true);
+                break;
+            }
+        }
+        return $this->isProcessedStatus();
     }
 
     public static function getFlightQuoteByOrderId(int $orderId): ?FlightQuote
@@ -379,5 +401,18 @@ class FlightManageApiService
     private static function mapTripType(string $tripType)
     {
         return array_search($tripType, FlightQuoteFlight::TRIP_TYPE_LIST);
+    }
+
+    public function isProcessedStatus(): bool
+    {
+        return $this->processedStatus;
+    }
+
+    /**
+     * @param bool $processedStatus
+     */
+    public function setProcessedStatus(bool $processedStatus): void
+    {
+        $this->processedStatus = $processedStatus;
     }
 }

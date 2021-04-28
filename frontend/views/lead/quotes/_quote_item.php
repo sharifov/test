@@ -268,13 +268,13 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 
             <?php echo QuoteHelper::formattedFreeBaggage($model->getMetaInfo()) ?>
 
-            <span class="quote__badge quote__badge--amenities <?php if (!$model->hasFreeBaggage) :
-                ?>quote__badge--disabled<?php
-                                                              endif;?>" data-toggle="tooltip"
-             title="<?= ($model->freeBaggageInfo) ? 'Free baggage - ' . $model->freeBaggageInfo : 'No free baggage'?>"
-            data-original-title="<?= ($model->freeBaggageInfo) ? 'Free baggage - ' . $model->freeBaggageInfo : 'No free baggage'?>">
+            <!--<span class="quote__badge quote__badge--amenities <?php /*if (!$model->hasFreeBaggage) :
+                */?>quote__badge--disabled<?php
+/*                                                              endif;*/?>" data-toggle="tooltip"
+             title="<?/*= ($model->freeBaggageInfo) ? 'Free baggage - ' . $model->freeBaggageInfo : 'No free baggage'*/?>"
+            data-original-title="<?/*= ($model->freeBaggageInfo) ? 'Free baggage - ' . $model->freeBaggageInfo : 'No free baggage'*/?>">
                 <i class="fa fa-suitcase"></i><span class="quote__badge-num"></span>
-            </span>
+            </span>-->
 
             <span class="quote__badge quote__badge--warning <?php if (!$needRecheck) :
                 ?>quote__badge--disabled<?php

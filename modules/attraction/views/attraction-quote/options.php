@@ -52,6 +52,7 @@ $form = ActiveForm::begin([
                     <th>Max Participants</th>
                     <th>Min Age</th>
                     <th>Max Age</th>
+                    <th>Is Valid</th>
                     <th>Price per Unit</th>
                 </tr>
                 </thead>
@@ -64,6 +65,7 @@ $form = ActiveForm::begin([
                             <td><?= Html::encode($pax['maxParticipants']) ?></td>
                             <td><?= Html::encode($pax['minAge']) ?></td>
                             <td><?= Html::encode($pax['maxAge']) ?></td>
+                            <td><?= $pax['isValid'] ? '<span class="label-success label">Yes<span>' : '<span class="label-danger label">No<span>' ?></td>
                             <td><?= Html::encode($pax['priceFormattedText']) ?></td>
                         </tr>
                     <?php endforeach; ?>
@@ -74,8 +76,18 @@ $form = ActiveForm::begin([
 <?php endif; ?>
 
 <div class="form-group text-center">
-    <?= Html::submitButton('<i class="fa fa-plus"></i> Apply Options', ['class' => 'btn btn-success']) ?>
+    <?= Html::submitButton('<i class="fa fa-plus"></i> Apply Options', ['class' => 'btn btn-success btn-add-attraction-option']) ?>
 </div>
 
 <?php ActiveForm::end() ?>
 <?php Pjax::end() ?>
+
+<?php
+$js = <<<JS
+$('body').off('click', '.btn-add-attraction-option').on('click', '.btn-add-attraction-option', function (e) {                 
+      let btnAdd = $(this);     
+      btnAdd.find('i').removeClass('fa-plus').addClass('fa-spin fa-spinner');
+})
+JS;
+$this->registerJs($js);
+?>

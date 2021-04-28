@@ -74,7 +74,6 @@ class BookingInfoApiForm extends Model
             }],
             [['airlinesCode'], 'checkAirlinesCode'],
 
-            [['insurance'], 'required'],
             [['insurance'], CheckJsonValidator::class],
             [['insurance'], 'filter', 'filter' => static function ($value) {
                 return JsonHelper::decode($value);

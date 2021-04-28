@@ -14,7 +14,7 @@ use yii\helpers\Html;
 /* @var FileStorage[]|null $orderFiles */
 /* @var UrlGenerator $urlGenerator */
 
-$this->title = $order->or_gid;
+$this->title = 'Order ' . $order->or_gid;
 $this->params['breadcrumbs'][] = ['label' => 'Order search', 'url' => ['/order/order/search']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
@@ -66,6 +66,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
             <?php if (Auth::can('order/view/payment')) : ?>
                 <?php echo $this->render('_partial/payment', [
+                    'order' => $order,
+                ]) ?>
+            <?php endif ?>
+
+            <?php if (Auth::can('global/transaction/list/view')) : ?>
+                <?php echo $this->render('_partial/transaction', [
                     'order' => $order,
                 ]) ?>
             <?php endif ?>

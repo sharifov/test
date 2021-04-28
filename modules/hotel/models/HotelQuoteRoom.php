@@ -50,6 +50,8 @@ use yii\helpers\StringHelper;
  * @property string $hqr_cancellation_policies [json]
  * @property float|null $actualCancelAmount
  * @property string|null $actualCancelDate
+ * @property string $hqr_cancel_amount
+ * @property string $hqr_cancel_from_dt
  */
 class HotelQuoteRoom extends ActiveRecord implements Serializable
 {
@@ -244,9 +246,9 @@ class HotelQuoteRoom extends ActiveRecord implements Serializable
 
     public function canFreeCancel(): bool
     {
-        if (!$this->isNonRefundable()) {
-            return true;
-        }
+//        if (!$this->isNonRefundable()) {
+//            return true;
+//        }
 
         foreach ($this->hqr_cancellation_policies ?? [] as $item) {
             if (!(time() < strtotime($item['from']))) {

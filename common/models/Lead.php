@@ -874,12 +874,13 @@ class Lead extends ActiveRecord implements Objectable
         return $lead;
     }
 
-    public static function createBookFailed($projectId): self
+    public static function createBookFailed($projectId, $department, $clientId): self
     {
         $lead = self::create();
         $lead->project_id = $projectId;
-        $lead->l_dep_id = Department::DEPARTMENT_SALES;
+        $lead->l_dep_id = $department;
         $lead->status = self::STATUS_BOOK_FAILED;
+        $lead->client_id = $clientId;
         $lead->recordEvent(new LeadCreatedBookFailedEvent($lead, $lead->status));
         return $lead;
     }
@@ -2938,6 +2939,11 @@ Reason: {reason}',
         $query = self::find()->innerJoinWith(['client.clientPhones'])
             ->where(['client_phone.phone' => $phoneNumber])
             ->andWhere(['<>', 'leads.status', self::STATUS_TRASH])
+            ->andWhere([
+                'OR',
+                ['IS', 'client_phone.type', null],
+                ['!=', 'client_phone.type', ClientPhone::PHONE_INVALID],
+            ])
             ->orderBy(['leads.id' => SORT_DESC])
             ->limit(1);
 

@@ -63,7 +63,7 @@ class ListItem extends React.Component {
                     </div>
                     <div className="call-list-item__main-action">
                         <a href="#" className="call-list-item__main-action-trigger btn-item-call-queue"
-                           data-type-action={call.data.queue === 'inProgress' ? 'hangup' : (call.data.queue === 'hold' ? 'return' : (call.data.isInternal ? 'acceptInternal' :'accept'))}
+                           data-type-action={getItemActionName(call)}
                            data-call-sid={call.data.callSid} data-from-internal={call.data.fromInternal}>
                             {call.isSentAcceptCallRequestState() || call.isSentHangupRequestState() || call.isSentReturnHoldCallRequestState()
                                 ? <i className="fa fa-spinner fa-spin"/>
@@ -76,6 +76,22 @@ class ListItem extends React.Component {
             </li>
         );
     }
+}
+
+function getItemActionName(call) {
+    if (call.data.queue === 'inProgress') {
+       return 'hangup';
+    }
+    if (call.data.queue === 'hold') {
+        return 'return';
+    }
+    if (call.data.isInternal) {
+        return 'acceptInternal';
+    }
+    if (call.data.isWarmTransfer) {
+        return 'acceptWarmTransfer';
+    }
+    return 'accept';
 }
 
 function ListItemMenu(props) {
@@ -117,7 +133,10 @@ function ListItemMenu(props) {
             <li className="call-item-menu__list-item">
                 <a href="#" className="call-item-menu__close"><i className="fa fa-chevron-right"> </i></a>
             </li>
-            <ListItemBtnTransfer call={call}/>
+            {!call.data.isHold
+             ? <ListItemBtnTransfer call={call}/>
+             : ''
+            }
             {conferenceBase
                 ?
                 <React.Fragment>

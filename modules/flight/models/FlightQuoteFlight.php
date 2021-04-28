@@ -3,6 +3,13 @@
 namespace modules\flight\models;
 
 use common\components\validators\CheckJsonValidator;
+use common\models\Client;
+use common\models\Lead;
+use common\models\Project;
+use modules\flight\models\query\FlightQuoteFlightQuery;
+use modules\flight\src\entities\flightQuoteFlight\serializer\FlightQuoteFlightSerializer;
+use modules\order\src\entities\order\Order;
+use modules\product\src\interfaces\ProductDataInterface;
 use sales\behaviors\StringToJsonBehavior;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -31,7 +38,7 @@ use yii\helpers\ArrayHelper;
  * @property FlightQuote $fqfFq
  * @property FlightQuoteBooking[] $flightQuoteBookings
  */
-class FlightQuoteFlight extends \yii\db\ActiveRecord
+class FlightQuoteFlight extends ActiveRecord implements ProductDataInterface
 {
     public const TRIP_TYPE_OW = 1;
     public const TRIP_TYPE_RT = 2;
@@ -133,9 +140,9 @@ class FlightQuoteFlight extends \yii\db\ActiveRecord
         ];
     }
 
-    public static function find(): \modules\flight\models\query\FlightQuoteFlightQuery
+    public static function find(): FlightQuoteFlightQuery
     {
-        return new \modules\flight\models\query\FlightQuoteFlightQuery(static::class);
+        return new FlightQuoteFlightQuery(static::class);
     }
 
     public static function tableName(): string
@@ -164,5 +171,38 @@ class FlightQuoteFlight extends \yii\db\ActiveRecord
         $model->fqf_validating_carrier = $validatingCarrier;
         $model->fqf_original_data_json = $originalDataJson;
         return $model;
+    }
+
+    public function getProject(): ?Project
+    {
+        if (($order = $this->getOrder()) && $project = $order->getProject()) {
+            return $project;
+        }
+        return $this->fqfFq->getProject();
+    }
+
+    public function getLead(): ?Lead
+    {
+        return $this->fqfFq->getLead();
+    }
+
+    public function getClient(): ?Client
+    {
+        return $this->fqfFq->getClient();
+    }
+
+    public function getOrder(): ?Order
+    {
+        return $this->fqfFq->getOrder();
+    }
+
+    public function getId(): int
+    {
+        return $this->fqf_id;
+    }
+
+    public function serialize(bool $withBooking = true): array
+    {
+        return (new FlightQuoteFlightSerializer($this))->getData($withBooking);
     }
 }

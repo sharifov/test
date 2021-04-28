@@ -7,6 +7,7 @@
 use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offer\OfferStatus;
 use modules\offer\src\helpers\formatters\OfferFormatter;
+use modules\offer\src\helpers\OfferHelper;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use sales\helpers\product\ProductQuoteHelper;
 use yii\bootstrap4\Html;
@@ -17,6 +18,11 @@ use yii\bootstrap4\Html;
     <div class="x_title">
 
             <?= Html::checkbox('offer_checkbox[' . $offer->of_id . ']', false, ['id' => 'off_ch' . $offer->of_id, 'class' => 'offer-checkbox', 'data-id' => $offer->of_id, 'style' => 'width: 16px; height: 16px;'])?>
+
+            <?php if ($offer->isAlternative()) : ?>
+                <?= OfferHelper::displayAlternativeOfferIcon() ?>
+            <?php endif;?>
+
             <small><span class="badge badge-white">OF<?=($offer->of_id)?></span></small>
             <?= OfferStatus::asFormat($offer->of_status_id) ?>
             (<span title="GID: <?=\yii\helpers\Html::encode($offer->of_gid)?>"><?=\yii\helpers\Html::encode($offer->of_uid)?></span>)
@@ -124,7 +130,7 @@ use yii\bootstrap4\Html;
 //                        $clientTotalPrice += ($quote->pq_price + $optionTotalPrice + $totalFee);
                     ?>
                     <tr>
-                        <td title="Product Quote ID: <?=Html::encode($quote->pq_id)?>"><?= $nr++ ?></td>
+                        <td title="Product Quote ID: <?=Html::encode($quote->pq_id)?>"><?= $nr++ ?> <br> <?= ProductQuoteHelper::displayOriginOrAlternativeIcon($quote) ?></td>
 
                         <td title="<?=Html::encode($quote->pq_product_id)?>">
                             <?= $quote->pqProduct->prType->pt_icon_class ? Html::tag('i', '', ['class' => $quote->pqProduct->prType->pt_icon_class]) : '' ?>

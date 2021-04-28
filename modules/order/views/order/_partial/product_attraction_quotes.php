@@ -13,7 +13,7 @@ use yii\data\ArrayDataProvider;
  */
 
 $dataProvider = new ArrayDataProvider([
-    'allModels' => $data,
+    'allModels' => array_reverse($data),
     'pagination' => [
         'pageSize' => 1,
     ],

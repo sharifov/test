@@ -13,6 +13,7 @@ use modules\flight\src\repositories\flightQuotePaxPriceRepository\FlightQuotePax
 use modules\flight\src\services\flight\FlightManageService;
 use modules\flight\src\services\flightQuote\FlightQuoteBookGuardService;
 use modules\flight\src\services\flightQuote\FlightQuotePdfService;
+use modules\flight\src\services\flightQuoteFlight\FlightQuoteFlightPdfService;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchForm;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchService;
@@ -571,19 +572,21 @@ class FlightQuoteController extends FController
             if (!$flightQuote->isBooked()) {
                 throw new \DomainException('Quote should have Booked status.');
             }
-
-            FlightQuotePdfService::guard($flightQuote);
-            $flightQuotePdfService = new FlightQuotePdfService($flightQuote);
-            $flightQuotePdfService->setProductQuoteId($flightQuote->fq_product_quote_id);
-            if ($flightQuotePdfService->processingFile()) {
-                $result['status'] = 1;
-                $result['message'] = 'Document have been successfully generated';
-                return $result;
+            if (!$flightQuote->flightQuoteFlights) {
+                throw new NotFoundException('FlightQuoteFlights not found in FlightQuote Id(' . $flightQuoteId . ')');
             }
-            throw new \DomainException('Document generate failed.');
+
+            foreach ($flightQuote->flightQuoteFlights as $flightQuoteFlight) {
+                $flightQuoteFlightPdfService = new FlightQuoteFlightPdfService($flightQuoteFlight);
+                $flightQuoteFlightPdfService->setProductQuoteId($flightQuoteFlight->fqfFq->fq_product_quote_id);
+                $flightQuoteFlightPdfService->processingFile();
+            }
+
+            $result['status'] = 1;
+            $result['message'] = 'Document have been successfully generated';
         } catch (\Throwable $throwable) {
             $result['message'] = $throwable->getMessage();
-            \Yii::error(AppHelper::throwableLog($throwable, true), 'FlightQuoteController:actionAjaxFileGenerate');
+            \Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteController:actionAjaxFileGenerate');
         }
         return $result;
     }

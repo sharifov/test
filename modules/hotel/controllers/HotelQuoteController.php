@@ -2,6 +2,7 @@
 
 namespace modules\hotel\controllers;
 
+use common\models\Lead;
 use common\models\Notifications;
 use frontend\controllers\FController;
 use modules\hotel\models\Hotel;
@@ -22,7 +23,12 @@ use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchForm;
 use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchGuard;
 use modules\hotel\src\useCases\api\searchQuote\HotelQuoteSearchService;
 use modules\hotel\src\useCases\quote\HotelQuoteManageService;
+use modules\offer\src\entities\offer\Offer;
+use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\order\src\events\OrderFileGeneratedEvent;
+use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuoteOrigin\ProductQuoteOrigin;
+use modules\product\src\entities\productQuoteRelation\service\ProductQuoteRelationService;
 use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
 use Yii;
@@ -45,25 +51,15 @@ use yii\web\Response;
  * @property HotelQuoteSearchService $hotelQuoteSearchService
  * @property HotelQuoteRoomRepository $hotelQuoteRoomRepository
  * @property HotelQuoteManageService $hotelQuoteManageService
+ * @property ProductQuoteRelationService $productQuoteRelationService
  */
 class HotelQuoteController extends FController
 {
-    /**
-     * @var HotelRepository
-     */
     private $hotelRepository;
-    /**
-     * @var HotelQuoteSearchService
-     */
     private $hotelQuoteSearchService;
-    /**
-     * @var HotelQuoteRoomRepository
-     */
     private $hotelQuoteRoomRepository;
-    /**
-     * @var HotelQuoteManageService
-     */
     private $hotelQuoteManageService;
+    private $productQuoteRelationService;
 
     public function __construct(
         $id,
@@ -72,6 +68,7 @@ class HotelQuoteController extends FController
         HotelRepository $hotelRepository,
         HotelQuoteManageService $hotelQuoteManageService,
         HotelQuoteRoomRepository $hotelQuoteRoomRepository,
+        ProductQuoteRelationService $productQuoteRelationService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -80,6 +77,7 @@ class HotelQuoteController extends FController
         $this->hotelRepository = $hotelRepository;
         $this->hotelQuoteRoomRepository = $hotelQuoteRoomRepository;
         $this->hotelQuoteManageService = $hotelQuoteManageService;
+        $this->productQuoteRelationService = $productQuoteRelationService;
     }
 
     /**
@@ -184,6 +182,129 @@ class HotelQuoteController extends FController
         ]);
     }
 
+    /**
+     * Lists all HotelQuote models.
+     * @return mixed
+     */
+    public function actionSearchAlternativeAjax()
+    {
+        $hotelId = (int) Yii::$app->request->get('id');
+        $hotel = $this->hotelRepository->find($hotelId);
+        $form = new HotelQuoteSearchForm();
+        $form->load(Yii::$app->request->post() ?: Yii::$app->request->get());
+
+        $this->increaseLimits();
+
+        $result = [];
+
+        if ($hotel) {
+            try {
+                $result = $this->hotelQuoteSearchService->search(HotelQuoteSearchGuard::guard($hotel));
+
+                if (isset($result['error'])) {
+                    throw new \DomainException($result['error']);
+                }
+            } catch (\DomainException $e) {
+                Yii::$app->session->setFlash('error', $e->getMessage());
+            }
+        }
+        $hotelList = $result['hotels'] ?? [];
+        $hotelTypes = $result['hotelTypes'] ?? [];
+
+        /*foreach ($hotelList as $key => $value) {
+            foreach ($value['rooms'] as $keyRoom => $room) {
+                if ($room['rates'][0]['type'] !== 'BOOKABLE') {
+                    unset($hotelList[$key]['rooms'][$keyRoom]);
+                }
+            }
+            if (empty($hotelList[$key]['rooms'])) {
+                unset($hotelList[$key]);
+            } else {
+                $hotelList[$key]['rooms'] = array_values($hotelList[$key]['rooms']);
+            }
+        }
+        $hotelList = array_values($hotelList);*/
+
+        if (!empty($hotelList)) {
+            $form->initFilters($hotelList, $hotelTypes);
+            $hotelList = $form->applyFilters($hotelList);
+        }
+
+        //VarDumper::dump($hotelList[0], 10, true); die();
+
+        $dataProvider = new ArrayDataProvider([
+            'allModels' => $hotelList,
+            'pagination' => [
+                'pageSize' => 10,
+                'params' => array_merge(Yii::$app->request->get(), $form->getFilters(), $params ?? []),
+            ],
+            'sort' => [
+                'attributes' => ['ranking', 'name', 's2C'],
+            ],
+        ]);
+
+        return $this->renderAjax('search/_search_quotes', [
+            'dataProvider' => $dataProvider,
+            'hotelSearch'   => $hotel,
+            'filtersForm' => $form,
+            'showFilters' => empty($result['hotels']),
+            'hotelTypes' => $hotelTypes
+        ]);
+    }
+
+    /**
+     * @return array
+     */
+    public function actionListMenuAlternativeAjax(): array
+    {
+        $leadId = (int) Yii::$app->request->post('lead_id');
+        $productQuoteId = (int) Yii::$app->request->post('product_quote_id');
+        $productList = [];
+
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        try {
+            if (!$leadId) {
+                throw new \yii\db\Exception('Not found Lead ID params', 2);
+            }
+
+            if (!$productQuoteId) {
+                throw new Exception('Not found Product Quote ID params', 3);
+            }
+
+            $lead = Lead::findOne($leadId);
+            if (!$lead) {
+                throw new Exception('Lead (' . $leadId . ') not found', 4);
+            }
+
+            $productQuote = ProductQuote::find()->where(['pq_id' => $productQuoteId])->all();
+
+            if ($productQuote) {
+                $exist = ProductQuoteOrigin::find()->where(['pqo_id' => $productQuoteId])->exists();
+
+                $offerList[] = \yii\bootstrap4\Html::a(($exist ? '<i class="fa fa-check-square-o success"></i> ' : '<i class="fa fa-square-o"></i> ') . $offer->of_name, null, [
+                    'class' => 'dropdown-item btn-add-quote-to-offer ', // . ($exist ? 'disabled' : ''),
+                    'title' => 'ID: ' . $offer->of_id . ', UID: ' . \yii\helpers\Html::encode($offer->of_uid),
+                    'data-product-quote-id' => $productQuoteId,
+                    'data-offer-id' => $offer->of_id,
+                    'data-url' => \yii\helpers\Url::to(['/offer/offer-product/create-ajax'])
+                ]);
+            }
+        } catch (\Throwable $throwable) {
+            return ['error' => 'Error: ' . $throwable->getMessage()];
+        }
+
+        $offerList[] = '<div class="dropdown-divider"></div>';
+        $offerList[] = Html::a('<i class="fa fa-plus-circle"></i> new offer', null, [
+            'class' => 'dropdown-item btn-add-quote-to-offer',
+            'data-product-quote-id' => $productQuoteId,
+            'data-offer-id' => 0,
+            'data-url' => \yii\helpers\Url::to(['/offer/offer-product/create-ajax'])
+        ]);
+
+        return ['html' => implode('', $offerList)];
+    }
+
     public function actionCheckRate(): array
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
@@ -278,6 +399,10 @@ class HotelQuoteController extends FController
 
             if (!$hotelQuote) {
                 throw new Exception('Not added hotel quote - hotel code (' . $hotelCode . ') room key (' . $quoteKey . ')', 8);
+            }
+
+            if ($productQuoteOrigin = ProductQuoteOrigin::findOne(['pqo_product_id' => $hotel->ph_product_id])) {
+                $this->productQuoteRelationService->createAlternative($productQuoteOrigin->pqo_quote_id, $hotelQuote->hq_product_quote_id, Auth::id());
             }
 
             Notifications::pub(

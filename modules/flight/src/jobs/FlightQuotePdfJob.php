@@ -4,6 +4,7 @@ namespace modules\flight\src\jobs;
 
 use modules\flight\models\FlightQuote;
 use modules\flight\src\services\flightQuote\FlightQuotePdfService;
+use modules\flight\src\services\flightQuoteFlight\FlightQuoteFlightPdfService;
 use modules\order\src\events\OrderFileGeneratedEvent;
 use yii\queue\Queue;
 use yii\queue\RetryableJobInterface;
@@ -31,17 +32,22 @@ class FlightQuotePdfJob implements RetryableJobInterface
 
         try {
             if (!$flightQuote = FlightQuote::findOne(['fq_id' => $this->flightQuoteId])) {
-                throw new NotFoundException('FlightQuote not found. Id (' . $this->flightQuoteId . ')');
+                throw new NotFoundException('FlightQuote not found. Id(' . $this->flightQuoteId . ')');
             }
-            FlightQuotePdfService::guard($flightQuote);
-            $flightQuotePdfService = new FlightQuotePdfService($flightQuote);
-            $flightQuotePdfService->setProductQuoteId($flightQuote->fq_product_quote_id);
-            if ($flightQuotePdfService->processingFile()) {
-                \Yii::info([
-                    'message' => 'FlightQuotePdfJob - file is generated',
-                    'quoteId' => $this->flightQuoteId,
-                ], 'info\FlightQuotePdfJob:success');
+            if (!$flightQuote->flightQuoteFlights) {
+                throw new NotFoundException('FlightQuoteFlights not found in FlightQuote Id(' . $this->flightQuoteId . ')');
             }
+
+            foreach ($flightQuote->flightQuoteFlights as $flightQuoteFlight) {
+                $flightQuoteFlightPdfService = new FlightQuoteFlightPdfService($flightQuoteFlight);
+                $flightQuoteFlightPdfService->setProductQuoteId($flightQuoteFlight->fqfFq->fq_product_quote_id);
+                $flightQuoteFlightPdfService->processingFile();
+            }
+
+            \Yii::info([
+                'message' => 'FlightQuotePdfJob - file is generated',
+                'quoteId' => $this->flightQuoteId,
+            ], 'info\FlightQuotePdfJob:success');
         } catch (NotFoundException $throwable) {
             AppHelper::throwableLogger(
                 $throwable,
