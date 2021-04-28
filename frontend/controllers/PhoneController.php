@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\components\CommunicationService;
+use common\components\jobs\CheckWarmTransferTimeExpiredJob;
 use common\models\Call;
 use common\models\CallUserAccess;
 use common\models\ClientPhone;
@@ -20,7 +21,11 @@ use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
 use sales\helpers\UserCallIdentity;
+use sales\model\call\helper\CallHelper;
+use sales\model\call\services\FriendlyName;
 use sales\model\call\services\RecordManager;
+use sales\model\call\services\reserve\CallReserver;
+use sales\model\call\services\reserve\Key;
 use sales\model\call\useCase\checkRecording\CheckRecordingForm;
 use sales\model\call\useCase\conference\create\CreateCallForm;
 use sales\model\callLog\entity\callLog\CallLog;
@@ -63,6 +68,8 @@ class PhoneController extends FController
             'access' => [
                 'allowActions' => [
                     'ajax-recording-disable',
+                    'ajax-call-transfer',
+                    'ajax-warm-transfer-to-user',
                 ],
             ],
         ];
@@ -430,6 +437,10 @@ class PhoneController extends FController
                 throw new BadRequestHttpException('Is not your Call', 8);
             }
 
+            if ($originalCall->currentParticipant->isHold()) {
+                throw new \Exception('Call is Hold');
+            }
+
 //            $to_id = (int)Yii::$app->request->post('to_id');
 //            $projectId = (int)Yii::$app->request->post('project_id');
 //            $lead_id = (int)Yii::$app->request->post('lead_id');
@@ -726,7 +737,8 @@ class PhoneController extends FController
             'phones' => $phones,
             'departments' => $departments,
             'call' => $call,
-            'error' => $error
+            'error' => $error,
+            'canWarmTransfer' => $call ? $call->isIn() : false
         ]);
     }
 
@@ -778,9 +790,16 @@ class PhoneController extends FController
                 throw new BadRequestHttpException('Is not your Call', 8);
             }
 
+            if ($originCall->currentParticipant->isHold()) {
+                throw new \Exception('Call is Hold');
+            }
+
             $data = [];
 
             if ($type === 'user') {
+                if (!Auth::can('PhoneWidget_TransferToUser')) {
+                    throw new ForbiddenHttpException('Access denied.');
+                }
                 $user = Employee::findOne($id);
                 if (!$user) {
                     throw new BadRequestHttpException('Invalid User Id: ' . $id, 6);
@@ -794,6 +813,9 @@ class PhoneController extends FController
                     $data['dep_id'] = $userDepartment['upp_dep_id'];
                 }
             } elseif ($type === 'department') {
+                if (!Auth::can('PhoneWidget_TransferToDepartment')) {
+                    throw new ForbiddenHttpException('Access denied.');
+                }
                 $department = DepartmentPhoneProject::findOne($id);
                 if (!$department) {
                     throw new BadRequestHttpException('Invalid Department Id: ' . $id, 8);
@@ -971,6 +993,204 @@ class PhoneController extends FController
 
 
             // \Yii::info(VarDumper::dumpAsString(['call' => $call ? $call->attributes  : null, 'sid' => $sid, 'updateData' => $updateData, 'result' => $result, 'post' => \Yii::$app->request->post()]), 'info\PhoneController:actionAjaxCallRedirectToAgent');
+        } catch (\Throwable $e) {
+            $result = [
+                'error' => true,
+                'message' => $e->getMessage() . '   File/Line: ' . $e->getFile() . ':' . $e->getLine(),
+            ];
+        }
+        return $result;
+    }
+
+    public function actionAjaxWarmTransferToUser()
+    {
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $result = [
+            'error' => false,
+            'message' => '',
+        ];
+
+        try {
+            if (!Auth::can('PhoneWidget_WarmTransferToUser')) {
+                throw new ForbiddenHttpException('Access denied.');
+            }
+
+            $callSid = Yii::$app->request->post('callSid');
+            $userId = (int)Yii::$app->request->post('userId');
+
+            if (!$callSid) {
+                throw new BadRequestHttpException('Not found Call SID in request');
+            }
+
+            if (!$userId) {
+                throw new BadRequestHttpException('Not found User Id in request');
+            }
+
+            $originCall = Call::find()
+                ->bySid($callSid)
+                ->byCreatedUser(Auth::id())
+                //todo status
+//                ->andWhere(['c_status_id' => [Call::STATUS_IN_PROGRESS]])
+                ->limit(1)->one();
+
+            if (!$originCall->isIn()) {
+                throw new BadRequestHttpException('Call must be Incoming');
+            }
+
+            if (!$originCall) {
+                throw new BadRequestHttpException('Not found Call');
+            }
+
+            if ($originCall->isJoin()) {
+                throw new Exception('Error: Cant redirect Join Call');
+            }
+
+            if (!$originCall->isOwner(Auth::id())) {
+                throw new BadRequestHttpException('Is not your Call');
+            }
+
+            if ($originCall->currentParticipant->isHold()) {
+                throw new \Exception('Call is Hold');
+            }
+
+            $user = Employee::findOne($userId);
+
+            if (!$user) {
+                throw new BadRequestHttpException('Invalid User Id: ' . $userId);
+            }
+
+            if (!$user->isOnline()) {  // || !$userRedirect->isCallFree()
+                throw new NotAcceptableHttpException('This agent is not online (Id: ' . $userId . ')');
+            }
+
+
+            //
+            $groupId = $originCall->c_group_id ?: $originCall->c_id;
+
+            if ($originCall->cParent) {
+                if ($originCall->isOut() || ($originCall->isReturn() && $originCall->cParent->isOut())) {
+                    $parent = Call::find()->firstChild($originCall->c_parent_id)->one();
+                } else {
+                    $parent = $originCall->cParent;
+                }
+
+                if ($parent) {
+                    $originCall->c_is_transfer = true;
+                    $parent->c_is_transfer = true;
+
+                    if (!$originCall->c_group_id) {
+                        $originCall->c_group_id = $groupId;
+                        $parent->c_group_id = $groupId;
+                    }
+
+                    if (!$parent->c_group_id) {
+                        $parent->c_group_id = $groupId;
+                    }
+
+                    if ($parent->isOut()) {
+                        $parent->c_from = $parent->c_to;
+                    }
+                    $parent->c_to = null;
+
+                    if (!$originCall->save()) {
+                        Yii::error('Cant save original call', 'PhoneController:AjaxCallTransfer');
+                    }
+                    if (!$parent->save()) {
+                        Yii::error('Cant save original->parent call', 'PhoneController:AjaxCallTransfer');
+                    }
+                } else {
+                    throw new \DomainException('Not found originCall->cParent->firstChild, Origin CallSid: ' . $originCall->c_call_sid);
+                }
+            } else {
+                $childCall = Call::find()
+                    ->andWhere(['c_parent_id' => $originCall->c_id])
+                    ->andWhere(['<>', 'c_call_type_id', Call::CALL_TYPE_JOIN])
+                    ->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+
+                if ($childCall) {
+                    $originCall->c_is_transfer = true;
+                    $childCall->c_is_transfer = true;
+
+                    if (!$originCall->c_group_id) {
+                        $originCall->c_group_id = $groupId;
+                        $childCall->c_group_id = $groupId;
+                    }
+
+                    if (!$childCall->c_group_id) {
+                        $childCall->c_group_id = $groupId;
+                    }
+
+                    if ($childCall->isOut()) {
+                        $childCall->c_from = $childCall->c_to;
+                    }
+                    $childCall->c_to = null;
+
+                    if (!$originCall->save()) {
+                        Yii::error('Cant save original call. Point 2', 'PhoneController:AjaxCallTransfer');
+                    }
+                    if (!$childCall->save()) {
+                        Yii::error('Cant save child call. Point 2', 'PhoneController:AjaxCallTransfer');
+                    }
+                } else {
+                    throw new \DomainException('Not found originCall->cParent, Origin CallSid: ' . $originCall->c_call_sid);
+                }
+            }
+            //
+
+            if ($originCall->cParent) {
+                if ($originCall->isOut() || ($originCall->isReturn() && $originCall->cParent->isOut())) {
+                    $parent = Call::find()->firstChild($originCall->c_parent_id)->one();
+                } else {
+                    $parent = $originCall->cParent;
+                }
+                if (!$parent) {
+                    throw new \DomainException('Not found originCall->cParent->firstChild, Origin CallSid: ' . $originCall->c_call_sid);
+                }
+                //$callSid = $parent->c_call_sid;
+                $data = $this->getDataForHoldConferenceCall($callSid, Auth::id());
+                /** @var Call $call */
+                $call = $data['call'];
+                if (!$call->currentParticipant->isJoin()) {
+                    throw new \Exception('Invalid type of Participant');
+                }
+                $result = Yii::$app->communication->holdConferenceCall($data['conferenceSid'], $data['keeperSid']);
+                if ($result['error']) {
+                    throw new \DomainException($result['message']);
+                }
+                if (Call::applyCallToAgentAccessWarmTransfer($parent, $userId)) {
+                    $timeOut = CallHelper::warmTransferTimeout($parent->c_dep_id);
+                    if ($timeOut) {
+                        $checkJob = new CheckWarmTransferTimeExpiredJob($parent->c_id, $userId, $data['conferenceSid'], $data['keeperSid'], $data['recordingDisabled']);
+                        Yii::$app->queue_job->delay($timeOut)->push($checkJob);
+                    }
+                }
+            } else {
+                $childCall = Call::find()
+                    ->andWhere(['c_parent_id' => $originCall->c_id])
+                    ->andWhere(['<>', 'c_call_type_id', Call::CALL_TYPE_JOIN])
+                    ->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+                if (!$childCall) {
+                    throw new \DomainException('Not found originCall->cParent, Origin CallSid: ' . $originCall->c_call_sid);
+                }
+//                $callSid = $childCall->c_call_sid;
+                $data = $this->getDataForHoldConferenceCall($callSid, Auth::id());
+                /** @var Call $call */
+                $call = $data['call'];
+                if (!$call->currentParticipant->isJoin()) {
+                    throw new \Exception('Invalid type of Participant');
+                }
+                $result = Yii::$app->communication->holdConferenceCall($data['conferenceSid'], $data['keeperSid']);
+                if ($result['error']) {
+                    throw new \DomainException($result['message']);
+                }
+                if (Call::applyCallToAgentAccessWarmTransfer($childCall, $userId)) {
+                    $timeOut = CallHelper::warmTransferTimeout($childCall->c_dep_id);
+                    if ($timeOut) {
+                        $checkJob = new CheckWarmTransferTimeExpiredJob($childCall->c_id, $userId, $data['conferenceSid'], $data['keeperSid'], $data['recordingDisabled']);
+                        Yii::$app->queue_job->delay($timeOut)->push($checkJob);
+                    }
+                }
+            }
         } catch (\Throwable $e) {
             $result = [
                 'error' => true,
@@ -1226,6 +1446,45 @@ class PhoneController extends FController
             if (!$call->currentParticipant->isHold()) {
                 throw new \Exception('Invalid type of Participant');
             }
+
+            //
+            if (!$conference = Conference::findOne(['cf_id' => $call->c_conference_id])) {
+                throw new BadRequestHttpException('Not found conference. SID: ' . $call->c_conference_sid);
+            }
+
+            if (!$participants = $conference->conferenceParticipants) {
+                throw new BadRequestHttpException('Not found participants on Conference Sid: ' . $call->c_conference_sid);
+            }
+
+            $reserver = Yii::createObject(CallReserver::class);
+            foreach ($participants as $participant) {
+                $key = Key::byWarmTransfer($participant->cp_call_id);
+                if ($reserver->isReserved($key)) {
+                    throw new \DomainException('Please wait. Try again later.');
+                }
+            }
+
+            foreach ($participants as $participant) {
+                $callUserAccess = CallUserAccess::find()
+                    ->andWhere([
+                        'cua_call_id' => $participant->cp_call_id,
+                        'cua_status_id' => CallUserAccess::STATUS_TYPE_WARM_TRANSFER
+                    ])
+                    ->one();
+                if ($callUserAccess) {
+                    $callUserAccess->noAnsweredCall();
+                    $callUserAccess->save();
+                    Notifications::createAndPublish(
+                        $callUserAccess->cua_user_id,
+                        'Warm transfer canceled',
+                        'Warm transfer canceled. Call Id: ' . $callUserAccess->cua_call_id,
+                        Notifications::TYPE_WARNING,
+                        true
+                    );
+                }
+            }
+            //
+
             $result = Yii::$app->communication->unholdConferenceCall(
                 $data['conferenceSid'],
                 $data['keeperSid'],
@@ -1797,7 +2056,7 @@ class PhoneController extends FController
                     'isConferenceCreator' => 'false',
                     'recordingDisabled' => $recordingManager->isDisabledRecord(),
                 ],
-                str_replace('-', '', UuidHelper::uuid()),
+                FriendlyName::next(),
                 $recordingManager->isDisabledRecord()
             );
         } catch (\Throwable $e) {

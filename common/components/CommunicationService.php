@@ -11,6 +11,7 @@ namespace common\components;
 
 use sales\helpers\setting\SettingHelper;
 use sales\model\call\useCase\conference\create\CreateCallForm;
+use thamtech\uuid\helpers\UuidHelper;
 use Yii;
 use yii\base\Component;
 use yii\helpers\Url;
@@ -803,8 +804,17 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $this->processConferenceResponse($response);
     }
 
-    public function acceptConferenceCall($id, $sid, $to, $from, $userId, $callRecordingDisabled, $phoneListId, $toNumber): array
-    {
+    public function acceptConferenceCall(
+        $id,
+        $sid,
+        $to,
+        $from,
+        $userId,
+        $callRecordingDisabled,
+        $phoneListId,
+        $toNumber,
+        $friendlyName
+    ): array {
         $data = [
             'call_id' => $id,
             'call_sid' => $sid,
@@ -814,9 +824,44 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'call_recording_disabled' => $callRecordingDisabled,
             'phone_list_id' => $phoneListId,
             'to_number' => $toNumber,
+            'friendly_name' => $friendlyName,
         ];
 
         $response = $this->sendRequest('twilio-conference/accept-call', $data);
+
+        return $this->processConferenceResponse($response);
+    }
+
+    public function acceptWarmTransferCall(
+        $id,
+        $sid,
+        $to,
+        $from,
+        $userId,
+        $callRecordingDisabled,
+        $phoneListId,
+        $toNumber,
+        $friendlyName,
+        $dep_id,
+        $oldCallOwnerId,
+        $callGroupId
+    ): array {
+        $data = [
+            'call_id' => $id,
+            'call_sid' => $sid,
+            'to' => $to,
+            'from' => $from,
+            'user_id' => $userId,
+            'call_recording_disabled' => $callRecordingDisabled,
+            'phone_list_id' => $phoneListId,
+            'to_number' => $toNumber,
+            'friendly_name' => $friendlyName,
+            'dep_id' => $dep_id,
+            'old_call_owner_id' => $oldCallOwnerId,
+            'call_group_id' => $callGroupId,
+        ];
+
+        $response = $this->sendRequest('twilio-conference/accept-warm-transfer-call', $data);
 
         return $this->processConferenceResponse($response);
     }

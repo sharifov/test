@@ -37,6 +37,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
     public const STATUS_TYPE_SKIP = 3;
     public const STATUS_TYPE_BUSY = 4;
     public const STATUS_TYPE_NO_ANSWERED = 5;
+    public const STATUS_TYPE_WARM_TRANSFER = 6;
 
     public const STATUS_TYPE_LIST = [
         self::STATUS_TYPE_PENDING       => 'Pending',
@@ -44,6 +45,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
         self::STATUS_TYPE_SKIP          => 'Skip',
         self::STATUS_TYPE_BUSY          => 'Busy',
         self::STATUS_TYPE_NO_ANSWERED   => 'No Answered',
+        self::STATUS_TYPE_WARM_TRANSFER => 'Warm transfer',
     ];
 
     public const STATUS_TYPE_LIST_LABEL = [
@@ -52,6 +54,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
         self::STATUS_TYPE_SKIP          => 'label-default',
         self::STATUS_TYPE_BUSY          => 'label-default',
         self::STATUS_TYPE_NO_ANSWERED   => 'label-default',
+        self::STATUS_TYPE_WARM_TRANSFER => 'label-default',
     ];
 
     /**
@@ -184,6 +187,16 @@ class CallUserAccess extends \yii\db\ActiveRecord
         return $this->cua_status_id === self::STATUS_TYPE_PENDING;
     }
 
+    public function warmTransfer(): void
+    {
+        $this->cua_status_id = self::STATUS_TYPE_WARM_TRANSFER;
+    }
+
+    public function isWarmTransfer(): bool
+    {
+        return $this->cua_status_id === self::STATUS_TYPE_WARM_TRANSFER;
+    }
+
     /**
      * @param bool $insert
      * @param array $changedAttributes
@@ -195,7 +208,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
         $call = $this->cuaCall;
 
         if ($insert) {
-            if ($call && !$call->isHold()) {
+            if ($call && !$call->isHold() && !$this->isWarmTransfer()) {
                 if (
                     SettingHelper::isGeneralLinePriorityEnable()
                     && ($call->c_source_type_id === Call::SOURCE_GENERAL_LINE || $call->c_source_type_id === Call::SOURCE_REDIRECT_CALL)
@@ -226,13 +239,14 @@ class CallUserAccess extends \yii\db\ActiveRecord
             NativeEventDispatcher::trigger(CallUserAccessEvents::class, CallUserAccessEvents::INSERT);
         }
 
-        if (($insert || isset($changedAttributes['cua_status_id'])) && $call && ($call->isIn() || $call->isHold())) {
+        if (($insert || isset($changedAttributes['cua_status_id'])) && $call && ($call->isIn() || $call->isHold() || $this->isWarmTransfer())) {
 //        if(($insert || isset($changedAttributes['cua_status_id']))) {
             //Notifications::socket($this->cua_user_id, null, 'updateIncomingCall', $this->attributes);
             if (
                 SettingHelper::isGeneralLinePriorityEnable()
                 && ($call->c_source_type_id === Call::SOURCE_GENERAL_LINE || $call->c_source_type_id === Call::SOURCE_REDIRECT_CALL)
                 && !$call->isHold()
+                && !$this->isWarmTransfer()
             ) {
                 if ($this->isPending()) {
                     Notifications::publish(
@@ -262,7 +276,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
                     );
                 }
             } else {
-                if ($this->isPending()) {
+                if ($this->isPending() || $this->isWarmTransfer()) {
                     $client = $this->cuaCall->cClient;
 
                     $name = '';
@@ -277,7 +291,11 @@ class CallUserAccess extends \yii\db\ActiveRecord
                         if ($call->isIn()) {
                             $phone = $call->c_from;
                         } elseif ($call->isOut()) {
-                            $phone = $call->c_to;
+                            if ($this->isWarmTransfer()) {
+                                $phone = $call->c_from;
+                            } else {
+                                $phone = $call->c_to;
+                            }
                         }
                     }
 
@@ -290,9 +308,9 @@ class CallUserAccess extends \yii\db\ActiveRecord
                         'status' => $call->getStatusName(),
                         'duration' => 0,
                         'leadId' => $call->c_lead_id,
-                        'typeId' => $call->c_call_type_id,
-                        'type' => CallHelper::getTypeDescription($this->cuaCall),
-                        'source_type_id' => $call->c_source_type_id,
+                        'typeId' => $this->isWarmTransfer() ? Call::CALL_TYPE_IN : $call->c_call_type_id,
+                        'type' => $this->isWarmTransfer() ? 'Incoming' : CallHelper::getTypeDescription($this->cuaCall),
+                        'source_type_id' => $this->isWarmTransfer() ? Call::SOURCE_DIRECT_CALL : $call->c_source_type_id,
                         'fromInternal' => PhoneList::find()->byPhone($this->cuaCall->c_from)->enabled()->exists(),
                         'isHold' => false,
                         'holdDuration' => 0,
@@ -301,7 +319,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
                         'isBarge' => false,
                         'isMute' => false,
                         'project' => $call->c_project_id ? $call->cProject->name : '',
-                        'source' => $call->c_source_type_id ? $call->getSourceName() : '',
+                        'source' => $this->isWarmTransfer() ? Call::SOURCE_LIST[Call::SOURCE_DIRECT_CALL] : ($call->c_source_type_id ? $call->getSourceName() : ''),
                         'isEnded' => false,
                         'contact' => [
                             'id' => $call->c_client_id,
@@ -314,7 +332,8 @@ class CallUserAccess extends \yii\db\ActiveRecord
                             'callSid' => $call->c_call_sid,
                         ],
                         'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
-                        'queue' => Call::getQueueName($call),
+                        'queue' => $this->isWarmTransfer() ? Call::QUEUE_DIRECT : Call::getQueueName($call),
+                        'isWarmTransfer' => $this->isWarmTransfer()
                     ];
                 }
                 Notifications::publish(
@@ -326,6 +345,9 @@ class CallUserAccess extends \yii\db\ActiveRecord
         }
 
         if (isset($changedAttributes['cua_status_id']) && $call && ($call->isIn() || $call->isHold()) && $this->cua_status_id === self::STATUS_TYPE_NO_ANSWERED) {
+            Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $this->cua_user_id], RemoveIncomingRequestMessage::create($call->c_call_sid));
+        }
+        if (isset($changedAttributes['cua_status_id']) && $changedAttributes['cua_status_id'] == self::STATUS_TYPE_WARM_TRANSFER && $this->cua_status_id === self::STATUS_TYPE_NO_ANSWERED) {
             Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $this->cua_user_id], RemoveIncomingRequestMessage::create($call->c_call_sid));
         }
 

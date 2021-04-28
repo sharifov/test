@@ -11,7 +11,11 @@ class ClientsQuery
     public static function allByPhone(string $phone): array
     {
         return Client::find()->alias('cl_tbl')
-            ->innerJoin(ClientPhone::tableName() . ' as clp', 'clp.client_id = cl_tbl.id AND clp.phone = :phone', [':phone' => $phone])
+            ->innerJoin(
+                ClientPhone::tableName() . ' as clp',
+                'clp.client_id = cl_tbl.id AND clp.phone = :phone AND (clp.type IS NULL OR clp.type != :type)',
+                [':phone' => $phone, ':type' => ClientPhone::PHONE_INVALID]
+            )
             ->orderBy(['cl_tbl.id' => SORT_ASC])
             ->all();
     }

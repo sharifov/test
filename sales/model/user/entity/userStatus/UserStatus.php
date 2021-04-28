@@ -3,6 +3,7 @@
 namespace sales\model\user\entity\userStatus;
 
 use common\models\Call;
+use common\models\ConferenceParticipant;
 use common\models\Employee;
 use sales\helpers\app\AppHelper;
 use Yii;
@@ -97,8 +98,16 @@ class UserStatus extends ActiveRecord
         }
 
         $activeAnotherCall = Call::find()
-            ->where(['c_created_user_id' => $user->id, 'c_status_id' => [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING]])
+            ->andWhere(['c_created_user_id' => $user->id, 'c_status_id' => [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING]])
             ->andWhere(['<>', 'c_group_id', $groupId])
+            ->innerJoin(
+                ConferenceParticipant::tableName(),
+                'cp_call_id = c_id AND cp_status_id != :status AND cp_type_id = :type',
+                [
+                    ':status' => ConferenceParticipant::STATUS_LEAVE,
+                    ':type' => ConferenceParticipant::TYPE_AGENT,
+                ]
+            )
             ->exists();
 
         if (!$activeAnotherCall && $user->userStatus) {

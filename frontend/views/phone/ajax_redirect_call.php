@@ -1,6 +1,7 @@
 <?php
 
 use common\models\DepartmentPhoneProject;
+use sales\auth\Auth;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -9,6 +10,7 @@ use yii\helpers\Html;
 /* @var $departments DepartmentPhoneProject[] */
 /* @var $call \common\models\Call */
 /* @var $error string */
+/* @var $canWarmTransfer bool */
 ?>
 <div class="ajax-redirect-call">
     <?php if ($error) :?>
@@ -86,12 +88,14 @@ use yii\helpers\Html;
 <!--                        <td><i class="fa fa-phone"></i> --><?php //=Html::encode($department->dpp_phone_number) ?><!--</td>-->
                         <td><i class="fa fa-phone"></i> <?=Html::encode($department->getPhone())?> </td>
                         <td class="text-center">
-                            <?=Html::button('<i class="fa fa-forward"></i> Redirect', [
-                                'class' => 'btn btn-xs btn-success btn-transfer',
-                                'data-type' => 'department',
-                                'data-value' => $department->dpp_id,
-                                'data-call-sid' => $call->c_call_sid
-                            ])?>
+                            <?php if (Auth::can('PhoneWidget_TransferToDepartment')) : ?>
+                                <?= Html::button('<i class="fa fa-forward"></i> Redirect', [
+                                    'class' => 'btn btn-xs btn-success btn-transfer',
+                                    'data-type' => 'department',
+                                    'data-value' => $department->dpp_id,
+                                    'data-call-sid' => $call->c_call_sid
+                                ])?>
+                            <?php endif; ?>
                         </td>
                     </tr>
                 <?php endforeach;?>
@@ -131,15 +135,25 @@ use yii\helpers\Html;
                         <td><i class="fa fa-user"></i> <b><?=Html::encode($userModel->username)?></b></td>
                         <td><?=( is_array($roles) ? implode(', ', $roles) : '-')?></td>
                         <td class="text-center">
-                            <?=Html::button('<i class="fa fa-forward"></i> Redirect', [
-                                    'class' => 'btn btn-xs ' . $btnClass . ' btn-transfer',
-                                    'data-type' => 'user',
-                                    //'data-user_id' => $userModel->id,
-                                    'data-value' => $userModel->id,
-                                    // 'data-project_id' => $call->c_project_id,
-                                    // 'data-dep_id' => $call->c_dep_id
-                                'data-call-sid' => $call->c_call_sid
-                            ])?>
+                            <?php if (Auth::can('PhoneWidget_TransferToUser')) : ?>
+                                <?= Html::button('<i class="fa fa-forward"></i> Redirect', [
+                                        'class' => 'btn btn-xs ' . $btnClass . ' btn-transfer',
+                                        'data-type' => 'user',
+                                        //'data-user_id' => $userModel->id,
+                                        'data-value' => $userModel->id,
+                                        // 'data-project_id' => $call->c_project_id,
+                                        // 'data-dep_id' => $call->c_dep_id
+                                    'data-call-sid' => $call->c_call_sid
+                                ])?>
+                            <?php endif; ?>
+
+                            <?php if ($canWarmTransfer && Auth::can('PhoneWidget_WarmTransferToUser')) : ?>
+                                <?= Html::button('<i class="fa fa-feed"></i> Warm transfer', [
+                                        'class' => 'btn btn-xs ' . $btnClass . ' btn-warm-transfer-to-user',
+                                        'data-user-id' => $userModel->id,
+                                        'data-call-sid' => $call->c_call_sid
+                                ])?>
+                            <?php endif; ?>
                         </td>
                     </tr>
                 <?php endforeach;?>
