@@ -201,6 +201,7 @@ $('#form-' + availabilityID).on('beforeSubmit', function (e) {
                         type: 'error'                
                     });
                 }
+                btnAdd.find('i').removeClass('fa-spin fa-spinner').addClass('fa-save');
             }            
        },
        error: function (error) {

@@ -10,7 +10,7 @@ use yii\widgets\Pjax;
  */
 
 $dataProvider = new ArrayDataProvider([
-    'allModels' => $data,
+    'allModels' => array_reverse($data),
     'pagination' => [
         'pageSize' => 1,
     ],

@@ -101,16 +101,16 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
                             'class' => 'dropdown-item text-success btn-search-attraction-quotes'
                         ]) ?>
 
-                        <?php if (!$product->attraction->attractionPaxes) : ?>
-                            <?= Html::a('<i class="fa fa-plus"></i> Add Travelers', null, [
+                        <!--<?php /*if (!$product->attraction->attractionPaxes) : */?>
+                            <?/*= Html::a('<i class="fa fa-plus"></i> Add Travelers', null, [
                                 'data-url' => \yii\helpers\Url::to([
                                     '/attraction/attraction-pax/create-ajax',
                                     'id' => $product->attraction->atn_id,
                                 ]),
                                 'data-hotel-id' => $product->attraction->atn_id,
                                 'class' => 'dropdown-item btn-add-attraction-travelers'
-                            ]) ?>
-                        <?php endif; ?>
+                            ]) */?>
+                        <?php /*endif; */?>-->
 
                         <div class="dropdown-divider"></div>
                         <?= Html::a('<i class="fa fa-edit"></i> Update Product', null, [
