@@ -45,13 +45,21 @@ use yii\bootstrap4\Html;
                 ])?>
             </li>
 
-            <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-cog"></i></a>
+            <li class="dropdown offer-li-action">
+                <a href="#" class="dropdown-toggle offer-btn-action" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-cog"></i></a>
                 <div class="dropdown-menu" role="menu">
                     <?php /*= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Update Request', null, [
                                 'class' => 'dropdown-item text-danger btn-update-product',
                                 'data-product-id' => $product->pr_id
                             ])*/ ?>
+
+                    <?php if ($offer->isAlternative()) : ?>
+                        <?= Html::a('<i class="glyphicon glyphicon-ok text-success"></i> Confirm alternative', null, [
+                            'class' => 'dropdown-item text-success btn-confirm-alternative-offer',
+                            'data-offer-id' => $offer->of_id,
+                            'data-url' => \yii\helpers\Url::to(['/offer/offer/ajax-confirm-alternative']),
+                        ]) ?>
+                    <?php endif; ?>
 
                     <?= Html::a('<i class="glyphicon glyphicon-remove-circle text-danger"></i> Delete offer', null, [
                         'class' => 'dropdown-item text-danger btn-delete-offer',

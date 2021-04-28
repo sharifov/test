@@ -224,6 +224,39 @@ $js = <<<JS
         });
      });
      
+     $('body').off('click', '.btn-confirm-alternative-offer').on('click', '.btn-confirm-alternative-offer', function (e) {
+        e.preventDefault();
+        let url = $(this).data('url');
+        let id = $(this).data('offer-id');
+        let offerBtnAction = $(this).closest('.offer-li-action').find('.offer-btn-action');
+        let offerBtnActionHtml = offerBtnAction.html();
+          
+        $.ajax({
+            url: url,
+            data: {offerId: id},
+            type: 'post',
+            dataType: 'json',
+            cache: false,
+            beforeSend: function () {
+                offerBtnAction.html('<i class="fa fa-spinner fa-spin"></i>');
+            },
+            success: function (data) {
+                if (data.error) {
+                    createNotify('Error', data.message, 'error');
+                } else {
+                    createNotify('Success', 'Offer alternative successfully confirmed', 'success');
+                    pjaxReload({container: "#pjax-lead-orders", async: false, timeout: 5000});
+                }
+            },
+            error: function (xhr) {
+                createNotify('Error', xhr.responseText, 'error');
+            },
+            complete: function () {
+                offerBtnAction.html(offerBtnActionHtml);
+            }
+        })
+     });
+     
 JS;
 
 $this->registerJs($js, \yii\web\View::POS_READY, 'lead-offer-js');
