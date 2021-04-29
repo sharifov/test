@@ -12,6 +12,7 @@ use modules\offer\src\useCases\offer\api\view\OfferViewForm;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\processManager\OrderProcessManagerFactory;
+use sales\helpers\app\AppHelper;
 use sales\services\TransactionManager;
 use webapi\src\logger\ApiLogger;
 use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
@@ -743,6 +744,7 @@ class OfferController extends BaseController
                 new CodeMessage(OfferCodeException::API_OFFER_CA_QUOTE_NOT_PROCESSED)
             );
         } catch (\Throwable $e) {
+            \Yii::error(AppHelper::throwableLog($e, true), 'API:OfferController:actionConfirmAlternative:Throwable');
             return new ErrorResponse(
                 new ErrorsMessage('Internal Server Error'),
                 new CodeMessage($e->getCode())
