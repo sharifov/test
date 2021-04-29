@@ -27,6 +27,7 @@ use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\order\src\events\OrderFileGeneratedEvent;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\entities\productQuoteOrigin\ProductQuoteOrigin;
 use modules\product\src\entities\productQuoteRelation\service\ProductQuoteRelationService;
 use sales\auth\Auth;
@@ -52,6 +53,7 @@ use yii\web\Response;
  * @property HotelQuoteRoomRepository $hotelQuoteRoomRepository
  * @property HotelQuoteManageService $hotelQuoteManageService
  * @property ProductQuoteRelationService $productQuoteRelationService
+ * @property ProductQuoteRepository $productQuoteRepository
  */
 class HotelQuoteController extends FController
 {
@@ -60,6 +62,7 @@ class HotelQuoteController extends FController
     private $hotelQuoteRoomRepository;
     private $hotelQuoteManageService;
     private $productQuoteRelationService;
+    private $productQuoteRepository;
 
     public function __construct(
         $id,
@@ -69,6 +72,7 @@ class HotelQuoteController extends FController
         HotelQuoteManageService $hotelQuoteManageService,
         HotelQuoteRoomRepository $hotelQuoteRoomRepository,
         ProductQuoteRelationService $productQuoteRelationService,
+        ProductQuoteRepository $productQuoteRepository,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -78,6 +82,7 @@ class HotelQuoteController extends FController
         $this->hotelQuoteRoomRepository = $hotelQuoteRoomRepository;
         $this->hotelQuoteManageService = $hotelQuoteManageService;
         $this->productQuoteRelationService = $productQuoteRelationService;
+        $this->productQuoteRepository = $productQuoteRepository;
     }
 
     /**
@@ -628,6 +633,22 @@ class HotelQuoteController extends FController
         }
 
         throw new BadRequestHttpException();
+    }
+
+    public function actionAjaxQuoteDetails(): string
+    {
+        $productQuoteId = Yii::$app->request->get('id');
+        $productQuote = $this->productQuoteRepository->find($productQuoteId);
+        //$lead = $productQuote->pqProduct->prLead;
+
+        /*if ($lead->isInTrash() && Auth::user()->isAgent()) {
+            throw new ForbiddenHttpException('Access Denied for Agent');
+        }*/
+
+        return $this->renderAjax('partial/_quote_view_details', [
+            //'productQuote' => $productQuote,
+            'hotelQuote' => $productQuote->hotelQuote
+        ]);
     }
 
     /**
