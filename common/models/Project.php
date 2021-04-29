@@ -648,8 +648,13 @@ class Project extends \yii\db\ActiveRecord
         return $this->hasMany(VisitorLog::class, ['vl_project_id' => 'id']);
     }
 
-    public function getEmailNoReply()
+    public function getEmailNoReply(): string
     {
         return $this->getContactInfo()->getEmailNoReply() . '@' . $this->email_postfix;
+    }
+
+    public function getEmailFromName(): ?string
+    {
+        return $this->getContactInfo()->getEmailFromName();
     }
 }

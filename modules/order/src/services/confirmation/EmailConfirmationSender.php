@@ -126,7 +126,7 @@ class EmailConfirmationSender
 
         $project = $order->project;
         $from = $project->getEmailNoReply();
-        $fromName = $project->name;
+        $fromName = $project->getEmailFromName() ?? $project->name;
 
         $orderContacts = OrderContact::find()
             ->select('oc_email')
