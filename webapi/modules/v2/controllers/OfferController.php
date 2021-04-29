@@ -619,7 +619,7 @@ class OfferController extends BaseController
      * @apiName ConfirmAlternativeOffer
      * @apiGroup Offer
      * @apiPermission Authorized User
-     *
+     * @apiDescription Offer can only be confirmed if it is in the Pending status
      * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
      * @apiHeaderExample {json} Header-Example:
      *  {
@@ -732,7 +732,10 @@ class OfferController extends BaseController
                 $dto = $this->offerService->confirmAlternative($offer);
 
                 if (!$dto->cntConfirmedQuotes) {
-                    throw new \DomainException('Offer does not contain quotes that can be confirmed', OfferCodeException::API_OFFER_CA_QUOTE_NOT_PROCESSED);
+                    throw new \DomainException(
+                        'Offer does not contain quotes that can be confirmed',
+                        OfferCodeException::API_OFFER_CA_QUOTE_NOT_PROCESSED
+                    );
                 }
 
                 if ($dto->orderId) {
@@ -740,25 +743,16 @@ class OfferController extends BaseController
                     $this->orderProcessManagerFactory->create($dto->orderId, $order->or_type_id);
                 }
             });
-        } catch (\Throwable $e) {
-            $code = $e->getCode();
-            $message = $e->getMessage();
-
-            if ($code === (int)OfferCodeException::API_OFFER_CA_QUOTE_NOT_PROCESSED) {
-                return new ErrorResponse(
-                    new StatusCodeMessage(422),
-                    new ErrorsMessage($message),
-                    new CodeMessage(OfferCodeException::API_OFFER_CA_QUOTE_NOT_PROCESSED)
-                );
-            }
-
-            if ($code === 500) {
-                $message = 'Internal Server Error';
-            }
-
+        } catch (\RuntimeException | \DomainException $e) {
             return new ErrorResponse(
-                new ErrorsMessage($message),
-                new CodeMessage($code)
+                new StatusCodeMessage(422),
+                new ErrorsMessage($e->getMessage()),
+                new CodeMessage(OfferCodeException::API_OFFER_CA_QUOTE_NOT_PROCESSED)
+            );
+        } catch (\Throwable $e) {
+            return new ErrorResponse(
+                new ErrorsMessage('Internal Server Error'),
+                new CodeMessage($e->getCode())
             );
         }
 

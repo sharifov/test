@@ -3427,6 +3427,7 @@ define({ "api": [
         "name": "Authorized User"
       }
     ],
+    "description": "<p>Offer can only be confirmed if it is in the Pending status</p>",
     "header": {
       "fields": {
         "Header": [
