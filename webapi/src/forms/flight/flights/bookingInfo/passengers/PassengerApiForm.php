@@ -48,7 +48,7 @@ class PassengerApiForm extends Model
     public function rules(): array
     {
         return [
-            [['paxType', 'tktNumber'], 'required'],
+            [['paxType'], 'required'],
 
             [['gender', 'nationality'], 'filter', 'filter' => 'trim', 'skipOnEmpty' => true],
             [['gender', 'nationality'], 'filter', 'filter' => 'strtoupper', 'skipOnEmpty' => true],

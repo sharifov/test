@@ -15,10 +15,12 @@ use modules\flight\models\FlightQuoteTicket;
 use modules\flight\models\FlightQuoteTrip;
 use modules\flight\src\dto\flightQuotePaxPrice\FlightQuotePaxPriceApiBoDto;
 use modules\flight\src\dto\flightSegment\FlightQuoteSegmentApiBoDto;
+use modules\flight\src\entities\flightQuoteOption\FlightQuoteOption;
 use modules\flight\src\repositories\flightPaxRepository\FlightPaxRepository;
 use modules\flight\src\repositories\flightQuoteBookingAirline\FlightQuoteBookingAirlineRepository;
 use modules\flight\src\repositories\flightQuoteFlight\FlightQuoteFlightRepository;
 use modules\flight\src\repositories\flightQuoteBooking\FlightQuoteBookingRepository;
+use modules\flight\src\repositories\flightQuoteOption\FlightQuoteOptionRepository;
 use modules\flight\src\repositories\flightQuotePaxPriceRepository\FlightQuotePaxPriceRepository;
 use modules\flight\src\repositories\flightQuoteRepository\FlightQuoteRepository;
 use modules\flight\src\repositories\flightQuoteSegment\FlightQuoteSegmentRepository;
@@ -68,6 +70,7 @@ use yii\helpers\ArrayHelper;
  * @property ProductQuoteOptionRepository $productQuoteOptionRepository
  * @property OrderRepository $orderRepository
  * @property OrderPriceUpdater $orderPriceUpdater
+ * @property FlightQuoteOptionRepository $flightQuoteOptionRepository
  */
 class FlightManageApiService
 {
@@ -90,6 +93,7 @@ class FlightManageApiService
     private ProductQuoteOptionRepository $productQuoteOptionRepository;
     private OrderRepository $orderRepository;
     private OrderPriceUpdater $orderPriceUpdater;
+    private FlightQuoteOptionRepository $flightQuoteOptionRepository;
 
     /**
      * @param FlightQuoteFlightRepository $flightQuoteFlightRepository
@@ -109,6 +113,7 @@ class FlightManageApiService
      * @param ProductQuoteOptionRepository $productQuoteOptionRepository
      * @param OrderRepository $orderRepository
      * @param OrderPriceUpdater $orderPriceUpdater
+     * @param FlightQuoteOptionRepository $flightQuoteOptionRepository
      */
     public function __construct(
         FlightQuoteFlightRepository $flightQuoteFlightRepository,
@@ -127,7 +132,8 @@ class FlightManageApiService
         ProductOptionRepository $productOptionRepository,
         ProductQuoteOptionRepository $productQuoteOptionRepository,
         OrderRepository $orderRepository,
-        OrderPriceUpdater $orderPriceUpdater
+        OrderPriceUpdater $orderPriceUpdater,
+        FlightQuoteOptionRepository $flightQuoteOptionRepository
     ) {
         $this->flightQuoteFlightRepository = $flightQuoteFlightRepository;
         $this->flightQuoteBookingRepository = $flightQuoteBookingRepository;
@@ -146,6 +152,7 @@ class FlightManageApiService
         $this->productQuoteOptionRepository = $productQuoteOptionRepository;
         $this->orderRepository = $orderRepository;
         $this->orderPriceUpdater = $orderPriceUpdater;
+        $this->flightQuoteOptionRepository = $flightQuoteOptionRepository;
     }
 
     public function ticketIssue(FlightRequestApiForm $flightRequestApiForm): void
@@ -349,6 +356,40 @@ class FlightManageApiService
                 $this->flightQuoteTripRepository->save($flightTrip);
             }
         }
+
+        if ($flightRequestApiForm->optionApiForms) {
+            foreach ($flightRequestApiForm->optionApiForms as $key => $optionApiForm) {
+                $productQuoteOption = ProductQuoteOption::create(
+                    $newFlightQuote->fq_product_quote_id,
+                    $optionApiForm->productOption->po_id,
+                    $optionApiForm->pqo_name,
+                    $optionApiForm->pqo_description,
+                    $optionApiForm->pqo_price,
+                    $optionApiForm->pqo_price + $optionApiForm->pqo_markup,
+                    $optionApiForm->pqo_markup,
+                    JsonHelper::encode($optionApiForm->pqo_request_data)
+                );
+                $productQuoteOption->done();
+                $this->productQuoteOptionRepository->save($productQuoteOption);
+
+                $flightQuoteOption = FlightQuoteOption::create(
+                    $productQuoteOption->pqo_id,
+                    null,
+                    null,
+                    null,
+                    $optionApiForm->pqo_name,
+                    $optionApiForm->pqo_markup,
+                    $optionApiForm->pqo_markup,
+                    $optionApiForm->pqo_price,
+                    $optionApiForm->pqo_price,
+                    $optionApiForm->pqo_price,
+                    $optionApiForm->pqo_price,
+                    null
+                );
+                $this->flightQuoteOptionRepository->save($flightQuoteOption);
+            }
+        }
+
         return $this;
     }
 

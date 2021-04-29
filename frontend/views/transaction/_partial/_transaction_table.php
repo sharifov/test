@@ -110,7 +110,7 @@ $js = <<<JS
         .done(function(dataResponse) {
             if (dataResponse.status === 1) {
                 if ($('#pjax-order-transaction-' + orderId).length) {
-                    pjaxReload({container: '#pjax-order-transaction-' + orderId});
+                    pjaxReload({container: '#pjax-order-transaction-' + orderId, async: true});
                 }
                 createNotify('Success', 'Transaction was successfully deleted', 'success');
             } else if (dataResponse.message.length) {

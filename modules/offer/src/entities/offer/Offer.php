@@ -370,4 +370,24 @@ class Offer extends \yii\db\ActiveRecord implements Serializable
 
         return $this->ofLead && $this->ofLead->isBookFailed();
     }
+
+    public function pending(): void
+    {
+        $this->of_status_id = OfferStatus::PENDING;
+    }
+
+    public function isPending(): bool
+    {
+        return $this->of_status_id === OfferStatus::PENDING;
+    }
+
+    public function confirm(): void
+    {
+        $this->of_status_id = OfferStatus::CONFIRM;
+    }
+
+    public function isConfirm(): bool
+    {
+        return $this->of_status_id === OfferStatus::CONFIRM;
+    }
 }

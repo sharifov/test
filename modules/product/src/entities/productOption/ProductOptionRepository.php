@@ -53,4 +53,18 @@ class ProductOptionRepository
         }
         throw new RuntimeException('Product Option not found by key: ' . $key, ProductCodeException::PRODUCT_OPTION_NOT_FOUND);
     }
+
+    public function findOrCreate(string $key, ?string $name = null, ?int $productTypeId = null): ProductOption
+    {
+        if ($option = ProductOption::findOne(['po_key' => $key])) {
+            return $option;
+        }
+        if ($name !== null && $productTypeId !== null) {
+            $productOption = ProductOption::create($key, $name, $productTypeId);
+            if ($productOption->validate()) {
+                $this->save($productOption);
+            }
+        }
+        throw new RuntimeException('Product Option not found by key: ' . $key, ProductCodeException::PRODUCT_OPTION_NOT_FOUND);
+    }
 }

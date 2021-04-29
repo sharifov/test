@@ -117,6 +117,7 @@ class FlightController extends ApiBaseController
      * @apiParam {string{15}}   fareId                      Fare Id (Order identity)
      * @apiParam {object}       flights                     Flights data array
      * @apiParam {object}       [payments]                  Payments data array
+     * @apiParam {object}       [options]                   Options data array
      *
      * @apiParamExample {json} Request-Example:
      *
@@ -309,6 +310,24 @@ class FlightController extends ApiBaseController
                         "email": "barabara@test.com"
                     }
                 }
+            ],
+            "options": [
+                {
+                  "pqo_key": "cfar",
+                  "pqo_name": "CFAR option",
+                  "pqo_price": 750.21,
+                  "pqo_markup": 100.21,
+                  "pqo_description": "CFAR option: Cancel before limit",
+                  "pqo_request_data": "{\"type\":\"standard\",\"amount\":750.21,\"options\":[{\"name\":\"Cancel before limit\",\"type\":\"before\",\"limit\":0,\"value\":\"60\"}],\"paxCount\":3,\"isActivated\":true,\"amountPerPax\":250.07}"
+                },
+                {
+                  "pqo_key": "package",
+                  "pqo_name": "Package option",
+                  "pqo_price": 89.85,
+                  "pqo_markup": 0,
+                  "pqo_description": "Package option: Exchange and Refund Processing Fee",
+                  "pqo_request_data": "{\"type\":\"standard\",\"amount\":89.85,\"options\":[{\"name\":\"24 Hour Free Cancellation\",\"type\":\"VOID\",\"value\":\"included\",\"special\":true}],\"paxCount\":3,\"isActivated\":true,\"amountPerPax\":29.95}"
+                }
             ]
         }
      *
@@ -469,6 +488,7 @@ class FlightController extends ApiBaseController
      * @apiParam {string{255}}          fareId                      Fare Id (Order identity)
      * @apiParam {object}               flights                     Flights data array
      * @apiParam {object}               [payments]                  Payments data array
+     * @apiParam {object}               [options]                   Options data array
      *
      * @apiParamExample {json} Request-Example:
      *
@@ -660,6 +680,24 @@ class FlightController extends ApiBaseController
                         "phone": "+19074861000",
                         "email": "barabara@test.com"
                     }
+                }
+            ],
+            "options": [
+                {
+                  "pqo_key": "cfar",
+                  "pqo_name": "CFAR option",
+                  "pqo_price": 750.21,
+                  "pqo_markup": 100.21,
+                  "pqo_description": "CFAR option: Cancel before limit",
+                  "pqo_request_data": "{\"type\":\"standard\",\"amount\":750.21,\"options\":[{\"name\":\"Cancel before limit\",\"type\":\"before\",\"limit\":0,\"value\":\"60\"}],\"paxCount\":3,\"isActivated\":true,\"amountPerPax\":250.07}"
+                },
+                {
+                  "pqo_key": "package",
+                  "pqo_name": "Package option",
+                  "pqo_price": 89.85,
+                  "pqo_markup": 0,
+                  "pqo_description": "Package option: Exchange and Refund Processing Fee",
+                  "pqo_request_data": "{\"type\":\"standard\",\"amount\":89.85,\"options\":[{\"name\":\"24 Hour Free Cancellation\",\"type\":\"VOID\",\"value\":\"included\",\"special\":true}],\"paxCount\":3,\"isActivated\":true,\"amountPerPax\":29.95}"
                 }
             ]
         }
