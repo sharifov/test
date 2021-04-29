@@ -34,21 +34,23 @@ class OfferService
         $this->orderPriceUpdater = $orderPriceUpdater;
     }
 
-    public function confirmAlternative(Offer $offer): void
+    public function confirmAlternative(Offer $offer): OfferConfirmAlternativeResultDTO
     {
-        $order = null;
+        $dto = new OfferConfirmAlternativeResultDTO();
         foreach ($offer->offerProducts as $offerProduct) {
             $productQuote = $offerProduct->opProductQuote;
             if (($originQuote = ProductQuoteQuery::getOriginProductQuoteByAlternative($productQuote->pq_id)) && $originQuote->pq_order_id) {
-                $productQuote->pq_order_id = $originQuote->pq_order_id;
+                $dto->orderId = $productQuote->pq_order_id = $originQuote->pq_order_id;
                 $this->productQuoteService->detachProductQuoteFromOrder($originQuote);
                 $this->productQuoteRepository->save($productQuote);
+                $dto->cntConfirmedQuotes++;
             }
         }
 
-        /** @var Order|null $order */
-        if ($order) {
-            $this->orderPriceUpdater->update($order->or_id);
+        if ($dto->orderId) {
+            $this->orderPriceUpdater->update($dto->orderId);
         }
+
+        return $dto;
     }
 }

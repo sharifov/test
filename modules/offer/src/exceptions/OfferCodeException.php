@@ -26,4 +26,10 @@ class OfferCodeException
     public const API_OFFER_VIEW_NOT_FOUND_DATA_ON_REQUEST = Module::OFFER . 300;
     public const API_OFFER_VIEW_VALIDATE = Module::OFFER . 301;
     public const API_OFFER_VIEW_NOT_FOUND = Module::OFFER . 302;
+
+    public const API_OFFER_CA_NOT_FOUND_DATA_ON_REQUEST = Module::OFFER . 400;
+    public const API_OFFER_CA_VALIDATE = Module::OFFER . 401;
+    public const API_OFFER_CA_NOT_FOUND = Module::OFFER . 402;
+    public const API_OFFER_CA_NOT_ALTERNATIVE = Module::OFFER . 403;
+    public const API_OFFER_CA_QUOTE_NOT_PROCESSED = Module::OFFER . 404;
 }

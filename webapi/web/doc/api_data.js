@@ -3417,6 +3417,95 @@ define({ "api": [
   },
   {
     "type": "post",
+    "url": "/v2/offer/confirm-alternative",
+    "title": "Confirm Alternative Offer",
+    "version": "0.2.0",
+    "name": "ConfirmAlternativeOffer",
+    "group": "Offer",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "max 32",
+            "optional": false,
+            "field": "gid",
+            "description": "<p>Offer gid</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "\n{\n    \"gid\": \"04d3fe3fc74d0514ee93e208a52bcf90\",\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n {\n            \"status\": 200,\n            \"message\": \"OK\",\n        }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n            \"status\": 422,\n            \"message\": \"Error\",\n            \"errors\": [\n                \"Not found Offer\"\n            ],\n            \"code\": \"18402\"\n        }",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (422):",
+          "content": "\nHTTP/1.1 422 Validation Error\n{\n            \"status\": 422,\n            \"message\": \"Validation error\",\n            \"errors\": {\n                \"gid\": [\n                    \"Gid should contain at most 32 characters.\"\n                ]\n            },\n            \"code\": \"18401\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (422):",
+          "content": "\nHTTP/1.1 422 Validation Error\n{\n            \"status\": 422,\n            \"message\": \"Error\",\n            \"errors\": [\n                \"Offer does not contain quotes that can be confirmed\"\n            ],\n            \"code\": \"18404\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n            \"status\": 400,\n            \"message\": \"Load data error\",\n            \"errors\": [\n                \"Not found Offer data on POST request\"\n            ],\n            \"code\": \"18400\"\n        }",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/OfferController.php",
+    "groupTitle": "Offer"
+  },
+  {
+    "type": "post",
     "url": "/v2/offer/view",
     "title": "View Offer",
     "version": "0.2.0",
