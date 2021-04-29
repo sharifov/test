@@ -158,4 +158,16 @@ class ProductOption extends ActiveRecord implements Serializable
     {
         return (new ProductOptionSerializer($this))->getData();
     }
+
+    public static function create(
+        string $key,
+        string $name,
+        int $productTypeId
+    ): ProductOption {
+        $model = new self();
+        $model->po_key = $key;
+        $model->po_name = $name;
+        $model->po_product_type_id = $productTypeId;
+        return $model;
+    }
 }

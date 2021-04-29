@@ -12,6 +12,7 @@ use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
 use modules\product\src\entities\productType\ProductType;
 use sales\helpers\ErrorsToStringHelper;
 use webapi\src\forms\flight\flights\FlightApiForm;
+use webapi\src\forms\flight\options\OptionApiForm;
 use webapi\src\services\flight\FlightManageApiService;
 use yii\base\Model;
 
@@ -22,10 +23,12 @@ use yii\base\Model;
  * @property $flights
  * @property $parentId
  * @property $parentBookingId
+ * @property $options
  *
  * @property Order $order
  * @property FlightQuote $flightQuote
  * @property FlightApiForm[] $flightApiForms
+ * @property OptionApiForm[] $optionApiForms
  */
 class FlightRequestApiForm extends Model
 {
@@ -56,6 +59,8 @@ class FlightRequestApiForm extends Model
                 return JsonHelper::decode($value);
             }],
             [['flights'], 'checkFlights'],
+
+            [['options'], 'checkOptions'],
         ];
     }
 
@@ -82,6 +87,24 @@ class FlightRequestApiForm extends Model
                 break;
             }
             $this->flightApiForms[$key] = $flightApiForm;
+        }
+    }
+
+    public function checkOptions($attribute): void
+    {
+        if (!empty($this->options) && JsonHelper::isValidJson($this->options) && $options = JsonHelper::decode($this->options)) {
+            foreach ($options as $key => $option) {
+                $optionApiForm = new OptionApiForm($option);
+                if (!$optionApiForm->load($option)) {
+                    $this->addError($attribute, 'OptionApiForm is not loaded');
+                    break;
+                }
+                if (!$optionApiForm->validate()) {
+                    $this->addError($attribute, 'OptionApiForm error: ' . ErrorsToStringHelper::extractFromModel($optionApiForm));
+                    break;
+                }
+                $this->optionApiForms[$key] = $optionApiForm;
+            }
         }
     }
 
