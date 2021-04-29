@@ -246,6 +246,7 @@ $js = <<<JS
                 } else {
                     createNotify('Success', 'Offer alternative successfully confirmed', 'success');
                     pjaxReload({container: "#pjax-lead-orders", async: false, timeout: 5000});
+                    pjaxReload({container: "#pjax-lead-offers", async: false, timeout: 5000});
                 }
             },
             error: function (xhr) {

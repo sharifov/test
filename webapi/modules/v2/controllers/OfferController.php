@@ -731,13 +731,6 @@ class OfferController extends BaseController
             $this->transactionManager->wrap(function () use ($offer) {
                 $dto = $this->offerService->confirmAlternative($offer);
 
-                if (!$dto->cntConfirmedQuotes) {
-                    throw new \DomainException(
-                        'Offer does not contain quotes that can be confirmed',
-                        OfferCodeException::API_OFFER_CA_QUOTE_NOT_PROCESSED
-                    );
-                }
-
                 if ($dto->orderId) {
                     $order = $this->orderRepository->find($dto->orderId);
                     $this->orderProcessManagerFactory->create($dto->orderId, $order->or_type_id);

@@ -68,6 +68,10 @@ class OfferService
         $offer->detachBehavior('user');
         $this->offerRepository->save($offer);
 
+        if (!$dto->cntConfirmedQuotes) {
+            throw new \DomainException('Offer does not contain quotes that can be confirmed');
+        }
+
         return $dto;
     }
 }
