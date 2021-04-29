@@ -3,9 +3,7 @@
 namespace modules\flight\src\jobs;
 
 use modules\flight\models\FlightQuote;
-use modules\flight\src\services\flightQuote\FlightQuotePdfService;
-use modules\flight\src\services\flightQuoteFlight\FlightQuoteFlightPdfService;
-use modules\order\src\events\OrderFileGeneratedEvent;
+use modules\flight\src\services\flightQuote\FlightQuoteTicketIssuedService;
 use yii\queue\Queue;
 use yii\queue\RetryableJobInterface;
 use sales\helpers\app\AppHelper;
@@ -38,11 +36,7 @@ class FlightQuotePdfJob implements RetryableJobInterface
                 throw new NotFoundException('FlightQuoteFlights not found in FlightQuote Id(' . $this->flightQuoteId . ')');
             }
 
-            foreach ($flightQuote->flightQuoteFlights as $flightQuoteFlight) {
-                $flightQuoteFlightPdfService = new FlightQuoteFlightPdfService($flightQuoteFlight);
-                $flightQuoteFlightPdfService->setProductQuoteId($flightQuoteFlight->fqfFq->fq_product_quote_id);
-                $flightQuoteFlightPdfService->processingFile();
-            }
+            FlightQuoteTicketIssuedService::generateTicketIssued($flightQuote);
 
             \Yii::info([
                 'message' => 'FlightQuotePdfJob - file is generated',

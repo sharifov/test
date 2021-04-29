@@ -213,24 +213,23 @@ class AttractionQuoteController extends FController
         $attractionId = (int) Yii::$app->request->get('id', 0);
 
         $optionsModel->load(Yii::$app->request->post());
-        $result = [];
         $apiAttractionService = AttractionModule::getInstance()->apiService;
 
-        try {
-            $result = $apiAttractionService->inputOptionsToAvailability($optionsModel);
-        } catch (\DomainException $e) {
-            Yii::$app->session->setFlash('error', $e->getMessage());
-        }
-
+        $result = $apiAttractionService->inputOptionsToAvailability($optionsModel);
         //VarDumper::dump($attractionId, 10, true); die();
-        $availability = $result['availability'];
-
-        return $this->renderAjax('availability_details', [
-            'availability' => $availability,
-            'paxForm' => $availabilityPaxForm,
-            'attractionId' => $attractionId,
-            'model' => $optionsModel,
-        ]);
+        if (empty($result['errors'])) {
+            $availability = $result['data']['availability'];
+            return $this->renderAjax('availability_details', [
+                'availability' => $availability,
+                'paxForm' => $availabilityPaxForm,
+                'attractionId' => $attractionId,
+                'model' => $optionsModel,
+            ]);
+        } else {
+            $response['error'] = true;
+            $response['message'] = $result['errors'];
+            return $this->asJson($response);
+        }
     }
 
     public function actionAddQuoteAjax()

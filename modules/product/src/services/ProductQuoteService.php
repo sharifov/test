@@ -37,4 +37,13 @@ class ProductQuoteService
         $productQuote->recountClientPrice($clientCurrency);
         $this->productQuoteRepository->save($productQuote);
     }
+
+    public function detachProductQuoteFromOrder(ProductQuote $productQuote): void
+    {
+        if ($productQuote->isInProgress() || $productQuote->isPending()) {
+            $productQuote->declined();
+        }
+        $productQuote->pq_order_id = null;
+        $this->productQuoteRepository->save($productQuote);
+    }
 }
