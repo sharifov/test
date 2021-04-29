@@ -249,8 +249,8 @@ class ApiAttractionService extends Component
 
         $result = self::execRequest(@json_encode($query));
         $data = json_decode($result, true);
-        //VarDumper::dump($result, 10, true); exit();
-        return $data['data'] ?? [];
+        //VarDumper::dump($data, 10, true); exit();
+        return $data ?? [];
     }
 
     public function getAvailability(string $availabilityId): array
