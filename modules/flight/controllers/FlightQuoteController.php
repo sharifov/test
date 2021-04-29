@@ -12,8 +12,7 @@ use modules\flight\src\repositories\flight\FlightRepository;
 use modules\flight\src\repositories\flightQuotePaxPriceRepository\FlightQuotePaxPriceRepository;
 use modules\flight\src\services\flight\FlightManageService;
 use modules\flight\src\services\flightQuote\FlightQuoteBookGuardService;
-use modules\flight\src\services\flightQuote\FlightQuotePdfService;
-use modules\flight\src\services\flightQuoteFlight\FlightQuoteFlightPdfService;
+use modules\flight\src\services\flightQuote\FlightQuoteTicketIssuedService;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchForm;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchService;
@@ -576,11 +575,7 @@ class FlightQuoteController extends FController
                 throw new NotFoundException('FlightQuoteFlights not found in FlightQuote Id(' . $flightQuoteId . ')');
             }
 
-            foreach ($flightQuote->flightQuoteFlights as $flightQuoteFlight) {
-                $flightQuoteFlightPdfService = new FlightQuoteFlightPdfService($flightQuoteFlight);
-                $flightQuoteFlightPdfService->setProductQuoteId($flightQuoteFlight->fqfFq->fq_product_quote_id);
-                $flightQuoteFlightPdfService->processingFile();
-            }
+            FlightQuoteTicketIssuedService::generateTicketIssued($flightQuote);
 
             $result['status'] = 1;
             $result['message'] = 'Document have been successfully generated';
