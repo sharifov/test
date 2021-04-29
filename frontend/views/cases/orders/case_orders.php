@@ -630,13 +630,16 @@ $js = <<<JS
                         });
                       return;
                   }
-                  pjaxReload({container: '#pjax-order-payment-' + orderId, timout: 8000});
+                  pjaxReload({container: '#pjax-order-payment-' + orderId, timout: 8000, async: true});
                   new PNotify({
                         title: 'Payment was successfully deleted',
                         type: 'success',
                         text: data.message,
                         hide: true
                     });
+                  if ($('#pjax-order-transaction-' + orderId).length) {
+                      pjaxReload({container: '#pjax-order-transaction-' + orderId, async: true});
+                  }
               })
             .fail(function( jqXHR, textStatus ) {
                 alert( "Request failed: " + textStatus );

@@ -188,8 +188,12 @@ $js = <<<JS
             if (data.error) {
                 createNotify('Error: delete Payment', data.error, 'error'); 
             } else {
-                pjaxReload({container: '#pjax-order-payment-' + orderId, timout: 8000});
+                pjaxReload({container: '#pjax-order-payment-' + orderId, timout: 8000, async: true});
                 createNotify('Payment was successfully deleted', data.message, 'success');
+                
+                if ($('#pjax-order-transaction-' + orderId).length) {
+                    pjaxReload({container: '#pjax-order-transaction-' + orderId, async: true});
+                }
             }
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
