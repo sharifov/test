@@ -42,18 +42,26 @@ use modules\product\src\entities\productQuote\ProductQuoteRepository;
  *
  * @property OrderPriceUpdater $orderPriceUpdater
  * @property OfferPriceUpdater $offerPriceUpdater
+ * @property ProductQuoteRepository $productQuoteRepository
  */
 class RentCarQuoteController extends FController
 {
     private OrderPriceUpdater $orderPriceUpdater;
-
     private OfferPriceUpdater $offerPriceUpdater;
+    private $productQuoteRepository;
 
-    public function __construct($id, $module, OrderPriceUpdater $orderPriceUpdater, OfferPriceUpdater $offerPriceUpdater, $config = [])
-    {
+    public function __construct(
+        $id,
+        $module,
+        OrderPriceUpdater $orderPriceUpdater,
+        OfferPriceUpdater $offerPriceUpdater,
+        ProductQuoteRepository $productQuoteRepository,
+        $config = []
+    ) {
         parent::__construct($id, $module, $config);
         $this->orderPriceUpdater = $orderPriceUpdater;
         $this->offerPriceUpdater = $offerPriceUpdater;
+        $this->productQuoteRepository = $productQuoteRepository;
     }
 
     public function init(): void
@@ -386,6 +394,16 @@ class RentCarQuoteController extends FController
         }
 
         throw new BadRequestHttpException();
+    }
+
+    public function actionAjaxQuoteDetails(): string
+    {
+        $productQuoteId = Yii::$app->request->get('id');
+        $productQuote = $this->productQuoteRepository->find($productQuoteId);
+
+        return $this->renderAjax('partial/_quote_view_details', [
+            'rentCarQuote' => $productQuote->rentCarQuote
+        ]);
     }
 
     /**

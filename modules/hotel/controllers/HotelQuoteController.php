@@ -639,14 +639,8 @@ class HotelQuoteController extends FController
     {
         $productQuoteId = Yii::$app->request->get('id');
         $productQuote = $this->productQuoteRepository->find($productQuoteId);
-        //$lead = $productQuote->pqProduct->prLead;
-
-        /*if ($lead->isInTrash() && Auth::user()->isAgent()) {
-            throw new ForbiddenHttpException('Access Denied for Agent');
-        }*/
 
         return $this->renderAjax('partial/_quote_view_details', [
-            //'productQuote' => $productQuote,
             'hotelQuote' => $productQuote->hotelQuote
         ]);
     }
