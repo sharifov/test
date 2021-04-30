@@ -590,6 +590,16 @@ class AttractionQuoteController extends FController
         return $result;
     }
 
+    public function actionAjaxQuoteDetails(): string
+    {
+        $productQuoteId = Yii::$app->request->get('id');
+        $productQuote = $this->productQuoteRepository->find($productQuoteId);
+
+        return $this->renderAjax('partial/_quote_view_details', [
+            'attractionQuote' => $productQuote->attractionQuote
+        ]);
+    }
+
     /**
      * Finds the HotelQuote model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.

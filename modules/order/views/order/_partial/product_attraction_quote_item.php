@@ -180,6 +180,23 @@ use modules\product\src\entities\productQuote\ProductQuote;
             $('#preloader').addClass('d-none');
         });
     });
+    
+    $('body').on('click','.btn-attraction-quote-details', function (e) {
+        e.preventDefault();
+        let url = $(this).data('url');
+        let modal = $('#modal-lg');       
+        $('#modal-lg-label').html($(this).data('title'));        
+        modal.find('.modal-body').html('');
+        $('#preloader').removeClass('hidden');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            if (status == 'error') {
+                alert(response);
+            } else {
+                $('#preloader').addClass('hidden');
+                modal.modal('show');
+            }
+        });
+    });
 JS;
 
     $this->registerJs($js, \yii\web\View::POS_READY);
@@ -220,6 +237,14 @@ JS;
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-bars text-warning"></i></a>
                     <div class="dropdown-menu" role="menu">
                         <h6 class="dropdown-header">Quote Q<?=($model->attractionQuote->atnq_product_quote_id)?></h6>
+
+                        <?= Html::a('<i class="fa fa-search"></i> Details', null, [
+                            'class' => 'btn-attraction-quote-details dropdown-item',
+                            'data-id' => $model->pq_id,
+                            'data-title' => '<i class="fas fa-archway"></i> ' . $model->attractionQuote->atnqAttraction->atn_destination,
+                            'data-url' => Url::to(['/attraction/attraction-quote/ajax-quote-details', 'id' => $model->pq_id]),
+                            'title' => 'Details'
+                        ]) ?>
 
                         <!--<?php /*if ($model->isBookable()) : */?>
                             <?/*= Html::a(
