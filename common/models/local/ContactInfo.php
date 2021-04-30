@@ -14,11 +14,12 @@ class ContactInfo extends Model
     public $smtpPort = null;
     public $encryption = null;
     public $email_no_reply_prefix = 'no-reply';
+    public $email_from_name = null;
 
     public function rules()
     {
         return [
-            [['phone','email', 'password', 'smtpHost', 'smtpPort', 'encryption', 'email_no_reply_prefix'], 'safe'],
+            [['phone','email', 'password', 'smtpHost', 'smtpPort', 'encryption', 'email_no_reply_prefix', 'email_from_name'], 'safe'],
         ];
     }
 
@@ -34,12 +35,18 @@ class ContactInfo extends Model
             'smtpHost' => 'SMTP Host',
             'smtpPort' => 'SMTP Port',
             'encryption' => 'Encryption',
-            'email_no_reply_prefix' => 'Email NoReply Prefix'
+            'email_no_reply_prefix' => 'Email NoReply Prefix',
+            'email_form_name' => 'Email From Name'
         ];
     }
 
     public function getEmailNoReply(): string
     {
         return $this->email_no_reply_prefix;
+    }
+
+    public function getEmailFromName(): ?string
+    {
+        return $this->email_from_name;
     }
 }

@@ -26,6 +26,7 @@ use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\repositories\lead\LeadRepository;
 use sales\services\quote\addQuote\TripService;
+use webapi\src\behaviors\ApiUserProjectRelatedAccessBehavior;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
@@ -42,6 +43,15 @@ use common\models\QuoteSegmentBaggageCharge;
 class QuoteController extends ApiBaseController
 {
 
+    public function behaviors(): array
+    {
+        $behaviors = parent::behaviors();
+
+        if ($this->action->id === 'get-info' && $apiKey = Yii::$app->request->post('apiKey')) {
+            $behaviors['apiUserProjectAccessBehavior'] = ['class' => ApiUserProjectRelatedAccessBehavior::class, 'apiKey' => $apiKey];
+        }
+        return $behaviors;
+    }
 
     /**
      *

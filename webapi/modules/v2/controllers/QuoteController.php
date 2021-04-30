@@ -13,6 +13,7 @@ use common\models\UserProjectParams;
 use common\models\VisitorLog;
 use frontend\helpers\JsonHelper;
 use frontend\widgets\notification\NotificationMessage;
+use webapi\src\behaviors\ApiUserProjectRelatedAccessBehavior;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
@@ -22,6 +23,15 @@ use yii\web\UnprocessableEntityHttpException;
 
 class QuoteController extends ApiBaseController
 {
+
+    public function behaviors(): array
+    {
+        $behaviors = parent::behaviors();
+        if ($this->action->uniqueId === 'get-info' && $apiKey = Yii::$app->request->post('apiKey')) {
+            $behaviors['apiUserProjectAccessBehavior'] = ['class' => ApiUserProjectRelatedAccessBehavior::class, 'apiKey' => $apiKey];
+        }
+        return $behaviors;
+    }
 
     /**
      *
