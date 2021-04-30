@@ -2,7 +2,9 @@
 
 namespace common\models\search;
 
+use common\components\validators\IsArrayValidator;
 use common\models\Employee;
+use sales\model\project\entity\projectRelation\ProjectRelation;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Project;
@@ -10,9 +12,13 @@ use yii\db\Expression;
 
 /**
  * ProjectSearch represents the model behind the search form of `common\models\Project`.
+ *
+ * @property array|null $related_projects
  */
 class ProjectSearch extends Project
 {
+    public $related_projects;
+
     /**
      * {@inheritdoc}
      */
@@ -24,30 +30,18 @@ class ProjectSearch extends Project
             [['email_postfix'], 'string', 'max' => 100],
             [['project_key'], 'string', 'max' => 50],
             [['last_update'], 'date', 'format' => 'php:Y-m-d'],
+
+            ['related_projects', 'integer'],
         ];
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function scenarios()
-    {
-        // bypass scenarios() implementation in the parent class
-        return Model::scenarios();
-    }
-
-    /**
-     * Creates data provider instance with search query applied
-     *
      * @param array $params
-     *
      * @return ActiveDataProvider
      */
     public function search($params)
     {
         $query = Project::find();
-
-        // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -56,8 +50,7 @@ class ProjectSearch extends Project
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
@@ -66,7 +59,6 @@ class ProjectSearch extends Project
                 ->andFilterWhere(['<=', 'last_update', Employee::convertTimeFromUserDtToUTC(strtotime($this->last_update) + 3600 * 24)]);
         }
 
-        // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
             'closed' => $this->closed,
@@ -78,6 +70,11 @@ class ProjectSearch extends Project
             ->andFilterWhere(['like', 'contact_info', $this->contact_info])
             ->andFilterWhere(['like', 'project_key', $this->project_key])
             ->andFilterWhere(['like', 'email_postfix', $this->email_postfix]);
+
+        if (!empty($this->related_projects)) {
+            $query->innerJoin(ProjectRelation::tableName(), Project::tableName() . '.id = prl_project_id');
+            $query->andWhere(['IN', 'prl_related_project_id', $this->related_projects]);
+        }
 
         return $dataProvider;
     }

@@ -91,7 +91,7 @@ class ClientChatController extends Controller
         foreach ($users as $user) {
             $pass = $rocketChat::generatePassword();
 
-            $rocketChatUsername = $user['nickname_client_chat'] ?: $user['username'];
+            $rocketChatUsername = $user['nickname'] ?: $user['username'];
             $result = $rocketChat->createUser(
                 $user['username'],
                 $pass,
@@ -124,9 +124,13 @@ class ClientChatController extends Controller
                 $userClientChatData->uccd_rc_user_id = $result['data']['_id'];
                 $userClientChatData->uccd_auth_token = $login['data']['authToken'];
                 $userClientChatData->uccd_token_expired = $rocketChat::generateTokenExpired();
+                $userClientChatData->uccd_username = $user['username'];
+                $userClientChatData->uccd_name = $rocketChatUsername;
 
                 if (!$userClientChatData->save()) {
+                    $rocketChat->deleteUser($result['data']['_id']);
                     $errorMessage = VarDumper::dumpAsString(['profile' => $userClientChatData->attributes, 'errors' => $userClientChatData->errors]);
+                    printf(" - Error1: %s\n", $this->ansiFormat('Failed saving client chat data; Profile removed from rc; User: ' . $user['username'], Console::FG_RED));
                     \Yii::error($errorMessage, 'Console:ClientChat:RcCreateUserProfile:userClientChatData:save');
                     continue;
                 }

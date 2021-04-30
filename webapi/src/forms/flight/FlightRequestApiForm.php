@@ -36,10 +36,12 @@ class FlightRequestApiForm extends Model
     public $flights;
     public $parentId;
     public $parentBookingId;
+    public $options;
 
     private $order;
     private $flightQuote;
     private array $flightApiForms = [];
+    private array $optionApiForms = [];
 
     public function rules(): array
     {
@@ -129,5 +131,13 @@ class FlightRequestApiForm extends Model
     public function getFlightQuote(): FlightQuote
     {
         return $this->flightQuote;
+    }
+
+    /**
+     * @return OptionApiForm[]
+     */
+    public function getOptionApiForms(): array
+    {
+        return $this->optionApiForms;
     }
 }
