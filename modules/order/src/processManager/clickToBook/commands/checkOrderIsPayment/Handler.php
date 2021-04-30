@@ -43,10 +43,10 @@ class Handler
 
         $order = $manager->order;
 
-        if (!$order->isPaymentPaid()) {
-            $this->errorOrder->error($order->or_id, 'ClickToBook AutoProcessing error. Order Payment is not Paid.');
-            return;
-        }
+//        if (!$order->isPaymentPaid()) {
+//            $this->errorOrder->error($order->or_id, 'ClickToBook AutoProcessing error. Order Payment is not Paid.');
+//            return;
+//        }
 
         if ($this->bookableQuoteChecker->has($order->or_id)) {
             $this->bookingRunner->run($order->or_id);
