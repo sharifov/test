@@ -11,6 +11,7 @@ use sales\model\clientChat\entity\projectConfig\ClientChatProjectConfig;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\phoneLine\phoneLine\entity\PhoneLine;
 use sales\model\project\entity\params\Params;
+use sales\model\project\entity\projectRelation\ProjectRelation;
 use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -41,6 +42,8 @@ use common\components\validators\IsArrayValidator;
  * @property int|null $p_update_user_id
  * @property array|string|null $p_params_json
  *
+ * @property array|null $relatedProjects
+ *
  * @property ContactInfo $contactInfo
  * @property Params|null $params
  *
@@ -69,12 +72,15 @@ use common\components\validators\IsArrayValidator;
  * @property Employee[] $uppUsers
  * @property UserProjectParams[] $userProjectParams
  * @property VisitorLog[] $visitorLogs
+ * @property ProjectRelation[] $projectRelations
  */
 class Project extends \yii\db\ActiveRecord
 {
     private ContactInfo $_contactInfo;
 
     private ?Params $params = null;
+
+    public $relatedProjects;
 
     /**
      * @return string
@@ -105,6 +111,11 @@ class Project extends \yii\db\ActiveRecord
                 return JsonHelper::encode($value);
             }],
             [['contact_info'], 'string'],
+
+            ['relatedProjects', IsArrayValidator::class],
+            ['relatedProjects', 'filter', 'filter' => static function ($value) {
+                return empty($value) ? [] : $value;
+            }],
         ];
     }
 
@@ -198,6 +209,15 @@ class Project extends \yii\db\ActiveRecord
     {
         $data = self::find()->orderBy(['name' => SORT_ASC])->asArray()->all();
         return ArrayHelper::map($data, 'id', 'name');
+    }
+
+    public static function getListExcludeIds(array $ids): array
+    {
+        return ArrayHelper::map(
+            self::find()->where(['NOT IN', 'id', $ids])->orderBy(['name' => SORT_ASC])->asArray()->all(),
+            'id',
+            'name'
+        );
     }
 
     public static function getSmsEnabledList(): array
@@ -646,6 +666,23 @@ class Project extends \yii\db\ActiveRecord
     public function getVisitorLogs(): ActiveQuery
     {
         return $this->hasMany(VisitorLog::class, ['vl_project_id' => 'id']);
+    }
+
+    public function getProjectRelations(): ActiveQuery
+    {
+        return $this->hasMany(ProjectRelation::class, ['prl_project_id' => 'id']);
+    }
+
+    public function getRelatedProjectIds(): array
+    {
+        $result = [];
+        if (!$this->projectRelations) {
+            return $result;
+        }
+        foreach ($this->projectRelations as $projectRelations) {
+            $result[] = $projectRelations->prl_related_project_id;
+        }
+        return $result;
     }
 
     public function getEmailNoReply(): string

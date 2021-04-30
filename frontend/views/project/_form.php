@@ -31,6 +31,19 @@ use yii\widgets\ActiveForm;
         <?php //= $form->field($model, 'contact_info')->textarea(['rows' => 6]) ?>
 
         <?php
+        echo $form->field($model, 'relatedProjects')->widget(\kartik\select2\Select2::class, [
+            'data' => \common\models\Project::getListExcludeIds([$model->id]),
+            'size' => \kartik\select2\Select2::SMALL,
+            'options' => [
+                'placeholder' => 'Select projects',
+                'multiple' => true,
+                'value' => $model->relatedProjects ?? $model->getRelatedProjectIds(),
+            ],
+            'pluginOptions' => ['allowClear' => true],
+        ]);
+        ?>
+
+        <?php
 
         try {
             echo $form->field($model, 'contact_info')->widget(

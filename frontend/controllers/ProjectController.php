@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use sales\model\project\entity\params\Params;
+use sales\model\project\entity\projectRelation\ProjectRelationRepository;
 use sales\widgets\ProjectSelect2Widget;
 use Yii;
 use common\models\Project;
@@ -89,6 +90,8 @@ class ProjectController extends FController
                 $model->p_params_json = [];
             }
             if ($model->save()) {
+                (new ProjectRelationRepository())->replaceRelations($model->id, $model->relatedProjects);
+
                 return $this->redirect(['view', 'id' => $model->id]);
             }
         }
@@ -117,7 +120,10 @@ class ProjectController extends FController
                 Yii::$app->session->addFlash('error', 'Parameters: ' .  $e->getMessage());
                 $model->p_params_json = $originalParams;
             }
+
             if ($model->save()) {
+                (new ProjectRelationRepository())->replaceRelations($model->id, $model->relatedProjects);
+
                 return $this->redirect(['view', 'id' => $model->id]);
             }
         }
