@@ -109,7 +109,6 @@ class HotelQuoteBookService
                 Yii::error(AppHelper::throwableLog($throwable), 'HotelQuoteBookService:response:book:success');
             }
         } else {
-            $this->leadFailBooking->create($productQuote->pq_id, null);
             $this->message = $apiResponse['message'];
             $productQuote = $model->hqProductQuote;
             $productQuote->error($userId, $apiResponse['message']);

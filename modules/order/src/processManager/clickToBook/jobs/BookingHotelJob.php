@@ -9,6 +9,7 @@ use modules\hotel\models\HotelQuote;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookGuard;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookService;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCheckRateService;
+use modules\lead\src\services\LeadFailBooking;
 use modules\order\src\processManager\clickToBook\ErrorOrder;
 use sales\repositories\lead\LeadRepository;
 use yii\queue\JobInterface;
@@ -88,7 +89,7 @@ class BookingHotelJob implements JobInterface
                 $errorOrder = Yii::createObject(ErrorOrder::class);
                 $errorOrder->error($orderId, 'ClickToBook AutoProcessing Error: Hotel Quote Book Error');
             }
-            $this->createBookFailedLead();
+            $this->createBookFailedLead($quote->hq_product_quote_id);
         } catch (\Throwable $e) {
             Yii::error([
                 'message' => 'BookingHotelJob errorBook',
@@ -98,11 +99,10 @@ class BookingHotelJob implements JobInterface
         }
     }
 
-    private function createBookFailedLead(): void
+    private function createBookFailedLead(int $productQuoteId): void
     {
-//        $repo = Yii::createObject(LeadRepository::class);
-//        $lead = Lead::createBookFailed();
-//        $repo->save($lead);
+        $leadFailBookingService = Yii::createObject(LeadFailBooking::class);
+        $leadFailBookingService->create($productQuoteId, null);
     }
 
 //    public function getTtr(): int
