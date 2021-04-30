@@ -132,6 +132,23 @@ use yii\widgets\Pjax;
             });
         });
      });
+    
+    $('body').on('click','.btn-cruise-quote-details', function (e) {
+        e.preventDefault();
+        let url = $(this).data('url');
+        let modal = $('#modal-lg');       
+        $('#modal-lg-label').html($(this).data('title'));        
+        modal.find('.modal-body').html('');
+        $('#preloader').removeClass('hidden');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            if (status == 'error') {
+                alert(response);
+            } else {
+                $('#preloader').addClass('hidden');
+                modal.modal('show');
+            }
+        });
+    });
 JS;
 
     $this->registerJs($js, \yii\web\View::POS_READY);
@@ -167,6 +184,13 @@ JS;
                     <div class="dropdown-menu" role="menu">
                         <h6 class="dropdown-header">Quote Q<?=($model->cruiseQuote->crq_product_quote_id)?></h6>
 
+                        <?= Html::a('<i class="fa fa-search"></i> Details', null, [
+                            'class' => 'btn-cruise-quote-details dropdown-item',
+                            'data-id' => $model->pq_id,
+                            'data-title' => '<i class="fa fa-ship"></i> ' . $model->cruiseQuote->crq_data_json['cruiseLine']['name'] . ' <img src="' . $model->cruiseQuote->crq_data_json['cruiseLine']['logoImage']['low'] . '">',
+                            'data-url' => Url::to(['/cruise/cruise-quote/ajax-quote-details', 'id' => $model->pq_id]),
+                            'title' => 'Details'
+                        ]) ?>
 
                         <!--<?php /*echo Html::a('<i class="fa fa-plus-circle"></i> Add option', null, [
                             'class' => 'dropdown-item text-success btn-add-product-quote-option',
