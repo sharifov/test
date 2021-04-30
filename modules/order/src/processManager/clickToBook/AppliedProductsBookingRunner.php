@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\order\src\processManager;
+namespace modules\order\src\processManager\clickToBook;
 
 use modules\order\src\processManager\clickToBook\jobs\BookingHotelJob;
 use modules\order\src\processManager\queue\Queue;

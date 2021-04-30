@@ -65,7 +65,7 @@ class BookingHotelJob implements JobInterface
             }
             throw new \DomainException($checkResult->message);
         } catch (\Throwable $e) {
-            $this->errorBook($quote, $e->getMessage());
+            $this->errorBook($quote);
             \Yii::error([
                 'message' => 'Booking Hotel error',
                 'error' => $e->getMessage(),
@@ -80,13 +80,13 @@ class BookingHotelJob implements JobInterface
         }
     }
 
-    private function errorBook(HotelQuote $quote, string $message): void
+    private function errorBook(HotelQuote $quote): void
     {
         try {
             $orderId = $quote->hqProductQuote->pq_order_id ?? null;
             if ($orderId) {
                 $errorOrder = Yii::createObject(ErrorOrder::class);
-                $errorOrder->error($orderId, 'ClickToBook AutoProcessing error. Message: ' . $message);
+                $errorOrder->error($orderId, 'ClickToBook AutoProcessing Error: Hotel Quote Book Error');
             }
             $this->createBookFailedLead();
         } catch (\Throwable $e) {

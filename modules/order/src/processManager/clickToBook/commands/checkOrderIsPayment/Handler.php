@@ -2,7 +2,7 @@
 
 namespace modules\order\src\processManager\clickToBook\commands\checkOrderIsPayment;
 
-use modules\order\src\processManager\AppliedProductsBookingRunner;
+use modules\order\src\processManager\clickToBook\AppliedProductsBookingRunner;
 use modules\order\src\processManager\BookableQuoteChecker;
 use modules\order\src\processManager\clickToBook\OrderProcessManagerRepository;
 use modules\order\src\processManager\clickToBook\ErrorOrder;
