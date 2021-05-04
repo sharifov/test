@@ -5999,6 +5999,142 @@ define({ "api": [
   },
   {
     "type": "post",
+    "url": "/v1/offer-email/send-quote",
+    "title": "Offer email Send Quote",
+    "version": "0.1.0",
+    "name": "SendQuote",
+    "group": "Quotes",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "13",
+            "optional": false,
+            "field": "quote_uid",
+            "description": "<p>Quote UID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "template_key",
+            "description": "<p>Template key</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "email_from",
+            "description": "<p>Email from</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "email_from_name",
+            "description": "<p>Email from name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "email_to",
+            "description": "<p>Email to</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "json",
+            "optional": true,
+            "field": "additional_data",
+            "description": "<p>Additional data</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "5",
+            "optional": true,
+            "field": "language_id",
+            "description": "<p>Language Id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": true,
+            "field": "market_country_code",
+            "description": "<p>Market country code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "apiKey",
+            "description": "<p>API Key for Project (if not use Basic-Authorization)</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n   \"quote_uid\": \"60910028642b8\",\n   \"template_key\": \"cl_offer\",\n   \"email_from\": \"from@test.com\",\n   \"email_from_name\": \"Tester\",\n   \"email_to\": \"to@test.com\",\n   \"language_id\": \"en-US\",\n   \"market_country_code\": \"RU\",\n   \"additional_data\": [\n       {\n           \"code\": \"PR\",\n           \"airline\": \"Philippine Airlines\"\n       }\n   ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n     {\n                \"status\": 200,\n                \"message\": \"OK\",\n                \"data\": {\n                    \"result\": \"Email sending\"\n                }\n            }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 404 Not Found\n{\n    \"name\": \"Not Found\",\n    \"message\": \"Not found Quote UID: 30\",\n    \"code\": 2,\n    \"status\": 404,\n    \"type\": \"yii\\\\web\\\\NotFoundHttpException\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v1/controllers/OfferEmailController.php",
+    "groupTitle": "Quotes"
+  },
+  {
+    "type": "post",
     "url": "/v2/quote/get-info",
     "title": "Get Quote",
     "version": "0.2.0",

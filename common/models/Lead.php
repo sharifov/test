@@ -3946,7 +3946,7 @@ Reason: {reason}',
      * @param string|null $lang
      * @return array
      */
-    public function getEmailData2(array $quoteIds, $projectContactInfo, ?string $lang = null): array
+    public function getEmailData2(array $quoteIds, $projectContactInfo, ?string $lang = null, array $agent = []): array
     {
         $project = $this->project;
 
@@ -4003,12 +4003,10 @@ Reason: {reason}',
         ];
 
         $content_data['agent'] = [
-            'name'  => Yii::$app->user->identity->full_name,
-            'username'  => Yii::$app->user->identity->username,
-            'nickname' => Yii::$app->user->identity->nickname,
-//            'phone' => $upp && $upp->upp_tw_phone_number ? $upp->upp_tw_phone_number : '',
+            'name'  => array_key_exists('full_name', $agent) ? $agent['full_name'] : Yii::$app->user->identity->full_name,
+            'username'  => array_key_exists('username', $agent) ? $agent['username'] : Yii::$app->user->identity->username,
+            'nickname' => array_key_exists('nickname', $agent) ? $agent['nickname'] : Yii::$app->user->identity->nickname,
             'phone' => $upp && $upp->getPhone() ? $upp->getPhone() : '',
-//            'email' => $upp && $upp->upp_email ? $upp->upp_email : '',
             'email' => $upp && $upp->getEmail() ? $upp->getEmail() : '',
         ];
 
@@ -4018,10 +4016,8 @@ Reason: {reason}',
             'lastName'     => $this->client ? $this->client->last_name : '',
         ];
 
-
         $arriveCity = '';
         $departCity = '';
-
         $arriveIATA = '';
         $departIATA = '';
 
