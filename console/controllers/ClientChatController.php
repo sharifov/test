@@ -68,7 +68,7 @@ class ClientChatController extends Controller
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
         $query = Employee::find()
-            ->select(['id', 'username', 'nickname', 'email', 'nickname_client_chat'])
+            ->select(['id', 'username', 'nickname', 'email'])
             ->leftJoin(UserClientChatData::tableName(), 'id = uccd_employee_id')
             ->where(['uccd_employee_id' => null])
             ->orWhere(['uccd_employee_id' => '']);

@@ -474,7 +474,7 @@ class UserClientChatDataController extends FController
 
         return [
             'username' => $user->username,
-            'name' => $user->nickname_client_chat ?: $user->username,
+            'name' => $user->nickname ?? $user->username,
         ];
     }
 }
