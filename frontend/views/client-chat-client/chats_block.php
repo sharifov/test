@@ -19,7 +19,7 @@ use yii\helpers\Html;
                     'attribute' => 'cch_id',
                     'value' => static function (ClientChat $chat) {
                         return Html::a('<i class="fa fa-comments"> </i> ' . $chat->cch_id, [
-                            'client-chat/index', 'chid' => $chat->cch_id
+                            'client-chat/dashboard-v2', 'chid' => $chat->cch_id
                         ], [
                             'data-pjax' => 0,
                             'target' => '_blank'

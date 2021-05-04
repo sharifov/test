@@ -18,7 +18,6 @@ use yii\helpers\ArrayHelper;
 class OnlineConnection extends \yii\bootstrap\Widget
 {
     public const CHAT_SUBSCRIBE_LIST = [
-        'client-chat/index',
         'client-chat/view',
         'client-chat/dashboard-v2',
     ];
