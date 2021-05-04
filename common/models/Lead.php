@@ -48,6 +48,7 @@ use sales\events\lead\LeadStatusChangedEvent;
 use sales\events\lead\LeadTaskEvent;
 use sales\events\lead\LeadTrashEvent;
 use sales\helpers\lead\LeadHelper;
+use sales\helpers\quote\QuoteProviderProjectHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\interfaces\Objectable;
 use sales\model\airportLang\service\AirportLangService;
@@ -3977,6 +3978,10 @@ Reason: {reason}',
                     ];
 
                     $quoteItem = array_merge($quoteItem, $quoteModel->getInfoForEmail2($lang));
+
+                    if ($providerProjects = QuoteProviderProjectHelper::getProviderProjects($quoteModel)) {
+                        $quoteItem['provider'] = $providerProjects;
+                    }
 
                     $content_data['quotes'][] = $quoteItem;
                 }

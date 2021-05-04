@@ -1132,8 +1132,8 @@ class FlightQuoteHelper
                 data-toggle="tooltip"
                 data-html="true"
                 title="' . QuoteHelper::innerPenalties($penalties) . '">
-				    <i class="fa fa-expand fa-border"></i>
-			</span>';
+                    <i class="fa fa-expand fa-border"></i>
+            </span>';
         }
         return '';
     }

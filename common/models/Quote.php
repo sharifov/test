@@ -56,6 +56,7 @@ use yii\helpers\VarDumper;
  * @property string $origin_search_data
  * @property string $gds_offer_id
  * @property float $agent_processing_fee
+ * @property int|null $provider_project_id
  *
  * @property QuotePrice[] $quotePrices
  * @property int $quotePricesCount
@@ -63,6 +64,7 @@ use yii\helpers\VarDumper;
  * @property Lead $lead
  * @property QuoteTrip[] $quoteTrips
  * @property Airline[] $mainAirline
+ * @property Project $providerProject
  */
 class Quote extends \yii\db\ActiveRecord
 {
@@ -285,6 +287,9 @@ class Quote extends \yii\db\ActiveRecord
             ['gds', 'string', 'max' => 1],
 
             [['agent_processing_fee'], 'number'],
+
+            ['provider_project_id', 'integer'],
+            ['provider_project_id', 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['provider_project_id' => 'id']],
         ];
     }
 
@@ -1589,7 +1594,6 @@ class Quote extends \yii\db\ActiveRecord
         return Airline::findIdentity($this->main_airline_code);
     }
 
-
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -1598,6 +1602,10 @@ class Quote extends \yii\db\ActiveRecord
         return $this->hasOne(Airline::class, ['iata' => 'main_airline_code']);
     }
 
+    public function getProviderProject(): ActiveQuery
+    {
+        return $this->hasOne(Project::class, ['id' => 'provider_project_id']);
+    }
 
     public function getQuoteTripsData()
     {

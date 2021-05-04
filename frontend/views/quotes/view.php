@@ -96,6 +96,7 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                         'filter' => \common\models\Lead::CABIN_LIST
                     ],
                     'main_airline_code',
+                     'provider_project_id:projectName',
                 ],
             ]) ?>
         </div>

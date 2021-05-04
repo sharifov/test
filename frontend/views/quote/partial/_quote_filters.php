@@ -338,3 +338,11 @@ use yii\bootstrap4\Html;
     </div>
 </div>
 
+<?php
+$css = <<<CSS
+    .noUi-connect {
+        background: #ccc;
+    }
+CSS;
+$this->registerCss($css);
+

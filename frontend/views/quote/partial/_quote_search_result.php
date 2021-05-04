@@ -78,8 +78,19 @@ JS;
         <?= \yii\widgets\ListView::widget([
             'dataProvider' => $dataProvider,
             'emptyText' => '<div class="text-center">Not found quotes</div><br>',
-            'itemView' => function ($resultItem, $key, $index, $widget) use ($locations, $airlines, $flightQuotes, $keyCache) {
-                return $this->render('_quote_search_item', ['resultKey' => $key,'result' => $resultItem,'locations' => $locations,'airlines' => $airlines, 'flightQuotes' => $flightQuotes, 'keyCache' => $keyCache]);
+            'itemView' => function ($resultItem, $key, $index, $widget) use ($locations, $airlines, $flightQuotes, $keyCache, $lead) {
+                return $this->render(
+                    '_quote_search_item',
+                    [
+                        'resultKey' => $key,
+                        'result' => $resultItem,
+                        'locations' => $locations,
+                        'airlines' => $airlines,
+                        'flightQuotes' => $flightQuotes,
+                        'keyCache' => $keyCache,
+                        'lead' => $lead,
+                    ]
+                );
             },
             'layout' => '{summary}{pager}{items}{pager}',
             'itemOptions' => [
