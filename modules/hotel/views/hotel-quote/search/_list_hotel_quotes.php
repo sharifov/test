@@ -149,7 +149,7 @@ HotelAsset::register($this);
     </div>
 
     <div class="quote__wrapper">
-        <div class="">
+        <div class="col-md-12">
             <div class="row">
                 <div class="col-3">
                     <?php if (isset($dataHotel['images'][0]['url'])) : ?>
