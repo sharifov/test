@@ -3,9 +3,11 @@
 namespace modules\abac\src\entities;
 
 use common\models\Employee;
+use modules\abac\src\AbacService;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\caching\TagDependency;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
@@ -39,6 +41,8 @@ class AbacPolicy extends ActiveRecord
         self::EFFECT_DENY => 'deny',
         self::EFFECT_ALLOW => 'allow',
     ];
+
+
 
     /**
      * @return string
@@ -112,6 +116,67 @@ class AbacPolicy extends ActiveRecord
         ];
     }
 
+    public function beforeSave($insert): bool
+    {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+
+        if ($this->ap_action_json) {
+            $this->ap_action = $this->getActionListById();
+        }
+
+        if ($this->ap_subject_json) {
+            $this->ap_subject = $this->getDecodeCode();
+        }
+
+        return true;
+    }
+
+    /**
+     * @param bool $insert
+     * @param array $changedAttributes
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+        $cacheTagDependency = Yii::$app->abac->getCacheTagDependency();
+        if ($cacheTagDependency) {
+            TagDependency::invalidate(Yii::$app->cache, $cacheTagDependency);
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getActionListById(): string
+    {
+        $str = '';
+        if ($this->ap_action_json) {
+            $actionData = @json_decode($this->ap_action_json, true);
+            if ($actionData && is_array($actionData)) {
+                $values = [];
+                foreach ($actionData as $actionId) {
+                    $values[] = '(' . $actionId . ')';
+                }
+                $str = implode('|', $values);
+            }
+        }
+        return $str;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSubjectByJson(): string
+    {
+        $str = '';
+        if ($this->ap_subject_json) {
+            //$data = @json_decode($this->ap_subject_json);
+        }
+        return $str;
+    }
+
     /**
      * Gets query for [[ApCreatedUser]].
      *
@@ -141,23 +206,28 @@ class AbacPolicy extends ActiveRecord
     }
 
     /**
-     * @return array
+     * @return string
      */
-    public function getActionList(): array
+    public function getEffectName(): string
     {
-        $list = [];
-        $list['view'] = 'view';
-        $list['edit'] = 'edit';
-        $list['delete'] = 'delete';
-        return $list;
+        return self::EFFECT_LIST[$this->ap_effect] ?? '-';
     }
 
-    public function getObjectList(): array
+    /**
+     * @param bool $human
+     * @return string
+     */
+    public function getDecodeCode(bool $human = false): string
     {
-        //$list = [];
-        $list = Yii::$app->abac->getObjectList();
-        //$list['hotel'] = 'hotel/*';
-        //$list['flight'] = 'flight/*';
-        return $list;
+        $code = '';
+        $rules = @json_decode($this->ap_subject_json, true);
+        if (is_array($rules)) {
+            $code = AbacService::conditionDecode($rules);
+
+            if ($human) {
+                $code = AbacService::humanConditionCode($code);
+            }
+        }
+        return $code;
     }
 }

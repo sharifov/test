@@ -2,9 +2,14 @@
 
 namespace modules\abac\controllers;
 
+use frontend\controllers\FController;
+use modules\abac\src\forms\AbacPolicyForm;
 use Yii;
 use modules\abac\src\entities\AbacPolicy;
 use modules\abac\src\entities\search\AbacPolicySearch;
+use yii\base\BaseObject;
+use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -12,21 +17,22 @@ use yii\filters\VerbFilter;
 /**
  * AbacPolicyController implements the CRUD actions for AbacPolicy model.
  */
-class AbacPolicyController extends Controller
+class AbacPolicyController extends FController
 {
     /**
-     * {@inheritdoc}
+     * @return array
      */
-    public function behaviors()
+    public function behaviors(): array
     {
-        return [
+        $behaviors = [
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class' => VerbFilter::class,
                 'actions' => [
-                    'delete' => ['POST'],
+                    'delete-ajax' => ['POST'],
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**
@@ -64,14 +70,63 @@ class AbacPolicyController extends Controller
      */
     public function actionCreate()
     {
-        $model = new AbacPolicy();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->ap_id]);
+        $model = new AbacPolicyForm();
+
+        if (Yii::$app->request->isPjax) {
+            $object = Yii::$app->request->get('object');
+            if (!empty($object)) {
+                $model->ap_object = $object;
+                //echo $object; exit;
+            }
+        }
+
+        $ap = new AbacPolicy();
+
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $ap->ap_object = $model->ap_object;
+            $ap->ap_effect = $model->ap_effect;
+            $ap->ap_sort_order = $model->ap_sort_order;
+            $ap->ap_title = $model->ap_title;
+            //VarDumper::dump($model->ap_action_list, 10, true); exit;
+
+            $actionData = [];
+            $subjectData = [];
+
+            if ($model->ap_action_list) {
+                $actionList = $model->ap_action_list; //@json_encode($model->ap_action_list);
+                //VarDumper::dump($actionList, 10, true); exit;
+                if ($actionList && is_array($actionList)) {
+                    foreach ($actionList as $actionId) {
+                        $actionData[] = $actionId;
+                    }
+                }
+                //$ap->ap_action_json = @json_encode($model->ap_action_list);
+            }
+
+            if ($model->ap_subject_json) {
+                $subjectData = @json_decode($model->ap_subject_json);
+            }
+
+            $ap->ap_action_json = \yii\helpers\Json::encode($actionData);
+            $ap->ap_subject_json = \yii\helpers\Json::encode($subjectData);
+
+            //VarDumper::dump($model->ap_action_list, 10, true); exit;
+
+
+            if ($ap->save()) {
+                return $this->redirect(['view', 'id' => $ap->ap_id]);
+            } else {
+                $model->addErrors($ap->errors);
+            }
+        } else {
+            $model->ap_sort_order = 50;
+            $model->ap_effect = AbacPolicy::EFFECT_ALLOW;
         }
 
         return $this->render('create', [
             'model' => $model,
+            'ap' => $ap
         ]);
     }
 
@@ -84,14 +139,60 @@ class AbacPolicyController extends Controller
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->ap_id]);
+        $ap = $this->findModel($id);
+        $model = new AbacPolicyForm();
+        $model->ap_id = $ap->ap_id;
+
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            //$ap->ap_object = $model->ap_object;
+            $ap->ap_effect = $model->ap_effect;
+            $ap->ap_sort_order = $model->ap_sort_order;
+            $ap->ap_title = $model->ap_title;
+            //VarDumper::dump($model->ap_action_list, 10, true); exit;
+
+            $actionData = [];
+            $subjectData = [];
+
+            if ($model->ap_action_list) {
+                $actionList = $model->ap_action_list; //@json_encode($model->ap_action_list);
+                //VarDumper::dump($actionList, 10, true); exit;
+                if ($actionList && is_array($actionList)) {
+                    foreach ($actionList as $actionId) {
+                        $actionData[] = $actionId;
+                    }
+                }
+                //$ap->ap_action_json = @json_encode($model->ap_action_list);
+            }
+
+            if ($model->ap_subject_json) {
+                $subjectData = @json_decode($model->ap_subject_json);
+            }
+
+            $ap->ap_action_json = \yii\helpers\Json::encode($actionData);
+            $ap->ap_subject_json = \yii\helpers\Json::encode($subjectData);
+
+            //VarDumper::dump($model->ap_action_list, 10, true); exit;
+
+
+            if ($ap->save()) {
+                return $this->redirect(['view', 'id' => $ap->ap_id]);
+            } else {
+                $model->addErrors($ap->errors);
+            }
+        } else {
+            $model->ap_sort_order = $ap->ap_sort_order;
+            $model->ap_effect = $ap->ap_effect;
+            $model->ap_object = $ap->ap_object;
+            $model->ap_title = $ap->ap_title;
+            $model->ap_action_list = @json_decode($ap->ap_action_json);
+            $model->ap_subject_json = $ap->ap_subject_json;
         }
+
 
         return $this->render('update', [
             'model' => $model,
+            'ap' => $ap,
         ]);
     }
 

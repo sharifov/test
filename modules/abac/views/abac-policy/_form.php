@@ -4,12 +4,49 @@ use kartik\select2\Select2;
 use modules\abac\src\entities\AbacPolicy;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $model modules\abac\src\entities\AbacPolicy */
+/* @var $model modules\abac\src\forms\AbacPolicyForm */
+/* @var $ap modules\abac\src\entities\AbacPolicy */
 /* @var $form yii\widgets\ActiveForm */
 
 \frontend\assets\QueryBuilderAsset::register($this);
+
+
+//$filtersData = [
+//    [
+//        'id' => 'id1',
+//        'label' => 'ID1',
+//        'type'  => "integer",
+//        //'value' => true // boolean
+//        'input' => 'radio',
+//        'values' => [
+//            1 => 'Yes',
+//            0 => 'No'
+//        ],
+//        'default_value' => 1,
+//        'operators' =>  ['equal'],
+//        'unique' => true,
+//        'description' => 'This filter is "unique", it can be used only once'
+//    ],
+//
+//    [
+//        'id' => 'id2',
+//        'label' => 'ID2',
+//        'type' => 'string',
+//        'operators' =>  ['equal', 'not_equal', 'in', 'not_in', '==', '!=', 'match']
+//    ],
+//];
+
+$rulesData = @json_decode($model->ap_subject_json);
+$rulesDataStr = json_encode($rulesData);
+
+//$rulesDataStr = $model->ap_subject_json ?: '{[]}';
+$filtersData = $model->getObjectAttributeList();
+$filtersDataStr = json_encode($filtersData);
+$operators = json_encode(Yii::$app->abac->getOperators());
+
 ?>
 <style>
     .rules-group-container {width: 100%}
@@ -19,12 +56,12 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
+    <?= $form->errorSummary($model) ?>
+
     <div class="row">
         <div class="col-md-5">
 
-            <?php
-                \yii\helpers\VarDumper::dump(Yii::$app->abac->getObjectList(), 10, true);
-            ?>
+
 
             <?php /*= $form->field($model, 'ap_rule_type')->textInput(['maxlength' => true])*/ ?>
 
@@ -33,11 +70,12 @@ use yii\widgets\ActiveForm;
             <?php /*= $form->field($model, 'ap_subject_json')->textarea()*/ ?>
 
 
+            <?php if ($ap->isNewRecord) : ?>
             <div class="row">
                 <div class="col-md-6">
                     <?php /*= $form->field($model, 'ap_object')->textInput(['maxlength' => true])*/ ?>
                     <?= $form->field($model, 'ap_object', [
-                        //'options' => ['class' => 'form-group']
+                        //'options' => ['id' => 'ap_object']
                     ])->widget(Select2::class, [
                         'data' => $model->getObjectList(),
                         'size' => Select2::SMALL,
@@ -46,16 +84,17 @@ use yii\widgets\ActiveForm;
                     ]) ?>
                 </div>
                 <div class="col-md-6">
-                    <?= $form->field($model, 'ap_action_json', [
-                        //'options' => ['class' => 'form-group']
-                    ])->widget(Select2::class, [
-                        'data' => $model->getActionList(),
-                        'size' => Select2::SMALL,
-                        'options' => ['placeholder' => 'Select Actions', 'multiple' => true],
-                        'pluginOptions' => ['allowClear' => true],
-                    ]) ?>
+
                 </div>
             </div>
+            <?php else : ?>
+                <?php echo $form->field($model, 'ap_object', [
+                    //'options' => ['id' => 'ap_object']
+                ])
+                    ->hiddenInput()
+                    ->label(false);
+                ?>
+            <?php endif; ?>
             <?php /* //$form->field($model, 'ap_action')->textInput(['maxlength' => true])*/ ?>
 
             <?php /*= $form->field($model, 'ap_action_json')->textarea()*///// ?>
@@ -87,13 +126,90 @@ use yii\widgets\ActiveForm;
 
 
         </div>
+
+
         <div class="col-md-7">
-            <h3>Rules Data</h3>
-            <div id="builder" style="width: 100%"></div>
-            <?=Html::button('Validate rules', ['class' => 'btn sm-btn btn-warning', 'id' => 'btn-getcode'])?>
-            <?= $form->field($model, 'ap_subject_json')->textarea(['rows' => 8, 'id' => 'ap_subject_json', 'readonly' => true]) ?>
+            <?php Pjax::begin(['id' => 'pjax-abac-policy-form']); ?>
+
+                <?php if ($model->ap_object) : ?>
+                <h2>Object</h2>
+                    <pre><b><?php echo Html::encode($model->ap_object) ?></b></pre>
+
+
+
+                    <?php if ($model->getActionList()) : ?>
+                        <?php echo Html::a('Show / hide Action List', null, ['class' => 'btn btn-sm btn-default', 'id' => 'btn-div-action-list']) ?>
+                        <div id="div-action-list" style="display: none">
+                            <pre><?php \yii\helpers\VarDumper::dump($model->getActionList(), 10, true) ?></pre>
+                        </div>
+
+                        <?= $form->field($model, 'ap_action_list', [
+                            //'options' => ['class' => 'form-group']
+                        ])->widget(Select2::class, [
+                            'data' => $model->getActionList(),
+                            'size' => Select2::SMALL,
+                            'options' => ['placeholder' => 'Select Actions', 'multiple' => true],
+                            'pluginOptions' => ['allowClear' => true],
+                        ]) ?>
+                    <?php else : ?>
+                        <div class="alert alert-warning" role="alert">
+                            <strong>Warning</strong>: ACTION list for this object is empty!
+                        </div>
+                    <?php endif; ?>
+
+                    <h2>Policy Rules</h2>
+                    <?php echo Html::a('Show / hide Attribute List', null, ['class' => 'btn btn-sm btn-default', 'id' => 'btn-div-attr-list']) ?>
+                    <div id="div-attr-list" style="display: none">
+                        <pre><?php \yii\helpers\VarDumper::dump($filtersData, 10, true)?></pre>
+                    </div>
+
+                    <?php if ($filtersData) : ?>
+                        <div id="builder" style="width: 100%"></div>
+                        <?=Html::button('Validate rules', ['class' => 'btn sm-btn btn-warning', 'id' => 'btn-getcode'])?>
+                        <?= $form->field($model, 'ap_subject_json')->textarea(['rows' => 8, 'id' => 'ap_subject_json', 'readonly' => true]) ?>
+                    <?php else : ?>
+                        <div class="alert alert-warning" role="alert">
+                            <strong>Warning</strong>: ATTRIBUTE list (Filter data) for this object is empty!
+                        </div>
+                    <?php endif; ?>
+
+                    <?php
+                    $jsCode = <<<JS
+    
+    var rulesData = $rulesDataStr;
+    var filtersData = $filtersDataStr;
+    var operators = $operators;
+    
+    $('#builder').queryBuilder({
+        operators: operators,
+        select_placeholder: '-- Select Attribute --',
+        allow_empty: true,
+        plugins: [
+            'sortable',
+            //'filter-description',
+            'unique-filter',
+            //'bt-tooltip-errors',
+            //'bt-selectpicker',    
+            'bt-checkbox',
+            'invert',
+            //'not-group'
+        ],
+        filters: filtersData,
+        rules: rulesData
+    });
+    JS;
+
+                    if ($filtersData) {
+                        $this->registerJs($jsCode, \yii\web\View::POS_READY);
+                    }
+                    ?>
+
+                <?php endif; ?>
+            <?php Pjax::end(); ?>
         </div>
+
     </div>
+
 
     <div class="row">
         <div class="col-md-12">
@@ -103,36 +219,66 @@ use yii\widgets\ActiveForm;
         </div>
     </div>
 
+
+    <div class="row">
+
+    <?php
+    // \yii\helpers\VarDumper::dump(Yii::$app->abac->getObjectList(), 10, true);
+    ?>
+    </div>
+
+
     <?php ActiveForm::end(); ?>
 
 </div>
 
 <?php
 
-$filtersData = [
-    [
-        'id' => 'id1',
-        'label' => 'ID1',
-        'type'  => "integer",
-        //'value' => true // boolean
-        'input' => 'radio',
-        'values' => [
-            1 => 'Yes',
-            0 => 'No'
-        ],
-        'default_value' => 1,
-        'operators' =>  ['equal'],
-        'unique' => true,
-        'description' => 'This filter is "unique", it can be used only once'
-    ],
 
-    [
-        'id' => 'id2',
-        'label' => 'ID2',
-        'type' => 'string',
-        'operators' =>  ['equal', 'not_equal', 'in', 'not_in', '==', '!=', 'match']
-    ],
-];
+$jsCode2 = <<<JS
+    $('#btn-submit').on('click', function() {
+      if(!getBuilder()) return false;
+    });
+
+    $('body').on('click', '#btn-div-attr-list', function() {
+        $('#div-attr-list').toggle();
+        return false;
+    });
+    
+    $('body').on('click', '#btn-div-action-list', function() {
+        $('#div-action-list').toggle();
+        return false;
+    });
+    
+
+    function getBuilder()
+    {
+        var result = $('#builder').queryBuilder('getRules');
+        if (!$.isEmptyObject(result)) {
+            var json = JSON.stringify(result, null);
+            $('#ap_subject_json').val(json);
+            if(result.valid) return true;
+        }
+        return false;
+    }
+    
+    $('body').on('change', '#abacpolicyform-ap_object', function(e) {
+        var value = $(this).val();
+        $.pjax.reload({container: '#pjax-abac-policy-form', push: false, replace: false, timeout: 5000, data: {object: value}});
+    });
+    
+    $('body').on('click', '#btn-getcode', function() {
+        var result = $('#builder').queryBuilder('getRules');
+        if (!$.isEmptyObject(result)) {
+            var json = JSON.stringify(result, null, 2);
+            alert(json);
+            console.log(json);
+        }
+    });
+    
+JS;
+
+$this->registerJs($jsCode2, \yii\web\View::POS_READY);
 
 
 //$filtersData = [
@@ -309,101 +455,5 @@ $filtersData = [
 //    ]
 //];*/
 
-$rulesData = @json_decode($model->ap_subject_json);
-$rulesDataStr = json_encode($rulesData);
-$filtersDataStr = json_encode($filtersData);
-
-$jsCode = <<<JS
-$('#btn-submit').on('click', function() {
-  if(!getBuilder()) return false;
-});
-
-$('#btn-getcode').on('click', function() {
-    var result = $('#builder').queryBuilder('getRules');
-
-    if (!$.isEmptyObject(result)) {
-        var json = JSON.stringify(result, null, 2);
-        alert(json);
-        console.log(json);
-    }
-});
-
-function getBuilder()
-{
-    var result = $('#builder').queryBuilder('getRules');
-
-    if (!$.isEmptyObject(result)) {
-        var json = JSON.stringify(result, null);
-        $('#ap_subject_json').val(json);
-        if(result.valid) return true;
-    }
-    
-    return false;
-}
-
-let rulesData = $rulesDataStr;
-let filtersData = $filtersDataStr;
 
 
-let operators = [
-        'equal',
-        'not_equal',
-        'in',
-        'not_in',
-        'less',
-        'less_or_equal',
-        'greater',
-        'greater_or_equal',
-        'between',
-        'not_between',
-        'begins_with',
-        'not_begins_with',
-        'contains',
-        'not_contains',
-        'ends_with',
-        'not_ends_with',
-        'is_empty',
-        'is_not_empty',
-        'is_null',
-        'is_not_null',
-        
-        { type: '==', optgroup: 'custom', nb_inputs: 1, multiple: false, apply_to: ['number', 'string'] },
-        { type: '!=', optgroup: 'custom', nb_inputs: 2, multiple: false, apply_to: ['number', 'string'] },
-        { type: '>', optgroup: 'custom', nb_inputs: 3, multiple: false, apply_to: ['number', 'string'] },
-        { type: '<', optgroup: 'custom', nb_inputs: 1, multiple: false, apply_to: ['number', 'string'] },
-        { type: '>=', optgroup: 'custom', nb_inputs: 1, multiple: false, apply_to: ['number', 'string'] },
-        { type: '<=', optgroup: 'custom', nb_inputs: 1, multiple: false, apply_to: ['number', 'string'] },
-        //{ type: 'contains', optgroup: 'custom', nb_inputs: 1, multiple: false, apply_to: ['string'] },
-        //{ type: 'begins_with', optgroup: 'custom', nb_inputs: 1, multiple: false, apply_to: ['string'] },
-        //{ type: 'ends with', optgroup: 'custom', nb_inputs: 1, multiple: false, apply_to: ['string'] },
-        { type: 'before', optgroup: 'custom', nb_inputs: 1, multiple: false, apply_to: ['string'] },
-        { type: 'after', optgroup: 'custom', nb_inputs: 1, multiple: false, apply_to: ['string'] },
-        //{ type: 'between', optgroup: 'custom', nb_inputs: 0, multiple: false, apply_to: ['string'] },
-        { type: 'match', optgroup: 'custom', nb_inputs: 1, multiple: false, apply_to: ['string'] }
-    ];
-
-// [
-//         'equal', 'not_equal', 'is_null',
-//          { type: 'contains_any', nb_inputs: 2, multiple: true, apply_to: ['string'] },
-//       ]
-
-$('#builder').queryBuilder({
-    operators: operators,
-    select_placeholder: '--Select Attribute--',
-    allow_empty: true,
-    plugins: [
-        'sortable',
-        //'filter-description',
-        'unique-filter',
-        //'bt-tooltip-errors',
-        //'bt-selectpicker',    
-        'bt-checkbox',
-        'invert',
-        //'not-group'
-    ],
-    filters: filtersData,
-    rules: rulesData
-});
-JS;
-
-$this->registerJs($jsCode, \yii\web\View::POS_READY);

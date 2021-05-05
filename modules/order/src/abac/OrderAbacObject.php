@@ -2,11 +2,11 @@
 
 namespace modules\order\src\abac;
 
+use modules\abac\components\AbacBaseModel;
 use modules\abac\src\entities\AbacInterface;
 
-class OrderAbacObject implements AbacInterface
+class OrderAbacObject extends AbacBaseModel implements AbacInterface
 {
-
     private const NS = 'order/order/';
 
     /** ALL PERMISSIONS */
@@ -40,21 +40,7 @@ class OrderAbacObject implements AbacInterface
     public const OBJ_CASE           = self::NS . 'obj/case';
 
 
-//    public const ACT_OBJECT_LIST = [
-//        self::ACT_ALL       => self::ACT_ALL,
-//        self::ACT_CREATE    => self::ACT_CREATE,
-//        self::ACT_READ      => self::ACT_READ,
-//        self::ACT_UPDATE    => self::ACT_UPDATE,
-//        self::ACT_DELETE    => self::ACT_DELETE,
-//    ];
-//
-//    public const UI_OBJECT_LIST = [
-//        self::UI_ALL            => self::UI_ALL,
-//        self::UI_BTN_CREATE     => self::UI_BTN_CREATE,
-//        self::UI_BLOCK_PAYMENTS => self::UI_BLOCK_PAYMENTS,
-//        self::UI_LINK_UPDATE    => self::UI_LINK_UPDATE,
-//        self::UI_MENU_ACTIONS   => self::UI_MENU_ACTIONS,
-//    ];
+
 
     public const OBJECT_LIST = [
         self::ACT_ALL       => self::ACT_ALL,
@@ -81,61 +67,47 @@ class OrderAbacObject implements AbacInterface
     ];
 
 
-    public const ATTR_TYPE_INTEGER  = 'integer';
-    public const ATTR_TYPE_STRING   = 'string';
-    public const ATTR_TYPE_DOUBLE   = 'double';
+    public const ACTION_ACCESS  = 'access';
+    public const ACTION_CREATE  = 'create';
+    public const ACTION_READ    = 'read';
+    public const ACTION_UPDATE  = 'update';
+    public const ACTION_DELETE  = 'delete';
 
-    public const ATTR_INPUT_RADIO       = 'radio';
-    public const ATTR_INPUT_CHECKBOX    = 'checkbox';
-    public const ATTR_INPUT_SELECT      = 'select';
+    public const OBJECT_ACTION_LIST = [
+        self::ACT_ALL       => [self::ACTION_ACCESS, self::ACTION_CREATE,
+            self::ACTION_READ, self::ACTION_UPDATE, self::ACTION_DELETE],
+        self::ACT_CREATE    => [self::ACTION_ACCESS, self::ACTION_CREATE],
+        self::ACT_READ      => [self::ACTION_ACCESS, self::ACTION_READ],
+        self::ACT_UPDATE    => [self::ACTION_ACCESS, self::ACTION_UPDATE],
+        self::ACT_DELETE    => [self::ACTION_ACCESS, self::ACTION_DELETE],
+    ];
 
-    public const ATTR_OPERATOR_EQUAL = 'equal';
-
-/*'equal',
-'not_equal',
-'in',
-'not_in',
-'less',
-'less_or_equal',
-'greater',
-'greater_or_equal',
-'between',
-'not_between',
-'begins_with',
-'not_begins_with',
-'contains',
-'not_contains',
-'ends_with',
-'not_ends_with',
-'is_empty',
-'is_not_empty',
-'is_null',
-'is_not_null',*/
 
     public const OBJECT_ATTRIBUTE_LIST = [
         self::ACT_CREATE    =>  [
             [
-                'id' => 'id1',
-                'label' => 'ID1',
-                'type'  => "integer",
+                'id' => self::NS . '/test1',
+                'label' => 'Test Attr1',
+                'type'  => self::ATTR_TYPE_INTEGER,
                 //'value' => true // boolean
                 'input' => 'radio',
                 'values' => [
+
                     1 => 'Yes',
                     0 => 'No'
                 ],
                 'default_value' => 1,
-                'operators' =>  ['equal'],
+                'operators' =>  [self::OP_EQUAL],
                 'unique' => true,
                 'description' => 'This filter is "unique", it can be used only once',
                 'icon' => 'fa fa-ticket',
             ],
 
             [
-                'id' => 'id2',
-                'label' => 'ID2',
+                'id' => self::NS . '/test2',
+                'label' => 'Test Attr2',
                 'type' => 'string',
-                'operators' =>  ['equal', 'not_equal', 'in', 'not_in', '==', '!=', 'match']
+                'operators' =>  [self::OP_EQUAL, self::OP_NOT_EQUAL, self::OP_IN, self::OP_NOT_IN, '==', '!=', self::OP_MATCH]
             ],
         ]
     ];
@@ -148,13 +120,21 @@ class OrderAbacObject implements AbacInterface
         return self::OBJECT_LIST;
     }
 
-//    public function getActionListByObject($object): array
-//    {
-//
-//    }
-//
-//    public function getAttributeListByObject($object): array
-//    {
-//
-//    }
+    /**
+     * @return string[]
+     */
+    public static function getObjectActionList(): array
+    {
+        return self::OBJECT_ACTION_LIST;
+    }
+
+    /**
+     * @return \array[][]
+     */
+    public static function getObjectAttributeList(): array
+    {
+        return self::OBJECT_ATTRIBUTE_LIST;
+    }
+
+
 }

@@ -3,7 +3,8 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model modules\abac\src\entities\AbacPolicy */
+/* @var $model modules\abac\src\forms\AbacPolicyForm */
+/* @var $ap modules\abac\src\entities\AbacPolicy */
 
 $this->title = 'Create Abac Policy';
 $this->params['breadcrumbs'][] = ['label' => 'Abac Policies', 'url' => ['index']];
@@ -15,6 +16,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?= $this->render('_form', [
         'model' => $model,
+        'ap' => $ap
     ]) ?>
 
 </div>

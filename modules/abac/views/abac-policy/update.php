@@ -3,11 +3,12 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model modules\abac\src\entities\AbacPolicy */
+/* @var $model modules\abac\src\forms\AbacPolicyForm */
+/* @var $ap modules\abac\src\entities\AbacPolicy */
 
-$this->title = 'Update Abac Policy: ' . $model->ap_id;
+$this->title = 'Update Policy: "' . $model->ap_object . '" (' . $model->ap_id . ') ';
 $this->params['breadcrumbs'][] = ['label' => 'Abac Policies', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->ap_id, 'url' => ['view', 'id' => $model->ap_id]];
+$this->params['breadcrumbs'][] = ['label' => $model->ap_object, 'url' => ['view', 'id' => $model->ap_id]];
 $this->params['breadcrumbs'][] = 'Update';
 ?>
 <div class="abac-policy-update">
@@ -16,6 +17,7 @@ $this->params['breadcrumbs'][] = 'Update';
 
     <?= $this->render('_form', [
         'model' => $model,
+        'ap' => $ap
     ]) ?>
 
 </div>

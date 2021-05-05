@@ -9,6 +9,6 @@ namespace modules\abac\src\entities;
 interface AbacInterface
 {
     public static function getObjectList(): array;
-    // public function getActionListByObject($object): array;
-   // public function getAttributeListByObject($object): array;
+    public static function getObjectActionList(): array;
+    public static function getObjectAttributeList(): array;
 }

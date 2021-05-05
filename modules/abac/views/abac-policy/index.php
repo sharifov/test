@@ -2,6 +2,7 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
+use modules\abac\src\entities\AbacPolicy;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -30,26 +31,45 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
 
-            'ap_id',
-            'ap_sort_order',
-            'ap_rule_type',
-            //'ap_subject',
-            'ap_subject_json',
+            [
+                'attribute' => 'ap_id',
+                'options' => [
+                    'style' => 'width:80px'
+                ],
+            ],
+
+            [
+                'attribute' => 'ap_sort_order',
+                'options' => [
+                    'style' => 'width:80px'
+                ],
+            ],
             'ap_object',
-            //'ap_action',
-            'ap_action_json',
-            'ap_effect',
-            'ap_title',
+            //'ap_rule_type',
+            'ap_subject',
+            //'ap_subject_json',
+
+            'ap_action',
+            //'ap_action_json',
+            //'ap_effect',
+            [
+                'attribute' => 'ap_effect',
+                'value' => static function (AbacPolicy $model) {
+                    return $model->getEffectName();
+                },
+                'filter' => AbacPolicy::getEffectList()
+            ],
+            //'ap_title',
 
 //            'ap_created_dt',
 //            'ap_updated_dt',
 
-            [
-                'class' => UserSelect2Column::class,
-                'attribute' => 'ap_created_user_id',
-                'relation' => 'apCreatedUser',
-                'placeholder' => 'Select User',
-            ],
+//            [
+//                'class' => UserSelect2Column::class,
+//                'attribute' => 'ap_created_user_id',
+//                'relation' => 'apCreatedUser',
+//                'placeholder' => 'Select User',
+//            ],
 
             [
                 'class' => UserSelect2Column::class,
