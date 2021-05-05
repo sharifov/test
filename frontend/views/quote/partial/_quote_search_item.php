@@ -3,6 +3,7 @@
 use common\components\SearchService;
 use common\models\Lead;
 use frontend\helpers\QuoteHelper;
+use sales\auth\Auth;
 use yii\bootstrap\Html;
 
 /**
@@ -439,7 +440,7 @@ $isQuoteAssignedToFlight = false;
 
                 ]) ?>
 
-                <?php if ($projectRelations = $lead->project->projectRelations) : ?>
+                <?php if (Auth::can('quote/addQuote/projectRelations') && $projectRelations = $lead->project->projectRelations) : ?>
                     <div class="btn-group js-btn-box" style="margin-left: 7px; height: 32px;">
                         <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <i class="fa fa-bars"></i>
