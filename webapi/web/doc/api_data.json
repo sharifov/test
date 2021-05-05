@@ -6312,7 +6312,7 @@
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n  {\n     \"status\": 200,\n     \"message\": \"OK\",\n     \"data\": {\n         \"result\": \"Email sending. Mail ID(427561)\"\n     }\n  }",
+          "content": "HTTP/1.1 200 OK\n{\n   \"status\": 200,\n   \"message\": \"OK\",\n   \"data\": {\n       \"result\": \"Email sending. Mail ID(427561)\"\n   }\n}",
           "type": "json"
         }
       ]
@@ -6326,7 +6326,7 @@
         },
         {
           "title": "Error-Response (400):",
-          "content": "HTTP/1.1 400 Bad Request\n  {\n     \"name\": \"Bad Request\",\n     \"message\": \"POST data request is empty\",\n     \"code\": 2,\n     \"status\": 400,\n     \"type\": \"yii\\\\web\\\\BadRequestHttpException\"\n  }",
+          "content": "HTTP/1.1 400 Bad Request\n{\n   \"name\": \"Bad Request\",\n   \"message\": \"POST data request is empty\",\n   \"code\": 2,\n   \"status\": 400,\n   \"type\": \"yii\\\\web\\\\BadRequestHttpException\"\n}",
           "type": "json"
         }
       ]

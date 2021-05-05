@@ -106,7 +106,7 @@ class OfferEmailController extends ApiBaseController
          }
      *
      * @apiSuccessExample {json} Success-Response:
-     * HTTP/1.1 200 OK
+     *   HTTP/1.1 200 OK
      *   {
      *      "status": 200,
      *      "message": "OK",
@@ -129,7 +129,7 @@ class OfferEmailController extends ApiBaseController
      *   }
      *
      * @apiErrorExample {json} Error-Response (400):
-     * HTTP/1.1 400 Bad Request
+     *   HTTP/1.1 400 Bad Request
      *   {
      *      "name": "Bad Request",
      *      "message": "POST data request is empty",
