@@ -1648,8 +1648,25 @@ class CommunicationController extends ApiBaseController
         QueueLongTimeNotificationParams $queueLongTimeParams
     ): array {
 
-        if (isset(Department::DEPARTMENT_LIST[$ivrSelectedDigit])) {
-            $callModel->c_dep_id = $ivrSelectedDigit;
+        $selectedDepartment = null;
+        $dParams = @json_decode($department->dpp_params, true);
+        $overrideDepartment = $dParams['overrideDepartment'] ?? [];
+        if ($overrideDepartment) {
+            if (array_key_exists($ivrSelectedDigit, $overrideDepartment)) {
+                $selectedDepartment = $overrideDepartment[$ivrSelectedDigit];
+                if (!isset(Department::DEPARTMENT_LIST[$selectedDepartment])) {
+                    $selectedDepartment = null;
+                }
+            }
+        }
+        if ($selectedDepartment === null) {
+            if (isset(Department::DEPARTMENT_LIST[$ivrSelectedDigit])) {
+                $selectedDepartment = $ivrSelectedDigit;
+            }
+        }
+
+        if ($selectedDepartment !== null) {
+            $callModel->c_dep_id = $selectedDepartment;
             if (!$callModel->save()) {
                 Yii::error(VarDumper::dumpAsString($callModel->errors), 'API:Communication:startCallService:Call:update');
             }
