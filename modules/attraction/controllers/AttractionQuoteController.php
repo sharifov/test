@@ -216,7 +216,7 @@ class AttractionQuoteController extends FController
         $apiAttractionService = AttractionModule::getInstance()->apiService;
 
         $result = $apiAttractionService->inputOptionsToAvailability($optionsModel);
-        //VarDumper::dump($attractionId, 10, true); die();
+
         if (empty($result['errors'])) {
             $availability = $result['data']['availability'];
             return $this->renderAjax('availability_details', [
@@ -226,9 +226,9 @@ class AttractionQuoteController extends FController
                 'model' => $optionsModel,
             ]);
         } else {
-            $response['error'] = true;
-            $response['message'] = $result['errors'];
-            return $this->asJson($response);
+            //VarDumper::dump($result, 10, true); die();
+            Yii::warning($result['errors'], 'AttractionQuoteController:InputAvailabilityOptions');
+            return '<div class="text-center">This availability is not available at this moment check another one<div>';
         }
     }
 
