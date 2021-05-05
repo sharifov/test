@@ -71,6 +71,7 @@ class ProductQuoteReplaceService
                     $this->hotelQuoteCloneService->clone($childQuote->getId(), $childProduct->getId(), $productQuote->pq_id);
                 } elseif ($originalQuote->isFlight()) {
                     $quote = FlightQuote::clone($originFlightQuote, $originFlightQuote->fq_flight_id, $productQuote->pq_id);
+                    $quote->setServiceFeePercent(0.00);
                     $this->flightQuoteRepository->save($quote);
                 } else {
                     throw new \DomainException('Undefined Product Quote type');

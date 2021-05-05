@@ -29,6 +29,8 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Json;
 
+use function Amp\Promise\timeoutWithDefault;
+
 class FlightQuoteHelper
 {
     /**
@@ -64,6 +66,7 @@ class FlightQuoteHelper
         $paxCodeId = null;
         $dtoTotal = new FlightQuoteTotalPriceDTO();
         $paxPrices = FlightQuotePaxPrice::find()->andWhere(['qpp_flight_quote_id' => $flightQuote->fq_id])->orderBy(['qpp_flight_pax_code_id' => SORT_ASC])->all();
+
         foreach ($paxPrices as $price) {
             $paxCode = FlightPax::getPaxTypeById($price->qpp_flight_pax_code_id);
             if ($dtoPax->paxCodeId !== $price->qpp_flight_pax_code_id) {
@@ -72,26 +75,42 @@ class FlightQuoteHelper
                 $dtoPax->paxCode = $paxCode;
             }
 
+            $fare = $price->qpp_fare;
             $dtoPax->fare += $price->qpp_fare;
-            $dtoPax->taxes += $price->qpp_tax;
-            $dtoPax->net = ($dtoPax->fare + $dtoPax->taxes) * $price->qpp_cnt;
+
+            $taxes = $price->qpp_tax;
+            $dtoPax->taxes += $taxes;
+
+            $net = ($fare + $taxes) * $price->qpp_cnt;
+            $dtoPax->net += $net;
+
             $dtoPax->tickets += $price->qpp_cnt;
-            $dtoPax->markUp += $price->qpp_system_mark_up * $price->qpp_cnt;
-            $dtoPax->extraMarkUp += $price->qpp_agent_mark_up * $price->qpp_cnt;
-            $dtoPax->selling = $dtoPax->net + $dtoPax->markUp + $dtoPax->extraMarkUp;
-            $dtoPax->serviceFee = ProductQuoteHelper::roundPrice($dtoPax->selling * $service_fee_percent / 100);
-            $dtoPax->selling = ProductQuoteHelper::roundPrice($dtoPax->serviceFee + $dtoPax->selling);
-            $dtoPax->clientSelling = ProductQuoteHelper::roundPrice($dtoPax->selling * $flightQuote->fqProductQuote->pq_client_currency_rate);
+
+            $markUp = $price->qpp_system_mark_up * $price->qpp_cnt;
+            $dtoPax->markUp += $markUp;
+
+            $extraMarkUp = $price->qpp_agent_mark_up * $price->qpp_cnt;
+            $dtoPax->extraMarkUp += $extraMarkUp;
+
+            $preSelling = $net + $markUp + $extraMarkUp;
+            $serviceFee = ProductQuoteHelper::roundPrice($preSelling * $service_fee_percent / 100);
+            $dtoPax->serviceFee += $serviceFee;
+
+            $selling = ProductQuoteHelper::roundPrice($serviceFee + $preSelling);
+            $dtoPax->selling += $selling;
+
+            $clientSelling = ProductQuoteHelper::roundPrice($selling * $flightQuote->fqProductQuote->pq_client_currency_rate);
+            $dtoPax->clientSelling += $clientSelling;
 
             $prices[$paxCode] = $dtoPax;
 
-            $dtoTotal->tickets += $dtoPax->tickets;
-            $dtoTotal->net += $dtoPax->net;
-            $dtoTotal->markUp += $dtoPax->markUp;
-            $dtoTotal->extraMarkUp += $dtoPax->extraMarkUp;
-            $dtoTotal->selling += $dtoPax->selling;
-            $dtoTotal->serviceFeeSum += $dtoPax->serviceFee;
-            $dtoTotal->clientSelling += $dtoPax->clientSelling;
+            $dtoTotal->tickets += $price->qpp_cnt;
+            $dtoTotal->net += $net;
+            $dtoTotal->markUp += $markUp;
+            $dtoTotal->extraMarkUp += $extraMarkUp;
+            $dtoTotal->selling += $selling;
+            $dtoTotal->serviceFeeSum += $serviceFee;
+            $dtoTotal->clientSelling += $clientSelling;
         }
 
         $priceDto = new FlightQuotePriceDataDTO();
