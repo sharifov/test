@@ -216,7 +216,7 @@ class ClientChatActionPermission
             return $this->canTake;
         }
 
-        $systemRuleValid = !$chat->isClosed() && !$chat->isArchive() && !$chat->isOwner(Auth::id());
+        $systemRuleValid = !$chat->isClosed() && !$chat->isArchive() && !$chat->isTransfer() && !$chat->isOwner(Auth::id());
         if (!$systemRuleValid) {
             $this->canTake = false;
             return $this->canTake;
