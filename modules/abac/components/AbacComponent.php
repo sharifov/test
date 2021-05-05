@@ -311,7 +311,6 @@ class AbacComponent extends Component
                     new TagDependency(['tags' => $this->getCacheTagDependency()])
                 );
             }
-
         } else {
             $policyListContent = $this->getPolicyListContentWOCache();
         }

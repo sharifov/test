@@ -11,7 +11,6 @@ namespace modules\abac\components;
 
 use common\models\Department;
 
-
 /**
  * Class AbacBaseModel
  * @package modules\abac\components

@@ -135,6 +135,4 @@ class OrderAbacObject extends AbacBaseModel implements AbacInterface
     {
         return self::OBJECT_ATTRIBUTE_LIST;
     }
-
-
 }

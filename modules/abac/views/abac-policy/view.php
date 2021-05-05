@@ -72,8 +72,8 @@ $this->params['breadcrumbs'][] = $this->title;
             <h2>Subject JSON</h2>
             <pre><?php
                 $subjectData = @json_decode($model->ap_subject_json, true);
-                VarDumper::dump($subjectData, 10 , true);
-                ?></pre>
+                VarDumper::dump($subjectData, 10, true);
+            ?></pre>
         </div>
 
 </div>
