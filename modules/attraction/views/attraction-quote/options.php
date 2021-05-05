@@ -1,6 +1,6 @@
 <?php
 
-use yii\bootstrap4\ActiveForm;
+use yii\bootstrap\ActiveForm;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
@@ -35,7 +35,13 @@ $form = ActiveForm::begin([
         $mappedOptions = ArrayHelper::map($option['availableOptions'], 'value', 'label');
         ?>
         <div class="col-3">
-            <?= $form->field($model, 'selected_options[' . $optionKey . '][' . $option['id'] . ']')->dropdownList($mappedOptions)->label($option['label']) ?>
+            <?php if ($option['dataType'] === 'BOOLEAN') : ?>
+                <?= $form->field($model, 'selected_options[' . $optionKey . '][' . $option['id'] . ']')->checkbox()->label($option['label']) ?>
+            <?php elseif ($option['dataType'] === 'TEXT') : ?>
+                <?= $form->field($model, 'selected_options[' . $optionKey . '][' . $option['id'] . ']')->textInput()->label($option['label']) ?>
+            <?php else : ?>
+                <?= $form->field($model, 'selected_options[' . $optionKey . '][' . $option['id'] . ']')->dropdownList($mappedOptions)->label($option['label']) ?>
+            <?php endif;?>
         </div>
     <?php endforeach; ?>
 </div>
