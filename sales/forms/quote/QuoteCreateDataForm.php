@@ -29,10 +29,13 @@ class QuoteCreateDataForm extends Model
         return [
             [['lead_id', 'origin_search_data'], 'required'],
             [['lead_id'], 'filter', 'filter' => 'intval'],
-            [['lead_id'], 'exist', 'targetClass' => Lead::class, 'targetAttribute' => ['lead_id' => 'id']],
+
+            [['provider_project_key'], 'string', 'max' => 50],
+
             [['origin_search_data'], CheckJsonValidator::class],
             [['origin_search_data'], 'validateOriginSearchData'],
-            [['provider_project_key'], 'string', 'max' => 50],
+
+            [['lead_id'], 'exist', 'targetClass' => Lead::class, 'targetAttribute' => ['lead_id' => 'id']],
             [['provider_project_key'], 'exist', 'targetClass' => Project::class, 'targetAttribute' => ['provider_project_key' => 'project_key']]
         ];
     }

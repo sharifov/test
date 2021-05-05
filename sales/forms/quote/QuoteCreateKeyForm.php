@@ -27,8 +27,11 @@ class QuoteCreateKeyForm extends Model
         return [
             [['lead_id', 'offer_search_key'], 'required'],
             [['lead_id'], 'filter', 'filter' => 'intval'],
-            [['lead_id'], 'exist', 'targetClass' => Lead::class, 'targetAttribute' => ['lead_id' => 'id']],
+
+            [['offer_search_key'], 'string', 'max' => 255],
             [['provider_project_key'], 'string', 'max' => 50],
+
+            [['lead_id'], 'exist', 'targetClass' => Lead::class, 'targetAttribute' => ['lead_id' => 'id']],
             [['provider_project_key'], 'exist', 'targetClass' => Project::class, 'targetAttribute' => ['provider_project_key' => 'project_key']]
         ];
     }
