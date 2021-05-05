@@ -75,7 +75,7 @@ $('#client-edit-name-form').on('beforeSubmit', function (e) {
                 $('#modal-client-manage-info').modal('hide');
                 
                 let clientLocale = $('#clientcreateform-locale').val();
-                if (clientLocale !== 'undefined' && clientLocale.length && $('#language option[value=' + clientLocale + ']').length) {
+                if (typeof clientLocale !== typeof undefined && clientLocale.length && $('#language option[value=' + clientLocale + ']').length) {
                     $('#language option[value=' + clientLocale + ']').prop('selected', true);
                 }
                 
