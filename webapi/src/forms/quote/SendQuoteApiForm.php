@@ -33,7 +33,7 @@ class SendQuoteApiForm extends Model
     public $email_to;
     public $additional_data;
 
-    private Quote $quote;
+    private ?Quote $quote;
 
     public function rules(): array
     {

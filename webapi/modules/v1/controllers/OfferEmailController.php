@@ -107,26 +107,36 @@ class OfferEmailController extends ApiBaseController
      *
      * @apiSuccessExample {json} Success-Response:
      * HTTP/1.1 200 OK
-     * {
-     *      {
-                "status": 200,
-                "message": "OK",
-                "data": {
-                    "result": "Email sending"
-                }
-            }
-     * }
+     *   {
+     *      "status": 200,
+     *      "message": "OK",
+     *      "data": {
+     *          "result": "Email sending. Mail ID(427561)"
+     *      }
+     *   }
      *
      * @apiErrorExample Error-Response:
      *   HTTP/1.1 404 Not Found
      *   {
-     *       "name": "Not Found",
-     *       "message": "Not found Quote UID: 30",
-     *       "code": 2,
-     *       "status": 404,
-     *       "type": "yii\\web\\NotFoundHttpException"
+     *      "status": 422,
+     *      "message": "Validation error",
+     *      "errors": {
+     *          "quote_uid": [
+     *              "Quote not found by Uid(60910028642b1)"
+     *          ]
+     *      },
+     *      "code": 0
      *   }
      *
+     * @apiErrorExample {json} Error-Response (400):
+     * HTTP/1.1 400 Bad Request
+     *   {
+     *      "name": "Bad Request",
+     *      "message": "POST data request is empty",
+     *      "code": 2,
+     *      "status": 400,
+     *      "type": "yii\\web\\BadRequestHttpException"
+     *   }
      */
     public function actionSendQuote()
     {

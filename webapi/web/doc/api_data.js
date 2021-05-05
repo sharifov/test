@@ -6312,7 +6312,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n     {\n                \"status\": 200,\n                \"message\": \"OK\",\n                \"data\": {\n                    \"result\": \"Email sending\"\n                }\n            }\n}",
+          "content": "HTTP/1.1 200 OK\n  {\n     \"status\": 200,\n     \"message\": \"OK\",\n     \"data\": {\n         \"result\": \"Email sending. Mail ID(427561)\"\n     }\n  }",
           "type": "json"
         }
       ]
@@ -6321,7 +6321,12 @@ define({ "api": [
       "examples": [
         {
           "title": "Error-Response:",
-          "content": "HTTP/1.1 404 Not Found\n{\n    \"name\": \"Not Found\",\n    \"message\": \"Not found Quote UID: 30\",\n    \"code\": 2,\n    \"status\": 404,\n    \"type\": \"yii\\\\web\\\\NotFoundHttpException\"\n}",
+          "content": "HTTP/1.1 404 Not Found\n{\n   \"status\": 422,\n   \"message\": \"Validation error\",\n   \"errors\": {\n       \"quote_uid\": [\n           \"Quote not found by Uid(60910028642b1)\"\n       ]\n   },\n   \"code\": 0\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (400):",
+          "content": "HTTP/1.1 400 Bad Request\n  {\n     \"name\": \"Bad Request\",\n     \"message\": \"POST data request is empty\",\n     \"code\": 2,\n     \"status\": 400,\n     \"type\": \"yii\\\\web\\\\BadRequestHttpException\"\n  }",
           "type": "json"
         }
       ]
