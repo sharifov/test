@@ -637,6 +637,7 @@ $js = <<<JS
                         text: data.message,
                         hide: true
                     });
+                    
                     $('#pjax-order-payment-' + orderId).on('pjax:end', function (data, xhr) {
                         if ($('#pjax-order-transaction-' + orderId).length) {
                             pjaxReload({container: '#pjax-order-transaction-' + orderId, async: true, replace: true});

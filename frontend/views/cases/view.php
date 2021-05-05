@@ -144,9 +144,11 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
         <div class="col-md-6">
             <?= $this->render('coupons/view', ['model' => $model, 'coupons' => $coupons, 'sendCouponsForm' => $sendCouponsForm]) ?>
 
-            <?= $this->render('orders/case_orders', [
-                'dataProviderOrders' => $dataProviderOrders,
-            ]) ?>
+            <?php if ($dataProviderOrders->totalCount) : ?>
+                <?= $this->render('orders/case_orders', [
+                    'dataProviderOrders' => $dataProviderOrders,
+                ]) ?>
+            <?php endif; ?>
         </div>
 
         <div class="col-md-6">

@@ -8,6 +8,7 @@ use modules\hotel\models\HotelQuote;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookGuard;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookService;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCheckRateService;
+use modules\lead\src\services\LeadFailBooking;
 use yii\queue\JobInterface;
 use yii\queue\RetryableJobInterface;
 use Yii;
@@ -68,12 +69,19 @@ class BookingHotelJob implements JobInterface
                 'quoteId' => $this->quoteId,
             ], 'OrderProcessManager:BookingHotelJob');
             $userId = $quote->hqProductQuote->pqOrder->orLead->employee_id ?? null;
+            $this->createBookFailedLead($quote->hq_product_quote_id);
             if ($userId) {
                 if ($ntf = Notifications::create($userId, 'Booking Hotel error.', 'QuoteId: ' . $this->quoteId . ' Error: ' . $e->getMessage(), Notifications::TYPE_DANGER, true)) {
                     Notifications::publish('getNewNotification', ['user_id' => $userId], NotificationMessage::add($ntf));
                 }
             }
         }
+    }
+
+    private function createBookFailedLead(int $productQuoteId): void
+    {
+        $leadFailBookingService = Yii::createObject(LeadFailBooking::class);
+        $leadFailBookingService->create($productQuoteId, null);
     }
 
 //    public function getTtr(): int
