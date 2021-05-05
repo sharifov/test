@@ -246,6 +246,10 @@ class ClientChatService
     {
         $response = \Yii::$app->chatBot->assignAgent($rid, $userId);
         if ($response['error']) {
+            if (mb_strpos($response['error']['message'] ?? '', 'error-selected-agent-room-agent-are-same')) {
+                return;
+            }
+
             throw new \RuntimeException('[Chat Bot Assign Agent] ' . $response['error']['message'] ?? 'Unknown error...', ClientChatCodeException::RC_ASSIGN_AGENT_FAILED);
         }
     }
@@ -682,7 +686,6 @@ class ClientChatService
         $lastMessage = $this->clientChatLastMessageRepository->getByChatId($clientChat->cch_id);
 
         return $this->transactionManager->wrap(function () use ($clientChat, $owner, $lastMessage, $action) {
-
             $clientChat->archive($owner->id, $action, null, null, true);
             $this->clientChatRepository->save($clientChat);
 
