@@ -23,6 +23,7 @@ use modules\invoice\src\exceptions\InvoiceCodeException;
 use modules\lead\src\entities\lead\LeadQuery;
 use sales\auth\Auth;
 use sales\forms\quote\QuoteCreateDataForm;
+use sales\forms\quote\QuoteCreateKeyForm;
 use sales\helpers\app\AppHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
@@ -1175,7 +1176,7 @@ class QuoteController extends ApiBaseController
      *  }
      *
      * @apiParam {Integer}          lead_id                     Lead Id
-     * @apiParam {String}           origin_search_data          Origin Search Data from flight search service <code>Valid JSON</code>
+     * @apiParam {String}           origin_search_data          Origin Search Data from air search service <code>Valid JSON</code>
      * @apiParam {String{..max 50}} [provider_project_key]      Project Key
      *
      * @apiParamExample {json} Request-Example:
@@ -1272,6 +1273,128 @@ class QuoteController extends ApiBaseController
             );
         } catch (\Throwable $e) {
             \Yii::error(AppHelper::throwableLog($e, true), 'API:QuoteController:actionCreateData:Throwable');
+            return new ErrorResponse(
+                new ErrorsMessage('An error occurred while creating a quote'),
+                new CodeMessage($e->getCode())
+            );
+        }
+        return new SuccessResponse();
+    }
+
+    /**
+     * @api {post} /v1/quote/create-key Create Flight Quote by key
+     * @apiVersion 1.0.0
+     * @apiName CreateQuoteKey
+     * @apiGroup Quotes
+     * @apiPermission Authorized User
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {Integer}          lead_id                     Lead Id
+     * @apiParam {String}           offer_search_key            Search key
+     * @apiParam {String{..max 50}} [provider_project_key]      Project Key
+     *
+     * @apiParamExample {json} Request-Example:
+     * {
+            "lead_id": 513146,
+            "offer_search_key": "2_U0FMMTAxKlkyMTAwL0tJVkxPTjIwMjEtMTEtMTcqUk9+I1JPMjAyI1JPMzkxfmxjOmVuX3Vz",
+            "provider_project_key": "hop2"
+        }
+     * @apiSuccessExample {json} Success-Response:
+     *
+     * HTTP/1.1 200 OK
+     *  {
+            "status": 200,
+            "message": "OK",
+        }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+            "status": 422,
+            "message": "Validation error",
+            "errors": {
+                "lead_id": [
+                    "Lead Id is invalid."
+                ]
+            },
+            "code": 0
+        }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Validation Error
+     * {
+            "status": 422,
+            "message": "Error",
+            "errors": [
+                "Not found project relation by key: ovago"
+            ],
+            "code": 0
+        }
+     *
+     * @apiErrorExample {json} Error-Response (400):
+     *
+     * HTTP/1.1 400 Bad Request
+     *
+     * {
+            "status": 400,
+            "message": "Load data error",
+            "errors": [
+                "Not found data on POST request"
+            ],
+            "code": 0
+        }
+     *
+     *
+     */
+    public function actionCreateKey()
+    {
+        $form = new QuoteCreateKeyForm();
+
+        if (!$form->load(Yii::$app->request->post())) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new ErrorsMessage('Not found data on POST request'),
+            );
+        }
+
+        if (!$form->validate()) {
+            return new ErrorResponse(
+                new MessageMessage(Messages::VALIDATION_ERROR),
+                new ErrorsMessage($form->getErrors()),
+            );
+        }
+
+        try {
+            $lead = $this->leadRepository->find($form->lead_id);
+
+            $projectProviderId = null;
+            if ($form->provider_project_key) {
+                $projectRelation = $this->projectRelationRepository->findByRelatedProjectKey($this->apiProject->id, $form->provider_project_key);
+                $projectProviderId = $projectRelation->prl_related_project_id;
+            }
+
+            $searchQuoteRequest = SearchService::getOnlineQuoteByKey($form->offer_search_key);
+            if (empty($searchQuoteRequest['data'])) {
+                throw new \RuntimeException('Quote not found by key: ' . $form->offer_search_key);
+            }
+            $preparedQuoteData = QuoteHelper::formatQuoteData(['results' => [$searchQuoteRequest['data']]]);
+            $this->addQuoteService->createByData($preparedQuoteData['results'][0], $lead, $projectProviderId);
+        } catch (\DomainException | \RuntimeException $e) {
+            return new ErrorResponse(
+                new MessageMessage('Error'),
+                new ErrorsMessage($e->getMessage()),
+                new CodeMessage($e->getCode())
+            );
+        } catch (\Throwable $e) {
+            \Yii::error(AppHelper::throwableLog($e, true), 'API:QuoteController:actionCreateKey:Throwable');
             return new ErrorResponse(
                 new ErrorsMessage('An error occurred while creating a quote'),
                 new CodeMessage($e->getCode())

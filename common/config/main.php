@@ -106,6 +106,7 @@ return [
             'username' => '',
             'password' => '',
             'searchQuoteEndpoint' => 'v1/internalsearch',
+            'searchQuoteByKeyEndpoint' => 'v1/result',
         ],
         'currency' => [
             'class' => \common\components\CurrencyService::class,
