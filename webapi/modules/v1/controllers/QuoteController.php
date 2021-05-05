@@ -17,16 +17,32 @@ use common\models\QuotePrice;
 use common\models\UserProjectParams;
 use common\models\VisitorLog;
 use frontend\helpers\JsonHelper;
+use frontend\helpers\QuoteHelper;
 use frontend\widgets\notification\NotificationMessage;
 use modules\invoice\src\exceptions\InvoiceCodeException;
 use modules\lead\src\entities\lead\LeadQuery;
 use sales\auth\Auth;
+use sales\forms\quote\QuoteCreateDataForm;
+use sales\forms\quote\QuoteCreateKeyForm;
 use sales\helpers\app\AppHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
+use sales\model\project\entity\projectRelation\ProjectRelation;
+use sales\model\project\entity\projectRelation\ProjectRelationQuery;
+use sales\model\project\entity\projectRelation\ProjectRelationRepository;
 use sales\repositories\lead\LeadRepository;
+use sales\repositories\NotFoundException;
+use sales\repositories\project\ProjectRepository;
+use sales\services\quote\addQuote\AddQuoteService;
 use sales\services\quote\addQuote\TripService;
 use webapi\src\behaviors\ApiUserProjectRelatedAccessBehavior;
+use webapi\src\Messages;
+use webapi\src\response\ErrorResponse;
+use webapi\src\response\messages\CodeMessage;
+use webapi\src\response\messages\ErrorsMessage;
+use webapi\src\response\messages\MessageMessage;
+use webapi\src\response\messages\StatusCodeMessage;
+use webapi\src\response\SuccessResponse;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
@@ -40,8 +56,37 @@ use common\models\QuoteTrip;
 use common\models\QuoteSegmentBaggage;
 use common\models\QuoteSegmentBaggageCharge;
 
+/**
+ * Class QuoteController
+ * @package webapi\modules\v1\controllers
+ *
+ * @property-read AddQuoteService $addQuoteService
+ * @property-read LeadRepository $leadRepository
+ * @property-read ProjectRepository $projectRepository
+ * @property-read ProjectRelationRepository $projectRelationRepository
+ */
 class QuoteController extends ApiBaseController
 {
+    public AddQuoteService $addQuoteService;
+    public LeadRepository $leadRepository;
+    public ProjectRepository $projectRepository;
+    public ProjectRelationRepository $projectRelationRepository;
+
+    public function __construct(
+        $id,
+        $module,
+        AddQuoteService $addQuoteService,
+        LeadRepository $leadRepository,
+        ProjectRepository $projectRepository,
+        ProjectRelationRepository $projectRelationRepository,
+        $config = []
+    ) {
+        $this->addQuoteService = $addQuoteService;
+        $this->leadRepository = $leadRepository;
+        $this->projectRepository = $projectRepository;
+        $this->projectRelationRepository = $projectRelationRepository;
+        parent::__construct($id, $module, $config);
+    }
 
     public function behaviors(): array
     {
@@ -1115,6 +1160,247 @@ class QuoteController extends ApiBaseController
         $responseData = $apiLog->endApiLog($responseData);
 
         return $responseData;
+    }
+
+    /**
+     * @api {post} /v1/quote/create-data Create Flight Quote by origin search data
+     * @apiVersion 1.0.0
+     * @apiName CreateQuoteData
+     * @apiGroup Quotes
+     * @apiPermission Authorized User
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {Integer}          lead_id                     Lead Id
+     * @apiParam {String}           origin_search_data          Origin Search Data from air search service <code>Valid JSON</code>
+     * @apiParam {String{..max 50}} [provider_project_key]      Project Key
+     *
+     * @apiParamExample {json} Request-Example:
+     * {
+            "lead_id": 513145,
+            "origin_search_data": "{\"key\":\"2_U0FMMTAxKlkyMTAwL0tJVkxPTjIwMjEtMTEtMTcqUk9+I1JPMjAyI1JPMzkxfmxjOmVuX3Vz\",\"routingId\":1,\"prices\":{\"lastTicketDate\":\"2021-05-05\",\"totalPrice\":408.9,\"totalTax\":99.9,\"comm\":0,\"isCk\":false,\"markupId\":0,\"markupUid\":\"\",\"markup\":0},\"passengers\":{\"ADT\":{\"codeAs\":\"JWZ\",\"cnt\":2,\"baseFare\":103,\"pubBaseFare\":103,\"baseTax\":33.3,\"markup\":0,\"comm\":0,\"price\":136.3,\"tax\":33.3,\"oBaseFare\":{\"amount\":103,\"currency\":\"USD\"},\"oBaseTax\":{\"amount\":33.3,\"currency\":\"USD\"}},\"CHD\":{\"codeAs\":\"JWC\",\"cnt\":1,\"baseFare\":103,\"pubBaseFare\":103,\"baseTax\":33.3,\"markup\":0,\"comm\":0,\"price\":136.3,\"tax\":33.3,\"oBaseFare\":{\"amount\":103,\"currency\":\"USD\"},\"oBaseTax\":{\"amount\":33.3,\"currency\":\"USD\"}}},\"penalties\":{\"exchange\":true,\"refund\":false,\"list\":[{\"type\":\"ex\",\"applicability\":\"before\",\"permitted\":true,\"amount\":72,\"oAmount\":{\"amount\":72,\"currency\":\"USD\"}},{\"type\":\"ex\",\"applicability\":\"after\",\"permitted\":true,\"amount\":72,\"oAmount\":{\"amount\":72,\"currency\":\"USD\"}},{\"type\":\"re\",\"applicability\":\"before\",\"permitted\":false},{\"type\":\"re\",\"applicability\":\"after\",\"permitted\":false}]},\"trips\":[{\"tripId\":1,\"segments\":[{\"segmentId\":1,\"departureTime\":\"2021-11-17 09:30\",\"arrivalTime\":\"2021-11-17 10:45\",\"stop\":0,\"stops\":[],\"flightNumber\":\"202\",\"bookingClass\":\"E\",\"duration\":75,\"departureAirportCode\":\"KIV\",\"departureAirportTerminal\":\"\",\"arrivalAirportCode\":\"OTP\",\"arrivalAirportTerminal\":\"\",\"operatingAirline\":\"RO\",\"airEquipType\":\"AT7\",\"marketingAirline\":\"RO\",\"marriageGroup\":\"I\",\"mileage\":215,\"cabin\":\"Y\",\"meal\":\"\",\"fareCode\":\"EOWSVRMD\",\"baggage\":{\"ADT\":{\"carryOn\":true,\"allowPieces\":1},\"CHD\":{\"carryOn\":true,\"allowPieces\":1}},\"recheckBaggage\":false},{\"segmentId\":2,\"departureTime\":\"2021-11-17 12:20\",\"arrivalTime\":\"2021-11-17 14:05\",\"stop\":0,\"stops\":[],\"flightNumber\":\"391\",\"bookingClass\":\"E\",\"duration\":225,\"departureAirportCode\":\"OTP\",\"departureAirportTerminal\":\"\",\"arrivalAirportCode\":\"LHR\",\"arrivalAirportTerminal\":\"4\",\"operatingAirline\":\"RO\",\"airEquipType\":\"73H\",\"marketingAirline\":\"RO\",\"marriageGroup\":\"O\",\"mileage\":1292,\"cabin\":\"Y\",\"meal\":\"\",\"fareCode\":\"EOWSVRGB\",\"baggage\":{\"ADT\":{\"carryOn\":true,\"allowPieces\":1},\"CHD\":{\"carryOn\":true,\"allowPieces\":1}},\"recheckBaggage\":false}],\"duration\":395}],\"maxSeats\":3,\"paxCnt\":3,\"validatingCarrier\":\"RO\",\"gds\":\"T\",\"pcc\":\"DVI\",\"cons\":\"GTT\",\"fareType\":\"PUB\",\"tripType\":\"OW\",\"cabin\":\"Y\",\"currency\":\"USD\",\"currencies\":[\"USD\"],\"currencyRates\":{\"USDUSD\":{\"from\":\"USD\",\"to\":\"USD\",\"rate\":1}},\"keys\":{\"travelport\":{\"traceId\":\"908f70b5-cbe1-4800-89e2-1f0496cc1502\",\"availabilitySources\":\"A,A\",\"type\":\"T\"},\"seatHoldSeg\":{\"trip\":0,\"segment\":0,\"seats\":3}},\"meta\":{\"eip\":0,\"noavail\":false,\"searchId\":\"U0FMMTAxWTIxMDB8S0lWTE9OMjAyMS0xMS0xNw==\",\"lang\":\"en\",\"group1\":\"KIVLON:RORO:0:408.90\",\"rank\":10,\"cheapest\":true,\"fastest\":false,\"best\":true,\"bags\":1,\"country\":\"us\",\"prod_types\":[\"PUB\"]}}",
+            "provider_project_key": "hop2"
+        }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *
+     * HTTP/1.1 200 OK
+     *  {
+            "status": 200,
+            "message": "OK",
+        }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+            "status": 422,
+            "message": "Validation error",
+            "errors": {
+                "lead_id": [
+                    "Lead Id is invalid."
+                ]
+            },
+            "code": 0
+        }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Validation Error
+     * {
+            "status": 422,
+            "message": "Error",
+            "errors": [
+                "Not found project relation by key: ovago"
+            ],
+            "code": 0
+        }
+     *
+     * @apiErrorExample {json} Error-Response (400):
+     *
+     * HTTP/1.1 400 Bad Request
+     *
+     * {
+            "status": 400,
+            "message": "Load data error",
+            "errors": [
+                "Not found data on POST request"
+            ],
+            "code": 0
+        }
+     *
+     *
+     */
+    public function actionCreateData()
+    {
+        $form = new QuoteCreateDataForm();
+
+        if (!$form->load(Yii::$app->request->post())) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new ErrorsMessage('Not found data on POST request'),
+            );
+        }
+
+        if (!$form->validate()) {
+            return new ErrorResponse(
+                new MessageMessage(Messages::VALIDATION_ERROR),
+                new ErrorsMessage($form->getErrors()),
+            );
+        }
+
+        try {
+            $lead = $this->leadRepository->find($form->lead_id);
+
+            $projectProviderId = null;
+            if ($form->provider_project_key) {
+                $projectRelation = $this->projectRelationRepository->findByRelatedProjectKey($this->apiProject->id, $form->provider_project_key);
+                $projectProviderId = $projectRelation->prl_related_project_id;
+            }
+
+            $preparedQuoteData = QuoteHelper::formatQuoteData(['results' => [JsonHelper::decode($form->origin_search_data)]]);
+            $this->addQuoteService->createByData($preparedQuoteData['results'][0], $lead, $projectProviderId);
+        } catch (\DomainException | \RuntimeException $e) {
+            return new ErrorResponse(
+                new MessageMessage('Error'),
+                new ErrorsMessage($e->getMessage()),
+                new CodeMessage($e->getCode())
+            );
+        } catch (\Throwable $e) {
+            \Yii::error(AppHelper::throwableLog($e, true), 'API:QuoteController:actionCreateData:Throwable');
+            return new ErrorResponse(
+                new ErrorsMessage('An error occurred while creating a quote'),
+                new CodeMessage($e->getCode())
+            );
+        }
+        return new SuccessResponse();
+    }
+
+    /**
+     * @api {post} /v1/quote/create-key Create Flight Quote by key
+     * @apiVersion 1.0.0
+     * @apiName CreateQuoteKey
+     * @apiGroup Quotes
+     * @apiPermission Authorized User
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {Integer}          lead_id                     Lead Id
+     * @apiParam {String}           offer_search_key            Search key
+     * @apiParam {String{..max 50}} [provider_project_key]      Project Key
+     *
+     * @apiParamExample {json} Request-Example:
+     * {
+            "lead_id": 513146,
+            "offer_search_key": "2_U0FMMTAxKlkyMTAwL0tJVkxPTjIwMjEtMTEtMTcqUk9+I1JPMjAyI1JPMzkxfmxjOmVuX3Vz",
+            "provider_project_key": "hop2"
+        }
+     * @apiSuccessExample {json} Success-Response:
+     *
+     * HTTP/1.1 200 OK
+     *  {
+            "status": 200,
+            "message": "OK",
+        }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+            "status": 422,
+            "message": "Validation error",
+            "errors": {
+                "lead_id": [
+                    "Lead Id is invalid."
+                ]
+            },
+            "code": 0
+        }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Validation Error
+     * {
+            "status": 422,
+            "message": "Error",
+            "errors": [
+                "Not found project relation by key: ovago"
+            ],
+            "code": 0
+        }
+     *
+     * @apiErrorExample {json} Error-Response (400):
+     *
+     * HTTP/1.1 400 Bad Request
+     *
+     * {
+            "status": 400,
+            "message": "Load data error",
+            "errors": [
+                "Not found data on POST request"
+            ],
+            "code": 0
+        }
+     *
+     *
+     */
+    public function actionCreateKey()
+    {
+        $form = new QuoteCreateKeyForm();
+
+        if (!$form->load(Yii::$app->request->post())) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new ErrorsMessage('Not found data on POST request'),
+            );
+        }
+
+        if (!$form->validate()) {
+            return new ErrorResponse(
+                new MessageMessage(Messages::VALIDATION_ERROR),
+                new ErrorsMessage($form->getErrors()),
+            );
+        }
+
+        try {
+            $lead = $this->leadRepository->find($form->lead_id);
+
+            $projectProviderId = null;
+            if ($form->provider_project_key) {
+                $projectRelation = $this->projectRelationRepository->findByRelatedProjectKey($this->apiProject->id, $form->provider_project_key);
+                $projectProviderId = $projectRelation->prl_related_project_id;
+            }
+
+            $searchQuoteRequest = SearchService::getOnlineQuoteByKey($form->offer_search_key);
+            if (empty($searchQuoteRequest['data'])) {
+                throw new \RuntimeException('Quote not found by key: ' . $form->offer_search_key);
+            }
+            $preparedQuoteData = QuoteHelper::formatQuoteData(['results' => [$searchQuoteRequest['data']]]);
+            $this->addQuoteService->createByData($preparedQuoteData['results'][0], $lead, $projectProviderId);
+        } catch (\DomainException | \RuntimeException $e) {
+            return new ErrorResponse(
+                new MessageMessage('Error'),
+                new ErrorsMessage($e->getMessage()),
+                new CodeMessage($e->getCode())
+            );
+        } catch (\Throwable $e) {
+            \Yii::error(AppHelper::throwableLog($e, true), 'API:QuoteController:actionCreateKey:Throwable');
+            return new ErrorResponse(
+                new ErrorsMessage('An error occurred while creating a quote'),
+                new CodeMessage($e->getCode())
+            );
+        }
+        return new SuccessResponse();
     }
 
     private function setTypeQuoteInsert($type, Quote $quote, Lead $lead): void
