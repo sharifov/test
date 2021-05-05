@@ -394,7 +394,7 @@ class Quote extends \yii\db\ActiveRecord
         return $quote;
     }
 
-    public static function createQuoteFromSearch(array $quoteData, Lead $lead, Employee $employee): Quote
+    public static function createQuoteFromSearch(array $quoteData, Lead $lead, ?Employee $employee): Quote
     {
         $quote = new self();
         $quote->uid = uniqid();
@@ -408,8 +408,8 @@ class Quote extends \yii\db\ActiveRecord
         $quote->main_airline_code = $quoteData['validatingCarrier'] ?? null;
         $quote->last_ticket_date = $quoteData['prices']['lastTicketDate'] ?? null;
         $quote->reservation_dump = str_replace('&nbsp;', ' ', SearchService::getItineraryDump($quoteData));
-        $quote->employee_id = $employee->id;
-        $quote->employee_name = $employee->username;
+        $quote->employee_id = $employee->id ?? null;
+        $quote->employee_name = $employee->username ?? null;
         $quote->origin_search_data = json_encode($quoteData);
         $quote->gds_offer_id = $quoteData['gdsOfferId'] ?? null;
         $quote->setMetricLabels(['action' => 'created', 'type_creation' => 'search']);

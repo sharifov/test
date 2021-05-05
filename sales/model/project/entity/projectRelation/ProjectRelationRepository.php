@@ -3,6 +3,7 @@
 namespace sales\model\project\entity\projectRelation;
 
 use sales\helpers\ErrorsToStringHelper;
+use sales\repositories\NotFoundException;
 
 /**
  * Class ProjectRelationRepository
@@ -30,5 +31,13 @@ class ProjectRelationRepository
             $result[$relationId] = $projectRelation;
         }
         return $result;
+    }
+
+    public function findByRelatedProjectKey(int $projectId, string $relatedProjectKey): ProjectRelation
+    {
+        if ($relation = ProjectRelationQuery::findByRelatedProjectKey($projectId, $relatedProjectKey)) {
+            return $relation;
+        }
+        throw new NotFoundException('Not found project relation by key: ' . $relatedProjectKey);
     }
 }
