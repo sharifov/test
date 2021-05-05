@@ -206,9 +206,6 @@ class OfferEmailController extends ApiBaseController
             if (!$lead->client_id) {
                 $lead->client_id = $client->id;
             }
-            if (!$lead->l_client_email) {
-                $lead->l_client_email = $sendQuoteApiForm->email_to;
-            }
             $this->leadRepository->save($lead);
 
             $responseData['result'] = 'Email sending. Mail ID(' . $mail->e_id . ')';
