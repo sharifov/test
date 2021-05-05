@@ -46,6 +46,7 @@ use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
 use sales\model\user\entity\userStatus\UserStatus;
 use sales\model\userVoiceMail\entity\UserVoiceMail;
 use sales\model\voiceMailRecord\entity\VoiceMailRecord;
+use sales\repositories\client\ClientsQuery;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\user\UserProjectParamsRepository;
 use sales\services\call\CallDeclinedException;
@@ -1094,14 +1095,18 @@ class CommunicationController extends ApiBaseController
     ): Call {
         $call = null;
         $parentCall = null;
-        $clientPhone = null;
+        $clientId = null;
 
         //error_log("Call Data: " . print_r($calData, true));
 
         if (isset($calData['From']) && $calData['From']) {
             $clientPhoneNumber = $calData['From'];
             if ($clientPhoneNumber) {
-                $clientPhone = ClientPhone::find()->where(['phone' => $clientPhoneNumber])->notInvalid()->orderBy(['id' => SORT_DESC])->limit(1)->one();
+                $client = ClientsQuery::oneByPhoneAndProject($clientPhoneNumber, $call_project_id, null);
+                if ($client) {
+                    /** @var Client $client */
+                    $clientId = $client->id;
+                }
             }
         }
 
@@ -1169,8 +1174,8 @@ class CommunicationController extends ApiBaseController
             $call->c_to = $calData['To']; //Called
             $call->c_created_user_id = null;
 
-            if ($clientPhone && $clientPhone->client_id) {
-                $call->c_client_id = $clientPhone->client_id;
+            if ($clientId) {
+                $call->c_client_id = $clientId;
             }
 
 //            if ($call->c_dep_id === Department::DEPARTMENT_SALES) {
